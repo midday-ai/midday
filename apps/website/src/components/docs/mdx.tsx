@@ -239,8 +239,8 @@ export function DocsMDX({ source }: DocsMDXProps) {
         // Links
         "[&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-border hover:[&_a]:decoration-foreground [&_a]:transition-colors",
         // Code
-        "[&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-sm [&_code]:text-foreground [&_code]:rounded-none",
-        "[&_pre]:bg-secondary [&_pre]:border [&_pre]:border-border [&_pre]:p-4 [&_pre]:my-6 [&_pre]:rounded-none",
+        "[&_code]:bg-[#f5f5f5] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-sm [&_code]:text-foreground [&_code]:rounded-none dark:[&_code]:bg-secondary",
+        "[&_pre]:bg-[#fafafa] [&_pre]:border [&_pre]:border-border [&_pre]:p-4 [&_pre]:my-6 [&_pre]:rounded-none dark:[&_pre]:bg-[#0c0c0c]",
         "[&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none",
       )}
     >

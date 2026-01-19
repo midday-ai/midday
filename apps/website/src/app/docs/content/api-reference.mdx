@@ -27,22 +27,33 @@ The API provides access to:
 
 ## Authentication
 
-All API requests require authentication using an API key.
+The Midday API supports two authentication methods:
 
-### Get your API key
+### API Keys (for your own data)
+
+For accessing your own Midday data in scripts, automations, or personal tools.
 
 1. Go to [Settings → Developer](https://app.midday.ai/settings/developer)
 2. Click **Create API key**
 3. Give it a descriptive name
 4. Copy the key immediately (you won't see it again)
 
-### Use the API key
-
 Include your API key in the `Authorization` header:
 
 ```
 Authorization: Bearer your-api-key-here
 ```
+
+### OAuth 2.0 (for user-facing apps)
+
+For building apps that access other users' Midday data with their permission.
+
+1. Create an OAuth application in [Settings → Developer](https://app.midday.ai/settings/developer)
+2. Implement the OAuth authorization flow
+3. Exchange authorization codes for access tokens
+4. Use access tokens in API requests
+
+[Build an OAuth app →](/docs/build-oauth-app)
 
 ## Base URL
 

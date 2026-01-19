@@ -1,0 +1,225 @@
+---
+title: App Review Process
+description: Get your OAuth app verified and listed in the Midday app directory.
+section: developer
+order: 5
+---
+
+Once your OAuth app is working, you can submit it for review. Verified apps display a trust badge and can be listed in the Midday app directory for users to discover.
+
+## Why get verified?
+
+### For users
+
+- **Trust badge**: Verified apps show users that Midday has reviewed the app
+- **Confidence**: Users know the app meets security and quality standards
+- **Discoverability**: Listed apps are easier to find
+
+### For developers
+
+- **Increased adoption**: Users trust verified apps more
+- **App directory listing**: Reach Midday's user base
+- **Partnership opportunities**: Connect with the Midday team
+
+## Verification levels
+
+### Unverified (default)
+
+All new OAuth apps start unverified:
+
+- Apps work fully
+- Users see a warning: "This app hasn't been verified by Midday yet"
+- Not listed in the app directory
+
+### Verified
+
+After passing review:
+
+- No warning displayed to users
+- Listed in the app directory (optional)
+- Trust badge on consent screen
+
+## Submission requirements
+
+Before submitting, ensure your app has:
+
+### 1. Complete app information
+
+Fill out all fields in your OAuth application settings:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| Name | Yes | Clear, recognizable app name |
+| Description | Yes | Brief description (1-2 sentences) |
+| Overview | Recommended | Detailed description with features |
+| Developer name | Yes | Your name or company name |
+| Website | Yes | Your app's homepage |
+| Logo | Recommended | Square image, at least 256x256px |
+| Screenshots | Recommended | Up to 4 screenshots showing your app |
+
+### 2. Working integration
+
+Your app must:
+
+- Successfully complete the OAuth flow
+- Handle tokens correctly (refresh, expiration)
+- Use requested scopes appropriately
+- Handle errors gracefully
+
+### 3. Privacy policy
+
+- Link to your privacy policy from your website
+- Explain what data you collect and how it's used
+- Describe data retention and deletion policies
+
+### 4. Security requirements
+
+- Use HTTPS for all endpoints
+- Store tokens securely
+- Implement PKCE for public clients
+- Never log or expose access tokens
+
+## Submitting for review
+
+### Step 1: Prepare your app
+
+1. Go to [Settings → Developer](https://app.midday.ai/settings/developer)
+2. Click on your OAuth application
+3. Fill in all required fields
+4. Add screenshots if you have them
+
+### Step 2: Test thoroughly
+
+Before submitting, verify:
+
+- [ ] Authorization flow works end-to-end
+- [ ] Token refresh works correctly
+- [ ] Error handling covers edge cases
+- [ ] All requested scopes are actually used
+- [ ] App works with different Midday accounts
+
+### Step 3: Submit for review
+
+1. In your OAuth application settings, click **Submit for review**
+2. Your app status changes to "Pending"
+3. You'll receive an email confirming submission
+
+## Review process
+
+### What we check
+
+Our team reviews:
+
+| Area | What we look for |
+|------|------------------|
+| **Security** | HTTPS, secure token handling, PKCE for public clients |
+| **Functionality** | OAuth flow works, errors handled, scopes used appropriately |
+| **User experience** | Clear app name, accurate description, working website |
+| **Privacy** | Privacy policy exists, data handling is clear |
+| **Quality** | App does what it claims, no misleading information |
+
+### Timeline
+
+- **Initial review**: 3-5 business days
+- **If changes needed**: We'll email specific feedback
+- **Re-review after changes**: 2-3 business days
+
+### Possible outcomes
+
+| Outcome | Description |
+|---------|-------------|
+| **Approved** | Your app is verified and can be listed |
+| **Changes requested** | We'll explain what needs to be fixed |
+| **Rejected** | Doesn't meet requirements (with explanation) |
+
+## After approval
+
+### Verification badge
+
+Approved apps display verification status on the consent screen, removing the "not verified" warning.
+
+### App directory listing
+
+After approval, you can opt to list your app in the Midday app directory:
+
+1. Go to your OAuth application settings
+2. Enable **List in app directory**
+3. Ensure your logo and screenshots are uploaded
+
+### Maintaining verification
+
+To keep your verified status:
+
+- Keep your app functional
+- Respond to user issues
+- Update your app when APIs change
+- Don't change scope usage without notification
+
+## Guidelines
+
+### Naming
+
+- Use your app's real name
+- Don't include "Midday" unless you have permission
+- Avoid misleading names that imply official Midday features
+
+### Description
+
+- Accurately describe what your app does
+- List key features
+- Be clear about any costs or limitations
+
+### Screenshots
+
+- Show your app's actual UI
+- Demonstrate key features
+- Use high-quality images
+- Don't use misleading mockups
+
+### Scopes
+
+- Only request scopes you actually use
+- Explain to users why you need each scope
+- Don't request broad scopes for simple features
+
+## Common rejection reasons
+
+| Issue | How to fix |
+|-------|------------|
+| Missing privacy policy | Add one to your website |
+| Non-working OAuth flow | Test thoroughly before submitting |
+| Unused scopes | Remove scopes you don't use |
+| Incomplete app info | Fill in all required fields |
+| HTTP endpoints | Use HTTPS everywhere |
+| Misleading description | Accurately describe your app |
+| No error handling | Handle authorization denials gracefully |
+
+## Updating verified apps
+
+After verification, you can still update your app:
+
+### No re-review needed
+
+- Updating logo or screenshots
+- Changing website URL
+- Editing description
+- Adding redirect URIs
+
+### May trigger re-review
+
+- Adding new scopes (users must re-authorize anyway)
+- Significant functionality changes
+- Changing app name
+
+## Contact us
+
+Questions about the review process?
+
+- **Email**: [support@midday.ai](mailto:support@midday.ai)
+- **Discord**: [go.midday.ai/discord](https://go.midday.ai/discord)
+
+## Related
+
+- [Build an OAuth App](/docs/build-oauth-app) — Getting started guide
+- [OAuth Scopes Reference](/docs/oauth-scopes) — Available permissions
+- [OAuth API Endpoints](/docs/oauth-api-endpoints) — Technical reference

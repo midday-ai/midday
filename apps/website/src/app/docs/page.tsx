@@ -105,11 +105,19 @@ const sections = [
     ],
   },
   {
-    title: "Assistant & API",
+    title: "Assistant",
     links: [
       { title: "Using Assistant", href: "/docs/using-assistant" },
       { title: "AI Tools (MCP)", href: "/docs/assistant-mcp" },
+    ],
+  },
+  {
+    title: "Developer",
+    links: [
       { title: "API Reference", href: "/docs/api-reference" },
+      { title: "Build OAuth Apps", href: "/docs/build-oauth-app" },
+      { title: "OAuth Scopes", href: "/docs/oauth-scopes" },
+      { title: "App Review", href: "/docs/app-review-process" },
     ],
   },
   {

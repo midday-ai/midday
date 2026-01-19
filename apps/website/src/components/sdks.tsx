@@ -6,14 +6,11 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  oneDark,
-  oneLight,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { highlight } from "sugar-high";
 import { MaterialIcon } from "./homepage/icon-mapping";
 
 type SDKTab = "typescript" | "go" | "php";
+type PackageManager = "npm" | "bun" | "pnpm" | "yarn";
 
 function ScrambledText() {
   const [tick, setTick] = useState(0);
@@ -83,17 +80,8 @@ function ScrambledText() {
 
 function CodeBlock({
   code,
-  language = "typescript",
 }: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const { resolvedTheme } = useTheme();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted && resolvedTheme === "dark";
 
   const handleCopy = async () => {
     try {
@@ -101,47 +89,86 @@ function CodeBlock({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      // Fallback for older browsers
       console.error("Failed to copy:", err);
     }
   };
 
-  // Map language for syntax highlighter
-  const highlightLanguage =
-    language === "bash" || language === "shell"
-      ? "bash"
-      : language === "javascript"
-        ? "javascript"
-        : language === "typescript"
-          ? "typescript"
-          : language === "go"
-            ? "go"
-            : language === "php"
-              ? "php"
-              : "typescript";
+  const codeHTML = highlight(code);
 
   return (
     <div className="relative group">
-      <div className="bg-secondary border border-border rounded-none overflow-hidden">
-        {/* @ts-expect-error - SyntaxHighlighter types */}
-        <SyntaxHighlighter
-          language={highlightLanguage}
-          style={isDark ? oneDark : oneLight}
-          customStyle={{
-            margin: 0,
-            padding: "1rem",
-            fontSize: "0.875rem",
-            background: "transparent",
-            fontFamily:
-              "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
-          }}
-          codeTagProps={{
-            className: "font-mono",
-          }}
-          PreTag="div"
-        >
-          {code}
-        </SyntaxHighlighter>
+      <div className="bg-[#fafafa] dark:bg-[#0c0c0c] border border-border rounded-none overflow-hidden">
+        <pre className="overflow-x-auto p-4 text-sm font-mono">
+          <code
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: Syntax highlighting requires innerHTML
+            dangerouslySetInnerHTML={{ __html: codeHTML }}
+          />
+        </pre>
+      </div>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="absolute top-3 right-3 p-1.5 bg-background/80 backdrop-blur-sm border border-border text-muted-foreground hover:text-foreground hover:bg-background transition-colors opacity-0 group-hover:opacity-100 rounded-none"
+        aria-label="Copy code"
+      >
+        {copied ? (
+          <Icons.Check size={14} className="text-foreground" />
+        ) : (
+          <Icons.Copy size={14} />
+        )}
+      </button>
+    </div>
+  );
+}
+
+function InstallTabs({ packageName }: { packageName: string }) {
+  const [activeManager, setActiveManager] = useState<PackageManager>("npm");
+  const [copied, setCopied] = useState(false);
+
+  const commands: Record<PackageManager, string> = {
+    npm: `npm install ${packageName}`,
+    bun: `bun add ${packageName}`,
+    pnpm: `pnpm add ${packageName}`,
+    yarn: `yarn add ${packageName}`,
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(commands[activeManager]);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  const codeHTML = highlight(commands[activeManager]);
+
+  return (
+    <div className="relative group">
+      <div className="bg-[#fafafa] dark:bg-[#0c0c0c] border border-border rounded-none overflow-hidden">
+        <div className="flex border-b border-border">
+          {(["npm", "bun", "pnpm", "yarn"] as PackageManager[]).map((pm) => (
+            <button
+              key={pm}
+              type="button"
+              onClick={() => setActiveManager(pm)}
+              className={`px-4 py-2 text-xs font-sans transition-colors ${
+                activeManager === pm
+                  ? "text-foreground bg-background"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {pm}
+            </button>
+          ))}
+        </div>
+        <pre className="overflow-x-auto p-4 text-sm font-mono">
+          <code
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: Syntax highlighting requires innerHTML
+            dangerouslySetInnerHTML={{ __html: codeHTML }}
+          />
+        </pre>
       </div>
       <button
         type="button"
@@ -459,24 +486,7 @@ export function SDKs() {
                     <p className="font-sans text-sm text-foreground mb-2">
                       Install:
                     </p>
-                    <div className="space-y-2">
-                      <CodeBlock
-                        code="npm install @midday-ai/sdk"
-                        language="bash"
-                      />
-                      <CodeBlock
-                        code="bun add @midday-ai/sdk"
-                        language="bash"
-                      />
-                      <CodeBlock
-                        code="pnpm add @midday-ai/sdk"
-                        language="bash"
-                      />
-                      <CodeBlock
-                        code="yarn add @midday-ai/sdk"
-                        language="bash"
-                      />
-                    </div>
+                    <InstallTabs packageName="@midday-ai/sdk" />
                   </div>
 
                   <div>
