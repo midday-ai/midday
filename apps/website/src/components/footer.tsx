@@ -36,7 +36,7 @@ export function Footer() {
                   { href: "/inbox", label: "Inbox" },
                   { href: "/time-tracking", label: "Time tracking" },
                   { href: "/invoicing", label: "Invoicing" },
-                  { href: "/customers", label: "Customers" },
+                  { href: "/customers", label: "CRM" },
                   { href: "/file-storage", label: "Files" },
                 ].map((item) => (
                   <Link

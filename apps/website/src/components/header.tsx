@@ -318,7 +318,7 @@ export function Header({
                                 },
                                 {
                                   href: "/customers",
-                                  title: "Customers",
+                                  title: "CRM",
                                   desc: "Know your customers",
                                 },
                                 {
@@ -823,7 +823,7 @@ export function Header({
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
-                          Customers
+                          CRM
                         </Link>
                         <Link
                           href="/file-storage"
