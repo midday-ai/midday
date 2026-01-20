@@ -9,6 +9,7 @@ import { filesRouter } from "./files";
 import { inboxRouter } from "./inbox";
 import { invoicePaymentsRouter } from "./invoice-payments";
 import { invoicesRouter } from "./invoices";
+import { mcpRouter } from "./mcp";
 import { notificationsRouter } from "./notifications";
 import oauthRouter from "./oauth";
 import { reportsRouter } from "./reports";
@@ -51,5 +52,6 @@ routers.route("/tracker-projects", trackerProjectsRouter);
 routers.route("/tracker-entries", trackerEntriesRouter);
 routers.route("/chat", chatRouter);
 routers.route("/transcription", transcriptionRouter);
+routers.route("/mcp", mcpRouter);
 
 export { routers };

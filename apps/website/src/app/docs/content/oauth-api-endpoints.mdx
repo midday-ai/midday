@@ -1,0 +1,481 @@
+---
+title: OAuth API Endpoints
+description: Technical reference for Midday OAuth 2.0 endpoints.
+section: developer
+order: 4
+---
+
+Complete technical reference for Midday's OAuth 2.0 implementation. These endpoints follow the [OAuth 2.0 RFC 6749](https://tools.ietf.org/html/rfc6749) and [PKCE RFC 7636](https://tools.ietf.org/html/rfc7636) specifications.
+
+## Base URLs
+
+| Environment | URL |
+|-------------|-----|
+| Authorization | `https://app.midday.ai/oauth` |
+| Token & API | `https://api.midday.ai/v1` |
+
+## Authorization endpoint
+
+Initiates the OAuth flow by redirecting users to log in and authorize your app.
+
+```
+GET https://app.midday.ai/oauth/authorize
+```
+
+### Request parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `response_type` | string | Yes | Must be `code` |
+| `client_id` | string | Yes | Your application's client ID |
+| `redirect_uri` | string | Yes | URI to redirect after authorization (must be registered) |
+| `scope` | string | Yes | Space-separated list of scopes |
+| `state` | string | Recommended | Opaque value for CSRF protection |
+| `code_challenge` | string | PKCE | Base64-URL-encoded SHA-256 hash of code verifier |
+| `code_challenge_method` | string | PKCE | Must be `S256` |
+
+### Example request
+
+```
+https://app.midday.ai/oauth/authorize?
+  response_type=code&
+  client_id=mid_client_abc123&
+  redirect_uri=https://yourapp.com/callback&
+  scope=transactions.read%20invoices.read&
+  state=xyz789&
+  code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&
+  code_challenge_method=S256
+```
+
+### Success response
+
+Redirects to your `redirect_uri` with:
+
+| Parameter | Description |
+|-----------|-------------|
+| `code` | Authorization code (valid for 10 minutes) |
+| `state` | Same value you sent (verify this!) |
+
+```
+https://yourapp.com/callback?code=AUTH_CODE_HERE&state=xyz789
+```
+
+### Error response
+
+Redirects to your `redirect_uri` with:
+
+| Parameter | Description |
+|-----------|-------------|
+| `error` | Error code |
+| `error_description` | Human-readable description |
+| `state` | Same value you sent |
+
+```
+https://yourapp.com/callback?error=access_denied&error_description=User%20denied%20access&state=xyz789
+```
+
+### Error codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_request` | Missing or invalid parameter |
+| `unauthorized_client` | Client not authorized for this grant type |
+| `access_denied` | User denied authorization |
+| `invalid_scope` | Invalid or unknown scope |
+| `server_error` | Internal server error |
+
+---
+
+## Token endpoint
+
+Exchange authorization codes for access tokens, or refresh existing tokens.
+
+```
+POST https://api.midday.ai/v1/oauth/token
+```
+
+### Content types
+
+Accepts both:
+- `application/json`
+- `application/x-www-form-urlencoded`
+
+### Authorization code grant
+
+Exchange an authorization code for tokens.
+
+#### Request body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `grant_type` | string | Yes | Must be `authorization_code` |
+| `code` | string | Yes | Authorization code from callback |
+| `redirect_uri` | string | Yes | Same URI used in authorization |
+| `client_id` | string | Yes | Your application's client ID |
+| `client_secret` | string | Confidential clients | Your client secret |
+| `code_verifier` | string | PKCE | Original code verifier |
+
+#### Example request (confidential client)
+
+```bash
+curl -X POST https://api.midday.ai/v1/oauth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "authorization_code",
+    "code": "AUTH_CODE",
+    "redirect_uri": "https://yourapp.com/callback",
+    "client_id": "mid_client_abc123",
+    "client_secret": "mid_secret_xyz789"
+  }'
+```
+
+#### Example request (public client with PKCE)
+
+```bash
+curl -X POST https://api.midday.ai/v1/oauth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "authorization_code",
+    "code": "AUTH_CODE",
+    "redirect_uri": "https://yourapp.com/callback",
+    "client_id": "mid_client_abc123",
+    "code_verifier": "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+  }'
+```
+
+#### Success response
+
+```json
+{
+  "access_token": "mid_at_xxxxxxxxxxxxx",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "mid_rt_xxxxxxxxxxxxx",
+  "scope": "transactions.read invoices.read"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `access_token` | Token for API requests |
+| `token_type` | Always `Bearer` |
+| `expires_in` | Seconds until expiration (3600 = 1 hour) |
+| `refresh_token` | Token to get new access tokens |
+| `scope` | Granted scopes (space-separated) |
+
+### Refresh token grant
+
+Get a new access token using a refresh token.
+
+#### Request body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `grant_type` | string | Yes | Must be `refresh_token` |
+| `refresh_token` | string | Yes | Current refresh token |
+| `client_id` | string | Yes | Your application's client ID |
+| `client_secret` | string | Confidential clients | Your client secret |
+| `scope` | string | No | Request subset of original scopes |
+
+#### Example request
+
+```bash
+curl -X POST https://api.midday.ai/v1/oauth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "refresh_token",
+    "refresh_token": "mid_rt_xxxxxxxxxxxxx",
+    "client_id": "mid_client_abc123",
+    "client_secret": "mid_secret_xyz789"
+  }'
+```
+
+#### Response
+
+Same format as authorization code grant. The refresh token may rotate (new token returned).
+
+### Token endpoint errors
+
+```json
+{
+  "error": "invalid_grant",
+  "error_description": "The authorization code has expired"
+}
+```
+
+| Error | Description |
+|-------|-------------|
+| `invalid_request` | Missing required parameter |
+| `invalid_client` | Invalid client credentials |
+| `invalid_grant` | Invalid, expired, or used code/token |
+| `unauthorized_client` | Client not authorized for grant type |
+| `unsupported_grant_type` | Grant type not supported |
+
+---
+
+## Revocation endpoint
+
+Revoke an access token or refresh token.
+
+```
+POST https://api.midday.ai/v1/oauth/revoke
+```
+
+### Request body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `token` | string | Yes | Token to revoke |
+| `client_id` | string | Yes | Your application's client ID |
+| `client_secret` | string | Confidential clients | Your client secret |
+
+### Example request
+
+```bash
+curl -X POST https://api.midday.ai/v1/oauth/revoke \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "mid_at_xxxxxxxxxxxxx",
+    "client_id": "mid_client_abc123",
+    "client_secret": "mid_secret_xyz789"
+  }'
+```
+
+### Response
+
+Always returns success, even if token was already invalid:
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+## Rate limits
+
+OAuth endpoints have specific rate limits to prevent abuse:
+
+| Endpoint | Limit |
+|----------|-------|
+| `/oauth/authorize` | 20 requests per 15 minutes per IP |
+| `/oauth/token` | 20 requests per 15 minutes per IP |
+| `/oauth/revoke` | 20 requests per 15 minutes per IP |
+
+Exceeding limits returns `429 Too Many Requests`.
+
+---
+
+## Token lifetimes
+
+| Token type | Lifetime | Notes |
+|------------|----------|-------|
+| Authorization code | 10 minutes | Single use |
+| Access token | 1 hour | Use refresh token to renew |
+| Refresh token | 30 days | Rotates on use |
+
+---
+
+## PKCE implementation
+
+PKCE adds security for public clients (mobile apps, SPAs).
+
+### 1. Generate code verifier
+
+Create a random string (43-128 characters, URL-safe):
+
+```typescript
+function base64UrlEncode(buffer: Uint8Array): string {
+  return btoa(String.fromCharCode(...buffer))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+function generateCodeVerifier(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return base64UrlEncode(array);
+}
+```
+
+### 2. Create code challenge
+
+SHA-256 hash of the verifier, base64-URL encoded:
+
+```typescript
+async function generateCodeChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return base64UrlEncode(new Uint8Array(hash));
+}
+```
+
+### 3. Use in flow
+
+1. Store `code_verifier` securely (session storage)
+2. Send `code_challenge` in authorization request
+3. Send `code_verifier` in token exchange
+
+---
+
+## Security considerations
+
+### State parameter
+
+Always use and validate the `state` parameter:
+
+```typescript
+// Generate
+const state = crypto.randomUUID();
+sessionStorage.setItem("oauth_state", state);
+
+// Validate on callback
+const storedState = sessionStorage.getItem("oauth_state");
+if (callbackState !== storedState) {
+  throw new Error("State mismatch - possible CSRF attack");
+}
+```
+
+### Redirect URI validation
+
+- Register all redirect URIs in your app settings
+- Use exact match validation (no wildcards)
+- Always use HTTPS in production
+
+### Token storage
+
+- Store tokens securely (encrypted, server-side preferred)
+- Never expose tokens in URLs or logs
+- Clear tokens on logout
+
+### Client secret protection
+
+- Never include client secrets in client-side code
+- Use environment variables on servers
+- Rotate secrets if compromised
+
+---
+
+## Error handling examples
+
+### Handle authorization errors
+
+```typescript
+app.get("/callback", (req, res) => {
+  const { error, error_description, code, state } = req.query;
+  
+  if (error) {
+    console.error(`OAuth error: ${error} - ${error_description}`);
+    return res.redirect("/connect?error=" + encodeURIComponent(error as string));
+  }
+  
+  // Verify state
+  if (state !== req.session.oauthState) {
+    return res.status(400).send("Invalid state");
+  }
+  
+  // Exchange code for tokens
+  // ...
+});
+```
+
+### Handle token errors
+
+```typescript
+async function exchangeCode(code: string) {
+  const response = await fetch("https://api.midday.ai/v1/oauth/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: REDIRECT_URI,
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+    }),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Token error: ${error.error} - ${error.error_description}`);
+  }
+  
+  return response.json();
+}
+```
+
+### Handle refresh failures
+
+```typescript
+async function refreshTokens(refreshToken: string) {
+  try {
+    const response = await fetch("https://api.midday.ai/v1/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+      }),
+    });
+    
+    const tokens = await response.json();
+    
+    if (tokens.error) {
+      // Refresh token expired or revoked
+      // Redirect user to re-authorize
+      return null;
+    }
+    
+    return tokens;
+  } catch (error) {
+    console.error("Refresh failed:", error);
+    return null;
+  }
+}
+```
+
+---
+
+## Using the SDK with OAuth tokens
+
+Once you have an access token, use the Midday SDK for API requests:
+
+```typescript
+import { Midday } from "@midday-ai/sdk";
+
+const midday = new Midday({
+  token: accessToken, // OAuth access token
+});
+
+// List transactions
+const transactions = await midday.transactions.list({
+  pageSize: 50,
+});
+
+// Get invoices
+const invoices = await midday.invoices.list({
+  statuses: ["unpaid", "overdue"],
+});
+
+// Get financial metrics
+const profit = await midday.metrics.profit({
+  from: "2024-01-01",
+  to: "2024-12-31",
+});
+```
+
+See the [SDK documentation](https://github.com/midday-ai/midday-ts) for all available methods.
+
+---
+
+## Related
+
+- [Build an OAuth App](/docs/build-oauth-app) — Getting started guide
+- [OAuth Scopes Reference](/docs/oauth-scopes) — Available permissions
+- [App Review Process](/docs/app-review-process) — Get your app verified
+- [API Reference](/docs/api-reference) — Full API documentation

@@ -3,17 +3,10 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Support",
-  description: "Get help with Midday",
+  description:
+    "Get help with Midday. Contact our team for assistance with any questions or issues you may have.",
 };
 
-export default function Page() {
-  return (
-    <div className="max-w-[750px] m-auto">
-      <h1 className="mt-24 font-medium text-center text-5xl mb-16 leading-snug">
-        Support
-      </h1>
-
-      <SupportForm />
-    </div>
-  );
+export default function SupportPage() {
+  return <SupportForm />;
 }

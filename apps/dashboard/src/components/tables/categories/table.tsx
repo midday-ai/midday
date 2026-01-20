@@ -87,9 +87,10 @@ export function DataTable() {
       });
     }
 
-    // With search: show parents and children that match, or children whose parent matches
+    // With search: show only categories that match the search
+    // Parents are shown if they match OR if they have matching children
+    // Children are only shown if they match the search
     const searchLower = searchValue.toLowerCase();
-    const matchingParentIds = new Set<string>();
 
     return flattenedData.filter((category) => {
       const matchesSearch = category.name?.toLowerCase().includes(searchLower);
@@ -101,22 +102,12 @@ export function DataTable() {
           child.name?.toLowerCase().includes(searchLower),
         );
 
-        if (matchesSearch || hasMatchingChild) {
-          matchingParentIds.add(category.id);
-          return true;
-        }
-        return false;
+        // Show parent if it matches OR has matching children
+        return matchesSearch || hasMatchingChild;
       }
 
-      // For children: show if they match search OR if their parent matches
-      if (matchesSearch) {
-        return true;
-      }
-      if (category.parentId && matchingParentIds.has(category.parentId)) {
-        return true;
-      }
-      // Don't show children that don't match search, even if parent is expanded
-      return false;
+      // For children: only show if they match the search
+      return matchesSearch;
     });
   }, [flattenedData, expandedCategories, searchValue, childrenByParentId]);
 

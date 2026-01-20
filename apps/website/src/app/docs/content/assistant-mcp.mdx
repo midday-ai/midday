@@ -1,0 +1,357 @@
+---
+title: Assistant and MCP Integration
+description: Use the Midday assistant in your own tools via MCP.
+section: assistant
+order: 2
+---
+
+The Midday assistant is available through the Model Context Protocol (MCP), letting you query your financial data from AI tools like Claude Desktop, Cursor, ChatGPT, and Raycast.
+
+## What is MCP?
+
+Model Context Protocol (MCP) is an open standard for connecting AI assistants to external data sources. Instead of copying and pasting data, MCP lets AI tools query your Midday data directly and securely.
+
+## Supported tools
+
+Midday MCP works with:
+
+- **Claude Desktop** - Anthropic's desktop app
+- **Cursor** - AI-powered code editor
+- **ChatGPT** - Via plugins/actions
+- **Raycast** - Mac productivity launcher
+- **Any MCP-compatible client**
+
+## Getting started
+
+### Step 1: Get your API key
+
+1. Go to [Settings → Developer](https://app.midday.ai/settings/developer)
+2. Click **Create API key**
+3. Give it a descriptive name (e.g., "Claude Desktop")
+4. Copy the key immediately (you won't see it again)
+
+### Step 2: Configure your client
+
+Choose your tool below for specific setup instructions.
+
+---
+
+## Claude Desktop setup
+
+Add Midday to your Claude Desktop configuration.
+
+### Find your config file
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+### Add Midday configuration
+
+Add or update the `mcpServers` section:
+
+```json
+{
+  "mcpServers": {
+    "midday": {
+      "command": "npx",
+      "args": ["-y", "@midday-ai/mcp"],
+      "env": {
+        "MIDDAY_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
+```
+
+### Restart Claude Desktop
+
+After saving, restart Claude Desktop. You should see Midday in your available tools.
+
+### Test it
+
+Ask Claude something like:
+- "What was my revenue last month?"
+- "Show me unpaid invoices"
+- "What's my current runway?"
+
+---
+
+## Cursor setup
+
+Use Midday data while coding in Cursor.
+
+### Open Cursor settings
+
+1. Open Cursor
+2. Go to Settings (Cmd/Ctrl + ,)
+3. Find the MCP configuration section
+
+### Add Midday
+
+Add to your MCP servers:
+
+```json
+{
+  "midday": {
+    "command": "npx",
+    "args": ["-y", "@midday-ai/mcp"],
+    "env": {
+      "MIDDAY_API_KEY": "your-api-key-here"
+    }
+  }
+}
+```
+
+### Use in conversations
+
+In Cursor's AI chat, you can now ask about your financial data while working on your projects.
+
+---
+
+## ChatGPT setup
+
+Use Midday with ChatGPT via custom GPTs or plugins.
+
+### Custom GPT approach
+
+1. Create a Custom GPT in ChatGPT
+2. Add actions that call the Midday API
+3. Configure authentication with your API key
+
+### Configuration
+
+Use the Midday API endpoints with your API key in the Authorization header:
+
+```
+Authorization: Bearer your-api-key-here
+```
+
+See the [API reference](/docs/api-reference) for available endpoints.
+
+---
+
+## Raycast setup
+
+Access Midday from Raycast on Mac.
+
+### Install the extension
+
+1. Open Raycast
+2. Search for "Midday" in the Store
+3. Install the extension
+
+### Configure
+
+1. Open Raycast preferences
+2. Find the Midday extension
+3. Enter your API key
+
+### Use it
+
+Trigger Raycast and use Midday commands to query your financial data.
+
+---
+
+## Available tools
+
+The MCP integration provides access to all your Midday data:
+
+### Transactions
+
+| Tool | Description |
+|------|-------------|
+| `transactions_list` | List transactions with filters (date, category, amount) |
+| `transactions_get` | Get details of a specific transaction |
+
+**Example queries**:
+- "Show transactions from last month"
+- "What did I spend on software this quarter?"
+- "Find transactions over $1,000"
+
+### Invoices
+
+| Tool | Description |
+|------|-------------|
+| `invoices_list` | List invoices with filters (status, customer, date) |
+| `invoices_get` | Get full details of an invoice |
+| `invoices_summary` | Get invoice totals by status |
+
+**Example queries**:
+- "Show unpaid invoices"
+- "What invoices are overdue?"
+- "Total outstanding amount"
+
+### Customers
+
+| Tool | Description |
+|------|-------------|
+| `customers_list` | List all customers |
+| `customers_get` | Get customer details |
+
+**Example queries**:
+- "List all my customers"
+- "Show details for Acme Corp"
+
+### Time tracking
+
+| Tool | Description |
+|------|-------------|
+| `tracker_projects_list` | List time tracking projects |
+| `tracker_projects_get` | Get project details |
+| `tracker_entries_list` | List time entries |
+
+**Example queries**:
+- "How many hours did I track this week?"
+- "Show time by project this month"
+- "What's unbilled for Project X?"
+
+### Reports
+
+| Tool | Description |
+|------|-------------|
+| `reports_revenue` | Get revenue for a period |
+| `reports_profit` | Get profit for a period |
+| `reports_burn_rate` | Get monthly burn rate |
+| `reports_runway` | Get runway estimate |
+| `reports_expenses` | Get expense breakdown |
+| `reports_spending` | Get spending by category |
+
+**Example queries**:
+- "What's my revenue this quarter?"
+- "Calculate my runway"
+- "Show spending by category"
+
+### Bank accounts
+
+| Tool | Description |
+|------|-------------|
+| `bank_accounts_list` | List connected accounts and balances |
+
+**Example queries**:
+- "What's my current cash balance?"
+- "Show all connected accounts"
+
+### Documents
+
+| Tool | Description |
+|------|-------------|
+| `documents_list` | List documents in the vault |
+| `documents_get` | Get document details |
+
+### Inbox
+
+| Tool | Description |
+|------|-------------|
+| `inbox_list` | List inbox items |
+| `inbox_get` | Get inbox item details |
+
+### Search
+
+| Tool | Description |
+|------|-------------|
+| `search_global` | Search across all data |
+
+**Example queries**:
+- "Search for Amazon"
+- "Find anything related to Stripe"
+
+### Team
+
+| Tool | Description |
+|------|-------------|
+| `team_get` | Get team information |
+| `team_members` | List team members |
+
+---
+
+## Example conversations
+
+### Financial overview
+
+> **You**: What's my financial health looking like?
+>
+> **Assistant**: Based on your Midday data:
+> - Cash balance: $45,230
+> - Monthly burn rate: $8,500
+> - Runway: 5.3 months
+> - Revenue this month: $12,400
+> - Profit margin: 31%
+
+### Invoice management
+
+> **You**: Do I have any overdue invoices?
+>
+> **Assistant**: You have 2 overdue invoices:
+> 1. INV-0042 to Acme Corp - $3,500 (15 days overdue)
+> 2. INV-0039 to Beta Inc - $1,200 (8 days overdue)
+>
+> Total overdue: $4,700
+
+### Expense analysis
+
+> **You**: What are my top expenses this quarter?
+>
+> **Assistant**: Your top expense categories this quarter:
+> 1. Salary: $24,000
+> 2. Software: $3,200
+> 3. Marketing: $2,800
+> 4. Rent: $2,400
+> 5. Professional Services: $1,500
+
+---
+
+## Security
+
+### API key permissions
+
+- API keys have **read-only access** by default
+- Cannot create, modify, or delete data
+- Cannot access sensitive credentials or payment information
+
+### Managing keys
+
+1. Go to [Settings → Developer](https://app.midday.ai/settings/developer)
+2. View all active API keys
+3. See last used date for each key
+4. Revoke keys you no longer need
+
+### Best practices
+
+- Create separate keys for different tools
+- Use descriptive names for keys
+- Revoke unused keys
+- Don't share keys publicly
+
+---
+
+## Troubleshooting
+
+### "Tool not found" errors
+
+- Ensure you've restarted your client after configuration
+- Check that the API key is valid
+- Verify the configuration syntax
+
+### No data returned
+
+- Check your API key has access to the team
+- Verify transactions/invoices exist for the queried period
+- Try a broader query
+
+### Connection issues
+
+- Ensure you have internet access
+- Check that `npx` is available in your PATH
+- Try running `npx @midday-ai/mcp` manually to test
+
+---
+
+## Tips for best results
+
+1. **Be specific**: "Revenue last month" works better than "How am I doing?"
+2. **Include dates**: "Expenses in Q4 2024" helps narrow results
+3. **Use follow-ups**: The assistant remembers context in a conversation
+4. **Try different phrasings**: If one query doesn't work, rephrase it
+
+[Learn about the in-app assistant →](/docs/using-assistant)
+[API reference →](/docs/api-reference)

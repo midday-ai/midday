@@ -1,0 +1,168 @@
+---
+title: Connect Outlook
+description: Automatically capture receipts from your Outlook inbox.
+section: inbox
+order: 3
+---
+
+Connect your Outlook account to automatically capture receipts and invoices from your email. Works with Outlook.com, Microsoft 365, and work/school accounts.
+
+## How it works
+
+Once connected, Midday:
+
+1. Scans your Outlook inbox for emails that look like receipts and invoices
+2. Uses AI to identify transaction-related emails
+3. Extracts attachments and relevant data
+4. Sends them to your Midday inbox for matching
+
+The scanning happens automatically on a regular schedule.
+
+## Connect Outlook
+
+1. Go to [Inbox → Settings](https://app.midday.ai/inbox/settings)
+2. Click **Connect Outlook**
+3. Sign in to your Microsoft account
+4. Review the permissions and click **Accept**
+
+### Supported account types
+
+- **Outlook.com**: Personal Microsoft accounts
+- **Microsoft 365**: Business and enterprise accounts
+- **Work/School**: Organizational accounts (if permitted by your IT admin)
+
+## What emails are scanned
+
+### Emails we process
+
+The AI looks for emails that are likely receipts or invoices:
+
+- **Order confirmations**: E-commerce purchases, online orders
+- **Digital receipts**: Uber, travel bookings, services
+- **Subscription receipts**: SaaS tools, subscriptions, memberships
+- **Invoice emails**: Bills, vendor invoices, payment confirmations
+- **Bank notifications**: Transaction alerts with receipt information
+
+### Emails we ignore
+
+The AI filters out non-receipt emails:
+
+- **Marketing emails**: Newsletters, promotions, announcements
+- **Social notifications**: LinkedIn, Teams messages
+- **Personal emails**: Non-business correspondence
+- **Spam/Junk**: Anything in your junk folder
+- **General business emails**: Meeting invites, project discussions
+
+### Focused Inbox consideration
+
+If you use Outlook's Focused Inbox feature, receipts may land in either Focused or Other. Midday scans both.
+
+## What Midday accesses
+
+Midday has **read-only** access to your Outlook:
+
+| Permission | What it allows | What we do |
+|------------|---------------|------------|
+| Read mail | View email content | Scan for receipt-like patterns |
+| Read attachments | View email attachments | Extract PDFs and images |
+
+### What we cannot do
+
+- Send emails from your account
+- Delete or modify emails
+- Access contacts or calendar
+- Read OneDrive files
+
+## Privacy and security
+
+### Data handling
+
+- **Selective processing**: Only emails matching receipt patterns are processed
+- **Secure storage**: Extracted receipts are encrypted in your Midday account
+- **No training data**: Your emails are not used to train AI models
+- **Team isolation**: Only your team can access your receipts
+
+### What we store
+
+- Extracted receipt/invoice files (PDFs, images)
+- Extracted data (merchant, amount, date)
+- Email metadata for deduplication (subject line, date, sender)
+
+We don't store the full content of non-receipt emails.
+
+### Enterprise considerations
+
+For Microsoft 365 and work accounts:
+
+- Your organization's policies may affect what apps can connect
+- Check with your IT admin if you have connection issues
+- Admin consent may be required for organizational accounts
+
+## Scan settings
+
+### Scan frequency
+
+Midday scans your inbox periodically. You can trigger a manual scan:
+
+1. Go to [Inbox → Settings](https://app.midday.ai/inbox/settings)
+2. Click **Sync now** next to Outlook
+
+### Historical receipts
+
+When first connected, Midday looks back at recent emails (typically 30-90 days) to capture existing receipts.
+
+## Troubleshooting
+
+### Missing receipts
+
+If some receipts aren't being captured:
+
+- **Check junk folder**: We don't scan junk mail
+- **Check Other inbox**: If using Focused Inbox, check both views
+- **Manual forward**: Forward specific receipts to your inbox email address
+- **Wait for sync**: New emails may take a few minutes to process
+
+### Permission issues
+
+If connection fails:
+
+- **Wrong account**: Ensure you're signing in with the correct Microsoft account
+- **Organization policy**: Your IT admin may need to allow third-party apps
+- **Admin consent**: Work accounts may require admin approval
+
+Contact your IT admin if using a work account and experiencing issues.
+
+### Connection expired
+
+Microsoft may require periodic re-authorization:
+
+1. Go to [Inbox → Settings](https://app.midday.ai/inbox/settings)
+2. Click **Reconnect** next to Outlook
+3. Sign in again to reauthorize
+
+## Disconnect Outlook
+
+To stop automatic capture:
+
+1. Go to [Inbox → Settings](https://app.midday.ai/inbox/settings)
+2. Click **Disconnect** next to Outlook
+
+### Revoke from Microsoft
+
+You can also revoke access from your [Microsoft Account settings](https://account.live.com/consent/Manage):
+
+1. Find "Midday" in your connected applications
+2. Click **Remove permissions**
+
+For work/school accounts, use the [Microsoft 365 app permissions page](https://myapps.microsoft.com/).
+
+Receipts already in your Midday inbox remain; no new receipts will sync.
+
+## Tips
+
+- **Works great with forwarding**: Use both for comprehensive capture
+- **Review weekly**: Check your Midday inbox for unmatched items
+- **Confirm matches**: The AI learns from your confirmations
+- **Use blocklist**: Block unwanted senders in inbox settings
+
+[Set up receipt matching →](/docs/receipt-matching)

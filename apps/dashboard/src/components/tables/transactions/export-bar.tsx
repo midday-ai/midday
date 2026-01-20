@@ -7,7 +7,6 @@ import {
   useAccountingError,
 } from "@/hooks/use-accounting-error";
 import { useJobStatus } from "@/hooks/use-job-status";
-import { useReviewTransactions } from "@/hooks/use-review-transactions";
 import { useSuccessSound } from "@/hooks/use-success-sound";
 import { useTransactionTab } from "@/hooks/use-transaction-tab";
 import { useExportStore } from "@/store/export";
@@ -54,7 +53,6 @@ export function ExportBar() {
     useAccountingError();
   const { play: playSuccessSound } = useSuccessSound();
   const { tab } = useTransactionTab();
-  const { transactionIds: reviewTransactionIds } = useReviewTransactions();
   const {
     exportData,
     setExportData,
@@ -122,14 +120,10 @@ export function ExportBar() {
     }),
   );
 
-  // Get IDs for export - either selected or all review transactions
+  // Get IDs for export - only manually selected transactions
   const transactionIdsForExport = useMemo(() => {
-    if (hasManualSelection) {
-      return Object.keys(rowSelection);
-    }
-    // Get all IDs from review data (with user filters applied)
-    return reviewTransactionIds;
-  }, [hasManualSelection, rowSelection, reviewTransactionIds]);
+    return Object.keys(rowSelection);
+  }, [rowSelection]);
 
   // Track job status for accounting export
   const {
@@ -214,19 +208,12 @@ export function ExportBar() {
   ]);
 
   // Determine what count to show - use exportingCount during export to prevent flickering
-  // IMPORTANT: Use transactionIdsForExport.length instead of reviewCount to ensure
-  // the displayed count matches what will actually be exported. This prevents a mismatch
-  // when: 1) user has filters applied, or 2) there are more than pageSize transactions
-  const displayCount =
-    exportingCount !== null
-      ? exportingCount
-      : hasManualSelection
-        ? selectedCount
-        : transactionIdsForExport.length;
+  // Show selected count (user must manually select transactions to export)
+  const displayCount = exportingCount !== null ? exportingCount : selectedCount;
 
-  // Show bar only on review tab - for exporting transactions
+  // Show bar on review tab - user selects transactions to export
   // Bulk edit bar handles selection on all/other tabs
-  const shouldShow = isReviewTab && (displayCount > 0 || hasManualSelection);
+  const shouldShow = isReviewTab;
 
   useEffect(() => {
     setOpen(shouldShow);
@@ -319,12 +306,11 @@ export function ExportBar() {
             />
             <div className="relative mx-2 md:mx-0 h-12 justify-between items-center flex pl-4 pr-2">
               <span className="text-sm">
-                {displayCount}{" "}
                 {exportingCount !== null
-                  ? "exporting"
-                  : hasManualSelection
-                    ? "selected"
-                    : "transactions ready to export"}
+                  ? `${displayCount} exporting`
+                  : displayCount > 0
+                    ? `${displayCount} selected`
+                    : "Select transactions to export"}
               </span>
 
               <div className="flex items-center space-x-2">

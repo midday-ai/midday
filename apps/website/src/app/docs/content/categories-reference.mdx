@@ -1,0 +1,266 @@
+---
+title: Transaction Categories Reference
+description: Complete guide to all transaction categories in Midday and how they affect your financial metrics.
+section: banking
+order: 5
+---
+
+Midday uses a structured category system to organize your transactions. Understanding these categories helps you maintain accurate books and ensures your financial metrics are calculated correctly.
+
+## How categories work
+
+Every transaction in Midday is assigned to a category. The AI automatically categorizes transactions when they sync, and you can adjust categories at any time. Categories are organized in a two-level hierarchy: parent categories contain more specific subcategories.
+
+Categories affect your financial reports:
+
+- **Revenue categories** count toward your income
+- **Expense categories** count toward your burn rate and reduce profit
+- **Excluded categories** are intentionally left out of burn rate calculations to prevent double-counting
+
+## Excluded categories
+
+Two categories are marked as "excluded" and won't count toward your burn rate:
+
+- **Credit Card Payment**: When you pay your credit card bill from your checking account, this transaction is excluded. Why? Because the individual purchases on your credit card already count as expenses. Counting the payment would double-count those expenses.
+
+- **Internal Transfer**: Moving money between your own accounts isn't an expense—it's just reorganizing your cash. These transfers are excluded from burn rate.
+
+This exclusion logic is automatic. You don't need to do anything special.
+
+---
+
+## Revenue
+
+Income flowing into your business. These transactions increase your revenue metrics.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Income | General income that doesn't fit other categories |
+| Product Sales | Revenue from selling physical or digital products |
+| Service Revenue | Revenue from providing services |
+| Consulting Revenue | Revenue from consulting engagements |
+| Subscription Revenue | Recurring subscription income (SaaS, memberships) |
+| Interest Income | Interest earned on bank accounts or investments |
+| Other Income | Miscellaneous income sources |
+| Customer Refunds | Refunds issued to customers (reduces revenue) |
+| Chargebacks & Disputes | Payment disputes and chargebacks (reduces revenue) |
+
+**Tip**: Customer Refunds and Chargebacks reduce your net revenue. Categorize them correctly for accurate revenue reporting.
+
+---
+
+## Cost of Goods Sold
+
+Direct costs of producing what you sell. Important for businesses selling products.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Inventory | Purchasing inventory for resale |
+| Manufacturing | Production and manufacturing costs |
+| Shipping (Inbound) | Freight and shipping to receive goods |
+| Duties & Customs | Import duties and customs fees |
+
+**Tip**: COGS is separated from operating expenses because it scales with sales. This helps you understand your gross margin.
+
+---
+
+## Sales & Marketing
+
+Spending to acquire customers and grow your business.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Marketing | General marketing activities |
+| Advertising | Paid ads (Google, Meta, LinkedIn, etc.) |
+| Website | Website hosting, domains, design services |
+| Events | Conferences, trade shows, hosted events |
+| Promotional Materials | Swag, printed materials, branded items |
+
+---
+
+## Operations
+
+Day-to-day costs of running your business.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Office Supplies | Supplies, stationery, small equipment |
+| Rent | Office or workspace rent |
+| Utilities | Electricity, water, gas |
+| Facilities Expenses | Cleaning, maintenance, repairs |
+| Equipment | Larger equipment purchases |
+| Internet & Telephone | Internet service, phone plans |
+| Shipping | Outbound shipping and postage |
+
+---
+
+## Professional Services
+
+External expertise and protection.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Professional Services Fees | Accountants, lawyers, consultants |
+| Contractors | Freelancers and contract workers |
+| Insurance | Business insurance premiums |
+
+---
+
+## Human Resources
+
+Team-related costs.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Salary | Employee salaries and wages |
+| Training | Training programs, courses, certifications |
+| Benefits | Health insurance, retirement contributions, perks |
+
+---
+
+## Travel & Entertainment
+
+Business travel and client entertainment.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Travel | Flights, hotels, car rentals, transportation |
+| Meals | Business meals and client entertainment |
+| Activity | Team activities, client entertainment |
+
+**Tip**: Keep receipts for travel and meals—these are commonly audited expense categories.
+
+---
+
+## Technology
+
+Software and digital subscriptions.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Software | SaaS subscriptions, software licenses |
+| Non-Software Subscriptions | Publications, memberships, non-software services |
+
+**Tip**: The AI is particularly good at recognizing software subscriptions from merchants like AWS, Vercel, GitHub, Notion, etc.
+
+---
+
+## Banking & Finance
+
+Financial transactions and fees.
+
+| Subcategory | Use for | Excluded? |
+|-------------|---------|-----------|
+| Transfer | General transfers | No |
+| Credit Card Payment | Paying your credit card bill | **Yes** |
+| Banking Fees | Bank service charges, wire fees | No |
+| Loan Proceeds | Money received from loans | No |
+| Loan Principal Repayment | Paying back loan principal | No |
+| Interest Expense | Interest paid on loans or credit | No |
+| Payouts | Payouts from payment processors (Stripe, PayPal) | No |
+| Processor Fees | Payment processing fees | No |
+| Fees | Other financial fees | No |
+
+**Important**: Credit Card Payment is excluded from burn rate. When you sync both your checking account and credit card, you'll see both the individual credit card purchases AND the payment from checking. The payment is excluded to prevent counting those expenses twice.
+
+---
+
+## Assets
+
+Capital expenditures and prepaid items.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Fixed Assets | Major equipment, vehicles, property |
+| Prepaid Expenses | Annual subscriptions paid upfront, prepaid rent |
+
+**Tip**: Fixed assets may be depreciated over time for accounting purposes. Your accountant can help with this.
+
+---
+
+## Liabilities & Debt
+
+Obligations and deferred items.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Leases | Lease payments for equipment or property |
+| Deferred Revenue | Payments received for services not yet delivered |
+
+---
+
+## Taxes & Government
+
+Tax payments and government fees.
+
+| Subcategory | Use for |
+|-------------|---------|
+| VAT/GST/PST/QST Payments | Value-added tax and sales tax payments |
+| Sales & Use Tax Payments | Sales tax remittances |
+| Income Tax Payments | Business income tax payments |
+| Payroll Tax Remittances | Employer payroll tax payments |
+| Employer Taxes | Employer portion of employment taxes |
+| Government Fees | Business licenses, permits, filing fees |
+
+**Tip**: Accurate tax categorization makes year-end much easier. Review these categories before exporting to your accountant.
+
+---
+
+## Owner / Equity
+
+Transactions between the business and owners.
+
+| Subcategory | Use for |
+|-------------|---------|
+| Owner Draws | Money taken out by owners |
+| Capital Investment | Money put into the business by owners |
+| Charitable Donations | Donations to charitable organizations |
+
+**Tip**: Owner draws aren't business expenses—they're distributions of profit. Categorize them correctly to avoid inflating your burn rate.
+
+---
+
+## System
+
+Special categories for uncategorized and internal transactions.
+
+| Subcategory | Use for | Excluded? |
+|-------------|---------|-----------|
+| Uncategorized | Transactions not yet categorized | No |
+| Other | Transactions that don't fit elsewhere | No |
+| Internal Transfer | Transfers between your own accounts | **Yes** |
+
+**Important**: Internal Transfer is excluded from burn rate. Moving money from checking to savings isn't spending—it's just moving your cash around.
+
+---
+
+## How categories affect your metrics
+
+| Metric | What counts |
+|--------|-------------|
+| Revenue | All transactions in Revenue categories |
+| Expenses | All expense categories except excluded ones |
+| Burn Rate | Monthly expenses (excludes Credit Card Payment and Internal Transfer) |
+| Profit | Revenue minus expenses |
+| Profit Margin | Profit divided by revenue |
+
+## Changing categories
+
+If the AI gets a category wrong:
+
+1. Click on the transaction
+2. Select the correct category
+3. Save
+
+The AI learns from your corrections and improves over time for similar transactions.
+
+## Bulk categorization
+
+For multiple similar transactions:
+
+1. Filter transactions (e.g., by merchant name)
+2. Select multiple transactions
+3. Choose **Categorize** from bulk actions
+4. Apply the category to all selected
+
+[Learn more about auto-categorization →](/docs/auto-categorization)

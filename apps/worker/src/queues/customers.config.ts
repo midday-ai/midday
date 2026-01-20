@@ -8,11 +8,7 @@ import type { QueueConfig } from "../types/queue-config";
 const customersQueueOptions: QueueOptions = {
   connection: getRedisConnection(),
   defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: "exponential",
-      delay: 2000,
-    },
+    attempts: 1,
     removeOnComplete: {
       age: 24 * 3600, // Keep completed jobs for 24 hours
       count: 1000, // Keep max 1000 completed jobs

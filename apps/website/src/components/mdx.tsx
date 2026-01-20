@@ -19,7 +19,9 @@ function Table({ data }: TableProps) {
   const rows = data.rows.map((row, rowIndex) => (
     <tr key={row.join("-")}>
       {row.map((cell, cellIndex) => (
-        <td key={`${cell}-${cellIndex}`}>{cell}</td>
+        <td key={`${rowIndex.toString()}-${cellIndex.toString()}-${cell}`}>
+          {cell}
+        </td>
       ))}
     </tr>
   ));
@@ -69,6 +71,7 @@ interface CodeProps {
 
 function Code({ children, ...props }: CodeProps) {
   const codeHTML = highlight(children);
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: Syntax highlighting requires innerHTML
   return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />;
 }
 
@@ -129,14 +132,18 @@ const components = {
 };
 
 interface CustomMDXProps {
+  source: string;
   components?: Record<string, React.ComponentType<unknown>>;
 }
 
-export function CustomMDX(props: CustomMDXProps) {
+export function CustomMDX({
+  source,
+  components: customComponents,
+}: CustomMDXProps) {
   return (
     <MDXRemote
-      {...props}
-      components={{ ...components, ...(props.components || {}) }}
+      source={source}
+      components={{ ...components, ...(customComponents || {}) }}
     />
   );
 }

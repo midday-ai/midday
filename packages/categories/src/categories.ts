@@ -116,7 +116,11 @@ const RAW_CATEGORIES = [
     name: "Banking & Finance",
     children: [
       { slug: "transfer", name: "Transfer" },
-      { slug: "credit-card-payment", name: "Credit Card Payment", excluded: true },
+      {
+        slug: "credit-card-payment",
+        name: "Credit Card Payment",
+        excluded: true,
+      },
       { slug: "banking-fees", name: "Banking Fees" },
       { slug: "loan-proceeds", name: "Loan Proceeds" },
       { slug: "loan-principal-repayment", name: "Loan Principal Repayment" },

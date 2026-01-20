@@ -312,6 +312,15 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
         </CardContent>
 
         <div className="px-6 pb-6 flex gap-2 mt-auto">
+          <Button
+            variant="outline"
+            className="w-full"
+            disabled={!app.active}
+            onClick={() => setParams({ app: app.id })}
+          >
+            Details
+          </Button>
+
           {app.installUrl ? (
             <Button
               variant="outline"
@@ -319,40 +328,27 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
               onClick={handleOnInitialize}
               disabled={!app.active}
             >
-              Download
+              {app.id === "midday-desktop" ? "Download" : "Install"}
             </Button>
+          ) : app.installed ? (
+            <SubmitButton
+              variant="outline"
+              className="w-full"
+              onClick={handleDisconnect}
+              isSubmitting={isDisconnecting}
+            >
+              Disconnect
+            </SubmitButton>
           ) : (
-            <>
-              <Button
-                variant="outline"
-                className="w-full"
-                disabled={!app.active}
-                onClick={() => setParams({ app: app.id })}
-              >
-                Details
-              </Button>
-
-              {app.installed ? (
-                <SubmitButton
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleDisconnect}
-                  isSubmitting={isDisconnecting}
-                >
-                  Disconnect
-                </SubmitButton>
-              ) : (
-                <SubmitButton
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleOnInitialize}
-                  disabled={!app.active}
-                  isSubmitting={isInstalling}
-                >
-                  Install
-                </SubmitButton>
-              )}
-            </>
+            <SubmitButton
+              variant="outline"
+              className="w-full"
+              onClick={handleOnInitialize}
+              disabled={!app.active}
+              isSubmitting={isInstalling}
+            >
+              Install
+            </SubmitButton>
           )}
         </div>
 
@@ -422,7 +418,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                     disabled={!app.active}
                     isSubmitting={isInstalling}
                   >
-                    {app.installUrl ? "Download" : "Install"}
+                    {app.id === "midday-desktop" ? "Download" : "Install"}
                   </SubmitButton>
                 )}
               </div>

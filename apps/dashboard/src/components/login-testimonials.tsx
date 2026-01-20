@@ -100,7 +100,7 @@ export default function LoginTestimonials() {
                 />
               </svg>
             </div>
-            <p className="font-serif text-xl text-white/40 leading-relaxed pl-4">
+            <p className="font-sans text-xl text-white/40 leading-relaxed pl-4">
               {(() => {
                 const testimonial = testimonials[currentTestimonial];
                 const secondPart = testimonial?.secondPart || "";

@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { PostCopyURL } from "./post-copy-url";
 
 const getAuthor = (id: string) =>
   ({
@@ -28,13 +27,10 @@ export function PostAuthor({ author }: Props) {
           height={24}
           alt={authorData.name}
           className="rounded-full overflow-hidden"
-          quality={90}
+          unoptimized
         />
         <span className="font-medium text-xs">{authorData.name}</span>
         <span className="text-xs text-[#878787]">{authorData.tagline}</span>
-      </div>
-      <div className="ml-auto">
-        <PostCopyURL slug={author} />
       </div>
     </div>
   );

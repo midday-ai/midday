@@ -61,7 +61,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
     } = job.data;
     const supabase = createClient();
 
-    const filePath = `export-${format(new Date(), dateFormat ?? "yyyy-MM-dd")}`;
+    const filePath = `export-${format(new Date(), `${dateFormat ?? "yyyy-MM-dd"}-HHmm`)}`;
     const path = `${teamId}/exports`;
     const fileName = `${filePath}.zip`;
 

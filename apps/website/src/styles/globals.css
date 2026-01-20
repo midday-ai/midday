@@ -3,17 +3,87 @@
 @tailwind utilities;
 
 :root {
+  --font-hedvig-sans: "Hedvig Letters Sans", system-ui, sans-serif;
+  --font-hedvig-serif: "Hedvig Letters Serif", Georgia, serif;
+
+  /* Light mode syntax highlighting (clear differentiation like dark mode) */
+  --sh-class: #171717;
+  --sh-identifier: #171717;
+  --sh-sign: #707070;
+  --sh-string: #4a4a4a;
+  --sh-keyword: #4a4a4a;
+  --sh-comment: #666666;
+  --sh-jsxliterals: #171717;
+  --sh-property: #4a4a4a;
+  --sh-entity: #4a4a4a;
+}
+
+.dark {
+  /* Dark mode syntax highlighting (monochrome) */
   --sh-class: #ffffff;
   --sh-identifier: #ffffff;
   --sh-sign: #8996a3;
   --sh-string: #a7a7a7;
   --sh-keyword: #a7a7a7;
-  --sh-comment: #a19595;
+  --sh-comment: #878787;
   --sh-jsxliterals: #ffffff;
   --sh-property: #a7a7a7;
   --sh-entity: #a7a7a7;
 }
 
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.2);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+  }
+}
+
+@keyframes fadeInBlur {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@layer utilities {
+  .bg-background-semi-transparent {
+    position: relative;
+  }
+
+  .bg-background-semi-transparent::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: hsl(var(--background));
+    opacity: 0.8;
+    z-index: -1;
+    pointer-events: none;
+  }
+}
+
+/* Updates/Blog styles */
 .updates p {
   min-height: 1.87em;
   margin-top: 1px;
@@ -23,7 +93,7 @@
 
 .updates h2 {
   font-size: 26px;
-  margin-top: .8em;
+  margin-top: 0.8em;
   margin-bottom: 10px;
   font-weight: 500;
 }
@@ -37,7 +107,7 @@
 
 .updates h3 {
   font-size: 1.25em;
-  margin-top: .8em;
+  margin-top: 0.8em;
   margin-bottom: 1px;
   font-weight: 500;
 }
@@ -70,7 +140,7 @@
 .updates p code {
   border-radius: 4px;
   background: hsla(44, 6%, 50%, 0.15);
-  padding: 0 .4em 3px .4em;
+  padding: 0 0.4em 3px 0.4em;
   line-height: normal;
 }
 
@@ -91,19 +161,30 @@
   font-weight: 500;
 }
 
+/* App description styles */
+.app-description strong {
+  display: block;
+  padding-top: 1.5em;
+  padding-bottom: 0.5em;
+  color: hsl(var(--foreground));
+}
+
+.app-description strong:first-child {
+  padding-top: 0;
+}
+
+.app-description ul,
+.app-description ol {
+  padding-bottom: 1em;
+}
+
 pre::-webkit-scrollbar {
   display: none;
 }
 
 pre {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-  padding: 20px;
-  border: 1px solid;
-  border-color: hsl(var(--border));
-  border-radius: 10px;
-  margin: 20px 0 !important;
-  background-color: #0c0c0c;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   overflow: auto;
 }
 
@@ -112,63 +193,29 @@ pre code {
   font-weight: 500 !important;
 }
 
-.dark .dotted-bg {
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    #232323 1px,
-    transparent 0
-  );
-  background-size: 8px 8px;
+.sh__line,
+pre code span,
+pre code div,
+pre span,
+pre div {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
-.light .dotted-bg {
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    #e7e7e7 1px,
-    transparent 0
-  );
-  background-size: 8px 8px;
-}
 
-.text-stroke {
-  color: white;
-  text-shadow: -1px 1px 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px -1px 0
-    black;
-}
+/* Respect user's motion preferences for accessibility and performance */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 
-.dark .text-stroke {
-  color: black;
-  text-shadow: -1px 1px 0 white, 1px 1px 0 white, 1px -1px 0 white, -1px -1px 0
-    white;
-}
-
-.dark .text-dotted {
-  background-image: radial-gradient(
-    circle at 0.4px 0.2px,
-    #fff 1px,
-    transparent 0
-  );
-  background-size: 5px 5px;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-dotted {
-  background-image: radial-gradient(
-    circle at 0.4px 0.2px,
-    #000 1px,
-    transparent 0
-  );
-  background-size: 5px 5px;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-::selection {
-  background: #00cc9937;
-  color: #007763fd;
-}
-
-img::selection {
-  background: transparent;
+  /* Keep essential animations but simplify */
+  video {
+    animation: none !important;
+  }
 }

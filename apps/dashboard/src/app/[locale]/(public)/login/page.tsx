@@ -1,5 +1,6 @@
 import { LoginContent } from "@/components/login-content";
 import { Cookies } from "@/utils/constants";
+import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import { userAgent } from "next/server";

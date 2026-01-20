@@ -503,3 +503,113 @@ export const getChartDataByLinkIdSchema = z
     }),
   })
   .openapi("GetChartDataByLinkIdSchema");
+
+export const getGrowthRateSchema = z
+  .object({
+    from: z.string().openapi({
+      description: "Start date (ISO 8601 format)",
+      example: "2023-01-01",
+    }),
+    to: z.string().openapi({
+      description: "End date (ISO 8601 format)",
+      example: "2023-12-31",
+    }),
+    currency: z.string().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+    type: z.enum(["revenue", "profit"]).optional().default("revenue").openapi({
+      description: "Type of growth to calculate",
+      example: "revenue",
+    }),
+    revenueType: z.enum(["gross", "net"]).optional().default("net").openapi({
+      description: "Type of revenue calculation",
+      example: "net",
+    }),
+    period: z
+      .enum(["monthly", "quarterly", "yearly"])
+      .optional()
+      .default("quarterly")
+      .openapi({
+        description: "Period for growth comparison",
+        example: "quarterly",
+      }),
+  })
+  .openapi("GetGrowthRateSchema");
+
+export const getProfitMarginSchema = z
+  .object({
+    from: z.string().openapi({
+      description: "Start date (ISO 8601 format)",
+      example: "2023-01-01",
+    }),
+    to: z.string().openapi({
+      description: "End date (ISO 8601 format)",
+      example: "2023-12-31",
+    }),
+    currency: z.string().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+    revenueType: z.enum(["gross", "net"]).optional().default("net").openapi({
+      description: "Type of revenue calculation (gross or net profit margin)",
+      example: "net",
+    }),
+  })
+  .openapi("GetProfitMarginSchema");
+
+export const getCashFlowSchema = z
+  .object({
+    from: z.string().openapi({
+      description: "Start date (ISO 8601 format)",
+      example: "2023-01-01",
+    }),
+    to: z.string().openapi({
+      description: "End date (ISO 8601 format)",
+      example: "2023-12-31",
+    }),
+    currency: z.string().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+    period: z
+      .enum(["monthly", "quarterly"])
+      .optional()
+      .default("monthly")
+      .openapi({
+        description: "Aggregation period for cash flow data",
+        example: "monthly",
+      }),
+  })
+  .openapi("GetCashFlowSchema");
+
+export const getRecurringExpensesSchema = z
+  .object({
+    from: z.string().optional().openapi({
+      description: "Start date filter (ISO 8601 format)",
+      example: "2023-01-01",
+    }),
+    to: z.string().optional().openapi({
+      description: "End date filter (ISO 8601 format)",
+      example: "2023-12-31",
+    }),
+    currency: z.string().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+  })
+  .openapi("GetRecurringExpensesSchema");
+
+export const getBalanceSheetSchema = z
+  .object({
+    asOf: z.string().optional().openapi({
+      description:
+        "Balance sheet as of date (ISO 8601 format), defaults to today",
+      example: "2023-12-31",
+    }),
+    currency: z.string().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+  })
+  .openapi("GetBalanceSheetSchema");

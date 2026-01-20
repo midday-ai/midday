@@ -14,7 +14,7 @@
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@hono/zod-openapi": "^1.2.0",
+    "@hono/zod-openapi": "1.2.0",
     "@hono/zod-validator": "^0.7.6",
     "hono": "4.11.4",
     "jose": "^6.1.3",

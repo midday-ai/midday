@@ -1,7 +1,6 @@
 "use client";
 
 import { useJobStatus } from "@/hooks/use-job-status";
-import { useReviewTransactions } from "@/hooks/use-review-transactions";
 import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
@@ -88,19 +87,10 @@ export function ExportTransactionsModal({
   const teamMutation = useTeamMutation();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { transactionIds: reviewTransactionIds } = useReviewTransactions();
-
-  // Get transaction IDs - either from selection or all review transactions
-  const selectedIds = Object.keys(rowSelection);
-  const hasManualSelection = selectedIds.length > 0;
-
-  // Get IDs for export - either selected or all review transactions (with user filters applied)
+  // Get transaction IDs - only manually selected transactions
   const transactionIds = useMemo(() => {
-    if (hasManualSelection) {
-      return selectedIds;
-    }
-    return reviewTransactionIds;
-  }, [hasManualSelection, selectedIds, reviewTransactionIds]);
+    return Object.keys(rowSelection);
+  }, [rowSelection]);
 
   const totalCount = transactionIds.length;
 

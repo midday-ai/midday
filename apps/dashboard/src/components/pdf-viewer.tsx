@@ -5,6 +5,7 @@ import { Document, Page, PasswordResponses, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
 import { Alert, AlertDescription } from "@midday/ui/alert";
 import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
@@ -116,13 +117,17 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
     );
   }
 
+  const isLoading = !numPages && !isPasswordProtected;
+
   return (
     <div
       className={cn(
-        "flex flex-col w-full h-full overflow-hidden",
+        "flex flex-col w-full h-full overflow-hidden relative",
         numPages && "bg-white",
       )}
     >
+      {isLoading && <Skeleton className="absolute inset-0 w-full h-full" />}
+
       {isPasswordProtected && !isSubmittingPassword ? (
         <div className="absolute inset-0 flex items-center justify-center p-8">
           <div className="max-w-md w-full space-y-6 text-center">
@@ -175,10 +180,10 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
           initialScale={1}
           minScale={1}
           maxScale={2}
-          doubleClick={{ mode: "toggle", step: 2 }}
+          doubleClick={{ mode: "toggle", step: 1 }}
           panning={{ disabled: false }}
-          wheel={{ disabled: true }}
-          smooth
+          wheel={{ wheelDisabled: true, touchPadDisabled: false, step: 0.5 }}
+          pinch={{ step: 5 }}
           alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
         >
           <TransformComponent
@@ -203,11 +208,9 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
                   <Skeleton className="w-full h-[calc(100vh-theme(spacing.24))]" />
                 }
                 error={
-                  <div className="flex flex-col items-center justify-center p-8 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Failed to load PDF. The file may be corrupted or
-                      unsupported.
-                    </p>
+                  <div className="flex flex-col items-center justify-center h-full w-full gap-2 text-muted-foreground">
+                    <Icons.BrokenImage className="size-8" />
+                    <p className="text-sm">File not found</p>
                   </div>
                 }
               >

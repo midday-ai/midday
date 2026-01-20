@@ -1,11 +1,14 @@
 import { baseUrl } from "@/app/sitemap";
 import { CustomMDX } from "@/components/mdx";
 import { PostAuthor } from "@/components/post-author";
-import { PostStatus } from "@/components/post-status";
 import { getBlogPosts } from "@/lib/blog";
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+
+// Force static generation
+export const dynamic = "force-static";
 
 export async function generateStaticParams() {
   const posts = getBlogPosts();
@@ -15,9 +18,16 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata(props): Promise<Metadata | undefined> {
-  const params = await props.params;
-  const post = getBlogPosts().find((post) => post.slug === params.slug);
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata | undefined> {
+  const { slug } = await params;
+  const post = getBlogPosts().find((post) => post.slug === slug);
+
   if (!post) {
     return;
   }
@@ -38,28 +48,25 @@ export async function generateMetadata(props): Promise<Metadata | undefined> {
       type: "article",
       publishedTime,
       url: `${baseUrl}/updates/${post.slug}`,
-      images: [
-        {
-          url: image,
-        },
-      ],
+      images: image
+        ? [
+            {
+              url: image,
+            },
+          ]
+        : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [image],
+      images: image ? [image] : undefined,
     },
   };
 }
 
-export default async function Page(props: {
-  params: Promise<{ slug: string }>;
-}) {
-  const params = await props.params;
-
-  const { slug } = params;
-
+export default async function Page({ params }: Props) {
+  const { slug } = await params;
   const post = getBlogPosts().find((post) => post.slug === slug);
 
   if (!post) {
@@ -71,6 +78,7 @@ export default async function Page(props: {
       <script
         type="application/ld+json"
         suppressHydrationWarning
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
@@ -79,14 +87,21 @@ export default async function Page(props: {
             datePublished: post.metadata.publishedAt,
             dateModified: post.metadata.publishedAt,
             description: post.metadata.summary,
-            image: `${baseUrl}${post.metadata.image}`,
+            image: post.metadata.image
+              ? `${baseUrl}${post.metadata.image}`
+              : undefined,
             url: `${baseUrl}/updates/${post.slug}`,
           }),
         }}
       />
 
-      <article className="max-w-[680px] pt-[80px] md:pt-[150px] w-full">
-        <PostStatus status={post.metadata.tag} />
+      <article className="max-w-[680px] pt-[80px] md:pt-[150px] w-full pb-24">
+        <Link
+          href="/updates"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 inline-block"
+        >
+          ← Go back
+        </Link>
 
         <h2 className="font-medium text-2xl mb-6">{post.metadata.title}</h2>
 

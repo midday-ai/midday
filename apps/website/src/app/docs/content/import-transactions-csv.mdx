@@ -1,0 +1,82 @@
+---
+title: Import Transactions from CSV
+description: Manually import transactions when bank connection isn't available.
+section: banking
+order: 3
+---
+
+If your bank isn't supported for automatic sync, you can import transactions manually via CSV.
+
+## When to use CSV import
+
+- Your bank isn't in our supported list
+- You have transactions from before connecting your bank
+- You're migrating from another tool
+- You need to import credit card statements
+
+## Prepare your CSV
+
+Your CSV file should include:
+
+- **Date**: Transaction date
+- **Description**: Merchant or transaction description
+- **Amount**: Transaction amount (positive for income, negative for expenses—or vice versa)
+
+Optional columns:
+
+- Category
+- Notes
+- Reference number
+
+Most bank exports work directly. Midday maps common formats automatically.
+
+## Import transactions
+
+1. Go to [Transactions](https://app.midday.ai/transactions)
+2. Click **Import** or the import icon
+3. Select your CSV file
+4. Map columns to Midday fields
+5. Review the preview
+6. Confirm import
+
+## Column mapping
+
+If Midday doesn't recognize your columns automatically:
+
+1. Match each CSV column to a Midday field
+2. Specify date format if needed
+3. Indicate if amounts are inverted (positive = expense)
+
+## After import
+
+Imported transactions:
+
+- Appear in your transaction list
+- Are categorized by AI automatically
+- Can be edited like any other transaction
+- Won't duplicate if you later connect the same bank
+
+## Tips
+
+- Export from your bank in CSV format, not PDF
+- Include as much history as useful (usually 1 year)
+- Review categories after import—AI needs to learn your patterns
+- Consider connecting the bank after import to avoid future manual work
+
+## Troubleshooting
+
+### Date parsing errors
+
+- Check your date format matches what you selected
+- Common formats: MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD
+
+### Duplicate transactions
+
+- Midday checks for duplicates based on date, amount, and description
+- Exact duplicates are skipped
+- Near-duplicates might import—delete manually if needed
+
+### Missing columns
+
+- Only Date, Description, and Amount are required
+- Other data can be added to transactions after import
