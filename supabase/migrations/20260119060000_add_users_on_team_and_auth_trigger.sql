@@ -91,3 +91,33 @@ $$;
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================================================
+-- PART 4: RLS Policies for teams table
+-- ============================================================================
+-- The teams table has RLS enabled but needs policies for users to access their teams
+
+-- Policy: Users can view teams they belong to
+CREATE POLICY "Users can view their teams"
+  ON public.teams FOR SELECT
+  USING (
+    id IN (
+      SELECT team_id FROM public.users_on_team
+      WHERE user_id = auth.uid()
+    )
+  );
+
+-- Policy: Users can update teams they own
+CREATE POLICY "Team owners can update their teams"
+  ON public.teams FOR UPDATE
+  USING (
+    id IN (
+      SELECT team_id FROM public.users_on_team
+      WHERE user_id = auth.uid() AND role = 'owner'
+    )
+  );
+
+-- Policy: Authenticated users can create teams
+CREATE POLICY "Authenticated users can create teams"
+  ON public.teams FOR INSERT
+  WITH CHECK (auth.uid() IS NOT NULL);

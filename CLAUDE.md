@@ -245,6 +245,9 @@ bun lint                   # Run ESLint
 bun format                 # Run Prettier
 ```
 
+### Dangerous Commands to Avoid
+- **Never run `taskkill //IM node.exe`** — This kills all Node.js processes including Claude Code itself, causing the session to freeze
+
 ---
 
 ## Key Files Reference

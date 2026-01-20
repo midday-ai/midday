@@ -89,3 +89,4 @@ dist-ssr
 # AI agent configs
 .claude/
 .serena/
+api/index.js
