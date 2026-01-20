@@ -2,13 +2,19 @@
 
 import { Button } from "@midday/ui/button";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { PricingSection } from "./sections/pricing-section";
 import { TestimonialsSection } from "./sections/testimonials-section";
 
 export function Download() {
   const [isDockLoaded, setIsDockLoaded] = useState(false);
+
+  // Trigger animation after mount to handle cached images
+  useEffect(() => {
+    const timer = setTimeout(() => setIsDockLoaded(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -32,7 +38,6 @@ export function Download() {
                     transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
                   }}
                   priority
-                  onLoad={() => setIsDockLoaded(true)}
                 />
                 <Image
                   src="/images/dock-dark.png"
@@ -46,7 +51,6 @@ export function Download() {
                     transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
                   }}
                   priority
-                  onLoad={() => setIsDockLoaded(true)}
                 />
               </div>
             </div>
@@ -98,7 +102,6 @@ export function Download() {
                     transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
                   }}
                   priority
-                  onLoad={() => setIsDockLoaded(true)}
                 />
                 <Image
                   src="/images/dock-dark.png"
@@ -112,7 +115,6 @@ export function Download() {
                     transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
                   }}
                   priority
-                  onLoad={() => setIsDockLoaded(true)}
                 />
               </div>
             </div>

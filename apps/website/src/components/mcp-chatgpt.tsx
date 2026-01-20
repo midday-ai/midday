@@ -3,28 +3,12 @@
 import { ChatGPTMcpLogo } from "@midday/app-store/logos";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
-import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  oneDark,
-  oneLight,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useMemo, useState } from "react";
+import { highlight } from "sugar-high";
 
-function CodeBlock({
-  code,
-  language = "typescript",
-}: { code: string; language?: string }) {
+function CodeBlock({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const { resolvedTheme } = useTheme();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted && resolvedTheme === "dark";
 
   const handleCopy = async () => {
     try {
@@ -36,27 +20,17 @@ function CodeBlock({
     }
   };
 
+  const codeHTML = highlight(code);
+
   return (
     <div className="relative group">
-      <div className="bg-secondary border border-border rounded-none overflow-hidden">
-        <SyntaxHighlighter
-          language={language}
-          style={isDark ? oneDark : oneLight}
-          customStyle={{
-            margin: 0,
-            padding: "1rem",
-            fontSize: "0.875rem",
-            background: "transparent",
-            fontFamily:
-              "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
-          }}
-          codeTagProps={{
-            className: "font-mono",
-          }}
-          PreTag="div"
-        >
-          {code}
-        </SyntaxHighlighter>
+      <div className="bg-[#fafafa] dark:bg-[#0c0c0c] border border-border rounded-none overflow-hidden">
+        <pre className="overflow-x-auto p-4 text-sm font-mono">
+          <code
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: Syntax highlighting requires innerHTML
+            dangerouslySetInnerHTML={{ __html: codeHTML }}
+          />
+        </pre>
       </div>
       <button
         type="button"
@@ -269,7 +243,7 @@ await client.close();`;
                 <p className="font-sans text-sm text-muted-foreground">
                   Create an MCP app in ChatGPT with this configuration:
                 </p>
-                <CodeBlock code={developerConfig} language="json" />
+                <CodeBlock code={developerConfig} />
                 <p className="font-sans text-xs text-muted-foreground">
                   Uses{" "}
                   <a
@@ -291,9 +265,9 @@ await client.close();`;
                 <p className="font-sans text-sm text-muted-foreground">
                   Build custom integrations with the MCP SDK:
                 </p>
-                <CodeBlock code={installCode} language="bash" />
+                <CodeBlock code={installCode} />
                 <div className="mt-4">
-                  <CodeBlock code={sdkCode} language="typescript" />
+                  <CodeBlock code={sdkCode} />
                 </div>
               </div>
             )}

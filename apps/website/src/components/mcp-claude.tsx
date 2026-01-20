@@ -4,28 +4,12 @@ import { ClaudeMcpLogo } from "@midday/app-store/logos";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
-import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  oneDark,
-  oneLight,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useMemo, useState } from "react";
+import { highlight } from "sugar-high";
 
-function CodeBlock({
-  code,
-  language = "json",
-}: { code: string; language?: string }) {
+function CodeBlock({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const { resolvedTheme } = useTheme();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted && resolvedTheme === "dark";
 
   const handleCopy = async () => {
     try {
@@ -37,27 +21,17 @@ function CodeBlock({
     }
   };
 
+  const codeHTML = highlight(code);
+
   return (
     <div className="relative group">
-      <div className="bg-secondary border border-border rounded-none overflow-hidden">
-        <SyntaxHighlighter
-          language={language}
-          style={isDark ? oneDark : oneLight}
-          customStyle={{
-            margin: 0,
-            padding: "1rem",
-            fontSize: "0.875rem",
-            background: "transparent",
-            fontFamily:
-              "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
-          }}
-          codeTagProps={{
-            className: "font-mono",
-          }}
-          PreTag="div"
-        >
-          {code}
-        </SyntaxHighlighter>
+      <div className="bg-[#fafafa] dark:bg-[#0c0c0c] border border-border rounded-none overflow-hidden">
+        <pre className="overflow-x-auto p-4 text-sm font-mono">
+          <code
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: Syntax highlighting requires innerHTML
+            dangerouslySetInnerHTML={{ __html: codeHTML }}
+          />
+        </pre>
       </div>
       <button
         type="button"
@@ -222,7 +196,7 @@ export function MCPClaude() {
                 <p className="font-sans text-sm text-muted-foreground">
                   Run this command in your terminal:
                 </p>
-                <CodeBlock code={cliCommand} language="bash" />
+                <CodeBlock code={cliCommand} />
               </div>
             )}
 
@@ -231,7 +205,7 @@ export function MCPClaude() {
                 <p className="font-sans text-sm text-muted-foreground">
                   Add to your Claude Desktop config file:
                 </p>
-                <CodeBlock code={desktopConfig} language="json" />
+                <CodeBlock code={desktopConfig} />
                 <p className="font-sans text-xs text-muted-foreground">
                   Requires{" "}
                   <a
