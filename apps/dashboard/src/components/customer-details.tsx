@@ -241,7 +241,7 @@ export function CustomerDetails() {
   // Subscribe to realtime updates for this customer
   useRealtime({
     channelName: "realtime_customers",
-    event: "UPDATE",
+    events: ["UPDATE"],
     table: "customers",
     filter: customerId ? `id=eq.${customerId}` : undefined,
     onEvent: (payload) => {

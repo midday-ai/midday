@@ -394,11 +394,10 @@ async function getTrackerActivityStats(
 
     if (!entry.billed) {
       unbilledSeconds += duration;
+      // Calculate billable amount for unbilled work only (rate is hourly)
+      const rate = Number(entry.rate ?? 0);
+      billableAmount += (rate * duration) / 3600;
     }
-
-    // Calculate billable amount (rate is hourly)
-    const rate = Number(entry.rate ?? 0);
-    billableAmount += (rate * duration) / 3600;
   }
 
   return {

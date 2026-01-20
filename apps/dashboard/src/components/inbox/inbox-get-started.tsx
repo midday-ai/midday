@@ -47,7 +47,7 @@ export function InboxGetStarted() {
   // When a webhook creates an inbox item, detect it and refresh the page
   useRealtime({
     channelName: "realtime_inbox_get_started",
-    event: "INSERT",
+    events: ["INSERT"],
     table: "inbox",
     filter: user?.teamId ? `team_id=eq.${user.teamId}` : undefined,
     onEvent: async (payload) => {
