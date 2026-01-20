@@ -1,6 +1,8 @@
 import chatgptMcpApp from "./chatgpt-mcp/config";
 import claudeMcpApp from "./claude-mcp/config";
 import cursorMcpApp from "./cursor-mcp/config";
+import opencodeMcpApp from "./opencode-mcp/config";
+import zapierMcpApp from "./zapier-mcp/config";
 import deelApp from "./deel/config";
 import dropboxApp from "./dropbox/config";
 import eInvoiceApp from "./e-invoice/config";
@@ -41,4 +43,6 @@ export const apps = [
   claudeMcpApp,
   raycastMcpApp,
   chatgptMcpApp,
+  opencodeMcpApp,
+  zapierMcpApp,
 ];

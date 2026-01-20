@@ -11,6 +11,7 @@ import {
   GmailLogo,
   GoogleDriveLogo,
   MiddayDesktopLogo,
+  OpenCodeMcpLogo,
   OutlookLogo,
   PolarLogo,
   QuickBooksLogo,
@@ -21,6 +22,7 @@ import {
   StripePaymentsLogo,
   WhatsAppLogo,
   XeroLogo,
+  ZapierMcpLogo,
 } from "@midday/app-store/logos";
 import { cn } from "@midday/ui/cn";
 
@@ -45,6 +47,8 @@ const logoMap: Record<string, React.ComponentType> = {
   "claude-mcp": ClaudeMcpLogo,
   "raycast-mcp": RaycastMcpLogo,
   "chatgpt-mcp": ChatGPTMcpLogo,
+  "opencode-mcp": OpenCodeMcpLogo,
+  "zapier-mcp": ZapierMcpLogo,
 };
 
 interface AppLogoProps {

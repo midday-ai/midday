@@ -4,7 +4,9 @@ import {
   ChatGPTMcpLogo,
   ClaudeMcpLogo,
   CursorMcpLogo,
+  OpenCodeMcpLogo,
   RaycastMcpLogo,
+  ZapierMcpLogo,
 } from "@midday/app-store/logos";
 import { Button } from "@midday/ui/button";
 import Image from "next/image";
@@ -15,7 +17,7 @@ const clients = [
   {
     id: "cursor",
     name: "Cursor",
-    description: "Track time and expenses while you code",
+    description: "Track time for clients while you code",
     href: "/mcp/cursor",
   },
   {
@@ -35,6 +37,18 @@ const clients = [
     name: "ChatGPT",
     description: "Build custom integrations",
     href: "/mcp/chatgpt",
+  },
+  {
+    id: "opencode",
+    name: "OpenCode",
+    description: "Track time for clients from your terminal",
+    href: "/mcp/opencode",
+  },
+  {
+    id: "zapier",
+    name: "Zapier",
+    description: "Automate workflows with 7,000+ apps",
+    href: "/mcp/zapier",
   },
 ];
 
@@ -60,7 +74,7 @@ const capabilities = [
   "50+ tools across transactions, invoices, customers, tracker, and reports",
   "Granular permissions—read-only or full access, you choose",
   "Secure authentication with your existing API keys",
-  "Works with Cursor, Claude, Raycast, and any MCP-compatible client",
+  "Works with Cursor, Claude, Raycast, OpenCode, Zapier, and any MCP-compatible client",
 ];
 
 function ClientLogo({ id, size = "md" }: { id: string; size?: "sm" | "md" }) {
@@ -69,6 +83,8 @@ function ClientLogo({ id, size = "md" }: { id: string; size?: "sm" | "md" }) {
     claude: ClaudeMcpLogo,
     raycast: RaycastMcpLogo,
     chatgpt: ChatGPTMcpLogo,
+    opencode: OpenCodeMcpLogo,
+    zapier: ZapierMcpLogo,
   };
 
   const Logo = logos[id];
@@ -148,7 +164,7 @@ export function MCP() {
             </div>
 
             {/* Client Cards */}
-            <div className="grid grid-cols-2 gap-4 w-full max-w-lg mt-12">
+            <div className="grid grid-cols-3 gap-4 w-full max-w-2xl mt-12">
               {clients.map((client) => (
                 <Link
                   key={client.id}
@@ -188,12 +204,12 @@ export function MCP() {
             </div>
 
             {/* Client Cards */}
-            <div className="flex justify-center gap-6">
+            <div className="grid grid-cols-3 gap-6 max-w-3xl">
               {clients.map((client) => (
                 <Link
                   key={client.id}
                   href={client.href}
-                  className="group border border-border bg-background p-6 flex flex-col items-start hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 w-52"
+                  className="group border border-border bg-background p-6 flex flex-col items-start hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
                 >
                   <div className="mb-4">
                     <ClientLogo id={client.id} />

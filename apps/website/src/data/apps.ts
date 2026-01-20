@@ -204,6 +204,26 @@ const appExtensions: Record<
     ],
     installUrl: "https://midday.ai/mcp/chatgpt",
   },
+  "opencode-mcp": {
+    slug: "opencode-mcp",
+    features: [
+      "Track time for clients while coding",
+      "Start/stop timers from terminal",
+      "Query finances from any editor",
+      "Open source AI coding agent",
+    ],
+    installUrl: "https://midday.ai/mcp/opencode",
+  },
+  "zapier-mcp": {
+    slug: "zapier-mcp",
+    features: [
+      "Connect to 7,000+ apps",
+      "Automate reports and alerts",
+      "No-code workflow builder",
+      "Sync data across tools",
+    ],
+    installUrl: "https://midday.ai/mcp/zapier",
+  },
 };
 
 // Merge app-store data with website extensions

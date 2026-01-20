@@ -1,9 +1,10 @@
 "use client";
 
-import { CursorMcpLogo } from "@midday/app-store/logos";
+import { OpenCodeMcpLogo } from "@midday/app-store/logos";
 import { Icons } from "@midday/ui/icons";
+import { Input } from "@midday/ui/input";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { highlight } from "sugar-high";
 
 function CodeBlock({ code }: { code: string }) {
@@ -47,31 +48,37 @@ function CodeBlock({ code }: { code: string }) {
   );
 }
 
-// Pre-computed deeplink with placeholder token
-const cursorConfig = {
-  url: "https://api.midday.ai/mcp",
-  headers: {
-    Authorization: "Bearer YOUR_API_KEY",
-  },
-};
-const cursorDeepLink = `cursor://anysphere.cursor-deeplink/mcp/install?name=midday&config=${encodeURIComponent(btoa(JSON.stringify(cursorConfig)))}`;
+type Tab = "curl" | "npm" | "bun" | "brew";
 
-const manualConfig = JSON.stringify(
-  {
-    mcpServers: {
-      midday: {
-        url: "https://api.midday.ai/mcp",
-        headers: {
-          Authorization: "Bearer YOUR_API_KEY",
+const installCommands: Record<Tab, string> = {
+  curl: "curl -fsSL https://opencode.ai/install | bash",
+  npm: "npm i -g opencode-ai",
+  bun: "bun add -g opencode-ai",
+  brew: "brew install anomalyco/tap/opencode",
+};
+
+export function MCPOpenCode() {
+  const [apiKey, setApiKey] = useState("");
+  const [activeTab, setActiveTab] = useState<Tab>("curl");
+
+  const mcpConfig = useMemo(() => {
+    const key = apiKey || "YOUR_API_KEY";
+    return JSON.stringify(
+      {
+        mcpServers: {
+          midday: {
+            url: "https://api.midday.ai/mcp",
+            headers: {
+              Authorization: `Bearer ${key}`,
+            },
+          },
         },
       },
-    },
-  },
-  null,
-  2,
-);
+      null,
+      2,
+    );
+  }, [apiKey]);
 
-export function MCPCursor() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -90,14 +97,14 @@ export function MCPCursor() {
             {/* Logo and Title */}
             <div className="flex items-center gap-4 mb-6">
               <div className="w-14 h-14 [&>img]:w-full [&>img]:h-full">
-                <CursorMcpLogo />
+                <OpenCodeMcpLogo />
               </div>
               <div>
                 <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
                   MCP Server
                 </p>
                 <h1 className="font-serif text-3xl sm:text-4xl text-foreground">
-                  Cursor
+                  OpenCode
                 </h1>
               </div>
             </div>
@@ -109,8 +116,8 @@ export function MCPCursor() {
               </h2>
               <p className="font-sans text-base text-muted-foreground leading-relaxed">
                 Start a timer for a client project, log hours, and check your
-                tracked time—all without leaving Cursor. Just ask "start timer
-                for Acme Corp" or "how many hours did I work on this project?"
+                tracked time—all from your terminal. Just ask "start timer for
+                Acme Corp" or "how many hours did I work this week?"
               </p>
             </div>
 
@@ -139,48 +146,85 @@ export function MCPCursor() {
               </ul>
             </div>
 
-            {/* Install Button */}
-            <div className="space-y-4 mb-12">
-              <a href={cursorDeepLink} className="inline-block">
-                <img
-                  src="https://cursor.com/deeplink/mcp-install-dark.png"
-                  alt="Add Midday MCP server to Cursor"
-                  height={32}
-                  className="h-8 dark:hidden"
-                />
-                <img
-                  src="https://cursor.com/deeplink/mcp-install-light.png"
-                  alt="Add Midday MCP server to Cursor"
-                  height={32}
-                  className="h-8 hidden dark:block"
-                />
-              </a>
+            {/* Install OpenCode */}
+            <div className="space-y-4 mb-8">
+              <h3 className="font-sans text-sm font-medium text-foreground">
+                Install OpenCode
+              </h3>
+              <div className="flex border-b border-border">
+                {(["curl", "npm", "bun", "brew"] as Tab[]).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-4 py-2 text-sm font-sans transition-colors relative ${
+                      activeTab === tab
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {tab}
+                    {activeTab === tab && (
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[1px]" />
+                    )}
+                  </button>
+                ))}
+              </div>
+              <CodeBlock code={installCommands[activeTab]} />
               <p className="font-sans text-xs text-muted-foreground">
-                After installing, update{" "}
-                <code className="font-mono">YOUR_API_KEY</code> in{" "}
-                <code className="font-mono">~/.cursor/mcp.json</code> with your{" "}
-                <Link
-                  href="https://app.midday.ai/settings/developer"
+                Desktop app and IDE extensions also available at{" "}
+                <a
+                  href="https://opencode.ai/download"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="underline hover:text-foreground"
                 >
-                  API key
-                </Link>
-                .
+                  opencode.ai/download
+                </a>
               </p>
             </div>
 
             {/* Divider */}
             <div className="h-px w-full border-t border-border mb-8" />
 
-            {/* Manual Setup */}
+            {/* API Key Input */}
+            <div className="space-y-4 mb-8">
+              <div className="space-y-2">
+                <label
+                  htmlFor="api-key"
+                  className="font-sans text-sm text-foreground"
+                >
+                  Your Midday API key
+                </label>
+                <Input
+                  id="api-key"
+                  type="password"
+                  placeholder="mid_..."
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="font-mono text-sm"
+                />
+                <p className="font-sans text-xs text-muted-foreground">
+                  Don't have an API key?{" "}
+                  <Link
+                    href="https://app.midday.ai/settings/developer"
+                    className="underline hover:text-foreground"
+                  >
+                    Create one in Settings → Developer
+                  </Link>
+                </p>
+              </div>
+            </div>
+
+            {/* MCP Configuration */}
             <div className="space-y-4">
               <h3 className="font-sans text-sm font-medium text-foreground">
-                Manual setup
+                MCP Configuration
               </h3>
               <p className="font-sans text-sm text-muted-foreground">
-                Add to <code className="font-mono">~/.cursor/mcp.json</code>:
+                Add to your OpenCode MCP config file:
               </p>
-              <CodeBlock code={manualConfig} />
+              <CodeBlock code={mcpConfig} />
             </div>
 
             {/* Steps */}
@@ -194,7 +238,7 @@ export function MCPCursor() {
                     1
                   </span>
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    Click "Add to Cursor" above
+                    Install OpenCode using one of the commands above
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -216,8 +260,7 @@ export function MCPCursor() {
                     3
                   </span>
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    Replace <code className="font-mono">YOUR_API_KEY</code> in{" "}
-                    <code className="font-mono">~/.cursor/mcp.json</code>
+                    Add the MCP configuration above to your OpenCode settings
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -225,7 +268,7 @@ export function MCPCursor() {
                     4
                   </span>
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    Restart Cursor and @-mention Midday in chat
+                    Restart OpenCode and ask about your Midday data
                   </span>
                 </li>
               </ol>

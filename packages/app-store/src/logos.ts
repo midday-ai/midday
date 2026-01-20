@@ -19,3 +19,5 @@ export { Logo as CursorMcpLogo } from "./cursor-mcp/assets/logo";
 export { Logo as ClaudeMcpLogo } from "./claude-mcp/assets/logo";
 export { Logo as RaycastMcpLogo } from "./raycast-mcp/assets/logo";
 export { Logo as ChatGPTMcpLogo } from "./chatgpt-mcp/assets/logo";
+export { Logo as OpenCodeMcpLogo } from "./opencode-mcp/assets/logo";
+export { Logo as ZapierMcpLogo } from "./zapier-mcp/assets/logo";
