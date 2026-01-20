@@ -42,7 +42,7 @@ export function ConsumptionTaxSummaryWidget() {
     return (
       <WidgetSkeleton
         title={t("widgets.consumption_tax_summary.title")}
-        icon={<Icons.Bank className="size-4" />}
+        icon={<Icons.Accounts className="size-4" />}
         descriptionLines={3}
       />
     );
@@ -97,7 +97,7 @@ export function ConsumptionTaxSummaryWidget() {
   return (
     <BaseWidget
       title={t("widgets.consumption_tax_summary.title")}
-      icon={<Icons.Bank className="size-4" />}
+      icon={<Icons.Accounts className="size-4" />}
       description={t("widgets.consumption_tax_summary.description")}
       onClick={handleViewConsumptionTax}
       actions={t("widgets.consumption_tax_summary.action")}

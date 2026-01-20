@@ -36,6 +36,11 @@ import { transactionsAssigned } from "./types/transactions-assigned";
 import { transactionsCategorized } from "./types/transactions-categorized";
 import { transactionsCreated } from "./types/transactions-created";
 import { transactionsExported } from "./types/transactions-exported";
+// Expense approval handlers (経費承認)
+import { expenseApproved } from "./types/expense-approved";
+import { expensePaid } from "./types/expense-paid";
+import { expenseRejected } from "./types/expense-rejected";
+import { expenseSubmitted } from "./types/expense-submitted";
 
 const handlers = {
   transactions_created: transactionsCreated,
@@ -60,6 +65,11 @@ const handlers = {
   recurring_series_started: recurringSeriesStarted,
   recurring_series_paused: recurringSeriesPaused,
   recurring_invoice_upcoming: recurringInvoiceUpcoming,
+  // Expense approval handlers (経費承認)
+  expense_submitted: expenseSubmitted,
+  expense_approved: expenseApproved,
+  expense_rejected: expenseRejected,
+  expense_paid: expensePaid,
 } as const;
 
 export class Notifications {
@@ -74,7 +84,7 @@ export class Notifications {
   #toUserData(
     teamMembers: Array<{
       id: string;
-      role: "owner" | "member" | null;
+      role: "owner" | "member" | "approver" | "viewer" | null;
       fullName: string | null;
       avatarUrl: string | null;
       email: string | null;
@@ -419,6 +429,11 @@ export {
   recurringSeriesStartedSchema,
   recurringSeriesPausedSchema,
   recurringInvoiceUpcomingSchema,
+  // Expense approval schemas (経費承認)
+  expenseSubmittedSchema,
+  expenseApprovedSchema,
+  expenseRejectedSchema,
+  expensePaidSchema,
 } from "./schemas";
 export type { NotificationTypes } from "./schemas";
 

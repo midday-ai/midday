@@ -21,21 +21,6 @@ const primaryPool = new Pool({
   ...connectionConfig,
 });
 
-const fraPool = new Pool({
-  connectionString: process.env.DATABASE_FRA_URL!,
-  ...connectionConfig,
-});
-
-const sjcPool = new Pool({
-  connectionString: process.env.DATABASE_SJC_URL!,
-  ...connectionConfig,
-});
-
-const iadPool = new Pool({
-  connectionString: process.env.DATABASE_IAD_URL!,
-  ...connectionConfig,
-});
-
 const hasReplicas = Boolean(
   process.env.DATABASE_FRA_URL &&
     process.env.DATABASE_SJC_URL &&
@@ -63,25 +48,48 @@ const getReplicaIndexForRegion = () => {
 // Create the database instance once and export it
 const replicaIndex = getReplicaIndexForRegion();
 
-export const db = withReplicas(
-  primaryDb,
-  [
-    // Order of replicas is important
-    drizzle(fraPool, {
-      schema,
-      casing: "snake_case",
-    }),
-    drizzle(iadPool, {
-      schema,
-      casing: "snake_case",
-    }),
-    drizzle(sjcPool, {
-      schema,
-      casing: "snake_case",
-    }),
-  ],
-  (replicas) => replicas[replicaIndex]!,
-);
+// Only create replica pools if all replica URLs are configured
+// In development, fall back to primary-only mode
+export const db = hasReplicas
+  ? withReplicas(
+      primaryDb,
+      [
+        // Order of replicas is important
+        drizzle(
+          new Pool({
+            connectionString: process.env.DATABASE_FRA_URL!,
+            ...connectionConfig,
+          }),
+          {
+            schema,
+            casing: "snake_case",
+          },
+        ),
+        drizzle(
+          new Pool({
+            connectionString: process.env.DATABASE_IAD_URL!,
+            ...connectionConfig,
+          }),
+          {
+            schema,
+            casing: "snake_case",
+          },
+        ),
+        drizzle(
+          new Pool({
+            connectionString: process.env.DATABASE_SJC_URL!,
+            ...connectionConfig,
+          }),
+          {
+            schema,
+            casing: "snake_case",
+          },
+        ),
+      ],
+      (replicas) => replicas[replicaIndex]!,
+    )
+  : // Development mode: use primary for all operations
+    withReplicas(primaryDb, [primaryDb], () => primaryDb);
 
 // Keep connectDb for backward compatibility, but just return the singleton
 export const connectDb = async () => {

@@ -465,8 +465,8 @@ export const widgetsRouter = createTRPCRouter({
         }),
       ]);
 
-      const collectedTax = collectedTaxes.summary.total ?? 0;
-      const paidTax = paidTaxes.summary.total ?? 0;
+      const collectedTax = collectedTaxes.summary.totalTaxAmount ?? 0;
+      const paidTax = paidTaxes.summary.totalTaxAmount ?? 0;
       const netTaxPayable = collectedTax - paidTax;
 
       // Calculate qualified invoice ratio (placeholder - would need actual tracking)
@@ -495,11 +495,12 @@ export const widgetsRouter = createTRPCRouter({
       });
 
       // Extract project data from billable hours
-      const projects = billableData.result?.projects ?? [];
+      const projects = billableData.projectBreakdown ?? [];
 
       // Calculate ROI for each project
-      const projectROIs = projects.slice(0, input.limit).map((project: { id: string; name: string; totalDuration: number; rate: number }) => {
-        const revenue = project.rate * (project.totalDuration / 3600); // Assuming rate is hourly
+      const projectROIs = projects.slice(0, input.limit).map((project) => {
+        // Use amount from billable data as revenue
+        const revenue = project.amount;
         const laborCost = revenue * 0.3; // Estimate 30% labor cost
         const expenses = revenue * 0.1; // Estimate 10% project expenses
 
@@ -513,7 +514,7 @@ export const widgetsRouter = createTRPCRouter({
           revenue,
           expenses,
           laborCost,
-          trackedHours: project.totalDuration / 3600,
+          trackedHours: project.duration / 3600,
           roi: Math.round(roi),
         };
       });

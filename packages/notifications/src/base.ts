@@ -61,7 +61,7 @@ export interface UserData {
   locale?: string;
   avatar_url?: string;
   team_id: string;
-  role?: "owner" | "member";
+  role?: "owner" | "member" | "approver" | "viewer";
 }
 
 // Combine template data with all Resend options using intersection type
@@ -95,7 +95,7 @@ export const userSchema = z.object({
   locale: z.string().optional(),
   avatar_url: z.string().optional(),
   team_id: z.string().uuid(),
-  role: z.enum(["owner", "member"]).optional(),
+  role: z.enum(["owner", "member", "approver", "viewer"]).optional(),
 });
 
 export const transactionSchema = z.object({

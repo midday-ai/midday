@@ -13,8 +13,10 @@ const icons = {
   "/transactions": () => <Icons.Transactions size={20} />,
   "/invoices": () => <Icons.Invoice size={20} />,
   "/tracker": () => <Icons.Tracker size={20} />,
+  "/expense-approvals": () => <Icons.ReceiptLong size={20} />,
   "/customers": () => <Icons.Customers size={20} />,
   "/vault": () => <Icons.Vault size={20} />,
+  "/tax-filing": () => <Icons.Tax size={20} />,
   "/settings": () => <Icons.Settings size={20} />,
   "/apps": () => <Icons.Apps size={20} />,
   "/inbox": () => <Icons.Inbox2 size={20} />,
@@ -63,6 +65,10 @@ const items = [
     children: [{ path: "/tracker?create=true", nameKey: "navigation.create_new" }],
   },
   {
+    path: "/expense-approvals",
+    nameKey: "expense_approval.page.title",
+  },
+  {
     path: "/customers",
     nameKey: "navigation.customers",
     children: [{ path: "/customers?createCustomer=true", nameKey: "navigation.create_new" }],
@@ -70,6 +76,10 @@ const items = [
   {
     path: "/vault",
     nameKey: "navigation.vault",
+  },
+  {
+    path: "/tax-filing",
+    nameKey: "tax_filing.nav.title",
   },
   {
     path: "/apps",
@@ -99,8 +109,10 @@ const KNOWN_MENU_PATHS = [
   "/inbox",
   "/invoices",
   "/tracker",
+  "/expense-approvals",
   "/customers",
   "/vault",
+  "/tax-filing",
   "/apps",
   "/settings",
 ];

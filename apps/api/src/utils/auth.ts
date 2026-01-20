@@ -1,4 +1,4 @@
-import { type JWTPayload, jwtVerify } from "jose";
+import { createClient } from "@supabase/supabase-js";
 
 export type Session = {
   user: {
@@ -9,32 +9,29 @@ export type Session = {
   teamId?: string;
 };
 
-type SupabaseJWTPayload = JWTPayload & {
-  user_metadata?: {
-    email?: string;
-    full_name?: string;
-    [key: string]: string | undefined;
-  };
-};
-
 export async function verifyAccessToken(
   accessToken?: string,
 ): Promise<Session | null> {
   if (!accessToken) return null;
 
   try {
-    const { payload } = await jwtVerify(
-      accessToken,
-      new TextEncoder().encode(process.env.SUPABASE_JWT_SECRET),
+    // Use Supabase SDK to verify the token (works with both HS256 and ES256)
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY!,
     );
 
-    const supabasePayload = payload as SupabaseJWTPayload;
+    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+
+    if (error || !user) {
+      return null;
+    }
 
     return {
       user: {
-        id: supabasePayload.sub!,
-        email: supabasePayload.user_metadata?.email,
-        full_name: supabasePayload.user_metadata?.full_name,
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name,
       },
     };
   } catch (error) {

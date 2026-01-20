@@ -35,6 +35,11 @@ export const createActivitySchema = z.object({
     "recurring_series_started",
     "recurring_series_paused",
     "recurring_invoice_upcoming",
+    // Expense approval activities (経費承認)
+    "expense_submitted",
+    "expense_approved",
+    "expense_rejected",
+    "expense_paid",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
@@ -338,6 +343,54 @@ export type TransactionsAssignedInput = z.infer<
   typeof transactionsAssignedSchema
 >;
 
+// Expense approval schemas (経費承認)
+export const expenseSubmittedSchema = z.object({
+  users: z.array(userSchema),
+  expenseApprovalId: z.string().uuid(),
+  requesterId: z.string().uuid(),
+  requesterName: z.string().optional(),
+  amount: z.number(),
+  currency: z.string(),
+  note: z.string().optional(),
+});
+
+export const expenseApprovedSchema = z.object({
+  users: z.array(userSchema),
+  expenseApprovalId: z.string().uuid(),
+  requesterId: z.string().uuid(),
+  requesterName: z.string().optional(),
+  approverId: z.string().uuid(),
+  approverName: z.string().optional(),
+  amount: z.number(),
+  currency: z.string(),
+});
+
+export const expenseRejectedSchema = z.object({
+  users: z.array(userSchema),
+  expenseApprovalId: z.string().uuid(),
+  requesterId: z.string().uuid(),
+  requesterName: z.string().optional(),
+  approverId: z.string().uuid(),
+  approverName: z.string().optional(),
+  amount: z.number(),
+  currency: z.string(),
+  rejectionReason: z.string().optional(),
+});
+
+export const expensePaidSchema = z.object({
+  users: z.array(userSchema),
+  expenseApprovalId: z.string().uuid(),
+  requesterId: z.string().uuid(),
+  requesterName: z.string().optional(),
+  amount: z.number(),
+  currency: z.string(),
+});
+
+export type ExpenseSubmittedInput = z.infer<typeof expenseSubmittedSchema>;
+export type ExpenseApprovedInput = z.infer<typeof expenseApprovedSchema>;
+export type ExpenseRejectedInput = z.infer<typeof expenseRejectedSchema>;
+export type ExpensePaidInput = z.infer<typeof expensePaidSchema>;
+
 // Notification types map - all available notification types with their data structures
 export type NotificationTypes = {
   transactions_created: TransactionsCreatedInput;
@@ -362,4 +415,9 @@ export type NotificationTypes = {
   recurring_series_started: RecurringSeriesStartedInput;
   recurring_series_paused: RecurringSeriesPausedInput;
   recurring_invoice_upcoming: RecurringInvoiceUpcomingInput;
+  // Expense approval notifications (経費承認)
+  expense_submitted: ExpenseSubmittedInput;
+  expense_approved: ExpenseApprovedInput;
+  expense_rejected: ExpenseRejectedInput;
+  expense_paid: ExpensePaidInput;
 };

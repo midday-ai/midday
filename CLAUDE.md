@@ -89,6 +89,34 @@ bun db:migrate
 bun db:generate
 ```
 
+## テスト・検証ルール
+
+### サーバー起動ルール（必須）
+**ブラウザでの動作確認・テスト実行前に、必ず以下のサーバーを起動/再起動すること：**
+
+```bash
+# 全サーバーを停止
+lsof -ti:3001,3003 | xargs kill -9 2>/dev/null
+
+# API サーバー起動 (port 3003)
+source ~/.zshrc && cd ~/document/midday-jp && bun dev --filter=@midday/api
+
+# Dashboard サーバー起動 (port 3001)
+source ~/.zshrc && cd ~/document/midday-jp && bun dev --filter=@midday/dashboard
+```
+
+### 起動確認
+- API: `http://localhost:3003` でサーバーが起動していること
+- Dashboard: `http://localhost:3001` でサーバーが起動していること
+
+### テスト前チェックリスト
+1. [ ] API サーバーが起動中 (port 3003)
+2. [ ] Dashboard サーバーが起動中 (port 3001)
+3. [ ] 環境変数の変更後は必ずサーバー再起動
+4. [ ] エラー発生時はまずサーバーログを確認
+
+---
+
 ## 注意事項
 - `.env` は絶対にGitにコミットしない
 - 翻訳キーを追加したら `ja.ts` と `en.ts` 両方に追加

@@ -183,7 +183,21 @@ export const reportTypesEnum = pgEnum("reportTypes", [
   "category_expenses",
 ]);
 
-export const teamRolesEnum = pgEnum("teamRoles", ["owner", "member"]);
+export const teamRolesEnum = pgEnum("teamRoles", [
+  "owner",
+  "member",
+  "approver", // 承認者: 経費承認権限
+  "viewer", // 閲覧者: 閲覧のみ
+]);
+
+// 経費承認ステータス
+export const expenseApprovalStatusEnum = pgEnum("expense_approval_status", [
+  "draft", // 下書き
+  "pending", // 承認待ち
+  "approved", // 承認済み
+  "rejected", // 却下
+  "paid", // 支払済み
+]);
 export const trackerStatusEnum = pgEnum("trackerStatus", [
   "in_progress",
   "completed",
@@ -259,6 +273,12 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "transaction_category_created",
   "transactions_exported",
   "customer_created",
+
+  // Expense approval activities (経費承認)
+  "expense_submitted", // 経費承認申請
+  "expense_approved", // 経費承認完了
+  "expense_rejected", // 経費却下
+  "expense_paid", // 経費支払完了
 ]);
 
 export const activitySourceEnum = pgEnum("activity_source", [
@@ -3753,6 +3773,135 @@ export const accountingSyncRecordsRelations = relations(
     team: one(teams, {
       fields: [accountingSyncRecords.teamId],
       references: [teams.id],
+    }),
+  }),
+);
+
+// ============================================
+// 経費承認（Expense Approval）テーブル
+// ============================================
+
+export const expenseApprovals = pgTable(
+  "expense_approvals",
+  {
+    id: uuid()
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+
+    // 対象取引
+    transactionId: uuid("transaction_id").references(() => transactions.id, {
+      onDelete: "cascade",
+    }),
+
+    // チーム
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, { onDelete: "cascade" }),
+
+    // 申請者
+    requesterId: uuid("requester_id")
+      .notNull()
+      .references(() => users.id),
+
+    // 承認者（承認/却下時に設定）
+    approverId: uuid("approver_id").references(() => users.id),
+
+    // ステータス
+    status: expenseApprovalStatusEnum().default("draft").notNull(),
+
+    // タイムスタンプ
+    submittedAt: timestamp("submitted_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    approvedAt: timestamp("approved_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    rejectedAt: timestamp("rejected_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    paidAt: timestamp("paid_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+
+    // 却下理由
+    rejectionReason: text("rejection_reason"),
+
+    // 金額情報（取引とは別に記録）
+    amount: numericCasted(),
+    currency: text(),
+
+    // 申請メモ
+    note: text(),
+
+    // メタデータ
+    metadata: jsonb(),
+
+    // 作成・更新日時
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    // インデックス
+    index("expense_approvals_team_id_idx").on(table.teamId),
+    index("expense_approvals_requester_id_idx").on(table.requesterId),
+    index("expense_approvals_approver_id_idx").on(table.approverId),
+    index("expense_approvals_status_idx").on(table.teamId, table.status),
+    index("expense_approvals_transaction_id_idx").on(table.transactionId),
+
+    // RLSポリシー
+    pgPolicy("Team members can view expense approvals", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+    }),
+    pgPolicy("Team members can insert expense approvals", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can update expense approvals", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+    }),
+  ],
+);
+
+export const expenseApprovalsRelations = relations(
+  expenseApprovals,
+  ({ one }) => ({
+    transaction: one(transactions, {
+      fields: [expenseApprovals.transactionId],
+      references: [transactions.id],
+    }),
+    team: one(teams, {
+      fields: [expenseApprovals.teamId],
+      references: [teams.id],
+    }),
+    requester: one(users, {
+      fields: [expenseApprovals.requesterId],
+      references: [users.id],
+      relationName: "requester",
+    }),
+    approver: one(users, {
+      fields: [expenseApprovals.approverId],
+      references: [users.id],
+      relationName: "approver",
     }),
   }),
 );

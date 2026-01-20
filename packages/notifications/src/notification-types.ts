@@ -135,6 +135,35 @@ export const allNotificationTypes: NotificationType[] = [
     category: "invoices",
     order: 1,
   },
+  // Expense approval notifications (経費承認)
+  {
+    type: "expense_submitted",
+    channels: ["in_app", "email"],
+    showInSettings: true,
+    category: "expenses",
+    order: 1,
+  },
+  {
+    type: "expense_approved",
+    channels: ["in_app", "email"],
+    showInSettings: true,
+    category: "expenses",
+    order: 2,
+  },
+  {
+    type: "expense_rejected",
+    channels: ["in_app", "email"],
+    showInSettings: true,
+    category: "expenses",
+    order: 3,
+  },
+  {
+    type: "expense_paid",
+    channels: ["in_app", "email"],
+    showInSettings: true,
+    category: "expenses",
+    order: 4,
+  },
 ];
 
 // Get all notification types (including hidden ones)

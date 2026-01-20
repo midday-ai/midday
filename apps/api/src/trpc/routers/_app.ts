@@ -11,6 +11,7 @@ import { customersRouter } from "./customers";
 import { documentTagAssignmentsRouter } from "./document-tag-assignments";
 import { documentTagsRouter } from "./document-tags";
 import { documentsRouter } from "./documents";
+import { expenseApprovalsRouter } from "./expense-approvals";
 import { chatFeedbackRouter } from "./feedback";
 import { inboxRouter } from "./inbox";
 import { inboxAccountsRouter } from "./inbox-accounts";
@@ -29,6 +30,7 @@ import { searchRouter } from "./search";
 import { shortLinksRouter } from "./short-links";
 import { suggestedActionsRouter } from "./suggested-actions";
 import { tagsRouter } from "./tags";
+import { taxReportsRouter } from "./tax-reports";
 import { teamRouter } from "./team";
 import { trackerEntriesRouter } from "./tracker-entries";
 import { trackerProjectsRouter } from "./tracker-projects";
@@ -51,6 +53,7 @@ export const appRouter = createTRPCRouter({
   documents: documentsRouter,
   documentTagAssignments: documentTagAssignmentsRouter,
   documentTags: documentTagsRouter,
+  expenseApprovals: expenseApprovalsRouter,
   chatFeedback: chatFeedbackRouter,
   inbox: inboxRouter,
   inboxAccounts: inboxAccountsRouter,
@@ -66,6 +69,7 @@ export const appRouter = createTRPCRouter({
   billing: billingRouter,
   suggestedActions: suggestedActionsRouter,
   tags: tagsRouter,
+  taxReports: taxReportsRouter,
   team: teamRouter,
   trackerEntries: trackerEntriesRouter,
   trackerProjects: trackerProjectsRouter,
