@@ -108,7 +108,11 @@ app.get(
 
 app.route("/", routers);
 
-export default {
+// Export for Vercel serverless deployment
+export default app;
+
+// Also export for Bun local development
+export const bunServer = {
   port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,
   fetch: app.fetch,
   host: "::", // Listen on all interfaces

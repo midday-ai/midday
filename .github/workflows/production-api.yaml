@@ -1,4 +1,4 @@
-name: Fly Deploy
+name: Deploy API to Fly.io
 permissions:
   contents: read
 on:
@@ -10,6 +10,8 @@ on:
       - packages/**
       - "!packages/email/**"
       - "!packages/ui/**"
+  workflow_dispatch:  # Allow manual trigger
+
 jobs:
   deploy:
     name: 🚀 Deploy to Fly API Production

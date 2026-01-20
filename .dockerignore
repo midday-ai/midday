@@ -1,0 +1,38 @@
+# Node modules are large and turbo prune handles dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+.next
+**/.turbo
+**/out
+# Exclude dist folders except engine which is pre-built
+apps/dashboard/dist
+apps/website/dist
+packages/*/dist
+!apps/engine/dist
+
+# Git
+.git
+
+# Environment files (secrets handled by Fly)
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Test files
+**/__tests__
+**/coverage
+
+# IDE and misc
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Apps not needed for API
+apps/website
+apps/desktop

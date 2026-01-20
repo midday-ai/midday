@@ -1,4 +1,4 @@
-import { type JWTPayload, jwtVerify } from "jose";
+import { type JWTPayload, createRemoteJWKSet, jwtVerify } from "jose";
 
 export type Session = {
   user: {
@@ -17,16 +17,20 @@ type SupabaseJWTPayload = JWTPayload & {
   };
 };
 
+// Cache the JWKS for performance - it fetches keys from Supabase's JWKS endpoint
+const JWKS = createRemoteJWKSet(
+  new URL(`${process.env.SUPABASE_URL}/auth/v1/.well-known/jwks.json`),
+);
+
 export async function verifyAccessToken(
   accessToken?: string,
 ): Promise<Session | null> {
   if (!accessToken) return null;
 
   try {
-    const { payload } = await jwtVerify(
-      accessToken,
-      new TextEncoder().encode(process.env.SUPABASE_JWT_SECRET),
-    );
+    const { payload } = await jwtVerify(accessToken, JWKS, {
+      issuer: `${process.env.SUPABASE_URL}/auth/v1`,
+    });
 
     const supabasePayload = payload as SupabaseJWTPayload;
 
@@ -38,6 +42,7 @@ export async function verifyAccessToken(
       },
     };
   } catch (error) {
+    console.error("[AUTH] JWT verification failed:", error);
     return null;
   }
 }
