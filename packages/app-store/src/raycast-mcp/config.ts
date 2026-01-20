@@ -1,7 +1,7 @@
 import { Logo } from "./assets/logo";
 
 export default {
-  name: "Raycast MCP",
+  name: "Raycast",
   id: "raycast-mcp",
   category: "AI",
   active: true,

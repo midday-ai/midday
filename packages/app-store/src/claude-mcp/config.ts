@@ -1,7 +1,7 @@
 import { Logo } from "./assets/logo";
 
 export default {
-  name: "Claude MCP",
+  name: "Claude",
   id: "claude-mcp",
   category: "AI",
   active: true,

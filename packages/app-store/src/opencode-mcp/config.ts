@@ -1,7 +1,7 @@
 import { Logo } from "./assets/logo";
 
 export default {
-  name: "OpenCode MCP",
+  name: "OpenCode",
   id: "opencode-mcp",
   category: "AI",
   active: true,

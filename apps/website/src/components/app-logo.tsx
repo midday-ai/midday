@@ -3,6 +3,7 @@
 import {
   ChatGPTMcpLogo,
   ClaudeMcpLogo,
+  CopilotMcpLogo,
   CursorMcpLogo,
   DeelLogo,
   DropboxLogo,
@@ -11,6 +12,8 @@ import {
   GmailLogo,
   GoogleDriveLogo,
   MiddayDesktopLogo,
+  MakeMcpLogo,
+  N8nMcpLogo,
   OpenCodeMcpLogo,
   OutlookLogo,
   PolarLogo,
@@ -49,6 +52,9 @@ const logoMap: Record<string, React.ComponentType> = {
   "chatgpt-mcp": ChatGPTMcpLogo,
   "opencode-mcp": OpenCodeMcpLogo,
   "zapier-mcp": ZapierMcpLogo,
+  "copilot-mcp": CopilotMcpLogo,
+  "n8n-mcp": N8nMcpLogo,
+  "make-mcp": MakeMcpLogo,
 };
 
 interface AppLogoProps {

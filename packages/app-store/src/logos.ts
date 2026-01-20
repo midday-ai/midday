@@ -21,3 +21,6 @@ export { Logo as RaycastMcpLogo } from "./raycast-mcp/assets/logo";
 export { Logo as ChatGPTMcpLogo } from "./chatgpt-mcp/assets/logo";
 export { Logo as OpenCodeMcpLogo } from "./opencode-mcp/assets/logo";
 export { Logo as ZapierMcpLogo } from "./zapier-mcp/assets/logo";
+export { Logo as CopilotMcpLogo } from "./copilot-mcp/assets/logo";
+export { Logo as N8nMcpLogo } from "./n8n-mcp/assets/logo";
+export { Logo as MakeMcpLogo } from "./make-mcp/assets/logo";

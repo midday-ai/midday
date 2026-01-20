@@ -1,7 +1,7 @@
 import { Logo } from "./assets/logo";
 
 export default {
-  name: "Cursor MCP",
+  name: "Cursor",
   id: "cursor-mcp",
   category: "AI",
   active: true,

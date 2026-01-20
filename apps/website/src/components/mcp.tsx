@@ -3,7 +3,10 @@
 import {
   ChatGPTMcpLogo,
   ClaudeMcpLogo,
+  CopilotMcpLogo,
   CursorMcpLogo,
+  MakeMcpLogo,
+  N8nMcpLogo,
   OpenCodeMcpLogo,
   RaycastMcpLogo,
   ZapierMcpLogo,
@@ -50,6 +53,24 @@ const clients = [
     description: "Automate workflows with 7,000+ apps",
     href: "/mcp/zapier",
   },
+  {
+    id: "copilot",
+    name: "Microsoft Copilot",
+    description: "Query data from Microsoft 365",
+    href: "/mcp/copilot",
+  },
+  {
+    id: "n8n",
+    name: "n8n",
+    description: "Automate workflows with AI agents",
+    href: "/mcp/n8n",
+  },
+  {
+    id: "make",
+    name: "Make",
+    description: "Visual automations with 1,500+ apps",
+    href: "/mcp/make",
+  },
 ];
 
 const questions = [
@@ -74,27 +95,37 @@ const capabilities = [
   "50+ tools across transactions, invoices, customers, tracker, and reports",
   "Granular permissions—read-only or full access, you choose",
   "Secure authentication with your existing API keys",
-  "Works with Cursor, Claude, Raycast, OpenCode, Zapier, and any MCP-compatible client",
+  "Works with Cursor, Claude, Raycast, Zapier, n8n, Make, and more",
 ];
 
-function ClientLogo({ id, size = "md" }: { id: string; size?: "sm" | "md" }) {
-  const logos: Record<string, React.ComponentType> = {
+function ClientLogo({
+  id,
+  size = "md",
+  variant = "default",
+}: { id: string; size?: "sm" | "md"; variant?: string }) {
+  const logos: Record<string, React.ComponentType<{ id?: string }>> = {
     cursor: CursorMcpLogo,
     claude: ClaudeMcpLogo,
     raycast: RaycastMcpLogo,
     chatgpt: ChatGPTMcpLogo,
     opencode: OpenCodeMcpLogo,
     zapier: ZapierMcpLogo,
+    copilot: CopilotMcpLogo,
+    n8n: N8nMcpLogo,
+    make: MakeMcpLogo,
   };
 
   const Logo = logos[id];
   if (!Logo) return null;
 
   const containerSize = size === "sm" ? "w-10 h-10" : "w-12 h-12";
+  const uniqueId = `${id}-${variant}`;
 
   return (
-    <div className={`${containerSize} [&>img]:w-full [&>img]:h-full`}>
-      <Logo />
+    <div
+      className={`${containerSize} [&>img]:w-full [&>img]:h-full [&>svg]:w-full [&>svg]:h-full`}
+    >
+      <Logo id={uniqueId} />
     </div>
   );
 }
@@ -152,14 +183,14 @@ export function MCP() {
             {/* Title and Description */}
             <div className="space-y-4 text-center max-w-xl w-full">
               <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
-                MCP Server
+                AI Integrations
               </p>
               <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground">
-                Your business, available to AI
+                Midday, everywhere
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Connect your AI tools to Midday. Ask about cash flow, invoices,
-                customers—get answers from your actual data.
+                Connect Claude, ChatGPT, Cursor, and more to your Midday data.
+                Ask questions and get answers from your actual business data.
               </p>
             </div>
 
@@ -172,7 +203,7 @@ export function MCP() {
                   className="group border border-border bg-background p-5 flex flex-col items-start hover:border-foreground/20 transition-all duration-200"
                 >
                   <div className="mb-3">
-                    <ClientLogo id={client.id} size="sm" />
+                    <ClientLogo id={client.id} size="sm" variant="mobile" />
                   </div>
                   <h3 className="font-sans text-sm font-medium text-foreground mb-1">
                     {client.name}
@@ -192,14 +223,14 @@ export function MCP() {
             {/* Title and Description */}
             <div className="text-center space-y-4 w-full mb-16">
               <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
-                MCP Server
+                AI Integrations
               </p>
               <h1 className="font-serif text-6xl xl:text-7xl 2xl:text-8xl leading-tight text-foreground">
-                Your business, available to AI
+                Midday, everywhere
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Connect your AI tools to Midday. Ask about cash flow, invoices,
-                customers—get answers from your actual data.
+                Connect Claude, ChatGPT, Cursor, and more to your Midday data.
+                Ask questions and get answers from your actual business data.
               </p>
             </div>
 
@@ -212,7 +243,7 @@ export function MCP() {
                   className="group border border-border bg-background p-6 flex flex-col items-start hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
                 >
                   <div className="mb-4">
-                    <ClientLogo id={client.id} />
+                    <ClientLogo id={client.id} variant="desktop" />
                   </div>
                   <h3 className="font-sans text-base font-medium text-foreground mb-1">
                     {client.name}

@@ -1,7 +1,7 @@
 import { Logo } from "./assets/logo";
 
 export default {
-  name: "ChatGPT MCP",
+  name: "ChatGPT",
   id: "chatgpt-mcp",
   category: "AI",
   active: true,

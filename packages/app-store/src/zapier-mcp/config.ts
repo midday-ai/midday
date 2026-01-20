@@ -1,7 +1,7 @@
 import { Logo } from "./assets/logo";
 
 export default {
-  name: "Zapier MCP",
+  name: "Zapier",
   id: "zapier-mcp",
   category: "AI",
   active: true,

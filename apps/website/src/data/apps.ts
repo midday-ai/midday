@@ -224,6 +224,36 @@ const appExtensions: Record<
     ],
     installUrl: "https://midday.ai/mcp/zapier",
   },
+  "copilot-mcp": {
+    slug: "copilot-mcp",
+    features: [
+      "Query data from Microsoft 365",
+      "Works with Word, Excel, Outlook",
+      "Build custom Copilot agents",
+      "Enterprise-ready integration",
+    ],
+    installUrl: "https://midday.ai/mcp/copilot",
+  },
+  "n8n-mcp": {
+    slug: "n8n-mcp",
+    features: [
+      "Build automated financial workflows",
+      "AI agents with Midday tools",
+      "Connect to 400+ apps via n8n",
+      "MCP Client & Server support",
+    ],
+    installUrl: "https://midday.ai/mcp/n8n",
+  },
+  "make-mcp": {
+    slug: "make-mcp",
+    features: [
+      "Visual scenario builder",
+      "Connect to 1,500+ apps",
+      "MCP Client module support",
+      "No-code workflow automation",
+    ],
+    installUrl: "https://midday.ai/mcp/make",
+  },
 };
 
 // Merge app-store data with website extensions

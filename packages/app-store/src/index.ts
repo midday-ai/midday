@@ -3,6 +3,9 @@ import claudeMcpApp from "./claude-mcp/config";
 import cursorMcpApp from "./cursor-mcp/config";
 import opencodeMcpApp from "./opencode-mcp/config";
 import zapierMcpApp from "./zapier-mcp/config";
+import copilotMcpApp from "./copilot-mcp/config";
+import n8nMcpApp from "./n8n-mcp/config";
+import makeMcpApp from "./make-mcp/config";
 import deelApp from "./deel/config";
 import dropboxApp from "./dropbox/config";
 import eInvoiceApp from "./e-invoice/config";
@@ -45,4 +48,7 @@ export const apps = [
   chatgptMcpApp,
   opencodeMcpApp,
   zapierMcpApp,
+  copilotMcpApp,
+  n8nMcpApp,
+  makeMcpApp,
 ];

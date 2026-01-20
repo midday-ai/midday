@@ -543,7 +543,7 @@ export function Header({
                               {[
                                 {
                                   href: "/mcp",
-                                  title: "MCP Server",
+                                  title: "AI Integrations",
                                   desc: "Connect AI tools to your financial data.",
                                   external: false,
                                 },
@@ -969,7 +969,7 @@ export function Header({
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
-                          MCP Server
+                          AI Integrations
                         </Link>
                         <a
                           href="https://api.midday.ai"
