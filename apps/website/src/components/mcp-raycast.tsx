@@ -79,9 +79,15 @@ const raycastConfig = {
   name: "midday",
   type: "stdio",
   command: "npx",
-  args: ["-y", "mcp-remote", "https://api.midday.ai/mcp"],
+  args: [
+    "-y",
+    "mcp-remote@latest",
+    "https://api.midday.ai/mcp",
+    "--header",
+    "Authorization:${AUTH_HEADER}",
+  ],
   env: {
-    MCP_AUTH_HEADER: "Bearer YOUR_API_KEY",
+    AUTH_HEADER: "Bearer YOUR_API_KEY",
   },
 };
 const raycastDeepLink = `raycast://mcp/install?${encodeURIComponent(JSON.stringify(raycastConfig))}`;
@@ -140,9 +146,9 @@ export function MCPRaycast() {
                 <a href={raycastDeepLink}>Add to Raycast</a>
               </Button>
               <p className="font-sans text-xs text-muted-foreground">
-                After installing, update{" "}
-                <code className="font-mono">YOUR_API_KEY</code> in Raycast's MCP
-                server settings with your{" "}
+                After installing, edit the server in Raycast's "Manage Servers"
+                and replace <code className="font-mono">YOUR_API_KEY</code> in
+                the environment variables with your{" "}
                 <Link
                   href="https://app.midday.ai/settings/developer"
                   className="underline hover:text-foreground"

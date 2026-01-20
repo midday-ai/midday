@@ -88,6 +88,7 @@ export function MCPChatGPT() {
           midday: {
             command: "npx",
             args: [
+              "-y",
               "mcp-remote@latest",
               "https://api.midday.ai/mcp",
               "--header",
@@ -140,7 +141,7 @@ console.log(result);
 await client.close();`;
   }, [apiKey]);
 
-  const installCode = `npm install @modelcontextprotocol/sdk`;
+  const installCode = "npm install @modelcontextprotocol/sdk";
 
   return (
     <div className="min-h-screen bg-background">

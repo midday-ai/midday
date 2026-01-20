@@ -93,9 +93,15 @@ export function MCPClaude() {
         mcpServers: {
           midday: {
             command: "npx",
-            args: ["-y", "mcp-remote", "https://api.midday.ai/mcp"],
+            args: [
+              "-y",
+              "mcp-remote@latest",
+              "https://api.midday.ai/mcp",
+              "--header",
+              "Authorization:${AUTH_HEADER}",
+            ],
             env: {
-              MCP_AUTH_HEADER: `Bearer ${key}`,
+              AUTH_HEADER: `Bearer ${key}`,
             },
           },
         },
