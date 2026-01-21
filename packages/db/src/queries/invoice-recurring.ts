@@ -1,3 +1,4 @@
+import { UTCDate } from "@date-fns/utc";
 import type { Database, DatabaseOrTransaction } from "@db/client";
 import {
   customers,
@@ -1107,7 +1108,8 @@ export async function getRecurringInvoiceProjection(
   const projection: RecurringInvoiceProjectionResult = new Map();
 
   // Calculate end date for the forecast period (used to filter results)
-  const forecastEndDate = addMonths(new Date(), forecastMonths);
+  // Use UTCDate for consistency with getRevenueForecast lookups in reports.ts
+  const forecastEndDate = addMonths(new UTCDate(), forecastMonths);
 
   for (const recurring of activeRecurring) {
     // Skip if no next scheduled date or no amount

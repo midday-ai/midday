@@ -2392,7 +2392,8 @@ async function getRecurringTransactionProjection(
 
   // Project into forecast months
   const projection: RecurringTransactionProjection = new Map();
-  const currentDate = new Date();
+  // Use UTCDate for consistency with getRevenueForecast lookups
+  const currentDate = new UTCDate();
 
   for (let i = 1; i <= forecastMonths; i++) {
     const monthKey = format(addMonths(currentDate, i), "yyyy-MM");
@@ -2446,7 +2447,8 @@ async function getTeamCollectionMetrics(
   db: Database,
   teamId: string,
 ): Promise<TeamCollectionMetrics> {
-  const twelveMonthsAgo = format(subMonths(new Date(), 12), "yyyy-MM-dd");
+  // Use UTCDate for consistency with other date calculations
+  const twelveMonthsAgo = format(subMonths(new UTCDate(), 12), "yyyy-MM-dd");
 
   // Get paid invoices from last 12 months
   const paidInvoices = await db

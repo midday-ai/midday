@@ -27,9 +27,24 @@ export const forecastArtifact = artifact(
         monthlyData: z.array(
           z.object({
             month: z.string(),
-            forecasted: z.number().optional(),
-            actual: z.number().optional(),
+            forecasted: z.number().nullable().optional(),
+            actual: z.number().nullable().optional(),
             date: z.string().optional(),
+            // Enhanced forecast fields (matching dashboard metrics widget)
+            optimistic: z.number().nullable().optional(),
+            pessimistic: z.number().nullable().optional(),
+            confidence: z.number().nullable().optional(),
+            breakdown: z
+              .object({
+                recurringInvoices: z.number(),
+                recurringTransactions: z.number(),
+                scheduled: z.number(),
+                collections: z.number(),
+                billableHours: z.number(),
+                newBusiness: z.number(),
+              })
+              .nullable()
+              .optional(),
           }),
         ),
         forecastStartIndex: z.number().optional(),
@@ -44,6 +59,8 @@ export const forecastArtifact = artifact(
         growthRate: z.number(),
         unpaidInvoices: z.number(),
         billableHours: z.number(),
+        // Overall confidence score (matching dashboard)
+        confidenceScore: z.number().nullable().optional(),
       })
       .optional(),
 

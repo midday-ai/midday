@@ -24,8 +24,8 @@ const getForecastSchema = z.object({
   revenueType: z.enum(["gross", "net"]).default("net").describe("Revenue type"),
   forecastMonths: z
     .number()
-    .default(3)
-    .describe("Number of months to forecast"),
+    .default(6)
+    .describe("Number of months to forecast (default: 6, matching dashboard)"),
   showCanvas: z.boolean().default(false).describe("Show visual analytics"),
 });
 
@@ -97,11 +97,23 @@ export const getForecastTool = tool({
 
       // Prepare monthly data for chart
       // Structure: one item per month with both actual and forecasted fields
+      // Match the dashboard widget's data structure exactly
       const monthlyData: Array<{
         month: string;
         date: string;
-        actual?: number;
-        forecasted?: number;
+        actual: number | null;
+        forecasted: number | null;
+        optimistic: number | null;
+        pessimistic: number | null;
+        confidence: number | null;
+        breakdown: {
+          recurringInvoices: number;
+          recurringTransactions: number;
+          scheduled: number;
+          collections: number;
+          billableHours: number;
+          newBusiness: number;
+        } | null;
       }> = [];
 
       // Check if data spans multiple years
@@ -127,7 +139,12 @@ export const getForecastTool = tool({
           date: item.date,
           actual: item.value,
           // On the last historical month (forecast start), set forecasted to same value as actual
-          forecasted: isLastHistorical ? item.value : undefined,
+          forecasted: isLastHistorical ? item.value : null,
+          // Historical points don't have confidence data
+          optimistic: null,
+          pessimistic: null,
+          confidence: null,
+          breakdown: null,
         });
       }
 
@@ -140,15 +157,24 @@ export const getForecastTool = tool({
         monthlyData.push({
           month,
           date: item.date,
-          actual: undefined,
+          actual: null,
           forecasted: item.value,
+          // Include enhanced forecast fields for bottom-up forecast (matching dashboard)
+          optimistic: "optimistic" in item ? (item.optimistic as number) : null,
+          pessimistic:
+            "pessimistic" in item ? (item.pessimistic as number) : null,
+          confidence: "confidence" in item ? (item.confidence as number) : null,
+          breakdown:
+            "breakdown" in item
+              ? (item.breakdown as (typeof monthlyData)[0]["breakdown"])
+              : null,
         });
       }
 
       // Find forecast start date index (last historical month index)
       const forecastStartIndex = forecastResult.historical.length - 1;
 
-      // Update artifact with chart data
+      // Update artifact with chart data (including enhanced fields to match dashboard)
       if (showCanvas && analysis) {
         await analysis.update({
           stage: "chart_ready",
@@ -162,6 +188,10 @@ export const getForecastTool = tool({
               forecasted: item.forecasted,
               actual: item.actual,
               date: item.date,
+              optimistic: item.optimistic,
+              pessimistic: item.pessimistic,
+              confidence: item.confidence,
+              breakdown: item.breakdown,
             })),
             ...(forecastStartIndex !== undefined && { forecastStartIndex }),
           },
@@ -170,6 +200,12 @@ export const getForecastTool = tool({
 
       // Prepare metrics
       const summary = forecastResult.summary;
+      // Get confidence score from meta (matching dashboard widget)
+      const confidenceScore =
+        forecastResult.meta && "confidenceScore" in forecastResult.meta
+          ? (forecastResult.meta.confidenceScore as number)
+          : null;
+
       const metrics = {
         peakMonth: {
           month: format(parseISO(summary.peakMonth.date), "MMM"),
@@ -178,6 +214,7 @@ export const getForecastTool = tool({
         growthRate: summary.avgMonthlyGrowthRate,
         unpaidInvoices: summary.unpaidInvoices.totalAmount,
         billableHours: summary.billableHours.totalHours,
+        confidenceScore,
       };
 
       // Update artifact with metrics
@@ -191,6 +228,10 @@ export const getForecastTool = tool({
               forecasted: item.forecasted,
               actual: item.actual,
               date: item.date,
+              optimistic: item.optimistic,
+              pessimistic: item.pessimistic,
+              confidence: item.confidence,
+              breakdown: item.breakdown,
             })),
             ...(forecastStartIndex !== undefined && { forecastStartIndex }),
           },
@@ -200,6 +241,7 @@ export const getForecastTool = tool({
             growthRate: metrics.growthRate,
             unpaidInvoices: metrics.unpaidInvoices,
             billableHours: metrics.billableHours,
+            confidenceScore: metrics.confidenceScore,
           },
         });
       }
@@ -262,6 +304,10 @@ Provide a concise analysis (2-3 sentences) highlighting key insights about the r
               forecasted: item.forecasted,
               actual: item.actual,
               date: item.date,
+              optimistic: item.optimistic,
+              pessimistic: item.pessimistic,
+              confidence: item.confidence,
+              breakdown: item.breakdown,
             })),
             ...(forecastStartIndex !== undefined && { forecastStartIndex }),
           },
@@ -271,6 +317,7 @@ Provide a concise analysis (2-3 sentences) highlighting key insights about the r
             growthRate: metrics.growthRate,
             unpaidInvoices: metrics.unpaidInvoices,
             billableHours: metrics.billableHours,
+            confidenceScore: metrics.confidenceScore,
           },
           analysis: {
             summary: summaryText,
