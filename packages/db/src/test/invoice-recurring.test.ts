@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   type RecurringInvoiceParams,
+  advanceToFutureDate,
   calculateFirstScheduledDate,
   calculateNextScheduledDate,
   calculateUpcomingDates,
@@ -730,6 +731,150 @@ describe("calculateFirstScheduledDate", () => {
 
       // Should return the future issue date
       expect(result.toISOString()).toBe(futureDate.toISOString());
+    });
+  });
+});
+
+describe("advanceToFutureDate", () => {
+  describe("biweekly frequency - late scheduler scenario", () => {
+    const biweeklyParams: RecurringInvoiceParams = {
+      frequency: "biweekly",
+      frequencyDay: null,
+      frequencyWeek: null,
+      frequencyInterval: null,
+      timezone: "UTC",
+    };
+
+    test("returns original date when already in future", () => {
+      // Scheduled date is Jan 15, now is Jan 10
+      const scheduledDate = new Date("2025-01-15T12:00:00.000Z");
+      const now = new Date("2025-01-10T12:00:00.000Z");
+
+      const result = advanceToFutureDate(biweeklyParams, scheduledDate, now);
+
+      expect(result.date.toISOString()).toBe(scheduledDate.toISOString());
+      expect(result.intervalsSkipped).toBe(0);
+      expect(result.hitSafetyLimit).toBe(false);
+    });
+
+    test("advances one interval when scheduler runs late", () => {
+      // Biweekly: scheduled for Jan 1, processed on Jan 21
+      // Initial next date: Jan 1 + 14 = Jan 15 (still in past)
+      // Should advance to: Jan 15 + 14 = Jan 29
+      const scheduledDate = new Date("2025-01-15T12:00:00.000Z"); // Jan 1 + 14 days
+      const now = new Date("2025-01-21T12:00:00.000Z");
+
+      const result = advanceToFutureDate(biweeklyParams, scheduledDate, now);
+
+      // Should advance to Jan 29
+      expect(result.date.getDate()).toBe(29);
+      expect(result.date.getMonth()).toBe(0); // January
+      expect(result.intervalsSkipped).toBe(1);
+      expect(result.hitSafetyLimit).toBe(false);
+    });
+
+    test("advances multiple intervals when scheduler runs very late", () => {
+      // Biweekly: scheduled for Jan 1, processed on Feb 15
+      // Initial: Jan 15, then Jan 29, then Feb 12, then Feb 26
+      const scheduledDate = new Date("2025-01-15T12:00:00.000Z");
+      const now = new Date("2025-02-15T12:00:00.000Z");
+
+      const result = advanceToFutureDate(biweeklyParams, scheduledDate, now);
+
+      // Should be Feb 26 (skipped Jan 29 and Feb 12)
+      expect(result.date > now).toBe(true);
+      expect(result.intervalsSkipped).toBe(3);
+      expect(result.hitSafetyLimit).toBe(false);
+    });
+  });
+
+  describe("custom frequency - late scheduler scenario", () => {
+    const customParams: RecurringInvoiceParams = {
+      frequency: "custom",
+      frequencyDay: null,
+      frequencyWeek: null,
+      frequencyInterval: 7, // Weekly custom
+      timezone: "UTC",
+    };
+
+    test("advances through missed intervals", () => {
+      // Custom 7-day: scheduled Jan 8, processed on Jan 25
+      const scheduledDate = new Date("2025-01-08T12:00:00.000Z");
+      const now = new Date("2025-01-25T12:00:00.000Z");
+
+      const result = advanceToFutureDate(customParams, scheduledDate, now);
+
+      // Jan 8 -> Jan 15 -> Jan 22 -> Jan 29 (first future date)
+      expect(result.date.getDate()).toBe(29);
+      expect(result.intervalsSkipped).toBe(3);
+      expect(result.hitSafetyLimit).toBe(false);
+    });
+  });
+
+  describe("safety limit", () => {
+    test("falls back to now when hitting safety limit", () => {
+      const params: RecurringInvoiceParams = {
+        frequency: "custom",
+        frequencyDay: null,
+        frequencyWeek: null,
+        frequencyInterval: 1, // Daily
+        timezone: "UTC",
+      };
+
+      // Date in the past with very small maxIterations
+      const scheduledDate = new Date("2025-01-01T12:00:00.000Z");
+      const now = new Date("2025-01-15T12:00:00.000Z");
+
+      const result = advanceToFutureDate(params, scheduledDate, now, 5);
+
+      // Should hit safety limit after 5 iterations and fall back to now + 1 day
+      expect(result.hitSafetyLimit).toBe(true);
+      expect(result.intervalsSkipped).toBe(0);
+      expect(result.date > now).toBe(true);
+    });
+  });
+
+  describe("edge cases", () => {
+    test("handles date exactly equal to now", () => {
+      const params: RecurringInvoiceParams = {
+        frequency: "biweekly",
+        frequencyDay: null,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      const scheduledDate = new Date("2025-01-15T12:00:00.000Z");
+      const now = new Date("2025-01-15T12:00:00.000Z"); // Exactly equal
+
+      const result = advanceToFutureDate(params, scheduledDate, now);
+
+      // Should advance since <= now triggers the loop
+      expect(result.date > now).toBe(true);
+      expect(result.intervalsSkipped).toBe(1);
+    });
+
+    test("handles monthly frequencies correctly", () => {
+      const monthlyParams: RecurringInvoiceParams = {
+        frequency: "monthly_date",
+        frequencyDay: 15,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      // Scheduled for Feb 15, processed on March 20
+      const scheduledDate = new Date("2025-02-15T12:00:00.000Z");
+      const now = new Date("2025-03-20T12:00:00.000Z");
+
+      const result = advanceToFutureDate(monthlyParams, scheduledDate, now);
+
+      // Feb 15 <= March 20? Yes, advance -> March 15
+      // March 15 <= March 20? Yes, advance -> April 15
+      // April 15 <= March 20? No, done (2 intervals skipped)
+      expect(result.date.getMonth()).toBe(3); // April
+      expect(result.date.getDate()).toBe(15);
+      expect(result.intervalsSkipped).toBe(2);
     });
   });
 });
