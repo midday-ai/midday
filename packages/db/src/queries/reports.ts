@@ -2323,21 +2323,50 @@ async function getRecurringTransactionProjection(
     gte(transactions.date, sixMonthsAgo),
   ];
 
+  // Currency filter: include transactions where either currency OR baseCurrency matches
   if (currency) {
-    conditions.push(eq(transactions.currency, currency));
+    conditions.push(
+      or(
+        eq(transactions.currency, currency),
+        eq(transactions.baseCurrency, currency),
+      )!,
+    );
   }
 
+  // Query with LEFT JOIN to transactionCategories for category exclusion
+  // This matches the pattern used by all other report functions
   const recurringIncome = await db
     .select({
       name: transactions.name,
       amount: transactions.amount,
+      baseAmount: transactions.baseAmount,
+      baseCurrency: transactions.baseCurrency,
       frequency: transactions.frequency,
       date: transactions.date,
     })
     .from(transactions)
-    .where(and(...conditions));
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactionCategories.slug, transactions.categorySlug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        ...conditions,
+        // Category exclusion: match pattern from other reports
+        // Allow uncategorized, or categories where excluded is NULL or false
+        or(
+          isNull(transactions.categorySlug),
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    );
 
   // Group by name to get unique recurring sources (use most recent amount)
+  // For multi-currency support: use baseAmount if available and matches target currency
   const recurringByName = new Map<
     string,
     { amount: number; frequency: string | null; lastDate: string }
@@ -2346,8 +2375,15 @@ async function getRecurringTransactionProjection(
   for (const tx of recurringIncome) {
     const existing = recurringByName.get(tx.name);
     if (!existing || tx.date > existing.lastDate) {
+      // Use baseAmount when available (converted to team's base currency)
+      // This ensures multi-currency accounts are properly included
+      const effectiveAmount =
+        currency && tx.baseCurrency === currency && tx.baseAmount !== null
+          ? tx.baseAmount
+          : tx.amount;
+
       recurringByName.set(tx.name, {
-        amount: tx.amount,
+        amount: effectiveAmount,
         frequency: tx.frequency,
         lastDate: tx.date,
       });
@@ -2369,7 +2405,16 @@ async function getRecurringTransactionProjection(
       // Convert to monthly equivalent based on frequency
       switch (recurring.frequency) {
         case "weekly":
+          // ~4.33 weeks per month (52 weeks / 12 months)
           monthlyAmount = recurring.amount * 4.33;
+          break;
+        case "biweekly":
+          // ~2.17 occurrences per month (26 biweekly periods / 12 months)
+          monthlyAmount = recurring.amount * 2.17;
+          break;
+        case "semi_monthly":
+          // Exactly 2 occurrences per month (e.g., 1st and 15th)
+          monthlyAmount = recurring.amount * 2;
           break;
         case "annually":
           monthlyAmount = recurring.amount / 12;
@@ -3100,7 +3145,9 @@ export async function getRevenueForecast(
       warnings,
       // Source contribution summary
       recurringRevenueTotal: totalRecurringRevenue,
-      recurringInvoicesCount: recurringInvoiceData.size,
+      recurringInvoicesCount:
+        recurringInvoiceData.get(format(addMonths(currentDate, 1), "yyyy-MM"))
+          ?.count ?? 0,
       recurringTransactionsCount:
         recurringTransactionData.get(
           format(addMonths(currentDate, 1), "yyyy-MM"),

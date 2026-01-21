@@ -16,7 +16,7 @@ import {
   calculateUpcomingDates,
   shouldMarkCompleted,
 } from "@db/utils/invoice-recurring";
-import { format, parseISO } from "date-fns";
+import { addMonths, format, parseISO } from "date-fns";
 import { and, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 
 export type CreateInvoiceRecurringParams = {
@@ -983,6 +983,69 @@ export async function markUpcomingNotificationSent(
 }
 
 /**
+ * Calculate the maximum number of invoices that could occur in a given forecast period
+ * based on the recurring invoice frequency.
+ *
+ * This converts forecastMonths into an invoice count limit, accounting for how many
+ * invoices each frequency type generates per month.
+ *
+ * @param frequency - The recurring invoice frequency
+ * @param frequencyInterval - Custom interval in days (for 'custom' frequency)
+ * @param forecastMonths - Number of months to forecast
+ * @returns Maximum number of invoices to calculate
+ */
+function calculateInvoiceLimitForPeriod(
+  frequency: InvoiceRecurringFrequency,
+  frequencyInterval: number | null,
+  forecastMonths: number,
+): number {
+  // Add a buffer to ensure we don't miss edge cases at period boundaries
+  const buffer = 2;
+
+  switch (frequency) {
+    case "weekly":
+      // ~4.33 weeks per month
+      return Math.ceil(forecastMonths * 4.33) + buffer;
+
+    case "biweekly":
+      // ~2.17 invoices per month (every 2 weeks)
+      return Math.ceil(forecastMonths * 2.17) + buffer;
+
+    case "monthly_date":
+    case "monthly_weekday":
+    case "monthly_last_day":
+      // 1 invoice per month
+      return forecastMonths + buffer;
+
+    case "quarterly":
+      // 1 invoice per 3 months
+      return Math.ceil(forecastMonths / 3) + buffer;
+
+    case "semi_annual":
+      // 1 invoice per 6 months
+      return Math.ceil(forecastMonths / 6) + buffer;
+
+    case "annual":
+      // 1 invoice per 12 months
+      return Math.ceil(forecastMonths / 12) + buffer;
+
+    case "custom":
+      // frequencyInterval is in days
+      if (frequencyInterval && frequencyInterval > 0) {
+        // Average 30.44 days per month
+        const invoicesPerMonth = 30.44 / frequencyInterval;
+        return Math.ceil(forecastMonths * invoicesPerMonth) + buffer;
+      }
+      // Fallback if interval is not set
+      return forecastMonths + buffer;
+
+    default:
+      // Default to monthly as a safe fallback
+      return forecastMonths + buffer;
+  }
+}
+
+/**
  * Project active recurring invoices into future months for revenue forecasting.
  *
  * This function queries all active recurring invoices and uses calculateUpcomingDates()
@@ -1007,7 +1070,18 @@ export async function getRecurringInvoiceProjection(
   db: Database,
   params: GetRecurringInvoiceProjectionParams,
 ): Promise<RecurringInvoiceProjectionResult> {
-  const { teamId, forecastMonths } = params;
+  const { teamId, forecastMonths, currency } = params;
+
+  // Build query conditions
+  const conditions = [
+    eq(invoiceRecurring.teamId, teamId),
+    eq(invoiceRecurring.status, "active"),
+  ];
+
+  // Filter by currency when provided to avoid mixing currencies without conversion
+  if (currency) {
+    conditions.push(eq(invoiceRecurring.currency, currency));
+  }
 
   // Get all active recurring invoices
   const activeRecurring = await db
@@ -1027,15 +1101,13 @@ export async function getRecurringInvoiceProjection(
       timezone: invoiceRecurring.timezone,
     })
     .from(invoiceRecurring)
-    .where(
-      and(
-        eq(invoiceRecurring.teamId, teamId),
-        eq(invoiceRecurring.status, "active"),
-      ),
-    );
+    .where(and(...conditions));
 
   // Project each recurring invoice into forecast months
   const projection: RecurringInvoiceProjectionResult = new Map();
+
+  // Calculate end date for the forecast period (used to filter results)
+  const forecastEndDate = addMonths(new Date(), forecastMonths);
 
   for (const recurring of activeRecurring) {
     // Skip if no next scheduled date or no amount
@@ -1051,6 +1123,15 @@ export async function getRecurringInvoiceProjection(
       timezone: recurring.timezone,
     };
 
+    // Calculate the maximum number of invoices that could occur in the forecast period
+    // based on the frequency. This is the 'limit' parameter for calculateUpcomingDates,
+    // which controls how many invoices to return (not the time period).
+    const invoiceLimitForPeriod = calculateInvoiceLimitForPeriod(
+      recurring.frequency,
+      recurring.frequencyInterval,
+      forecastMonths,
+    );
+
     // Calculate upcoming invoice dates
     const upcoming = calculateUpcomingDates(
       recurringParams,
@@ -1061,12 +1142,19 @@ export async function getRecurringInvoiceProjection(
       recurring.endDate ? new Date(recurring.endDate) : null,
       recurring.endCount,
       recurring.invoicesGenerated,
-      forecastMonths,
+      invoiceLimitForPeriod,
     );
 
-    // Group by month
+    // Group by month, filtering to only include invoices within the forecast period
     for (const invoice of upcoming.invoices) {
-      const monthKey = format(parseISO(invoice.date), "yyyy-MM");
+      const invoiceDate = parseISO(invoice.date);
+
+      // Skip invoices beyond the forecast period
+      if (invoiceDate > forecastEndDate) {
+        continue;
+      }
+
+      const monthKey = format(invoiceDate, "yyyy-MM");
       const existing = projection.get(monthKey) || { amount: 0, count: 0 };
       projection.set(monthKey, {
         amount: existing.amount + invoice.amount,
