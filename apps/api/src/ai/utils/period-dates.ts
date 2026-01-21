@@ -3,8 +3,22 @@ import { format, subMonths, subYears } from "date-fns";
 
 type PeriodOption = "3-months" | "6-months" | "1-year" | "2-years" | "5-years";
 
+/** Valid historical period options */
+const VALID_PERIOD_OPTIONS: ReadonlySet<string> = new Set([
+  "3-months",
+  "6-months",
+  "1-year",
+  "2-years",
+  "5-years",
+]);
+
+/** Check if a value is a valid historical period option */
+function isValidPeriodOption(value: unknown): value is PeriodOption {
+  return typeof value === "string" && VALID_PERIOD_OPTIONS.has(value);
+}
+
 /** Convert period string to date range (matches dashboard logic) */
-function getPeriodDates(period: string): { from: string; to: string } {
+function getPeriodDates(period: PeriodOption): { from: string; to: string } {
   const now = new Date();
   const to = format(now, "yyyy-MM-dd");
 
@@ -84,15 +98,23 @@ export function resolveToolParams(
   // 2. AI PARAMS + METRICS FILTER FALLBACK
   // Priority: AI explicit > metricsFilter > hardcoded default
 
-  // Handle date range (some tools use 'period', others use 'dateRange')
-  const periodParam = aiParams.period ?? aiParams.dateRange;
+  // Handle historical date range:
+  // - Some tools use 'period' for historical period (e.g., get-expenses)
+  // - Others use 'dateRange' for historical period and 'period' for aggregation (e.g., getCashFlow uses 'period' for "monthly"/"quarterly")
+  // Only consider values that are valid historical periods (e.g., "1-year", "6-months")
+  // Ignore aggregation values like "monthly", "quarterly", "yearly"
+  const historicalPeriod = isValidPeriodOption(aiParams.dateRange)
+    ? aiParams.dateRange
+    : isValidPeriodOption(aiParams.period)
+      ? aiParams.period
+      : undefined;
 
   let from: string;
   let to: string;
 
-  if (periodParam) {
-    // AI specified a period - convert to dates
-    const dates = getPeriodDates(periodParam);
+  if (historicalPeriod) {
+    // AI specified a valid historical period - convert to dates
+    const dates = getPeriodDates(historicalPeriod);
     from = dates.from;
     to = dates.to;
   } else if (aiParams.from && aiParams.to) {

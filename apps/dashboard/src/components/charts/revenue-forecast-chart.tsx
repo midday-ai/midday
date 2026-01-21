@@ -211,15 +211,21 @@ export function RevenueForecastChart({
   onSelectionComplete,
   onSelectionStateChange,
 }: RevenueForecastChartProps) {
-  // Normalize data - add confidence band range for Area component
+  // Normalize data - compute confidence band values for stacked Area components
+  // Recharts Area doesn't support array dataKey, so we use two stacked areas:
+  // 1. pessimistic (transparent baseline)
+  // 2. confidenceBandHeight (optimistic - pessimistic, visible fill)
   const normalizedData = useMemo(() => {
     if (!data || data.length === 0) return [];
     return data.map((d) => ({
       ...d,
-      // Create a range array for the Area component [pessimistic, optimistic]
-      confidenceRange:
+      // Keep pessimistic as the baseline for stacking
+      pessimisticBaseline:
+        d.optimistic != null && d.pessimistic != null ? d.pessimistic : null,
+      // Compute the band height (difference between optimistic and pessimistic)
+      confidenceBandHeight:
         d.optimistic != null && d.pessimistic != null
-          ? [d.pessimistic, d.optimistic]
+          ? d.optimistic - d.pessimistic
           : null,
     }));
   }, [data]);
@@ -307,7 +313,7 @@ export function RevenueForecastChart({
 
   // Check if we have confidence band data
   const hasConfidenceBand = useMemo(() => {
-    return normalizedData.some((d) => d.confidenceRange != null);
+    return normalizedData.some((d) => d.confidenceBandHeight != null);
   }, [normalizedData]);
 
   const chartContent = (
@@ -364,16 +370,31 @@ export function RevenueForecastChart({
                 />
               )}
             {/* Confidence band (shaded area between pessimistic and optimistic) */}
+            {/* Uses two stacked areas: transparent baseline + visible band height */}
             {hasConfidenceBand && (
-              <Area
-                type="monotone"
-                dataKey="confidenceRange"
-                fill="var(--chart-forecast-line)"
-                fillOpacity={0.1}
-                stroke="none"
-                isAnimationActive={false}
-                connectNulls={false}
-              />
+              <>
+                {/* Baseline area (pessimistic) - transparent, just for stacking */}
+                <Area
+                  type="monotone"
+                  dataKey="pessimisticBaseline"
+                  stackId="confidenceBand"
+                  fill="transparent"
+                  stroke="none"
+                  isAnimationActive={false}
+                  connectNulls={false}
+                />
+                {/* Band height area (optimistic - pessimistic) - visible fill */}
+                <Area
+                  type="monotone"
+                  dataKey="confidenceBandHeight"
+                  stackId="confidenceBand"
+                  fill="var(--chart-forecast-line)"
+                  fillOpacity={0.1}
+                  stroke="none"
+                  isAnimationActive={false}
+                  connectNulls={false}
+                />
+              </>
             )}
             <Tooltip
               content={

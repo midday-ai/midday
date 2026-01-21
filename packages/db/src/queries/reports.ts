@@ -2654,18 +2654,89 @@ function calculateWeightedMedian(values: number[], weights: number[]): number {
 }
 
 /**
+ * Calculate historical monthly average of paid recurring invoice revenue.
+ * This is needed to avoid double-counting: recurring invoice payments appear
+ * in historical revenue (as bank deposits) AND are projected separately.
+ */
+async function getHistoricalRecurringInvoiceAverage(
+  db: Database,
+  params: {
+    teamId: string;
+    currency?: string;
+  },
+): Promise<number> {
+  const { teamId, currency } = params;
+
+  // Look at last 6 months of paid invoices linked to recurring templates
+  const sixMonthsAgo = format(subMonths(new Date(), 6), "yyyy-MM-dd");
+
+  const conditions = [
+    eq(invoices.teamId, teamId),
+    eq(invoices.status, "paid"),
+    isNotNull(invoices.invoiceRecurringId), // Only invoices from recurring templates
+    isNotNull(invoices.paidAt),
+    gte(invoices.paidAt, sixMonthsAgo),
+  ];
+
+  // Filter by currency when provided
+  if (currency) {
+    conditions.push(eq(invoices.currency, currency));
+  }
+
+  const paidRecurringInvoices = await db
+    .select({
+      amount: invoices.amount,
+      paidAt: invoices.paidAt,
+    })
+    .from(invoices)
+    .where(and(...conditions));
+
+  if (paidRecurringInvoices.length === 0) {
+    return 0;
+  }
+
+  // Group by month and calculate average
+  const monthlyTotals = new Map<string, number>();
+
+  for (const inv of paidRecurringInvoices) {
+    if (!inv.paidAt || !inv.amount) continue;
+    const monthKey = format(parseISO(inv.paidAt), "yyyy-MM");
+    const amount = Number(inv.amount) || 0;
+    monthlyTotals.set(monthKey, (monthlyTotals.get(monthKey) || 0) + amount);
+  }
+
+  if (monthlyTotals.size === 0) {
+    return 0;
+  }
+
+  // Calculate average monthly revenue from recurring invoices
+  const totalRevenue = Array.from(monthlyTotals.values()).reduce(
+    (a, b) => a + b,
+    0,
+  );
+  return totalRevenue / monthlyTotals.size;
+}
+
+/**
  * Calculate non-recurring revenue baseline from historical data.
- * This is total revenue minus recurring transaction amounts.
+ * This is total revenue minus BOTH recurring transaction amounts AND
+ * recurring invoice payments (to avoid double-counting).
  */
 async function calculateNonRecurringBaseline(
   db: Database,
   params: {
     teamId: string;
     currency?: string;
-    recurringMonthlyAvg: number;
+    recurringTxMonthlyAvg: number;
+    recurringInvoiceMonthlyAvg: number;
   },
 ): Promise<number> {
-  const { teamId, currency, recurringMonthlyAvg } = params;
+  const {
+    teamId,
+    currency,
+    recurringTxMonthlyAvg,
+    recurringInvoiceMonthlyAvg,
+  } = params;
 
   // Get last 6 months of revenue
   const sixMonthsAgo = format(subMonths(new Date(), 6), "yyyy-MM-dd");
@@ -2683,9 +2754,14 @@ async function calculateNonRecurringBaseline(
     return 0;
   }
 
-  // Subtract recurring transaction average from each month
+  // Total recurring revenue to subtract = bank transactions + invoice payments
+  // This prevents double-counting since both are projected separately
+  const totalRecurringMonthlyAvg =
+    recurringTxMonthlyAvg + recurringInvoiceMonthlyAvg;
+
+  // Subtract total recurring average from each month
   const nonRecurringValues = historicalRevenue.map((month) =>
-    Math.max(0, Number.parseFloat(month.value) - recurringMonthlyAvg),
+    Math.max(0, Number.parseFloat(month.value) - totalRecurringMonthlyAvg),
   );
 
   // Weight recent months more heavily (older to newer)
@@ -2942,11 +3018,23 @@ export async function getRevenueForecast(
     break;
   }
 
-  // Calculate non-recurring baseline (historical revenue minus recurring)
+  // Calculate historical recurring invoice monthly average
+  // This is needed to avoid double-counting: payments from recurring invoices
+  // appear in historical revenue AND are projected separately
+  const recurringInvoiceMonthlyAvg = await getHistoricalRecurringInvoiceAverage(
+    db,
+    {
+      teamId,
+      currency: inputCurrency,
+    },
+  );
+
+  // Calculate non-recurring baseline (historical revenue minus ALL recurring sources)
   const nonRecurringBaseline = await calculateNonRecurringBaseline(db, {
     teamId,
     currency: inputCurrency,
-    recurringMonthlyAvg: recurringTxMonthlyAvg,
+    recurringTxMonthlyAvg,
+    recurringInvoiceMonthlyAvg,
   });
 
   // Billable hours value (convert from seconds to value)

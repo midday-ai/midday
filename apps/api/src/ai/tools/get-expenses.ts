@@ -94,14 +94,14 @@ export const getExpensesTool = tool({
         teamId,
         from: finalFrom,
         to: finalTo,
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
       });
 
       const periodSummary = await getSpendingForPeriod(db, {
         teamId,
         from: finalFrom,
         to: finalTo,
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
       });
 
       const totalExpenses = periodSummary.totalSpending;
