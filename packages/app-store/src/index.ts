@@ -2,6 +2,7 @@ import chatgptMcpApp from "./chatgpt-mcp/config";
 import claudeMcpApp from "./claude-mcp/config";
 import cursorMcpApp from "./cursor-mcp/config";
 import opencodeMcpApp from "./opencode-mcp/config";
+import perplexityMcpApp from "./perplexity-mcp/config";
 import zapierMcpApp from "./zapier-mcp/config";
 import copilotMcpApp from "./copilot-mcp/config";
 import n8nMcpApp from "./n8n-mcp/config";
@@ -44,6 +45,7 @@ export const apps = [
   eInvoiceApp,
   cursorMcpApp,
   claudeMcpApp,
+  perplexityMcpApp,
   raycastMcpApp,
   chatgptMcpApp,
   opencodeMcpApp,

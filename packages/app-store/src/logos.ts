@@ -24,3 +24,4 @@ export { Logo as ZapierMcpLogo } from "./zapier-mcp/assets/logo";
 export { Logo as CopilotMcpLogo } from "./copilot-mcp/assets/logo";
 export { Logo as N8nMcpLogo } from "./n8n-mcp/assets/logo";
 export { Logo as MakeMcpLogo } from "./make-mcp/assets/logo";
+export { Logo as PerplexityMcpLogo } from "./perplexity-mcp/assets/logo";

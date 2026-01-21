@@ -8,6 +8,7 @@ import {
   MakeMcpLogo,
   N8nMcpLogo,
   OpenCodeMcpLogo,
+  PerplexityMcpLogo,
   RaycastMcpLogo,
   ZapierMcpLogo,
 } from "@midday/app-store/logos";
@@ -28,6 +29,12 @@ const clients = [
     name: "Claude",
     description: "Analyze trends and get insights",
     href: "/mcp/claude",
+  },
+  {
+    id: "perplexity",
+    name: "Perplexity",
+    description: "AI search with your real data",
+    href: "/mcp/perplexity",
   },
   {
     id: "raycast",
@@ -95,7 +102,7 @@ const capabilities = [
   "50+ tools across transactions, invoices, customers, tracker, and reports",
   "Granular permissions—read-only or full access, you choose",
   "Secure authentication with your existing API keys",
-  "Works with Cursor, Claude, Raycast, Zapier, n8n, Make, and more",
+  "Works with Cursor, Claude, Perplexity, Raycast, Zapier, n8n, Make, and more",
 ];
 
 function ClientLogo({
@@ -106,6 +113,7 @@ function ClientLogo({
   const logos: Record<string, React.ComponentType<{ id?: string }>> = {
     cursor: CursorMcpLogo,
     claude: ClaudeMcpLogo,
+    perplexity: PerplexityMcpLogo,
     raycast: RaycastMcpLogo,
     chatgpt: ChatGPTMcpLogo,
     opencode: OpenCodeMcpLogo,
@@ -189,7 +197,7 @@ export function MCP() {
                 Midday, everywhere
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Connect Claude, ChatGPT, Cursor, and more to your Midday data.
+                Connect Claude, ChatGPT, Perplexity, Cursor, and more to your Midday data.
                 Ask questions and get answers from your actual business data.
               </p>
             </div>
@@ -229,7 +237,7 @@ export function MCP() {
                 Midday, everywhere
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Connect Claude, ChatGPT, Cursor, and more to your Midday data.
+                Connect Claude, ChatGPT, Perplexity, Cursor, and more to your Midday data.
                 Ask questions and get answers from your actual business data.
               </p>
             </div>

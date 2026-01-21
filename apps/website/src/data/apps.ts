@@ -184,6 +184,16 @@ const appExtensions: Record<
     ],
     installUrl: "https://midday.ai/mcp/claude",
   },
+  "perplexity-mcp": {
+    slug: "perplexity-mcp",
+    features: [
+      "AI search with your real data",
+      "Works with Perplexity Mac app",
+      "Query transactions and reports",
+      "Natural language questions",
+    ],
+    installUrl: "https://midday.ai/mcp/perplexity",
+  },
   "raycast-mcp": {
     slug: "raycast-mcp",
     features: [
