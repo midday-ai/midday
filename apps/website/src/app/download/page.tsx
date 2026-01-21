@@ -2,7 +2,7 @@ import { baseUrl } from "@/app/sitemap";
 import { Download } from "@/components/download";
 import type { Metadata } from "next";
 
-const title = "Download Midday for Mac";
+const title = "Download";
 const description =
   "Download Midday for Mac. Your finances, always one click away. Access your business data directly from your desktop.";
 

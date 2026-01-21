@@ -2,7 +2,7 @@ import { baseUrl } from "@/app/sitemap";
 import { Assistant } from "@/components/assistant";
 import type { Metadata } from "next";
 
-const title = "AI Financial Assistant";
+const title = "AI Assistant";
 const description =
   "Your AI-powered financial assistant. Ask questions about your business and get clear, actionable answers based on your real financial data.";
 

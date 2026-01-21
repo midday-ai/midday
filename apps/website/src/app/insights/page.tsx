@@ -2,7 +2,7 @@ import { baseUrl } from "@/app/sitemap";
 import { Insights } from "@/components/insights";
 import type { Metadata } from "next";
 
-const title = "Financial Insights for Small Business";
+const title = "Financial Insights";
 const description =
   "Understand your business finances at a glance. Get weekly summaries, cash flow analysis, and clear explanations of revenue and spending trends.";
 

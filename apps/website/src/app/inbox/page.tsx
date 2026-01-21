@@ -2,7 +2,7 @@ import { baseUrl } from "@/app/sitemap";
 import { Inbox } from "@/components/inbox";
 import type { Metadata } from "next";
 
-const title = "Receipt Management for Business";
+const title = "Receipt Inbox";
 const description =
   "Capture receipts and invoices automatically. Match documents to transactions, search your financial records, and stay organized. Built for small business owners.";
 

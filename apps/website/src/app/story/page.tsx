@@ -2,7 +2,7 @@ import { baseUrl } from "@/app/sitemap";
 import type { Metadata } from "next";
 import Image from "next/image";
 
-const title = "Our Story";
+const title = "Story";
 const description =
   "Why we built Midday. Learn about our mission to help founders and small teams stay on top of their business finances without the manual work.";
 

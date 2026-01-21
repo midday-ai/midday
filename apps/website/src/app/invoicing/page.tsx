@@ -2,7 +2,7 @@ import { baseUrl } from "@/app/sitemap";
 import { Invoicing } from "@/components/invoicing";
 import type { Metadata } from "next";
 
-const title = "Invoice Software for Small Business";
+const title = "Invoicing";
 const description =
   "Create professional invoices in seconds. Track payments, send reminders, and get paid faster with invoicing software built for small business owners.";
 

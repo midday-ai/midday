@@ -2,7 +2,7 @@ import { baseUrl } from "@/app/sitemap";
 import { FileStorage } from "@/components/file-storage";
 import type { Metadata } from "next";
 
-const title = "Document Storage for Business";
+const title = "Document Vault";
 const description =
   "Store and organize all your business documents in one secure place. Access receipts, contracts, invoices, and files anytime. Built for small business owners.";
 

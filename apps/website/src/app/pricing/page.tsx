@@ -2,7 +2,7 @@ import { baseUrl } from "@/app/sitemap";
 import { Pricing } from "@/components/pricing";
 import type { Metadata } from "next";
 
-const title = "Pricing - Free for Small Business";
+const title = "Pricing";
 const description =
   "Simple, transparent pricing for Midday. Start free and upgrade as you grow. Invoicing, expense tracking, and financial tools for small business owners.";
 

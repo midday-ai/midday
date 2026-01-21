@@ -2,7 +2,7 @@ import { baseUrl } from "@/app/sitemap";
 import { Transactions } from "@/components/transactions";
 import type { Metadata } from "next";
 
-const title = "Business Expense Tracking";
+const title = "Transactions";
 const description =
   "Track all your business expenses in one place. Automatically sync and categorize transactions from your bank accounts. Built for small business owners.";
 
