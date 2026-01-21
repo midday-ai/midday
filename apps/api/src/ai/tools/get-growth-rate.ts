@@ -2,7 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { growthRateArtifact } from "@api/ai/artifacts/growth-rate";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
-import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getGrowthRate } from "@midday/db/queries";
@@ -11,31 +11,31 @@ import { tool } from "ai";
 import { z } from "zod";
 
 const getGrowthRateSchema = z.object({
-  from: z.string().optional().describe("Start date (ISO 8601)"),
-  to: z.string().optional().describe("End date (ISO 8601)"),
-  currency: z
-    .string()
-    .describe("Currency code (ISO 4217, e.g. 'USD')")
-    .nullable()
-    .optional(),
+  dateRange: z
+    .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
+    .optional()
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
+  to: z.string().optional().describe("End date (yyyy-MM-dd)"),
+  currency: z.string().nullable().optional().describe("Currency code"),
   type: z
     .enum(["revenue", "profit"])
     .default("revenue")
-    .describe("Type of growth rate: 'revenue' or 'profit'"),
-  revenueType: z.enum(["gross", "net"]).default("net").describe("Revenue type"),
+    .describe("Growth type: revenue or profit"),
+  revenueType: z.enum(["gross", "net"]).optional().describe("Revenue type"),
   period: z
     .enum(["monthly", "quarterly", "yearly"])
     .default("quarterly")
-    .describe("Period for comparison: 'monthly', 'quarterly', or 'yearly'"),
-  showCanvas: z.boolean().default(false).describe("Show visual analytics"),
+    .describe("Comparison period: monthly, quarterly (default), or yearly"),
+  showCanvas: z.boolean().default(false).describe("Show visual canvas"),
 });
 
 export const getGrowthRateTool = tool({
   description:
-    "Calculate and analyze growth rate - shows period-over-period growth comparisons (monthly, quarterly, or yearly), growth trends, and percentage changes. Supports both revenue and profit growth analysis.",
+    "Calculate growth rate - shows period-over-period comparisons and trends.",
   inputSchema: getGrowthRateSchema,
   execute: async function* (
-    { from, to, currency, type, revenueType, period, showCanvas },
+    { dateRange, from, to, currency, type, revenueType, period, showCanvas },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -61,10 +61,31 @@ export const getGrowthRateTool = tool({
     }
 
     try {
-      // Use fiscal year-aware defaults if dates not provided
-      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
-      const finalFrom = from ?? defaultDates.from;
-      const finalTo = to ?? defaultDates.to;
+      // Resolve parameters with proper priority:
+      // 1. Forced params from widget click (if this tool was triggered by widget)
+      // 2. Explicit AI params (user override)
+      // 3. Dashboard metricsFilter (source of truth)
+      // 4. Hardcoded defaults
+      const resolved = resolveToolParams({
+        toolName: "getGrowthRate",
+        appContext,
+        aiParams: {
+          dateRange,
+          from,
+          to,
+          currency,
+          revenueType,
+          // Pass through other params
+          type,
+          period,
+          showCanvas,
+        },
+      });
+
+      const finalFrom = resolved.from;
+      const finalTo = resolved.to;
+      const finalCurrency = resolved.currency;
+      const finalRevenueType = resolved.revenueType ?? "net";
 
       // Generate description based on date range
       const description = generateArtifactDescription(finalFrom, finalTo);
@@ -76,12 +97,12 @@ export const getGrowthRateTool = tool({
         analysis = growthRateArtifact.stream(
           {
             stage: "loading",
-            currency: currency || appContext.baseCurrency || "USD",
+            currency: finalCurrency || "USD",
             from: finalFrom,
             to: finalTo,
             description,
             type,
-            revenueType,
+            revenueType: finalRevenueType,
             period,
           },
           writer,
@@ -92,9 +113,9 @@ export const getGrowthRateTool = tool({
         teamId,
         from: finalFrom,
         to: finalTo,
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
         type,
-        revenueType,
+        revenueType: finalRevenueType,
         period,
       });
 
@@ -121,7 +142,7 @@ export const getGrowthRateTool = tool({
 
       // Build response text
       const typeLabel = type === "profit" ? "Profit" : "Revenue";
-      const revenueTypeLabel = revenueType === "gross" ? "Gross" : "Net";
+      const revenueTypeLabel = finalRevenueType === "gross" ? "Gross" : "Net";
       const periodLabelLower =
         period === "monthly"
           ? "month"
@@ -193,7 +214,7 @@ export const getGrowthRateTool = tool({
           to: finalTo,
           description,
           type,
-          revenueType,
+          revenueType: finalRevenueType,
           period,
           chart: {
             periodData: chartData,
@@ -207,7 +228,7 @@ export const getGrowthRateTool = tool({
           stage: "metrics_ready",
           currency: targetCurrency,
           type,
-          revenueType,
+          revenueType: finalRevenueType,
           period,
           chart: {
             periodData: chartData,
@@ -255,7 +276,7 @@ export const getGrowthRateTool = tool({
           to: finalTo,
           description,
           type,
-          revenueType,
+          revenueType: finalRevenueType,
           period,
           chart: {
             periodData: chartData,
@@ -299,7 +320,7 @@ export const getGrowthRateTool = tool({
         currency: targetCurrency,
         period,
         type,
-        revenueType,
+        revenueType: finalRevenueType,
         trend,
         changeAmount: currentTotal - prevTotal,
       };

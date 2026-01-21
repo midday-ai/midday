@@ -3,7 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { spendingArtifact } from "@api/ai/artifacts/spending";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
-import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getSpending, getSpendingForPeriod } from "@midday/db/queries";
@@ -15,22 +15,36 @@ import { endOfMonth, parseISO, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getSpendingSchema = z.object({
-  from: z.string().optional().describe("Start date (ISO 8601)"),
-  to: z.string().optional().describe("End date (ISO 8601)"),
+  // Date range parameters - resolved using dashboard metricsFilter as default
+  period: z
+    .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
+    .optional()
+    .describe(
+      "Historical period. Only specify if user explicitly requests a different range.",
+    ),
+  from: z
+    .string()
+    .optional()
+    .describe("Start date (yyyy-MM-dd). Usually auto-filled from dashboard."),
+  to: z
+    .string()
+    .optional()
+    .describe("End date (yyyy-MM-dd). Usually auto-filled from dashboard."),
   currency: z
     .string()
-    .describe("Currency code (ISO 4217, e.g. 'USD')")
     .nullable()
-    .optional(),
+    .optional()
+    .describe("Currency code. Usually auto-filled from dashboard."),
   showCanvas: z.boolean().default(false).describe("Show visual analytics"),
 });
 
 export const getSpendingTool = tool({
   description:
-    "Analyze spending patterns with transaction details - shows spending totals, top transactions by amount, spending by category, and trends.",
+    "Analyze spending patterns with transaction details - shows spending totals, top transactions by amount, spending by category, and trends. " +
+    "Parameters are auto-filled from dashboard state. Only override if user explicitly requests different values.",
   inputSchema: getSpendingSchema,
   execute: async function* (
-    { from, to, currency, showCanvas },
+    { period, from, to, currency, showCanvas },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -56,10 +70,20 @@ export const getSpendingTool = tool({
     }
 
     try {
-      // Use fiscal year-aware defaults if dates not provided
-      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
-      const finalFrom = from ?? defaultDates.from;
-      const finalTo = to ?? defaultDates.to;
+      // Resolve parameters with proper priority:
+      // 1. Forced params from widget click (if this tool was triggered by widget)
+      // 2. Explicit AI params (user override)
+      // 3. Dashboard metricsFilter (source of truth)
+      // 4. Hardcoded defaults
+      const resolved = resolveToolParams({
+        toolName: "getSpending",
+        appContext,
+        aiParams: { period, from, to, currency },
+      });
+
+      const finalFrom = resolved.from;
+      const finalTo = resolved.to;
+      const finalCurrency = resolved.currency;
 
       // Generate description based on date range
       const description = generateArtifactDescription(finalFrom, finalTo);
@@ -71,7 +95,7 @@ export const getSpendingTool = tool({
         analysis = spendingArtifact.stream(
           {
             stage: "loading",
-            currency: currency || appContext.baseCurrency || "USD",
+            currency: finalCurrency || "USD",
             from: finalFrom,
             to: finalTo,
             description,
@@ -80,7 +104,7 @@ export const getSpendingTool = tool({
         );
       }
 
-      const targetCurrency = currency || appContext.baseCurrency || "USD";
+      const targetCurrency = finalCurrency || "USD";
       const locale = appContext.locale || "en-US";
 
       // Fetch spending data
@@ -88,14 +112,14 @@ export const getSpendingTool = tool({
         teamId,
         from: finalFrom,
         to: finalTo,
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
       });
 
       const periodSummary = await getSpendingForPeriod(db, {
         teamId,
         from: finalFrom,
         to: finalTo,
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
       });
 
       // Fetch transactions (we'll sort by absolute amount after fetching)
@@ -146,7 +170,7 @@ export const getSpendingTool = tool({
         teamId,
         from: currentMonthStart.toISOString(),
         to: currentMonthEnd.toISOString(),
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
       });
       const currentMonthSpending = currentMonthSummary.totalSpending;
 

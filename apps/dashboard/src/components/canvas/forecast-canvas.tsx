@@ -31,12 +31,18 @@ export function ForecastCanvas() {
   const locale = user?.locale ?? undefined;
 
   // Use artifact data or fallback to empty/default values
+  // Include enhanced forecast fields (optimistic, pessimistic, confidence, breakdown)
+  // to match the dashboard metrics card data structure
   const forecastData =
     data?.chart?.monthlyData?.map((item) => ({
       month: item.month,
       actual: item.actual ?? undefined,
       forecasted: item.forecasted ?? undefined,
       date: item.date,
+      optimistic: item.optimistic ?? undefined,
+      pessimistic: item.pessimistic ?? undefined,
+      confidence: item.confidence ?? undefined,
+      breakdown: item.breakdown ?? undefined,
     })) || [];
 
   const forecastStartIndex = data?.chart?.forecastStartIndex;
@@ -75,6 +81,17 @@ export function ForecastCanvas() {
           value: `${data.metrics.billableHours}h`,
           subtitle: "This month tracked",
         },
+        // Include confidence score when available (matching dashboard metrics card)
+        ...(data.metrics.confidenceScore != null
+          ? [
+              {
+                id: "confidence",
+                title: "Confidence",
+                value: `${data.metrics.confidenceScore}%`,
+                subtitle: "Forecast reliability",
+              },
+            ]
+          : []),
       ]
     : [];
 

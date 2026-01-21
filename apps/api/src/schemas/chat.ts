@@ -41,6 +41,32 @@ const messageSchema = z
     },
   });
 
+/**
+ * Dashboard metrics filter schema - sent with every chat request
+ * to provide context about the current dashboard view.
+ */
+export const metricsFilterSchema = z
+  .object({
+    period: z.string().describe("Period option (e.g., '1-year', '6-months')"),
+    from: z.string().describe("Start date in yyyy-MM-dd format"),
+    to: z.string().describe("End date in yyyy-MM-dd format"),
+    currency: z.string().optional().describe("Currency code (e.g., 'USD')"),
+    revenueType: z
+      .enum(["gross", "net"])
+      .describe("Revenue type for calculations"),
+  })
+  .openapi({
+    description:
+      "Current dashboard metrics filter state - used as defaults for AI tools",
+    example: {
+      period: "1-year",
+      from: "2025-01-21",
+      to: "2026-01-21",
+      currency: "USD",
+      revenueType: "net",
+    },
+  });
+
 export const chatRequestSchema = z.object({
   id: z.string().openapi({
     description: "Chat ID",
@@ -79,6 +105,10 @@ export const chatRequestSchema = z.object({
   toolChoice: z.string().optional().openapi({
     description: "Tool choice",
     example: "getBurnRate",
+  }),
+  metricsFilter: metricsFilterSchema.optional().openapi({
+    description:
+      "Current dashboard metrics filter state - tools use this as default",
   }),
   files: z
     .array(

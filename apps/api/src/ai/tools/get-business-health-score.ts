@@ -2,7 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { businessHealthScoreArtifact } from "@api/ai/artifacts/business-health-score";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
-import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getCashFlow, getExpenses, getReports } from "@midday/db/queries";
@@ -12,24 +12,17 @@ import {
   endOfMonth,
   format,
   startOfMonth,
-  subMonths,
 } from "date-fns";
 import { z } from "zod";
 
 const getBusinessHealthScoreSchema = z.object({
-  from: z
-    .string()
-    .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
-    .describe("Start date (ISO 8601)"),
-  to: z
-    .string()
-    .default(() => endOfMonth(new Date()).toISOString())
-    .describe("End date (ISO 8601)"),
-  currency: z
-    .string()
-    .describe("Currency code (ISO 4217, e.g. 'USD')")
-    .nullable()
-    .optional(),
+  period: z
+    .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
+    .optional()
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
+  to: z.string().optional().describe("End date (yyyy-MM-dd)"),
+  currency: z.string().nullable().optional().describe("Currency code"),
   showCanvas: z.boolean().default(false).describe("Show visual analytics"),
 });
 
@@ -38,7 +31,7 @@ export const getBusinessHealthScoreTool = tool({
     "Calculate business health score (0-100) - composite score based on revenue, expenses, cash flow, and profitability metrics.",
   inputSchema: getBusinessHealthScoreSchema,
   execute: async function* (
-    { from, to, currency, showCanvas },
+    { period, from, to, currency, showCanvas },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -60,10 +53,15 @@ export const getBusinessHealthScoreTool = tool({
     }
 
     try {
-      // Use fiscal year-aware defaults if dates not provided
-      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
-      const finalFrom = from ?? defaultDates.from;
-      const finalTo = to ?? defaultDates.to;
+      const resolved = resolveToolParams({
+        toolName: "getBusinessHealthScore",
+        appContext,
+        aiParams: { period, from, to, currency },
+      });
+
+      const finalFrom = resolved.from;
+      const finalTo = resolved.to;
+      const finalCurrency = resolved.currency;
 
       // Generate description based on date range
       const description = generateArtifactDescription(finalFrom, finalTo);
@@ -77,7 +75,7 @@ export const getBusinessHealthScoreTool = tool({
         analysis = businessHealthScoreArtifact.stream(
           {
             stage: "loading",
-            currency: currency || appContext.baseCurrency || "USD",
+            currency: finalCurrency || "USD",
             from: finalFrom,
             to: finalTo,
             description,
@@ -86,7 +84,7 @@ export const getBusinessHealthScoreTool = tool({
         );
       }
 
-      const targetCurrency = currency || appContext.baseCurrency || "USD";
+      const targetCurrency = finalCurrency || "USD";
       const locale = appContext.locale || "en-US";
 
       // Fetch all required data in parallel
@@ -96,7 +94,7 @@ export const getBusinessHealthScoreTool = tool({
             teamId,
             from: finalFrom,
             to: finalTo,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
             type: "revenue",
             revenueType: "net",
           }),
@@ -104,20 +102,20 @@ export const getBusinessHealthScoreTool = tool({
             teamId,
             from: finalFrom,
             to: finalTo,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
           }),
           getCashFlow(db, {
             teamId,
             from: finalFrom,
             to: finalTo,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
             period: "monthly",
           }),
           getReports(db, {
             teamId,
             from: finalFrom,
             to: finalTo,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
             type: "profit",
             revenueType: "net",
           }),

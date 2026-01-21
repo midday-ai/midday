@@ -3,7 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { forecastArtifact } from "@api/ai/artifacts/forecast";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
-import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getRevenueForecast } from "@midday/db/queries";
@@ -14,27 +14,24 @@ import { format, parseISO } from "date-fns";
 import { z } from "zod";
 
 const getForecastSchema = z.object({
-  from: z.string().optional().describe("Start date (ISO 8601)"),
-  to: z.string().optional().describe("End date (ISO 8601)"),
-  currency: z
-    .string()
-    .describe("Currency code (ISO 4217, e.g. 'USD')")
-    .nullable()
-    .optional(),
-  revenueType: z.enum(["gross", "net"]).default("net").describe("Revenue type"),
-  forecastMonths: z
-    .number()
-    .default(6)
-    .describe("Number of months to forecast (default: 6, matching dashboard)"),
-  showCanvas: z.boolean().default(false).describe("Show visual analytics"),
+  period: z
+    .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
+    .optional()
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
+  to: z.string().optional().describe("End date (yyyy-MM-dd)"),
+  currency: z.string().nullable().optional().describe("Currency code"),
+  revenueType: z.enum(["gross", "net"]).optional().describe("Revenue type"),
+  forecastMonths: z.number().default(6).describe("Months to forecast"),
+  showCanvas: z.boolean().default(false).describe("Show visual canvas"),
 });
 
 export const getForecastTool = tool({
   description:
-    "Generate revenue forecast and projections - shows historical revenue trends, forecasted future revenue, growth rates, peak months, unpaid invoices, and billable hours.",
+    "Generate revenue forecast - shows projections, growth rates, and billable hours.",
   inputSchema: getForecastSchema,
   execute: async function* (
-    { from, to, currency, revenueType, forecastMonths, showCanvas },
+    { period, from, to, currency, revenueType, forecastMonths, showCanvas },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -58,10 +55,21 @@ export const getForecastTool = tool({
     }
 
     try {
-      // Use fiscal year-aware defaults if dates not provided
-      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
-      const finalFrom = from ?? defaultDates.from;
-      const finalTo = to ?? defaultDates.to;
+      // Resolve parameters with proper priority:
+      // 1. Forced params from widget click (if this tool was triggered by widget)
+      // 2. Explicit AI params (user override)
+      // 3. Dashboard metricsFilter (source of truth)
+      // 4. Hardcoded defaults
+      const resolved = resolveToolParams({
+        toolName: "getForecast",
+        appContext,
+        aiParams: { period, from, to, currency, revenueType },
+      });
+
+      const finalFrom = resolved.from;
+      const finalTo = resolved.to;
+      const finalCurrency = resolved.currency;
+      const finalRevenueType = resolved.revenueType ?? "net";
 
       // Generate description based on date range
       const description = generateArtifactDescription(finalFrom, finalTo);
@@ -73,7 +81,7 @@ export const getForecastTool = tool({
         analysis = forecastArtifact.stream(
           {
             stage: "loading",
-            currency: currency || appContext.baseCurrency || "USD",
+            currency: finalCurrency || "USD",
             from: finalFrom,
             to: finalTo,
             description,
@@ -82,7 +90,7 @@ export const getForecastTool = tool({
         );
       }
 
-      const targetCurrency = currency || appContext.baseCurrency || "USD";
+      const targetCurrency = finalCurrency || "USD";
       const locale = appContext.locale || "en-US";
 
       // Fetch forecast data
@@ -91,8 +99,8 @@ export const getForecastTool = tool({
         from: finalFrom,
         to: finalTo,
         forecastMonths,
-        currency: currency ?? undefined,
-        revenueType: revenueType ?? "net",
+        currency: finalCurrency ?? undefined,
+        revenueType: finalRevenueType,
       });
 
       // Prepare monthly data for chart
