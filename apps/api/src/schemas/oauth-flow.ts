@@ -44,7 +44,7 @@ export const oauthAuthorizationResponseSchema = z.object({
   authorize_url: z.string().url().openapi({
     description: "URL to redirect user for authorization",
     example:
-      "https://app.midday.ai/oauth/authorize?client_id=mid_abcdef123456789&...",
+      "https://app.abacuslabs.com/oauth/authorize?client_id=mid_abcdef123456789&...",
   }),
 });
 

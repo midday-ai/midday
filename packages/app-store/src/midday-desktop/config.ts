@@ -10,5 +10,5 @@ export default {
     "With Midday on Mac you have everything accessible just one click away. Track time, manage invoices, and run your business smarter.",
   description: null,
   images: [],
-  installUrl: "https://midday.ai/download",
+  installUrl: "https://abacuslabs.com/download",
 };

@@ -51,7 +51,7 @@ export function LoginVideoBackground() {
         }}
       >
         <img
-          src="https://midday.ai/cdn-cgi/image/width=1000,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
+          src="https://abacuslabs.com/cdn-cgi/image/width=1000,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
           alt=""
           className="w-full h-full object-cover"
           aria-hidden="true"
@@ -69,7 +69,7 @@ export function LoginVideoBackground() {
         muted
         playsInline
         preload="auto"
-        poster="https://midday.ai/cdn-cgi/image/width=1000,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
+        poster="https://abacuslabs.com/cdn-cgi/image/width=1000,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
       >
         <source
           src="https://cdn.midday.ai/videos/login-video.mp4"

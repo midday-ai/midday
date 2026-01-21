@@ -94,7 +94,7 @@ export function PricingSection() {
                   asChild
                   className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
                 >
-                  <a href="https://app.midday.ai/">Start your trial</a>
+                  <a href="https://app.abacuslabs.com/">Start your trial</a>
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
                   Best for getting started
@@ -187,7 +187,7 @@ export function PricingSection() {
                   asChild
                   className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors"
                 >
-                  <a href="https://app.midday.ai/">Start your trial</a>
+                  <a href="https://app.abacuslabs.com/">Start your trial</a>
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
                   Best value for most businesses

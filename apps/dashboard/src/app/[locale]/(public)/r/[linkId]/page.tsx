@@ -124,10 +124,10 @@ export default async function Page({ params }: Props) {
           <p className="text-center text-xs text-muted-foreground">
             Powered by{" "}
             <a
-              href="https://midday.ai"
+              href="https://abacuslabs.com"
               className="hover:text-foreground transition-colors"
             >
-              Midday
+              Abacus
             </a>
           </p>
         </div>

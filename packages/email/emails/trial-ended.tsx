@@ -71,7 +71,7 @@ export const TrialEndedEmail = ({ fullName = "" }: Props) => {
             <strong>1 more day</strong>.
           </Text>
           <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href="https://app.midday.ai">Upgrade now</Button>
+            <Button href="https://app.abacuslabs.com">Upgrade now</Button>
           </Section>
           <Text
             className={`text-[14px] ${themeClasses.text}`}

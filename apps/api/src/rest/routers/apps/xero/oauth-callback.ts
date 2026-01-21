@@ -82,7 +82,7 @@ app.openapi(
     const query = c.req.valid("query");
     const { code, state, error } = query;
     const dashboardUrl =
-      process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
+      process.env.MIDDAY_DASHBOARD_URL || "https://app.abacuslabs.com";
 
     // Handle OAuth errors (user denied access, etc.)
     if (error || !code) {

@@ -21,5 +21,5 @@ export default {
 2. Add your Midday API key to Cursor's MCP configuration
 3. Restart Cursor and @-mention Midday in chat`,
   images: [],
-  installUrl: "https://midday.ai/mcp/cursor",
+  installUrl: "https://abacuslabs.com/mcp/cursor",
 };

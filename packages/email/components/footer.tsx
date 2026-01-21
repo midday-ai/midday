@@ -89,7 +89,7 @@ export function Footer() {
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://midday.ai/download"
+            href="https://abacuslabs.com/download"
             style={{ color: lightStyles.mutedText.color }}
           >
             Download
@@ -235,7 +235,7 @@ export function Footer() {
 
       <Link
         className={`text-[14px] block ${themeClasses.mutedLink}`}
-        href="https://app.midday.ai/settings/notifications"
+        href="https://app.abacuslabs.com/settings/notifications"
         title="Unsubscribe"
         style={{ color: lightStyles.mutedText.color }}
       >

@@ -4,7 +4,7 @@ interface ImageLoaderParams {
   quality?: number;
 }
 
-const CDN_URL = "https://midday.ai";
+const CDN_URL = "https://abacuslabs.com";
 
 export default function imageLoader({
   src,

@@ -21,5 +21,5 @@ export default {
 2. Add Midday as an MCP server in Raycast
 3. @-mention Midday in Raycast AI`,
   images: [],
-  installUrl: "https://midday.ai/mcp/raycast",
+  installUrl: "https://abacuslabs.com/mcp/raycast",
 };

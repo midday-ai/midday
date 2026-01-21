@@ -47,7 +47,7 @@ export function getWelcomeMessage(isPrivateChannel = false) {
           text: "⚙️ Notification Settings",
           emoji: true,
         },
-        url: "https://app.midday.ai/apps?app=slack&settings=true",
+        url: "https://app.abacuslabs.com/apps?app=slack&settings=true",
         action_id: "view_settings",
       },
     ],

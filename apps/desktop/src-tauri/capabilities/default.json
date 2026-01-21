@@ -33,7 +33,7 @@
     "urls": [
       "http://localhost:3001/**",
       "https://beta.midday.ai/**",
-      "https://app.midday.ai/**"
+      "https://app.abacuslabs.com/**"
     ]
   },
   "platforms": ["macOS"]

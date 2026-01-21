@@ -270,7 +270,7 @@ async function sendSlackNotification<T extends ProviderNotificationType>(
               {
                 type: "button",
                 text: { type: "plain_text", text: "View transactions" },
-                url: "https://app.midday.ai/transactions",
+                url: "https://app.abacuslabs.com/transactions",
                 action_id: "button_click",
               },
             ],

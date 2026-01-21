@@ -153,7 +153,7 @@ export function StartPage() {
                     asChild
                     className="w-full lg:w-auto btn-inverse h-11 px-5 lg:px-4 transition-colors"
                   >
-                    <a href="https://app.midday.ai/">
+                    <a href="https://app.abacuslabs.com/">
                       <span className="text-inherit text-sm">
                         Set up your business
                       </span>

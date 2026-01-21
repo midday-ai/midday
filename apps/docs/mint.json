@@ -4,7 +4,7 @@
   "logo": {
     "dark": "/logos/logotype-dark.svg",
     "light": "/logos/logotype.svg",
-    "href": "https://midday.ai"
+    "href": "https://abacuslabs.com"
   },
   "favicon": "/logos/favicon.png",
   "colors": {
@@ -28,7 +28,7 @@
   ],
   "topbarCtaButton": {
     "name": "Dashboard",
-    "url": "https://app.midday.ai"
+    "url": "https://app.abacuslabs.com"
   },
   "openapi": "https://engine.midday.ai/openapi",
   "tabs": [
@@ -41,7 +41,7 @@
     {
       "name": "Help Center",
       "icon": "question",
-      "url": "https://midday.ai/support"
+      "url": "https://abacuslabs.com/support"
     },
     {
       "name": "GitHub",
@@ -91,7 +91,7 @@
   "footerSocials": {
     "twitter": "https://twitter.com/middayai",
     "github": "https://git.new/midday",
-    "website": "https://midday.ai",
+    "website": "https://abacuslabs.com",
     "linkedin": "https://www.linkedin.com/company/midday-ai"
   }
 }

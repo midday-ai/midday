@@ -331,7 +331,7 @@ export function MCP() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button asChild className="h-11 px-6 text-sm font-sans">
-                <Link href="https://app.midday.ai/settings/developer">
+                <Link href="https://app.abacuslabs.com/settings/developer">
                   Get API key
                 </Link>
               </Button>

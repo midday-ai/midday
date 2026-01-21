@@ -13,7 +13,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://app.midday.ai"
+          "value": "https://app.abacuslabs.com"
         },
         {
           "key": "X-Content-Type-Options",

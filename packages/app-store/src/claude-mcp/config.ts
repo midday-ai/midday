@@ -21,5 +21,5 @@ export default {
 2. Use the Claude CLI or Desktop app configuration
 3. Add your Midday API key and start chatting`,
   images: [],
-  installUrl: "https://midday.ai/mcp/claude",
+  installUrl: "https://abacuslabs.com/mcp/claude",
 };
