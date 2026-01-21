@@ -88,7 +88,10 @@ export function Footer() {
                     href: "/compare/xero-alternative",
                     label: "vs Xero",
                   },
-                  { href: "/compare/freshbooks-alternative", label: "vs FreshBooks" },
+                  {
+                    href: "/compare/freshbooks-alternative",
+                    label: "vs FreshBooks",
+                  },
                   { href: "/compare/wave-alternative", label: "vs Wave" },
                   { href: "/compare/bench-alternative", label: "vs Bench" },
                   { href: "/compare/qonto-alternative", label: "vs Qonto" },
