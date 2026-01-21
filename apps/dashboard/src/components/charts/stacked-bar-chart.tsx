@@ -3,7 +3,6 @@
 
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
-import { Icons } from "@midday/ui/icons";
 import { format, parseISO } from "date-fns";
 import {
   Bar,
@@ -99,17 +98,6 @@ export function StackedBarChart({
 
   const chartContent = (
     <div className="w-full relative">
-      <div className="space-x-4 absolute right-0 -top-10 hidden md:flex">
-        <div className="flex space-x-2 items-center">
-          <span className="w-2 h-2 rounded-full bg-[#C6C6C6] dark:bg-[#606060]" />
-          <span className="text-sm text-[#606060]">Total expenses</span>
-        </div>
-        <div className="flex space-x-2 items-center">
-          <Icons.DotRaster />
-          <span className="text-sm text-[#606060]">Recurring</span>
-        </div>
-      </div>
-
       {/* Chart */}
       <div style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">

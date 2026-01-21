@@ -16,6 +16,7 @@ import { ChartLegend } from "./base-charts";
 import {
   commonChartConfig,
   createYAxisTickFormatter,
+  getZeroInclusiveDomain,
   useChartMargin,
 } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
@@ -147,6 +148,7 @@ export function CashFlowChart({
                 fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={tickFormatter}
+              domain={getZeroInclusiveDomain()}
             />
 
             <Tooltip

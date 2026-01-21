@@ -98,7 +98,7 @@ export function RecurringExpensesWidget() {
     >
       {recurringData && recurringData.summary.totalExpenses > 0 && (
         <div className="flex items-baseline w-full">
-          <span className="text-3xl">
+          <span className="text-2xl font-normal">
             <FormatAmount
               amount={recurringData.summary.totalMonthlyEquivalent}
               currency={currency || "USD"}

@@ -157,7 +157,7 @@ export function TaxSummaryWidget() {
         <div className="flex flex-col gap-4">
           {/* Main net amount */}
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-medium">
+            <span className="text-2xl font-normal">
               <FormatAmount
                 amount={Math.abs(netAmount)}
                 currency={currency || "USD"}

@@ -11,7 +11,7 @@ import { z } from "zod";
 
 const getRunwaySchema = z.object({
   period: z
-    .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
+    .enum(["3-months", "6-months", "this-year", "1-year", "2-years", "5-years"])
     .optional()
     .describe("Historical period"),
   from: z.string().optional().describe("Start date (yyyy-MM-dd)"),

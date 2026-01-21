@@ -109,7 +109,7 @@ export function RevenueForecastWidget() {
       icon={<Icons.TrendingUp className="size-4" />}
       description={
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-[#878787]">Revenue projection</p>
+          <p className="text-sm text-[#666666]">Revenue projection</p>
 
           {/* Simple trend line chart */}
           {chartData.length > 0 ? (

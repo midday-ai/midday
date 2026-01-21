@@ -14,6 +14,7 @@ import {
 import {
   commonChartConfig,
   createCompactTickFormatter,
+  getZeroInclusiveDomain,
   useChartMargin,
 } from "./chart-utils";
 
@@ -144,7 +145,7 @@ export function GrowthRateChart({
               tickFormatter={(value) =>
                 `${value > 0 ? "+" : ""}${value.toFixed(0)}%`
               }
-              dataKey="growthRate"
+              domain={getZeroInclusiveDomain()}
             />
             <Tooltip
               content={<CustomTooltip currency={currency} locale={locale} />}

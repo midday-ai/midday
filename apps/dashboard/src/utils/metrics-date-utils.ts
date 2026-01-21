@@ -1,9 +1,17 @@
 import { getFiscalYearDates } from "@midday/utils";
-import { format, formatISO, parseISO, subMonths, subYears } from "date-fns";
+import {
+  format,
+  formatISO,
+  parseISO,
+  startOfYear,
+  subMonths,
+  subYears,
+} from "date-fns";
 
 export type PeriodOption =
   | "3-months"
   | "6-months"
+  | "this-year"
   | "1-year"
   | "2-years"
   | "5-years"
@@ -23,6 +31,8 @@ export function getPeriodLabel(
       return "3 months";
     case "6-months":
       return "6 months";
+    case "this-year":
+      return "This year";
     case "1-year":
       return "1 year";
     case "2-years":
@@ -62,6 +72,13 @@ export function getPeriodDateRange(
     }
     case "6-months": {
       const from = subMonths(now, 6);
+      return {
+        from: formatISO(from, { representation: "date" }),
+        to,
+      };
+    }
+    case "this-year": {
+      const from = startOfYear(now);
       return {
         from: formatISO(from, { representation: "date" }),
         to,

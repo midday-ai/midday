@@ -12,7 +12,6 @@ import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import {
   Bar,
-  Cell,
   ComposedChart,
   ReferenceLine,
   ResponsiveContainer,
@@ -99,14 +98,10 @@ export function ProfitAnalysisWidget() {
     });
   };
 
-  // Prepare data for chart
-  const chartData = (data?.result || []).slice(-12).map((item, index) => ({
+  // Prepare data for chart - use consistent foreground color since this only shows current period
+  const chartData = (data?.result || []).slice(-12).map((item) => ({
     month: format(parseISO(item.date), "MMM"),
     profit: item.current.value,
-    fill:
-      index % 2 === 0
-        ? "hsl(var(--muted-foreground))"
-        : "hsl(var(--foreground))",
   }));
 
   return (
@@ -141,11 +136,12 @@ export function ProfitAnalysisWidget() {
                 strokeDasharray="3 3"
                 strokeWidth={1}
               />
-              <Bar dataKey="profit" maxBarSize={8} isAnimationActive={false}>
-                {chartData.map((entry) => (
-                  <Cell key={entry.month} fill={entry.fill} />
-                ))}
-              </Bar>
+              <Bar
+                dataKey="profit"
+                maxBarSize={8}
+                isAnimationActive={false}
+                fill="hsl(var(--foreground))"
+              />
             </ComposedChart>
           </ResponsiveContainer>
         </div>

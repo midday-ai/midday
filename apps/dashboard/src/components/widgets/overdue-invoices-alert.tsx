@@ -97,7 +97,7 @@ export function OverdueInvoicesAlertWidget() {
     >
       {hasOverdue ? (
         <div className="flex items-baseline justify-between">
-          <span className="text-3xl font-medium">
+          <span className="text-2xl font-normal">
             <FormatAmount
               amount={overdueData.totalAmount}
               currency={overdueData.currency}
