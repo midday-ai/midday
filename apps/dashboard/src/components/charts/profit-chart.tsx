@@ -14,6 +14,7 @@ import {
 import {
   commonChartConfig,
   createCompactTickFormatter,
+  getZeroInclusiveDomain,
   useChartMargin,
 } from "./chart-utils";
 import { SelectableChartWrapper } from "./selectable-chart-wrapper";
@@ -142,7 +143,7 @@ export function ProfitChart({
                 fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={tickFormatter}
-              dataKey="profit"
+              domain={getZeroInclusiveDomain()}
             />
             <Tooltip
               content={<CustomTooltip currency={currency} locale={locale} />}

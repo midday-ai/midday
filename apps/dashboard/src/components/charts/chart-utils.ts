@@ -83,6 +83,19 @@ export const createMonthsTickFormatter = () => {
   };
 };
 
+/**
+ * Returns a domain config that ensures zero is always included,
+ * properly handling both positive and negative values.
+ * Use this for charts where values can go negative (profit, cash flow, growth rate).
+ */
+export const getZeroInclusiveDomain = (): [
+  (dataMin: number) => number,
+  (dataMax: number) => number,
+] => [
+  (dataMin: number) => Math.min(0, dataMin),
+  (dataMax: number) => Math.max(0, dataMax),
+];
+
 // Calculate Y-axis domain and ticks for forecast charts
 export const calculateYAxisDomain = <
   T extends { actual?: number; forecasted?: number },
