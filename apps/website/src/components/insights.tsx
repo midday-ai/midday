@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { HeroImage } from "./hero-image";
 import { AIAssistantAnimation } from "./homepage/ai-assistant-animation";
 import { BurnrateAnimation } from "./homepage/burnrate-animation";
 import { WidgetsAnimation } from "./homepage/widgets-animation";
@@ -89,21 +90,12 @@ export function Insights() {
                       "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
-                <Image
-                  src="/images/dashboard-light.svg"
+                <HeroImage
+                  lightSrc="/images/dashboard-light.svg"
+                  darkSrc="/images/dashboard-dark.svg"
                   alt="Dashboard illustration"
                   width={1000}
                   height={750}
-                  className="w-full h-auto object-contain relative z-0 dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/images/dashboard-dark.svg"
-                  alt="Dashboard illustration"
-                  width={1000}
-                  height={750}
-                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
-                  priority
                 />
               </div>
             </div>
@@ -141,21 +133,12 @@ export function Insights() {
                       "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
-                <Image
-                  src="/images/dashboard-light.svg"
+                <HeroImage
+                  lightSrc="/images/dashboard-light.svg"
+                  darkSrc="/images/dashboard-dark.svg"
                   alt="Dashboard illustration"
                   width={1000}
                   height={750}
-                  className="w-full h-auto object-contain relative z-0 dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/images/dashboard-dark.svg"
-                  alt="Dashboard illustration"
-                  width={1000}
-                  height={750}
-                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
-                  priority
                 />
               </div>
             </div>

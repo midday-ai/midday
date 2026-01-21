@@ -230,9 +230,12 @@ export function Header({
               >
                 <button
                   type="button"
-                  className="text-sm transition-colors text-muted-foreground hover:text-foreground px-3 py-2"
+                  className="text-sm transition-colors text-muted-foreground hover:text-foreground px-3 py-2 flex items-center gap-1"
                 >
                   Features
+                  <Icons.ChevronDown
+                    className={`w-3 h-3 transition-transform duration-200 ${isFeaturesOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
                 {/* Invisible bridge to dropdown */}
                 {isFeaturesOpen && (
@@ -318,7 +321,7 @@ export function Header({
                                 },
                                 {
                                   href: "/customers",
-                                  title: "CRM",
+                                  title: "Customers",
                                   desc: "Know your customers",
                                 },
                                 {
@@ -432,19 +435,19 @@ export function Header({
                 Pricing
               </Link>
               <Link
-                href="/updates"
-                className="text-sm transition-colors text-muted-foreground hover:text-foreground"
-              >
-                Updates
-              </Link>
-              <Link
                 href="/story"
                 className="text-sm transition-colors text-muted-foreground hover:text-foreground"
               >
                 Story
               </Link>
+              <Link
+                href="/download"
+                className="text-sm transition-colors text-muted-foreground hover:text-foreground"
+              >
+                Download
+              </Link>
 
-              {/* Apps with Dropdown */}
+              {/* Resources with Dropdown */}
               <div
                 className="relative -mx-3 -my-2"
                 onMouseEnter={() => {
@@ -462,9 +465,12 @@ export function Header({
               >
                 <button
                   type="button"
-                  className="text-sm transition-colors text-muted-foreground hover:text-foreground px-3 py-2"
+                  className="text-sm transition-colors text-muted-foreground hover:text-foreground px-3 py-2 flex items-center gap-1"
                 >
-                  Apps
+                  Resources
+                  <Icons.ChevronDown
+                    className={`w-3 h-3 transition-transform duration-200 ${isAppsOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
                 {/* Invisible bridge to dropdown */}
                 {isAppsOpen && (
@@ -474,7 +480,7 @@ export function Header({
                   />
                 )}
 
-                {/* Apps Dropdown - Full Width */}
+                {/* Resources Dropdown - Full Width */}
                 {isAppsOpen && (
                   <div
                     className="fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden opacity-0 animate-dropdown-fade"
@@ -498,12 +504,6 @@ export function Header({
                             <div>
                               {[
                                 {
-                                  href: "/download",
-                                  title: "Mac app",
-                                  desc: "Your finances, always one click away.",
-                                  external: false,
-                                },
-                                {
                                   href: "/integrations",
                                   title: "Integrations",
                                   desc: "Connect your existing tools.",
@@ -513,6 +513,12 @@ export function Header({
                                   href: "/docs",
                                   title: "Documentation",
                                   desc: "Learn how to use Midday.",
+                                  external: false,
+                                },
+                                {
+                                  href: "/mcp",
+                                  title: "AI Integrations",
+                                  desc: "Connect AI tools to your financial data.",
                                   external: false,
                                 },
                               ].map((item, index) => (
@@ -541,12 +547,6 @@ export function Header({
                             {/* Column 2 */}
                             <div>
                               {[
-                                {
-                                  href: "/mcp",
-                                  title: "AI Integrations",
-                                  desc: "Connect AI tools to your financial data.",
-                                  external: false,
-                                },
                                 {
                                   href: "https://api.midday.ai",
                                   title: "Developer & API",
@@ -823,7 +823,7 @@ export function Header({
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
-                          CRM
+                          Customers
                         </Link>
                         <Link
                           href="/file-storage"
@@ -861,25 +861,6 @@ export function Header({
                 Pricing
               </Link>
               <Link
-                href="/updates"
-                onTouchEnd={(e) => {
-                  const target = e.currentTarget;
-                  if (target) {
-                    target.blur();
-                    setTimeout(() => {
-                      if (target) {
-                        target.blur();
-                      }
-                    }, 100);
-                  }
-                }}
-                className="no-touch-active text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
-                onClick={() => setIsMenuOpen(false)}
-                style={{ WebkitTapHighlightColor: "transparent" }}
-              >
-                Updates
-              </Link>
-              <Link
                 href="/story"
                 onTouchEnd={(e) => {
                   const target = e.currentTarget;
@@ -898,8 +879,27 @@ export function Header({
               >
                 Story
               </Link>
+              <Link
+                href="/download"
+                onTouchEnd={(e) => {
+                  const target = e.currentTarget;
+                  if (target) {
+                    target.blur();
+                    setTimeout(() => {
+                      if (target) {
+                        target.blur();
+                      }
+                    }, 100);
+                  }
+                }}
+                className="no-touch-active text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
+                onClick={() => setIsMenuOpen(false)}
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                Download
+              </Link>
 
-              {/* Apps Expandable Section */}
+              {/* Resources Expandable Section */}
               <div className="flex flex-col">
                 <button
                   type="button"
@@ -915,7 +915,7 @@ export function Header({
                     WebkitTapHighlightColor: "transparent",
                   }}
                 >
-                  <span>Apps</span>
+                  <span>Resources</span>
                   <Icons.ChevronDown
                     className={`w-5 h-5 transition-transform duration-200 ${
                       isMobileAppsOpen ? "rotate-180" : ""
@@ -927,17 +927,6 @@ export function Header({
                     <div className="h-px w-full border-t border-border my-2" />
                     <div className="overflow-hidden opacity-0 animate-mobile-slide">
                       <div className="flex flex-col space-y-4 pt-2">
-                        <Link
-                          href="/download"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileAppsOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Mac app
-                        </Link>
                         <Link
                           href="/integrations"
                           onClick={() => {

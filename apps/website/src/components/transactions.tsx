@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { HeroImage } from "./hero-image";
 import { BulkReconciliationAnimation } from "./homepage/bulk-reconciliation-animation";
 import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
@@ -90,21 +91,10 @@ export function Transactions() {
                       "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
-                <Image
-                  src="/images/transactions-light.svg"
+                <HeroImage
+                  lightSrc="/images/transactions-light.svg"
+                  darkSrc="/images/transactions-dark.svg"
                   alt="Transactions Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/images/transactions-dark.svg"
-                  alt="Transactions Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
-                  priority
                 />
               </div>
             </div>
@@ -142,21 +132,10 @@ export function Transactions() {
                       "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
-                <Image
-                  src="/images/transactions-light.svg"
+                <HeroImage
+                  lightSrc="/images/transactions-light.svg"
+                  darkSrc="/images/transactions-dark.svg"
                   alt="Transactions Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/images/transactions-dark.svg"
-                  alt="Transactions Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
-                  priority
                 />
               </div>
             </div>

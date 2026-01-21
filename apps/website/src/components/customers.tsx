@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { HeroImage } from "./hero-image";
 import { CompanyEnrichmentAnimation } from "./homepage/company-enrichment-animation";
 import { CustomerStatementAnimation } from "./homepage/customer-statement-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
@@ -86,21 +87,10 @@ export function Customers() {
                       "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
-                <Image
-                  src="/images/customers-light.svg"
+                <HeroImage
+                  lightSrc="/images/customers-light.svg"
+                  darkSrc="/images/customers-dark.svg"
                   alt="Customers Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/images/customers-dark.svg"
-                  alt="Customers Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
-                  priority
                 />
               </div>
             </div>
@@ -137,21 +127,10 @@ export function Customers() {
                       "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
-                <Image
-                  src="/images/customers-light.svg"
+                <HeroImage
+                  lightSrc="/images/customers-light.svg"
+                  darkSrc="/images/customers-dark.svg"
                   alt="Customers Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/images/customers-dark.svg"
-                  alt="Customers Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
-                  priority
                 />
               </div>
             </div>

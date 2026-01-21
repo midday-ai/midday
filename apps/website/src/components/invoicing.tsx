@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { HeroImage } from "./hero-image";
 import { InvoicePaymentAnimation } from "./homepage/invoice-payment-animation";
 import { InvoicePromptAnimation } from "./homepage/invoice-prompt-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
@@ -87,21 +88,10 @@ export function Invoicing() {
                       "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
-                <Image
-                  src="/images/invoicing-light.svg"
+                <HeroImage
+                  lightSrc="/images/invoicing-light.svg"
+                  darkSrc="/images/invoicing-dark.svg"
                   alt="Invoicing Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/images/invoicing-dark.svg"
-                  alt="Invoicing Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
-                  priority
                 />
               </div>
             </div>
@@ -136,21 +126,10 @@ export function Invoicing() {
                       "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
-                <Image
-                  src="/images/invoicing-light.svg"
+                <HeroImage
+                  lightSrc="/images/invoicing-light.svg"
+                  darkSrc="/images/invoicing-dark.svg"
                   alt="Invoicing Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/images/invoicing-dark.svg"
-                  alt="Invoicing Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
-                  priority
                 />
               </div>
             </div>

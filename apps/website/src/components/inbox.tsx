@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { HeroImage } from "./hero-image";
 import { InboxMatchAnimation } from "./homepage/inbox-match-animation";
 import { ReceiptAttachmentAnimation } from "./homepage/receipt-attachment-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
@@ -88,21 +89,10 @@ export function Inbox() {
                       "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
-                <Image
-                  src="/images/inbox-light.svg"
+                <HeroImage
+                  lightSrc="/images/inbox-light.svg"
+                  darkSrc="/images/inbox-dark.svg"
                   alt="Inbox Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/images/inbox-dark.svg"
-                  alt="Inbox Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
-                  priority
                 />
               </div>
             </div>
@@ -138,21 +128,10 @@ export function Inbox() {
                       "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
-                <Image
-                  src="/images/inbox-light.svg"
+                <HeroImage
+                  lightSrc="/images/inbox-light.svg"
+                  darkSrc="/images/inbox-dark.svg"
                   alt="Inbox Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 dark:hidden"
-                  priority
-                />
-                <Image
-                  src="/images/inbox-dark.svg"
-                  alt="Inbox Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
-                  priority
                 />
               </div>
             </div>
