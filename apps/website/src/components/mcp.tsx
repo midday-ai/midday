@@ -203,20 +203,20 @@ export function MCP() {
             </div>
 
             {/* Client Cards */}
-            <div className="grid grid-cols-3 gap-4 w-full max-w-2xl mt-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 w-full max-w-4xl mt-12">
               {clients.map((client) => (
                 <Link
                   key={client.id}
                   href={client.href}
-                  className="group border border-border bg-background p-5 flex flex-col items-start hover:border-foreground/20 transition-all duration-200"
+                  className="group border border-border bg-background p-4 sm:p-5 flex flex-col items-start hover:border-foreground/20 transition-all duration-200"
                 >
-                  <div className="mb-3">
+                  <div className="mb-2 sm:mb-3">
                     <ClientLogo id={client.id} size="sm" variant="mobile" />
                   </div>
-                  <h3 className="font-sans text-sm font-medium text-foreground mb-1">
+                  <h3 className="font-sans text-xs sm:text-sm font-medium text-foreground mb-0.5 sm:mb-1">
                     {client.name}
                   </h3>
-                  <p className="font-sans text-xs text-muted-foreground">
+                  <p className="font-sans text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
                     {client.description}
                   </p>
                 </Link>
@@ -243,20 +243,20 @@ export function MCP() {
             </div>
 
             {/* Client Cards */}
-            <div className="grid grid-cols-3 gap-6 max-w-3xl">
+            <div className="grid grid-cols-5 gap-5 max-w-5xl">
               {clients.map((client) => (
                 <Link
                   key={client.id}
                   href={client.href}
-                  className="group border border-border bg-background p-6 flex flex-col items-start hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
+                  className="group border border-border bg-background p-5 flex flex-col items-start hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
                 >
-                  <div className="mb-4">
+                  <div className="mb-3">
                     <ClientLogo id={client.id} variant="desktop" />
                   </div>
-                  <h3 className="font-sans text-base font-medium text-foreground mb-1">
+                  <h3 className="font-sans text-sm font-medium text-foreground mb-1">
                     {client.name}
                   </h3>
-                  <p className="font-sans text-sm text-muted-foreground">
+                  <p className="font-sans text-xs text-muted-foreground line-clamp-2">
                     {client.description}
                   </p>
                 </Link>
