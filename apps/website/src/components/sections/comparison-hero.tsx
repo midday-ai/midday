@@ -26,10 +26,10 @@ export function ComparisonHero({ competitor, differentiators, sections }: Props)
       {/* Main Content */}
       <div className="lg:col-span-2">
         <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
-          {competitor.name} Alternative: {competitor.tagline}
+          Best {competitor.name} Alternative for Founders
         </h1>
         <p className="font-sans text-lg text-muted-foreground mb-8 max-w-2xl">
-          {competitor.description}
+          {competitor.description} Compare features, pricing, and see why teams are switching to Midday.
         </p>
 
         {/* CTA Buttons */}

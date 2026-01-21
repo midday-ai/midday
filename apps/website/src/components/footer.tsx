@@ -80,12 +80,20 @@ export function Footer() {
               </h3>
               <div className="space-y-2.5">
                 {[
-                  { href: "/compare/quickbooks-alternative", label: "vs QuickBooks" },
+                  {
+                    href: "/compare/quickbooks-alternative",
+                    label: "vs QuickBooks",
+                  },
+                  {
+                    href: "/compare/xero-alternative",
+                    label: "vs Xero",
+                  },
                   { href: "/compare/freshbooks-alternative", label: "vs FreshBooks" },
-                  { href: "/compare/xero-alternative", label: "vs Xero" },
                   { href: "/compare/wave-alternative", label: "vs Wave" },
-                  { href: "/compare/harvest-alternative", label: "vs Harvest" },
-                  { href: "/compare/toggl-alternative", label: "vs Toggl" },
+                  { href: "/compare/bench-alternative", label: "vs Bench" },
+                  { href: "/compare/qonto-alternative", label: "vs Qonto" },
+                  { href: "/compare/pleo-alternative", label: "vs Pleo" },
+                  { href: "/compare", label: "View all" },
                 ].map((item) => (
                   <Link
                     key={item.href}

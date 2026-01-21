@@ -1196,6 +1196,846 @@ export const competitors: Competitor[] = [
       "Businesses needing financial visibility",
     ],
   },
+  {
+    id: "clockify",
+    slug: "clockify-alternative",
+    name: "Clockify",
+    tagline: "Why Founders Switch to Midday",
+    description:
+      "Looking for a Clockify alternative? Midday offers time tracking plus invoicing, bank connections, and AI-powered financial insights in one workspace.",
+    keyDifferences: [
+      {
+        title: "Scope",
+        midday: "Complete financial workspace",
+        competitor: "Time tracking only",
+      },
+      {
+        title: "Financial Features",
+        midday: "Bank connections + invoicing",
+        competitor: "None",
+      },
+      {
+        title: "Business Insights",
+        midday: "AI-powered analytics",
+        competitor: "Time reports only",
+      },
+      {
+        title: "Pricing",
+        midday: "All-inclusive",
+        competitor: "Free + paid add-ons",
+      },
+    ],
+    features: [
+      {
+        category: "Time Tracking",
+        features: [
+          { name: "Timer", midday: true, competitor: true },
+          { name: "Manual entry", midday: true, competitor: true },
+          { name: "Project tracking", midday: true, competitor: true },
+          { name: "Team timesheets", midday: true, competitor: true },
+          { name: "Desktop app", midday: true, competitor: true },
+          { name: "Mobile app", midday: true, competitor: true },
+          { name: "Unlimited tracking", midday: true, competitor: true },
+        ],
+      },
+      {
+        category: "Financial Management",
+        features: [
+          { name: "Invoicing", midday: true, competitor: "Basic" },
+          { name: "Bank connections", midday: true, competitor: false },
+          { name: "Expense tracking", midday: true, competitor: "Paid add-on" },
+          { name: "Receipt capture", midday: true, competitor: false },
+          { name: "Cash flow insights", midday: true, competitor: false },
+          { name: "AI assistant", midday: true, competitor: false },
+        ],
+      },
+    ],
+    pricing: {
+      midday: middayPricing,
+      competitor: [
+        {
+          name: "Free",
+          price: "$0",
+          period: "",
+          features: ["Unlimited tracking", "Unlimited users", "Basic reports"],
+        },
+        {
+          name: "Basic",
+          price: "$4.99",
+          period: "/user/month",
+          features: ["Time off", "Targets", "Custom fields"],
+        },
+        {
+          name: "Standard",
+          price: "$6.99",
+          period: "/user/month",
+          features: ["Timesheet approvals", "Invoicing", "Scheduling"],
+        },
+        {
+          name: "Pro",
+          price: "$9.99",
+          period: "/user/month",
+          features: ["GPS tracking", "Screenshots", "Labor costs"],
+        },
+      ],
+      competitorNote: "Many features require paid upgrades",
+    },
+    switchingSteps: [
+      {
+        title: "Export your Clockify data",
+        description: "Download your time entries, projects, and clients as CSV.",
+      },
+      {
+        title: "Create your Midday account",
+        description: "Sign up and connect your bank accounts.",
+      },
+      {
+        title: "Set up your projects",
+        description: "Recreate your project structure in Midday.",
+      },
+      {
+        title: "Experience the full picture",
+        description: "See time tracking connected to invoices and cash flow.",
+      },
+    ],
+    faq: [
+      {
+        question: "Clockify is free - why pay for Midday?",
+        answer:
+          "Clockify's free tier is generous for time tracking alone, but you'll need additional paid tools for invoicing, expense tracking, and financial visibility. Midday includes everything in one workspace, saving you the cost and complexity of multiple tools.",
+      },
+      {
+        question: "How does time tracking compare?",
+        answer:
+          "Both offer solid time tracking with timers, manual entry, and project tracking. The difference is that Midday connects your tracked time directly to invoicing, bank transactions, and financial insights.",
+      },
+      {
+        question: "What about the unlimited free users?",
+        answer:
+          "Clockify's free plan is great for teams just tracking time. But once you need invoicing, expense tracking, or financial insights, you'll pay per user for multiple tools. Midday's predictable pricing includes everything.",
+      },
+    ],
+    targetAudience: [
+      "Teams outgrowing Clockify's free features",
+      "Founders needing invoicing and financial tracking",
+      "Users tired of cobbling together multiple tools",
+      "Teams wanting bank connectivity with time tracking",
+    ],
+  },
+  {
+    id: "bench",
+    slug: "bench-alternative",
+    name: "Bench",
+    tagline: "Why Founders Switch to Midday",
+    description:
+      "Looking for a Bench alternative? Midday gives you real-time financial visibility and control, without waiting for monthly bookkeeper reports.",
+    keyDifferences: [
+      {
+        title: "Access",
+        midday: "Real-time, self-service",
+        competitor: "Monthly bookkeeper reports",
+      },
+      {
+        title: "Control",
+        midday: "You're in control",
+        competitor: "Dependent on bookkeeper",
+      },
+      {
+        title: "Speed",
+        midday: "Instant insights",
+        competitor: "Wait for month-end",
+      },
+      {
+        title: "Cost",
+        midday: "Predictable $29-49/mo",
+        competitor: "$299+/month",
+      },
+    ],
+    features: [
+      {
+        category: "Financial Management",
+        features: [
+          { name: "Bank connections", midday: true, competitor: true },
+          { name: "Transaction categorization", midday: "Automatic + AI", competitor: "Done by bookkeeper" },
+          { name: "Real-time visibility", midday: true, competitor: false },
+          { name: "Financial reports", midday: "Instant", competitor: "Monthly" },
+          { name: "Tax-ready books", midday: "Export anytime", competitor: true },
+        ],
+      },
+      {
+        category: "Additional Features",
+        features: [
+          { name: "Invoicing", midday: true, competitor: false },
+          { name: "Time tracking", midday: true, competitor: false },
+          { name: "Receipt capture", midday: true, competitor: true },
+          { name: "AI assistant", midday: true, competitor: false },
+          { name: "Weekly summaries", midday: true, competitor: false },
+        ],
+      },
+    ],
+    pricing: {
+      midday: middayPricing,
+      competitor: [
+        {
+          name: "Bookkeeping",
+          price: "$299",
+          period: "/month",
+          features: [
+            "Monthly bookkeeping",
+            "Year-end financial package",
+            "Direct messaging",
+          ],
+        },
+        {
+          name: "Bookkeeping + Tax",
+          price: "$499",
+          period: "/month",
+          features: [
+            "Everything in Bookkeeping",
+            "Tax filing",
+            "Tax advisory",
+          ],
+        },
+      ],
+      competitorNote: "Prices for businesses with <$20k monthly expenses",
+    },
+    switchingSteps: [
+      {
+        title: "Download your Bench reports",
+        description: "Get your financial statements and transaction history.",
+      },
+      {
+        title: "Sign up for Midday",
+        description: "Create your account and connect your bank accounts.",
+      },
+      {
+        title: "Let Midday categorize",
+        description: "AI-powered categorization starts working immediately.",
+      },
+      {
+        title: "Enjoy real-time access",
+        description: "No more waiting for monthly reports.",
+      },
+    ],
+    faq: [
+      {
+        question: "Is Midday a replacement for bookkeeping?",
+        answer:
+          "Midday handles day-to-day financial management and gives you real-time visibility. For tax filing and complex accounting, you may still want an accountant - but you'll spend far less on bookkeeping services because Midday keeps everything organized.",
+      },
+      {
+        question: "What about tax preparation?",
+        answer:
+          "Midday categorizes transactions, tracks receipts, and exports tax-ready reports. Your accountant will have everything they need, organized and ready to go.",
+      },
+      {
+        question: "Why is Midday so much cheaper?",
+        answer:
+          "Bench employs human bookkeepers who manually review your transactions monthly. Midday uses AI and automation for instant categorization, giving you better speed at a fraction of the cost.",
+      },
+    ],
+    targetAudience: [
+      "Founders frustrated with monthly reporting delays",
+      "Teams wanting real-time financial visibility",
+      "Businesses looking to reduce bookkeeping costs",
+      "Founders who want control over their finances",
+    ],
+  },
+  {
+    id: "qonto",
+    slug: "qonto-alternative",
+    name: "Qonto",
+    tagline: "Why Founders Switch to Midday",
+    description:
+      "Looking for a Qonto alternative? Midday offers financial management that works with any bank, plus invoicing, time tracking, and AI insights.",
+    keyDifferences: [
+      {
+        title: "Bank Freedom",
+        midday: "Works with any bank",
+        competitor: "Must use Qonto bank",
+      },
+      {
+        title: "Invoicing",
+        midday: "Full invoicing suite",
+        competitor: "Basic invoicing",
+      },
+      {
+        title: "Time Tracking",
+        midday: "Built-in",
+        competitor: "None",
+      },
+      {
+        title: "AI Features",
+        midday: "AI assistant + insights",
+        competitor: "Limited automation",
+      },
+    ],
+    features: [
+      {
+        category: "Financial Management",
+        features: [
+          { name: "Multi-bank support", midday: "25,000+ banks", competitor: "Qonto only" },
+          { name: "Transaction categorization", midday: true, competitor: true },
+          { name: "Expense tracking", midday: true, competitor: true },
+          { name: "Receipt capture", midday: true, competitor: true },
+          { name: "Team cards", midday: false, competitor: true },
+          { name: "AI insights", midday: true, competitor: false },
+        ],
+      },
+      {
+        category: "Business Tools",
+        features: [
+          { name: "Full invoicing", midday: true, competitor: "Basic" },
+          { name: "Time tracking", midday: true, competitor: false },
+          { name: "Project tracking", midday: true, competitor: false },
+          { name: "Weekly summaries", midday: true, competitor: false },
+          { name: "Customer management", midday: true, competitor: false },
+        ],
+      },
+    ],
+    pricing: {
+      midday: middayPricing,
+      competitor: [
+        {
+          name: "Basic",
+          price: "€9",
+          period: "/month",
+          features: ["1 user", "German IBAN", "20 transfers/month"],
+        },
+        {
+          name: "Smart",
+          price: "€19",
+          period: "/month",
+          features: ["2 users", "100 transfers/month", "5 cards"],
+        },
+        {
+          name: "Premium",
+          price: "€39",
+          period: "/month",
+          features: ["5 users", "500 transfers/month", "Connect banks"],
+        },
+        {
+          name: "Enterprise",
+          price: "€99",
+          period: "/month",
+          features: ["10 users", "Unlimited transfers", "Priority support"],
+        },
+      ],
+      competitorNote: "Must switch your banking to Qonto",
+    },
+    switchingSteps: [
+      {
+        title: "Keep your current bank",
+        description: "No need to switch banks - Midday connects to your existing accounts.",
+      },
+      {
+        title: "Sign up for Midday",
+        description: "Create your account and connect your bank accounts.",
+      },
+      {
+        title: "Import your customers",
+        description: "Add your existing customers for invoicing.",
+      },
+      {
+        title: "Start using all features",
+        description: "Access time tracking, AI insights, and more.",
+      },
+    ],
+    faq: [
+      {
+        question: "Do I need to switch banks?",
+        answer:
+          "No! Unlike Qonto, Midday works with your existing bank accounts. Connect any of 25,000+ banks worldwide and keep your current banking relationships.",
+      },
+      {
+        question: "What about team expense cards?",
+        answer:
+          "Midday focuses on financial management, not banking. If you need team cards, you can use your existing bank's cards while using Midday for tracking, invoicing, and insights.",
+      },
+      {
+        question: "Is Midday available in Europe?",
+        answer:
+          "Yes! Midday works globally with banks across Europe, including SEPA countries. You get the same features whether you're in Germany, France, Netherlands, or anywhere else.",
+      },
+    ],
+    targetAudience: [
+      "EU founders who want to keep their current bank",
+      "Teams needing more than basic invoicing",
+      "Businesses wanting time tracking built-in",
+      "Users who need AI-powered financial insights",
+    ],
+  },
+  {
+    id: "pleo",
+    slug: "pleo-alternative",
+    name: "Pleo",
+    tagline: "Why Founders Switch to Midday",
+    description:
+      "Looking for a Pleo alternative? Midday offers expense tracking plus invoicing, time tracking, and full financial visibility without requiring corporate cards.",
+    keyDifferences: [
+      {
+        title: "Flexibility",
+        midday: "Works with any payment method",
+        competitor: "Requires Pleo cards",
+      },
+      {
+        title: "Scope",
+        midday: "Complete financial workspace",
+        competitor: "Expense management only",
+      },
+      {
+        title: "Invoicing",
+        midday: "Full suite",
+        competitor: "None",
+      },
+      {
+        title: "Time Tracking",
+        midday: "Built-in",
+        competitor: "None",
+      },
+    ],
+    features: [
+      {
+        category: "Expense Management",
+        features: [
+          { name: "Receipt capture", midday: true, competitor: true },
+          { name: "Automatic categorization", midday: true, competitor: true },
+          { name: "Expense tracking", midday: true, competitor: true },
+          { name: "Corporate cards", midday: false, competitor: true },
+          { name: "Spending limits", midday: false, competitor: true },
+          { name: "Works with any card", midday: true, competitor: false },
+        ],
+      },
+      {
+        category: "Financial Management",
+        features: [
+          { name: "Bank connections", midday: true, competitor: "Limited" },
+          { name: "Invoicing", midday: true, competitor: false },
+          { name: "Time tracking", midday: true, competitor: false },
+          { name: "Cash flow insights", midday: true, competitor: "Limited" },
+          { name: "AI assistant", midday: true, competitor: false },
+          { name: "Weekly summaries", midday: true, competitor: false },
+        ],
+      },
+    ],
+    pricing: {
+      midday: middayPricing,
+      competitor: [
+        {
+          name: "Starter",
+          price: "Free",
+          period: "",
+          features: ["3 users", "Pleo cards", "Basic features"],
+        },
+        {
+          name: "Essential",
+          price: "€35",
+          period: "/month base",
+          features: ["Unlimited users", "Analytics", "Integrations"],
+        },
+        {
+          name: "Advanced",
+          price: "€75",
+          period: "/month base",
+          features: ["Budgets", "Multi-entity", "Priority support"],
+        },
+      ],
+      competitorNote: "+ per-user fees on paid plans",
+    },
+    switchingSteps: [
+      {
+        title: "Export from Pleo",
+        description: "Download your expense data and receipts.",
+      },
+      {
+        title: "Sign up for Midday",
+        description: "Create your account and connect your bank accounts.",
+      },
+      {
+        title: "Set up receipt forwarding",
+        description: "Forward receipts via email or capture them in-app.",
+      },
+      {
+        title: "Add invoicing and time tracking",
+        description: "Start using features Pleo doesn't offer.",
+      },
+    ],
+    faq: [
+      {
+        question: "What about corporate cards?",
+        answer:
+          "Midday focuses on financial management, not issuing cards. You can use your existing corporate or personal cards - all transactions sync automatically from your connected bank accounts.",
+      },
+      {
+        question: "Can I still track team expenses?",
+        answer:
+          "Yes! Midday tracks all expenses from your connected bank accounts, regardless of which team member made the purchase. Receipts can be attached to any transaction.",
+      },
+      {
+        question: "Is Midday available in Europe?",
+        answer:
+          "Absolutely. Midday works with banks across Europe and supports multiple currencies. You get the same features whether you're in Denmark, UK, Germany, or elsewhere.",
+      },
+    ],
+    targetAudience: [
+      "Teams who don't want to switch to corporate cards",
+      "Founders needing invoicing alongside expenses",
+      "Businesses wanting time tracking included",
+      "EU teams seeking a simpler expense solution",
+    ],
+  },
+  {
+    id: "honeybook",
+    slug: "honeybook-alternative",
+    name: "HoneyBook",
+    tagline: "Why Founders Switch to Midday",
+    description:
+      "Looking for a HoneyBook alternative? Midday offers clean financial management with invoicing and time tracking, without the CRM complexity.",
+    keyDifferences: [
+      {
+        title: "Focus",
+        midday: "Financial clarity",
+        competitor: "CRM + project management",
+      },
+      {
+        title: "Simplicity",
+        midday: "Clean, focused workspace",
+        competitor: "Feature-heavy platform",
+      },
+      {
+        title: "Bank Connections",
+        midday: "25,000+ banks",
+        competitor: "Limited",
+      },
+      {
+        title: "AI Features",
+        midday: "AI assistant + insights",
+        competitor: "Basic automation",
+      },
+    ],
+    features: [
+      {
+        category: "Financial Management",
+        features: [
+          { name: "Invoicing", midday: true, competitor: true },
+          { name: "Online payments", midday: true, competitor: true },
+          { name: "Bank connections", midday: true, competitor: "Limited" },
+          { name: "Expense tracking", midday: true, competitor: "Basic" },
+          { name: "Time tracking", midday: true, competitor: "Basic" },
+          { name: "AI insights", midday: true, competitor: false },
+        ],
+      },
+      {
+        category: "Business Tools",
+        features: [
+          { name: "Contracts/proposals", midday: false, competitor: true },
+          { name: "Client portal", midday: true, competitor: true },
+          { name: "Scheduling", midday: false, competitor: true },
+          { name: "Weekly summaries", midday: true, competitor: false },
+          { name: "Cash flow visibility", midday: true, competitor: "Limited" },
+        ],
+      },
+    ],
+    pricing: {
+      midday: middayPricing,
+      competitor: [
+        {
+          name: "Starter",
+          price: "$16",
+          period: "/month",
+          features: ["Unlimited clients", "Invoices", "Basic automation"],
+        },
+        {
+          name: "Essentials",
+          price: "$32",
+          period: "/month",
+          features: ["Scheduler", "Automation", "Custom branding"],
+        },
+        {
+          name: "Premium",
+          price: "$66",
+          period: "/month",
+          features: ["Priority support", "Multiple companies", "Advanced reports"],
+        },
+      ],
+      competitorNote: "Payment processing: 2.9% + $0.25 per transaction",
+    },
+    switchingSteps: [
+      {
+        title: "Export client and invoice data",
+        description: "Download your clients and invoice history from HoneyBook.",
+      },
+      {
+        title: "Sign up for Midday",
+        description: "Create your account and connect your bank accounts.",
+      },
+      {
+        title: "Import your customers",
+        description: "Add your clients to continue invoicing.",
+      },
+      {
+        title: "Enjoy financial clarity",
+        description: "Focus on finances without CRM complexity.",
+      },
+    ],
+    faq: [
+      {
+        question: "What about contracts and proposals?",
+        answer:
+          "Midday focuses on financial management rather than proposals. If you need contract management, you might use a dedicated tool like DocuSign alongside Midday for your financial tracking and invoicing.",
+      },
+      {
+        question: "Is Midday good for freelancers?",
+        answer:
+          "Absolutely! Midday is built for founders and freelancers who want clarity over their business finances. You get invoicing, time tracking, expense management, and AI insights in one clean interface.",
+      },
+      {
+        question: "What about client scheduling?",
+        answer:
+          "Midday doesn't include scheduling. If you need that, tools like Calendly work great alongside Midday. Many users find they prefer best-in-class tools for each function rather than an all-in-one that compromises on each.",
+      },
+    ],
+    targetAudience: [
+      "Creatives who find HoneyBook too complex",
+      "Freelancers wanting better financial visibility",
+      "Users who don't need CRM features",
+      "Teams wanting AI-powered insights",
+    ],
+  },
+  {
+    id: "freeagent",
+    slug: "freeagent-alternative",
+    name: "FreeAgent",
+    tagline: "Why Founders Switch to Midday",
+    description:
+      "Looking for a FreeAgent alternative? Midday offers modern financial management with AI-powered insights, without the accounting complexity.",
+    keyDifferences: [
+      {
+        title: "Design",
+        midday: "Modern, clean interface",
+        competitor: "Traditional accounting UI",
+      },
+      {
+        title: "Complexity",
+        midday: "Built for founders",
+        competitor: "Built for accountants",
+      },
+      {
+        title: "AI Features",
+        midday: "AI assistant + weekly insights",
+        competitor: "None",
+      },
+      {
+        title: "Global Reach",
+        midday: "25,000+ banks worldwide",
+        competitor: "UK-focused",
+      },
+    ],
+    features: [
+      {
+        category: "Core Features",
+        features: [
+          { name: "Bank connections", midday: "Global", competitor: "UK-focused" },
+          { name: "Invoicing", midday: true, competitor: true },
+          { name: "Expense tracking", midday: true, competitor: true },
+          { name: "Time tracking", midday: true, competitor: true },
+          { name: "Receipt capture", midday: true, competitor: true },
+          { name: "AI insights", midday: true, competitor: false },
+        ],
+      },
+      {
+        category: "Accounting",
+        features: [
+          { name: "VAT returns", midday: "Export for accountant", competitor: true },
+          { name: "MTD compatible", midday: "Via export", competitor: true },
+          { name: "Self-assessment", midday: "Export ready", competitor: true },
+          { name: "Weekly summaries", midday: true, competitor: false },
+          { name: "No accounting knowledge needed", midday: true, competitor: false },
+        ],
+      },
+    ],
+    pricing: {
+      midday: middayPricing,
+      competitor: [
+        {
+          name: "FreeAgent",
+          price: "£19",
+          period: "/month",
+          features: [
+            "Unlimited users",
+            "Full accounting",
+            "MTD compatible",
+            "Banking integration",
+          ],
+        },
+      ],
+      competitorNote: "Free with some UK banks (NatWest, RBS, etc.)",
+    },
+    switchingSteps: [
+      {
+        title: "Export from FreeAgent",
+        description: "Download your contacts, invoices, and transaction history.",
+      },
+      {
+        title: "Sign up for Midday",
+        description: "Create your account and connect your bank accounts.",
+      },
+      {
+        title: "Import customers",
+        description: "Add your existing clients for invoicing.",
+      },
+      {
+        title: "Experience modern finance",
+        description: "Enjoy AI insights and a cleaner interface.",
+      },
+    ],
+    faq: [
+      {
+        question: "What about Making Tax Digital (MTD)?",
+        answer:
+          "Midday exports your data in formats compatible with MTD requirements. Your accountant can use these exports for VAT submissions. Midday focuses on day-to-day financial clarity rather than tax compliance features.",
+      },
+      {
+        question: "I get FreeAgent free with my bank - why switch?",
+        answer:
+          "Free is great, but if you find FreeAgent's interface dated or complex, Midday offers a modern experience with AI-powered insights. The value of time saved and better visibility often exceeds the subscription cost.",
+      },
+      {
+        question: "Is Midday suitable for UK businesses?",
+        answer:
+          "Yes! Midday works with UK banks and handles GBP and multi-currency. While it doesn't file VAT directly, it provides everything your accountant needs for compliance.",
+      },
+    ],
+    targetAudience: [
+      "UK freelancers wanting a modern interface",
+      "Founders who find FreeAgent too accounting-focused",
+      "Users wanting AI-powered financial insights",
+      "Teams that don't need built-in tax filing",
+    ],
+  },
+  {
+    id: "ramp",
+    slug: "ramp-alternative",
+    name: "Ramp",
+    tagline: "Why Founders Switch to Midday",
+    description:
+      "Looking for a Ramp alternative? Midday offers financial visibility and expense tracking without requiring you to switch corporate cards.",
+    keyDifferences: [
+      {
+        title: "Flexibility",
+        midday: "Works with any bank/card",
+        competitor: "Requires Ramp cards",
+      },
+      {
+        title: "Invoicing",
+        midday: "Full invoicing suite",
+        competitor: "Bill pay only",
+      },
+      {
+        title: "Time Tracking",
+        midday: "Built-in",
+        competitor: "None",
+      },
+      {
+        title: "Target",
+        midday: "Founders & small teams",
+        competitor: "Mid-size companies",
+      },
+    ],
+    features: [
+      {
+        category: "Expense Management",
+        features: [
+          { name: "Receipt capture", midday: true, competitor: true },
+          { name: "Automatic categorization", midday: true, competitor: true },
+          { name: "Corporate cards", midday: false, competitor: true },
+          { name: "Spending limits", midday: false, competitor: true },
+          { name: "Works with any card", midday: true, competitor: false },
+          { name: "Bill pay", midday: false, competitor: true },
+        ],
+      },
+      {
+        category: "Financial Management",
+        features: [
+          { name: "Bank connections", midday: true, competitor: true },
+          { name: "Invoicing", midday: true, competitor: false },
+          { name: "Time tracking", midday: true, competitor: false },
+          { name: "Cash flow insights", midday: true, competitor: true },
+          { name: "AI assistant", midday: true, competitor: "Limited" },
+          { name: "Weekly summaries", midday: true, competitor: false },
+        ],
+      },
+    ],
+    pricing: {
+      midday: middayPricing,
+      competitor: [
+        {
+          name: "Ramp",
+          price: "$0",
+          period: "",
+          features: [
+            "Corporate cards",
+            "Expense management",
+            "Bill pay",
+            "Accounting integrations",
+          ],
+        },
+        {
+          name: "Ramp Plus",
+          price: "$12",
+          period: "/user/month",
+          features: [
+            "Everything in Ramp",
+            "Advanced controls",
+            "Custom workflows",
+            "Priority support",
+          ],
+        },
+      ],
+      competitorNote: "Requires using Ramp corporate cards",
+    },
+    switchingSteps: [
+      {
+        title: "Keep your current cards",
+        description: "No need to switch - Midday works with your existing accounts.",
+      },
+      {
+        title: "Sign up for Midday",
+        description: "Create your account and connect your bank accounts.",
+      },
+      {
+        title: "Set up expense tracking",
+        description: "All card transactions sync automatically.",
+      },
+      {
+        title: "Add invoicing and time tracking",
+        description: "Start using features Ramp doesn't offer.",
+      },
+    ],
+    faq: [
+      {
+        question: "Why not use free Ramp cards?",
+        answer:
+          "Ramp is great if you want to switch all spending to their cards and you're a larger team. But if you want flexibility to use any bank or card, plus invoicing and time tracking, Midday is the better fit for founders and small teams.",
+      },
+      {
+        question: "What about the cashback and savings?",
+        answer:
+          "Ramp offers 1.5% cashback on their cards. However, the value of having invoicing, time tracking, and full financial visibility in one place often exceeds those savings for most small businesses.",
+      },
+      {
+        question: "Is Midday for startups too?",
+        answer:
+          "Yes! While Ramp targets VC-backed startups with larger teams, Midday is built specifically for founders and small teams who want clarity without corporate card requirements.",
+      },
+    ],
+    targetAudience: [
+      "Founders who don't want to switch cards",
+      "Small teams needing invoicing too",
+      "Businesses wanting time tracking built-in",
+      "Teams too small for enterprise expense tools",
+    ],
+  },
 ];
 
 export function getCompetitorBySlug(slug: string): Competitor | undefined {

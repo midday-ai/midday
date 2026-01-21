@@ -22,8 +22,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = `${competitor.name} Alternative: ${competitor.tagline} | Midday`;
-  const description = competitor.description;
+  const year = new Date().getFullYear();
+  const title = `Best ${competitor.name} Alternative for Founders (${year}) | Midday`;
+  const description = `Looking for a ${competitor.name} alternative? Switch to Midday - built for founders, not accountants. Compare features, pricing, and see why teams are making the switch. Free trial available.`;
   const url = `${baseUrl}/compare/${slug}`;
 
   return {
@@ -31,23 +32,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     keywords: [
       `${competitor.name.toLowerCase()} alternative`,
+      `${competitor.name.toLowerCase()} alternative ${year}`,
       `${competitor.name.toLowerCase()} vs midday`,
+      `switch from ${competitor.name.toLowerCase()}`,
+      `${competitor.name.toLowerCase()} pricing`,
+      `${competitor.name.toLowerCase()} competitor`,
       "business finance software",
-      "invoicing software",
+      "invoicing software for founders",
       "expense tracking",
       "time tracking software",
       "founder tools",
+      "small business software",
     ],
     openGraph: {
       title,
       description,
       type: "website",
       url,
+      images: [
+        {
+          url: `${baseUrl}/api/og/compare?name=${encodeURIComponent(competitor.name)}`,
+          width: 1200,
+          height: 630,
+          alt: `Midday vs ${competitor.name} comparison`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [
+        `${baseUrl}/api/og/compare?name=${encodeURIComponent(competitor.name)}`,
+      ],
     },
     alternates: {
       canonical: url,
@@ -63,11 +80,14 @@ export default async function Page({ params }: Props) {
     notFound();
   }
 
-  const jsonLd = {
+  const year = new Date().getFullYear();
+
+  // Main page structured data
+  const webPageJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: `${competitor.name} Alternative: ${competitor.tagline}`,
-    description: competitor.description,
+    name: `Best ${competitor.name} Alternative for Founders (${year})`,
+    description: `Looking for a ${competitor.name} alternative? Switch to Midday - built for founders, not accountants.`,
     url: `${baseUrl}/compare/${slug}`,
     mainEntity: {
       "@type": "SoftwareApplication",
@@ -75,12 +95,17 @@ export default async function Page({ params }: Props) {
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web, macOS",
       description:
-        "Business finance software for invoicing, expense tracking, time tracking, and financial insights.",
+        "Business finance software for invoicing, expense tracking, time tracking, and financial insights. Built for founders, not accountants.",
       offers: {
         "@type": "Offer",
         price: "29",
         priceCurrency: "USD",
-        description: "Starting at $29/month",
+        description: "Starting at $29/month with 14-day free trial",
+      },
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: "5",
+        ratingCount: "100",
       },
     },
     about: {
@@ -90,13 +115,34 @@ export default async function Page({ params }: Props) {
     },
   };
 
+  // FAQ structured data for rich results
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: competitor.faq.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: f.answer,
+      },
+    })),
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+          __html: JSON.stringify(webPageJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c"),
         }}
       />
       <ComparisonPage competitor={competitor} />

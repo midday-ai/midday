@@ -4,23 +4,42 @@ import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-const title = "Compare Midday to Alternatives";
+const year = new Date().getFullYear();
+const title = `Compare Midday to QuickBooks, Xero, FreshBooks & More (${year})`;
 const description =
-  "See how Midday compares to QuickBooks, FreshBooks, Xero, and other financial tools. Built for founders, not accountants.";
+  "Looking for QuickBooks, Xero, or FreshBooks alternatives? Compare Midday to popular accounting and finance tools. Built for founders, not accountants. Free 14-day trial.";
 
 export const metadata: Metadata = {
   title,
   description,
+  keywords: [
+    "quickbooks alternative",
+    "xero alternative",
+    "freshbooks alternative",
+    "accounting software comparison",
+    "business finance software",
+    "invoicing software for founders",
+    "small business tools",
+  ],
   openGraph: {
     title,
     description,
     type: "website",
     url: `${baseUrl}/compare`,
+    images: [
+      {
+        url: `${baseUrl}/api/og/compare`,
+        width: 1200,
+        height: 630,
+        alt: "Compare Midday to alternatives",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
+    images: [`${baseUrl}/api/og/compare`],
   },
   alternates: {
     canonical: `${baseUrl}/compare`,

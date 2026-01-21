@@ -1,6 +1,7 @@
 "use client";
 
 import type { Competitor } from "@/data/competitors";
+import { Fragment } from "react";
 
 interface Props {
   competitor: Competitor;
@@ -44,8 +45,8 @@ export function FeatureComparison({ competitor }: Props) {
           </thead>
           <tbody>
             {competitor.features.map((category) => (
-              <>
-                <tr key={category.category} className="border-b border-border bg-muted/30">
+              <Fragment key={category.category}>
+                <tr className="border-b border-border bg-muted/30">
                   <td
                     colSpan={3}
                     className="font-sans text-sm text-foreground py-3 px-2"
@@ -69,7 +70,7 @@ export function FeatureComparison({ competitor }: Props) {
                     </td>
                   </tr>
                 ))}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>
