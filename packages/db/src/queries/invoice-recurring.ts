@@ -16,6 +16,7 @@ import {
   calculateUpcomingDates,
   shouldMarkCompleted,
 } from "@db/utils/invoice-recurring";
+import { format, parseISO } from "date-fns";
 import { and, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 
 export type CreateInvoiceRecurringParams = {
@@ -979,4 +980,100 @@ export async function markUpcomingNotificationSent(
     .returning();
 
   return result;
+}
+
+/**
+ * Project active recurring invoices into future months for revenue forecasting.
+ *
+ * This function queries all active recurring invoices and uses calculateUpcomingDates()
+ * to project when they will generate invoices in the forecast period.
+ *
+ * @param db - Database connection
+ * @param params - Parameters including teamId and forecastMonths
+ * @returns Map of month keys (yyyy-MM) to projected amounts and counts
+ */
+export type GetRecurringInvoiceProjectionParams = {
+  teamId: string;
+  forecastMonths: number;
+  currency?: string;
+};
+
+export type RecurringInvoiceProjectionResult = Map<
+  string,
+  { amount: number; count: number }
+>;
+
+export async function getRecurringInvoiceProjection(
+  db: Database,
+  params: GetRecurringInvoiceProjectionParams,
+): Promise<RecurringInvoiceProjectionResult> {
+  const { teamId, forecastMonths } = params;
+
+  // Get all active recurring invoices
+  const activeRecurring = await db
+    .select({
+      id: invoiceRecurring.id,
+      amount: invoiceRecurring.amount,
+      currency: invoiceRecurring.currency,
+      frequency: invoiceRecurring.frequency,
+      frequencyDay: invoiceRecurring.frequencyDay,
+      frequencyWeek: invoiceRecurring.frequencyWeek,
+      frequencyInterval: invoiceRecurring.frequencyInterval,
+      nextScheduledAt: invoiceRecurring.nextScheduledAt,
+      endType: invoiceRecurring.endType,
+      endDate: invoiceRecurring.endDate,
+      endCount: invoiceRecurring.endCount,
+      invoicesGenerated: invoiceRecurring.invoicesGenerated,
+      timezone: invoiceRecurring.timezone,
+    })
+    .from(invoiceRecurring)
+    .where(
+      and(
+        eq(invoiceRecurring.teamId, teamId),
+        eq(invoiceRecurring.status, "active"),
+      ),
+    );
+
+  // Project each recurring invoice into forecast months
+  const projection: RecurringInvoiceProjectionResult = new Map();
+
+  for (const recurring of activeRecurring) {
+    // Skip if no next scheduled date or no amount
+    if (!recurring.nextScheduledAt || !recurring.amount) {
+      continue;
+    }
+
+    const recurringParams: RecurringInvoiceParams = {
+      frequency: recurring.frequency,
+      frequencyDay: recurring.frequencyDay,
+      frequencyWeek: recurring.frequencyWeek,
+      frequencyInterval: recurring.frequencyInterval,
+      timezone: recurring.timezone,
+    };
+
+    // Calculate upcoming invoice dates
+    const upcoming = calculateUpcomingDates(
+      recurringParams,
+      new Date(recurring.nextScheduledAt),
+      recurring.amount,
+      recurring.currency ?? "USD",
+      recurring.endType,
+      recurring.endDate ? new Date(recurring.endDate) : null,
+      recurring.endCount,
+      recurring.invoicesGenerated,
+      forecastMonths,
+    );
+
+    // Group by month
+    for (const invoice of upcoming.invoices) {
+      const monthKey = format(parseISO(invoice.date), "yyyy-MM");
+      const existing = projection.get(monthKey) || { amount: 0, count: 0 };
+      projection.set(monthKey, {
+        amount: existing.amount + invoice.amount,
+        count: existing.count + 1,
+      });
+    }
+  }
+
+  return projection;
 }

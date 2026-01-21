@@ -6,11 +6,13 @@ import {
 } from "@midday/categories";
 import { CASH_ACCOUNT_TYPES } from "@midday/engine/account";
 import {
+  addMonths,
   eachMonthOfInterval,
   endOfMonth,
   format,
   parseISO,
   startOfMonth,
+  subMonths,
   subYears,
 } from "date-fns";
 import {
@@ -45,6 +47,7 @@ import {
 } from "../schema";
 import { getCashBalance } from "./bank-accounts";
 import { getExchangeRatesBatch } from "./exhange-rates";
+import { getRecurringInvoiceProjection } from "./invoice-recurring";
 import { getBillableHours } from "./tracker-entries";
 
 function getPercentageIncrease(a: number, b: number) {
@@ -2289,6 +2292,442 @@ export async function getRecurringExpenses(
   };
 }
 
+// ============================================================================
+// REVENUE FORECAST HELPER FUNCTIONS (Bottom-Up Approach)
+// ============================================================================
+
+/**
+ * Project recurring income transactions into forecast months.
+ * These are bank transactions marked as recurring (e.g., retainers, subscriptions).
+ */
+type RecurringTransactionProjection = Map<
+  string,
+  { amount: number; count: number }
+>;
+
+async function getRecurringTransactionProjection(
+  db: Database,
+  params: { teamId: string; forecastMonths: number; currency?: string },
+): Promise<RecurringTransactionProjection> {
+  const { teamId, forecastMonths, currency } = params;
+
+  // Get recurring income transactions from the last 6 months to establish patterns
+  const sixMonthsAgo = format(subMonths(new Date(), 6), "yyyy-MM-dd");
+
+  const conditions = [
+    eq(transactions.teamId, teamId),
+    eq(transactions.recurring, true),
+    gt(transactions.amount, 0), // Income only
+    eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
+    gte(transactions.date, sixMonthsAgo),
+  ];
+
+  if (currency) {
+    conditions.push(eq(transactions.currency, currency));
+  }
+
+  const recurringIncome = await db
+    .select({
+      name: transactions.name,
+      amount: transactions.amount,
+      frequency: transactions.frequency,
+      date: transactions.date,
+    })
+    .from(transactions)
+    .where(and(...conditions));
+
+  // Group by name to get unique recurring sources (use most recent amount)
+  const recurringByName = new Map<
+    string,
+    { amount: number; frequency: string | null; lastDate: string }
+  >();
+
+  for (const tx of recurringIncome) {
+    const existing = recurringByName.get(tx.name);
+    if (!existing || tx.date > existing.lastDate) {
+      recurringByName.set(tx.name, {
+        amount: tx.amount,
+        frequency: tx.frequency,
+        lastDate: tx.date,
+      });
+    }
+  }
+
+  // Project into forecast months
+  const projection: RecurringTransactionProjection = new Map();
+  const currentDate = new Date();
+
+  for (let i = 1; i <= forecastMonths; i++) {
+    const monthKey = format(addMonths(currentDate, i), "yyyy-MM");
+    let monthTotal = 0;
+    let count = 0;
+
+    for (const [, recurring] of recurringByName) {
+      let monthlyAmount = recurring.amount;
+
+      // Convert to monthly equivalent based on frequency
+      switch (recurring.frequency) {
+        case "weekly":
+          monthlyAmount = recurring.amount * 4.33;
+          break;
+        case "annually":
+          monthlyAmount = recurring.amount / 12;
+          break;
+        // monthly is default, no conversion needed
+      }
+
+      monthTotal += monthlyAmount;
+      count++;
+    }
+
+    projection.set(monthKey, { amount: monthTotal, count });
+  }
+
+  return projection;
+}
+
+/**
+ * Calculate team's actual historical collection metrics from paid invoices.
+ * Used to adjust collection probability based on real payment behavior.
+ */
+interface TeamCollectionMetrics {
+  onTimeRate: number; // Percentage paid on or before due date
+  avgDaysToPay: number; // Average days from issue to payment
+  sampleSize: number; // Number of invoices in calculation
+}
+
+async function getTeamCollectionMetrics(
+  db: Database,
+  teamId: string,
+): Promise<TeamCollectionMetrics> {
+  const twelveMonthsAgo = format(subMonths(new Date(), 12), "yyyy-MM-dd");
+
+  // Get paid invoices from last 12 months
+  const paidInvoices = await db
+    .select({
+      issueDate: invoices.issueDate,
+      paidAt: invoices.paidAt,
+      dueDate: invoices.dueDate,
+      amount: invoices.amount,
+    })
+    .from(invoices)
+    .where(
+      and(
+        eq(invoices.teamId, teamId),
+        eq(invoices.status, "paid"),
+        isNotNull(invoices.paidAt),
+        isNotNull(invoices.issueDate),
+        gte(invoices.paidAt, twelveMonthsAgo),
+      ),
+    );
+
+  if (paidInvoices.length === 0) {
+    // Default values if no history
+    return {
+      onTimeRate: 0.7,
+      avgDaysToPay: 30,
+      sampleSize: 0,
+    };
+  }
+
+  let onTimeCount = 0;
+  let totalDaysToPay = 0;
+  let validPaymentCount = 0;
+
+  for (const inv of paidInvoices) {
+    if (!inv.issueDate || !inv.paidAt) continue;
+
+    const issueDate = parseISO(inv.issueDate);
+    const paidDate = parseISO(inv.paidAt);
+    const daysToPay = Math.floor(
+      (paidDate.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    // Only count reasonable payment times (0-365 days)
+    if (daysToPay >= 0 && daysToPay <= 365) {
+      totalDaysToPay += daysToPay;
+      validPaymentCount++;
+
+      // Check if paid on time
+      if (inv.dueDate) {
+        const dueDate = parseISO(inv.dueDate);
+        if (paidDate <= dueDate) {
+          onTimeCount++;
+        }
+      }
+    }
+  }
+
+  return {
+    onTimeRate: validPaymentCount > 0 ? onTimeCount / validPaymentCount : 0.7,
+    avgDaysToPay:
+      validPaymentCount > 0 ? totalDaysToPay / validPaymentCount : 30,
+    sampleSize: validPaymentCount,
+  };
+}
+
+/**
+ * Calculate expected collections from outstanding invoices using team's actual payment history.
+ */
+interface ExpectedCollections {
+  month1: number;
+  month2: number;
+  totalExpected: number;
+  invoiceCount: number;
+}
+
+async function calculateExpectedCollections(
+  db: Database,
+  teamId: string,
+  teamMetrics: TeamCollectionMetrics,
+  currency?: string,
+): Promise<ExpectedCollections> {
+  // Get outstanding invoices
+  const conditions = [
+    eq(invoices.teamId, teamId),
+    inArray(invoices.status, ["unpaid", "overdue"]),
+  ];
+
+  if (currency) {
+    conditions.push(eq(invoices.currency, currency));
+  }
+
+  const outstandingInvoices = await db
+    .select({
+      id: invoices.id,
+      amount: invoices.amount,
+      issueDate: invoices.issueDate,
+      dueDate: invoices.dueDate,
+      status: invoices.status,
+    })
+    .from(invoices)
+    .where(and(...conditions));
+
+  if (outstandingInvoices.length === 0) {
+    return {
+      month1: 0,
+      month2: 0,
+      totalExpected: 0,
+      invoiceCount: 0,
+    };
+  }
+
+  const now = new Date();
+  // Team factor adjusts probability based on their actual payment history
+  const teamFactor = teamMetrics.onTimeRate / 0.7; // Normalize around 70% baseline
+
+  let month1Total = 0;
+  let month2Total = 0;
+
+  for (const inv of outstandingInvoices) {
+    const amount = inv.amount ?? 0;
+    const daysSinceIssue = inv.issueDate
+      ? Math.floor(
+          (now.getTime() - parseISO(inv.issueDate).getTime()) /
+            (1000 * 60 * 60 * 24),
+        )
+      : 0;
+
+    const daysPastDue = inv.dueDate
+      ? Math.floor(
+          (now.getTime() - parseISO(inv.dueDate).getTime()) /
+            (1000 * 60 * 60 * 24),
+        )
+      : 0;
+
+    // Base probability by age
+    let baseProbability: number;
+    if (daysSinceIssue < 30) {
+      baseProbability = 0.85; // Fresh invoice
+    } else if (daysPastDue <= 0) {
+      baseProbability = 0.75; // Not yet due
+    } else if (daysPastDue <= 30) {
+      baseProbability = 0.5; // Recently overdue
+    } else if (daysPastDue <= 60) {
+      baseProbability = 0.3; // Moderately overdue
+    } else if (daysPastDue <= 90) {
+      baseProbability = 0.15; // Significantly overdue
+    } else {
+      baseProbability = 0.05; // Very old - unlikely
+    }
+
+    // Adjust by team's actual payment behavior (capped at reasonable bounds)
+    const adjustedProbability = Math.min(
+      0.95,
+      Math.max(0.05, baseProbability * teamFactor),
+    );
+
+    const expectedAmount = amount * adjustedProbability;
+
+    // Estimate timing: fresh invoices likely month 1, older ones split
+    if (daysSinceIssue < 45) {
+      month1Total += expectedAmount;
+    } else {
+      month1Total += expectedAmount * 0.6;
+      month2Total += expectedAmount * 0.4;
+    }
+  }
+
+  return {
+    month1: month1Total,
+    month2: month2Total,
+    totalExpected: month1Total + month2Total,
+    invoiceCount: outstandingInvoices.length,
+  };
+}
+
+/**
+ * Calculate weighted median for new business baseline.
+ * Recent months are weighted more heavily.
+ */
+function calculateWeightedMedian(values: number[], weights: number[]): number {
+  if (values.length === 0) return 0;
+  if (values.length === 1) return values[0] ?? 0;
+
+  // Create weighted pairs and sort by value
+  const pairs = values.map((v, i) => ({
+    value: v,
+    weight: weights[i] ?? 1,
+  }));
+  pairs.sort((a, b) => a.value - b.value);
+
+  const totalWeight = pairs.reduce((sum, p) => sum + p.weight, 0);
+  const midWeight = totalWeight / 2;
+
+  let cumWeight = 0;
+  for (const pair of pairs) {
+    cumWeight += pair.weight;
+    if (cumWeight >= midWeight) {
+      return pair.value;
+    }
+  }
+
+  return pairs[pairs.length - 1]?.value ?? 0;
+}
+
+/**
+ * Calculate non-recurring revenue baseline from historical data.
+ * This is total revenue minus recurring transaction amounts.
+ */
+async function calculateNonRecurringBaseline(
+  db: Database,
+  params: {
+    teamId: string;
+    currency?: string;
+    recurringMonthlyAvg: number;
+  },
+): Promise<number> {
+  const { teamId, currency, recurringMonthlyAvg } = params;
+
+  // Get last 6 months of revenue
+  const sixMonthsAgo = format(subMonths(new Date(), 6), "yyyy-MM-dd");
+  const today = format(new Date(), "yyyy-MM-dd");
+
+  const historicalRevenue = await getRevenue(db, {
+    teamId,
+    from: sixMonthsAgo,
+    to: today,
+    currency,
+    revenueType: "net",
+  });
+
+  if (historicalRevenue.length === 0) {
+    return 0;
+  }
+
+  // Subtract recurring transaction average from each month
+  const nonRecurringValues = historicalRevenue.map((month) =>
+    Math.max(0, Number.parseFloat(month.value) - recurringMonthlyAvg),
+  );
+
+  // Weight recent months more heavily (older to newer)
+  const weights = nonRecurringValues.map((_, i) => 0.5 + i * 0.1);
+
+  return calculateWeightedMedian(nonRecurringValues, weights);
+}
+
+/**
+ * Forecast breakdown by source.
+ */
+interface ForecastBreakdown {
+  recurringInvoices: number;
+  recurringTransactions: number;
+  scheduled: number;
+  collections: number;
+  billableHours: number;
+  newBusiness: number;
+}
+
+/**
+ * Calculate confidence bounds based on source contributions.
+ */
+interface ConfidenceBounds {
+  optimistic: number;
+  pessimistic: number;
+  confidence: number;
+}
+
+function calculateConfidenceBounds(
+  breakdown: ForecastBreakdown,
+): ConfidenceBounds {
+  const optimistic =
+    breakdown.recurringInvoices * 1.05 +
+    breakdown.recurringTransactions * 1.1 +
+    breakdown.scheduled * 1.05 +
+    breakdown.collections * 1.2 +
+    breakdown.billableHours * 1.15 +
+    breakdown.newBusiness * 1.5;
+
+  const pessimistic =
+    breakdown.recurringInvoices * 0.95 +
+    breakdown.recurringTransactions * 0.85 + // More conservative (85% not 90%)
+    breakdown.scheduled * 0.9 +
+    breakdown.collections * 0.6 +
+    breakdown.billableHours * 0.7 +
+    breakdown.newBusiness * 0.4;
+
+  // Overall confidence = weighted average based on source proportions
+  const total = Object.values(breakdown).reduce((a, b) => a + b, 0);
+  const confidence =
+    total > 0
+      ? (breakdown.recurringInvoices / total) * 95 +
+        (breakdown.recurringTransactions / total) * 85 +
+        (breakdown.scheduled / total) * 90 +
+        (breakdown.collections / total) * 70 +
+        (breakdown.billableHours / total) * 75 +
+        (breakdown.newBusiness / total) * 35
+      : 0;
+
+  return {
+    optimistic,
+    pessimistic,
+    confidence: Math.round(confidence),
+  };
+}
+
+/**
+ * Check for potential double-counting between recurring invoices and transactions.
+ */
+function checkForOverlap(
+  recurringInvoices: number,
+  recurringTransactions: number,
+): string | null {
+  // If both are significant (> $500/month each), warn user
+  if (recurringInvoices > 500 && recurringTransactions > 500) {
+    return (
+      "Both recurring invoices and recurring transactions detected. " +
+      "If these represent the same revenue (e.g., a retainer billed via invoice " +
+      "that also shows as a recurring bank deposit), the forecast may be overstated."
+    );
+  }
+  return null;
+}
+
+// ============================================================================
+// END REVENUE FORECAST HELPER FUNCTIONS
+// ============================================================================
+
 export type GetRevenueForecastParams = {
   teamId: string;
   from: string;
@@ -2305,6 +2744,26 @@ interface ForecastDataPoint {
   type: "actual" | "forecast";
 }
 
+/**
+ * Enhanced forecast data point with confidence and breakdown.
+ */
+interface EnhancedForecastDataPoint extends ForecastDataPoint {
+  optimistic: number;
+  pessimistic: number;
+  confidence: number;
+  breakdown: ForecastBreakdown;
+}
+
+/**
+ * Revenue forecast using bottom-up approach.
+ *
+ * Sums KNOWN revenue sources (recurring invoices, recurring transactions,
+ * scheduled invoices, expected collections, billable hours) plus a
+ * conservative baseline for new business.
+ *
+ * This replaces the previous growth-rate extrapolation approach which
+ * caused unrealistic "hockey stick" projections.
+ */
 export async function getRevenueForecast(
   db: Database,
   params: GetRevenueForecastParams,
@@ -2337,15 +2796,17 @@ export async function getRevenueForecast(
     "yyyy-MM-dd",
   );
 
-  // Fetch all required data in parallel for better performance
+  // Fetch ALL data sources in parallel for the bottom-up forecast
   const [
     historicalData,
     outstandingInvoicesData,
     billableHoursData,
     scheduledInvoicesData,
-    paidInvoicesData,
+    recurringInvoiceData,
+    recurringTransactionData,
+    teamCollectionMetrics,
   ] = await Promise.all([
-    // Historical revenue data
+    // Historical revenue data (for display and baseline calculation)
     getRevenue(db, {
       teamId,
       from,
@@ -2382,26 +2843,23 @@ export async function getRevenueForecast(
           lte(invoices.issueDate, forecastEndDate),
         ),
       ),
-    // Paid invoices for collection rate calculation
-    db
-      .select({
-        issueDate: invoices.issueDate,
-        paidAt: invoices.paidAt,
-        amount: invoices.amount,
-        dueDate: invoices.dueDate,
-      })
-      .from(invoices)
-      .where(
-        and(
-          eq(invoices.teamId, teamId),
-          eq(invoices.status, "paid"),
-          isNotNull(invoices.paidAt),
-          isNotNull(invoices.issueDate),
-        ),
-      ),
+    // Recurring invoices projected into forecast months
+    getRecurringInvoiceProjection(db, {
+      teamId,
+      forecastMonths,
+      currency: inputCurrency,
+    }),
+    // Recurring transactions projected into forecast months
+    getRecurringTransactionProjection(db, {
+      teamId,
+      forecastMonths,
+      currency: inputCurrency,
+    }),
+    // Team's actual collection metrics
+    getTeamCollectionMetrics(db, teamId),
   ]);
 
-  // Convert to numbers - keep ALL months including zero revenue
+  // Convert historical data to numbers
   const historical = historicalData.map((item: ReportsResultItem) => ({
     date: item.date,
     value: Number.parseFloat(item.value),
@@ -2410,320 +2868,11 @@ export async function getRevenueForecast(
 
   const currency = historical[0]?.currency || inputCurrency || "USD";
 
-  // Need at least 3 months of data for meaningful forecast
-  if (historical.length < 3) {
-    // Not enough data - use simple average or last value
-    const recentValues = historical.slice(-3);
-    const avgValue =
-      recentValues.reduce((sum, item) => sum + item.value, 0) /
-      recentValues.length;
-    const lastActualValue =
-      historical[historical.length - 1]?.value ?? avgValue;
-
-    const forecast: ForecastDataPoint[] = [];
-
-    for (let i = 1; i <= forecastMonths; i++) {
-      const forecastDate = endOfMonth(
-        new UTCDate(currentDate.getFullYear(), currentDate.getMonth() + i, 1),
-      );
-      forecast.push({
-        date: format(forecastDate, "yyyy-MM-dd"),
-        value: Math.max(0, Number(lastActualValue.toFixed(2))),
-        currency,
-        type: "forecast",
-      });
-    }
-
-    const combinedData: ForecastDataPoint[] = [
-      ...historical.map((item: (typeof historical)[number]) => ({
-        ...item,
-        type: "actual" as const,
-      })),
-      ...forecast,
-    ];
-
-    return {
-      summary: {
-        nextMonthProjection: forecast[0]?.value || 0,
-        avgMonthlyGrowthRate: 0,
-        totalProjectedRevenue: Number(
-          (forecast.reduce((sum, item) => sum + item.value, 0) ?? 0).toFixed(2),
-        ),
-        peakMonth: {
-          date: forecast[0]?.date || "",
-          value: forecast[0]?.value || 0,
-        },
-        currency,
-        revenueType,
-        forecastStartDate: forecast[0]?.date,
-        unpaidInvoices: {
-          count: outstandingInvoicesData.summary.count,
-          totalAmount: outstandingInvoicesData.summary.totalAmount,
-          currency: outstandingInvoicesData.summary.currency,
-        },
-        billableHours: {
-          totalHours: Math.round(billableHoursData.totalDuration / 3600),
-          totalAmount: Number(billableHoursData.totalAmount.toFixed(2)),
-          currency: billableHoursData.currency,
-        },
-      },
-      historical: historical.map((item: (typeof historical)[number]) => ({
-        date: item.date,
-        value: item.value,
-        currency: item.currency,
-      })),
-      forecast: forecast.map((item: ForecastDataPoint) => ({
-        date: item.date,
-        value: item.value,
-        currency: item.currency,
-      })),
-      combined: combinedData,
-      meta: {
-        historicalMonths: historical.length,
-        forecastMonths,
-        avgGrowthRate: 0,
-        basedOnMonths: historical.length,
-        currency,
-        includesUnpaidInvoices: outstandingInvoicesData.summary.count > 0,
-        includesBillableHours:
-          Math.round(billableHoursData.totalDuration / 3600) > 0,
-      },
-    };
-  }
-
-  // Step 1: Detect and remove outliers using IQR method
-  const values = historical.map((item) => item.value);
-  const sortedValues = [...values].sort((a, b) => a - b);
-  const q1 = sortedValues[Math.floor(sortedValues.length * 0.25)] || 0;
-  const q3 = sortedValues[Math.floor(sortedValues.length * 0.75)] || 0;
-  const iqr = q3 - q1;
-  const lowerBound = q1 - 1.5 * iqr;
-  const upperBound = q3 + 1.5 * iqr;
-
-  // Filter outliers but keep at least last 3 months for trend
-  const cleanedData = historical.map((item, index) => {
-    const isOutlier = item.value < lowerBound || item.value > upperBound;
-    const isRecent = index >= historical.length - 3;
-    return {
-      ...item,
-      isOutlier: isOutlier && !isRecent,
-    };
-  });
-
-  // Step 2: Calculate growth rates with exponential weighting (recent = more important)
-  const growthRates: Array<{ rate: number; weight: number }> = [];
-
-  for (let i = 1; i < cleanedData.length; i++) {
-    const prev = cleanedData[i - 1];
-    const curr = cleanedData[i];
-
-    // Skip if either value is an outlier or if previous value is zero
-    if (
-      !prev ||
-      !curr ||
-      prev.isOutlier ||
-      curr.isOutlier ||
-      prev.value === 0
-    ) {
-      continue;
-    }
-
-    const rate = (curr.value - prev.value) / prev.value;
-
-    // Exponential weight: recent months matter more (alpha = 0.3)
-    const recencyWeight = Math.exp(-0.3 * (cleanedData.length - i));
-
-    growthRates.push({
-      rate,
-      weight: recencyWeight,
-    });
-  }
-
-  // Step 3: Calculate weighted average growth rate (or use median as fallback)
-  let avgGrowthRate = 0;
-
-  if (growthRates.length >= 2) {
-    // Use weighted average
-    const totalWeight = growthRates.reduce((sum, item) => sum + item.weight, 0);
-    const weightedSum = growthRates.reduce(
-      (sum, item) => sum + item.rate * item.weight,
-      0,
-    );
-    avgGrowthRate = weightedSum / totalWeight;
-
-    // Sanity check: Cap growth rate at realistic bounds (-50% to +100% per month)
-    avgGrowthRate = Math.max(-0.5, Math.min(1.0, avgGrowthRate));
-  } else {
-    // Fallback to median growth rate
-    const rates = growthRates.map((item) => item.rate).sort((a, b) => a - b);
-    avgGrowthRate = rates[Math.floor(rates.length / 2)] || 0;
-  }
-
-  // Step 4: Detect seasonality patterns (if we have 12 months)
-  let seasonalityFactor = 1.0;
-  if (historical.length === 12) {
-    // Calculate same-month-last-year comparison
-    const currentMonthIndex = new Date().getMonth();
-    const lastYearSameMonth = historical.find((item) => {
-      const itemMonth = parseISO(item.date).getMonth();
-      return itemMonth === currentMonthIndex;
-    });
-
-    if (lastYearSameMonth && lastYearSameMonth.value > 0) {
-      // Calculate year-over-year growth for this specific month
-      const recentMonths = historical.slice(-3);
-      const avgRecent =
-        recentMonths.reduce((sum, item) => sum + item.value, 0) /
-        recentMonths.length;
-
-      if (avgRecent > 0) {
-        seasonalityFactor = avgRecent / lastYearSameMonth.value;
-        // Cap seasonality factor to reasonable bounds (0.5x to 2x)
-        seasonalityFactor = Math.max(0.5, Math.min(2.0, seasonalityFactor));
-      }
-    }
-  }
-
-  // Step 5: Use exponential smoothing for baseline (weighted average of recent months)
-  const alpha = 0.3; // Smoothing factor
-  let smoothedValue = historical[0]?.value ?? 0;
-
-  for (let i = 1; i < historical.length; i++) {
-    const actualValue = historical[i]?.value ?? 0;
-    smoothedValue = alpha * actualValue + (1 - alpha) * smoothedValue;
-  }
-
-  // Apply seasonality adjustment to smoothed baseline
-  const lastActualValue = smoothedValue * seasonalityFactor;
-
-  // Calculate dynamic collection rate from historical paid invoices
-  const calculateCollectionRate = (
-    paidInvoices: Array<{
-      issueDate: string | null;
-      paidAt: string | null;
-      amount: number | null;
-      dueDate: string | null;
-    }>,
-    outstandingInvoices: Array<{
-      issueDate?: string | null;
-      dueDate?: string | null;
-    }>,
-  ): number => {
-    if (paidInvoices.length === 0) {
-      // No historical data, use conservative default
-      return 0.7;
-    }
-
-    // Calculate average days to payment from historical data
-    const paymentDelays: number[] = [];
-    for (const invoice of paidInvoices) {
-      if (invoice.issueDate && invoice.paidAt) {
-        const issueDate = parseISO(invoice.issueDate);
-        const paidDate = parseISO(invoice.paidAt);
-        const daysToPayment = Math.floor(
-          (paidDate.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24),
-        );
-        if (daysToPayment >= 0 && daysToPayment <= 365) {
-          // Only include reasonable payment delays (0-365 days)
-          paymentDelays.push(daysToPayment);
-        }
-      }
-    }
-
-    if (paymentDelays.length === 0) {
-      return 0.7; // Default if no valid payment delays
-    }
-
-    const avgDaysToPayment =
-      paymentDelays.reduce((sum, days) => sum + days, 0) / paymentDelays.length;
-
-    // Calculate collection rate by invoice age
-    const now = new UTCDate();
-    let totalOutstanding = 0;
-    let weightedCollection = 0;
-
-    for (const invoice of outstandingInvoices) {
-      if (!invoice.issueDate) continue;
-
-      const issueDate = parseISO(invoice.issueDate);
-      const daysSinceIssue = Math.floor(
-        (now.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24),
-      );
-
-      // Determine collection probability based on invoice age
-      let collectionRate = 0.7; // Default
-      if (daysSinceIssue < 30) {
-        // Recent invoices (< 30 days): Higher probability
-        collectionRate = 0.85;
-      } else if (invoice.dueDate) {
-        const dueDate = parseISO(invoice.dueDate);
-        const daysSinceDue = Math.floor(
-          (now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
-        );
-        if (daysSinceDue > 0) {
-          // Overdue: Lower probability
-          collectionRate = 0.5;
-        } else {
-          // Not yet due: Normal probability
-          collectionRate = 0.7;
-        }
-      } else if (daysSinceIssue > 90) {
-        // Very old invoices (> 90 days): Lower probability
-        collectionRate = 0.5;
-      }
-
-      // Weight by expected payment timing (invoices closer to avg payment time have higher weight)
-      const daysUntilExpectedPayment = Math.max(
-        0,
-        avgDaysToPayment - daysSinceIssue,
-      );
-      const weight = Math.max(
-        0.1,
-        Math.min(1.0, daysUntilExpectedPayment / 30),
-      );
-      weightedCollection += collectionRate * weight;
-      totalOutstanding += weight;
-    }
-
-    // Return weighted average collection rate, or default if no outstanding invoices
-    return totalOutstanding > 0
-      ? Math.max(0.5, Math.min(0.9, weightedCollection / totalOutstanding))
-      : 0.7;
-  };
-
-  // Get outstanding invoices with dates for collection rate calculation
-  const outstandingInvoicesWithDates = await db
-    .select({
-      issueDate: invoices.issueDate,
-      dueDate: invoices.dueDate,
-    })
-    .from(invoices)
-    .where(
-      and(
-        eq(invoices.teamId, teamId),
-        inArray(invoices.status, ["unpaid", "overdue"]),
-      ),
-    );
-
-  const collectionRate = calculateCollectionRate(
-    paidInvoicesData as Array<{
-      issueDate: string | null;
-      paidAt: string | null;
-      amount: number | null;
-      dueDate: string | null;
-    }>,
-    outstandingInvoicesWithDates as Array<{
-      issueDate: string | null;
-      dueDate: string | null;
-    }>,
-  );
-
   // Group scheduled invoices by month
   const scheduledByMonth = new Map<string, number>();
   for (const invoice of scheduledInvoicesData) {
     if (!invoice.issueDate) continue;
-    const issueDate = parseISO(invoice.issueDate);
-    const monthKey = format(issueDate, "yyyy-MM");
+    const monthKey = format(parseISO(invoice.issueDate), "yyyy-MM");
     const amount = Number(invoice.amount) || 0;
     scheduledByMonth.set(
       monthKey,
@@ -2731,169 +2880,175 @@ export async function getRevenueForecast(
     );
   }
 
-  // Step 6: Generate forecast with conservative dampening
-  const forecast: ForecastDataPoint[] = [];
+  // Calculate expected collections using team's actual payment history
+  const expectedCollections = await calculateExpectedCollections(
+    db,
+    teamId,
+    teamCollectionMetrics,
+    inputCurrency,
+  );
 
-  // Calculate expected collection from unpaid invoices using dynamic rate
-  const expectedInvoiceCollection =
-    outstandingInvoicesData.summary.totalAmount * collectionRate;
+  // Calculate recurring transaction monthly average for baseline adjustment
+  let recurringTxMonthlyAvg = 0;
+  for (const [, data] of recurringTransactionData) {
+    recurringTxMonthlyAvg = data.amount; // All months have same projection
+    break;
+  }
+
+  // Calculate non-recurring baseline (historical revenue minus recurring)
+  const nonRecurringBaseline = await calculateNonRecurringBaseline(db, {
+    teamId,
+    currency: inputCurrency,
+    recurringMonthlyAvg: recurringTxMonthlyAvg,
+  });
+
+  // Billable hours value (convert from seconds to value)
+  const billableHoursTotal = Math.round(billableHoursData.totalDuration / 3600);
+  const billableHoursValue = billableHoursData.totalAmount;
+
+  // ============================================================================
+  // BUILD BOTTOM-UP FORECAST
+  // ============================================================================
+  const forecast: EnhancedForecastDataPoint[] = [];
+  const warnings: string[] = [];
 
   for (let i = 1; i <= forecastMonths; i++) {
     const forecastDate = endOfMonth(
       new UTCDate(currentDate.getFullYear(), currentDate.getMonth() + i, 1),
     );
+    const monthKey = format(
+      new UTCDate(currentDate.getFullYear(), currentDate.getMonth() + i, 1),
+      "yyyy-MM",
+    );
 
-    // Progressive dampening: The further out, the more conservative
-    // Months 1-3: 98% of growth rate
-    // Months 4-6: 95% of growth rate
-    // Months 7+: 90% of growth rate
-    let dampeningFactor = 1.0;
-    if (i <= 3) {
-      dampeningFactor = 0.98 ** i;
-    } else if (i <= 6) {
-      dampeningFactor = 0.98 ** 3 * 0.95 ** (i - 3);
-    } else {
-      dampeningFactor = 0.98 ** 3 * 0.95 ** 3 * 0.9 ** (i - 6);
-    }
+    // Known sources
+    const recurringInvoices = recurringInvoiceData.get(monthKey)?.amount ?? 0;
+    const recurringTransactions =
+      recurringTransactionData.get(monthKey)?.amount ?? 0;
+    const scheduled = scheduledByMonth.get(monthKey) ?? 0;
 
-    // Apply dampened growth rate
-    const effectiveGrowthRate = avgGrowthRate * dampeningFactor;
-    const projectedValue = lastActualValue * (1 + effectiveGrowthRate) ** i;
+    // Expected sources (time-limited)
+    // Collections: 70% in month 1, 30% in month 2, none after
+    const collections =
+      i === 1
+        ? expectedCollections.month1
+        : i === 2
+          ? expectedCollections.month2
+          : 0;
 
-    // Add slight regression to mean (pull towards historical average)
-    const historicalAvg =
-      historical.reduce((sum, item) => sum + item.value, 0) / historical.length;
-    const regressionWeight = Math.min(0.15 * i, 0.6); // Max 60% weight on mean
-    let finalValue =
-      projectedValue * (1 - regressionWeight) +
-      historicalAvg * regressionWeight;
+    // Billable hours: only applies to month 1
+    const billableHours = i === 1 ? billableHoursValue : 0;
 
-    // Add expected invoice collection to first month only (one-time boost)
-    if (i === 1 && expectedInvoiceCollection > 0) {
-      finalValue += expectedInvoiceCollection;
-    }
+    // New business baseline with decay
+    // Month 1: 80%, Month 2: 70%, Month 3: 60%, Month 4+: 50%
+    const decay = Math.max(0.5, 0.9 - i * 0.1);
+    const newBusiness = nonRecurringBaseline * decay;
 
-    // Add scheduled invoices for this month
-    const monthKey = format(forecastDate, "yyyy-MM");
-    const scheduledAmount = scheduledByMonth.get(monthKey) || 0;
-    if (scheduledAmount > 0) {
-      finalValue += scheduledAmount;
-    }
+    const breakdown: ForecastBreakdown = {
+      recurringInvoices,
+      recurringTransactions,
+      scheduled,
+      collections,
+      billableHours,
+      newBusiness,
+    };
+
+    const value = Object.values(breakdown).reduce((a, b) => a + b, 0);
+    const { optimistic, pessimistic, confidence } =
+      calculateConfidenceBounds(breakdown);
 
     forecast.push({
       date: format(forecastDate, "yyyy-MM-dd"),
-      value: Math.max(0, Number(finalValue.toFixed(2))),
+      value: Math.max(0, Number(value.toFixed(2))),
+      optimistic: Math.max(0, Number(optimistic.toFixed(2))),
+      pessimistic: Math.max(0, Number(pessimistic.toFixed(2))),
+      confidence,
+      breakdown,
       currency,
       type: "forecast",
     });
   }
 
-  // Step 7: Calculate summary metrics and volatility
+  // Check for potential double-counting
+  const firstMonthBreakdown = forecast[0]?.breakdown;
+  if (firstMonthBreakdown) {
+    const overlapWarning = checkForOverlap(
+      firstMonthBreakdown.recurringInvoices,
+      firstMonthBreakdown.recurringTransactions,
+    );
+    if (overlapWarning) {
+      warnings.push(overlapWarning);
+    }
+  }
+
+  // Calculate summary metrics
   const nextMonthProjection = forecast[0]?.value || 0;
-  const avgMonthlyGrowthRate = Number((avgGrowthRate * 100).toFixed(2));
-
-  // Calculate volatility (standard deviation of growth rates)
-  const volatility =
-    growthRates.length >= 2
-      ? Math.sqrt(
-          growthRates.reduce((sum, item) => {
-            const diff = item.rate - avgGrowthRate;
-            return sum + diff * diff;
-          }, 0) / growthRates.length,
-        )
-      : 0;
-
-  // Calculate trend strength (how consistent is the direction?)
-  const positiveMonths = growthRates.filter((item) => item.rate > 0).length;
-  const trendStrength =
-    growthRates.length > 0
-      ? Math.abs((positiveMonths / growthRates.length) * 2 - 1) // 0 = no trend, 1 = strong trend
-      : 0;
-
-  // Calculate revenue stability (coefficient of variation)
-  const revenueStdDev = Math.sqrt(
-    historical.reduce((sum, item) => {
-      const diff =
-        item.value -
-        historical.reduce((s, i) => s + i.value, 0) / historical.length;
-      return sum + diff * diff;
-    }, 0) / historical.length,
-  );
-  const revenueAvg =
-    historical.reduce((sum, item) => sum + item.value, 0) / historical.length;
-  const coefficientOfVariation =
-    revenueAvg > 0 ? revenueStdDev / revenueAvg : 1;
-
-  // Calculate confidence based on comprehensive data quality
-  const dataQuality = {
-    outlierCount: cleanedData.filter((item) => item.isOutlier).length,
-    growthRateConsistency:
-      growthRates.length >= 2
-        ? 1 -
-          Math.min(
-            1,
-            Math.abs(
-              Math.max(...growthRates.map((r) => r.rate)) -
-                Math.min(...growthRates.map((r) => r.rate)),
-            ),
-          )
-        : 0.5,
-    dataPoints: historical.length,
-    trendStrength,
-    volatility,
-    stability: 1 - Math.min(1, coefficientOfVariation), // Lower CV = higher stability
-  };
-
-  // Comprehensive confidence score:
-  // - Low outliers (25%)
-  // - Consistent growth rates (20%)
-  // - More data points (20%)
-  // - Strong trend direction (20%)
-  // - Low volatility (10%)
-  // - Revenue stability (5%)
-  const confidenceScore = Math.min(
-    100,
-    Math.max(
-      30,
-      Math.round(
-        (1 - dataQuality.outlierCount / historical.length) * 25 +
-          dataQuality.growthRateConsistency * 20 +
-          Math.min(dataQuality.dataPoints / 12, 1) * 20 +
-          dataQuality.trendStrength * 20 +
-          (1 - Math.min(1, volatility * 2)) * 10 +
-          dataQuality.stability * 5,
-      ),
-    ),
-  );
-
-  // Find peak month in forecast
-  const peakForecast = forecast.reduce((max, curr) =>
-    curr.value > max.value ? curr : max,
-  );
-
-  // Calculate total projected revenue for forecast period
   const totalProjectedRevenue = forecast.reduce(
     (sum, item) => sum + item.value,
     0,
   );
+  const peakForecast = forecast.reduce(
+    (max, curr) => (curr.value > max.value ? curr : max),
+    forecast[0] || { date: "", value: 0 },
+  );
 
-  // Combine historical and forecast data for charting
+  // Calculate average confidence across forecast
+  const avgConfidence =
+    forecast.length > 0
+      ? Math.round(
+          forecast.reduce((sum, f) => sum + f.confidence, 0) / forecast.length,
+        )
+      : 0;
+
+  // Combine historical and forecast for charting
   const combinedData: ForecastDataPoint[] = [
-    ...historical.map((item: (typeof historical)[number]) => ({
+    ...historical.map((item) => ({
       ...item,
       type: "actual" as const,
     })),
-    ...forecast,
+    ...forecast.map((item) => ({
+      date: item.date,
+      value: item.value,
+      currency: item.currency,
+      type: "forecast" as const,
+    })),
   ];
 
-  // Calculate billable hours in hours (convert from seconds)
-  const billableHoursTotal = Math.round(billableHoursData.totalDuration / 3600);
-  const billableHoursAmount = billableHoursData.totalAmount;
+  // Calculate totals from first month breakdown for summary
+  const firstBreakdown = forecast[0]?.breakdown || {
+    recurringInvoices: 0,
+    recurringTransactions: 0,
+    scheduled: 0,
+    collections: 0,
+    billableHours: 0,
+    newBusiness: 0,
+  };
 
+  const totalRecurringRevenue =
+    firstBreakdown.recurringInvoices + firstBreakdown.recurringTransactions;
+
+  // For backward compatibility, calculate a synthetic "growth rate" based on
+  // comparing forecast month 1 to the last historical month
+  const lastHistoricalValue = historical[historical.length - 1]?.value || 0;
+  const impliedGrowthRate =
+    lastHistoricalValue > 0
+      ? ((nextMonthProjection - lastHistoricalValue) / lastHistoricalValue) *
+        100
+      : 0;
+
+  // Calculate scheduled invoices total
+  const scheduledInvoicesTotal = Array.from(scheduledByMonth.values()).reduce(
+    (sum, amount) => sum + amount,
+    0,
+  );
+
+  // ============================================================================
+  // RETURN RESULT (backward compatible with new fields)
+  // ============================================================================
   return {
     summary: {
-      nextMonthProjection,
-      avgMonthlyGrowthRate,
+      nextMonthProjection: Number(nextMonthProjection.toFixed(2)),
+      avgMonthlyGrowthRate: Number(impliedGrowthRate.toFixed(2)),
       totalProjectedRevenue: Number(totalProjectedRevenue.toFixed(2)),
       peakMonth: {
         date: peakForecast.date,
@@ -2910,53 +3065,58 @@ export async function getRevenueForecast(
       },
       billableHours: {
         totalHours: billableHoursTotal,
-        totalAmount: Number(billableHoursAmount.toFixed(2)),
+        totalAmount: Number(billableHoursValue.toFixed(2)),
         currency: billableHoursData.currency,
       },
     },
-    historical: historical.map((item: (typeof historical)[number]) => ({
+    historical: historical.map((item) => ({
       date: item.date,
       value: item.value,
       currency: item.currency,
     })),
-    forecast: forecast.map((item: ForecastDataPoint) => ({
+    // Enhanced forecast with confidence and breakdown
+    forecast: forecast.map((item) => ({
       date: item.date,
       value: item.value,
       currency: item.currency,
+      // New fields for bottom-up forecast
+      optimistic: item.optimistic,
+      pessimistic: item.pessimistic,
+      confidence: item.confidence,
+      breakdown: item.breakdown,
     })),
     combined: combinedData,
     meta: {
       historicalMonths: historical.length,
       forecastMonths,
-      avgGrowthRate: avgMonthlyGrowthRate,
+      avgGrowthRate: Number(impliedGrowthRate.toFixed(2)),
       basedOnMonths: historical.length,
       currency,
       includesUnpaidInvoices: outstandingInvoicesData.summary.count > 0,
       includesBillableHours: billableHoursTotal > 0,
-      confidenceScore,
-      outlierMonths: dataQuality.outlierCount,
-      forecastMethod: "exponential_smoothing_with_seasonality",
-      // Advanced metrics
-      volatility: Number((volatility * 100).toFixed(2)), // as percentage
-      trendStrength: Number((trendStrength * 100).toFixed(2)), // 0-100%
-      trendDirection:
-        avgGrowthRate > 0.02
-          ? "growing"
-          : avgGrowthRate < -0.02
-            ? "declining"
-            : "stable",
-      seasonalityDetected:
-        historical.length === 12 && seasonalityFactor !== 1.0,
-      seasonalityFactor: Number(seasonalityFactor.toFixed(2)),
-      revenueStability: Number(((1 - coefficientOfVariation) * 100).toFixed(2)), // 0-100%
-      expectedInvoiceCollection: Number(expectedInvoiceCollection.toFixed(2)),
-      collectionRate: Number((collectionRate * 100).toFixed(1)), // as percentage
-      scheduledInvoicesTotal: Number(
-        Array.from(scheduledByMonth.values())
-          .reduce((sum, amount) => sum + amount, 0)
-          .toFixed(2),
+      // New bottom-up forecast metadata
+      forecastMethod: "bottom_up",
+      confidenceScore: avgConfidence,
+      warnings,
+      // Source contribution summary
+      recurringRevenueTotal: totalRecurringRevenue,
+      recurringInvoicesCount: recurringInvoiceData.size,
+      recurringTransactionsCount:
+        recurringTransactionData.get(
+          format(addMonths(currentDate, 1), "yyyy-MM"),
+        )?.count ?? 0,
+      expectedCollections: expectedCollections.totalExpected,
+      collectionRate: Number(
+        (teamCollectionMetrics.onTimeRate * 100).toFixed(1),
       ),
+      scheduledInvoicesTotal: Number(scheduledInvoicesTotal.toFixed(2)),
       scheduledInvoicesCount: scheduledByMonth.size,
+      newBusinessBaseline: Number(nonRecurringBaseline.toFixed(2)),
+      teamCollectionMetrics: {
+        onTimeRate: Number((teamCollectionMetrics.onTimeRate * 100).toFixed(1)),
+        avgDaysToPay: Math.round(teamCollectionMetrics.avgDaysToPay),
+        sampleSize: teamCollectionMetrics.sampleSize,
+      },
     },
   };
 }
