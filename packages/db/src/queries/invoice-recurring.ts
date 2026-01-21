@@ -542,7 +542,12 @@ export async function markInvoiceGenerated(
     timezone: current.timezone,
   };
 
-  const nextScheduledAt = calculateNextScheduledDate(recurringParams, now);
+  // Use the original scheduled time as the base to preserve the intended time
+  // This prevents time drift when the scheduler runs at slightly different times
+  const baseDate = current.nextScheduledAt
+    ? new Date(current.nextScheduledAt)
+    : now;
+  const nextScheduledAt = calculateNextScheduledDate(recurringParams, baseDate);
 
   // Check if series should be completed
   const isCompleted = shouldMarkCompleted(
