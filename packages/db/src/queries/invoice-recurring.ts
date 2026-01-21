@@ -10,6 +10,7 @@ import {
   type InvoiceRecurringEndType,
   type InvoiceRecurringFrequency,
   type RecurringInvoiceParams,
+  advanceToFutureDate,
   calculateFirstScheduledDate,
   calculateNextScheduledDate,
   calculateUpcomingDates,
@@ -542,12 +543,20 @@ export async function markInvoiceGenerated(
     timezone: current.timezone,
   };
 
-  // Use the original scheduled time as the base to preserve the intended time
-  // This prevents time drift when the scheduler runs at slightly different times
+  // Use the original scheduled time as the base to preserve the intended schedule pattern
+  // (e.g., biweekly invoices stay on the same weekday, monthly on the same date)
   const baseDate = current.nextScheduledAt
     ? new Date(current.nextScheduledAt)
     : now;
-  const nextScheduledAt = calculateNextScheduledDate(recurringParams, baseDate);
+
+  const initialNextDate = calculateNextScheduledDate(recurringParams, baseDate);
+
+  // Advance to future if scheduler ran late (prevents catch-up loop)
+  const { date: nextScheduledAt } = advanceToFutureDate(
+    recurringParams,
+    initialNextDate,
+    now,
+  );
 
   // Check if series should be completed
   const isCompleted = shouldMarkCompleted(

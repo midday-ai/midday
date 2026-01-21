@@ -404,3 +404,52 @@ export function shouldMarkCompleted(
       return false;
   }
 }
+
+/**
+ * Advance a scheduled date to the future if it's in the past.
+ *
+ * When the scheduler runs late, the calculated next date (based on the original
+ * scheduled date) might still be in the past. This function advances through
+ * missed intervals until reaching a future date.
+ *
+ * @param params - Recurring invoice parameters
+ * @param scheduledDate - The initially calculated next scheduled date
+ * @param now - The current time to compare against
+ * @param maxIterations - Safety limit to prevent infinite loops (default: 1000)
+ * @returns Object with the future date and number of intervals skipped
+ *
+ * @example
+ * ```ts
+ * // Biweekly invoice scheduled for Jan 1, processed on Jan 21
+ * // Initial calculation: Jan 1 + 14 days = Jan 15 (still in past)
+ * const result = advanceToFutureDate(params, new Date('2025-01-15'), new Date('2025-01-21'));
+ * // result.date = Jan 29 (future)
+ * // result.intervalsSkipped = 1
+ * ```
+ */
+export function advanceToFutureDate(
+  params: RecurringInvoiceParams,
+  scheduledDate: Date,
+  now: Date,
+  maxIterations = 1000,
+): { date: Date; intervalsSkipped: number; hitSafetyLimit: boolean } {
+  let nextDate = scheduledDate;
+  let intervalsSkipped = 0;
+
+  while (nextDate <= now && intervalsSkipped < maxIterations) {
+    nextDate = calculateNextScheduledDate(params, nextDate);
+    intervalsSkipped++;
+  }
+
+  // If we hit the safety limit, fall back to scheduling from now
+  const hitSafetyLimit = intervalsSkipped >= maxIterations;
+  if (hitSafetyLimit) {
+    nextDate = calculateNextScheduledDate(params, now);
+  }
+
+  return {
+    date: nextDate,
+    intervalsSkipped: hitSafetyLimit ? 0 : intervalsSkipped,
+    hitSafetyLimit,
+  };
+}
