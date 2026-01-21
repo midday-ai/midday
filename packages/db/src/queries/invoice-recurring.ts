@@ -17,7 +17,7 @@ import {
   calculateUpcomingDates,
   shouldMarkCompleted,
 } from "@db/utils/invoice-recurring";
-import { addMonths, format, parseISO } from "date-fns";
+import { addMonths, endOfMonth, format, parseISO } from "date-fns";
 import { and, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 
 export type CreateInvoiceRecurringParams = {
@@ -1108,8 +1108,10 @@ export async function getRecurringInvoiceProjection(
   const projection: RecurringInvoiceProjectionResult = new Map();
 
   // Calculate end date for the forecast period (used to filter results)
-  // Use UTCDate for consistency with getRevenueForecast lookups in reports.ts
-  const forecastEndDate = addMonths(new UTCDate(), forecastMonths);
+  // Use endOfMonth to match getRevenueForecast in reports.ts, which covers through
+  // the last day of each forecast month. Without this, invoices scheduled for
+  // later in the last forecast month would be incorrectly excluded.
+  const forecastEndDate = endOfMonth(addMonths(new UTCDate(), forecastMonths));
 
   for (const recurring of activeRecurring) {
     // Skip if no next scheduled date or no amount
