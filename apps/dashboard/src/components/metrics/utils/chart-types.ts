@@ -57,12 +57,12 @@ const reportToChartMap: Record<ReportType, ChartId> = {
 const chartDisplayNames: Record<ReportType, string> = {
   profit: "Profit & Loss",
   revenue: "Monthly Revenue",
-  burn_rate: "Monthly Burn Rate",
-  expense: "Expenses",
+  burn_rate: "Average Monthly Burn Rate",
+  expense: "Average Monthly Expenses",
   monthly_revenue: "Monthly Revenue",
   revenue_forecast: "Revenue Forecast",
   runway: "Runway",
-  category_expenses: "Spending by Category",
+  category_expenses: "Expenses by Category",
 };
 
 export function chartTypeToReportType(chartId: ChartId): ReportType {

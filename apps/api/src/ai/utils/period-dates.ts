@@ -1,12 +1,19 @@
 import type { AppContext } from "@api/ai/agents/config/shared";
-import { format, subMonths, subYears } from "date-fns";
+import { format, startOfYear, subMonths, subYears } from "date-fns";
 
-type PeriodOption = "3-months" | "6-months" | "1-year" | "2-years" | "5-years";
+type PeriodOption =
+  | "3-months"
+  | "6-months"
+  | "this-year"
+  | "1-year"
+  | "2-years"
+  | "5-years";
 
 /** Valid historical period options */
 const VALID_PERIOD_OPTIONS: ReadonlySet<string> = new Set([
   "3-months",
   "6-months",
+  "this-year",
   "1-year",
   "2-years",
   "5-years",
@@ -27,6 +34,8 @@ function getPeriodDates(period: PeriodOption): { from: string; to: string } {
       return { from: format(subMonths(now, 3), "yyyy-MM-dd"), to };
     case "6-months":
       return { from: format(subMonths(now, 6), "yyyy-MM-dd"), to };
+    case "this-year":
+      return { from: format(startOfYear(now), "yyyy-MM-dd"), to };
     case "1-year":
       return { from: format(subYears(now, 1), "yyyy-MM-dd"), to };
     case "2-years":

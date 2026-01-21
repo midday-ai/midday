@@ -90,7 +90,7 @@ export function CategoryExpensesCard({
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">
-            Category Expense Breakdown
+            Expenses by Category
           </h3>
           <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
             <ShareMetricButton

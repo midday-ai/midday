@@ -8,6 +8,7 @@ import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
 import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
 import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ShareMetricButton } from "../components/share-metric-button";
@@ -62,7 +63,7 @@ export function ExpensesCard({
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">
-            Monthly Expenses
+            Average Monthly Expenses
           </h3>
           <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
             <ShareMetricButton
@@ -81,7 +82,18 @@ export function ExpensesCard({
             maximumFractionDigits={0}
           />
         </p>
-        <p className="text-xs text-muted-foreground">Average expenses</p>
+        <div className="flex items-center gap-4 mt-2">
+          <div className="flex gap-2 items-center">
+            <div className="w-2 h-2 rounded-full bg-[#C6C6C6] dark:bg-[#606060]" />
+            <span className="text-xs text-muted-foreground">Total</span>
+          </div>
+          <div className="flex gap-2 items-center">
+            <div className="w-2 h-2 flex items-center justify-center">
+              <Icons.DotRaster />
+            </div>
+            <span className="text-xs text-muted-foreground">Recurring</span>
+          </div>
+        </div>
       </div>
       <div className="h-80">
         {expenseData?.result && expenseData.result.length > 0 ? (

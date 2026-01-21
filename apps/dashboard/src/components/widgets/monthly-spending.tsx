@@ -30,7 +30,7 @@ export function MonthlySpendingWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Monthly Spending"
+        title="Expenses"
         icon={<Icons.Transactions className="size-4" />}
       />
     );
@@ -40,7 +40,7 @@ export function MonthlySpendingWidget() {
 
   const getDescription = () => {
     if (!spending || spending.totalSpending === 0) {
-      return "No expenses recorded this month";
+      return "No expenses recorded for this period";
     }
 
     if (spending.topCategory) {
@@ -48,7 +48,7 @@ export function MonthlySpendingWidget() {
       return `${spending.topCategory.name} makes up ${percentage}% of your spending`;
     }
 
-    return "Track your monthly expenses";
+    return "Track your expenses";
   };
 
   const handleToolCall = (params: {
@@ -89,19 +89,19 @@ export function MonthlySpendingWidget() {
 
   return (
     <BaseWidget
-      title="Monthly Spending"
+      title="Expenses"
       icon={<Icons.Transactions className="size-4" />}
       description={getDescription()}
       onClick={handleSeeExpenses}
-      actions="See biggest cost"
+      actions="See breakdown"
     >
       {spending && spending.totalSpending > 0 && (
-        <p className="text-3xl">
+        <h2 className="text-2xl font-normal">
           <FormatAmount
             amount={spending.totalSpending}
             currency={currency || "USD"}
           />
-        </p>
+        </h2>
       )}
     </BaseWidget>
   );
