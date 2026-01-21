@@ -1,3 +1,4 @@
+import { baseUrl } from "@/app/sitemap";
 import { CustomMDX } from "@/components/mdx";
 import { Pagination } from "@/components/pagination";
 import { PostStatus } from "@/components/post-status";
@@ -25,10 +26,28 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { page } = await params;
+  const title = `Updates - Page ${page}`;
+  const description =
+    "The latest updates and improvements to Midday. See what we've been building to help you manage your business finances better.";
+  const url = `${baseUrl}/updates/page/${page}`;
+
   return {
-    title: `Updates - Page ${page}`,
-    description:
-      "The latest updates and improvements to Midday. See what we've been building to help you manage your business finances better.",
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    alternates: {
+      canonical: url,
+    },
   };
 }
 
