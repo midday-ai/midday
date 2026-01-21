@@ -2,7 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { revenueArtifact } from "@api/ai/artifacts/revenue";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
-import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getReports } from "@midday/db/queries";
@@ -12,23 +12,23 @@ import { endOfMonth, format, parseISO, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getRevenueSummarySchema = z.object({
-  from: z.string().optional().describe("Start date (ISO 8601)"),
-  to: z.string().optional().describe("End date (ISO 8601)"),
-  currency: z
-    .string()
-    .describe("Currency code (ISO 4217, e.g. 'USD')")
-    .nullable()
-    .optional(),
-  revenueType: z.enum(["gross", "net"]).default("net").describe("Revenue type"),
-  showCanvas: z.boolean().default(false).describe("Show visual analytics"),
+  period: z
+    .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
+    .optional()
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
+  to: z.string().optional().describe("End date (yyyy-MM-dd)"),
+  currency: z.string().nullable().optional().describe("Currency code"),
+  revenueType: z.enum(["gross", "net"]).optional().describe("Revenue type"),
+  showCanvas: z.boolean().default(false).describe("Show visual canvas"),
 });
 
 export const getRevenueSummaryTool = tool({
   description:
-    "Calculate and analyze revenue (income/sales) - shows revenue totals, monthly trends, year-over-year comparisons, and growth rates.",
+    "Analyze revenue (income/sales) - totals, trends, and growth rates.",
   inputSchema: getRevenueSummarySchema,
   execute: async function* (
-    { from, to, currency, revenueType, showCanvas },
+    { period, from, to, currency, revenueType, showCanvas },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -52,10 +52,21 @@ export const getRevenueSummaryTool = tool({
     }
 
     try {
-      // Use fiscal year-aware defaults if dates not provided
-      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
-      const finalFrom = from ?? defaultDates.from;
-      const finalTo = to ?? defaultDates.to;
+      // Resolve parameters with proper priority:
+      // 1. Forced params from widget click (if this tool was triggered by widget)
+      // 2. Explicit AI params (user override)
+      // 3. Dashboard metricsFilter (source of truth)
+      // 4. Hardcoded defaults
+      const resolved = resolveToolParams({
+        toolName: "getRevenueSummary",
+        appContext,
+        aiParams: { period, from, to, currency, revenueType },
+      });
+
+      const finalFrom = resolved.from;
+      const finalTo = resolved.to;
+      const finalCurrency = resolved.currency;
+      const finalRevenueType = resolved.revenueType ?? "net";
 
       // Generate description based on date range
       const description = generateArtifactDescription(finalFrom, finalTo);
@@ -67,7 +78,7 @@ export const getRevenueSummaryTool = tool({
         analysis = revenueArtifact.stream(
           {
             stage: "loading",
-            currency: currency || appContext.baseCurrency || "USD",
+            currency: finalCurrency || "USD",
             from: finalFrom,
             to: finalTo,
             description,
@@ -80,9 +91,9 @@ export const getRevenueSummaryTool = tool({
         teamId,
         from: finalFrom,
         to: finalTo,
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
         type: "revenue",
-        revenueType,
+        revenueType: finalRevenueType,
       });
 
       const currentTotal = result.summary.currentTotal;
@@ -140,7 +151,7 @@ export const getRevenueSummaryTool = tool({
           : 0;
 
       // Build response text
-      const revenueTypeLabel = revenueType === "gross" ? "Gross" : "Net";
+      const revenueTypeLabel = finalRevenueType === "gross" ? "Gross" : "Net";
       let responseText = `**Total ${revenueTypeLabel} Revenue:** ${formattedCurrentTotal}\n\n`;
 
       if (prevTotal !== 0) {

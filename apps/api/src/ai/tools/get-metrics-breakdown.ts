@@ -3,7 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { metricsBreakdownSummaryArtifact } from "@api/ai/artifacts/metrics-breakdown";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
-import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import {
   CONTRA_REVENUE_CATEGORIES,
@@ -32,13 +32,13 @@ import { z } from "zod";
 import { createMonthlyArtifactType } from "./metrics-breakdown-constants";
 
 const getMetricsBreakdownSchema = z.object({
-  from: z.string().optional().describe("Start date (ISO 8601)"),
-  to: z.string().optional().describe("End date (ISO 8601)"),
-  currency: z
-    .string()
-    .describe("Currency code (ISO 4217, e.g. 'USD')")
-    .nullable()
-    .optional(),
+  period: z
+    .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
+    .optional()
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
+  to: z.string().optional().describe("End date (yyyy-MM-dd)"),
+  currency: z.string().nullable().optional().describe("Currency code"),
   chartType: z
     .string()
     .optional()
@@ -150,10 +150,11 @@ function createMonthlyBreakdownArtifact(monthKey: string) {
 
 export const getMetricsBreakdownTool = tool({
   description:
-    "Get a comprehensive breakdown of financial metrics for a specific period. Use this tool when the user requests a 'breakdown', 'break down', 'show me a breakdown', 'breakdown of', 'detailed breakdown', or 'comprehensive breakdown' of any financial metric (revenue, expenses, profit, burn rate, etc.). Provides revenue, expenses, profit, transactions, category breakdowns, and analysis. ALWAYS use this tool (not getBurnRate, getRevenueSummary, etc.) when 'breakdown' is mentioned in the request.",
+    "Get a comprehensive breakdown of financial metrics for a specific period. Use this tool when the user requests a 'breakdown', 'break down', 'show me a breakdown', 'breakdown of', 'detailed breakdown', or 'comprehensive breakdown' of any financial metric (revenue, expenses, profit, burn rate, etc.). Provides revenue, expenses, profit, transactions, category breakdowns, and analysis. ALWAYS use this tool (not getBurnRate, getRevenueSummary, etc.) when 'breakdown' is mentioned in the request. " +
+    "IMPORTANT: Use the 'period' parameter for standard time ranges.",
   inputSchema: getMetricsBreakdownSchema,
   execute: async function* (
-    { from, to, currency, chartType, showCanvas },
+    { period, from, to, currency, chartType, showCanvas },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -182,12 +183,17 @@ export const getMetricsBreakdownTool = tool({
     }
 
     try {
-      // Use fiscal year-aware defaults if dates not provided
-      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
-      const finalFrom = from ?? defaultDates.from;
-      const finalTo = to ?? defaultDates.to;
+      const resolved = resolveToolParams({
+        toolName: "getMetricsBreakdown",
+        appContext,
+        aiParams: { period, from, to, currency },
+      });
 
-      const targetCurrency = currency || appContext.baseCurrency || "USD";
+      const finalFrom = resolved.from;
+      const finalTo = resolved.to;
+      const finalCurrency = resolved.currency;
+
+      const targetCurrency = finalCurrency || "USD";
       const locale = appContext.locale || "en-US";
 
       // Check if period spans multiple months
@@ -274,7 +280,7 @@ export const getMetricsBreakdownTool = tool({
             teamId,
             from: monthFrom,
             to: monthTo,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
             type: "revenue",
             revenueType: "net",
           });
@@ -284,14 +290,14 @@ export const getMetricsBreakdownTool = tool({
             teamId,
             from: monthFrom,
             to: monthTo,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
           });
 
           const periodSummary = await getSpendingForPeriod(db, {
             teamId,
             from: monthFrom,
             to: monthTo,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
           });
 
           // Fetch profit data for this month
@@ -299,7 +305,7 @@ export const getMetricsBreakdownTool = tool({
             teamId,
             from: monthFrom,
             to: monthTo,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
             type: "profit",
             revenueType: "net",
           });
@@ -756,7 +762,7 @@ Write it as natural, flowing text.`,
         teamId,
         from: finalFrom,
         to: finalTo,
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
         type: "revenue",
         revenueType: "net",
       });
@@ -766,14 +772,14 @@ Write it as natural, flowing text.`,
         teamId,
         from: finalFrom,
         to: finalTo,
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
       });
 
       const periodSummary = await getSpendingForPeriod(db, {
         teamId,
         from: finalFrom,
         to: finalTo,
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
       });
 
       // Fetch profit data
@@ -781,7 +787,7 @@ Write it as natural, flowing text.`,
         teamId,
         from: finalFrom,
         to: finalTo,
-        currency: currency ?? undefined,
+        currency: finalCurrency ?? undefined,
         type: "profit",
         revenueType: "net",
       });

@@ -2,7 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { cashFlowStressTestArtifact } from "@api/ai/artifacts/cash-flow-stress-test";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
-import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getCashBalance, getCashFlow, getRunway } from "@midday/db/queries";
@@ -10,13 +10,13 @@ import { tool } from "ai";
 import { z } from "zod";
 
 const getCashFlowStressTestSchema = z.object({
-  from: z.string().optional().describe("Start date (ISO 8601)"),
-  to: z.string().optional().describe("End date (ISO 8601)"),
-  currency: z
-    .string()
-    .describe("Currency code (ISO 4217, e.g. 'USD')")
-    .nullable()
-    .optional(),
+  period: z
+    .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
+    .optional()
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
+  to: z.string().optional().describe("End date (yyyy-MM-dd)"),
+  currency: z.string().nullable().optional().describe("Currency code"),
   showCanvas: z.boolean().default(false).describe("Show visual analytics"),
 });
 
@@ -25,7 +25,7 @@ export const getCashFlowStressTestTool = tool({
     "Perform cash flow stress testing - analyzes base case, worst case, and best case scenarios to assess financial resilience.",
   inputSchema: getCashFlowStressTestSchema,
   execute: async function* (
-    { from, to, currency, showCanvas },
+    { period, from, to, currency, showCanvas },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -49,10 +49,15 @@ export const getCashFlowStressTestTool = tool({
     }
 
     try {
-      // Use fiscal year-aware defaults if dates not provided
-      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
-      const finalFrom = from ?? defaultDates.from;
-      const finalTo = to ?? defaultDates.to;
+      const resolved = resolveToolParams({
+        toolName: "getCashFlowStressTest",
+        appContext,
+        aiParams: { period, from, to, currency },
+      });
+
+      const finalFrom = resolved.from;
+      const finalTo = resolved.to;
+      const finalCurrency = resolved.currency;
 
       // Generate description based on date range
       const description = generateArtifactDescription(finalFrom, finalTo);
@@ -66,7 +71,7 @@ export const getCashFlowStressTestTool = tool({
         analysis = cashFlowStressTestArtifact.stream(
           {
             stage: "loading",
-            currency: currency || appContext.baseCurrency || "USD",
+            currency: finalCurrency || "USD",
             from: finalFrom,
             to: finalTo,
             description,
@@ -75,7 +80,7 @@ export const getCashFlowStressTestTool = tool({
         );
       }
 
-      const targetCurrency = currency || appContext.baseCurrency || "USD";
+      const targetCurrency = finalCurrency || "USD";
       const locale = appContext.locale || "en-US";
 
       // Fetch required data in parallel
@@ -85,18 +90,18 @@ export const getCashFlowStressTestTool = tool({
             teamId,
             from: finalFrom,
             to: finalTo,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
             period: "monthly",
           }),
           getCashBalance(db, {
             teamId,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
           }),
           getRunway(db, {
             teamId,
             from: finalFrom,
             to: finalTo,
-            currency: currency ?? undefined,
+            currency: finalCurrency ?? undefined,
           }),
         ]);
 

@@ -4,9 +4,10 @@ import { formatAmount } from "@/utils/format";
 import { format, parseISO } from "date-fns";
 import { useMemo } from "react";
 import {
+  Area,
   CartesianGrid,
+  ComposedChart,
   Line,
-  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -21,11 +22,26 @@ import {
 import type { BaseChartProps } from "./chart-utils";
 import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
+// Breakdown of revenue sources for the bottom-up forecast
+interface ForecastBreakdown {
+  recurringInvoices: number;
+  recurringTransactions: number;
+  scheduled: number;
+  collections: number;
+  billableHours: number;
+  newBusiness: number;
+}
+
 interface ForecastData {
   month: string;
   actual?: number | null;
   forecasted?: number | null;
   date?: string; // Full date for tooltip
+  // New fields for enhanced forecast
+  optimistic?: number | null;
+  pessimistic?: number | null;
+  confidence?: number | null;
+  breakdown?: ForecastBreakdown | null;
 }
 
 interface RevenueForecastChartProps extends Omit<BaseChartProps, "data"> {
@@ -46,7 +62,7 @@ interface RevenueForecastChartProps extends Omit<BaseChartProps, "data"> {
   onSelectionStateChange?: (isSelecting: boolean) => void;
 }
 
-// Custom tooltip component
+// Custom tooltip component with breakdown support
 const CustomTooltip = ({
   active,
   payload,
@@ -61,9 +77,19 @@ const CustomTooltip = ({
   forecastStartMonth?: string | null;
 }) => {
   if (active && Array.isArray(payload) && payload.length > 0) {
-    const data = payload[0]?.payload;
-    const value = payload[0]?.value;
-    const isActual = payload[0]?.dataKey === "actual";
+    // Get the data point from any payload entry (they all share the same payload)
+    const data = payload[0]?.payload as ForecastData | undefined;
+
+    // Find the actual or forecasted entry (not the confidenceRange which is an array)
+    const actualEntry = payload.find((p) => p.dataKey === "actual");
+    const forecastedEntry = payload.find((p) => p.dataKey === "forecasted");
+
+    // Determine which value to show - actual takes precedence
+    const isActual = actualEntry?.value != null;
+    const value = isActual
+      ? (actualEntry?.value as number)
+      : (forecastedEntry?.value as number | undefined);
+
     const isForecastStart = data?.month === forecastStartMonth;
 
     // Extract year from date if available, otherwise use current year
@@ -80,9 +106,16 @@ const CustomTooltip = ({
         maximumFractionDigits: 0,
       }) ?? `${currency}${amount.toLocaleString()}`;
 
+    // Check if we have breakdown data (only for forecast points)
+    const hasBreakdown = !isActual && data?.breakdown;
+    const breakdown = data?.breakdown;
+    const confidence = data?.confidence;
+    const optimistic = data?.optimistic;
+    const pessimistic = data?.pessimistic;
+
     return (
       <div
-        className="bg-white dark:bg-[#0c0c0c] border border-[#e6e6e6] dark:border-[#1d1d1d] p-2 text-[10px] font-stack-sans-slashed-zero"
+        className="bg-white dark:bg-[#0c0c0c] border border-[#e6e6e6] dark:border-[#1d1d1d] p-2 text-[10px] font-stack-sans-slashed-zero min-w-[180px]"
         style={{
           opacity: 1,
           boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
@@ -92,10 +125,10 @@ const CustomTooltip = ({
         <p className="mb-1 text-[#707070] dark:text-[#666666]">
           {data?.month} {year}
         </p>
-        <p className="text-black dark:text-white">
-          Revenue: {formatCurrency(value)}
+        <p className="text-black dark:text-white font-medium">
+          Revenue: {value != null ? formatCurrency(value) : "-"}
         </p>
-        <p className="text-[#707070] dark:text-[#666666]">
+        <p className="text-[#707070] dark:text-[#666666] mb-1">
           {isForecastStart
             ? isActual
               ? "Actual (Baseline)"
@@ -104,6 +137,62 @@ const CustomTooltip = ({
               ? "Actual"
               : "Forecast"}
         </p>
+
+        {/* Confidence band info for forecasts */}
+        {!isActual && optimistic != null && pessimistic != null && (
+          <div className="mt-1.5 pt-1.5 border-t border-[#e6e6e6] dark:border-[#1d1d1d]">
+            <p className="text-[#707070] dark:text-[#666666] text-[9px]">
+              Range: {formatCurrency(pessimistic)} -{" "}
+              {formatCurrency(optimistic)}
+            </p>
+            {confidence != null && (
+              <p className="text-[#707070] dark:text-[#666666] text-[9px]">
+                Confidence: {confidence}%
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Breakdown of revenue sources */}
+        {hasBreakdown && breakdown && (
+          <div className="mt-1.5 pt-1.5 border-t border-[#e6e6e6] dark:border-[#1d1d1d]">
+            <p className="text-[#888] dark:text-[#555] text-[9px] mb-0.5 uppercase tracking-wider">
+              Sources
+            </p>
+            {breakdown.recurringInvoices > 0 && (
+              <p className="text-[#707070] dark:text-[#666666] text-[9px]">
+                Recurring Invoices:{" "}
+                {formatCurrency(breakdown.recurringInvoices)}
+              </p>
+            )}
+            {breakdown.recurringTransactions > 0 && (
+              <p className="text-[#707070] dark:text-[#666666] text-[9px]">
+                Recurring Deposits:{" "}
+                {formatCurrency(breakdown.recurringTransactions)}
+              </p>
+            )}
+            {breakdown.scheduled > 0 && (
+              <p className="text-[#707070] dark:text-[#666666] text-[9px]">
+                Scheduled: {formatCurrency(breakdown.scheduled)}
+              </p>
+            )}
+            {breakdown.collections > 0 && (
+              <p className="text-[#707070] dark:text-[#666666] text-[9px]">
+                Collections: {formatCurrency(breakdown.collections)}
+              </p>
+            )}
+            {breakdown.billableHours > 0 && (
+              <p className="text-[#707070] dark:text-[#666666] text-[9px]">
+                Billable Hours: {formatCurrency(breakdown.billableHours)}
+              </p>
+            )}
+            {breakdown.newBusiness > 0 && (
+              <p className="text-[#707070] dark:text-[#666666] text-[9px]">
+                New Business: {formatCurrency(breakdown.newBusiness)}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -122,10 +211,17 @@ export function RevenueForecastChart({
   onSelectionComplete,
   onSelectionStateChange,
 }: RevenueForecastChartProps) {
-  // Normalize data - use data prop directly, fallback to empty array
+  // Normalize data - create a range array for confidence band
   const normalizedData = useMemo(() => {
     if (!data || data.length === 0) return [];
-    return data;
+    return data.map((d) => ({
+      ...d,
+      // Create a range array for the Area component [pessimistic, optimistic]
+      confidenceRange:
+        d.optimistic != null && d.pessimistic != null
+          ? [d.pessimistic, d.optimistic]
+          : null,
+    }));
   }, [data]);
 
   // Detect forecast start index dynamically
@@ -185,10 +281,15 @@ export function RevenueForecastChart({
   }));
   const { marginLeft } = useChartMargin(marginData, "value", tickFormatter);
 
-  // Calculate dynamic domain based on data
+  // Calculate dynamic domain based on data (including confidence bands)
   const yAxisDomain = useMemo(() => {
     const allValues = normalizedData
-      .flatMap((d) => [d.actual ?? 0, d.forecasted ?? 0])
+      .flatMap((d) => [
+        d.actual ?? 0,
+        d.forecasted ?? 0,
+        d.optimistic ?? 0,
+        d.pessimistic ?? 0,
+      ])
       .filter((v) => v > 0);
 
     if (allValues.length === 0) return { min: 0, max: 10000 };
@@ -204,12 +305,17 @@ export function RevenueForecastChart({
     return { min: minWithPadding, max: maxWithPadding };
   }, [normalizedData]);
 
+  // Check if we have confidence band data
+  const hasConfidenceBand = useMemo(() => {
+    return normalizedData.some((d) => d.confidenceRange != null);
+  }, [normalizedData]);
+
   const chartContent = (
     <div className={`w-full ${className}`}>
       {/* Chart */}
       <div style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
+          <ComposedChart
             data={normalizedData}
             margin={{ top: 20, right: 6, left: -marginLeft, bottom: 6 }}
           >
@@ -257,6 +363,18 @@ export function RevenueForecastChart({
                   }}
                 />
               )}
+            {/* Confidence band (shaded area between pessimistic and optimistic) */}
+            {hasConfidenceBand && (
+              <Area
+                type="monotone"
+                dataKey="confidenceRange"
+                fill="var(--chart-forecast-line)"
+                fillOpacity={0.1}
+                stroke="none"
+                isAnimationActive={false}
+                connectNulls={false}
+              />
+            )}
             <Tooltip
               content={
                 <CustomTooltip
@@ -317,7 +435,7 @@ export function RevenueForecastChart({
               isAnimationActive={false}
               connectNulls={true}
             />
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>

@@ -37,6 +37,8 @@ const howItWorksSteps = [
 
 export function PreAccounting() {
   const [activeStep, setActiveStep] = useState(0);
+  const [isLightLoaded, setIsLightLoaded] = useState(false);
+  const [isDarkLoaded, setIsDarkLoaded] = useState(false);
 
   return (
     <div className="min-h-screen">
@@ -53,16 +55,26 @@ export function PreAccounting() {
                   alt="Accounting Interface"
                   width={112}
                   height={400}
-                  className="h-full w-auto object-contain dark:hidden"
+                  className="h-full w-auto object-contain dark:hidden transition-all duration-700 ease-out"
+                  style={{
+                    filter: isLightLoaded ? "blur(0px)" : "blur(20px)",
+                    transform: isLightLoaded ? "scale(1)" : "scale(1.02)",
+                  }}
                   priority
+                  onLoad={() => setIsLightLoaded(true)}
                 />
                 <Image
                   src="/images/accounting-dark.png"
                   alt="Accounting Interface"
                   width={112}
                   height={400}
-                  className="h-full w-auto object-contain hidden dark:block"
+                  className="h-full w-auto object-contain hidden dark:block transition-all duration-700 ease-out"
+                  style={{
+                    filter: isDarkLoaded ? "blur(0px)" : "blur(20px)",
+                    transform: isDarkLoaded ? "scale(1)" : "scale(1.02)",
+                  }}
                   priority
+                  onLoad={() => setIsDarkLoaded(true)}
                 />
               </div>
             </div>
@@ -116,16 +128,26 @@ export function PreAccounting() {
                   alt="Accounting Interface"
                   width={112}
                   height={400}
-                  className="h-full w-auto object-contain dark:hidden"
+                  className="h-full w-auto object-contain dark:hidden transition-all duration-700 ease-out"
+                  style={{
+                    filter: isLightLoaded ? "blur(0px)" : "blur(20px)",
+                    transform: isLightLoaded ? "scale(1)" : "scale(1.02)",
+                  }}
                   priority
+                  onLoad={() => setIsLightLoaded(true)}
                 />
                 <Image
                   src="/images/accounting-dark.png"
                   alt="Accounting Interface"
                   width={112}
                   height={400}
-                  className="h-full w-auto object-contain hidden dark:block"
+                  className="h-full w-auto object-contain hidden dark:block transition-all duration-700 ease-out"
+                  style={{
+                    filter: isDarkLoaded ? "blur(0px)" : "blur(20px)",
+                    transform: isDarkLoaded ? "scale(1)" : "scale(1.02)",
+                  }}
                   priority
+                  onLoad={() => setIsDarkLoaded(true)}
                 />
               </div>
             </div>

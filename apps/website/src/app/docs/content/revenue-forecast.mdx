@@ -1,0 +1,174 @@
+---
+title: Revenue Forecast
+description: See projected revenue for the coming months based on your recurring income, outstanding invoices, and tracked work.
+section: reports
+order: 6
+---
+
+Your revenue forecast shows how much money you can expect to receive in the coming months. Unlike simple projections that just extend past trends, Midday builds your forecast from real, known sources of incoming revenue.
+
+## Why forecasting matters
+
+Knowing what's coming in helps you:
+
+- **Plan cash flow**: Match expected income against upcoming expenses
+- **Make hiring decisions**: Know if you can afford to grow the team
+- **Time big purchases**: Align spending with expected revenue
+- **Spot gaps early**: See slow months before they happen
+
+## View your forecast
+
+1. Go to [Overview](https://app.midday.ai)
+2. Find the Revenue Forecast card
+3. Hover over any month to see the breakdown
+
+The forecast shows:
+
+- **Historical revenue**: What you actually received (solid line)
+- **Projected revenue**: What Midday expects you'll receive (dashed line)
+- **Confidence score**: How reliable the projection is
+
+## How the forecast works
+
+Midday calculates your forecast by adding up known and expected revenue sources. This "bottom-up" approach is more accurate than simply assuming past trends will continue.
+
+### Revenue sources included
+
+Your forecast is built from these sources, ordered by reliability:
+
+**High confidence (most reliable)**
+- **Recurring invoices**: Active recurring invoices you've set up that will automatically generate
+- **Recurring deposits**: Bank deposits that happen regularly (like retainer payments)
+- **Scheduled invoices**: Invoices you've created but scheduled for future dates
+
+**Medium confidence**
+- **Outstanding invoices**: Unpaid invoices adjusted by your historical collection rate
+- **Billable hours**: Tracked time that hasn't been invoiced yet
+
+**Low confidence**
+- **New business baseline**: A conservative estimate based on your typical non-recurring revenue
+
+### What's excluded
+
+To keep forecasts realistic, Midday automatically excludes:
+
+- **Credit card payments**: These are payments to your debt, not revenue
+- **Internal transfers**: Moving money between your own accounts
+- **Refunds and chargebacks**: These reduce revenue, not add to it
+- **One-time windfalls**: Unusual large deposits that won't repeat
+
+## Understanding confidence scores
+
+Each forecast month shows a confidence score (0-100%). Higher scores mean the projection relies more on known, reliable sources.
+
+| Confidence | Meaning |
+|------------|---------|
+| 80-100% | Mostly recurring revenue—very reliable |
+| 60-80% | Good mix of recurring and expected collections |
+| 40-60% | Significant portion from new business estimates |
+| Below 40% | Mostly projections—treat as rough estimate |
+
+Confidence naturally decreases for months further in the future since there's more uncertainty.
+
+## Improving forecast accuracy
+
+The more information Midday has, the better your forecast:
+
+### Set up recurring invoices
+
+If you bill clients the same amount regularly, [create recurring invoices](/docs/set-up-recurring-invoice). These are the most reliable source for forecasting.
+
+### Track your time
+
+When you [track billable hours](/docs/track-time-timer), Midday can estimate unbilled revenue. Link your tracked time to projects with hourly rates.
+
+### Keep invoices updated
+
+- Mark invoices as paid when you receive payment
+- Cancel invoices that won't be collected
+- Send scheduled invoices on time
+
+### Connect all revenue accounts
+
+Make sure all accounts where you receive payments are connected and enabled. Missing accounts mean missing data.
+
+## Multi-currency support
+
+If you receive payments in different currencies:
+
+- All amounts are converted to your base currency
+- Exchange rates are updated regularly
+- Your forecast shows everything in one unified view
+
+Set your base currency in [Settings](https://app.midday.ai/settings).
+
+## Forecast breakdown
+
+Hover over any forecast month to see exactly where the projected revenue comes from:
+
+- **Recurring invoices**: From your active recurring invoice schedules
+- **Recurring deposits**: From bank transactions marked as recurring
+- **Scheduled**: From invoices you've scheduled for that month
+- **Collections**: From unpaid invoices expected to be paid
+- **Billable hours**: From tracked time at project rates
+- **New business**: Conservative baseline from historical patterns
+
+## Forecast vs. reality
+
+The forecast updates as new information comes in:
+
+- **New invoice created**: Forecast increases
+- **Invoice paid**: Moves from forecast to actual
+- **Invoice canceled**: Forecast decreases
+- **Recurring invoice stopped**: Future months decrease
+
+Check your forecast weekly to see how projections are tracking against reality.
+
+## Using forecast for planning
+
+### Cash flow planning
+
+Compare your forecast against expected expenses:
+
+```
+Expected Cash Position = Current Cash + Forecast Revenue - Expected Expenses
+```
+
+If projected revenue won't cover expenses, you'll know ahead of time.
+
+### Capacity planning
+
+Use the forecast to answer:
+- Can we afford to hire next month?
+- Is there enough coming in to cover that software purchase?
+- When is our next slow period?
+
+### Client concentration
+
+If one client dominates your recurring revenue, that's worth noting. Losing that client would significantly impact future months.
+
+## Warnings and notes
+
+Midday may show warnings on your forecast:
+
+**"Double-counting possible"**: You have both recurring invoices and recurring bank deposits that might represent the same revenue (e.g., a retainer billed via invoice that also shows as a recurring bank deposit).
+
+**"Limited history"**: Not enough historical data to calculate reliable baselines. Accuracy improves as you use Midday longer.
+
+## Limitations
+
+The forecast is a projection, not a guarantee:
+
+- **New clients**: Future clients you haven't signed yet aren't included
+- **One-time projects**: Large projects without recurring patterns aren't predicted
+- **Market changes**: External factors that affect your business aren't modeled
+- **Payment delays**: Clients may pay late or not at all
+
+Use the forecast as one input for planning, not the only one.
+
+## Related features
+
+- [Recurring invoices](/docs/set-up-recurring-invoice): Set up automatic billing
+- [Time tracking](/docs/track-time-timer): Track billable work
+- [Invoice status](/docs/track-invoice-status): Monitor outstanding payments
+- [Understanding metrics](/docs/understanding-metrics): Learn about all financial metrics

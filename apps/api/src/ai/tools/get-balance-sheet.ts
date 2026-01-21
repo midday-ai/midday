@@ -2,7 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { balanceSheetArtifact } from "@api/ai/artifacts/balance-sheet";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
-import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getBalanceSheet } from "@midday/db/queries";
@@ -12,25 +12,25 @@ import { format, parseISO } from "date-fns";
 import { z } from "zod";
 
 const getBalanceSheetSchema = z.object({
-  from: z.string().optional().describe("Start date (ISO 8601)"),
+  period: z
+    .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
+    .optional()
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
   to: z
     .string()
     .optional()
-    .describe("End date (ISO 8601) - used as 'as of' date for balance sheet"),
-  currency: z
-    .string()
-    .describe("Currency code (ISO 4217, e.g. 'USD')")
-    .nullable()
-    .optional(),
-  showCanvas: z.boolean().default(false).describe("Show visual analytics"),
+    .describe("End date (yyyy-MM-dd) - used as 'as of' date"),
+  currency: z.string().nullable().optional().describe("Currency code"),
+  showCanvas: z.boolean().default(false).describe("Show visual canvas"),
 });
 
 export const getBalanceSheetTool = tool({
   description:
-    "Generate balance sheet - shows assets, liabilities, and equity for a given period. Use this tool for any request about balance sheet, financial position, assets and liabilities, statement of financial position, or snapshot of company finances. Examples: 'show me my balance sheet', 'what's my balance sheet', 'balance sheet report', 'financial position', 'assets and liabilities', 'show balance sheet', 'my balance sheet', 'company balance sheet'.",
+    "Generate balance sheet - assets, liabilities, and equity as of a date.",
   inputSchema: getBalanceSheetSchema,
   execute: async function* (
-    { from, to, currency, showCanvas },
+    { period, from, to, currency, showCanvas },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -54,15 +54,25 @@ export const getBalanceSheetTool = tool({
     }
 
     try {
-      // Use fiscal year-aware defaults if dates not provided
-      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
-      const finalFrom = from ?? defaultDates.from;
-      const finalTo = to ?? defaultDates.to;
+      // Resolve parameters with proper priority:
+      // 1. Forced params from widget click (if this tool was triggered by widget)
+      // 2. Explicit AI params (user override)
+      // 3. Dashboard metricsFilter (source of truth)
+      // 4. Hardcoded defaults
+      const resolved = resolveToolParams({
+        toolName: "getBalanceSheet",
+        appContext,
+        aiParams: { period, from, to, currency },
+      });
+
+      const finalFrom = resolved.from;
+      const finalTo = resolved.to;
+      const finalCurrency = resolved.currency;
 
       // Generate description based on date range
       const description = generateArtifactDescription(finalFrom, finalTo);
 
-      const targetCurrency = currency || appContext.baseCurrency || "USD";
+      const targetCurrency = finalCurrency || "USD";
       const locale = appContext.locale || "en-US";
 
       // Use 'to' date as the asOf date (balance sheet is a snapshot as of a specific date)
@@ -88,7 +98,7 @@ export const getBalanceSheetTool = tool({
       // Fetch balance sheet data
       const balanceSheetData = await getBalanceSheet(db, {
         teamId,
-        currency: currency || undefined,
+        currency: finalCurrency ?? undefined,
         asOf: asOfDate,
       });
 

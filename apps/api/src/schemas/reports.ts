@@ -450,6 +450,174 @@ export const getRevenueForecastSchema = z
   })
   .openapi("GetRevenueForecastSchema");
 
+// Forecast breakdown showing contribution from each revenue source
+const forecastBreakdownSchema = z
+  .object({
+    recurringInvoices: z.number().openapi({
+      description: "Revenue from recurring invoices (high confidence)",
+      example: 5000,
+    }),
+    recurringTransactions: z.number().openapi({
+      description: "Revenue from recurring bank transactions (high confidence)",
+      example: 2000,
+    }),
+    scheduled: z.number().openapi({
+      description: "Revenue from scheduled invoices (high confidence)",
+      example: 1000,
+    }),
+    collections: z.number().openapi({
+      description:
+        "Expected collections from outstanding invoices (medium confidence)",
+      example: 3000,
+    }),
+    billableHours: z.number().openapi({
+      description: "Value of unbilled tracked hours (medium confidence)",
+      example: 1500,
+    }),
+    newBusiness: z.number().openapi({
+      description: "Projected new business revenue (low confidence)",
+      example: 2500,
+    }),
+  })
+  .openapi("ForecastBreakdown");
+
+// Enhanced forecast data point with confidence and breakdown
+const enhancedForecastPointSchema = z
+  .object({
+    date: z.string().openapi({
+      description: "Forecast date (ISO 8601)",
+      example: "2024-02-29",
+    }),
+    value: z.number().openapi({
+      description: "Base forecast value (most likely scenario)",
+      example: 15000,
+    }),
+    currency: z.string().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+    optimistic: z.number().openapi({
+      description: "Optimistic forecast (80th percentile)",
+      example: 18000,
+    }),
+    pessimistic: z.number().openapi({
+      description: "Pessimistic forecast (20th percentile)",
+      example: 10000,
+    }),
+    confidence: z.number().openapi({
+      description: "Confidence score for this month (0-100%)",
+      example: 75,
+    }),
+    breakdown: forecastBreakdownSchema.openapi({
+      description: "Breakdown of revenue sources contributing to forecast",
+    }),
+  })
+  .openapi("EnhancedForecastPoint");
+
+export const getRevenueForecastResponseSchema = z
+  .object({
+    summary: z
+      .object({
+        nextMonthProjection: z.number().openapi({
+          description: "Projected revenue for next month",
+          example: 15000,
+        }),
+        avgMonthlyGrowthRate: z.number().openapi({
+          description: "Implied monthly growth rate (%)",
+          example: 5.2,
+        }),
+        totalProjectedRevenue: z.number().openapi({
+          description: "Total projected revenue across forecast period",
+          example: 90000,
+        }),
+        peakMonth: z
+          .object({
+            date: z.string(),
+            value: z.number(),
+          })
+          .openapi({ description: "Month with highest projected revenue" }),
+        currency: z.string(),
+        revenueType: z.enum(["gross", "net"]),
+        forecastStartDate: z.string().optional(),
+        unpaidInvoices: z.object({
+          count: z.number(),
+          totalAmount: z.number(),
+          currency: z.string(),
+        }),
+        billableHours: z.object({
+          totalHours: z.number(),
+          totalAmount: z.number(),
+          currency: z.string(),
+        }),
+      })
+      .openapi("ForecastSummary"),
+    historical: z.array(
+      z.object({
+        date: z.string(),
+        value: z.number(),
+        currency: z.string(),
+      }),
+    ),
+    forecast: z.array(enhancedForecastPointSchema).openapi({
+      description: "Forecast data with confidence bounds and source breakdown",
+    }),
+    combined: z.array(
+      z.object({
+        date: z.string(),
+        value: z.number(),
+        currency: z.string(),
+        type: z.enum(["actual", "forecast"]),
+      }),
+    ),
+    meta: z
+      .object({
+        historicalMonths: z.number(),
+        forecastMonths: z.number(),
+        avgGrowthRate: z.number(),
+        basedOnMonths: z.number(),
+        currency: z.string(),
+        includesUnpaidInvoices: z.boolean(),
+        includesBillableHours: z.boolean(),
+        forecastMethod: z.literal("bottom_up").openapi({
+          description: "Forecast methodology used",
+          example: "bottom_up",
+        }),
+        confidenceScore: z.number().openapi({
+          description: "Average confidence across all forecast months",
+          example: 72,
+        }),
+        warnings: z.array(z.string()).openapi({
+          description:
+            "Warnings about potential issues (e.g., double-counting)",
+          example: [],
+        }),
+        recurringRevenueTotal: z.number().openapi({
+          description: "Total recurring revenue in first forecast month",
+          example: 7000,
+        }),
+        recurringInvoicesCount: z.number(),
+        recurringTransactionsCount: z.number(),
+        expectedCollections: z.number(),
+        collectionRate: z.number().openapi({
+          description: "Team's historical on-time payment rate (%)",
+          example: 78.5,
+        }),
+        scheduledInvoicesTotal: z.number(),
+        scheduledInvoicesCount: z.number(),
+        newBusinessBaseline: z.number().openapi({
+          description: "Baseline for projected new business revenue",
+          example: 2500,
+        }),
+        teamCollectionMetrics: z.object({
+          onTimeRate: z.number(),
+          avgDaysToPay: z.number(),
+          sampleSize: z.number(),
+        }),
+      })
+      .openapi("ForecastMeta"),
+  })
+  .openapi("GetRevenueForecastResponse");
+
 export const reportTypeSchema = z.enum([
   "profit",
   "revenue",

@@ -102,6 +102,8 @@ export function StartPage() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isPosterLoaded, setIsPosterLoaded] = useState(false);
+  const [isDashboardLightLoaded, setIsDashboardLightLoaded] = useState(false);
+  const [isDashboardDarkLoaded, setIsDashboardDarkLoaded] = useState(false);
 
   const videoContainerRef = useRef(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -232,18 +234,36 @@ export function StartPage() {
                     alt="Dashboard illustration"
                     width={1600}
                     height={1200}
-                    className="w-full h-auto md:!scale-[0.85] lg:!scale-100 lg:object-contain lg:max-w-[85%] 2xl:max-w-[66%] dark:hidden lg:[transform:rotate(-2deg)_skewY(1deg)] lg:[filter:drop-shadow(0_30px_60px_rgba(0,0,0,0.6))]"
+                    className="w-full h-auto md:!scale-[0.85] lg:!scale-100 lg:object-contain lg:max-w-[85%] 2xl:max-w-[66%] dark:hidden lg:[transform:rotate(-2deg)_skewY(1deg)] lg:[filter:drop-shadow(0_30px_60px_rgba(0,0,0,0.6))] transition-all duration-700 ease-out"
+                    style={{
+                      filter: isDashboardLightLoaded
+                        ? "blur(0px) drop-shadow(0 30px 60px rgba(0,0,0,0.6))"
+                        : "blur(20px)",
+                      transform: isDashboardLightLoaded
+                        ? "scale(1)"
+                        : "scale(1.02)",
+                    }}
                     priority
                     fetchPriority="high"
+                    onLoad={() => setIsDashboardLightLoaded(true)}
                   />
                   <Image
                     src="/images/dashboard-dark.svg"
                     alt="Dashboard illustration"
                     width={1600}
                     height={1200}
-                    className="w-full h-auto md:!scale-[0.85] lg:!scale-100 lg:object-contain lg:max-w-[85%] 2xl:max-w-[66%] hidden dark:block lg:[transform:rotate(-2deg)_skewY(1deg)] lg:[filter:drop-shadow(0_30px_60px_rgba(0,0,0,0.6))]"
+                    className="w-full h-auto md:!scale-[0.85] lg:!scale-100 lg:object-contain lg:max-w-[85%] 2xl:max-w-[66%] hidden dark:block lg:[transform:rotate(-2deg)_skewY(1deg)] lg:[filter:drop-shadow(0_30px_60px_rgba(0,0,0,0.6))] transition-all duration-700 ease-out"
+                    style={{
+                      filter: isDashboardDarkLoaded
+                        ? "blur(0px) drop-shadow(0 30px 60px rgba(0,0,0,0.6))"
+                        : "blur(20px)",
+                      transform: isDashboardDarkLoaded
+                        ? "scale(1)"
+                        : "scale(1.02)",
+                    }}
                     priority
                     fetchPriority="high"
+                    onLoad={() => setIsDashboardDarkLoaded(true)}
                   />
                 </div>
               </div>

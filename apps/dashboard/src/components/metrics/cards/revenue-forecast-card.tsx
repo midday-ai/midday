@@ -51,7 +51,7 @@ export function RevenueForecastCard({
     }),
   );
 
-  // Transform revenue forecast data
+  // Transform revenue forecast data with enhanced fields
   const revenueForecastChartData = useMemo(() => {
     if (!revenueForecastData) return [];
 
@@ -65,12 +65,21 @@ export function RevenueForecastCard({
         // Set forecasted value on the last historical point to same as actual to connect the lines
         forecasted: index === historical.length - 1 ? item.value : null,
         date: item.date,
+        // Historical points don't have confidence data
+        optimistic: null,
+        pessimistic: null,
+        confidence: null,
+        breakdown: null,
       })),
       ...forecast.map((item) => ({
         month: format(parseISO(item.date), "MMM"),
         actual: null,
         forecasted: item.value,
         date: item.date,
+        optimistic: item.optimistic ?? null,
+        pessimistic: item.pessimistic ?? null,
+        confidence: item.confidence ?? null,
+        breakdown: item.breakdown ?? null,
       })),
     ];
   }, [revenueForecastData]);
@@ -83,6 +92,15 @@ export function RevenueForecastCard({
 
   const forecastedRevenue =
     revenueForecastData?.summary?.totalProjectedRevenue ?? 0;
+
+  // Get confidence score from new bottom-up forecast meta
+  const confidenceScore = useMemo(() => {
+    const meta = revenueForecastData?.meta;
+    if (meta && "confidenceScore" in meta) {
+      return meta.confidenceScore as number;
+    }
+    return null;
+  }, [revenueForecastData]);
 
   const dateRangeDisplay = useMemo(() => {
     try {
@@ -140,6 +158,13 @@ export function RevenueForecastCard({
             />
             <span className="text-xs text-muted-foreground">Forecast</span>
           </div>
+          {confidenceScore !== null && (
+            <div className="flex gap-1 items-center ml-auto">
+              <span className="text-xs text-muted-foreground">
+                {confidenceScore}% confidence
+              </span>
+            </div>
+          )}
         </div>
       </div>
       <div className="h-80">

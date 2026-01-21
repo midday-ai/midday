@@ -2,7 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { profitArtifact } from "@api/ai/artifacts/profit";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
-import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getReports } from "@midday/db/queries";
@@ -12,27 +12,23 @@ import { format, parseISO } from "date-fns";
 import { z } from "zod";
 
 const getProfitAnalysisSchema = z.object({
-  from: z.string().optional().describe("Start date (ISO 8601)"),
-  to: z.string().optional().describe("End date (ISO 8601)"),
-  currency: z
-    .string()
-    .describe("Currency code (ISO 4217, e.g. 'USD')")
-    .nullable()
-    .optional(),
-  revenueType: z
-    .enum(["gross", "net"])
+  period: z
+    .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
     .optional()
-    .default("net")
-    .describe("Revenue type: 'net' (after taxes) or 'gross' (before taxes)"),
-  showCanvas: z.boolean().default(false).describe("Show visual analytics"),
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
+  to: z.string().optional().describe("End date (yyyy-MM-dd)"),
+  currency: z.string().nullable().optional().describe("Currency code"),
+  revenueType: z.enum(["gross", "net"]).optional().describe("Revenue type"),
+  showCanvas: z.boolean().default(false).describe("Show visual canvas"),
 });
 
 export const getProfitAnalysisTool = tool({
   description:
-    "Calculate and analyze profit (revenue minus expenses) - shows profit totals, monthly trends, year-over-year comparisons, and margins. Supports both net and gross revenue types.",
+    "Analyze profit (revenue minus expenses) - totals, trends, and margins.",
   inputSchema: getProfitAnalysisSchema,
   execute: async function* (
-    { from, to, currency, revenueType, showCanvas },
+    { period, from, to, currency, revenueType, showCanvas },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -56,10 +52,21 @@ export const getProfitAnalysisTool = tool({
     }
 
     try {
-      // Use fiscal year-aware defaults if dates not provided
-      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
-      const finalFrom = from ?? defaultDates.from;
-      const finalTo = to ?? defaultDates.to;
+      // Resolve parameters with proper priority:
+      // 1. Forced params from widget click (if this tool was triggered by widget)
+      // 2. Explicit AI params (user override)
+      // 3. Dashboard metricsFilter (source of truth)
+      // 4. Hardcoded defaults
+      const resolved = resolveToolParams({
+        toolName: "getProfitAnalysis",
+        appContext,
+        aiParams: { period, from, to, currency, revenueType },
+      });
+
+      const finalFrom = resolved.from;
+      const finalTo = resolved.to;
+      const finalCurrency = resolved.currency;
+      const finalRevenueType = resolved.revenueType ?? "net";
 
       // Generate description based on date range
       const description = generateArtifactDescription(finalFrom, finalTo);
@@ -71,7 +78,7 @@ export const getProfitAnalysisTool = tool({
         analysis = profitArtifact.stream(
           {
             stage: "loading",
-            currency: currency || appContext.baseCurrency || "USD",
+            currency: finalCurrency || "USD",
             from: finalFrom,
             to: finalTo,
             description,
@@ -88,15 +95,15 @@ export const getProfitAnalysisTool = tool({
           teamId,
           from: finalFrom,
           to: finalTo,
-          currency: currency ?? undefined,
+          currency: finalCurrency ?? undefined,
           type: "profit",
-          revenueType: revenueType ?? "net", // Use revenueType to determine gross vs net profit
+          revenueType: finalRevenueType, // Use revenueType to determine gross vs net profit
         }),
         getReports(db, {
           teamId,
           from: finalFrom,
           to: finalTo,
-          currency: currency ?? undefined,
+          currency: finalCurrency ?? undefined,
           type: "revenue",
           revenueType: "net", // Always use net revenue for profit margin denominator
         }),
@@ -295,7 +302,7 @@ export const getProfitAnalysisTool = tool({
       }
 
       // Build response text
-      const revenueTypeLabel = revenueType === "gross" ? "Gross" : "Net";
+      const revenueTypeLabel = finalRevenueType === "gross" ? "Gross" : "Net";
       let responseText = `**Total ${revenueTypeLabel} Profit:** ${formattedCurrentTotal}\n\n`;
 
       if (prevTotal !== 0) {

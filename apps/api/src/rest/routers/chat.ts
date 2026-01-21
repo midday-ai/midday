@@ -1,3 +1,7 @@
+import type {
+  ForcedToolCall,
+  MetricsFilter,
+} from "@api/ai/agents/config/shared";
 import { buildAppContext } from "@api/ai/agents/config/shared";
 import { mainAgent } from "@api/ai/agents/main";
 import { getUserContext } from "@api/ai/utils/get-user-context";
@@ -17,8 +21,16 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
     return c.json({ success: false, error: validationResult.error }, 400);
   }
 
-  const { message, id, timezone, agentChoice, toolChoice, country, city } =
-    validationResult.data;
+  const {
+    message,
+    id,
+    timezone,
+    agentChoice,
+    toolChoice,
+    country,
+    city,
+    metricsFilter,
+  } = validationResult.data;
 
   const teamId = c.get("teamId");
   const session = c.get("session");
@@ -34,7 +46,21 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
     timezone,
   });
 
-  const appContext = buildAppContext(userContext, id);
+  // Extract forced tool params from message metadata (widget clicks)
+  // When a widget sends toolParams, use them directly (bypasses AI decisions)
+  let forcedToolCall: ForcedToolCall | undefined;
+  const metadata = (message as any)?.metadata;
+  if (metadata?.toolCall?.toolName && metadata?.toolCall?.toolParams) {
+    forcedToolCall = {
+      toolName: metadata.toolCall.toolName,
+      toolParams: metadata.toolCall.toolParams,
+    };
+  }
+
+  const appContext = buildAppContext(userContext, id, {
+    metricsFilter: metricsFilter as MetricsFilter | undefined,
+    forcedToolCall,
+  });
 
   // Pass user preferences to main agent as context
   // The main agent will use this information to make better routing decisions

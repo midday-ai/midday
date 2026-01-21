@@ -3,6 +3,7 @@
 import { Portal } from "@/components/portal";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useChatStatus } from "@/hooks/use-chat-status";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import type { UIChatMessage } from "@midday/api/ai/types";
 import { createClient } from "@midday/supabase/client";
@@ -40,6 +41,9 @@ export function ChatInterface({ geo }: Props) {
   const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
     "suggestions",
   );
+
+  // Get current dashboard metrics filter state (source of truth for AI tool defaults)
+  const { period, from, to, currency, revenueType } = useMetricsFilter();
 
   // Reset chat state when navigating away from a chat (sidebar, browser back, etc.)
   useEffect(() => {
@@ -99,6 +103,8 @@ export function ChatInterface({ geo }: Props) {
             agentChoice,
             toolChoice,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            // Dashboard metrics filter state - source of truth for AI tool defaults
+            metricsFilter: { period, from, to, currency, revenueType },
           },
         };
       },
