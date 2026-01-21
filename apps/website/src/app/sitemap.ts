@@ -1,4 +1,5 @@
 import { categories, getAllSlugs } from "@/data/apps";
+import { getAllCompetitorSlugs } from "@/data/competitors";
 import { getBlogPosts } from "@/lib/blog";
 import { getAllDocSlugs } from "@/lib/docs";
 import type { MetadataRoute } from "next";
@@ -14,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/about",
     "/assistant",
     "/bank-coverage",
+    "/compare",
     "/customers",
     "/docs",
     "/download",
@@ -74,11 +76,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified,
   }));
 
+  // Comparison pages
+  const comparisonPages = getAllCompetitorSlugs().map((slug) => ({
+    url: `${baseUrl}/compare/${slug}`,
+    lastModified,
+  }));
+
   return [
     ...staticRoutes,
     ...blogPosts,
     ...integrations,
     ...integrationCategories,
     ...docPages,
+    ...comparisonPages,
   ];
 }

@@ -1,0 +1,204 @@
+"use client";
+
+import type { Competitor } from "@/data/competitors";
+import { middayDifferentiators } from "@/data/competitors";
+import { Button } from "@midday/ui/button";
+import Link from "next/link";
+import { ComparisonHero } from "./sections/comparison-hero";
+import { CompetitorFAQ } from "./sections/competitor-faq";
+import { FeatureComparison } from "./sections/feature-comparison";
+import { PricingComparison } from "./sections/pricing-comparison";
+
+interface Props {
+  competitor: Competitor;
+}
+
+export function ComparisonPage({ competitor }: Props) {
+  const sections = [
+    { id: "differences", label: "Key differences at a glance" },
+    { id: "features", label: "Feature comparison" },
+    { id: "pricing", label: "Pricing comparison" },
+    { id: "switching", label: `Switching from ${competitor.name}` },
+    { id: "better-fit", label: "Where Midday is a better fit" },
+    { id: "faq", label: "Frequently asked questions" },
+  ];
+
+  return (
+    <div className="min-h-screen pt-24 sm:pt-28 lg:pt-32 pb-24">
+      <div className="max-w-[1400px] mx-auto">
+        {/* Hero Section */}
+        <ComparisonHero
+          competitor={competitor}
+          differentiators={middayDifferentiators}
+          sections={sections}
+        />
+
+        {/* Divider */}
+        <div className="my-12 lg:my-16">
+          <div className="h-px w-full border-t border-border" />
+        </div>
+
+        {/* Key Differences Section */}
+        <section id="differences" className="scroll-mt-24 mb-16 lg:mb-24">
+          <h2 className="font-serif text-2xl text-foreground mb-8 text-center">
+            Key differences at a glance
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+            {competitor.keyDifferences.map((diff) => (
+              <div
+                key={diff.title}
+                className="border border-border p-6"
+              >
+                <h3 className="font-sans text-sm text-muted-foreground mb-4">
+                  {diff.title}
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-primary mt-1.5 flex-shrink-0" />
+                    <div>
+                      <span className="font-sans text-xs text-muted-foreground">
+                        Midday
+                      </span>
+                      <p className="font-sans text-sm text-foreground">
+                        {diff.midday}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-border mt-1.5 flex-shrink-0" />
+                    <div>
+                      <span className="font-sans text-xs text-muted-foreground">
+                        {competitor.name}
+                      </span>
+                      <p className="font-sans text-sm text-muted-foreground">
+                        {diff.competitor}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Divider */}
+        <div className="mb-16 lg:mb-24">
+          <div className="h-px w-full border-t border-border" />
+        </div>
+
+        {/* Feature Comparison */}
+        <section id="features" className="scroll-mt-24 mb-16 lg:mb-24">
+          <FeatureComparison
+            competitor={competitor}
+          />
+        </section>
+
+        {/* Divider */}
+        <div className="mb-16 lg:mb-24">
+          <div className="h-px w-full border-t border-border" />
+        </div>
+
+        {/* Pricing Comparison */}
+        <section id="pricing" className="scroll-mt-24 mb-16 lg:mb-24">
+          <PricingComparison competitor={competitor} />
+        </section>
+
+        {/* Divider */}
+        <div className="mb-16 lg:mb-24">
+          <div className="h-px w-full border-t border-border" />
+        </div>
+
+        {/* Switching Guide */}
+        <section id="switching" className="scroll-mt-24 mb-16 lg:mb-24">
+          <h2 className="font-serif text-2xl text-foreground mb-4 text-center">
+            Switching from {competitor.name} to Midday
+          </h2>
+          <p className="font-sans text-base text-muted-foreground mb-8 text-center max-w-2xl mx-auto">
+            Making the switch is straightforward. Here's how to get started.
+          </p>
+          <div className="max-w-3xl mx-auto">
+            <div className="space-y-6">
+              {competitor.switchingSteps.map((step, index) => (
+                <div key={step.title} className="flex gap-4 lg:gap-6">
+                  <div className="flex-shrink-0 w-8 h-8 border border-border flex items-center justify-center">
+                    <span className="font-sans text-sm text-foreground">
+                      {index + 1}
+                    </span>
+                  </div>
+                  <div className="pt-1">
+                    <h3 className="font-sans text-base text-foreground mb-1">
+                      {step.title}
+                    </h3>
+                    <p className="font-sans text-sm text-muted-foreground">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Divider */}
+        <div className="mb-16 lg:mb-24">
+          <div className="h-px w-full border-t border-border" />
+        </div>
+
+        {/* Where Midday is a Better Fit */}
+        <section id="better-fit" className="scroll-mt-24 mb-16 lg:mb-24">
+          <h2 className="font-serif text-2xl text-foreground mb-4 text-center">
+            Where Midday is a better fit
+          </h2>
+          <p className="font-sans text-base text-muted-foreground mb-8 text-center max-w-2xl mx-auto">
+            Midday is the right choice if you're...
+          </p>
+          <div className="max-w-2xl mx-auto">
+            <ul className="space-y-4">
+              {competitor.targetAudience.map((audience) => (
+                <li key={audience} className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 bg-primary mt-2 flex-shrink-0" />
+                  <span className="font-sans text-base text-foreground">
+                    {audience}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* Divider */}
+        <div className="mb-16 lg:mb-24">
+          <div className="h-px w-full border-t border-border" />
+        </div>
+
+        {/* FAQ Section */}
+        <section id="faq" className="scroll-mt-24 mb-16 lg:mb-24">
+          <CompetitorFAQ competitor={competitor} />
+        </section>
+
+        {/* Divider */}
+        <div className="mb-16 lg:mb-24">
+          <div className="h-px w-full border-t border-border" />
+        </div>
+
+        {/* CTA Section */}
+        <section className="text-center">
+          <h2 className="font-serif text-2xl text-foreground mb-4">
+            Ready to make the switch?
+          </h2>
+          <p className="font-sans text-base text-muted-foreground mb-8 max-w-xl mx-auto">
+            Start your 14-day free trial. No credit card required until you're ready to upgrade.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild className="btn-inverse h-11 px-6">
+              <a href="https://app.midday.ai/">Start your free trial</a>
+            </Button>
+            <Button asChild variant="outline" className="h-11 px-6">
+              <Link href="/pricing">View pricing</Link>
+            </Button>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}

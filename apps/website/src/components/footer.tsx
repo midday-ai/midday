@@ -22,7 +22,7 @@ export function Footer() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-16 sm:pb-80">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-16">
           {/* Left Column - Links */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4 sm:gap-x-12 sm:gap-y-12 lg:col-span-1">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3 md:grid-cols-5 sm:gap-x-8 sm:gap-y-12 lg:col-span-1">
             {/* Features Column */}
             <div className="space-y-3">
               <h3 className="font-sans text-sm text-foreground mb-4">
@@ -61,6 +61,31 @@ export function Footer() {
                   { href: "/download", label: "Download" },
                   { href: "/pre-accounting", label: "Pre-accounting" },
                   { href: "/integrations", label: "Apps & Integrations" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors block"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Compare Column */}
+            <div className="space-y-3">
+              <h3 className="font-sans text-sm text-foreground mb-4">
+                Compare
+              </h3>
+              <div className="space-y-2.5">
+                {[
+                  { href: "/compare/quickbooks-alternative", label: "vs QuickBooks" },
+                  { href: "/compare/freshbooks-alternative", label: "vs FreshBooks" },
+                  { href: "/compare/xero-alternative", label: "vs Xero" },
+                  { href: "/compare/wave-alternative", label: "vs Wave" },
+                  { href: "/compare/harvest-alternative", label: "vs Harvest" },
+                  { href: "/compare/toggl-alternative", label: "vs Toggl" },
                 ].map((item) => (
                   <Link
                     key={item.href}
