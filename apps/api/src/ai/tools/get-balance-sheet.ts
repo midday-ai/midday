@@ -12,35 +12,22 @@ import { format, parseISO } from "date-fns";
 import { z } from "zod";
 
 const getBalanceSheetSchema = z.object({
-  // Date range parameters - resolved using dashboard metricsFilter as default
   period: z
     .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
     .optional()
-    .describe(
-      "Historical period. The 'to' date is used as the 'as of' date for balance sheet.",
-    ),
-  from: z
-    .string()
-    .optional()
-    .describe("Start date (yyyy-MM-dd). Usually auto-filled from dashboard."),
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
   to: z
     .string()
     .optional()
-    .describe(
-      "End date (yyyy-MM-dd) - used as 'as of' date. Usually auto-filled from dashboard.",
-    ),
-  currency: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Currency code. Usually auto-filled from dashboard."),
-  showCanvas: z.boolean().default(false).describe("Show visual analytics"),
+    .describe("End date (yyyy-MM-dd) - used as 'as of' date"),
+  currency: z.string().nullable().optional().describe("Currency code"),
+  showCanvas: z.boolean().default(false).describe("Show visual canvas"),
 });
 
 export const getBalanceSheetTool = tool({
   description:
-    "Generate balance sheet - shows assets, liabilities, and equity as of a specific date. Use this tool for any request about balance sheet, financial position, assets and liabilities, statement of financial position, or snapshot of company finances. " +
-    "Parameters are auto-filled from dashboard state. The 'to' date is used as the 'as of' date for the snapshot.",
+    "Generate balance sheet - assets, liabilities, and equity as of a date.",
   inputSchema: getBalanceSheetSchema,
   execute: async function* (
     { period, from, to, currency, showCanvas },

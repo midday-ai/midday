@@ -15,33 +15,19 @@ import { endOfMonth, parseISO, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getSpendingSchema = z.object({
-  // Date range parameters - resolved using dashboard metricsFilter as default
   period: z
     .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
     .optional()
-    .describe(
-      "Historical period. Only specify if user explicitly requests a different range.",
-    ),
-  from: z
-    .string()
-    .optional()
-    .describe("Start date (yyyy-MM-dd). Usually auto-filled from dashboard."),
-  to: z
-    .string()
-    .optional()
-    .describe("End date (yyyy-MM-dd). Usually auto-filled from dashboard."),
-  currency: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Currency code. Usually auto-filled from dashboard."),
-  showCanvas: z.boolean().default(false).describe("Show visual analytics"),
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
+  to: z.string().optional().describe("End date (yyyy-MM-dd)"),
+  currency: z.string().nullable().optional().describe("Currency code"),
+  showCanvas: z.boolean().default(false).describe("Show visual canvas"),
 });
 
 export const getSpendingTool = tool({
   description:
-    "Analyze spending patterns with transaction details - shows spending totals, top transactions by amount, spending by category, and trends. " +
-    "Parameters are auto-filled from dashboard state. Only override if user explicitly requests different values.",
+    "Analyze spending patterns - totals, top transactions, category breakdown.",
   inputSchema: getSpendingSchema,
   execute: async function* (
     { period, from, to, currency, showCanvas },

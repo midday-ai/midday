@@ -12,37 +12,20 @@ import { endOfMonth, format, parseISO, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getRevenueSummarySchema = z.object({
-  // Date range parameters - resolved using dashboard metricsFilter as default
   period: z
     .enum(["3-months", "6-months", "1-year", "2-years", "5-years"])
     .optional()
-    .describe(
-      "Historical period. Only specify if user explicitly requests a different range.",
-    ),
-  from: z
-    .string()
-    .optional()
-    .describe("Start date (yyyy-MM-dd). Usually auto-filled from dashboard."),
-  to: z
-    .string()
-    .optional()
-    .describe("End date (yyyy-MM-dd). Usually auto-filled from dashboard."),
-  currency: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Currency code. Usually auto-filled from dashboard."),
-  revenueType: z
-    .enum(["gross", "net"])
-    .optional()
-    .describe("Revenue type. Usually auto-filled from dashboard."),
-  showCanvas: z.boolean().default(false).describe("Show visual analytics"),
+    .describe("Historical period"),
+  from: z.string().optional().describe("Start date (yyyy-MM-dd)"),
+  to: z.string().optional().describe("End date (yyyy-MM-dd)"),
+  currency: z.string().nullable().optional().describe("Currency code"),
+  revenueType: z.enum(["gross", "net"]).optional().describe("Revenue type"),
+  showCanvas: z.boolean().default(false).describe("Show visual canvas"),
 });
 
 export const getRevenueSummaryTool = tool({
   description:
-    "Calculate and analyze revenue (income/sales) - shows revenue totals, monthly trends, year-over-year comparisons, and growth rates. " +
-    "Parameters are auto-filled from dashboard state. Only override if user explicitly requests different values.",
+    "Analyze revenue (income/sales) - totals, trends, and growth rates.",
   inputSchema: getRevenueSummarySchema,
   execute: async function* (
     { period, from, to, currency, revenueType, showCanvas },
