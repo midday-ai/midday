@@ -190,6 +190,7 @@ export const teamRouter = createTRPCRouter({
       );
 
       // Delete the team from database after cleanup job is enqueued
+      // Note: deleteTeam handles cache invalidation for all team members internally
       const data = await deleteTeam(db, {
         teamId: input.teamId,
         userId: session.user.id,
