@@ -6,6 +6,8 @@ import {
   users,
   usersOnTeam,
 } from "@db/schema";
+import { chatCache } from "@midday/cache/chat-cache";
+import { teamCache } from "@midday/cache/team-cache";
 import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
 import {
   CATEGORIES,
@@ -409,12 +411,39 @@ export async function deleteTeam(db: Database, params: DeleteTeamParams) {
     throw new Error("User is not a member of this team");
   }
 
+  // Get all team members BEFORE deleting (needed for cache invalidation)
+  const teamMembers = await db
+    .select({ userId: usersOnTeam.userId })
+    .from(usersOnTeam)
+    .where(eq(usersOnTeam.teamId, params.teamId));
+
   const [result] = await db
     .delete(teams)
     .where(eq(teams.id, params.teamId))
     .returning({
       id: teams.id,
     });
+
+  // Invalidate caches for all team members after successful deletion
+  // This prevents stale cache data when users create new teams after deleting their only team
+  // Cache invalidation errors are non-fatal - log but don't throw
+  try {
+    await Promise.all([
+      chatCache.invalidateTeamContext(params.teamId),
+      ...teamMembers.map(async (member) => {
+        if (member.userId) {
+          await Promise.all([
+            teamPermissionsCache.delete(`user:${member.userId}:team`),
+            teamCache.delete(`user:${member.userId}:team:${params.teamId}`),
+            chatCache.invalidateUserContext(member.userId, params.teamId),
+          ]);
+        }
+      }),
+    ]);
+  } catch (error) {
+    // Log but don't fail - team deletion succeeded, cache will expire naturally
+    console.error("Failed to invalidate caches after team deletion:", error);
+  }
 
   return result;
 }
