@@ -98,7 +98,7 @@ export const getBalanceSheetTool = tool({
       // Fetch balance sheet data
       const balanceSheetData = await getBalanceSheet(db, {
         teamId,
-        currency: currency || undefined,
+        currency: finalCurrency ?? undefined,
         asOf: asOfDate,
       });
 
