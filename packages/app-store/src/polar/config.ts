@@ -3,7 +3,7 @@ import { Logo } from "./assets/logo";
 export default {
   name: "Polar",
   id: "polar",
-  category: "Payments",
+  category: "payments",
   active: false,
   logo: Logo,
   short_description:

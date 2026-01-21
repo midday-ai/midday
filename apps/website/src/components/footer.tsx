@@ -122,7 +122,7 @@ export function Footer() {
                   { href: "/sdks", label: "SDKs", external: false },
                   { href: "/support", label: "Support", external: false },
                   {
-                    href: "/privacy",
+                    href: "/policy",
                     label: "Privacy Policy",
                     external: false,
                   },

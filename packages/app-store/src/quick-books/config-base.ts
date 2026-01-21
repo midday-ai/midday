@@ -4,7 +4,7 @@ import { Logo } from "./assets/logo";
 export const baseConfig = {
   name: "QuickBooks",
   id: "quickbooks",
-  category: "Accounting",
+  category: "accounting",
   active: true,
   beta: true,
   logo: Logo,

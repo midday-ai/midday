@@ -97,12 +97,34 @@ export const viewport = {
   ],
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Midday",
+  url: "https://midday.ai",
+  logo: "https://cdn.midday.ai/logo.png",
+  sameAs: [
+    "https://x.com/middayai",
+    "https://github.com/midday-ai/midday",
+    "https://linkedin.com/company/midday-ai",
+  ],
+  description:
+    "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
+};
+
 export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://cdn.midday.ai" />
         <link rel="dns-prefetch" href="https://cdn.midday.ai" />
+        <script
+          type="application/ld+json"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
       </head>
       <body
         className={cn(

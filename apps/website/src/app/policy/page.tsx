@@ -1,9 +1,27 @@
+import { baseUrl } from "@/app/sitemap";
 import type { Metadata } from "next";
 
+const title = "Privacy Policy";
+const description =
+  "Privacy Policy for Midday. Learn how we collect, use, and protect your personal data.";
+
 export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description:
-    "Privacy Policy for Midday. Learn how we collect, use, and protect your personal data.",
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    type: "website",
+    url: `${baseUrl}/policy`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+  alternates: {
+    canonical: `${baseUrl}/policy`,
+  },
 };
 
 export default function PrivacyPage() {

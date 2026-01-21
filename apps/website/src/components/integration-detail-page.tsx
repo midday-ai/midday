@@ -1,7 +1,7 @@
 import { AppLogo } from "@/components/app-logo";
 import { CustomMDX } from "@/components/mdx";
 import type { WebsiteApp } from "@/data/apps";
-import { apps } from "@/data/apps";
+import { apps, getCategoryName } from "@/data/apps";
 import { Button } from "@midday/ui/button";
 import Link from "next/link";
 
@@ -63,7 +63,7 @@ export function IntegrationDetailPage({ app }: Props) {
                   )}
                 </div>
                 <p className="font-sans text-sm text-muted-foreground">
-                  {app.category}
+                  {getCategoryName(app.category)}
                 </p>
               </div>
             </div>

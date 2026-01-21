@@ -3,7 +3,7 @@ import { Logo } from "./assets/logo";
 export default {
   name: "Perplexity",
   id: "perplexity-mcp",
-  category: "AI",
+  category: "ai-automation",
   active: true,
   logo: Logo,
   short_description:

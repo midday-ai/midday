@@ -3,7 +3,7 @@ import { Logo } from "./assets/logo";
 export default {
   name: "Stripe",
   id: "stripe",
-  category: "Payments",
+  category: "payments",
   active: false,
   logo: Logo,
   short_description:

@@ -1,22 +1,15 @@
-"use client";
-
 import { AppLogo } from "@/components/app-logo";
-import { apps, categories } from "@/data/apps";
+import type { WebsiteApp } from "@/data/apps";
+import { categories, getCategoryName } from "@/data/apps";
 import { cn } from "@midday/ui/cn";
 import Link from "next/link";
-import { useState } from "react";
 
-export function IntegrationsPage() {
-  const [activeCategory, setActiveCategory] = useState("all");
+interface IntegrationsGridProps {
+  apps: WebsiteApp[];
+  activeCategory: string;
+}
 
-  const filteredApps =
-    activeCategory === "all"
-      ? apps
-      : apps.filter(
-          (app) =>
-            app.category.toLowerCase().replace(" ", "-") === activeCategory,
-        );
-
+export function IntegrationsGrid({ apps, activeCategory }: IntegrationsGridProps) {
   return (
     <div className="pt-32 pb-24">
       {/* Header */}
@@ -36,28 +29,33 @@ export function IntegrationsPage() {
       {/* Category Filter */}
       <div className="max-w-[1400px] mx-auto mb-12">
         <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              type="button"
-              onClick={() => setActiveCategory(category.id)}
-              className={cn(
-                "px-4 py-2 text-sm font-sans border transition-colors",
-                activeCategory === category.id
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-background text-muted-foreground border-border hover:border-foreground hover:text-foreground",
-              )}
-            >
-              {category.name}
-            </button>
-          ))}
+          {categories.map((category) => {
+            const href = category.id === "all" 
+              ? "/integrations" 
+              : `/integrations/category/${category.id}`;
+            
+            return (
+              <Link
+                key={category.id}
+                href={href}
+                className={cn(
+                  "px-4 py-2 text-sm font-sans border transition-colors",
+                  activeCategory === category.id
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-background text-muted-foreground border-border hover:border-foreground hover:text-foreground",
+                )}
+              >
+                {category.name}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
       {/* Apps Grid */}
       <div className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredApps.map((app) => (
+          {apps.map((app) => (
             <Link
               key={app.id}
               href={`/integrations/${app.slug}`}
@@ -93,7 +91,7 @@ export function IntegrationsPage() {
               </p>
               <div className="mt-4 pt-4 border-t border-border">
                 <span className="text-xs font-sans text-muted-foreground">
-                  {app.category}
+                  {getCategoryName(app.category)}
                 </span>
               </div>
             </Link>

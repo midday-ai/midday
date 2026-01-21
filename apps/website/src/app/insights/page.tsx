@@ -1,10 +1,35 @@
+import { baseUrl } from "@/app/sitemap";
 import { Insights } from "@/components/insights";
 import type { Metadata } from "next";
 
+const title = "Financial Insights for Small Business";
+const description =
+  "Understand your business finances at a glance. Get weekly summaries, cash flow analysis, and clear explanations of revenue and spending trends.";
+
 export const metadata: Metadata = {
-  title: "Insights",
-  description:
-    "Understand what's happening in your business. Get weekly summaries and clear explanations of changes in cash, revenue, and spending.",
+  title,
+  description,
+  keywords: [
+    "financial insights",
+    "business analytics",
+    "cash flow analysis",
+    "revenue tracking",
+    "spending analysis",
+  ],
+  openGraph: {
+    title,
+    description,
+    type: "website",
+    url: `${baseUrl}/insights`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+  alternates: {
+    canonical: `${baseUrl}/insights`,
+  },
 };
 
 export default function Page() {

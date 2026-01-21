@@ -4,7 +4,7 @@ import { Logo } from "./assets/logo";
 export const baseConfig = {
   name: "Outlook",
   id: "outlook",
-  category: "Inbox",
+  category: "capture",
   active: true,
   logo: Logo,
   short_description:

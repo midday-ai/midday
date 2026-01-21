@@ -3,7 +3,7 @@ import { Logo } from "./assets/logo";
 export default {
   name: "Midday Desktop",
   id: "midday-desktop",
-  category: "Productivity",
+  category: "apps",
   active: true,
   logo: Logo,
   short_description:

@@ -3,7 +3,7 @@ import { Logo } from "./assets/logo";
 export default {
   name: "Zapier",
   id: "zapier",
-  category: "Automation",
+  category: "ai-automation",
   active: false,
   logo: Logo,
   short_description:

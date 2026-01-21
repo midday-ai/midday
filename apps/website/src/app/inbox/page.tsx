@@ -1,10 +1,35 @@
+import { baseUrl } from "@/app/sitemap";
 import { Inbox } from "@/components/inbox";
 import type { Metadata } from "next";
 
+const title = "Receipt Management for Business";
+const description =
+  "Capture receipts and invoices automatically. Match documents to transactions, search your financial records, and stay organized. Built for small business owners.";
+
 export const metadata: Metadata = {
-  title: "Inbox",
-  description:
-    "Use your personalized email for invoices and receipts, with transaction suggestions from Midday. Easily search, reconcile and export documents.",
+  title,
+  description,
+  keywords: [
+    "receipt management",
+    "receipt scanner",
+    "invoice management",
+    "document management",
+    "expense receipts",
+  ],
+  openGraph: {
+    title,
+    description,
+    type: "website",
+    url: `${baseUrl}/inbox`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+  alternates: {
+    canonical: `${baseUrl}/inbox`,
+  },
 };
 
 export default function Page() {

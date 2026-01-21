@@ -1,10 +1,28 @@
+import { baseUrl } from "@/app/sitemap";
 import { SDKs } from "@/components/sdks";
 import type { Metadata } from "next";
 
+const title = "SDKs";
+const description =
+  "Typed SDKs to build faster with Midday. Integrate Midday into your applications with our official client libraries.";
+
 export const metadata: Metadata = {
-  title: "SDKs",
-  description:
-    "Typed SDKs to build faster with Midday. Integrate Midday into your applications with our official client libraries.",
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    type: "website",
+    url: `${baseUrl}/sdks`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+  alternates: {
+    canonical: `${baseUrl}/sdks`,
+  },
 };
 
 export default function Page() {

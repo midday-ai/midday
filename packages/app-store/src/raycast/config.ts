@@ -3,7 +3,7 @@ import { Logo } from "./assets/logo";
 export default {
   name: "Raycast",
   id: "raycast",
-  category: "Time Tracking",
+  category: "apps",
   active: false,
   logo: Logo,
   short_description:

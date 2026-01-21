@@ -4,7 +4,7 @@ import { Logo } from "./assets/logo";
 export const baseConfig = {
   name: "Slack",
   id: "slack",
-  category: "Productivity",
+  category: "capture",
   active: true,
   logo: Logo,
   short_description:

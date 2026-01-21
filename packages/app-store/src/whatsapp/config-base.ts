@@ -4,7 +4,7 @@ import { Logo } from "./assets/logo";
 export const baseConfig = {
   name: "WhatsApp",
   id: "whatsapp",
-  category: "Productivity",
+  category: "capture",
   active: true,
   logo: Logo,
   short_description:

@@ -3,7 +3,7 @@ import { Logo } from "./assets/logo";
 export default {
   name: "Google Drive",
   id: "google-drive",
-  category: "Storage",
+  category: "storage",
   active: false,
   logo: Logo,
   short_description:

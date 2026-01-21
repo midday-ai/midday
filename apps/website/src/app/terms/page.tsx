@@ -1,9 +1,27 @@
+import { baseUrl } from "@/app/sitemap";
 import type { Metadata } from "next";
 
+const title = "Terms and Conditions";
+const description =
+  "Terms and Conditions for using Midday. Read about your rights and responsibilities when using our service.";
+
 export const metadata: Metadata = {
-  title: "Terms and Conditions",
-  description:
-    "Terms and Conditions for using Midday. Read about your rights and responsibilities when using our service.",
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    type: "website",
+    url: `${baseUrl}/terms`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+  alternates: {
+    canonical: `${baseUrl}/terms`,
+  },
 };
 
 export default function TermsPage() {

@@ -1,4 +1,4 @@
-import { getAllSlugs } from "@/data/apps";
+import { categories, getAllSlugs } from "@/data/apps";
 import { getBlogPosts } from "@/lib/blog";
 import { getAllDocSlugs } from "@/lib/docs";
 import type { MetadataRoute } from "next";
@@ -22,9 +22,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/insights",
     "/integrations",
     "/invoicing",
+    "/mcp",
+    "/mcp/chatgpt",
+    "/mcp/claude",
+    "/mcp/copilot",
+    "/mcp/cursor",
+    "/mcp/make",
+    "/mcp/n8n",
+    "/mcp/opencode",
+    "/mcp/perplexity",
+    "/mcp/raycast",
+    "/mcp/zapier",
     "/pre-accounting",
     "/pricing",
-    "/privacy",
+    "/policy",
     "/sdks",
     "/story",
     "/support",
@@ -49,11 +60,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified,
   }));
 
+  // Integration category pages
+  const integrationCategories = categories
+    .filter((c) => c.id !== "all")
+    .map((c) => ({
+      url: `${baseUrl}/integrations/category/${c.id}`,
+      lastModified,
+    }));
+
   // Documentation pages
   const docPages = getAllDocSlugs().map((slug) => ({
     url: `${baseUrl}/docs/${slug}`,
     lastModified,
   }));
 
-  return [...staticRoutes, ...blogPosts, ...integrations, ...docPages];
+  return [
+    ...staticRoutes,
+    ...blogPosts,
+    ...integrations,
+    ...integrationCategories,
+    ...docPages,
+  ];
 }

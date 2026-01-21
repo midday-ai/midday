@@ -4,7 +4,7 @@ import { Logo } from "./assets/logo";
 export const baseConfig = {
   name: "Gmail",
   id: "gmail",
-  category: "Inbox",
+  category: "capture",
   active: true,
   logo: Logo,
   short_description:

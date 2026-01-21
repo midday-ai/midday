@@ -3,7 +3,7 @@ import { Logo } from "./assets/logo";
 export default {
   name: "Make",
   id: "make-mcp",
-  category: "AI",
+  category: "ai-automation",
   active: true,
   logo: Logo,
   short_description:

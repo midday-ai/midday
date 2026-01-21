@@ -1,11 +1,29 @@
+import { baseUrl } from "@/app/sitemap";
 import { DocsHomeHero } from "@/components/docs/docs-home-hero";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+const title = "Documentation";
+const description =
+  "Learn how to use Midday to run your business finances. Get answers about invoicing, banking, time tracking, reports, and more.";
+
 export const metadata: Metadata = {
-  title: "Documentation",
-  description:
-    "Learn how to use Midday to run your business finances. Get answers about invoicing, banking, time tracking, reports, and more.",
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    type: "website",
+    url: `${baseUrl}/docs`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+  alternates: {
+    canonical: `${baseUrl}/docs`,
+  },
 };
 
 const popularGuides = [

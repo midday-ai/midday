@@ -1,3 +1,4 @@
+import { baseUrl } from "@/app/sitemap";
 import { CustomMDX } from "@/components/mdx";
 import { Pagination } from "@/components/pagination";
 import { PostStatus } from "@/components/post-status";
@@ -6,10 +7,27 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+const title = "Updates";
+const description =
+  "The latest updates and improvements to Midday. See what we've been building to help you manage your business finances better.";
+
 export const metadata: Metadata = {
-  title: "Updates",
-  description:
-    "The latest updates and improvements to Midday. See what we've been building to help you manage your business finances better.",
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    type: "website",
+    url: `${baseUrl}/updates`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+  alternates: {
+    canonical: `${baseUrl}/updates`,
+  },
 };
 
 // Force static generation

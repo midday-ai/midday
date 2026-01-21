@@ -4,7 +4,7 @@ import { Logo } from "./assets/logo";
 export const baseConfig = {
   name: "Stripe Payments",
   id: "stripe-payments",
-  category: "Payments",
+  category: "payments",
   active: true,
   logo: Logo,
   short_description:

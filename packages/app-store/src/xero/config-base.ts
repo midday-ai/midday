@@ -4,7 +4,7 @@ import { Logo } from "./assets/logo";
 export const baseConfig = {
   name: "Xero",
   id: "xero",
-  category: "Accounting",
+  category: "accounting",
   active: true,
   beta: true,
   logo: Logo,

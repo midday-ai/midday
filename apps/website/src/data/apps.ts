@@ -295,14 +295,12 @@ export const apps: WebsiteApp[] = appStoreApps
 
 export const categories = [
   { id: "all", name: "All" },
-  { id: "ai", name: "AI" },
-  { id: "inbox", name: "Inbox" },
-  { id: "productivity", name: "Productivity" },
+  { id: "capture", name: "Capture" },
   { id: "accounting", name: "Accounting" },
   { id: "payments", name: "Payments" },
   { id: "storage", name: "Storage" },
-  { id: "payroll", name: "Payroll" },
-  { id: "invoicing", name: "Invoicing" },
+  { id: "apps", name: "Apps" },
+  { id: "ai-automation", name: "AI & Automation" },
 ];
 
 export function getAppBySlug(slug: string): WebsiteApp | undefined {
@@ -311,9 +309,12 @@ export function getAppBySlug(slug: string): WebsiteApp | undefined {
 
 export function getAppsByCategory(category: string): WebsiteApp[] {
   if (category === "all") return apps;
-  return apps.filter(
-    (app) => app.category.toLowerCase().replace(" ", "-") === category,
-  );
+  return apps.filter((app) => app.category === category);
+}
+
+export function getCategoryName(categoryId: string): string {
+  const category = categories.find((c) => c.id === categoryId);
+  return category?.name || categoryId;
 }
 
 export function getAllSlugs(): string[] {

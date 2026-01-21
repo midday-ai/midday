@@ -1,10 +1,35 @@
+import { baseUrl } from "@/app/sitemap";
 import { MCPZapier } from "@/components/mcp-zapier";
 import type { Metadata } from "next";
 
+const title = "Zapier MCP Integration";
+const description =
+  "Connect Midday to 7,000+ apps through Zapier via MCP. Automate financial reports, alerts, and workflows without writing code.";
+
 export const metadata: Metadata = {
-  title: "MCP for Zapier",
-  description:
-    "Connect Midday to 7,000+ apps through Zapier. Automate reports, alerts, and workflows without code.",
+  title,
+  description,
+  keywords: [
+    "Zapier MCP",
+    "Zapier integration",
+    "Model Context Protocol",
+    "workflow automation",
+    "no-code automation",
+  ],
+  openGraph: {
+    title,
+    description,
+    type: "website",
+    url: `${baseUrl}/mcp/zapier`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+  alternates: {
+    canonical: `${baseUrl}/mcp/zapier`,
+  },
 };
 
 export default function Page() {
