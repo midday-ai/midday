@@ -76,11 +76,10 @@ export function RevenueForecastCard({
         actual: null,
         forecasted: item.value,
         date: item.date,
-        // Include enhanced forecast fields for bottom-up forecast
-        optimistic: "optimistic" in item ? item.optimistic : null,
-        pessimistic: "pessimistic" in item ? item.pessimistic : null,
-        confidence: "confidence" in item ? item.confidence : null,
-        breakdown: "breakdown" in item ? item.breakdown : null,
+        optimistic: item.optimistic ?? null,
+        pessimistic: item.pessimistic ?? null,
+        confidence: item.confidence ?? null,
+        breakdown: item.breakdown ?? null,
       })),
     ];
   }, [revenueForecastData]);
