@@ -1,8 +1,12 @@
 import { getDb } from "@jobs/init";
+import { getInvoiceAttachments } from "@midday/db/queries";
 import { Notifications } from "@midday/notifications";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
+
+// Resend's max email size limit is 40MB, keep buffer for email content
+const MAX_TOTAL_ATTACHMENT_SIZE = 35 * 1024 * 1024; // 35MB
 
 export const sendInvoiceEmail = schemaTask({
   id: "send-invoice-email",
@@ -11,13 +15,14 @@ export const sendInvoiceEmail = schemaTask({
     filename: z.string(),
     fullPath: z.string(),
   }),
-  maxDuration: 30,
+  maxDuration: 60,
   queue: {
     concurrencyLimit: 10,
   },
   run: async ({ invoiceId, filename, fullPath }) => {
+    const db = getDb();
     const supabase = createClient();
-    const notifications = new Notifications(getDb());
+    const notifications = new Notifications(db);
 
     const { data: invoice } = await supabase
       .from("invoices")
@@ -33,6 +38,7 @@ export const sendInvoiceEmail = schemaTask({
     }
 
     let attachments: { content: string; filename: string }[] | undefined;
+    let totalAttachmentSize = 0;
 
     // @ts-expect-error template is a jsonb field
     if (invoice.template.includePdf) {
@@ -40,16 +46,71 @@ export const sendInvoiceEmail = schemaTask({
         .from("vault")
         .download(fullPath);
 
-      attachments = attachmentData
-        ? [
-            {
-              content: Buffer.from(await attachmentData.arrayBuffer()).toString(
-                "base64",
-              ),
-              filename,
-            },
-          ]
-        : undefined;
+      if (attachmentData) {
+        const pdfBuffer = Buffer.from(await attachmentData.arrayBuffer());
+        totalAttachmentSize += pdfBuffer.length;
+        attachments = [
+          {
+            content: pdfBuffer.toString("base64"),
+            filename,
+          },
+        ];
+      }
+    }
+
+    // Fetch and include invoice attachments (user-uploaded PDFs)
+    try {
+      const invoiceAttachments = await getInvoiceAttachments(db, {
+        invoiceId,
+        teamId: invoice.team_id,
+      });
+
+      if (invoiceAttachments.length > 0) {
+        logger.info(`Found ${invoiceAttachments.length} invoice attachments`);
+
+        for (const attachment of invoiceAttachments) {
+          // Check if adding this attachment would exceed the limit
+          const estimatedSize = attachment.size ?? 0;
+          if (totalAttachmentSize + estimatedSize > MAX_TOTAL_ATTACHMENT_SIZE) {
+            logger.warn(
+              `Skipping attachment ${attachment.name}: would exceed size limit`,
+            );
+            continue;
+          }
+
+          const storagePath = attachment.path?.join("/");
+          if (!storagePath) continue;
+
+          const { data: fileData, error: downloadError } = await supabase.storage
+            .from("vault")
+            .download(storagePath);
+
+          if (downloadError || !fileData) {
+            logger.warn(`Failed to download attachment: ${attachment.name}`, {
+              error: downloadError?.message,
+            });
+            continue;
+          }
+
+          const fileBuffer = Buffer.from(await fileData.arrayBuffer());
+          totalAttachmentSize += fileBuffer.length;
+
+          // Initialize attachments array if needed
+          if (!attachments) {
+            attachments = [];
+          }
+
+          attachments.push({
+            content: fileBuffer.toString("base64"),
+            filename: attachment.name,
+          });
+
+          logger.info(`Added attachment: ${attachment.name}`);
+        }
+      }
+    } catch (error) {
+      logger.warn("Failed to fetch invoice attachments", { error });
+      // Continue without extra attachments - don't fail the email
     }
 
     const customerEmail = invoice?.customer?.email;
