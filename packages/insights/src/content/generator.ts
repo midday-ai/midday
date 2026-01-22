@@ -22,33 +22,35 @@ const openai = createOpenAI({
  * Schema for AI-generated content
  * Note: OpenAI structured output requires all properties to be required,
  * so we use nullable() instead of optional() for optional fields.
+ * 
+ * "What Matters Now" format - action-first, specific names/amounts
  */
 const insightContentSchema = z.object({
   title: z
     .string()
     .describe(
-      "Exactly one sentence. Format: 'Revenue $X, Expenses $Y, Net $Z. [Other metric]. [Sentiment]!'. Use actual numbers and currency symbol from data.",
+      "15-20 words. Conversational, like a friend catching you up. Main thing + bigger picture. NEVER sound like a notification.",
     ),
   sentiment: z
     .enum(["positive", "neutral", "challenging"])
-    .describe("positive, neutral, or challenging"),
+    .describe("positive (wins/growth), neutral (steady), challenging (needs attention)"),
   opener: z
     .string()
-    .describe("Max 10 words. The single most important insight."),
+    .describe("Max 15 words. Set up the story - what's the main thing happening this week?"),
   story: z
     .string()
-    .describe("Exactly 2 sentences connecting specific data points."),
+    .describe("3-4 sentences telling the story of their week. Like catching up over coffee. Weave in comparison to usual and streaks when available."),
   actions: z
     .array(
       z.object({
-        text: z.string().describe("Specific action with names/amounts"),
+        text: z.string().describe("Specific action with customer name and amount"),
       }),
     )
-    .describe("Exactly 2 specific actions"),
+    .describe("1-2 specific actions. Primary action should be the single most impactful thing."),
   celebration: z
     .string()
     .nullable()
-    .describe("A genuine win to celebrate, or null"),
+    .describe("A genuine win to celebrate (milestone, streak, personal best), or null if nothing notable"),
 });
 
 type InsightContentOutput = z.infer<typeof insightContentSchema>;
@@ -118,8 +120,8 @@ export class ContentGenerator {
         error instanceof Error ? error.message : "Unknown error",
       );
 
-      // Return fallback content
-      return getFallbackContent(periodLabel, periodType);
+      // Return fallback content with activity for context
+      return getFallbackContent(periodLabel, periodType, activity);
     }
   }
 }

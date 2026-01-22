@@ -2,8 +2,10 @@ import { formatMetricValue } from "../metrics/calculator";
 /**
  * Audio script builder for insights
  * Creates natural-sounding scripts with Eleven v3 audio tags
+ * 
+ * "What Matters Now" format - action-first, specific, conversational
  */
-import type { InsightContent, InsightMetric, InsightSentiment } from "../types";
+import type { InsightActivity, InsightContent, InsightMetric, InsightSentiment } from "../types";
 
 /**
  * Eleven v3 Audio Tags Reference:
@@ -33,11 +35,19 @@ function getOpenerTone(sentiment: InsightSentiment): string {
 /**
  * Build an audio script from insight content
  * Uses Eleven v3 audio tags for expressive narration
+ * 
+ * "What Matters Now" format:
+ * 1. Quick greeting
+ * 2. The main thing (money on table or highlight)
+ * 3. Brief context
+ * 4. One priority action
+ * 5. Celebration if earned
  *
  * @param content - The AI-generated insight content
  * @param periodLabel - Human-readable period label (e.g., "Week 2, 2026")
  * @param metrics - Selected key metrics to highlight
  * @param currency - Currency code for formatting
+ * @param activity - Optional activity data for richer context
  * @returns Script string with embedded audio tags
  */
 export function buildAudioScript(
@@ -45,87 +55,96 @@ export function buildAudioScript(
   periodLabel: string,
   metrics: InsightMetric[],
   currency: string,
+  activity?: InsightActivity,
 ): string {
   const parts: string[] = [];
-
-  // Opening with warm greeting
-  parts.push(`[warmly] Here's your ${periodLabel} business insight. [pause]`);
-
-  // Opener with sentiment-appropriate tone
   const openerTone = getOpenerTone(content.sentiment);
+
+  // Quick greeting
+  parts.push(`[warmly] Here's your ${periodLabel} update. [pause]`);
+
+  // The main thing - opener with appropriate tone
   parts.push(`${openerTone} ${content.opener}`);
 
-  // Key metrics summary (clear, professional delivery)
-  if (metrics.length > 0) {
-    const topMetrics = metrics.slice(0, 3);
-    const metricsText = topMetrics
-      .map(
-        (m) =>
-          `${m.label}: ${formatMetricValue(m.value, m.unit ?? "number", currency)}`,
-      )
-      .join(". [pause] ");
-    parts.push(`[pause] [clearly] Your key numbers: ${metricsText}.`);
+  // Story section - the context (keep it brief)
+  if (content.story) {
+    parts.push(`[pause] [warmly] ${content.story}`);
   }
 
-  // Story section (conversational, warm tone)
-  parts.push(`[pause] [warmly] ${content.story}`);
+  // Money on table highlight if significant
+  const moneyOnTable = activity?.moneyOnTable;
+  if (moneyOnTable && moneyOnTable.totalAmount > 500) {
+    const totalFormatted = formatMetricValue(moneyOnTable.totalAmount, "currency", currency);
+    
+    // Highlight top overdue invoice by name
+    if (moneyOnTable.overdueInvoices.length > 0) {
+      const top = moneyOnTable.overdueInvoices[0]!;
+      const topAmount = formatMetricValue(top.amount, "currency", currency);
+      parts.push(
+        `[pause] [clearly] Quick note: ${top.customerName} owes you ${topAmount}, now ${top.daysOverdue} days overdue.`,
+      );
+    }
+  }
 
-  // Actions (clear, actionable tone)
+  // One priority action (if any)
   if (content.actions.length > 0) {
-    const actionCount = Math.min(content.actions.length, 3);
-    parts.push("[pause] [clearly] Here are your recommended actions:");
-    content.actions.slice(0, actionCount).forEach((action, i) => {
-      parts.push(`${i + 1}. ${action.text}`);
-    });
+    const primaryAction = content.actions[0]!;
+    parts.push(`[pause] [clearly] Your priority this week: ${primaryAction.text}`);
   }
 
   // Celebration (excited tone for achievements)
   if (content.celebration) {
     parts.push(
-      `[pause] [excited] And something to celebrate: ${content.celebration}`,
+      `[pause] [excited] And worth celebrating: ${content.celebration}`,
     );
   }
 
-  // Sign off (warm, encouraging)
-  const signOff = getSignOff(periodLabel);
+  // Brief sign off
+  const signOff = getSignOff(periodLabel, content.sentiment);
   parts.push(`[pause] [warmly] ${signOff}`);
 
   return parts.join("\n\n");
 }
 
 /**
- * Generate a contextual sign-off based on the period
+ * Generate a contextual sign-off based on the period and sentiment
  */
-function getSignOff(periodLabel: string): string {
+function getSignOff(periodLabel: string, sentiment?: InsightSentiment): string {
   const lowerLabel = periodLabel.toLowerCase();
+  const isWeekly = lowerLabel.includes("week");
 
-  if (lowerLabel.includes("week")) {
-    return "That's your weekly insight. Have a great week ahead!";
+  // Shorter, more conversational sign-offs
+  if (sentiment === "positive") {
+    return isWeekly
+      ? "Keep up the momentum!"
+      : "You're on a good track.";
   }
+
+  if (sentiment === "challenging") {
+    return isWeekly
+      ? "You've got this. One step at a time."
+      : "Focus on that priority and you'll be fine.";
+  }
+
+  // Neutral / default
+  if (isWeekly) {
+    return "That's your week. You're in good shape.";
+  }
+
   if (lowerLabel.includes("q1") || lowerLabel.includes("quarter 1")) {
-    return "That's your first quarter insight. Here's to a strong year!";
+    return "Strong start to the year.";
   }
   if (lowerLabel.includes("q2") || lowerLabel.includes("quarter 2")) {
-    return "That's your second quarter insight. Keep up the great work!";
+    return "Halfway there. Keep going.";
   }
   if (lowerLabel.includes("q3") || lowerLabel.includes("quarter 3")) {
-    return "That's your third quarter insight. The finish line is in sight!";
+    return "Home stretch is coming up.";
   }
   if (lowerLabel.includes("q4") || lowerLabel.includes("quarter 4")) {
-    return "That's your fourth quarter insight. Let's finish strong!";
-  }
-  if (
-    lowerLabel.includes("january") ||
-    lowerLabel.includes("february") ||
-    lowerLabel.includes("march")
-  ) {
-    return "That's your monthly insight. Here's to a great month ahead!";
-  }
-  if (lowerLabel.includes("december") || lowerLabel.includes("year")) {
-    return "That's your insight. Here's to continued success!";
+    return "Let's finish strong.";
   }
 
-  return "That's your insight for this period. Keep up the momentum!";
+  return "That's your update. You're doing fine.";
 }
 
 /**
@@ -147,5 +166,12 @@ export function buildTeaserScript(
   periodLabel: string,
 ): string {
   const openerTone = getOpenerTone(content.sentiment);
-  return `[warmly] Here's your ${periodLabel} business insight. [pause] ${openerTone} ${content.opener} [pause] [warmly] Check your dashboard for the full details and recommended actions.`;
+  
+  // Super short - just the hook and call to action
+  const hasAction = content.actions.length > 0;
+  const actionHint = hasAction
+    ? "Tap to see your priority for the week."
+    : "Tap to see the details.";
+    
+  return `[warmly] Your ${periodLabel} update is ready. [pause] ${openerTone} ${content.opener} [pause] [warmly] ${actionHint}`;
 }

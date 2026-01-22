@@ -907,3 +907,489 @@ export async function checkInsightDataQuality(
     metrics,
   };
 }
+
+// ============================================================================
+// DETAILED "MONEY ON TABLE" QUERIES
+// ============================================================================
+
+export type OverdueInvoiceDetail = {
+  id: string;
+  invoiceNumber: string;
+  customerName: string;
+  customerEmail?: string;
+  amount: number;
+  currency: string;
+  dueDate: string;
+  daysOverdue: number;
+};
+
+/**
+ * Get detailed overdue invoice information with customer names and days overdue.
+ * Returns invoices sorted by days overdue (oldest first).
+ */
+export async function getOverdueInvoiceDetails(
+  db: Database,
+  params: { teamId: string; currency?: string },
+): Promise<OverdueInvoiceDetail[]> {
+  const { teamId, currency } = params;
+
+  const conditions = [
+    eq(invoices.teamId, teamId),
+    eq(invoices.status, "overdue"),
+    isNotNull(invoices.dueDate),
+  ];
+
+  if (currency) {
+    conditions.push(eq(invoices.currency, currency));
+  }
+
+  const result = await db
+    .select({
+      id: invoices.id,
+      invoiceNumber: invoices.invoiceNumber,
+      customerName: invoices.customerName,
+      amount: invoices.amount,
+      currency: invoices.currency,
+      dueDate: invoices.dueDate,
+      customerEmail: customers.email,
+    })
+    .from(invoices)
+    .leftJoin(customers, eq(invoices.customerId, customers.id))
+    .where(and(...conditions))
+    .orderBy(sql`${invoices.dueDate} ASC`);
+
+  const now = new Date();
+
+  return result.map((inv) => {
+    const dueDate = new Date(inv.dueDate!);
+    const daysOverdue = Math.floor(
+      (now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    return {
+      id: inv.id,
+      invoiceNumber: inv.invoiceNumber ?? "",
+      customerName: inv.customerName ?? "Unknown",
+      customerEmail: inv.customerEmail ?? undefined,
+      amount: Number(inv.amount ?? 0),
+      currency: inv.currency ?? "USD",
+      dueDate: inv.dueDate!,
+      daysOverdue: Math.max(0, daysOverdue),
+    };
+  });
+}
+
+export type UnbilledHoursDetail = {
+  projectId: string;
+  projectName: string;
+  customerName?: string;
+  hours: number;
+  rate: number;
+  currency: string;
+  billableAmount: number;
+};
+
+/**
+ * Get detailed unbilled hours by project with customer names and calculated amounts.
+ * Returns projects with unbilled work, sorted by billable amount (highest first).
+ */
+export async function getUnbilledHoursDetails(
+  db: Database,
+  params: { teamId: string; currency?: string },
+): Promise<UnbilledHoursDetail[]> {
+  const { teamId, currency } = params;
+
+  // Get unbilled entries grouped by project
+  const result = await db
+    .select({
+      projectId: trackerProjects.id,
+      projectName: trackerProjects.name,
+      customerName: customers.name,
+      rate: trackerProjects.rate,
+      currency: trackerProjects.currency,
+      totalSeconds: sql<number>`COALESCE(SUM(${trackerEntries.duration}), 0)::int`,
+    })
+    .from(trackerEntries)
+    .innerJoin(
+      trackerProjects,
+      eq(trackerEntries.projectId, trackerProjects.id),
+    )
+    .leftJoin(customers, eq(trackerProjects.customerId, customers.id))
+    .where(
+      and(
+        eq(trackerEntries.teamId, teamId),
+        eq(trackerEntries.billed, false),
+        currency ? eq(trackerProjects.currency, currency) : sql`true`,
+      ),
+    )
+    .groupBy(
+      trackerProjects.id,
+      trackerProjects.name,
+      trackerProjects.rate,
+      trackerProjects.currency,
+      customers.name,
+    )
+    .having(sql`SUM(${trackerEntries.duration}) > 0`);
+
+  return result
+    .map((row) => {
+      const hours = Math.round((row.totalSeconds / 3600) * 10) / 10;
+      const rate = Number(row.rate ?? 0);
+      const billableAmount = Math.round(hours * rate * 100) / 100;
+
+      return {
+        projectId: row.projectId,
+        projectName: row.projectName,
+        customerName: row.customerName ?? undefined,
+        hours,
+        rate,
+        currency: row.currency ?? "USD",
+        billableAmount,
+      };
+    })
+    .filter((row) => row.hours > 0)
+    .sort((a, b) => b.billableAmount - a.billableAmount);
+}
+
+export type DraftInvoiceDetail = {
+  id: string;
+  invoiceNumber?: string;
+  customerName: string;
+  amount: number;
+  currency: string;
+  createdAt: string;
+};
+
+/**
+ * Get draft invoices that are ready to send.
+ * Returns drafts sorted by amount (highest first).
+ */
+export async function getDraftInvoices(
+  db: Database,
+  params: { teamId: string; currency?: string },
+): Promise<DraftInvoiceDetail[]> {
+  const { teamId, currency } = params;
+
+  const conditions = [
+    eq(invoices.teamId, teamId),
+    eq(invoices.status, "draft"),
+  ];
+
+  if (currency) {
+    conditions.push(eq(invoices.currency, currency));
+  }
+
+  const result = await db
+    .select({
+      id: invoices.id,
+      invoiceNumber: invoices.invoiceNumber,
+      customerName: invoices.customerName,
+      amount: invoices.amount,
+      currency: invoices.currency,
+      createdAt: invoices.createdAt,
+    })
+    .from(invoices)
+    .where(and(...conditions))
+    .orderBy(sql`${invoices.amount} DESC`);
+
+  return result.map((inv) => ({
+    id: inv.id,
+    invoiceNumber: inv.invoiceNumber ?? undefined,
+    customerName: inv.customerName ?? "Unknown",
+    amount: Number(inv.amount ?? 0),
+    currency: inv.currency ?? "USD",
+    createdAt: inv.createdAt
+      ? inv.createdAt instanceof Date
+        ? inv.createdAt.toISOString()
+        : String(inv.createdAt)
+      : new Date().toISOString(),
+  }));
+}
+
+// ============================================================================
+// ROLLING AVERAGES & COMPARISON CONTEXT
+// ============================================================================
+
+export type RollingAverages = {
+  avgRevenue: number;
+  avgExpenses: number;
+  avgProfit: number;
+  weeksIncluded: number;
+};
+
+/**
+ * Get rolling averages for key metrics from past weekly insights.
+ * Looks at the last N completed weekly insights to calculate averages.
+ *
+ * @param weeksBack - Number of past weeks to include (default 4)
+ * @param currentPeriodYear - Exclude this period from the average
+ * @param currentPeriodNumber - Exclude this period from the average
+ */
+export async function getRollingAverages(
+  db: Database,
+  params: {
+    teamId: string;
+    weeksBack?: number;
+    currentPeriodYear?: number;
+    currentPeriodNumber?: number;
+  },
+): Promise<RollingAverages> {
+  const {
+    teamId,
+    weeksBack = 4,
+    currentPeriodYear,
+    currentPeriodNumber,
+  } = params;
+
+  // Query past weekly insights with completed metrics
+  const conditions = [
+    eq(insights.teamId, teamId),
+    eq(insights.periodType, "weekly"),
+    eq(insights.status, "completed"),
+    isNotNull(insights.allMetrics),
+  ];
+
+  // Exclude current week if specified
+  if (currentPeriodYear && currentPeriodNumber) {
+    conditions.push(
+      sql`NOT (${insights.periodYear} = ${currentPeriodYear} AND ${insights.periodNumber} = ${currentPeriodNumber})`,
+    );
+  }
+
+  const pastInsights = await db
+    .select({
+      allMetrics: insights.allMetrics,
+      periodYear: insights.periodYear,
+      periodNumber: insights.periodNumber,
+    })
+    .from(insights)
+    .where(and(...conditions))
+    .orderBy(desc(insights.periodYear), desc(insights.periodNumber))
+    .limit(weeksBack);
+
+  if (pastInsights.length === 0) {
+    return {
+      avgRevenue: 0,
+      avgExpenses: 0,
+      avgProfit: 0,
+      weeksIncluded: 0,
+    };
+  }
+
+  // Extract metrics from past insights
+  let totalRevenue = 0;
+  let totalExpenses = 0;
+  let totalProfit = 0;
+  let validWeeks = 0;
+
+  for (const insight of pastInsights) {
+    const metrics = insight.allMetrics as Record<
+      string,
+      { value: number }
+    > | null;
+    if (!metrics) continue;
+
+    const revenue = metrics.revenue?.value ?? 0;
+    const expenses = metrics.expenses?.value ?? 0;
+    const profit = metrics.netProfit?.value ?? metrics.profit?.value ?? 0;
+
+    totalRevenue += revenue;
+    totalExpenses += expenses;
+    totalProfit += profit;
+    validWeeks++;
+  }
+
+  if (validWeeks === 0) {
+    return {
+      avgRevenue: 0,
+      avgExpenses: 0,
+      avgProfit: 0,
+      weeksIncluded: 0,
+    };
+  }
+
+  return {
+    avgRevenue: Math.round((totalRevenue / validWeeks) * 100) / 100,
+    avgExpenses: Math.round((totalExpenses / validWeeks) * 100) / 100,
+    avgProfit: Math.round((totalProfit / validWeeks) * 100) / 100,
+    weeksIncluded: validWeeks,
+  };
+}
+
+// ============================================================================
+// STREAK DETECTION
+// ============================================================================
+
+export type StreakType =
+  | "revenue_growth"
+  | "revenue_decline"
+  | "profitable"
+  | "invoices_paid_on_time"
+  | null;
+
+export type StreakInfo = {
+  type: StreakType;
+  count: number;
+  description: string | null;
+};
+
+/**
+ * Detect consecutive week patterns for celebrating momentum or flagging trends.
+ *
+ * Detects:
+ * - revenue_growth: N consecutive weeks where revenue > previous week
+ * - revenue_decline: N consecutive weeks where revenue < previous week
+ * - profitable: N consecutive weeks with positive profit
+ * - invoices_paid_on_time: N consecutive weeks with no overdue invoices
+ */
+export async function getStreakInfo(
+  db: Database,
+  params: {
+    teamId: string;
+    currentPeriodYear: number;
+    currentPeriodNumber: number;
+    currentRevenue: number;
+    currentProfit: number;
+    hasOverdueInvoices: boolean;
+  },
+): Promise<StreakInfo> {
+  const {
+    teamId,
+    currentPeriodYear,
+    currentPeriodNumber,
+    currentRevenue,
+    currentProfit,
+    hasOverdueInvoices,
+  } = params;
+
+  // Get the last 8 weekly insights (to detect streaks up to 8 weeks)
+  const pastInsights = await db
+    .select({
+      allMetrics: insights.allMetrics,
+      activity: insights.activity,
+      periodYear: insights.periodYear,
+      periodNumber: insights.periodNumber,
+    })
+    .from(insights)
+    .where(
+      and(
+        eq(insights.teamId, teamId),
+        eq(insights.periodType, "weekly"),
+        eq(insights.status, "completed"),
+        isNotNull(insights.allMetrics),
+        sql`NOT (${insights.periodYear} = ${currentPeriodYear} AND ${insights.periodNumber} = ${currentPeriodNumber})`,
+      ),
+    )
+    .orderBy(desc(insights.periodYear), desc(insights.periodNumber))
+    .limit(8);
+
+  if (pastInsights.length === 0) {
+    return { type: null, count: 0, description: null };
+  }
+
+  // Build array of weekly data points (most recent first)
+  type WeekData = {
+    revenue: number;
+    profit: number;
+    hasOverdue: boolean;
+  };
+
+  const weeks: WeekData[] = [
+    {
+      revenue: currentRevenue,
+      profit: currentProfit,
+      hasOverdue: hasOverdueInvoices,
+    },
+  ];
+
+  for (const insight of pastInsights) {
+    const metrics = insight.allMetrics as Record<
+      string,
+      { value: number }
+    > | null;
+    const activity = insight.activity as { invoicesOverdue?: number } | null;
+
+    if (!metrics) continue;
+
+    weeks.push({
+      revenue: metrics.revenue?.value ?? 0,
+      profit: metrics.netProfit?.value ?? metrics.profit?.value ?? 0,
+      hasOverdue: (activity?.invoicesOverdue ?? 0) > 0,
+    });
+  }
+
+  // Check for revenue growth streak (current week is higher than each previous)
+  let growthStreak = 0;
+  for (let i = 0; i < weeks.length - 1; i++) {
+    if (weeks[i]!.revenue > weeks[i + 1]!.revenue) {
+      growthStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Check for revenue decline streak
+  let declineStreak = 0;
+  for (let i = 0; i < weeks.length - 1; i++) {
+    if (weeks[i]!.revenue < weeks[i + 1]!.revenue) {
+      declineStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Check for profitable streak
+  let profitableStreak = 0;
+  for (const week of weeks) {
+    if (week.profit > 0) {
+      profitableStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Check for invoices paid on time streak
+  let paidOnTimeStreak = 0;
+  for (const week of weeks) {
+    if (!week.hasOverdue) {
+      paidOnTimeStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Return the most significant streak (prioritize growth > profitable > paid on time > decline)
+  if (growthStreak >= 2) {
+    return {
+      type: "revenue_growth",
+      count: growthStreak,
+      description: `${growthStreak} consecutive growth weeks`,
+    };
+  }
+
+  if (profitableStreak >= 3) {
+    return {
+      type: "profitable",
+      count: profitableStreak,
+      description: `${profitableStreak} profitable weeks in a row`,
+    };
+  }
+
+  if (paidOnTimeStreak >= 3) {
+    return {
+      type: "invoices_paid_on_time",
+      count: paidOnTimeStreak,
+      description: `${paidOnTimeStreak} weeks with all invoices paid on time`,
+    };
+  }
+
+  if (declineStreak >= 2) {
+    return {
+      type: "revenue_decline",
+      count: declineStreak,
+      description: `Revenue down ${declineStreak} weeks in a row`,
+    };
+  }
+
+  return { type: null, count: 0, description: null };
+}

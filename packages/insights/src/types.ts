@@ -80,6 +80,56 @@ export type InsightMilestone = {
 };
 
 /**
+ * Overdue invoice - money owed by a client that's past due date
+ */
+export type OverdueInvoiceDetail = {
+  id: string;
+  invoiceNumber: string;
+  customerName: string;
+  customerEmail?: string;
+  amount: number;
+  currency: string;
+  dueDate: string;
+  daysOverdue: number;
+};
+
+/**
+ * Detailed unbilled hours for "money on table" section
+ */
+export type UnbilledHoursDetail = {
+  projectId: string;
+  projectName: string;
+  customerName?: string;
+  hours: number;
+  rate: number;
+  currency: string;
+  billableAmount: number;
+};
+
+/**
+ * Draft invoice ready to send to a client (potential revenue)
+ */
+export type DraftInvoiceDetail = {
+  id: string;
+  invoiceNumber?: string;
+  customerName: string;
+  amount: number;
+  currency: string;
+  createdAt: string;
+};
+
+/**
+ * "Money on the Table" - revenue waiting to be collected
+ */
+export type MoneyOnTable = {
+  totalAmount: number;
+  currency: string;
+  overdueInvoices: OverdueInvoiceDetail[];
+  unbilledWork: UnbilledHoursDetail[];
+  draftInvoices: DraftInvoiceDetail[];
+};
+
+/**
  * Business activity summary for the period
  */
 export type InsightActivity = {
@@ -94,6 +144,7 @@ export type InsightActivity = {
   newCustomers: number;
   receiptsMatched: number;
   transactionsCategorized: number;
+  /** Recurring invoices scheduled to go out to clients (expected revenue) */
   upcomingInvoices?: {
     count: number;
     totalAmount: number;
@@ -105,6 +156,34 @@ export type InsightActivity = {
       frequency?: string;
     }>;
   };
+  /** Detailed "money on table" data for specific names/amounts */
+  moneyOnTable?: MoneyOnTable;
+  /** Comparison and momentum context for richer narratives */
+  context?: InsightContext;
+};
+
+/**
+ * Comparison and momentum context for richer narratives
+ */
+export type InsightContext = {
+  /** Rolling averages from past weeks */
+  rollingAverage?: {
+    revenue: number;
+    expenses: number;
+    profit: number;
+    weeksIncluded: number;
+  };
+  /** Current week vs rolling average */
+  comparison?: {
+    revenueVsAvg: number; // percentage above/below average
+    description: string; // "20% above your usual"
+  };
+  /** Consecutive week patterns */
+  streak?: {
+    type: "revenue_growth" | "revenue_decline" | "profitable" | "invoices_paid_on_time";
+    count: number;
+    description: string; // "3 consecutive growth weeks"
+  };
 };
 
 /**
@@ -114,19 +193,19 @@ export type InsightSentiment = "positive" | "neutral" | "challenging";
 
 /**
  * AI-generated content structure
- * Uses adaptive tone based on actual business performance
+ * "What Matters Now" format - action-first, specific names/amounts
  */
 export type InsightContent = {
-  title: string; // Natural summary combining key metrics (max 15 words)
+  title: string; // Conversational summary: main thing + bigger picture (15-20 words, never notification-like)
   sentiment: InsightSentiment;
-  opener: string; // Context-aware opening (positive, neutral, or empathetic)
-  story: string;
+  opener: string; // Sets up the story - what's the main thing happening (max 15 words)
+  story: string; // 3-4 sentences telling the story of their week, like catching up over coffee
   actions: Array<{
     text: string;
     type?: string;
     deepLink?: string;
   }>;
-  celebration?: string;
+  celebration?: string; // Only for genuine wins (milestones, streaks, personal bests)
 };
 
 /**

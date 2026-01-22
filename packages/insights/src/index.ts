@@ -1,22 +1,18 @@
-/**
- * @midday/insights - AI-powered business insights generation
- *
- * This package provides:
- * - Smart metric selection and analysis
- * - AI-powered content generation
- * - Period date utilities
- * - Type definitions for insights
- */
 import type { Database } from "@midday/db/client";
 import {
   getCashFlow,
+  getDraftInvoices,
   getInsightActivityData,
+  getOverdueInvoiceDetails,
   getOverdueInvoicesAlert,
   getProfit,
   getRevenue,
+  getRollingAverages,
   getRunway,
   getSpending,
   getSpendingForPeriod,
+  getStreakInfo,
+  getUnbilledHoursDetails,
   getUpcomingDueRecurringByTeam,
 } from "@midday/db/queries";
 import {
@@ -42,9 +38,11 @@ import type {
   InsightActivity,
   InsightAnomaly,
   InsightContent,
+  InsightContext,
   InsightGenerationResult,
   InsightMetric,
   MetricData,
+  MoneyOnTable,
   PeriodInfo,
   PeriodType,
 } from "./types";
@@ -133,12 +131,13 @@ export class InsightsService {
       currency,
     );
 
-    // Build activity summary
+    // Build activity summary with comparison context
     const activity = await this.buildActivitySummary(
       teamId,
       currentPeriod,
       currency,
       currentActivity,
+      currentMetrics,
     );
 
     // Generate AI content
@@ -287,15 +286,47 @@ export class InsightsService {
       receiptsMatched: number;
       transactionsCategorized: number;
     },
+    currentMetrics: MetricData,
   ): Promise<InsightActivity> {
-    // Fetch overdue and upcoming invoices
+    // Fetch all detailed data in parallel
     const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const [overdueData, upcomingRecurring] = await Promise.all([
+    const [
+      overdueData,
+      upcomingRecurring,
+      overdueDetails,
+      unbilledDetails,
+      draftInvoices,
+      rollingAverages,
+    ] = await Promise.all([
       getOverdueInvoicesAlert(this.db, { teamId, currency }).catch(() => null),
       getUpcomingDueRecurringByTeam(this.db, {
         teamId,
         before: sevenDaysFromNow,
-      }).catch(() => []),
+      }).catch(
+        () => [] as Awaited<ReturnType<typeof getUpcomingDueRecurringByTeam>>,
+      ),
+      // Detailed queries for "money on table"
+      getOverdueInvoiceDetails(this.db, { teamId, currency }).catch(
+        () => [] as Awaited<ReturnType<typeof getOverdueInvoiceDetails>>,
+      ),
+      getUnbilledHoursDetails(this.db, { teamId, currency }).catch(
+        () => [] as Awaited<ReturnType<typeof getUnbilledHoursDetails>>,
+      ),
+      getDraftInvoices(this.db, { teamId, currency }).catch(
+        () => [] as Awaited<ReturnType<typeof getDraftInvoices>>,
+      ),
+      // Rolling averages for comparison context
+      getRollingAverages(this.db, {
+        teamId,
+        weeksBack: 4,
+        currentPeriodYear: period.periodYear,
+        currentPeriodNumber: period.periodNumber,
+      }).catch(() => ({
+        avgRevenue: 0,
+        avgExpenses: 0,
+        avgProfit: 0,
+        weeksIncluded: 0,
+      })),
     ]);
 
     // Build upcoming invoices summary
@@ -318,6 +349,76 @@ export class InsightsService {
           }
         : undefined;
 
+    // Build "money on table" summary with detailed breakdown
+    const overdueTotal = overdueDetails.reduce(
+      (sum: number, inv: { amount: number }) => sum + inv.amount,
+      0,
+    );
+    const unbilledTotal = unbilledDetails.reduce(
+      (sum: number, proj: { billableAmount: number }) =>
+        sum + proj.billableAmount,
+      0,
+    );
+    const draftTotal = draftInvoices.reduce(
+      (sum: number, inv: { amount: number }) => sum + inv.amount,
+      0,
+    );
+
+    const moneyOnTable: MoneyOnTable = {
+      totalAmount: overdueTotal + unbilledTotal + draftTotal,
+      currency,
+      overdueInvoices: overdueDetails,
+      unbilledWork: unbilledDetails,
+      draftInvoices,
+    };
+
+    // Get streak info (needs to be after we know about overdue invoices)
+    const hasOverdueInvoices = (overdueData?.summary?.count ?? 0) > 0;
+    const streakInfo = await getStreakInfo(this.db, {
+      teamId,
+      currentPeriodYear: period.periodYear,
+      currentPeriodNumber: period.periodNumber,
+      currentRevenue: currentMetrics.revenue,
+      currentProfit: currentMetrics.netProfit,
+      hasOverdueInvoices,
+    }).catch(() => ({ type: null, count: 0, description: null }));
+
+    // Build comparison context
+    const context: InsightContext = {};
+
+    // Add rolling averages if we have enough data
+    if (rollingAverages.weeksIncluded >= 2) {
+      context.rollingAverage = {
+        revenue: rollingAverages.avgRevenue,
+        expenses: rollingAverages.avgExpenses,
+        profit: rollingAverages.avgProfit,
+        weeksIncluded: rollingAverages.weeksIncluded,
+      };
+
+      // Calculate comparison vs average
+      if (rollingAverages.avgRevenue > 0) {
+        const revenueVsAvg = Math.round(
+          ((currentMetrics.revenue - rollingAverages.avgRevenue) /
+            rollingAverages.avgRevenue) *
+            100,
+        );
+        const direction = revenueVsAvg >= 0 ? "above" : "below";
+        context.comparison = {
+          revenueVsAvg,
+          description: `${Math.abs(revenueVsAvg)}% ${direction} your usual`,
+        };
+      }
+    }
+
+    // Add streak info if significant
+    if (streakInfo.type && streakInfo.count >= 2) {
+      context.streak = {
+        type: streakInfo.type,
+        count: streakInfo.count,
+        description: streakInfo.description ?? "",
+      };
+    }
+
     return {
       invoicesSent: activityData.invoicesSent,
       invoicesPaid: activityData.invoicesPaid,
@@ -331,6 +432,8 @@ export class InsightsService {
       receiptsMatched: activityData.receiptsMatched,
       transactionsCategorized: activityData.transactionsCategorized,
       upcomingInvoices,
+      moneyOnTable,
+      context: Object.keys(context).length > 0 ? context : undefined,
     };
   }
 }
@@ -394,18 +497,23 @@ export type {
   AnomalySeverity,
   CategorySpending,
   ChangeDirection,
+  DraftInvoiceDetail,
   ExpenseAnomaly,
   GenerateInsightParams,
   InsightActivity,
   InsightAnomaly,
   InsightContent,
+  InsightContext,
   InsightGenerationResult,
   InsightMetric,
   InsightMilestone,
   MetricCategory,
   MetricData,
+  MoneyOnTable,
+  OverdueInvoiceDetail,
   PeriodInfo,
   PeriodType,
+  UnbilledHoursDetail,
 } from "./types";
 
 // Re-export constants
