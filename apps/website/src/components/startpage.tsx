@@ -103,55 +103,64 @@ const videos = [
   {
     id: "overview",
     title: "Overview",
-    subtitle: "See how Midday helps you run your business finances without manual work.",
+    subtitle:
+      "See how Midday helps you run your business finances without manual work.",
     url: "https://cdn.midday.ai/videos/login-video.mp4",
   },
   {
     id: "assistant",
     title: "Assistant",
-    subtitle: "Ask questions and get clear answers based on your business data, including revenue and expenses.",
+    subtitle:
+      "Ask questions and get clear answers based on your business data, including revenue and expenses.",
     url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
   },
   {
     id: "insights",
     title: "Insights",
-    subtitle: "Understand how your business evolves with live widgets and summaries highlighting what's changing.",
+    subtitle:
+      "Understand how your business evolves with live widgets and summaries highlighting what's changing.",
     url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
   },
   {
     id: "transactions",
     title: "Transactions",
-    subtitle: "Every payment is automatically collected, categorized, and kept in one place so nothing gets lost.",
+    subtitle:
+      "Every payment is automatically collected, categorized, and kept in one place so nothing gets lost.",
     url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
   },
   {
     id: "inbox",
     title: "Inbox",
-    subtitle: "Receipts and invoices are pulled from email and payments, then matched to transactions automatically.",
+    subtitle:
+      "Receipts and invoices are pulled from email and payments, then matched to transactions automatically.",
     url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
   },
   {
     id: "time-tracking",
     title: "Time tracking",
-    subtitle: "Track time across projects and customers, then turn hours into accurate invoices so nothing is missed.",
+    subtitle:
+      "Track time across projects and customers, then turn hours into accurate invoices so nothing is missed.",
     url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
   },
   {
     id: "invoicing",
     title: "Invoicing",
-    subtitle: "Create invoices, send to customers, and track payments flowing into your financial overview.",
+    subtitle:
+      "Create invoices, send to customers, and track payments flowing into your financial overview.",
     url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
   },
   {
     id: "customers",
     title: "Customers",
-    subtitle: "See revenue, profitability, and activity per customer in one place without switching between tools.",
+    subtitle:
+      "See revenue, profitability, and activity per customer in one place without switching between tools.",
     url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
   },
   {
     id: "files",
     title: "Files",
-    subtitle: "Smart storage that automatically organizes and connects files to transactions, invoices, and customers.",
+    subtitle:
+      "Smart storage that automatically organizes and connects files to transactions, invoices, and customers.",
     url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
   },
 ];
@@ -398,7 +407,9 @@ export function StartPage() {
                   setActiveVideoId("overview");
                 }}
                 className={`absolute inset-0 z-[3] flex items-center justify-center pointer-events-none transition-opacity duration-500 delay-300 ${
-                  (isDashboardLightLoaded || isDashboardDarkLoaded) ? 'opacity-100' : 'opacity-0'
+                  isDashboardLightLoaded || isDashboardDarkLoaded
+                    ? "opacity-100"
+                    : "opacity-0"
                 }`}
                 aria-label="Play video"
               >
@@ -435,7 +446,7 @@ export function StartPage() {
               animation: "fadeIn 200ms ease-out",
             }}
           />
-          <div 
+          <div
             className="relative bg-background border border-border w-auto max-w-4xl max-h-[90vh] overflow-hidden z-[10000] flex flex-col w-full sm:w-auto"
             style={{
               animation: "fadeIn 200ms ease-out 50ms both",
@@ -443,7 +454,9 @@ export function StartPage() {
           >
             {/* Video Player - Center */}
             <div className="relative w-full aspect-video bg-background">
-              <style dangerouslySetInnerHTML={{__html: `
+              <style
+                dangerouslySetInnerHTML={{
+                  __html: `
                 @keyframes fadeIn {
                   from { opacity: 0; }
                   to { opacity: 1; }
@@ -460,7 +473,9 @@ export function StartPage() {
                   height: 100% !important;
                   object-fit: cover !important;
                 }
-              `}} />
+              `,
+                }}
+              />
               <button
                 type="button"
                 onClick={() => setIsVideoModalOpen(false)}
@@ -478,12 +493,10 @@ export function StartPage() {
                 muted
                 controls
                 controlsList="nodownload noplaybackrate"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
               >
                 <source
-                  src={
-                    videos.find((v) => v.id === activeVideoId)?.url || ""
-                  }
+                  src={videos.find((v) => v.id === activeVideoId)?.url || ""}
                   type="video/mp4"
                 />
               </video>
@@ -491,76 +504,99 @@ export function StartPage() {
 
             {/* Video List - Below Video */}
             <div className="relative w-full border-t border-border bg-background overflow-hidden">
-              <div ref={videoTagsScrollRef} className="overflow-x-auto scrollbar-hide">
+              <div
+                ref={videoTagsScrollRef}
+                className="overflow-x-auto scrollbar-hide"
+              >
                 <div className="p-4 lg:p-6">
                   <div className="flex gap-4">
                     {videos.map((video, index) => (
                       <div key={video.id} className="flex items-stretch">
-                        {index > 0 && (
-                          <div className="w-px bg-border mr-4" />
-                        )}
+                        {index > 0 && <div className="w-px bg-border mr-4" />}
                         <button
                           type="button"
                           onClick={(e) => {
                             setActiveVideoId(video.id);
                             setVideoProgress(0);
-                            
+
                             const scrollContainer = videoTagsScrollRef.current;
                             if (!scrollContainer) return;
-                            
-                            const buttonRect = e.currentTarget.getBoundingClientRect();
-                            const containerRect = scrollContainer.getBoundingClientRect();
-                            const currentScrollLeft = scrollContainer.scrollLeft;
-                            
+
+                            const buttonRect =
+                              e.currentTarget.getBoundingClientRect();
+                            const containerRect =
+                              scrollContainer.getBoundingClientRect();
+                            const currentScrollLeft =
+                              scrollContainer.scrollLeft;
+
                             // Check if this is the last visible tag and scroll to show next one
                             if (index < videos.length - 1) {
-                              const isLastVisible = buttonRect.right >= containerRect.right - 50; // 50px threshold
-                              
+                              const isLastVisible =
+                                buttonRect.right >= containerRect.right - 50; // 50px threshold
+
                               if (isLastVisible) {
-                                const nextTag = scrollContainer.querySelector(`[data-video-index="${index + 1}"]`) as HTMLElement;
+                                const nextTag = scrollContainer.querySelector(
+                                  `[data-video-index="${index + 1}"]`,
+                                ) as HTMLElement;
                                 if (nextTag) {
-                                  const nextTagRect = nextTag.getBoundingClientRect();
+                                  const nextTagRect =
+                                    nextTag.getBoundingClientRect();
                                   // Calculate how much to scroll to show the next tag
-                                  const scrollAmount = nextTagRect.right - containerRect.right + 20; // 20px padding
-                                  
+                                  const scrollAmount =
+                                    nextTagRect.right -
+                                    containerRect.right +
+                                    20; // 20px padding
+
                                   scrollContainer.scrollTo({
                                     left: currentScrollLeft + scrollAmount,
-                                    behavior: 'smooth'
+                                    behavior: "smooth",
                                   });
                                 }
                               }
                             }
-                            
+
                             // Check if this is the first visible tag and scroll to show previous one
                             if (index > 0) {
-                              const isFirstVisible = buttonRect.left <= containerRect.left + 50; // 50px threshold
-                              
+                              const isFirstVisible =
+                                buttonRect.left <= containerRect.left + 50; // 50px threshold
+
                               if (isFirstVisible) {
-                                const prevTag = scrollContainer.querySelector(`[data-video-index="${index - 1}"]`) as HTMLElement;
+                                const prevTag = scrollContainer.querySelector(
+                                  `[data-video-index="${index - 1}"]`,
+                                ) as HTMLElement;
                                 if (prevTag) {
-                                  const prevTagRect = prevTag.getBoundingClientRect();
+                                  const prevTagRect =
+                                    prevTag.getBoundingClientRect();
                                   // Calculate how much to scroll to show the previous tag
-                                  const scrollAmount = containerRect.left - prevTagRect.left + 20; // 20px padding
-                                  
+                                  const scrollAmount =
+                                    containerRect.left - prevTagRect.left + 20; // 20px padding
+
                                   scrollContainer.scrollTo({
                                     left: currentScrollLeft - scrollAmount,
-                                    behavior: 'smooth'
+                                    behavior: "smooth",
                                   });
                                 }
                               }
                             }
                           }}
                           data-video-index={index}
-                          className={`w-[100px] sm:w-[140px] md:w-[310px] flex-shrink-0 pt-1 pb-3 md:pt-2 md:pb-5 transition-colors flex flex-col items-start gap-1 md:gap-2 text-left relative bg-background text-muted-foreground hover:text-foreground ${index > 0 ? 'pl-2' : ''}`}
+                          className={`w-[100px] sm:w-[140px] md:w-[310px] flex-shrink-0 pt-1 pb-3 md:pt-2 md:pb-5 transition-colors flex flex-col items-start gap-1 md:gap-2 text-left relative bg-background text-muted-foreground hover:text-foreground ${index > 0 ? "pl-2" : ""}`}
                         >
-                          <span className={`font-sans text-sm md:text-base leading-tight text-left ${activeVideoId === video.id ? 'text-primary' : ''}`}>{video.title}</span>
+                          <span
+                            className={`font-sans text-sm md:text-base leading-tight text-left ${activeVideoId === video.id ? "text-primary" : ""}`}
+                          >
+                            {video.title}
+                          </span>
                           {video.subtitle && (
                             <span className="hidden md:block font-sans text-xs text-muted-foreground leading-tight text-left">
                               {video.subtitle}
                             </span>
                           )}
                           {activeVideoId === video.id && (
-                            <div className="absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-150" style={{ width: `${videoProgress}%` }} />
+                            <div
+                              className="absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-150"
+                              style={{ width: `${videoProgress}%` }}
+                            />
                           )}
                         </button>
                       </div>
@@ -582,7 +618,7 @@ export function StartPage() {
       )}
 
       {/* Features 2-Column Layout Section */}
-      <section className="bg-background pt-12 sm:pt-16 lg:pt-6 xl:pt-8 2xl:pt-12 3xl:pt-32 pb-20 lg:pb-24">
+      <section className="bg-background pt-12 sm:pt-2 lg:pt-6 xl:pt-8 2xl:pt-12 3xl:pt-32 pb-20 lg:pb-24">
         <div className="max-w-[1400px] mx-auto">
           {/* Mobile: Stacked features */}
           <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
