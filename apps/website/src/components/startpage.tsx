@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -98,15 +99,77 @@ const features = [
   },
 ];
 
+const videos = [
+  {
+    id: "overview",
+    title: "Overview",
+    subtitle: "See how Midday helps you run your business finances without manual work.",
+    url: "https://cdn.midday.ai/videos/login-video.mp4",
+  },
+  {
+    id: "assistant",
+    title: "Assistant",
+    subtitle: "Ask questions and get clear answers based on your business data, including revenue and expenses.",
+    url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
+  },
+  {
+    id: "insights",
+    title: "Insights",
+    subtitle: "Understand how your business evolves with live widgets and summaries highlighting what's changing.",
+    url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
+  },
+  {
+    id: "transactions",
+    title: "Transactions",
+    subtitle: "Every payment is automatically collected, categorized, and kept in one place so nothing gets lost.",
+    url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
+  },
+  {
+    id: "inbox",
+    title: "Inbox",
+    subtitle: "Receipts and invoices are pulled from email and payments, then matched to transactions automatically.",
+    url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
+  },
+  {
+    id: "time-tracking",
+    title: "Time tracking",
+    subtitle: "Track time across projects and customers, then turn hours into accurate invoices so nothing is missed.",
+    url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
+  },
+  {
+    id: "invoicing",
+    title: "Invoicing",
+    subtitle: "Create invoices, send to customers, and track payments flowing into your financial overview.",
+    url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
+  },
+  {
+    id: "customers",
+    title: "Customers",
+    subtitle: "See revenue, profitability, and activity per customer in one place without switching between tools.",
+    url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
+  },
+  {
+    id: "files",
+    title: "Files",
+    subtitle: "Smart storage that automatically organizes and connects files to transactions, invoices, and customers.",
+    url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
+  },
+];
+
 export function StartPage() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isPosterLoaded, setIsPosterLoaded] = useState(false);
   const [isDashboardLightLoaded, setIsDashboardLightLoaded] = useState(false);
   const [isDashboardDarkLoaded, setIsDashboardDarkLoaded] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [activeVideoId, setActiveVideoId] = useState("overview");
+  const [videoProgress, setVideoProgress] = useState(0);
 
   const videoContainerRef = useRef(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const modalVideoRef = useRef<HTMLVideoElement>(null);
+  const videoTagsScrollRef = useRef<HTMLDivElement>(null);
 
   // Handle video load
   useEffect(() => {
@@ -127,6 +190,65 @@ export function StartPage() {
       video.removeEventListener("loadeddata", handleLoad);
     };
   }, []);
+
+  // Handle modal video switching
+  useEffect(() => {
+    const video = modalVideoRef.current;
+    if (!video || !isVideoModalOpen) return;
+
+    const activeVideo = videos.find((v) => v.id === activeVideoId);
+    if (activeVideo) {
+      if (video.src !== activeVideo.url) {
+        video.src = activeVideo.url;
+        video.load();
+        setVideoProgress(0);
+      }
+      // Try to play when video is ready
+      const handleCanPlay = () => {
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Autoplay may fail, user can click play
+          });
+        }
+      };
+      video.addEventListener("canplay", handleCanPlay);
+      // If already loaded, play immediately
+      if (video.readyState >= 3) {
+        handleCanPlay();
+      }
+      return () => {
+        video.removeEventListener("canplay", handleCanPlay);
+      };
+    }
+  }, [activeVideoId, isVideoModalOpen]);
+
+  // Track video progress
+  useEffect(() => {
+    const video = modalVideoRef.current;
+    if (!video || !isVideoModalOpen) return;
+
+    const updateProgress = () => {
+      if (video.duration) {
+        const progress = (video.currentTime / video.duration) * 100;
+        setVideoProgress(progress);
+      }
+    };
+
+    const handleTimeUpdate = () => updateProgress();
+    const handleLoadedMetadata = () => {
+      setVideoProgress(0);
+      updateProgress();
+    };
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+
+    return () => {
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+    };
+  }, [activeVideoId, isVideoModalOpen]);
 
   return (
     <div className="min-h-screen">
@@ -267,10 +389,180 @@ export function StartPage() {
                   />
                 </div>
               </div>
+
+              {/* Play Button Overlay */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsVideoModalOpen(true);
+                  setActiveVideoId("overview");
+                }}
+                className={`absolute inset-0 z-[3] flex items-center justify-center pointer-events-none transition-opacity duration-500 delay-300 ${
+                  (isDashboardLightLoaded || isDashboardDarkLoaded) ? 'opacity-100' : 'opacity-0'
+                }`}
+                aria-label="Play video"
+              >
+                <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-muted hover:bg-secondary hover:scale-105 flex items-center justify-center transition-all duration-200 pointer-events-auto">
+                  <Icons.Play className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
+                </div>
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Video Modal */}
+      {isVideoModalOpen && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        >
+          <div
+            className="fixed inset-0 bg-white/40 backdrop-blur-xs dark:bg-black/40"
+            onClick={() => setIsVideoModalOpen(false)}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          />
+          <div className="relative bg-background border border-border w-auto max-w-4xl max-h-[90vh] overflow-hidden z-[10000] flex flex-col w-full sm:w-auto">
+            {/* Video Player - Center */}
+            <div className="relative w-full aspect-video bg-background">
+              <style dangerouslySetInnerHTML={{__html: `
+                video::-webkit-media-controls-timeline,
+                video::-webkit-media-controls-current-time-display,
+                video::-webkit-media-controls-time-remaining-display,
+                video::-webkit-media-controls-timeline-container {
+                  display: none !important;
+                }
+              `}} />
+              <button
+                type="button"
+                onClick={() => setIsVideoModalOpen(false)}
+                className="hidden sm:block absolute top-4 right-4 z-10 backdrop-blur-md bg-background-semi-transparent p-2 transition-colors"
+                aria-label="Close dialog"
+              >
+                <Icons.Close className="h-5 w-5 text-foreground" />
+              </button>
+              <video
+                ref={modalVideoRef}
+                className="w-full h-full object-contain"
+                autoPlay
+                playsInline
+                loop
+                muted
+                controls
+                controlsList="nodownload noplaybackrate"
+              >
+                <source
+                  src={
+                    videos.find((v) => v.id === activeVideoId)?.url || ""
+                  }
+                  type="video/mp4"
+                />
+              </video>
+            </div>
+
+            {/* Video List - Below Video */}
+            <div className="relative w-full border-t border-border bg-background overflow-hidden">
+              <div ref={videoTagsScrollRef} className="overflow-x-auto scrollbar-hide">
+                <div className="p-4 lg:p-6">
+                  <div className="flex gap-4">
+                    {videos.map((video, index) => (
+                      <div key={video.id} className="flex items-stretch">
+                        {index > 0 && (
+                          <div className="w-px bg-border mr-4" />
+                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            setActiveVideoId(video.id);
+                            setVideoProgress(0);
+                            
+                            const scrollContainer = videoTagsScrollRef.current;
+                            if (!scrollContainer) return;
+                            
+                            const buttonRect = e.currentTarget.getBoundingClientRect();
+                            const containerRect = scrollContainer.getBoundingClientRect();
+                            const currentScrollLeft = scrollContainer.scrollLeft;
+                            
+                            // Check if this is the last visible tag and scroll to show next one
+                            if (index < videos.length - 1) {
+                              const isLastVisible = buttonRect.right >= containerRect.right - 50; // 50px threshold
+                              
+                              if (isLastVisible) {
+                                const nextTag = scrollContainer.querySelector(`[data-video-index="${index + 1}"]`) as HTMLElement;
+                                if (nextTag) {
+                                  const nextTagRect = nextTag.getBoundingClientRect();
+                                  // Calculate how much to scroll to show the next tag
+                                  const scrollAmount = nextTagRect.right - containerRect.right + 20; // 20px padding
+                                  
+                                  scrollContainer.scrollTo({
+                                    left: currentScrollLeft + scrollAmount,
+                                    behavior: 'smooth'
+                                  });
+                                }
+                              }
+                            }
+                            
+                            // Check if this is the first visible tag and scroll to show previous one
+                            if (index > 0) {
+                              const isFirstVisible = buttonRect.left <= containerRect.left + 50; // 50px threshold
+                              
+                              if (isFirstVisible) {
+                                const prevTag = scrollContainer.querySelector(`[data-video-index="${index - 1}"]`) as HTMLElement;
+                                if (prevTag) {
+                                  const prevTagRect = prevTag.getBoundingClientRect();
+                                  // Calculate how much to scroll to show the previous tag
+                                  const scrollAmount = containerRect.left - prevTagRect.left + 20; // 20px padding
+                                  
+                                  scrollContainer.scrollTo({
+                                    left: currentScrollLeft - scrollAmount,
+                                    behavior: 'smooth'
+                                  });
+                                }
+                              }
+                            }
+                          }}
+                          data-video-index={index}
+                          className={`w-[100px] sm:w-[140px] md:w-[310px] flex-shrink-0 pt-2 pb-5 transition-colors flex flex-col items-start gap-2 text-left relative bg-background text-muted-foreground hover:text-foreground ${index > 0 ? 'pl-2' : ''}`}
+                        >
+                          <span className={`font-sans text-sm md:text-base leading-tight text-left ${activeVideoId === video.id ? 'text-primary' : ''}`}>{video.title}</span>
+                          {video.subtitle && (
+                            <span className="hidden md:block font-sans text-xs text-muted-foreground leading-tight text-left">
+                              {video.subtitle}
+                            </span>
+                          )}
+                          {activeVideoId === video.id && (
+                            <div className="absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-150" style={{ width: `${videoProgress}%` }} />
+                          )}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Gradient fade-out on the right */}
+              <div
+                className="absolute top-0 right-0 bottom-0 w-24 pointer-events-none z-10"
+                style={{
+                  background:
+                    "linear-gradient(to left, hsl(var(--background)) 0%, hsl(var(--background)) 30%, hsla(var(--background), 0.8) 50%, hsla(var(--background), 0.4) 70%, transparent 100%)",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Features 2-Column Layout Section */}
       <section className="bg-background pt-12 sm:pt-16 lg:pt-24 3xl:pt-32 pb-20 lg:pb-24">
