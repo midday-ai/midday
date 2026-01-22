@@ -424,7 +424,7 @@ export function StartPage() {
           }}
         >
           <div
-            className="fixed inset-0 bg-white/40 backdrop-blur-xs dark:bg-black/40"
+            className="fixed inset-0 bg-white/40 backdrop-blur-sm dark:bg-black/40 transition-all duration-300 animate-in fade-in"
             onClick={() => setIsVideoModalOpen(false)}
             style={{
               position: "fixed",

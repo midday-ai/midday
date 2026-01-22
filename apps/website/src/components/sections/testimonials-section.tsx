@@ -217,7 +217,7 @@ function VideoTestimonialCard({
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
-            className="fixed inset-0 bg-white/40 backdrop-blur-xs dark:bg-black/40"
+            className="fixed inset-0 bg-white/40 backdrop-blur-sm dark:bg-black/40 transition-all duration-300 animate-in fade-in"
             onClick={() => setIsOpen(false)}
           />
           <div className="relative bg-background border border-border p-8 max-w-2xl w-[90vw] max-h-[90vh] overflow-y-auto z-50">
@@ -296,7 +296,7 @@ function VideoTestimonialCardMobile({
       }}
     >
       <div
-        className="fixed inset-0 bg-white/40 backdrop-blur-xs dark:bg-black/40"
+        className="fixed inset-0 bg-white/40 backdrop-blur-sm dark:bg-black/40 transition-all duration-300 animate-in fade-in"
         onClick={() => setIsOpen(false)}
         style={{
           position: "fixed",
