@@ -139,7 +139,7 @@ export async function getInsights(db: Database, params: GetInsightsParams) {
     .select()
     .from(insights)
     .where(and(...conditions))
-    .orderBy(desc(insights.periodEnd))
+    .orderBy(desc(insights.periodYear), desc(insights.periodNumber))
     .limit(pageSize)
     .offset(offset);
 
@@ -727,7 +727,7 @@ export async function getInsightsForUser(
 
   const data = await query
     .where(and(...conditions))
-    .orderBy(desc(insights.periodEnd))
+    .orderBy(desc(insights.periodYear), desc(insights.periodNumber))
     .limit(pageSize)
     .offset(offset);
 

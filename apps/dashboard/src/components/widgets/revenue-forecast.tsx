@@ -113,8 +113,8 @@ export function RevenueForecastWidget() {
 
           {/* Simple trend line chart */}
           {chartData.length > 0 ? (
-            <div className="h-12 w-full">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full">
+              <ResponsiveContainer width="100%" height={48}>
                 <LineChart
                   data={chartData}
                   margin={{ top: 1, right: 0, left: 0, bottom: 1 }}

@@ -314,7 +314,7 @@ export function RevenueForecastChart({
     <div className={`w-full ${className}`}>
       {/* Chart */}
       <div style={{ height }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" debounce={1}>
           <ComposedChart
             data={normalizedData}
             margin={{ top: 20, right: 6, left: -marginLeft, bottom: 6 }}

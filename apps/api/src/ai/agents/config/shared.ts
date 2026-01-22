@@ -128,9 +128,7 @@ export function buildAppContext(
   };
 }
 
-// Type assertion needed due to redis package version type mismatches
-// biome-ignore lint/suspicious/noExplicitAny: Redis client type compatibility
-export const memoryProvider = new RedisProvider(getSharedRedisClient() as any);
+export const memoryProvider = new RedisProvider(getSharedRedisClient());
 
 export const createAgent = (config: AgentConfig<AppContext>) => {
   return new Agent({

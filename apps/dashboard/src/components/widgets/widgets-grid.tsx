@@ -1,6 +1,8 @@
 "use client";
 
 import { ErrorBoundary } from "@/components/error-boundary";
+import { useRealtime } from "@/hooks/use-realtime";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import {
   DndContext,
@@ -23,7 +25,7 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
 import { useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
@@ -111,7 +113,6 @@ function SortableCard({
 
 // Widget mapping to components
 const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
-  insights: InsightsWidget,
   runway: RunwayWidget,
   "top-customer": TopCustomerWidget,
   "revenue-summary": RevenueSummaryWidget,
@@ -138,6 +139,8 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
 
 export function WidgetsGrid() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const { data: user } = useUserQuery();
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const gridRef = useRef<HTMLDivElement>(null!);
 
@@ -145,6 +148,20 @@ export function WidgetsGrid() {
   const primaryWidgets = usePrimaryWidgets();
   const availableWidgets = useAvailableWidgets();
   const { setIsCustomizing } = useWidgetActions();
+
+  // Realtime subscription for insights
+  // Note: Dynamic channel name required due to Supabase Realtime auth race condition
+  // The effect cleanup handles channel removal, so this is safe
+  useRealtime({
+    channelName: `insights_${Date.now()}`,
+    table: "insights",
+    filter: user?.teamId ? `team_id=eq.${user.teamId}` : undefined,
+    onEvent: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.insights.list.queryKey(),
+      });
+    },
+  });
 
   useOnClickOutside(gridRef, (event) => {
     if (isCustomizing) {

@@ -20,6 +20,8 @@
  *   bun run scripts/generate-test-insight.ts abc123-team-id weekly 2026 2 --force
  */
 
+import { getTeamById } from "@midday/db/queries";
+import { getWorkerDb } from "@midday/db/worker-client";
 import { Queue } from "bullmq";
 import { getWeek, getYear, subWeeks } from "date-fns";
 
@@ -88,9 +90,18 @@ async function main() {
     process.exit(1);
   }
 
-  const teamId = args[0];
+  const teamId = args[0] as string;
   const periodType = (args[1] as PeriodType) || "weekly";
-  const currency = args[4] || "USD";
+
+  // Fetch team to get base currency
+  const db = getWorkerDb();
+  const team = await getTeamById(db, teamId);
+  if (!team) {
+    console.error(`❌ Team not found: ${teamId}`);
+    process.exit(1);
+  }
+
+  const currency = team.baseCurrency ?? "USD";
 
   // Get period info - either from args or calculate previous complete period
   let periodYear: number;
@@ -110,19 +121,17 @@ async function main() {
   console.log(`   Period Type: ${periodType}`);
   console.log(`   Period Year: ${periodYear}`);
   console.log(`   Period Number: ${periodNumber}`);
-  console.log(`   Currency: ${currency}`);
+  console.log(`   Currency: ${currency} (from team settings)`);
   if (skipDataQualityCheck) {
     console.log("   ⚠️  Force mode: bypassing data quality checks");
   }
   console.log();
 
   // Create queue connection directly
-  const redisUrl = process.env.REDIS_URL || process.env.UPSTASH_REDIS_URL;
+  const redisUrl = process.env.REDIS_URL;
 
   if (!redisUrl) {
-    console.error(
-      "❌ REDIS_URL or UPSTASH_REDIS_URL environment variable is required",
-    );
+    console.error("❌ REDIS_URL environment variable is required");
     process.exit(1);
   }
 

@@ -1,3 +1,12 @@
+import {
+  dismissInsightSchema,
+  insightAudioUrlSchema,
+  insightByIdSchema,
+  insightByPeriodSchema,
+  latestInsightSchema,
+  listInsightsSchema,
+  markInsightAsReadSchema,
+} from "@api/schemas/insights";
 import { createAdminClient } from "@api/services/supabase";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
@@ -9,11 +18,8 @@ import {
   markInsightAsRead,
 } from "@midday/db/queries";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
 const AUDIO_BUCKET = "vault";
-
-const periodTypeEnum = z.enum(["weekly", "monthly", "quarterly", "yearly"]);
 
 export const insightsRouter = createTRPCRouter({
   /**
@@ -21,14 +27,7 @@ export const insightsRouter = createTRPCRouter({
    * By default, filters out insights the user has dismissed
    */
   list: protectedProcedure
-    .input(
-      z.object({
-        periodType: periodTypeEnum.optional(),
-        limit: z.number().min(1).max(50).default(10),
-        cursor: z.string().nullish(),
-        includeDismissed: z.boolean().default(false),
-      }),
-    )
+    .input(listInsightsSchema)
     .query(async ({ ctx: { db, teamId, session }, input }) => {
       return getInsightsForUser(db, {
         teamId: teamId!,
@@ -45,11 +44,7 @@ export const insightsRouter = createTRPCRouter({
    * Get the most recent completed insight
    */
   latest: protectedProcedure
-    .input(
-      z.object({
-        periodType: periodTypeEnum.optional(),
-      }),
-    )
+    .input(latestInsightSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
       return getLatestInsight(db, {
         teamId: teamId!,
@@ -61,11 +56,7 @@ export const insightsRouter = createTRPCRouter({
    * Get a specific insight by ID
    */
   byId: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-      }),
-    )
+    .input(insightByIdSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
       const insight = await getInsightById(db, {
         id: input.id,
@@ -86,13 +77,7 @@ export const insightsRouter = createTRPCRouter({
    * Get insight for a specific period
    */
   byPeriod: protectedProcedure
-    .input(
-      z.object({
-        periodType: periodTypeEnum,
-        periodYear: z.number(),
-        periodNumber: z.number(),
-      }),
-    )
+    .input(insightByPeriodSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
       const insight = await getInsightByPeriod(db, {
         teamId: teamId!,
@@ -116,11 +101,7 @@ export const insightsRouter = createTRPCRouter({
    * Returns a short-lived URL (1 hour) for dashboard playback
    */
   audioUrl: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-      }),
-    )
+    .input(insightAudioUrlSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
       const insight = await getInsightById(db, {
         id: input.id,
@@ -165,11 +146,7 @@ export const insightsRouter = createTRPCRouter({
    * Safe to call multiple times - only sets readAt if not already set
    */
   markAsRead: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-      }),
-    )
+    .input(markInsightAsReadSchema)
     .mutation(async ({ ctx: { db, teamId, session }, input }) => {
       // Verify the insight belongs to the user's team
       const insight = await getInsightById(db, {
@@ -197,11 +174,7 @@ export const insightsRouter = createTRPCRouter({
    * The insight will no longer appear in their list unless includeDismissed is true
    */
   dismiss: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-      }),
-    )
+    .input(dismissInsightSchema)
     .mutation(async ({ ctx: { db, teamId, session }, input }) => {
       // Verify the insight belongs to the user's team
       const insight = await getInsightById(db, {
