@@ -109,8 +109,9 @@ function SortableCard({
   );
 }
 
-// Widget mapping to components (insights is rendered separately)
+// Widget mapping to components
 const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
+  insights: InsightsWidget,
   runway: RunwayWidget,
   "top-customer": TopCustomerWidget,
   "revenue-summary": RevenueSummaryWidget,

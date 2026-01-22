@@ -45,7 +45,8 @@ export const getInsightsTool = tool({
       let insight: Insight | null = null;
 
       // If specific period requested, fetch it
-      if (periodNumber && year) {
+      // Use explicit undefined checks to distinguish "not provided" from "provided as zero"
+      if (periodNumber !== undefined && year !== undefined) {
         insight = await getInsightByPeriod(db, {
           teamId,
           periodType,
