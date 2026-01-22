@@ -582,7 +582,7 @@ export function StartPage() {
       )}
 
       {/* Features 2-Column Layout Section */}
-      <section className="bg-background pt-12 sm:pt-16 lg:pt-24 3xl:pt-32 pb-20 lg:pb-24">
+      <section className="bg-background pt-12 sm:pt-16 lg:pt-6 xl:pt-8 2xl:pt-12 3xl:pt-32 pb-20 lg:pb-24">
         <div className="max-w-[1400px] mx-auto">
           {/* Mobile: Stacked features */}
           <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
