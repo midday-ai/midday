@@ -55,7 +55,7 @@ export default function ComparePage() {
           <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
             Compare Midday to alternatives
           </h1>
-          <p className="font-sans text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="font-sans text-base text-muted-foreground max-w-2xl mx-auto">
             Midday is built for founders and small teams who want clarity over their finances without the complexity of traditional accounting software.
           </p>
         </div>

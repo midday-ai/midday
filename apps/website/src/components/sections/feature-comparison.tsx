@@ -29,16 +29,16 @@ export function FeatureComparison({ competitor }: Props) {
       </p>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table className="w-full border-collapse border border-border">
           <thead>
-            <tr className="border-b border-border">
-              <th className="text-left font-sans text-sm text-muted-foreground py-4 pr-4 w-1/2">
+            <tr className="border-b border-border bg-secondary">
+              <th className="text-left font-sans font-normal text-sm text-muted-foreground py-4 pl-4 pr-4 w-1/2">
                 Feature
               </th>
-              <th className="text-center font-sans text-sm text-foreground py-4 px-4 w-1/4">
+              <th className="text-center font-sans font-normal text-sm text-foreground py-4 px-4 w-1/4">
                 Midday
               </th>
-              <th className="text-center font-sans text-sm text-muted-foreground py-4 pl-4 w-1/4">
+              <th className="text-center font-sans font-normal text-sm text-muted-foreground py-4 pl-4 w-1/4">
                 {competitor.name}
               </th>
             </tr>
@@ -46,20 +46,12 @@ export function FeatureComparison({ competitor }: Props) {
           <tbody>
             {competitor.features.map((category) => (
               <Fragment key={category.category}>
-                <tr className="border-b border-border bg-muted/30">
-                  <td
-                    colSpan={3}
-                    className="font-sans text-sm text-foreground py-3 px-2"
-                  >
-                    {category.category}
-                  </td>
-                </tr>
                 {category.features.map((feature) => (
                   <tr
                     key={feature.name}
                     className="border-b border-border hover:bg-muted/20 transition-colors"
                   >
-                    <td className="font-sans text-sm text-foreground py-3 pr-4">
+                    <td className="font-sans text-sm text-foreground py-3 pl-4 pr-4">
                       {feature.name}
                     </td>
                     <td className="text-center font-sans text-sm py-3 px-4">

@@ -47,16 +47,16 @@ export function ComparisonPage({ competitor }: Props) {
             {competitor.keyDifferences.map((diff) => (
               <div
                 key={diff.title}
-                className="border border-border p-6"
+                className="bg-secondary border border-border p-6"
               >
                 <h3 className="font-sans text-sm text-muted-foreground mb-4">
                   {diff.title}
                 </h3>
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-primary mt-1.5 flex-shrink-0" />
                     <div>
-                      <span className="font-sans text-xs text-muted-foreground">
+                      <span className="font-sans text-xs text-primary">
                         Midday
                       </span>
                       <p className="font-sans text-sm text-foreground">
@@ -117,24 +117,26 @@ export function ComparisonPage({ competitor }: Props) {
             Making the switch is straightforward. Here's how to get started.
           </p>
           <div className="max-w-3xl mx-auto">
-            <div className="space-y-6">
-              {competitor.switchingSteps.map((step, index) => (
-                <div key={step.title} className="flex gap-4 lg:gap-6">
-                  <div className="flex-shrink-0 w-8 h-8 border border-border flex items-center justify-center">
-                    <span className="font-sans text-sm text-foreground">
-                      {index + 1}
-                    </span>
+            <div className="bg-secondary border border-border p-6">
+              <div className="space-y-6">
+                {competitor.switchingSteps.map((step, index) => (
+                  <div key={step.title} className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                      <span className="font-sans text-sm text-foreground">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-sans text-sm text-foreground mb-1">
+                        {step.title}
+                      </h3>
+                      <p className="font-sans text-sm text-muted-foreground">
+                        {step.description}
+                      </p>
+                    </div>
                   </div>
-                  <div className="pt-1">
-                    <h3 className="font-sans text-base text-foreground mb-1">
-                      {step.title}
-                    </h3>
-                    <p className="font-sans text-sm text-muted-foreground">
-                      {step.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -153,16 +155,18 @@ export function ComparisonPage({ competitor }: Props) {
             Midday is the right choice if you're...
           </p>
           <div className="max-w-2xl mx-auto">
-            <ul className="space-y-4">
-              {competitor.targetAudience.map((audience) => (
-                <li key={audience} className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 bg-primary mt-2 flex-shrink-0" />
-                  <span className="font-sans text-base text-foreground">
-                    {audience}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <div className="bg-secondary border border-border p-6">
+              <div className="space-y-6">
+                {competitor.targetAudience.map((audience) => (
+                  <div key={audience} className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 bg-primary flex-shrink-0" />
+                    <span className="font-sans text-sm text-foreground">
+                      {audience}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -182,20 +186,24 @@ export function ComparisonPage({ competitor }: Props) {
         </div>
 
         {/* CTA Section */}
-        <section className="text-center">
-          <h2 className="font-serif text-2xl text-foreground mb-4">
-            Ready to make the switch?
-          </h2>
-          <p className="font-sans text-base text-muted-foreground mb-8 max-w-xl mx-auto">
-            Start your 14-day free trial. No credit card required until you're ready to upgrade.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild className="btn-inverse h-11 px-6">
-              <a href="https://app.midday.ai/">Start your free trial</a>
-            </Button>
-            <Button asChild variant="outline" className="h-11 px-6">
-              <Link href="/pricing">View pricing</Link>
-            </Button>
+        <section className="text-center pb-24">
+          <div className="bg-background border border-border p-8 lg:p-12 text-center relative before:absolute before:inset-0 before:bg-[repeating-linear-gradient(-60deg,rgba(219,219,219,0.4),rgba(219,219,219,0.4)_1px,transparent_1px,transparent_6px)] dark:before:bg-[repeating-linear-gradient(-60deg,rgba(44,44,44,0.4),rgba(44,44,44,0.4)_1px,transparent_1px,transparent_6px)] before:pointer-events-none">
+            <div className="relative z-10">
+              <h2 className="font-serif text-2xl text-foreground mb-4">
+                Ready to make the switch?
+              </h2>
+              <p className="font-sans text-base text-muted-foreground mb-8 max-w-xl mx-auto">
+                Start your 14-day free trial. No credit card required until you're ready to upgrade.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button asChild className="btn-inverse h-11 px-6">
+                  <a href="https://app.midday.ai/">Start your free trial</a>
+                </Button>
+                <Button asChild variant="outline" className="bg-background h-11 px-6">
+                  <Link href="/pricing">View pricing</Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
       </div>

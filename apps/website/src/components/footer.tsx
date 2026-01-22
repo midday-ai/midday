@@ -74,7 +74,7 @@ export function Footer() {
             </div>
 
             {/* Compare Column */}
-            <div className="space-y-3">
+            <div className="space-y-3 hidden md:block">
               <h3 className="font-sans text-sm text-foreground mb-4">
                 Compare
               </h3>

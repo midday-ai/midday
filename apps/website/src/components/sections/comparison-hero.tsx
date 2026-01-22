@@ -28,7 +28,7 @@ export function ComparisonHero({ competitor, differentiators, sections }: Props)
         <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
           Best {competitor.name} Alternative for Founders
         </h1>
-        <p className="font-sans text-lg text-muted-foreground mb-8 max-w-2xl">
+        <p className="font-sans text-base text-muted-foreground mb-8 max-w-2xl">
           {competitor.description} Compare features, pricing, and see why teams are switching to Midday.
         </p>
 
@@ -47,7 +47,7 @@ export function ComparisonHero({ competitor, differentiators, sections }: Props)
           {differentiators.map((diff) => (
             <div
               key={diff.title}
-              className="border border-border px-4 py-2"
+              className="border border-border px-3 py-1.5"
             >
               <span className="font-sans text-sm text-foreground">
                 {diff.title}

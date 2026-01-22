@@ -47,8 +47,8 @@ export function PricingComparison({ competitor }: Props) {
                 <ul className="space-y-2">
                   {tier.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
-                      <span className="text-foreground leading-[1.5rem]">•</span>
-                      <span className="font-sans text-sm text-muted-foreground">
+                      <span className="text-primary leading-[1.5rem]">•</span>
+                      <span className="font-sans text-sm text-primary">
                         {feature}
                       </span>
                     </li>
