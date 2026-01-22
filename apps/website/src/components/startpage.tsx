@@ -451,8 +451,14 @@ export function StartPage() {
                 video::-webkit-media-controls-timeline,
                 video::-webkit-media-controls-current-time-display,
                 video::-webkit-media-controls-time-remaining-display,
-                video::-webkit-media-controls-timeline-container {
+                video::-webkit-media-controls-timeline-container,
+                video::-webkit-media-controls-panel {
                   display: none !important;
+                }
+                video {
+                  width: 100% !important;
+                  height: 100% !important;
+                  object-fit: cover !important;
                 }
               `}} />
               <button
@@ -465,13 +471,14 @@ export function StartPage() {
               </button>
               <video
                 ref={modalVideoRef}
-                className="w-full h-full object-contain"
+                className="w-full h-full"
                 autoPlay
                 playsInline
                 loop
                 muted
                 controls
                 controlsList="nodownload noplaybackrate"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               >
                 <source
                   src={
@@ -544,7 +551,7 @@ export function StartPage() {
                             }
                           }}
                           data-video-index={index}
-                          className={`w-[100px] sm:w-[140px] md:w-[310px] flex-shrink-0 pt-2 pb-5 transition-colors flex flex-col items-start gap-2 text-left relative bg-background text-muted-foreground hover:text-foreground ${index > 0 ? 'pl-2' : ''}`}
+                          className={`w-[100px] sm:w-[140px] md:w-[310px] flex-shrink-0 pt-1 pb-3 md:pt-2 md:pb-5 transition-colors flex flex-col items-start gap-1 md:gap-2 text-left relative bg-background text-muted-foreground hover:text-foreground ${index > 0 ? 'pl-2' : ''}`}
                         >
                           <span className={`font-sans text-sm md:text-base leading-tight text-left ${activeVideoId === video.id ? 'text-primary' : ''}`}>{video.title}</span>
                           {video.subtitle && (
