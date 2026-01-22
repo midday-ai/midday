@@ -424,7 +424,7 @@ export function StartPage() {
           }}
         >
           <div
-            className="fixed inset-0 bg-white/40 backdrop-blur-sm dark:bg-black/40 transition-all duration-300 animate-in fade-in"
+            className="fixed inset-0 bg-white/40 backdrop-blur-sm dark:bg-black/40 transition-opacity duration-200"
             onClick={() => setIsVideoModalOpen(false)}
             style={{
               position: "fixed",
@@ -432,12 +432,22 @@ export function StartPage() {
               left: 0,
               right: 0,
               bottom: 0,
+              animation: "fadeIn 200ms ease-out",
             }}
           />
-          <div className="relative bg-background border border-border w-auto max-w-4xl max-h-[90vh] overflow-hidden z-[10000] flex flex-col w-full sm:w-auto">
+          <div 
+            className="relative bg-background border border-border w-auto max-w-4xl max-h-[90vh] overflow-hidden z-[10000] flex flex-col w-full sm:w-auto"
+            style={{
+              animation: "fadeIn 200ms ease-out 50ms both",
+            }}
+          >
             {/* Video Player - Center */}
             <div className="relative w-full aspect-video bg-background">
               <style dangerouslySetInnerHTML={{__html: `
+                @keyframes fadeIn {
+                  from { opacity: 0; }
+                  to { opacity: 1; }
+                }
                 video::-webkit-media-controls-timeline,
                 video::-webkit-media-controls-current-time-display,
                 video::-webkit-media-controls-time-remaining-display,
