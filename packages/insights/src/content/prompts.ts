@@ -635,7 +635,7 @@ WRITE A "WHAT MATTERS NOW" SUMMARY:
    - Write naturally for the locale
    
    GOOD WEEKS:
-   - "260,340 kr profit this week on 269,668 kr revenue, expenses at 9,328 kr. Acme Inc AB owes you 750 kr. 14 months runway, a strong position."
+   - "260,340 kr profit this week on 269,668 kr revenue, expenses at 9,328 kr. [Customer] owes you 750 kr. 14 months runway, a strong position."
    
    ZERO/LOSS WEEKS:
    - "Quieter week with no payments landing - just timing. Expenses at 22,266 kr. With 14 months runway, no stress. Lost Island AB still owes 750 kr."
@@ -698,7 +698,7 @@ TONE & STYLE:
 - Sound like a smart friend who's genuinely excited about your wins
 - Be conversational: "hasn't", "it's", "you've", "that's", "you're"
 - NO alarm words: never say "urgent", "critical", "immediately", "action required", "warning"
-- Write amounts naturally for the locale: "269k kr" not "SEK 269,000"
+- Write amounts naturally for the locale: "269,668 kr" not "SEK 269,668" - use full amounts, not abbreviations
 - Always use specific customer names and amounts
 - Make them FEEL something - pride in wins, confidence in their position
 - One clear priority is better than a list of five things

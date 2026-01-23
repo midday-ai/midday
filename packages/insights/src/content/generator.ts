@@ -32,7 +32,7 @@ const insightContentSchema = z.object({
   title: z
     .string()
     .describe(
-      "20-35 words. Week snapshot for widget cards. Lead with profit and context (margin, comparison). Include runway and any overdue. NO superlatives. Use full amounts. Example: '338,958 kr profit on 350,000 kr revenue - healthy 97% margin. 14 months runway. Acme Inc owes 750 kr.'",
+      "20-35 words. Week snapshot for widget cards. Lead with profit and context (margin, comparison). Include runway and any overdue. NO superlatives. Use full amounts. Example: '338,958 kr profit on 350,000 kr revenue - healthy 97% margin. 14 months runway. [Customer] owes 750 kr.'",
     ),
   summary: z
     .string()

@@ -196,11 +196,6 @@ export type InsightContext = {
 };
 
 /**
- * Sentiment indicator for insight tone
- */
-export type InsightSentiment = "positive" | "neutral" | "challenging";
-
-/**
  * AI-generated content structure
  * "What Matters Now" format - action-first, specific names/amounts
  */
