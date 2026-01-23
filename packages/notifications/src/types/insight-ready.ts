@@ -17,7 +17,7 @@ export const insightReady: NotificationHandler = {
       periodLabel: data.periodLabel,
       periodNumber: data.periodNumber,
       periodYear: data.periodYear,
-      opener: data.opener,
+      title: data.title,
     },
   }),
 
@@ -30,7 +30,7 @@ export const insightReady: NotificationHandler = {
       data: {
         fullName: user.full_name,
         periodLabel: data.periodLabel,
-        opener: data.opener || "Your weekly insight is ready to review.",
+        title: data.title || "Your weekly insight is ready to review.",
         audioUrl: data.audioPresignedUrl,
         insightId: data.insightId,
         locale: user.locale || "en",

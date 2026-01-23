@@ -19,7 +19,7 @@ import {
 interface Props {
   fullName: string;
   periodLabel: string;
-  opener: string;
+  title: string;
   audioUrl?: string;
   insightId: string;
   locale?: string;
@@ -30,7 +30,7 @@ const baseAppUrl = getAppUrl();
 export const InsightReadyEmail = ({
   fullName = "",
   periodLabel = "Week 2, 2026",
-  opener = "Your revenue grew 12% this week, with profit margins improving across all categories.",
+  title = "338,958 kr profit on 350,000 kr revenue - healthy 97% margin. 14 months runway.",
   audioUrl,
   insightId = "preview-insight-id",
   locale = "en",
@@ -39,7 +39,7 @@ export const InsightReadyEmail = ({
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
-  const previewText = `Your ${periodLabel} business insight is ready: ${opener.slice(0, 100)}`;
+  const previewText = `Your ${periodLabel} business insight is ready: ${title.slice(0, 100)}`;
   const dashboardUrl = `${baseAppUrl}/?insight=${insightId}`;
 
   return (
@@ -91,7 +91,7 @@ export const InsightReadyEmail = ({
               className="text-[14px] leading-[22px] m-0"
               style={{ color: "#1e293b" }}
             >
-              {opener}
+              {title}
             </Text>
           </Section>
 

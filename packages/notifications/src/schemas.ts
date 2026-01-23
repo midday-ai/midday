@@ -295,7 +295,7 @@ export const insightReadySchema = z.object({
   periodLabel: z.string(),
   periodNumber: z.number(),
   periodYear: z.number(),
-  opener: z.string().optional(),
+  title: z.string().optional(),
   audioPresignedUrl: z.string().optional(),
 });
 

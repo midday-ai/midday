@@ -119,7 +119,7 @@ const cardVariants = {
     transition: {
       delay: i * 0.1,
       duration: 0.3,
-      ease: [0.25, 0.46, 0.45, 0.94], // easeOutQuad
+      ease: "easeOut" as const,
     },
   }),
 };
@@ -131,7 +131,7 @@ const sectionVariants = {
     y: 0,
     transition: {
       duration: 0.25,
-      ease: [0.25, 0.46, 0.45, 0.94],
+      ease: "easeOut" as const,
     },
   },
 };

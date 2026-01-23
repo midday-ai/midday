@@ -281,7 +281,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
               periodLabel: period.periodLabel,
               periodNumber: period.periodNumber,
               periodYear: period.periodYear,
-              opener: result.content.opener,
+              title: result.content.title,
               audioPresignedUrl,
             },
             "notifications",

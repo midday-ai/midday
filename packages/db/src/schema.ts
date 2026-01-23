@@ -3834,8 +3834,6 @@ export type InsightActivity = {
   };
 };
 
-export type InsightSentiment = "positive" | "neutral" | "challenging";
-
 // Forward-looking predictions stored for follow-through in next insight
 export type InsightPredictions = {
   // Invoices due next week
@@ -3854,15 +3852,14 @@ export type InsightPredictions = {
 };
 
 export type InsightContent = {
-  sentiment: InsightSentiment;
-  opener: string;
+  title: string;
+  summary: string;
   story: string;
   actions: Array<{
     text: string;
     type?: string;
     deepLink?: string;
   }>;
-  celebration?: string;
 };
 
 export const insights = pgTable(
