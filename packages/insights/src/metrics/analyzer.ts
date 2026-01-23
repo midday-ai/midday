@@ -73,9 +73,22 @@ function scoreMetric(metric: InsightMetric): number {
 }
 
 /**
+ * Categories to exclude from top metrics display
+ * These are bookkeeping metrics, not business KPIs
+ */
+const EXCLUDED_METRIC_CATEGORIES = new Set(["operations"]);
+
+/**
+ * Specific metric types to exclude from top metrics display
+ * - invoices_overdue: Point-in-time status, not period activity. Shown in "Needs attention" instead.
+ */
+const EXCLUDED_METRIC_TYPES = new Set(["invoices_overdue"]);
+
+/**
  * Select the top N most relevant metrics for display
  *
  * Strategy:
+ * - Exclude bookkeeping metrics (operations category)
  * - Score all metrics
  * - Ensure diversity (max 2 from same category)
  * - Always include at least 1 core financial metric
@@ -90,8 +103,23 @@ export function selectTopMetrics(
     ? metrics
     : Object.values(metrics);
 
+  // Filter out bookkeeping metrics, point-in-time status metrics, and zero-value metrics
+  const businessMetrics = metricsArray.filter((m) => {
+    // Exclude specific metric types
+    if (EXCLUDED_METRIC_TYPES.has(m.type)) return false;
+    // Exclude zero-value metrics (no activity in current or previous period)
+    if (
+      m.value === 0 &&
+      (m.previousValue === 0 || m.previousValue === undefined)
+    )
+      return false;
+    // Exclude operational categories
+    const definition = getMetricDefinition(m.type);
+    return !EXCLUDED_METRIC_CATEGORIES.has(definition?.category ?? "other");
+  });
+
   // Score all metrics
-  const scoredMetrics = metricsArray.map((m) => ({
+  const scoredMetrics = businessMetrics.map((m) => ({
     metric: m,
     score: scoreMetric(m),
   }));
@@ -120,8 +148,8 @@ export function selectTopMetrics(
   // Ensure at least one core financial metric
   const hasFinancial = selected.some((m) => isCoreFinancialMetric(m.type));
 
-  if (!hasFinancial && metricsArray.length > 0) {
-    const financialMetric = metricsArray.find((m) =>
+  if (!hasFinancial && businessMetrics.length > 0) {
+    const financialMetric = businessMetrics.find((m) =>
       isCoreFinancialMetric(m.type),
     );
     if (financialMetric) {
@@ -253,6 +281,76 @@ function getTipForCategory(categorySlug: string, isNew: boolean): string {
 }
 
 /**
+ * Categories that are typically periodic (monthly, quarterly, annual)
+ * and shouldn't trigger spike alerts since variability is expected
+ */
+const PERIODIC_EXPENSE_CATEGORIES = new Set([
+  // Payroll & taxes (often paid on specific schedules)
+  "payroll",
+  "payroll_tax",
+  "payroll-tax",
+  "payroll_tax_remittances",
+  "payroll-tax-remittances",
+  "taxes",
+  "tax",
+  "income_tax",
+  "sales_tax",
+  // Insurance (typically annual or quarterly)
+  "insurance",
+  "capital_insurance",
+  "capital-insurance",
+  "health_insurance",
+  "liability_insurance",
+  // Subscriptions & memberships (can vary by billing cycle)
+  "subscriptions",
+  "memberships",
+  "software",
+  "saas",
+  // Communications (often billed irregularly or with usage spikes)
+  "telephone",
+  "phone",
+  "internet",
+  "internet-and-telephone",
+  "communications",
+  // Banking & fees (vary by transaction volume)
+  "fees",
+  "bank_fees",
+  "bank-fees",
+  "transaction_fees",
+  "payment_processing",
+  // Rent & utilities (generally stable but can have seasonal variation)
+  "rent",
+  "utilities",
+  // Uncategorized (too noisy, user should categorize)
+  "uncategorized",
+]);
+
+/**
+ * Check if a category matches any periodic category pattern
+ * Checks both slug and name for flexibility
+ */
+function isPeriodicCategory(slug: string, name?: string): boolean {
+  const normalizedSlug = slug.toLowerCase().replace(/[-_\s]/g, "_");
+  const normalizedName = name?.toLowerCase().replace(/[-_\s]/g, "_") ?? "";
+
+  // Direct match on slug
+  if (PERIODIC_EXPENSE_CATEGORIES.has(normalizedSlug)) return true;
+
+  // Check for partial matches in slug or name
+  for (const periodic of PERIODIC_EXPENSE_CATEGORIES) {
+    if (
+      normalizedSlug.includes(periodic) ||
+      periodic.includes(normalizedSlug) ||
+      normalizedName.includes(periodic) ||
+      periodic.includes(normalizedName)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Detect anomalies in category-level spending
  *
  * Detection rules:
@@ -260,6 +358,7 @@ function getTipForCategory(categorySlug: string, isNew: boolean): string {
  * - Moderate spike: > 30% increase AND > $50 absolute = info
  * - New category: First-time spend > $50 = info, > $500 = warning
  * - Significant decrease: > 50% decrease = info (good news, not warning)
+ * - Periodic categories (payroll, insurance, etc.) are excluded from alerts
  */
 export function detectExpenseAnomalies(
   currentSpending: CategorySpending[],
@@ -276,6 +375,11 @@ export function detectExpenseAnomalies(
 
   // Check each current category
   for (const current of currentSpending) {
+    // Skip periodic categories - their variability is expected
+    if (isPeriodicCategory(current.slug, current.name)) {
+      continue;
+    }
+
     const previous = previousMap.get(current.slug);
 
     if (!previous) {
@@ -293,7 +397,9 @@ export function detectExpenseAnomalies(
           message: `New expense category: ${current.name}`,
           tip: getTipForCategory(current.slug, true),
         });
-      } else if (current.amount >= EXPENSE_ANOMALY_THRESHOLDS.newCategoryMinor) {
+      } else if (
+        current.amount >= EXPENSE_ANOMALY_THRESHOLDS.newCategoryMinor
+      ) {
         anomalies.push({
           type: "new_category",
           severity: "info",
@@ -356,7 +462,8 @@ export function detectExpenseAnomalies(
       // Significant decrease (> 50%) - could be good news
       else if (
         percentChange <= -EXPENSE_ANOMALY_THRESHOLDS.largeSpikePercent &&
-        Math.abs(absoluteChange) >= EXPENSE_ANOMALY_THRESHOLDS.largeSpikeAbsolute
+        Math.abs(absoluteChange) >=
+          EXPENSE_ANOMALY_THRESHOLDS.largeSpikeAbsolute
       ) {
         anomalies.push({
           type: "category_decrease",

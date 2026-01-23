@@ -4,6 +4,7 @@ import {
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
+import { getInsightsTool } from "@api/ai/tools/get-insights";
 import { webSearchTool } from "@api/ai/tools/web-search";
 import { analyticsAgent } from "./analytics";
 import { customersAgent } from "./customers";
@@ -30,12 +31,19 @@ ${COMMON_AGENT_RULES}
 <capabilities>
 - Answer simple questions directly
 - Use webSearch for current information, news, external data
-- Route to specialists for business-specific data
+- Use getInsights for weekly/monthly/quarterly business summaries - DO NOT hand off, use the tool directly
+- Route to specialists for detailed business-specific data (but NOT for summaries/insights)
 - When a PDF file is attached to a user message, read and analyze its content to answer questions about it
-- Answer questions about PDF content directly when the PDF is attached to the message
-</capabilities>`,
+</capabilities>
+
+<CRITICAL>
+For "weekly summary", "monthly summary", "insights", "business overview" requests:
+- ALWAYS use getInsights tool directly - NEVER hand off to another agent
+- Display the response EXACTLY as returned - do not rewrite or summarize
+</CRITICAL>`,
   tools: {
     webSearch: webSearchTool,
+    getInsights: getInsightsTool,
   },
   handoffs: [
     operationsAgent,

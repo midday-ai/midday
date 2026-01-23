@@ -177,7 +177,7 @@ export function getPreviousPeriod(
 
 /**
  * Get a human-readable label for a period
- * Used to derive the label instead of storing it in the database
+ * Format: "Weekly Summary — November 10-16, 2024"
  *
  * @param periodType - weekly, monthly, quarterly, yearly
  * @param periodYear - The year (e.g., 2026)
@@ -190,21 +190,33 @@ export function getPeriodLabel(
   periodNumber: number,
   locale = "en-US",
 ): string {
+  const periodInfo = getPeriodInfo(periodType, periodYear, periodNumber);
+  const { periodStart, periodEnd } = periodInfo;
+
+  const formatMonth = (date: Date) =>
+    date.toLocaleDateString(locale, { month: "long" });
+  const startMonth = formatMonth(periodStart);
+  const endMonth = formatMonth(periodEnd);
+  const startDay = periodStart.getDate();
+  const endDay = periodEnd.getDate();
+  const endYear = periodEnd.getFullYear();
+
   switch (periodType) {
-    case "weekly":
-      return `Week ${periodNumber}, ${periodYear}`;
-    case "monthly": {
-      // periodNumber 1-12 → month name
-      const monthName = new Date(
-        periodYear,
-        periodNumber - 1,
-      ).toLocaleDateString(locale, { month: "long" });
-      return `${monthName} ${periodYear}`;
+    case "weekly": {
+      // Same month: "November 10-16, 2024"
+      // Different months: "December 30 - January 5, 2025"
+      const dateRange =
+        startMonth === endMonth
+          ? `${startMonth} ${startDay}-${endDay}, ${endYear}`
+          : `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${endYear}`;
+      return `Weekly Summary — ${dateRange}`;
     }
+    case "monthly":
+      return `Monthly Summary — ${startMonth} ${endYear}`;
     case "quarterly":
-      return `Q${periodNumber} ${periodYear}`;
+      return `Quarterly Summary — Q${periodNumber} ${periodYear}`;
     case "yearly":
-      return `${periodYear} Year in Review`;
+      return `Yearly Summary — ${periodYear}`;
     default:
       return `${periodType} ${periodNumber}, ${periodYear}`;
   }
@@ -309,7 +321,7 @@ export const DEFAULT_INSIGHT_HOUR = 7;
  */
 export function calculateNextInsightTime(
   periodType: PeriodType,
-  timezone: string = "UTC",
+  timezone = "UTC",
   targetHour: number = DEFAULT_INSIGHT_HOUR,
   referenceDate: Date = new Date(),
 ): Date {
@@ -422,19 +434,23 @@ function setHourInTimezone(date: Date, hour: number, timezone: string): Date {
 
     // Calculate hour difference
     let hourDiff = checkHour - hour;
-    let dayDiff = checkDay - date.getDate();
+    const dayDiff = checkDay - date.getDate();
 
     // Adjust for day boundary
     if (dayDiff > 0) hourDiff += 24;
     if (dayDiff < 0) hourDiff -= 24;
 
     // Adjust UTC time to compensate
-    const adjustedUtc = new Date(targetUtc.getTime() - hourDiff * 60 * 60 * 1000);
+    const adjustedUtc = new Date(
+      targetUtc.getTime() - hourDiff * 60 * 60 * 1000,
+    );
 
     return adjustedUtc;
   } catch {
     // Fallback to UTC if timezone is invalid
-    return new Date(Date.UTC(year, date.getMonth(), date.getDate(), hour, 0, 0));
+    return new Date(
+      Date.UTC(year, date.getMonth(), date.getDate(), hour, 0, 0),
+    );
   }
 }
 
@@ -448,7 +464,7 @@ function setHourInTimezone(date: Date, hour: number, timezone: string): Date {
  */
 export function getInitialInsightSchedule(
   periodType: PeriodType,
-  timezone: string = "UTC",
+  timezone = "UTC",
   targetHour: number = DEFAULT_INSIGHT_HOUR,
 ): Date {
   const now = new Date();
@@ -481,7 +497,12 @@ export function getInitialInsightSchedule(
       default:
         futureRef = addWeeks(now, 1);
     }
-    return calculateNextInsightTime(periodType, timezone, targetHour, futureRef);
+    return calculateNextInsightTime(
+      periodType,
+      timezone,
+      targetHour,
+      futureRef,
+    );
   }
 
   return nextTime;

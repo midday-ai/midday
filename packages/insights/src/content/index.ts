@@ -4,7 +4,9 @@
 export {
   ContentGenerator,
   createContentGenerator,
+  type ContentGenerationContext,
   type ContentGeneratorOptions,
+  type YearOverYearContext,
 } from "./generator";
 
 export {

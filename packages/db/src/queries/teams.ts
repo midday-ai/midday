@@ -549,6 +549,44 @@ export async function getAvailablePlans(
 }
 
 /**
+ * Owner info returned from getTeamOwnerInfo
+ */
+export type TeamOwnerInfo = {
+  timezone: string;
+  locale: string;
+};
+
+/**
+ * Get the team owner's timezone and locale.
+ * Owner is defined as the first user to join the team (earliest usersOnTeam.createdAt).
+ * Falls back to UTC and "en" if not set.
+ *
+ * @param db - Database instance
+ * @param teamId - Team ID to get owner info for
+ * @returns Owner's timezone (IANA format) and locale
+ */
+export async function getTeamOwnerInfo(
+  db: Database,
+  teamId: string,
+): Promise<TeamOwnerInfo> {
+  const result = await db
+    .select({
+      timezone: users.timezone,
+      locale: users.locale,
+    })
+    .from(usersOnTeam)
+    .innerJoin(users, eq(usersOnTeam.userId, users.id))
+    .where(eq(usersOnTeam.teamId, teamId))
+    .orderBy(usersOnTeam.createdAt)
+    .limit(1);
+
+  return {
+    timezone: result[0]?.timezone || "UTC",
+    locale: result[0]?.locale || "en",
+  };
+}
+
+/**
  * Get the team owner's timezone.
  * Owner is defined as the first user to join the team (earliest usersOnTeam.createdAt).
  * Falls back to UTC if no timezone is set.
@@ -561,17 +599,8 @@ export async function getTeamOwnerTimezone(
   db: Database,
   teamId: string,
 ): Promise<string> {
-  const result = await db
-    .select({
-      timezone: users.timezone,
-    })
-    .from(usersOnTeam)
-    .innerJoin(users, eq(usersOnTeam.userId, users.id))
-    .where(eq(usersOnTeam.teamId, teamId))
-    .orderBy(usersOnTeam.createdAt)
-    .limit(1);
-
-  return result[0]?.timezone || "UTC";
+  const info = await getTeamOwnerInfo(db, teamId);
+  return info.timezone;
 }
 
 /**
@@ -596,6 +625,7 @@ export type GetTeamsForInsightsParams = {
 export type InsightEligibleTeam = {
   id: string;
   baseCurrency: string | null;
+  ownerLocale: string;
 };
 
 /**
@@ -671,25 +701,29 @@ export async function getTeamsForInsights(
     .orderBy(teams.id)
     .limit(limit);
 
-  // If no target hour filter, return all eligible teams
-  if (targetLocalHour === undefined) {
-  return result;
-  }
-
-  // Filter by teams where it's currently the target hour in their timezone
+  // Enrich results with owner locale (and filter by timezone if needed)
   const now = new Date();
-  const teamsInTargetHour: InsightEligibleTeam[] = [];
+  const enrichedTeams: InsightEligibleTeam[] = [];
 
   for (const team of result) {
-    const ownerTimezone = await getTeamOwnerTimezone(db, team.id);
-    const localHour = getHourInTimezone(now, ownerTimezone);
+    const ownerInfo = await getTeamOwnerInfo(db, team.id);
 
-    if (localHour === targetLocalHour) {
-      teamsInTargetHour.push(team);
+    // If targeting a specific hour, filter by timezone
+    if (targetLocalHour !== undefined) {
+      const localHour = getHourInTimezone(now, ownerInfo.timezone);
+      if (localHour !== targetLocalHour) {
+        continue;
+      }
     }
+
+    enrichedTeams.push({
+      id: team.id,
+      baseCurrency: team.baseCurrency,
+      ownerLocale: ownerInfo.locale,
+    });
   }
 
-  return teamsInTargetHour;
+  return enrichedTeams;
 }
 
 /**

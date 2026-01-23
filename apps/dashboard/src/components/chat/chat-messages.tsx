@@ -3,11 +3,13 @@
 import { ArtifactToggleIcon } from "@/components/chat/artifact-toggle-icon";
 import { ChatMessageActions } from "@/components/chat/chat-message-actions";
 import { ConnectBankMessage } from "@/components/chat/connect-bank-message";
+import { InsightMessage } from "@/components/chat/insight-message";
 import { FaviconStack } from "@/components/favicon-stack";
 import { useUserQuery } from "@/hooks/use-user";
 import {
   extractArtifactTypeFromMessage,
   extractBankAccountRequired,
+  extractInsightData,
 } from "@/lib/chat-utils";
 import { Message, MessageAvatar, MessageContent } from "@midday/ui/message";
 import { Response } from "@midday/ui/response";
@@ -110,6 +112,10 @@ export function ChatMessages({
         // Check if bank account is required
         const bankAccountRequired = extractBankAccountRequired(parts);
 
+        // Check if this is an insight response
+        const insightData =
+          message.role === "assistant" ? extractInsightData(parts) : null;
+
         // Extract artifact type from message parts
         const artifactType =
           message.role === "assistant"
@@ -199,8 +205,19 @@ export function ChatMessages({
               </Message>
             )}
 
-            {/* Render text content in message */}
-            {textParts.length > 0 && !bankAccountRequired && (
+            {/* Render insight as a dedicated component - full width */}
+            {insightData &&
+              message.role === "assistant" &&
+              !bankAccountRequired && (
+                <Message from={message.role}>
+                  <MessageContent className="!max-w-full w-full">
+                    <InsightMessage insight={insightData} />
+                  </MessageContent>
+                </Message>
+              )}
+
+            {/* Render text content in message (skip if we rendered insight) */}
+            {textParts.length > 0 && !bankAccountRequired && !insightData && (
               <Message from={message.role}>
                 <MessageContent className="max-w-[80%]">
                   <Response>{textContent}</Response>
@@ -224,7 +241,7 @@ export function ChatMessages({
             {/* Render message actions and artifact toggle for assistant messages when finished */}
             {message.role === "assistant" &&
               isMessageFinished &&
-              textContent &&
+              (textContent || insightData) &&
               !bankAccountRequired && (
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <div className="flex items-center gap-1 mt-3">

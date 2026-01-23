@@ -71,177 +71,129 @@ export const getInsightsTool = tool({
       const locale = appContext.locale || "en-US";
       const currency = insight.currency || appContext.baseCurrency || "USD";
 
-      // Build rich response with the insight data
+      // Build conversational "What Matters Now" response using AI-generated content
       let responseText = "";
 
-      // Header with period
+      // Period label as context
       const periodLabel = getPeriodLabel(
         insight.periodType,
         insight.periodYear,
         insight.periodNumber,
       );
-      responseText += `## ${periodLabel}\n\n`;
 
-      // Opener section
-      if (insight.content?.opener) {
-        responseText += `### Summary\n${insight.content.opener}\n\n`;
+      // Lead with the AI-generated title (the main insight)
+      if (insight.title) {
+        responseText += `**${periodLabel}**\n\n`;
+        responseText += `${insight.title}\n\n`;
+      } else {
+        responseText += `## ${periodLabel}\n\n`;
       }
 
-      // Key Metrics Grid (4 metrics)
-      if (insight.selectedMetrics && insight.selectedMetrics.length > 0) {
-        responseText += "### Key Metrics\n\n";
-        responseText += "| Metric | Value | vs Previous |\n";
-        responseText += "|--------|-------|-------------|\n";
-
-        for (const metric of insight.selectedMetrics) {
-          const formattedValue = formatMetricValue(
-            metric.value,
-            metric.type,
-            currency,
-            locale,
-          );
-          const changeText = formatChange(
-            metric.change,
-            metric.changeDirection,
-          );
-          responseText += `| ${metric.label} | ${formattedValue} | ${changeText} |\n`;
-        }
-        responseText += "\n";
-      }
-
-      // Story section
+      // The story - this is the heart of the insight
       if (insight.content?.story) {
-        responseText += `### What Happened\n${insight.content.story}\n\n`;
+        responseText += `${insight.content.story}\n\n`;
       }
 
-      // Upcoming invoices section
-      if (
-        insight.activity?.upcomingInvoices &&
-        insight.activity.upcomingInvoices.count > 0
-      ) {
-        const upcoming = insight.activity.upcomingInvoices;
-        responseText += "### Upcoming Invoices\n";
-        responseText += `You have **${upcoming.count}** recurring invoice${upcoming.count > 1 ? "s" : ""} scheduled in the next 7 days`;
-        if (upcoming.totalAmount > 0) {
-          responseText += ` totaling **${formatMetricValue(upcoming.totalAmount, "currency", currency, locale)}**`;
-        }
-        responseText += ".\n\n";
-
-        if (upcoming.items && upcoming.items.length > 0) {
-          for (const item of upcoming.items.slice(0, 3)) {
-            const amountStr = formatMetricValue(
-              item.amount,
-              "currency",
-              currency,
-              locale,
-            );
-            responseText += `- **${item.customerName}**: ${amountStr}`;
-            if (item.frequency) {
-              responseText += ` (${item.frequency})`;
-            }
-            responseText += "\n";
-          }
-          if (upcoming.items.length > 3) {
-            responseText += `- ... and ${upcoming.items.length - 3} more\n`;
-          }
-          responseText += "\n";
-        }
+      // Celebration (show prominently if earned)
+      if (insight.content?.celebration) {
+        responseText += `🎉 **${insight.content.celebration}**\n\n`;
       }
 
-      // Overdue invoices alert
-      if (
-        insight.activity?.invoicesOverdue &&
-        insight.activity.invoicesOverdue > 0
-      ) {
-        responseText += "### Needs Attention\n";
-        responseText += `You have **${insight.activity.invoicesOverdue}** overdue invoice${insight.activity.invoicesOverdue > 1 ? "s" : ""}`;
-        if (insight.activity.overdueAmount) {
-          responseText += ` totaling **${formatMetricValue(insight.activity.overdueAmount, "currency", currency, locale)}**`;
-        }
-        responseText += ". Consider following up with these customers.\n\n";
-      }
-
-      // Action items
+      // Action items (specific and actionable)
       if (insight.content?.actions && insight.content.actions.length > 0) {
-        responseText += "### Recommended Actions\n";
+        responseText += "**What to do:**\n";
         for (const action of insight.content.actions) {
           responseText += `- ${action.text}\n`;
         }
         responseText += "\n";
       }
 
-      // Celebration (if any)
-      if (insight.content?.celebration) {
-        responseText += `### Celebration\n${insight.content.celebration}\n\n`;
+      // Overdue invoices (if any)
+      if (
+        insight.activity?.invoicesOverdue &&
+        insight.activity.invoicesOverdue > 0
+      ) {
+        responseText += "**Needs attention:**\n";
+        responseText += `- ${insight.activity.invoicesOverdue} overdue invoice${insight.activity.invoicesOverdue > 1 ? "s" : ""}`;
+        if (insight.activity.overdueAmount) {
+          responseText += ` (${formatMetricValue(insight.activity.overdueAmount, "currency", currency, locale)})`;
+        }
+        responseText += "\n\n";
       }
 
-      // Anomalies (notable changes)
-      if (insight.anomalies && insight.anomalies.length > 0) {
-        const significantAnomalies = insight.anomalies.filter(
-          (a) => a.severity === "warning" || a.severity === "alert",
+      // Key numbers (compact, not a table)
+      if (insight.selectedMetrics && insight.selectedMetrics.length > 0) {
+        responseText += "**The numbers:**\n";
+        for (const metric of insight.selectedMetrics.slice(0, 4)) {
+          const formattedValue = formatMetricValue(
+            metric.value,
+            metric.type,
+            currency,
+            locale,
+          );
+          const changeText = formatChangeCompact(
+            metric.change,
+            metric.changeDirection,
+          );
+          responseText += `- ${metric.label}: ${formattedValue} ${changeText}\n`;
+        }
+        responseText += "\n";
+      }
+
+      // Expense changes (only spikes, not decreases - decreases are good!)
+      if (insight.expenseAnomalies && insight.expenseAnomalies.length > 0) {
+        const spikes = insight.expenseAnomalies.filter(
+          (ea) => ea.type === "category_spike" || ea.type === "new_category",
         );
-        if (significantAnomalies.length > 0) {
-          responseText += "### Notable Changes\n";
-          for (const anomaly of significantAnomalies) {
-            responseText += `- ${anomaly.message}\n`;
+        if (spikes.length > 0) {
+          responseText += "**Expense heads up:**\n";
+          for (const ea of spikes.slice(0, 3)) {
+            const currentFormatted = formatMetricValue(
+              ea.currentAmount,
+              "currency",
+              currency,
+              locale,
+            );
+            if (ea.type === "new_category") {
+              responseText += `- New: ${ea.categoryName} (${currentFormatted})\n`;
+            } else {
+              responseText += `- ${ea.categoryName} up ${ea.change}% to ${currentFormatted}\n`;
+            }
           }
           responseText += "\n";
         }
       }
 
-      // Expense category anomalies
-      if (insight.expenseAnomalies && insight.expenseAnomalies.length > 0) {
-        responseText += "### Expense Alerts\n";
-        for (const ea of insight.expenseAnomalies) {
-          const currentFormatted = formatMetricValue(
-            ea.currentAmount,
-            "currency",
-            currency,
-            locale,
-          );
-          const previousFormatted = formatMetricValue(
-            ea.previousAmount,
-            "currency",
-            currency,
-            locale,
-          );
+      // Yield insight data for direct rendering in chat UI
+      const insightData = {
+        id: insight.id,
+        periodLabel,
+        periodType: insight.periodType,
+        periodYear: insight.periodYear,
+        periodNumber: insight.periodNumber,
+        currency,
+        title: insight.title,
+        selectedMetrics: insight.selectedMetrics,
+        content: insight.content,
+        anomalies: insight.anomalies,
+        expenseAnomalies: insight.expenseAnomalies,
+        milestones: insight.milestones,
+        activity: insight.activity,
+        generatedAt: insight.generatedAt,
+      };
 
-          if (ea.type === "new_category") {
-            responseText += `- **${ea.categoryName}** (NEW): ${currentFormatted} first-time spend\n`;
-          } else if (ea.type === "category_decrease") {
-            responseText += `- **${ea.categoryName}** decreased ${Math.abs(ea.change)}% (${previousFormatted} → ${currentFormatted})\n`;
-          } else {
-            // category_spike
-            responseText += `- **${ea.categoryName}** increased ${ea.change}% (${previousFormatted} → ${currentFormatted})\n`;
-          }
+      yield {
+        text: responseText,
+        success: true,
+        insight: insightData,
+      };
 
-          if (ea.tip) {
-            responseText += `  *Tip: ${ea.tip}*\n`;
-          }
-        }
-        responseText += "\n";
-      }
-
-      yield { text: responseText };
-
-      // Return structured data for potential UI rendering
+      // Return for AI context - include insight so extractInsightData() can find it
       return {
         success: true,
-        insight: {
-          id: insight.id,
-          periodLabel,
-          periodType: insight.periodType,
-          periodYear: insight.periodYear,
-          periodNumber: insight.periodNumber,
-          currency,
-          selectedMetrics: insight.selectedMetrics,
-          content: insight.content,
-          anomalies: insight.anomalies,
-          expenseAnomalies: insight.expenseAnomalies,
-          milestones: insight.milestones,
-          activity: insight.activity,
-          generatedAt: insight.generatedAt,
-        },
+        insight: insightData,
+        instruction:
+          "The insight has been displayed to the user. Do not repeat or summarize it.",
       };
     } catch (error) {
       yield {
@@ -302,17 +254,16 @@ function formatMetricValue(
   );
 }
 
-function formatChange(
+function formatChangeCompact(
   change: number,
   direction: "up" | "down" | "flat",
 ): string {
   if (direction === "flat" || Math.abs(change) < 0.5) {
-    return "→ stable";
+    return "(steady)";
   }
 
-  const arrow = direction === "up" ? "↑" : "↓";
   const sign = direction === "up" ? "+" : "";
-  return `${arrow} ${sign}${change.toFixed(1)}%`;
+  return `(${sign}${Math.round(change)}%)`;
 }
 
 // Helper to get current period info

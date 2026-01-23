@@ -50,32 +50,35 @@ describe("selectTopMetrics", () => {
   });
 
   it("should ensure category diversity (max 2 from same category)", () => {
-    // All financial metrics
+    // Mix of financial and profitability metrics
     const metrics: InsightMetric[] = [
-      createTestMetric("revenue", 10000, 8000, 25, "up"),
-      createTestMetric("expenses", 5000, 4000, 25, "up"),
-      createTestMetric("net_profit", 5000, 4000, 25, "up"),
-      createTestMetric("cash_flow", 3000, 2000, 50, "up"),
-      createTestMetric("profit_margin", 50, 45, 11, "up"),
+      createTestMetric("revenue", 10000, 8000, 25, "up"), // financial
+      createTestMetric("expenses", 5000, 4000, 25, "up"), // financial
+      createTestMetric("cash_flow", 3000, 2000, 50, "up"), // financial
+      createTestMetric("net_profit", 5000, 4000, 25, "up"), // profitability
+      createTestMetric("profit_margin", 50, 45, 11, "up"), // profitability
       createTestMetric("hours_tracked", 40, 35, 14, "up"), // time category
     ];
 
     const result = selectTopMetrics(metrics, 4);
 
-    // Count financial metrics in result
-    const financialTypes = [
-      "revenue",
-      "expenses",
-      "net_profit",
-      "cash_flow",
-      "profit_margin",
-    ];
+    // Count metrics from the "financial" category (revenue, expenses, cash_flow)
+    const financialTypes = ["revenue", "expenses", "cash_flow"];
     const financialCount = result.filter((m) =>
       financialTypes.includes(m.type),
     ).length;
 
     // Should have max 2 from financial category
     expect(financialCount).toBeLessThanOrEqual(2);
+
+    // Count metrics from the "profitability" category (net_profit, profit_margin)
+    const profitabilityTypes = ["net_profit", "profit_margin"];
+    const profitabilityCount = result.filter((m) =>
+      profitabilityTypes.includes(m.type),
+    ).length;
+
+    // Should have max 2 from profitability category
+    expect(profitabilityCount).toBeLessThanOrEqual(2);
   });
 
   it("should guarantee at least one core financial metric", () => {

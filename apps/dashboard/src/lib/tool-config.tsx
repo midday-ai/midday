@@ -154,6 +154,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: PieChart,
     description: "Analyzing business health",
   },
+  getInsights: {
+    name: "Insights",
+    icon: Brain,
+    description: "Loading your insights",
+  },
   cashFlowForecast: {
     name: "Cash Flow Forecast",
     icon: TrendingUp,

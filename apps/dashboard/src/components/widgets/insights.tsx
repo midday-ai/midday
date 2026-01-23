@@ -47,7 +47,6 @@ type InsightCard = {
   periodNumber: number;
   periodYear: number;
   title?: string;
-  opener?: string;
   story?: string;
   hasAudio?: boolean;
 };
@@ -317,7 +316,6 @@ export function InsightsWidget() {
       periodNumber: insight.periodNumber,
       periodYear: insight.periodYear,
       title: insight.title ?? undefined,
-      opener: insight.content?.opener,
       story: insight.content?.story,
       hasAudio: !!insight.audioPath,
     })) ?? [];

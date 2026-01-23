@@ -3836,6 +3836,23 @@ export type InsightActivity = {
 
 export type InsightSentiment = "positive" | "neutral" | "challenging";
 
+// Forward-looking predictions stored for follow-through in next insight
+export type InsightPredictions = {
+  // Invoices due next week
+  invoicesDue?: {
+    count: number;
+    totalAmount: number;
+    currency: string;
+  };
+  // Current streak info to track if maintained
+  streakAtRisk?: {
+    type: string;
+    count: number;
+  };
+  // Any other forward-looking items
+  notes?: string[];
+};
+
 export type InsightContent = {
   sentiment: InsightSentiment;
   opener: string;
@@ -3890,6 +3907,9 @@ export const insights = pgTable(
 
     // AI-generated content (relief-first structure)
     content: jsonb().$type<InsightContent>(),
+
+    // Forward-looking predictions for follow-through tracking
+    predictions: jsonb().$type<InsightPredictions>(),
 
     // Audio narration storage path: {teamId}/insights/{insightId}.mp3
     audioPath: text("audio_path"),

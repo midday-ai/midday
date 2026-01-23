@@ -10,7 +10,10 @@ import type {
   InsightAnomaly,
   InsightContent,
   InsightMetric,
+  InsightPredictions,
+  MomentumContext,
   PeriodType,
+  PreviousPredictionsContext,
 } from "../types";
 import { buildInsightPrompt, getFallbackContent } from "./prompts";
 
@@ -22,41 +25,67 @@ const openai = createOpenAI({
  * Schema for AI-generated content
  * Note: OpenAI structured output requires all properties to be required,
  * so we use nullable() instead of optional() for optional fields.
- * 
+ *
  * "What Matters Now" format - action-first, specific names/amounts
  */
 const insightContentSchema = z.object({
   title: z
     .string()
     .describe(
-      "15-20 words. Conversational, like a friend catching you up. Main thing + bigger picture. NEVER sound like a notification.",
+      "20-35 words. Week snapshot for widget cards. Lead with profit and context (margin, comparison). Include runway and any overdue. NO superlatives. Use full amounts. Example: '338,958 kr profit on 350,000 kr revenue - healthy 97% margin. 14 months runway. Acme Inc owes 750 kr.'",
     ),
-  sentiment: z
-    .enum(["positive", "neutral", "challenging"])
-    .describe("positive (wins/growth), neutral (steady), challenging (needs attention)"),
-  opener: z
+  summary: z
     .string()
-    .describe("Max 15 words. Set up the story - what's the main thing happening this week?"),
+    .describe(
+      "30-50 words. Use EXACT amounts from the data. If mentioning overdue, use EXACT customer name from the data. Include: profit, revenue, expenses, runway, overdue (if any). NEVER make up customer names.",
+    ),
   story: z
     .string()
-    .describe("3-4 sentences telling the story of their week. Like catching up over coffee. Weave in comparison to usual and streaks when available."),
+    .describe(
+      "2-3 sentences that make the owner FEEL something. Celebrate wins ('profit up 7x - that's the kind of week you remember'), add historical context ('best since October'), patterns, implications. NO amounts (those are in summary). NO action reminders (those are in actions).",
+    ),
   actions: z
     .array(
       z.object({
-        text: z.string().describe("Specific action with customer name and amount"),
+        text: z
+          .string()
+          .describe(
+            "Action with EXACT customer name and amount from the data. NEVER make up names.",
+          ),
       }),
     )
-    .describe("1-2 specific actions. Primary action should be the single most impactful thing."),
-  celebration: z
-    .string()
-    .nullable()
-    .describe("A genuine win to celebrate (milestone, streak, personal best), or null if nothing notable"),
+    .describe(
+      "1-2 actions using ONLY data provided. Priority: 1) Overdue invoices 2) Draft invoices 3) Unbilled work. Empty array if no actionable data.",
+    ),
 });
 
 type InsightContentOutput = z.infer<typeof insightContentSchema>;
 
 export type ContentGeneratorOptions = {
   model?: string;
+};
+
+/**
+ * Year-over-year comparison data
+ */
+export type YearOverYearContext = {
+  lastYearRevenue: number;
+  lastYearProfit: number;
+  revenueChangePercent: number;
+  profitChangePercent: number;
+  hasComparison: boolean;
+};
+
+/**
+ * Additional context for content generation (momentum, predictions, etc.)
+ */
+export type ContentGenerationContext = {
+  momentumContext?: MomentumContext;
+  previousPredictions?: PreviousPredictionsContext;
+  predictions?: InsightPredictions;
+  yearOverYear?: YearOverYearContext;
+  runwayMonths?: number;
+  locale?: string;
 };
 
 /**
@@ -80,6 +109,7 @@ export class ContentGenerator {
     periodType: PeriodType,
     currency: string,
     expenseAnomalies: ExpenseAnomaly[] = [],
+    context: ContentGenerationContext = {},
   ): Promise<InsightContent> {
     const prompt = buildInsightPrompt(
       selectedMetrics,
@@ -89,6 +119,7 @@ export class ContentGenerator {
       periodType,
       currency,
       expenseAnomalies,
+      context,
     );
 
     try {
@@ -106,13 +137,11 @@ export class ContentGenerator {
 
       return {
         title: object.title,
-        sentiment: object.sentiment,
-        opener: object.opener,
+        summary: object.summary,
         story: object.story,
         actions: object.actions.map((action) => ({
           text: action.text,
         })),
-        celebration: object.celebration ?? undefined,
       };
     } catch (error) {
       console.error(

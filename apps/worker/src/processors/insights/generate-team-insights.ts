@@ -31,6 +31,8 @@ type GenerateTeamInsightsPayload = {
   periodYear: number;
   periodNumber: number;
   currency: string;
+  /** Owner's locale for formatting (e.g., "en", "sv", "de") */
+  locale?: string;
   /** If true, bypass data quality checks (for testing) */
   skipDataQualityCheck?: boolean;
 };
@@ -62,6 +64,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
       periodYear,
       periodNumber,
       currency,
+      locale,
       skipDataQualityCheck,
     } = job.data;
     const db = getDb();
@@ -178,6 +181,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         periodYear: period.periodYear,
         periodNumber: period.periodNumber,
         currency,
+        locale,
       });
 
       // Generate audio if ElevenLabs is configured
@@ -239,7 +243,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         }
       }
 
-      // Update insight with all data (including audio path if generated)
+      // Update insight with all data (including audio path and predictions for next week)
       await updateInsight(db, {
         id: insightId,
         teamId,
@@ -251,6 +255,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         expenseAnomalies: result.expenseAnomalies,
         activity: result.activity,
         content: result.content,
+        predictions: result.predictions,
         audioPath,
         generatedAt: new Date(),
       });

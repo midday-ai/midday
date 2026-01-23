@@ -17,9 +17,14 @@ export type MetricDefinition = {
 
 /**
  * All available metric definitions
+ *
+ * Priority guide for SMB owners:
+ * - Priority 1: Core metrics every business owner needs (revenue, expenses, profit, runway)
+ * - Priority 2: Important supporting metrics (margins, AR, time tracking)
+ * - Priority 3+: Nice-to-have activity metrics
  */
 export const METRIC_DEFINITIONS: MetricDefinition[] = [
-  // Core financial (always candidates)
+  // Core financial - Revenue & Expenses (the inputs)
   {
     type: "revenue",
     label: "Revenue",
@@ -37,25 +42,27 @@ export const METRIC_DEFINITIONS: MetricDefinition[] = [
     description: "Total spending for the period",
   },
   {
-    type: "net_profit",
-    label: "Net Profit",
-    category: "financial",
-    priority: 1,
-    unit: "currency",
-    description: "Revenue minus expenses",
-  },
-  {
     type: "cash_flow",
     label: "Cash Flow",
     category: "financial",
-    priority: 1,
+    priority: 2,
     unit: "currency",
     description: "Net change in cash position",
+  },
+
+  // Profitability - The bottom line (separate category so it doesn't compete with revenue/expenses)
+  {
+    type: "net_profit",
+    label: "Profit",
+    category: "profitability",
+    priority: 1,
+    unit: "currency",
+    description: "Revenue minus expenses - the bottom line",
   },
   {
     type: "profit_margin",
     label: "Profit Margin",
-    category: "financial",
+    category: "profitability",
     priority: 2,
     unit: "percentage",
     description: "Profit as percentage of revenue",
@@ -66,27 +73,27 @@ export const METRIC_DEFINITIONS: MetricDefinition[] = [
     type: "runway_months",
     label: "Runway",
     category: "runway",
-    priority: 2,
+    priority: 1,
     unit: "months",
     description: "Months of operation at current burn rate",
   },
 
-  // Invoice health
+  // Invoice health - Money owed to you
   {
     type: "invoices_overdue",
     label: "Overdue Invoices",
     category: "invoicing",
-    priority: 1,
+    priority: 5, // Low priority - shown in "Needs attention" section instead
     unit: "count",
     description: "Number of unpaid invoices past due date",
   },
   {
     type: "outstanding_ar",
-    label: "Outstanding AR",
+    label: "Outstanding",
     category: "invoicing",
-    priority: 2,
+    priority: 1, // High priority - money customers owe you matters
     unit: "currency",
-    description: "Total accounts receivable",
+    description: "Total accounts receivable - money owed to you",
   },
   {
     type: "invoices_sent",
@@ -149,12 +156,12 @@ export const METRIC_DEFINITIONS: MetricDefinition[] = [
     description: "Value of unbilled work",
   },
 
-  // Operations
+  // Operations (low priority - internal bookkeeping, not key business metrics)
   {
     type: "receipts_matched",
     label: "Receipts Matched",
     category: "operations",
-    priority: 3,
+    priority: 5, // Very low - bookkeeping metric, not business KPI
     unit: "count",
     description: "Receipts matched to transactions",
   },
@@ -162,7 +169,7 @@ export const METRIC_DEFINITIONS: MetricDefinition[] = [
     type: "transactions_categorized",
     label: "Categorized",
     category: "operations",
-    priority: 3,
+    priority: 5, // Very low - bookkeeping metric, not business KPI
     unit: "count",
     description: "Transactions categorized",
   },

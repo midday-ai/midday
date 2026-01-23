@@ -11,10 +11,16 @@ import type {
   InsightAnomaly,
   InsightContext,
   InsightMetric,
-  InsightSentiment,
+  InsightPredictions,
+  MomentumContext,
   MoneyOnTable,
   PeriodType,
+  PreviousPredictionsContext,
 } from "../types";
+import type {
+  ContentGenerationContext,
+  YearOverYearContext,
+} from "./generator";
 
 /**
  * Get the period name for display in prompts
@@ -44,7 +50,24 @@ export function formatMetricsContext(
             ? `${m.change.toFixed(1)}%`
             : "unchanged";
       const formattedValue = formatMetricValue(m.value, m.type, currency);
-      return `- ${m.label}: ${formattedValue} (${changeText} vs last ${periodName})`;
+      // Include historical context if available (e.g., "Your best week ever", "Highest since October")
+      const historicalNote = m.historicalContext
+        ? ` [${m.historicalContext}]`
+        : "";
+
+      // For big swings (>40%), show previous value to give context
+      // This helps the AI understand "quiet week after big week" patterns
+      let previousNote = "";
+      if (Math.abs(m.change) > 40 && m.previousValue > 0) {
+        const prevFormatted = formatMetricValue(
+          m.previousValue,
+          m.type,
+          currency,
+        );
+        previousNote = ` [last ${periodName}: ${prevFormatted}]`;
+      }
+
+      return `- ${m.label}: ${formattedValue} (${changeText} vs last ${periodName})${historicalNote}${previousNote}`;
     })
     .join("\n");
 }
@@ -261,6 +284,173 @@ export function formatComparisonContext(
 }
 
 /**
+ * Format momentum and recovery context for the AI prompt
+ */
+export function formatMomentumContext(
+  momentumContext: MomentumContext | undefined,
+): string {
+  if (!momentumContext) return "";
+
+  const lines: string[] = [];
+
+  // Momentum (acceleration)
+  if (momentumContext.momentum) {
+    const momentumDesc =
+      momentumContext.momentum === "accelerating"
+        ? "Growth is accelerating (growing faster than last week)"
+        : momentumContext.momentum === "decelerating"
+          ? "Growth is slowing down (still growing, but less than last week)"
+          : "Growth is steady";
+    lines.push(momentumDesc);
+  }
+
+  // Recovery
+  if (momentumContext.recovery?.isRecovery) {
+    lines.push(
+      `RECOVERY: ${momentumContext.recovery.description} [${momentumContext.recovery.strength} bounce-back]`,
+    );
+  }
+
+  if (lines.length === 0) return "";
+
+  return `\nMOMENTUM:\n${lines.map((l) => `- ${l}`).join("\n")}`;
+}
+
+/**
+ * Format previous predictions context for follow-through
+ */
+export function formatPreviousPredictionsContext(
+  previousPredictions: PreviousPredictionsContext | undefined,
+  currency: string,
+): string {
+  if (!previousPredictions) return "";
+
+  const lines: string[] = [];
+
+  // Invoices that were due
+  if (previousPredictions.invoicesDue) {
+    const predicted = formatMetricValue(
+      previousPredictions.invoicesDue.predicted,
+      "currency",
+      currency,
+    );
+    lines.push(
+      `Last week I said ${predicted} in invoices was due - how did it go?`,
+    );
+  }
+
+  // Streak that was at risk
+  if (previousPredictions.streakAtRisk) {
+    const streakType = previousPredictions.streakAtRisk.type.replace(/_/g, " ");
+    lines.push(
+      `Last week you had a ${previousPredictions.streakAtRisk.count}-week ${streakType} streak going`,
+    );
+  }
+
+  if (lines.length === 0) return "";
+
+  return `\nFOLLOW-THROUGH (from last week's predictions):\n${lines.map((l) => `- ${l}`).join("\n")}`;
+}
+
+/**
+ * Format forward-looking predictions context
+ */
+export function formatPredictionsContext(
+  predictions: InsightPredictions | undefined,
+  currency: string,
+): string {
+  if (!predictions) return "";
+
+  const lines: string[] = [];
+
+  // Invoices due next week
+  if (predictions.invoicesDue && predictions.invoicesDue.count > 0) {
+    const amount = formatMetricValue(
+      predictions.invoicesDue.totalAmount,
+      "currency",
+      currency,
+    );
+    lines.push(
+      `Next week: ${predictions.invoicesDue.count} invoice(s) due totaling ${amount}`,
+    );
+  }
+
+  // Current streak at risk
+  if (predictions.streakAtRisk) {
+    const streakType = predictions.streakAtRisk.type.replace(/_/g, " ");
+    lines.push(
+      `Streak to maintain: ${predictions.streakAtRisk.count}-week ${streakType} streak`,
+    );
+  }
+
+  if (lines.length === 0) return "";
+
+  return `\nLOOKING AHEAD:\n${lines.map((l) => `- ${l}`).join("\n")}`;
+}
+
+/**
+ * Format year-over-year comparison context
+ */
+export function formatYearOverYearContext(
+  yoy: YearOverYearContext | undefined,
+  currency: string,
+): string {
+  if (!yoy || !yoy.hasComparison) return "";
+
+  const lines: string[] = [];
+  const lastYearRevFormatted = formatMetricValue(
+    yoy.lastYearRevenue,
+    "currency",
+    currency,
+  );
+
+  // Revenue YoY
+  if (yoy.revenueChangePercent !== 0) {
+    const direction = yoy.revenueChangePercent > 0 ? "up" : "down";
+    const absChange = Math.abs(yoy.revenueChangePercent);
+    lines.push(
+      `Revenue vs same week last year: ${direction} ${absChange}% (was ${lastYearRevFormatted})`,
+    );
+  } else {
+    lines.push(`Revenue same as this week last year (${lastYearRevFormatted})`);
+  }
+
+  if (lines.length === 0) return "";
+
+  return `\nYEAR-OVER-YEAR:\n${lines.map((l) => `- ${l}`).join("\n")}`;
+}
+
+/**
+ * Format runway context (especially important for slow weeks)
+ */
+export function formatRunwayContext(
+  runwayMonths: number | undefined,
+  isSlowWeek: boolean,
+): string {
+  if (!runwayMonths || runwayMonths <= 0) return "";
+
+  // Always show if less than 6 months (important)
+  // Show on slow weeks for reassurance
+  // Show if very healthy (12+ months) as a positive
+  const shouldShow = runwayMonths < 6 || isSlowWeek || runwayMonths >= 12;
+
+  if (!shouldShow) return "";
+
+  let description: string;
+  if (runwayMonths >= 12) {
+    description = `${Math.round(runwayMonths)} months of runway - very healthy position`;
+  } else if (runwayMonths >= 6) {
+    description = `${Math.round(runwayMonths)} months of runway - solid buffer`;
+  } else if (runwayMonths >= 3) {
+    description = `${Math.round(runwayMonths)} months of runway - worth keeping an eye on`;
+  } else {
+    description = `${Math.round(runwayMonths)} months of runway - needs attention`;
+  }
+
+  return `\nRUNWAY (based on last 3 months burn rate):\n- ${description}`;
+}
+
+/**
  * Determine if this is a "nothing notable" week
  */
 export function isNothingNotableWeek(
@@ -295,6 +485,7 @@ export function buildInsightPrompt(
   periodType: PeriodType,
   currency: string,
   expenseAnomalies: ExpenseAnomaly[] = [],
+  context: ContentGenerationContext = {},
 ): string {
   const periodName = getPeriodName(periodType);
   const metricsContext = formatMetricsContext(
@@ -318,8 +509,37 @@ export function buildInsightPrompt(
   // Comparison context (rolling averages and streaks)
   const comparisonContext = formatComparisonContext(activity.context, currency);
 
-  // Check if this is a "nothing notable" week
+  // Momentum and recovery context
+  const momentumContextStr = formatMomentumContext(context.momentumContext);
+
+  // Previous predictions for follow-through
+  const previousPredictionsStr = formatPreviousPredictionsContext(
+    context.previousPredictions,
+    currency,
+  );
+
+  // Forward-looking predictions
+  const predictionsStr = formatPredictionsContext(
+    context.predictions,
+    currency,
+  );
+
+  // Year-over-year comparison
+  const yoyContextStr = formatYearOverYearContext(
+    context.yearOverYear,
+    currency,
+  );
+
+  // Check if this is a "nothing notable" week or a slow week
   const isQuietWeek = isNothingNotableWeek(selectedMetrics, activity);
+  const revenueMetric = selectedMetrics.find((m) => m.type === "revenue");
+  const isSlowWeek = revenueMetric && revenueMetric.change < -15; // Down more than 15%
+
+  // Runway context (especially important for slow weeks)
+  const runwayContextStr = formatRunwayContext(
+    context.runwayMonths,
+    isSlowWeek ?? false,
+  );
 
   // Quiet week prompt
   if (isQuietWeek) {
@@ -327,27 +547,29 @@ export function buildInsightPrompt(
 
 THE DATA:
 ${metricsContext}
+${runwayContextStr}
+${yoyContextStr}
 ${upcomingContext}
 
 WRITE A CALM, REASSURING SUMMARY:
 
-1. TITLE (12-15 words): Reassure them it's okay. Frame it as a weekly check-in.
+1. TITLE (20-35 words): Informative hook with amounts only.
+   
    Examples:
-   - "Quiet week - nothing needs your attention right now"
-   - "Calm week, but $1,200 coming in Monday from Acme"
-   - "All clear this week - your books are in good shape"
+   - "Quiet week with 45k kr revenue, 12k kr expenses. Nothing needs attention, 8 months runway."
+   - "Steady week - 89k kr revenue, 37k kr profit. All invoices paid, books in good shape."
+   - "Calm week ahead. 52k kr revenue locked in, plus $1,200 coming Monday from [Customer]."
 
-2. SENTIMENT: "neutral"
+2. SUMMARY (25-35 words): Clean description with amounts only.
+   Examples:
+   - "Quiet week with no revenue movement, but you've got 8 months runway and $12k in the bank. Nothing needs your attention right now."
+   - "Calm week - $2,100 in expenses, nothing overdue. You've got $1,200 coming in Monday from [Customer] to kick off next week."
+   - "All clear this week. Revenue steady at $3,400, expenses at $2,900. Your books are in good shape with 6 months runway."
 
-3. OPENER (max 10 words): Reassure them, mention what's coming.
-   Good: "Quiet week - nothing urgent."
-   Good: "No action needed this week."
+3. STORY (1-2 sentences): What's coming next week, or a reassuring note about their position.
+   IMPORTANT: If RUNWAY is shown, mention it! "You've got X months of runway" is the most reassuring thing you can say.
 
-4. STORY (1-2 sentences): What's coming next week, or a reassuring note about their position.
-
-5. ACTIONS: Only include if there's genuinely something to do. Otherwise empty array.
-
-6. CELEBRATION: null (nothing to celebrate in a quiet week)
+4. ACTIONS: Only include if there's genuinely something to do. Otherwise empty array.
 
 Be calm and reassuring. A quiet week is not a bad week.`;
   }
@@ -358,109 +580,192 @@ Be calm and reassuring. A quiet week is not a bad week.`;
 THE DATA:
 ${metricsContext}
 ${comparisonContext}
+${yoyContextStr}
+${runwayContextStr}
+${momentumContextStr}
 ${moneyOnTableContext}
 ${anomaliesContext}${expenseAnomaliesContext}${upcomingContext}
+${previousPredictionsStr}
+${predictionsStr}
+
+CRITICAL - DO NOT HALLUCINATE:
+- ONLY use customer names that appear in the data above
+- ONLY use amounts that appear in the data above
+- If you mention a customer, they MUST be in MONEY ON THE TABLE or OVERDUE INVOICES
+- NEVER make up or estimate amounts - use exact figures from the data
 
 WRITE A "WHAT MATTERS NOW" SUMMARY:
 
-1. TITLE (15-20 words): The first thing they see. Combine the main highlight with secondary context.
+1. TITLE (20-35 words): Week snapshot for widget cards. Key numbers with context.
    
-   Write like a trusted advisor catching them up on their week. Be conversational, not clinical.
+   RULES:
+   - Lead with profit and add context (margin %, revenue comparison, or trend)
+   - Include runway months
+   - Mention any overdue with customer name and amount
+   - Use full amounts (260,000 kr not "260k kr")
+   - Use REAL customer names from the data
+   - NO superlatives like "best week", "strong week", "great week" - let numbers speak
    
-   FORMAT: [Main thing] + [But here's the bigger picture]
+   GOOD WEEKS:
+   - "338,958 kr profit on 350,000 kr revenue - healthy 97% margin. 14 months runway. Lost Island AB owes 750 kr."
+   - "45,000 kr profit with expenses at just 5,000 kr. Everyone paid on time. 12 months runway."
+   - "89,000 kr profit, up from 60,000 kr last week. Runway solid at 14 months."
    
-   GOOD EXAMPLES by priority:
+   ZERO/LOSS WEEKS (lead with runway for reassurance):
+   - "No payments landed this week - just timing. 14 months runway, no stress. Lost Island AB owes 750 kr."
+   - "22,266 kr in expenses, no revenue this week. With 14 months runway, you're in good shape."
    
-   A) MONEY TO COLLECT (overdue):
-      - "Acme's $4,500 is two weeks late - worth a nudge. Rest of your week looks solid."
-      - "One thing to chase: Lost Island owes you 15 870 kr. Otherwise a good week."
-   
-   B) MONEY TO BILL (unbilled/drafts):
-      - "You've got 12 billable hours on TechStart sitting there. Revenue's up 15% too."
-      - "Quick win: $3,200 draft invoice to Acme ready to send. Third strong week running."
-   
-   C) WIN TO CELEBRATE:
-      - "Nice week - $4,200 came in, about 20% above your usual. Momentum's building."
-      - "You're on a run - third growth week straight, $3,100 this time."
-   
-   D) STEADY STATE:
-      - "Solid week - $2,800 in, everyone paid on time. Right where you usually are."
-      - "Quiet week at $1,900, but 6 months runway and nothing chasing you."
-   
-   E) NEEDS ATTENTION:
-      - "Lighter week at $1,200, about 30% below usual. Worth keeping an eye on."
-      - "Revenue's down a bit this week, but no overdue invoices and expenses are stable."
-   
-   BAD EXAMPLES (too clinical/notification-like):
-      - "$4,500 overdue from Acme Corp - 15 days late." (no context, sounds like an alert)
-      - "Revenue: $3,200. One overdue invoice." (just listing facts)
-      - "Invoice #1234 is 15 days past due." (sounds like accounting software)
-   
-   STYLE RULES:
-   - ALWAYS balance the news - if something needs attention, mention what's going well too
-   - Write amounts naturally: "15 870 kr" not "SEK 15,870", "$4,500" not "USD 4500"
-   - NO alarm words: "urgent", "critical", "warning", "alert", "overdue from" (say "owes you" instead)
-   - Use contractions and casual phrasing: "worth a nudge", "sitting there", "on a run"
-   - Sound like a helpful friend giving a quick update, not a notification
+   BAD:
+   - "Your best week!" (loses meaning if repeated)
+   - "Strong week:", "Great week:" (generic superlatives)
+   - "You faced a loss" (alarming)
+   - Abbreviated amounts like "260k" (unprofessional)
 
-2. SENTIMENT: "positive" | "neutral" | "challenging"
-   - positive: Growth, wins, money coming in
-   - neutral: Steady, nothing urgent
-   - challenging: Needs attention, but constructive
+2. SUMMARY (30-50 words): DETAILED description for the insight view. Full picture.
+   
+   INCLUDE ALL:
+   - Profit amount (lead with this when positive/impressive)
+   - Revenue amount
+   - Expenses amount  
+   - Runway months (ALWAYS include - most reassuring metric)
+   - Any overdue with customer name and amount
+   
+   FORMAT:
+   - Use precise amounts from the data (260,340 kr not "260k")
+   - Write naturally for the locale
+   
+   GOOD WEEKS:
+   - "260,340 kr profit this week on 269,668 kr revenue, expenses at 9,328 kr. Acme Inc AB owes you 750 kr. 14 months runway, a strong position."
+   
+   ZERO/LOSS WEEKS:
+   - "Quieter week with no payments landing - just timing. Expenses at 22,266 kr. With 14 months runway, no stress. Lost Island AB still owes 750 kr."
+   - Lead with reassurance, not the loss
+   - NEVER say "profit loss of -X" - say "expenses at X" or "22,266 kr in costs this week"
+   
+   BAD:
+   - "You faced a profit loss of -22,266 kr" (alarming, redundant)
+   - "Expenses skyrocketing" (alarm word)
+   - Missing runway on a bad week (runway is the reassurance!)
 
-3. OPENER (max 15 words): Set up the story - what's the main thing happening?
-   GOOD: "Lost Island usually pays fast, so this one's a bit unusual."
-   GOOD: "This was actually your strongest week since October."
-   GOOD: "You put in solid hours on TechStart but haven't billed for them yet."
-   BAD: "This week had some highlights and challenges." (boring, no personality)
+3. STORY (2-3 sentences): Add NEW context and celebrate wins - the summary has the numbers.
+   
+   The STORY should make the owner FEEL something:
+   
+   CELEBRATE WINS (when applicable):
+   - Big profit jump? "Profit up 7x - that's the kind of week you remember."
+   - Best week? "This is the week you'll look back on. Real momentum building."
+   - Growth streak? "Three weeks of growth. You're not just lucky, you're building something."
+   
+   ADD UNIQUE CONTEXT:
+   - Historical: "Your best since October" or "First time above 200k"
+   - Patterns: "[Customer] usually pays fast - this delay is out of character"
+   - Implications: "At this pace, Q1 is going to be your best yet"
+   - Momentum: "You've got real momentum now"
+   
+   DO NOT REPEAT (already in summary/actions):
+   - Exact revenue/expense amounts
+   - "worth checking in" or "send a reminder" (that's in actions)
+   - Runway months
+   
+   GOOD EXAMPLES:
+   "Your best week since October - and profit up 7x. You're building real momentum heading into
+   the new year. [Customer] usually pays fast, so the delay is out of character for them."
+   
+   "This is the kind of week that changes quarters. Three growth weeks in a row now, and your
+   margins are looking healthier than ever. Keep this energy."
+   
+   BAD (flat, repeats things):
+   "This is your best week since October, showing impressive growth. [Customer] usually pays
+   promptly, so it's worth checking in with them." (repeats action)
 
-4. STORY (3-4 sentences): Tell the story of their week. What happened, why it matters, what's the situation.
+4. ACTIONS (1-2 items): ONLY from the data provided. NEVER make up names or amounts.
    
-   Write like you're catching up with a friend over coffee. Connect the dots between different things.
-   ALWAYS weave in the COMPARISON CONTEXT if available - how this week compares to their usual, any streaks.
+   PRIORITY ORDER (if data exists):
+   1. Overdue invoices → "Send [Customer] a friendly reminder about the [amount]"
+   2. Draft invoices ready → "Send [Customer] the invoice for [amount]"
+   3. Unbilled work → "Invoice [Customer/Project] for [hours] hours ([amount])"
    
-   GOOD EXAMPLE (overdue + comparison):
-   "Lost Island's invoice has been sitting there for three weeks now - they usually pay within a few days. 
-   Worth reaching out since it's not like them. The good news is the rest of your week was solid - 
-   you're actually 15% above your usual revenue, which makes this the third growth week in a row."
+   CRITICAL RULES:
+   - ONLY use customer names from MONEY ON THE TABLE section
+   - ONLY use amounts from the data - NEVER estimate or round
+   - If overdue invoices exist, the FIRST action MUST be about the overdue
+   - If no actionable data, return empty array
    
-   GOOD EXAMPLE (good week + streak):
-   "The money's flowing nicely right now. You brought in $4,200 this week, which is about 20% more 
-   than your usual $3,500. That's three weeks of growth in a row now - you're building real momentum. 
-   If you keep this pace through the month, you'll hit your best quarter yet."
-   
-   GOOD EXAMPLE (steady + context):
-   "Pretty standard week - $2,800 came in, which is right in line with your average. Everyone paid 
-   on time, nothing's overdue, and your runway is healthy. Sometimes a week that just hums along 
-   is exactly what you need."
-   
-   GOOD EXAMPLE (slower week + perspective):
-   "Lighter week at $1,800, about 25% below your usual $2,400. But there's no cause for alarm - 
-   no overdue invoices, expenses are stable, and you've got plenty of runway. Could just be 
-   normal fluctuation, but worth keeping an eye on next week."
-   
-   BAD: "Revenue increased by 20%. Expenses were $1,200. One invoice is overdue." (just listing facts)
-
-5. ACTIONS (1-2 items): What should they actually do? Be specific and friendly.
-   Primary action should be the single most impactful thing they can do.
-   GOOD: "Send Acme a friendly reminder about the $2,800."
-   GOOD: "Invoice TechStart for the 12.5 hours ($1,875)."
-   BAD: "Follow up on overdue invoices." (which ones? how much?)
-   
-   If there's genuinely nothing to do, return an empty array.
-
-6. CELEBRATION: Only for genuine wins. Otherwise null.
-   GOOD: "First ${periodName} with all invoices paid on time!"
-   GOOD: "You crossed $10K monthly revenue!"
-   null if nothing worth celebrating.
+   BAD: "Follow up on overdue invoices" (which ones? how much?)
+   BAD: Making up customer names not in the data
 
 TONE & STYLE:
-- Sound like a trusted friend who looked at your numbers, not a notification system
-- Use contractions naturally: "hasn't", "it's", "you've", "that's", "you're"
+- Sound like a smart friend who's genuinely excited about your wins
+- Be conversational: "hasn't", "it's", "you've", "that's", "you're"
 - NO alarm words: never say "urgent", "critical", "immediately", "action required", "warning"
-- Write amounts naturally for the locale: "15 870 kr" not "SEK 15,870"
+- Write amounts naturally for the locale: "269k kr" not "SEK 269,000"
 - Always use specific customer names and amounts
-- One clear priority is better than a list of five things`;
+- Make them FEEL something - pride in wins, confidence in their position
+- One clear priority is better than a list of five things
+
+IMPORTANT - PERSONAL BESTS (CELEBRATE THESE!):
+- [Your best week ever] or [Your most profitable week ever] → This is HUGE. Lead with it. Make them feel proud.
+- [Highest since X] or [Most profitable since X] → Real achievement. "Your best since October" hits different.
+- Big profit jump (500%+) → Call it out: "Profit up 7x" or "margins looking incredible"
+- These moments are why someone runs a business. Help them savor it.
+
+IMPORTANT - FOLLOW-THROUGH LOOP:
+- If FOLLOW-THROUGH section shows predictions from last week, OPEN with how that turned out
+- Example: "Last week I said $6K was due - $5,200 came in (87%). Not bad!"
+- This creates accountability and trust - they'll look forward to seeing if predictions came true
+
+IMPORTANT - LOOKING AHEAD:
+- If LOOKING AHEAD section shows what's coming, weave it into the story or actions
+- Example: "Next week looks busy - $7,100 in invoices due. Keep the momentum going."
+- This creates anticipation for next week's insight
+
+IMPORTANT - MOMENTUM & RECOVERY:
+- If MOMENTUM shows "accelerating", mention that growth is speeding up (this is exciting!)
+- If MOMENTUM shows "decelerating", frame constructively - "still growing, just catching your breath"
+- If RECOVERY is present, celebrate the bounce-back: "Bounced back strong after a couple slow weeks"
+
+IMPORTANT - YEAR-OVER-YEAR (THE BIG PICTURE):
+- If YEAR-OVER-YEAR section is present, USE IT! This gives the owner crucial long-term perspective
+- Good weeks: "Up 15% vs last week AND 40% vs this time last year. Your Q1 is shaping up nicely."
+- Slow weeks: "Quieter week, but you're still up 25% vs this time last year. The trend is your friend."
+- Down YoY: Be honest but constructive - "Down a bit from last year, but let's see what next week brings."
+- YoY comparisons are powerful because they account for seasonality
+
+IMPORTANT - RUNWAY (THE SAFETY NET):
+- If RUNWAY section is present, weave it into the narrative
+- Slow weeks with good runway: "Lighter week at $1,800, but you've got 8 months of runway. No stress."
+- This is THE most reassuring sentence you can write for a worried business owner
+- Low runway (< 3 months): Mention it matter-of-factly, not alarmingly - "Runway's at X months based on recent spending"
+- High runway (12+ months): Use it to celebrate stability - "You're in a strong position"
+- REMEMBER: Runway is calculated from 3 months of burn rate - one unusual month can skew it
+
+UNDERSTANDING BIG SWINGS:
+- Revenue down 50%+ from last week? It's almost ALWAYS timing (big invoice paid last week, not this week)
+- Frame it as: "Quieter week at $X after last week's $Y" - this explains the drop without alarm
+- Compare to AVERAGE, not just last week: "About X% below your usual" is more meaningful
+- Invoice-based businesses are naturally lumpy - help them see the pattern, not panic at each swing
+
+BAD WEEK REFRAMING RULES:
+- Revenue down after a high week → "A breather after last week's big payments"
+- Revenue down 50%+ → Almost certainly timing, frame as "quieter week" not "crash"
+- Revenue down but still on streak → "Quieter week, but you're still up X% this year"
+- Revenue flat → "Holding steady" (not "no growth")
+- NEVER make the owner feel bad about a slow week - always find the constructive angle
+
+ZERO REVENUE / LOSS WEEK RULES:
+- Zero revenue is NORMAL for invoice-based businesses - it's just timing
+- Frame as: "No payments landed this week - that's just timing" 
+- Expenses in a zero-revenue week are likely normal monthly costs, NOT "skyrocketing"
+- ALWAYS lead with runway: "14 months runway means no stress"
+- Negative profit = "22,266 kr in expenses this week" NOT "profit loss of -22,266 kr"
+- NEVER use: "skyrocketing", "plummeting", "crashed", "loss", "deficit"
+- DO use: "quieter week", "no payments this week", "expenses at X", "breather"
+
+STYLE - DO NOT:
+- End with "Let me know if you need anything!" or similar ChatGPT-style phrases
+- Use phrases like "I hope this helps" or "Feel free to ask"
+- Sound like an AI assistant - sound like a trusted advisor giving a quick update
+- Offer to do more analysis unless specifically relevant`;
 }
 
 /**
@@ -472,11 +777,9 @@ export function getFallbackContent(
   activity?: InsightActivity,
 ): {
   title: string;
-  sentiment: InsightSentiment;
-  opener: string;
+  summary: string;
   story: string;
   actions: Array<{ text: string }>;
-  celebration?: string;
 } {
   // If there's money on the table, mention it even in fallback
   const moneyOnTable = activity?.moneyOnTable;
@@ -487,12 +790,12 @@ export function getFallbackContent(
     return {
       title:
         hasOverdue && topOverdue
-          ? `${topOverdue.customerName} owes you - check your ${periodLabel} summary.`
-          : `${periodLabel} summary ready - review your numbers.`,
-      sentiment: "neutral",
-      opener: hasOverdue
-        ? "You have outstanding invoices to follow up on."
-        : `${periodLabel} summary is ready.`,
+          ? `${topOverdue.customerName} owes you - check your summary.`
+          : `${periodLabel} summary ready.`,
+      summary:
+        hasOverdue && topOverdue
+          ? `You have outstanding invoices to follow up on. ${topOverdue.customerName} owes you - check your ${periodLabel} summary for details.`
+          : `${periodLabel} summary is ready. Check the dashboard for your detailed metrics.`,
       story:
         "Your weekly numbers are ready for review. Check the dashboard for detailed metrics and any items needing attention.",
       actions: hasOverdue
@@ -503,8 +806,7 @@ export function getFallbackContent(
 
   return {
     title: `${periodLabel} summary ready.`,
-    sentiment: "neutral",
-    opener: "Your weekly summary is ready.",
+    summary: `Your ${periodLabel} summary is ready. Check the dashboard for detailed numbers and any items needing attention.`,
     story:
       "Check your dashboard for the detailed numbers and any items needing attention.",
     actions: [],

@@ -19,6 +19,7 @@ import {
   trackerProjects,
   transactions,
 } from "@db/schema";
+import { format } from "date-fns";
 import {
   and,
   count,
@@ -83,6 +84,7 @@ export type UpdateInsightParams = {
   milestones?: InsightMilestone[];
   activity?: InsightActivity;
   content?: InsightContent;
+  predictions?: import("@db/schema").InsightPredictions;
   audioPath?: string;
   generatedAt?: Date;
 };
@@ -1098,12 +1100,511 @@ export async function getDraftInvoices(
     customerName: inv.customerName ?? "Unknown",
     amount: Number(inv.amount ?? 0),
     currency: inv.currency ?? "USD",
-    createdAt: inv.createdAt
-      ? inv.createdAt instanceof Date
-        ? inv.createdAt.toISOString()
-        : String(inv.createdAt)
-      : new Date().toISOString(),
+    createdAt: inv.createdAt ?? new Date().toISOString(),
   }));
+}
+
+// ============================================================================
+// CONSOLIDATED INSIGHT HISTORY (Single query for all historical analysis)
+// ============================================================================
+
+// Forward type declarations for compute functions
+// (Full definitions are below in their respective sections for documentation)
+
+export type StreakType =
+  | "revenue_growth"
+  | "revenue_decline"
+  | "profitable"
+  | "invoices_paid_on_time"
+  | null;
+
+export type StreakInfo = {
+  type: StreakType;
+  count: number;
+  description: string | null;
+};
+
+export type MomentumType = "accelerating" | "steady" | "decelerating";
+
+export type RecoveryInfo = {
+  isRecovery: boolean;
+  downWeeksBefore: number;
+  strength?: "strong" | "moderate" | "mild";
+  description?: string;
+};
+
+export type HistoricalContext = {
+  revenueRank: number | null;
+  revenueHighestSince?: string;
+  profitRank: number | null;
+  profitHighestSince?: string;
+  isAllTimeRevenueHigh: boolean;
+  isAllTimeProfitHigh: boolean;
+  isRecentRevenueHigh: boolean;
+  isRecentProfitHigh: boolean;
+  weeksOfHistory: number;
+  yearOverYear?: {
+    lastYearRevenue: number;
+    lastYearProfit: number;
+    revenueChangePercent: number;
+    profitChangePercent: number;
+    hasComparison: boolean;
+  };
+};
+
+/**
+ * A single week's data from insight history
+ */
+export type InsightHistoryWeek = {
+  periodYear: number;
+  periodNumber: number;
+  periodStart: Date;
+  revenue: number;
+  expenses: number;
+  profit: number;
+  hasOverdue: boolean;
+  predictions?: import("@db/schema").InsightPredictions;
+};
+
+/**
+ * Consolidated historical insight data - fetched once, used by multiple functions
+ */
+export type InsightHistoryData = {
+  weeks: InsightHistoryWeek[];
+  weeksOfHistory: number;
+};
+
+/**
+ * Fetch insight history once for a team. This data can be reused by:
+ * - getRollingAveragesFromHistory
+ * - getStreakInfoFromHistory
+ * - getHistoricalContextFromHistory
+ * - getMomentumFromHistory
+ * - detectRecoveryFromHistory
+ *
+ * This eliminates 5-6 redundant database queries during insight generation.
+ *
+ * @param weeksBack - Maximum weeks to fetch (default 52 for YoY comparison)
+ */
+export async function getInsightHistory(
+  db: Database,
+  params: {
+    teamId: string;
+    weeksBack?: number;
+    excludeCurrentPeriod?: { year: number; number: number };
+  },
+): Promise<InsightHistoryData> {
+  const { teamId, weeksBack = 52, excludeCurrentPeriod } = params;
+
+  const conditions = [
+    eq(insights.teamId, teamId),
+    eq(insights.periodType, "weekly"),
+    eq(insights.status, "completed"),
+    isNotNull(insights.allMetrics),
+  ];
+
+  if (excludeCurrentPeriod) {
+    conditions.push(
+      sql`NOT (${insights.periodYear} = ${excludeCurrentPeriod.year} AND ${insights.periodNumber} = ${excludeCurrentPeriod.number})`,
+    );
+  }
+
+  const pastInsights = await db
+    .select({
+      allMetrics: insights.allMetrics,
+      activity: insights.activity,
+      predictions: insights.predictions,
+      periodStart: insights.periodStart,
+      periodYear: insights.periodYear,
+      periodNumber: insights.periodNumber,
+    })
+    .from(insights)
+    .where(and(...conditions))
+    .orderBy(desc(insights.periodYear), desc(insights.periodNumber))
+    .limit(weeksBack);
+
+  const weeks: InsightHistoryWeek[] = pastInsights
+    .map((insight): InsightHistoryWeek | null => {
+      const metrics = insight.allMetrics as Record<
+        string,
+        { value: number }
+      > | null;
+      const activity = insight.activity as { invoicesOverdue?: number } | null;
+
+      if (!metrics) return null;
+
+      const week: InsightHistoryWeek = {
+        periodYear: insight.periodYear,
+        periodNumber: insight.periodNumber,
+        periodStart: insight.periodStart,
+        revenue: metrics.revenue?.value ?? 0,
+        expenses: metrics.expenses?.value ?? 0,
+        profit: metrics.netProfit?.value ?? metrics.profit?.value ?? 0,
+        hasOverdue: (activity?.invoicesOverdue ?? 0) > 0,
+      };
+
+      if (insight.predictions) {
+        week.predictions = insight.predictions;
+      }
+
+      return week;
+    })
+    .filter((w): w is InsightHistoryWeek => w !== null);
+
+  return {
+    weeks,
+    weeksOfHistory: weeks.length,
+  };
+}
+
+/**
+ * Compute rolling averages from pre-fetched history data.
+ * Pure function - no database access.
+ */
+export function computeRollingAverages(
+  history: InsightHistoryData,
+  weeksBack = 4,
+): RollingAverages {
+  const weeksToUse = history.weeks.slice(0, weeksBack);
+
+  if (weeksToUse.length === 0) {
+    return { avgRevenue: 0, avgExpenses: 0, avgProfit: 0, weeksIncluded: 0 };
+  }
+
+  let totalRevenue = 0;
+  let totalExpenses = 0;
+  let totalProfit = 0;
+
+  for (const week of weeksToUse) {
+    totalRevenue += week.revenue;
+    totalExpenses += week.expenses;
+    totalProfit += week.profit;
+  }
+
+  const count = weeksToUse.length;
+  return {
+    avgRevenue: Math.round((totalRevenue / count) * 100) / 100,
+    avgExpenses: Math.round((totalExpenses / count) * 100) / 100,
+    avgProfit: Math.round((totalProfit / count) * 100) / 100,
+    weeksIncluded: count,
+  };
+}
+
+/**
+ * Compute streak info from pre-fetched history data.
+ * Pure function - no database access.
+ */
+export function computeStreakInfo(
+  history: InsightHistoryData,
+  currentWeek: { revenue: number; profit: number; hasOverdue: boolean },
+): StreakInfo {
+  if (history.weeks.length === 0) {
+    return { type: null, count: 0, description: null };
+  }
+
+  // Build array with current week first
+  const weeks = [currentWeek, ...history.weeks.slice(0, 8)];
+
+  // Check for revenue growth streak
+  let growthStreak = 0;
+  for (let i = 0; i < weeks.length - 1; i++) {
+    if (weeks[i]!.revenue > weeks[i + 1]!.revenue) {
+      growthStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Check for revenue decline streak
+  let declineStreak = 0;
+  for (let i = 0; i < weeks.length - 1; i++) {
+    if (weeks[i]!.revenue < weeks[i + 1]!.revenue) {
+      declineStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Check for profitable streak
+  let profitableStreak = 0;
+  for (const week of weeks) {
+    if (week.profit > 0) {
+      profitableStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Check for invoices paid on time streak
+  let paidOnTimeStreak = 0;
+  for (const week of weeks) {
+    if (!week.hasOverdue) {
+      paidOnTimeStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Return the most significant streak
+  if (growthStreak >= 2) {
+    return {
+      type: "revenue_growth",
+      count: growthStreak,
+      description: `${growthStreak} consecutive growth weeks`,
+    };
+  }
+  if (profitableStreak >= 3) {
+    return {
+      type: "profitable",
+      count: profitableStreak,
+      description: `${profitableStreak} profitable weeks in a row`,
+    };
+  }
+  if (paidOnTimeStreak >= 3) {
+    return {
+      type: "invoices_paid_on_time",
+      count: paidOnTimeStreak,
+      description: `${paidOnTimeStreak} weeks with all invoices paid on time`,
+    };
+  }
+  if (declineStreak >= 2) {
+    return {
+      type: "revenue_decline",
+      count: declineStreak,
+      description: `Revenue down ${declineStreak} weeks in a row`,
+    };
+  }
+
+  return { type: null, count: 0, description: null };
+}
+
+/**
+ * Compute historical context from pre-fetched history data.
+ * Pure function - no database access.
+ */
+export function computeHistoricalContext(
+  history: InsightHistoryData,
+  currentWeek: {
+    revenue: number;
+    profit: number;
+    periodYear: number;
+    periodNumber: number;
+  },
+): HistoricalContext {
+  const { revenue: currentRevenue, profit: currentProfit } = currentWeek;
+
+  // Filter to weeks with revenue > 0
+  const validWeeks = history.weeks.filter((w) => w.revenue > 0);
+
+  if (validWeeks.length < 4) {
+    return {
+      revenueRank: null,
+      profitRank: null,
+      isAllTimeRevenueHigh: false,
+      isAllTimeProfitHigh: false,
+      isRecentRevenueHigh: false,
+      isRecentProfitHigh: false,
+      weeksOfHistory: validWeeks.length,
+    };
+  }
+
+  // Calculate revenue rank
+  const revenueRank =
+    validWeeks.filter((w) => w.revenue > currentRevenue).length + 1;
+  const isAllTimeRevenueHigh = revenueRank === 1;
+
+  // Find "highest since X" for revenue
+  let revenueHighestSince: string | undefined;
+  if (revenueRank <= 3 && revenueRank > 1) {
+    const higherWeek = validWeeks.find((w) => w.revenue > currentRevenue);
+    if (higherWeek) {
+      revenueHighestSince = format(higherWeek.periodStart, "MMMM yyyy");
+    }
+  }
+
+  // Calculate profit rank
+  const profitRank =
+    validWeeks.filter((w) => w.profit > currentProfit).length + 1;
+  const isAllTimeProfitHigh = profitRank === 1 && currentProfit > 0;
+
+  // Find "highest since X" for profit
+  let profitHighestSince: string | undefined;
+  if (profitRank <= 3 && profitRank > 1 && currentProfit > 0) {
+    const higherWeek = validWeeks.find((w) => w.profit > currentProfit);
+    if (higherWeek) {
+      profitHighestSince = format(higherWeek.periodStart, "MMMM yyyy");
+    }
+  }
+
+  // Check if in top 3 recent weeks
+  const isRecentRevenueHigh = revenueRank <= 3 && validWeeks.length >= 8;
+  const isRecentProfitHigh =
+    profitRank <= 3 && validWeeks.length >= 8 && currentProfit > 0;
+
+  // Year-over-year comparison
+  let yearOverYear: HistoricalContext["yearOverYear"];
+  const lastYearInsight = history.weeks.find(
+    (w) =>
+      w.periodYear === currentWeek.periodYear - 1 &&
+      w.periodNumber === currentWeek.periodNumber,
+  );
+
+  if (lastYearInsight && lastYearInsight.revenue > 0) {
+    const revenueChangePercent = Math.round(
+      ((currentRevenue - lastYearInsight.revenue) / lastYearInsight.revenue) *
+        100,
+    );
+    const profitChangePercent =
+      lastYearInsight.profit !== 0
+        ? Math.round(
+            ((currentProfit - lastYearInsight.profit) /
+              Math.abs(lastYearInsight.profit)) *
+              100,
+          )
+        : 0;
+
+    yearOverYear = {
+      lastYearRevenue: lastYearInsight.revenue,
+      lastYearProfit: lastYearInsight.profit,
+      revenueChangePercent,
+      profitChangePercent,
+      hasComparison: true,
+    };
+  }
+
+  return {
+    revenueRank,
+    revenueHighestSince,
+    profitRank,
+    profitHighestSince,
+    isAllTimeRevenueHigh,
+    isAllTimeProfitHigh,
+    isRecentRevenueHigh,
+    isRecentProfitHigh,
+    weeksOfHistory: validWeeks.length,
+    yearOverYear,
+  };
+}
+
+/**
+ * Compute momentum from pre-fetched history data.
+ * Pure function - no database access.
+ */
+export function computeMomentum(
+  history: InsightHistoryData,
+  currentRevenue: number,
+): {
+  momentum: MomentumType;
+  currentGrowthRate: number;
+  previousGrowthRate: number;
+} | null {
+  if (history.weeks.length < 2) {
+    return null;
+  }
+
+  const prevRevenue = history.weeks[0]!.revenue;
+  const weekBeforeRevenue = history.weeks[1]!.revenue;
+
+  if (prevRevenue === 0 || weekBeforeRevenue === 0) {
+    return null;
+  }
+
+  const currentGrowthRate =
+    ((currentRevenue - prevRevenue) / prevRevenue) * 100;
+  const previousGrowthRate =
+    ((prevRevenue - weekBeforeRevenue) / weekBeforeRevenue) * 100;
+
+  return {
+    momentum: detectMomentum(currentGrowthRate, previousGrowthRate),
+    currentGrowthRate: Math.round(currentGrowthRate * 10) / 10,
+    previousGrowthRate: Math.round(previousGrowthRate * 10) / 10,
+  };
+}
+
+/**
+ * Compute recovery info from pre-fetched history data.
+ * Pure function - no database access.
+ */
+export function computeRecovery(
+  history: InsightHistoryData,
+  currentRevenue: number,
+): RecoveryInfo {
+  if (history.weeks.length < 2) {
+    return { isRecovery: false, downWeeksBefore: 0 };
+  }
+
+  const revenues = history.weeks
+    .filter((w) => w.revenue > 0)
+    .map((w) => w.revenue);
+  if (revenues.length < 2) {
+    return { isRecovery: false, downWeeksBefore: 0 };
+  }
+
+  const previousRevenue = revenues[0]!;
+
+  // Check if current week is up from previous
+  if (currentRevenue <= previousRevenue) {
+    return { isRecovery: false, downWeeksBefore: 0 };
+  }
+
+  // Count consecutive down weeks before the previous week
+  let downWeeksBefore = 0;
+  for (let i = 0; i < revenues.length - 1; i++) {
+    if (revenues[i]! < revenues[i + 1]!) {
+      downWeeksBefore++;
+    } else {
+      break;
+    }
+  }
+
+  if (downWeeksBefore === 0) {
+    return { isRecovery: false, downWeeksBefore: 0 };
+  }
+
+  // Calculate recovery strength
+  const recoveryPercent =
+    ((currentRevenue - previousRevenue) / previousRevenue) * 100;
+  let strength: "strong" | "moderate" | "mild";
+  if (recoveryPercent >= 20) {
+    strength = "strong";
+  } else if (recoveryPercent >= 10) {
+    strength = "moderate";
+  } else {
+    strength = "mild";
+  }
+
+  const description =
+    downWeeksBefore >= 3
+      ? `Bounced back after ${downWeeksBefore} down weeks`
+      : downWeeksBefore === 2
+        ? "Bounced back after 2 down weeks"
+        : "Bounced back from last week's dip";
+
+  return {
+    isRecovery: true,
+    downWeeksBefore,
+    strength,
+    description,
+  };
+}
+
+/**
+ * Get previous week's predictions from history data.
+ * Pure function - no database access.
+ */
+export function getPredictionsFromHistory(history: InsightHistoryData): {
+  predictions: import("@db/schema").InsightPredictions | null;
+  periodStart: Date | null;
+} | null {
+  if (history.weeks.length === 0) {
+    return null;
+  }
+
+  const previousWeek = history.weeks[0];
+  return {
+    predictions: previousWeek?.predictions ?? null,
+    periodStart: previousWeek?.periodStart ?? null,
+  };
 }
 
 // ============================================================================
@@ -1219,19 +1720,6 @@ export async function getRollingAverages(
 // ============================================================================
 // STREAK DETECTION
 // ============================================================================
-
-export type StreakType =
-  | "revenue_growth"
-  | "revenue_decline"
-  | "profitable"
-  | "invoices_paid_on_time"
-  | null;
-
-export type StreakInfo = {
-  type: StreakType;
-  count: number;
-  description: string | null;
-};
 
 /**
  * Detect consecutive week patterns for celebrating momentum or flagging trends.
@@ -1392,4 +1880,576 @@ export async function getStreakInfo(
   }
 
   return { type: null, count: 0, description: null };
+}
+
+// ============================================================================
+// HISTORICAL CONTEXT (PERSONAL BESTS)
+// ============================================================================
+
+/**
+ * Get historical context for the current period's metrics.
+ * Finds personal bests and notable comparisons like "Highest since October".
+ *
+ * Requires at least 4 weeks of history to provide meaningful context.
+ */
+export async function getHistoricalContext(
+  db: Database,
+  params: {
+    teamId: string;
+    currentRevenue: number;
+    currentProfit: number;
+    currentPeriodYear: number;
+    currentPeriodNumber: number;
+  },
+): Promise<HistoricalContext> {
+  const {
+    teamId,
+    currentRevenue,
+    currentProfit,
+    currentPeriodYear,
+    currentPeriodNumber,
+  } = params;
+
+  // Get all past weekly insights ordered by date (most recent first)
+  const pastInsights = await db
+    .select({
+      allMetrics: insights.allMetrics,
+      periodStart: insights.periodStart,
+      periodYear: insights.periodYear,
+      periodNumber: insights.periodNumber,
+    })
+    .from(insights)
+    .where(
+      and(
+        eq(insights.teamId, teamId),
+        eq(insights.periodType, "weekly"),
+        eq(insights.status, "completed"),
+        isNotNull(insights.allMetrics),
+        // Exclude current period
+        sql`NOT (${insights.periodYear} = ${currentPeriodYear} AND ${insights.periodNumber} = ${currentPeriodNumber})`,
+      ),
+    )
+    .orderBy(desc(insights.periodStart))
+    .limit(52); // Last year of data
+
+  const weeksOfHistory = pastInsights.length;
+
+  // Default response for insufficient history
+  if (weeksOfHistory < 4) {
+    return {
+      revenueRank: null,
+      profitRank: null,
+      isAllTimeRevenueHigh: false,
+      isAllTimeProfitHigh: false,
+      isRecentRevenueHigh: false,
+      isRecentProfitHigh: false,
+      weeksOfHistory,
+    };
+  }
+
+  // Extract revenue and profit values from past insights
+  const historicalWeeks = pastInsights
+    .map((insight) => {
+      const metrics = insight.allMetrics as Record<
+        string,
+        { value: number }
+      > | null;
+      if (!metrics) return null;
+
+      return {
+        revenue: metrics.revenue?.value ?? 0,
+        profit: metrics.netProfit?.value ?? metrics.profit?.value ?? 0,
+        periodStart: insight.periodStart,
+      };
+    })
+    .filter(
+      (w): w is { revenue: number; profit: number; periodStart: Date } =>
+        w !== null && w.revenue > 0,
+    );
+
+  if (historicalWeeks.length < 4) {
+    return {
+      revenueRank: null,
+      profitRank: null,
+      isAllTimeRevenueHigh: false,
+      isAllTimeProfitHigh: false,
+      isRecentRevenueHigh: false,
+      isRecentProfitHigh: false,
+      weeksOfHistory: historicalWeeks.length,
+    };
+  }
+
+  // Calculate revenue rank (how many past weeks had higher revenue)
+  const revenueRank =
+    historicalWeeks.filter((w) => w.revenue > currentRevenue).length + 1;
+  const isAllTimeRevenueHigh = revenueRank === 1;
+
+  // Find "highest since X" for revenue if in top 3 but not all-time
+  let revenueHighestSince: string | undefined;
+  if (revenueRank <= 3 && revenueRank > 1) {
+    const higherWeek = historicalWeeks.find((w) => w.revenue > currentRevenue);
+    if (higherWeek) {
+      revenueHighestSince = format(higherWeek.periodStart, "MMMM yyyy");
+    }
+  }
+
+  // Calculate profit rank
+  const profitRank =
+    historicalWeeks.filter((w) => w.profit > currentProfit).length + 1;
+  const isAllTimeProfitHigh = profitRank === 1 && currentProfit > 0;
+
+  // Find "highest since X" for profit if in top 3 but not all-time
+  let profitHighestSince: string | undefined;
+  if (profitRank <= 3 && profitRank > 1 && currentProfit > 0) {
+    const higherWeek = historicalWeeks.find((w) => w.profit > currentProfit);
+    if (higherWeek) {
+      profitHighestSince = format(higherWeek.periodStart, "MMMM yyyy");
+    }
+  }
+
+  // Check if in top 3 recent weeks (requires at least 8 weeks of history)
+  const isRecentRevenueHigh = revenueRank <= 3 && historicalWeeks.length >= 8;
+  const isRecentProfitHigh =
+    profitRank <= 3 && historicalWeeks.length >= 8 && currentProfit > 0;
+
+  // Year-over-year comparison: find same week from last year
+  let yearOverYear: HistoricalContext["yearOverYear"];
+  const lastYearWeekNumber = currentPeriodNumber;
+  const lastYearYear = currentPeriodYear - 1;
+
+  // Look for the insight from same week last year
+  const lastYearInsight = pastInsights.find(
+    (insight) =>
+      insight.periodYear === lastYearYear &&
+      insight.periodNumber === lastYearWeekNumber,
+  );
+
+  if (lastYearInsight) {
+    const lastYearMetrics = lastYearInsight.allMetrics as Record<
+      string,
+      { value: number }
+    > | null;
+    if (lastYearMetrics) {
+      const lastYearRevenue = lastYearMetrics.revenue?.value ?? 0;
+      const lastYearProfit =
+        lastYearMetrics.netProfit?.value ?? lastYearMetrics.profit?.value ?? 0;
+
+      // Calculate percentage changes
+      const revenueChangePercent =
+        lastYearRevenue > 0
+          ? Math.round(
+              ((currentRevenue - lastYearRevenue) / lastYearRevenue) * 100,
+            )
+          : 0;
+      const profitChangePercent =
+        lastYearProfit !== 0
+          ? Math.round(
+              ((currentProfit - lastYearProfit) / Math.abs(lastYearProfit)) *
+                100,
+            )
+          : 0;
+
+      yearOverYear = {
+        lastYearRevenue,
+        lastYearProfit,
+        revenueChangePercent,
+        profitChangePercent,
+        hasComparison: lastYearRevenue > 0,
+      };
+    }
+  }
+
+  return {
+    revenueRank,
+    revenueHighestSince,
+    profitRank,
+    profitHighestSince,
+    isAllTimeRevenueHigh,
+    isAllTimeProfitHigh,
+    isRecentRevenueHigh,
+    isRecentProfitHigh,
+    weeksOfHistory: historicalWeeks.length,
+    yearOverYear,
+  };
+}
+
+// ============================================================================
+// FORWARD-LOOKING QUERIES (for addiction loop)
+// ============================================================================
+
+export type UpcomingInvoicesResult = {
+  totalDue: number;
+  count: number;
+  currency: string;
+};
+
+/**
+ * Get invoices due in a future date range.
+ * Used to create forward-looking predictions like "Next week: $7,100 in invoices due".
+ */
+export async function getUpcomingInvoicesForInsight(
+  db: Database,
+  params: {
+    teamId: string;
+    fromDate: Date;
+    toDate: Date;
+    currency?: string;
+  },
+): Promise<UpcomingInvoicesResult> {
+  const { teamId, fromDate, toDate, currency } = params;
+
+  const conditions = [
+    eq(invoices.teamId, teamId),
+    // Only unpaid invoices (sent but not paid)
+    sql`${invoices.status} IN ('unpaid', 'overdue')`,
+    isNotNull(invoices.dueDate),
+    gte(invoices.dueDate, fromDate.toISOString()),
+    lte(invoices.dueDate, toDate.toISOString()),
+  ];
+
+  if (currency) {
+    conditions.push(eq(invoices.currency, currency));
+  }
+
+  const result = await db
+    .select({
+      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)::numeric`,
+      invoiceCount: sql<number>`COUNT(*)::int`,
+      currency: invoices.currency,
+    })
+    .from(invoices)
+    .where(and(...conditions))
+    .groupBy(invoices.currency);
+
+  // Return the first result (or defaults if no invoices)
+  const row = result[0];
+  return {
+    totalDue: Number(row?.totalAmount ?? 0),
+    count: row?.invoiceCount ?? 0,
+    currency: row?.currency ?? currency ?? "USD",
+  };
+}
+
+export type OverdueInvoicesSummary = {
+  count: number;
+  totalAmount: number;
+  oldestDays: number;
+  currency: string;
+};
+
+/**
+ * Get summary of overdue invoices for insight nudge section.
+ * Returns count, total amount, and how old the oldest overdue invoice is.
+ */
+export async function getOverdueInvoicesSummary(
+  db: Database,
+  params: {
+    teamId: string;
+    asOfDate: Date;
+    currency?: string;
+  },
+): Promise<OverdueInvoicesSummary> {
+  const { teamId, asOfDate, currency } = params;
+
+  const conditions = [
+    eq(invoices.teamId, teamId),
+    eq(invoices.status, "overdue"),
+    isNotNull(invoices.dueDate),
+  ];
+
+  if (currency) {
+    conditions.push(eq(invoices.currency, currency));
+  }
+
+  // Get summary stats
+  const [summaryResult] = await db
+    .select({
+      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)::numeric`,
+      invoiceCount: sql<number>`COUNT(*)::int`,
+      oldestDueDate: sql<string>`MIN(${invoices.dueDate})`,
+      currency: invoices.currency,
+    })
+    .from(invoices)
+    .where(and(...conditions))
+    .groupBy(invoices.currency);
+
+  if (!summaryResult || summaryResult.invoiceCount === 0) {
+    return {
+      count: 0,
+      totalAmount: 0,
+      oldestDays: 0,
+      currency: currency ?? "USD",
+    };
+  }
+
+  // Calculate days since oldest due date
+  const oldestDueDate = new Date(summaryResult.oldestDueDate);
+  const oldestDays = Math.floor(
+    (asOfDate.getTime() - oldestDueDate.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  return {
+    count: summaryResult.invoiceCount,
+    totalAmount: Number(summaryResult.totalAmount),
+    oldestDays: Math.max(0, oldestDays),
+    currency: summaryResult.currency ?? currency ?? "USD",
+  };
+}
+
+// ============================================================================
+// MOMENTUM DETECTION
+// ============================================================================
+
+/**
+ * Detect momentum - is growth accelerating, steady, or decelerating?
+ * Compares rate of change between periods.
+ *
+ * @param currentGrowthRate - Percentage change this period vs previous (e.g., 15 for 15%)
+ * @param previousGrowthRate - Percentage change previous period vs one before (e.g., 10 for 10%)
+ * @returns 'accelerating' if growth is speeding up, 'decelerating' if slowing, 'steady' otherwise
+ */
+export function detectMomentum(
+  currentGrowthRate: number,
+  previousGrowthRate: number,
+): MomentumType {
+  const difference = currentGrowthRate - previousGrowthRate;
+
+  // Require at least 5 percentage points difference to be significant
+  if (difference > 5) {
+    return "accelerating";
+  }
+  if (difference < -5) {
+    return "decelerating";
+  }
+  return "steady";
+}
+
+/**
+ * Get momentum from historical insight data.
+ * Calculates growth rates from past insights and determines if momentum is changing.
+ */
+export async function getMomentumFromHistory(
+  db: Database,
+  params: {
+    teamId: string;
+    currentRevenue: number;
+    currentPeriodYear: number;
+    currentPeriodNumber: number;
+  },
+): Promise<{
+  momentum: MomentumType;
+  currentGrowthRate: number;
+  previousGrowthRate: number;
+} | null> {
+  const { teamId, currentRevenue, currentPeriodYear, currentPeriodNumber } =
+    params;
+
+  // Get the last 3 weekly insights (we need 2 previous periods to calculate momentum)
+  const pastInsights = await db
+    .select({
+      allMetrics: insights.allMetrics,
+      periodYear: insights.periodYear,
+      periodNumber: insights.periodNumber,
+    })
+    .from(insights)
+    .where(
+      and(
+        eq(insights.teamId, teamId),
+        eq(insights.periodType, "weekly"),
+        eq(insights.status, "completed"),
+        isNotNull(insights.allMetrics),
+        sql`NOT (${insights.periodYear} = ${currentPeriodYear} AND ${insights.periodNumber} = ${currentPeriodNumber})`,
+      ),
+    )
+    .orderBy(desc(insights.periodYear), desc(insights.periodNumber))
+    .limit(2);
+
+  if (pastInsights.length < 2) {
+    return null; // Not enough history
+  }
+
+  // Extract revenue values
+  const previousWeek = pastInsights[0]!.allMetrics as Record<
+    string,
+    { value: number }
+  > | null;
+  const weekBefore = pastInsights[1]!.allMetrics as Record<
+    string,
+    { value: number }
+  > | null;
+
+  const prevRevenue = previousWeek?.revenue?.value ?? 0;
+  const weekBeforeRevenue = weekBefore?.revenue?.value ?? 0;
+
+  if (prevRevenue === 0 || weekBeforeRevenue === 0) {
+    return null; // Can't calculate growth with zero values
+  }
+
+  // Calculate growth rates
+  const currentGrowthRate =
+    ((currentRevenue - prevRevenue) / prevRevenue) * 100;
+  const previousGrowthRate =
+    ((prevRevenue - weekBeforeRevenue) / weekBeforeRevenue) * 100;
+
+  return {
+    momentum: detectMomentum(currentGrowthRate, previousGrowthRate),
+    currentGrowthRate: Math.round(currentGrowthRate * 10) / 10,
+    previousGrowthRate: Math.round(previousGrowthRate * 10) / 10,
+  };
+}
+
+// ============================================================================
+// RECOVERY DETECTION
+// ============================================================================
+
+/**
+ * Detect if current week is a recovery (bounce back) from a dip.
+ * A recovery is when revenue increases after 1+ weeks of decline.
+ */
+export async function detectRecovery(
+  db: Database,
+  params: {
+    teamId: string;
+    currentRevenue: number;
+    currentPeriodYear: number;
+    currentPeriodNumber: number;
+  },
+): Promise<RecoveryInfo> {
+  const { teamId, currentRevenue, currentPeriodYear, currentPeriodNumber } =
+    params;
+
+  // Get the last 8 weekly insights
+  const pastInsights = await db
+    .select({
+      allMetrics: insights.allMetrics,
+      periodYear: insights.periodYear,
+      periodNumber: insights.periodNumber,
+    })
+    .from(insights)
+    .where(
+      and(
+        eq(insights.teamId, teamId),
+        eq(insights.periodType, "weekly"),
+        eq(insights.status, "completed"),
+        isNotNull(insights.allMetrics),
+        sql`NOT (${insights.periodYear} = ${currentPeriodYear} AND ${insights.periodNumber} = ${currentPeriodNumber})`,
+      ),
+    )
+    .orderBy(desc(insights.periodYear), desc(insights.periodNumber))
+    .limit(8);
+
+  if (pastInsights.length < 2) {
+    return { isRecovery: false, downWeeksBefore: 0 };
+  }
+
+  // Extract revenues (most recent first)
+  const revenues = pastInsights
+    .map((i) => {
+      const metrics = i.allMetrics as Record<string, { value: number }> | null;
+      return metrics?.revenue?.value ?? 0;
+    })
+    .filter((r) => r > 0);
+
+  if (revenues.length < 2) {
+    return { isRecovery: false, downWeeksBefore: 0 };
+  }
+
+  const previousRevenue = revenues[0]!;
+
+  // Check if current week is up from previous
+  if (currentRevenue <= previousRevenue) {
+    return { isRecovery: false, downWeeksBefore: 0 };
+  }
+
+  // Count how many consecutive down weeks preceded the previous week
+  let downWeeksBefore = 0;
+  for (let i = 0; i < revenues.length - 1; i++) {
+    if (revenues[i]! < revenues[i + 1]!) {
+      downWeeksBefore++;
+    } else {
+      break;
+    }
+  }
+
+  // Only consider it a recovery if there was at least 1 down week
+  if (downWeeksBefore === 0) {
+    return { isRecovery: false, downWeeksBefore: 0 };
+  }
+
+  // Calculate recovery strength
+  const recoveryPercent =
+    ((currentRevenue - previousRevenue) / previousRevenue) * 100;
+  let strength: "strong" | "moderate" | "mild";
+  if (recoveryPercent >= 20) {
+    strength = "strong";
+  } else if (recoveryPercent >= 10) {
+    strength = "moderate";
+  } else {
+    strength = "mild";
+  }
+
+  // Build description
+  let description: string;
+  if (downWeeksBefore >= 3) {
+    description = `Bounced back after ${downWeeksBefore} down weeks`;
+  } else if (downWeeksBefore === 2) {
+    description = "Bounced back after 2 down weeks";
+  } else {
+    description = "Bounced back from last week's dip";
+  }
+
+  return {
+    isRecovery: true,
+    downWeeksBefore,
+    strength,
+    description,
+  };
+}
+
+// ============================================================================
+// PREVIOUS PREDICTIONS RETRIEVAL
+// ============================================================================
+
+/**
+ * Get predictions from the previous week's insight for follow-through comparison.
+ */
+export async function getPreviousInsightPredictions(
+  db: Database,
+  params: {
+    teamId: string;
+    currentPeriodYear: number;
+    currentPeriodNumber: number;
+  },
+): Promise<{
+  predictions: import("@db/schema").InsightPredictions | null;
+  periodStart: Date | null;
+} | null> {
+  const { teamId, currentPeriodYear, currentPeriodNumber } = params;
+
+  // Get the previous week's insight
+  const [previousInsight] = await db
+    .select({
+      predictions: insights.predictions,
+      periodStart: insights.periodStart,
+    })
+    .from(insights)
+    .where(
+      and(
+        eq(insights.teamId, teamId),
+        eq(insights.periodType, "weekly"),
+        eq(insights.status, "completed"),
+        sql`NOT (${insights.periodYear} = ${currentPeriodYear} AND ${insights.periodNumber} = ${currentPeriodNumber})`,
+      ),
+    )
+    .orderBy(desc(insights.periodYear), desc(insights.periodNumber))
+    .limit(1);
+
+  if (!previousInsight) {
+    return null;
+  }
+
+  return {
+    predictions: previousInsight.predictions,
+    periodStart: previousInsight.periodStart,
+  };
 }

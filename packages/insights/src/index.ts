@@ -1,19 +1,27 @@
 import type { Database } from "@midday/db/client";
 import {
+  type InsightHistoryData,
+  computeHistoricalContext,
+  computeMomentum,
+  computeRecovery,
+  computeRollingAverages,
+  computeStreakInfo,
   getCashFlow,
   getDraftInvoices,
   getInsightActivityData,
+  getInsightHistory,
   getOverdueInvoiceDetails,
   getOverdueInvoicesAlert,
+  getOverdueInvoicesSummary,
+  getPredictionsFromHistory,
   getProfit,
   getRevenue,
-  getRollingAverages,
   getRunway,
   getSpending,
   getSpendingForPeriod,
-  getStreakInfo,
   getUnbilledHoursDetails,
   getUpcomingDueRecurringByTeam,
+  getUpcomingInvoicesForInsight,
 } from "@midday/db/queries";
 import {
   ContentGenerator,
@@ -41,10 +49,13 @@ import type {
   InsightContext,
   InsightGenerationResult,
   InsightMetric,
+  InsightPredictions,
   MetricData,
+  MomentumContext,
   MoneyOnTable,
   PeriodInfo,
   PeriodType,
+  PreviousPredictionsContext,
 } from "./types";
 
 export type InsightsServiceOptions = {
@@ -80,6 +91,7 @@ export class InsightsService {
       periodYear,
       periodNumber,
       currency,
+      locale,
     } = params;
 
     // Create period info
@@ -94,14 +106,28 @@ export class InsightsService {
     // Get previous period for comparison
     const previousPeriod = getPreviousPeriod(periodType, currentPeriod);
 
-    // Fetch all data in parallel
-    const [currentMetrics, previousMetrics, currentActivity, previousActivity] =
-      await Promise.all([
-        this.fetchMetricData(teamId, currentPeriod, currency),
-        this.fetchMetricData(teamId, previousPeriod, currency),
-        this.fetchActivityData(teamId, currentPeriod, currency),
-        this.fetchActivityData(teamId, previousPeriod, currency),
-      ]);
+    // Fetch all data in parallel (including insight history for historical analysis)
+    const [
+      currentMetrics,
+      previousMetrics,
+      currentActivity,
+      previousActivity,
+      insightHistory,
+    ] = await Promise.all([
+      this.fetchMetricData(teamId, currentPeriod, currency),
+      this.fetchMetricData(teamId, previousPeriod, currency),
+      this.fetchActivityData(teamId, currentPeriod, currency),
+      this.fetchActivityData(teamId, previousPeriod, currency),
+      periodType === "weekly"
+        ? getInsightHistory(this.db, {
+            teamId,
+            weeksBack: 52, // Enough for YoY comparison
+            excludeCurrentPeriod: { year: periodYear, number: periodNumber },
+          }).catch(
+            () => ({ weeks: [], weeksOfHistory: 0 }) as InsightHistoryData,
+          )
+        : null,
+    ]);
 
     // Calculate all metrics
     let allMetrics = calculateAllMetrics(
@@ -117,6 +143,54 @@ export class InsightsService {
       previousActivity,
       currency,
     );
+
+    // Add historical context for personal bests (weekly insights only)
+    let yearOverYearContext:
+      | import("./content").YearOverYearContext
+      | undefined;
+
+    if (
+      periodType === "weekly" &&
+      insightHistory &&
+      insightHistory.weeks.length >= 4
+    ) {
+      const historicalContext = computeHistoricalContext(insightHistory, {
+        revenue: currentMetrics.revenue,
+        profit: currentMetrics.netProfit,
+        periodYear,
+        periodNumber,
+      });
+
+      // Add historical context to revenue metric
+      if (allMetrics.revenue) {
+        if (historicalContext.isAllTimeRevenueHigh) {
+          allMetrics.revenue.historicalContext = "Your best week ever";
+        } else if (historicalContext.revenueHighestSince) {
+          allMetrics.revenue.historicalContext = `Highest since ${historicalContext.revenueHighestSince}`;
+        } else if (historicalContext.isRecentRevenueHigh) {
+          allMetrics.revenue.historicalContext =
+            "One of your best recent weeks";
+        }
+      }
+
+      // Add historical context to profit metric
+      if (allMetrics.net_profit) {
+        if (historicalContext.isAllTimeProfitHigh) {
+          allMetrics.net_profit.historicalContext =
+            "Your most profitable week ever";
+        } else if (historicalContext.profitHighestSince) {
+          allMetrics.net_profit.historicalContext = `Most profitable since ${historicalContext.profitHighestSince}`;
+        } else if (historicalContext.isRecentProfitHigh) {
+          allMetrics.net_profit.historicalContext =
+            "One of your most profitable recent weeks";
+        }
+      }
+
+      // Store YoY context for the content generator
+      if (historicalContext.yearOverYear?.hasComparison) {
+        yearOverYearContext = historicalContext.yearOverYear;
+      }
+    }
 
     // Select top metrics
     const selectedMetrics = selectTopMetrics(allMetrics);
@@ -138,7 +212,93 @@ export class InsightsService {
       currency,
       currentActivity,
       currentMetrics,
+      insightHistory,
     );
+
+    // For weekly insights, compute momentum and recovery from history, and build predictions
+    let momentumContext: MomentumContext | undefined;
+    let predictions: InsightPredictions | undefined;
+    let previousPredictions: PreviousPredictionsContext | undefined;
+
+    if (periodType === "weekly" && insightHistory) {
+      // Compute momentum and recovery from pre-fetched history (no extra DB calls)
+      const momentumData = computeMomentum(
+        insightHistory,
+        currentMetrics.revenue,
+      );
+      const recoveryData = computeRecovery(
+        insightHistory,
+        currentMetrics.revenue,
+      );
+
+      // Fetch invoice data in parallel (these can't be derived from history)
+      const [upcomingInvoicesData, overdueData] = await Promise.all([
+        // Get invoices due next week for predictions
+        getUpcomingInvoicesForInsight(this.db, {
+          teamId,
+          fromDate: new Date(periodEnd.getTime() + 24 * 60 * 60 * 1000), // Day after period end
+          toDate: new Date(periodEnd.getTime() + 8 * 24 * 60 * 60 * 1000), // 7 days later
+          currency,
+        }).catch(() => ({ totalDue: 0, count: 0, currency })),
+        // Get current overdue for streak tracking
+        getOverdueInvoicesSummary(this.db, {
+          teamId,
+          asOfDate: new Date(),
+          currency,
+        }).catch(() => ({
+          count: 0,
+          totalAmount: 0,
+          oldestDays: 0,
+          currency,
+        })),
+      ]);
+
+      // Build momentum context
+      if (momentumData || recoveryData.isRecovery) {
+        momentumContext = {};
+        if (momentumData) {
+          momentumContext.momentum = momentumData.momentum;
+          momentumContext.currentGrowthRate = momentumData.currentGrowthRate;
+          momentumContext.previousGrowthRate = momentumData.previousGrowthRate;
+        }
+        if (recoveryData.isRecovery) {
+          momentumContext.recovery = recoveryData;
+        }
+      }
+
+      // Build predictions for next week
+      predictions = {};
+      if (upcomingInvoicesData.count > 0) {
+        predictions.invoicesDue = {
+          count: upcomingInvoicesData.count,
+          totalAmount: upcomingInvoicesData.totalDue,
+          currency: upcomingInvoicesData.currency,
+        };
+      }
+      // Track current streak to see if maintained next week
+      if (activity.context?.streak && activity.context.streak.count >= 2) {
+        predictions.streakAtRisk = {
+          type: activity.context.streak.type,
+          count: activity.context.streak.count,
+        };
+      }
+
+      // Get previous predictions from history for follow-through narrative
+      const previousPredictionsData = getPredictionsFromHistory(insightHistory);
+      if (previousPredictionsData?.predictions) {
+        const prev = previousPredictionsData.predictions;
+        previousPredictions = {};
+        if (prev.invoicesDue) {
+          previousPredictions.invoicesDue = {
+            predicted: prev.invoicesDue.totalAmount,
+            currency: prev.invoicesDue.currency,
+          };
+        }
+        if (prev.streakAtRisk) {
+          previousPredictions.streakAtRisk = prev.streakAtRisk;
+        }
+      }
+    }
 
     // Generate AI content
     const content = await this.contentGenerator.generate(
@@ -149,6 +309,14 @@ export class InsightsService {
       periodType,
       currency,
       expenseAnomalies,
+      {
+        momentumContext,
+        previousPredictions,
+        predictions,
+        yearOverYear: yearOverYearContext,
+        runwayMonths: currentMetrics.runwayMonths,
+        locale,
+      },
     );
 
     return {
@@ -156,9 +324,12 @@ export class InsightsService {
       allMetrics,
       anomalies,
       expenseAnomalies,
-      milestones: [], // TODO: Implement milestone detection
+      milestones: [], // Covered by historicalContext (personal bests, streaks)
       activity,
       content,
+      predictions,
+      previousPredictions,
+      momentumContext,
     };
   }
 
@@ -173,6 +344,13 @@ export class InsightsService {
     const from = formatDateForQuery(period.periodStart);
     const to = formatDateForQuery(period.periodEnd);
 
+    // Runway needs a multi-month lookback for burn rate calculation
+    // Use last 3 months ending at period end
+    const runwayFromDate = new Date(period.periodEnd);
+    runwayFromDate.setMonth(runwayFromDate.getMonth() - 3);
+    const runwayFrom = formatDateForQuery(runwayFromDate);
+    const runwayTo = to;
+
     const [
       revenueData,
       profitData,
@@ -181,13 +359,41 @@ export class InsightsService {
       runwayData,
       categorySpendingData,
     ] = await Promise.all([
-      getRevenue(this.db, { teamId, from, to, currency }).catch(() => []),
-      getProfit(this.db, { teamId, from, to, currency }).catch(() => []),
-      getCashFlow(this.db, { teamId, from, to, currency }).catch(() => null),
-      getSpendingForPeriod(this.db, { teamId, from, to, currency }).catch(
-        () => null,
-      ),
-      getRunway(this.db, { teamId, from, to, currency }).catch(() => 0),
+      // Use exactDates: true to get data for the specific period (e.g., week) not full month
+      getRevenue(this.db, {
+        teamId,
+        from,
+        to,
+        currency,
+        exactDates: true,
+      }).catch(() => []),
+      getProfit(this.db, {
+        teamId,
+        from,
+        to,
+        currency,
+        exactDates: true,
+      }).catch(() => []),
+      getCashFlow(this.db, {
+        teamId,
+        from,
+        to,
+        currency,
+        exactDates: true,
+      }).catch(() => null),
+      getSpendingForPeriod(this.db, {
+        teamId,
+        from,
+        to,
+        currency,
+        exactDates: true,
+      }).catch(() => null),
+      getRunway(this.db, {
+        teamId,
+        from: runwayFrom,
+        to: runwayTo,
+        currency,
+      }).catch(() => 0),
       getSpending(this.db, { teamId, from, to, currency }).catch(() => []),
     ]);
 
@@ -287,6 +493,7 @@ export class InsightsService {
       transactionsCategorized: number;
     },
     currentMetrics: MetricData,
+    insightHistory: InsightHistoryData | null,
   ): Promise<InsightActivity> {
     // Fetch all detailed data in parallel
     const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -296,7 +503,6 @@ export class InsightsService {
       overdueDetails,
       unbilledDetails,
       draftInvoices,
-      rollingAverages,
     ] = await Promise.all([
       getOverdueInvoicesAlert(this.db, { teamId, currency }).catch(() => null),
       getUpcomingDueRecurringByTeam(this.db, {
@@ -315,19 +521,12 @@ export class InsightsService {
       getDraftInvoices(this.db, { teamId, currency }).catch(
         () => [] as Awaited<ReturnType<typeof getDraftInvoices>>,
       ),
-      // Rolling averages for comparison context
-      getRollingAverages(this.db, {
-        teamId,
-        weeksBack: 4,
-        currentPeriodYear: period.periodYear,
-        currentPeriodNumber: period.periodNumber,
-      }).catch(() => ({
-        avgRevenue: 0,
-        avgExpenses: 0,
-        avgProfit: 0,
-        weeksIncluded: 0,
-      })),
     ]);
+
+    // Compute rolling averages from history (no extra DB call)
+    const rollingAverages = insightHistory
+      ? computeRollingAverages(insightHistory, 4)
+      : { avgRevenue: 0, avgExpenses: 0, avgProfit: 0, weeksIncluded: 0 };
 
     // Build upcoming invoices summary
     type UpcomingInvoice = (typeof upcomingRecurring)[number];
@@ -372,16 +571,15 @@ export class InsightsService {
       draftInvoices,
     };
 
-    // Get streak info (needs to be after we know about overdue invoices)
+    // Compute streak info from history (no extra DB call)
     const hasOverdueInvoices = (overdueData?.summary?.count ?? 0) > 0;
-    const streakInfo = await getStreakInfo(this.db, {
-      teamId,
-      currentPeriodYear: period.periodYear,
-      currentPeriodNumber: period.periodNumber,
-      currentRevenue: currentMetrics.revenue,
-      currentProfit: currentMetrics.netProfit,
-      hasOverdueInvoices,
-    }).catch(() => ({ type: null, count: 0, description: null }));
+    const streakInfo = insightHistory
+      ? computeStreakInfo(insightHistory, {
+          revenue: currentMetrics.revenue,
+          profit: currentMetrics.netProfit,
+          hasOverdue: hasOverdueInvoices,
+        })
+      : { type: null, count: 0, description: null };
 
     // Build comparison context
     const context: InsightContext = {};
@@ -507,12 +705,15 @@ export type {
   InsightGenerationResult,
   InsightMetric,
   InsightMilestone,
+  InsightPredictions,
   MetricCategory,
   MetricData,
+  MomentumContext,
   MoneyOnTable,
   OverdueInvoiceDetail,
   PeriodInfo,
   PeriodType,
+  PreviousPredictionsContext,
   UnbilledHoursDetail,
 } from "./types";
 

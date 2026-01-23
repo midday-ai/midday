@@ -2,12 +2,17 @@
  * Core types for the @midday/insights package
  */
 
+// Import and re-export InsightPredictions from schema (single source of truth)
+import type { InsightPredictions } from "@midday/db/schema";
+export type { InsightPredictions };
+
 export type PeriodType = "weekly" | "monthly" | "quarterly" | "yearly";
 
 export type ChangeDirection = "up" | "down" | "flat";
 
 export type MetricCategory =
   | "financial"
+  | "profitability"
   | "runway"
   | "invoicing"
   | "customers"
@@ -180,7 +185,11 @@ export type InsightContext = {
   };
   /** Consecutive week patterns */
   streak?: {
-    type: "revenue_growth" | "revenue_decline" | "profitable" | "invoices_paid_on_time";
+    type:
+      | "revenue_growth"
+      | "revenue_decline"
+      | "profitable"
+      | "invoices_paid_on_time";
     count: number;
     description: string; // "3 consecutive growth weeks"
   };
@@ -196,16 +205,14 @@ export type InsightSentiment = "positive" | "neutral" | "challenging";
  * "What Matters Now" format - action-first, specific names/amounts
  */
 export type InsightContent = {
-  title: string; // Conversational summary: main thing + bigger picture (15-20 words, never notification-like)
-  sentiment: InsightSentiment;
-  opener: string; // Sets up the story - what's the main thing happening (max 15 words)
-  story: string; // 3-4 sentences telling the story of their week, like catching up over coffee
+  title: string; // Short hook for widget cards (15-20 words)
+  summary: string; // Detailed description with metrics for insight view (25-40 words)
+  story: string; // 2-3 sentences adding context, patterns, implications
   actions: Array<{
     text: string;
     type?: string;
     deepLink?: string;
   }>;
-  celebration?: string; // Only for genuine wins (milestones, streaks, personal bests)
 };
 
 /**
@@ -234,6 +241,8 @@ export type GenerateInsightParams = {
   periodYear: number;
   periodNumber: number;
   currency: string;
+  /** Owner's locale for formatting (e.g., "en", "sv", "de") */
+  locale?: string;
 };
 
 /**
@@ -247,6 +256,37 @@ export type PeriodInfo = {
   periodYear: number;
 };
 
+// InsightPredictions is defined in @midday/db/schema - import from there
+
+/**
+ * Context from previous week's predictions for follow-through
+ */
+export type PreviousPredictionsContext = {
+  invoicesDue?: {
+    predicted: number;
+    currency: string;
+  };
+  streakAtRisk?: {
+    type: string;
+    count: number;
+  };
+};
+
+/**
+ * Momentum and recovery context
+ */
+export type MomentumContext = {
+  momentum?: "accelerating" | "steady" | "decelerating";
+  currentGrowthRate?: number;
+  previousGrowthRate?: number;
+  recovery?: {
+    isRecovery: boolean;
+    downWeeksBefore: number;
+    strength?: "strong" | "moderate" | "mild";
+    description?: string;
+  };
+};
+
 /**
  * Result of insight generation
  */
@@ -258,4 +298,10 @@ export type InsightGenerationResult = {
   milestones: InsightMilestone[];
   activity: InsightActivity;
   content: InsightContent;
+  /** Forward-looking predictions for next week's follow-through */
+  predictions?: InsightPredictions;
+  /** Context from previous predictions for follow-through narrative */
+  previousPredictions?: PreviousPredictionsContext;
+  /** Momentum and recovery context */
+  momentumContext?: MomentumContext;
 };

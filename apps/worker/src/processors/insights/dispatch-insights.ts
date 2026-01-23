@@ -180,6 +180,7 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
               periodYear: period.periodYear,
               periodNumber: period.periodNumber,
               currency: team.baseCurrency ?? "USD",
+              locale: team.ownerLocale,
             },
             {
               jobId: `insights-${team.id}-${periodType}-${period.periodYear}-${period.periodNumber}`,
