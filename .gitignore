@@ -91,3 +91,4 @@ dist-ssr
 .claude/
 .serena/
 api/index.js
+.vercel

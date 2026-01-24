@@ -85,7 +85,7 @@ export default async function UpgradePage() {
           </Link>{" "}
           or{" "}
           <OpenURL
-            href="https://cal.com/pontus-midday/15min"
+            href="https://cal.com/abacus-labs"
             className="hover:underline"
           >
             book a call with the founders

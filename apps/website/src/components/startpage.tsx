@@ -35,9 +35,6 @@ const FeaturesGridSection = dynamic(() =>
 const TimeSavingsSection = dynamic(() =>
   import("./sections/time-savings-section").then((m) => m.TimeSavingsSection),
 );
-const WeeklyAudioSection = dynamic(() =>
-  import("./sections/weekly-audio-section").then((m) => m.WeeklyAudioSection),
-);
 const PreAccountingSection = dynamic(() =>
   import("./sections/pre-accounting-section").then(
     (m) => m.PreAccountingSection,
@@ -467,14 +464,6 @@ export function StartPage() {
 
       {/* Time Savings Bento Grid Section */}
       <TimeSavingsSection />
-
-      {/* Divider */}
-      <div className="max-w-[1400px] mx-auto">
-        <div className="h-px w-full border-t border-border" />
-      </div>
-
-      {/* Weekly Audio Section */}
-      <WeeklyAudioSection audioUrl="https://cdn.midday.ai/weekly-speech.mp3" />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">
