@@ -1,7 +1,6 @@
 "use client";
 
 import { getUrl } from "@/utils/environment";
-import { isDesktopApp } from "@midday/desktop-client/platform";
 import { createClient } from "@midday/supabase/client";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
@@ -18,29 +17,12 @@ export function AppleSignIn({ showLastUsed = false }: Props) {
   const handleSignIn = async () => {
     setLoading(true);
 
-    if (isDesktopApp()) {
-      const redirectTo = new URL("/api/auth/callback", getUrl());
-
-      redirectTo.searchParams.append("provider", "apple");
-      redirectTo.searchParams.append("client", "desktop");
-
-      await supabase.auth.signInWithOAuth({
-        provider: "apple",
-        options: {
-          redirectTo: redirectTo.toString(),
-          queryParams: {
-            client: "desktop",
-          },
-        },
-      });
-    } else {
-      await supabase.auth.signInWithOAuth({
-        provider: "apple",
-        options: {
-          redirectTo: `${getUrl()}/api/auth/callback?provider=apple`,
-        },
-      });
-    }
+    await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: {
+        redirectTo: `${getUrl()}/api/auth/callback?provider=apple`,
+      },
+    });
 
     setTimeout(() => {
       setLoading(false);

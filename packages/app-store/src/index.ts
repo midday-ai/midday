@@ -28,7 +28,6 @@ export const apps = [
   fortnoxApp,
   whatsappApp,
   stripePaymentsApp,
-  middayDesktopApp,
   raycastApp,
   googleDriveApp,
   dropboxApp,

@@ -1,6 +1,5 @@
 import { createGoCardLessLinkAction } from "@/actions/institutions/create-gocardless-link";
 import { getUrl } from "@/utils/environment";
-import { isDesktopApp } from "@midday/desktop-client/platform";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { BankConnectButton } from "./bank-connect-button";
@@ -30,7 +29,7 @@ export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
     createGoCardLessLink.execute({
       institutionId: id,
       availableHistory: availableHistory,
-      redirectBase: isDesktopApp() ? "midday://" : getUrl(),
+      redirectBase: getUrl(),
     });
   };
 

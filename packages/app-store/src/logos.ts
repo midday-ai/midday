@@ -9,7 +9,6 @@ export { Logo as FortnoxLogo } from "./fortnox/assets/logo";
 export { Logo as RaycastLogo } from "./raycast/assets/logo";
 export { Logo as StripeLogo } from "./stripe/assets/logo";
 export { Logo as StripePaymentsLogo } from "./stripe-payments/assets/logo";
-export { Logo as MiddayDesktopLogo } from "./midday-desktop/assets/logo";
 export { Logo as GoogleDriveLogo } from "./google-drive/assets/logo";
 export { Logo as DropboxLogo } from "./dropbox/assets/logo";
 export { Logo as PolarLogo } from "./polar/assets/logo";

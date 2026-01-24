@@ -12,8 +12,6 @@ import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useSearchStore } from "@/store/search";
 import { useTRPC } from "@/trpc/client";
-import { Window, emit, invoke, listen } from "@midday/desktop-client/core";
-import { isDesktopApp } from "@midday/desktop-client/platform";
 import {
   Command,
   CommandEmpty,

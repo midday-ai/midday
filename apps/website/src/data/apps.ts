@@ -109,16 +109,6 @@ const appExtensions: Record<
       "Real-time updates",
     ],
   },
-  "midday-desktop": {
-    slug: "midday-desktop",
-    features: [
-      "One-click access to finances",
-      "Track time from menu bar",
-      "Manage invoices",
-      "Native Mac experience",
-    ],
-    installUrl: "https://abacuslabs.co/download",
-  },
   "google-drive": {
     slug: "google-drive",
     features: [

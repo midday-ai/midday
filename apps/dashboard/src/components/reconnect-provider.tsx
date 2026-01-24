@@ -2,7 +2,6 @@ import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-
 import { reconnectEnableBankingLinkAction } from "@/actions/institutions/reconnect-enablebanking-link";
 import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
 import { getUrl } from "@/utils/environment";
-import { isDesktopApp } from "@midday/desktop-client/platform";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
@@ -161,7 +160,7 @@ export function ReconnectProvider({
           institutionId,
           availableHistory: 60,
           redirectTo: `${getUrl()}/api/gocardless/reconnect`,
-          isDesktop: isDesktopApp(),
+          isDesktop: false,
         });
       }
       case "enablebanking": {
@@ -169,7 +168,7 @@ export function ReconnectProvider({
         // The useReconnect hook detects URL params and triggers the job
         return reconnectEnableBankingLink.execute({
           institutionId,
-          isDesktop: isDesktopApp(),
+          isDesktop: false,
           sessionId: referenceId!,
         });
       }
