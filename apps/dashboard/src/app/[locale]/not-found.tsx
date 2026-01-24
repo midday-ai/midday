@@ -1,8 +1,13 @@
+"use client";
+
+import { useCurrentLocale } from "@/locales/client";
 import Image from "next/image";
 import Link from "next/link";
 import appIcon from "public/appicon.png";
 
 export default function NotFound() {
+  const locale = useCurrentLocale();
+
   return (
     <div className="h-screen flex flex-col items-center justify-center text-center text-sm text-[#606060]">
       <Image
@@ -15,7 +20,7 @@ export default function NotFound() {
       />
       <h2 className="text-xl font-semibold mb-2">Not Found</h2>
       <p className="mb-4">Could not find requested resource</p>
-      <Link href="/" className="underline">
+      <Link href={`/${locale}`} className="underline">
         Return Home
       </Link>
     </div>
