@@ -16,18 +16,11 @@ export async function GET(req: NextRequest) {
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
   const referenceId = requestUrl.searchParams.get("reference_id") ?? undefined;
-  const isDesktop = requestUrl.searchParams.get("desktop");
 
   if (id) {
     await updateBankConnection(supabase, { id, referenceId });
     // Frontend will trigger the reconnect job via useEffect when it sees step=reconnect
     // This allows the frontend to track job progress via runId/accessToken
-  }
-
-  if (isDesktop === "true") {
-    return NextResponse.redirect(
-      `midday://settings/accounts?id=${id}&step=reconnect`,
-    );
   }
 
   return NextResponse.redirect(

@@ -18,13 +18,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/", requestUrl.origin));
   }
 
-  const [type, method, sessionId] = state?.split(":") ?? [];
-
-  const isDesktop = type === "desktop";
-  const redirectBase = isDesktop ? "midday://" : requestUrl.origin;
+  const [_type, method, sessionId] = state?.split(":") ?? [];
 
   if (!code) {
-    return NextResponse.redirect(new URL("/?error=missing_code", redirectBase));
+    return NextResponse.redirect(new URL("/?error=missing_code", requestUrl.origin));
   }
 
   const sessionResponse = await client.auth.enablebanking.exchange.$get({
@@ -34,7 +31,7 @@ export async function GET(request: NextRequest) {
   });
 
   if (sessionResponse.status !== 200) {
-    return NextResponse.redirect(new URL("/?error=invalid_code", redirectBase));
+    return NextResponse.redirect(new URL("/?error=invalid_code", requestUrl.origin));
   }
 
   if (method === "connect") {
@@ -44,7 +41,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(
         new URL(
           `/?ref=${sessionData.session_id}&provider=enablebanking&step=account`,
-          redirectBase,
+          requestUrl.origin,
         ),
       );
     }
@@ -71,11 +68,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(
         new URL(
           `/settings/accounts?id=${data?.id}&step=reconnect`,
-          redirectBase,
+          requestUrl.origin,
         ),
       );
     }
   }
 
-  return NextResponse.redirect(new URL("/", redirectBase));
+  return NextResponse.redirect(new URL("/", requestUrl.origin));
 }
