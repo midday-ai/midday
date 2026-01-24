@@ -235,6 +235,7 @@ export function StartPage() {
                     className="w-full h-auto md:!scale-[0.85] lg:!scale-100 lg:object-contain lg:max-w-[85%] 2xl:max-w-[66%] dark:hidden lg:[transform:rotate(-2deg)_skewY(1deg)] lg:[filter:drop-shadow(0_30px_60px_rgba(0,0,0,0.6))]"
                     priority
                     fetchPriority="high"
+                    unoptimized
                   />
                   <Image
                     src="/images/dashboard-dark.svg"
@@ -244,6 +245,7 @@ export function StartPage() {
                     className="w-full h-auto md:!scale-[0.85] lg:!scale-100 lg:object-contain lg:max-w-[85%] 2xl:max-w-[66%] hidden dark:block lg:[transform:rotate(-2deg)_skewY(1deg)] lg:[filter:drop-shadow(0_30px_60px_rgba(0,0,0,0.6))]"
                     priority
                     fetchPriority="high"
+                    unoptimized
                   />
                 </div>
               </div>

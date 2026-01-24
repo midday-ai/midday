@@ -96,6 +96,7 @@ export function Insights() {
                   height={750}
                   className="w-full h-auto object-contain relative z-0 dark:hidden"
                   priority
+                  unoptimized
                 />
                 <Image
                   src="/images/dashboard-dark.svg"
@@ -104,6 +105,7 @@ export function Insights() {
                   height={750}
                   className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
+                  unoptimized
                 />
               </div>
             </div>
@@ -148,6 +150,7 @@ export function Insights() {
                   height={750}
                   className="w-full h-auto object-contain relative z-0 dark:hidden"
                   priority
+                  unoptimized
                 />
                 <Image
                   src="/images/dashboard-dark.svg"
@@ -156,6 +159,7 @@ export function Insights() {
                   height={750}
                   className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
+                  unoptimized
                 />
               </div>
             </div>
