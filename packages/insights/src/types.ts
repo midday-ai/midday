@@ -206,7 +206,8 @@ export type InsightContent = {
   actions: Array<{
     text: string;
     type?: string;
-    deepLink?: string;
+    invoiceId?: string;
+    projectId?: string;
   }>;
 };
 

@@ -76,7 +76,8 @@ export const insightActivitySchema = z.object({
 export const insightActionSchema = z.object({
   text: z.string(),
   type: z.string().optional(),
-  deepLink: z.string().optional(),
+  invoiceId: z.string().optional(),
+  projectId: z.string().optional(),
 });
 
 export const insightContentSchema = z.object({

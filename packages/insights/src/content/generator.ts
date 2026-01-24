@@ -1,8 +1,14 @@
 /**
  * AI content generation for insights
+ *
+ * Uses split prompts for maximum quality:
+ * - Title: Concise headline (10-20 words)
+ * - Summary: Complete financial picture (40-60 words)
+ * - Story: Forward-looking or actionable insight (max 15 words)
+ * - Actions: Specific actionable items with exact names/amounts
  */
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { z } from "zod/v4";
 import type {
   ExpenseAnomaly,
@@ -15,51 +21,18 @@ import type {
   PeriodType,
   PreviousPredictionsContext,
 } from "../types";
-import { buildInsightPrompt, getFallbackContent } from "./prompts";
+import { getFallbackContent } from "./prompts";
+import {
+  buildActionsPrompt,
+  buildStoryPrompt,
+  buildSummaryPrompt,
+  buildTitlePrompt,
+  computeSlots,
+} from "./prompts/index";
 
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
-
-/**
- * Schema for AI-generated content
- * Note: OpenAI structured output requires all properties to be required,
- * so we use nullable() instead of optional() for optional fields.
- *
- * "What Matters Now" format - action-first, specific names/amounts
- */
-const insightContentSchema = z.object({
-  title: z
-    .string()
-    .describe(
-      "20-35 words. Week snapshot for widget cards. Lead with profit and context (margin, comparison). Include runway and any overdue. NO superlatives. Use full amounts. Example: '338,958 kr profit on 350,000 kr revenue - healthy 97% margin. 14 months runway. [Customer] owes 750 kr.'",
-    ),
-  summary: z
-    .string()
-    .describe(
-      "30-50 words. Use EXACT amounts from the data. If mentioning overdue, use EXACT customer name from the data. Include: profit, revenue, expenses, runway, overdue (if any). NEVER make up customer names.",
-    ),
-  story: z
-    .string()
-    .describe(
-      "2-3 sentences that make the owner FEEL something. Celebrate wins ('profit up 7x - that's the kind of week you remember'), add historical context ('best since October'), patterns, implications. NO amounts (those are in summary). NO action reminders (those are in actions).",
-    ),
-  actions: z
-    .array(
-      z.object({
-        text: z
-          .string()
-          .describe(
-            "Action with EXACT customer name and amount from the data. NEVER make up names.",
-          ),
-      }),
-    )
-    .describe(
-      "1-2 actions using ONLY data provided. Priority: 1) Overdue invoices 2) Draft invoices 3) Unbilled work. Empty array if no actionable data.",
-    ),
-});
-
-type InsightContentOutput = z.infer<typeof insightContentSchema>;
 
 export type ContentGeneratorOptions = {
   model?: string;
@@ -77,6 +50,14 @@ export type YearOverYearContext = {
 };
 
 /**
+ * Revenue concentration data
+ */
+export type RevenueConcentrationContext = {
+  topCustomer: { name: string; revenue: number; percentage: number } | null;
+  isConcentrated: boolean;
+};
+
+/**
  * Additional context for content generation (momentum, predictions, etc.)
  */
 export type ContentGenerationContext = {
@@ -86,10 +67,17 @@ export type ContentGenerationContext = {
   yearOverYear?: YearOverYearContext;
   runwayMonths?: number;
   locale?: string;
+  weeksOfHistory?: number;
+  revenueConcentration?: RevenueConcentrationContext;
 };
 
 /**
  * Content generator class for creating AI-powered insight summaries
+ *
+ * Uses split prompts for maximum quality:
+ * 1. Title + Summary generated in parallel (both only need slots)
+ * 2. Story generated after (needs title/summary context)
+ * 3. Actions generated in parallel with story (only needs slots)
  */
 export class ContentGenerator {
   private model: string;
@@ -99,11 +87,11 @@ export class ContentGenerator {
   }
 
   /**
-   * Generate insight content using AI
+   * Generate insight content using split focused prompts
    */
   async generate(
     selectedMetrics: InsightMetric[],
-    anomalies: InsightAnomaly[],
+    _anomalies: InsightAnomaly[],
     activity: InsightActivity,
     periodLabel: string,
     periodType: PeriodType,
@@ -111,38 +99,35 @@ export class ContentGenerator {
     expenseAnomalies: ExpenseAnomaly[] = [],
     context: ContentGenerationContext = {},
   ): Promise<InsightContent> {
-    const prompt = buildInsightPrompt(
-      selectedMetrics,
-      anomalies,
-      activity,
-      periodLabel,
-      periodType,
-      currency,
-      expenseAnomalies,
-      context,
-    );
-
     try {
-      const { object } = await generateObject({
-        model: openai(this.model),
-        schema: insightContentSchema,
-        temperature: 0.4, // Lower for more consistent, focused output
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      });
+      // 1. Compute all slots (exact values for AI to use)
+      const slots = computeSlots(
+        selectedMetrics,
+        activity,
+        currency,
+        periodLabel,
+        periodType,
+        {
+          momentumContext: context.momentumContext,
+          yearOverYear: context.yearOverYear,
+          runwayMonths: context.runwayMonths,
+          weeksOfHistory: context.weeksOfHistory,
+          expenseAnomalies,
+          revenueConcentration: context.revenueConcentration,
+        },
+      );
 
-      return {
-        title: object.title,
-        summary: object.summary,
-        story: object.story,
-        actions: object.actions.map((action) => ({
-          text: action.text,
-        })),
-      };
+      // 2. Generate title, summary, and actions in parallel
+      const [title, summary, actions] = await Promise.all([
+        this.generateTitle(slots),
+        this.generateSummary(slots),
+        this.generateActions(slots),
+      ]);
+
+      // 3. Generate story
+      const story = await this.generateStory(slots);
+
+      return { title, summary, story, actions };
     } catch (error) {
       console.error(
         "Failed to generate AI content:",
@@ -152,6 +137,143 @@ export class ContentGenerator {
       // Return fallback content with activity for context
       return getFallbackContent(periodLabel, periodType, activity);
     }
+  }
+
+  /**
+   * Generate title using focused prompt
+   */
+  private async generateTitle(
+    slots: ReturnType<typeof computeSlots>,
+  ): Promise<string> {
+    const prompt = buildTitlePrompt(slots);
+
+    const { text } = await generateText({
+      model: openai(this.model),
+      temperature: 0.3, // Lower for consistency
+      prompt,
+    });
+
+    return text.trim();
+  }
+
+  /**
+   * Generate summary using focused prompt
+   */
+  private async generateSummary(
+    slots: ReturnType<typeof computeSlots>,
+  ): Promise<string> {
+    const prompt = buildSummaryPrompt(slots);
+
+    const { text } = await generateText({
+      model: openai(this.model),
+      temperature: 0.3,
+      prompt,
+    });
+
+    return text.trim();
+  }
+
+  /**
+   * Generate story using focused prompt
+   */
+  private async generateStory(
+    slots: ReturnType<typeof computeSlots>,
+  ): Promise<string> {
+    const prompt = buildStoryPrompt(slots);
+
+    const { text } = await generateText({
+      model: openai(this.model),
+      temperature: 0.4, // Slightly higher for creative forward-looking content
+      prompt,
+    });
+
+    // Strip quotes and clean up
+    return text.trim().replace(/^["']|["']$/g, "");
+  }
+
+  /**
+   * Generate actions using structured output
+   */
+  private async generateActions(
+    slots: ReturnType<typeof computeSlots>,
+  ): Promise<
+    Array<{
+      text: string;
+      type?: string;
+      invoiceId?: string;
+      projectId?: string;
+    }>
+  > {
+    const prompt = buildActionsPrompt(slots);
+
+    // No actionable data
+    if (!prompt) {
+      return [];
+    }
+
+    const { object } = await generateObject({
+      model: openai(this.model),
+      temperature: 0.2, // Low for consistent structured output
+      schema: z.object({
+        actions: z.array(z.object({ text: z.string() })),
+      }),
+      prompt,
+    });
+
+    // Enrich actions with deep links based on slot data
+    return object.actions.map((action) => {
+      const enriched = this.enrichActionWithEntity(action.text, slots);
+      return enriched;
+    });
+  }
+
+  /**
+   * Match action text to slot data and add entity ID for client-side sheet opening
+   */
+  private enrichActionWithEntity(
+    text: string,
+    slots: ReturnType<typeof computeSlots>,
+  ): { text: string; type?: string; invoiceId?: string; projectId?: string } {
+    const textLower = text.toLowerCase();
+
+    // Check overdue invoices
+    for (const inv of slots.overdue) {
+      if (textLower.includes(inv.company.toLowerCase())) {
+        return {
+          text,
+          type: "overdue",
+          invoiceId: inv.id,
+        };
+      }
+    }
+
+    // Check drafts
+    for (const draft of slots.drafts) {
+      if (textLower.includes(draft.company.toLowerCase())) {
+        return {
+          text,
+          type: "draft",
+          invoiceId: draft.id,
+        };
+      }
+    }
+
+    // Check unbilled work
+    for (const work of slots.unbilled) {
+      if (
+        textLower.includes(work.project.toLowerCase()) ||
+        (work.customer && textLower.includes(work.customer.toLowerCase()))
+      ) {
+        return {
+          text,
+          type: "unbilled",
+          projectId: work.projectId,
+        };
+      }
+    }
+
+    // No match - return as is
+    return { text };
   }
 }
 

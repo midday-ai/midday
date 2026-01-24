@@ -94,11 +94,6 @@ export const getInsightsTool = tool({
         responseText += `${insight.content.story}\n\n`;
       }
 
-      // Celebration (show prominently if earned)
-      if (insight.content?.celebration) {
-        responseText += `🎉 **${insight.content.celebration}**\n\n`;
-      }
-
       // Action items (specific and actionable)
       if (insight.content?.actions && insight.content.actions.length > 0) {
         responseText += "**What to do:**\n";
@@ -179,6 +174,7 @@ export const getInsightsTool = tool({
         expenseAnomalies: insight.expenseAnomalies,
         milestones: insight.milestones,
         activity: insight.activity,
+        predictions: insight.predictions,
         generatedAt: insight.generatedAt,
       };
 

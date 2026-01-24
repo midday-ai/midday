@@ -1,5 +1,7 @@
 "use client";
 
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 import type { InsightData } from "@/lib/chat-utils";
 import { formatAmount } from "@midday/utils/format";
 import { AnimatePresence, motion } from "framer-motion";
@@ -137,7 +139,12 @@ const sectionVariants = {
 };
 
 export function InsightMessage({ insight }: InsightMessageProps) {
-  const { content, selectedMetrics, expenseAnomalies, currency } = insight;
+  const { content, selectedMetrics, expenseAnomalies, predictions, currency } =
+    insight;
+
+  // Sheet hooks for opening details
+  const { setParams: setInvoiceParams } = useInvoiceParams();
+  const { setParams: setTrackerParams } = useTrackerParams();
 
   // Track streaming completion states
   const [titleComplete, setTitleComplete] = useState(false);
@@ -146,6 +153,16 @@ export function InsightMessage({ insight }: InsightMessageProps) {
   const [showStory, setShowStory] = useState(false);
   const [storyComplete, setStoryComplete] = useState(false);
   const [showActions, setShowActions] = useState(false);
+
+  // Detect if this is the first insight (no meaningful comparison)
+  // Either explicitly flagged or detected by unrealistic changes (+100% revenue from 0)
+  const isFirstInsight =
+    insight.isFirstInsight ||
+    (selectedMetrics?.some(
+      (m) =>
+        m.type === "revenue" && m.change === 100 && m.changeDirection === "up",
+    ) ??
+      false);
 
   // Get period name for change comparison text
   const periodName =
@@ -238,9 +255,12 @@ export function InsightMessage({ insight }: InsightMessageProps) {
             <div className="grid grid-cols-2 gap-3 pb-3">
               {selectedMetrics.slice(0, 4).map((metric, index) => {
                 const isRunway = metric.type === "runway_months";
+                // For first insight, don't show misleading "vs last week"
                 const changeText = isRunway
                   ? "based on 3 month avg"
-                  : `${formatChange(metric.change, metric.changeDirection)} vs last ${periodName}`;
+                  : isFirstInsight
+                    ? "this period"
+                    : `${formatChange(metric.change, metric.changeDirection)} vs last ${periodName}`;
 
                 return (
                   <motion.div
@@ -301,18 +321,45 @@ export function InsightMessage({ insight }: InsightMessageProps) {
           >
             <p className="text-sm text-primary">Recommended actions</p>
             <ul className="space-y-1">
-              {content.actions.map((action, i) => (
-                <motion.li
-                  key={action.text}
-                  initial={{ opacity: 0, x: -4 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05, duration: 0.2 }}
-                  className="text-sm text-muted-foreground flex items-start gap-2"
-                >
-                  <span>•</span>
-                  <span>{action.text}</span>
-                </motion.li>
-              ))}
+              {content.actions.map((action, i) => {
+                const hasLink = action.invoiceId || action.projectId;
+                const handleClick = () => {
+                  if (action.invoiceId) {
+                    setInvoiceParams({
+                      invoiceId: action.invoiceId,
+                      type: "details",
+                    });
+                  } else if (action.projectId) {
+                    setTrackerParams({
+                      projectId: action.projectId,
+                      update: true,
+                    });
+                  }
+                };
+
+                return (
+                  <motion.li
+                    key={action.text}
+                    initial={{ opacity: 0, x: -4 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.2 }}
+                    className="text-sm text-muted-foreground flex items-start gap-2"
+                  >
+                    <span>•</span>
+                    {hasLink ? (
+                      <button
+                        type="button"
+                        onClick={handleClick}
+                        className="text-left hover:text-primary underline-offset-2 hover:underline transition-colors"
+                      >
+                        {action.text}
+                      </button>
+                    ) : (
+                      <span>{action.text}</span>
+                    )}
+                  </motion.li>
+                );
+              })}
             </ul>
           </motion.div>
         )}
@@ -404,6 +451,31 @@ export function InsightMessage({ insight }: InsightMessageProps) {
                     </motion.li>
                   ))}
               </ul>
+            </motion.div>
+          )}
+      </AnimatePresence>
+
+      {/* Next Week Predictions */}
+      <AnimatePresence>
+        {showActions &&
+          predictions?.invoicesDue &&
+          predictions.invoicesDue.count > 0 && (
+            <motion.div
+              variants={sectionVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-2"
+            >
+              <p className="text-sm text-primary">Next week</p>
+              <p className="text-sm text-muted-foreground">
+                {predictions.invoicesDue.count} invoice
+                {predictions.invoicesDue.count > 1 ? "s" : ""} due (
+                {formatAmount({
+                  amount: predictions.invoicesDue.totalAmount,
+                  currency: predictions.invoicesDue.currency,
+                })}
+                )
+              </p>
             </motion.div>
           )}
       </AnimatePresence>

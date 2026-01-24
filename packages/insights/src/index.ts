@@ -16,6 +16,7 @@ import {
   getPredictionsFromHistory,
   getProfit,
   getRevenue,
+  getRevenueConcentration,
   getRunway,
   getSpending,
   getSpendingForPeriod,
@@ -113,6 +114,7 @@ export class InsightsService {
       currentActivity,
       previousActivity,
       insightHistory,
+      revenueConcentration,
     ] = await Promise.all([
       this.fetchMetricData(teamId, currentPeriod, currency),
       this.fetchMetricData(teamId, previousPeriod, currency),
@@ -127,6 +129,19 @@ export class InsightsService {
             () => ({ weeks: [], weeksOfHistory: 0 }) as InsightHistoryData,
           )
         : null,
+      // Revenue concentration for risk assessment
+      getRevenueConcentration(this.db, {
+        teamId,
+        from: formatDateForQuery(periodStart),
+        to: formatDateForQuery(periodEnd),
+        currency,
+      }).catch(() => ({
+        topCustomer: null,
+        totalRevenue: 0,
+        customerCount: 0,
+        isConcentrated: false,
+        currency,
+      })),
     ]);
 
     // Calculate all metrics
@@ -316,6 +331,17 @@ export class InsightsService {
         yearOverYear: yearOverYearContext,
         runwayMonths: currentMetrics.runwayMonths,
         locale,
+        weeksOfHistory: insightHistory?.weeksOfHistory ?? 0,
+        revenueConcentration: revenueConcentration.topCustomer
+          ? {
+              topCustomer: {
+                name: revenueConcentration.topCustomer.name,
+                revenue: revenueConcentration.topCustomer.revenue,
+                percentage: revenueConcentration.topCustomer.percentage,
+              },
+              isConcentrated: revenueConcentration.isConcentrated,
+            }
+          : undefined,
       },
     );
 

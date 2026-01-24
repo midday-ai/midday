@@ -9,13 +9,15 @@ export {
   type YearOverYearContext,
 } from "./generator";
 
+export { getFallbackContent } from "./prompts";
+
 export {
-  buildInsightPrompt,
-  formatAnomaliesContext,
-  formatExpenseAnomaliesContext,
-  formatMetricsContext,
-  formatOverdueContext,
-  formatUpcomingInvoicesContext,
-  getFallbackContent,
-  getPeriodName,
-} from "./prompts";
+  buildActionsPrompt,
+  buildStoryPrompt,
+  buildSummaryPrompt,
+  buildTitlePrompt,
+  computeSlots,
+  type InsightSlots,
+  type WeekHighlight,
+  type WeekType,
+} from "./prompts/index";

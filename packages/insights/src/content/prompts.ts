@@ -558,12 +558,12 @@ WRITE A CALM, REASSURING SUMMARY:
    Examples:
    - "Quiet week with 45k kr revenue, 12k kr expenses. Nothing needs attention, 8 months runway."
    - "Steady week - 89k kr revenue, 37k kr profit. All invoices paid, books in good shape."
-   - "Calm week ahead. 52k kr revenue locked in, plus $1,200 coming Monday from [Customer]."
+   - "Calm week ahead. 52k kr revenue locked in, plus $1,200 coming Monday from [Company]."
 
 2. SUMMARY (25-35 words): Clean description with amounts only.
    Examples:
    - "Quiet week with no revenue movement, but you've got 8 months runway and $12k in the bank. Nothing needs your attention right now."
-   - "Calm week - $2,100 in expenses, nothing overdue. You've got $1,200 coming in Monday from [Customer] to kick off next week."
+   - "Calm week - $2,100 in expenses, nothing overdue. You've got $1,200 coming in Monday from [Company] to kick off next week."
    - "All clear this week. Revenue steady at $3,400, expenses at $2,900. Your books are in good shape with 6 months runway."
 
 3. STORY (1-2 sentences): What's coming next week, or a reassuring note about their position.
@@ -596,30 +596,30 @@ CRITICAL - DO NOT HALLUCINATE:
 
 WRITE A "WHAT MATTERS NOW" SUMMARY:
 
-1. TITLE (20-35 words): Week snapshot for widget cards. Key numbers with context.
+1. TITLE (15-25 words MAX): Week snapshot for widget cards. Keep it tight.
    
    RULES:
-   - Lead with profit and add context (margin %, revenue comparison, or trend)
+   - Lead with profit amount and margin %
    - Include runway months
-   - Mention any overdue with customer name and amount
+   - If overdue exists, mention ONLY the largest one (save others for summary)
    - Use full amounts (260,000 kr not "260k kr")
    - Use REAL customer names from the data
-   - NO superlatives like "best week", "strong week", "great week" - let numbers speak
+   - NO adjectives: "solid", "healthy", "strong", "great" - just numbers
    
    GOOD WEEKS:
-   - "338,958 kr profit on 350,000 kr revenue - healthy 97% margin. 14 months runway. Lost Island AB owes 750 kr."
-   - "45,000 kr profit with expenses at just 5,000 kr. Everyone paid on time. 12 months runway."
-   - "89,000 kr profit, up from 60,000 kr last week. Runway solid at 14 months."
+   - "11,882 kr profit, 33.9% margin. 14 months runway. Sherwood Studio AB owes 62,500 kr."
+   - "45,000 kr profit, 90% margin. Everyone paid. 12 months runway."
+   - "89,000 kr profit, up from 60,000 kr last week. 14 months runway."
    
-   ZERO/LOSS WEEKS (lead with runway for reassurance):
-   - "No payments landed this week - just timing. 14 months runway, no stress. Lost Island AB owes 750 kr."
-   - "22,266 kr in expenses, no revenue this week. With 14 months runway, you're in good shape."
+   ZERO/LOSS WEEKS (lead with runway):
+   - "No payments this week. 14 months runway. Lost Island AB owes 750 kr."
+   - "22,266 kr expenses, no revenue. 14 months runway."
    
    BAD:
-   - "Your best week!" (loses meaning if repeated)
-   - "Strong week:", "Great week:" (generic superlatives)
-   - "You faced a loss" (alarming)
-   - Abbreviated amounts like "260k" (unprofessional)
+   - Listing multiple overdue customers (save for summary)
+   - Adjectives like "solid margin", "healthy position"
+   - "Your best week!" or other superlatives
+   - Abbreviated amounts like "260k"
 
 2. SUMMARY (30-50 words): DETAILED description for the insight view. Full picture.
    
@@ -635,7 +635,7 @@ WRITE A "WHAT MATTERS NOW" SUMMARY:
    - Write naturally for the locale
    
    GOOD WEEKS:
-   - "260,340 kr profit this week on 269,668 kr revenue, expenses at 9,328 kr. [Customer] owes you 750 kr. 14 months runway, a strong position."
+   - "260,340 kr profit this week on 269,668 kr revenue, expenses at 9,328 kr. [Company] owes you 750 kr. 14 months runway, a strong position."
    
    ZERO/LOSS WEEKS:
    - "Quieter week with no payments landing - just timing. Expenses at 22,266 kr. With 14 months runway, no stress. Lost Island AB still owes 750 kr."
@@ -658,7 +658,7 @@ WRITE A "WHAT MATTERS NOW" SUMMARY:
    
    ADD UNIQUE CONTEXT:
    - Historical: "Your best since October" or "First time above 200k"
-   - Patterns: "[Customer] usually pays fast - this delay is out of character"
+   - Patterns: "[Company] usually pays fast - this delay is out of character"
    - Implications: "At this pace, Q1 is going to be your best yet"
    - Momentum: "You've got real momentum now"
    
@@ -669,20 +669,20 @@ WRITE A "WHAT MATTERS NOW" SUMMARY:
    
    GOOD EXAMPLES:
    "Your best week since October - and profit up 7x. You're building real momentum heading into
-   the new year. [Customer] usually pays fast, so the delay is out of character for them."
+   the new year. [Company] usually pays fast, so the delay is out of character for them."
    
    "This is the kind of week that changes quarters. Three growth weeks in a row now, and your
    margins are looking healthier than ever. Keep this energy."
    
    BAD (flat, repeats things):
-   "This is your best week since October, showing impressive growth. [Customer] usually pays
+   "This is your best week since October, showing impressive growth. [Company] usually pays
    promptly, so it's worth checking in with them." (repeats action)
 
 4. ACTIONS (1-2 items): ONLY from the data provided. NEVER make up names or amounts.
    
    PRIORITY ORDER (if data exists):
-   1. Overdue invoices → "Send [Customer] a friendly reminder about the [amount]"
-   2. Draft invoices ready → "Send [Customer] the invoice for [amount]"
+   1. Overdue invoices → "Send [Company] a friendly reminder about the [amount]"
+   2. Draft invoices ready → "Send [Company] the invoice for [amount]"
    3. Unbilled work → "Invoice [Customer/Project] for [hours] hours ([amount])"
    
    CRITICAL RULES:

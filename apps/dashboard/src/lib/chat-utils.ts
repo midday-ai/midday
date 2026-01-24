@@ -13,7 +13,12 @@ export type InsightData = {
   content?: {
     summary?: string;
     story?: string;
-    actions?: Array<{ text: string; priority?: number }>;
+    actions?: Array<{
+      text: string;
+      type?: string;
+      invoiceId?: string;
+      projectId?: string;
+    }>;
   } | null;
   selectedMetrics?: Array<{
     type: string;
@@ -34,6 +39,18 @@ export type InsightData = {
     change: number;
     currency: string;
   }>;
+  predictions?: {
+    invoicesDue?: {
+      count: number;
+      totalAmount: number;
+      currency: string;
+    };
+    streakAtRisk?: {
+      type: string;
+      count: number;
+    };
+  };
+  isFirstInsight?: boolean;
   currency: string;
 };
 

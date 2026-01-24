@@ -38,14 +38,12 @@ export async function uploadInsightAudio(
 ): Promise<string> {
   const path = getAudioPath(teamId, insightId);
 
-  const { data, error } = await supabase.storage.from(BUCKET).upload(
-    path,
-    audioBuffer,
-    {
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, audioBuffer, {
       contentType: "audio/mpeg",
       upsert: true, // Overwrite if regenerating
-    },
-  );
+    });
 
   if (error) {
     throw new Error(`Failed to upload insight audio: ${error.message}`);
@@ -96,13 +94,12 @@ export async function audioExists(
 ): Promise<boolean> {
   const path = getAudioPath(teamId, insightId);
 
-  const { data, error } = await supabase.storage.from(BUCKET).list(
-    `${teamId}/insights`,
-    {
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .list(`${teamId}/insights`, {
       search: `${insightId}.mp3`,
       limit: 1,
-    },
-  );
+    });
 
   if (error) {
     console.error("Error checking audio existence:", error);
