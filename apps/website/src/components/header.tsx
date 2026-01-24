@@ -55,7 +55,6 @@ export function Header({
   const featuresListRef = useRef<HTMLDivElement>(null);
   const preAccountingRef = useRef<HTMLAnchorElement>(null);
   const appsListRef = useRef<HTMLDivElement>(null);
-  const macAppRef = useRef<HTMLAnchorElement>(null);
   const integrationsAppRef = useRef<HTMLAnchorElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const featuresPrefetched = useRef(false);
@@ -448,7 +447,7 @@ export function Header({
                 Story
               </Link>
 
-              {/* Apps with Dropdown */}
+              {/* Integrations with Dropdown */}
               <div
                 className="relative -mx-3 -my-2"
                 onMouseEnter={() => {
@@ -468,7 +467,7 @@ export function Header({
                   type="button"
                   className="text-sm transition-colors text-muted-foreground hover:text-foreground px-3 py-2"
                 >
-                  Apps
+                  Integrations
                 </button>
                 {/* Invisible bridge to dropdown */}
                 {isAppsOpen && (
@@ -502,15 +501,15 @@ export function Header({
                             <div>
                               {[
                                 {
-                                  href: "/download",
-                                  title: "Mac app",
-                                  desc: "Your finances, always one click away.",
-                                  external: false,
-                                },
-                                {
                                   href: "/integrations",
                                   title: "Integrations",
                                   desc: "Connect your existing tools.",
+                                  external: false,
+                                },
+                                {
+                                  href: "/launch-program",
+                                  title: "Launch Program",
+                                  desc: "Custom implementation & training.",
                                   external: false,
                                 },
                               ].map((item, index) => (
@@ -642,35 +641,26 @@ export function Header({
                             </div>
                           </Link>
 
-                          {/* Mac App Preview */}
+                          {/* Launch Program Preview */}
                           <Link
-                            ref={macAppRef}
-                            href="/download"
+                            href="/launch-program"
                             onClick={() => setIsAppsOpen(false)}
                             className="w-full max-w-[320px] lg:w-[320px] lg:max-w-none xl:w-[350px] 2xl:w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
                           >
-                            <div className="flex-1 flex items-center justify-center bg-background p-4">
-                              <Image
-                                src="/images/header-dock-light.png"
-                                alt="Mac Dock"
-                                width={1200}
-                                height={300}
-                                className="w-3/4 h-auto object-contain dark:hidden"
-                              />
-                              <Image
-                                src="/images/header-dock-dark.png"
-                                alt="Mac Dock"
-                                width={1200}
-                                height={300}
-                                className="w-3/4 h-auto object-contain hidden dark:block"
-                              />
+                            <div className="flex-1 flex items-center justify-center bg-background p-6">
+                              <div className="text-center space-y-3">
+                                <div className="text-4xl">🚀</div>
+                                <p className="font-sans text-sm text-muted-foreground max-w-[200px]">
+                                  Get up and running in 30 days
+                                </p>
+                              </div>
                             </div>
                             <div className="bg-background border-t border-border p-2.5">
                               <span className="font-sans text-xs text-foreground block">
-                                Mac app
+                                Launch Program
                               </span>
                               <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                Your finances, always one click away.
+                                Custom implementation & training
                               </span>
                             </div>
                           </Link>
@@ -913,7 +903,7 @@ export function Header({
                     WebkitTapHighlightColor: "transparent",
                   }}
                 >
-                  <span>Apps</span>
+                  <span>Integrations</span>
                   <Icons.ChevronDown
                     className={`w-5 h-5 transition-transform duration-200 ${
                       isMobileAppsOpen ? "rotate-180" : ""
@@ -925,17 +915,6 @@ export function Header({
                     <div className="h-px w-full border-t border-border my-2" />
                     <div className="overflow-hidden opacity-0 animate-mobile-slide">
                       <div className="flex flex-col space-y-4 pt-2">
-                        <Link
-                          href="/download"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileAppsOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Mac app
-                        </Link>
                         <Link
                           href="/integrations"
                           onClick={() => {
@@ -979,6 +958,17 @@ export function Header({
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           SDKs
+                        </Link>
+                        <Link
+                          href="/launch-program"
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            setIsMobileAppsOpen(false);
+                          }}
+                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Launch Program
                         </Link>
                       </div>
                     </div>
