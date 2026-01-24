@@ -8,6 +8,10 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { HeaderIntegrationsPreview } from "./header-integrations-preview";
 
+// Get the dashboard app URL from environment or use fallback for development
+const APP_URL =
+  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
+
 interface HeaderProps {
   transparent?: boolean;
   hideMenuItems?: boolean;
@@ -542,9 +546,9 @@ export function Header({
                                   external: false,
                                 },
                                 {
-                                  href: "https://api.midday.ai",
+                                  href: "https://api.abacuslabs.co",
                                   title: "Developer & API",
-                                  desc: "Programmatic access to Midday.",
+                                  desc: "Programmatic access to Abacus.",
                                   external: true,
                                 },
                                 {
@@ -680,7 +684,7 @@ export function Header({
               {/* Sign in */}
               <div className="border-l border-border pl-4">
                 <Link
-                  href="https://app.abacuslabs.co/"
+                  href={APP_URL}
                   className="text-sm transition-colors text-primary hover:text-primary/80"
                 >
                   Sign in
@@ -955,7 +959,7 @@ export function Header({
                           MCP Server
                         </Link>
                         <a
-                          href="https://api.midday.ai"
+                          href="https://api.abacuslabs.co"
                           onClick={() => {
                             setIsMenuOpen(false);
                             setIsMobileAppsOpen(false);
@@ -985,7 +989,7 @@ export function Header({
               {/* Sign in */}
               <div className="border-t border-border pt-8 mt-8">
                 <Link
-                  href="https://app.abacuslabs.co/"
+                  href={APP_URL}
                   onTouchEnd={(e) => {
                     const target = e.currentTarget;
                     if (target) {
