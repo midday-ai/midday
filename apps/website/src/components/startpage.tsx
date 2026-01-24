@@ -134,13 +134,13 @@ export function StartPage() {
               <div className="space-y-4 lg:space-y-3 text-center lg:text-left max-w-xl mx-auto lg:mx-0 px-2 lg:px-0">
                 <h1 className="font-serif text-3xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3]">
                   <span className="text-foreground">
-                    Run your business finances without manual work.
+                    Run your MCA business without the manual work.
                   </span>
                 </h1>
 
                 <p className="text-muted-foreground text-base leading-normal font-sans max-w-md lg:max-w-none text-center mx-auto lg:text-left lg:mx-0">
-                  One place for transactions, receipts, invoices and everything
-                  around it.
+                  One place for portfolio management, risk alerts, and a branded
+                  merchant portal.
                 </p>
               </div>
 

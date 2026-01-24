@@ -3,7 +3,9 @@ import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { NewVersionChecker } from "@/components/new-version-toast";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@midday/ui/toaster";
 import { Provider as Analytics } from "@midday/events/client";
 import type { Metadata } from "next";
 import { Hedvig_Letters_Sans, Hedvig_Letters_Serif } from "next/font/google";
@@ -121,6 +123,8 @@ export default function Layout({ children }: { children: ReactElement }) {
           </main>
           <Footer />
           <Analytics />
+          <Toaster />
+          <NewVersionChecker />
         </ThemeProvider>
       </body>
     </html>
