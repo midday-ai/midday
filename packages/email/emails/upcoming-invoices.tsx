@@ -24,7 +24,7 @@ interface Props {
 export const UpcomingInvoicesEmail = ({
   count = 3,
   teamName = "Your Team",
-  link = "https://app.abacuslabs.com/invoices",
+  link = "https://app.abacuslabs.co/invoices",
 }: Props) => {
   // Link to invoices filtered to show only recurring invoices
   const viewLink = `${link}?recurring=true`;

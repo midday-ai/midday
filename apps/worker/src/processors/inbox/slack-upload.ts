@@ -423,7 +423,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
                   text: "View in Midday",
                   emoji: true,
                 },
-                url: `https://app.abacuslabs.com/inbox?inboxId=${encodeURIComponent(updatedInbox.id)}`,
+                url: `https://app.abacuslabs.co/inbox?inboxId=${encodeURIComponent(updatedInbox.id)}`,
                 action_id: "view_receipt",
               },
             ],

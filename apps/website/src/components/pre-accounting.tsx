@@ -85,7 +85,7 @@ export function PreAccounting() {
                   asChild
                   className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
                 >
-                  <a href="https://app.abacuslabs.com/">Start free trial</a>
+                  <a href="https://app.abacuslabs.co/">Start free trial</a>
                 </Button>
                 <Button
                   variant="outline"
@@ -99,7 +99,7 @@ export function PreAccounting() {
                 </Button>
               </div>
               <p className="text-muted-foreground text-xs font-sans">
-                14-day free trial · Cancel anytime
+                30-day free trial · Cancel anytime
               </p>
             </div>
           </div>
@@ -144,7 +144,7 @@ export function PreAccounting() {
             {/* CTA Buttons */}
             <div className="flex gap-6 justify-center">
               <Button asChild className="h-11 px-6 text-sm font-sans">
-                <a href="https://app.abacuslabs.com/">Start free trial</a>
+                <a href="https://app.abacuslabs.co/">Start free trial</a>
               </Button>
               <Button
                 variant="outline"
@@ -158,7 +158,7 @@ export function PreAccounting() {
               </Button>
             </div>
             <p className="text-muted-foreground text-xs font-sans text-center">
-              14-day free trial · Cancel anytime
+              30-day free trial · Cancel anytime
             </p>
           </div>
         </div>

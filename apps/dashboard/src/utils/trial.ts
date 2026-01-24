@@ -9,11 +9,11 @@ export function getTrialDaysLeft(createdAt: string): number {
   // Convert to UTCDate for consistent calculation
   const createdAtDate = new UTCDate(rawCreatedAt);
 
-  // Set trial end date 14 days from creation
-  const trialEndDate = addDays(createdAtDate, 14);
+  // Set trial end date 30 days from creation
+  const trialEndDate = addDays(createdAtDate, 30);
 
   return isSameDay(createdAtDate, today)
-    ? 14
+    ? 30
     : Math.max(0, differenceInDays(trialEndDate, today));
 }
 

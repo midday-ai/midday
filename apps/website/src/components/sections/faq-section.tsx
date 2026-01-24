@@ -9,59 +9,59 @@ interface FAQItem {
 
 const faqs: FAQItem[] = [
   {
-    question: "What is Midday?",
+    question: "What is Abacus?",
     answer:
-      "Midday is a financial workspace for founders and small teams. It brings transactions, receipts, invoices, time tracking, and files into one connected system so you always know what's going on in your business.",
+      "Abacus is the operating system for MCA businesses. It brings your portfolio, payments, merchant data, and risk alerts into one connected system so you always know what's going on with your deals.",
   },
   {
-    question: "Who is Midday for?",
+    question: "Who is Abacus for?",
     answer:
-      "Midday is built for solo founders, freelancers, and small teams who want clarity and control over their business finances without spending time on manual admin or spreadsheets.",
+      "Abacus is built for MCA operators and funders who want clarity and control over their portfolio without spending time on manual admin or spreadsheets.",
   },
   {
-    question: "Do I need financial or accounting knowledge to use Midday?",
+    question: "Do I need financial or accounting knowledge to use Abacus?",
     answer:
-      "No. Midday is designed for day-to-day use by non-financial users. It helps you stay organized, informed, and in control without requiring accounting expertise.",
+      "No. Abacus is designed for day-to-day use by MCA operators. It helps you stay organized, informed, and in control without requiring accounting expertise.",
   },
   {
-    question: "How does Midday connect to my bank?",
+    question: "How does Abacus connect to my bank?",
     answer:
-      "Midday connects to over 25,000 banks worldwide. Once connected, transactions are imported automatically and kept up to date.",
+      "Abacus connects to over 25,000 banks worldwide. Once connected, transactions are imported automatically and kept up to date.",
   },
   {
-    question: "How do receipts and invoices get into Midday?",
+    question: "How do receipts and invoices get into Abacus?",
     answer:
       "Receipts and invoices can be pulled automatically from connected email accounts, synced from existing folders, or uploaded manually. They are then matched to transactions so everything stays organized.",
   },
   {
     question: "What does the Assistant do?",
     answer:
-      "The Assistant helps you understand your business. You can ask questions about revenue, expenses, cash flow, customers, or recent changes and get clear answers, summaries, and reports based on your real data.",
+      "The Assistant helps you understand your portfolio. You can ask questions about payments, merchants, risk trends, or recent changes and get clear answers, summaries, and reports based on your real data.",
   },
   {
     question: "What are weekly updates?",
     answer:
-      "Weekly updates are automatic summaries that highlight what changed in your business and what's worth paying attention to, so you don't have to check everything constantly.",
+      "Weekly updates are automatic summaries that highlight what changed in your portfolio and what's worth paying attention to, so you don't have to check everything constantly.",
   },
   {
-    question: "Can I create invoices in Midday?",
+    question: "Can I create invoices in Abacus?",
     answer:
       "Yes. You can create one-off, recurring, scheduled, and web invoices. Invoice activity is reflected directly in your financial overview.",
   },
   {
-    question: "Does time tracking connect to invoicing?",
+    question: "Can I connect my existing spreadsheet?",
     answer:
-      "Yes. Tracked time can be linked to projects and customers and turned into invoices, keeping work, revenue, and customers connected.",
+      "Yes. Connect your Google Sheet and Abacus will sync your data automatically. Keep using your existing workflow while getting a professional dashboard on top.",
   },
   {
     question: "Can I export my data?",
     answer:
-      "Yes. Your data is always yours. You can export transactions, receipts, invoices, and reports whenever you need, or share them with external tools or collaborators.",
+      "Yes. Your data is always yours. You can export transactions, merchant data, and reports whenever you need, or share them with external tools or collaborators.",
   },
   {
-    question: "Is Midday secure?",
+    question: "Is Abacus secure?",
     answer:
-      "Yes. Midday uses industry-standard security practices to protect your data. You control what gets connected and shared at all times.",
+      "Yes. Abacus uses industry-standard security practices to protect your data. You control what gets connected and shared at all times.",
   },
   {
     question: "Can I change plans later?",
@@ -71,7 +71,7 @@ const faqs: FAQItem[] = [
   {
     question: "Is there a free trial?",
     answer:
-      "Yes. All plans include a 14-day free trial. A credit card is required to get started, and you won't be charged until the trial ends.",
+      "Yes. All plans include a 30-day free trial. A credit card is required to get started, and you won't be charged until the trial ends.",
   },
 ];
 

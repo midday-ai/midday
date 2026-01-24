@@ -8,7 +8,7 @@ export interface TeamEligibilityData {
 /**
  * Checks if a team is eligible for sync operations based on:
  * 1. Teams with starter or pro plan (always eligible)
- * 2. Trial teams created during beta period (within 14 days of creation)
+ * 2. Trial teams created during beta period (within 30 days of creation)
  */
 export function isTeamEligibleForSync(team: TeamEligibilityData): boolean {
   // Pro and starter teams are always eligible
@@ -16,13 +16,13 @@ export function isTeamEligibleForSync(team: TeamEligibilityData): boolean {
     return true;
   }
 
-  // Trial teams are only eligible if created within the beta period (14 days)
+  // Trial teams are only eligible if created within the beta period (30 days)
   if (team.plan === "trial") {
     const teamCreatedAt = new Date(team.created_at);
-    const fourteenDaysAgo = subDays(new Date(), 14);
+    const thirtyDaysAgo = subDays(new Date(), 30);
 
-    // Team is eligible if created within the last 14 days (inclusive)
-    return teamCreatedAt >= fourteenDaysAgo;
+    // Team is eligible if created within the last 30 days (inclusive)
+    return teamCreatedAt >= thirtyDaysAgo;
   }
 
   // All other cases are not eligible

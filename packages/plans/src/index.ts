@@ -37,7 +37,7 @@ export const STRIPE_PRICES = {
     productId: "prod_Tok9GyBgGAPdxZ",
     name: "Starter",
     key: "starter" as const,
-    amount: 39900, // $399 in cents
+    amount: 49900, // $499 in cents
     currency: "usd",
   },
   pro: {

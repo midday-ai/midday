@@ -6,6 +6,9 @@ interface ImageLoaderParams {
 
 const CDN_URL = "https://abacuslabs.com";
 
+// Set to true when Cloudflare Image Resizing is enabled on your plan
+const USE_CLOUDFLARE_CDN = false;
+
 export default function imageLoader({
   src,
   width,
@@ -24,7 +27,7 @@ export default function imageLoader({
     return src;
   }
 
-  // In preview, skip Cloudflare CDN (not available on preview URLs)
+  // In preview, serve from Vercel preview URL
   const isPreview = process.env.NEXT_PUBLIC_VERCEL_ENV === "preview";
   const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL;
 
@@ -35,12 +38,24 @@ export default function imageLoader({
     return src;
   }
 
-  // Production: use Cloudflare CDN transformation
-  if (src.startsWith("/_next")) {
-    return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/${CDN_URL}${src}`;
+  // Production: serve directly (CDN transformation disabled)
+  if (!USE_CLOUDFLARE_CDN) {
+    if (src.startsWith("/")) {
+      return `${CDN_URL}${src}`;
+    }
+    return src;
   }
 
-  if (src.startsWith("/")) {
+  // Production with Cloudflare CDN: use image transformation
+  // SVGs don't need transformation - serve directly
+  if (src.endsWith(".svg")) {
+    if (src.startsWith("/")) {
+      return `${CDN_URL}${src}`;
+    }
+    return src;
+  }
+
+  if (src.startsWith("/_next") || src.startsWith("/")) {
     return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/${CDN_URL}${src}`;
   }
 

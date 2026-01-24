@@ -22,7 +22,7 @@ interface Props {
 
 export const InvoicePaidEmail = ({
   invoiceNumber = "INV-0001",
-  link = "https://app.abacuslabs.com/invoices?invoiceId=40b25275-258c-48e0-9678-57324cd770a6&type=details",
+  link = "https://app.abacuslabs.co/invoices?invoiceId=40b25275-258c-48e0-9678-57324cd770a6&type=details",
 }: Props) => {
   const text = `Invoice ${invoiceNumber} has been paid`;
   const themeClasses = getEmailThemeClasses();

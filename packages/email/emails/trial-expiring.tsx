@@ -72,7 +72,7 @@ export const TrialExpiringEmail = ({ fullName = "" }: Props) => {
             claim it before your trial ends.
           </Text>
           <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href="https://app.abacuslabs.com/settings/billing">
+            <Button href="https://app.abacuslabs.co/settings/billing">
               Claim your discount
             </Button>
           </Section>

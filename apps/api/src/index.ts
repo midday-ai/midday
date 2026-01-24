@@ -71,8 +71,8 @@ app.doc("/openapi", {
       "Abacus is the operating system for Merchant Cash Advance businesses.",
     contact: {
       name: "Abacus Support",
-      email: "support@abacuslabs.com",
-      url: "https://abacuslabs.com",
+      email: "support@abacuslabs.co",
+      url: "https://abacuslabs.co",
     },
     license: {
       name: "AGPL-3.0 license",
@@ -81,7 +81,7 @@ app.doc("/openapi", {
   },
   servers: [
     {
-      url: "https://api.abacuslabs.com",
+      url: "https://api.abacuslabs.co",
       description: "Production API",
     },
   ],

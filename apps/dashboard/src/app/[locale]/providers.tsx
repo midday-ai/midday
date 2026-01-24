@@ -1,6 +1,5 @@
 "use client";
 
-import { DesktopProvider } from "@/components/desktop-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
 import { TRPCReactProvider } from "@/trpc/client";
@@ -15,8 +14,6 @@ export function Providers({ locale, children }: ProviderProps) {
   return (
     <TRPCReactProvider>
       <I18nProviderClient locale={locale}>
-        <DesktopProvider />
-
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

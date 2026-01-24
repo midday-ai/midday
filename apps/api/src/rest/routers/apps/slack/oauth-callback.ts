@@ -237,7 +237,7 @@ app.openapi(
 
         // Build redirect URL to dashboard
         const dashboardUrl =
-          process.env.MIDDAY_DASHBOARD_URL || "https://app.abacuslabs.com";
+          process.env.MIDDAY_DASHBOARD_URL || "https://app.abacuslabs.co";
         const redirectUrl = `${dashboardUrl}/all-done?event=app_oauth_completed`;
 
         return c.redirect(redirectUrl, 302);

@@ -16,7 +16,7 @@ export function IntegrationDetailPage({ app }: Props) {
     .slice(0, 3);
 
   const dashboardUrl = app.active
-    ? `https://app.abacuslabs.com/apps?app=${app.id}`
+    ? `https://app.abacuslabs.co/apps?app=${app.id}`
     : undefined;
 
   return (

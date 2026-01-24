@@ -117,7 +117,7 @@ const appExtensions: Record<
       "Manage invoices",
       "Native Mac experience",
     ],
-    installUrl: "https://abacuslabs.com/download",
+    installUrl: "https://abacuslabs.co/download",
   },
   "google-drive": {
     slug: "google-drive",
@@ -172,7 +172,7 @@ const appExtensions: Record<
       "One-click install via deeplink",
       "27 tools for financial data",
     ],
-    installUrl: "https://abacuslabs.com/mcp/cursor",
+    installUrl: "https://abacuslabs.co/mcp/cursor",
   },
   "claude-mcp": {
     slug: "claude-mcp",
@@ -182,7 +182,7 @@ const appExtensions: Record<
       "Query invoices and reports",
       "Granular permission controls",
     ],
-    installUrl: "https://abacuslabs.com/mcp/claude",
+    installUrl: "https://abacuslabs.co/mcp/claude",
   },
   "raycast-mcp": {
     slug: "raycast-mcp",
@@ -192,7 +192,7 @@ const appExtensions: Record<
       "One-click install via deeplink",
       "@-mention in Raycast AI",
     ],
-    installUrl: "https://abacuslabs.com/mcp/raycast",
+    installUrl: "https://abacuslabs.co/mcp/raycast",
   },
   "chatgpt-mcp": {
     slug: "chatgpt-mcp",
@@ -202,7 +202,7 @@ const appExtensions: Record<
       "Programmatic data access",
       "TypeScript support",
     ],
-    installUrl: "https://abacuslabs.com/mcp/chatgpt",
+    installUrl: "https://abacuslabs.co/mcp/chatgpt",
   },
 };
 

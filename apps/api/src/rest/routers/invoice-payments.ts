@@ -100,7 +100,7 @@ app.openapi(
     });
 
     const dashboardUrl =
-      process.env.MIDDAY_DASHBOARD_URL || "https://app.abacuslabs.com";
+      process.env.MIDDAY_DASHBOARD_URL || "https://app.abacuslabs.co";
     const redirectUri = `${process.env.MIDDAY_API_URL || "https://api.midday.ai"}/invoice-payments/connect-stripe/callback`;
 
     // Build Stripe Connect OAuth URL (Standard accounts)
@@ -183,7 +183,7 @@ app.openapi(
     const db = c.get("db");
     const { code, state, error, error_description } = c.req.valid("query");
     const dashboardUrl =
-      process.env.MIDDAY_DASHBOARD_URL || "https://app.abacuslabs.com";
+      process.env.MIDDAY_DASHBOARD_URL || "https://app.abacuslabs.co";
 
     // Handle OAuth errors
     if (error || !code) {

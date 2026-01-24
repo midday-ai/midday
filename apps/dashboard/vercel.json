@@ -13,7 +13,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://app.abacuslabs.com"
+          "value": "https://app.abacuslabs.co"
         },
         {
           "key": "X-Content-Type-Options",

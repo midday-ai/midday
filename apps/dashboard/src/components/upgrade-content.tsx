@@ -52,7 +52,7 @@ export function UpgradeContent({ user }: UpgradeContentProps) {
           </h1>
           <p className="text-sm text-muted-foreground">
             {firstName ? `Hi ${firstName}, ` : ""}You've been using Midday for
-            14 days. Your trial has ended—choose a plan to continue using all of
+            30 days. Your trial has ended—choose a plan to continue using all of
             Midday's features.
           </p>
         </div>

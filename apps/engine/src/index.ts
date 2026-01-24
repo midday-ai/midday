@@ -31,7 +31,7 @@ app.use(securityMiddleware);
 app.use(loggingMiddleware);
 
 app.get("/", (c) => {
-  return c.redirect("https://abacuslabs.com", 302);
+  return c.redirect("https://abacuslabs.co", 302);
 });
 
 export const appRoutes = app

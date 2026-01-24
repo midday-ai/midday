@@ -43,8 +43,7 @@ export async function middleware(request: NextRequest) {
     !newUrl.pathname.includes("/s/") &&
     !newUrl.pathname.includes("/r/") &&
     !newUrl.pathname.includes("/verify") &&
-    !newUrl.pathname.includes("/all-done") &&
-    !newUrl.pathname.includes("/desktop/search")
+    !newUrl.pathname.includes("/all-done")
   ) {
     const url = new URL("/login", request.url);
 

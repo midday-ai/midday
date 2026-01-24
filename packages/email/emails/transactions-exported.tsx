@@ -23,7 +23,7 @@ interface Props {
 export const TransactionsExportedEmail = ({
   teamName = "Midday",
   transactionCount = 100,
-  downloadLink = "https://app.abacuslabs.com/s/abc123",
+  downloadLink = "https://app.abacuslabs.co/s/abc123",
 }: Props) => {
   const text = `Transaction Export from ${teamName}`;
   const themeClasses = getEmailThemeClasses();

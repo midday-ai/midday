@@ -7,7 +7,6 @@ import eInvoiceApp from "./e-invoice/config";
 import fortnoxApp from "./fortnox/config-client";
 import gmailApp from "./gmail/config-client";
 import googleDriveApp from "./google-drive/config";
-import middayDesktopApp from "./midday-desktop/config";
 import outlookApp from "./outlook/config-client";
 import polarApp from "./polar/config";
 import quickBooksApp from "./quick-books/config-client";

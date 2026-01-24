@@ -23,7 +23,7 @@ interface Props {
 export const InvoiceEmail = ({
   customerName = "Customer",
   teamName = "Midday",
-  link = "https://app.abacuslabs.com/i/1234567890",
+  link = "https://app.abacuslabs.co/i/1234567890",
 }: Props) => {
   const text = `You've Received an Invoice from ${teamName}`;
   const themeClasses = getEmailThemeClasses();

@@ -61,10 +61,10 @@ export class PlaidApi {
 
   #generateWebhookUrl(environment: "sandbox" | "production") {
     if (environment === "sandbox") {
-      return "https://staging.app.abacuslabs.com/api/webhook/plaid";
+      return "https://staging.app.abacuslabs.co/api/webhook/plaid";
     }
 
-    return "https://app.abacuslabs.com/api/webhook/plaid";
+    return "https://app.abacuslabs.co/api/webhook/plaid";
   }
 
   async getHealthCheck() {

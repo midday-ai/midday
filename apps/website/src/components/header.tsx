@@ -680,7 +680,7 @@ export function Header({
               {/* Sign in */}
               <div className="border-l border-border pl-4">
                 <Link
-                  href="https://app.abacuslabs.com/"
+                  href="https://app.abacuslabs.co/"
                   className="text-sm transition-colors text-primary hover:text-primary/80"
                 >
                   Sign in
@@ -985,7 +985,7 @@ export function Header({
               {/* Sign in */}
               <div className="border-t border-border pt-8 mt-8">
                 <Link
-                  href="https://app.abacuslabs.com/"
+                  href="https://app.abacuslabs.co/"
                   onTouchEnd={(e) => {
                     const target = e.currentTarget;
                     if (target) {

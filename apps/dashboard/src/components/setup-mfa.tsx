@@ -52,7 +52,7 @@ export function SetupMfa() {
   return (
     <div>
       <div className="absolute left-5 top-4 md:left-10 md:top-10">
-        <Link href="https://abacuslabs.com">
+        <Link href="https://abacuslabs.co">
           <Icons.LogoSmall />
         </Link>
       </div>

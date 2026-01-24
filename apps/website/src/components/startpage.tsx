@@ -153,7 +153,7 @@ export function StartPage() {
                     asChild
                     className="w-full lg:w-auto btn-inverse h-11 px-5 lg:px-4 transition-colors"
                   >
-                    <a href="https://app.abacuslabs.com/">
+                    <a href="https://app.abacuslabs.co/">
                       <span className="text-inherit text-sm">
                         Set up your business
                       </span>
@@ -163,10 +163,10 @@ export function StartPage() {
 
                 <p className="text-muted-foreground text-xs font-sans">
                   <span className="lg:hidden">
-                    14-day free trial · Cancel anytime
+                    30-day free trial · Cancel anytime
                   </span>
                   <span className="hidden lg:inline">
-                    14-day free trial. Cancel anytime.
+                    30-day free trial. Cancel anytime.
                   </span>
                 </p>
               </div>

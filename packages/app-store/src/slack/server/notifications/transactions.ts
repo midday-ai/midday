@@ -79,7 +79,7 @@ export async function sendSlackTransactionNotifications({
                 type: "plain_text",
                 text: "View transactions",
               },
-              url: "https://app.abacuslabs.com/transactions",
+              url: "https://app.abacuslabs.co/transactions",
               action_id: "button_click",
             },
           ],

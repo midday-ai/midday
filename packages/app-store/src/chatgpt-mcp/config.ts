@@ -21,5 +21,5 @@ export default {
 2. Use the ChatGPT Developer config or MCP SDK
 3. Add your Midday API key and start building`,
   images: [],
-  installUrl: "https://abacuslabs.com/mcp/chatgpt",
+  installUrl: "https://abacuslabs.co/mcp/chatgpt",
 };

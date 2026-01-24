@@ -88,7 +88,7 @@ export async function PdfTemplate(
   let qrCode = null;
 
   if (template.includeQr) {
-    qrCode = await QRCodeUtil.toDataURL(`https://app.abacuslabs.com/i/${token}`, {
+    qrCode = await QRCodeUtil.toDataURL(`https://app.abacuslabs.co/i/${token}`, {
       margin: 0,
       width: 40 * 3,
     });

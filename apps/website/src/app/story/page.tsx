@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Story",
+  title: "Our Story",
   description:
-    "Why we built Midday. Learn about our mission to help founders and small teams stay on top of their business finances without the manual work.",
+    "Why we built Abacus. Learn how we're leveling the playing field for MCA operators, giving mom and pop shops the same tools as the big players.",
 };
 
 export default function StoryPage() {
@@ -16,35 +15,37 @@ export default function StoryPage() {
             {/* Title */}
             <div className="space-y-4 text-center">
               <h1 className="font-serif text-3xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-foreground">
-                Why we started Midday
+                Why we started Abacus
               </h1>
             </div>
 
             {/* Content */}
             <div className="prose prose-sm sm:prose-base max-w-none space-y-8 font-sans text-foreground">
-                {/* The problem */}
+                {/* Where we started */}
                 <section className="space-y-4">
                   <h2 className="font-sans text-base text-foreground">
-                    The problem
+                    Where we started
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Running a business shouldn't require constant checking just
-                    to know where things stand.
+                    We started with two small MCA businesses. Two operators
+                    juggling spreadsheets, chasing payments, and trying to stay
+                    on top of their portfolios the same way everyone else
+                    was — manually.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    After years of running our own companies, we kept running
-                    into the same friction. Time tracking lived in one place.
-                    Invoices in another. Receipts scattered across inboxes and
-                    folders. Transactions buried in bank dashboards. And when
-                    something changed, you often found out too late or only
-                    after digging through numbers.
+                    What struck us wasn't just the inefficiency. It was the gap
+                    between how small operators were forced to work and the
+                    polished, professional experience that larger players could
+                    offer their merchants. The big funds had custom software,
+                    branded portals, and automated workflows. Everyone else had
+                    Google Sheets and a lot of phone calls.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Most tools handling this work focus on individual tasks.
-                    They rarely work together, and even more rarely help you
-                    stay on top of your business without manual effort. The
-                    result is too much context switching, too many tools, and a
-                    constant feeling of being slightly behind.
+                    That didn't seem right. The MCA industry is built on
+                    relationships and hustle, not who can afford a $50,000
+                    software build. We believed the best operators should win on
+                    their ability to serve merchants well — not on their IT
+                    budget.
                   </p>
                 </section>
 
@@ -56,33 +57,31 @@ export default function StoryPage() {
                 {/* The idea */}
                 <section className="space-y-4">
                   <h2 className="font-sans text-base text-foreground">
-                    The idea
+                    Leveling the playing field
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    We didn't want another finance tool. We wanted a system that
-                    works for you.
+                    Abacus exists to give every MCA operator — from a one-person
+                    shop to a growing team — the same tools and experience that
+                    the big players have. Better, actually.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday is built around the idea that your finances should
-                    stay reconciled, explained, and monitored as your business
-                    changes — without you having to constantly check dashboards
-                    or chase updates. Time, invoices, receipts, transactions,
-                    and documents shouldn't live in silos. They should reinforce
-                    each other and reflect what's actually happening.
+                    When a merchant logs into your branded portal to check their
+                    balance and make a payment, they don't know if you're
+                    funding $5 million a year or $500 million. They just see a
+                    professional operation that has their information ready and
+                    makes their life easier.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Instead of pulling information out of the system, Midday
-                    pushes the right information to you. Summaries,
-                    notifications, and clear signals help you understand what's
-                    changed, what needs attention, and what's on track. That
-                    way, you stay informed without living inside financial
-                    software.
+                    That's the experience every MCA operator should be able to
+                    offer. Not because they have deep pockets for custom
+                    development, but because Abacus gives it to them out of the
+                    box.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday doesn't replace your accountant. It sits in between,
-                    keeping everything organized, connected, and ready, so
-                    conversations are easier and decisions are based on
-                    up-to-date information.
+                    We're not just building portfolio software. We're building
+                    the infrastructure that lets any MCA operator run like a
+                    $100 million fund — with the visibility, automation, and
+                    professionalism that used to be reserved for the top tier.
                   </p>
                 </section>
 
@@ -91,58 +90,65 @@ export default function StoryPage() {
                   <div className="h-px w-full max-w-xs border-t border-border" />
                 </div>
 
-                {/* What we're focused on */}
+                {/* A better ecosystem */}
                 <section className="space-y-4">
                   <h2 className="font-sans text-base text-foreground">
-                    What we're focused on
+                    A better ecosystem for everyone
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday is built for founders and small teams who want to
-                    feel on top of their business without spending their time
-                    managing financial admin.
+                    When you can track your portfolio better, you give better
+                    service to your merchants. When your merchants have a better
+                    experience — clear information, easy payments, professional
+                    interactions — everyone wins. The whole ecosystem gets
+                    healthier.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    We focus on:
+                    That's what we're focused on: automation, simplification,
+                    and creating a genuinely good experience for operators and
+                    merchants alike.
                   </p>
-                  <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                    <li>Reducing manual and repetitive work</li>
-                    <li>Keeping financial data consistent and reliable</li>
-                    <li>Surfacing the right information at the right time</li>
-                    <li>
-                      Making it easy to understand what's happening and why
-                    </li>
-                    <li>
-                      Building software that works quietly in the background
-                    </li>
-                  </ul>
-                  <p className="text-muted-foreground leading-relaxed mt-4">
-                    Our goal is simple: when you use Midday, you shouldn't have
-                    to wonder how your business is doing.
-                  </p>
-                  <p className="text-muted-foreground leading-relaxed font-medium">
-                    Your finances should explain themselves.
+                  <p className="text-muted-foreground leading-relaxed">
+                    Less time chasing spreadsheets means more time building
+                    relationships. Less friction for merchants means fewer
+                    problems and faster payments. Better tools mean better
+                    outcomes — for you and everyone you work with.
                   </p>
                 </section>
-            </div>
 
-            {/* Founders Image */}
-            <div className="w-full space-y-3">
-              <Image
-                src="/founders.png"
-                alt="Founders"
-                width={1200}
-                height={450}
-                className="w-full h-[350px] sm:h-[450px] object-cover object-center"
-                priority
-              />
-              <div className="text-left">
-                <p className="font-sans text-sm text-primary">
-                  Pontus & Viktor
-                </p>
-                <p className="font-sans text-sm text-muted-foreground">
-                  Founders, Midday
-                </p>
-              </div>
+                {/* Divider */}
+                <div className="flex items-center justify-center py-8">
+                  <div className="h-px w-full max-w-xs border-t border-border" />
+                </div>
+
+                {/* Where we are now */}
+                <section className="space-y-4">
+                  <h2 className="font-sans text-base text-foreground">
+                    Where we are now
+                  </h2>
+                  <p className="text-muted-foreground leading-relaxed">
+                    What started with two small businesses has slowly expanded
+                    to hundreds of MCA operators using Abacus to manage their
+                    portfolios, serve their merchants, and grow their
+                    businesses.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    We've watched operators go from drowning in spreadsheets to
+                    knowing exactly where they stand at any moment. We've seen
+                    them offer their merchants a professional experience that
+                    builds trust and reduces friction. We've helped them catch
+                    problems early, collect faster, and spend less time on admin
+                    so they can focus on what they do best — funding deals and
+                    building relationships.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Every feature we build comes from this mission: simplify the
+                    MCA experience, so any operator can compete with anyone.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed font-medium">
+                    The best operators should win. We're here to make sure the
+                    tools aren't what's holding you back.
+                  </p>
+                </section>
             </div>
           </div>
         </div>

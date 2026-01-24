@@ -1,8 +1,6 @@
 import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
-import { DesktopHeader } from "@/components/desktop-header";
-import { isDesktopApp } from "@/utils/desktop";
 import { Provider as Analytics } from "@midday/events/client";
 import { Toaster } from "@midday/ui/toaster";
 import type { Metadata } from "next";
@@ -89,22 +87,14 @@ export default async function Layout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const isDesktop = await isDesktopApp();
-
   return (
-    <html
-      lang={locale}
-      suppressHydrationWarning
-      className={cn(isDesktop && "desktop")}
-    >
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={cn(
           `${hedvigSans.variable} ${hedvigSerif.variable} font-sans`,
           "whitespace-pre-line overscroll-none antialiased",
         )}
       >
-        <DesktopHeader />
-
         <NuqsAdapter>
           <Providers locale={locale}>
             {children}

@@ -8,7 +8,7 @@ export function getAppUrl() {
     process.env.VERCEL_ENV === "production" ||
     process.env.NODE_ENV === "production"
   ) {
-    return "https://app.abacuslabs.com";
+    return "https://app.abacuslabs.co";
   }
 
   if (process.env.VERCEL_ENV === "preview") {
@@ -23,7 +23,7 @@ export function getEmailUrl() {
     return "http://localhost:3000";
   }
 
-  return "https://abacuslabs.com";
+  return "https://abacuslabs.co";
 }
 
 export function getWebsiteUrl() {
@@ -31,7 +31,7 @@ export function getWebsiteUrl() {
     process.env.VERCEL_ENV === "production" ||
     process.env.NODE_ENV === "production"
   ) {
-    return "https://abacuslabs.com";
+    return "https://abacuslabs.co";
   }
 
   if (process.env.VERCEL_ENV === "preview") {

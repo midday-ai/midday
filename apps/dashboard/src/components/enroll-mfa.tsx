@@ -58,7 +58,7 @@ export function EnrollMFA() {
     async function enroll() {
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
-        issuer: "app.abacuslabs.com",
+        issuer: "app.abacuslabs.co",
       });
 
       if (error || !data) {

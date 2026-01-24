@@ -368,7 +368,7 @@ export function PortalContent({ portalId }: Props) {
       {/* Footer */}
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a
-          href="https://abacuslabs.com?utm_source=customer-portal"
+          href="https://abacuslabs.co?utm_source=customer-portal"
           target="_blank"
           rel="noreferrer"
           className="text-[9px] text-[#878787]"

@@ -4,7 +4,7 @@ interface ImageLoaderParams {
   quality?: number;
 }
 
-const CDN_URL = "https://abacuslabs.com";
+const CDN_URL = "https://abacuslabs.co";
 
 export default function imageLoader({
   src,
@@ -36,7 +36,7 @@ export default function imageLoader({
 
   // Existing logic for other URLs
   if (src.startsWith("/_next")) {
-    return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/https://app.abacuslabs.com${src}`;
+    return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/https://app.abacuslabs.co${src}`;
   }
   return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/${src}`;
 }

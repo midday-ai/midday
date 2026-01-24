@@ -9,7 +9,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Updates",
   description:
-    "The latest updates and improvements to Midday. See what we've been building to help you manage your business finances better.",
+    "The latest updates and improvements to Abacus. See what we've been building to help you manage your MCA portfolio.",
 };
 
 // Force static generation

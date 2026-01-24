@@ -144,7 +144,7 @@ export function MCPRaycast() {
                 <code className="font-mono">YOUR_API_KEY</code> in Raycast's MCP
                 server settings with your{" "}
                 <Link
-                  href="https://app.abacuslabs.com/settings/developer"
+                  href="https://app.abacuslabs.co/settings/developer"
                   className="underline hover:text-foreground"
                 >
                   API key
@@ -188,7 +188,7 @@ export function MCPRaycast() {
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
                     Get an API key from{" "}
                     <Link
-                      href="https://app.abacuslabs.com/settings/developer"
+                      href="https://app.abacuslabs.co/settings/developer"
                       className="underline hover:text-foreground"
                     >
                       Settings → Developer
