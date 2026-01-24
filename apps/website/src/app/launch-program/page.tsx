@@ -164,7 +164,7 @@ export default function LaunchProgramPage() {
                 className="btn-inverse font-sans text-sm py-3 px-8 transition-colors"
               >
                 <Link
-                  href="https://cal.com/abacus/implementation"
+                  href="https://cal.com/abacus-labs"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
