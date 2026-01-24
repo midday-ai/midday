@@ -35,13 +35,13 @@ const hedvigSerif = Hedvig_Letters_Serif({
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "The Operating System for MCA Businesses | Abacus",
+    default: "Abacus",
     template: "%s | Abacus",
   },
   description:
     "Abacus is the operating system for Merchant Cash Advance businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
   openGraph: {
-    title: "The Operating System for MCA Businesses | Abacus",
+    title: "Abacus",
     description:
       "Abacus is the operating system for Merchant Cash Advance businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
     url: baseUrl,
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    title: "The Operating System for MCA Businesses | Abacus",
+    title: "Abacus",
     description:
       "Abacus is the operating system for Merchant Cash Advance businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
     images: [
