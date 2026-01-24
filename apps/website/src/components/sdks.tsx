@@ -274,10 +274,10 @@ export function SDKs() {
             {/* Title and Description */}
             <div className="space-y-4 text-center max-w-xl w-full">
               <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground">
-                Build with Midday
+                Build with Abacus
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Use Midday's SDKs to integrate financial data, insights, and
+                Use Abacus's SDKs to integrate financial data, insights, and
                 workflows into your product with just a few lines of code.
               </p>
             </div>
@@ -295,7 +295,7 @@ export function SDKs() {
                 variant="outline"
                 className="w-full sm:w-auto h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
               >
-                <Link href="https://api.midday.ai">API documentation</Link>
+                <Link href="https://api.abacuslabs.co">API documentation</Link>
               </Button>
             </div>
           </div>
@@ -353,10 +353,10 @@ export function SDKs() {
             {/* Title and Description */}
             <div className="text-center space-y-4 w-full">
               <h1 className="font-serif text-6xl xl:text-7xl 2xl:text-8xl leading-tight text-foreground">
-                Build with Midday
+                Build with Abacus
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-xl mx-auto font-sans text-center">
-                Use Midday's SDKs to integrate financial data, insights, and
+                Use Abacus's SDKs to integrate financial data, insights, and
                 workflows into your product with just a few lines of code.
               </p>
             </div>
@@ -371,7 +371,7 @@ export function SDKs() {
                 variant="outline"
                 className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
               >
-                <Link href="https://api.midday.ai">API documentation</Link>
+                <Link href="https://api.abacuslabs.co">API documentation</Link>
               </Button>
             </div>
           </div>
@@ -874,7 +874,7 @@ if ($response->object !== null) {
                 </p>
               </Link>
               <Link
-                href="https://api.midday.ai"
+                href="https://api.abacuslabs.co"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"

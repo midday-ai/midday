@@ -76,10 +76,10 @@ function CodeBlock({
 
 // Raycast config for deeplink
 const raycastConfig = {
-  name: "midday",
+  name: "abacus",
   type: "stdio",
   command: "npx",
-  args: ["-y", "mcp-remote", "https://api.midday.ai/mcp"],
+  args: ["-y", "mcp-remote", "https://api.abacuslabs.co/mcp"],
   env: {
     MCP_AUTH_HEADER: "Bearer YOUR_API_KEY",
   },

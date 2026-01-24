@@ -98,7 +98,7 @@ app.openAPIRegistry.registerComponent("securitySchemes", "token", {
   type: "http",
   scheme: "bearer",
   description: "Default authentication mechanism",
-  "x-speakeasy-example": "MIDDAY_API_KEY",
+  "x-speakeasy-example": "ABACUS_API_KEY",
 });
 
 app.get(

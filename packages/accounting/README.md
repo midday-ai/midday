@@ -467,17 +467,17 @@ updateSyncedAttachmentMapping(db, {
 # Xero
 XERO_CLIENT_ID=your_client_id
 XERO_CLIENT_SECRET=your_client_secret
-XERO_OAUTH_REDIRECT_URL=https://api.midday.ai/v1/apps/xero/oauth-callback
+XERO_OAUTH_REDIRECT_URL=https://api.abacuslabs.co/v1/apps/xero/oauth-callback
 
 # QuickBooks
 QUICKBOOKS_CLIENT_ID=your_client_id
 QUICKBOOKS_CLIENT_SECRET=your_client_secret
-QUICKBOOKS_OAUTH_REDIRECT_URL=https://api.midday.ai/v1/apps/quickbooks/oauth-callback
+QUICKBOOKS_OAUTH_REDIRECT_URL=https://api.abacuslabs.co/v1/apps/quickbooks/oauth-callback
 
 # Fortnox
 FORTNOX_CLIENT_ID=your_client_id
 FORTNOX_CLIENT_SECRET=your_client_secret
-FORTNOX_OAUTH_REDIRECT_URL=https://api.midday.ai/v1/apps/fortnox/oauth-callback
+FORTNOX_OAUTH_REDIRECT_URL=https://api.abacuslabs.co/v1/apps/fortnox/oauth-callback
 
 # OAuth state encryption
 ACCOUNTING_OAUTH_SECRET=32_byte_encryption_key

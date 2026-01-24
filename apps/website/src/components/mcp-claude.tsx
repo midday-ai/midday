@@ -83,7 +83,7 @@ export function MCPClaude() {
 
   const cliCommand = useMemo(() => {
     const key = apiKey || "YOUR_API_KEY";
-    return `claude mcp add --transport http midday https://api.midday.ai/mcp --header "Authorization: Bearer ${key}"`;
+    return `claude mcp add --transport http abacus https://api.abacuslabs.co/mcp --header "Authorization: Bearer ${key}"`;
   }, [apiKey]);
 
   const desktopConfig = useMemo(() => {
@@ -91,9 +91,9 @@ export function MCPClaude() {
     return JSON.stringify(
       {
         mcpServers: {
-          midday: {
+          abacus: {
             command: "npx",
-            args: ["-y", "mcp-remote", "https://api.midday.ai/mcp"],
+            args: ["-y", "mcp-remote", "https://api.abacuslabs.co/mcp"],
             env: {
               MCP_AUTH_HEADER: `Bearer ${key}`,
             },
@@ -277,7 +277,7 @@ export function MCPClaude() {
                   </span>
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
                     {activeTab === "code"
-                      ? "Use @midday in Claude Code to access your data"
+                      ? "Use @abacus in Claude Code to access your data"
                       : "Restart Claude Desktop and use Midday tools"}
                   </span>
                 </li>

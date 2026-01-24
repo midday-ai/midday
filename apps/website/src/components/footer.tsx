@@ -47,6 +47,7 @@ export function Footer() {
               <div className="space-y-2.5">
                 {[
                   { href: "/pricing", label: "Pricing" },
+                  { href: "/launch-program", label: "Launch Program" },
                   { href: "/download", label: "Download" },
                   { href: "/pre-accounting", label: "Pre-accounting" },
                   { href: "/integrations", label: "Apps & Integrations" },
@@ -103,7 +104,7 @@ export function Footer() {
               <div className="space-y-2.5">
                 {[
                   {
-                    href: "https://api.midday.ai",
+                    href: "https://api.abacuslabs.co",
                     label: "API",
                     external: true,
                   },

@@ -85,11 +85,11 @@ export function MCPChatGPT() {
     return JSON.stringify(
       {
         mcpServers: {
-          midday: {
+          abacus: {
             command: "npx",
             args: [
               "mcp-remote@latest",
-              "https://api.midday.ai/mcp",
+              "https://api.abacuslabs.co/mcp",
               "--header",
               "Authorization:${AUTH_HEADER}",
             ],
@@ -110,7 +110,7 @@ export function MCPChatGPT() {
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 const transport = new StreamableHTTPClientTransport({
-  url: "https://api.midday.ai/mcp",
+  url: "https://api.abacuslabs.co/mcp",
   headers: {
     Authorization: "Bearer ${key}",
   },

@@ -338,7 +338,7 @@ export function PaymentModal({
     setError(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.midday.ai";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.abacuslabs.co";
 
       const response = await fetch(
         `${apiUrl}/invoice-payments/payment-intent`,

@@ -195,12 +195,12 @@ Dashboard and Website have different:
 ```
 FRONTEND (React/Next.js)
   └── Vercel
-      ├── Dashboard → app.midday.ai
-      └── Website → midday.ai
+      ├── Dashboard → app.abacuslabs.co
+      └── Website → abacuslabs.co
 
 BACKEND (Bun/Hono)
   └── Fly.io (via Docker)
-      ├── API → api.midday.ai
+      ├── API → api.abacuslabs.co
       └── Worker → (internal)
 
 DATA

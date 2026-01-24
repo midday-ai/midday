@@ -1,21 +1,21 @@
 ---
 title: "MCP Server"
-description: "Connect AI assistants to Midday using the Model Context Protocol"
+description: "Connect AI assistants to Abacus using the Model Context Protocol"
 ---
 
 # MCP Server
 
-Midday exposes a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that allows AI assistants like Claude, OpenAI, and Cursor to interact with your financial data.
+Abacus exposes a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that allows AI assistants like Claude, OpenAI, and Cursor to interact with your financial data.
 
 ## Endpoint
 
 ```
-POST https://api.midday.ai/mcp
+POST https://api.abacuslabs.co/mcp
 ```
 
 ## Authentication
 
-The MCP endpoint requires authentication using your Midday API key. Include it in the `Authorization` header:
+The MCP endpoint requires authentication using your Abacus API key. Include it in the `Authorization` header:
 
 ```
 Authorization: Bearer mid_your_api_key
@@ -23,7 +23,7 @@ Authorization: Bearer mid_your_api_key
 
 ### Getting an API Key
 
-1. Go to **Settings → Developer** in the Midday dashboard
+1. Go to **Settings → Developer** in the Abacus dashboard
 2. Click **Create API Key**
 3. Choose the appropriate scope (Full Access, Read Only, or Restricted)
 4. Copy and securely store the generated key
@@ -143,9 +143,9 @@ Resources provide static or semi-static data that AI can reference without makin
 
 | Resource URI | Description |
 |--------------|-------------|
-| `midday://team/info` | Current team information including name and base currency |
-| `midday://categories` | List of all transaction categories with hierarchy and colors |
-| `midday://tags` | List of custom tags used for organizing data |
+| `abacus://team/info` | Current team information including name and base currency |
+| `abacus://categories` | List of all transaction categories with hierarchy and colors |
+| `abacus://tags` | List of custom tags used for organizing data |
 
 ## Prompts
 
@@ -182,7 +182,7 @@ All tools include MCP annotations to help AI assistants make better decisions:
 - `readOnlyHint: true/false` - Indicates whether the tool only reads data or can modify it
 - `destructiveHint: true/false` - Indicates whether the tool can delete data (e.g., `customers_delete`, `invoices_delete`)
 - `idempotentHint: true/false` - Indicates whether the tool can be called multiple times with the same result
-- `openWorldHint: false` - All tools operate only on your Midday data
+- `openWorldHint: false` - All tools operate only on your Abacus data
 
 Write tools (those with `readOnlyHint: false`) require the corresponding `.write` scope.
 
@@ -195,10 +195,10 @@ Add to `~/.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "midday": {
-      "url": "https://api.midday.ai/mcp",
+    "abacus": {
+      "url": "https://api.abacuslabs.co/mcp",
       "headers": {
-        "Authorization": "Bearer mid_your_api_key"
+        "Authorization": "Bearer YOUR_API_KEY"
       }
     }
   }
@@ -212,11 +212,11 @@ Add to your Claude Desktop config (requires [mcp-remote](https://www.npmjs.com/p
 ```json
 {
   "mcpServers": {
-    "midday": {
+    "abacus": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://api.midday.ai/mcp"],
+      "args": ["-y", "mcp-remote", "https://api.abacuslabs.co/mcp"],
       "env": {
-        "MCP_AUTH_HEADER": "Bearer mid_your_api_key"
+        "MCP_AUTH_HEADER": "Bearer YOUR_API_KEY"
       }
     }
   }
@@ -232,9 +232,9 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 const transport = new StreamableHTTPClientTransport({
-  url: "https://api.midday.ai/mcp",
+  url: "https://api.abacuslabs.co/mcp",
   headers: {
-    Authorization: "Bearer mid_your_api_key",
+    Authorization: "Bearer YOUR_API_KEY",
   },
 });
 

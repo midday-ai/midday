@@ -75,18 +75,18 @@ function CodeBlock({
 
 // Pre-computed deeplink with placeholder token
 const cursorConfig = {
-  url: "https://api.midday.ai/mcp",
+  url: "https://api.abacuslabs.co/mcp",
   headers: {
     Authorization: "Bearer YOUR_API_KEY",
   },
 };
-const cursorDeepLink = `cursor://anysphere.cursor-deeplink/mcp/install?name=midday&config=${encodeURIComponent(btoa(JSON.stringify(cursorConfig)))}`;
+const cursorDeepLink = `cursor://anysphere.cursor-deeplink/mcp/install?name=abacus&config=${encodeURIComponent(btoa(JSON.stringify(cursorConfig)))}`;
 
 const manualConfig = JSON.stringify(
   {
     mcpServers: {
-      midday: {
-        url: "https://api.midday.ai/mcp",
+      abacus: {
+        url: "https://api.abacuslabs.co/mcp",
         headers: {
           Authorization: "Bearer YOUR_API_KEY",
         },
