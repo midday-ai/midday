@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
+import Link from "next/link";
 
 export function PricingSection() {
   return (
@@ -192,6 +193,34 @@ export function PricingSection() {
                 <p className="font-sans text-xs text-muted-foreground text-center">
                   Best value for most businesses
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Launch Program */}
+        <div className="max-w-2xl mx-auto mt-14">
+          <div className="bg-background backdrop-blur-[43px] border border-border p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+              <div className="space-y-2">
+                <h3 className="font-sans text-base text-foreground">
+                  Launch Program
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground leading-relaxed max-w-md">
+                  Want us to handle everything? We'll migrate your data, set up
+                  your dashboard, and train your team — all in 30 days.
+                </p>
+                <p className="font-sans text-sm text-foreground">
+                  Custom pricing
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <Button
+                  asChild
+                  className="w-full sm:w-auto bg-background border border-border text-foreground font-sans text-sm py-3 px-6 hover:bg-muted transition-colors"
+                >
+                  <Link href="/launch-program">Learn more</Link>
+                </Button>
               </div>
             </div>
           </div>

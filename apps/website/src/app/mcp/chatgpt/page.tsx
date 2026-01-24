@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "MCP for ChatGPT",
   description:
-    "Build custom ChatGPT integrations with Midday using the MCP SDK. Connect OpenAI-powered apps to your financial data.",
+    "Build custom ChatGPT integrations with Abacus using the MCP SDK. Connect OpenAI-powered apps to your financial data.",
 };
 
 export default function Page() {

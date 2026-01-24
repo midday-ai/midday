@@ -2,8 +2,6 @@ import { useAppOAuth } from "@/hooks/use-app-oauth";
 import { useTRPC } from "@/trpc/client";
 import { getScopeDescription } from "@/utils/scopes";
 import type { UnifiedApp } from "@midday/app-store/types";
-import { openUrl } from "@midday/desktop-client/core";
-import { isDesktopApp } from "@midday/desktop-client/platform";
 import { createClient } from "@midday/supabase/client";
 import {
   Accordion,
@@ -225,13 +223,9 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
         return;
       }
 
-      // Handle apps with installUrl (like Midday Desktop download page)
+      // Handle apps with installUrl
       if (app.installUrl) {
-        if (isDesktopApp()) {
-          openUrl(app.installUrl);
-        } else {
-          window.open(app.installUrl, "_blank");
-        }
+        window.open(app.installUrl, "_blank");
         setLoading(false);
         return;
       }
@@ -328,7 +322,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
               onClick={handleOnInitialize}
               disabled={!app.active}
             >
-              {app.id === "midday-desktop" ? "Download" : "Install"}
+              Install
             </Button>
           ) : app.installed ? (
             <SubmitButton
@@ -418,7 +412,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                     disabled={!app.active}
                     isSubmitting={isInstalling}
                   >
-                    {app.id === "midday-desktop" ? "Download" : "Install"}
+                    Install
                   </SubmitButton>
                 )}
               </div>

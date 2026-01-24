@@ -33,17 +33,17 @@ const hedvigSerif = Hedvig_Letters_Serif({
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Run your business finances without manual work | Midday",
-    template: "%s | Midday",
+    default: "The Operating System for MCA Businesses | Abacus",
+    template: "%s | Abacus",
   },
   description:
-    "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
+    "Abacus is the operating system for Merchant Cash Advance businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
   openGraph: {
-    title: "Run your business finances without manual work | Midday",
+    title: "The Operating System for MCA Businesses | Abacus",
     description:
-      "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
+      "Abacus is the operating system for Merchant Cash Advance businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
     url: baseUrl,
-    siteName: "Midday",
+    siteName: "Abacus",
     locale: "en_US",
     type: "website",
     images: [
@@ -60,9 +60,9 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    title: "Run your business finances without manual work | Midday",
+    title: "The Operating System for MCA Businesses | Abacus",
     description:
-      "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
+      "Abacus is the operating system for Merchant Cash Advance businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image-v1.jpg",

@@ -170,48 +170,6 @@ const formatGroupName = (name: string): string | null => {
   }
 };
 
-// Add desktop navigation function
-const handleDesktopNavigation = async (
-  path: string,
-  params?: Record<string, any>,
-) => {
-  if (!isDesktopApp()) return false;
-
-  try {
-    // Step 1: Get the main window first to check its current path
-    const mainWindow = await Window.getByLabel("main");
-
-    if (!mainWindow) {
-      console.error("Main window not found for navigation");
-      return false;
-    }
-
-    // Step 2: Close search window
-    await emit("search-window-close-requested");
-
-    // Step 3: Show and focus main window
-    await invoke("show_window");
-
-    // Step 4: Navigate in main window context
-    // If we have params, we need to use the main window's current path
-    // If it's a full path (like /inbox?inboxId=...), use it directly
-    if (params && Object.keys(params).length > 0) {
-      // For param navigation, we want to stay on the current main window page
-      // but we can't easily get the main window's current path from here
-      // So let's send a special signal to navigate with params on current page
-      await mainWindow.emit("desktop-navigate-with-params", { params });
-    } else {
-      // For full path navigation, use the path directly
-      await mainWindow.emit("desktop-navigate", { path, params });
-    }
-
-    return true;
-  } catch (error) {
-    console.error("Failed to handle desktop navigation:", error);
-    return false;
-  }
-};
-
 const useSearchNavigation = () => {
   const router = useRouter();
   const { setOpen } = useSearchStore();
@@ -221,64 +179,31 @@ const useSearchNavigation = () => {
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setDocumentParams } = useDocumentParams();
 
-  const shouldUseWebNavigation = async () => {
-    if (!isDesktopApp()) {
-      return true;
-    }
-
-    try {
-      const currentWindow = await Window.getCurrent();
-      const currentLabel = currentWindow.label;
-      return currentLabel === "main";
-    } catch (error) {
-      console.error("Failed to get current window label:", error);
-      return false;
-    }
-  };
-
-  const navigateWithParams = async (
+  const navigateWithParams = (
     params: Record<string, any>,
     paramSetter: (params: any) => void,
   ) => {
-    const useWebNav = await shouldUseWebNavigation();
-
-    if (useWebNav) {
-      // Web mode - use traditional navigation
-      setOpen();
-      paramSetter(params);
-      return;
-    }
-
-    // Desktop mode - use params-only navigation to stay on current main window page
-    await handleDesktopNavigation("", params);
+    setOpen();
+    paramSetter(params);
   };
 
-  const navigateToPath = async (path: string) => {
-    const useWebNav = await shouldUseWebNavigation();
-
-    if (useWebNav) {
-      // Web mode - use traditional navigation
-      setOpen();
-      router.push(path);
-      return;
-    }
-
-    // Desktop mode - use full path navigation
-    await handleDesktopNavigation(path);
+  const navigateToPath = (path: string) => {
+    setOpen();
+    router.push(path);
   };
 
   return {
     navigateToDocument: (params: { documentId: string }) => {
-      return navigateWithParams(params, setDocumentParams);
+      navigateWithParams(params, setDocumentParams);
     },
     navigateToCustomer: (params: { customerId: string }) => {
-      return navigateWithParams(params, setCustomerParams);
+      navigateWithParams(params, setCustomerParams);
     },
     navigateToInvoice: (params: {
       invoiceId: string;
       type: "details" | "create" | "edit" | "success";
     }) => {
-      return navigateWithParams(params, setInvoiceParams);
+      navigateWithParams(params, setInvoiceParams);
     },
     navigateToTracker: (params: {
       projectId?: string;
@@ -286,35 +211,35 @@ const useSearchNavigation = () => {
       create?: boolean;
       selectedDate?: string;
     }) => {
-      return navigateWithParams(params, setTrackerParams);
+      navigateWithParams(params, setTrackerParams);
     },
     navigateToTransaction: (params: {
       transactionId?: string;
       createTransaction?: boolean;
     }) => {
-      return navigateWithParams(params, setTransactionParams);
+      navigateWithParams(params, setTransactionParams);
     },
     navigateToPath: (path: string) => {
-      return navigateToPath(path);
+      navigateToPath(path);
     },
     // Action helpers
     createInvoice: () => {
-      return navigateWithParams({ type: "create" as const }, setInvoiceParams);
+      navigateWithParams({ type: "create" as const }, setInvoiceParams);
     },
     createCustomer: (params = { createCustomer: true }) => {
-      return navigateWithParams(params, setCustomerParams);
+      navigateWithParams(params, setCustomerParams);
     },
     createTransaction: () => {
-      return navigateWithParams(
+      navigateWithParams(
         { createTransaction: true },
         setTransactionParams,
       );
     },
     createProject: () => {
-      return navigateWithParams({ create: true }, setTrackerParams);
+      navigateWithParams({ create: true }, setTrackerParams);
     },
     trackTime: () => {
-      return navigateWithParams(
+      navigateWithParams(
         { selectedDate: formatISO(new Date(), { representation: "date" }) },
         setTrackerParams,
       );
@@ -568,38 +493,13 @@ export function Search() {
     "esc",
     () => {
       setDebouncedSearch("");
-      emit("search-window-close-requested");
     },
     {
       enableOnFormTags: true,
     },
   );
 
-  useEffect(() => {
-    if (!isDesktopApp()) {
-      return;
-    }
-
-    const unlistenPromise = listen("search-window-open", (event) => {
-      const isOpen = event.payload as boolean;
-      if (isOpen) {
-        // Refetch timer status to get the most up-to-date information
-        refetchTimerStatus();
-
-        // Focus the search input field when window opens
-        setTimeout(() => {
-          searchInputRef.current?.focus();
-        }, 100); // Small delay to ensure window is fully rendered
-      }
-    });
-
-    // Cleanup function
-    return () => {
-      unlistenPromise.then((unlisten) => unlisten());
-    };
-  }, [refetchTimerStatus]);
-
-  // Refetch timer status when search component mounts (for both desktop and web)
+  // Refetch timer status when search component mounts
   useEffect(() => {
     refetchTimerStatus();
   }, [refetchTimerStatus]);
@@ -795,7 +695,7 @@ export function Search() {
   ]);
 
   useEffect(() => {
-    if (height.current && ref.current && !isDesktopApp()) {
+    if (height.current && ref.current) {
       const el = height.current;
       const wrapper = ref.current;
       let animationFrame: number;

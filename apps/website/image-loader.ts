@@ -4,7 +4,7 @@ interface ImageLoaderParams {
   quality?: number;
 }
 
-const CDN_URL = "https://abacuslabs.com";
+const CDN_URL = "https://abacuslabs.co";
 
 // Set to true when Cloudflare Image Resizing is enabled on your plan
 const USE_CLOUDFLARE_CDN = false;

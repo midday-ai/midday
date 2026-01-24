@@ -16,6 +16,10 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
         </div>
 
         <div className="flex space-x-4">
+          <Link href="/">
+            <Button variant="outline">Go home</Button>
+          </Link>
+
           <Button onClick={() => reset()} variant="outline">
             Try again
           </Button>

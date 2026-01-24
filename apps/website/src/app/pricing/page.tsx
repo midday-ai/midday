@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Simple, transparent pricing for Midday. Start free and upgrade as you grow. One plan for all your business finance needs.",
+    "Simple, transparent pricing for Abacus. Start free and upgrade as you grow. The operating system for MCA businesses.",
 };
 
 export default function Page() {

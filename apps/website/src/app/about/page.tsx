@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "About Midday. Learn more about the team and company behind your AI-powered business assistant.",
+    "About Abacus. Learn more about the team and company behind the operating system for MCA businesses.",
 };
 
 export default function AboutPage() {

@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "MCP for Cursor",
   description:
-    "Connect Cursor to your Midday data via MCP. Access transactions, invoices, and reports while you code.",
+    "Connect Cursor to your Abacus data via MCP. Access transactions, invoices, and reports while you code.",
 };
 
 export default function Page() {

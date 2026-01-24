@@ -200,6 +200,20 @@ This project has MCP (Model Context Protocol) servers and CLIs configured. **Alw
 | **Vercel CLI** | Deploy, view logs, project setup | Vercel Dashboard |
 | **GitHub CLI (`gh`)** | PRs, issues, repo operations | GitHub web interface |
 
+### Vercel Project Configuration
+
+**IMPORTANT**: This workspace has two Vercel projects. Do NOT create new projects.
+
+| App | Vercel Project | Domain | Project ID |
+|-----|----------------|--------|------------|
+| `apps/dashboard/` | **abacus-dashboard** | app.abacuslabs.co | `prj_OZKy4pLE8OALMg1HqdzQtsnJsO3f` |
+| `apps/website/` | **abacus-website** | abacuslabs.co | `prj_A8jkBFwGykJh8k8IB42KUpKw6yKr` |
+
+Each app has a `.vercel/project.json` file that links it to the correct project. When deploying:
+- **Always use the existing projects** — never create new ones
+- **Use explicit project flags**: `vercel --project=abacus-dashboard` or `vercel --project=abacus-website`
+- **If prompted to create a new project, select "Link to existing project" and choose the correct one**
+
 ### When to Use Each
 
 ```

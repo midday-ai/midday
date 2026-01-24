@@ -28,7 +28,7 @@ export default function CreateTeam() {
             <h1 className="text-lg mb-2 font-serif">Setup your team</h1>
             <p className="text-[#878787] text-sm mb-8">
               Add your company name, country and currency. We’ll use this to
-              personalize your experience in Midday.
+              personalize your experience in Abacus.
             </p>
           </div>
 
