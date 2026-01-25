@@ -4,6 +4,7 @@ import "@midday/ui/globals.css";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { NewVersionChecker } from "@/components/new-version-toast";
+import { StatsigProvider } from "@/components/statsig-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@midday/ui/toaster";
 import { Provider as Analytics } from "@midday/events/client";
@@ -111,21 +112,23 @@ export default function Layout({ children }: { children: ReactElement }) {
           "bg-background overflow-x-hidden font-sans antialiased",
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Header />
-          <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
-            {children}
-          </main>
-          <Footer />
-          <Analytics />
-          <Toaster />
-          <NewVersionChecker />
-        </ThemeProvider>
+        <StatsigProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Header />
+            <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
+              {children}
+            </main>
+            <Footer />
+            <Analytics />
+            <Toaster />
+            <NewVersionChecker />
+          </ThemeProvider>
+        </StatsigProvider>
       </body>
     </html>
   );
