@@ -11,6 +11,7 @@ import { HeaderIntegrationsPreview } from "./header-integrations-preview";
 // Get the dashboard app URL from environment or use production URL
 const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL || "https://app.abacuslabs.co";
+const LOGIN_URL = `${APP_URL}/login`;
 
 interface HeaderProps {
   transparent?: boolean;
@@ -655,7 +656,7 @@ export function Header({
               {/* Sign in */}
               <div className="border-l border-border pl-4">
                 <Link
-                  href={APP_URL}
+                  href={LOGIN_URL}
                   className="text-sm transition-colors text-primary hover:text-primary/80"
                 >
                   Sign in
@@ -927,7 +928,7 @@ export function Header({
               {/* Sign in */}
               <div className="border-t border-border pt-8 mt-8">
                 <Link
-                  href={APP_URL}
+                  href={LOGIN_URL}
                   onTouchEnd={(e) => {
                     const target = e.currentTarget;
                     if (target) {
