@@ -4,7 +4,7 @@ import { Button } from "@midday/ui/button";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { useHeroExperiment } from "@/hooks/use-hero-experiment";
+import { HERO_TEXT } from "@/hooks/use-hero-experiment";
 
 // Dynamic imports for animations (5,500+ lines - loaded after hero)
 const AIAssistantAnimation = dynamic(() =>
@@ -100,7 +100,6 @@ export function StartPage() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isPosterLoaded, setIsPosterLoaded] = useState(false);
-  const { variant, isLoading: isExperimentLoading } = useHeroExperiment();
 
   const videoContainerRef = useRef(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -135,21 +134,13 @@ export function StartPage() {
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end w-full space-y-8 lg:space-y-0">
               <div className="space-y-4 lg:space-y-3 text-center lg:text-left max-w-xl mx-auto lg:mx-0 px-2 lg:px-0">
                 <h1 className="font-serif text-3xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3]">
-                  <span
-                    className={`text-foreground transition-opacity duration-200 ${
-                      isExperimentLoading ? "opacity-0" : "opacity-100"
-                    }`}
-                  >
-                    {variant.headline}
+                  <span className="text-foreground">
+                    {HERO_TEXT.headline}
                   </span>
                 </h1>
 
-                <p
-                  className={`text-muted-foreground text-base leading-normal font-sans max-w-md lg:max-w-none text-center mx-auto lg:text-left lg:mx-0 transition-opacity duration-200 ${
-                    isExperimentLoading ? "opacity-0" : "opacity-100"
-                  }`}
-                >
-                  {variant.subheadline}
+                <p className="text-muted-foreground text-base leading-normal font-sans max-w-md lg:max-w-none text-center mx-auto lg:text-left lg:mx-0">
+                  {HERO_TEXT.subheadline}
                 </p>
               </div>
 
