@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // 1. Not authenticated
+  // 1. Not authenticated - redirect to login
   if (
     !session &&
     newUrl.pathname !== "/login" &&
@@ -43,7 +43,9 @@ export async function middleware(request: NextRequest) {
     !newUrl.pathname.includes("/s/") &&
     !newUrl.pathname.includes("/r/") &&
     !newUrl.pathname.includes("/verify") &&
-    !newUrl.pathname.includes("/all-done")
+    !newUrl.pathname.includes("/all-done") &&
+    !newUrl.pathname.includes("/forgot-password") &&
+    !newUrl.pathname.includes("/reset-password")
   ) {
     const url = new URL("/login", request.url);
 
@@ -52,6 +54,11 @@ export async function middleware(request: NextRequest) {
     }
 
     return NextResponse.redirect(url);
+  }
+
+  // 2. Already authenticated - redirect away from login page to dashboard
+  if (session && newUrl.pathname === "/login") {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   // If authenticated, proceed with other checks
