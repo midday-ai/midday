@@ -258,7 +258,7 @@ function formatChangeCompact(
     return "(steady)";
   }
 
-  const sign = direction === "up" ? "+" : "";
+  const sign = direction === "up" ? "+" : "-";
   return `(${sign}${Math.round(change)}%)`;
 }
 

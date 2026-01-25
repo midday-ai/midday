@@ -240,8 +240,8 @@ export class ContentGenerator {
     Array<{
       text: string;
       type?: string;
-      invoiceId?: string;
-      projectId?: string;
+      entityType?: "invoice" | "project" | "customer" | "transaction";
+      entityId?: string;
     }>
   > {
     const prompt = buildActionsPrompt(slots);
@@ -273,7 +273,12 @@ export class ContentGenerator {
   private enrichActionWithEntity(
     text: string,
     slots: ReturnType<typeof computeSlots>,
-  ): { text: string; type?: string; invoiceId?: string; projectId?: string } {
+  ): {
+    text: string;
+    type?: string;
+    entityType?: "invoice" | "project" | "customer" | "transaction";
+    entityId?: string;
+  } {
     const textLower = text.toLowerCase();
 
     // Check overdue invoices
@@ -282,7 +287,8 @@ export class ContentGenerator {
         return {
           text,
           type: "overdue",
-          invoiceId: inv.id,
+          entityType: "invoice",
+          entityId: inv.id,
         };
       }
     }
@@ -293,7 +299,8 @@ export class ContentGenerator {
         return {
           text,
           type: "draft",
-          invoiceId: draft.id,
+          entityType: "invoice",
+          entityId: draft.id,
         };
       }
     }

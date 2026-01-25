@@ -175,27 +175,31 @@ function InsightCardComponent({
         }
       }}
     >
-      <motion.div
-        initial={isNew ? { scale: 0.95 } : false}
-        animate={{
-          rotate: baseRotation,
-          x: translateX,
-          y: translateY,
-          opacity,
-          scale: 1,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 600,
-          damping: 35,
-          mass: 0.8,
-        }}
+      <div
+        style={
+          index > 1
+            ? {
+                transform: `rotate(${baseRotation}deg) translateX(${translateX}px) translateY(${translateY}px)`,
+                opacity,
+                pointerEvents: "none",
+              }
+            : {
+                opacity,
+                pointerEvents: isTopCard ? "auto" : "none",
+              }
+        }
         className={cn(
           "absolute inset-0 h-[210px] p-4 flex flex-col justify-between",
           "dark:bg-[#131313] bg-[#f7f7f7]",
           "dark:border-[#1d1d1d] border-[#e6e6e6] border",
           "dark:shadow-[0_6px_16px_rgba(0,0,0,0.3)] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)]",
           isTopCard && totalCards > 1 && "cursor-grab",
+          // Top card (index 0): tilts left, more on hover
+          isTopCard &&
+            "-rotate-[1.5deg] translate-x-[2px] -translate-y-[1px] transition-transform duration-300 group-hover:-rotate-[2.5deg]",
+          // Second card (index 1): tilts right, more on hover
+          index === 1 &&
+            "rotate-[1deg] translate-y-[4px] transition-transform duration-300 group-hover:rotate-[2deg]",
         )}
       >
         {isTopCard && (
@@ -249,7 +253,7 @@ function InsightCardComponent({
             </div>
           </>
         )}
-      </motion.div>
+      </div>
     </motion.div>
   );
 }

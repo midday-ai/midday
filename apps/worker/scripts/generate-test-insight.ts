@@ -22,47 +22,9 @@
 
 import { getTeamById } from "@midday/db/queries";
 import { getWorkerDb } from "@midday/db/worker-client";
+import { getPreviousCompletePeriod } from "@midday/insights/period";
+import type { PeriodType } from "@midday/insights/types";
 import { Queue } from "bullmq";
-import { getWeek, getYear, subWeeks } from "date-fns";
-
-type PeriodType = "weekly" | "monthly" | "quarterly" | "yearly";
-
-function getPreviousCompletePeriod(periodType: PeriodType) {
-  const now = new Date();
-
-  switch (periodType) {
-    case "weekly": {
-      const previousWeek = subWeeks(now, 1);
-      return {
-        periodYear: getYear(previousWeek),
-        periodNumber: getWeek(previousWeek, { weekStartsOn: 1 }),
-      };
-    }
-    case "monthly": {
-      const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      return {
-        periodYear: previousMonth.getFullYear(),
-        periodNumber: previousMonth.getMonth() + 1,
-      };
-    }
-    case "quarterly": {
-      const currentQuarter = Math.floor(now.getMonth() / 3) + 1;
-      const previousQuarter = currentQuarter === 1 ? 4 : currentQuarter - 1;
-      const year =
-        currentQuarter === 1 ? now.getFullYear() - 1 : now.getFullYear();
-      return {
-        periodYear: year,
-        periodNumber: previousQuarter,
-      };
-    }
-    case "yearly": {
-      return {
-        periodYear: now.getFullYear() - 1,
-        periodNumber: 1,
-      };
-    }
-  }
-}
 
 async function main() {
   const rawArgs = process.argv.slice(2);

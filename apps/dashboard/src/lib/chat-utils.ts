@@ -16,8 +16,8 @@ export type InsightData = {
     actions?: Array<{
       text: string;
       type?: string;
-      invoiceId?: string;
-      projectId?: string;
+      entityType?: "invoice" | "project" | "customer" | "transaction";
+      entityId?: string;
     }>;
   } | null;
   selectedMetrics?: Array<{

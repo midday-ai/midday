@@ -196,8 +196,8 @@ export type InsightContent = {
   actions: Array<{
     text: string;
     type?: string;
-    invoiceId?: string;
-    projectId?: string;
+    entityType?: "invoice" | "project" | "customer" | "transaction";
+    entityId?: string;
   }>;
 };
 

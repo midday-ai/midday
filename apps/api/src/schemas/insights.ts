@@ -20,10 +20,14 @@ export const listInsightsSchema = z
       description:
         "A cursor for pagination. Pass the value returned from the previous response to get the next page.",
     }),
-    includeDismissed: z.coerce.boolean().default(false).openapi({
-      description: "Whether to include insights the user has dismissed",
-      example: false,
-    }),
+    includeDismissed: z
+      .union([z.boolean(), z.string().transform((val) => val === "true")])
+      .optional()
+      .default(false)
+      .openapi({
+        description: "Whether to include insights the user has dismissed",
+        example: false,
+      }),
   })
   .openapi({
     description: "Query parameters for listing insights",
@@ -57,6 +61,14 @@ export const insightByIdSchema = z
     description: "Parameters for getting an insight by ID",
   });
 
+/** Maximum valid period number for each period type */
+const periodNumberLimits: Record<z.infer<typeof periodTypeSchema>, number> = {
+  weekly: 53,
+  monthly: 12,
+  quarterly: 4,
+  yearly: 1,
+};
+
 export const insightByPeriodSchema = z
   .object({
     periodType: periodTypeSchema.openapi({
@@ -68,9 +80,19 @@ export const insightByPeriodSchema = z
     }),
     periodNumber: z.coerce.number().int().min(1).max(53).openapi({
       description:
-        "Period number (week 1-53, month 1-12, quarter 1-4, or year)",
+        "Period number (week 1-53, month 1-12, quarter 1-4, or year 1)",
       example: 1,
     }),
+  })
+  .superRefine((data, ctx) => {
+    const maxPeriod = periodNumberLimits[data.periodType];
+    if (data.periodNumber > maxPeriod) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Period number for ${data.periodType} periods must be between 1 and ${maxPeriod}`,
+        path: ["periodNumber"],
+      });
+    }
   })
   .openapi({
     description: "Parameters for getting an insight by specific period",
@@ -137,24 +159,21 @@ const insightMetricSchema = z
 // Insight content schema
 const insightContentSchema = z
   .object({
-    sentiment: z
-      .enum(["positive", "neutral", "challenging"])
-      .openapi({ description: "Overall sentiment of the insight" }),
-    opener: z.string().openapi({ description: "Opening summary sentence" }),
+    title: z.string().openapi({ description: "Short hook for widget cards" }),
+    summary: z.string().openapi({ description: "Opening summary sentence" }),
     story: z.string().openapi({ description: "Narrative explanation" }),
     actions: z
       .array(
         z.object({
           text: z.string(),
           type: z.string().optional(),
-          deepLink: z.string().optional(),
+          entityType: z
+            .enum(["invoice", "project", "customer", "transaction"])
+            .optional(),
+          entityId: z.string().optional(),
         }),
       )
-      .openapi({ description: "Recommended actions" }),
-    celebration: z
-      .string()
-      .optional()
-      .openapi({ description: "Celebration message for achievements" }),
+      .openapi({ description: "Recommended actions with optional deep links" }),
   })
   .openapi({ description: "AI-generated insight content" });
 

@@ -108,7 +108,7 @@ function formatChange(
   if (direction === "flat" || Math.abs(change) < 0.5) {
     return "steady";
   }
-  const sign = direction === "up" ? "+" : "";
+  const sign = direction === "up" ? "+" : "-";
   return `${sign}${Math.round(change)}%`;
 }
 
@@ -322,18 +322,24 @@ export function InsightMessage({ insight }: InsightMessageProps) {
             <p className="text-sm text-primary">Recommended actions</p>
             <ul className="space-y-1">
               {content.actions.map((action, i) => {
-                const hasLink = action.invoiceId || action.projectId;
+                const hasLink = action.entityId && action.entityType;
                 const handleClick = () => {
-                  if (action.invoiceId) {
-                    setInvoiceParams({
-                      invoiceId: action.invoiceId,
-                      type: "details",
-                    });
-                  } else if (action.projectId) {
-                    setTrackerParams({
-                      projectId: action.projectId,
-                      update: true,
-                    });
+                  if (!action.entityId || !action.entityType) return;
+
+                  switch (action.entityType) {
+                    case "invoice":
+                      setInvoiceParams({
+                        invoiceId: action.entityId,
+                        type: "details",
+                      });
+                      break;
+                    case "project":
+                      setTrackerParams({
+                        projectId: action.entityId,
+                        update: true,
+                      });
+                      break;
+                    // Future: handle "customer", "transaction", etc.
                   }
                 };
 

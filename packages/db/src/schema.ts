@@ -3857,7 +3857,8 @@ export type InsightContent = {
   actions: Array<{
     text: string;
     type?: string;
-    deepLink?: string;
+    entityType?: "invoice" | "project" | "customer" | "transaction";
+    entityId?: string;
   }>;
 };
 
