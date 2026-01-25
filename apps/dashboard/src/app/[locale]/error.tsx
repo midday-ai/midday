@@ -19,17 +19,17 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
         </div>
 
         <div className="flex space-x-4">
-          <Link href={`/${locale}`}>
-            <Button variant="outline">Go home</Button>
-          </Link>
+          <Button variant="outline" asChild>
+            <Link href={`/${locale}`}>Go home</Link>
+          </Button>
 
           <Button onClick={() => reset()} variant="outline">
             Try again
           </Button>
 
-          <Link href="/account/support">
-            <Button>Contact us</Button>
-          </Link>
+          <Button asChild>
+            <Link href={`/${locale}/account/support`}>Contact us</Link>
+          </Button>
         </div>
       </div>
     </div>

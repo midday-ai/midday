@@ -649,7 +649,7 @@ export function Header({
                           >
                             <div className="flex-1 flex items-center justify-center bg-background p-6">
                               <div className="text-center space-y-3">
-                                <div className="text-4xl">🚀</div>
+                                <Icons.ShowChart className="w-10 h-10 text-muted-foreground mx-auto" />
                                 <p className="font-sans text-sm text-muted-foreground max-w-[200px]">
                                   Get up and running in 30 days
                                 </p>

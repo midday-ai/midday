@@ -4,6 +4,7 @@ import { getUrl } from "@/utils/environment";
 import { createClient } from "@midday/supabase/client";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useState } from "react";
 
 type Props = {
@@ -13,16 +14,43 @@ type Props = {
 export function AppleSignIn({ showLastUsed = false }: Props) {
   const [isLoading, setLoading] = useState(false);
   const supabase = createClient();
+  const { toast } = useToast();
 
   const handleSignIn = async () => {
     setLoading(true);
 
-    await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "apple",
       options: {
         redirectTo: `${getUrl()}/api/auth/callback?provider=apple`,
       },
     });
+
+    if (error) {
+      console.error("[AppleSignIn] OAuth error:", error.message);
+      toast({
+        duration: 5000,
+        variant: "error",
+        title: "Sign-in failed",
+        description:
+          error.message || "Could not connect to Apple. Please try again.",
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!data?.url) {
+      console.error("[AppleSignIn] No redirect URL returned from OAuth");
+      toast({
+        duration: 5000,
+        variant: "error",
+        title: "Sign-in failed",
+        description:
+          "Apple sign-in is not available. Please try another method.",
+      });
+      setLoading(false);
+      return;
+    }
 
     setTimeout(() => {
       setLoading(false);

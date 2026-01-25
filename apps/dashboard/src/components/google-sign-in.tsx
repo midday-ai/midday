@@ -4,6 +4,7 @@ import { getUrl } from "@/utils/environment";
 import { createClient } from "@midday/supabase/client";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -16,6 +17,7 @@ export function GoogleSignIn({ showLastUsed = false }: Props) {
   const supabase = createClient();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("return_to");
+  const { toast } = useToast();
 
   const handleSignIn = async () => {
     setLoading(true);
@@ -28,7 +30,9 @@ export function GoogleSignIn({ showLastUsed = false }: Props) {
 
     redirectTo.searchParams.append("provider", "google");
 
-    await supabase.auth.signInWithOAuth({
+    console.log("[GoogleSignIn] Calling signInWithOAuth with redirectTo:", redirectTo.toString());
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: redirectTo.toString(),
@@ -37,6 +41,34 @@ export function GoogleSignIn({ showLastUsed = false }: Props) {
         },
       },
     });
+
+    console.log("[GoogleSignIn] OAuth response:", { data, error });
+
+    if (error) {
+      console.error("[GoogleSignIn] OAuth error:", error.message);
+      toast({
+        duration: 5000,
+        variant: "error",
+        title: "Sign-in failed",
+        description:
+          error.message || "Could not connect to Google. Please try again.",
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!data?.url) {
+      console.error("[GoogleSignIn] No redirect URL returned from OAuth");
+      toast({
+        duration: 5000,
+        variant: "error",
+        title: "Sign-in failed",
+        description:
+          "Google sign-in is not available. Please try another method.",
+      });
+      setLoading(false);
+      return;
+    }
 
     setTimeout(() => {
       setLoading(false);

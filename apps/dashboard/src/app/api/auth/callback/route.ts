@@ -12,9 +12,34 @@ export async function GET(req: NextRequest) {
   const cookieStore = await cookies();
   const requestUrl = new URL(req.url);
   const code = requestUrl.searchParams.get("code");
+  const error = requestUrl.searchParams.get("error");
+  const errorDescription = requestUrl.searchParams.get("error_description");
   const client = requestUrl.searchParams.get("client");
   const returnTo = requestUrl.searchParams.get("return_to");
   const provider = requestUrl.searchParams.get("provider");
+
+  // Handle OAuth errors - redirect back to login with error info
+  if (error) {
+    console.error("[Auth Callback] OAuth error:", {
+      error,
+      errorDescription,
+      provider,
+    });
+
+    const loginUrl = new URL("/login", requestUrl.origin);
+    loginUrl.searchParams.set("error", error);
+    if (errorDescription) {
+      loginUrl.searchParams.set("error_description", errorDescription);
+    }
+    if (provider) {
+      loginUrl.searchParams.set("provider", provider);
+    }
+    if (returnTo) {
+      loginUrl.searchParams.set("return_to", returnTo);
+    }
+
+    return NextResponse.redirect(loginUrl.toString());
+  }
 
   if (client === "desktop") {
     return NextResponse.redirect(`${requestUrl.origin}/verify?code=${code}`);

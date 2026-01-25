@@ -2,12 +2,14 @@ import { EmailPasswordSignIn } from "@/components/email-password-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { LoginAccordion } from "@/components/login-accordion";
 import { LoginVideoBackground } from "@/components/login-video-background";
+import { OAuthErrorAlert } from "@/components/oauth-error-alert";
 import { OTPSignIn } from "@/components/otp-sign-in";
 import { Cookies } from "@/utils/constants";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Login | Abacus",
@@ -66,6 +68,11 @@ export default async function Page() {
 
   return (
     <div className="min-h-screen bg-background flex relative">
+      {/* OAuth Error Alert - displays toast if redirected with error */}
+      <Suspense fallback={null}>
+        <OAuthErrorAlert />
+      </Suspense>
+
       {/* Logo - Fixed position matching website header exactly */}
       <nav className="fixed top-0 left-0 right-0 z-50 w-full pointer-events-none">
         <div className="relative py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center">

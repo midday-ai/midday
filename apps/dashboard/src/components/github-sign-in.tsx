@@ -4,6 +4,7 @@ import { getUrl } from "@/utils/environment";
 import { createClient } from "@midday/supabase/client";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -16,6 +17,7 @@ export function GithubSignIn({ showLastUsed = false }: Props) {
   const supabase = createClient();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("return_to");
+  const { toast } = useToast();
 
   const handleSignIn = async () => {
     setLoading(true);
@@ -28,12 +30,38 @@ export function GithubSignIn({ showLastUsed = false }: Props) {
 
     redirectTo.searchParams.append("provider", "github");
 
-    await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
         redirectTo: redirectTo.toString(),
       },
     });
+
+    if (error) {
+      console.error("[GithubSignIn] OAuth error:", error.message);
+      toast({
+        duration: 5000,
+        variant: "error",
+        title: "Sign-in failed",
+        description:
+          error.message || "Could not connect to GitHub. Please try again.",
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!data?.url) {
+      console.error("[GithubSignIn] No redirect URL returned from OAuth");
+      toast({
+        duration: 5000,
+        variant: "error",
+        title: "Sign-in failed",
+        description:
+          "GitHub sign-in is not available. Please try another method.",
+      });
+      setLoading(false);
+      return;
+    }
 
     setTimeout(() => {
       setLoading(false);
