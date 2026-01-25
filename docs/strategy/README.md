@@ -10,15 +10,35 @@ When building roadmaps or planning features, reference these documents in this o
 
 | Priority | Document | Purpose |
 |----------|----------|---------|
-| 1 | [PRODUCT_VISION.md](./PRODUCT_VISION.md) | Core product strategy, phases, target market, philosophy |
-| 2 | [FEATURE_PARITY.md](./FEATURE_PARITY.md) | Detailed feature inventory from Honest Funding/Emmy Capital |
-| 3 | [MIGRATION_MASTER.md](./MIGRATION_MASTER.md) | Technical migration status (Midday → Abacus) |
-| 4 | [FEATURE_PARITY_AGENTS.md](./FEATURE_PARITY_AGENTS.md) | Agent prompts for feature analysis |
-| 5 | [SPRINT_TEMPLATE.md](./SPRINT_TEMPLATE.md) | Template for sprint planning |
+| 1 | [ROADMAP.md](./ROADMAP.md) | **20-week launch roadmap** - weekly sprints, deliverables, milestones |
+| 2 | [PRODUCT_VISION.md](./PRODUCT_VISION.md) | Core product strategy, phases, target market, philosophy |
+| 3 | [FEATURE_PARITY.md](./FEATURE_PARITY.md) | Detailed feature inventory from Honest Funding/Emmy Capital |
+| 4 | [MIGRATION_MASTER.md](./MIGRATION_MASTER.md) | Technical migration status (Midday → Abacus) |
+| 5 | [FEATURE_PARITY_AGENTS.md](./FEATURE_PARITY_AGENTS.md) | Agent prompts for feature analysis |
+| 6 | [SPRINT_TEMPLATE.md](./SPRINT_TEMPLATE.md) | Template for sprint planning |
 
 ---
 
 ## Document Summaries
+
+### ROADMAP.md
+**The 20-week execution plan**
+
+Aggressive 5-month launch roadmap with weekly sprints:
+- 7 phases, 20 one-week sprints
+- Goal: 15 customers, $7.5K MRR by Week 20
+- Solo developer + Claude Code AI workflow
+
+Key phases:
+- Weeks 1-4: Data Foundation (Google Sheets sync)
+- Weeks 5-8: Admin Experience (Portfolio dashboard)
+- Weeks 9-12: Collections & Stickiness
+- Weeks 13-14: Letter Generation
+- Weeks 15-16: Access Control & Namespace Migration
+- Weeks 17-18: Alerts & Intelligence
+- Weeks 19-20: Launch Readiness
+
+Use this as the weekly execution guide. Ask "What's the focus for Week X?" to get specific tasks.
 
 ### PRODUCT_VISION.md
 **The "why" and "what" of Abacus**
