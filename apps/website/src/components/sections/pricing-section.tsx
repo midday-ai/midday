@@ -31,7 +31,7 @@ export function PricingSection() {
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
-                    $29
+                    $399
                   </span>
                   <span className="font-sans text-sm text-muted-foreground">
                     /month
@@ -124,7 +124,7 @@ export function PricingSection() {
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
-                    $49
+                    $499
                   </span>
                   <span className="font-sans text-sm text-muted-foreground">
                     /month

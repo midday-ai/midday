@@ -33,16 +33,16 @@ export const PLANS = {
 // Stripe subscription plans
 export const STRIPE_PRICES = {
   starter: {
-    priceId: process.env.STRIPE_STARTER_PRICE_ID ?? "price_1Sr6f3BROJBOfZpmxgvC85AG",
-    productId: "prod_Tok9GyBgGAPdxZ",
+    priceId: process.env.STRIPE_STARTER_PRICE_ID ?? "price_1StV2sPhqDnZkVAwx5F3Vji6",
+    productId: "prod_TrDTsDNm2Vw2rt",
     name: "Starter",
     key: "starter" as const,
-    amount: 49900, // $499 in cents
+    amount: 39900, // $399 in cents
     currency: "usd",
   },
   pro: {
-    priceId: process.env.STRIPE_PRO_PRICE_ID ?? "price_1Sr6g4BROJBOfZpmZgoC6JB4",
-    productId: "prod_Tok9vsaLyPHvLj",
+    priceId: process.env.STRIPE_PRO_PRICE_ID ?? "price_1StV33PhqDnZkVAwT0Mzi8Y6",
+    productId: "prod_TrDTedpbB0YW3v",
     name: "Pro",
     key: "pro" as const,
     amount: 49900, // $499 in cents

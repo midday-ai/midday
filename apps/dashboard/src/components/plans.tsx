@@ -48,7 +48,7 @@ export function Plans() {
         <div className="flex flex-col p-6 border bg-background">
           <h2 className="text-xl mb-2 text-left">Starter</h2>
           <div className="mt-1 flex items-baseline">
-            <span className="text-2xl font-medium tracking-tight">$499</span>
+            <span className="text-2xl font-medium tracking-tight">$399</span>
             <span className="ml-1 text-xl font-medium">/mo</span>
             <span className="ml-2 text-xs text-muted-foreground">
               Excl. VAT
