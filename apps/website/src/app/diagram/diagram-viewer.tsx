@@ -37,49 +37,17 @@ export function DiagramViewer() {
   };
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className="flex flex-col min-h-[calc(100vh-200px)]">
       {/* Header */}
-      <div
-        style={{
-          padding: "16px 24px",
-          borderBottom: "1px solid #e2e8f0",
-          background: "#ffffff",
-          display: "flex",
-          alignItems: "center",
-          gap: "24px",
-          flexWrap: "wrap",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "20px",
-            fontWeight: 600,
-            color: "#0f172a",
-            margin: 0,
-          }}
-        >
-          Abacus Product Diagrams
+      <div className="flex items-center gap-6 flex-wrap py-8 border-b border-border">
+        <h1 className="text-2xl font-medium tracking-tight">
+          Product Diagrams
         </h1>
 
         <select
           value={selectedDiagram}
           onChange={(e) => handleDiagramChange(e.target.value as DiagramKey)}
-          style={{
-            padding: "8px 12px",
-            fontSize: "14px",
-            borderRadius: "6px",
-            border: "1px solid #cbd5e1",
-            background: "#f8fafc",
-            cursor: "pointer",
-            minWidth: "300px",
-          }}
+          className="px-3 py-2 text-sm rounded-md border border-border bg-background cursor-pointer min-w-[300px] focus:outline-none focus:ring-2 focus:ring-primary"
         >
           {Object.keys(allDiagrams).map((key) => (
             <option key={key} value={key}>
@@ -88,13 +56,13 @@ export function DiagramViewer() {
           ))}
         </select>
 
-        <span style={{ color: "#64748b", fontSize: "14px" }}>
+        <span className="text-muted-foreground text-sm">
           {diagram.nodes.length} nodes · {diagram.edges.length} edges
         </span>
       </div>
 
       {/* React Flow Canvas */}
-      <div style={{ flex: 1 }}>
+      <div className="flex-1 min-h-[600px] rounded-lg border border-border bg-card mt-6">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -104,13 +72,15 @@ export function DiagramViewer() {
           fitView
           fitViewOptions={{ padding: 0.2 }}
           defaultEdgeOptions={{ type: "smoothstep" }}
+          className="rounded-lg"
         >
-          <Background color="#e2e8f0" gap={16} />
-          <Controls />
+          <Background color="hsl(var(--border))" gap={16} />
+          <Controls className="!bg-card !border-border !shadow-sm" />
           <MiniMap
-            nodeStrokeColor="#0ea5e9"
-            nodeColor="#f8fafc"
+            nodeStrokeColor="hsl(var(--primary))"
+            nodeColor="hsl(var(--card))"
             nodeBorderRadius={4}
+            className="!bg-card !border-border"
           />
         </ReactFlow>
       </div>
