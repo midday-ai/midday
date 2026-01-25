@@ -24,7 +24,7 @@
     "@sindresorhus/slugify": "^3.0.0",
     "@zip.js/zip.js": "^2.8.10",
     "ai": "5.0.87",
-    "camelcase-keys": "^10.0.1",
+    "camelcase-keys": "^10.0.2",
     "heic-convert": "1.2.4",
     "node-xlsx": "^0.24.0",
     "sharp": "0.34.5",

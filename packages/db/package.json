@@ -43,7 +43,7 @@
     "@sindresorhus/slugify": "^3.0.0",
     "@types/pg": "^8.15.6",
     "drizzle-orm": "^0.45.0",
-    "camelcase-keys": "^10.0.1",
+    "camelcase-keys": "^10.0.2",
     "nanoid": "^5.1.6",
     "pg": "^8.16.3",
     "snakecase-keys": "^9.0.2"
