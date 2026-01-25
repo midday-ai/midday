@@ -38,6 +38,7 @@ import { transactionTagsRouter } from "./transaction-tags";
 import { transactionsRouter } from "./transactions";
 import { userRouter } from "./user";
 import { widgetsRouter } from "./widgets";
+import { merchantPortalRouter } from "./merchant-portal";
 
 export const appRouter = createTRPCRouter({
   accounting: accountingRouter,
@@ -78,6 +79,7 @@ export const appRouter = createTRPCRouter({
   shortLinks: shortLinksRouter,
   apiKeys: apiKeysRouter,
   widgets: widgetsRouter,
+  merchantPortal: merchantPortalRouter,
 });
 
 // export type definition of API

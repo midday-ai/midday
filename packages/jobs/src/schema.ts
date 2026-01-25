@@ -99,6 +99,19 @@ export const inviteTeamMembersSchema = z.object({
 
 export type InviteTeamMembersPayload = z.infer<typeof inviteTeamMembersSchema>;
 
+export const inviteMerchantToPortalSchema = z.object({
+  email: z.string().email(),
+  inviterName: z.string(),
+  teamName: z.string(),
+  teamLogoUrl: z.string().optional().nullable(),
+  customerName: z.string(),
+  inviteCode: z.string(),
+});
+
+export type InviteMerchantToPortalPayload = z.infer<
+  typeof inviteMerchantToPortalSchema
+>;
+
 export const updateBaseCurrencySchema = z.object({
   teamId: z.string().uuid(),
   baseCurrency: z.string(),

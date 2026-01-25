@@ -1590,6 +1590,8 @@ export const teams = pgTable(
     stripeCustomerId: text("stripe_customer_id"),
     stripeSubscriptionId: text("stripe_subscription_id"),
     stripePriceId: text("stripe_price_id"),
+    // Branding customization for merchant portal
+    branding: jsonb().$type<TeamBranding>().default({}),
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),
@@ -3202,6 +3204,11 @@ export const customersRelations = relations(customers, ({ one, many }) => ({
     references: [teams.id],
   }),
   trackerProjects: many(trackerProjects),
+  mcaDeals: many(mcaDeals),
+  merchantPortalSessions: many(merchantPortalSessions),
+  merchantPortalInvites: many(merchantPortalInvites),
+  merchantPortalAccess: many(merchantPortalAccess),
+  payoffLetterRequests: many(payoffLetterRequests),
 }));
 
 export const tagsRelations = relations(tags, ({ one, many }) => ({
@@ -3736,3 +3743,504 @@ export const accountingSyncRecordsRelations = relations(
     }),
   }),
 );
+
+// ============================================================================
+// MCA (Merchant Cash Advance) Tables
+// ============================================================================
+
+export const mcaDealStatusEnum = pgEnum("mca_deal_status", [
+  "active",
+  "paid_off",
+  "defaulted",
+  "paused",
+  "late",
+  "in_collections",
+]);
+
+export const mcaPaymentTypeEnum = pgEnum("mca_payment_type", [
+  "ach",
+  "wire",
+  "check",
+  "manual",
+  "other",
+]);
+
+export const mcaPaymentStatusEnum = pgEnum("mca_payment_status", [
+  "completed",
+  "returned",
+  "pending",
+  "failed",
+]);
+
+export const merchantPortalInviteStatusEnum = pgEnum(
+  "merchant_portal_invite_status",
+  ["pending", "accepted", "expired", "revoked"],
+);
+
+export const merchantPortalAccessStatusEnum = pgEnum(
+  "merchant_portal_access_status",
+  ["active", "suspended", "revoked"],
+);
+
+export const payoffLetterStatusEnum = pgEnum("payoff_letter_status", [
+  "pending",
+  "approved",
+  "sent",
+  "expired",
+  "rejected",
+]);
+
+/**
+ * MCA Deals - Core MCA funding records
+ */
+export const mcaDeals = pgTable(
+  "mca_deals",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow(),
+
+    // Relationships
+    customerId: uuid("customer_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // Deal Terms
+    dealCode: text("deal_code").notNull(),
+    fundingAmount: numericCasted({ precision: 12, scale: 2 }).notNull(),
+    factorRate: numericCasted({ precision: 5, scale: 4 }).notNull(),
+    paybackAmount: numericCasted({ precision: 12, scale: 2 }).notNull(),
+    dailyPayment: numericCasted({ precision: 10, scale: 2 }),
+    paymentFrequency: text("payment_frequency").default("daily"),
+
+    // Deal Status
+    status: mcaDealStatusEnum().default("active"),
+    fundedAt: timestamp("funded_at", { withTimezone: true, mode: "string" }),
+    expectedPayoffDate: date("expected_payoff_date"),
+
+    // Balance Tracking
+    currentBalance: numericCasted({ precision: 12, scale: 2 }).notNull(),
+    totalPaid: numericCasted({ precision: 12, scale: 2 }).default(0),
+    nsfCount: integer("nsf_count").default(0),
+
+    // External References (for spreadsheet sync)
+    externalId: text("external_id"),
+  },
+  (table) => [
+    index("mca_deals_customer_id_idx").on(table.customerId),
+    index("mca_deals_team_id_idx").on(table.teamId),
+    index("mca_deals_status_idx").on(table.status),
+    index("mca_deals_deal_code_idx").on(table.dealCode),
+    unique("mca_deals_team_deal_code_unique").on(table.teamId, table.dealCode),
+    foreignKey({
+      columns: [table.customerId],
+      foreignColumns: [customers.id],
+      name: "mca_deals_customer_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "mca_deals_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage MCA deals", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * MCA Payments - Payment ledger for MCA deals
+ */
+export const mcaPayments = pgTable(
+  "mca_payments",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Relationships
+    dealId: uuid("deal_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // Payment Details
+    amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
+    paymentDate: date("payment_date").notNull(),
+    paymentType: mcaPaymentTypeEnum("payment_type").default("ach"),
+    status: mcaPaymentStatusEnum().default("completed"),
+    description: text(),
+
+    // NSF Tracking
+    nsfAt: timestamp("nsf_at", { withTimezone: true, mode: "string" }),
+    nsfFee: numericCasted({ precision: 10, scale: 2 }),
+
+    // Balance Snapshot (for audit trail)
+    balanceBefore: numericCasted({ precision: 12, scale: 2 }),
+    balanceAfter: numericCasted({ precision: 12, scale: 2 }),
+
+    // External References
+    externalId: text("external_id"),
+  },
+  (table) => [
+    index("mca_payments_deal_id_idx").on(table.dealId),
+    index("mca_payments_team_id_idx").on(table.teamId),
+    index("mca_payments_payment_date_idx").on(table.paymentDate),
+    index("mca_payments_status_idx").on(table.status),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "mca_payments_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "mca_payments_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage MCA payments", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * Merchant Portal Sessions - Magic link authentication for merchants
+ */
+export const merchantPortalSessions = pgTable(
+  "merchant_portal_sessions",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Link to customer
+    customerId: uuid("customer_id").notNull(),
+    portalId: text("portal_id").notNull(),
+
+    // Email verification
+    email: text().notNull(),
+    verificationToken: text("verification_token").notNull().unique(),
+    verifiedAt: timestamp("verified_at", { withTimezone: true, mode: "string" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "string" })
+      .notNull(),
+
+    // Session tracking
+    lastActiveAt: timestamp("last_active_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+  },
+  (table) => [
+    index("merchant_sessions_customer_idx").on(table.customerId),
+    index("merchant_sessions_token_idx").on(table.verificationToken),
+    index("merchant_sessions_portal_idx").on(table.portalId),
+    index("merchant_sessions_email_idx").on(table.email),
+    foreignKey({
+      columns: [table.customerId],
+      foreignColumns: [customers.id],
+      name: "merchant_portal_sessions_customer_id_fkey",
+    }).onDelete("cascade"),
+  ],
+);
+
+/**
+ * Merchant Portal Invites - Access invitations for merchants
+ */
+export const merchantPortalInvites = pgTable(
+  "merchant_portal_invites",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "string" })
+      .default(sql`(now() + interval '7 days')`),
+
+    // Who is being invited
+    email: text().notNull(),
+
+    // What they're being invited to access
+    customerId: uuid("customer_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // Invite details
+    code: text().notNull().unique(),
+    invitedBy: uuid("invited_by").notNull(),
+
+    // Status
+    status: merchantPortalInviteStatusEnum().default("pending"),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true, mode: "string" }),
+  },
+  (table) => [
+    index("merchant_invites_code_idx").on(table.code),
+    index("merchant_invites_email_idx").on(table.email),
+    index("merchant_invites_customer_idx").on(table.customerId),
+    index("merchant_invites_team_idx").on(table.teamId),
+    unique("merchant_invites_email_customer_unique").on(
+      table.email,
+      table.customerId,
+    ),
+    foreignKey({
+      columns: [table.customerId],
+      foreignColumns: [customers.id],
+      name: "merchant_portal_invites_customer_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "merchant_portal_invites_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.invitedBy],
+      foreignColumns: [users.id],
+      name: "merchant_portal_invites_invited_by_fkey",
+    }),
+  ],
+);
+
+/**
+ * Merchant Portal Access - Who can access what in the merchant portal
+ */
+export const merchantPortalAccess = pgTable(
+  "merchant_portal_access",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Who has access
+    userId: uuid("user_id").notNull(),
+
+    // What they can access
+    customerId: uuid("customer_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // Status
+    status: merchantPortalAccessStatusEnum().default("active"),
+
+    // Revocation tracking
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "string" }),
+    revokedBy: uuid("revoked_by"),
+    revokedReason: text("revoked_reason"),
+  },
+  (table) => [
+    index("merchant_access_user_idx").on(table.userId),
+    index("merchant_access_customer_idx").on(table.customerId),
+    index("merchant_access_team_idx").on(table.teamId),
+    unique("merchant_access_user_customer_unique").on(
+      table.userId,
+      table.customerId,
+    ),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "merchant_portal_access_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.customerId],
+      foreignColumns: [customers.id],
+      name: "merchant_portal_access_customer_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "merchant_portal_access_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.revokedBy],
+      foreignColumns: [users.id],
+      name: "merchant_portal_access_revoked_by_fkey",
+    }),
+  ],
+);
+
+/**
+ * Payoff Letter Requests - Document requests from merchants
+ */
+export const payoffLetterRequests = pgTable(
+  "payoff_letter_requests",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Relationships
+    dealId: uuid("deal_id").notNull(),
+    customerId: uuid("customer_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // Request details
+    requestedPayoffDate: date("requested_payoff_date").notNull(),
+    requestedByEmail: text("requested_by_email").notNull(),
+
+    // Calculated amounts
+    balanceAtRequest: numericCasted({ precision: 12, scale: 2 }).notNull(),
+    payoffAmount: numericCasted({ precision: 12, scale: 2 }).notNull(),
+
+    // Status workflow
+    status: payoffLetterStatusEnum().default("pending"),
+    approvedAt: timestamp("approved_at", { withTimezone: true, mode: "string" }),
+    approvedBy: uuid("approved_by"),
+    sentAt: timestamp("sent_at", { withTimezone: true, mode: "string" }),
+
+    // Generated document
+    documentPath: text("document_path"),
+    expiresAt: date("expires_at"),
+  },
+  (table) => [
+    index("payoff_requests_deal_idx").on(table.dealId),
+    index("payoff_requests_customer_idx").on(table.customerId),
+    index("payoff_requests_team_idx").on(table.teamId),
+    index("payoff_requests_status_idx").on(table.status),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "payoff_letter_requests_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.customerId],
+      foreignColumns: [customers.id],
+      name: "payoff_letter_requests_customer_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "payoff_letter_requests_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.approvedBy],
+      foreignColumns: [users.id],
+      name: "payoff_letter_requests_approved_by_fkey",
+    }),
+    pgPolicy("Team members can manage payoff letter requests", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+// ============================================================================
+// MCA Relations
+// ============================================================================
+
+export const mcaDealsRelations = relations(mcaDeals, ({ one, many }) => ({
+  customer: one(customers, {
+    fields: [mcaDeals.customerId],
+    references: [customers.id],
+  }),
+  team: one(teams, {
+    fields: [mcaDeals.teamId],
+    references: [teams.id],
+  }),
+  payments: many(mcaPayments),
+  payoffLetterRequests: many(payoffLetterRequests),
+}));
+
+export const mcaPaymentsRelations = relations(mcaPayments, ({ one }) => ({
+  deal: one(mcaDeals, {
+    fields: [mcaPayments.dealId],
+    references: [mcaDeals.id],
+  }),
+  team: one(teams, {
+    fields: [mcaPayments.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const merchantPortalSessionsRelations = relations(
+  merchantPortalSessions,
+  ({ one }) => ({
+    customer: one(customers, {
+      fields: [merchantPortalSessions.customerId],
+      references: [customers.id],
+    }),
+  }),
+);
+
+export const merchantPortalInvitesRelations = relations(
+  merchantPortalInvites,
+  ({ one }) => ({
+    customer: one(customers, {
+      fields: [merchantPortalInvites.customerId],
+      references: [customers.id],
+    }),
+    team: one(teams, {
+      fields: [merchantPortalInvites.teamId],
+      references: [teams.id],
+    }),
+    inviter: one(users, {
+      fields: [merchantPortalInvites.invitedBy],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const merchantPortalAccessRelations = relations(
+  merchantPortalAccess,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [merchantPortalAccess.userId],
+      references: [users.id],
+    }),
+    customer: one(customers, {
+      fields: [merchantPortalAccess.customerId],
+      references: [customers.id],
+    }),
+    team: one(teams, {
+      fields: [merchantPortalAccess.teamId],
+      references: [teams.id],
+    }),
+    revoker: one(users, {
+      fields: [merchantPortalAccess.revokedBy],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const payoffLetterRequestsRelations = relations(
+  payoffLetterRequests,
+  ({ one }) => ({
+    deal: one(mcaDeals, {
+      fields: [payoffLetterRequests.dealId],
+      references: [mcaDeals.id],
+    }),
+    customer: one(customers, {
+      fields: [payoffLetterRequests.customerId],
+      references: [customers.id],
+    }),
+    team: one(teams, {
+      fields: [payoffLetterRequests.teamId],
+      references: [teams.id],
+    }),
+    approver: one(users, {
+      fields: [payoffLetterRequests.approvedBy],
+      references: [users.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// Team Branding Type
+// ============================================================================
+
+export type TeamBranding = {
+  displayName?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  emailFromName?: string;
+  pdfFooterText?: string;
+};

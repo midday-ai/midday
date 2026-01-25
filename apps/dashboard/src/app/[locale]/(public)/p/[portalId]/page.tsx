@@ -1,6 +1,7 @@
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { McaPortalContent } from "./mca-portal-content";
 import { PortalContent } from "./portal-content";
 
 export async function generateMetadata(props: {
@@ -10,6 +11,37 @@ export async function generateMetadata(props: {
   const queryClient = getQueryClient();
 
   try {
+    // Try MCA portal data first
+    const mcaData = await queryClient.fetchQuery(
+      trpc.merchantPortal.getPortalData.queryOptions({
+        portalId: params.portalId,
+      }),
+    );
+
+    if (mcaData) {
+      const title = `${mcaData.customer.name} | ${mcaData.customer.team?.name || "Portal"}`;
+      const description = `Merchant portal for ${mcaData.customer.name}`;
+
+      return {
+        title,
+        description,
+        openGraph: {
+          title,
+          description,
+        },
+        twitter: {
+          card: "summary_large_image",
+          title,
+          description,
+        },
+        robots: {
+          index: false,
+          follow: false,
+        },
+      };
+    }
+
+    // Fall back to invoice portal data
     const data = await queryClient.fetchQuery(
       trpc.customers.getByPortalId.queryOptions({
         portalId: params.portalId,
@@ -65,7 +97,23 @@ export default async function Page(props: Props) {
   const params = await props.params;
   const queryClient = getQueryClient();
 
-  // Prefetch customer and summary data
+  // Try to fetch MCA portal data first
+  const mcaPortalData = await queryClient.fetchQuery(
+    trpc.merchantPortal.getPortalData.queryOptions({
+      portalId: params.portalId,
+    }),
+  );
+
+  // If MCA deals exist, show MCA portal
+  if (mcaPortalData && mcaPortalData.deals && mcaPortalData.deals.length > 0) {
+    return (
+      <HydrateClient>
+        <McaPortalContent portalId={params.portalId} />
+      </HydrateClient>
+    );
+  }
+
+  // Fall back to invoice portal
   const portalData = await queryClient.fetchQuery(
     trpc.customers.getByPortalId.queryOptions({
       portalId: params.portalId,
