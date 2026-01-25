@@ -3,8 +3,10 @@ node_modules
 
 # Build outputs
 .next
-dist
 build
+# Exclude all dist except engine dist which is needed
+**/dist
+!apps/engine/dist
 
 # Logs
 npm-debug.log*

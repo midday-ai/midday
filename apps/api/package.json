@@ -2,6 +2,7 @@
   "name": "@midday/api",
   "scripts": {
     "dev": "TZ=UTC PORT=3003 bun run --hot src/index.ts",
+    "build:vercel": "bun build apps/api/api/index.ts --outdir=apps/api/dist --target=node --packages=external",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

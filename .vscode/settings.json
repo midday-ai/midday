@@ -27,7 +27,7 @@
     "editor.formatOnSave": true
   },
   "[jsonc]": {
-    "editor.defaultFormatter": "biomejs.biome",
+    "editor.defaultFormatter": "vscode.json-language-features",
     "editor.formatOnSave": true
   },
   "typescript.enablePromptUseWorkspaceTsdk": true,

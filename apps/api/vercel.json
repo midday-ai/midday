@@ -1,13 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "npm install bun -g && bun install",
-  "buildCommand": "bun build api/index.ts --outdir=dist --target=node --packages=external",
+  "installCommand": "bun install",
+  "buildCommand": "bun build api/index.ts --outdir=dist --target=node --packages=external --external=@sentry/*",
   "outputDirectory": "dist",
   "functions": {
     "api/index.ts": {
       "memory": 1024,
-      "maxDuration": 30
+      "maxDuration": 60
     }
   },
   "rewrites": [

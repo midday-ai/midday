@@ -45,6 +45,16 @@ export const createTRPCContext = async (
 
 const t = initTRPC.context<TRPCContext>().create({
   transformer: superjson,
+  errorFormatter({ shape, error }) {
+    console.error("[TRPC Error]", {
+      code: shape.code,
+      message: shape.message,
+      path: shape.data?.path,
+      cause: error.cause instanceof Error ? error.cause.message : undefined,
+      stack: error.stack,
+    });
+    return shape;
+  },
 });
 
 export const createTRPCRouter = t.router;

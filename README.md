@@ -4,16 +4,7 @@
 	<h1 align="center"><b>Abacus</b></h1>
 <p align="center">
     Your AI-Powered MCA Portfolio Management Platform
-    <br />
-    <br />
-    <a href="https://github.com/midday-ai/midday/issues">Issues</a>
   </p>
-</p>
-
-<p align="center">
-  <a href="https://go.midday.ai/K7GwMoQ">
-    <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
-  </a>
 </p>
 
 ## About Abacus

@@ -1,10 +1,13 @@
 # Abacus 5-Month Launch Roadmap
 
 ## Executive Summary
-**Timeline:** 20 weeks (20 one-week sprints)
+**Timeline:** ~21 weeks (Week 0 + 0.5 foundation, then 20 one-week sprints)
 **Team:** Solo developer + Claude Code AI assistance
 **Goal:** 15 customers live, merchant portal + collections workflow operational
 **Launch Date:** ~June 2026
+
+**Phase 0 (Foundation):** Authentication, onboarding, payment/trial flow
+**Phases 1-7:** Core product build (data sync → admin → collections → letters → alerts → launch)
 
 ---
 
@@ -26,6 +29,42 @@ Without data, the portal is an empty shell. The sync is the "wedge" that proves 
 ---
 
 ## 20-Week Sprint Roadmap (1-Week Sprints)
+
+---
+
+## PHASE 0: AUTHENTICATION & ONBOARDING (Week 0 + 0.5)
+
+### Week 0: "Authentication Foundation"
+**Goal:** Users can sign in, create account, create team, and land on dashboard.
+
+**Deliverables:**
+- Login page (`/login`) - Google OAuth + email/password
+- Sign up page (`/signup`) - New user registration
+- "No account found" interstitial - Graceful handling for new Google users
+- Forgot password page - Email-based password reset
+- Team creation page - Company name, country, currency
+- Dashboard welcome modal - "Welcome to Abacus!" onboarding start
+
+**Exit Criteria:** New user can complete full flow: homepage → sign up → team creation → dashboard with welcome modal
+
+**Key Files:** `apps/dashboard/src/app/[locale]/(public)/login/`, `apps/dashboard/src/app/[locale]/(public)/signup/`
+
+**PRD:** [Week 0 PRD](../prds/Week%200%20PRD.md)
+
+---
+
+### Week 0.5: "Payment & Trial Flow"
+**Goal:** Collect payment info, establish trial, monetization-ready.
+
+**Deliverables:**
+- Welcome/value prop page - Trial benefits, email reminder opt-in
+- Plan selection page - Pricing display, annual vs monthly
+- Stripe payment integration - Payment form, promo codes
+- Trial logic - 14-day trial, charge after trial ends
+
+**Exit Criteria:** New user enters payment info, starts 14-day trial, can access full product
+
+**Key Files:** `apps/dashboard/src/app/[locale]/(public)/onboarding/`
 
 ---
 
@@ -406,3 +445,41 @@ Sheets Sync (S1) → Pilot Migration (S2) → Admin Dashboard (S3) → Collectio
 | Weeks 17-20 | Polish | Email templates, testing, docs |
 
 **Estimated Weekly Velocity:** 15-25 hours focused work + AI assistance
+
+---
+
+## FUTURE: Post-Launch Features
+
+Features to build after core 20-week roadmap is complete.
+
+### Retention & Engagement
+| Feature | Description | Inspiration |
+|---------|-------------|-------------|
+| **Trial extension offer** | When user attempts to cancel trial, offer 7 more days free | Monarch |
+| **Cancellation survey** | Ask why they're leaving with clear options (too expensive, missing features, found alternative, etc.) | Monarch |
+| **Win-back emails** | Automated email sequence after cancellation | Standard SaaS |
+| **Team invites** | Invite team members to collaborate | Growth mechanism |
+| **Referral program** | "Invite a funder, get a free month" | Viral growth |
+| **Usage nudges** | "You haven't checked your portfolio in 5 days" | Re-engagement |
+| **Trial countdown** | Show "X days left in trial" in dashboard | Urgency |
+
+### Growth & Expansion
+| Feature | Description | Priority |
+|---------|-------------|----------|
+| **Bank account connections** | Plaid integration for payment tracking | High |
+| **Payment processor integrations** | Stripe, Square for reconciliation | Medium |
+| **Multi-currency support** | CAD, GBP portfolios | Low |
+| **White-label portal** | Custom domains for enterprise customers | Low |
+| **API access** | Public API for integrations | Medium |
+
+### Advanced Analytics
+| Feature | Description | Priority |
+|---------|-------------|----------|
+| **Portfolio benchmarking** | Compare performance vs industry averages | Medium |
+| **Predictive risk scoring** | AI-powered default prediction | High |
+| **Cohort analysis** | Track deal vintage performance | Medium |
+| **Custom reports builder** | User-defined report generation | Low |
+
+---
+
+_This section is a living backlog. Features move to sprint planning as capacity allows._
