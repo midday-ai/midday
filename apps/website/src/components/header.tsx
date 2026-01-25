@@ -8,9 +8,9 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { HeaderIntegrationsPreview } from "./header-integrations-preview";
 
-// Get the dashboard app URL from environment or use fallback for development
+// Get the dashboard app URL from environment or use production URL
 const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
+  process.env.NEXT_PUBLIC_APP_URL || "https://app.abacuslabs.co";
 
 interface HeaderProps {
   transparent?: boolean;
