@@ -7,11 +7,7 @@
  * - Few-shot examples with input/output
  * - Direct, specific instructions
  */
-import {
-  type InsightSlots,
-  getNotableContext,
-  getToneGuidance,
-} from "./slots";
+import { type InsightSlots, getNotableContext, getToneGuidance } from "./slots";
 
 /**
  * Build the summary generation prompt

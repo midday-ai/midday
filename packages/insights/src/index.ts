@@ -516,27 +516,25 @@ export class InsightsService {
   ): Promise<InsightActivity> {
     // Fetch all detailed data in parallel
     const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const [
-      overdueData,
-      upcomingRecurring,
-      overdueDetails,
-      draftInvoices,
-    ] = await Promise.all([
-      getOverdueInvoicesAlert(this.db, { teamId, currency }).catch(() => null),
-      getUpcomingDueRecurringByTeam(this.db, {
-        teamId,
-        before: sevenDaysFromNow,
-      }).catch(
-        () => [] as Awaited<ReturnType<typeof getUpcomingDueRecurringByTeam>>,
-      ),
-      // Detailed queries for "money on table"
-      getOverdueInvoiceDetails(this.db, { teamId, currency }).catch(
-        () => [] as Awaited<ReturnType<typeof getOverdueInvoiceDetails>>,
-      ),
-      getDraftInvoices(this.db, { teamId, currency }).catch(
-        () => [] as Awaited<ReturnType<typeof getDraftInvoices>>,
-      ),
-    ]);
+    const [overdueData, upcomingRecurring, overdueDetails, draftInvoices] =
+      await Promise.all([
+        getOverdueInvoicesAlert(this.db, { teamId, currency }).catch(
+          () => null,
+        ),
+        getUpcomingDueRecurringByTeam(this.db, {
+          teamId,
+          before: sevenDaysFromNow,
+        }).catch(
+          () => [] as Awaited<ReturnType<typeof getUpcomingDueRecurringByTeam>>,
+        ),
+        // Detailed queries for "money on table"
+        getOverdueInvoiceDetails(this.db, { teamId, currency }).catch(
+          () => [] as Awaited<ReturnType<typeof getOverdueInvoiceDetails>>,
+        ),
+        getDraftInvoices(this.db, { teamId, currency }).catch(
+          () => [] as Awaited<ReturnType<typeof getDraftInvoices>>,
+        ),
+      ]);
 
     // Compute rolling averages from history (no extra DB call)
     const rollingAverages = insightHistory

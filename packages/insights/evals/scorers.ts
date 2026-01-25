@@ -86,11 +86,11 @@ export const summaryWordCount = createScorer<InsightSlots, InsightOutput>({
  */
 export const noBannedPhrases = createScorer<InsightSlots, InsightOutput>({
   name: "No banned phrases",
-  description:
-    "Output should not use generic/flowery adjectives",
+  description: "Output should not use generic/flowery adjectives",
   scorer: ({ output }) => {
     const fullText = `${output.title} ${output.summary} ${output.story}`;
-    const banned = /\b(robust|solid|excellent|strong|healthy|remarkable|impressive|amazing|outstanding|significant)\b/i;
+    const banned =
+      /\b(robust|solid|excellent|strong|healthy|remarkable|impressive|amazing|outstanding|significant)\b/i;
     return banned.test(fullText) ? 0 : 1;
   },
 });
