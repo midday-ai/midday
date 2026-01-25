@@ -11,17 +11,17 @@ const faqs: FAQItem[] = [
   {
     question: "What is Abacus?",
     answer:
-      "Abacus is the operating system for MCA businesses. It brings your portfolio, payments, merchant data, and risk alerts into one connected system so you always know what's going on with your deals.",
+      "Abacus is the operating system for funding businesses. It brings your portfolio, payments, merchant data, and risk alerts into one connected system so you always know what's going on with your deals.",
   },
   {
     question: "Who is Abacus for?",
     answer:
-      "Abacus is built for MCA operators and funders who want clarity and control over their portfolio without spending time on manual admin or spreadsheets.",
+      "Abacus is built for funding operators who want clarity and control over their portfolio without spending time on manual admin or spreadsheets.",
   },
   {
     question: "Do I need financial or accounting knowledge to use Abacus?",
     answer:
-      "No. Abacus is designed for day-to-day use by MCA operators. It helps you stay organized, informed, and in control without requiring accounting expertise.",
+      "No. Abacus is designed for day-to-day use by funding operators. It helps you stay organized, informed, and in control without requiring accounting expertise.",
   },
   {
     question: "How does Abacus connect to my bank?",

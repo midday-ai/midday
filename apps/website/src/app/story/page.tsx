@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Our Story",
   description:
-    "Why we built Abacus. Learn how we're leveling the playing field for MCA operators, giving mom and pop shops the same tools as the big players.",
+    "Why we built Abacus. Learn how we're leveling the playing field for funding operators, giving mom and pop shops the same tools as the big players.",
 };
 
 export default function StoryPage() {
@@ -27,7 +27,7 @@ export default function StoryPage() {
                     Where we started
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    We started with two small MCA businesses. Two operators
+                    We started with two small funding businesses. Two operators
                     juggling spreadsheets, chasing payments, and trying to stay
                     on top of their portfolios the same way everyone else
                     was — manually.
@@ -41,7 +41,7 @@ export default function StoryPage() {
                     Google Sheets and a lot of phone calls.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    That didn't seem right. The MCA industry is built on
+                    That didn't seem right. The funding industry is built on
                     relationships and hustle, not who can afford a $50,000
                     software build. We believed the best operators should win on
                     their ability to serve merchants well — not on their IT
@@ -60,7 +60,7 @@ export default function StoryPage() {
                     Leveling the playing field
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Abacus exists to give every MCA operator — from a one-person
+                    Abacus exists to give every funding operator — from a one-person
                     shop to a growing team — the same tools and experience that
                     the big players have. Better, actually.
                   </p>
@@ -72,14 +72,14 @@ export default function StoryPage() {
                     makes their life easier.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    That's the experience every MCA operator should be able to
+                    That's the experience every funding operator should be able to
                     offer. Not because they have deep pockets for custom
                     development, but because Abacus gives it to them out of the
                     box.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
                     We're not just building portfolio software. We're building
-                    the infrastructure that lets any MCA operator run like a
+                    the infrastructure that lets any funding operator run like a
                     $100 million fund — with the visibility, automation, and
                     professionalism that used to be reserved for the top tier.
                   </p>
@@ -127,7 +127,7 @@ export default function StoryPage() {
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
                     What started with two small businesses has slowly expanded
-                    to hundreds of MCA operators using Abacus to manage their
+                    to hundreds of funding operators using Abacus to manage their
                     portfolios, serve their merchants, and grow their
                     businesses.
                   </p>
@@ -142,7 +142,7 @@ export default function StoryPage() {
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
                     Every feature we build comes from this mission: simplify the
-                    MCA experience, so any operator can compete with anyone.
+                    funding experience, so any operator can compete with anyone.
                   </p>
                   <p className="text-muted-foreground leading-relaxed font-medium">
                     The best operators should win. We're here to make sure the

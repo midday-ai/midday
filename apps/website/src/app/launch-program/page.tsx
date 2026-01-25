@@ -138,7 +138,7 @@ export default function LaunchProgramPage() {
                   Custom pricing
                 </p>
                 <p className="font-sans text-sm text-muted-foreground leading-relaxed">
-                  Every MCA operation is different. We'll scope your
+                  Every funding operation is different. We'll scope your
                   implementation based on portfolio size, data complexity, and
                   customization needs.
                 </p>

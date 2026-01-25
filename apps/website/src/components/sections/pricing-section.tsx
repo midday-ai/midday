@@ -30,7 +30,7 @@ export function PricingSection() {
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
-                    $499
+                    $299
                   </span>
                   <span className="font-sans text-sm text-muted-foreground">
                     /month
@@ -42,31 +42,31 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Financial overview and widgets
+                    Portfolio dashboard and analytics
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Weekly summaries and insights
+                    Weekly portfolio summaries and risk alerts
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Transactions with categorization
+                    Payment tracking with categorization
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 10 invoices per month
+                    Up to 50 merchants tracked
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 2 connected banks
+                    Up to 2 bank connections
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
@@ -78,7 +78,7 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    10GB storage
+                    10GB document storage
                   </span>
                 </div>
               </div>
@@ -112,7 +112,7 @@ export function PricingSection() {
                   Pro
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground mb-3">
-                  For growing teams running weekly finance workflows end to end
+                  For growing funding operations managing multiple portfolios
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
@@ -134,13 +134,13 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 50 invoices per month
+                    Up to 250 merchants tracked
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 10 connected banks
+                    Up to 10 bank connections
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
@@ -152,13 +152,13 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    100GB storage
+                    100GB document storage
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    500 inbox items per month
+                    NSF and risk alert monitoring
                   </span>
                 </div>
               </div>
@@ -185,7 +185,7 @@ export function PricingSection() {
                   Pro Plus
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground mb-3">
-                  For scaling operations with unlimited access and advanced tools
+                  For scaling funding operations with unlimited access and advanced underwriting
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
@@ -207,13 +207,13 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Unlimited invoices
+                    Unlimited merchants
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Unlimited connected banks
+                    Unlimited bank connections
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
@@ -225,13 +225,13 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    1TB storage
+                    1TB document storage
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Unlimited inbox items
+                    Unlimited alert monitoring
                   </span>
                 </div>
                 <div className="flex items-start gap-2">

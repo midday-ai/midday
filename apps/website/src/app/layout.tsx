@@ -40,11 +40,11 @@ export const metadata: Metadata = {
     template: "%s | Abacus",
   },
   description:
-    "Abacus is the operating system for Merchant Cash Advance businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
+    "Abacus is the operating system for funding businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
   openGraph: {
     title: "Abacus",
     description:
-      "Abacus is the operating system for Merchant Cash Advance businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
+      "Abacus is the operating system for funding businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
     url: baseUrl,
     siteName: "Abacus",
     locale: "en_US",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
   twitter: {
     title: "Abacus",
     description:
-      "Abacus is the operating system for Merchant Cash Advance businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
+      "Abacus is the operating system for funding businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
