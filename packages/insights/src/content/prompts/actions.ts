@@ -8,7 +8,6 @@ export function buildActionsPrompt(slots: InsightSlots): string | null {
   if (
     !slots.hasOverdue &&
     !slots.hasDrafts &&
-    !slots.hasUnbilled &&
     !slots.hasExpenseSpikes &&
     !slots.concentrationWarning
   ) {
@@ -28,7 +27,7 @@ ${data}
 
 <rules>
 - MUST be 1-3 actions maximum
-- MUST follow priority order: overdue → drafts → unbilled → expense spikes → concentration warning
+- MUST follow priority order: overdue → drafts → expense spikes → concentration warning
 - MUST use professional, direct tone
 - MUST use the exact currency format shown in data values (copy the format, not the ISO code)
 - MUST include brief rationale where relevant (days overdue, percentage increase)
@@ -41,7 +40,6 @@ ${data}
 <concrete_example>Invoice for Beta Inc (4,354 kr) is finalized and ready to send</concrete_example>
 <pattern_example>Follow up on [amount] overdue from [Company] ([X] days) - recommend escalation if unresolved this week</pattern_example>
 <pattern_example>Invoice for [Company] ([amount]) is finalized and ready to send</pattern_example>
-<pattern_example>[X] hours of billable work for [Company] pending invoicing</pattern_example>
 </examples>
 
 <verify>
@@ -78,23 +76,15 @@ function buildActionData(slots: InsightSlots): string {
     }
   }
 
-  if (slots.hasUnbilled) {
-    lines.push("unbilled work (priority 3):");
-    for (const work of slots.unbilled) {
-      const who = work.customer || work.project;
-      lines.push(`  - ${who}: ${work.hours}h = ${work.amount}`);
-    }
-  }
-
   if (slots.hasExpenseSpikes) {
-    lines.push("expense spikes (priority 4):");
+    lines.push("expense spikes (priority 3):");
     for (const spike of slots.expenseSpikes) {
       lines.push(`  - ${spike.category}: ${spike.amount} (+${spike.change}%)`);
     }
   }
 
   if (slots.concentrationWarning) {
-    lines.push("concentration risk (priority 5):");
+    lines.push("concentration risk (priority 4):");
     lines.push(
       `  - ${slots.concentrationWarning.percentage}% of revenue from ${slots.concentrationWarning.customerName} (${slots.concentrationWarning.amount})`,
     );

@@ -168,26 +168,6 @@ export function formatExpenseAnomaliesContext(
 }
 
 /**
- * Format unbilled hours context - this is a KEY Midday insight
- */
-function formatUnbilledContext(
-  activity: InsightActivity,
-  currency: string,
-): string {
-  if (!activity.unbilledHours || activity.unbilledHours === 0) {
-    return "";
-  }
-
-  const hours = activity.unbilledHours;
-  const amount = activity.billableAmount ?? 0;
-
-  if (amount > 0) {
-    return `\nUnbilled Work:\n- ${hours.toFixed(1)} hours worth ${formatMetricValue(amount, "currency", currency)} not yet invoiced`;
-  }
-  return `\nUnbilled Work:\n- ${hours.toFixed(1)} hours not yet invoiced`;
-}
-
-/**
  * Format detailed "Money on Table" context with specific customer names and amounts
  * This is the key differentiator - specific, actionable information
  */
@@ -208,24 +188,6 @@ export function formatMoneyOnTableContext(
         return `  - ${inv.customerName}: ${amount} (${inv.daysOverdue} days overdue)`;
       });
     sections.push(`Overdue Invoices:\n${overdueLines.join("\n")}`);
-  }
-
-  // Unbilled work with project names
-  if (moneyOnTable.unbilledWork.length > 0) {
-    const unbilledLines = moneyOnTable.unbilledWork
-      .slice(0, 3) // Top 3 only
-      .map((work) => {
-        const amount = formatMetricValue(
-          work.billableAmount,
-          "currency",
-          currency,
-        );
-        const projectInfo = work.customerName
-          ? `${work.projectName} (${work.customerName})`
-          : work.projectName;
-        return `  - ${projectInfo}: ${work.hours}h = ${amount}`;
-      });
-    sections.push(`Unbilled Work:\n${unbilledLines.join("\n")}`);
   }
 
   // Draft invoices ready to send
@@ -461,7 +423,6 @@ export function isNothingNotableWeek(
   const revenueMetric = metrics.find((m) => m.type === "revenue");
   const hasRevenue = revenueMetric && revenueMetric.value > 0;
   const hasOverdue = activity.invoicesOverdue > 0;
-  const hasUnbilled = activity.unbilledHours > 5; // More than 5 hours
   const hasActivity =
     activity.invoicesSent > 0 ||
     activity.invoicesPaid > 0 ||
@@ -469,7 +430,7 @@ export function isNothingNotableWeek(
     activity.newCustomers > 0;
 
   // If there's nothing actionable and no significant activity
-  return !hasRevenue && !hasOverdue && !hasUnbilled && !hasActivity;
+  return !hasRevenue && !hasOverdue && !hasActivity;
 }
 
 /**
@@ -683,7 +644,6 @@ WRITE A "WHAT MATTERS NOW" SUMMARY:
    PRIORITY ORDER (if data exists):
    1. Overdue invoices → "Send [Company] a friendly reminder about the [amount]"
    2. Draft invoices ready → "Send [Company] the invoice for [amount]"
-   3. Unbilled work → "Invoice [Customer/Project] for [hours] hours ([amount])"
    
    CRITICAL RULES:
    - ONLY use customer names from MONEY ON THE TABLE section

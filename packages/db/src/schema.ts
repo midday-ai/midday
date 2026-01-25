@@ -3815,7 +3815,6 @@ export type InsightActivity = {
   invoicesOverdue: number;
   overdueAmount?: number;
   hoursTracked: number;
-  unbilledHours: number;
   largestPayment?: { customer: string; amount: number };
   newCustomers: number;
   receiptsMatched: number;

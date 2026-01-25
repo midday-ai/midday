@@ -15,7 +15,9 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "lint:fix": "biome format --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eval": "bunx evalite watch",
+    "eval:run": "bunx evalite"
   },
   "dependencies": {
     "@midday/db": "workspace:*",
@@ -28,6 +30,9 @@
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "typescript": "^5.9.3"
+    "dotenv": "^17.2.3",
+    "evalite": "^0.19.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

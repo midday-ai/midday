@@ -99,19 +99,6 @@ export type OverdueInvoiceDetail = {
 };
 
 /**
- * Detailed unbilled hours for "money on table" section
- */
-export type UnbilledHoursDetail = {
-  projectId: string;
-  projectName: string;
-  customerName?: string;
-  hours: number;
-  rate: number;
-  currency: string;
-  billableAmount: number;
-};
-
-/**
  * Draft invoice ready to send to a client (potential revenue)
  */
 export type DraftInvoiceDetail = {
@@ -130,7 +117,6 @@ export type MoneyOnTable = {
   totalAmount: number;
   currency: string;
   overdueInvoices: OverdueInvoiceDetail[];
-  unbilledWork: UnbilledHoursDetail[];
   draftInvoices: DraftInvoiceDetail[];
 };
 
@@ -143,8 +129,6 @@ export type InsightActivity = {
   invoicesOverdue: number;
   overdueAmount?: number;
   hoursTracked: number;
-  unbilledHours: number;
-  billableAmount?: number;
   largestPayment?: { customer: string; amount: number };
   newCustomers: number;
   receiptsMatched: number;

@@ -139,22 +139,6 @@ export const METRIC_DEFINITIONS: MetricDefinition[] = [
     unit: "hours",
     description: "Total hours logged",
   },
-  {
-    type: "unbilled_hours",
-    label: "Unbilled Hours",
-    category: "time",
-    priority: 2,
-    unit: "hours",
-    description: "Hours not yet invoiced",
-  },
-  {
-    type: "billable_amount",
-    label: "Billable Amount",
-    category: "time",
-    priority: 2,
-    unit: "currency",
-    description: "Value of unbilled work",
-  },
 
   // Operations (low priority - internal bookkeeping, not key business metrics)
   {

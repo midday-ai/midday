@@ -52,8 +52,6 @@ export const insightActivitySchema = z.object({
   invoicesOverdue: z.number(),
   overdueAmount: z.number().optional(),
   hoursTracked: z.number(),
-  unbilledHours: z.number(),
-  billableAmount: z.number().optional(),
   largestPayment: z
     .object({
       customer: z.string(),

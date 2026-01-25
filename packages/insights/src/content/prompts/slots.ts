@@ -26,18 +26,6 @@ export type OverdueSlot = {
 };
 
 /**
- * Unbilled work slot
- */
-export type UnbilledSlot = {
-  projectId: string;
-  project: string;
-  customer?: string;
-  hours: number;
-  amount: string;
-  rawAmount: number;
-};
-
-/**
  * Draft invoice slot
  */
 export type DraftSlot = {
@@ -121,11 +109,6 @@ export type InsightSlots = {
   overdue: OverdueSlot[];
   largestOverdue?: OverdueSlot;
 
-  hasUnbilled: boolean;
-  unbilledTotal: string;
-  unbilledCount: number;
-  unbilled: UnbilledSlot[];
-
   hasDrafts: boolean;
   draftsTotal: string;
   draftsCount: number;
@@ -195,6 +178,90 @@ export function getNotableContext(slots: InsightSlots): string | null {
   if (slots.vsAverage) {
     return slots.vsAverage;
   }
+  return null;
+}
+
+/**
+ * Get tone guidance for prompts based on week type
+ * Helps AI match the appropriate voice for the situation
+ */
+export function getToneGuidance(weekType: WeekType): string {
+  switch (weekType) {
+    case "great":
+      return "Tone: Confident and acknowledging — recognize the achievement without being over-the-top. Sound like a trusted advisor noting a milestone.";
+    case "good":
+      return "Tone: Warm and professional — matter-of-fact with a positive undercurrent. Business as usual, things are working.";
+    case "quiet":
+      return "Tone: Brief and reassuring — no drama about low activity. Acknowledge the quiet period without concern.";
+    case "challenging":
+      return "Tone: Direct and constructive — honest about the situation but focused on the buffer (runway) and clear next steps. No alarm, just clarity.";
+  }
+}
+
+/**
+ * Primary action type for story prompt
+ */
+export type PrimaryAction = {
+  type: "overdue" | "draft" | "expense_spike" | "concentration";
+  description: string;
+  amount: string;
+  company?: string;
+  daysOverdue?: number;
+  category?: string;
+  change?: number;
+};
+
+/**
+ * Select the single most important action to highlight
+ * Priority: overdue > drafts > expense spikes > concentration warning
+ */
+export function selectPrimaryAction(slots: InsightSlots): PrimaryAction | null {
+  // Priority 1: Overdue invoices (money you're owed)
+  if (slots.hasOverdue && slots.largestOverdue) {
+    return {
+      type: "overdue",
+      description: `Collect ${slots.largestOverdue.amount} overdue from ${slots.largestOverdue.company}`,
+      amount: slots.largestOverdue.amount,
+      company: slots.largestOverdue.company,
+      daysOverdue: slots.largestOverdue.daysOverdue,
+    };
+  }
+
+  // Priority 2: Draft invoices ready to send
+  if (slots.hasDrafts && slots.drafts.length > 0) {
+    const topDraft = slots.drafts.reduce((max, d) =>
+      d.rawAmount > max.rawAmount ? d : max,
+    );
+    return {
+      type: "draft",
+      description: `Send the ${topDraft.amount} draft invoice to ${topDraft.company}`,
+      amount: topDraft.amount,
+      company: topDraft.company,
+    };
+  }
+
+  // Priority 3: Expense spikes worth reviewing
+  if (slots.hasExpenseSpikes && slots.expenseSpikes.length > 0) {
+    const topSpike = slots.expenseSpikes[0]!;
+    return {
+      type: "expense_spike",
+      description: `Review ${topSpike.category} spending — up ${topSpike.change}% to ${topSpike.amount}`,
+      amount: topSpike.amount,
+      category: topSpike.category,
+      change: topSpike.change,
+    };
+  }
+
+  // Priority 4: Revenue concentration risk
+  if (slots.concentrationWarning) {
+    return {
+      type: "concentration",
+      description: `${slots.concentrationWarning.percentage}% of revenue from ${slots.concentrationWarning.customerName} — consider diversifying`,
+      amount: slots.concentrationWarning.amount,
+      company: slots.concentrationWarning.customerName,
+    };
+  }
+
   return null;
 }
 
@@ -372,17 +439,6 @@ export function computeSlots(
         )
       : undefined;
 
-  // Money on table - Unbilled
-  const unbilled: UnbilledSlot[] =
-    moneyOnTable?.unbilledWork.map((work) => ({
-      projectId: work.projectId,
-      project: work.projectName,
-      customer: work.customerName,
-      hours: work.hours,
-      amount: formatMetricValue(work.billableAmount, "currency", currency),
-      rawAmount: work.billableAmount,
-    })) ?? [];
-
   // Money on table - Drafts
   const drafts: DraftSlot[] =
     moneyOnTable?.draftInvoices.map((inv) => ({
@@ -506,19 +562,6 @@ export function computeSlots(
     overdueCount: overdue.length,
     overdue,
     largestOverdue,
-
-    // Unbilled
-    hasUnbilled: unbilled.length > 0,
-    unbilledTotal: formatMetricValue(
-      moneyOnTable?.unbilledWork.reduce(
-        (sum, w) => sum + w.billableAmount,
-        0,
-      ) ?? 0,
-      "currency",
-      currency,
-    ),
-    unbilledCount: unbilled.length,
-    unbilled,
 
     // Drafts
     hasDrafts: drafts.length > 0,

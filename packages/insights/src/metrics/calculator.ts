@@ -115,8 +115,6 @@ export function addActivityMetrics(
     invoicesPaid: number;
     invoicesOverdue: number;
     hoursTracked: number;
-    unbilledHours: number;
-    billableAmount?: number;
     newCustomers: number;
     receiptsMatched: number;
     transactionsCategorized: number;
@@ -126,13 +124,11 @@ export function addActivityMetrics(
     invoicesPaid: number;
     invoicesOverdue: number;
     hoursTracked: number;
-    unbilledHours: number;
-    billableAmount?: number;
     newCustomers: number;
     receiptsMatched: number;
     transactionsCategorized: number;
   },
-  currency: string,
+  _currency: string,
 ): Record<string, InsightMetric> {
   // Invoicing metrics
   metrics.invoices_sent = createMetric(
@@ -159,24 +155,6 @@ export function addActivityMetrics(
     currentActivity.hoursTracked,
     previousActivity.hoursTracked,
   );
-
-  metrics.unbilled_hours = createMetric(
-    "unbilled_hours",
-    currentActivity.unbilledHours,
-    previousActivity.unbilledHours,
-  );
-
-  if (
-    currentActivity.billableAmount !== undefined ||
-    previousActivity.billableAmount !== undefined
-  ) {
-    metrics.billable_amount = createMetric(
-      "billable_amount",
-      currentActivity.billableAmount ?? 0,
-      previousActivity.billableAmount ?? 0,
-      currency,
-    );
-  }
 
   // Customer metrics
   metrics.new_customers = createMetric(

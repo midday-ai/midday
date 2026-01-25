@@ -20,7 +20,6 @@ import {
   getRunway,
   getSpending,
   getSpendingForPeriod,
-  getUnbilledHoursDetails,
   getUpcomingDueRecurringByTeam,
   getUpcomingInvoicesForInsight,
 } from "@midday/db/queries";
@@ -468,8 +467,6 @@ export class InsightsService {
     invoicesPaid: number;
     invoicesOverdue: number;
     hoursTracked: number;
-    unbilledHours: number;
-    billableAmount?: number;
     largestPayment?: { customer: string; amount: number };
     newCustomers: number;
     receiptsMatched: number;
@@ -490,8 +487,6 @@ export class InsightsService {
       invoicesPaid: activityData?.invoicesPaid ?? 0,
       invoicesOverdue: 0, // Fetched separately for current only
       hoursTracked: activityData?.hoursTracked ?? 0,
-      unbilledHours: activityData?.unbilledHours ?? 0,
-      billableAmount: activityData?.billableAmount,
       largestPayment: activityData?.largestPayment,
       newCustomers: activityData?.newCustomers ?? 0,
       receiptsMatched: activityData?.receiptsMatched ?? 0,
@@ -511,8 +506,6 @@ export class InsightsService {
       invoicesPaid: number;
       invoicesOverdue: number;
       hoursTracked: number;
-      unbilledHours: number;
-      billableAmount?: number;
       largestPayment?: { customer: string; amount: number };
       newCustomers: number;
       receiptsMatched: number;
@@ -527,7 +520,6 @@ export class InsightsService {
       overdueData,
       upcomingRecurring,
       overdueDetails,
-      unbilledDetails,
       draftInvoices,
     ] = await Promise.all([
       getOverdueInvoicesAlert(this.db, { teamId, currency }).catch(() => null),
@@ -540,9 +532,6 @@ export class InsightsService {
       // Detailed queries for "money on table"
       getOverdueInvoiceDetails(this.db, { teamId, currency }).catch(
         () => [] as Awaited<ReturnType<typeof getOverdueInvoiceDetails>>,
-      ),
-      getUnbilledHoursDetails(this.db, { teamId, currency }).catch(
-        () => [] as Awaited<ReturnType<typeof getUnbilledHoursDetails>>,
       ),
       getDraftInvoices(this.db, { teamId, currency }).catch(
         () => [] as Awaited<ReturnType<typeof getDraftInvoices>>,
@@ -579,21 +568,15 @@ export class InsightsService {
       (sum: number, inv: { amount: number }) => sum + inv.amount,
       0,
     );
-    const unbilledTotal = unbilledDetails.reduce(
-      (sum: number, proj: { billableAmount: number }) =>
-        sum + proj.billableAmount,
-      0,
-    );
     const draftTotal = draftInvoices.reduce(
       (sum: number, inv: { amount: number }) => sum + inv.amount,
       0,
     );
 
     const moneyOnTable: MoneyOnTable = {
-      totalAmount: overdueTotal + unbilledTotal + draftTotal,
+      totalAmount: overdueTotal + draftTotal,
       currency,
       overdueInvoices: overdueDetails,
-      unbilledWork: unbilledDetails,
       draftInvoices,
     };
 
@@ -649,8 +632,6 @@ export class InsightsService {
       invoicesOverdue: overdueData?.summary?.count ?? 0,
       overdueAmount: overdueData?.summary?.totalAmount ?? 0,
       hoursTracked: activityData.hoursTracked,
-      unbilledHours: activityData.unbilledHours,
-      billableAmount: activityData.billableAmount,
       largestPayment: activityData.largestPayment,
       newCustomers: activityData.newCustomers,
       receiptsMatched: activityData.receiptsMatched,
@@ -740,7 +721,6 @@ export type {
   PeriodInfo,
   PeriodType,
   PreviousPredictionsContext,
-  UnbilledHoursDetail,
 } from "./types";
 
 // Re-export constants

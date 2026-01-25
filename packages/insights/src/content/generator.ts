@@ -83,7 +83,8 @@ export class ContentGenerator {
   private model: string;
 
   constructor(options: ContentGeneratorOptions = {}) {
-    this.model = options.model ?? "gpt-4o-mini";
+    // gpt-4.1-mini: best instruction following + cost efficiency for text generation
+    this.model = options.model ?? "gpt-4.1-mini";
   }
 
   /**
@@ -254,20 +255,6 @@ export class ContentGenerator {
           text,
           type: "draft",
           invoiceId: draft.id,
-        };
-      }
-    }
-
-    // Check unbilled work
-    for (const work of slots.unbilled) {
-      if (
-        textLower.includes(work.project.toLowerCase()) ||
-        (work.customer && textLower.includes(work.customer.toLowerCase()))
-      ) {
-        return {
-          text,
-          type: "unbilled",
-          projectId: work.projectId,
         };
       }
     }

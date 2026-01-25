@@ -7,7 +7,7 @@
  * - Few-shot examples
  * - Direct, specific instructions
  */
-import { type InsightSlots, getNotableContext } from "./slots";
+import { type InsightSlots, getNotableContext, getToneGuidance } from "./slots";
 
 /**
  * Build the title generation prompt
@@ -17,37 +17,57 @@ export function buildTitlePrompt(slots: InsightSlots): string {
 
   const data = buildDataSection(slots);
   const examples = buildExamples(weekType, isFirstInsight);
+  const tone = getToneGuidance(weekType);
 
   const firstInsightNote = isFirstInsight
-    ? "\n- This is their FIRST insight - no 'vs last week' comparisons"
+    ? "\n- This is their FIRST insight - welcome them warmly, no 'vs last week' comparisons"
     : "";
 
   return `<role>
-You write concise, varied headlines for weekly financial reports.
-Lead with what's most notable. No fixed format.
+You write the headline for a weekly business insight that appears in a dashboard widget.
+This is the FIRST thing users see — it must feel personal and make them want to read more.
+Sound like a trusted CFO giving a quick verbal update, not a dashboard generating a report.
 </role>
+
+<voice>
+${tone}
+</voice>
 
 <data>
 ${data}
 </data>
 
-<rules>
-- MUST be 10-20 words
-- NEVER use "Weekly Summary:" prefix - vary the opening
-- If "notable" context provided, MUST lead with it
-- Otherwise lead with the most significant metric (profit, or runway if challenging week)
-- MUST include runway somewhere
-- MUST use the exact currency format shown in data values (copy the format, not the ISO code)
-- NEVER use these adjectives: solid, healthy, strong, great, robust, excellent
-- ZERO VALUES: If profit/revenue/expenses are all 0, lead with "No activity this period" or focus on runway/outstanding items
-- NEVER report percentage changes when the result is 0 (e.g., don't say "+100%" for 0 kr profit)
-- Note largest overdue only if significant${firstInsightNote}
-</rules>
+<constraints>
+Word count: 15-30 words
+WHY: Under 15 feels incomplete. Over 30 won't fit the widget and loses punch.
+
+Must use "your" or "you": Speak directly to the business owner.
+WHY: "Your profit" feels personal. "Profit of X" feels like a spreadsheet.
+
+Lead with context, not numbers: Start with streak/milestone/situation, then the figures.
+WHY: "Third straight profitable week" hooks attention. "117k profit" is just data.
+
+Include runway naturally: Mention it as reassurance, not as a metric.
+WHY: Runway tells them they're safe. It should feel like comfort, not a data point.
+
+Match currency format exactly: Copy the format from data (e.g., "338,958 kr" not "SEK 338958").
+WHY: Consistency with their familiar format builds trust.
+</constraints>
+
+<banned_words>
+solid, healthy, strong, great, robust, excellent, remarkable, impressive, amazing, outstanding, significant
+WHY: These are filler words that add no meaning. Plain language sounds more genuine.
+</banned_words>
+
+<additional_rules>
+- NEVER start with a number — always start with context or "Your"
+- NEVER use "Weekly Summary:" or similar prefixes${firstInsightNote}
+</additional_rules>
 
 ${examples}
 
 <output>
-Write ONE headline (10-20 words). Begin directly - no preamble.
+Write ONE headline (15-30 words). Begin directly — no preamble.
 </output>`;
 }
 
@@ -60,15 +80,28 @@ function buildDataSection(slots: InsightSlots): string {
   );
   lines.push("");
 
-  // Notable context for dynamic leads (shared utility)
+  // Period context for personalization
+  lines.push(`period: ${slots.periodLabel}`);
+  lines.push("");
+
+  // Notable context for leading the title (most important!)
   if (!slots.isFirstInsight) {
     const notable = getNotableContext(slots);
     if (notable) {
-      lines.push(`notable: ${notable}`);
+      lines.push(`notable_context: ${notable}`);
+      lines.push(
+        "(LEAD with this context - it's what makes this week interesting)",
+      );
       lines.push("");
     }
   }
 
+  // Streak info for personalization
+  if (slots.streak && slots.streak.count >= 2) {
+    lines.push(`streak: ${slots.streak.count} ${slots.streak.type}`);
+  }
+
+  // Core financials
   lines.push(`profit: ${slots.profit}`);
   lines.push(`margin: ${slots.margin}%`);
   lines.push(`runway: ${slots.runway} months`);
@@ -81,42 +114,59 @@ function buildDataSection(slots: InsightSlots): string {
     lines.push(`expenses: ${slots.expenses}`);
   }
 
+  // Pending money (helps paint the full picture)
   if (slots.largestOverdue) {
     lines.push(
-      `overdue: ${slots.largestOverdue.company} owes ${slots.largestOverdue.amount}`,
+      `overdue: ${slots.largestOverdue.amount} from ${slots.largestOverdue.company} (${slots.largestOverdue.daysOverdue} days)`,
     );
+  }
+
+  if (slots.hasDrafts) {
+    lines.push(`drafts_ready: ${slots.draftsTotal}`);
   }
 
   return lines.join("\n");
 }
 
 function buildExamples(weekType: string, isFirstInsight: boolean): string {
+  // Personal examples that lead with context, use "your/you", and feel conversational
   const examples: Record<string, string[]> = {
     great: [
-      "[amount] profit at [X]% margin. [X]-month runway. [amount] outstanding from [Company].",
-      "Best week since [month] — [amount] profit, [X]% margin, [X]-month runway.",
+      "Your best profit week ever — [amount] at [X]% margin with a comfortable [X]-month runway ahead",
+      "Best week since [month] — [amount] profit caps off a strong run, and your [X]-month runway gives you options",
+      "Your [X]th consecutive week above [threshold] — [amount] profit with [X]% margin and [X] months of runway",
     ],
     good: [
-      "[amount] profit ([X]% margin) with [X]-month runway. [amount] overdue from [Company].",
-      "Third consecutive profitable week — [amount] at [X]% margin. [X]-month runway.",
+      "Third straight week above [threshold] — [month] is shaping up well, and your [X]-month runway gives you room",
+      "Another profitable week for you — [amount] at [X]% margin, with [amount] pending from [Company] to chase",
+      "Your [month] is on track — [amount] profit this week, [X]% margin, and a [X]-month runway buffer",
     ],
     quiet: [
-      "Steady week: [amount] profit, [X]% margin, [X]-month runway.",
-      "[amount] profit with margin holding. Runway at [X] months.",
-      "No activity this period. [X]-month runway. [amount] outstanding from [Company].",
+      "Quiet week on the revenue side, but your [X]-month runway and the [amount] pending from [Company] keep things stable",
+      "Slower week for you — [amount] profit, but your [X]-month runway means no pressure",
+      "Not much movement this week, though your [X]-month runway and [X]% margin give you flexibility",
     ],
     challenging: [
-      "No revenue this period — [amount] expenses. [X]-month runway provides buffer.",
-      "Payment timing gap. [X]-month runway. [amount] outstanding from [Company].",
-      "No activity recorded. Runway at [X] months. [amount] overdue from [Company].",
+      "No revenue landed this week — payment timing gap, but your [X]-month runway means there's no rush",
+      "Tough week with [amount] in expenses — your [X]-month buffer gives you time to work with",
+      "Payment gap this week — [amount] sitting with [Company] overdue, but your [X]-month runway provides cushion",
     ],
   };
 
   const weekExamples = examples[weekType] ?? examples.good;
 
-  // Concrete example showing exact format
-  const concreteExample =
-    "338,958 kr profit at 99.7% margin. 14-month runway. 750 kr outstanding from Acme Corp.";
+  // Concrete examples showing the personal, conversational format
+  const concreteExamples: Record<string, string> = {
+    great:
+      "Your best profit week ever — 338,958 kr at 99% margin with a comfortable 14-month runway ahead",
+    good: "Third straight week above 100k — January is shaping up well, and your 8-month runway gives you room",
+    quiet:
+      "Quiet week on the revenue side, but your 8-month runway and the 24,300 kr pending from Klarna keep things stable",
+    challenging:
+      "No revenue landed this week — payment timing gap, but your 14-month runway means there's no rush",
+  };
+
+  const concreteExample = concreteExamples[weekType] ?? concreteExamples.good;
 
   return `<examples>
 <concrete_example>${concreteExample}</concrete_example>

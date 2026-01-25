@@ -7,48 +7,91 @@
  * - Few-shot examples with input/output
  * - Direct, specific instructions
  */
-import { type InsightSlots, getNotableContext } from "./slots";
+import {
+  type InsightSlots,
+  getNotableContext,
+  getToneGuidance,
+} from "./slots";
 
 /**
  * Build the summary generation prompt
  */
 export function buildSummaryPrompt(slots: InsightSlots): string {
-  const { isFirstInsight } = slots;
+  const { isFirstInsight, weekType } = slots;
+  const tone = getToneGuidance(weekType);
 
   const role = `<role>
-You are a financial analyst providing a weekly business briefing.
-Clear, precise language. No fluff, but accessible to non-accountants.
-</role>`;
+You write the summary paragraph for a weekly business insight.
+This follows the headline and gives the full financial picture in flowing prose.
+Sound like a knowledgeable colleague giving a verbal debrief — not a report generator.
+</role>
+
+<voice>
+${tone}
+</voice>`;
 
   const data = buildDataSection(slots);
 
   const rules = isFirstInsight
-    ? `<rules>
-- This is their FIRST weekly insight - provide brief context on what this report covers
-- MUST be 40-60 words, professional and precise
-- MUST include: profit, margin, runway with brief assessment
-- Assess business health objectively (margin quality, runway adequacy)
-- NEVER use "vs last week" comparisons - no prior data exists
-- Note any outstanding receivables at the end
-- ACCURACY: If profit is negative and revenue is zero, expenses MUST equal the absolute value of profit. NEVER say "no expenses" when profit is negative.
-- MUST use the exact currency format shown in data values (copy the format, not the ISO code)
-- NEVER use these adjectives: robust, solid, excellent, strong, healthy
-- CRITICAL: Profit of 0 is NOT a loss. Only negative profit is a loss. Zero profit with zero expenses = "no activity", not "loss"
-</rules>`
-    : `<rules>
-- MUST be 40-60 words, professional and precise
-- If "notable" context provided, MUST LEAD with it (e.g., "Best week since October: ..." or "Third consecutive profitable week: ...")
-- MUST include: profit, margin, runway
-- MUST use direct statements: "Profit of X" not casual "You made X"
-- Note outstanding receivables at end if any
-- ACCURACY: All stated figures MUST match the data exactly. If revenue is 0 and profit is negative, expenses exist.
-- MUST use the exact currency format shown in data values (copy the format, not the ISO code)
-- NEVER use these adjectives: robust, solid, excellent, strong, healthy
-- For loss periods: acknowledge honestly, explain likely cause (timing), note runway buffer
-- ZERO VALUES: If profit, revenue, AND expenses are all 0, state "No financial activity this period" - don't report meaningless percentages
-- NEVER report percentage changes when the result is 0 (e.g., don't say "+100% to reach 0 kr")
-- CRITICAL: Profit of 0 is NOT a loss. Only negative profit is a loss. If profit = 0, say "break-even" or "no activity", never "loss"
-</rules>`;
+    ? `<banned_words>
+solid, healthy, strong, great, robust, excellent, remarkable, impressive, amazing, outstanding, significant
+WHY: These are filler words. Plain language sounds more genuine.
+</banned_words>
+
+<constraints>
+This is their FIRST insight: Welcome them briefly — this sets the tone for the relationship.
+
+Word count: EXACTLY 40-60 words. Count before submitting.
+WHY: Under 40 feels incomplete. Over 60 is too long.
+
+Include profit, revenue, margin, runway: Woven together naturally.
+WHY: First impressions matter. Show them you understand their core metrics.
+
+Connect with flow words: "with", "while", "and your", "giving you".
+WHY: Prose, not bullet points.
+
+Never say "this period": Sounds robotic.
+WHY: Real people don't talk like reports.
+
+Match currency format exactly: Copy from data.
+WHY: Consistency from day one.
+</constraints>
+
+<accuracy>
+- All figures must match exactly
+- If profit is negative, expenses MUST be mentioned
+- Profit of 0 is "no activity", NOT a loss
+</accuracy>`
+    : `<banned_words>
+solid, healthy, strong, great, robust, excellent, remarkable, impressive, amazing, outstanding, significant
+WHY: These are filler words. Plain language sounds more genuine and trustworthy.
+</banned_words>
+
+<constraints>
+Word count: EXACTLY 40-60 words. Count before submitting.
+WHY: Under 40 feels incomplete. Over 60 becomes a wall of text they won't read.
+
+Include profit, revenue, margin, runway: All four metrics, woven together naturally.
+WHY: These are the core health indicators. Listing them separately feels like a spreadsheet.
+
+Connect facts with flow words: Use "with", "while", "and your", "giving you".
+WHY: Connected prose reads naturally. Bullet-point style feels robotic.
+
+Never say "this period": Say "this week" or nothing.
+WHY: "This period" is report-speak. Real people say "this week."
+
+Match currency format exactly: Copy from data (e.g., "117,061 kr").
+WHY: Consistency builds trust.
+
+Mention outstanding receivables at the end: If any exist.
+WHY: Ends with an actionable item they can address.
+</constraints>
+
+<accuracy>
+- All figures must match the data exactly
+- If profit is negative, expenses MUST be mentioned
+- Profit of 0 is "no activity" or "break-even", NOT a loss
+</accuracy>`;
 
   const examples = isFirstInsight
     ? buildFirstInsightExamples(slots)
@@ -65,16 +108,16 @@ ${rules}
 ${examples}
 
 <verify>
-Before responding, check:
-- All amounts use the same format as shown in data (e.g., if data shows "338,957 kr", use "kr" not "SEK")
-- Word count is 40-60 words
-- No banned adjectives (robust, solid, excellent, strong, healthy)
-- All figures match the data exactly
-- If profit is negative, did you mention expenses? (NEVER say "no expenses" when profit is negative)
+Before responding, COUNT YOUR WORDS:
+- Is word count between 40-60? (This is critical — rewrite if not)
+- Does it flow naturally when read aloud?
+- Are facts connected, not just listed?
+- Is "this period" avoided?
+- Do amounts match the data format exactly?
 </verify>
 
 <output>
-Write ONE summary (40-60 words). Begin directly with the content - no preamble or introduction.
+Write ONE summary (40-60 words exactly). Begin directly — no preamble.
 </output>`;
 }
 
@@ -126,55 +169,54 @@ function buildDataSection(slots: InsightSlots): string {
 }
 
 function buildExamples(slots: InsightSlots): string {
-  // Examples showing different lead patterns for variety
+  // Examples showing natural, flowing language that connects facts
   const examples: Record<string, { input: string; output: string }> = {
     // When there's a milestone/personal best
     milestone: {
       input:
-        "notable: Best profit week since [month]\n\nprofit: [amount], revenue: [amount], expenses: [amount], margin: [X]%, runway: [X] months, overdue: [Company] [amount]",
+        "notable: Best profit week since October\n\nprofit: 117,061 kr, revenue: 120,200 kr, expenses: 3,139 kr, margin: 97.4%, runway: 8 months, overdue: Klarna 24,300 kr",
       output:
-        "Best profit week since [month]: [amount] on [amount] revenue. Margin at [X]% with minimal expenses. Runway at [X] months. Outstanding: [amount] from [Company].",
+        "Your best profit week since October — 117,061 kr on 120,200 kr revenue with margin holding at 97%. Expenses stayed minimal, and your 8-month runway gives you flexibility. Klarna still owes 24,300 kr worth chasing.",
     },
     // When there's a streak
     streak: {
       input:
-        "notable: [X] consecutive profitable weeks\n\nprofit: [amount], revenue: [amount], expenses: [amount], margin: [X]%, runway: [X] months",
+        "notable: 3 consecutive profitable weeks\n\nprofit: 117,061 kr, revenue: 120,200 kr, expenses: 3,139 kr, margin: 97.4%, runway: 8 months",
       output:
-        "[Xth] consecutive profitable week: [amount] profit at [X]% margin. Revenue of [amount] with [amount] expenses. Runway at [X] months.",
+        "Third straight profitable week — 117,061 kr profit at 97% margin, continuing the momentum. Revenue came in at 120,200 kr with minimal expenses, and your 8-month runway keeps things comfortable.",
     },
     // When there's a recovery
     recovery: {
       input:
-        "notable: Recovery after [X] down weeks\n\nprofit: [amount], revenue: [amount], expenses: [amount], margin: [X]%, runway: [X] months, overdue: [Company] [amount]",
+        "notable: Recovery after 2 down weeks\n\nprofit: 85,000 kr, revenue: 90,000 kr, expenses: 5,000 kr, margin: 94.4%, runway: 6 months, overdue: Beta Inc 12,000 kr",
       output:
-        "Recovery after [X] down weeks: [amount] profit on [amount] revenue. Margin at [X]%, runway at [X] months. Outstanding: [amount] from [Company].",
+        "Back in the black after two tough weeks — 85,000 kr profit on 90,000 kr revenue. Margin recovered to 94%, and your 6-month runway held steady. Beta Inc still owes 12,000 kr from before.",
     },
     // Standard (no notable context)
     standard: {
       input:
-        "profit: [amount], revenue: [amount], expenses: [amount], margin: [X]%, runway: [X] months, overdue: [Company] [amount]",
+        "profit: 75,000 kr, revenue: 80,000 kr, expenses: 5,000 kr, margin: 93.8%, runway: 10 months, overdue: Acme Corp 8,000 kr",
       output:
-        "Profit of [amount] on [amount] revenue this period. Margin at [X]% with [amount] in expenses. Runway at [X] months. Outstanding: [amount] from [Company].",
+        "Solid week with 75,000 kr profit on 80,000 kr revenue — margin at 94% with low expenses. Your 10-month runway gives you room to operate. Acme Corp owes 8,000 kr that's worth following up on.",
     },
     // Challenging week - IMPORTANT: if profit is negative, expenses MUST be mentioned
     challenging: {
       input:
         "profit: -22,266 kr, revenue: 0 kr, expenses: 22,266 kr, runway: 14 months, overdue: Acme Corp 750 kr",
       output:
-        "No revenue this period with 22,266 kr in expenses, resulting in a net loss. This reflects invoice payment timing. Runway of 14 months provides buffer. Outstanding: 750 kr from Acme Corp.",
+        "No revenue landed this week, with 22,266 kr in expenses creating a gap. This is usually payment timing — invoices crossing weeks. Your 14-month runway means no pressure. Acme Corp still owes 750 kr.",
     },
     // Zero activity week (all values are 0) - NOT a loss, just no activity
     zero_activity: {
       input:
-        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, margin: 0%, runway: [X] months, overdue: [Company] [amount]",
+        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, margin: 0%, runway: 8 months, overdue: Klarna 5,000 kr",
       output:
-        "No financial activity recorded this period — no revenue or expenses. Runway remains at [X] months. Outstanding: [amount] from [Company] overdue by [X] days.",
+        "Quiet week with no revenue or expenses recorded — sometimes weeks are just slow. Your 8-month runway is unchanged, and Klarna's 5,000 kr overdue is still there to collect.",
     },
   };
 
   // Select appropriate example based on context
   let exampleKey: string;
-  // Check for zero activity week first
   const isZeroActivity =
     slots.profitRaw === 0 && slots.revenueRaw === 0 && slots.expensesRaw === 0;
 
@@ -194,12 +236,12 @@ function buildExamples(slots: InsightSlots): string {
 
   const example = examples[exampleKey]!;
 
-  // Concrete example showing exact format expected
+  // Concrete example showing exact natural, flowing format
   const concreteExample = {
     input:
-      "currency: SEK\n\nprofit: 338,958 kr, revenue: 340,000 kr, expenses: 1,042 kr, margin: 99.7%, runway: 14 months, overdue: Acme Corp 750 kr",
+      "currency: SEK\n\nnotable: 3 consecutive profitable weeks\n\nprofit: 117,061 kr, revenue: 120,200 kr, expenses: 3,139 kr, margin: 97.4%, runway: 8 months, overdue: Klarna 24,300 kr",
     output:
-      "Profit of 338,958 kr on 340,000 kr revenue this period. Margin at 99.7% with minimal expenses of 1,042 kr. Runway at 14 months. Outstanding: 750 kr from Acme Corp.",
+      "Third straight profitable week — 117,061 kr on 120,200 kr revenue with margin holding at 97%. Expenses stayed minimal at 3,139 kr, and your 8-month runway keeps things comfortable. Klarna owes 24,300 kr worth chasing.",
   };
 
   return `<examples>
@@ -220,37 +262,36 @@ function buildFirstInsightExamples(slots: InsightSlots): string {
   const examples: Record<string, { input: string; output: string }> = {
     great: {
       input:
-        "profit: [amount], margin: [X]%, runway: [X] months, overdue: [Company] [amount]",
+        "profit: 260,340 kr, revenue: 268,000 kr, expenses: 7,660 kr, margin: 97%, runway: 14 months, overdue: Acme Corp 750 kr",
       output:
-        "Initial weekly analysis: [amount] profit with [X]% operating margin, indicating low cost relative to revenue. Current runway of [X] months. Outstanding receivable: [amount] from [Company].",
+        "Welcome to your weekly insights. This week brought 260,340 kr profit on 268,000 kr revenue — a 97% margin with minimal expenses. Your 14-month runway gives you plenty of flexibility. One thing to chase: 750 kr overdue from Acme Corp.",
     },
     good: {
       input:
-        "profit: [amount], margin: [X]%, runway: [X] months, overdue: [Company] [amount]",
+        "profit: 85,000 kr, revenue: 95,000 kr, expenses: 10,000 kr, margin: 89%, runway: 8 months, overdue: Beta Inc 5,000 kr",
       output:
-        "Initial weekly analysis: [amount] profit at [X]% margin, typical for service-based operations. Runway of [X] months. Action needed: [amount] overdue from [Company].",
+        "Welcome to your weekly insights. You're starting with 85,000 kr profit on 95,000 kr revenue — 89% margin after 10,000 kr in expenses. Your 8-month runway is comfortable. Beta Inc owes 5,000 kr worth following up on.",
     },
     quiet: {
-      input: "profit: [amount], margin: [X]%, runway: [X] months",
+      input:
+        "profit: 12,000 kr, revenue: 15,000 kr, expenses: 3,000 kr, margin: 80%, runway: 6 months",
       output:
-        "Initial weekly analysis: [amount] profit with [X]% operating margin. Runway of [X] months. No outstanding receivables to address.",
+        "Welcome to your weekly insights. Quieter start with 12,000 kr profit on 15,000 kr revenue — 80% margin with low expenses. Your 6-month runway gives you time. No outstanding receivables to worry about.",
     },
     challenging: {
       input:
-        "profit: -[amount], revenue: 0, expenses: [amount], runway: [X] months, overdue: [Company] [amount]",
+        "profit: -15,000 kr, revenue: 0 kr, expenses: 15,000 kr, runway: 10 months, overdue: Acme Corp 8,000 kr",
       output:
-        "Initial weekly analysis: No revenue recorded with [amount] in expenses, resulting in a net loss for the period. This is common when invoice payments span multiple periods. Runway of [X] months provides operating buffer. Outstanding: [amount] from [Company].",
+        "Welcome to your weekly insights. No revenue this week with 15,000 kr in expenses — often just payment timing when invoices cross weeks. Your 10-month runway means no rush. Acme Corp owes 8,000 kr that's worth collecting.",
     },
-    // Zero activity - NOT a loss
     zero_activity: {
       input:
-        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, runway: [X] months, overdue: [Company] [amount]",
+        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, runway: 8 months, overdue: Klarna 3,000 kr",
       output:
-        "Initial weekly analysis: No financial activity recorded — no revenue or expenses this period. Runway of [X] months. Outstanding: [amount] from [Company] requires follow-up.",
+        "Welcome to your weekly insights. No financial activity recorded this week — sometimes weeks are just quiet. Your 8-month runway is unchanged. Klarna still owes 3,000 kr from before.",
     },
   };
 
-  // Check for zero activity first
   const isZeroActivity =
     slots.profitRaw === 0 && slots.revenueRaw === 0 && slots.expensesRaw === 0;
   const example = isZeroActivity
@@ -260,9 +301,9 @@ function buildFirstInsightExamples(slots: InsightSlots): string {
   // Concrete example for first insights
   const concreteExample = {
     input:
-      "currency: SEK\n\nprofit: 260,340 kr, margin: 97%, runway: 14 months, overdue: Acme Corp 750 kr",
+      "currency: SEK\n\nprofit: 260,340 kr, revenue: 268,000 kr, expenses: 7,660 kr, margin: 97%, runway: 14 months, overdue: Acme Corp 750 kr",
     output:
-      "Initial weekly analysis: 260,340 kr profit with 97% operating margin, indicating efficient cost management. Current runway of 14 months. Outstanding receivable: 750 kr from Acme Corp.",
+      "Welcome to your weekly insights. This week brought 260,340 kr profit on 268,000 kr revenue — a 97% margin with minimal expenses. Your 14-month runway gives you plenty of flexibility. One thing to chase: 750 kr overdue from Acme Corp.",
   };
 
   return `<examples>
