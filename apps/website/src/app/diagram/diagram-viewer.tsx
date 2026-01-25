@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useCallback } from "react";
 import {
-  ReactFlow,
   Background,
+  type Connection,
   Controls,
   MiniMap,
-  useNodesState,
-  useEdgesState,
+  ReactFlow,
   addEdge,
-  type Connection,
+  useEdgesState,
+  useNodesState,
 } from "@xyflow/react";
+import { useCallback, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import { allDiagrams, diagramDescriptions } from "./diagrams";
 
@@ -26,7 +26,7 @@ export function DiagramViewer() {
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    [setEdges],
   );
 
   const handleDiagramChange = (key: DiagramKey) => {
@@ -37,7 +37,7 @@ export function DiagramViewer() {
   };
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-200px)]">
+    <div className="flex flex-col min-h-screen pt-24">
       {/* Header */}
       <div className="flex items-center gap-6 flex-wrap py-8 border-b border-border">
         <h1 className="text-2xl font-medium tracking-tight">
@@ -62,7 +62,10 @@ export function DiagramViewer() {
       </div>
 
       {/* React Flow Canvas */}
-      <div className="rounded-lg border border-border mt-6" style={{ height: '70vh', minHeight: '600px', background: '#ffffff' }}>
+      <div
+        className="rounded-lg border border-border mt-6 flex-1"
+        style={{ minHeight: "500px", background: "#ffffff" }}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -73,7 +76,7 @@ export function DiagramViewer() {
           fitViewOptions={{ padding: 0.2 }}
           defaultEdgeOptions={{ type: "smoothstep" }}
           className="rounded-lg"
-          style={{ background: '#ffffff' }}
+          style={{ background: "#ffffff" }}
         >
           <Background color="#e2e8f0" gap={16} />
           <Controls className="!bg-white !border-gray-200 !shadow-sm" />
