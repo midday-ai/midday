@@ -20,6 +20,7 @@
     "@statsig/react-bindings": "^3.31.2",
     "@statsig/session-replay": "^3.31.2",
     "@statsig/web-analytics": "^3.31.2",
+    "@xyflow/react": "^12.10.0",
     "hls.js": "^1.6.15",
     "motion": "^12.26.2",
     "next": "16.1.3",
