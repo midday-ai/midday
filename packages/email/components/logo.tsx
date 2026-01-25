@@ -37,7 +37,7 @@ export function Logo() {
         src={`${baseUrl}/email/logo.png`}
         width="40"
         height="40"
-        alt="Midday"
+        alt="Abacus"
         className="my-0 mx-auto block logo-blend"
       />
     </Section>

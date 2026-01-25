@@ -42,7 +42,6 @@ const defaultIntegrations: Integration[] = [
     alt: "Dropbox",
     slug: "dropbox",
   },
-  { name: "Slack", icon: "/images/slack.svg", alt: "Slack", slug: "slack" },
   {
     name: "Stripe",
     icon: "/images/stripe.svg",

@@ -9,7 +9,7 @@ import { BaseProcessor } from "../base";
  * Invoice Notification Processor
  * Handles all invoice notification types (paid, overdue, sent, cancelled, scheduled, reminder_sent)
  * Sends email, in-app notifications via @midday/notifications
- * Sends Slack/WhatsApp notifications via sendToProviders
+ * Sends WhatsApp notifications via sendToProviders
  */
 export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificationPayload> {
   async process(job: Job<InvoiceNotificationPayload>): Promise<void> {
@@ -52,7 +52,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
           },
         );
 
-        // Send to external providers (Slack, WhatsApp)
+        // Send to external providers (WhatsApp, etc.)
         await sendToProviders(db, teamId, "invoice_paid", {
           invoiceId,
           invoiceNumber,

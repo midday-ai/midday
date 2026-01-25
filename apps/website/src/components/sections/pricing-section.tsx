@@ -17,110 +17,16 @@ export function PricingSection() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="flex flex-col lg:flex-row gap-14 justify-center items-center lg:items-stretch max-w-6xl mx-auto">
+        <div className="flex flex-col lg:flex-row gap-8 justify-center items-center lg:items-stretch max-w-7xl mx-auto px-4">
           {/* Starter */}
-          <div className="flex-1 max-w-md w-full lg:w-auto">
+          <div className="flex-1 max-w-sm w-full lg:w-auto">
             <div className="bg-background backdrop-blur-[43px] border border-border p-4 py-6 h-full flex flex-col">
               <div className="mb-4">
                 <h3 className="font-sans text-base text-foreground mb-1">
                   Starter
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground mb-3">
-                  For solo founders who want a clean starting point for their
-                  business finances
-                </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="font-sans text-2xl text-foreground">
-                    $399
-                  </span>
-                  <span className="font-sans text-sm text-muted-foreground">
-                    /month
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex-1 space-y-1 border-t border-border pt-6 pb-6">
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Financial overview and widgets
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Weekly summaries and insights
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Transactions with categorization
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Receipts and file storage
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Invoicing (up to 10 invoices per month)
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Time tracking
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 2 connected banks
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 2 team members
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <Button
-                  asChild
-                  className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
-                >
-                  <a href="https://app.abacuslabs.co/">Start your trial</a>
-                </Button>
-                <p className="font-sans text-xs text-muted-foreground text-center">
-                  Best for getting started
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Pro */}
-          <div className="flex-1 max-w-md w-full lg:w-auto">
-            <div className="bg-background backdrop-blur-[43px] border border-primary p-4 py-6 h-full flex flex-col relative">
-              <div className="absolute top-0 right-4 -translate-y-1/2">
-                <div className="bg-background border border-primary px-2 py-1 rounded-full flex items-center justify-center">
-                  <span className="font-sans text-xs text-foreground">
-                    Most popular
-                  </span>
-                </div>
-              </div>
-              <div className="mb-4">
-                <h3 className="font-sans text-base text-foreground mb-1">
-                  Pro
-                </h3>
-                <p className="font-sans text-sm text-muted-foreground mb-3">
-                  For founders and small teams running weekly finance workflows
-                  end to end
+                  For solo operators getting started with portfolio management
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
@@ -154,19 +60,81 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Receipts and file storage
+                    Up to 10 invoices per month
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Invoicing (up to 50 invoices per month)
+                    Up to 2 connected banks
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Time tracking
+                    Up to 2 team members
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    10GB storage
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  asChild
+                  className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
+                >
+                  <a href="https://app.abacuslabs.co/">Start your trial</a>
+                </Button>
+                <p className="font-sans text-xs text-muted-foreground text-center">
+                  Best for getting started
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Pro */}
+          <div className="flex-1 max-w-sm w-full lg:w-auto">
+            <div className="bg-background backdrop-blur-[43px] border border-primary p-4 py-6 h-full flex flex-col relative">
+              <div className="absolute top-0 right-4 -translate-y-1/2">
+                <div className="bg-background border border-primary px-2 py-1 rounded-full flex items-center justify-center">
+                  <span className="font-sans text-xs text-foreground">
+                    Most popular
+                  </span>
+                </div>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-sans text-base text-foreground mb-1">
+                  Pro
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground mb-3">
+                  For growing teams running weekly finance workflows end to end
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-sans text-2xl text-foreground">
+                    $599
+                  </span>
+                  <span className="font-sans text-sm text-muted-foreground">
+                    /month
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-1 border-t border-border pt-6 pb-6">
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Everything in Starter, plus:
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Up to 50 invoices per month
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
@@ -181,6 +149,18 @@ export function PricingSection() {
                     Up to 10 team members
                   </span>
                 </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    100GB storage
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    500 inbox items per month
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -192,6 +172,85 @@ export function PricingSection() {
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
                   Best value for most businesses
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Pro Plus */}
+          <div className="flex-1 max-w-sm w-full lg:w-auto">
+            <div className="bg-background backdrop-blur-[43px] border border-border p-4 py-6 h-full flex flex-col">
+              <div className="mb-4">
+                <h3 className="font-sans text-base text-foreground mb-1">
+                  Pro Plus
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground mb-3">
+                  For scaling operations with unlimited access and advanced tools
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-sans text-2xl text-foreground">
+                    $899
+                  </span>
+                  <span className="font-sans text-sm text-muted-foreground">
+                    /month
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-1 border-t border-border pt-6 pb-6">
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Everything in Pro, plus:
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Unlimited invoices
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Unlimited connected banks
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Unlimited team members
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    1TB storage
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Unlimited inbox items
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Underwriting tools
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  asChild
+                  className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
+                >
+                  <a href="https://app.abacuslabs.co/">Start your trial</a>
+                </Button>
+                <p className="font-sans text-xs text-muted-foreground text-center">
+                  Best for scaling operations
                 </p>
               </div>
             </div>

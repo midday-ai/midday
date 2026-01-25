@@ -21,10 +21,7 @@ interface HeaderProps {
 const FEATURE_ROUTES = [
   "/assistant",
   "/insights",
-  "/transactions",
   "/inbox",
-  "/time-tracking",
-  "/invoicing",
   "/customers",
   "/file-storage",
   "/pre-accounting",
@@ -81,7 +78,6 @@ export function Header({
   // All non-ERP integrations
   const allIntegrations = [
     { src: "/images/gmail.svg", alt: "Gmail" },
-    { src: "/images/slack.svg", alt: "Slack" },
     { src: "/images/stripe.svg", alt: "Stripe" },
     { src: "/images/gdrive.svg", alt: "Google Drive" },
     { src: "/images/outlook.svg", alt: "Outlook" },
@@ -202,13 +198,13 @@ export function Header({
             className="flex items-center gap-2 hover:opacity-80 active:opacity-80 transition-opacity duration-200 touch-manipulation"
             onClick={() => setIsMenuOpen(false)}
             style={{ WebkitTapHighlightColor: "transparent" }}
-            aria-label="Midday - Go to homepage"
+            aria-label="Abacus - Go to homepage"
           >
             <div className="w-6 h-6">
               <Icons.LogoSmall className="w-full h-full text-foreground" />
             </div>
             <span className="font-sans text-base xl:hidden text-foreground">
-              midday
+              abacus
             </span>
           </Link>
 
@@ -274,14 +270,9 @@ export function Header({
                                   desc: "See what's changing",
                                 },
                                 {
-                                  href: "/transactions",
-                                  title: "Transactions",
-                                  desc: "All transactions together",
-                                },
-                                {
                                   href: "/inbox",
                                   title: "Inbox",
-                                  desc: "Receipts handled automatically",
+                                  desc: "Documents handled automatically",
                                 },
                               ].map((item, index) => (
                                 <div
@@ -309,16 +300,6 @@ export function Header({
                             {/* Column 2 */}
                             <div>
                               {[
-                                {
-                                  href: "/time-tracking",
-                                  title: "Time tracking",
-                                  desc: "See where time goes",
-                                },
-                                {
-                                  href: "/invoicing",
-                                  title: "Invoicing",
-                                  desc: "Get paid faster",
-                                },
                                 {
                                   href: "/customers",
                                   title: "Customers",
@@ -759,17 +740,6 @@ export function Header({
                           Insights
                         </Link>
                         <Link
-                          href="/transactions"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Transactions
-                        </Link>
-                        <Link
                           href="/inbox"
                           onClick={() => {
                             setIsMenuOpen(false);
@@ -779,28 +749,6 @@ export function Header({
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Inbox
-                        </Link>
-                        <Link
-                          href="/time-tracking"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Time tracking
-                        </Link>
-                        <Link
-                          href="/invoicing"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Invoicing
                         </Link>
                         <Link
                           href="/customers"

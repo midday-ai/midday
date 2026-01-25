@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "Privacy Policy for Midday. Learn how we collect, use, and protect your personal data.",
+    "Privacy Policy for Abacus. Learn how we collect, use, and protect your personal data.",
 };
 
 export default function PrivacyPage() {
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
 
               <div className="prose prose-sm sm:prose-base max-w-none space-y-6 font-sans text-foreground">
                 <p className="text-muted-foreground leading-relaxed">
-                  Midday Labs AB ("us", "we", or "our") operates the Midday
+                  Abacus Labs ("us", "we", or "our") operates the Midday
                   application (hereinafter referred to as the "Service").
                 </p>
 
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
                         Service
                       </h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        Service is the Midday application operated by Midday
+                        Service is the Abacus application operated by Midday
                         Labs AB
                       </p>
                     </div>
@@ -238,7 +238,7 @@ export default function PrivacyPage() {
                     Use of Data
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday Labs AB uses the collected data for various purposes:
+                    Abacus Labs uses the collected data for various purposes:
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                     <li>To provide and maintain our Service</li>
@@ -269,7 +269,7 @@ export default function PrivacyPage() {
                     Use of Google User Data
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday's use of information received from Google APIs will
+                    Abacus's use of information received from Google APIs will
                     adhere to the Google API Services User Data Policy,
                     including the Limited Use requirements.
                   </p>
@@ -301,7 +301,7 @@ export default function PrivacyPage() {
                     we collect it.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday Labs AB may process your Personal Data because:
+                    Abacus Labs may process your Personal Data because:
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                     <li>We need to perform a contract with you</li>
@@ -320,7 +320,7 @@ export default function PrivacyPage() {
                     Retention of Data
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday Labs AB will retain your Personal Data only for as
+                    Abacus Labs will retain your Personal Data only for as
                     long as is necessary for the purposes set out in this
                     Privacy Policy. We will retain and use your Personal Data to
                     the extent necessary to comply with our legal obligations
@@ -329,7 +329,7 @@ export default function PrivacyPage() {
                     our legal agreements and policies.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday Labs AB will also retain Usage Data for internal
+                    Abacus Labs will also retain Usage Data for internal
                     analysis purposes. Usage Data is generally retained for a
                     shorter period of time, except when this data is used to
                     strengthen the security or to improve the functionality of
@@ -360,7 +360,7 @@ export default function PrivacyPage() {
                     that transfer.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday Labs AB will take all the steps reasonably necessary
+                    Abacus Labs will take all the steps reasonably necessary
                     to ensure that your data is treated securely and in
                     accordance with this Privacy Policy and no transfer of your
                     Personal Data will take place to an organisation or a
@@ -381,7 +381,7 @@ export default function PrivacyPage() {
                         Business Transaction
                       </h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        If Midday Labs AB is involved in a merger, acquisition
+                        If Abacus Labs is involved in a merger, acquisition
                         or asset sale, your Personal Data may be transferred. We
                         will provide notice before your Personal Data is
                         transferred and becomes subject to a different Privacy
@@ -394,7 +394,7 @@ export default function PrivacyPage() {
                         Disclosure for Law Enforcement
                       </h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        Under certain circumstances, Midday Labs AB may be
+                        Under certain circumstances, Abacus Labs may be
                         required to disclose your Personal Data if required to
                         do so by law or in response to valid requests by public
                         authorities (e.g. a court or a government agency).
@@ -406,7 +406,7 @@ export default function PrivacyPage() {
                         Legal Requirements
                       </h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        Midday Labs AB may disclose your Personal Data in the
+                        Abacus Labs may disclose your Personal Data in the
                         good faith belief that such action is necessary to:
                       </p>
                       <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
@@ -465,7 +465,7 @@ export default function PrivacyPage() {
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
                     If you are a resident of the European Economic Area (EEA),
-                    you have certain data protection rights. Midday Labs AB aims
+                    you have certain data protection rights. Abacus Labs aims
                     to take reasonable steps to allow you to correct, amend,
                     delete or limit the use of your Personal Data.
                   </p>
@@ -512,7 +512,7 @@ export default function PrivacyPage() {
                     <li>
                       <strong>The right to withdraw consent.</strong> You also
                       have the right to withdraw your consent at any time where
-                      Midday Labs AB relied on your consent to process your
+                      Abacus Labs relied on your consent to process your
                       personal information.
                     </li>
                   </ul>
@@ -727,10 +727,10 @@ export default function PrivacyPage() {
                   <p className="text-foreground leading-relaxed">
                     By email:{" "}
                     <a
-                      href="mailto:support@midday.ai"
+                      href="mailto:support@abacuslabs.co"
                       className="text-foreground hover:text-muted-foreground transition-colors"
                     >
-                      support@midday.ai
+                      support@abacuslabs.co
                     </a>
                   </p>
                 </section>

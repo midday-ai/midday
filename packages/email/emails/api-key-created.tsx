@@ -25,7 +25,7 @@ interface Props {
 
 export const ApiKeyCreatedEmail = ({
   fullName = "",
-  keyName = "Midday API Key",
+  keyName = "Abacus API Key",
   createdAt = "May 28, 2025",
   email = "user@example.com",
   ip = "204.13.186.218",
@@ -34,7 +34,7 @@ export const ApiKeyCreatedEmail = ({
   const firstName = fullName?.trim() ? fullName.split(" ").at(0) : "";
   const greeting = firstName ? `Hi ${firstName},` : "Hi,";
 
-  const text = `${greeting}\n\nYou've created a new API key with the name "${keyName}" on ${format(new Date(createdAt), "MMM d, yyyy")}. If this was not you, please contact support immediately.\n\nBest,\nThe Midday Team`;
+  const text = `${greeting}\n\nYou've created a new API key with the name "${keyName}" on ${format(new Date(createdAt), "MMM d, yyyy")}. If this was not you, please contact support immediately.\n\nBest,\nThe Abacus Team`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 

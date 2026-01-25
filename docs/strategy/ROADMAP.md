@@ -52,8 +52,11 @@ Without data, the portal is an empty shell. The sync is the "wedge" that proves 
 **Deliverables:**
 - Column mapping configuration UI
 - AI-suggested column mapping (Claude)
+- **AI spreadsheet logic analysis** (auto-detect formulas, fee structures, factor rate calculations, business mechanics) - reduces 40+ hour manual mapping to minutes
 - Initial sync: MainSheet → mca_deals table
 - Sync status indicator in header
+
+**Technology:** Leverages Claude API and Claude for Sheets for intelligent spreadsheet analysis that understands not just column names, but the underlying business logic (factor rates, fee structures, balance calculations).
 
 **Exit Criteria:** Honest Funding's deals appear in database with correct field mapping
 

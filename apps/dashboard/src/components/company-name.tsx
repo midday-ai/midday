@@ -46,7 +46,7 @@ export function CompanyName() {
           <CardHeader>
             <CardTitle>Company name</CardTitle>
             <CardDescription>
-              This is your company's visible name within Midday. For example,
+              This is your company's visible name within Abacus. For example,
               the name of your company or department.
             </CardDescription>
           </CardHeader>

@@ -197,7 +197,7 @@ export function Footer() {
               src={`${baseUrl}/email/x.png`}
               width="18"
               height="18"
-              alt="Midday on X"
+              alt="Abacus on X"
             />
           </Link>
         </Column>
@@ -207,7 +207,7 @@ export function Footer() {
               src={`${baseUrl}/email/producthunt.png`}
               width="22"
               height="22"
-              alt="Midday on Producthunt"
+              alt="Abacus on Producthunt"
             />
           </Link>
         </Column>
@@ -217,7 +217,7 @@ export function Footer() {
               src={`${baseUrl}/email/linkedin.png`}
               width="22"
               height="22"
-              alt="Midday on LinkedIn"
+              alt="Abacus on LinkedIn"
             />
           </Link>
         </Column>
@@ -230,7 +230,7 @@ export function Footer() {
         className={`text-xs ${themeClasses.secondaryText}`}
         style={{ color: lightStyles.secondaryText.color }}
       >
-        Midday Labs AB - Torsgatan 59 113 37, Stockholm, Sweden.
+        Abacus Labs - Your MCA Operating System.
       </Text>
 
       <Link

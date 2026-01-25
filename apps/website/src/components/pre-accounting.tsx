@@ -73,7 +73,7 @@ export function PreAccounting() {
                 Pre-accounting, handled.
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Midday collects, matches, and prepares your financial data so
+                Abacus collects, matches, and prepares your financial data so
                 your books are always ready before they reach an accountant.
               </p>
             </div>
@@ -136,7 +136,7 @@ export function PreAccounting() {
                 Pre-accounting, handled.
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-xl mx-auto font-sans text-center">
-                Midday collects, matches, and prepares your financial data so
+                Abacus collects, matches, and prepares your financial data so
                 your books are always ready before they reach an accountant.
               </p>
             </div>
@@ -341,7 +341,7 @@ export function PreAccounting() {
               Accountant-ready, without the back and forth
             </h2>
             <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
-              Midday prepares clean, structured records so exporting or syncing
+              Abacus prepares clean, structured records so exporting or syncing
               to your accounting system takes minutes, not days.
             </p>
           </div>
@@ -498,21 +498,6 @@ export function PreAccounting() {
                       />
                       <span className="font-sans text-sm text-foreground">
                         Outlook
-                      </span>
-                    </Link>
-                    <Link
-                      href="/integrations/slack"
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
-                    >
-                      <Image
-                        src="/images/slack.svg"
-                        alt="Slack"
-                        width={16}
-                        height={16}
-                        className="object-contain"
-                      />
-                      <span className="font-sans text-sm text-foreground">
-                        Slack
                       </span>
                     </Link>
                     <Link

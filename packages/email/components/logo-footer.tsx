@@ -32,11 +32,11 @@ export function LogoFooter() {
           }
         `}</style>
 
-      <Link href="https://go.midday.ai/FZwOHud">
+      <Link href="https://abacuslabs.co">
         <Img
           src={`${baseUrl}/email/logo-footer.png`}
           width="80"
-          alt="Midday"
+          alt="Abacus"
           className="block logo-blend"
         />
       </Link>

@@ -21,10 +21,7 @@ export function Footer() {
                 {[
                   { href: "/assistant", label: "Assistant" },
                   { href: "/insights", label: "Insights" },
-                  { href: "/transactions", label: "Transactions" },
                   { href: "/inbox", label: "Inbox" },
-                  { href: "/time-tracking", label: "Time tracking" },
-                  { href: "/invoicing", label: "Invoicing" },
                   { href: "/customers", label: "Customers" },
                   { href: "/file-storage", label: "Files" },
                 ].map((item) => (

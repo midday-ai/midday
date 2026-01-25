@@ -33,19 +33,27 @@ export const PLANS = {
 // Stripe subscription plans
 export const STRIPE_PRICES = {
   starter: {
-    priceId: process.env.STRIPE_STARTER_PRICE_ID ?? "price_1StV2sPhqDnZkVAwx5F3Vji6",
+    priceId: process.env.STRIPE_STARTER_PRICE_ID ?? "price_1StVRtPhqDnZkVAwOpsjMaNl",
     productId: "prod_TrDTsDNm2Vw2rt",
     name: "Starter",
     key: "starter" as const,
-    amount: 39900, // $399 in cents
+    amount: 49900, // $499 in cents
     currency: "usd",
   },
   pro: {
-    priceId: process.env.STRIPE_PRO_PRICE_ID ?? "price_1StV33PhqDnZkVAwT0Mzi8Y6",
+    priceId: process.env.STRIPE_PRO_PRICE_ID ?? "price_1StVRvPhqDnZkVAwLZOzHm8y",
     productId: "prod_TrDTedpbB0YW3v",
     name: "Pro",
     key: "pro" as const,
-    amount: 49900, // $499 in cents
+    amount: 59900, // $599 in cents
+    currency: "usd",
+  },
+  pro_plus: {
+    priceId: process.env.STRIPE_PRO_PLUS_PRICE_ID ?? "price_1StVRrPhqDnZkVAwLEgUR0b0",
+    productId: "prod_TrDtfQS20kFtJk",
+    name: "Pro Plus",
+    key: "pro_plus" as const,
+    amount: 89900, // $899 in cents
     currency: "usd",
   },
 } as const;
@@ -65,7 +73,7 @@ export const DISCOUNTS = {
   },
 } as const;
 
-export type PlanKey = "starter" | "pro";
+export type PlanKey = "starter" | "pro" | "pro_plus";
 export type PlanEnvironment = "production" | "sandbox";
 
 export const getDiscount = (planType?: string | null) => {
@@ -110,6 +118,8 @@ export function getPlanName(plan: string | null | undefined): string {
       return "Starter";
     case "pro":
       return "Pro";
+    case "pro_plus":
+      return "Pro Plus";
     case "trial":
       return "Trial";
     default:
@@ -129,8 +139,8 @@ export function getPlanLimits(plan: string): PlanLimits {
   switch (plan) {
     case "starter":
       return {
-        users: 1,
-        bankConnections: 1,
+        users: 2,
+        bankConnections: 2,
         storage: 10 * 1024 * 1024 * 1024, // 10GB in bytes
         inbox: 50,
         invoices: 10,
@@ -142,7 +152,15 @@ export function getPlanLimits(plan: string): PlanLimits {
         bankConnections: 10,
         storage: 100 * 1024 * 1024 * 1024, // 100GB in bytes
         inbox: 500,
-        invoices: 30,
+        invoices: 50,
+      };
+    case "pro_plus":
+      return {
+        users: Infinity,
+        bankConnections: Infinity,
+        storage: 1024 * 1024 * 1024 * 1024, // 1TB in bytes
+        inbox: Infinity,
+        invoices: Infinity,
       };
     default:
       return {

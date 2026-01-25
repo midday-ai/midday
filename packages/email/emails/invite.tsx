@@ -64,7 +64,7 @@ export const InviteEmail = ({
             style={{ color: lightStyles.text.color }}
           >
             {t("invite.title1")} <strong>{teamName}</strong>{" "}
-            {t("invite.title2")} <strong>Midday</strong>
+            {t("invite.title2")} <strong>Abacus</strong>
           </Heading>
 
           <Text
@@ -80,7 +80,7 @@ export const InviteEmail = ({
               {invitedByEmail}
             </Link>
             ) {t("invite.link1")} <strong>{teamName}</strong>{" "}
-            {t("invite.link2")} <strong>Midday</strong>.
+            {t("invite.link2")} <strong>Abacus</strong>.
           </Text>
           <Section className="mb-[42px] mt-[32px] text-center">
             <Button href={inviteLink}>{t("invite.join")}</Button>

@@ -31,14 +31,6 @@ export function MostActiveClient() {
     );
   }
 
-  const trackerHours = Math.round(data.totalTrackerTime / 3600);
-  const trackerMinutes = Math.round((data.totalTrackerTime % 3600) / 60);
-
-  const timeDisplay =
-    trackerHours > 0
-      ? `${trackerHours}h${trackerMinutes > 0 ? ` ${trackerMinutes}m` : ""}`
-      : `${trackerMinutes}m`;
-
   return (
     <Card className="hidden sm:block">
       <CardHeader className="pb-2">
@@ -51,12 +43,6 @@ export function MostActiveClient() {
         <div className="flex flex-col gap-2">
           <div>Most Active Client</div>
           <div className="text-sm text-muted-foreground">
-            {data.totalTrackerTime > 0 && (
-              <>
-                {timeDisplay} tracked
-                {data.invoiceCount > 0 && " and "}
-              </>
-            )}
             {data.invoiceCount > 0 && (
               <>
                 {data.invoiceCount} invoice{data.invoiceCount !== 1 ? "s" : ""}

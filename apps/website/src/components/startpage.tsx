@@ -83,7 +83,7 @@ const features = [
   {
     title: "Understand what's happening",
     subtitle:
-      "Midday explains changes in cash, revenue, and spending as they happen.",
+      "Abacus explains changes in cash, revenue, and spending as they happen.",
     mobileSubtitle: "See what's changing and why.",
     illustration: "animation",
   },
@@ -198,7 +198,7 @@ export function StartPage() {
               >
                 <Image
                   src="https://cdn.midday.ai/video-poster-v2.jpg"
-                  alt="Midday dashboard preview"
+                  alt="Abacus dashboard preview"
                   fill
                   fetchPriority="high"
                   quality={50}

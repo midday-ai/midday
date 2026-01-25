@@ -47,7 +47,7 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
   // WhatsApp number from environment
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
   const inboxId = team?.inboxId || "";
-  const message = `Connect to Midday: ${inboxId}`;
+  const message = `Connect to Abacus: ${inboxId}`;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
   useEffect(() => {

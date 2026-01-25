@@ -30,8 +30,6 @@ import { shortLinksRouter } from "./short-links";
 import { suggestedActionsRouter } from "./suggested-actions";
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
-import { trackerEntriesRouter } from "./tracker-entries";
-import { trackerProjectsRouter } from "./tracker-projects";
 import { transactionAttachmentsRouter } from "./transaction-attachments";
 import { transactionCategoriesRouter } from "./transaction-categories";
 import { transactionTagsRouter } from "./transaction-tags";
@@ -68,8 +66,6 @@ export const appRouter = createTRPCRouter({
   suggestedActions: suggestedActionsRouter,
   tags: tagsRouter,
   team: teamRouter,
-  trackerEntries: trackerEntriesRouter,
-  trackerProjects: trackerProjectsRouter,
   transactionAttachments: transactionAttachmentsRouter,
   transactionCategories: transactionCategoriesRouter,
   transactions: transactionsRouter,

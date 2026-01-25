@@ -268,8 +268,10 @@ bun format                 # Run Prettier
 
 | File | Purpose |
 |------|---------|
-| `PRODUCT_VISION.md` | Full product vision, roadmap, and strategy |
-| `docs/spec.md` | Sprint planning template |
+| `docs/strategy/` | **Strategy & Planning folder** - all strategic docs |
+| `docs/strategy/PRODUCT_VISION.md` | Full product vision, roadmap, and strategy |
+| `docs/strategy/FEATURE_PARITY.md` | Feature inventory and gap analysis |
+| `docs/strategy/MIGRATION_MASTER.md` | Technical migration status |
 | `packages/ui/` | Shared UI component library |
 | `apps/dashboard/` | Main application |
 | `supabase/` | Database schema and migrations |
@@ -277,4 +279,4 @@ bun format                 # Run Prettier
 
 ---
 
-*For full product context, see `PRODUCT_VISION.md`*
+*For full product context, see `docs/strategy/PRODUCT_VISION.md`*

@@ -23,8 +23,6 @@ export const createActivitySchema = z.object({
     "document_uploaded",
     "document_processed",
     "invoice_duplicated",
-    "tracker_entry_created",
-    "tracker_project_created",
     "transactions_categorized",
     "transactions_assigned",
     "transaction_attachment_created",
@@ -114,7 +112,7 @@ export const inboxItemSchema = z.object({
 export const inboxNewSchema = z.object({
   users: z.array(userSchema),
   totalCount: z.number(),
-  inboxType: z.enum(["email", "sync", "slack", "upload"]),
+  inboxType: z.enum(["email", "sync", "upload"]),
   source: z.enum(["user", "system"]).default("system"),
   provider: z.string().optional(),
 });

@@ -184,7 +184,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
             );
 
             await resend.emails.send({
-              from: "Midday <middaybot@midday.ai>",
+              from: "Abacus <hello@abacuslabs.co>",
               to: session.user.email,
               subject: "An app has been added to your team",
               html,

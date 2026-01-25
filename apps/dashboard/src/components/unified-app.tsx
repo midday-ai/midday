@@ -33,7 +33,6 @@ const oauthAppConfig: Record<
   string,
   { endpoint: string; queryKey: "apps" | "inboxAccounts" | "stripeStatus" }
 > = {
-  slack: { endpoint: "/apps/slack/install-url", queryKey: "apps" },
   gmail: { endpoint: "/apps/gmail/install-url", queryKey: "inboxAccounts" },
   outlook: { endpoint: "/apps/outlook/install-url", queryKey: "inboxAccounts" },
   xero: { endpoint: "/apps/xero/install-url", queryKey: "apps" },
@@ -389,7 +388,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                     {app.category} •{" "}
                     {app.type === "external"
                       ? `By ${app.developerName}`
-                      : "By Midday"}
+                      : "By Abacus"}
                   </span>
                 </div>
               </div>
@@ -511,15 +510,15 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
 
               <div className="absolute bottom-4 pt-8 border-t border-border">
                 <p className="text-[10px] text-[#878787]">
-                  All apps on the Midday App Store are open-source and
-                  peer-reviewed. Midday Labs AB maintains high standards but
-                  doesn't endorse third-party apps. Apps published by Midday are
+                  All apps on the Abacus App Store are open-source and
+                  peer-reviewed. Abacus Labs maintains high standards but
+                  doesn't endorse third-party apps. Apps published by Abacus are
                   officially certified. Report any concerns about app content or
                   behavior.
                 </p>
 
                 <a
-                  href="mailto:support@midday.dev"
+                  href="mailto:support@abacuslabs.co"
                   className="text-[10px] text-red-500"
                 >
                   Report app

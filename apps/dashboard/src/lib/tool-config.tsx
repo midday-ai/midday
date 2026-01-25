@@ -4,7 +4,6 @@ import {
   Brain,
   Calculator,
   Calendar,
-  Clock,
   CreditCard,
   DollarSign,
   Download,
@@ -12,14 +11,10 @@ import {
   FileSpreadsheet,
   FileText,
   Flame,
-  FolderOpen,
   Inbox,
   PieChart,
-  Play,
   Receipt,
   Search,
-  Square,
-  Timer,
   TrendingUp,
   User,
   Users,
@@ -244,63 +239,6 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     name: "Get Transaction",
     icon: Receipt,
     description: "Fetching transaction details",
-  },
-
-  // Time tracking tools
-  startTimer: {
-    name: "Start Timer",
-    icon: Play,
-    description: "Starting timer",
-  },
-  stopTimer: {
-    name: "Stop Timer",
-    icon: Square,
-    description: "Stopping timer",
-  },
-  getTimeEntries: {
-    name: "Get Time Entries",
-    icon: Clock,
-    description: "Fetching time entries",
-  },
-  createTimeEntry: {
-    name: "Create Time Entry",
-    icon: Timer,
-    description: "Creating time entry",
-  },
-  updateTimeEntry: {
-    name: "Update Time Entry",
-    icon: Timer,
-    description: "Updating time entry",
-  },
-  deleteTimeEntry: {
-    name: "Delete Time Entry",
-    icon: Timer,
-    description: "Deleting time entry",
-  },
-  getProjects: {
-    name: "Get Projects",
-    icon: FolderOpen,
-    description: "Fetching projects",
-  },
-  getTrackerProjects: {
-    name: "Get Tracker Projects",
-    icon: FolderOpen,
-    description: "Fetching tracker projects",
-  },
-  getTrackerEntries: {
-    name: "Get Tracker Entries",
-    icon: Clock,
-    description: "Fetching tracker entries",
-  },
-  createTrackerEntry: {
-    name: "Create Tracker Entry",
-    icon: Timer,
-    description: "Recording your time",
-  },
-  getTimerStatus: {
-    name: "Get Timer Status",
-    icon: Clock,
-    description: "Checking timer status",
   },
 
   // Operations tools

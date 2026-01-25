@@ -6,7 +6,6 @@ import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
@@ -24,7 +23,6 @@ import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
 import { formatDate } from "@midday/utils/format";
 import { useQuery } from "@tanstack/react-query";
-import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
@@ -32,7 +30,6 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounceValue } from "usehooks-ts";
 import { useCopyToClipboard } from "usehooks-ts";
 import { FilePreviewIcon } from "../file-preview-icon";
-import { TrackerTimer } from "../tracker-timer";
 
 interface SearchItem {
   id: string;
@@ -158,8 +155,6 @@ const formatGroupName = (name: string): string | null => {
       return "Vault";
     case "invoice":
       return "Invoices";
-    case "tracker_project":
-      return "Tracker";
     case "transaction":
       return "Transactions";
     case "inbox":
@@ -175,7 +170,6 @@ const useSearchNavigation = () => {
   const { setOpen } = useSearchStore();
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const { setParams: setCustomerParams } = useCustomerParams();
-  const { setParams: setTrackerParams } = useTrackerParams();
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setDocumentParams } = useDocumentParams();
 
@@ -205,14 +199,6 @@ const useSearchNavigation = () => {
     }) => {
       navigateWithParams(params, setInvoiceParams);
     },
-    navigateToTracker: (params: {
-      projectId?: string;
-      update?: boolean;
-      create?: boolean;
-      selectedDate?: string;
-    }) => {
-      navigateWithParams(params, setTrackerParams);
-    },
     navigateToTransaction: (params: {
       transactionId?: string;
       createTransaction?: boolean;
@@ -233,15 +219,6 @@ const useSearchNavigation = () => {
       navigateWithParams(
         { createTransaction: true },
         setTransactionParams,
-      );
-    },
-    createProject: () => {
-      navigateWithParams({ create: true }, setTrackerParams);
-    },
-    trackTime: () => {
-      navigateWithParams(
-        { selectedDate: formatISO(new Date(), { representation: "date" }) },
-        setTrackerParams,
       );
     },
   };
@@ -394,27 +371,6 @@ const SearchResultItemDisplay = ({
         );
         break;
       }
-      case "tracker_project": {
-        onSelect = () =>
-          nav.navigateToTracker({ projectId: item.id, update: true });
-
-        icon = null; // TrackerTimer will handle its own icon
-        resultDisplay = (
-          <div className="flex items-center w-full">
-            <div className="flex-grow min-w-0 -ml-[6px]">
-              <TrackerTimer
-                projectId={item.id}
-                projectName={item.data.name as string}
-                onClick={() =>
-                  nav.navigateToTracker({ projectId: item.id, update: true })
-                }
-                alwaysShowButton={true}
-              />
-            </div>
-          </div>
-        );
-        break;
-      }
       case "transaction": {
         onSelect = () => nav.navigateToTransaction({ transactionId: item.id });
 
@@ -482,13 +438,6 @@ export function Search() {
   const nav = useSearchNavigation();
   const trpc = useTRPC();
 
-  // Get current timer status to prioritize tracker section
-  const { data: timerStatus, refetch: refetchTimerStatus } = useQuery({
-    ...trpc.trackerEntries.getTimerStatus.queryOptions(),
-    refetchInterval: false,
-    staleTime: 5 * 60 * 1000,
-  });
-
   useHotkeys(
     "esc",
     () => {
@@ -498,11 +447,6 @@ export function Search() {
       enableOnFormTags: true,
     },
   );
-
-  // Refetch timer status when search component mounts
-  useEffect(() => {
-    refetchTimerStatus();
-  }, [refetchTimerStatus]);
 
   const [debouncedSearch, setDebouncedSearch] = useDebounceValue(
     "",
@@ -527,18 +471,6 @@ export function Search() {
       type: "transaction",
       title: "Create transaction",
       action: nav.createTransaction,
-    },
-    {
-      id: "sc-create-project",
-      type: "tracker_project",
-      title: "Create project",
-      action: nav.createProject,
-    },
-    {
-      id: "sc-track-time",
-      type: "tracker_project",
-      title: "Track time",
-      action: nav.trackTime,
     },
     {
       id: "sc-view-documents",
@@ -569,12 +501,6 @@ export function Search() {
       type: "invoice",
       title: "View invoices",
       action: () => nav.navigateToPath("/invoices"),
-    },
-    {
-      id: "sc-view-tracker",
-      type: "tracker_project",
-      title: "View tracker",
-      action: () => nav.navigateToPath("/tracker"),
     },
   ];
 
@@ -630,36 +556,13 @@ export function Search() {
       groups[groupKey].push(actionItem);
     }
 
-    // Sort tracker projects to put the running project first
-    const trackerProjectKey = "tracker_project";
-    if (groups[trackerProjectKey] && timerStatus?.currentEntry?.projectId) {
-      const runningProjectId = timerStatus.currentEntry.projectId;
-      groups[trackerProjectKey] = groups[trackerProjectKey].sort((a, b) => {
-        // Put the running project first
-        if (a.id === runningProjectId && b.id !== runningProjectId) return -1;
-        if (b.id === runningProjectId && a.id !== runningProjectId) return 1;
-        return 0; // Keep original order for non-running projects
-      });
-    }
-
-    // Prioritize tracker projects when timer is running
-    const definedGroupOrder = timerStatus?.isRunning
-      ? [
-          "tracker_project",
-          "vault",
-          "customer",
-          "invoice",
-          "transaction",
-          "inbox",
-        ]
-      : [
-          "vault",
-          "customer",
-          "invoice",
-          "transaction",
-          "tracker_project",
-          "inbox",
-        ];
+    const definedGroupOrder = [
+      "vault",
+      "customer",
+      "invoice",
+      "transaction",
+      "inbox",
+    ];
 
     const allGroupKeysInOrder: string[] = [];
     const addedKeys = new Set<string>();
@@ -687,12 +590,7 @@ export function Search() {
       }
     }
     return orderedGroups;
-  }, [
-    combinedData,
-    debouncedSearch,
-    timerStatus?.isRunning,
-    timerStatus?.currentEntry?.projectId,
-  ]);
+  }, [combinedData, debouncedSearch]);
 
   useEffect(() => {
     if (height.current && ref.current) {

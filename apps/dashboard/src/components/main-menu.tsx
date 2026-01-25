@@ -11,7 +11,6 @@ const icons = {
   "/": () => <Icons.Overview size={20} />,
   "/transactions": () => <Icons.Transactions size={20} />,
   "/invoices": () => <Icons.Invoice size={20} />,
-  "/tracker": () => <Icons.Tracker size={20} />,
   "/customers": () => <Icons.Customers size={20} />,
   "/vault": () => <Icons.Vault size={20} />,
   "/settings": () => <Icons.Settings size={20} />,
@@ -57,11 +56,6 @@ const items = [
     ],
   },
   {
-    path: "/tracker",
-    name: "Tracker",
-    children: [{ path: "/tracker?create=true", name: "Create new" }],
-  },
-  {
     path: "/customers",
     name: "Customers",
     children: [{ path: "/customers?createCustomer=true", name: "Create new" }],
@@ -97,7 +91,6 @@ const KNOWN_MENU_PATHS = [
   "/transactions",
   "/inbox",
   "/invoices",
-  "/tracker",
   "/customers",
   "/vault",
   "/apps",

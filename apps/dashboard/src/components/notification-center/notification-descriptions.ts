@@ -65,8 +65,6 @@ const handleInboxNew: NotificationDescriptionHandler = (metadata, user, t) => {
     case "sync":
       // @ts-expect-error
       return t("notifications.inbox_new.type.sync", { count, provider });
-    case "slack":
-      return t("notifications.inbox_new.type.slack", { count });
     case "upload":
       return t("notifications.inbox_new.type.upload", { count });
     default:

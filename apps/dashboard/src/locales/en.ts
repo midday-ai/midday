@@ -227,8 +227,6 @@ export default {
       "type.sync#one": "New document synced from your {provider} account",
       "type.sync#other":
         "{count} new documents synced from your {provider} account",
-      "type.slack#one": "New document shared via Slack",
-      "type.slack#other": "{count} new documents shared via Slack",
       "type.upload#one": "New document uploaded to your inbox",
       "type.upload#other": "{count} new documents uploaded to your inbox",
       // Fallback titles (shouldn't be used with new implementation)

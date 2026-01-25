@@ -97,7 +97,7 @@ export async function triggerMatchingNotification(params: {
         matchType: "auto_matched",
       });
 
-      // Send to external providers (Slack)
+      // Send to external providers (WhatsApp, etc.)
       await sendToProviders(
         db,
         teamId,
@@ -120,7 +120,7 @@ export async function triggerMatchingNotification(params: {
         matchType,
       });
 
-      // Send to external providers (Slack)
+      // Send to external providers (WhatsApp, etc.)
       await sendToProviders(
         db,
         teamId,

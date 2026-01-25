@@ -48,7 +48,7 @@ export function CompanyEmail() {
             <CardTitle>Company email</CardTitle>
             <CardDescription>
               This is the email address that will be used to receive emails from
-              Midday.
+              Abacus.
             </CardDescription>
           </CardHeader>
 

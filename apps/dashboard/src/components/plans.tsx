@@ -23,9 +23,9 @@ export function Plans() {
     trpc.billing.createCheckout.mutationOptions(),
   );
 
-  const handleCheckout = async (plan: "starter" | "pro") => {
+  const handleCheckout = async (plan: "starter" | "pro" | "pro_plus") => {
     try {
-      setIsSubmitting(plan === "starter" ? 1 : 2);
+      setIsSubmitting(plan === "starter" ? 1 : plan === "pro" ? 2 : 3);
 
       const { url } = await createCheckoutMutation.mutateAsync({
         plan,
@@ -43,12 +43,12 @@ export function Plans() {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-7 w-full">
         {/* Starter Plan */}
         <div className="flex flex-col p-6 border bg-background">
           <h2 className="text-xl mb-2 text-left">Starter</h2>
           <div className="mt-1 flex items-baseline">
-            <span className="text-2xl font-medium tracking-tight">$399</span>
+            <span className="text-2xl font-medium tracking-tight">$499</span>
             <span className="ml-1 text-xl font-medium">/mo</span>
             <span className="ml-2 text-xs text-muted-foreground">
               Excl. VAT
@@ -153,7 +153,7 @@ export function Plans() {
           </div>
           <h2 className="text-xl text-left mb-2">Pro</h2>
           <div className="mt-1 flex items-baseline">
-            <span className="text-2xl font-medium tracking-tight">$499</span>
+            <span className="text-2xl font-medium tracking-tight">$599</span>
             <span className="ml-1 text-xl font-medium">/mo</span>
             <span className="ml-2 text-xs text-muted-foreground">
               Excl. VAT
@@ -221,6 +221,87 @@ export function Plans() {
               isSubmitting={isSubmitting === 2}
             >
               Choose pro plan
+            </SubmitButton>
+          </div>
+        </div>
+
+        {/* Pro Plus Plan */}
+        <div className="flex flex-col p-6 border bg-background">
+          <h2 className="text-xl mb-2 text-left">Pro Plus</h2>
+          <div className="mt-1 flex items-baseline">
+            <span className="text-2xl font-medium tracking-tight">$899</span>
+            <span className="ml-1 text-xl font-medium">/mo</span>
+            <span className="ml-2 text-xs text-muted-foreground">
+              Excl. VAT
+            </span>
+          </div>
+
+          <div className="mt-4">
+            <h3 className="text-xs font-medium uppercase tracking-wide text-left text-[#878787] font-mono">
+              INCLUDING
+            </h3>
+            <ul className="mt-4 space-y-2">
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">
+                  Unlimited invoices
+                </span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">Unlimited connected banks</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">Unlimited bank accounts</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">Financial overview</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">Time Tracker</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">Unlimited inbox items</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">Customer management</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">Export CSV & reports</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">Assistant</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">1TB Vault Storage</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">Unlimited users</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+                <span className="text-xs">Underwriting tools</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="mt-8 border-t border-border pt-4">
+            <SubmitButton
+              variant="secondary"
+              className="h-9 hover:bg-primary hover:text-secondary w-full"
+              onClick={() => handleCheckout("pro_plus")}
+              isSubmitting={isSubmitting === 3}
+            >
+              Choose pro plus plan
             </SubmitButton>
           </div>
         </div>

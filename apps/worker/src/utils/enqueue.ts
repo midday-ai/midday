@@ -5,7 +5,6 @@ import type {
   InboxProviderInitialSetupPayload,
   InboxProviderSyncAccountPayload,
   ProcessAttachmentPayload,
-  SlackUploadPayload,
 } from "../schemas/inbox";
 import type { ProcessTransactionAttachmentPayload } from "../schemas/transactions";
 
@@ -18,10 +17,6 @@ export async function enqueueProcessAttachment(
   payload: ProcessAttachmentPayload,
 ) {
   return triggerJob("process-attachment", payload, "inbox");
-}
-
-export async function enqueueSlackUpload(payload: SlackUploadPayload) {
-  return triggerJob("slack-upload", payload, "inbox");
 }
 
 export async function enqueueEmbedInbox(payload: EmbedInboxPayload) {

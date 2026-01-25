@@ -190,22 +190,6 @@ export const onboardTeamSchema = z.object({
 
 export type OnboardTeamPayload = z.infer<typeof onboardTeamSchema>;
 
-export const inboxSlackUploadSchema = z.object({
-  teamId: z.string(),
-  token: z.string(),
-  channelId: z.string(),
-  threadId: z.string().optional(),
-  file: z.object({
-    id: z.string(),
-    name: z.string(),
-    mimetype: z.string(),
-    size: z.number(),
-    url: z.string(),
-  }),
-});
-
-export type InboxSlackUploadPayload = z.infer<typeof inboxSlackUploadSchema>;
-
 export const processTransactionAttachmentSchema = z.object({
   transactionId: z.string(),
   mimetype: z.string(),

@@ -48,12 +48,12 @@ export function UpgradeContent({ user }: UpgradeContentProps) {
       <div className="w-full max-w-[696px] p-8">
         <div className="mb-8 md:mt-8">
           <h1 className="text-xl font-semibold leading-none tracking-tight mb-2">
-            Unlock full access to Midday
+            Unlock full access to Abacus
           </h1>
           <p className="text-sm text-muted-foreground">
-            {firstName ? `Hi ${firstName}, ` : ""}You've been using Midday for
+            {firstName ? `Hi ${firstName}, ` : ""}You've been using Abacus for
             30 days. Your trial has ended—choose a plan to continue using all of
-            Midday's features.
+            Abacus's features.
           </p>
         </div>
 

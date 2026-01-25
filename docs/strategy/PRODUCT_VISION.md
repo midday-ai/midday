@@ -475,6 +475,31 @@ Connect your spreadsheet and go.
 - User confirms or corrects
 - Dashboard generates automatically
 
+#### AI Spreadsheet Logic Analysis (Killer Feature)
+Automatically understand your existing spreadsheet mechanics — no manual rewiring required.
+
+**The Problem:** Every MCA operator has their own spreadsheet with custom formulas, fee structures, and business logic. Manually mapping this to Abacus can take 40+ hours per customer.
+
+**The Solution:** Our AI analyzes your spreadsheet to understand:
+- Factor rate calculations and structures
+- Principal and funded amount logic
+- Fee structures and payment schedules
+- Balance calculations and formulas
+- Status codes and their meanings
+- Custom fields and business-specific logic
+
+**How It Works:**
+1. Connect your Google Sheet
+2. AI scans formulas, cell relationships, and data patterns
+3. AI infers your business mechanics (not just column names)
+4. Auto-populate mappings based on detected logic
+5. Review and override any mappings in the UI
+6. Go live with accurate, logic-aware data
+
+**Technology:** Leverages Claude AI (via API and Claude for Sheets) to perform intelligent spreadsheet analysis.
+
+**Impact:** Reduces onboarding from 40+ hours of manual mapping to minutes of AI-assisted setup with human review.
+
 #### Merchant Management
 Everything about each merchant in one place.
 
@@ -1171,6 +1196,69 @@ For each column, identify:
 Respond in JSON format.
 ```
 
+### AI Spreadsheet Logic Analysis
+
+Beyond column mapping, Abacus uses AI to understand the *business logic* embedded in your spreadsheet.
+
+**What We Analyze:**
+```typescript
+interface SpreadsheetLogicAnalysis {
+  // Formula detection
+  formulas: {
+    cell: string;
+    formula: string;
+    purpose: 'balance_calc' | 'payment_calc' | 'fee_calc' | 'status_logic' | 'other';
+    dependencies: string[];
+  }[];
+
+  // Inferred business mechanics
+  mechanics: {
+    factorRateStructure: 'flat' | 'tiered' | 'variable';
+    feeStructure: 'upfront' | 'backend' | 'split' | 'none';
+    paymentFrequency: 'daily' | 'weekly' | 'monthly' | 'variable';
+    balanceCalculation: 'simple' | 'amortizing' | 'custom';
+  };
+
+  // Data relationships
+  relationships: {
+    sourceColumn: string;
+    targetColumn: string;
+    relationship: 'sum' | 'product' | 'difference' | 'lookup' | 'custom';
+  }[];
+
+  // Confidence scores
+  confidence: {
+    overall: number;
+    perMechanic: Record<string, number>;
+  };
+}
+```
+
+**Sample AI Prompt for Logic Analysis:**
+
+```markdown
+You are analyzing a Google Sheet used by an MCA company. Beyond identifying columns, understand the BUSINESS LOGIC:
+
+1. Examine formulas to understand how balances are calculated
+2. Identify fee structures (upfront fees, backend fees, etc.)
+3. Detect payment calculation logic
+4. Map relationships between columns (e.g., Payback = Principal × Factor Rate)
+5. Identify any custom business rules embedded in formulas
+
+For each detected mechanic, provide:
+- What it calculates
+- The formula/logic used
+- Confidence level (0-100%)
+- Suggested Abacus field mapping
+
+Return structured JSON with your analysis.
+```
+
+**Technology Stack:**
+- **Claude API** for complex logic analysis
+- **Claude for Sheets** browser extension for in-context analysis
+- **Google Sheets API** for formula extraction and cell relationship mapping
+
 ### Risk Scoring Algorithm
 
 ```typescript
@@ -1439,6 +1527,7 @@ What we're NOT doing:
 #### Q1 2025: Foundation
 - [ ] Multi-tenant architecture (single codebase, multiple orgs)
 - [ ] AI-powered spreadsheet onboarding
+- [ ] **AI spreadsheet logic analysis** (auto-detect formulas, fee structures, business mechanics)
 - [ ] Configuration-driven column mappings
 - [ ] Portfolio dashboard (responsive, modern UI)
 - [ ] Merchant detail view

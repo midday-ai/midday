@@ -63,27 +63,6 @@ export function FeaturesGridSection() {
             </Link>
 
             <Link
-              href="/transactions"
-              className="flex flex-col items-center w-full sm:w-[150px]"
-            >
-              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
-                <MaterialIcon
-                  name="list_alt"
-                  className="text-muted-foreground "
-                  size={24}
-                />
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <h3 className="font-sans text-sm text-foreground leading-[21px]">
-                  Transactions
-                </h3>
-                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                  Money movement
-                </p>
-              </div>
-            </Link>
-
-            <Link
               href="/inbox"
               className="flex flex-col items-center w-full sm:w-[150px]"
             >
@@ -106,48 +85,6 @@ export function FeaturesGridSection() {
           </div>
 
           <div className="grid grid-cols-2 gap-6 sm:flex sm:justify-center sm:gap-20">
-            <Link
-              href="/time-tracking"
-              className="flex flex-col items-center w-full sm:w-[150px]"
-            >
-              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
-                <MaterialIcon
-                  name="timer"
-                  className="text-muted-foreground "
-                  size={24}
-                />
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <h3 className="font-sans text-sm text-foreground leading-[21px]">
-                  Time tracking
-                </h3>
-                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                  Project hours
-                </p>
-              </div>
-            </Link>
-
-            <Link
-              href="/invoicing"
-              className="flex flex-col items-center w-full sm:w-[150px]"
-            >
-              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
-                <MaterialIcon
-                  name="description"
-                  className="text-muted-foreground "
-                  size={24}
-                />
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <h3 className="font-sans text-sm text-foreground leading-[21px]">
-                  Invoicing
-                </h3>
-                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                  Invoice management
-                </p>
-              </div>
-            </Link>
-
             <Link
               href="/customers"
               className="flex flex-col items-center w-full sm:w-[150px]"

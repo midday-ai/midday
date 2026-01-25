@@ -37,15 +37,6 @@ const appExtensions: Record<
       "Secure OAuth authentication",
     ],
   },
-  slack: {
-    slug: "slack",
-    features: [
-      "Real-time transaction notifications",
-      "Direct receipt upload from Slack",
-      "Smart document matching",
-      "One-click approve or decline",
-    ],
-  },
   whatsapp: {
     slug: "whatsapp",
     features: [
@@ -82,15 +73,6 @@ const appExtensions: Record<
       "Compliance-ready exports",
     ],
   },
-  raycast: {
-    slug: "raycast",
-    features: [
-      "Start/stop timers instantly",
-      "Project selection",
-      "Create new projects",
-      "Keyboard-first workflow",
-    ],
-  },
   "stripe-payments": {
     slug: "stripe-payments",
     features: [
@@ -125,24 +107,6 @@ const appExtensions: Record<
       "Document organization",
       "Seamless backup",
       "Easy file access",
-    ],
-  },
-  polar: {
-    slug: "polar",
-    features: [
-      "Sync subscription payments",
-      "Revenue tracking",
-      "Customer insights",
-      "Automated reconciliation",
-    ],
-  },
-  deel: {
-    slug: "deel",
-    features: [
-      "Sync contractor payments",
-      "Payroll integration",
-      "Compliance tracking",
-      "Global workforce support",
     ],
   },
   "e-invoice": {

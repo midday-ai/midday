@@ -70,7 +70,7 @@ export function SupportForm() {
             Support
           </h1>
           <p className="font-sans text-base text-muted-foreground leading-relaxed">
-            Get help with Midday. Contact our team for assistance with any
+            Get help with Abacus. Contact our team for assistance with any
             questions or issues you may have.
           </p>
         </div>

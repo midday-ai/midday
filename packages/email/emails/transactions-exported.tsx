@@ -21,7 +21,7 @@ interface Props {
 }
 
 export const TransactionsExportedEmail = ({
-  teamName = "Midday",
+  teamName = "Abacus",
   transactionCount = 100,
   downloadLink = "https://app.abacuslabs.co/s/abc123",
 }: Props) => {

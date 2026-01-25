@@ -19,7 +19,6 @@ const schema = z.object({
       z.enum([
         "transactions",
         "invoices",
-        "tracker_projects",
         "customers",
         "documents",
       ]),
@@ -80,7 +79,6 @@ GUIDELINES:
 - Choose appropriate types based on the query context:
   * "transactions" for money movements, payments, expenses
   * "invoices" are for user created invoices, "Unpaid invoices for customer X"
-  * "tracker_projects" for work items, tasks, projects
   * "customers" for client or customer information
   * "documents" for files, attachments, contracts, receipts, bills, invoices etc, but also in the query like "invoices from vendor X"
 

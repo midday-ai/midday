@@ -72,32 +72,6 @@ export const RESOURCES = [
     ],
   },
   {
-    key: "tracker-entries",
-    name: "Tracker Entries",
-    description: "Access to tracker entry data",
-    scopes: [
-      { scope: "tracker-entries.read", type: "read", label: "Read" },
-      {
-        scope: "tracker-entries.write",
-        type: "write",
-        label: "Write",
-      },
-    ],
-  },
-  {
-    key: "tracker-projects",
-    name: "Tracker Projects",
-    description: "Access to tracker project data",
-    scopes: [
-      { scope: "tracker-projects.read", type: "read", label: "Read" },
-      {
-        scope: "tracker-projects.write",
-        type: "write",
-        label: "Write",
-      },
-    ],
-  },
-  {
     key: "tags",
     name: "Tags",
     description: "Access to tag data",

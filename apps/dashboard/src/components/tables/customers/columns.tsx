@@ -272,31 +272,6 @@ export const columns: ColumnDef<Customer>[] = [
     },
   },
   {
-    id: "projects",
-    accessorKey: "projects",
-    header: "Projects",
-    size: 120,
-    minSize: 100,
-    maxSize: 180,
-    enableResizing: true,
-    meta: {
-      skeleton: { type: "text", width: "w-8" },
-      headerLabel: "Projects",
-      className: "w-[120px] min-w-[100px]",
-    },
-    cell: ({ row }) => {
-      if (row.original.projectCount > 0) {
-        return (
-          <Link href={`/tracker?customers=${row.original.id}`}>
-            {row.original.projectCount}
-          </Link>
-        );
-      }
-
-      return "-";
-    },
-  },
-  {
     id: "industry",
     accessorKey: "industry",
     header: "Industry",

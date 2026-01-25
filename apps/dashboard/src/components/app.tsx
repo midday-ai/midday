@@ -155,7 +155,7 @@ export function App({
                   </div>
 
                   <span className="text-xs text-[#878787]">
-                    {category} • Published by Midday
+                    {category} • Published by Abacus
                   </span>
                 </div>
               </div>
@@ -232,14 +232,14 @@ export function App({
 
           <div className="absolute bottom-4 pt-8 border-t border-border">
             <p className="text-[10px] text-[#878787]">
-              All apps on the Midday App Store are open-source and
-              peer-reviewed. Midday Labs AB maintains high standards but doesn't
-              endorse third-party apps. Apps published by Midday are officially
+              All apps on the Abacus App Store are open-source and
+              peer-reviewed. Abacus Labs maintains high standards but doesn't
+              endorse third-party apps. Apps published by Abacus are officially
               certified. Report any concerns about app content or behavior.
             </p>
 
             <a
-              href="mailto:support@midday.dev"
+              href="mailto:support@abacuslabs.co"
               className="text-[10px] text-red-500"
             >
               Report app

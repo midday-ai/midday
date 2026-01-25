@@ -30,10 +30,6 @@ export const WIDGET_TYPES = [
   // Profitability metrics
   "profit-margin",
 
-  // Operations
-  "time-tracker",
-  "billable-hours",
-
   // Admin & documents
   "inbox",
   "vault",

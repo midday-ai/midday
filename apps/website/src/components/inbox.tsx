@@ -179,7 +179,7 @@ export function Inbox() {
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">
-                        Personal Midday inbox email
+                        Personal Abacus inbox email
                       </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
@@ -240,21 +240,6 @@ export function Inbox() {
                       />
                       <span className="font-sans text-sm text-foreground">
                         WhatsApp
-                      </span>
-                    </Link>
-                    <Link
-                      href="/integrations/slack"
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
-                    >
-                      <Image
-                        src="/images/slack.svg"
-                        alt="Slack"
-                        width={16}
-                        height={16}
-                        className="object-contain"
-                      />
-                      <span className="font-sans text-sm text-foreground">
-                        Slack
                       </span>
                     </Link>
                   </div>
