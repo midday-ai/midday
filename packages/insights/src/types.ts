@@ -15,6 +15,7 @@ export type MetricCategory =
   | "profitability"
   | "runway"
   | "invoicing"
+  | "receivables"
   | "customers"
   | "time"
   | "operations"
@@ -60,6 +61,7 @@ export type InsightMetric = {
   previousValue: number;
   change: number; // percentage
   changeDirection: ChangeDirection;
+  changeDescription?: string; // User-friendly: "up 50%" or "break-even this week"
   unit?: string;
   currency?: string;
   historicalContext?: string; // "Highest since October"
@@ -96,6 +98,10 @@ export type OverdueInvoiceDetail = {
   currency: string;
   dueDate: string;
   daysOverdue: number;
+  // Payment behavior anomaly detection
+  typicalPayDays?: number;
+  isUnusual?: boolean;
+  unusualReason?: string;
 };
 
 /**
@@ -205,6 +211,8 @@ export type MetricData = {
   cashFlow: number;
   profitMargin: number;
   runwayMonths: number;
+  /** Total cash across all bank accounts */
+  cashBalance: number;
   /** Per-category spending breakdown */
   categorySpending?: CategorySpending[];
 };

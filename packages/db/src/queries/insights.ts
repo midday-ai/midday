@@ -6,6 +6,7 @@ import {
   type InsightContent,
   type InsightMetric,
   type InsightMilestone,
+  type InsightPredictions,
   bankAccounts,
   bankConnections,
   customers,
@@ -19,7 +20,13 @@ import {
   trackerProjects,
   transactions,
 } from "@db/schema";
-import { format } from "date-fns";
+import {
+  differenceInDays,
+  endOfQuarter,
+  format,
+  getQuarter,
+  startOfQuarter,
+} from "date-fns";
 import {
   and,
   count,
@@ -84,7 +91,7 @@ export type UpdateInsightParams = {
   milestones?: InsightMilestone[];
   activity?: InsightActivity;
   content?: InsightContent;
-  predictions?: import("@db/schema").InsightPredictions;
+  predictions?: InsightPredictions;
   audioPath?: string;
   generatedAt?: Date;
 };
@@ -981,6 +988,101 @@ export async function getOverdueInvoiceDetails(
   });
 }
 
+/**
+ * Overdue invoice with payment behavior anomaly detection
+ */
+export type OverdueInvoiceWithBehavior = OverdueInvoiceDetail & {
+  typicalPayDays?: number; // Customer's average days to pay
+  isUnusual: boolean; // Current overdue is unusual for this customer
+  unusualReason?: string; // "usually pays within 14 days"
+};
+
+/**
+ * Get overdue invoices enriched with customer payment behavior analysis.
+ * Flags invoices that are unusual given the customer's typical payment patterns.
+ */
+export async function getOverdueInvoicesWithBehavior(
+  db: Database,
+  params: { teamId: string; currency?: string },
+): Promise<OverdueInvoiceWithBehavior[]> {
+  const { teamId, currency } = params;
+
+  // First, get overdue invoices
+  const overdueInvoices = await getOverdueInvoiceDetails(db, {
+    teamId,
+    currency,
+  });
+
+  if (overdueInvoices.length === 0) {
+    return [];
+  }
+
+  // Get customer IDs from overdue invoices
+  const customerConditions = [
+    eq(invoices.teamId, teamId),
+    eq(invoices.status, "paid"),
+    isNotNull(invoices.paidAt),
+    isNotNull(invoices.dueDate),
+  ];
+
+  // Get payment behavior for all customers with paid invoices
+  const paymentBehavior = await db
+    .select({
+      customerName: invoices.customerName,
+      avgDaysToPay: sql<number>`
+        AVG(
+          EXTRACT(DAY FROM (${invoices.paidAt}::timestamp - ${invoices.dueDate}::timestamp))
+        )::float
+      `,
+      invoiceCount: sql<number>`COUNT(*)::int`,
+    })
+    .from(invoices)
+    .where(and(...customerConditions))
+    .groupBy(invoices.customerName)
+    .having(sql`COUNT(*) >= 2`); // Need at least 2 paid invoices for reliable pattern
+
+  // Build a map of customer payment behavior
+  const behaviorMap = new Map<string, { avgDays: number; count: number }>();
+  for (const row of paymentBehavior) {
+    if (row.customerName) {
+      // avgDaysToPay is relative to due date:
+      // negative = paid before due, positive = paid after due
+      // Add grace period of ~14 days as "normal" payment time after due date
+      const normalPayDays = Math.max(0, Math.round(row.avgDaysToPay ?? 0) + 14);
+      behaviorMap.set(row.customerName, {
+        avgDays: normalPayDays,
+        count: row.invoiceCount,
+      });
+    }
+  }
+
+  // Enrich overdue invoices with behavior analysis
+  return overdueInvoices.map((inv) => {
+    const behavior = behaviorMap.get(inv.customerName);
+
+    if (!behavior) {
+      // No payment history - can't determine if unusual
+      return { ...inv, isUnusual: false };
+    }
+
+    // Consider unusual if current overdue is > 1.5x their typical late payment + 7 days buffer
+    const unusualThreshold = Math.max(
+      behavior.avgDays * 1.5,
+      behavior.avgDays + 7,
+    );
+    const isUnusual = inv.daysOverdue > unusualThreshold;
+
+    return {
+      ...inv,
+      typicalPayDays: behavior.avgDays,
+      isUnusual,
+      unusualReason: isUnusual
+        ? `usually pays within ${behavior.avgDays} days`
+        : undefined,
+    };
+  });
+}
+
 export type UnbilledHoursDetail = {
   projectId: string;
   projectName: string;
@@ -1150,6 +1252,14 @@ export type HistoricalContext = {
     profitChangePercent: number;
     hasComparison: boolean;
   };
+  quarterPace?: {
+    currentQuarter: number; // Q1, Q2, Q3, Q4
+    qtdRevenue: number; // Revenue so far this quarter
+    projectedRevenue: number; // Projected full quarter revenue
+    lastYearQuarterRevenue: number; // Same quarter last year
+    vsLastYearPercent: number; // +/- vs last year
+    hasComparison: boolean;
+  };
 };
 
 /**
@@ -1163,7 +1273,8 @@ export type InsightHistoryWeek = {
   expenses: number;
   profit: number;
   hasOverdue: boolean;
-  predictions?: import("@db/schema").InsightPredictions;
+  invoicesPaid: number; // Number of invoices paid this week
+  predictions?: InsightPredictions;
 };
 
 /**
@@ -1229,7 +1340,10 @@ export async function getInsightHistory(
         string,
         { value: number }
       > | null;
-      const activity = insight.activity as { invoicesOverdue?: number } | null;
+      const activity = insight.activity as {
+        invoicesOverdue?: number;
+        invoicesPaid?: number;
+      } | null;
 
       if (!metrics) return null;
 
@@ -1241,6 +1355,7 @@ export async function getInsightHistory(
         expenses: metrics.expenses?.value ?? 0,
         profit: metrics.netProfit?.value ?? metrics.profit?.value ?? 0,
         hasOverdue: (activity?.invoicesOverdue ?? 0) > 0,
+        invoicesPaid: activity?.invoicesPaid ?? 0,
       };
 
       if (insight.predictions) {
@@ -1296,7 +1411,12 @@ export function computeRollingAverages(
  */
 export function computeStreakInfo(
   history: InsightHistoryData,
-  currentWeek: { revenue: number; profit: number; hasOverdue: boolean },
+  currentWeek: {
+    revenue: number;
+    profit: number;
+    hasOverdue: boolean;
+    invoicesPaid: number;
+  },
 ): StreakInfo {
   if (history.weeks.length === 0) {
     return { type: null, count: 0, description: null };
@@ -1336,11 +1456,19 @@ export function computeStreakInfo(
   }
 
   // Check for invoices paid on time streak
+  // IMPORTANT: Only count weeks where there were invoices to pay AND none were overdue
+  // Weeks with no invoice activity don't count towards this streak
   let paidOnTimeStreak = 0;
   for (const week of weeks) {
-    if (!week.hasOverdue) {
+    // Must have had invoices paid AND no overdue to count
+    if (week.invoicesPaid > 0 && !week.hasOverdue) {
       paidOnTimeStreak++;
+    } else if (week.invoicesPaid === 0) {
+      // No invoice activity this week - skip but don't break streak
+      // This allows gaps in invoice activity without resetting the streak
+      // (intentionally empty - just skip to next iteration)
     } else {
+      // Had overdue invoices - streak is broken
       break;
     }
   }
@@ -1472,6 +1600,67 @@ export function computeHistoricalContext(
     };
   }
 
+  // Quarter pace projection
+  let quarterPace: HistoricalContext["quarterPace"];
+  const now = new Date();
+  const currentQuarter = getQuarter(now);
+  const quarterStart = startOfQuarter(now);
+  const quarterEnd = endOfQuarter(now);
+  const daysElapsed = differenceInDays(now, quarterStart) + 1;
+  const totalQuarterDays = differenceInDays(quarterEnd, quarterStart) + 1;
+
+  // Sum up revenue from weeks in current quarter (including current week)
+  const quarterWeeks = history.weeks.filter((w) => {
+    return (
+      w.periodStart >= quarterStart &&
+      w.periodStart <= now &&
+      w.periodYear === currentWeek.periodYear
+    );
+  });
+
+  // Add current week to QTD revenue
+  const qtdRevenue =
+    quarterWeeks.reduce((sum, w) => sum + w.revenue, 0) + currentRevenue;
+
+  if (qtdRevenue > 0 && daysElapsed > 7) {
+    // Only project if we have at least a week of data
+    const projectedRevenue = Math.round(
+      (qtdRevenue / daysElapsed) * totalQuarterDays,
+    );
+
+    // Find same quarter last year's total revenue
+    const lastYearQuarterWeeks = history.weeks.filter((w) => {
+      const weekQuarter = getQuarter(w.periodStart);
+      return (
+        weekQuarter === currentQuarter &&
+        w.periodYear === currentWeek.periodYear - 1
+      );
+    });
+
+    const lastYearQuarterRevenue = lastYearQuarterWeeks.reduce(
+      (sum, w) => sum + w.revenue,
+      0,
+    );
+
+    const vsLastYearPercent =
+      lastYearQuarterRevenue > 0
+        ? Math.round(
+            ((projectedRevenue - lastYearQuarterRevenue) /
+              lastYearQuarterRevenue) *
+              100,
+          )
+        : 0;
+
+    quarterPace = {
+      currentQuarter,
+      qtdRevenue,
+      projectedRevenue,
+      lastYearQuarterRevenue,
+      vsLastYearPercent,
+      hasComparison: lastYearQuarterRevenue > 0,
+    };
+  }
+
   return {
     revenueRank,
     revenueHighestSince,
@@ -1483,6 +1672,7 @@ export function computeHistoricalContext(
     isRecentProfitHigh,
     weeksOfHistory: validWeeks.length,
     yearOverYear,
+    quarterPace,
   };
 }
 
@@ -1593,7 +1783,7 @@ export function computeRecovery(
  * Pure function - no database access.
  */
 export function getPredictionsFromHistory(history: InsightHistoryData): {
-  predictions: import("@db/schema").InsightPredictions | null;
+  predictions: InsightPredictions | null;
   periodStart: Date | null;
 } | null {
   if (history.weeks.length === 0) {
@@ -2421,7 +2611,7 @@ export async function getPreviousInsightPredictions(
     currentPeriodNumber: number;
   },
 ): Promise<{
-  predictions: import("@db/schema").InsightPredictions | null;
+  predictions: InsightPredictions | null;
   periodStart: Date | null;
 } | null> {
   const { teamId, currentPeriodYear, currentPeriodNumber } = params;

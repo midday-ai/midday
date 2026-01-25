@@ -27,6 +27,40 @@ export function getChangeDirection(change: number): ChangeDirection {
 }
 
 /**
+ * Compute a user-friendly change description
+ * Handles edge cases like "to zero" more gracefully than raw percentages
+ */
+export function computeChangeDescription(
+  currentValue: number,
+  previousValue: number,
+  changePercent: number,
+): string {
+  const absChange = Math.abs(changePercent);
+  const roundedChange = Math.round(absChange);
+
+  // No significant change
+  if (absChange < 5) {
+    return "flat";
+  }
+
+  // Current value is zero (went to zero from something)
+  if (currentValue === 0 && previousValue !== 0) {
+    return "inactive this week";
+  }
+
+  // Previous was zero, now has value
+  if (previousValue === 0 && currentValue !== 0) {
+    return "new this week";
+  }
+
+  // Standard percentage change
+  if (changePercent > 0) {
+    return `+${roundedChange}%`;
+  }
+  return `-${roundedChange}%`;
+}
+
+/**
  * Create an InsightMetric from raw values
  */
 export function createMetric(
@@ -37,14 +71,20 @@ export function createMetric(
 ): InsightMetric {
   const change = calculatePercentageChange(currentValue, previousValue);
   const unit = getMetricUnit(type);
+  const roundedChange = Math.round(change * 10) / 10;
 
   return {
     type,
     label: getMetricLabel(type),
     value: currentValue,
     previousValue,
-    change: Math.round(change * 10) / 10, // Round to 1 decimal
+    change: roundedChange,
     changeDirection: getChangeDirection(change),
+    changeDescription: computeChangeDescription(
+      currentValue,
+      previousValue,
+      roundedChange,
+    ),
     unit: unit === "currency" ? undefined : unit,
     currency: unit === "currency" ? currency : undefined,
   };
@@ -102,6 +142,14 @@ export function calculateAllMetrics(
     previousData.runwayMonths,
   );
 
+  // State metrics (point-in-time values, useful for quiet weeks)
+  metrics.cash_balance = createMetric(
+    "cash_balance",
+    currentData.cashBalance,
+    previousData.cashBalance,
+    currency,
+  );
+
   return metrics;
 }
 
@@ -114,6 +162,7 @@ export function addActivityMetrics(
     invoicesSent: number;
     invoicesPaid: number;
     invoicesOverdue: number;
+    overdueAmount?: number;
     hoursTracked: number;
     newCustomers: number;
     receiptsMatched: number;
@@ -123,12 +172,13 @@ export function addActivityMetrics(
     invoicesSent: number;
     invoicesPaid: number;
     invoicesOverdue: number;
+    overdueAmount?: number;
     hoursTracked: number;
     newCustomers: number;
     receiptsMatched: number;
     transactionsCategorized: number;
   },
-  _currency: string,
+  currency: string,
 ): Record<string, InsightMetric> {
   // Invoicing metrics
   metrics.invoices_sent = createMetric(
@@ -147,6 +197,14 @@ export function addActivityMetrics(
     "invoices_overdue",
     currentActivity.invoicesOverdue,
     previousActivity.invoicesOverdue,
+  );
+
+  // Overdue amount (state metric - total to collect)
+  metrics.overdue_amount = createMetric(
+    "overdue_amount",
+    currentActivity.overdueAmount ?? 0,
+    previousActivity.overdueAmount ?? 0,
+    currency,
   );
 
   // Time tracking metrics

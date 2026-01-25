@@ -81,12 +81,20 @@ WHY: Consistency builds trust.
 
 Mention outstanding receivables at the end: If any exist.
 WHY: Ends with an actionable item they can address.
+
+Include runway exhaustion date when provided: If data shows "cash lasts until [DATE]", include it.
+WHY: Specific dates create urgency and help planning. "1 month" is vague; "until February 10" is actionable.
 </constraints>
 
 <accuracy>
 - All figures must match the data exactly
 - If profit is negative, expenses MUST be mentioned
 - Profit of 0 is "no activity" or "break-even", NOT a loss
+- CRITICAL: If profit is NEGATIVE, never say it "improved", "doubled", or "grew" even if the loss decreased
+  - Say "loss decreased" or "loss shrank" instead
+  - A smaller loss is NOT the same as profit growth
+- If revenue is 0, margin is meaningless - don't emphasize margin changes
+- When comparing weeks: -7k is better than -189k, but both are losses - frame accordingly
 </accuracy>`;
 
   const examples = isFirstInsight
@@ -104,16 +112,17 @@ ${rules}
 ${examples}
 
 <verify>
-Before responding, COUNT YOUR WORDS:
-- Is word count between 40-60? (This is critical — rewrite if not)
-- Does it flow naturally when read aloud?
-- Are facts connected, not just listed?
-- Is "this period" avoided?
-- Do amounts match the data format exactly?
+Before responding, silently verify (DO NOT include this in your response):
+- Word count between 40-60? Rewrite if not.
+- Flows naturally when read aloud?
+- Facts connected, not listed?
+- "This period" avoided?
+- Amounts match data format?
 </verify>
 
 <output>
-Write ONE summary (40-60 words exactly). Begin directly — no preamble.
+Write ONE summary (40-60 words). Begin directly — no preamble, no word count, no meta-commentary.
+ONLY output the summary text itself.
 </output>`;
 }
 
@@ -141,24 +150,50 @@ function buildDataSection(slots: InsightSlots): string {
   lines.push(`revenue: ${slots.revenue}`);
   lines.push(`expenses: ${slots.expenses}`);
   lines.push(`margin: ${slots.margin}%`);
-  lines.push(`runway: ${slots.runway} months`);
+  if (slots.runwayExhaustionDate) {
+    lines.push(
+      `runway: ${slots.runway} months (cash lasts until ${slots.runwayExhaustionDate})`,
+    );
+  } else {
+    lines.push(`runway: ${slots.runway} months`);
+  }
 
-  // Overdue
+  // Overdue (with payment behavior anomaly flags)
   if (slots.hasOverdue) {
     lines.push("");
     lines.push("overdue:");
     for (const inv of slots.overdue) {
-      lines.push(`  - ${inv.company}: ${inv.amount} (${inv.daysOverdue} days)`);
+      if (inv.isUnusual && inv.unusualReason) {
+        // Flag unusual payment behavior - this customer typically pays faster
+        lines.push(
+          `  - ${inv.company}: ${inv.amount} (${inv.daysOverdue} days) ⚠️ UNUSUAL - ${inv.unusualReason}`,
+        );
+      } else {
+        lines.push(
+          `  - ${inv.company}: ${inv.amount} (${inv.daysOverdue} days)`,
+        );
+      }
     }
   }
 
   // Skip "vs last week" for first insight
   if (!slots.isFirstInsight && slots.profitChange !== 0) {
-    const dir = slots.profitDirection === "up" ? "+" : "";
     lines.push("");
-    lines.push(
-      `change: profit ${dir}${slots.profitChange.toFixed(0)}% vs last week`,
-    );
+    lines.push(`change: ${slots.profitChangeDescription}`);
+  }
+
+  // Year-over-year comparison (if available)
+  if (slots.yoyRevenue || slots.yoyProfit) {
+    lines.push("");
+    lines.push("vs last year:");
+    if (slots.yoyRevenue) lines.push(`  revenue: ${slots.yoyRevenue}`);
+    if (slots.yoyProfit) lines.push(`  profit: ${slots.yoyProfit}`);
+  }
+
+  // Quarter pace projection (if available)
+  if (slots.quarterPace) {
+    lines.push("");
+    lines.push(`quarter projection: ${slots.quarterPace}`);
   }
 
   return lines.join("\n");
@@ -198,16 +233,17 @@ function buildExamples(slots: InsightSlots): string {
     // Challenging week - IMPORTANT: if profit is negative, expenses MUST be mentioned
     challenging: {
       input:
-        "profit: -22,266 kr, revenue: 0 kr, expenses: 22,266 kr, runway: 14 months, overdue: Acme Corp 750 kr",
+        "profit: -22,266 kr, revenue: 0 kr, expenses: 22,266 kr, runway: 2 months (cash lasts until March 15, 2026), overdue: Acme Corp 750 kr",
       output:
-        "No revenue landed this week, with 22,266 kr in expenses creating a gap. This is usually payment timing — invoices crossing weeks. Your 14-month runway means no pressure. Acme Corp still owes 750 kr.",
+        "No revenue landed this week, with 22,266 kr in expenses creating a gap. Your cash lasts until March 15, so collecting the 750 kr from Acme Corp and landing new work should be top priority.",
     },
     // Zero activity week (all values are 0) - NOT a loss, just no activity
+    // When runway is short, include the specific exhaustion date
     zero_activity: {
       input:
-        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, margin: 0%, runway: 8 months, overdue: Klarna 5,000 kr",
+        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, margin: 0%, runway: 1 months (cash lasts until February 10, 2026), overdue: Klarna 5,000 kr",
       output:
-        "Quiet week with no revenue or expenses recorded — sometimes weeks are just slow. Your 8-month runway is unchanged, and Klarna's 5,000 kr overdue is still there to collect.",
+        "No financial activity this week. With cash lasting until February 10, collecting the 5,000 kr overdue from Klarna should be a priority to extend your runway.",
     },
   };
 
@@ -282,9 +318,9 @@ function buildFirstInsightExamples(slots: InsightSlots): string {
     },
     zero_activity: {
       input:
-        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, runway: 8 months, overdue: Klarna 3,000 kr",
+        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, runway: 1 months (cash lasts until February 10, 2026), overdue: Klarna 3,000 kr",
       output:
-        "Welcome to your weekly insights. No financial activity recorded this week — sometimes weeks are just quiet. Your 8-month runway is unchanged. Klarna still owes 3,000 kr from before.",
+        "Welcome to your weekly insights. No financial activity recorded this week. With cash lasting until February 10, collecting the 3,000 kr from Klarna should be a priority.",
     },
   };
 

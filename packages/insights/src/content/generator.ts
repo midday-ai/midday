@@ -1,3 +1,4 @@
+import { createOpenAI } from "@ai-sdk/openai";
 /**
  * AI content generation for insights
  *
@@ -7,9 +8,11 @@
  * - Story: Forward-looking or actionable insight (max 15 words)
  * - Actions: Specific actionable items with exact names/amounts
  */
-import { createOpenAI } from "@ai-sdk/openai";
+import { createLoggerWithContext } from "@midday/logger";
 import { generateObject, generateText } from "ai";
 import { z } from "zod/v4";
+
+const logger = createLoggerWithContext("insights:generator");
 import type {
   ExpenseAnomaly,
   InsightActivity,
@@ -58,6 +61,18 @@ export type RevenueConcentrationContext = {
 };
 
 /**
+ * Quarter pace projection data
+ */
+export type QuarterPaceContext = {
+  currentQuarter: number;
+  qtdRevenue: number;
+  projectedRevenue: number;
+  lastYearQuarterRevenue: number;
+  vsLastYearPercent: number;
+  hasComparison: boolean;
+};
+
+/**
  * Additional context for content generation (momentum, predictions, etc.)
  */
 export type ContentGenerationContext = {
@@ -65,7 +80,9 @@ export type ContentGenerationContext = {
   previousPredictions?: PreviousPredictionsContext;
   predictions?: InsightPredictions;
   yearOverYear?: YearOverYearContext;
+  quarterPace?: QuarterPaceContext;
   runwayMonths?: number;
+  periodEnd?: Date; // End of insight period, for calculating dates relative to period
   locale?: string;
   weeksOfHistory?: number;
   revenueConcentration?: RevenueConcentrationContext;
@@ -100,6 +117,8 @@ export class ContentGenerator {
     expenseAnomalies: ExpenseAnomaly[] = [],
     context: ContentGenerationContext = {},
   ): Promise<InsightContent> {
+    const startTime = Date.now();
+
     try {
       // 1. Compute all slots (exact values for AI to use)
       const slots = computeSlots(
@@ -111,12 +130,22 @@ export class ContentGenerator {
         {
           momentumContext: context.momentumContext,
           yearOverYear: context.yearOverYear,
+          quarterPace: context.quarterPace,
           runwayMonths: context.runwayMonths,
+          periodEnd: context.periodEnd,
           weeksOfHistory: context.weeksOfHistory,
           expenseAnomalies,
           revenueConcentration: context.revenueConcentration,
         },
       );
+
+      logger.debug("Slots computed", {
+        weekType: slots.weekType,
+        profit: slots.profitRaw,
+        revenue: slots.revenueRaw,
+        expenses: slots.expensesRaw,
+        isFirstInsight: slots.isFirstInsight,
+      });
 
       // 2. Generate title, summary, and actions in parallel
       const [title, summary, actions] = await Promise.all([
@@ -128,12 +157,22 @@ export class ContentGenerator {
       // 3. Generate story
       const story = await this.generateStory(slots);
 
+      const duration = Date.now() - startTime;
+      logger.info("Content generated", {
+        model: this.model,
+        durationMs: duration,
+        actionsCount: actions.length,
+      });
+
       return { title, summary, story, actions };
     } catch (error) {
-      console.error(
-        "Failed to generate AI content:",
-        error instanceof Error ? error.message : "Unknown error",
-      );
+      const duration = Date.now() - startTime;
+      logger.error("Failed to generate AI content", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        model: this.model,
+        durationMs: duration,
+        periodLabel,
+      });
 
       // Return fallback content with activity for context
       return getFallbackContent(periodLabel, periodType, activity);

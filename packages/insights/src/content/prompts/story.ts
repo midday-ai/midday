@@ -57,6 +57,7 @@ Amount: ${primaryAction.amount}
   - Quiet weeks: "One thing to keep moving...", "Worth following up on..."
 - NEVER use generic phrases: "enhance cash flow", "improve profitability", "optimize receivables"
 - NEVER restate the summary — this adds a forward action
+- CRITICAL: If profit is NEGATIVE, never say "doubled", "strong momentum", or imply growth. A smaller loss is progress, not success.
 </rules>
 
 <examples>
@@ -212,13 +213,17 @@ function getHighlight(slots: InsightSlots): string {
 
   // Additional highlights not covered by pre-computed highlight
 
-  // Strong profit growth (20%+)
-  if (slots.profitChange >= 20 && slots.profitDirection === "up") {
-    return `Profit up ${Math.round(slots.profitChange)}% vs last week`;
+  // Strong profit change (20%+) - use pre-computed description
+  if (Math.abs(slots.profitChange) >= 20) {
+    return slots.profitChangeDescription;
   }
 
-  // Strong revenue growth (20%+)
-  if (slots.revenueChange >= 20 && slots.revenueDirection === "up") {
+  // Strong revenue growth (20%+) - but only if there's actual revenue
+  if (
+    slots.revenueChange >= 20 &&
+    slots.revenueDirection === "up" &&
+    slots.revenueRaw > 0
+  ) {
     return `Revenue up ${Math.round(slots.revenueChange)}% vs last week`;
   }
 

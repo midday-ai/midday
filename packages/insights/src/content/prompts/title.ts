@@ -64,6 +64,12 @@ WHY: These are filler words that add no meaning. Plain language sounds more genu
 - NEVER use "Weekly Summary:" or similar prefixes${firstInsightNote}
 </additional_rules>
 
+<accuracy>
+- If profit is NEGATIVE: never say "doubled", "grew", or "improved" even if the loss decreased
+- A smaller loss is progress, not growth — say "loss decreased" or "expenses down"
+- If revenue is 0: don't emphasize margin — it's meaningless without revenue
+</accuracy>
+
 ${examples}
 
 <output>
@@ -101,10 +107,21 @@ function buildDataSection(slots: InsightSlots): string {
     lines.push(`streak: ${slots.streak.count} ${slots.streak.type}`);
   }
 
+  // Year-over-year comparison (significant growth/decline only)
+  if (slots.yoyProfit) {
+    lines.push(`vs_last_year: profit ${slots.yoyProfit}`);
+  }
+
   // Core financials
   lines.push(`profit: ${slots.profit}`);
   lines.push(`margin: ${slots.margin}%`);
-  lines.push(`runway: ${slots.runway} months`);
+  if (slots.runwayExhaustionDate) {
+    lines.push(
+      `runway: ${slots.runway} months (until ${slots.runwayExhaustionDate})`,
+    );
+  } else {
+    lines.push(`runway: ${slots.runway} months`);
+  }
 
   if (slots.revenueRaw > 0) {
     lines.push(`revenue: ${slots.revenue}`);

@@ -85,6 +85,16 @@ const EXCLUDED_METRIC_CATEGORIES = new Set(["operations"]);
 const EXCLUDED_METRIC_TYPES = new Set(["invoices_overdue"]);
 
 /**
+ * State metrics that should be allowed even when zero (useful for quiet weeks)
+ * These are point-in-time values that provide context regardless of period activity
+ */
+const STATE_METRICS = new Set([
+  "cash_balance",
+  "overdue_amount",
+  "runway_months",
+]);
+
+/**
  * Select the top N most relevant metrics for display
  *
  * Strategy:
@@ -93,6 +103,7 @@ const EXCLUDED_METRIC_TYPES = new Set(["invoices_overdue"]);
  * - Ensure diversity (max 2 from same category)
  * - Always include at least 1 core financial metric
  * - Prioritize metrics with significant changes
+ * - Fill remaining slots with state metrics if needed
  */
 export function selectTopMetrics(
   metrics: InsightMetric[] | Record<string, InsightMetric>,
@@ -104,15 +115,19 @@ export function selectTopMetrics(
     : Object.values(metrics);
 
   // Filter out bookkeeping metrics, point-in-time status metrics, and zero-value metrics
+  // But allow state metrics even when zero
   const businessMetrics = metricsArray.filter((m) => {
     // Exclude specific metric types
     if (EXCLUDED_METRIC_TYPES.has(m.type)) return false;
     // Exclude zero-value metrics (no activity in current or previous period)
+    // BUT allow state metrics even when zero (they provide context for quiet weeks)
     if (
       m.value === 0 &&
       (m.previousValue === 0 || m.previousValue === undefined)
-    )
-      return false;
+    ) {
+      // Still include state metrics - they're useful even at zero
+      if (!STATE_METRICS.has(m.type)) return false;
+    }
     // Exclude operational categories
     const definition = getMetricDefinition(m.type);
     return !EXCLUDED_METRIC_CATEGORIES.has(definition?.category ?? "other");
@@ -155,6 +170,30 @@ export function selectTopMetrics(
     if (financialMetric) {
       selected.pop(); // Remove lowest priority
       selected.unshift(financialMetric); // Add financial at start
+    }
+  }
+
+  // Fill remaining slots with state metrics if we don't have enough
+  // This ensures quiet weeks still show meaningful data
+  if (selected.length < count) {
+    const selectedTypes = new Set(selected.map((m) => m.type));
+
+    // Priority order for state metric fallbacks
+    const stateMetricPriority = [
+      "cash_balance",
+      "overdue_amount",
+      "runway_months",
+    ];
+
+    for (const metricType of stateMetricPriority) {
+      if (selected.length >= count) break;
+      if (selectedTypes.has(metricType)) continue;
+
+      const stateMetric = metricsArray.find((m) => m.type === metricType);
+      if (stateMetric) {
+        selected.push(stateMetric);
+        selectedTypes.add(metricType);
+      }
     }
   }
 

@@ -30,17 +30,17 @@ async function generateInsight(slots: InsightSlots) {
     generateText({
       model: openai(MODEL),
       prompt: buildTitlePrompt(slots),
-      temperature: 0.3,
+      temperature: 0.25,
     }),
     generateText({
       model: openai(MODEL),
       prompt: buildSummaryPrompt(slots),
-      temperature: 0.3,
+      temperature: 0.25,
     }),
     generateText({
       model: openai(MODEL),
       prompt: buildStoryPrompt(slots),
-      temperature: 0.4,
+      temperature: 0.3,
     }),
   ]);
 

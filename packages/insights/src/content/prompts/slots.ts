@@ -1,3 +1,4 @@
+import { createLoggerWithContext } from "@midday/logger";
 import { formatMetricValue } from "../../metrics/calculator";
 import type {
   ExpenseAnomaly,
@@ -7,7 +8,9 @@ import type {
   PeriodType,
   PreviousPredictionsContext,
 } from "../../types";
-import type { YearOverYearContext } from "../generator";
+import type { QuarterPaceContext, YearOverYearContext } from "../generator";
+
+const logger = createLoggerWithContext("insights:slots");
 
 /**
  * Week classification for prompt selection
@@ -23,6 +26,9 @@ export type OverdueSlot = {
   amount: string;
   rawAmount: number;
   daysOverdue: number;
+  // Payment behavior anomaly detection
+  isUnusual?: boolean; // This customer usually pays faster
+  unusualReason?: string; // "usually pays within 14 days"
 };
 
 /**
@@ -89,12 +95,14 @@ export type InsightSlots = {
   margin: string;
   marginRaw: number;
   runway: number;
+  runwayExhaustionDate?: string; // "September 15, 2026" - specific date cash runs out
   cashFlow: string;
   cashFlowRaw: number;
 
   // Changes vs last period
   profitChange: number;
   profitDirection: "up" | "down" | "flat";
+  profitChangeDescription: string; // Pre-computed, semantically correct description
   revenueChange: number;
   revenueDirection: "up" | "down" | "flat";
 
@@ -145,6 +153,9 @@ export type InsightSlots = {
   // Year over year
   yoyRevenue?: string; // "up 40% vs last year"
   yoyProfit?: string;
+
+  // Quarter pace projection
+  quarterPace?: string; // "On pace for 450,000 kr this quarter — 18% ahead of Q1 last year"
 
   // Predictions
   nextWeekInvoicesDue?: {
@@ -292,9 +303,16 @@ function computeHighlight(data: {
     return { type: "recovery", description: data.recoveryDescription };
   }
 
-  // 3. Significant streak (3+ weeks)
-  if (data.streak && data.streak.count >= 3) {
-    return { type: "streak", description: data.streak.description };
+  // 3. Significant streak (3+ weeks profitable, or 2+ weeks declining)
+  if (data.streak) {
+    // Revenue decline is more urgent - highlight at 2+ weeks
+    if (data.streak.type === "revenue_decline" && data.streak.count >= 2) {
+      return { type: "streak", description: data.streak.description };
+    }
+    // Other positive streaks at 3+ weeks
+    if (data.streak.count >= 3) {
+      return { type: "streak", description: data.streak.description };
+    }
   }
 
   // 4. Big profit multiplier (3x or more vs last week)
@@ -305,9 +323,15 @@ function computeHighlight(data: {
     }
   }
 
-  // 5. YoY growth (significant)
-  if (data.yoyProfit?.includes("up")) {
-    return { type: "yoy_growth", description: `Profit ${data.yoyProfit}` };
+  // 5. YoY comparison (significant growth or decline)
+  if (data.yoyProfit) {
+    if (data.yoyProfit.includes("up")) {
+      return { type: "yoy_growth", description: `Profit ${data.yoyProfit}` };
+    }
+    // Also highlight significant YoY decline (important context)
+    if (data.yoyProfit.includes("down") && data.profitRaw < 0) {
+      return { type: "yoy_growth", description: `Profit ${data.yoyProfit}` };
+    }
   }
 
   // 6. Big payment
@@ -325,6 +349,62 @@ function computeHighlight(data: {
   }
 
   return { type: "none" };
+}
+
+/**
+ * Compute a semantically correct profit change description
+ * This prevents misleading interpretations like "profit doubled" when loss just decreased
+ */
+export function computeProfitChangeDescription(
+  currentProfit: number,
+  previousProfit: number,
+  changePercent: number,
+): string {
+  const absChange = Math.abs(changePercent);
+
+  // No significant change
+  if (absChange < 5) {
+    return "flat vs last week";
+  }
+
+  // Both periods profitable - straightforward
+  if (currentProfit > 0 && previousProfit > 0) {
+    return changePercent > 0
+      ? `up ${Math.round(absChange)}% vs last week`
+      : `down ${Math.round(absChange)}% vs last week`;
+  }
+
+  // Both periods in loss - describe loss change correctly
+  if (currentProfit < 0 && previousProfit < 0) {
+    if (currentProfit > previousProfit) {
+      // Loss decreased (e.g., -189k to -7k)
+      return `loss decreased ${Math.round(absChange)}% vs last week`;
+    }
+    // Loss increased
+    return `loss increased ${Math.round(absChange)}% vs last week`;
+  }
+
+  // Crossed from loss to profit
+  if (currentProfit > 0 && previousProfit < 0) {
+    return "returned to profit";
+  }
+
+  // Crossed from profit to loss
+  if (currentProfit < 0 && previousProfit > 0) {
+    return "turned to loss";
+  }
+
+  // From zero
+  if (previousProfit === 0 && currentProfit !== 0) {
+    return currentProfit > 0 ? "profit this week" : "loss this week";
+  }
+
+  // To zero
+  if (currentProfit === 0) {
+    return "break-even this week";
+  }
+
+  return "vs last week";
 }
 
 /**
@@ -367,8 +447,10 @@ export function computeSlots(
   context?: {
     momentumContext?: MomentumContext;
     yearOverYear?: YearOverYearContext;
+    quarterPace?: QuarterPaceContext;
     previousPredictions?: PreviousPredictionsContext;
     runwayMonths?: number;
+    periodEnd?: Date; // For calculating dates relative to period
     weeksOfHistory?: number;
     expenseAnomalies?: ExpenseAnomaly[];
     revenueConcentration?: {
@@ -391,19 +473,75 @@ export function computeSlots(
 
   // Raw values
   const profitRaw = profitMetric?.value ?? 0;
-  const revenueRaw = revenueMetric?.value ?? 0;
-  const expensesRaw = expensesMetric?.value ?? 0;
+  let revenueRaw = revenueMetric?.value ?? 0;
+  let expensesRaw = expensesMetric?.value ?? 0;
+
+  // CRITICAL: Data consistency defense
+  // The math MUST hold: profit = revenue - expenses
+
+  // Case 1: If expenses is 0 but profit < revenue, derive expenses
+  const impliedExpenses = revenueRaw - profitRaw;
+  if (expensesRaw === 0 && impliedExpenses > 0) {
+    logger.warn("Data fix: expenses derived in slots", {
+      originalExpenses: 0,
+      derivedExpenses: impliedExpenses,
+      revenue: revenueRaw,
+      profit: profitRaw,
+    });
+    expensesRaw = impliedExpenses;
+  }
+
+  // Case 2: If revenue is 0 but profit + expenses suggests otherwise, derive revenue
+  // This happens when transactions aren't categorized as revenue but show up in profit
+  const impliedRevenue = profitRaw + expensesRaw;
+  if (revenueRaw === 0 && impliedRevenue > 0 && profitRaw > 0) {
+    logger.warn("Data fix: revenue derived in slots", {
+      originalRevenue: 0,
+      derivedRevenue: impliedRevenue,
+      profit: profitRaw,
+      expenses: expensesRaw,
+    });
+    revenueRaw = impliedRevenue;
+  }
+
   const marginRaw =
     marginMetric?.value ??
     (revenueRaw > 0 ? (profitRaw / revenueRaw) * 100 : 0);
   const cashFlowRaw = cashFlowMetric?.value ?? 0;
   const runway = context?.runwayMonths ?? runwayMetric?.value ?? 0;
 
+  // Calculate runway exhaustion date (when cash runs out)
+  // Use period end date if available, otherwise fall back to today
+  let runwayExhaustionDate: string | undefined;
+  if (runway > 0 && runway < 24) {
+    // Only show date if runway is meaningful (< 2 years)
+    const baseDate = context?.periodEnd
+      ? new Date(context.periodEnd)
+      : new Date();
+    const exhaustionDate = new Date(baseDate);
+    exhaustionDate.setDate(exhaustionDate.getDate() + Math.round(runway * 30));
+    // Format as "September 15, 2026"
+    runwayExhaustionDate = exhaustionDate.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
   // Changes
   const profitChange = profitMetric?.change ?? 0;
   const profitDirection = profitMetric?.changeDirection ?? "flat";
   const revenueChange = revenueMetric?.change ?? 0;
   const revenueDirection = revenueMetric?.changeDirection ?? "flat";
+  const previousProfitRaw = profitMetric?.previousValue ?? 0;
+
+  // Pre-computed, semantically correct change description
+  // This prevents the AI from misinterpreting "+96%" as "doubled" when we're still in loss
+  const profitChangeDescription = computeProfitChangeDescription(
+    profitRaw,
+    previousProfitRaw,
+    profitChange,
+  );
 
   // Historical context
   const historicalContext =
@@ -422,7 +560,7 @@ export function computeSlots(
     isPersonalBest,
   );
 
-  // Money on table - Overdue
+  // Money on table - Overdue (with payment behavior anomaly detection)
   const moneyOnTable = activity.moneyOnTable;
   const overdue: OverdueSlot[] =
     moneyOnTable?.overdueInvoices.map((inv) => ({
@@ -431,6 +569,8 @@ export function computeSlots(
       amount: formatMetricValue(inv.amount, "currency", currency),
       rawAmount: inv.amount,
       daysOverdue: inv.daysOverdue,
+      isUnusual: inv.isUnusual,
+      unusualReason: inv.unusualReason,
     })) ?? [];
   const largestOverdue =
     overdue.length > 0
@@ -463,6 +603,24 @@ export function computeSlots(
     if (yoy.profitChangePercent !== 0) {
       const dir = yoy.profitChangePercent > 0 ? "up" : "down";
       yoyProfit = `${dir} ${Math.abs(yoy.profitChangePercent).toFixed(0)}% vs last year`;
+    }
+  }
+
+  // Quarter pace projection
+  let quarterPace: string | undefined;
+  const qp = context?.quarterPace;
+  if (qp && qp.projectedRevenue > 0) {
+    const projectedFormatted = formatMetricValue(
+      qp.projectedRevenue,
+      "currency",
+      currency,
+    );
+    if (qp.hasComparison && qp.vsLastYearPercent !== 0) {
+      const dir = qp.vsLastYearPercent > 0 ? "ahead of" : "behind";
+      const pct = Math.abs(qp.vsLastYearPercent);
+      quarterPace = `On pace for ${projectedFormatted} this Q${qp.currentQuarter} — ${pct}% ${dir} Q${qp.currentQuarter} last year`;
+    } else {
+      quarterPace = `On pace for ${projectedFormatted} this Q${qp.currentQuarter}`;
     }
   }
 
@@ -538,12 +696,14 @@ export function computeSlots(
     margin: marginRaw.toFixed(1),
     marginRaw,
     runway: Math.round(runway),
+    runwayExhaustionDate,
     cashFlow: formatMetricValue(cashFlowRaw, "currency", currency),
     cashFlowRaw,
 
     // Changes
     profitChange,
     profitDirection,
+    profitChangeDescription,
     revenueChange,
     revenueDirection,
 
@@ -613,6 +773,9 @@ export function computeSlots(
     // YoY
     yoyRevenue,
     yoyProfit,
+
+    // Quarter pace
+    quarterPace,
 
     // Predictions
     nextWeekInvoicesDue: undefined, // TODO: Wire up predictions

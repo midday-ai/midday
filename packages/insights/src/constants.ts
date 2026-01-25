@@ -78,6 +78,24 @@ export const METRIC_DEFINITIONS: MetricDefinition[] = [
     description: "Months of operation at current burn rate",
   },
 
+  // State metrics - Point-in-time values (useful for quiet weeks)
+  {
+    type: "cash_balance",
+    label: "Cash Balance",
+    category: "financial",
+    priority: 2,
+    unit: "currency",
+    description: "Total cash across all bank accounts",
+  },
+  {
+    type: "overdue_amount",
+    label: "Overdue",
+    category: "receivables",
+    priority: 2,
+    unit: "currency",
+    description: "Total overdue invoices to collect",
+  },
+
   // Invoice health - Money owed to you
   {
     type: "invoices_overdue",

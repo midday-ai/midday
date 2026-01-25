@@ -1,4 +1,7 @@
 import type { Database } from "@midday/db/client";
+import { createLoggerWithContext } from "@midday/logger";
+
+const logger = createLoggerWithContext("insights");
 import {
   type InsightHistoryData,
   computeHistoricalContext,
@@ -6,13 +9,14 @@ import {
   computeRecovery,
   computeRollingAverages,
   computeStreakInfo,
+  getCashBalance,
   getCashFlow,
   getDraftInvoices,
   getInsightActivityData,
   getInsightHistory,
-  getOverdueInvoiceDetails,
   getOverdueInvoicesAlert,
   getOverdueInvoicesSummary,
+  getOverdueInvoicesWithBehavior,
   getPredictionsFromHistory,
   getProfit,
   getRevenue,
@@ -26,6 +30,7 @@ import {
 import {
   ContentGenerator,
   type ContentGeneratorOptions,
+  type YearOverYearContext,
 } from "./content/generator";
 import {
   addActivityMetrics,
@@ -94,6 +99,15 @@ export class InsightsService {
       locale,
     } = params;
 
+    logger.info("Generating insight", {
+      teamId,
+      periodType,
+      periodLabel,
+      periodYear,
+      periodNumber,
+      currency,
+    });
+
     // Create period info
     const currentPeriod: PeriodInfo = {
       periodStart,
@@ -159,8 +173,9 @@ export class InsightsService {
     );
 
     // Add historical context for personal bests (weekly insights only)
-    let yearOverYearContext:
-      | import("./content").YearOverYearContext
+    let yearOverYearContext: YearOverYearContext | undefined;
+    let quarterPaceContext:
+      | import("./content/generator").QuarterPaceContext
       | undefined;
 
     if (
@@ -203,6 +218,11 @@ export class InsightsService {
       // Store YoY context for the content generator
       if (historicalContext.yearOverYear?.hasComparison) {
         yearOverYearContext = historicalContext.yearOverYear;
+      }
+
+      // Store quarter pace context
+      if (historicalContext.quarterPace) {
+        quarterPaceContext = historicalContext.quarterPace;
       }
     }
 
@@ -328,7 +348,9 @@ export class InsightsService {
         previousPredictions,
         predictions,
         yearOverYear: yearOverYearContext,
+        quarterPace: quarterPaceContext,
         runwayMonths: currentMetrics.runwayMonths,
+        periodEnd,
         locale,
         weeksOfHistory: insightHistory?.weeksOfHistory ?? 0,
         revenueConcentration: revenueConcentration.topCustomer
@@ -343,6 +365,14 @@ export class InsightsService {
           : undefined,
       },
     );
+
+    logger.info("Insight generated successfully", {
+      teamId,
+      periodLabel,
+      metricsCount: selectedMetrics.length,
+      anomaliesCount: anomalies.length,
+      hasContent: !!content,
+    });
 
     return {
       selectedMetrics,
@@ -383,6 +413,7 @@ export class InsightsService {
       spendingData,
       runwayData,
       categorySpendingData,
+      cashBalanceData,
     ] = await Promise.all([
       // Use exactDates: true to get data for the specific period (e.g., week) not full month
       getRevenue(this.db, {
@@ -420,6 +451,9 @@ export class InsightsService {
         currency,
       }).catch(() => 0),
       getSpending(this.db, { teamId, from, to, currency }).catch(() => []),
+      getCashBalance(this.db, { teamId, currency }).catch(() => ({
+        totalBalance: 0,
+      })),
     ]);
 
     // Sum up monthly values for revenue
@@ -438,11 +472,49 @@ export class InsightsService {
     const netCashFlow = cashIn - cashOut;
 
     // Get expenses from spending
-    const expenses = spendingData?.totalSpending ?? 0;
+    let expenses = spendingData?.totalSpending ?? 0;
+    const originalExpenses = expenses;
+
+    // CRITICAL: Ensure data consistency
+    // The math MUST hold: profit = revenue - expenses
+    // If expenses is 0 but profit < revenue, derive expenses from the difference
+    const impliedExpenses = revenueTotal - profitTotal;
+    if (expenses === 0 && impliedExpenses > 0) {
+      // Spending query returned 0 but profit tells us there were expenses
+      expenses = impliedExpenses;
+      logger.warn(
+        "Data consistency fix applied: expenses derived from profit",
+        {
+          originalExpenses,
+          derivedExpenses: expenses,
+          revenue: revenueTotal,
+          profit: profitTotal,
+          teamId,
+        },
+      );
+    } else if (expenses > 0 && Math.abs(expenses - impliedExpenses) > 1) {
+      // Data mismatch - trust the profit calculation and derive expenses
+      // This ensures the summary never contradicts itself
+      expenses = Math.max(expenses, impliedExpenses);
+      logger.warn(
+        "Data consistency fix applied: expenses adjusted for mismatch",
+        {
+          originalExpenses,
+          adjustedExpenses: expenses,
+          impliedExpenses,
+          revenue: revenueTotal,
+          profit: profitTotal,
+          teamId,
+        },
+      );
+    }
 
     // Calculate profit margin
     const profitMargin =
       revenueTotal > 0 ? (profitTotal / revenueTotal) * 100 : 0;
+
+    // Get cash balance (point-in-time value)
+    const cashBalance = cashBalanceData?.totalBalance ?? 0;
 
     return {
       revenue: revenueTotal,
@@ -451,6 +523,7 @@ export class InsightsService {
       cashFlow: netCashFlow,
       profitMargin,
       runwayMonths: typeof runwayData === "number" ? runwayData : 0,
+      cashBalance,
       categorySpending: categorySpendingData,
     };
   }
@@ -527,9 +600,10 @@ export class InsightsService {
         }).catch(
           () => [] as Awaited<ReturnType<typeof getUpcomingDueRecurringByTeam>>,
         ),
-        // Detailed queries for "money on table"
-        getOverdueInvoiceDetails(this.db, { teamId, currency }).catch(
-          () => [] as Awaited<ReturnType<typeof getOverdueInvoiceDetails>>,
+        // Detailed queries for "money on table" with payment behavior analysis
+        getOverdueInvoicesWithBehavior(this.db, { teamId, currency }).catch(
+          () =>
+            [] as Awaited<ReturnType<typeof getOverdueInvoicesWithBehavior>>,
         ),
         getDraftInvoices(this.db, { teamId, currency }).catch(
           () => [] as Awaited<ReturnType<typeof getDraftInvoices>>,
@@ -585,6 +659,7 @@ export class InsightsService {
           revenue: currentMetrics.revenue,
           profit: currentMetrics.netProfit,
           hasOverdue: hasOverdueInvoices,
+          invoicesPaid: activityData.invoicesPaid,
         })
       : { type: null, count: 0, description: null };
 

@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@midday/db": "workspace:*",
+    "@midday/logger": "workspace:*",
     "@ai-sdk/openai": "2.0.62",
     "@elevenlabs/elevenlabs-js": "^2.30.0",
     "@supabase/supabase-js": "^2.49.4",

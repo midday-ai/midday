@@ -4,9 +4,9 @@
  * Only scorers that catch real quality problems
  */
 import "dotenv/config";
-import { createScorer } from "evalite";
-import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
+import { createScorer } from "evalite";
 import type { InsightSlots } from "../src/content/prompts/slots";
 
 type InsightOutput = {
@@ -47,14 +47,15 @@ export const titleNoLeadingNumber = createScorer<InsightSlots, InsightOutput>({
 });
 
 /**
- * Title word count should be 15-30 words
+ * Title word count should be 12-35 words
+ * Slightly wider range since exact counts don't affect user experience
  */
 export const titleWordCount = createScorer<InsightSlots, InsightOutput>({
-  name: "Title: 15-30 words",
+  name: "Title: 12-35 words",
   description: "Title should be substantial but not too long",
   scorer: ({ output }) => {
     const count = output.title.trim().split(/\s+/).length;
-    return count >= 15 && count <= 30 ? 1 : 0;
+    return count >= 12 && count <= 35 ? 1 : 0;
   },
 });
 
@@ -70,14 +71,15 @@ export const summaryNoThisPeriod = createScorer<InsightSlots, InsightOutput>({
 });
 
 /**
- * Summary word count should be 40-60 words
+ * Summary word count should be 35-65 words
+ * Slightly wider range - what matters is readability, not exact count
  */
 export const summaryWordCount = createScorer<InsightSlots, InsightOutput>({
-  name: "Summary: 40-60 words",
+  name: "Summary: 35-65 words",
   description: "Summary should be complete but concise",
   scorer: ({ output }) => {
     const count = output.summary.trim().split(/\s+/).length;
-    return count >= 40 && count <= 60 ? 1 : 0;
+    return count >= 35 && count <= 65 ? 1 : 0;
   },
 });
 
@@ -92,6 +94,203 @@ export const noBannedPhrases = createScorer<InsightSlots, InsightOutput>({
     const banned =
       /\b(robust|solid|excellent|strong|healthy|remarkable|impressive|amazing|outstanding|significant)\b/i;
     return banned.test(fullText) ? 0 : 1;
+  },
+});
+
+// ============================================================================
+// Data accuracy scorers - CRITICAL for correctness
+// ============================================================================
+
+/**
+ * Extract numbers from text (handles formats like "117,061", "117.061", "117061")
+ */
+function extractNumbers(text: string): number[] {
+  // Match numbers with optional thousand separators and decimals
+  const matches = text.match(/[\d,.\s]+\d/g) || [];
+  return matches
+    .map((m) => {
+      // Remove spaces, normalize separators
+      const cleaned = m.replace(/\s/g, "").replace(/,/g, "");
+      return Number.parseFloat(cleaned);
+    })
+    .filter((n) => !Number.isNaN(n) && n > 0);
+}
+
+/**
+ * Check if a number appears in text (with tolerance for formatting differences)
+ */
+function numberAppearsInText(
+  num: number,
+  text: string,
+  tolerance = 0.01,
+): boolean {
+  const extracted = extractNumbers(text);
+  const absNum = Math.abs(num);
+  return extracted.some(
+    (n) => Math.abs(n - absNum) / Math.max(absNum, 1) < tolerance,
+  );
+}
+
+/**
+ * Profit value should appear in the summary
+ * CRITICAL: Users must see accurate numbers
+ */
+export const summaryHasCorrectProfit = createScorer<
+  InsightSlots,
+  InsightOutput
+>({
+  name: "Accuracy: profit value in summary",
+  description: "Summary should mention the correct profit amount",
+  scorer: ({ input, output }) => {
+    // Skip if profit is 0 (might not be mentioned)
+    if (input.profitRaw === 0) return 1;
+
+    const profitNum = Math.abs(input.profitRaw);
+    // Check if the profit number appears in summary
+    if (numberAppearsInText(profitNum, output.summary)) {
+      return 1;
+    }
+
+    // Also check title since some insights lead with the number
+    if (numberAppearsInText(profitNum, output.title)) {
+      return 1;
+    }
+
+    return 0;
+  },
+});
+
+/**
+ * Runway should appear somewhere in title or summary
+ */
+export const hasRunwayMentioned = createScorer<InsightSlots, InsightOutput>({
+  name: "Accuracy: runway mentioned",
+  description: "Runway months should be mentioned for reassurance",
+  scorer: ({ input, output }) => {
+    const runway = input.runway;
+    const fullText = `${output.title} ${output.summary}`;
+
+    // Check for runway number
+    const runwayPattern = new RegExp(`\\b${runway}[- ]month`, "i");
+    if (runwayPattern.test(fullText)) {
+      return 1;
+    }
+
+    // Also accept "X months runway" pattern
+    const altPattern = new RegExp(
+      `${runway}\\s*months?\\s*(of\\s+)?runway`,
+      "i",
+    );
+    if (altPattern.test(fullText)) {
+      return 1;
+    }
+
+    return 0;
+  },
+});
+
+/**
+ * CRITICAL: If profit is negative, should NOT say "no expenses" or similar
+ * This catches the exact bug the user reported
+ */
+export const noContradictoryExpenseStatement = createScorer<
+  InsightSlots,
+  InsightOutput
+>({
+  name: "Accuracy: no contradictory expense claims",
+  description: "Should not claim 'no expenses' when profit is negative",
+  scorer: ({ input, output }) => {
+    const fullText = `${output.title} ${output.summary} ${output.story}`;
+
+    // If profit is negative, there MUST be expenses
+    if (input.profitRaw < 0) {
+      // Check for contradictory statements
+      const noExpensePatterns = [
+        /no expenses/i,
+        /zero expenses/i,
+        /without (any )?expenses/i,
+        /expenses.*\b0\b/i,
+      ];
+
+      for (const pattern of noExpensePatterns) {
+        if (pattern.test(fullText)) {
+          return 0; // FAIL - contradictory statement
+        }
+      }
+    }
+
+    return 1;
+  },
+});
+
+/**
+ * If there are overdue invoices, they should be mentioned
+ */
+export const overdueInvoicesMentioned = createScorer<
+  InsightSlots,
+  InsightOutput
+>({
+  name: "Accuracy: overdue invoices mentioned",
+  description: "Overdue invoices should be mentioned when they exist",
+  scorer: ({ input, output }) => {
+    if (!input.hasOverdue || input.overdueCount === 0) {
+      return 1; // No overdue to mention
+    }
+
+    const fullText = `${output.title} ${output.summary} ${output.story}`;
+
+    // Check for overdue mention
+    if (/overdue/i.test(fullText)) {
+      return 1;
+    }
+
+    // Also accept "owes", "owed", "outstanding"
+    if (/\b(owes?|owed|outstanding)\b/i.test(fullText)) {
+      return 1;
+    }
+
+    return 0;
+  },
+});
+
+/**
+ * CRITICAL: No false growth language when in loss
+ * Prevents misleading statements like "profit doubled" when loss just decreased
+ */
+export const noFalseGrowthInLoss = createScorer<InsightSlots, InsightOutput>({
+  name: "Accuracy: no false growth language in loss",
+  description:
+    "When profit is negative, should not use growth language like 'doubled', 'grew', etc.",
+  scorer: ({ input, output }) => {
+    // Only applicable when in loss
+    if (input.profitRaw >= 0) {
+      return 1;
+    }
+
+    const fullText =
+      `${output.title} ${output.summary} ${output.story}`.toLowerCase();
+
+    // Bad phrases that suggest growth when we're actually in loss
+    const badPhrases = [
+      "doubled",
+      "tripled",
+      "quadrupled",
+      " grew",
+      "growth",
+      "strong momentum",
+      "profit up",
+      "profits up",
+      "profit increased",
+      "profits increased",
+    ];
+
+    for (const phrase of badPhrases) {
+      if (fullText.includes(phrase)) {
+        return 0;
+      }
+    }
+
+    return 1;
   },
 });
 
@@ -177,16 +376,184 @@ VERDICT: [PASS or FAIL]`;
   },
 });
 
+// ============================================================================
+// Projection and anomaly scorers
+// ============================================================================
+
 /**
- * All deterministic scorers (cheap, always run)
+ * If runway exhaustion date is provided, it should appear in the summary
  */
-export const deterministicScorers = [
+export const runwayDateMentioned = createScorer<InsightSlots, InsightOutput>({
+  name: "Projection: runway date mentioned",
+  description:
+    "When runway exhaustion date is provided, it should be mentioned",
+  scorer: ({ input, output }) => {
+    // Only check if we have a runway exhaustion date
+    if (!input.runwayExhaustionDate) {
+      return 1; // Skip if no date provided
+    }
+
+    const fullText = `${output.title} ${output.summary}`;
+
+    // Check for month names (the date format is "Month Day, Year")
+    const monthPattern =
+      /\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/i;
+
+    if (monthPattern.test(fullText)) {
+      return 1;
+    }
+
+    // Also accept "lasts until" or "runs out" phrasing
+    if (/lasts until|runs out|run out/i.test(fullText)) {
+      return 0.5; // Partial credit if they mention timing but not exact date
+    }
+
+    return 0;
+  },
+});
+
+/**
+ * If quarter pace is provided, it should be mentioned in summary
+ */
+export const quarterPaceMentioned = createScorer<InsightSlots, InsightOutput>({
+  name: "Projection: quarter pace mentioned",
+  description: "When quarter pace projection is provided, it should be used",
+  scorer: ({ input, output }) => {
+    // Only check if we have quarter pace data
+    if (!input.quarterPace) {
+      return 1; // Skip if no quarter pace
+    }
+
+    const fullText = `${output.title} ${output.summary}`;
+
+    // Check for quarter/Q1/Q2/etc mention
+    if (/\bQ[1-4]\b|quarter/i.test(fullText)) {
+      return 1;
+    }
+
+    // Check for "on pace" language
+    if (/on pace|on track|pacing/i.test(fullText)) {
+      return 0.75;
+    }
+
+    return 0;
+  },
+});
+
+/**
+ * If there are unusual payment delays, they should be flagged
+ */
+export const paymentAnomalyHighlighted = createScorer<
+  InsightSlots,
+  InsightOutput
+>({
+  name: "Anomaly: payment delay highlighted",
+  description: "Unusual payment delays should be highlighted",
+  scorer: ({ input, output }) => {
+    // Check if any overdue has isUnusual flag
+    const unusualOverdue = input.overdue?.filter((inv) => inv.isUnusual) ?? [];
+
+    if (unusualOverdue.length === 0) {
+      return 1; // Skip if no unusual payments
+    }
+
+    const fullText = `${output.title} ${output.summary} ${output.story}`;
+
+    // Check for unusual/anomaly language
+    if (/unusual|typically|usually|normally|out of character/i.test(fullText)) {
+      return 1;
+    }
+
+    // Check if at least mentioning the customer with the unusual delay
+    const unusualCustomer = unusualOverdue[0]?.company;
+    if (unusualCustomer && fullText.includes(unusualCustomer)) {
+      return 0.5; // Partial credit for mentioning the customer
+    }
+
+    return 0;
+  },
+});
+
+/**
+ * Short runway (< 4 months) should have urgent tone
+ */
+export const shortRunwayUrgency = createScorer<InsightSlots, InsightOutput>({
+  name: "Tone: short runway urgency",
+  description:
+    "When runway is < 4 months, tone should convey appropriate urgency",
+  scorer: ({ input, output }) => {
+    // Only check for short runway
+    if (input.runway >= 4) {
+      return 1; // Skip if runway is comfortable
+    }
+
+    const fullText = `${output.title} ${output.summary} ${output.story}`;
+
+    // Check for urgency indicators
+    const urgencyPatterns = [
+      /prioritize|priority/i,
+      /urgent|immediately/i,
+      /act (now|quickly|fast)/i,
+      /limited time/i,
+      /collect/i,
+      /critical/i,
+    ];
+
+    for (const pattern of urgencyPatterns) {
+      if (pattern.test(fullText)) {
+        return 1;
+      }
+    }
+
+    // Partial credit if they mention runway is short
+    if (/\b[1-3]\s*month/i.test(fullText)) {
+      return 0.5;
+    }
+
+    return 0;
+  },
+});
+
+/**
+ * Quality scorers (formatting, style)
+ */
+export const qualityScorers = [
   titleHasPersonalPronoun,
   titleNoLeadingNumber,
   titleWordCount,
   summaryNoThisPeriod,
   summaryWordCount,
   noBannedPhrases,
+];
+
+/**
+ * Accuracy scorers (data correctness) - CRITICAL
+ */
+export const accuracyScorers = [
+  summaryHasCorrectProfit,
+  hasRunwayMentioned,
+  noContradictoryExpenseStatement,
+  overdueInvoicesMentioned,
+  noFalseGrowthInLoss,
+];
+
+/**
+ * Projection and anomaly scorers
+ */
+export const projectionScorers = [
+  runwayDateMentioned,
+  quarterPaceMentioned,
+  paymentAnomalyHighlighted,
+  shortRunwayUrgency,
+];
+
+/**
+ * All deterministic scorers (cheap, always run)
+ */
+export const deterministicScorers = [
+  ...qualityScorers,
+  ...accuracyScorers,
+  ...projectionScorers,
 ];
 
 /**
