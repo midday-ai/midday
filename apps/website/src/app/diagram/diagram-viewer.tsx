@@ -62,7 +62,7 @@ export function DiagramViewer() {
       </div>
 
       {/* React Flow Canvas */}
-      <div className="flex-1 min-h-[600px] rounded-lg border border-border bg-card mt-6">
+      <div className="rounded-lg border border-border mt-6" style={{ height: '70vh', minHeight: '600px', background: '#ffffff' }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -73,14 +73,15 @@ export function DiagramViewer() {
           fitViewOptions={{ padding: 0.2 }}
           defaultEdgeOptions={{ type: "smoothstep" }}
           className="rounded-lg"
+          style={{ background: '#ffffff' }}
         >
-          <Background color="hsl(var(--border))" gap={16} />
-          <Controls className="!bg-card !border-border !shadow-sm" />
+          <Background color="#e2e8f0" gap={16} />
+          <Controls className="!bg-white !border-gray-200 !shadow-sm" />
           <MiniMap
-            nodeStrokeColor="hsl(var(--primary))"
-            nodeColor="hsl(var(--card))"
+            nodeStrokeColor="#0ea5e9"
+            nodeColor="#f8fafc"
             nodeBorderRadius={4}
-            className="!bg-card !border-border"
+            className="!bg-white !border-gray-200"
           />
         </ReactFlow>
       </div>
