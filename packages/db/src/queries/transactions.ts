@@ -575,6 +575,7 @@ export async function getTransactions(
       bankAccounts.name,
       bankAccounts.currency,
       bankConnections.id,
+      bankConnections.name,
       bankConnections.logoUrl,
     );
 
