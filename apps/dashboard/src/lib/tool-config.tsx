@@ -25,6 +25,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+import { MdOutlineInsights } from "react-icons/md";
 import type { ComponentType, SVGProps } from "react";
 
 export type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
@@ -156,7 +157,7 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
   },
   getInsights: {
     name: "Insights",
-    icon: Brain,
+    icon: MdOutlineInsights,
     description: "Loading your insights",
   },
   cashFlowForecast: {

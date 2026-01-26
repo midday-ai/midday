@@ -26,6 +26,8 @@ export function AudioPlayer() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  // Track which audio element the source is bound to (for detecting remounts)
+  const sourceElementRef = useRef<HTMLAudioElement | null>(null);
   const prevAudioUrlRef = useRef<string | null>(null);
 
   // Reset state when audio URL changes
@@ -127,9 +129,16 @@ export function AudioPlayer() {
 
         // Create source only once per audio element (cannot be recreated)
         // A MediaElementAudioSourceNode is permanently bound to its HTMLMediaElement
+        // Reset source if the audio element changed (element was remounted)
+        if (sourceRef.current && sourceElementRef.current !== audio) {
+          sourceRef.current = null;
+          sourceElementRef.current = null;
+        }
+
         if (!sourceRef.current) {
           const source = audioContext.createMediaElementSource(audio);
           sourceRef.current = source;
+          sourceElementRef.current = audio;
         }
 
         // Connect/reconnect the audio graph
@@ -186,6 +195,9 @@ export function AudioPlayer() {
       if (audioContextRef.current?.state !== "closed") {
         audioContextRef.current?.close();
       }
+      // Reset source refs on unmount
+      sourceRef.current = null;
+      sourceElementRef.current = null;
     };
   }, []);
 

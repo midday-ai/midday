@@ -213,13 +213,13 @@ export function AudioWaveform({
 
       ctx.clearRect(0, 0, width, canvasHeight);
 
-      // Resolve bar color
+      // Resolve bar color (use primary color for better dark mode support)
+      // CSS variables are HSL values without hsl() wrapper, so we need to add it
+      const primaryValue = getComputedStyle(document.documentElement)
+        .getPropertyValue("--primary")
+        .trim();
       const computedBarColor =
-        barColor ||
-        getComputedStyle(document.documentElement)
-          .getPropertyValue("--foreground")
-          .trim() ||
-        "#000";
+        barColor || (primaryValue ? `hsl(${primaryValue})` : "#000");
 
       // Calculate progress
       const progress = duration > 0 ? currentTime / duration : 0;

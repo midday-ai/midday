@@ -259,7 +259,7 @@ function formatChangeCompact(
   }
 
   const sign = direction === "up" ? "+" : "-";
-  return `(${sign}${Math.round(change)}%)`;
+  return `(${sign}${Math.abs(Math.round(change))}%)`;
 }
 
 // Helper to get current period info
@@ -278,7 +278,7 @@ export function getCurrentPeriodInfo(periodType: string): {
     case "quarterly":
       return { year, number: getQuarter(now) };
     case "yearly":
-      return { year, number: year };
+      return { year, number: 1 };
     default:
       return { year, number: getISOWeek(now) };
   }

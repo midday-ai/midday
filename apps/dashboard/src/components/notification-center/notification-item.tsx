@@ -48,7 +48,7 @@ export function NotificationItem({
       return <Icons.AlertCircle className="size-4" />;
     if (activityType === "match") return <Icons.Match className="size-4" />;
     if (activityType === "insight_ready")
-      return <Icons.AIOutline className="size-4" />;
+      return <Icons.Insights className="size-4" />;
     return <Icons.Notifications className="size-4" />;
   };
 
