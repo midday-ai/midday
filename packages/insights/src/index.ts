@@ -363,6 +363,8 @@ export class InsightsService {
               isConcentrated: revenueConcentration.isConcentrated,
             }
           : undefined,
+        // Pass all metrics for activity change descriptions
+        allMetrics,
       },
     );
 

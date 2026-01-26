@@ -148,6 +148,7 @@ export type InsightSlots = {
   // Activity highlights
   invoicesPaid: number;
   invoicesSent: number;
+  invoicesSentChange?: string; // Pre-computed: "no activity", "+2", "-50%", etc.
   hoursTracked: number;
   newCustomers: number;
   largestPayment?: {
@@ -186,6 +187,10 @@ export type InsightSlots = {
 
   // First insight detection
   isFirstInsight: boolean;
+
+  // Cash flow explanation when it differs from profit
+  // Helps users understand why cash flow ≠ profit (receivables timing, etc.)
+  cashFlowExplanation?: string;
 };
 
 /**
@@ -474,6 +479,16 @@ export function computeSlots(
       isConcentrated: boolean;
     };
     anomalies?: InsightAnomaly[];
+    /** All computed metrics (for activity metric change descriptions) */
+    allMetrics?: Record<string, InsightMetric>;
+    /** Forward-looking predictions for next week */
+    predictions?: {
+      invoicesDue?: {
+        count: number;
+        totalAmount: number;
+        currency: string;
+      };
+    };
   },
 ): InsightSlots {
   // Extract metrics
@@ -543,6 +558,24 @@ export function computeSlots(
       day: "numeric",
       year: "numeric",
     });
+  }
+
+  // Cash flow explanation when it differs significantly from profit
+  // This helps users understand why cash flow ≠ profit (receivables timing, etc.)
+  let cashFlowExplanation: string | undefined;
+  const cashFlowDiff = Math.abs(cashFlowRaw - profitRaw);
+  const significantDiffThreshold = Math.max(Math.abs(profitRaw) * 0.2, 500); // 20% or 500, whichever is larger
+
+  if (cashFlowDiff > significantDiffThreshold && profitRaw !== 0) {
+    if (cashFlowRaw > profitRaw) {
+      // Cash flow higher than profit: likely collected receivables from previous periods
+      cashFlowExplanation =
+        "Cash flow exceeds profit due to collected receivables from previous periods";
+    } else {
+      // Cash flow lower than profit: likely revenue not yet collected (invoices outstanding)
+      cashFlowExplanation =
+        "Cash flow is lower than profit because some revenue hasn't been collected yet";
+    }
   }
 
   // Changes
@@ -725,6 +758,7 @@ export function computeSlots(
     runwayExhaustionDate,
     cashFlow: formatMetricValue(cashFlowRaw, "currency", currency),
     cashFlowRaw,
+    cashFlowExplanation,
 
     // Changes
     profitChange,
@@ -772,9 +806,11 @@ export function computeSlots(
     hasAlerts,
     hasWarnings,
 
-    // Activity
+    // Activity (with pre-computed change descriptions from allMetrics)
     invoicesPaid: activity.invoicesPaid,
     invoicesSent: activity.invoicesSent,
+    invoicesSentChange:
+      context?.allMetrics?.invoices_sent?.changeDescription ?? undefined,
     hoursTracked: activity.hoursTracked,
     newCustomers: activity.newCustomers,
     largestPayment: activity.largestPayment
@@ -808,8 +844,17 @@ export function computeSlots(
     // Quarter pace
     quarterPace,
 
-    // Predictions
-    nextWeekInvoicesDue: undefined, // TODO: Wire up predictions
+    // Predictions - forward-looking data for next week
+    nextWeekInvoicesDue: context?.predictions?.invoicesDue
+      ? {
+          count: context.predictions.invoicesDue.count,
+          amount: formatMetricValue(
+            context.predictions.invoicesDue.totalAmount,
+            "currency",
+            currency,
+          ),
+        }
+      : undefined,
 
     // Meta
     currency,

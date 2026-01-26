@@ -240,18 +240,32 @@ export function detectAnomalies(
       });
     }
 
-    // Low runway warning
+    // Low runway warning with escalating urgency
     if (
       metric.type === "runway_months" &&
       metric.value < ANOMALY_THRESHOLDS.runwayWarning
     ) {
+      let message: string;
+      let severity: "info" | "warning" | "alert";
+
+      if (metric.value < ANOMALY_THRESHOLDS.runwayUrgent) {
+        // < 2 months = urgent alert
+        severity = "alert";
+        message = `URGENT: Only ${metric.value.toFixed(1)} months of runway remaining — prioritize collecting receivables and securing new revenue`;
+      } else if (metric.value < ANOMALY_THRESHOLDS.runwayCritical) {
+        // < 3 months = alert
+        severity = "alert";
+        message = `Runway is ${metric.value.toFixed(1)} months — focus on cash collection and revenue`;
+      } else {
+        // < 6 months = warning
+        severity = "warning";
+        message = `Runway is ${metric.value.toFixed(1)} months`;
+      }
+
       anomalies.push({
         type: "low_runway",
-        severity:
-          metric.value < ANOMALY_THRESHOLDS.runwayCritical
-            ? "alert"
-            : "warning",
-        message: `Runway is ${metric.value.toFixed(1)} months`,
+        severity,
+        message,
         metricType: metric.type,
       });
     }

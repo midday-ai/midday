@@ -207,8 +207,9 @@ export const ANOMALY_THRESHOLDS = {
   minorChange: 5,
 
   // Runway warning levels (months)
-  runwayCritical: 3,
-  runwayWarning: 6,
+  runwayUrgent: 2, // < 2 months = urgent alert with specific messaging
+  runwayCritical: 3, // < 3 months = alert
+  runwayWarning: 6, // < 6 months = warning
 
   // Cash flow warnings
   negativeCashFlow: 0,

@@ -13,10 +13,11 @@ import { type InsightSlots, getNotableContext, getToneGuidance } from "./slots";
  * Build the title generation prompt
  */
 export function buildTitlePrompt(slots: InsightSlots): string {
-  const { weekType, isFirstInsight } = slots;
+  const { weekType, isFirstInsight, runway } = slots;
 
   const data = buildDataSection(slots);
-  const examples = buildExamples(weekType, isFirstInsight);
+  const isLowRunway = runway < 3;
+  const examples = buildExamples(weekType, isFirstInsight, isLowRunway);
   const tone = getToneGuidance(weekType);
 
   const firstInsightNote = isFirstInsight
@@ -47,8 +48,11 @@ WHY: "Your profit" feels personal. "Profit of X" feels like a spreadsheet.
 Lead with context, not numbers: Start with streak/milestone/situation, then the figures.
 WHY: "Third straight profitable week" hooks attention. "117k profit" is just data.
 
-Include runway naturally: Mention it as reassurance, not as a metric.
-WHY: Runway tells them they're safe. It should feel like comfort, not a data point.
+Runway framing depends on length:
+- 6+ months: Mention as reassurance ("your 8-month runway gives you room")
+- 3-6 months: Mention neutrally ("with 4 months of runway")
+- Under 3 months: Frame as URGENT — never say "reassuring", "comfortable", or "steady"
+WHY: Short runway is a critical situation, not a comfort.
 
 Match currency format exactly: Copy the format from data (e.g., "338,958 kr" not "SEK 338958").
 WHY: Consistency with their familiar format builds trust.
@@ -68,6 +72,9 @@ WHY: These are filler words that add no meaning. Plain language sounds more genu
 - If profit is NEGATIVE: never say "doubled", "grew", or "improved" even if the loss decreased
 - A smaller loss is progress, not growth — say "loss decreased" or "expenses down"
 - If revenue is 0: don't emphasize margin — it's meaningless without revenue
+- CRITICAL: If runway is under 2 months, NEVER use words like "reassuring", "comfortable", "steady", "stable", or "flexibility"
+  - Instead use: "urgent", "priority", "focus on collections", "cash is tight"
+  - A 1-month runway means cash runs out in ~30 days — this is an emergency, not stability
 </accuracy>
 
 ${examples}
@@ -79,6 +86,24 @@ Write ONE headline (15-30 words). Begin directly — no preamble.
 
 function buildDataSection(slots: InsightSlots): string {
   const lines: string[] = [];
+
+  // CRITICAL: Low runway warning at the top
+  if (slots.runway < 2) {
+    lines.push("CRITICAL RUNWAY WARNING");
+    lines.push(
+      `Runway is only ${slots.runway} months — this overrides all other context.`,
+    );
+    lines.push(
+      "Do NOT use reassuring language. Frame runway as URGENT, not comfortable.",
+    );
+    lines.push("");
+  } else if (slots.runway < 3) {
+    lines.push("LOW RUNWAY WARNING");
+    lines.push(
+      `Runway is ${slots.runway} months — be careful with reassuring language.`,
+    );
+    lines.push("");
+  }
 
   // Currency context - tell AI to match the format shown in data values
   lines.push(
@@ -145,12 +170,16 @@ function buildDataSection(slots: InsightSlots): string {
   return lines.join("\n");
 }
 
-function buildExamples(weekType: string, isFirstInsight: boolean): string {
+function buildExamples(
+  weekType: string,
+  isFirstInsight: boolean,
+  isLowRunway = false,
+): string {
   // Personal examples that lead with context, use "your/you", and feel conversational
   const examples: Record<string, string[]> = {
     great: [
       "Your best profit week ever — [amount] at [X]% margin with a comfortable [X]-month runway ahead",
-      "Best week since [month] — [amount] profit caps off a strong run, and your [X]-month runway gives you options",
+      "Best week since [month] — [amount] profit caps off a great run, and your [X]-month runway gives you options",
       "Your [X]th consecutive week above [threshold] — [amount] profit with [X]% margin and [X] months of runway",
     ],
     good: [
@@ -168,9 +197,17 @@ function buildExamples(weekType: string, isFirstInsight: boolean): string {
       "Tough week with [amount] in expenses — your [X]-month buffer gives you time to work with",
       "Payment gap this week — [amount] sitting with [Company] overdue, but your [X]-month runway provides cushion",
     ],
+    // LOW RUNWAY examples - these override other week types when runway < 3 months
+    low_runway: [
+      "Profit at [amount] this week, but with only [X] months runway, collecting the [amount] overdue is urgent",
+      "Good profit week at [amount], though your [X]-month runway means cash collection is the priority",
+      "[amount] profit helps, but [X] months of runway until [date] — focus on collecting [amount] overdue",
+    ],
   };
 
-  const weekExamples = examples[weekType] ?? examples.good;
+  // Use low_runway examples when runway is critical, regardless of week type
+  const effectiveWeekType = isLowRunway ? "low_runway" : weekType;
+  const weekExamples = examples[effectiveWeekType] ?? examples.good;
 
   // Concrete examples showing the personal, conversational format
   const concreteExamples: Record<string, string> = {
@@ -178,12 +215,15 @@ function buildExamples(weekType: string, isFirstInsight: boolean): string {
       "Your best profit week ever — 338,958 kr at 99% margin with a comfortable 14-month runway ahead",
     good: "Third straight week above 100k — January is shaping up well, and your 8-month runway gives you room",
     quiet:
-      "Quiet week on the revenue side, but your 8-month runway and the 24,300 kr pending from Klarna keep things stable",
+      "Quiet week on the revenue side, but your 8-month runway and the 24,300 kr pending from [Company] keep things stable",
     challenging:
       "No revenue landed this week — payment timing gap, but your 14-month runway means there's no rush",
+    low_runway:
+      "Profit reached 5,644 kr this week, but with only 1 month runway until February 24, collecting the 22,500 kr overdue is urgent",
   };
 
-  const concreteExample = concreteExamples[weekType] ?? concreteExamples.good;
+  const concreteExample =
+    concreteExamples[effectiveWeekType] ?? concreteExamples.good;
 
   return `<examples>
 <concrete_example>${concreteExample}</concrete_example>

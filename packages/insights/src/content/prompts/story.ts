@@ -45,6 +45,8 @@ ${primaryAction.daysOverdue ? `Days overdue: ${primaryAction.daysOverdue}` : ""}
 Amount: ${primaryAction.amount}
 </primary_action>
 
+<runway>${slots.runway} months${slots.runway < 3 ? " — SHORT RUNWAY, use urgent language" : ""}</runway>
+
 <rules>
 - MUST be 1-2 sentences, 15-25 words total
 - MUST focus on the ONE primary action above — don't list multiple things
@@ -55,6 +57,10 @@ Amount: ${primaryAction.amount}
   - Good/great weeks: "With X going well...", "Now's a good time to...", "Lock in the momentum by..."
   - Challenging weeks: "To get things moving...", "While waiting for revenue...", "Your next step is..."
   - Quiet weeks: "One thing to keep moving...", "Worth following up on..."
+- CRITICAL RUNWAY: If runway < 3 months, use URGENT language:
+  - "Collecting X is urgent to extend your runway"
+  - "Priority: chase the X from Y to strengthen cash position"
+  - AVOID soft language like "now's a good time" when runway is critical
 - NEVER use generic phrases: "enhance cash flow", "improve profitability", "optimize receivables"
 - NEVER restate the summary — this adds a forward action
 - CRITICAL: If profit is NEGATIVE, never say "doubled", "strong momentum", or imply growth. A smaller loss is progress, not success.
@@ -62,16 +68,16 @@ Amount: ${primaryAction.amount}
 
 <examples>
 <great_week>
-"With January going well, now's a good time to chase Klarna's 24,300 kr — it's been sitting there 45 days."
+"With January going well, now's a good time to chase [Company]'s 24,300 kr — it's been sitting there 45 days."
 </great_week>
 <good_week>
-"One thing to keep this momentum: follow up on Acme Corp's 8,000 kr that's been overdue since December."
+"One thing to keep this momentum: follow up on [Company]'s 8,000 kr that's been overdue since December."
 </good_week>
 <quiet_week>
-"Quiet week, but worth sending that 12,000 kr draft to Beta Inc to get some revenue queued up."
+"Quiet week, but worth sending that 12,000 kr draft to [Company] to get some revenue queued up."
 </quiet_week>
 <challenging_week>
-"While waiting for payments to land, chase the 5,000 kr from Klarna — it's been 30 days."
+"While waiting for payments to land, chase the 5,000 kr from [Company] — it's been 30 days."
 </challenging_week>
 </examples>
 
@@ -111,7 +117,7 @@ ${highlight}
 
 <examples>
 <great_week>
-"Keep this up and you'll have a strong quarter to look back on."
+"Keep this up and you'll have a great quarter to look back on."
 </great_week>
 <good_week>
 "Steady progress — your runway gives you room to keep building."
@@ -149,8 +155,8 @@ ${primaryAction.company ? `Company: ${primaryAction.company}` : ""}
 </rules>
 
 <examples>
-"First thing to tackle: the 750 kr overdue from Acme Corp — it's been sitting there a while."
-"One item needs attention: send that 12,000 kr draft to Beta Inc to get things moving."
+"First thing to tackle: the 750 kr overdue from [Company] — it's been sitting there a while."
+"One item needs attention: send that 12,000 kr draft to [Company] to get things moving."
 </examples>
 
 <output>

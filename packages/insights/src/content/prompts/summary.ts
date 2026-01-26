@@ -57,6 +57,7 @@ WHY: Consistency from day one.
 - All figures must match exactly
 - If profit is negative, expenses MUST be mentioned
 - Profit of 0 is "no activity", NOT a loss
+- ACTIVITY METRICS: For invoices sent, hours tracked — use the description from data, NOT "down 100%"
 </accuracy>`
     : `<banned_words>
 solid, healthy, strong, great, robust, excellent, remarkable, impressive, amazing, outstanding, significant
@@ -95,6 +96,13 @@ WHY: Specific dates create urgency and help planning. "1 month" is vague; "until
   - A smaller loss is NOT the same as profit growth
 - If revenue is 0, margin is meaningless - don't emphasize margin changes
 - When comparing weeks: -7k is better than -189k, but both are losses - frame accordingly
+- ACTIVITY METRICS: For invoices sent, hours tracked, etc. — use the description from data
+  - If "no activity" or "no new invoices" — say that, NOT "down 100%"
+  - "Down 100%" sounds alarming for normal activity variations
+- CRITICAL RUNWAY RULE: If runway is under 2 months, NEVER use reassuring language like:
+  - "reassuring", "comfortable", "steady", "stable", "flexibility", "buffer", "cushion"
+  - Instead emphasize URGENCY: "only X months", "cash is tight", "collecting overdue is urgent"
+  - A 1-month runway is an EMERGENCY, not stability — frame it accordingly
 </accuracy>`;
 
   const examples = isFirstInsight
@@ -128,6 +136,27 @@ ONLY output the summary text itself.
 
 function buildDataSection(slots: InsightSlots): string {
   const lines: string[] = [];
+
+  // CRITICAL: Low runway warning at the very top - overrides tone
+  if (slots.runway < 2) {
+    lines.push("CRITICAL RUNWAY WARNING");
+    lines.push(
+      `Runway is only ${slots.runway} months (until ${slots.runwayExhaustionDate || "soon"}).`,
+    );
+    lines.push(
+      "NEVER use words like: reassuring, comfortable, steady, stable, flexibility, buffer",
+    );
+    lines.push(
+      "MUST frame as: urgent, priority, tight, limited time, needs immediate attention",
+    );
+    lines.push("");
+  } else if (slots.runway < 3) {
+    lines.push("LOW RUNWAY WARNING");
+    lines.push(
+      `Runway is ${slots.runway} months — avoid overly reassuring language.`,
+    );
+    lines.push("");
+  }
 
   // Currency context - tell AI to match the format shown in data values
   lines.push(
@@ -172,12 +201,24 @@ function buildDataSection(slots: InsightSlots): string {
   lines.push(`revenue: ${slots.revenue}`);
   lines.push(`expenses: ${slots.expenses}`);
   lines.push(`margin: ${slots.margin}%`);
+
+  // Activity changes (use these descriptions, don't calculate percentages)
+  if (slots.invoicesSentChange) {
+    lines.push(`invoices sent: ${slots.invoicesSentChange}`);
+  } else if (slots.invoicesSent === 0) {
+    lines.push("invoices sent: no new invoices this week");
+  }
   if (slots.runwayExhaustionDate) {
     lines.push(
       `runway: ${slots.runway} months (cash lasts until ${slots.runwayExhaustionDate})`,
     );
   } else {
     lines.push(`runway: ${slots.runway} months`);
+  }
+
+  // Cash flow with explanation if it differs from profit
+  if (slots.cashFlowExplanation) {
+    lines.push(`cash flow: ${slots.cashFlow} (${slots.cashFlowExplanation})`);
   }
 
   // Overdue (with payment behavior anomaly flags)
@@ -227,9 +268,9 @@ function buildExamples(slots: InsightSlots): string {
     // When there's a milestone/personal best
     milestone: {
       input:
-        "notable: Best profit week since October\n\nprofit: 117,061 kr, revenue: 120,200 kr, expenses: 3,139 kr, margin: 97.4%, runway: 8 months, overdue: Klarna 24,300 kr",
+        "notable: Best profit week since October\n\nprofit: 117,061 kr, revenue: 120,200 kr, expenses: 3,139 kr, margin: 97.4%, runway: 8 months, overdue: [Company] 24,300 kr",
       output:
-        "Your best profit week since October — 117,061 kr on 120,200 kr revenue with margin holding at 97%. Expenses stayed minimal, and your 8-month runway gives you flexibility. Klarna still owes 24,300 kr worth chasing.",
+        "Your best profit week since October — 117,061 kr on 120,200 kr revenue with margin holding at 97%. Expenses stayed minimal, and your 8-month runway gives you flexibility. [Company] still owes 24,300 kr worth chasing.",
     },
     // When there's a streak
     streak: {
@@ -241,31 +282,39 @@ function buildExamples(slots: InsightSlots): string {
     // When there's a recovery
     recovery: {
       input:
-        "notable: Recovery after 2 down weeks\n\nprofit: 85,000 kr, revenue: 90,000 kr, expenses: 5,000 kr, margin: 94.4%, runway: 6 months, overdue: Beta Inc 12,000 kr",
+        "notable: Recovery after 2 down weeks\n\nprofit: 85,000 kr, revenue: 90,000 kr, expenses: 5,000 kr, margin: 94.4%, runway: 6 months, overdue: [Company] 12,000 kr",
       output:
-        "Back in the black after two tough weeks — 85,000 kr profit on 90,000 kr revenue. Margin recovered to 94%, and your 6-month runway held steady. Beta Inc still owes 12,000 kr from before.",
+        "Back in the black after two tough weeks — 85,000 kr profit on 90,000 kr revenue. Margin recovered to 94%, and your 6-month runway held steady. [Company] still owes 12,000 kr from before.",
     },
     // Standard (no notable context)
     standard: {
       input:
-        "profit: 75,000 kr, revenue: 80,000 kr, expenses: 5,000 kr, margin: 93.8%, runway: 10 months, overdue: Acme Corp 8,000 kr",
+        "profit: 75,000 kr, revenue: 80,000 kr, expenses: 5,000 kr, margin: 93.8%, runway: 10 months, overdue: [Company] 8,000 kr",
       output:
-        "Solid week with 75,000 kr profit on 80,000 kr revenue — margin at 94% with low expenses. Your 10-month runway gives you room to operate. Acme Corp owes 8,000 kr that's worth following up on.",
+        "Good week with 75,000 kr profit on 80,000 kr revenue — margin at 94% with low expenses. Your 10-month runway gives you room to operate. [Company] owes 8,000 kr that's worth following up on.",
     },
     // Challenging week - IMPORTANT: if profit is negative, expenses MUST be mentioned
     challenging: {
       input:
-        "profit: -22,266 kr, revenue: 0 kr, expenses: 22,266 kr, runway: 2 months (cash lasts until March 15, 2026), overdue: Acme Corp 750 kr",
+        "profit: -22,266 kr, revenue: 0 kr, expenses: 22,266 kr, runway: 2 months (cash lasts until March 15, 2026), overdue: [Company] 750 kr",
       output:
-        "No revenue landed this week, with 22,266 kr in expenses creating a gap. Your cash lasts until March 15, so collecting the 750 kr from Acme Corp and landing new work should be top priority.",
+        "No revenue landed this week, with 22,266 kr in expenses creating a gap. Your cash lasts until March 15, so collecting the 750 kr from [Company] and landing new work should be top priority.",
     },
     // Zero activity week (all values are 0) - NOT a loss, just no activity
     // When runway is short, include the specific exhaustion date
     zero_activity: {
       input:
-        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, margin: 0%, runway: 1 months (cash lasts until February 10, 2026), overdue: Klarna 5,000 kr",
+        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, margin: 0%, runway: 1 months (cash lasts until February 10, 2026), overdue: [Company] 5,000 kr",
       output:
-        "No financial activity this week. With cash lasting until February 10, collecting the 5,000 kr overdue from Klarna should be a priority to extend your runway.",
+        "No financial activity this week. With cash lasting until February 10, collecting the 5,000 kr overdue from [Company] should be a priority to extend your runway.",
+    },
+    // LOW RUNWAY with positive profit - CRITICAL: don't be reassuring!
+    // This is the tricky case where good metrics might make AI sound too positive
+    low_runway_profitable: {
+      input:
+        "CRITICAL RUNWAY WARNING\nRunway is only 1 months (until February 24, 2026).\n\nprofit: 5,644 kr, revenue: 7,500 kr, expenses: 1,856 kr, margin: 75.3%, runway: 1 months (cash lasts until February 24, 2026), overdue: [Company A] 7,500 kr, [Company B] 7,500 kr, [Company C] 7,500 kr",
+      output:
+        "Profit reached 5,644 kr on 7,500 kr revenue with a 75% margin, but with only 1 month of runway until February 24, cash is tight. The 22,500 kr overdue from three clients needs urgent attention to extend your runway.",
     },
   };
 
@@ -273,8 +322,13 @@ function buildExamples(slots: InsightSlots): string {
   let exampleKey: string;
   const isZeroActivity =
     slots.profitRaw === 0 && slots.revenueRaw === 0 && slots.expensesRaw === 0;
+  const isLowRunwayProfitable = slots.runway < 2 && slots.profitRaw > 0;
 
-  if (isZeroActivity) {
+  // LOW RUNWAY takes priority over other classifications when profitable
+  // This ensures we don't show celebratory examples for critical situations
+  if (isLowRunwayProfitable) {
+    exampleKey = "low_runway_profitable";
+  } else if (isZeroActivity) {
     exampleKey = "zero_activity";
   } else if (slots.isPersonalBest && slots.historicalContext) {
     exampleKey = "milestone";
@@ -293,9 +347,9 @@ function buildExamples(slots: InsightSlots): string {
   // Concrete example showing exact natural, flowing format
   const concreteExample = {
     input:
-      "currency: SEK\n\nnotable: 3 consecutive profitable weeks\n\nprofit: 117,061 kr, revenue: 120,200 kr, expenses: 3,139 kr, margin: 97.4%, runway: 8 months, overdue: Klarna 24,300 kr",
+      "currency: SEK\n\nnotable: 3 consecutive profitable weeks\n\nprofit: 117,061 kr, revenue: 120,200 kr, expenses: 3,139 kr, margin: 97.4%, runway: 8 months, overdue: [Company] 24,300 kr",
     output:
-      "Third straight profitable week — 117,061 kr on 120,200 kr revenue with margin holding at 97%. Expenses stayed minimal at 3,139 kr, and your 8-month runway keeps things comfortable. Klarna owes 24,300 kr worth chasing.",
+      "Third straight profitable week — 117,061 kr on 120,200 kr revenue with margin holding at 97%. Expenses stayed minimal at 3,139 kr, and your 8-month runway keeps things comfortable. [Company] owes 24,300 kr worth chasing.",
   };
 
   return `<examples>
@@ -316,33 +370,33 @@ function buildFirstInsightExamples(slots: InsightSlots): string {
   const examples: Record<string, { input: string; output: string }> = {
     great: {
       input:
-        "profit: 260,340 kr, revenue: 268,000 kr, expenses: 7,660 kr, margin: 97%, runway: 14 months, overdue: Acme Corp 750 kr",
+        "profit: 260,340 kr, revenue: 268,000 kr, expenses: 7,660 kr, margin: 97%, runway: 14 months, overdue: [Company] 750 kr",
       output:
-        "Welcome to your weekly insights. This week brought 260,340 kr profit on 268,000 kr revenue — a 97% margin with minimal expenses. Your 14-month runway gives you plenty of flexibility. One thing to chase: 750 kr overdue from Acme Corp.",
+        "Welcome to your weekly insights. This week brought 260,340 kr profit on 268,000 kr revenue — a 97% margin with minimal expenses. Your 14-month runway gives you plenty of flexibility. One thing to chase: 750 kr overdue from [Company].",
     },
     good: {
       input:
-        "profit: 85,000 kr, revenue: 95,000 kr, expenses: 10,000 kr, margin: 89%, runway: 8 months, overdue: Beta Inc 5,000 kr",
+        "profit: 85,000 kr, revenue: 95,000 kr, expenses: 10,000 kr, margin: 89%, runway: 8 months, overdue: [Company] 5,000 kr",
       output:
-        "Welcome to your weekly insights. You're starting with 85,000 kr profit on 95,000 kr revenue — 89% margin after 10,000 kr in expenses. Your 8-month runway is comfortable. Beta Inc owes 5,000 kr worth following up on.",
+        "Welcome to your weekly insights. You're starting with 85,000 kr profit on 95,000 kr revenue — 89% margin after 10,000 kr in expenses. Your 8-month runway is comfortable. [Company] owes 5,000 kr worth following up on.",
     },
     quiet: {
       input:
         "profit: 12,000 kr, revenue: 15,000 kr, expenses: 3,000 kr, margin: 80%, runway: 6 months",
       output:
-        "Welcome to your weekly insights. Quieter start with 12,000 kr profit on 15,000 kr revenue — 80% margin with low expenses. Your 6-month runway gives you time. No outstanding receivables to worry about.",
+        "Welcome to your weekly insights. Quieter start with 12,000 kr profit on 15,000 kr revenue — 80% margin with low expenses. Your 6-month runway gives you time. No overdue invoices to worry about.",
     },
     challenging: {
       input:
-        "profit: -15,000 kr, revenue: 0 kr, expenses: 15,000 kr, runway: 10 months, overdue: Acme Corp 8,000 kr",
+        "profit: -15,000 kr, revenue: 0 kr, expenses: 15,000 kr, runway: 10 months, overdue: [Company] 8,000 kr",
       output:
-        "Welcome to your weekly insights. No revenue this week with 15,000 kr in expenses — often just payment timing when invoices cross weeks. Your 10-month runway means no rush. Acme Corp owes 8,000 kr that's worth collecting.",
+        "Welcome to your weekly insights. No revenue this week with 15,000 kr in expenses — often just payment timing when invoices cross weeks. Your 10-month runway means no rush. [Company] owes 8,000 kr that's worth collecting.",
     },
     zero_activity: {
       input:
-        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, runway: 1 months (cash lasts until February 10, 2026), overdue: Klarna 3,000 kr",
+        "profit: 0 kr, revenue: 0 kr, expenses: 0 kr, runway: 1 months (cash lasts until February 10, 2026), overdue: [Company] 3,000 kr",
       output:
-        "Welcome to your weekly insights. No financial activity recorded this week. With cash lasting until February 10, collecting the 3,000 kr from Klarna should be a priority.",
+        "Welcome to your weekly insights. No financial activity recorded this week. With cash lasting until February 10, collecting the 3,000 kr from [Company] should be a priority.",
     },
   };
 
@@ -355,9 +409,9 @@ function buildFirstInsightExamples(slots: InsightSlots): string {
   // Concrete example for first insights
   const concreteExample = {
     input:
-      "currency: SEK\n\nprofit: 260,340 kr, revenue: 268,000 kr, expenses: 7,660 kr, margin: 97%, runway: 14 months, overdue: Acme Corp 750 kr",
+      "currency: SEK\n\nprofit: 260,340 kr, revenue: 268,000 kr, expenses: 7,660 kr, margin: 97%, runway: 14 months, overdue: [Company] 750 kr",
     output:
-      "Welcome to your weekly insights. This week brought 260,340 kr profit on 268,000 kr revenue — a 97% margin with minimal expenses. Your 14-month runway gives you plenty of flexibility. One thing to chase: 750 kr overdue from Acme Corp.",
+      "Welcome to your weekly insights. This week brought 260,340 kr profit on 268,000 kr revenue — a 97% margin with minimal expenses. Your 14-month runway gives you plenty of flexibility. One thing to chase: 750 kr overdue from [Company].",
   };
 
   return `<examples>

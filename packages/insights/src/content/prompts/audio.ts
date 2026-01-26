@@ -252,13 +252,13 @@ ${toneGuidance}
 </rules>
 
 <examples>
-Strong week: "Week 4. Profit reached fifty-six hundred kronor, your highest this year. Margin is at seventy-five percent. PES Sälj paid their invoice, contributing to the result. Three invoices remain overdue."
+Great week: "Week 4. Profit reached three hundred thirty-nine thousand kronor on three hundred forty thousand in revenue, your best week since October. That puts your margin at nearly one hundred percent with expenses staying minimal. Your fourteen month runway gives you flexibility. [Company] paid one hundred eighty thousand kronor this week. One invoice from [Company] is overdue at seven hundred fifty kronor, worth following up on."
 
-Recovery: "Week 3. Profit recovered to four thousand kronor after two slower weeks. Revenue is up thirty percent. Three invoices are overdue totaling twenty-two thousand, with Whelma being the largest at seventy-five hundred."
+Recovery: "Week 3. Profit recovered to forty-five thousand kronor after two slower weeks. Revenue came in at sixty thousand with expenses at fifteen thousand, putting your margin at seventy-five percent. Your nine month runway is holding steady. You have a twenty thousand kronor draft ready to send to [Company] that could boost next week's numbers."
 
-Quiet week: "Week 2. Profit came in at two thousand kronor with higher than usual expenses. Three invoices are overdue totaling twenty-two thousand kronor. Following up with Whelma would address the largest outstanding amount."
+Quiet week: "Week 2. Profit came in at twelve thousand kronor on fifteen thousand in revenue with expenses staying low. Margin is at eighty percent. Your six month runway gives you time to operate. No overdue invoices to chase this week, leaving you free to focus on new business development."
 
-Forward-looking: "Week 5. Profit is at eight thousand kronor with healthy margins. Three invoices totaling fifteen thousand kronor are due next week."
+Forward-looking: "Week 5. Profit is at ninety-five thousand kronor with revenue at one hundred ten thousand. Margin is holding at eighty-six percent. Your fourteen month runway is comfortable. Three invoices totaling twenty-five thousand kronor are due next week, and you're on pace for four hundred fifty thousand this quarter."
 </examples>
 
 <task>

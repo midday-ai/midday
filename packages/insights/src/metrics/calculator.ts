@@ -6,11 +6,21 @@ import { getMetricLabel, getMetricUnit } from "./definitions";
 
 /**
  * Calculate the percentage change between two values
+ *
+ * For regular metrics: calculates relative percentage change
+ * For percentage metrics (like profit_margin): returns absolute point change
  */
 export function calculatePercentageChange(
   current: number,
   previous: number,
+  isPercentageMetric = false,
 ): number {
+  // For percentage-type metrics (margin, etc.), return absolute point change
+  // This avoids confusing "margin +129%" when margin went from 33% to 75%
+  if (isPercentageMetric) {
+    return current - previous;
+  }
+
   if (previous === 0) {
     return current === 0 ? 0 : 100;
   }
@@ -29,13 +39,25 @@ export function getChangeDirection(change: number): ChangeDirection {
 /**
  * Compute a user-friendly change description
  * Handles edge cases like "to zero" more gracefully than raw percentages
+ *
+ * @param isPercentageMetric - If true, treats changePercent as absolute point change
  */
 export function computeChangeDescription(
   currentValue: number,
   previousValue: number,
   changePercent: number,
+  isPercentageMetric = false,
 ): string {
   const absChange = Math.abs(changePercent);
+
+  // For percentage metrics (margin, etc.), show point change
+  if (isPercentageMetric) {
+    if (absChange < 1) {
+      return "flat";
+    }
+    const direction = changePercent > 0 ? "+" : "";
+    return `${direction}${changePercent.toFixed(1)}pp`; // pp = percentage points
+  }
 
   // No significant change
   if (absChange < 5) {
@@ -80,8 +102,14 @@ export function createMetric(
   previousValue: number,
   currency?: string,
 ): InsightMetric {
-  const change = calculatePercentageChange(currentValue, previousValue);
   const unit = getMetricUnit(type);
+  const isPercentageMetric = unit === "percentage";
+
+  const change = calculatePercentageChange(
+    currentValue,
+    previousValue,
+    isPercentageMetric,
+  );
   const roundedChange = Math.round(change * 10) / 10;
 
   return {
@@ -95,6 +123,7 @@ export function createMetric(
       currentValue,
       previousValue,
       roundedChange,
+      isPercentageMetric,
     ),
     unit: unit === "currency" ? undefined : unit,
     currency: unit === "currency" ? currency : undefined,

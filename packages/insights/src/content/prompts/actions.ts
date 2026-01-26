@@ -52,8 +52,8 @@ For drafts: "Send [amount with currency] invoice to [Company]"
 For expense spikes: "Review [category] (+[X]%)"
 For concentration: "Diversify - [X]% revenue from [Company]"
 
-Example: If data shows "7,500 kr", write "Collect 7,500 kr from Whelma AB"
-Example unusual: "Collect 7,500 kr from Whelma AB — unusual delay, they typically pay faster"
+Example: If data shows "7,500 kr", write "Collect 7,500 kr from [Company]"
+Example unusual: "Collect 7,500 kr from [Company] — unusual delay, they typically pay faster"
 </format>
 
 <verify>

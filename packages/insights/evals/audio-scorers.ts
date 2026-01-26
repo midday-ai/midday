@@ -204,6 +204,7 @@ function extractNumbers(text: string): number[] {
 
 /**
  * Check if a number appears in text (with tolerance)
+ * Handles both numeric and written forms
  */
 function numberAppearsInText(
   num: number,
@@ -213,25 +214,112 @@ function numberAppearsInText(
   const extracted = extractNumbers(text);
   const absNum = Math.abs(num);
 
-  // Also check for written numbers like "five thousand"
-  const writtenApprox = [
-    { pattern: /five thousand/i, value: 5000 },
-    { pattern: /ten thousand/i, value: 10000 },
-    { pattern: /fifteen thousand/i, value: 15000 },
-    { pattern: /twenty thousand/i, value: 20000 },
-    { pattern: /fifty thousand/i, value: 50000 },
-    { pattern: /hundred thousand/i, value: 100000 },
+  // Check for extracted numeric values first
+  if (
+    extracted.some(
+      (n) => Math.abs(n - absNum) / Math.max(absNum, 1) < tolerance,
+    )
+  ) {
+    return true;
+  }
+
+  // Parse written numbers from text to handle speech format
+  // E.g., "three hundred thirty-nine thousand" = 339000
+  const writtenPatterns = [
+    // Hundreds of thousands
+    {
+      pattern:
+        /(\w+)\s+hundred\s+(\w+)(?:-(\w+))?\s+thousand/i,
+      parse: (m: RegExpMatchArray) => {
+        const h = wordToNumber(m[1]!) * 100;
+        const t = wordToNumber(m[2]!);
+        const u = m[3] ? wordToNumber(m[3]) : 0;
+        return (h + t + u) * 1000;
+      },
+    },
+    // X hundred thousand
+    {
+      pattern: /(\w+)\s+hundred\s+thousand/i,
+      parse: (m: RegExpMatchArray) => wordToNumber(m[1]!) * 100000,
+    },
+    // X thousand Y hundred (like "339 thousand")
+    {
+      pattern: /(\d+)\s+thousand/i,
+      parse: (m: RegExpMatchArray) => Number.parseInt(m[1]!, 10) * 1000,
+    },
+    // Word thousands (one through ninety-nine thousand)
+    {
+      pattern: /(\w+)(?:-(\w+))?\s+thousand/i,
+      parse: (m: RegExpMatchArray) => {
+        const t = wordToNumber(m[1]!);
+        const u = m[2] ? wordToNumber(m[2]) : 0;
+        return (t + u) * 1000;
+      },
+    },
+    // X thousand Y (like "5 thousand 600")
+    {
+      pattern: /(\d+)\s+thousand\s+(\d+)/i,
+      parse: (m: RegExpMatchArray) =>
+        Number.parseInt(m[1]!, 10) * 1000 + Number.parseInt(m[2]!, 10),
+    },
   ];
 
-  for (const { pattern, value } of writtenApprox) {
-    if (pattern.test(text) && Math.abs(value - absNum) / absNum < tolerance) {
-      return true;
+  for (const { pattern, parse } of writtenPatterns) {
+    const match = text.match(pattern);
+    if (match) {
+      try {
+        const value = parse(match);
+        if (
+          value > 0 &&
+          Math.abs(value - absNum) / Math.max(absNum, 1) < tolerance
+        ) {
+          return true;
+        }
+      } catch {
+        // Pattern matched but parsing failed, continue
+      }
     }
   }
 
-  return extracted.some(
-    (n) => Math.abs(n - absNum) / Math.max(absNum, 1) < tolerance,
-  );
+  return false;
+}
+
+/**
+ * Convert a word to a number
+ */
+function wordToNumber(word: string): number {
+  const words: Record<string, number> = {
+    zero: 0,
+    one: 1,
+    two: 2,
+    three: 3,
+    four: 4,
+    five: 5,
+    six: 6,
+    seven: 7,
+    eight: 8,
+    nine: 9,
+    ten: 10,
+    eleven: 11,
+    twelve: 12,
+    thirteen: 13,
+    fourteen: 14,
+    fifteen: 15,
+    sixteen: 16,
+    seventeen: 17,
+    eighteen: 18,
+    nineteen: 19,
+    twenty: 20,
+    thirty: 30,
+    forty: 40,
+    fifty: 50,
+    sixty: 60,
+    seventy: 70,
+    eighty: 80,
+    ninety: 90,
+    hundred: 100,
+  };
+  return words[word.toLowerCase()] ?? 0;
 }
 
 /**

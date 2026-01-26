@@ -85,15 +85,23 @@ export const summaryWordCount = createScorer<InsightSlots, InsightOutput>({
 
 /**
  * No banned adjectives anywhere — they sound generic
+ * Note: "outstanding" is allowed when used in financial context (outstanding receivables/invoices)
  */
 export const noBannedPhrases = createScorer<InsightSlots, InsightOutput>({
   name: "No banned phrases",
   description: "Output should not use generic/flowery adjectives",
   scorer: ({ output }) => {
     const fullText = `${output.title} ${output.summary} ${output.story}`;
+
+    // Remove legitimate uses of "outstanding" (financial term for unpaid)
+    const cleanedText = fullText.replace(
+      /outstanding\s+(receivables?|invoices?|balance|amount|payment)/gi,
+      "UNPAID_TERM",
+    );
+
     const banned =
       /\b(robust|solid|excellent|strong|healthy|remarkable|impressive|amazing|outstanding|significant)\b/i;
-    return banned.test(fullText) ? 0 : 1;
+    return banned.test(cleanedText) ? 0 : 1;
   },
 });
 

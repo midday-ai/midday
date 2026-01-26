@@ -87,6 +87,8 @@ export type ContentGenerationContext = {
   locale?: string;
   weeksOfHistory?: number;
   revenueConcentration?: RevenueConcentrationContext;
+  /** All computed metrics (for activity metric change descriptions) */
+  allMetrics?: Record<string, InsightMetric>;
 };
 
 /**
@@ -138,6 +140,8 @@ export class ContentGenerator {
           expenseAnomalies,
           revenueConcentration: context.revenueConcentration,
           anomalies,
+          allMetrics: context.allMetrics,
+          predictions: context.predictions,
         },
       );
 
