@@ -278,7 +278,8 @@ export function getCurrentPeriodInfo(periodType: string): {
     case "quarterly":
       return { year, number: getQuarter(now) };
     case "yearly":
-      return { year, number: 1 };
+      // For yearly periods, periodNumber is the year itself
+      return { year, number: year };
     default:
       return { year, number: getISOWeek(now) };
   }

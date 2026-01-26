@@ -61,14 +61,6 @@ export const insightByIdSchema = z
     description: "Parameters for getting an insight by ID",
   });
 
-/** Maximum valid period number for each period type */
-const periodNumberLimits: Record<z.infer<typeof periodTypeSchema>, number> = {
-  weekly: 53,
-  monthly: 12,
-  quarterly: 4,
-  yearly: 1,
-};
-
 export const insightByPeriodSchema = z
   .object({
     periodType: periodTypeSchema.openapi({
@@ -78,18 +70,35 @@ export const insightByPeriodSchema = z
       description: "Year of the insight period",
       example: 2024,
     }),
-    periodNumber: z.coerce.number().int().min(1).max(53).openapi({
+    periodNumber: z.coerce.number().int().min(1).max(2100).openapi({
       description:
-        "Period number (week 1-53, month 1-12, quarter 1-4, or year 1)",
+        "Period number (week 1-53, month 1-12, quarter 1-4, or year e.g. 2024)",
       example: 1,
     }),
   })
   .superRefine((data, ctx) => {
-    const maxPeriod = periodNumberLimits[data.periodType];
-    if (data.periodNumber > maxPeriod) {
+    // Period number limits by type (yearly uses the actual year as periodNumber)
+    const periodNumberLimits = {
+      weekly: { min: 1, max: 53 },
+      monthly: { min: 1, max: 12 },
+      quarterly: { min: 1, max: 4 },
+      yearly: { min: 2000, max: 2100 },
+    } as const;
+
+    const limits = periodNumberLimits[data.periodType];
+    if (data.periodNumber < limits.min || data.periodNumber > limits.max) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `Period number for ${data.periodType} periods must be between 1 and ${maxPeriod}`,
+        message: `Period number for ${data.periodType} periods must be between ${limits.min} and ${limits.max}`,
+        path: ["periodNumber"],
+      });
+    }
+
+    // For yearly periods, periodNumber should equal periodYear
+    if (data.periodType === "yearly" && data.periodNumber !== data.periodYear) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `For yearly periods, periodNumber must equal periodYear (got ${data.periodNumber}, expected ${data.periodYear})`,
         path: ["periodNumber"],
       });
     }

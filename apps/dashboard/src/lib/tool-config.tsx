@@ -25,8 +25,8 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { MdOutlineInsights } from "react-icons/md";
 import type { ComponentType, SVGProps } from "react";
+import { MdOutlineInsights } from "react-icons/md";
 
 export type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
