@@ -1,12 +1,12 @@
 "use client";
 
+import { AudioPlayer } from "@/components/chat/audio-player";
 import {
   ChatHistoryButton,
   ChatHistoryDropdown,
   ChatHistoryProvider,
   useChatHistoryContext,
 } from "@/components/chat/chat-history";
-import { AudioPlayer } from "@/components/chat/audio-player";
 import { CommandMenu } from "@/components/chat/command-menu";
 import { RecordButton } from "@/components/chat/record-button";
 import { SuggestedActionsButton } from "@/components/suggested-actions-button";

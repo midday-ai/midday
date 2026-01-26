@@ -207,10 +207,7 @@ export function AudioWaveform({
       }
 
       // Generate static pattern if needed
-      if (
-        (!active || !analyser) &&
-        staticBarsRef.current.length !== barCount
-      ) {
+      if ((!active || !analyser) && staticBarsRef.current.length !== barCount) {
         staticBarsRef.current = generateStaticPattern(barCount);
       }
 
@@ -261,9 +258,7 @@ export function AudioWaveform({
         } else if (processing) {
           ctx.globalAlpha = 0.5 + (barH / canvasHeight) * 0.3;
         } else {
-          ctx.globalAlpha = isPlayed
-            ? 0.7
-            : 0.25 + (barH / canvasHeight) * 0.2;
+          ctx.globalAlpha = isPlayed ? 0.7 : 0.25 + (barH / canvasHeight) * 0.2;
         }
 
         if (barRadius > 0) {

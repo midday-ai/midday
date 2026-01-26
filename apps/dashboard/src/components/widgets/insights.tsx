@@ -273,7 +273,6 @@ export function InsightsWidget() {
   const knownInsightIdsRef = useRef<Set<string>>(new Set());
   const [newInsightIds, setNewInsightIds] = useState<Set<string>>(new Set());
 
-
   // Fetch insights (excluding dismissed)
   const { data, isLoading } = useQuery(
     trpc.insights.list.queryOptions({
