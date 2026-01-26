@@ -1,4 +1,5 @@
 import { ExportStatus } from "@/components/export-status";
+import { FeedbackWidget } from "@midday/ui/feedback-widget";
 import { Header } from "@/components/header";
 import { GlobalSheetsProvider } from "@/components/sheets/global-sheets-provider";
 import { Sidebar } from "@/components/sidebar";
@@ -70,6 +71,7 @@ export default async function Layout({
         <ExportStatus />
         <GlobalSheetsProvider />
         <TimezoneDetector />
+        <FeedbackWidget source="dashboard" userEmail={user.email ?? undefined} />
       </div>
     </HydrateClient>
   );

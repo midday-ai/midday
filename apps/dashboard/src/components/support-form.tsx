@@ -1,6 +1,6 @@
 "use client";
 
-import { sendSupportAction } from "@/actions/send-support-action";
+import { sendSupportAction } from "@/actions/send-support-linear-action";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { Button } from "@midday/ui/button";
 import {

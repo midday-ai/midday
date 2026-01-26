@@ -38,7 +38,6 @@
         "PLAID_CLIENT_ID",
         "PLAID_SECRET",
         "GITHUB_TOKEN",
-        "PLAIN_API_KEY",
         "BASELIME_SERVICE",
         "BASELIME_API_KEY",
         "OPENAI_API_KEY",

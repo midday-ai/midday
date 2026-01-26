@@ -1,7 +1,7 @@
 "use client";
 
 import { sendSupportSchema } from "@/actions/schema";
-import { sendSupportAction } from "@/actions/send-support-action";
+import { sendSupportAction } from "@/actions/send-support-linear-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {

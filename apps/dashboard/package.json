@@ -49,7 +49,6 @@
     "@tanstack/react-query": "^5.90.16",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.18",
-    "@team-plain/typescript-sdk": "^5.11.0",
     "@trigger.dev/react-hooks": "4.1.1",
     "@trigger.dev/sdk": "4.1.1",
     "@trpc/client": "^11.8.1",

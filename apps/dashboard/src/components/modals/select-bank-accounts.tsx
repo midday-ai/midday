@@ -1,6 +1,6 @@
 "use client";
 
-import { sendSupportAction } from "@/actions/send-support-action";
+import { sendSupportAction } from "@/actions/send-support-linear-action";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useI18n } from "@/locales/client";

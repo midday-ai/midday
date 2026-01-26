@@ -35,6 +35,7 @@
     "./dialog": "./src/components/dialog.tsx",
     "./drawer": "./src/components/drawer.tsx",
     "./dropdown-menu": "./src/components/dropdown-menu.tsx",
+    "./feedback-widget": "./src/components/feedback-widget.tsx",
     "./form": "./src/components/form.tsx",
     "./editor": "./src/components/editor/index.tsx",
     "./globals.css": "./src/globals.css",
