@@ -9,27 +9,27 @@ interface FAQItem {
 
 const faqs: FAQItem[] = [
   {
-    question: "What is Abacus?",
+    question: "What is abacus?",
     answer:
-      "Abacus is the operating system for funding businesses. It brings your portfolio, payments, merchant data, and risk alerts into one connected system so you always know what's going on with your deals.",
+      "abacus is the operating system for funding businesses. It brings your portfolio, payments, merchant data, and risk alerts into one connected system so you always know what's going on with your deals.",
   },
   {
-    question: "Who is Abacus for?",
+    question: "Who is abacus for?",
     answer:
-      "Abacus is built for funding operators who want clarity and control over their portfolio without spending time on manual admin or spreadsheets.",
+      "abacus is built for funding operators who want clarity and control over their portfolio without spending time on manual admin or spreadsheets.",
   },
   {
-    question: "Do I need financial or accounting knowledge to use Abacus?",
+    question: "Do I need financial or accounting knowledge to use abacus?",
     answer:
-      "No. Abacus is designed for day-to-day use by funding operators. It helps you stay organized, informed, and in control without requiring accounting expertise.",
+      "No. abacus is designed for day-to-day use by funding operators. It helps you stay organized, informed, and in control without requiring accounting expertise.",
   },
   {
-    question: "How does Abacus connect to my bank?",
+    question: "How does abacus connect to my bank?",
     answer:
-      "Abacus connects to over 25,000 banks worldwide. Once connected, transactions are imported automatically and kept up to date.",
+      "abacus connects to over 25,000 banks worldwide. Once connected, transactions are imported automatically and kept up to date.",
   },
   {
-    question: "How do receipts and invoices get into Abacus?",
+    question: "How do receipts and invoices get into abacus?",
     answer:
       "Receipts and invoices can be pulled automatically from connected email accounts, synced from existing folders, or uploaded manually. They are then matched to transactions so everything stays organized.",
   },
@@ -44,14 +44,14 @@ const faqs: FAQItem[] = [
       "Weekly updates are automatic summaries that highlight what changed in your portfolio and what's worth paying attention to, so you don't have to check everything constantly.",
   },
   {
-    question: "Can I create invoices in Abacus?",
+    question: "Can I create invoices in abacus?",
     answer:
       "Yes. You can create one-off, recurring, scheduled, and web invoices. Invoice activity is reflected directly in your financial overview.",
   },
   {
     question: "Can I connect my existing spreadsheet?",
     answer:
-      "Yes. Connect your Google Sheet and Abacus will sync your data automatically. Keep using your existing workflow while getting a professional dashboard on top.",
+      "Yes. Connect your Google Sheet and abacus will sync your data automatically. Keep using your existing workflow while getting a professional dashboard on top.",
   },
   {
     question: "Can I export my data?",
@@ -59,9 +59,9 @@ const faqs: FAQItem[] = [
       "Yes. Your data is always yours. You can export transactions, merchant data, and reports whenever you need, or share them with external tools or collaborators.",
   },
   {
-    question: "Is Abacus secure?",
+    question: "Is abacus secure?",
     answer:
-      "Yes. Abacus uses industry-standard security practices to protect your data. You control what gets connected and shared at all times.",
+      "Yes. abacus uses industry-standard security practices to protect your data. You control what gets connected and shared at all times.",
   },
   {
     question: "Can I change plans later?",

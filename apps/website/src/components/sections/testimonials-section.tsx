@@ -419,9 +419,9 @@ const defaultTestimonials: Testimonial[] = [
     company: "Honest Funding LLC",
     country: "United States",
     content:
-      "Before Abacus, I was managing everything in spreadsheets. Now I see my entire portfolio in one place and can finally focus on growing the business instead of tracking it.",
+      "Before abacus, I was managing everything in spreadsheets. Now I see my entire portfolio in one place and can finally focus on growing the business instead of tracking it.",
     fullContent:
-      "Company\nHonest Funding LLC provides funding solutions for small businesses and entrepreneurs.\n\nChallenge\nManaging the entire portfolio in spreadsheets was time-consuming and error-prone. Tracking deals, payments, and performance across multiple files made it difficult to get a clear picture of the business.\n\nImpact\nAbacus consolidated all portfolio data into one platform, eliminating spreadsheet chaos and freeing up time to focus on business growth rather than administrative tracking.\n\nFavorite features\nPortfolio overview, centralized data management, and clean interface that makes financial tracking effortless.",
+      "Company\nHonest Funding LLC provides funding solutions for small businesses and entrepreneurs.\n\nChallenge\nManaging the entire portfolio in spreadsheets was time-consuming and error-prone. Tracking deals, payments, and performance across multiple files made it difficult to get a clear picture of the business.\n\nImpact\nabacus consolidated all portfolio data into one platform, eliminating spreadsheet chaos and freeing up time to focus on business growth rather than administrative tracking.\n\nFavorite features\nPortfolio overview, centralized data management, and clean interface that makes financial tracking effortless.",
   },
   {
     name: "John DeSimonte",
@@ -429,9 +429,9 @@ const defaultTestimonials: Testimonial[] = [
     company: "Emmy Capital",
     country: "United States",
     content:
-      "We went from chasing spreadsheets and digging through emails to having everything we need in one dashboard. Abacus cut our admin time in half.",
+      "We went from chasing spreadsheets and digging through emails to having everything we need in one dashboard. abacus cut our admin time in half.",
     fullContent:
-      "Company\nEmmy Capital is an investment firm focused on strategic capital deployment and portfolio management.\n\nChallenge\nSpreadsheets and scattered email threads made it hard to stay on top of portfolio performance. Finding the right information required digging through multiple sources, wasting valuable time.\n\nImpact\nAbacus brought everything into one dashboard, cutting admin time in half and giving the team instant access to the data they need to make decisions.\n\nFavorite features\nUnified dashboard, streamlined workflows, and significant time savings on administrative tasks.",
+      "Company\nEmmy Capital is an investment firm focused on strategic capital deployment and portfolio management.\n\nChallenge\nSpreadsheets and scattered email threads made it hard to stay on top of portfolio performance. Finding the right information required digging through multiple sources, wasting valuable time.\n\nImpact\nabacus brought everything into one dashboard, cutting admin time in half and giving the team instant access to the data they need to make decisions.\n\nFavorite features\nUnified dashboard, streamlined workflows, and significant time savings on administrative tasks.",
   },
 ];
 

@@ -1,12 +1,12 @@
 /**
- * Abacus Product Visualization - React Flow Data
+ * abacus Product Visualization - React Flow Data
  */
 
 import type { Edge, Node } from "@xyflow/react";
 
 // Human-readable descriptions for the dropdown
 export const diagramDescriptions: Record<string, string> = {
-  coreIdentity: "1. Core Identity - What is Abacus?",
+  coreIdentity: "1. Core Identity - What is abacus?",
   threePillars: "2. The Three Pillars",
   onboardingFlow: "3. 5-Minute Onboarding Flow",
   enhancedOnboardingFlow: "4. Enhanced Onboarding (with Website Scraping)",
@@ -29,7 +29,7 @@ export const diagramDescriptions: Record<string, string> = {
 };
 
 // ============================================================================
-// 1. CORE IDENTITY - What is Abacus?
+// 1. CORE IDENTITY - What is abacus?
 // ============================================================================
 
 export const coreIdentity = {
@@ -37,7 +37,7 @@ export const coreIdentity = {
     {
       id: "abacus",
       position: { x: 400, y: 300 },
-      data: { label: "Abacus" },
+      data: { label: "abacus" },
       type: "input",
       style: {
         background: "#0ea5e9",
@@ -753,7 +753,7 @@ export const featureMap = {
     {
       id: "features",
       position: { x: 400, y: 250 },
-      data: { label: "Abacus Features" },
+      data: { label: "abacus Features" },
       style: {
         background: "#0ea5e9",
         color: "white",
@@ -4626,7 +4626,7 @@ export const fullStackVision = {
       },
     },
 
-    // Abacus backbone
+    // abacus backbone
     {
       id: "backbone",
       position: { x: 250, y: 500 },

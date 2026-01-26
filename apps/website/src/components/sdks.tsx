@@ -274,10 +274,10 @@ export function SDKs() {
             {/* Title and Description */}
             <div className="space-y-4 text-center max-w-xl w-full">
               <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground">
-                Build with Abacus
+                Build with abacus
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Use Abacus's SDKs to integrate financial data, insights, and
+                Use abacus's SDKs to integrate financial data, insights, and
                 workflows into your product with just a few lines of code.
               </p>
             </div>
@@ -353,10 +353,10 @@ export function SDKs() {
             {/* Title and Description */}
             <div className="text-center space-y-4 w-full">
               <h1 className="font-serif text-6xl xl:text-7xl 2xl:text-8xl leading-tight text-foreground">
-                Build with Abacus
+                Build with abacus
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-xl mx-auto font-sans text-center">
-                Use Abacus's SDKs to integrate financial data, insights, and
+                Use abacus's SDKs to integrate financial data, insights, and
                 workflows into your product with just a few lines of code.
               </p>
             </div>

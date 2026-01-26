@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Terms and Conditions",
   description:
-    "Terms and Conditions for using Abacus. Read about your rights and responsibilities when using our service.",
+    "Terms and Conditions for using abacus. Read about your rights and responsibilities when using our service.",
 };
 
 export default function TermsPage() {
@@ -25,7 +25,7 @@ export default function TermsPage() {
               <div className="prose prose-sm sm:prose-base max-w-none space-y-6 font-sans text-foreground">
                 <p className="text-muted-foreground leading-relaxed">
                   These Terms and Conditions ("Terms", "Terms and Conditions")
-                  govern your relationship with the Abacus application (the
+                  govern your relationship with the abacus application (the
                   "Service") operated by Abacus Labs ("us", "we", or "our").
                 </p>
 

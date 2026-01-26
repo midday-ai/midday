@@ -210,7 +210,7 @@ export function Footer() {
             </div>
           </Link>
           <p className="font-sans text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Abacus by Suphian. All rights reserved.
+            © {new Date().getFullYear()} abacus by Suphian. All rights reserved.
           </p>
         </div>
       </div>

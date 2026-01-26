@@ -36,17 +36,17 @@ const hedvigSerif = Hedvig_Letters_Serif({
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Abacus",
-    template: "%s | Abacus",
+    default: "abacus",
+    template: "%s | abacus",
   },
   description:
-    "Abacus is the operating system for funding businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
+    "abacus is the operating system for funding businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
   openGraph: {
-    title: "Abacus",
+    title: "abacus",
     description:
-      "Abacus is the operating system for funding businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
+      "abacus is the operating system for funding businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
     url: baseUrl,
-    siteName: "Abacus",
+    siteName: "abacus",
     locale: "en_US",
     type: "website",
     images: [
@@ -63,9 +63,9 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    title: "Abacus",
+    title: "abacus",
     description:
-      "Abacus is the operating system for funding businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
+      "abacus is the operating system for funding businesses. Connect your Google Sheet and get a professional dashboard, risk alerts, and branded merchant portal.",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image-v1.jpg",

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "Privacy Policy for Abacus. Learn how we collect, use, and protect your personal data.",
+    "Privacy Policy for abacus. Learn how we collect, use, and protect your personal data.",
 };
 
 export default function PrivacyPage() {
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
                         Service
                       </h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        Service is the Abacus application operated by Midday
+                        Service is the abacus application operated by Midday
                         Labs AB
                       </p>
                     </div>
@@ -269,7 +269,7 @@ export default function PrivacyPage() {
                     Use of Google User Data
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Abacus's use of information received from Google APIs will
+                    abacus's use of information received from Google APIs will
                     adhere to the Google API Services User Data Policy,
                     including the Limited Use requirements.
                   </p>

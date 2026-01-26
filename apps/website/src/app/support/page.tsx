@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Support",
   description:
-    "Get help with Abacus. Contact our team for assistance with any questions or issues you may have.",
+    "Get help with abacus. Contact our team for assistance with any questions or issues you may have.",
 };
 
 export default function SupportPage() {

@@ -199,7 +199,7 @@ export function Header({
             className="flex items-center gap-2 hover:opacity-80 active:opacity-80 transition-opacity duration-200 touch-manipulation"
             onClick={() => setIsMenuOpen(false)}
             style={{ WebkitTapHighlightColor: "transparent" }}
-            aria-label="Abacus - Go to homepage"
+            aria-label="abacus - Go to homepage"
           >
             <div className="w-6 h-6">
               <Icons.LogoSmall className="w-full h-full text-foreground" />
@@ -529,7 +529,7 @@ export function Header({
                                 {
                                   href: "https://api.abacuslabs.co",
                                   title: "Developer & API",
-                                  desc: "Programmatic access to Abacus.",
+                                  desc: "Programmatic access to abacus.",
                                   external: true,
                                 },
                                 {

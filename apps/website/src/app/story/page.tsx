@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Our Story",
   description:
-    "Why we built Abacus. Learn how we're leveling the playing field for funding operators, giving mom and pop shops the same tools as the big players.",
+    "Why we built abacus. Learn how we're leveling the playing field for funding operators, giving mom and pop shops the same tools as the big players.",
 };
 
 export default function StoryPage() {
@@ -15,7 +15,7 @@ export default function StoryPage() {
             {/* Title */}
             <div className="space-y-4 text-center">
               <h1 className="font-serif text-3xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-foreground">
-                Why we started Abacus
+                Why we started abacus
               </h1>
             </div>
 
@@ -60,7 +60,7 @@ export default function StoryPage() {
                     Leveling the playing field
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Abacus exists to give every funding operator — from a one-person
+                    abacus exists to give every funding operator — from a one-person
                     shop to a growing team — the same tools and experience that
                     the big players have. Better, actually.
                   </p>
@@ -74,7 +74,7 @@ export default function StoryPage() {
                   <p className="text-muted-foreground leading-relaxed">
                     That's the experience every funding operator should be able to
                     offer. Not because they have deep pockets for custom
-                    development, but because Abacus gives it to them out of the
+                    development, but because abacus gives it to them out of the
                     box.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
@@ -127,7 +127,7 @@ export default function StoryPage() {
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
                     What started with two small businesses has slowly expanded
-                    to hundreds of funding operators using Abacus to manage their
+                    to hundreds of funding operators using abacus to manage their
                     portfolios, serve their merchants, and grow their
                     businesses.
                   </p>

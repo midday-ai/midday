@@ -5,7 +5,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Launch Program",
   description:
-    "Get up and running with Abacus in 30 days. Custom implementation, Google Sheet migration, dashboard setup, and team training — all handled for you.",
+    "Get up and running with abacus in 30 days. Custom implementation, Google Sheet migration, dashboard setup, and team training — all handled for you.",
 };
 
 export default function LaunchProgramPage() {

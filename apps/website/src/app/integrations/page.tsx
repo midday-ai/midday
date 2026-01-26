@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Integrations",
   description:
-    "Connect Abacus with your favorite tools. Explore integrations for email, accounting, productivity, and more.",
+    "Connect abacus with your favorite tools. Explore integrations for email, accounting, productivity, and more.",
 };
 
 export default function Page() {

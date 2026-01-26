@@ -73,7 +73,7 @@ export function PreAccounting() {
                 Pre-accounting, handled.
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Abacus collects, matches, and prepares your financial data so
+                abacus collects, matches, and prepares your financial data so
                 your books are always ready before they reach an accountant.
               </p>
             </div>
@@ -136,7 +136,7 @@ export function PreAccounting() {
                 Pre-accounting, handled.
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-xl mx-auto font-sans text-center">
-                Abacus collects, matches, and prepares your financial data so
+                abacus collects, matches, and prepares your financial data so
                 your books are always ready before they reach an accountant.
               </p>
             </div>
@@ -341,7 +341,7 @@ export function PreAccounting() {
               Accountant-ready, without the back and forth
             </h2>
             <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
-              Abacus prepares clean, structured records so exporting or syncing
+              abacus prepares clean, structured records so exporting or syncing
               to your accounting system takes minutes, not days.
             </p>
           </div>
