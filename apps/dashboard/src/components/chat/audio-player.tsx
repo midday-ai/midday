@@ -207,16 +207,6 @@ export function AudioPlayer() {
     close();
   }, [close]);
 
-  console.log("isVisible", isVisible);
-  console.log("audioUrl", audioUrl);
-  console.log("autoPlay", autoPlay);
-  console.log("isPlaying", isPlaying);
-  console.log("currentTime", currentTime);
-  console.log("duration", duration);
-  console.log("analyserRef.current", analyserRef.current);
-  console.log("sourceRef.current", sourceRef.current);
-  console.log("audioContextRef.current", audioContextRef.current);
-
   return (
     <AnimatePresence>
       {isVisible && (
