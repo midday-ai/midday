@@ -1,9 +1,7 @@
 import { EmailPasswordSignIn } from "@/components/email-password-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
-import { LoginAccordion } from "@/components/login-accordion";
 import { LoginVideoBackground } from "@/components/login-video-background";
 import { OAuthErrorAlert } from "@/components/oauth-error-alert";
-import { OTPSignIn } from "@/components/otp-sign-in";
 import { Cookies } from "@/utils/constants";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
@@ -19,52 +17,8 @@ export default async function Page() {
   const cookieStore = await cookies();
   const preferred = cookieStore.get(Cookies.PreferredSignInProvider);
 
-  let moreSignInOptions = null;
-  let preferredSignInOption = (
-    <GoogleSignIn
-      showLastUsed={!preferred?.value || preferred?.value === "google"}
-    />
-  );
-
-  switch (preferred?.value) {
-    case "google":
-      preferredSignInOption = <GoogleSignIn showLastUsed={true} />;
-      moreSignInOptions = (
-        <>
-          <OTPSignIn className="border-t-[1px] border-border pt-8" />
-          <EmailPasswordSignIn className="border-t-[1px] border-border pt-8" />
-        </>
-      );
-      break;
-
-    case "otp":
-      preferredSignInOption = <OTPSignIn />;
-      moreSignInOptions = (
-        <>
-          <GoogleSignIn />
-          <EmailPasswordSignIn className="border-t-[1px] border-border pt-8" />
-        </>
-      );
-      break;
-
-    case "password":
-      preferredSignInOption = <EmailPasswordSignIn />;
-      moreSignInOptions = (
-        <>
-          <GoogleSignIn />
-          <OTPSignIn className="border-t-[1px] border-border pt-8" />
-        </>
-      );
-      break;
-
-    default:
-      moreSignInOptions = (
-        <>
-          <OTPSignIn className="border-t-[1px] border-border pt-8" />
-          <EmailPasswordSignIn className="border-t-[1px] border-border pt-8" />
-        </>
-      );
-  }
+  // Show Google first by default, or Email/Password if that was last used
+  const preferGoogle = !preferred?.value || preferred?.value === "google";
 
   return (
     <div className="min-h-screen bg-background flex relative">
@@ -102,9 +56,13 @@ export default async function Page() {
               </p>
             </div>
 
-            {/* Sign In Options */}
+            {/* Primary Sign In Option */}
             <div className="space-y-3 flex items-center justify-center w-full">
-              {preferredSignInOption}
+              {preferGoogle ? (
+                <GoogleSignIn showLastUsed={true} />
+              ) : (
+                <EmailPasswordSignIn />
+              )}
             </div>
 
             {/* Divider */}
@@ -119,8 +77,14 @@ export default async function Page() {
               </div>
             </div>
 
-            {/* More Options Accordion */}
-            <LoginAccordion>{moreSignInOptions}</LoginAccordion>
+            {/* Secondary Sign In Option */}
+            <div className="flex items-center justify-center w-full">
+              {preferGoogle ? (
+                <EmailPasswordSignIn />
+              ) : (
+                <GoogleSignIn />
+              )}
+            </div>
           </div>
 
           {/* Terms and Privacy Policy - Bottom aligned */}
