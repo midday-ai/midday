@@ -269,7 +269,11 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
       });
 
       // Trigger notification for new insights (not updates)
-      if (!existingInsight) {
+      // Must be explicitly enabled via INSIGHTS_NOTIFICATIONS_ENABLED=true
+      const notificationsEnabled =
+        process.env.INSIGHTS_NOTIFICATIONS_ENABLED === "true";
+
+      if (!existingInsight && notificationsEnabled) {
         try {
           await triggerJob(
             "notification",
@@ -294,6 +298,11 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
             error: error instanceof Error ? error.message : "Unknown error",
           });
         }
+      } else if (!notificationsEnabled) {
+        this.logger.info("Insight notifications disabled via env var", {
+          teamId,
+          insightId,
+        });
       }
 
       return {
