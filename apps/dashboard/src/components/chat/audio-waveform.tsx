@@ -268,8 +268,9 @@ export function AudioWaveform({
         const barProgress = i / barCount;
         const isPlayed = showProgress && barProgress <= progress;
         // Partial fill for the bar at the progress boundary
-        const isPartial = showProgress && 
-          barProgress <= progress && 
+        const isPartial =
+          showProgress &&
+          barProgress <= progress &&
           (i + 1) / barCount > progress;
 
         ctx.fillStyle = isPlayed
@@ -283,10 +284,13 @@ export function AudioWaveform({
         } else {
           // Smooth opacity transition at progress boundary
           if (isPartial) {
-            const partialProgress = (progress * barCount) - i;
-            ctx.globalAlpha = 0.25 + partialProgress * 0.45 + (barH / canvasHeight) * 0.2;
+            const partialProgress = progress * barCount - i;
+            ctx.globalAlpha =
+              0.25 + partialProgress * 0.45 + (barH / canvasHeight) * 0.2;
           } else {
-            ctx.globalAlpha = isPlayed ? 0.7 : 0.25 + (barH / canvasHeight) * 0.2;
+            ctx.globalAlpha = isPlayed
+              ? 0.7
+              : 0.25 + (barH / canvasHeight) * 0.2;
           }
         }
 
