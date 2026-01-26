@@ -486,7 +486,7 @@ export function InsightsWidget() {
     );
   }
 
-  if (insights.length === 0) {
+  if (insightsData.length === 0) {
     return (
       <div
         className={cn(

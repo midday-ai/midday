@@ -36,7 +36,6 @@ export function computeChangeDescription(
   changePercent: number,
 ): string {
   const absChange = Math.abs(changePercent);
-  const roundedChange = Math.round(absChange);
 
   // No significant change
   if (absChange < 5) {
@@ -45,19 +44,31 @@ export function computeChangeDescription(
 
   // Current value is zero (went to zero from something)
   if (currentValue === 0 && previousValue !== 0) {
-    return "inactive this week";
+    return "no activity";
   }
 
   // Previous was zero, now has value
   if (previousValue === 0 && currentValue !== 0) {
-    return "new this week";
+    return "new activity";
   }
+
+  // Sign change (profit to loss or vice versa) - use descriptive text for extreme swings
+  const signChanged =
+    (previousValue > 0 && currentValue < 0) ||
+    (previousValue < 0 && currentValue > 0);
+
+  if (signChanged && absChange > 200) {
+    return changePercent > 0 ? "turned positive" : "turned negative";
+  }
+
+  // Cap extreme percentages at 999% for readability
+  const cappedChange = Math.min(Math.round(absChange), 999);
 
   // Standard percentage change
   if (changePercent > 0) {
-    return `+${roundedChange}%`;
+    return `+${cappedChange}%`;
   }
-  return `-${roundedChange}%`;
+  return `-${cappedChange}%`;
 }
 
 /**

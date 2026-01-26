@@ -24,6 +24,7 @@ export type InsightData = {
     type: string;
     label: string;
     value: number;
+    previousValue?: number;
     change: number;
     changeDirection: "up" | "down" | "flat";
     currency?: string;

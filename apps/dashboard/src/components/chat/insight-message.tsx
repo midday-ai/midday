@@ -104,12 +104,42 @@ function formatMetricValue(
 function formatChange(
   change: number,
   direction: "up" | "down" | "flat",
+  currentValue?: number,
+  previousValue?: number,
 ): string {
   if (direction === "flat" || Math.abs(change) < 0.5) {
     return "steady";
   }
+
+  // Current value is zero (went to zero from something)
+  if (
+    currentValue === 0 &&
+    previousValue !== undefined &&
+    previousValue !== 0
+  ) {
+    return "no activity";
+  }
+
+  // Previous was zero, now has value
+  if (previousValue === 0 && currentValue !== undefined && currentValue !== 0) {
+    return "new activity";
+  }
+
+  // Detect sign change (profit to loss or vice versa) with extreme swing
+  const signChanged =
+    previousValue !== undefined &&
+    currentValue !== undefined &&
+    ((previousValue > 0 && currentValue < 0) ||
+      (previousValue < 0 && currentValue > 0));
+
+  if (signChanged && Math.abs(change) > 200) {
+    return change > 0 ? "turned positive" : "turned negative";
+  }
+
+  // Cap at 999% for readability
+  const cappedChange = Math.min(Math.abs(Math.round(change)), 999);
   const sign = direction === "up" ? "+" : "-";
-  return `${sign}${Math.round(change)}%`;
+  return `${sign}${cappedChange}%`;
 }
 
 // Animation variants
@@ -154,15 +184,9 @@ export function InsightMessage({ insight }: InsightMessageProps) {
   const [storyComplete, setStoryComplete] = useState(false);
   const [showActions, setShowActions] = useState(false);
 
-  // Detect if this is the first insight (no meaningful comparison)
-  // Either explicitly flagged or detected by unrealistic changes (+100% revenue from 0)
-  const isFirstInsight =
-    insight.isFirstInsight ||
-    (selectedMetrics?.some(
-      (m) =>
-        m.type === "revenue" && m.change === 100 && m.changeDirection === "up",
-    ) ??
-      false);
+  // First insight flag comes from backend based on actual history
+  // Don't use heuristics - going from 0 revenue to positive is "new activity", not "first insight"
+  const isFirstInsight = insight.isFirstInsight ?? false;
 
   // Get period name for change comparison text
   const periodName =
@@ -260,7 +284,7 @@ export function InsightMessage({ insight }: InsightMessageProps) {
                   ? "based on 3 month avg"
                   : isFirstInsight
                     ? "this period"
-                    : `${formatChange(metric.change, metric.changeDirection)} vs last ${periodName}`;
+                    : `${formatChange(metric.change, metric.changeDirection, metric.value, metric.previousValue)} vs last ${periodName}`;
 
                 return (
                   <motion.div

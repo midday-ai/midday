@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import {
   calculatePercentageChange,
+  computeChangeDescription,
   createMetric,
   formatMetricValue,
   getChangeDirection,
@@ -67,6 +68,52 @@ describe("getChangeDirection", () => {
     expect(getChangeDirection(-0.3)).toBe("flat");
     expect(getChangeDirection(0.5)).toBe("flat");
     expect(getChangeDirection(-0.5)).toBe("flat");
+  });
+});
+
+describe("computeChangeDescription", () => {
+  it("should return 'flat' for small changes", () => {
+    expect(computeChangeDescription(100, 100, 0)).toBe("flat");
+    expect(computeChangeDescription(102, 100, 2)).toBe("flat");
+    expect(computeChangeDescription(98, 100, -2)).toBe("flat");
+  });
+
+  it("should return 'no activity' when current is zero", () => {
+    expect(computeChangeDescription(0, 100, -100)).toBe("no activity");
+  });
+
+  it("should return 'new activity' when previous was zero", () => {
+    expect(computeChangeDescription(100, 0, 100)).toBe("new activity");
+  });
+
+  it("should return 'turned negative' for profit to loss with extreme swing", () => {
+    // Went from +4000 to -19500 = -587.5% change
+    expect(computeChangeDescription(-19500, 4000, -587.5)).toBe(
+      "turned negative",
+    );
+  });
+
+  it("should return 'turned positive' for loss to profit with extreme swing", () => {
+    // Went from -5000 to +10000 = +300% change
+    expect(computeChangeDescription(10000, -5000, 300)).toBe("turned positive");
+  });
+
+  it("should cap percentages at 999%", () => {
+    // A 1500% increase should display as +999%
+    expect(computeChangeDescription(1600, 100, 1500)).toBe("+999%");
+    expect(computeChangeDescription(100, 1600, -1500)).toBe("-999%");
+  });
+
+  it("should show normal percentages for moderate changes", () => {
+    expect(computeChangeDescription(150, 100, 50)).toBe("+50%");
+    expect(computeChangeDescription(50, 100, -50)).toBe("-50%");
+  });
+
+  it("should show sign change text only for extreme swings over 200%", () => {
+    // 150% change from negative to positive is not extreme enough
+    expect(computeChangeDescription(50, -100, 150)).toBe("+150%");
+    // 250% change is extreme
+    expect(computeChangeDescription(150, -100, 250)).toBe("turned positive");
   });
 });
 
