@@ -179,6 +179,7 @@ export function StartPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const modalVideoRef = useRef<HTMLVideoElement>(null);
   const videoTagsScrollRef = useRef<HTMLDivElement>(null);
+  const styleSheetRef = useRef<HTMLStyleElement | null>(null);
 
   // Handle video load
   useEffect(() => {
@@ -258,6 +259,40 @@ export function StartPage() {
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
   }, [activeVideoId, isVideoModalOpen]);
+
+  // Inject video modal styles
+  useEffect(() => {
+    if (!isVideoModalOpen) return;
+
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      video::-webkit-media-controls-timeline,
+      video::-webkit-media-controls-current-time-display,
+      video::-webkit-media-controls-time-remaining-display,
+      video::-webkit-media-controls-timeline-container,
+      video::-webkit-media-controls-panel {
+        display: none !important;
+      }
+      video {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+      }
+    `;
+    document.head.appendChild(style);
+    styleSheetRef.current = style;
+
+    return () => {
+      if (styleSheetRef.current) {
+        document.head.removeChild(styleSheetRef.current);
+        styleSheetRef.current = null;
+      }
+    };
+  }, [isVideoModalOpen]);
 
   return (
     <div className="min-h-screen">
@@ -406,7 +441,7 @@ export function StartPage() {
                   setIsVideoModalOpen(true);
                   setActiveVideoId("overview");
                 }}
-                className={`absolute inset-0 z-[3] flex items-center justify-center pointer-events-none transition-opacity duration-500 delay-300 ${
+                className={`absolute inset-0 z-[4] flex items-center justify-center pointer-events-none transition-opacity duration-500 delay-300 ${
                   isDashboardLightLoaded || isDashboardDarkLoaded
                     ? "opacity-100"
                     : "opacity-0"
@@ -447,35 +482,13 @@ export function StartPage() {
             }}
           />
           <div
-            className="relative bg-background border border-border w-auto max-w-4xl max-h-[90vh] overflow-hidden z-[10000] flex flex-col w-full sm:w-auto"
+            className="relative bg-background border border-border max-w-4xl max-h-[90vh] overflow-hidden z-[10000] flex flex-col"
             style={{
               animation: "fadeIn 200ms ease-out 50ms both",
             }}
           >
             {/* Video Player - Center */}
             <div className="relative w-full aspect-video bg-background">
-              <style
-                dangerouslySetInnerHTML={{
-                  __html: `
-                @keyframes fadeIn {
-                  from { opacity: 0; }
-                  to { opacity: 1; }
-                }
-                video::-webkit-media-controls-timeline,
-                video::-webkit-media-controls-current-time-display,
-                video::-webkit-media-controls-time-remaining-display,
-                video::-webkit-media-controls-timeline-container,
-                video::-webkit-media-controls-panel {
-                  display: none !important;
-                }
-                video {
-                  width: 100% !important;
-                  height: 100% !important;
-                  object-fit: cover !important;
-                }
-              `,
-                }}
-              />
               <button
                 type="button"
                 onClick={() => setIsVideoModalOpen(false)}

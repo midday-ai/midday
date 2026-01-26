@@ -43,34 +43,36 @@ export function ComparisonPage({ competitor }: Props) {
           <h2 className="font-serif text-2xl text-foreground mb-8 text-center">
             Key differences at a glance
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             {competitor.keyDifferences.map((diff) => (
               <div
                 key={diff.title}
-                className="bg-secondary border border-border p-6"
+                className="border border-border overflow-hidden"
               >
-                <h3 className="font-sans text-sm text-muted-foreground mb-4">
-                  {diff.title}
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-primary mt-1.5 flex-shrink-0" />
-                    <div>
-                      <span className="font-sans text-xs text-primary">
+                <div className="bg-secondary px-6 py-4 border-b border-border">
+                  <h3 className="font-sans text-sm font-medium text-foreground">
+                    {diff.title}
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 divide-x divide-border">
+                  {/* Midday Column */}
+                  <div className="p-6 bg-background relative border-l-4 border-l-primary">
+                    <div className="space-y-2">
+                      <span className="font-sans text-xs font-semibold text-primary uppercase tracking-wide block">
                         Midday
                       </span>
-                      <p className="font-sans text-sm text-foreground">
+                      <p className="font-sans text-sm text-foreground leading-relaxed font-medium">
                         {diff.midday}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-border mt-1.5 flex-shrink-0" />
-                    <div>
-                      <span className="font-sans text-xs text-muted-foreground">
+                  {/* Competitor Column */}
+                  <div className="p-6 bg-secondary/50">
+                    <div className="space-y-2">
+                      <span className="font-sans text-xs font-medium text-muted-foreground uppercase tracking-wide block">
                         {competitor.name}
                       </span>
-                      <p className="font-sans text-sm text-muted-foreground">
+                      <p className="font-sans text-sm text-muted-foreground leading-relaxed">
                         {diff.competitor}
                       </p>
                     </div>
