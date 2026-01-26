@@ -3,6 +3,7 @@ import { db } from "@midday/db/client";
 import {
   type Insight,
   getInsightByPeriod,
+  getInsights,
   getLatestInsight,
 } from "@midday/db/queries";
 import { getPeriodLabel } from "@midday/insights";
@@ -159,6 +160,26 @@ export const getInsightsTool = tool({
         }
       }
 
+      // Check if this is the first insight for the team
+      // (no earlier completed insights exist)
+      const earlierInsights = await getInsights(db, {
+        teamId,
+        periodType: insight.periodType,
+        status: "completed",
+        pageSize: 2, // We only need to know if there's at least one other
+      });
+
+      // Filter out the current insight and check if any remain
+      const hasEarlierInsights = earlierInsights.data.some(
+        (i) =>
+          i.id !== insight.id &&
+          (i.periodYear < insight.periodYear ||
+            (i.periodYear === insight.periodYear &&
+              i.periodNumber < insight.periodNumber)),
+      );
+
+      const isFirstInsight = !hasEarlierInsights;
+
       // Yield insight data for direct rendering in chat UI
       const insightData = {
         id: insight.id,
@@ -176,6 +197,7 @@ export const getInsightsTool = tool({
         activity: insight.activity,
         predictions: insight.predictions,
         generatedAt: insight.generatedAt,
+        isFirstInsight,
       };
 
       yield {
