@@ -270,6 +270,40 @@ export async function insightExistsForPeriod(
   return (result[0]?.count ?? 0) > 0;
 }
 
+export type HasEarlierInsightParams = {
+  teamId: string;
+  periodType: (typeof insightPeriodTypeEnum.enumValues)[number];
+  periodYear: number;
+  periodNumber: number;
+};
+
+/**
+ * Check if any completed insight exists with an earlier period than the given one.
+ * Used to determine if an insight is the first for a team (for UI display purposes).
+ */
+export async function hasEarlierInsight(
+  db: Database,
+  params: HasEarlierInsightParams,
+): Promise<boolean> {
+  const { teamId, periodType, periodYear, periodNumber } = params;
+
+  const result = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(insights)
+    .where(
+      and(
+        eq(insights.teamId, teamId),
+        eq(insights.periodType, periodType),
+        eq(insights.status, "completed"),
+        // Earlier period: either earlier year, or same year with earlier period number
+        sql`(${insights.periodYear} < ${periodYear} OR (${insights.periodYear} = ${periodYear} AND ${insights.periodNumber} < ${periodNumber}))`,
+      ),
+    )
+    .limit(1);
+
+  return (result[0]?.count ?? 0) > 0;
+}
+
 // ============================================================================
 // INSIGHT ACTIVITY DATA QUERIES
 // ============================================================================
