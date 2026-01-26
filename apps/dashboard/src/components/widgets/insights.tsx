@@ -1,6 +1,7 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useAudioPlayerStore } from "@/store/audio-player";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { cn } from "@midday/ui/cn";
@@ -264,23 +265,14 @@ export function InsightsWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
+  const playAudio = useAudioPlayerStore((state) => state.play);
 
   // Refs for managing state without re-renders
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioFetchingRef = useRef(false);
   const markedAsReadRef = useRef<Set<string>>(new Set());
   const knownInsightIdsRef = useRef<Set<string>>(new Set());
   const [newInsightIds, setNewInsightIds] = useState<Set<string>>(new Set());
 
-  // Cleanup audio on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
 
   // Fetch insights (excluding dismissed)
   const { data, isLoading } = useQuery(
@@ -390,12 +382,6 @@ export function InsightsWidget() {
 
   const handleListenClick = useCallback(
     async (insight: InsightCard) => {
-      // Stop any currently playing audio
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-
       if (!insight.hasAudio) return;
 
       // Prevent concurrent fetches - if already fetching, ignore this click
@@ -409,26 +395,16 @@ export function InsightsWidget() {
         );
 
         if (result.audioUrl) {
-          const audio = new Audio(result.audioUrl);
-          audioRef.current = audio;
-
-          audio.onended = () => {
-            audioRef.current = null;
-          };
-
-          audio.onerror = () => {
-            audioRef.current = null;
-          };
-
-          await audio.play();
+          // Use the audio player store to play the audio
+          playAudio(result.audioUrl);
         }
-      } catch {
-        audioRef.current = null;
+      } catch (error) {
+        console.error("Failed to fetch audio URL:", error);
       } finally {
         audioFetchingRef.current = false;
       }
     },
-    [queryClient, trpc],
+    [queryClient, trpc, playAudio],
   );
 
   const handleCardClick = useCallback(
