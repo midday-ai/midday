@@ -95,6 +95,14 @@ export const InsightsWeeklyEmail = ({
                 )}
               </tr>
             </table>
+            {audioUrl && (
+              <Text
+                className="text-[12px] mt-[16px] mb-0"
+                style={{ color: "#6b7280" }}
+              >
+                Audio link expires in 7 days
+              </Text>
+            )}
           </Section>
 
           <Footer />
