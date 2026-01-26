@@ -13,3 +13,9 @@ export {
   type WeekHighlight,
   type WeekType,
 } from "./slots";
+export {
+  extractFacts,
+  getHeadlineFact,
+  getPrimaryAction,
+  type InsightFacts,
+} from "./shared-data";

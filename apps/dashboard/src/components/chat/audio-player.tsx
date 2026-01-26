@@ -3,6 +3,7 @@
 import { useAudioPlayerStore } from "@/store/audio-player";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import { Spinner } from "@midday/ui/spinner";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AudioWaveform } from "./audio-waveform";
@@ -15,7 +16,8 @@ function formatTime(seconds: number): string {
 }
 
 export function AudioPlayer() {
-  const { isVisible, audioUrl, autoPlay, close } = useAudioPlayerStore();
+  const { isVisible, audioUrl, autoPlay, isLoading, close } =
+    useAudioPlayerStore();
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -267,15 +269,19 @@ export function AudioPlayer() {
             <button
               type="button"
               onClick={togglePlayPause}
-              disabled={!audioUrl}
+              disabled={!audioUrl || isLoading}
               className={cn(
                 "flex items-center justify-center w-8 h-8 transition-colors duration-200",
                 "hover:bg-[rgba(0,0,0,0.05)] dark:hover:bg-[rgba(255,255,255,0.05)]",
-                !audioUrl && "opacity-50 cursor-not-allowed",
+                (!audioUrl || isLoading) && "opacity-50 cursor-not-allowed",
               )}
-              aria-label={isPlaying ? "Pause" : "Play"}
+              aria-label={
+                isLoading ? "Generating audio..." : isPlaying ? "Pause" : "Play"
+              }
             >
-              {isPlaying ? (
+              {isLoading ? (
+                <Spinner size={16} />
+              ) : isPlaying ? (
                 <Icons.Stop className="w-4 h-4 text-foreground" />
               ) : (
                 <Icons.Play className="w-4 h-4 text-foreground" />
@@ -284,7 +290,9 @@ export function AudioPlayer() {
 
             {/* Duration Display */}
             <div className="text-xs whitespace-nowrap text-muted-foreground min-w-[70px]">
-              {formatTime(currentTime)} / {formatTime(duration)}
+              {isLoading
+                ? "Generating..."
+                : `${formatTime(currentTime)} / ${formatTime(duration)}`}
             </div>
 
             {/* Waveform with integrated scrubbing */}
@@ -292,6 +300,7 @@ export function AudioPlayer() {
               <AudioWaveform
                 analyser={analyserRef.current}
                 active={isPlaying}
+                processing={isLoading}
                 barWidth={2}
                 barGap={1}
                 barRadius={0}

@@ -6,7 +6,18 @@
  * - Clear role assignment
  * - Few-shot examples with input/output
  * - Direct, specific instructions
+ *
+ * Uses shared data layer for consistency with audio prompt.
  */
+import {
+  BANNED_WORDS,
+  CRITICAL_RUNWAY_BANNED_WORDS,
+  extractFacts,
+  getHeadlineFact,
+  getProfitDescription,
+  getRevenueDescription,
+  getRunwayDescription,
+} from "./shared-data";
 import { type InsightSlots, getNotableContext, getToneGuidance } from "./slots";
 
 /**
@@ -30,7 +41,7 @@ ${tone}
 
   const rules = isFirstInsight
     ? `<banned_words>
-solid, healthy, strong, great, robust, excellent, remarkable, impressive, amazing, outstanding, significant
+${BANNED_WORDS.join(", ")}
 WHY: These are filler words. Plain language sounds more genuine.
 </banned_words>
 
@@ -60,7 +71,7 @@ WHY: Consistency from day one.
 - ACTIVITY METRICS: For invoices sent, hours tracked — use the description from data, NOT "down 100%"
 </accuracy>`
     : `<banned_words>
-solid, healthy, strong, great, robust, excellent, remarkable, impressive, amazing, outstanding, significant
+${BANNED_WORDS.join(", ")}
 WHY: These are filler words. Plain language sounds more genuine and trustworthy.
 </banned_words>
 
@@ -137,23 +148,24 @@ ONLY output the summary text itself.
 function buildDataSection(slots: InsightSlots): string {
   const lines: string[] = [];
 
+  // Extract shared facts for consistency with audio prompt
+  const facts = extractFacts(slots);
+
   // CRITICAL: Low runway warning at the very top - overrides tone
-  if (slots.runway < 2) {
+  if (facts.runway.isCritical) {
     lines.push("CRITICAL RUNWAY WARNING");
+    lines.push(`${getRunwayDescription(facts)}`);
     lines.push(
-      `Runway is only ${slots.runway} months (until ${slots.runwayExhaustionDate || "soon"}).`,
-    );
-    lines.push(
-      "NEVER use words like: reassuring, comfortable, steady, stable, flexibility, buffer",
+      `NEVER use words like: ${CRITICAL_RUNWAY_BANNED_WORDS.join(", ")}`,
     );
     lines.push(
       "MUST frame as: urgent, priority, tight, limited time, needs immediate attention",
     );
     lines.push("");
-  } else if (slots.runway < 3) {
+  } else if (facts.runway.isLow) {
     lines.push("LOW RUNWAY WARNING");
     lines.push(
-      `Runway is ${slots.runway} months — avoid overly reassuring language.`,
+      `Runway is ${facts.runway.months} months — avoid overly reassuring language.`,
     );
     lines.push("");
   }
@@ -164,23 +176,25 @@ function buildDataSection(slots: InsightSlots): string {
   );
   lines.push("");
 
-  // Explicit warnings (pre-computed by backend) - prioritize alerts
-  if (slots.hasAlerts || slots.hasWarnings) {
-    const alerts = slots.anomalies.filter((a) => a.severity === "alert");
-    const warnings = slots.anomalies.filter((a) => a.severity === "warning");
+  // Headline fact - same as audio will use
+  const headline = getHeadlineFact(facts);
+  lines.push(`headline: ${headline}`);
+  lines.push("");
 
-    if (alerts.length > 0) {
+  // Explicit warnings (pre-computed by backend) - prioritize alerts
+  if (facts.hasAlerts || facts.hasWarnings) {
+    if (facts.alerts.length > 0) {
       lines.push("ALERTS (mention these):");
-      for (const a of alerts) {
-        lines.push(`  - ${a.message}`);
+      for (const alert of facts.alerts) {
+        lines.push(`  - ${alert}`);
       }
       lines.push("");
     }
 
-    if (warnings.length > 0) {
+    if (facts.warnings.length > 0) {
       lines.push("warnings (weave in naturally if relevant):");
-      for (const w of warnings) {
-        lines.push(`  - ${w.message}`);
+      for (const warning of facts.warnings) {
+        lines.push(`  - ${warning}`);
       }
       lines.push("");
     }
@@ -196,9 +210,9 @@ function buildDataSection(slots: InsightSlots): string {
     }
   }
 
-  // Core financials
-  lines.push(`profit: ${slots.profit}`);
-  lines.push(`revenue: ${slots.revenue}`);
+  // Core financials - using shared descriptions for consistency with audio
+  lines.push(`profit: ${getProfitDescription(facts)} (${slots.profit})`);
+  lines.push(`revenue: ${getRevenueDescription(facts)} (${slots.revenue})`);
   lines.push(`expenses: ${slots.expenses}`);
   lines.push(`margin: ${slots.margin}%`);
 

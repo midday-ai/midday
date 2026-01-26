@@ -44,3 +44,19 @@ export function getWebsiteUrl() {
 export function getCdnUrl() {
   return "https://cdn.midday.ai";
 }
+
+export function getApiUrl() {
+  // Allow explicit override via API_URL env var
+  if (process.env.API_URL) {
+    return process.env.API_URL;
+  }
+
+  if (
+    process.env.VERCEL_ENV === "production" ||
+    process.env.NODE_ENV === "production"
+  ) {
+    return "https://api.midday.ai";
+  }
+
+  return "http://localhost:3002";
+}

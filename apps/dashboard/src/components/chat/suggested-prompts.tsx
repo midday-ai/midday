@@ -2,6 +2,7 @@
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { extractBankAccountRequired } from "@/lib/chat-utils";
+import { useAudioPlayerStore } from "@/store/audio-player";
 import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -22,6 +23,7 @@ export function SuggestedPrompts() {
   const { isChatPage } = useChatInterface();
   const { messages } = useChat();
   const { isAtBottom, scrollRef } = useStickToBottomContext();
+  const isAudioPlayerVisible = useAudioPlayerStore((state) => state.isVisible);
   const [shouldShow, setShouldShow] = useState(true);
   const prevScrollTopRef = useRef<number>(0);
   const isAtBottomRef = useRef<boolean>(isAtBottom);
@@ -121,12 +123,14 @@ export function SuggestedPrompts() {
     };
   }, [prompts, shouldShow]);
 
+  // Hide follow-up questions when audio player is visible
   if (
     !suggestions?.prompts ||
     suggestions.prompts.length === 0 ||
     !isChatPage ||
     bankAccountRequired ||
-    !shouldShow
+    !shouldShow ||
+    isAudioPlayerVisible
   ) {
     return null;
   }

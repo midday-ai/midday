@@ -13,14 +13,12 @@ import {
   getPeriodLabel,
 } from "@midday/insights";
 import {
-  buildAudioScript,
-  generateAudio,
-  getAudioPresignedUrl,
-  isAudioEnabled,
-  uploadInsightAudio,
+  buildAudioUrl,
+  createAudioToken,
+  isAudioTokenEnabled,
 } from "@midday/insights/audio";
 import { triggerJob } from "@midday/job-client";
-import { createClient } from "@midday/supabase/job";
+import { getApiUrl } from "@midday/utils/envs";
 import type { Job } from "bullmq";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
@@ -184,66 +182,31 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         locale,
       });
 
-      // Generate audio if ElevenLabs is configured
-      let audioPath: string | undefined;
-      let audioPresignedUrl: string | undefined;
+      // Generate token-based audio URL for email notifications
+      // Audio is generated lazily when user clicks "Listen" (saves ElevenLabs costs)
+      let audioUrl: string | undefined;
 
-      if (isAudioEnabled()) {
+      if (isAudioTokenEnabled()) {
         try {
-          const supabase = createClient();
+          // Create a 7-day token for email link access
+          const token = await createAudioToken(insightId, teamId);
+          audioUrl = buildAudioUrl(getApiUrl(), insightId, token);
 
-          // Build audio script that narrates the visual content
-          const script = buildAudioScript(
-            result.content,
-            period.periodLabel,
-            result.selectedMetrics,
-            result.activity,
-            currency,
-          );
-
-          this.logger.info("Generating audio for insight", {
+          this.logger.info("Audio token URL generated for email", {
             teamId,
             insightId,
-            scriptLength: script.length,
-          });
-
-          // Generate audio via ElevenLabs v3
-          const audioBuffer = await generateAudio(script);
-
-          // Upload to Supabase storage
-          audioPath = await uploadInsightAudio(
-            supabase,
-            teamId,
-            insightId,
-            audioBuffer,
-          );
-
-          // Generate 7-day presigned URL for email notification
-          audioPresignedUrl = await getAudioPresignedUrl(
-            supabase,
-            audioPath,
-            7 * 24 * 60 * 60, // 7 days
-          );
-
-          this.logger.info("Audio generated successfully", {
-            teamId,
-            insightId,
-            audioPath,
           });
         } catch (error) {
-          // Don't fail the insight if audio generation fails - it's optional
-          this.logger.warn(
-            "Audio generation failed, continuing without audio",
-            {
-              teamId,
-              insightId,
-              error: error instanceof Error ? error.message : "Unknown error",
-            },
-          );
+          // Don't fail the insight if token generation fails - audio is optional
+          this.logger.warn("Failed to generate audio token URL", {
+            teamId,
+            insightId,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
         }
       }
 
-      // Update insight with all data (including audio path and predictions for next week)
+      // Update insight with all data (audio is generated lazily on first listen)
       await updateInsight(db, {
         id: insightId,
         teamId,
@@ -256,7 +219,6 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         activity: result.activity,
         content: result.content,
         predictions: result.predictions,
-        audioPath,
         generatedAt: new Date(),
       });
 
@@ -265,7 +227,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         insightId,
         periodLabel: period.periodLabel,
         metricsCount: result.selectedMetrics.length,
-        hasAudio: !!audioPath,
+        hasAudioUrl: !!audioUrl,
       });
 
       // Trigger notification for new insights (not updates)
@@ -286,7 +248,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
               periodNumber: period.periodNumber,
               periodYear: period.periodYear,
               title: result.content.title,
-              audioUrl: audioPresignedUrl,
+              audioUrl,
             },
             "notifications",
           );

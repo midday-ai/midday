@@ -6,7 +6,17 @@
  * - Clear role assignment
  * - Few-shot examples
  * - Direct, specific instructions
+ *
+ * Uses shared data layer for consistency with summary and audio prompts.
  */
+import {
+  BANNED_WORDS,
+  CRITICAL_RUNWAY_BANNED_WORDS,
+  extractFacts,
+  getHeadlineFact,
+  getProfitDescription,
+  getRunwayDescription,
+} from "./shared-data";
 import { type InsightSlots, getNotableContext, getToneGuidance } from "./slots";
 
 /**
@@ -59,7 +69,7 @@ WHY: Consistency with their familiar format builds trust.
 </constraints>
 
 <banned_words>
-solid, healthy, strong, great, robust, excellent, remarkable, impressive, amazing, outstanding, significant
+${BANNED_WORDS.join(", ")}
 WHY: These are filler words that add no meaning. Plain language sounds more genuine.
 </banned_words>
 
@@ -87,20 +97,23 @@ Write ONE headline (15-30 words). Begin directly — no preamble.
 function buildDataSection(slots: InsightSlots): string {
   const lines: string[] = [];
 
+  // Extract shared facts for consistency with summary and audio
+  const facts = extractFacts(slots);
+
   // CRITICAL: Low runway warning at the top
-  if (slots.runway < 2) {
+  if (facts.runway.isCritical) {
     lines.push("CRITICAL RUNWAY WARNING");
     lines.push(
-      `Runway is only ${slots.runway} months — this overrides all other context.`,
+      `${getRunwayDescription(facts)} — this overrides all other context.`,
     );
     lines.push(
-      "Do NOT use reassuring language. Frame runway as URGENT, not comfortable.",
+      `Do NOT use: ${CRITICAL_RUNWAY_BANNED_WORDS.slice(0, 5).join(", ")}`,
     );
     lines.push("");
-  } else if (slots.runway < 3) {
+  } else if (facts.runway.isLow) {
     lines.push("LOW RUNWAY WARNING");
     lines.push(
-      `Runway is ${slots.runway} months — be careful with reassuring language.`,
+      `Runway is ${facts.runway.months} months — be careful with reassuring language.`,
     );
     lines.push("");
   }
@@ -113,6 +126,12 @@ function buildDataSection(slots: InsightSlots): string {
 
   // Period context for personalization
   lines.push(`period: ${slots.periodLabel}`);
+  lines.push("");
+
+  // Headline fact - same as summary and audio will use
+  const headline = getHeadlineFact(facts);
+  lines.push(`headline: ${headline}`);
+  lines.push("(This is the lead - same as summary and audio will say)");
   lines.push("");
 
   // Notable context for leading the title (most important!)
@@ -128,25 +147,19 @@ function buildDataSection(slots: InsightSlots): string {
   }
 
   // Streak info for personalization
-  if (slots.streak && slots.streak.count >= 2) {
-    lines.push(`streak: ${slots.streak.count} ${slots.streak.type}`);
+  if (facts.streak && facts.streak.count >= 2) {
+    lines.push(`streak: ${facts.streak.count} weeks`);
   }
 
   // Year-over-year comparison (significant growth/decline only)
-  if (slots.yoyProfit) {
-    lines.push(`vs_last_year: profit ${slots.yoyProfit}`);
+  if (facts.yoyProfit) {
+    lines.push(`vs_last_year: profit ${facts.yoyProfit}`);
   }
 
-  // Core financials
-  lines.push(`profit: ${slots.profit}`);
+  // Core financials - using shared descriptions for consistency
+  lines.push(`profit: ${getProfitDescription(facts)} (${slots.profit})`);
   lines.push(`margin: ${slots.margin}%`);
-  if (slots.runwayExhaustionDate) {
-    lines.push(
-      `runway: ${slots.runway} months (until ${slots.runwayExhaustionDate})`,
-    );
-  } else {
-    lines.push(`runway: ${slots.runway} months`);
-  }
+  lines.push(`runway: ${getRunwayDescription(facts)}`);
 
   if (slots.revenueRaw > 0) {
     lines.push(`revenue: ${slots.revenue}`);

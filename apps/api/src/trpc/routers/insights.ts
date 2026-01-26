@@ -16,7 +16,13 @@ import {
   getInsightsForUser,
   getLatestInsight,
   markInsightAsRead,
+  updateInsight,
 } from "@midday/db/queries";
+import {
+  canGenerateAudio,
+  generateInsightAudio,
+  isAudioEnabled,
+} from "@midday/insights/audio";
 import { TRPCError } from "@trpc/server";
 
 const AUDIO_BUCKET = "vault";
@@ -98,7 +104,8 @@ export const insightsRouter = createTRPCRouter({
 
   /**
    * Get presigned URL for insight audio
-   * Returns a short-lived URL (1 hour) for dashboard playback
+   * Audio is generated on-demand if not already cached.
+   * Returns a short-lived URL (1 hour) for dashboard playback.
    */
   audioUrl: protectedProcedure
     .input(insightAudioUrlSchema)
@@ -115,18 +122,48 @@ export const insightsRouter = createTRPCRouter({
         });
       }
 
-      if (!insight.audioPath) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Audio not available for this insight",
-        });
+      const supabase = await createAdminClient();
+      let audioPath = insight.audioPath;
+
+      // Lazy generation: generate audio if not already cached
+      if (!audioPath) {
+        if (!isAudioEnabled()) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Audio generation is not configured",
+          });
+        }
+
+        if (!canGenerateAudio(insight)) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Audio not available for this insight",
+          });
+        }
+
+        try {
+          const result = await generateInsightAudio(supabase, insight);
+          audioPath = result.audioPath;
+
+          // Update the insight with the new audio path for future requests
+          await updateInsight(db, {
+            id: insight.id,
+            teamId: insight.teamId,
+            audioPath,
+          });
+        } catch (error) {
+          console.error("Failed to generate audio:", error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to generate audio",
+          });
+        }
       }
 
       // Generate presigned URL (1 hour for dashboard playback)
-      const supabase = await createAdminClient();
       const { data, error } = await supabase.storage
         .from(AUDIO_BUCKET)
-        .createSignedUrl(insight.audioPath, 60 * 60); // 1 hour
+        .createSignedUrl(audioPath, 60 * 60); // 1 hour
 
       if (error || !data?.signedUrl) {
         throw new TRPCError({

@@ -1,226 +1,35 @@
+import {
+  BANNED_WORDS,
+  CRITICAL_RUNWAY_BANNED_WORDS,
+  type InsightFacts,
+  extractFacts,
+  formatNumberForSpeech,
+  getHeadlineFact,
+  getPrimaryAction,
+  getProfitDescriptionSpoken,
+  getRevenueDescriptionSpoken,
+  getRunwayDescription,
+  getToneGuidanceFromFacts,
+} from "./shared-data";
+/**
+ * Audio script prompt - TTS-optimized spoken summary
+ *
+ * Uses shared data layer to ensure consistency with written prompts.
+ * All prompts derive from the same InsightFacts.
+ */
 import type { InsightSlots } from "./slots";
 
 /**
- * Format a number for natural speech
- * Examples: 5644.42 → "about fifty-six hundred", 22500 → "twenty-two thousand five hundred"
- */
-function formatNumberForSpeech(value: number): string {
-  const rounded = Math.round(value);
-
-  // For amounts under 1000, just say the number
-  if (rounded < 1000) {
-    return rounded.toString();
-  }
-
-  // For amounts 1000-9999, use "thousand" phrasing
-  if (rounded < 10000) {
-    const thousands = Math.floor(rounded / 1000);
-    const hundreds = Math.round((rounded % 1000) / 100) * 100;
-    if (hundreds > 0) {
-      return `${thousands} thousand ${hundreds}`;
-    }
-    return `${thousands} thousand`;
-  }
-
-  // For larger amounts, simplify
-  if (rounded < 100000) {
-    const thousands = Math.round(rounded / 1000);
-    return `${thousands} thousand`;
-  }
-
-  // Very large amounts
-  if (rounded < 1000000) {
-    const hundreds = Math.round(rounded / 1000);
-    return `${hundreds} thousand`;
-  }
-
-  const millions = (rounded / 1000000).toFixed(1);
-  return `${millions} million`;
-}
-
-/**
- * Get currency as spoken word
- */
-function getCurrencyWord(currency: string): string {
-  const currencyMap: Record<string, string> = {
-    SEK: "kronor",
-    NOK: "kroner",
-    DKK: "kroner",
-    USD: "dollars",
-    EUR: "euros",
-    GBP: "pounds",
-    CHF: "francs",
-    JPY: "yen",
-  };
-  return currencyMap[currency] || currency.toLowerCase();
-}
-
-/**
- * Determine the emotional tone based on the week's performance
- * WeekType: "great" | "good" | "quiet" | "challenging"
- */
-function getWeekMood(
-  slots: InsightSlots,
-): "celebratory" | "positive" | "neutral" | "supportive" {
-  if (slots.isPersonalBest || slots.weekType === "great") return "celebratory";
-  if (
-    slots.isRecovery ||
-    slots.profitChange > 20 ||
-    slots.weekType === "good"
-  ) {
-    return "positive";
-  }
-  if (slots.weekType === "quiet" || slots.weekType === "challenging") {
-    return "supportive";
-  }
-  return "neutral";
-}
-
-/**
- * Build the audio script prompt
+ * Build the audio script prompt using shared facts
  */
 export function buildAudioPrompt(slots: InsightSlots): string {
-  const currencyWord = getCurrencyWord(slots.currency);
-  const mood = getWeekMood(slots);
+  // Extract facts using shared data layer (same as summary/title)
+  const facts = extractFacts(slots);
 
-  // Build data context for the AI
-  const dataLines: string[] = [];
+  // Build data section from shared facts
+  const dataLines = buildDataSection(facts);
 
-  // Period and mood context
-  dataLines.push(`<period>${slots.periodLabel}</period>`);
-  dataLines.push(`<mood>${mood}</mood>`);
-
-  // Week type classification (great | good | quiet | challenging)
-  dataLines.push(`<week_type>${slots.weekType}</week_type>`);
-
-  // Core metrics (using raw values for comparison)
-  if (slots.revenueRaw > 0) {
-    dataLines.push(
-      `<revenue>${formatNumberForSpeech(slots.revenueRaw)} ${currencyWord}</revenue>`,
-    );
-  }
-  if (slots.profitRaw !== 0) {
-    dataLines.push(
-      `<profit>${formatNumberForSpeech(Math.abs(slots.profitRaw))} ${currencyWord}${slots.profitRaw < 0 ? " loss" : ""}</profit>`,
-    );
-  }
-  if (slots.expensesRaw > 0) {
-    dataLines.push(
-      `<expenses>${formatNumberForSpeech(slots.expensesRaw)} ${currencyWord}</expenses>`,
-    );
-  }
-  if (slots.marginRaw > 0) {
-    dataLines.push(`<margin>${Math.round(slots.marginRaw)} percent</margin>`);
-  }
-
-  // Historical context - this is the wow factor
-  if (slots.isPersonalBest) {
-    dataLines.push("<personal_best>true</personal_best>");
-  }
-  if (slots.historicalContext) {
-    dataLines.push(
-      `<historical_context>${slots.historicalContext}</historical_context>`,
-    );
-  }
-  if (slots.vsAverage) {
-    dataLines.push(`<vs_average>${slots.vsAverage}</vs_average>`);
-  }
-
-  // Streak and momentum
-  if (slots.streak) {
-    dataLines.push(`<streak>${slots.streak.description}</streak>`);
-  }
-  if (slots.momentum && slots.momentum !== "steady") {
-    dataLines.push(`<momentum>${slots.momentum}</momentum>`);
-  }
-
-  // Recovery story
-  if (slots.isRecovery && slots.recoveryDescription) {
-    dataLines.push(`<recovery>${slots.recoveryDescription}</recovery>`);
-  }
-
-  // Year over year comparisons
-  if (slots.yoyRevenue) {
-    dataLines.push(`<yoy_revenue>${slots.yoyRevenue}</yoy_revenue>`);
-  }
-  if (slots.yoyProfit) {
-    dataLines.push(`<yoy_profit>${slots.yoyProfit}</yoy_profit>`);
-  }
-
-  // Quarter pace projection
-  if (slots.quarterPace) {
-    dataLines.push(`<quarter_pace>${slots.quarterPace}</quarter_pace>`);
-  }
-
-  // Significant changes
-  if (Math.abs(slots.profitChange) >= 15) {
-    const direction = slots.profitChange > 0 ? "up" : "down";
-    dataLines.push(
-      `<change>profit is ${direction} ${Math.abs(Math.round(slots.profitChange))} percent</change>`,
-    );
-  }
-  if (Math.abs(slots.revenueChange) >= 15) {
-    const direction = slots.revenueChange > 0 ? "up" : "down";
-    dataLines.push(
-      `<change>revenue is ${direction} ${Math.abs(Math.round(slots.revenueChange))} percent</change>`,
-    );
-  }
-
-  // Largest payment (personalization)
-  if (slots.largestPayment) {
-    const amountNum = Number.parseFloat(
-      slots.largestPayment.amount.replace(/[^0-9.-]/g, ""),
-    );
-    dataLines.push(
-      `<largest_payment>${slots.largestPayment.customer} paid ${formatNumberForSpeech(amountNum)} ${currencyWord}</largest_payment>`,
-    );
-  }
-
-  // Overdue invoices
-  if (slots.overdue.length > 0) {
-    const total = slots.overdue.reduce((sum, inv) => sum + inv.rawAmount, 0);
-    dataLines.push(
-      `<overdue>${slots.overdue.length} overdue invoices totaling ${formatNumberForSpeech(total)} ${currencyWord}</overdue>`,
-    );
-    if (slots.largestOverdue) {
-      dataLines.push(
-        `<largest_overdue>${slots.largestOverdue.company} owes ${formatNumberForSpeech(slots.largestOverdue.rawAmount)} ${currencyWord}</largest_overdue>`,
-      );
-    }
-  }
-
-  // Runway warning
-  if (slots.runway && slots.runway <= 3) {
-    dataLines.push(
-      `<runway_warning>${slots.runway} months of runway${slots.runwayExhaustionDate ? ` until ${slots.runwayExhaustionDate}` : ""}</runway_warning>`,
-    );
-  }
-
-  // Next week preview (forward-looking hook)
-  if (slots.nextWeekInvoicesDue && slots.nextWeekInvoicesDue.count > 0) {
-    dataLines.push(
-      `<next_week>${slots.nextWeekInvoicesDue.count} invoices due next week worth ${slots.nextWeekInvoicesDue.amount}</next_week>`,
-    );
-  }
-
-  // Highlight (fallback for anything special)
-  if (
-    slots.highlight.type !== "none" &&
-    slots.highlight.type !== "big_payment"
-  ) {
-    if ("description" in slots.highlight) {
-      dataLines.push(`<highlight>${slots.highlight.description}</highlight>`);
-    }
-  }
-
-  const toneGuidance =
-    mood === "celebratory"
-      ? "Sound confident and pleased, but understated. Let the numbers speak for themselves."
-      : mood === "positive"
-        ? "Sound calm and assured. Acknowledge progress without overstating."
-        : mood === "supportive"
-          ? "Sound steady and pragmatic. Focus on actionable next steps."
-          : "Sound clear and informative.";
+  const toneGuidance = getToneGuidanceFromFacts(facts);
 
   return `<role>
 You are a professional financial analyst delivering a brief audio summary.
@@ -240,16 +49,29 @@ ${toneGuidance}
 1. TARGET: 20-30 seconds when spoken (~60-80 words)
 2. TONE: Professional and measured. ${toneGuidance}
 3. NUMBERS: Use natural phrasing - "about five thousand" not "5,039.55"
-4. CURRENCY: Always say "${currencyWord}" never abbreviations
+4. CURRENCY: Always say "${facts.currencyWord}" never abbreviations
 5. OPENING: Start with the period name directly (e.g., "Week 4" or "January summary"). No greetings.
 6. FACTUAL: State the key facts clearly. Avoid superlatives like "amazing", "fantastic", "incredible".
 7. PERSONALIZE: Use customer names when mentioning payments or overdue invoices.
 8. SENTENCES: Keep them clear and direct.
 9. NO: bullet points, lists, headers, formatting, or exclamation marks
-10. ACCURACY: Only mention data provided above. Don't invent numbers.
+10. ACCURACY: Only mention data provided above. Don't invent numbers or imply growth when there isn't any.
 11. CLOSING: End with a practical next step or forward-looking note.
 12. AVOID: Thanking customers, celebrating, or being overly enthusiastic. Just report the facts.
+13. SEMANTIC ACCURACY: Use profit/revenue descriptions EXACTLY as provided in the data tags:
+    - "no revenue" = say exactly that, not "revenue is flat"
+    - "no financial activity" = say that, not "quiet week" or "things slowed down"
+    - "break-even" = zero profit, NOT growth or improvement
+    - "loss decreased" = still in loss, NOT positive progress
+14. ZERO VALUES: When profit shows "no financial activity" or "break-even", lead with that fact. Don't skip it or imply things are positive.
+15. CRITICAL RUNWAY: If <runway_warning> shows 1-2 months, use URGENT language. Never say "comfortable", "stable", or "gives you time" for short runway.
+16. CONSISTENCY: This audio will accompany a written summary. Match the same facts and framing - if the summary says "no profit this week", the audio must say the same.
 </rules>
+
+<banned_words>
+${BANNED_WORDS.join(", ")}
+${facts.runway.isCritical ? `\nCRITICAL RUNWAY - also avoid: ${CRITICAL_RUNWAY_BANNED_WORDS.join(", ")}` : ""}
+</banned_words>
 
 <examples>
 Great week: "Week 4. Profit reached three hundred thirty-nine thousand kronor on three hundred forty thousand in revenue, your best week since October. That puts your margin at nearly one hundred percent with expenses staying minimal. Your fourteen month runway gives you flexibility. [Company] paid one hundred eighty thousand kronor this week. One invoice from [Company] is overdue at seven hundred fifty kronor, worth following up on."
@@ -259,6 +81,10 @@ Recovery: "Week 3. Profit recovered to forty-five thousand kronor after two slow
 Quiet week: "Week 2. Profit came in at twelve thousand kronor on fifteen thousand in revenue with expenses staying low. Margin is at eighty percent. Your six month runway gives you time to operate. No overdue invoices to chase this week, leaving you free to focus on new business development."
 
 Forward-looking: "Week 5. Profit is at ninety-five thousand kronor with revenue at one hundred ten thousand. Margin is holding at eighty-six percent. Your fourteen month runway is comfortable. Three invoices totaling twenty-five thousand kronor are due next week, and you're on pace for four hundred fifty thousand this quarter."
+
+No activity with critical runway: "Week 2. No revenue or profit this week, with runway at just one month until February tenth. Three invoices totaling twenty-three thousand kronor are overdue, with Whelma owing seven thousand five hundred. Collecting these payments is urgent to extend your runway."
+
+Challenging week: "Week 3. No revenue landed this week. Your one month runway until March fifteenth means collecting the eight thousand kronor from [Company] should be your immediate priority."
 </examples>
 
 <task>
@@ -266,4 +92,121 @@ Write a professional spoken summary of this financial update.
 Be factual and measured. Lead with the most significant information.
 Do NOT include any formatting, just the spoken text.
 </task>`;
+}
+
+/**
+ * Build data section from shared facts
+ */
+function buildDataSection(facts: InsightFacts): string[] {
+  const dataLines: string[] = [];
+
+  // Period and context
+  dataLines.push(`<period>${facts.periodLabel}</period>`);
+  dataLines.push(`<mood>${facts.mood}</mood>`);
+  dataLines.push(`<week_type>${facts.weekType}</week_type>`);
+
+  // Headline fact - what leads the insight
+  const headline = getHeadlineFact(facts);
+  dataLines.push(`<headline>${headline}</headline>`);
+
+  // Core financials - using shared descriptions for consistency
+  dataLines.push(`<profit>${getProfitDescriptionSpoken(facts)}</profit>`);
+  dataLines.push(`<revenue>${getRevenueDescriptionSpoken(facts)}</revenue>`);
+
+  if (facts.expensesRaw > 0) {
+    dataLines.push(
+      `<expenses>${formatNumberForSpeech(facts.expensesRaw)} ${facts.currencyWord}</expenses>`,
+    );
+  }
+
+  if (facts.marginPercent !== null && facts.marginPercent > 0) {
+    dataLines.push(
+      `<margin>${Math.round(facts.marginPercent)} percent</margin>`,
+    );
+  }
+
+  // Historical context
+  if (facts.isPersonalBest) {
+    dataLines.push("<personal_best>true</personal_best>");
+  }
+  if (facts.historicalContext) {
+    dataLines.push(
+      `<historical_context>${facts.historicalContext}</historical_context>`,
+    );
+  }
+
+  // Streak and momentum
+  if (facts.streak) {
+    dataLines.push(`<streak>${facts.streak.description}</streak>`);
+  }
+
+  // Recovery
+  if (facts.isRecovery && facts.recoveryDescription) {
+    dataLines.push(`<recovery>${facts.recoveryDescription}</recovery>`);
+  }
+
+  // Year over year
+  if (facts.yoyRevenue) {
+    dataLines.push(`<yoy_revenue>${facts.yoyRevenue}</yoy_revenue>`);
+  }
+  if (facts.yoyProfit) {
+    dataLines.push(`<yoy_profit>${facts.yoyProfit}</yoy_profit>`);
+  }
+
+  // Quarter pace
+  if (facts.quarterPace) {
+    dataLines.push(`<quarter_pace>${facts.quarterPace}</quarter_pace>`);
+  }
+
+  // Changes - using shared semantic descriptions
+  if (facts.profitChange) {
+    dataLines.push(`<profit_change>${facts.profitChange}</profit_change>`);
+  }
+  if (facts.revenueChange && facts.revenueStatus.type === "revenue") {
+    dataLines.push(`<revenue_change>${facts.revenueChange}</revenue_change>`);
+  }
+
+  // Largest payment
+  if (facts.largestPayment) {
+    dataLines.push(
+      `<largest_payment>${facts.largestPayment.customer} paid ${formatNumberForSpeech(facts.largestPayment.rawAmount)} ${facts.currencyWord}</largest_payment>`,
+    );
+  }
+
+  // Overdue invoices
+  if (facts.overdue.hasOverdue) {
+    dataLines.push(
+      `<overdue>${facts.overdue.count} overdue invoice${facts.overdue.count !== 1 ? "s" : ""} totaling ${formatNumberForSpeech(facts.overdue.totalRaw)} ${facts.currencyWord}</overdue>`,
+    );
+    if (facts.overdue.largest) {
+      dataLines.push(
+        `<largest_overdue>${facts.overdue.largest.company} owes ${formatNumberForSpeech(facts.overdue.largest.rawAmount)} ${facts.currencyWord}</largest_overdue>`,
+      );
+    }
+  }
+
+  // Runway - with urgency context
+  const runwayDesc = getRunwayDescription(facts);
+  if (facts.runway.isCritical || facts.runway.isLow) {
+    dataLines.push(
+      `<runway_warning>${runwayDesc}${facts.runway.isCritical ? " — URGENT" : ""}</runway_warning>`,
+    );
+  } else {
+    dataLines.push(`<runway>${runwayDesc}</runway>`);
+  }
+
+  // Primary action (same as summary/story)
+  const primaryAction = getPrimaryAction(facts);
+  if (primaryAction) {
+    dataLines.push(
+      `<primary_action>${primaryAction.description}</primary_action>`,
+    );
+  }
+
+  // Alerts (high priority warnings)
+  if (facts.hasAlerts && facts.alerts.length > 0) {
+    dataLines.push(`<alerts>${facts.alerts.join("; ")}</alerts>`);
+  }
+
+  return dataLines;
 }

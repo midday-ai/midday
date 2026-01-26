@@ -24,3 +24,20 @@ export {
   getAudioPresignedUrl,
   uploadInsightAudio,
 } from "./storage";
+
+// Reusable audio generation for insights (lazy generation)
+export {
+  canGenerateAudio,
+  generateInsightAudio,
+  type AudioGenerationResult,
+  type InsightForAudio,
+} from "./generate-for-insight";
+
+// Token utilities for public audio access (email links)
+export {
+  buildAudioUrl,
+  createAudioToken,
+  isAudioTokenEnabled,
+  verifyAudioToken,
+  type AudioTokenPayload,
+} from "./token";

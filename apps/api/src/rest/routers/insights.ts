@@ -15,7 +15,15 @@ import {
   getInsightById,
   getInsightsForUser,
   getLatestInsight,
+  updateInsight,
 } from "@midday/db/queries";
+import {
+  canGenerateAudio,
+  generateInsightAudio,
+  getAudioPresignedUrl,
+  isAudioEnabled,
+  verifyAudioToken,
+} from "@midday/insights/audio";
 import { withRequiredScope } from "../middleware";
 
 const AUDIO_BUCKET = "vault";
@@ -178,7 +186,7 @@ app.openapi(
     operationId: "getInsightAudioUrl",
     "x-speakeasy-name-override": "getAudioUrl",
     description:
-      "Generate a pre-signed URL for the insight's audio file. The URL is valid for 1 hour.",
+      "Generate a pre-signed URL for the insight's audio file. Audio is generated on-demand if not already cached. The URL is valid for 1 hour.",
     tags: ["Insights"],
     request: {
       params: insightByIdSchema,
@@ -193,7 +201,7 @@ app.openapi(
         },
       },
       404: {
-        description: "Insight or audio not found",
+        description: "Insight not found or audio generation not available",
         content: {
           "application/json": {
             schema: errorResponseSchema,
@@ -222,14 +230,39 @@ app.openapi(
       return c.json({ error: "Insight not found" }, 404);
     }
 
-    if (!insight.audioPath) {
-      return c.json({ error: "Audio not available for this insight" }, 404);
+    const supabase = await createAdminClient();
+    let audioPath = insight.audioPath;
+
+    // Lazy generation: generate audio if not already cached
+    if (!audioPath) {
+      if (!isAudioEnabled()) {
+        return c.json({ error: "Audio generation is not configured" }, 404);
+      }
+
+      if (!canGenerateAudio(insight)) {
+        return c.json({ error: "Audio not available for this insight" }, 404);
+      }
+
+      try {
+        const result = await generateInsightAudio(supabase, insight);
+        audioPath = result.audioPath;
+
+        // Update the insight with the new audio path for future requests
+        await updateInsight(db, {
+          id: insight.id,
+          teamId: insight.teamId,
+          audioPath,
+        });
+      } catch (error) {
+        console.error("Failed to generate audio:", error);
+        return c.json({ error: "Failed to generate audio" }, 500);
+      }
     }
 
-    const supabase = await createAdminClient();
+    // Generate presigned URL for the audio file
     const { data, error } = await supabase.storage
       .from(AUDIO_BUCKET)
-      .createSignedUrl(insight.audioPath, 60 * 60); // 1 hour
+      .createSignedUrl(audioPath, 60 * 60); // 1 hour
 
     if (error || !data?.signedUrl) {
       return c.json({ error: "Failed to generate audio URL" }, 500);
@@ -245,6 +278,128 @@ app.openapi(
       ),
       200,
     );
+  },
+);
+
+// Public audio endpoint for email links (token-based auth)
+const audioTokenQuerySchema = z.object({
+  token: z.string().min(1).openapi({
+    description: "JWT token for audio access",
+    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  }),
+});
+
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/{id}/audio",
+    summary: "Stream insight audio (public with token)",
+    operationId: "getInsightAudio",
+    "x-speakeasy-name-override": "getAudio",
+    description:
+      "Access insight audio via a signed token (for email links). Audio is generated on-demand if not cached. Redirects to the audio file.",
+    tags: ["Insights"],
+    request: {
+      params: insightByIdSchema,
+      query: audioTokenQuerySchema,
+    },
+    responses: {
+      302: {
+        description: "Redirect to audio file",
+      },
+      400: {
+        description: "Invalid or expired token",
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+      },
+      404: {
+        description: "Insight not found or audio not available",
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+      },
+      500: {
+        description: "Failed to generate audio",
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+      },
+    },
+    // No middleware - public endpoint with token auth
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const { id } = c.req.valid("param");
+    const { token } = c.req.valid("query");
+
+    // Verify the token
+    let tokenPayload: { insightId: string; teamId: string };
+    try {
+      tokenPayload = await verifyAudioToken(token);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Invalid token";
+      return c.json({ error: message }, 400);
+    }
+
+    // Validate that the token is for this insight
+    if (tokenPayload.insightId !== id) {
+      return c.json({ error: "Token does not match insight ID" }, 400);
+    }
+
+    // Fetch the insight
+    const insight = await getInsightById(db, {
+      id,
+      teamId: tokenPayload.teamId,
+    });
+
+    if (!insight) {
+      return c.json({ error: "Insight not found" }, 404);
+    }
+
+    const supabase = await createAdminClient();
+    let audioPath = insight.audioPath;
+
+    // Lazy generation: generate audio if not already cached
+    if (!audioPath) {
+      if (!isAudioEnabled()) {
+        return c.json({ error: "Audio generation is not configured" }, 404);
+      }
+
+      if (!canGenerateAudio(insight)) {
+        return c.json({ error: "Audio not available for this insight" }, 404);
+      }
+
+      try {
+        const result = await generateInsightAudio(supabase, insight);
+        audioPath = result.audioPath;
+
+        // Update the insight with the new audio path
+        await updateInsight(db, {
+          id: insight.id,
+          teamId: insight.teamId,
+          audioPath,
+        });
+      } catch (error) {
+        console.error("Failed to generate audio:", error);
+        return c.json({ error: "Failed to generate audio" }, 500);
+      }
+    }
+
+    // Generate presigned URL and redirect
+    const presignedUrl = await getAudioPresignedUrl(
+      supabase,
+      audioPath,
+      60 * 60, // 1 hour
+    );
+
+    return c.redirect(presignedUrl, 302);
   },
 );
 

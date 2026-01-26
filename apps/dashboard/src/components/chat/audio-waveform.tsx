@@ -66,9 +66,13 @@ export function AudioWaveform({
   const animationRef = useRef<number>(0);
   const staticBarsRef = useRef<number[]>([]);
   const frequencyDataRef = useRef<number[]>([]);
+  const smoothedBarsRef = useRef<number[]>([]); // For smooth interpolation
   const cachedRectRef = useRef({ width: 0, height: 0 });
   const isDraggingRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
+
+  // Smoothing factor for bar height interpolation (0-1, lower = smoother)
+  const SMOOTHING_FACTOR = 0.15;
 
   // Generate static pattern for idle state
   const generateStaticPattern = useCallback((barCount: number): number[] => {
@@ -221,34 +225,53 @@ export function AudioWaveform({
       const computedBarColor =
         barColor || (primaryValue ? `hsl(${primaryValue})` : "#000");
 
-      // Calculate progress
+      // Calculate smooth progress (0-1)
       const progress = duration > 0 ? currentTime / duration : 0;
-      const progressIndex = Math.floor(progress * barCount);
+
+      // Initialize smoothed bars if needed
+      if (smoothedBarsRef.current.length !== barCount) {
+        smoothedBarsRef.current = new Array(barCount).fill(0.3);
+      }
 
       for (let i = 0; i < barCount; i++) {
         const x = i * step;
 
-        let barH: number;
+        let targetH: number;
         if (active && frequencyDataRef.current.length > 0) {
           // Use real frequency data when playing
           const value = frequencyDataRef.current[i] || 0.1;
-          barH = Math.max(2, value * canvasHeight * 0.85);
+          targetH = Math.max(2, value * canvasHeight * 0.85);
         } else if (processing) {
-          // Pulsing animation when processing
+          // Smooth wave animation when processing (no random noise)
           const time = Date.now() / 1000;
-          const pulse =
-            0.3 + Math.sin(time * 3 + i * 0.1) * 0.2 + Math.random() * 0.1;
-          barH = Math.max(2, pulse * canvasHeight * 0.6);
+          // Multiple overlapping sine waves for organic movement
+          const wave1 = Math.sin(time * 2 + i * 0.15) * 0.25;
+          const wave2 = Math.sin(time * 3.7 + i * 0.08) * 0.15;
+          const wave3 = Math.sin(time * 1.3 - i * 0.12) * 0.1;
+          const pulse = 0.35 + wave1 + wave2 + wave3;
+          targetH = Math.max(2, pulse * canvasHeight * 0.7);
         } else {
           // Use static pattern
           const value = staticBarsRef.current[i] || 0.15;
-          barH = Math.max(2, value * canvasHeight * 0.8);
+          targetH = Math.max(2, value * canvasHeight * 0.8);
         }
 
+        // Smooth interpolation for bar heights
+        const currentH = smoothedBarsRef.current[i] || targetH;
+        const smoothedH = currentH + (targetH - currentH) * SMOOTHING_FACTOR;
+        smoothedBarsRef.current[i] = smoothedH;
+
+        const barH = smoothedH;
         const y = centerY - barH / 2;
 
-        // Set color and opacity based on progress
-        const isPlayed = showProgress && i <= progressIndex;
+        // Smooth progress calculation (not snapping to bar boundaries)
+        const barProgress = i / barCount;
+        const isPlayed = showProgress && barProgress <= progress;
+        // Partial fill for the bar at the progress boundary
+        const isPartial = showProgress && 
+          barProgress <= progress && 
+          (i + 1) / barCount > progress;
+
         ctx.fillStyle = isPlayed
           ? progressColor || computedBarColor
           : computedBarColor;
@@ -258,7 +281,13 @@ export function AudioWaveform({
         } else if (processing) {
           ctx.globalAlpha = 0.5 + (barH / canvasHeight) * 0.3;
         } else {
-          ctx.globalAlpha = isPlayed ? 0.7 : 0.25 + (barH / canvasHeight) * 0.2;
+          // Smooth opacity transition at progress boundary
+          if (isPartial) {
+            const partialProgress = (progress * barCount) - i;
+            ctx.globalAlpha = 0.25 + partialProgress * 0.45 + (barH / canvasHeight) * 0.2;
+          } else {
+            ctx.globalAlpha = isPlayed ? 0.7 : 0.25 + (barH / canvasHeight) * 0.2;
+          }
         }
 
         if (barRadius > 0) {

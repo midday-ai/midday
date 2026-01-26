@@ -265,7 +265,8 @@ export function InsightsWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const playAudio = useAudioPlayerStore((state) => state.play);
+  const showLoading = useAudioPlayerStore((state) => state.showLoading);
+  const setAudioUrl = useAudioPlayerStore((state) => state.setUrl);
 
   // Refs for managing state without re-renders
   const audioFetchingRef = useRef(false);
@@ -312,7 +313,8 @@ export function InsightsWidget() {
       periodYear: insight.periodYear,
       title: insight.title ?? undefined,
       story: insight.content?.story,
-      hasAudio: !!insight.audioPath,
+      // Audio is generated lazily - show button if content exists (audio can be generated)
+      hasAudio: !!insight.content,
     })) ?? [];
 
   // Track card order for drag cycling
@@ -388,22 +390,27 @@ export function InsightsWidget() {
 
       audioFetchingRef.current = true;
 
+      // Show the audio player immediately with loading state
+      showLoading();
+
       try {
         const result = await queryClient.fetchQuery(
           trpc.insights.audioUrl.queryOptions({ id: insight.id }),
         );
 
         if (result.audioUrl) {
-          // Use the audio player store to play the audio
-          playAudio(result.audioUrl);
+          // Set the URL and auto-play
+          setAudioUrl(result.audioUrl);
         }
       } catch (error) {
         console.error("Failed to fetch audio URL:", error);
+        // Close the player on error
+        useAudioPlayerStore.getState().close();
       } finally {
         audioFetchingRef.current = false;
       }
     },
-    [queryClient, trpc, playAudio],
+    [queryClient, trpc, showLoading, setAudioUrl],
   );
 
   const handleCardClick = useCallback(
