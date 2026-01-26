@@ -47,6 +47,8 @@ export function NotificationItem({
     if (activityType === "inbox_needs_review")
       return <Icons.AlertCircle className="size-4" />;
     if (activityType === "match") return <Icons.Match className="size-4" />;
+    if (activityType === "insight_ready")
+      return <Icons.AIOutline className="size-4" />;
     return <Icons.Notifications className="size-4" />;
   };
 

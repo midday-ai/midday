@@ -7,6 +7,7 @@ import { embeddingsProcessors } from "./embeddings";
 import { inboxProcessors } from "./inbox";
 import { insightsProcessors } from "./insights";
 import { invoiceProcessors } from "./invoices";
+import { notificationProcessors } from "./notifications";
 import { ratesProcessors } from "./rates";
 import { teamProcessors } from "./teams";
 import { transactionProcessors } from "./transactions";
@@ -67,6 +68,11 @@ for (const [jobName, processor] of Object.entries(teamProcessors)) {
 
 // Register insights processors
 for (const [jobName, processor] of Object.entries(insightsProcessors)) {
+  processors.set(jobName, processor);
+}
+
+// Register notification processors
+for (const [jobName, processor] of Object.entries(notificationProcessors)) {
   processors.set(jobName, processor);
 }
 

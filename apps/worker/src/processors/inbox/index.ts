@@ -22,7 +22,6 @@ export { InitialSetupProcessor } from "./initial-setup";
 /**
  * Inbox processor registry
  * Maps job names to processor instances
-
  */
 export const inboxProcessors = {
   "batch-process-matching": new BatchProcessMatchingProcessor(),

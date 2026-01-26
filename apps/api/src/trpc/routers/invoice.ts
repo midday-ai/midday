@@ -547,16 +547,16 @@ export const invoiceRouter = createTRPCRouter({
 
         // Fire and forget notification - don't block the response
         triggerJob(
-          "invoice-notification",
+          "notification",
           {
-            type: "scheduled",
+            type: "invoice_scheduled",
             teamId: teamId!,
             invoiceId: input.id,
             invoiceNumber: data.invoiceNumber!,
             scheduledAt: input.scheduledAt,
             customerName: data.customerName ?? undefined,
           },
-          "invoices",
+          "notifications",
         ).catch(() => {
           // Ignore notification errors - invoice was scheduled successfully
         });

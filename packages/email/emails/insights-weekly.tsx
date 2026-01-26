@@ -72,30 +72,13 @@ export const InsightsWeeklyEmail = ({
             {firstName ? `Hi ${firstName},` : "Hello,"}
           </Text>
 
-          {/* Hook - Title/Summary */}
+          {/* Summary */}
           <Text
             className={`text-[14px] leading-[24px] ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Your weekly insight is ready.
+            {title}
           </Text>
-
-          {/* Highlight Box */}
-          <Section
-            className="my-[24px] p-[16px]"
-            style={{
-              backgroundColor: "#fafafa",
-              borderWidth: 1,
-              borderStyle: "solid",
-              borderColor: "#ededed",
-            }}
-          >
-            <Text
-              className="text-[14px] leading-[22px] m-0 text-[#1c1c1c]"
-            >
-              "{title}"
-            </Text>
-          </Section>
 
           {/* CTA Button */}
           <Section className="text-center mt-[32px] mb-[32px]">

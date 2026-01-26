@@ -24,6 +24,7 @@ const SUPPORTED_NOTIFICATION_TYPES = [
   "recurring_series_completed",
   "recurring_series_paused",
   "recurring_invoice_upcoming",
+  "insight_ready",
 ];
 
 export function isNotificationClickable(activityType: string): boolean {
@@ -123,6 +124,13 @@ export function NotificationLink({
           // Open the edit recurring sheet to let user review/modify the series
           if (recordId) {
             setInvoiceParams({ editRecurringId: recordId });
+          }
+          break;
+
+        case "insight_ready":
+          // Navigate to overview with insight query param to trigger the insight display
+          if (recordId) {
+            router.push(`/?insight=${recordId}`);
           }
           break;
 

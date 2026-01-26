@@ -33,8 +33,9 @@ const invoicesWorkerOptions: WorkerOptions = {
 
 /**
  * Invoices queue configuration
- * Handles all invoice-related notification jobs
- * Jobs: invoice-notification
+ * Handles invoice generation, scheduling, email sending, and recurring invoices
+ * Jobs: generate-invoice, send-invoice-email, send-invoice-reminder, schedule-invoice,
+ *       invoice-recurring-scheduler, invoice-upcoming-notification
  */
 export const invoicesQueueConfig: QueueConfig = {
   name: "invoices",

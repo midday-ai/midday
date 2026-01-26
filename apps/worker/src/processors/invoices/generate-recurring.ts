@@ -20,6 +20,7 @@ import {
   RecurringInvoiceErrors,
 } from "../../errors/invoice-errors";
 import { invoicesQueue } from "../../queues/invoices";
+import { notificationsQueue } from "../../queues/notifications";
 import type { InvoiceRecurringSchedulerPayload } from "../../schemas/invoices";
 import { getDb } from "../../utils/db";
 import { isStaging } from "../../utils/env";
@@ -209,10 +210,10 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             // Queue notification
             const invoiceNumber =
               existingInvoice.invoiceNumber ?? `REC-${nextSequence}`;
-            await invoicesQueue.add(
-              "invoice-notification",
+            await notificationsQueue.add(
+              "notification",
               {
-                type: "recurring_generated",
+                type: "invoice_recurring_generated",
                 invoiceId: existingInvoice.id,
                 invoiceNumber,
                 teamId: recurring.teamId,
@@ -415,10 +416,10 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           );
 
           // Queue notification for invoice generation
-          await invoicesQueue.add(
-            "invoice-notification",
+          await notificationsQueue.add(
+            "notification",
             {
-              type: "recurring_generated",
+              type: "invoice_recurring_generated",
               invoiceId,
               invoiceNumber,
               teamId: recurring.teamId,
@@ -432,8 +433,8 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
 
           // If series is now completed, queue completion notification
           if (updatedRecurring?.status === "completed") {
-            await invoicesQueue.add(
-              "invoice-notification",
+            await notificationsQueue.add(
+              "notification",
               {
                 type: "recurring_series_completed",
                 invoiceId,
@@ -441,8 +442,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
                 teamId: recurring.teamId,
                 customerName: recurring.customerName ?? undefined,
                 recurringId: recurring.id,
-                recurringSequence: nextSequence,
-                recurringTotalCount: recurring.endCount ?? undefined,
+                totalGenerated: nextSequence,
               },
               DEFAULT_JOB_OPTIONS,
             );
@@ -506,12 +506,10 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           );
 
           // Queue notification for auto-pause
-          await invoicesQueue.add(
-            "invoice-notification",
+          await notificationsQueue.add(
+            "notification",
             {
               type: "recurring_series_paused",
-              invoiceId: recurring.id, // Use recurring ID as placeholder
-              invoiceNumber: `Recurring-${recurring.id.slice(0, 8)}`,
               teamId: recurring.teamId,
               customerName: recurring.customerName ?? undefined,
               recurringId: recurring.id,

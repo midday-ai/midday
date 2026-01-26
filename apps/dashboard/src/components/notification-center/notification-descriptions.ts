@@ -613,6 +613,25 @@ const handleInboxNeedsReview: NotificationDescriptionHandler = (
   return t("notifications.inbox_needs_review.title");
 };
 
+const handleInsightReady: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  t,
+) => {
+  const periodLabel = metadata?.periodLabel;
+  const title = metadata?.title;
+
+  if (title) {
+    return title;
+  }
+
+  if (periodLabel) {
+    return t("notifications.insight_ready.with_period", { periodLabel });
+  }
+
+  return t("notifications.insight_ready.title");
+};
+
 const handleInboxCrossCurrencyMatched: NotificationDescriptionHandler = (
   metadata,
   user,
@@ -701,6 +720,7 @@ const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   inbox_auto_matched: handleInboxAutoMatched,
   inbox_needs_review: handleInboxNeedsReview,
   inbox_cross_currency_matched: handleInboxCrossCurrencyMatched,
+  insight_ready: handleInsightReady,
   invoice_paid: handleInvoicePaid,
   invoice_overdue: handleInvoiceOverdue,
   invoice_scheduled: handleInvoiceScheduled,

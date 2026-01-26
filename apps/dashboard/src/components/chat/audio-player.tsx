@@ -36,8 +36,11 @@ export function AudioPlayer() {
       setDuration(0);
       prevAudioUrlRef.current = audioUrl;
 
-      // Reset Web Audio API connections for new audio
-      sourceRef.current = null;
+      // Note: We intentionally do NOT reset sourceRef here.
+      // A MediaElementAudioSourceNode is permanently bound to its HTMLMediaElement -
+      // you can only call createMediaElementSource() once per audio element.
+      // The source remains valid when the audio src attribute changes.
+      // We only reset the analyser to allow reconnection if needed.
       analyserRef.current = null;
     }
   }, [audioUrl]);
@@ -96,9 +99,6 @@ export function AudioPlayer() {
     if (!audio || !audioUrl) return;
 
     const setupAudioContext = async () => {
-      // Only create once per audio element
-      if (sourceRef.current) return;
-
       try {
         // Reuse or create audio context
         if (
@@ -117,16 +117,31 @@ export function AudioPlayer() {
 
         const audioContext = audioContextRef.current;
 
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.8;
-        analyserRef.current = analyser;
+        // Create analyser if needed (reset when URL changes)
+        if (!analyserRef.current) {
+          const analyser = audioContext.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.8;
+          analyserRef.current = analyser;
+        }
 
-        const source = audioContext.createMediaElementSource(audio);
-        sourceRef.current = source;
+        // Create source only once per audio element (cannot be recreated)
+        // A MediaElementAudioSourceNode is permanently bound to its HTMLMediaElement
+        if (!sourceRef.current) {
+          const source = audioContext.createMediaElementSource(audio);
+          sourceRef.current = source;
+        }
 
-        source.connect(analyser);
-        analyser.connect(audioContext.destination);
+        // Connect/reconnect the audio graph
+        // Disconnect first to avoid duplicate connections
+        try {
+          sourceRef.current.disconnect();
+        } catch {
+          // Ignore if not connected
+        }
+
+        sourceRef.current.connect(analyserRef.current);
+        analyserRef.current.connect(audioContext.destination);
       } catch (error) {
         console.error("Error setting up Web Audio API:", error);
       }

@@ -120,16 +120,16 @@ app.openapi(
             if (invoice) {
               // Trigger notification job
               await triggerJob(
-                "invoice-notification",
+                "notification",
                 {
-                  type: "paid",
+                  type: "invoice_paid",
                   invoiceId,
                   invoiceNumber: invoice.invoiceNumber || "",
                   teamId,
                   customerName: invoice.customerName || "",
                   paidAt,
                 },
-                "invoices",
+                "notifications",
               );
 
               logger.info("Invoice paid notification triggered", {
@@ -210,16 +210,16 @@ app.openapi(
 
             // Trigger refund notification job
             await triggerJob(
-              "invoice-notification",
+              "notification",
               {
-                type: "refunded",
+                type: "invoice_refunded",
                 invoiceId: invoice.id,
                 invoiceNumber: invoice.invoiceNumber || "",
                 teamId: invoice.teamId,
                 customerName: invoice.customerName || "",
                 refundedAt,
               },
-              "invoices",
+              "notifications",
             );
 
             logger.info("Invoice refund notification triggered", {
