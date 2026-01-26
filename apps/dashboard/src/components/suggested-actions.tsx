@@ -1,6 +1,7 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useAudioPlayerStore } from "@/store/audio-player";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
@@ -16,6 +17,7 @@ export function SuggestedActions() {
   const { setChatId } = useChatInterface();
   const chatId = useChatId();
   const trpc = useTRPC();
+  const isAudioPlayerVisible = useAudioPlayerStore((state) => state.isVisible);
 
   const { data: suggestedActionsData } = useSuspenseQuery(
     trpc.suggestedActions.list.queryOptions({
@@ -162,6 +164,11 @@ export function SuggestedActions() {
 
   type SuggestedAction =
     RouterOutputs["suggestedActions"]["list"]["actions"][number];
+
+  // Hide suggested actions when audio player is visible
+  if (isAudioPlayerVisible) {
+    return null;
+  }
 
   return (
     <div className="w-[calc(100%+16px)] md:w-full -mx-4 md:mx-0 md:px-6 mt-10 mb-8 flex items-center justify-center">

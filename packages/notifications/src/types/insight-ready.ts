@@ -1,4 +1,3 @@
-import { getAppUrl } from "@midday/utils/envs";
 import type { NotificationHandler } from "../base";
 import { insightReadySchema } from "../schemas";
 
@@ -23,15 +22,14 @@ export const insightReady: NotificationHandler = {
 
   createEmail: (data, user) => {
     return {
-      template: "insight-ready",
+      template: "insights-weekly",
       emailType: "owners",
-      subject: `Your ${data.periodLabel} business insight is ready`,
+      subject: `${data.periodLabel}: Your weekly insight is ready`,
       user,
       data: {
         fullName: user.full_name,
         periodLabel: data.periodLabel,
-        title: data.title || "Your weekly insight is ready to review.",
-        audioUrl: data.audioPresignedUrl,
+        title: data.title || "Your weekly breakdown is ready.",
         insightId: data.insightId,
         locale: user.locale || "en",
       },

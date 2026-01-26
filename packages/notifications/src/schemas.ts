@@ -296,7 +296,6 @@ export const insightReadySchema = z.object({
   periodNumber: z.number(),
   periodYear: z.number(),
   title: z.string().optional(),
-  audioPresignedUrl: z.string().optional(),
 });
 
 export type UserData = z.infer<typeof userSchema>;

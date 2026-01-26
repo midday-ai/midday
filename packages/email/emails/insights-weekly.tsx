@@ -19,19 +19,17 @@ import {
 interface Props {
   fullName: string;
   periodLabel: string;
-  title: string;
-  audioUrl?: string;
+  title?: string;
   insightId: string;
   locale?: string;
 }
 
 const baseAppUrl = getAppUrl();
 
-export const InsightReadyEmail = ({
+export const InsightsWeeklyEmail = ({
   fullName = "",
   periodLabel = "Week 2, 2026",
-  title = "338,958 kr profit on 350,000 kr revenue - healthy 97% margin. 14 months runway.",
-  audioUrl,
+  title = "Revenue up 23% with healthy margins - your weekly breakdown is ready.",
   insightId = "preview-insight-id",
   locale = "en",
 }: Props) => {
@@ -39,7 +37,7 @@ export const InsightReadyEmail = ({
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
-  const previewText = `Your ${periodLabel} business insight is ready: ${title.slice(0, 100)}`;
+  const previewText = `${periodLabel}: ${title.slice(0, 100)}`;
   const dashboardUrl = `${baseAppUrl}/?insight=${insightId}`;
 
   return (
@@ -58,13 +56,15 @@ export const InsightReadyEmail = ({
         >
           <Logo />
 
+          {/* Period Label Header */}
           <Heading
             className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
-            Your {periodLabel} Insight
+            {periodLabel}
           </Heading>
 
+          {/* Greeting */}
           <Text
             className={`text-[14px] leading-[24px] ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
@@ -72,51 +72,36 @@ export const InsightReadyEmail = ({
             {firstName ? `Hi ${firstName},` : "Hello,"}
           </Text>
 
+          {/* Hook - Title/Summary */}
           <Text
             className={`text-[14px] leading-[24px] ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Your {periodLabel.toLowerCase()} business insight is ready.
+            Your weekly insight is ready.
           </Text>
 
-          {/* Insight Highlight */}
+          {/* Highlight Box */}
           <Section
-            className="my-[24px] p-[16px] rounded-[8px]"
+            className="my-[24px] p-[16px]"
             style={{
-              backgroundColor: "#f8fafc",
-              border: "1px solid #e2e8f0",
+              backgroundColor: "#fafafa",
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderColor: "#ededed",
             }}
           >
             <Text
-              className="text-[14px] leading-[22px] m-0"
-              style={{ color: "#1e293b" }}
+              className="text-[14px] leading-[22px] m-0 text-[#1c1c1c]"
             >
-              {title}
+              "{title}"
             </Text>
           </Section>
 
-          <Text
-            className={`text-[14px] leading-[24px] ${themeClasses.mutedText}`}
-            style={{ color: lightStyles.mutedText.color }}
-          >
-            Check your dashboard for the full story, key metrics, and
-            recommended actions to grow your business.
-          </Text>
-
-          {/* CTA Buttons */}
-          <Section className="text-center mt-[32px] mb-[16px]">
+          {/* CTA Button */}
+          <Section className="text-center mt-[32px] mb-[32px]">
             <Button href={dashboardUrl}>View breakdown</Button>
           </Section>
 
-          {audioUrl && (
-            <Section className="text-center mb-[32px]">
-              <Button href={audioUrl} variant="secondary">
-                Listen to breakdown
-              </Button>
-            </Section>
-          )}
-
-          <br />
           <Footer />
         </Container>
       </Body>
@@ -124,4 +109,4 @@ export const InsightReadyEmail = ({
   );
 };
 
-export default InsightReadyEmail;
+export default InsightsWeeklyEmail;
