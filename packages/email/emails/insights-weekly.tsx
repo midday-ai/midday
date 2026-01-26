@@ -22,6 +22,7 @@ interface Props {
   title?: string;
   insightId: string;
   locale?: string;
+  audioUrl?: string;
 }
 
 const baseAppUrl = getAppUrl();
@@ -32,6 +33,7 @@ export const InsightsWeeklyEmail = ({
   title = "Revenue up 23% with healthy margins - your weekly breakdown is ready.",
   insightId = "preview-insight-id",
   locale = "en",
+  audioUrl,
 }: Props) => {
   const firstName = fullName ? fullName.split(" ").at(0) : "";
   const themeClasses = getEmailThemeClasses();
@@ -64,25 +66,35 @@ export const InsightsWeeklyEmail = ({
             {periodLabel}
           </Heading>
 
-          {/* Greeting */}
+          {/* Greeting and Summary */}
           <Text
             className={`text-[14px] leading-[24px] ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            {firstName ? `Hi ${firstName},` : "Hello,"}
-          </Text>
-
-          {/* Summary */}
-          <Text
-            className={`text-[14px] leading-[24px] ${themeClasses.text}`}
-            style={{ color: lightStyles.text.color }}
-          >
+            {firstName ? `Hi ${firstName},` : "Hi,"} here's your weekly summary:{" "}
             {title}
           </Text>
 
-          {/* CTA Button */}
-          <Section className="text-center mt-[32px] mb-[32px]">
-            <Button href={dashboardUrl}>View breakdown</Button>
+          {/* CTA Buttons */}
+          <Section className="text-center mt-[56px] mb-[56px]">
+            <table
+              align="center"
+              border={0}
+              cellPadding={0}
+              cellSpacing={0}
+              role="presentation"
+            >
+              <tr>
+                <td style={{ paddingRight: audioUrl ? 8 : 0 }}>
+                  <Button href={dashboardUrl}>View details</Button>
+                </td>
+                {audioUrl && (
+                  <td style={{ paddingLeft: 8 }}>
+                    <Button href={audioUrl}>Listen to summary</Button>
+                  </td>
+                )}
+              </tr>
+            </table>
           </Section>
 
           <Footer />

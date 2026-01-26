@@ -32,6 +32,7 @@ export const insightReady: NotificationHandler = {
         title: data.title || "Your weekly breakdown is ready.",
         insightId: data.insightId,
         locale: user.locale || "en",
+        audioUrl: data.audioUrl,
       },
     };
   },
