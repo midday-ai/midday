@@ -199,6 +199,8 @@ export type InsightContent = {
     entityType?: "invoice" | "project" | "customer" | "transaction";
     entityId?: string;
   }>;
+  /** AI-generated script optimized for text-to-speech (natural spoken delivery) */
+  audioScript?: string;
 };
 
 /**

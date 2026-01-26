@@ -844,6 +844,7 @@ export {
 
 // Re-export content utilities
 export {
+  type AnomalySlot,
   ContentGenerator,
   type ContentGeneratorOptions,
   createContentGenerator,

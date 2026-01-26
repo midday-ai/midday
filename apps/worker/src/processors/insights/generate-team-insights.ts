@@ -192,13 +192,13 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         try {
           const supabase = createClient();
 
-          // Build audio script from content with activity for money-on-table details
+          // Build audio script that narrates the visual content
           const script = buildAudioScript(
             result.content,
             period.periodLabel,
             result.selectedMetrics,
-            currency,
             result.activity,
+            currency,
           );
 
           this.logger.info("Generating audio for insight", {

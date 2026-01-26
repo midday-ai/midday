@@ -1,198 +1,212 @@
-import { formatMetricValue } from "../metrics/calculator";
 /**
  * Audio script builder for insights
- * Creates natural-sounding scripts with Eleven v3 audio tags
  *
- * "What Matters Now" format - action-first, specific, conversational
+ * Target: ~25-35 seconds of audio
+ * Structure: opening → summary → story → alerts → highlight
  */
 import type { InsightActivity, InsightContent, InsightMetric } from "../types";
 
-/**
- * Eleven v3 Audio Tags Reference:
- * - [warmly] - Friendly, approachable tone
- * - [upbeat] - Energetic, positive delivery
- * - [clearly] - Precise, professional enunciation
- * - [pause] - Natural pauses for emphasis
- * - [excited] - For celebrations and achievements
- * - [thoughtfully] - Reflective, considered tone
- * - [gently] - Soft, supportive tone for challenging news
- */
+export type AudioScriptOptions = {
+  content: InsightContent;
+  periodLabel: string;
+  metrics: InsightMetric[];
+  activity?: InsightActivity;
+  currency?: string;
+};
 
 /**
- * Infer sentiment from content metrics and profit
+ * Currency code to spoken word mapping
+ * ElevenLabs struggles with abbreviations like "kr", "SEK", etc.
  */
-function inferSentiment(
-  metrics: InsightMetric[],
-): "positive" | "neutral" | "challenging" {
-  const profitMetric = metrics.find((m) => m.type === "net_profit");
-  if (profitMetric) {
-    if (profitMetric.value > 0 && profitMetric.changeDirection === "up") {
-      return "positive";
-    }
-    if (profitMetric.value < 0) {
-      return "challenging";
-    }
+const CURRENCY_SPEECH_MAP: Record<string, string> = {
+  // Nordic
+  SEK: "Swedish kronor",
+  NOK: "Norwegian kroner",
+  DKK: "Danish kroner",
+  ISK: "Icelandic króna",
+  // Common
+  USD: "dollars",
+  EUR: "euros",
+  GBP: "pounds",
+  CHF: "Swiss francs",
+  JPY: "yen",
+  CAD: "Canadian dollars",
+  AUD: "Australian dollars",
+  NZD: "New Zealand dollars",
+  // Abbreviations
+  kr: "kronor",
+  "kr.": "kronor",
+};
+
+/**
+ * Normalize text for better TTS pronunciation
+ * - Removes decimals from currency amounts (5,644.42 → 5,644)
+ * - Rounds percentages (75.3% → 75%)
+ * - Converts currency codes to spoken words
+ * - Expands abbreviations (vs → versus, avg → average)
+ * - Improves date pronunciation
+ */
+export function normalizeForSpeech(text: string): string {
+  let normalized = text;
+
+  // Remove decimals from large numbers (5,644.42 → 5,644)
+  // Only for numbers with thousand separators (not percentages like 75.3%)
+  normalized = normalized.replace(/(\d{1,3}(?:,\d{3})+)\.\d+/g, "$1");
+
+  // Round percentages to whole numbers (75.3% → 75%)
+  normalized = normalized.replace(/(\d+)\.\d+%/g, "$1%");
+
+  // Replace currency codes with spoken equivalents
+  for (const [code, spoken] of Object.entries(CURRENCY_SPEECH_MAP)) {
+    const pattern = new RegExp(`(\\d[\\d,]*)\\s*${code}\\b`, "gi");
+    normalized = normalized.replace(pattern, `$1 ${spoken}`);
   }
-  return "neutral";
+
+  // Expand common abbreviations
+  normalized = normalized.replace(/\bvs\.?\b/gi, "versus");
+  normalized = normalized.replace(/\bavg\.?\b/gi, "average");
+  normalized = normalized.replace(/\bapprox\.?\b/gi, "approximately");
+
+  // Make dates sound more natural (February 24, → February 24th,)
+  // Match month + day number at word boundary
+  const months =
+    "January|February|March|April|May|June|July|August|September|October|November|December";
+  normalized = normalized.replace(
+    new RegExp(`(${months})\\s+(\\d{1,2})(?=[,\\s]|$)`, "g"),
+    (_, month, day) => {
+      const num = Number.parseInt(day, 10);
+      const suffix =
+        num === 1 || num === 21 || num === 31
+          ? "st"
+          : num === 2 || num === 22
+            ? "nd"
+            : num === 3 || num === 23
+              ? "rd"
+              : "th";
+      return `${month} ${num}${suffix}`;
+    },
+  );
+
+  // Clean up any double spaces
+  normalized = normalized.replace(/\s+/g, " ").trim();
+
+  return normalized;
 }
 
 /**
- * Get the appropriate tone tag based on sentiment
+ * Get the most notable metric highlight for audio
  */
-function getOpenerTone(
-  sentiment: "positive" | "neutral" | "challenging",
-): string {
-  switch (sentiment) {
-    case "positive":
-      return "[upbeat]";
-    case "neutral":
-      return "[warmly]";
-    case "challenging":
-      return "[gently]";
-  }
+function getMetricHighlight(metrics: InsightMetric[]): string | null {
+  if (!metrics.length) return null;
+
+  // Find the most significant change (positive or negative)
+  const significant = metrics
+    .filter((m) => Math.abs(m.change) >= 20 && m.value !== 0)
+    .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))[0];
+
+  if (!significant) return null;
+
+  const direction = significant.change > 0 ? "up" : "down";
+  const absChange = Math.abs(Math.round(significant.change));
+
+  // Only highlight if it's noteworthy
+  if (absChange < 20) return null;
+
+  return `${significant.label} is ${direction} ${absChange}% from last week.`;
 }
 
 /**
- * Build an audio script from insight content
- * Uses Eleven v3 audio tags for expressive narration
+ * Format amount for natural speech (no decimals for round numbers)
+ */
+function formatAmountForSpeech(amount: number, currency: string): string {
+  const rounded = Math.round(amount);
+  return `${rounded.toLocaleString()} ${currency}`;
+}
+
+/**
+ * Get overdue alert text if there are overdue invoices
+ */
+function getOverdueAlert(
+  activity?: InsightActivity,
+  currency?: string,
+): string | null {
+  if (!activity?.invoicesOverdue || activity.invoicesOverdue === 0) {
+    return null;
+  }
+
+  const count = activity.invoicesOverdue;
+  const invoiceWord = count === 1 ? "invoice" : "invoices";
+
+  if (activity.overdueAmount && currency) {
+    return `You have ${count} overdue ${invoiceWord} totaling ${formatAmountForSpeech(activity.overdueAmount, currency)} that need attention.`;
+  }
+
+  return `You have ${count} overdue ${invoiceWord} that need attention.`;
+}
+
+/**
+ * Build an audio script for TTS
  *
- * "What Matters Now" format:
- * 1. Quick greeting
- * 2. The main thing (money on table or highlight)
- * 3. Brief context
- * 4. One priority action
- * 5. Celebration if earned
+ * Uses AI-generated audioScript if available (optimized for natural speech),
+ * otherwise falls back to structured content assembly.
  *
- * @param content - The AI-generated insight content
- * @param periodLabel - Human-readable period label (e.g., "Week 2, 2026")
- * @param metrics - Selected key metrics to highlight
- * @param currency - Currency code for formatting
- * @param activity - Optional activity data for richer context
- * @returns Script string with embedded audio tags
+ * The script is normalized for TTS pronunciation (currency codes → spoken words)
  */
 export function buildAudioScript(
   content: InsightContent,
   periodLabel: string,
   metrics: InsightMetric[],
-  currency: string,
   activity?: InsightActivity,
+  currency?: string,
 ): string {
+  // Use AI-generated script if available (already optimized for speech)
+  if (content.audioScript) {
+    return normalizeForSpeech(content.audioScript);
+  }
+
+  // Fallback: assemble from content parts
   const parts: string[] = [];
-  const sentiment = inferSentiment(metrics);
-  const openerTone = getOpenerTone(sentiment);
 
-  // Quick greeting
-  parts.push(`[warmly] Here's your ${periodLabel} update. [pause]`);
+  // Opening with period context
+  parts.push(`Here's your update for ${periodLabel}.`);
 
-  // The main thing - use title as the hook
-  parts.push(`${openerTone} ${content.title}`);
+  // Core content (matches visual summary + story)
+  parts.push(content.summary);
 
-  // Story section - the context (keep it brief)
   if (content.story) {
-    parts.push(`[pause] [warmly] ${content.story}`);
+    parts.push(content.story);
   }
 
-  // Money on table highlight if significant
-  const moneyOnTable = activity?.moneyOnTable;
-  if (moneyOnTable && moneyOnTable.totalAmount > 500) {
-    // Highlight top overdue invoice by name
-    if (moneyOnTable.overdueInvoices.length > 0) {
-      const top = moneyOnTable.overdueInvoices[0];
-      if (top) {
-        const topAmount = formatMetricValue(top.amount, "currency", currency);
-        parts.push(
-          `[pause] [clearly] Quick note: ${top.customerName} owes you ${topAmount}, now ${top.daysOverdue} days overdue.`,
-        );
-      }
-    }
+  // Alert callout (matches visual "Needs attention" section)
+  const overdueAlert = getOverdueAlert(activity, currency);
+  if (overdueAlert) {
+    parts.push(overdueAlert);
   }
 
-  // One priority action (if any)
-  if (content.actions.length > 0) {
-    const primaryAction = content.actions[0];
-    if (primaryAction) {
-      parts.push(
-        `[pause] [clearly] Your priority this week: ${primaryAction.text}`,
-      );
-    }
+  // Metric highlight (reinforces Key Metrics section)
+  const highlight = getMetricHighlight(metrics);
+  if (highlight) {
+    parts.push(highlight);
   }
 
-  // Brief sign off
-  const signOff = getSignOff(periodLabel, sentiment);
-  parts.push(`[pause] [warmly] ${signOff}`);
-
-  return parts.join("\n\n");
+  // Normalize for better TTS pronunciation
+  return normalizeForSpeech(parts.join(" "));
 }
 
 /**
- * Generate a contextual sign-off based on the period and sentiment
- */
-function getSignOff(
-  periodLabel: string,
-  sentiment?: "positive" | "neutral" | "challenging",
-): string {
-  const lowerLabel = periodLabel.toLowerCase();
-  const isWeekly = lowerLabel.includes("week");
-
-  // Shorter, more conversational sign-offs
-  if (sentiment === "positive") {
-    return isWeekly ? "Keep up the momentum!" : "You're on a good track.";
-  }
-
-  if (sentiment === "challenging") {
-    return isWeekly
-      ? "You've got this. One step at a time."
-      : "Focus on that priority and you'll be fine.";
-  }
-
-  // Neutral / default
-  if (isWeekly) {
-    return "That's your week. You're in good shape.";
-  }
-
-  if (lowerLabel.includes("q1") || lowerLabel.includes("quarter 1")) {
-    return "Strong start to the year.";
-  }
-  if (lowerLabel.includes("q2") || lowerLabel.includes("quarter 2")) {
-    return "Halfway there. Keep going.";
-  }
-  if (lowerLabel.includes("q3") || lowerLabel.includes("quarter 3")) {
-    return "Home stretch is coming up.";
-  }
-  if (lowerLabel.includes("q4") || lowerLabel.includes("quarter 4")) {
-    return "Let's finish strong.";
-  }
-
-  return "That's your update. You're doing fine.";
-}
-
-/**
- * Estimate the character count for cost estimation
- * ElevenLabs charges per character
+ * Estimate character count for cost estimation
  */
 export function estimateScriptCharacters(script: string): number {
-  // Remove audio tags for accurate character count (they're free)
-  const withoutTags = script.replace(/\[[\w]+\]/g, "");
-  return withoutTags.length;
+  return script.length;
 }
 
 /**
- * Build a shorter audio script for teaser/preview
- * Used in notifications or quick summaries
+ * Build a teaser script for notifications
  */
 export function buildTeaserScript(
   content: InsightContent,
-  periodLabel: string,
-  metrics: InsightMetric[],
+  _periodLabel: string,
+  _metrics: InsightMetric[],
 ): string {
-  const sentiment = inferSentiment(metrics);
-  const openerTone = getOpenerTone(sentiment);
-
-  // Super short - just the hook and call to action
-  const hasAction = content.actions.length > 0;
-  const actionHint = hasAction
-    ? "Tap to see your priority for the week."
-    : "Tap to see the details.";
-
-  return `[warmly] Your ${periodLabel} update is ready. [pause] ${openerTone} ${content.title} [pause] [warmly] ${actionHint}`;
+  return content.title;
 }

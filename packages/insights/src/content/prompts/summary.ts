@@ -135,6 +135,28 @@ function buildDataSection(slots: InsightSlots): string {
   );
   lines.push("");
 
+  // Explicit warnings (pre-computed by backend) - prioritize alerts
+  if (slots.hasAlerts || slots.hasWarnings) {
+    const alerts = slots.anomalies.filter((a) => a.severity === "alert");
+    const warnings = slots.anomalies.filter((a) => a.severity === "warning");
+
+    if (alerts.length > 0) {
+      lines.push("ALERTS (mention these):");
+      for (const a of alerts) {
+        lines.push(`  - ${a.message}`);
+      }
+      lines.push("");
+    }
+
+    if (warnings.length > 0) {
+      lines.push("warnings (weave in naturally if relevant):");
+      for (const w of warnings) {
+        lines.push(`  - ${w.message}`);
+      }
+      lines.push("");
+    }
+  }
+
   // Notable context (already computed, surface for variety)
   // Only include for non-first insights (first insight has no comparison data)
   if (!slots.isFirstInsight) {

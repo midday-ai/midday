@@ -3,6 +3,7 @@ import { formatMetricValue } from "../../metrics/calculator";
 import type {
   ExpenseAnomaly,
   InsightActivity,
+  InsightAnomaly,
   InsightMetric,
   MomentumContext,
   PeriodType,
@@ -76,6 +77,15 @@ export type WeekHighlight =
   | { type: "none" };
 
 /**
+ * Anomaly slot for explicit warning signals
+ */
+export type AnomalySlot = {
+  type: string;
+  severity: "info" | "warning" | "alert";
+  message: string;
+};
+
+/**
  * All pre-computed slots for AI prompts
  */
 export type InsightSlots = {
@@ -128,6 +138,12 @@ export type InsightSlots = {
 
   // Revenue concentration risk (>50% from one customer)
   concentrationWarning?: ConcentrationWarning;
+
+  // Explicit anomaly warnings (pre-computed by backend)
+  // Gives AI explicit signals like "low_runway is an ALERT" vs inferring from raw values
+  anomalies: AnomalySlot[];
+  hasAlerts: boolean; // Any severity="alert" anomalies
+  hasWarnings: boolean; // Any severity="warning" anomalies
 
   // Activity highlights
   invoicesPaid: number;
@@ -457,6 +473,7 @@ export function computeSlots(
       topCustomer: { name: string; revenue: number; percentage: number } | null;
       isConcentrated: boolean;
     };
+    anomalies?: InsightAnomaly[];
   },
 ): InsightSlots {
   // Extract metrics
@@ -682,6 +699,15 @@ export function computeSlots(
     vsAverage: activityContext?.comparison?.description,
   });
 
+  // Process anomalies into slots
+  const anomalies: AnomalySlot[] = (context?.anomalies ?? []).map((a) => ({
+    type: a.type,
+    severity: a.severity,
+    message: a.message,
+  }));
+  const hasAlerts = anomalies.some((a) => a.severity === "alert");
+  const hasWarnings = anomalies.some((a) => a.severity === "warning");
+
   return {
     weekType,
     highlight,
@@ -740,6 +766,11 @@ export function computeSlots(
 
     // Revenue concentration risk
     concentrationWarning,
+
+    // Explicit anomaly warnings
+    anomalies,
+    hasAlerts,
+    hasWarnings,
 
     // Activity
     invoicesPaid: activity.invoicesPaid,

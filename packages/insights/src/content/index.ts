@@ -13,10 +13,12 @@ export { getFallbackContent } from "./prompts";
 
 export {
   buildActionsPrompt,
+  buildAudioPrompt,
   buildStoryPrompt,
   buildSummaryPrompt,
   buildTitlePrompt,
   computeSlots,
+  type AnomalySlot,
   type InsightSlots,
   type WeekHighlight,
   type WeekType,

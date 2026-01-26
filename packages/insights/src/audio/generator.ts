@@ -1,6 +1,19 @@
 /**
  * ElevenLabs TTS audio generation for insights
- * Uses Eleven v3 model with audio tags for expressive narration
+ *
+ * Uses Eleven v3 model for:
+ * - 70+ language support (vs 29 in multilingual_v2)
+ * - Better pronunciation of non-English text
+ * - Audio tags support for expressiveness (optional)
+ *
+ * Note: Currency abbreviations (kr, SEK) should be normalized
+ * to full words in the script for better pronunciation.
+ * See normalizeForSpeech() in script.ts
+ *
+ * Voice recommendations:
+ * - Browse: https://elevenlabs.io/voice-library
+ * - Look for voices with "multilingual" or specific language tags
+ * - Test pronunciation with sample text containing your currency
  */
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
@@ -19,26 +32,20 @@ function getElevenLabsClient(): ElevenLabsClient {
 }
 
 /**
- * Default voice ID for Eleven v3
- * "George" - Professional, warm, clear business voice
- * Can be overridden via ELEVENLABS_VOICE_ID env var
- * See available voices at: https://elevenlabs.io/voice-library
+ * Default voice ID - can be overridden via ELEVENLABS_VOICE_ID env var
+ *
+ * Recommended voices for multilingual content:
+ * - "Rachel" (21m00Tcm4TlvDq8ikWAM) - Clear, professional
+ * - "Adam" (pNInz6obpgDQGcFmaJgB) - Warm, natural
+ * - Browse multilingual voices: https://elevenlabs.io/voice-library/multilingual
  */
-const DEFAULT_VOICE_ID = "JBFqnCBsd6RMkjVDRZzb"; // George - warm, professional
+const DEFAULT_VOICE_ID = "TX3LPaxmHKxFdv7VOQHJ";
 
 /**
- * Voice settings optimized for business insights
- * - stability: 0.5 = balanced between consistent and expressive
- * - similarity_boost: 0.8 = close to natural voice
- * - style: 0.3 = slight expressiveness without being dramatic
- * - speed: 1.1 = slightly faster for efficient delivery
+ * Using eleven_v3 for better language support (70+ languages)
+ * vs eleven_multilingual_v2 which supports 29 languages
  */
-const VOICE_SETTINGS = {
-  stability: 0.5,
-  similarity_boost: 0.8,
-  style: 0.3,
-  use_speaker_boost: true,
-};
+const DEFAULT_MODEL_ID = "eleven_v3";
 
 function getVoiceId(): string {
   return process.env.ELEVENLABS_VOICE_ID || DEFAULT_VOICE_ID;
@@ -52,22 +59,19 @@ export function isAudioEnabled(): boolean {
 }
 
 /**
- * Generate audio from a script using ElevenLabs v3
- * The script can include v3 audio tags like [warmly], [upbeat], [clearly], [pause]
+ * Generate audio from a script using ElevenLabs
  *
- * @param script - Text to convert to speech (can include audio tags)
+ * @param script - Text to convert to speech
  * @returns Buffer containing MP3 audio data
  */
 export async function generateAudio(script: string): Promise<Buffer> {
   const client = getElevenLabsClient();
   const voiceId = getVoiceId();
 
-  // Use convert() for full audio buffer (not streaming)
   const audioStream = await client.textToSpeech.convert(voiceId, {
     text: script,
-    modelId: "eleven_v3", // Use v3 for audio tag support
-    outputFormat: "mp3_44100_128", // High quality MP3
-    voiceSettings: VOICE_SETTINGS,
+    modelId: DEFAULT_MODEL_ID,
+    outputFormat: "mp3_44100_128",
   });
 
   // ReadableStream to Buffer conversion
@@ -96,7 +100,7 @@ export async function generateAudioWithSettings(
 ): Promise<Buffer> {
   const client = getElevenLabsClient();
   const voiceId = options.voiceId || getVoiceId();
-  const modelId = options.modelId || "eleven_v3";
+  const modelId = options.modelId || DEFAULT_MODEL_ID;
   const outputFormat = options.outputFormat || "mp3_44100_128";
 
   const audioStream = await client.textToSpeech.convert(voiceId, {
