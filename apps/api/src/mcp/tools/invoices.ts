@@ -15,6 +15,7 @@ import {
   getNextInvoiceNumber,
   updateInvoice,
 } from "@midday/db/queries";
+import { UI_RESOURCE_URIS } from "@midday/mcp-ui/apps";
 import { z } from "zod";
 import { READ_ONLY_ANNOTATIONS, type RegisterTools, hasScope } from "../types";
 
@@ -113,6 +114,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           "Get a summary of invoices including total amounts and counts by status",
         inputSchema: invoiceSummarySchema.shape,
         annotations: READ_ONLY_ANNOTATIONS,
+        _meta: { ui: { resourceUri: UI_RESOURCE_URIS.invoiceSummary } },
       },
       async (params) => {
         const result = await getInvoiceSummary(db, {
@@ -121,7 +123,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         });
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+          _meta: { ui: { resourceUri: UI_RESOURCE_URIS.invoiceSummary } },
         };
       },
     );

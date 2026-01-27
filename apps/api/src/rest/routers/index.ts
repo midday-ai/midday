@@ -10,6 +10,7 @@ import { inboxRouter } from "./inbox";
 import { invoicePaymentsRouter } from "./invoice-payments";
 import { invoicesRouter } from "./invoices";
 import { mcpRouter } from "./mcp";
+import { mcpUIRouter } from "./mcp-ui";
 import { notificationsRouter } from "./notifications";
 import oauthRouter from "./oauth";
 import { reportsRouter } from "./reports";
@@ -31,6 +32,7 @@ routers.route("/webhook", webhookRouter);
 routers.route("/files", filesRouter);
 routers.route("/apps", appsRouter);
 routers.route("/invoice-payments", invoicePaymentsRouter);
+routers.route("/mcp-ui", mcpUIRouter);
 
 // Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);

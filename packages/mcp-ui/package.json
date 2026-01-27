@@ -1,0 +1,54 @@
+{
+  "name": "@midday/mcp-ui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "build": "vite build",
+    "build:bundles": "rm -rf dist/bundles && for chart in spending-chart cash-flow-chart burn-rate-chart revenue-chart profit-chart runway-gauge forecast-chart growth-rate-chart profit-margin-chart invoice-status-chart; do CHART=$chart vite build; done",
+    "dev": "vite",
+    "dev:watch": "vite build --watch",
+    "clean": "rm -rf dist node_modules .turbo",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./components": "./src/components/index.ts",
+    "./apps": "./src/apps/index.ts",
+    "./apps/resource-factory": "./src/apps/resource-factory.ts",
+    "./apps/mcp-handler": "./src/apps/mcp-handler.ts",
+    "./utils": "./src/utils/index.ts",
+    "./styles": "./src/styles/globals.css"
+  },
+  "dependencies": {
+    "@mcp-ui/server": "^6.0.0",
+    "@modelcontextprotocol/ext-apps": "^1.0.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "recharts": "2.15.3",
+    "tailwind-merge": "2.5.3"
+  },
+  "devDependencies": {
+    "@midday/tsconfig": "workspace:*",
+    "@types/node": "^24.10.1",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.9.3",
+    "vite": "^6.3.5",
+    "vite-plugin-singlefile": "^2.0.3"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  }
+}

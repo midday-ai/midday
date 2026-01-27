@@ -27,7 +27,16 @@ import {
   getSpending,
   getTaxSummary,
 } from "@midday/db/queries";
+import { UI_RESOURCE_URIS } from "@midday/mcp-ui/apps";
 import { READ_ONLY_ANNOTATIONS, type RegisterTools, hasScope } from "../types";
+
+// Helper to create tool result with UI metadata
+function createUIResult(data: unknown, resourceUri: string) {
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
+    _meta: { ui: { resourceUri } },
+  };
+}
 
 export const registerReportTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
@@ -45,6 +54,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         "Get revenue reports for a date range. Returns total revenue with comparisons to previous period.",
       inputSchema: getRevenueSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
+      _meta: { ui: { resourceUri: UI_RESOURCE_URIS.revenue } },
     },
     async (params) => {
       const result = await getReports(db, {
@@ -56,9 +66,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         revenueType: params.revenueType,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
+      return createUIResult(result, UI_RESOURCE_URIS.revenue);
     },
   );
 
@@ -70,6 +78,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         "Get profit reports for a date range. Returns profit with revenue minus expenses.",
       inputSchema: getProfitSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
+      _meta: { ui: { resourceUri: UI_RESOURCE_URIS.profit } },
     },
     async (params) => {
       const result = await getReports(db, {
@@ -81,9 +90,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         revenueType: params.revenueType,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
+      return createUIResult(result, UI_RESOURCE_URIS.profit);
     },
   );
 
@@ -95,6 +102,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         "Get burn rate (monthly spending) for a date range. Useful for understanding cash outflow.",
       inputSchema: getBurnRateSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
+      _meta: { ui: { resourceUri: UI_RESOURCE_URIS.burnRate } },
     },
     async (params) => {
       const result = await getBurnRate(db, {
@@ -104,9 +112,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         currency: params.currency,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
+      return createUIResult(result, UI_RESOURCE_URIS.burnRate);
     },
   );
 
@@ -118,6 +124,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         "Get runway estimate (months of cash remaining based on burn rate). Critical for financial planning.",
       inputSchema: getRunwaySchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
+      _meta: { ui: { resourceUri: UI_RESOURCE_URIS.runway } },
     },
     async (params) => {
       const result = await getRunway(db, {
@@ -127,9 +134,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         currency: params.currency,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
+      return createUIResult(result, UI_RESOURCE_URIS.runway);
     },
   );
 
@@ -164,6 +169,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         "Get spending breakdown by category for a date range. Shows where money is being spent.",
       inputSchema: getSpendingSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
+      _meta: { ui: { resourceUri: UI_RESOURCE_URIS.spending } },
     },
     async (params) => {
       const result = await getSpending(db, {
@@ -173,9 +179,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         currency: params.currency,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
+      return createUIResult(result, UI_RESOURCE_URIS.spending);
     },
   );
 
@@ -213,6 +217,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         "Get revenue or profit growth rate comparing current period to previous period. Supports monthly, quarterly, or yearly comparisons.",
       inputSchema: getGrowthRateSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
+      _meta: { ui: { resourceUri: UI_RESOURCE_URIS.growthRate } },
     },
     async (params) => {
       const result = await getGrowthRate(db, {
@@ -225,9 +230,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         period: params.period,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
+      return createUIResult(result, UI_RESOURCE_URIS.growthRate);
     },
   );
 
@@ -239,6 +242,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         "Get profit margin analysis for a date range. Shows profit as percentage of revenue with monthly breakdown and trend.",
       inputSchema: getProfitMarginSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
+      _meta: { ui: { resourceUri: UI_RESOURCE_URIS.profitMargin } },
     },
     async (params) => {
       const result = await getProfitMargin(db, {
@@ -249,9 +253,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         revenueType: params.revenueType,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
+      return createUIResult(result, UI_RESOURCE_URIS.profitMargin);
     },
   );
 
@@ -263,6 +265,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         "Get cash flow analysis showing income vs expenses over time. Includes monthly breakdown and net cash flow.",
       inputSchema: getCashFlowSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
+      _meta: { ui: { resourceUri: UI_RESOURCE_URIS.cashFlow } },
     },
     async (params) => {
       const result = await getCashFlow(db, {
@@ -273,9 +276,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         period: params.period,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
+      return createUIResult(result, UI_RESOURCE_URIS.cashFlow);
     },
   );
 
@@ -310,6 +311,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         "Get revenue forecast based on historical data, outstanding invoices, billable hours, and scheduled invoices. Projects future revenue.",
       inputSchema: getRevenueForecastSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
+      _meta: { ui: { resourceUri: UI_RESOURCE_URIS.forecast } },
     },
     async (params) => {
       const result = await getRevenueForecast(db, {
@@ -321,9 +323,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         revenueType: params.revenueType,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
+      return createUIResult(result, UI_RESOURCE_URIS.forecast);
     },
   );
 

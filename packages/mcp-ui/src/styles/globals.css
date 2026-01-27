@@ -1,0 +1,150 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base colors */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --border: 0 0% 90%;
+    
+    /* Chart colors - Light mode */
+    --chart-grid-stroke: #e6e6e6;
+    --chart-axis-text: #707070;
+    --chart-reference-line-stroke: #e6e6e6;
+    --chart-reference-label: #707070;
+    --chart-actual-line: #000000;
+    --chart-forecast-line: #666666;
+    --chart-tooltip-cursor: #666666;
+    --chart-pattern-bg: white;
+    --chart-pattern-stroke: #707070;
+    --chart-bar-fill: #000000;
+    --chart-bar-fill-secondary: #6666664d;
+    --chart-gradient-start: #707070;
+    --chart-gradient-end: #000000;
+    --chart-line-secondary: #666666;
+    
+    /* Status colors */
+    --positive-color: #22c55e;
+    --negative-color: #ef4444;
+    --warning-color: #f59e0b;
+  }
+
+  .dark,
+  [data-theme="dark"] {
+    /* Base colors */
+    --background: 0 0% 5%;
+    --foreground: 0 0% 98%;
+    --muted: 0 0% 11%;
+    --muted-foreground: 0 0% 38%;
+    --border: 0 0% 11%;
+    
+    /* Chart colors - Dark mode */
+    --chart-grid-stroke: #1d1d1d;
+    --chart-axis-text: #666666;
+    --chart-reference-line-stroke: #333333;
+    --chart-reference-label: #666666;
+    --chart-actual-line: #ffffff;
+    --chart-forecast-line: #999999;
+    --chart-tooltip-cursor: #999999;
+    --chart-pattern-bg: #0c0c0c;
+    --chart-pattern-stroke: #666666;
+    --chart-bar-fill: white;
+    --chart-bar-fill-secondary: #6666664d;
+    --chart-gradient-start: #666666;
+    --chart-gradient-end: #ffffff;
+    --chart-line-secondary: #999999;
+    
+    /* Status colors */
+    --positive-color: #4ade80;
+    --negative-color: #f87171;
+    --warning-color: #fbbf24;
+  }
+  
+  /* Auto dark mode based on system preference */
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light):not([data-theme="light"]) {
+      --background: 0 0% 5%;
+      --foreground: 0 0% 98%;
+      --muted: 0 0% 11%;
+      --muted-foreground: 0 0% 38%;
+      --border: 0 0% 11%;
+      
+      --chart-grid-stroke: #1d1d1d;
+      --chart-axis-text: #666666;
+      --chart-reference-line-stroke: #333333;
+      --chart-reference-label: #666666;
+      --chart-actual-line: #ffffff;
+      --chart-forecast-line: #999999;
+      --chart-tooltip-cursor: #999999;
+      --chart-pattern-bg: #0c0c0c;
+      --chart-pattern-stroke: #666666;
+      --chart-bar-fill: white;
+      --chart-bar-fill-secondary: #6666664d;
+      --chart-gradient-start: #666666;
+      --chart-gradient-end: #ffffff;
+      --chart-line-secondary: #999999;
+      
+      --positive-color: #4ade80;
+      --negative-color: #f87171;
+      --warning-color: #fbbf24;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Chart tooltip styling */
+.chart-tooltip {
+  @apply p-2 text-[10px] border bg-white dark:bg-[#0c0c0c] border-gray-200 dark:border-[#1d1d1d] text-black dark:text-white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.chart-tooltip-label {
+  @apply mb-1 text-gray-500 dark:text-[#666666];
+}
+
+.chart-tooltip-value {
+  @apply text-black dark:text-white;
+}
+
+/* Chart legend styling */
+.chart-legend {
+  @apply flex gap-4 items-center;
+}
+
+.chart-legend-item {
+  @apply flex gap-2 items-center;
+}
+
+.chart-legend-color {
+  @apply w-2 h-2;
+}
+
+.chart-legend-label {
+  @apply text-[12px] text-gray-500 dark:text-[#666666];
+}
+
+/* Loading state */
+.chart-loading {
+  @apply flex items-center justify-center h-full text-muted-foreground text-sm;
+}
+
+/* Error state */
+.chart-error {
+  @apply flex items-center justify-center h-full text-red-500 text-sm;
+}
