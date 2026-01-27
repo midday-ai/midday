@@ -2,7 +2,11 @@
 
 import type { ArtifactStage, ArtifactType } from "@/lib/artifact-config";
 import { getSectionFromStage } from "@/lib/artifact-config";
-import { extractBankAccountRequired } from "@/lib/chat-utils";
+import {
+  extractBankAccountRequired,
+  extractInsightData,
+  hasInsightToolRunning,
+} from "@/lib/chat-utils";
 import type { AgentStatus } from "@/types/agents";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { useDataPart } from "@ai-sdk-tools/store";
@@ -13,6 +17,7 @@ interface ChatStatusResult {
   agentStatus: AgentStatus | null;
   currentToolCall: string | null;
   hasTextContent: boolean;
+  hasInsightData: boolean;
   artifactStage: ArtifactStage | null;
   artifactType: ArtifactType | null;
   currentSection: string | null;
@@ -58,6 +63,7 @@ export function useChatStatus(
         agentStatus: agentStatusData,
         currentToolCall: null,
         hasTextContent: false,
+        hasInsightData: false,
         artifactStage,
         artifactType,
         currentSection,
@@ -71,6 +77,7 @@ export function useChatStatus(
         agentStatus: agentStatusData,
         currentToolCall: null,
         hasTextContent: false,
+        hasInsightData: false,
         artifactStage,
         artifactType,
         currentSection,
@@ -87,6 +94,12 @@ export function useChatStatus(
       const textPart = part as { text?: string };
       return textPart.text?.trim();
     });
+
+    // Check if we have insight data (should hide loading indicator when insight is rendering)
+    const hasInsightData = extractInsightData(lastMessage.parts) !== null;
+
+    // Check if insight tool is running (hide agent status as soon as tool starts)
+    const isInsightToolActive = hasInsightToolRunning(lastMessage.parts);
 
     // Find active tool calls - check ALL tool-related parts
     const allParts = lastMessage.parts;
@@ -138,16 +151,21 @@ export function useChatStatus(
       _toolMetadata = toolWithMeta;
     }
 
-    // Hide tool when text starts streaming or when complete
-    if (currentToolCall && (hasTextContent || status === "ready")) {
+    // Hide tool indicator when content is streaming or complete
+    if (
+      currentToolCall &&
+      (hasTextContent || hasInsightData || status === "ready")
+    ) {
       currentToolCall = null;
       _toolMetadata = null;
     }
 
-    // Hide agent status when streaming text, when complete, when tool is showing, or when bank account is required
+    // Hide agent status when content is available or tool is showing
     const agentStatus =
       status === "ready" ||
       hasTextContent ||
+      hasInsightData ||
+      isInsightToolActive ||
       currentToolCall ||
       bankAccountRequired
         ? null
@@ -160,6 +178,7 @@ export function useChatStatus(
       agentStatus,
       currentToolCall: finalToolCall,
       hasTextContent,
+      hasInsightData,
       artifactStage,
       artifactType,
       currentSection,

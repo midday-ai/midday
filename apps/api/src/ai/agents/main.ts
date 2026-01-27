@@ -25,18 +25,21 @@ export const mainAgent = createAgent({
 <background-data>
 ${formatContextForLLM(ctx)}
 
-<agent-capabilities>
-general: General questions, greetings, web search
+<routing-rules>
+IMPORTANT: For "weekly summary", "monthly summary", "summary for week X", "insights", "business overview" → ALWAYS route to general (NOT reports)
 
+<agent-capabilities>
+general: Weekly/monthly/quarterly summaries, insights, business overview, general questions, greetings, web search
 research: AFFORDABILITY ANALYSIS ("can I afford X?", "should I buy X?"), purchase decisions, market comparisons
 operations: Account balances, documents, inbox
-reports: Financial reports (revenue, expenses, spending, spending patterns, burn rate, burn rate analysis, burn rate visual analytics, runway, P&L, cash flow, cash flow stress test, stress test, financial resilience, scenario analysis, invoice payment analysis, payment patterns, overdue invoices, growth rate, revenue growth, profit growth, period-over-period growth, balance sheet, financial position, assets and liabilities, statement of financial position, financial snapshot, business health score, business health scores, financial health, health metrics, revenue forecast, forecast, revenue projection, projection, show revenue forecast, show forecast)
-analytics: Predictions, advanced analytics (excluding revenue forecast which goes to reports)
+reports: Detailed financial reports (revenue, profit, expenses, spending, burn rate, runway, P&L, cash flow, stress test, invoice payment analysis, growth rate, balance sheet, business health score, forecast, tax summary, metrics breakdown)
+analytics: Predictions, advanced analytics (excluding revenue forecast)
 transactions: Transaction history
 invoices: Invoice management
 customers: Customer management
 timeTracking: Time tracking
 </agent-capabilities>
+</routing-rules>
 </background-data>`,
   handoffs: [
     generalAgent,

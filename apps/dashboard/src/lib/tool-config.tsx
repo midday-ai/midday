@@ -26,6 +26,7 @@ import {
   Wallet,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
+import { MdOutlineInsights } from "react-icons/md";
 
 export type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -153,6 +154,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     name: "Business Health Score",
     icon: PieChart,
     description: "Analyzing business health",
+  },
+  getInsights: {
+    name: "Insights",
+    icon: MdOutlineInsights,
+    description: "Loading your insights",
   },
   cashFlowForecast: {
     name: "Cash Flow Forecast",

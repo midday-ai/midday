@@ -65,7 +65,7 @@ export function useNotifications() {
   // Real-time subscription for activities filtered by user_id
   useRealtime({
     channelName: "user-notifications",
-    event: "INSERT",
+    events: ["INSERT"],
     table: "activities",
     filter: `user_id=eq.${user?.id}`,
     onEvent: (payload) => {

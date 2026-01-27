@@ -1,5 +1,6 @@
 "use client";
 
+import { AudioPlayer } from "@/components/chat/audio-player";
 import {
   ChatHistoryButton,
   ChatHistoryDropdown,
@@ -317,8 +318,9 @@ function ChatInputContent() {
           padding: containerPadding,
           flexDirection: containerFlexDirection,
         }}
-        className="!bg-[rgba(247,247,247,0.85)] dark:!bg-[rgba(19,19,19,0.7)] backdrop-blur-lg flex"
+        className="!bg-[rgba(247,247,247,0.85)] dark:!bg-[rgba(19,19,19,0.7)] backdrop-blur-lg flex relative"
       >
+        <AudioPlayer />
         <PromptInput
           onSubmit={handleSubmit}
           globalDrop

@@ -94,6 +94,7 @@ export default {
       transactions: "Transactions",
       invoices: "Invoices",
       inbox: "Inbox",
+      insights: "Insights",
     },
     transactions_created: {
       name: "New Transactions",
@@ -291,6 +292,12 @@ export default {
         '"{documentName}" ({documentAmount}) looks like it matches "{transactionName}" ({transactionAmount}) across currencies — click to review',
       high_confidence_names:
         '"{documentName}" looks like it matches "{transactionName}" across currencies — click to review',
+    },
+    insight_ready: {
+      name: "Weekly Insights",
+      description: "Get notified when your weekly business insights are ready",
+      title: "Your weekly insights are ready",
+      with_period: "Your {periodLabel} insights are ready",
     },
     default: {
       title: "New activity detected",

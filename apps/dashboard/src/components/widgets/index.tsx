@@ -1,6 +1,7 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useInsightFromUrl } from "@/hooks/use-insight-from-url";
 import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { usePrefetchMetrics } from "@/hooks/use-prefetch-metrics";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
@@ -42,6 +43,9 @@ function WidgetsContent() {
 
   // Prefetch metrics data in background when on overview tab
   usePrefetchMetrics();
+
+  // Handle ?insight= query parameter from email links
+  useInsightFromUrl();
 
   if (isChatPage) {
     return null;

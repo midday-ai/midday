@@ -69,6 +69,7 @@ export const getToolMessage = (toolName: string | null) => {
     // Analytics tools
     businessHealth: "Computing your business health score...",
     getBusinessHealthScore: "Computing your business health score...",
+    getInsights: "Loading your insights...",
     cashFlowForecast: "Projecting your future cash flow...",
     stressTest: "Running financial stress scenarios...",
     getCashFlowStressTest: "Running financial stress scenarios...",

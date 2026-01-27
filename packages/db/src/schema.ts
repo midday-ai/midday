@@ -259,6 +259,7 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "transaction_category_created",
   "transactions_exported",
   "customer_created",
+  "insight_ready",
 ]);
 
 export const activitySourceEnum = pgEnum("activity_source", [
@@ -270,6 +271,20 @@ export const activityStatusEnum = pgEnum("activity_status", [
   "unread",
   "read",
   "archived",
+]);
+
+export const insightPeriodTypeEnum = pgEnum("insight_period_type", [
+  "weekly",
+  "monthly",
+  "quarterly",
+  "yearly",
+]);
+
+export const insightStatusEnum = pgEnum("insight_status", [
+  "pending",
+  "generating",
+  "completed",
+  "failed",
 ]);
 
 export const documentTagEmbeddings = pgTable(
@@ -523,6 +538,8 @@ export const trackerEntries = pgTable(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
     ),
+    // Composite index for insights activity date range queries
+    index("tracker_entries_team_date_idx").on(table.teamId, table.date),
     foreignKey({
       columns: [table.assignedId],
       foreignColumns: [users.id],
@@ -938,6 +955,13 @@ export const invoices = pgTable(
       "btree",
       table.templateId.asc().nullsLast().op("uuid_ops"),
     ),
+    // Composite indexes for insights activity queries
+    index("invoices_team_sent_at_idx").on(table.teamId, table.sentAt),
+    index("invoices_team_status_paid_at_idx").on(
+      table.teamId,
+      table.status,
+      table.paidAt,
+    ),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [users.id],
@@ -1077,6 +1101,9 @@ export const customers = pgTable(
     index("idx_customers_enrichment_status").on(table.enrichmentStatus),
     index("idx_customers_website").on(table.website),
     index("idx_customers_industry").on(table.industry),
+    // Team and date indexes for insights activity queries
+    index("customers_team_id_idx").on(table.teamId),
+    index("customers_team_created_at_idx").on(table.teamId, table.createdAt),
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
@@ -2199,6 +2226,12 @@ export const inbox = pgTable(
     index("inbox_grouped_inbox_id_idx").using(
       "btree",
       table.groupedInboxId.asc().nullsLast().op("uuid_ops"),
+    ),
+    // Composite index for insights activity queries
+    index("inbox_team_status_created_at_idx").on(
+      table.teamId,
+      table.status,
+      table.createdAt,
     ),
     foreignKey({
       columns: [table.attachmentId],
@@ -3730,6 +3763,232 @@ export const accountingSyncRecordsRelations = relations(
     team: one(teams, {
       fields: [accountingSyncRecords.teamId],
       references: [teams.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// INSIGHTS - AI-generated business insights (weekly, monthly, quarterly, yearly)
+// ============================================================================
+
+// Type definitions for JSONB columns
+export type InsightMetric = {
+  type: string;
+  label: string;
+  value: number;
+  previousValue: number;
+  change: number; // percentage
+  changeDirection: "up" | "down" | "flat";
+  unit?: string;
+  historicalContext?: string; // "Highest since October"
+};
+
+export type InsightAnomaly = {
+  type: string;
+  severity: "info" | "warning" | "alert";
+  message: string;
+  metricType?: string;
+};
+
+export type ExpenseAnomaly = {
+  type: "category_spike" | "new_category" | "category_decrease";
+  severity: "info" | "warning" | "alert";
+  categoryName: string;
+  categorySlug: string;
+  currentAmount: number;
+  previousAmount: number;
+  change: number; // percentage change
+  currency: string;
+  message: string;
+  tip?: string; // actionable tip for the user
+};
+
+export type InsightMilestone = {
+  type: string;
+  description: string;
+  achievedAt: string;
+};
+
+export type InsightActivity = {
+  invoicesSent: number;
+  invoicesPaid: number;
+  invoicesOverdue: number;
+  overdueAmount?: number;
+  hoursTracked: number;
+  largestPayment?: { customer: string; amount: number };
+  newCustomers: number;
+  receiptsMatched: number;
+  transactionsCategorized: number;
+  // Upcoming scheduled/recurring invoices
+  upcomingInvoices?: {
+    count: number;
+    totalAmount: number;
+    nextDueDate?: string;
+    items?: Array<{
+      customerName: string;
+      amount: number;
+      scheduledAt: string;
+      frequency?: string;
+    }>;
+  };
+};
+
+// Forward-looking predictions stored for follow-through in next insight
+export type InsightPredictions = {
+  // Invoices due next week
+  invoicesDue?: {
+    count: number;
+    totalAmount: number;
+    currency: string;
+  };
+  // Current streak info to track if maintained
+  streakAtRisk?: {
+    type: string;
+    count: number;
+  };
+  // Any other forward-looking items
+  notes?: string[];
+};
+
+export type InsightContent = {
+  title: string;
+  summary: string;
+  story: string;
+  actions: Array<{
+    text: string;
+    type?: string;
+    entityType?: "invoice" | "project" | "customer" | "transaction";
+    entityId?: string;
+  }>;
+};
+
+export const insights = pgTable(
+  "insights",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, { onDelete: "cascade" }),
+
+    // Flexible period definition
+    periodType: insightPeriodTypeEnum("period_type").notNull(),
+    periodStart: timestamp("period_start", { withTimezone: true }).notNull(),
+    periodEnd: timestamp("period_end", { withTimezone: true }).notNull(),
+    periodYear: smallint("period_year").notNull(),
+    periodNumber: smallint("period_number").notNull(), // Week 1-53, Month 1-12, Quarter 1-4
+
+    status: insightStatusEnum().default("pending").notNull(),
+
+    // Selected 4 key metrics (dynamically chosen)
+    selectedMetrics: jsonb("selected_metrics").$type<InsightMetric[]>(),
+
+    // Full metrics snapshot (for drill-down)
+    allMetrics: jsonb("all_metrics").$type<Record<string, InsightMetric>>(),
+
+    // Detected anomalies and patterns
+    anomalies: jsonb().$type<InsightAnomaly[]>(),
+
+    // Expense category anomalies (spikes, new categories, etc.)
+    expenseAnomalies: jsonb("expense_anomalies").$type<ExpenseAnomaly[]>(),
+
+    // Streaks and milestones
+    milestones: jsonb().$type<InsightMilestone[]>(),
+
+    // Activity context
+    activity: jsonb().$type<InsightActivity>(),
+
+    currency: varchar({ length: 3 }).notNull(),
+
+    // AI-generated title (for card headers and email subjects)
+    title: text(),
+
+    // AI-generated content (relief-first structure)
+    content: jsonb().$type<InsightContent>(),
+
+    // Forward-looking predictions for follow-through tracking
+    predictions: jsonb().$type<InsightPredictions>(),
+
+    // Audio narration storage path: {teamId}/insights/{insightId}.mp3
+    audioPath: text("audio_path"),
+
+    generatedAt: timestamp("generated_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("insights_team_period_unique").on(
+      table.teamId,
+      table.periodType,
+      table.periodYear,
+      table.periodNumber,
+    ),
+    index("insights_team_id_idx").on(table.teamId),
+    index("insights_team_period_type_idx").on(
+      table.teamId,
+      table.periodType,
+      table.generatedAt.desc(),
+    ),
+    pgPolicy("Team members can view their insights", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+    }),
+  ],
+);
+
+export const insightsRelations = relations(insights, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [insights.teamId],
+    references: [teams.id],
+  }),
+  userStatuses: many(insightUserStatus),
+}));
+
+// Per-user insight interaction tracking (read/dismiss state)
+export const insightUserStatus = pgTable(
+  "insight_user_status",
+  {
+    insightId: uuid("insight_id")
+      .notNull()
+      .references(() => insights.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    dismissedAt: timestamp("dismissed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.insightId, table.userId] }),
+    index("insight_user_status_user_idx").on(table.userId),
+    index("insight_user_status_insight_idx").on(table.insightId),
+    pgPolicy("Users can manage their own insight status", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+    }),
+  ],
+);
+
+export const insightUserStatusRelations = relations(
+  insightUserStatus,
+  ({ one }) => ({
+    insight: one(insights, {
+      fields: [insightUserStatus.insightId],
+      references: [insights.id],
+    }),
+    user: one(users, {
+      fields: [insightUserStatus.userId],
+      references: [users.id],
     }),
   }),
 );

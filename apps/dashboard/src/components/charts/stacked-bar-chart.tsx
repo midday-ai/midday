@@ -100,7 +100,7 @@ export function StackedBarChart({
     <div className="w-full relative">
       {/* Chart */}
       <div style={{ height }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" debounce={1}>
           <ComposedChart
             data={formattedData}
             barGap={15}

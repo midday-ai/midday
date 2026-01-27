@@ -122,8 +122,8 @@ export function ProfitAnalysisWidget() {
       onClick={handleViewAnalysis}
     >
       {chartData.length > 0 ? (
-        <div className="h-16 w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="w-full">
+          <ResponsiveContainer width="100%" height={64}>
             <ComposedChart
               data={chartData}
               margin={{ top: 0, right: 0, left: 0, bottom: 0 }}

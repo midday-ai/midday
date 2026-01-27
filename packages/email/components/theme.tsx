@@ -58,6 +58,13 @@ export const getEmailDarkModeCSS = () => {
       .email-border {
         border-color: ${emailTheme.dark.border} !important;
       }
+      .email-highlight {
+        background-color: #1a1a1a !important;
+        border-color: ${emailTheme.dark.border} !important;
+      }
+      .email-highlight-text {
+        color: ${emailTheme.dark.foreground} !important;
+      }
       
       /* Image swapping for dark mode */
       .dark-mode-hide {
@@ -98,6 +105,17 @@ export const getEmailDarkModeCSS = () => {
         color: ${emailTheme.dark.accent} !important;
         border-color: ${emailTheme.dark.accent} !important;
       }
+      .gmail_dark .email-highlight,
+      .gmail_dark_theme .email-highlight,
+      [data-darkmode="true"] .email-highlight {
+        background-color: #1a1a1a !important;
+        border-color: ${emailTheme.dark.border} !important;
+      }
+      .gmail_dark .email-highlight-text,
+      .gmail_dark_theme .email-highlight-text,
+      [data-darkmode="true"] .email-highlight-text {
+        color: ${emailTheme.dark.foreground} !important;
+      }
     }
 
     /* Gmail Desktop conditional dark mode targeting */
@@ -125,6 +143,15 @@ export const getEmailDarkModeCSS = () => {
         color: ${emailTheme.dark.accent} !important;
         border-color: ${emailTheme.dark.accent} !important;
       }
+      div[style*="background"] .email-highlight,
+      .ii .email-highlight {
+        background-color: #1a1a1a !important;
+        border-color: ${emailTheme.dark.border} !important;
+      }
+      div[style*="background"] .email-highlight-text,
+      .ii .email-highlight-text {
+        color: ${emailTheme.dark.foreground} !important;
+      }
     }
 
     /* Outlook Web App and Outlook mobile targeting */
@@ -137,6 +164,13 @@ export const getEmailDarkModeCSS = () => {
     [data-ogsc] .email-accent {
       color: ${emailTheme.dark.accent} !important;
       border-color: ${emailTheme.dark.accent} !important;
+    }
+    [data-ogsc] .email-highlight {
+      background-color: #1a1a1a !important;
+      border-color: ${emailTheme.dark.border} !important;
+    }
+    [data-ogsc] .email-highlight-text {
+      color: ${emailTheme.dark.foreground} !important;
     }
     [data-ogsc] .dark-mode-hide {
       display: none !important;

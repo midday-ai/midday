@@ -1,7 +1,101 @@
 import type { Database } from "@db/client";
-import { customers, invoiceStatusEnum, invoices } from "@db/schema";
+import { customers, invoices } from "@db/schema";
 import { parseISO } from "date-fns";
 import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
+
+/**
+ * Revenue concentration data for a period
+ */
+export type RevenueConcentration = {
+  topCustomer: {
+    id: string;
+    name: string;
+    revenue: number;
+    percentage: number;
+  } | null;
+  totalRevenue: number;
+  customerCount: number;
+  isConcentrated: boolean; // >50% from one customer
+  currency: string;
+};
+
+export type GetRevenueConcentrationParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  currency: string;
+};
+
+/**
+ * Calculate revenue concentration for a period.
+ * Returns the top customer and their share of total revenue.
+ * Warns if a single customer accounts for >50% of revenue.
+ */
+export async function getRevenueConcentration(
+  db: Database,
+  params: GetRevenueConcentrationParams,
+): Promise<RevenueConcentration> {
+  const { teamId, from, to, currency } = params;
+
+  // Get revenue by customer for the period
+  const customerRevenue = await db
+    .select({
+      customerId: customers.id,
+      customerName: customers.name,
+      revenue: sql<number>`SUM(${invoices.amount})::float`,
+    })
+    .from(invoices)
+    .innerJoin(customers, eq(invoices.customerId, customers.id))
+    .where(
+      and(
+        eq(invoices.teamId, teamId),
+        gte(invoices.paidAt, from),
+        lte(invoices.paidAt, to),
+        eq(invoices.status, "paid"),
+        eq(invoices.currency, currency),
+      ),
+    )
+    .groupBy(customers.id, customers.name)
+    .orderBy(sql`SUM(${invoices.amount}) DESC`);
+
+  if (customerRevenue.length === 0) {
+    return {
+      topCustomer: null,
+      totalRevenue: 0,
+      customerCount: 0,
+      isConcentrated: false,
+      currency,
+    };
+  }
+
+  const totalRevenue = customerRevenue.reduce((sum, c) => sum + c.revenue, 0);
+  const topCustomerData = customerRevenue[0];
+
+  if (!topCustomerData) {
+    return {
+      topCustomer: null,
+      totalRevenue,
+      customerCount: customerRevenue.length,
+      isConcentrated: false,
+      currency,
+    };
+  }
+
+  const topCustomerPercentage = (topCustomerData.revenue / totalRevenue) * 100;
+
+  return {
+    topCustomer: {
+      id: topCustomerData.customerId,
+      name: topCustomerData.customerName,
+      revenue: topCustomerData.revenue,
+      percentage: Math.round(topCustomerPercentage),
+    },
+    totalRevenue,
+    customerCount: customerRevenue.length,
+    isConcentrated: topCustomerPercentage > 50,
+    currency,
+  };
+}
 
 export type GetTopRevenueClientParams = {
   teamId: string;

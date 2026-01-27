@@ -35,6 +35,7 @@ export const createActivitySchema = z.object({
     "recurring_series_started",
     "recurring_series_paused",
     "recurring_invoice_upcoming",
+    "insight_ready",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
@@ -287,6 +288,17 @@ export const transactionsAssignedSchema = z.object({
   transactionIds: z.array(z.string()),
 });
 
+export const insightReadySchema = z.object({
+  users: z.array(userSchema),
+  insightId: z.string(),
+  periodType: z.enum(["weekly", "monthly", "quarterly", "yearly"]),
+  periodLabel: z.string(),
+  periodNumber: z.number(),
+  periodYear: z.number(),
+  title: z.string().optional(),
+  audioUrl: z.string().optional(),
+});
+
 export type UserData = z.infer<typeof userSchema>;
 export type TransactionData = z.infer<typeof transactionSchema>;
 export type InvoiceData = z.infer<typeof invoiceSchema>;
@@ -337,6 +349,7 @@ export type TransactionsCategorizedInput = z.infer<
 export type TransactionsAssignedInput = z.infer<
   typeof transactionsAssignedSchema
 >;
+export type InsightReadyInput = z.infer<typeof insightReadySchema>;
 
 // Notification types map - all available notification types with their data structures
 export type NotificationTypes = {
@@ -362,4 +375,5 @@ export type NotificationTypes = {
   recurring_series_started: RecurringSeriesStartedInput;
   recurring_series_paused: RecurringSeriesPausedInput;
   recurring_invoice_upcoming: RecurringInvoiceUpcomingInput;
+  insight_ready: InsightReadyInput;
 };

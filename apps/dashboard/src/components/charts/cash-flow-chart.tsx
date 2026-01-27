@@ -102,7 +102,7 @@ export function CashFlowChart({
 
       {/* Chart */}
       <div style={{ height }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" debounce={1}>
           <ComposedChart
             data={data}
             margin={{ top: 6, right: 6, left: -marginLeft, bottom: 6 }}

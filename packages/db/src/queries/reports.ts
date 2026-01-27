@@ -94,6 +94,8 @@ export type GetReportsParams = {
   currency?: string;
   type?: "revenue" | "profit";
   revenueType?: "gross" | "net";
+  /** When true, use exact dates instead of expanding to month boundaries. Useful for weekly insights. */
+  exactDates?: boolean;
 };
 
 interface ReportsResultItem {
@@ -110,10 +112,17 @@ export async function getProfit(db: Database, params: GetReportsParams) {
     to,
     currency: inputCurrency,
     revenueType = "net",
+    exactDates = false,
   } = params;
 
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+  // When exactDates is true, use the exact dates provided (for weekly insights)
+  // Otherwise, expand to month boundaries (for monthly reports)
+  const fromDate = exactDates
+    ? new UTCDate(parseISO(from))
+    : startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = exactDates
+    ? new UTCDate(parseISO(to))
+    : endOfMonth(new UTCDate(parseISO(to)));
 
   // Step 1: Get the target currency (cached)
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
@@ -124,6 +133,7 @@ export async function getProfit(db: Database, params: GetReportsParams) {
   // Step 3: Get Net Revenue for each month (always use net revenue for profit calculation)
   const netRevenueData = await getRevenue(db, {
     teamId,
+    exactDates,
     from,
     to,
     currency: inputCurrency,
@@ -347,10 +357,17 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
     to,
     currency: inputCurrency,
     revenueType = "gross",
+    exactDates = false,
   } = params;
 
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+  // When exactDates is true, use the exact dates provided (for weekly insights)
+  // Otherwise, expand to month boundaries (for monthly reports)
+  const fromDate = exactDates
+    ? new UTCDate(parseISO(from))
+    : startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = exactDates
+    ? new UTCDate(parseISO(to))
+    : endOfMonth(new UTCDate(parseISO(to)));
 
   // Step 1: Get the target currency (cached)
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
@@ -707,6 +724,8 @@ export type GetExpensesParams = {
   from: string;
   to: string;
   currency?: string;
+  /** When true, use exact dates instead of expanding to month boundaries. Useful for weekly insights. */
+  exactDates?: boolean;
 };
 
 interface ExpensesResultItem {
@@ -717,10 +736,22 @@ interface ExpensesResultItem {
 }
 
 export async function getExpenses(db: Database, params: GetExpensesParams) {
-  const { teamId, from, to, currency: inputCurrency } = params;
+  const {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+    exactDates = false,
+  } = params;
 
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+  // When exactDates is true, use the exact dates provided (for weekly insights)
+  // Otherwise, expand to month boundaries (for monthly reports)
+  const fromDate = exactDates
+    ? new UTCDate(parseISO(from))
+    : startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = exactDates
+    ? new UTCDate(parseISO(to))
+    : endOfMonth(new UTCDate(parseISO(to)));
 
   // Step 1: Get the target currency (cached)
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
@@ -1225,13 +1256,21 @@ export type GetSpendingForPeriodParams = {
   from: string;
   to: string;
   currency?: string;
+  /** When true, use exact dates instead of expanding to month boundaries. Useful for weekly insights. */
+  exactDates?: boolean;
 };
 
 export async function getSpendingForPeriod(
   db: Database,
   params: GetSpendingForPeriodParams,
 ) {
-  const { teamId, from, to, currency: inputCurrency } = params;
+  const {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+    exactDates = false,
+  } = params;
 
   // Use existing getExpenses function for the specified period
   const expensesData = await getExpenses(db, {
@@ -1239,6 +1278,7 @@ export async function getSpendingForPeriod(
     from,
     to,
     currency: inputCurrency,
+    exactDates,
   });
 
   // Calculate total spending across all months in the period
@@ -1763,6 +1803,8 @@ export type GetCashFlowParams = {
   to: string;
   currency?: string;
   period?: "monthly" | "quarterly";
+  /** When true, use exact dates instead of expanding to month boundaries. Useful for weekly insights. */
+  exactDates?: boolean;
 };
 
 export async function getCashFlow(db: Database, params: GetCashFlowParams) {
@@ -1772,10 +1814,17 @@ export async function getCashFlow(db: Database, params: GetCashFlowParams) {
     to,
     currency: inputCurrency,
     period = "monthly",
+    exactDates = false,
   } = params;
 
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+  // When exactDates is true, use the exact dates provided (for weekly insights)
+  // Otherwise, expand to month boundaries (for monthly reports)
+  const fromDate = exactDates
+    ? new UTCDate(parseISO(from))
+    : startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = exactDates
+    ? new UTCDate(parseISO(to))
+    : endOfMonth(new UTCDate(parseISO(to)));
 
   // Get target currency
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);

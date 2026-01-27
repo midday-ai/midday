@@ -147,7 +147,7 @@ export function RunwayChart({
 
       {/* Chart */}
       <div style={{ height }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" debounce={1}>
           <ComposedChart
             data={data}
             margin={{

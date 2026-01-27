@@ -9,6 +9,7 @@ export const SCOPES = [
   "documents.write",
   "inbox.read",
   "inbox.write",
+  "insights.read",
   "invoices.read",
   "invoices.write",
   "reports.read",

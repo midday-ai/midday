@@ -273,6 +273,7 @@ export type Database = {
           account_id: string;
           account_number: string | null;
           account_reference: string | null;
+          available_balance: number | null;
           balance: number | null;
           bank_connection_id: string | null;
           base_balance: number | null;
@@ -280,6 +281,7 @@ export type Database = {
           bic: string | null;
           created_at: string;
           created_by: string;
+          credit_limit: number | null;
           currency: string | null;
           enabled: boolean;
           error_details: string | null;
@@ -294,13 +296,12 @@ export type Database = {
           team_id: string;
           type: Database["public"]["Enums"]["account_type"] | null;
           wire_routing_number: string | null;
-          available_balance: number | null;
-          credit_limit: number | null;
         };
         Insert: {
           account_id: string;
           account_number?: string | null;
           account_reference?: string | null;
+          available_balance?: number | null;
           balance?: number | null;
           bank_connection_id?: string | null;
           base_balance?: number | null;
@@ -308,6 +309,7 @@ export type Database = {
           bic?: string | null;
           created_at?: string;
           created_by: string;
+          credit_limit?: number | null;
           currency?: string | null;
           enabled?: boolean;
           error_details?: string | null;
@@ -322,13 +324,12 @@ export type Database = {
           team_id: string;
           type?: Database["public"]["Enums"]["account_type"] | null;
           wire_routing_number?: string | null;
-          available_balance?: number | null;
-          credit_limit?: number | null;
         };
         Update: {
           account_id?: string;
           account_number?: string | null;
           account_reference?: string | null;
+          available_balance?: number | null;
           balance?: number | null;
           bank_connection_id?: string | null;
           base_balance?: number | null;
@@ -336,6 +337,7 @@ export type Database = {
           bic?: string | null;
           created_at?: string;
           created_by?: string;
+          credit_limit?: number | null;
           currency?: string | null;
           enabled?: boolean;
           error_details?: string | null;
@@ -350,8 +352,6 @@ export type Database = {
           team_id?: string;
           type?: Database["public"]["Enums"]["account_type"] | null;
           wire_routing_number?: string | null;
-          available_balance?: number | null;
-          credit_limit?: number | null;
         };
         Relationships: [
           {

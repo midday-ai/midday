@@ -585,16 +585,16 @@ app.openapi(
 
       // Send notification (fire and forget)
       triggerJob(
-        "invoice-notification",
+        "notification",
         {
-          type: "scheduled",
+          type: "invoice_scheduled",
           teamId,
           invoiceId: result.id,
           invoiceNumber: finalResult.invoiceNumber!,
           scheduledAt: input.scheduledAt,
           customerName: finalResult.customerName ?? undefined,
         },
-        "invoices",
+        "notifications",
       ).catch(() => {
         // Ignore notification errors - invoice was scheduled successfully
       });

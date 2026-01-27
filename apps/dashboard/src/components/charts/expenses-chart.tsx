@@ -129,7 +129,7 @@ export function ExpensesChart({
 
         {/* Pie Chart */}
         <div className="relative" style={{ height }}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" debounce={1}>
             <PieChart>
               <Pie
                 data={categoryData}
