@@ -1,8 +1,6 @@
-import { AppleSignIn } from "@/components/apple-sign-in";
-import { GithubSignIn } from "@/components/github-sign-in";
-import { GoogleSignIn } from "@/components/google-sign-in";
 import { LoginAccordion } from "@/components/login-accordion";
 import { LoginVideoBackground } from "@/components/login-video-background";
+import { OAuthSignIn } from "@/components/oauth-sign-in";
 import { OTPSignIn } from "@/components/otp-sign-in";
 import { Cookies } from "@/utils/constants";
 import { Icons } from "@midday/ui/icons";
@@ -24,44 +22,72 @@ export default async function Page() {
   let preferredSignInOption =
     device?.vendor === "Apple" ? (
       <div className="flex flex-col space-y-3 w-full">
-        <GoogleSignIn showLastUsed={preferred?.value === "google"} />
-        <AppleSignIn showLastUsed={preferred?.value === "apple"} />
+        <OAuthSignIn
+          provider="google"
+          showLastUsed={preferred?.value === "google"}
+        />
+        <OAuthSignIn
+          provider="apple"
+          showLastUsed={preferred?.value === "apple"}
+        />
       </div>
     ) : (
-      <GoogleSignIn
-        showLastUsed={!preferred?.value || preferred?.value === "google"}
-      />
+      <div className="flex flex-col space-y-3 w-full">
+        <OAuthSignIn
+          provider="google"
+          showLastUsed={!preferred?.value || preferred?.value === "google"}
+        />
+        <OAuthSignIn
+          provider="azure"
+          showLastUsed={preferred?.value === "azure"}
+        />
+      </div>
     );
 
   switch (preferred?.value) {
     case "apple":
-      preferredSignInOption = <AppleSignIn showLastUsed={true} />;
+      preferredSignInOption = <OAuthSignIn provider="apple" showLastUsed />;
       moreSignInOptions = (
         <>
-          <GoogleSignIn />
-          <GithubSignIn />
+          <OAuthSignIn provider="google" />
+          <OAuthSignIn provider="azure" />
+          <OAuthSignIn provider="github" />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
       break;
 
     case "github":
-      preferredSignInOption = <GithubSignIn showLastUsed={true} />;
+      preferredSignInOption = <OAuthSignIn provider="github" showLastUsed />;
       moreSignInOptions = (
         <>
-          <GoogleSignIn />
-          <AppleSignIn />
+          <OAuthSignIn provider="google" />
+          <OAuthSignIn provider="apple" />
+          <OAuthSignIn provider="azure" />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
       break;
 
     case "google":
-      preferredSignInOption = <GoogleSignIn showLastUsed={true} />;
+      preferredSignInOption = <OAuthSignIn provider="google" showLastUsed />;
       moreSignInOptions = (
         <>
-          <AppleSignIn />
-          <GithubSignIn />
+          <OAuthSignIn provider="apple" />
+          <OAuthSignIn provider="azure" />
+          <OAuthSignIn provider="github" />
+          <OTPSignIn className="border-t-[1px] border-border pt-8" />
+        </>
+      );
+      break;
+
+    case "azure":
+      preferredSignInOption = <OAuthSignIn provider="azure" showLastUsed />;
+      moreSignInOptions = (
+        <>
+          <OAuthSignIn provider="google" />
+          <OAuthSignIn provider="apple" />
+          <OAuthSignIn provider="github" />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
@@ -71,9 +97,10 @@ export default async function Page() {
       preferredSignInOption = <OTPSignIn />;
       moreSignInOptions = (
         <>
-          <GoogleSignIn />
-          <AppleSignIn />
-          <GithubSignIn />
+          <OAuthSignIn provider="google" />
+          <OAuthSignIn provider="apple" />
+          <OAuthSignIn provider="azure" />
+          <OAuthSignIn provider="github" />
         </>
       );
       break;
@@ -82,15 +109,16 @@ export default async function Page() {
       if (device?.vendor === "Apple") {
         moreSignInOptions = (
           <>
-            <GithubSignIn />
+            <OAuthSignIn provider="azure" />
+            <OAuthSignIn provider="github" />
             <OTPSignIn className="border-t-[1px] border-border pt-8" />
           </>
         );
       } else {
         moreSignInOptions = (
           <>
-            <AppleSignIn />
-            <GithubSignIn />
+            <OAuthSignIn provider="apple" />
+            <OAuthSignIn provider="github" />
             <OTPSignIn className="border-t-[1px] border-border pt-8" />
           </>
         );

@@ -36,9 +36,12 @@ export function AmountRange() {
   const [minAmount, setMinAmount] = useState<string>(
     amountRange?.[0]?.toString() ?? "",
   );
-  const [maxAmount, setMaxAmount] = useState<string>(
-    amountRange?.[1]?.toString() ?? "",
-  );
+  const [maxAmount, setMaxAmount] = useState<string>(() => {
+    const max = amountRange?.[1];
+    // Don't display the sentinel value used for "no max" filtering
+    if (max === Number.MAX_SAFE_INTEGER) return "";
+    return max?.toString() ?? "";
+  });
 
   const handleApplyFilters = () => {
     // Set type filter
