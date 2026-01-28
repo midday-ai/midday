@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 import { HeaderIntegrationsPreview } from "./header-integrations-preview";
 
 interface HeaderProps {
@@ -700,16 +701,38 @@ export function Header({
             <button
               type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+              className="relative transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-primary hover:text-primary/80 xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
               style={{
                 WebkitTapHighlightColor: "transparent",
               }}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             >
-              {isMenuOpen ? (
-                <Icons.Close className="w-5 h-5" />
-              ) : (
-                <Icons.Menu className="w-5 h-5" />
-              )}
+              <div className="relative size-5 flex flex-col justify-center items-center">
+                <motion.span
+                  className="absolute w-4 h-[1.5px] bg-current rounded-none"
+                  animate={{
+                    rotate: isMenuOpen ? 45 : 0,
+                    y: isMenuOpen ? 0 : -4.5,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                />
+                <motion.span
+                  className="absolute w-4 h-[1.5px] bg-current rounded-none"
+                  animate={{
+                    opacity: isMenuOpen ? 0 : 1,
+                    scaleX: isMenuOpen ? 0 : 1,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                />
+                <motion.span
+                  className="absolute w-4 h-[1.5px] bg-current rounded-none"
+                  animate={{
+                    rotate: isMenuOpen ? -45 : 0,
+                    y: isMenuOpen ? 0 : 4.5,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                />
+              </div>
             </button>
           </div>
         </div>

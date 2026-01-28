@@ -144,15 +144,15 @@ export function FloatingChatInput({ navigation }: FloatingChatInputProps) {
             >
               <div className="relative size-4 flex flex-col justify-center items-center">
                 <motion.span
-                  className="absolute w-3.5 h-[1.5px] bg-current"
+                  className="absolute w-3.5 h-[1.5px] bg-current rounded-none"
                   animate={{
                     rotate: isNavOpen ? 45 : 0,
-                    y: isNavOpen ? 0 : -3,
+                    y: isNavOpen ? 0 : -4.5,
                   }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 />
                 <motion.span
-                  className="absolute w-3.5 h-[1.5px] bg-current"
+                  className="absolute w-3.5 h-[1.5px] bg-current rounded-none"
                   animate={{
                     opacity: isNavOpen ? 0 : 1,
                     scaleX: isNavOpen ? 0 : 1,
@@ -160,10 +160,10 @@ export function FloatingChatInput({ navigation }: FloatingChatInputProps) {
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 />
                 <motion.span
-                  className="absolute w-3.5 h-[1.5px] bg-current"
+                  className="absolute w-3.5 h-[1.5px] bg-current rounded-none"
                   animate={{
                     rotate: isNavOpen ? -45 : 0,
-                    y: isNavOpen ? 0 : 3,
+                    y: isNavOpen ? 0 : 4.5,
                   }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 />
