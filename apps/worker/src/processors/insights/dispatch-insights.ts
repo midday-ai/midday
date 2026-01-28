@@ -11,15 +11,12 @@ import { BaseProcessor } from "../base";
 
 type DispatchInsightsPayload = {
   periodType: PeriodType;
-  /** If true, skips timezone filter and generates for all teams without insight */
-  catchUp?: boolean;
 };
 
 type SkipReasons = {
   duplicate: number;
   queueError: number;
   alreadyGenerated: number;
-  wrongTimezone: number;
 };
 
 type ProcessResult = {
@@ -27,7 +24,6 @@ type ProcessResult = {
   skipped: number;
   skipReasons: SkipReasons;
   errors: Array<{ teamId: string; error: string }>;
-  mode: "primary" | "catchup";
 };
 
 /**
@@ -54,15 +50,10 @@ const TARGET_LOCAL_HOUR = 7;
 /**
  * Timezone-aware insight dispatcher.
  *
- * Primary mode (Monday, every 30 min):
+ * Runs every 30 min on Monday:
  * - Finds teams where it's currently 7 AM local
- * - Generates insights immediately with stagger delay
+ * - Generates insights with stagger delay
  * - 48 runs = 2 chances per timezone band
- *
- * Catch-up mode (Tuesday 10 AM UTC):
- * - Finds ALL teams without insight for the period
- * - Generates immediately (regardless of timezone)
- * - Safety net for any Monday failures
  *
  * Rate limiting:
  * - Jobs staggered by 15s
@@ -70,13 +61,11 @@ const TARGET_LOCAL_HOUR = 7;
  */
 export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPayload> {
   async process(job: Job<DispatchInsightsPayload>): Promise<ProcessResult> {
-    const { periodType, catchUp = false } = job.data;
+    const { periodType } = job.data;
     const db = getDb();
-    const mode = catchUp ? "catchup" : "primary";
 
-    this.logger.info(`Starting insights dispatcher (${mode} mode)`, {
+    this.logger.info("Starting insights dispatcher", {
       periodType,
-      catchUp,
       currentUtcHour: new Date().getUTCHours(),
     });
 
@@ -89,7 +78,7 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
         "No teams configured for insights (INSIGHTS_ENABLED_TEAM_IDS is empty)",
         { periodType },
       );
-      return emptyResult(mode);
+      return emptyResult();
     }
 
     if (enabledTeamIds !== undefined) {
@@ -107,7 +96,6 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
       duplicate: 0,
       queueError: 0,
       alreadyGenerated: 0,
-      wrongTimezone: 0,
     };
     let dispatched = 0;
     let skipped = 0;
@@ -115,9 +103,7 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
     let totalTeamsProcessed = 0;
 
     this.logger.info(
-      catchUp
-        ? "Catch-up mode: generating for all teams without insight"
-        : `Primary mode: generating for teams where it's ${TARGET_LOCAL_HOUR} AM local`,
+      `Generating insights for teams where it's ${TARGET_LOCAL_HOUR} AM local`,
       {
         periodType,
         periodLabel: period.periodLabel,
@@ -126,13 +112,12 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
 
     // Process teams in batches using cursor-based pagination
     while (true) {
-      // In primary mode, filter by timezone. In catch-up mode, get all teams.
       const eligibleTeams = await getTeamsForInsights(db, {
         enabledTeamIds,
         cursor,
         limit: BATCH_SIZE,
         trialEligibilityDays: TRIAL_ELIGIBILITY_DAYS,
-        targetLocalHour: catchUp ? undefined : TARGET_LOCAL_HOUR,
+        targetLocalHour: TARGET_LOCAL_HOUR,
       });
 
       if (eligibleTeams.length === 0) {
@@ -143,7 +128,6 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
 
       this.logger.debug(`Processing batch of ${eligibleTeams.length} teams`, {
         periodType,
-        mode,
         batchStart: eligibleTeams[0]?.id,
         batchEnd: eligibleTeams[eligibleTeams.length - 1]?.id,
       });
@@ -200,7 +184,6 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
             periodType,
             periodLabel: period.periodLabel,
             delay: `${jobDelay / 1000}s`,
-            mode,
           });
         } catch (error) {
           const errorMessage =
@@ -235,13 +218,10 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
     }
 
     if (totalTeamsProcessed === 0) {
-      this.logger.info(
-        catchUp
-          ? "No teams need catch-up (all have insights)"
-          : "No teams where it's 7 AM local right now",
-        { periodType, mode },
-      );
-      return emptyResult(mode);
+      this.logger.info("No teams where it's 7 AM local right now", {
+        periodType,
+      });
+      return emptyResult();
     }
 
     // Calculate estimated completion time
@@ -251,7 +231,6 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
     this.logger.info("Insights dispatch complete", {
       periodType,
       periodLabel: period.periodLabel,
-      mode,
       totalTeamsChecked: totalTeamsProcessed,
       dispatched,
       skipped,
@@ -265,12 +244,11 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
       skipped,
       skipReasons,
       errors,
-      mode,
     };
   }
 }
 
-function emptyResult(mode: "primary" | "catchup"): ProcessResult {
+function emptyResult(): ProcessResult {
   return {
     dispatched: 0,
     skipped: 0,
@@ -278,9 +256,7 @@ function emptyResult(mode: "primary" | "catchup"): ProcessResult {
       duplicate: 0,
       queueError: 0,
       alreadyGenerated: 0,
-      wrongTimezone: 0,
     },
     errors: [],
-    mode,
   };
 }

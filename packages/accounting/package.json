@@ -21,7 +21,7 @@
     "@midday/logger": "workspace:*",
     "intuit-oauth": "^4.2.2",
     "xero-node": "^13.3.0",
-    "zod": "^4.1.13"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
