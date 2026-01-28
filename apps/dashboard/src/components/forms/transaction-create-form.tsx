@@ -41,8 +41,8 @@ import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatISO } from "date-fns";
-import { nanoid } from "nanoid";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v3";
 
 const formSchema = z.object({
@@ -78,6 +78,9 @@ export function TransactionCreateForm() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useUserQuery();
   const { data: team } = useTeamQuery();
+
+  // Stable ID for file upload path - persists across re-renders
+  const filePathId = useMemo(() => uuidv4(), []);
   const { data: accounts } = useQuery(
     trpc.bankAccounts.get.queryOptions({
       enabled: true,
@@ -88,11 +91,28 @@ export function TransactionCreateForm() {
     trpc.transactionCategories.get.queryOptions(),
   );
 
+  const processTransactionAttachmentMutation = useMutation(
+    trpc.transactionAttachments.processAttachment.mutationOptions(),
+  );
+
   const createTransactionMutation = useMutation(
     trpc.transactions.create.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (transaction) => {
         // Invalidate reports and widgets since a new transaction affects analytics
         invalidateTransactionQueries();
+
+        // Trigger tax extraction for attachments now that we have a real transaction ID
+        // Note: Attachment records are created server-side by createTransaction
+        const currentAttachments = form.getValues("attachments");
+        if (transaction?.id && currentAttachments?.length) {
+          processTransactionAttachmentMutation.mutate(
+            currentAttachments.map((file) => ({
+              filePath: file.path,
+              mimetype: file.type,
+              transactionId: transaction.id,
+            })),
+          );
+        }
 
         setParams(null);
       },
@@ -448,11 +468,11 @@ export function TransactionCreateForm() {
                   transaction
                 </p>
                 <TransactionAttachments
-                  // NOTE: For manual attachments, we need to generate a unique id
-                  id={nanoid()}
-                  data={attachments?.map((attachment) => ({
+                  // Stable ID for file upload path (persists across re-renders)
+                  id={filePathId}
+                  data={attachments?.map((attachment, index) => ({
                     ...attachment,
-                    id: nanoid(),
+                    id: `temp-${index}`,
                     filename: attachment.name,
                     path: attachment.path.join("/"),
                   }))}
@@ -460,6 +480,9 @@ export function TransactionCreateForm() {
                     // @ts-expect-error
                     form.setValue("attachments", files);
                   }}
+                  // Disable DB operations - server creates attachments with createTransaction
+                  // Processing is triggered in onSuccess with the real transaction ID
+                  enableDatabaseOperations={false}
                 />
               </div>
             </AccordionContent>

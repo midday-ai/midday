@@ -1,3 +1,4 @@
+import { CACHE_TTL, withCache } from "@engine/utils/cache";
 import { ProviderError } from "@engine/utils/error";
 import { logger } from "@engine/utils/logger";
 import { formatISO, subDays } from "date-fns";
@@ -9,7 +10,6 @@ import type {
   GetAccessTokenResponse,
   GetAccountBalanceResponse,
   GetAccountDetailsResponse,
-  GetAccountResponse,
   GetAccountsRequest,
   GetAccountsResponse,
   GetInstitutionResponse,
@@ -33,10 +33,9 @@ export class GoCardLessApi {
   #accessTokenCacheKey = "gocardless_access_token";
   #refreshTokenCacheKey = "gocardless_refresh_token";
   #institutionsCacheKey = "gocardless_institutions";
+  #accountsCacheKeyPrefix = "gocardless_accounts";
 
   #kv: KVNamespace;
-
-  #oneHour = 3600;
 
   #secretKey;
   #secretId;
@@ -67,7 +66,7 @@ export class GoCardLessApi {
     );
 
     await this.#kv?.put(this.#accessTokenCacheKey, response.access, {
-      expirationTtl: response.access_expires - this.#oneHour,
+      expirationTtl: response.access_expires - CACHE_TTL.ONE_HOUR,
     });
 
     return response.refresh;
@@ -99,10 +98,10 @@ export class GoCardLessApi {
     try {
       await Promise.all([
         this.#kv?.put(this.#accessTokenCacheKey, response.access, {
-          expirationTtl: response.access_expires - this.#oneHour,
+          expirationTtl: response.access_expires - CACHE_TTL.ONE_HOUR,
         }),
         this.#kv?.put(this.#refreshTokenCacheKey, response.refresh, {
-          expirationTtl: response.refresh_expires - this.#oneHour,
+          expirationTtl: response.refresh_expires - CACHE_TTL.ONE_HOUR,
         }),
       ]);
     } catch (error) {
@@ -131,31 +130,39 @@ export class GoCardLessApi {
       | undefined;
     balances: GetAccountBalanceResponse["balances"] | undefined;
   }> {
-    const token = await this.#getAccessToken();
+    const cacheKey = `gocardless_account_balances_${accountId}`;
 
     try {
-      const { balances } = await this.#get<GetAccountBalanceResponse>(
-        `/api/v2/accounts/${accountId}/balances/`,
-        token,
-      );
+      return await withCache(
+        this.#kv,
+        cacheKey,
+        CACHE_TTL.ONE_HOUR,
+        async () => {
+          const token = await this.#getAccessToken();
+          const { balances } = await this.#get<GetAccountBalanceResponse>(
+            `/api/v2/accounts/${accountId}/balances/`,
+            token,
+          );
 
-      const foundInterimAvailable = balances?.find(
-        (account) =>
-          account.balanceType === "interimAvailable" ||
-          account.balanceType === "interimBooked",
-      );
+          const foundInterimAvailable = balances?.find(
+            (account) =>
+              account.balanceType === "interimAvailable" ||
+              account.balanceType === "interimBooked",
+          );
 
-      // For some accounts, the interimAvailable balance is 0, so we need to use the expected balance
-      const foundExpectedAvailable = balances?.find(
-        (account) => account.balanceType === "expected",
-      );
+          // For some accounts, the interimAvailable balance is 0, so we need to use the expected balance
+          const foundExpectedAvailable = balances?.find(
+            (account) => account.balanceType === "expected",
+          );
 
-      return {
-        primaryBalance:
-          foundInterimAvailable?.balanceAmount ||
-          foundExpectedAvailable?.balanceAmount,
-        balances,
-      };
+          return {
+            primaryBalance:
+              foundInterimAvailable?.balanceAmount ||
+              foundExpectedAvailable?.balanceAmount,
+            balances,
+          };
+        },
+      );
     } catch (error) {
       const parsedError = isError(error);
 
@@ -193,7 +200,7 @@ export class GoCardLessApi {
     );
 
     this.#kv?.put(cacheKey, JSON.stringify(response), {
-      expirationTtl: this.#oneHour,
+      expirationTtl: CACHE_TTL.ONE_HOUR,
     });
 
     if (countryCode) {
@@ -248,56 +255,77 @@ export class GoCardLessApi {
   }
 
   async getAccountDetails(id: string): Promise<GetAccountDetailsResponse> {
-    const token = await this.#getAccessToken();
+    const cacheKey = `gocardless_account_details_${id}`;
 
-    const [account, details] = await Promise.all([
-      this.#get<GetAccountResponse>(`/api/v2/accounts/${id}/`, token),
-      this.#get<GetAccountDetailsResponse>(
+    return withCache(this.#kv, cacheKey, CACHE_TTL.FOUR_HOURS, async () => {
+      const token = await this.#getAccessToken();
+
+      // Only fetch details endpoint - the basic /accounts/{id}/ endpoint returns
+      // fields (created, last_accessed, status, owner_name) that aren't used in transforms
+      const details = await this.#get<GetAccountDetailsResponse>(
         `/api/v2/accounts/${id}/details/`,
         token,
-      ),
-    ]);
+      );
 
-    return {
-      ...account,
-      ...details,
-    };
+      return {
+        ...details,
+        id, // Use the account ID we already have (details endpoint doesn't return id)
+      };
+    });
   }
 
   async getInstitution(id: string): Promise<GetInstitutionResponse> {
-    const token = await this.#getAccessToken();
+    const cacheKey = `gocardless_institution_${id}`;
 
-    return this.#get<GetInstitutionResponse>(
-      `/api/v2/institutions/${id}/`,
-      token,
-    );
+    return withCache(this.#kv, cacheKey, CACHE_TTL.ONE_HOUR, async () => {
+      const token = await this.#getAccessToken();
+      return this.#get<GetInstitutionResponse>(
+        `/api/v2/institutions/${id}/`,
+        token,
+      );
+    });
   }
 
   async getAccounts({
     id,
+    skipCache,
   }: GetAccountsRequest): Promise<GetAccountsResponse | undefined> {
+    const cacheKey = `${this.#accountsCacheKeyPrefix}_${id}`;
+
     try {
-      const response = await this.getRequestion(id);
+      return await withCache(
+        this.#kv,
+        cacheKey,
+        CACHE_TTL.FOUR_HOURS,
+        async () => {
+          const response = await this.getRequestion(id);
 
-      if (!response?.accounts) {
-        return undefined;
-      }
+          if (!response?.accounts) {
+            return undefined;
+          }
 
-      return Promise.all(
-        response.accounts.map(async (acountId: string) => {
-          const [details, balanceResult, institution] = await Promise.all([
-            this.getAccountDetails(acountId),
-            this.getAccountBalances(acountId),
-            this.getInstitution(response.institution_id),
-          ]);
+          // Fetch institution once - it's the same for all accounts in a requisition
+          const institution = await this.getInstitution(
+            response.institution_id,
+          );
 
-          return {
-            balance: balanceResult.primaryBalance,
-            balances: balanceResult.balances,
-            institution,
-            ...details,
-          };
-        }),
+          return Promise.all(
+            response.accounts.map(async (acountId: string) => {
+              const [details, balanceResult] = await Promise.all([
+                this.getAccountDetails(acountId),
+                this.getAccountBalances(acountId),
+              ]);
+
+              return {
+                balance: balanceResult.primaryBalance,
+                balances: balanceResult.balances,
+                institution,
+                ...details,
+              };
+            }),
+          );
+        },
+        { skipCache },
       );
     } catch (error) {
       const parsedError = isError(error);
@@ -346,12 +374,20 @@ export class GoCardLessApi {
   }
 
   async getRequestion(id: string): Promise<GetRequisitionResponse | undefined> {
-    try {
-      const token = await this.#getAccessToken();
+    const cacheKey = `gocardless_requisition_${id}`;
 
-      return this.#get<GetRequisitionResponse>(
-        `/api/v2/requisitions/${id}/`,
-        token,
+    try {
+      return await withCache(
+        this.#kv,
+        cacheKey,
+        CACHE_TTL.ONE_HOUR,
+        async () => {
+          const token = await this.#getAccessToken();
+          return this.#get<GetRequisitionResponse>(
+            `/api/v2/requisitions/${id}/`,
+            token,
+          );
+        },
       );
     } catch (error) {
       const parsedError = isError(error);

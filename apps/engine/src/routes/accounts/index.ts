@@ -44,7 +44,8 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
     async (c) => {
       const envs = env(c);
 
-      const { provider, accessToken, institutionId, id } = c.req.valid("query");
+      const { provider, accessToken, institutionId, id, skipCache } =
+        c.req.valid("query");
 
       const api = new Provider({
         provider,
@@ -58,6 +59,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           id,
           accessToken,
           institutionId,
+          skipCache,
         });
 
         return c.json(
