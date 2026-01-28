@@ -23,6 +23,6 @@
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",
     "googleapis": "^168.0.0",
-    "zod": "^4.3.6"
+    "zod": "^4.1.13"
   }
 }

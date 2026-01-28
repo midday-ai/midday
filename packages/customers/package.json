@@ -19,7 +19,7 @@
     "@midday/logger": "workspace:*",
     "ai": "^6.0.39",
     "exa-js": "^2.0.12",
-    "zod": "^4.3.6"
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
