@@ -23,6 +23,9 @@ export const invoiceReminderSent: NotificationHandler = {
 
   createEmail: (data, user, team) => {
     const { t } = getI18n({ locale: user?.locale ?? "en" });
+    const link = `${getAppUrl()}/i/${encodeURIComponent(
+      data.token,
+    )}?viewer=${encodeURIComponent(encrypt(data.customerEmail))}`;
 
     return {
       template: "invoice-reminder",
@@ -36,9 +39,12 @@ export const invoiceReminderSent: NotificationHandler = {
         companyName: data.customerName,
         teamName: team.name,
         invoiceNumber: data.invoiceNumber,
-        link: `${getAppUrl()}/i/${encodeURIComponent(
-          data.token,
-        )}?viewer=${encodeURIComponent(encrypt(data.customerEmail))}`,
+        link,
+        // Gmail structured data fields
+        amount: data.amount,
+        currency: data.currency,
+        dueDate: data.dueDate,
+        customerId: data.customerId,
       },
     };
   },

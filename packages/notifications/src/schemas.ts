@@ -196,6 +196,11 @@ export const invoiceSentSchema = z.object({
   invoiceNumber: z.string(),
   customerName: z.string(),
   customerEmail: z.string().email().optional(),
+  // Gmail structured data fields
+  amount: z.number().optional(),
+  currency: z.string().optional(),
+  dueDate: z.string().optional(),
+  customerId: z.string().uuid().optional(),
 });
 
 export const invoiceReminderSentSchema = z.object({
@@ -205,6 +210,11 @@ export const invoiceReminderSentSchema = z.object({
   invoiceNumber: z.string(),
   customerName: z.string(),
   customerEmail: z.string().email().optional(),
+  // Gmail structured data fields
+  amount: z.number().optional(),
+  currency: z.string().optional(),
+  dueDate: z.string().optional(),
+  customerId: z.string().uuid().optional(),
 });
 
 export const invoiceCancelledSchema = z.object({
