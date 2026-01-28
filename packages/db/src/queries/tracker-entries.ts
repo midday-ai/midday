@@ -983,8 +983,7 @@ export async function getTrackerEntryById(
   const { id, teamId } = params;
 
   const entry = await db.query.trackerEntries.findFirst({
-    where: (entries, { and, eq }) =>
-      and(eq(entries.id, id), eq(entries.teamId, teamId)),
+    where: and(eq(trackerEntries.id, id), eq(trackerEntries.teamId, teamId)),
   });
 
   return entry ?? null;

@@ -23,7 +23,7 @@
     "@hono/mcp": "^0.2.3",
     "@hono/trpc-server": "^0.4.2",
     "@hono/zod-openapi": "^1.2.0",
-    "@modelcontextprotocol/sdk": "^1.25.3",
+    "@modelcontextprotocol/sdk": "1.0.4",
     "@hono/zod-validator": "^0.7.6",
     "@midday/accounting": "workspace:*",
     "@midday/cache": "workspace:*",
