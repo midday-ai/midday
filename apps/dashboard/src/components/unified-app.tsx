@@ -23,6 +23,7 @@ import {
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
@@ -112,6 +113,7 @@ function CarouselWithDots({
 export function UnifiedAppComponent({ app }: UnifiedAppProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [isLoading, setLoading] = useState(false);
   const [params, setParams] = useQueryStates({
     app: parseAsString,
@@ -141,7 +143,12 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
       setLoading(false);
     },
     onError: () => {
-      // Error is shown in the popup window, just reset loading state
+      // Show toast notification - error details are also visible in the popup window
+      toast({
+        title: "Connection failed",
+        description: `Failed to connect ${app.name}. Please try again.`,
+        variant: "error",
+      });
       setLoading(false);
     },
   });

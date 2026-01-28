@@ -47,6 +47,19 @@ export function InboxView() {
   // State to track if timeout has been reached (for showing empty state)
   const [hasTimedOut, setHasTimedOut] = useState(false);
 
+  // Capture the "just connected" state locally so it persists even after URL params are cleared
+  // (AppConnectionToast clears params after 100ms, but we need this state for the 60s timeout)
+  const [wasJustConnected, setWasJustConnected] = useState(
+    () => params.connected === true,
+  );
+
+  // Update local state when params.connected becomes truthy
+  useEffect(() => {
+    if (params.connected === true) {
+      setWasJustConnected(true);
+    }
+  }, [params.connected]);
+
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
       order: params.order,
@@ -65,13 +78,25 @@ export function InboxView() {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
+  // Clear the "just connected" state once we have data or timeout fires
+  useEffect(() => {
+    if (wasJustConnected && (tableData.length > 0 || hasTimedOut)) {
+      setWasJustConnected(false);
+    }
+    // Reset hasTimedOut when data arrives after timeout - prevents showing
+    // InboxConnectedEmpty if user later deletes all items
+    if (hasTimedOut && tableData.length > 0) {
+      setHasTimedOut(false);
+    }
+  }, [wasJustConnected, tableData.length, hasTimedOut]);
+
   // Timeout configuration - wait 1 minute for sync to complete
   const SYNC_TIMEOUT = 60 * 1000; // 1 minute
 
   // Set up timeout to show empty state if no items appear
   useEffect(() => {
     // Only set timeout if user just connected and no items yet
-    if (!params.connected || tableData.length > 0 || hasTimedOut) {
+    if (!wasJustConnected || tableData.length > 0 || hasTimedOut) {
       return;
     }
 
@@ -80,7 +105,7 @@ export function InboxView() {
     }, SYNC_TIMEOUT);
 
     return () => clearTimeout(timeout);
-  }, [params.connected, tableData.length, hasTimedOut]);
+  }, [wasJustConnected, tableData.length, hasTimedOut]);
 
   // Enhanced batching mechanism using usehooks-ts
   const {
@@ -308,12 +333,12 @@ export function InboxView() {
 
   // If user just connected and no items yet, show skeleton while waiting for sync
   // (realtime will push items if found, timeout will trigger empty state if not)
-  if (params.connected && !tableData?.length && !hasTimedOut) {
+  if (wasJustConnected && !tableData?.length && !hasTimedOut) {
     return <InboxViewSkeleton />;
   }
 
   // If timeout reached with no items, show connected empty state
-  if (params.connected && !tableData?.length && hasTimedOut && !hasFilter) {
+  if (hasTimedOut && !tableData?.length && !hasFilter) {
     return <InboxConnectedEmpty />;
   }
 

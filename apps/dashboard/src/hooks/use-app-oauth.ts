@@ -49,7 +49,8 @@ export function useAppOAuth({
       if (oauthCompleted) return;
       oauthCompleted = true;
       cleanup();
-      popup?.close();
+      // Don't close the popup immediately - let the user read the error message
+      // displayed at /oauth-callback?status=error before closing it themselves
       onError?.(new Error("OAuth connection failed"));
       setIsLoading(false);
     };

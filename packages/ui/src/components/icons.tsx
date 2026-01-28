@@ -45,6 +45,7 @@ import {
   MdOutlineConfirmationNumber,
   MdOutlineContentCopy,
   MdOutlineCropFree,
+  MdOutlineDarkMode,
   MdOutlineDashboardCustomize,
   MdOutlineEditNote,
   MdOutlineEmail,
@@ -59,9 +60,8 @@ import {
   MdOutlineInsights,
   MdOutlineInventory2,
   MdOutlineLanguage,
-  MdOutlineLightMode,
-  MdOutlineDarkMode,
   MdOutlineLaunch,
+  MdOutlineLightMode,
   MdOutlineLink,
   MdOutlineListAlt,
   MdOutlineMoreTime,
@@ -214,19 +214,19 @@ export const Icons = {
       <g clipPath="url(#a)">
         <path
           d="M10 3.958c1.475 0 2.796.509 3.838 1.5l2.854-2.854C14.959.992 12.696 0 10 0a9.995 9.995 0 0 0-8.933 5.508l3.325 2.58c.787-2.371 3-4.13 5.608-4.13Z"
-          fill="#585858"
+          fill="#EA4335"
         />
         <path
           d="M19.575 10.23c0-.655-.063-1.288-.158-1.897H10v3.759h5.392a4.648 4.648 0 0 1-1.992 2.991l3.22 2.5c1.88-1.741 2.955-4.316 2.955-7.354Z"
-          fill="#878787"
+          fill="#4285F4"
         />
         <path
           d="M4.388 11.912A6.075 6.075 0 0 1 4.07 10c0-.667.112-1.308.317-1.913L1.063 5.508A9.964 9.964 0 0 0 0 10c0 1.617.383 3.142 1.067 4.492l3.32-2.58Z"
-          fill="#D7D7D7"
+          fill="#FBBC05"
         />
         <path
           d="M10 20c2.7 0 4.97-.887 6.62-2.42l-3.22-2.5c-.896.603-2.05.958-3.4.958-2.608 0-4.82-1.759-5.612-4.13l-3.325 2.58C2.712 17.758 6.091 20 10 20Z"
-          fill="#B3B3B3"
+          fill="#34A853"
         />
       </g>
       <defs>
@@ -234,6 +234,14 @@ export const Icons = {
           <path fill="currentColor" d="M0 0h20v20H0z" />
         </clipPath>
       </defs>
+    </SVGIcon>
+  ),
+  Microsoft: (props: SVGIconProps) => (
+    <SVGIcon {...props} viewBox="0 0 21 21" fill="none" strokeWidth={0}>
+      <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+      <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+      <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
+      <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
     </SVGIcon>
   ),
   InboxCustomize: (props: any) => (
@@ -717,7 +725,13 @@ export const Icons = {
   Instagram: (props: SVGIconProps) => (
     <SVGIcon {...props} viewBox="0 0 24 24">
       <defs>
-        <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+        <linearGradient
+          id="instagram-gradient"
+          x1="0%"
+          y1="100%"
+          x2="100%"
+          y2="0%"
+        >
           <stop offset="0%" stopColor="#FEDA77" />
           <stop offset="25%" stopColor="#FA7E1E" />
           <stop offset="50%" stopColor="#D62976" />
@@ -736,7 +750,14 @@ export const Icons = {
         strokeWidth="2"
         fill="none"
       />
-      <circle cx="12" cy="12" r="3.5" stroke="#fff" strokeWidth="2" fill="none" />
+      <circle
+        cx="12"
+        cy="12"
+        r="3.5"
+        stroke="#fff"
+        strokeWidth="2"
+        fill="none"
+      />
       <circle cx="17" cy="7" r="1.5" fill="#fff" />
     </SVGIcon>
   ),
