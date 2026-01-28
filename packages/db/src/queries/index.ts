@@ -14,6 +14,7 @@ export * from "./documents";
 export * from "./exhange-rates";
 export * from "./inbox";
 export * from "./inbox-accounts";
+export * from "./institutions";
 export * from "./inbox-blocklist";
 export * from "./inbox-embeddings";
 export * from "./inbox-matching";

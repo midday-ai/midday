@@ -4,47 +4,70 @@ import {
   updateUsageSchema,
 } from "@api/schemas/institutions";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { client } from "@midday/engine-client";
+import { Provider } from "@midday/banking";
+import {
+  getInstitutionById,
+  getInstitutions,
+  incrementInstitutionPopularity,
+} from "@midday/db/queries";
 import { TRPCError } from "@trpc/server";
 
 export const institutionsRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getInstitutionsSchema)
-    .query(async ({ input }) => {
-      const institutionsResponse = await client.institutions.$get({
-        query: input,
+    .query(async ({ ctx: { db }, input }) => {
+      const institutions = await getInstitutions(db, {
+        countryCode: input.countryCode,
+        query: input.q,
+        limit: 50,
       });
 
-      if (!institutionsResponse.ok) {
-        throw new Error("Failed to get institutions");
+      return institutions.map((institution) => ({
+        id: institution.id,
+        name: institution.name,
+        logo: institution.logoUrl,
+        availableHistory: institution.availableHistory,
+        maximumConsentValidity: institution.maximumConsentValidity,
+        type: institution.type,
+        provider: institution.provider,
+      }));
+    }),
+
+  getById: protectedProcedure
+    .input(updateUsageSchema)
+    .query(async ({ ctx: { db }, input }) => {
+      const institution = await getInstitutionById(db, input.id);
+
+      if (!institution) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Institution not found",
+        });
       }
 
-      const { data } = await institutionsResponse.json();
-
-      return data.map((institution) => ({
-        ...institution,
-        availableHistory: institution.available_history,
-        maximumConsentValidity: institution.maximum_consent_validity,
+      return {
+        id: institution.id,
+        name: institution.name,
+        logo: institution.logoUrl,
+        availableHistory: institution.availableHistory,
+        maximumConsentValidity: institution.maximumConsentValidity,
         type: institution.type,
-        provider: institution.provider!,
-      }));
+        provider: institution.provider,
+      };
     }),
 
   accounts: protectedProcedure
     .input(getAccountsSchema)
     .query(async ({ input }) => {
       try {
-        const accountsResponse = await client.accounts.$get({
-          query: input,
+        const provider = new Provider({ provider: input.provider });
+        const accounts = await provider.getAccounts({
+          id: input.id,
+          accessToken: input.accessToken,
+          institutionId: input.institutionId,
         });
 
-        if (!accountsResponse.ok) {
-          throw new Error("Failed to get accounts");
-        }
-
-        const { data } = await accountsResponse.json();
-
-        return data.sort((a, b) => b.balance.amount - a.balance.amount);
+        return accounts.sort((a, b) => b.balance.amount - a.balance.amount);
       } catch (error) {
         console.log(error);
         throw new TRPCError({
@@ -56,15 +79,16 @@ export const institutionsRouter = createTRPCRouter({
 
   updateUsage: protectedProcedure
     .input(updateUsageSchema)
-    .mutation(async ({ input }) => {
-      const usageResponse = await client.institutions[":id"].usage.$put({
-        param: input,
-      });
+    .mutation(async ({ ctx: { db }, input }) => {
+      const result = await incrementInstitutionPopularity(db, input.id);
 
-      if (!usageResponse.ok) {
-        throw new Error("Failed to update institution usage");
+      if (!result) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Institution not found",
+        });
       }
 
-      return usageResponse.json();
+      return { success: true };
     }),
 });

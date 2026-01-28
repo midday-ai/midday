@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { getAccessValidForDays } from "@midday/engine/gocardless/utils";
+import { getAccessValidForDays } from "@midday/banking";
 import { addDays, addMonths } from "date-fns";
 import { nanoid } from "nanoid";
 import type { Client } from "../types";

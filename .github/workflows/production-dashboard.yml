@@ -23,8 +23,6 @@ jobs:
           bun-version: v1.2.23
       - name: Install dependencies
         run: bun install
-      - name: 🏗 Build @midday/engine
-        run: bunx turbo run build --filter=@midday/engine --only
       - name: 🧪 Run tests
         run: bunx turbo run test --filter=@midday/dashboard...
       - name: 🔦 Run linter

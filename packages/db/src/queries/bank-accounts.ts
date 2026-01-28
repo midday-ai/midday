@@ -4,7 +4,7 @@ import { chatCache } from "@midday/cache/chat-cache";
 import {
   CASH_ACCOUNT_TYPES,
   CREDIT_ACCOUNT_TYPE,
-} from "@midday/engine/account";
+} from "@midday/banking";
 import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { nanoid } from "nanoid";

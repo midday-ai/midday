@@ -4,7 +4,7 @@ import {
   CONTRA_REVENUE_CATEGORIES,
   REVENUE_CATEGORIES,
 } from "@midday/categories";
-import { CASH_ACCOUNT_TYPES } from "@midday/engine/account";
+import { CASH_ACCOUNT_TYPES } from "@midday/banking";
 import {
   addMonths,
   eachMonthOfInterval,

@@ -1,8 +1,8 @@
-import { createGoCardLessLinkAction } from "@/actions/institutions/create-gocardless-link";
+import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import { useToast } from "@midday/ui/use-toast";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation } from "@tanstack/react-query";
 import { BankConnectButton } from "./bank-connect-button";
 
 type Props = {
@@ -13,8 +13,10 @@ type Props = {
 
 export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
   const { toast } = useToast();
+  const trpc = useTRPC();
 
-  const createGoCardLessLink = useAction(createGoCardLessLinkAction, {
+  const createAgreementMutation = useMutation({
+    ...trpc.banking.createGoCardlessAgreement.mutationOptions(),
     onError: () => {
       toast({
         duration: 3500,
@@ -24,14 +26,34 @@ export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
     },
   });
 
-  const handleOnSelect = () => {
+  const createLinkMutation = useMutation(
+    trpc.banking.createGoCardlessLink.mutationOptions(),
+  );
+
+  const handleOnSelect = async () => {
     onSelect();
 
-    createGoCardLessLink.execute({
-      institutionId: id,
-      availableHistory: availableHistory,
-      redirectBase: isDesktopApp() ? "midday://" : getUrl(),
-    });
+    const redirectBase = isDesktopApp() ? "midday://" : getUrl();
+    const redirectTo = new URL(redirectBase);
+    redirectTo.searchParams.append("step", "account");
+    redirectTo.searchParams.append("provider", "gocardless");
+
+    try {
+      const agreement = await createAgreementMutation.mutateAsync({
+        institutionId: id,
+        transactionTotalDays: availableHistory,
+      });
+
+      const link = await createLinkMutation.mutateAsync({
+        institutionId: id,
+        agreement: agreement.id,
+        redirect: redirectTo.toString(),
+      });
+
+      window.location.href = link.link;
+    } catch {
+      // Error handled by onError callback
+    }
   };
 
   return <BankConnectButton onClick={handleOnSelect} />;

@@ -1,5 +1,5 @@
 import { processBatch } from "@jobs/utils/process-batch";
-import { client } from "@midday/engine-client";
+import { getRates } from "@midday/banking";
 import { createClient } from "@midday/supabase/job";
 import { logger, schedules } from "@trigger.dev/sdk";
 
@@ -12,14 +12,12 @@ export const ratesScheduler = schedules.task({
 
     const supabase = createClient();
 
-    const ratesResponse = await client.rates.$get();
+    const ratesData = await getRates();
 
-    if (!ratesResponse.ok) {
+    if (!ratesData || ratesData.length === 0) {
       logger.error("Failed to get rates");
       throw new Error("Failed to get rates");
     }
-
-    const { data: ratesData } = await ratesResponse.json();
 
     const data = ratesData.flatMap((rate) => {
       return Object.entries(rate.rates).map(([target, value]) => ({
