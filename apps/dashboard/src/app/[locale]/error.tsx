@@ -1,10 +1,9 @@
 "use client";
 
 import { CopyInput } from "@/components/copy-input";
+import { SUPPORT_EMAIL } from "@/utils/constants";
 import { Button } from "@midday/ui/button";
 import { useEffect } from "react";
-
-const SUPPORT_EMAIL = "support@midday.ai";
 
 export default function ErrorPage({
   error,

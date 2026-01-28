@@ -14,3 +14,5 @@ export const LocalStorageKeys = {
   MatchLearningToastSeen: "match-learning-toast-seen",
   MetricsFilter: "metrics-filter-preferences",
 };
+
+export const SUPPORT_EMAIL = "support@midday.ai";

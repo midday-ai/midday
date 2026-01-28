@@ -86,6 +86,7 @@ const defaultSearch = {
   tags: null,
   amount_range: null,
   manual: null,
+  type: null,
 };
 
 const PLACEHOLDERS = [

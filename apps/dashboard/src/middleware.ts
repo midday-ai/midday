@@ -43,7 +43,6 @@ export async function middleware(request: NextRequest) {
     !newUrl.pathname.includes("/s/") &&
     !newUrl.pathname.includes("/r/") &&
     !newUrl.pathname.includes("/verify") &&
-    !newUrl.pathname.includes("/all-done") &&
     !newUrl.pathname.includes("/oauth-callback") &&
     !newUrl.pathname.includes("/desktop/search")
   ) {

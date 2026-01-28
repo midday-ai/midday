@@ -1,5 +1,6 @@
 "use client";
 
+import { OAUTH_CHANNEL_NAME, isOAuthMessage } from "@/utils/oauth-message";
 import { createClient } from "@midday/supabase/client";
 import { useEffect, useRef, useState } from "react";
 
@@ -8,15 +9,6 @@ interface UseAppOAuthOptions {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
-
-/**
- * Message payload received from OAuth popup
- */
-interface OAuthEventMessage {
-  type: "app_oauth_completed" | "app_oauth_error";
-}
-
-const CHANNEL_NAME = "midday_oauth_complete";
 const POPUP_WIDTH = 600;
 const POPUP_HEIGHT = 800;
 const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
@@ -73,20 +65,11 @@ export function useAppOAuth({
 
     cleanupRef.current = cleanup;
 
-    // Set up message listeners - handle both old string format and new object format
     const messageListener = (e: MessageEvent) => {
-      // Legacy string format for backwards compatibility
-      if (e.data === "app_oauth_completed") {
-        handleOAuthComplete();
-        return;
-      }
-
-      // New object format with error details
-      if (typeof e.data === "object" && e.data !== null) {
-        const message = e.data as OAuthEventMessage;
-        if (message.type === "app_oauth_completed") {
+      if (isOAuthMessage(e.data)) {
+        if (e.data.type === "app_oauth_completed") {
           handleOAuthComplete();
-        } else if (message.type === "app_oauth_error") {
+        } else if (e.data.type === "app_oauth_error") {
           handleOAuthError();
         }
       }
@@ -95,7 +78,7 @@ export function useAppOAuth({
     window.addEventListener("message", messageListener);
 
     try {
-      broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
+      broadcastChannel = new BroadcastChannel(OAUTH_CHANNEL_NAME);
       broadcastChannel.onmessage = messageListener;
     } catch {
       // BroadcastChannel not supported

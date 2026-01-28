@@ -1,20 +1,12 @@
 "use client";
 
+import { OAUTH_CHANNEL_NAME, type OAuthMessage } from "@/utils/oauth-message";
 import { useEffect } from "react";
 import type { OAuthStatus } from "./schema";
 
 type Props = {
   status: OAuthStatus;
 };
-
-const CHANNEL_NAME = "midday_oauth_complete";
-
-/**
- * Message sent to parent window when OAuth completes
- */
-interface OAuthMessage {
-  type: "app_oauth_completed" | "app_oauth_error";
-}
 
 export const EventEmitter = ({ status }: Props) => {
   useEffect(() => {
@@ -29,7 +21,7 @@ export const EventEmitter = ({ status }: Props) => {
     let channel: BroadcastChannel | null = null;
 
     try {
-      channel = new BroadcastChannel(CHANNEL_NAME);
+      channel = new BroadcastChannel(OAUTH_CHANNEL_NAME);
       channel.postMessage(message);
     } catch {
       // BroadcastChannel not supported, fallback to window.opener

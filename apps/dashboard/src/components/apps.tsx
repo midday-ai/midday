@@ -4,6 +4,7 @@ import { AppConnectionToast } from "@/components/app-connection-toast";
 import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { isOAuthMessage } from "@/utils/oauth-message";
 import { apps as appStoreApps } from "@midday/app-store";
 import type { UnifiedApp } from "@midday/app-store/types";
 import { Button } from "@midday/ui/button";
@@ -21,16 +22,13 @@ export function Apps() {
   // Global listener for OAuth completion messages
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
-      if (e.data === "app_oauth_completed") {
-        // Invalidate queries to refresh app status
+      if (isOAuthMessage(e.data) && e.data.type === "app_oauth_completed") {
         queryClient.invalidateQueries({
           queryKey: trpc.apps.get.queryKey(),
         });
-        // Also invalidate inbox accounts for Gmail/Outlook status
         queryClient.invalidateQueries({
           queryKey: trpc.inboxAccounts.get.queryKey(),
         });
-        // Also invalidate Stripe status for Stripe Payments app
         queryClient.invalidateQueries({
           queryKey: trpc.invoicePayments.stripeStatus.queryKey(),
         });
@@ -38,9 +36,7 @@ export function Apps() {
     };
 
     window.addEventListener("message", handleMessage);
-    return () => {
-      window.removeEventListener("message", handleMessage);
-    };
+    return () => window.removeEventListener("message", handleMessage);
   }, [queryClient, trpc]);
 
   // Fetch from both endpoints

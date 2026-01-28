@@ -34,6 +34,8 @@ export function AppConnectionToast() {
       return;
     }
 
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+
     if (connected === "false") {
       hasShownToast.current = true;
 
@@ -45,7 +47,7 @@ export function AppConnectionToast() {
       });
 
       // Clear the URL params after a short delay to avoid flash
-      setTimeout(() => {
+      timeout = setTimeout(() => {
         router.replace(pathname, { scroll: false });
       }, 100);
     } else if (connected === "true" && provider) {
@@ -61,18 +63,20 @@ export function AppConnectionToast() {
       });
 
       // Clear the URL params after a short delay
-      setTimeout(() => {
+      timeout = setTimeout(() => {
         router.replace(pathname, { scroll: false });
       }, 100);
-    }
-  }, [searchParams, router, pathname, toast]);
-
-  // Reset the flag when the component unmounts or params change
-  useEffect(() => {
-    return () => {
+    } else if (!connected) {
+      // Reset when URL params are cleared, allowing subsequent toasts
       hasShownToast.current = false;
+    }
+
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
     };
-  }, []);
+  }, [searchParams, router, pathname, toast]);
 
   return null;
 }
