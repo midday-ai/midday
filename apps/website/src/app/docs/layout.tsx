@@ -1,5 +1,6 @@
 import { DocsChatProvider } from "@/components/docs/docs-chat-provider";
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Documentation",
@@ -7,5 +8,9 @@ export const metadata = {
 };
 
 export default function DocsLayout({ children }: { children: ReactNode }) {
-  return <DocsChatProvider>{children}</DocsChatProvider>;
+  return (
+    <Suspense fallback={children}>
+      <DocsChatProvider>{children}</DocsChatProvider>
+    </Suspense>
+  );
 }
