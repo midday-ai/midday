@@ -1,17 +1,9 @@
 /**
  * Shared OAuth utilities for app integrations
  */
+import type { OAuthErrorCode } from "@midday/app-store/oauth-errors";
 
-/**
- * Standardized error codes used across all OAuth integrations
- */
-export type OAuthErrorCode =
-  | "access_denied"
-  | "missing_license"
-  | "missing_permissions"
-  | "invalid_state"
-  | "token_exchange_failed"
-  | "unknown_error";
+export type { OAuthErrorCode };
 
 /**
  * Map OAuth errors from any provider to standardized error codes

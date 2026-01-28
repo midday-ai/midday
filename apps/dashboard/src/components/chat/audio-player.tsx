@@ -71,6 +71,8 @@ export function AudioPlayer() {
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
+      // Hide the audio player when playback finishes
+      close();
     };
 
     audio.addEventListener("timeupdate", updateTime);
@@ -95,7 +97,7 @@ export function AudioPlayer() {
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
     };
-  }, [audioUrl]);
+  }, [audioUrl, close]);
 
   // Setup Web Audio API for waveform visualization
   useEffect(() => {

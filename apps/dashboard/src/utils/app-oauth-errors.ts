@@ -1,14 +1,9 @@
+import type { OAuthErrorCode } from "@midday/app-store/oauth-errors";
+
 /**
- * Standardized OAuth error codes for app integrations
- * Used across all OAuth providers (Fortnox, Xero, QuickBooks, Gmail, Outlook)
+ * Re-export the shared OAuth error code type for dashboard use
  */
-export type AppOAuthErrorCode =
-  | "access_denied"
-  | "missing_license"
-  | "missing_permissions"
-  | "invalid_state"
-  | "token_exchange_failed"
-  | "unknown_error";
+export type AppOAuthErrorCode = OAuthErrorCode;
 
 /**
  * User-friendly error titles
