@@ -60,34 +60,26 @@ export function useOAuthSignIn(provider: OAuthProvider) {
     const redirectTo = new URL("/api/auth/callback", getUrl());
     redirectTo.searchParams.append("provider", provider);
 
-    if (isDesktopApp()) {
+    const isDesktop = isDesktopApp();
+
+    if (isDesktop) {
       redirectTo.searchParams.append("client", "desktop");
-
-      await supabase.auth.signInWithOAuth({
-        provider: provider as Provider,
-        options: {
-          redirectTo: redirectTo.toString(),
-          scopes: config.scopes,
-          queryParams: {
-            ...config.queryParams,
-            client: "desktop",
-          },
-        },
-      });
-    } else {
-      if (config.supportsReturnTo && returnTo) {
-        redirectTo.searchParams.append("return_to", returnTo);
-      }
-
-      await supabase.auth.signInWithOAuth({
-        provider: provider as Provider,
-        options: {
-          redirectTo: redirectTo.toString(),
-          scopes: config.scopes,
-          queryParams: config.queryParams,
-        },
-      });
+    } else if (config.supportsReturnTo && returnTo) {
+      redirectTo.searchParams.append("return_to", returnTo);
     }
+
+    const queryParams = isDesktop
+      ? { ...config.queryParams, client: "desktop" }
+      : config.queryParams;
+
+    await supabase.auth.signInWithOAuth({
+      provider: provider as Provider,
+      options: {
+        redirectTo: redirectTo.toString(),
+        scopes: config.scopes,
+        queryParams,
+      },
+    });
 
     setTimeout(() => {
       setLoading(false);
