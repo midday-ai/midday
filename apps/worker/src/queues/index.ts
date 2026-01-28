@@ -12,6 +12,8 @@ import { inboxProviderQueue, inboxQueue } from "./inbox";
 import { inboxProviderQueueConfig, inboxQueueConfig } from "./inbox.config";
 import { insightsQueue } from "./insights";
 import { insightsQueueConfig } from "./insights.config";
+import { institutionsQueue } from "./institutions";
+import { institutionsQueueConfig } from "./institutions.config";
 import { invoicesQueue } from "./invoices";
 import { invoicesQueueConfig } from "./invoices.config";
 import { notificationsQueue } from "./notifications";
@@ -40,6 +42,7 @@ export const queueConfigs: QueueConfig[] = [
   teamsQueueConfig,
   insightsQueueConfig,
   notificationsQueueConfig,
+  institutionsQueueConfig,
 ];
 
 /**
@@ -60,5 +63,6 @@ export function getAllQueues(): Queue[] {
     teamsQueue,
     insightsQueue,
     notificationsQueue,
+    institutionsQueue,
   ];
 }

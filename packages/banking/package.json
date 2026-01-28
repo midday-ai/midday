@@ -1,0 +1,31 @@
+{
+  "name": "@midday/banking",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./providers": "./src/providers/index.ts",
+    "./types": "./src/types.ts",
+    "./cache": "./src/cache.ts",
+    "./utils/retry": "./src/utils/retry.ts",
+    "./utils/countries": "./src/utils/countries.ts",
+    "./utils/account": "./src/utils/account.ts",
+    "./utils/logo": "./src/utils/logo.ts",
+    "./utils/error": "./src/utils/error.ts",
+    "./utils/rates": "./src/utils/rates.ts"
+  },
+  "dependencies": {
+    "@midday/cache": "workspace:*",
+    "@midday/location": "workspace:*",
+    "@midday/logger": "workspace:*",
+    "axios": "^1.7.9",
+    "change-case": "^5.4.4",
+    "date-fns": "^4.1.0",
+    "jose": "^6.0.11",
+    "plaid": "^31.0.0",
+    "zod": "^3.25.49"
+  },
+  "devDependencies": {
+    "@types/node": "^22.12.0"
+  }
+}

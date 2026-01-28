@@ -1,4 +1,4 @@
-import { client } from "@midday/engine-client";
+import { trpc } from "@jobs/client/trpc";
 import { deleteConnectionSchema } from "@midday/jobs/schema";
 import { schemaTask } from "@trigger.dev/sdk";
 
@@ -12,12 +12,10 @@ export const deleteConnection = schemaTask({
   run: async (payload) => {
     const { referenceId, provider, accessToken } = payload;
 
-    await client.connections.delete.$delete({
-      json: {
-        id: referenceId!,
-        provider,
-        accessToken: accessToken ?? undefined,
-      },
+    await trpc.bankingService.deleteConnection.mutate({
+      provider,
+      id: referenceId!,
+      accessToken: accessToken ?? undefined,
     });
   },
 });

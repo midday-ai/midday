@@ -3992,3 +3992,41 @@ export const insightUserStatusRelations = relations(
     }),
   }),
 );
+
+// Institution type enum for banking institutions
+export const institutionTypeEnum = pgEnum("institution_type", [
+  "personal",
+  "business",
+]);
+
+// Banking institutions table - replaces Typesense for institution search
+export const institutions = pgTable(
+  "institutions",
+  {
+    id: text().primaryKey().notNull(),
+    name: text().notNull(),
+    logoUrl: text("logo_url"),
+    countries: text().array().notNull(),
+    provider: bankProvidersEnum().notNull(),
+    popularity: integer().default(0),
+    availableHistory: integer("available_history"),
+    maximumConsentValidity: integer("maximum_consent_validity"),
+    type: institutionTypeEnum(),
+    enabled: boolean().default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_institutions_countries").using("gin", table.countries),
+    index("idx_institutions_provider").on(table.provider),
+    index("idx_institutions_enabled").on(table.enabled),
+    index("idx_institutions_name_trgm").using(
+      "gin",
+      sql`${table.name} gin_trgm_ops`,
+    ),
+  ],
+);

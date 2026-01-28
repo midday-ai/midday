@@ -1,5 +1,5 @@
+import { getRates } from "@midday/banking";
 import { upsertExchangeRates } from "@midday/db/queries";
-import { client } from "@midday/engine-client";
 import type { Job } from "bullmq";
 import type { RatesSchedulerPayload } from "../../schemas/rates";
 import { getDb } from "../../utils/db";
@@ -8,7 +8,7 @@ import { BaseProcessor } from "../base";
 
 /**
  * Scheduled task that runs twice daily to update exchange rates
- * Fetches rates from the engine API and upserts them to the database
+ * Fetches rates from the currency API and upserts them to the database
  */
 export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload> {
   async process(job: Job<RatesSchedulerPayload>): Promise<{
@@ -27,18 +27,13 @@ export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload
 
     this.logger.info("Starting rates scheduler");
 
-    // Fetch rates from engine API
-    const ratesResponse = await client.rates.$get();
+    // Fetch rates from currency API
+    const ratesData = await getRates();
 
-    if (!ratesResponse.ok) {
-      this.logger.error("Failed to get rates from engine API", {
-        status: ratesResponse.status,
-        statusText: ratesResponse.statusText,
-      });
-      throw new Error("Failed to get rates from engine API");
+    if (!ratesData || ratesData.length === 0) {
+      this.logger.error("Failed to get rates from currency API");
+      throw new Error("Failed to get rates from currency API");
     }
-
-    const { data: ratesData } = await ratesResponse.json();
 
     // Transform rates data to match database schema
     const exchangeRateData = ratesData.flatMap((rate) => {

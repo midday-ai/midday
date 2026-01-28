@@ -1,7 +1,7 @@
+import { trpc } from "@jobs/client/trpc";
 import { reconnectConnectionSchema } from "@jobs/schema";
 import { syncConnection } from "@jobs/tasks/bank/sync/connection";
 import { matchAndUpdateAccountIds } from "@jobs/utils/account-matching";
-import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 
@@ -31,16 +31,16 @@ export const reconnectConnection = schemaTask({
 
     if (provider === "gocardless") {
       // We need to update the reference of the connection
-      const connection = await client.connections[":reference"].$get({
-        param: { reference: teamId },
-      });
+      const connectionResponse =
+        await trpc.bankingService.getConnectionByReference.query({
+          reference: teamId,
+        });
 
-      if (!connection.ok) {
+      if (!connectionResponse) {
         throw new Error("Connection not found");
       }
 
-      const connectionResponse = await connection.json();
-      const referenceId = connectionResponse?.data.id;
+      const referenceId = connectionResponse.id;
 
       // Update the reference_id of the new connection
       if (referenceId) {
@@ -53,23 +53,19 @@ export const reconnectConnection = schemaTask({
       }
 
       // Fetch fresh accounts from GoCardless API
-      const accounts = await client.accounts.$get({
-        query: {
-          id: referenceId,
-          provider: "gocardless",
-        },
+      const accountsData = await trpc.bankingService.getAccounts.query({
+        id: referenceId,
+        provider: "gocardless",
       });
 
-      if (!accounts.ok) {
+      if (!accountsData || accountsData.length === 0) {
         throw new Error("Accounts not found");
       }
-
-      const accountsResponse = await accounts.json();
 
       if (existingAccounts && existingAccounts.length > 0) {
         await matchAndUpdateAccountIds({
           existingAccounts,
-          apiAccounts: accountsResponse.data,
+          apiAccounts: accountsData as any[],
           connectionId,
           provider: "gocardless",
         });
@@ -91,29 +87,25 @@ export const reconnectConnection = schemaTask({
       }
 
       // Fetch fresh accounts from Teller API
-      const accounts = await client.accounts.$get({
-        query: {
-          id: connectionData.enrollment_id,
-          provider: "teller",
-          accessToken: connectionData.access_token,
-        },
+      const accountsData = await trpc.bankingService.getAccounts.query({
+        id: connectionData.enrollment_id,
+        provider: "teller",
+        accessToken: connectionData.access_token,
       });
 
-      if (!accounts.ok) {
+      if (!accountsData || accountsData.length === 0) {
         logger.error("Failed to fetch Teller accounts");
         throw new Error("Teller accounts not found");
       }
 
-      const accountsResponse = await accounts.json();
-
       logger.info("Updating Teller account IDs after reconnect", {
-        accountCount: accountsResponse.data.length,
+        accountCount: accountsData.length,
       });
 
       if (existingAccounts && existingAccounts.length > 0) {
         await matchAndUpdateAccountIds({
           existingAccounts,
-          apiAccounts: accountsResponse.data,
+          apiAccounts: accountsData as any[],
           connectionId,
           provider: "teller",
         });
@@ -135,28 +127,24 @@ export const reconnectConnection = schemaTask({
       }
 
       // Fetch fresh accounts from EnableBanking API
-      const accounts = await client.accounts.$get({
-        query: {
-          id: connectionData.reference_id,
-          provider: "enablebanking",
-        },
+      const accountsData = await trpc.bankingService.getAccounts.query({
+        id: connectionData.reference_id,
+        provider: "enablebanking",
       });
 
-      if (!accounts.ok) {
+      if (!accountsData || accountsData.length === 0) {
         logger.error("Failed to fetch EnableBanking accounts");
         throw new Error("EnableBanking accounts not found");
       }
 
-      const accountsResponse = await accounts.json();
-
       logger.info("Updating EnableBanking account IDs after reconnect", {
-        accountCount: accountsResponse.data.length,
+        accountCount: accountsData.length,
       });
 
       if (existingAccounts && existingAccounts.length > 0) {
         await matchAndUpdateAccountIds({
           existingAccounts,
-          apiAccounts: accountsResponse.data,
+          apiAccounts: accountsData as any[],
           connectionId,
           provider: "enablebanking",
         });
@@ -183,22 +171,19 @@ export const reconnectConnection = schemaTask({
         throw new Error("Plaid connection not found");
       }
 
-      const accounts = await client.accounts.$get({
-        query: {
-          provider: "plaid",
-          accessToken: connectionData.access_token,
-          institutionId: connectionData.institution_id ?? undefined,
-        },
+      const accountsData = await trpc.bankingService.getAccounts.query({
+        provider: "plaid",
+        accessToken: connectionData.access_token,
+        institutionId: connectionData.institution_id ?? undefined,
       });
 
-      if (!accounts.ok) {
+      if (!accountsData) {
         logger.error("Failed to verify Plaid accounts after reconnect");
         throw new Error("Plaid accounts verification failed");
       }
 
-      const accountsResponse = await accounts.json();
       logger.info("Plaid accounts verified after reconnect", {
-        accountCount: accountsResponse.data.length,
+        accountCount: accountsData.length,
       });
     }
 

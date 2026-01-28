@@ -1,7 +1,7 @@
+import { trpc } from "@jobs/client/trpc";
 import { syncConnectionSchema } from "@jobs/schema";
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
 import { encrypt } from "@midday/encryption";
-import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { transactionNotifications } from "../notifications/transactions";
@@ -75,27 +75,32 @@ async function backfillAccountStaticFields({
     accountsToBackfill: accountsNeedingBackfill.length,
   });
 
-  // Fetch fresh accounts from API
-  const accounts = await client.accounts.$get({
-    query: {
-      id: referenceId,
-      provider,
-      accessToken,
-    },
+  // Fetch fresh accounts from API via service
+  const accountsData = await trpc.bankingService.getAccounts.query({
+    provider,
+    id: referenceId,
+    accessToken,
   });
 
-  if (!accounts.ok) {
+  if (!accountsData || accountsData.length === 0) {
     logger.warn("Failed to fetch accounts for backfill", { connectionId });
     return;
   }
 
-  const accountsResponse = await accounts.json();
-
   // Create a map of API account ID to account data
   const apiAccountMap = new Map(
-    accountsResponse.data.map((account) => [
+    (accountsData as any[]).map((account) => [
       account.id,
-      account as ApiAccountWithDetails,
+      {
+        id: account.id,
+        iban: account.iban ?? null,
+        subtype: account.subtype ?? null,
+        bic: account.bic ?? null,
+        routing_number: account.routing_number ?? null,
+        wire_routing_number: account.wire_routing_number ?? null,
+        account_number: account.account_number ?? null,
+        sort_code: account.sort_code ?? null,
+      } as ApiAccountWithDetails,
     ]),
   );
 
@@ -177,26 +182,17 @@ export const syncConnection = schemaTask({
         throw new Error("Connection not found");
       }
 
-      const connectionResponse = await client.connections.status.$get({
-        query: {
-          id: data.reference_id!,
-          provider: data.provider as
-            | "gocardless"
-            | "plaid"
-            | "teller"
-            | "enablebanking", // Pluggy not supported yet
-          accessToken: data.access_token ?? undefined,
-        },
+      const connectionData = await trpc.bankingService.getConnectionStatus.query({
+        provider: data.provider as
+          | "gocardless"
+          | "plaid"
+          | "teller"
+          | "enablebanking",
+        id: data.reference_id!,
+        accessToken: data.access_token ?? undefined,
       });
 
-      logger.info("Connection response", { connectionResponse });
-
-      if (!connectionResponse.ok) {
-        logger.error("Failed to get connection status");
-        throw new Error("Failed to get connection status");
-      }
-
-      const { data: connectionData } = await connectionResponse.json();
+      logger.info("Connection response", { connectionData });
 
       if (connectionData.status === "connected") {
         await supabase

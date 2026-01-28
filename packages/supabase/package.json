@@ -10,6 +10,7 @@
     "db:generate": "supabase gen types --lang=typescript --project-id $PROJECT_ID --schema public > src/types/db.ts"
   },
   "dependencies": {
+    "@midday/banking": "workspace:*",
     "@supabase/supabase-js": "^2.87.0",
     "@supabase/postgrest-js": "^2.87.0",
     "@supabase/ssr": "^0.8.0",
