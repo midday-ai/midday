@@ -46,7 +46,7 @@
         "@midday/plans": "workspace:*",
         "@midday/supabase": "workspace:*",
         "@midday/utils": "workspace:*",
-        "@modelcontextprotocol/sdk": "^1.0.0",
+        "@modelcontextprotocol/sdk": "^1.25.3",
         "@polar-sh/sdk": "^0.42.1",
         "@scalar/hono-api-reference": "^0.9.37",
         "@sentry/bun": "^10.37.0",
@@ -67,8 +67,8 @@
         "stripe": "^20.1.0",
         "superjson": "^2.2.6",
         "uuid": "^13.0.0",
-        "zod": "^4.1.13",
-        "zod-openapi": "^5.4.5",
+        "zod": "^4.3.6",
+        "zod-openapi": "^5.4.6",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -156,7 +156,7 @@
         "tus-js-client": "4.3.1",
         "use-places-autocomplete": "^4.0.1",
         "usehooks-ts": "^3.1.1",
-        "zod": "^4.1.13",
+        "zod": "^4.3.6",
         "zustand": "^5.0.9",
       },
       "devDependencies": {
@@ -207,7 +207,7 @@
         "typesense": "^2.1.0",
         "workers-ai-provider": "^3.0.3",
         "xior": "^0.8.3",
-        "zod": "^4.3.5",
+        "zod": "^4.3.6",
       },
       "devDependencies": {
         "@cloudflare/workers-types": "^4.20260128.0",
@@ -281,7 +281,7 @@
         "papaparse": "^5.5.3",
         "sharp": "0.34.5",
         "workbench": "workspace:*",
-        "zod": "^4.1.13",
+        "zod": "^4.3.6",
       },
       "devDependencies": {
         "@types/bun": "latest",
