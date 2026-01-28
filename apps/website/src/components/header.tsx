@@ -234,8 +234,8 @@ export function Header({
                   className="text-sm transition-colors text-muted-foreground hover:text-foreground px-3 py-2 flex items-center gap-1"
                 >
                   Features
-                  <Icons.ChevronDown
-                    className={`w-3 h-3 transition-transform duration-200 ${isFeaturesOpen ? "rotate-180" : ""}`}
+                  <Icons.ArrowDropDown
+                    className={`w-4 h-4 transition-transform duration-200 ${isFeaturesOpen ? "rotate-180" : ""}`}
                   />
                 </button>
                 {/* Invisible bridge to dropdown */}
@@ -469,8 +469,8 @@ export function Header({
                   className="text-sm transition-colors text-muted-foreground hover:text-foreground px-3 py-2 flex items-center gap-1"
                 >
                   Resources
-                  <Icons.ChevronDown
-                    className={`w-3 h-3 transition-transform duration-200 ${isAppsOpen ? "rotate-180" : ""}`}
+                  <Icons.ArrowDropDown
+                    className={`w-4 h-4 transition-transform duration-200 ${isAppsOpen ? "rotate-180" : ""}`}
                   />
                 </button>
                 {/* Invisible bridge to dropdown */}
@@ -760,8 +760,8 @@ export function Header({
                   }}
                 >
                   <span>Features</span>
-                  <Icons.ChevronDown
-                    className={`w-5 h-5 transition-transform duration-200 ${
+                  <Icons.ArrowDropDown
+                    className={`w-6 h-6 transition-transform duration-200 ${
                       isMobileFeaturesOpen ? "rotate-180" : ""
                     }`}
                   />
@@ -939,8 +939,8 @@ export function Header({
                   }}
                 >
                   <span>Resources</span>
-                  <Icons.ChevronDown
-                    className={`w-5 h-5 transition-transform duration-200 ${
+                  <Icons.ArrowDropDown
+                    className={`w-6 h-6 transition-transform duration-200 ${
                       isMobileAppsOpen ? "rotate-180" : ""
                     }`}
                   />

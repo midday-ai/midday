@@ -97,7 +97,7 @@ export function FileStorage() {
         <div className="hidden lg:flex flex-col min-h-screen relative pt-40 overflow-hidden">
           <div className="flex-1 flex flex-col justify-start items-center space-y-12 z-20 px-4 pt-16">
             {/* Main Heading */}
-            <div className="text-center space-y-8 w-full">
+            <div className="text-center space-y-8 2xl:space-y-12 3xl:space-y-12 w-full">
               <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
                 Files
               </p>
