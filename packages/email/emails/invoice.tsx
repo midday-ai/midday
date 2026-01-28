@@ -6,6 +6,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { InvoiceSchema } from "../components/invoice-schema";
 import { Logo } from "../components/logo";
 import {
   Button,
@@ -18,19 +19,47 @@ interface Props {
   customerName: string;
   teamName: string;
   link: string;
+  // Gmail structured data fields
+  invoiceNumber?: string;
+  amount?: number;
+  currency?: string;
+  dueDate?: string;
+  customerId?: string;
 }
 
 export const InvoiceEmail = ({
   customerName = "Customer",
   teamName = "Midday",
   link = "https://app.midday.ai/i/1234567890",
+  // Gmail structured data fields with mock defaults for preview
+  invoiceNumber = "INV-0042",
+  amount = 1500,
+  currency = "USD",
+  dueDate = "2026-02-15T00:00:00.000Z",
+  customerId = "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
 }: Props) => {
   const text = `You've Received an Invoice from ${teamName}`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
+  // Only render Gmail schema if we have all required data
+  const hasSchemaData =
+    invoiceNumber && amount !== undefined && currency && dueDate;
+
   return (
     <EmailThemeProvider preview={<Preview>{text}</Preview>}>
+      {/* Gmail structured data - placed in body as some ESPs strip head scripts */}
+      {hasSchemaData && (
+        <InvoiceSchema
+          invoiceNumber={invoiceNumber}
+          teamName={teamName}
+          amount={amount}
+          currency={currency}
+          dueDate={dueDate}
+          link={link}
+          customerId={customerId}
+        />
+      )}
       <Body
         className={`my-auto mx-auto font-sans ${themeClasses.body}`}
         style={lightStyles.body}
