@@ -311,15 +311,16 @@ function MorphingDialogContainer({ children }: MorphingDialogContainerProps) {
         <>
           <motion.div
             key={`backdrop-${uniqueId}`}
-            className="fixed inset-0 bg-white/40 backdrop-blur-xs dark:bg-black/40"
+            className="fixed inset-0 bg-white/40 backdrop-blur-sm dark:bg-black/40 z-[9999]"
             style={{
               height: "100dvh", // Dynamic viewport height for mobile Safari
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
           />
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center">
             {children}
           </div>
         </>

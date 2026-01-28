@@ -7,14 +7,10 @@ export const metadata = {
   description: "Learn how to use Midday to run your business finances",
 };
 
-function DocsLayoutContent({ children }: { children: ReactNode }) {
-  return <DocsChatProvider>{children}</DocsChatProvider>;
-}
-
 export default function DocsLayout({ children }: { children: ReactNode }) {
   return (
-    <Suspense fallback={null}>
-      <DocsLayoutContent>{children}</DocsLayoutContent>
+    <Suspense fallback={children}>
+      <DocsChatProvider>{children}</DocsChatProvider>
     </Suspense>
   );
 }

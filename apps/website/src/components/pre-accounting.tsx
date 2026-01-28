@@ -154,7 +154,7 @@ export function PreAccounting() {
 
             {/* Title and Description */}
             <div className="text-center space-y-4 w-full pt-6">
-              <h1 className="font-serif text-6xl xl:text-7xl 2xl:text-8xl leading-tight text-foreground">
+              <h1 className="font-serif text-6xl xl:text-7xl 2xl:text-7xl leading-tight text-foreground">
                 Pre-accounting, handled.
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-xl mx-auto font-sans text-center">
