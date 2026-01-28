@@ -14,13 +14,13 @@ import {
   useSuspenseInfiniteQuery,
 } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
 import { useBoolean, useCounter, useDebounceCallback } from "usehooks-ts";
 import { InboxBulkActions } from "./inbox-bulk-actions";
 import { InboxDetails } from "./inbox-details";
-import { NoResults } from "./inbox-empty";
+import { InboxConnectedEmpty, NoResults } from "./inbox-empty";
 import { InboxItem } from "./inbox-item";
 import { InboxViewSkeleton } from "./inbox-skeleton";
 
@@ -44,6 +44,9 @@ export function InboxView() {
   const scrollAreaViewportRef = useRef<HTMLDivElement | null>(null);
   const shouldScrollRef = useRef(false);
 
+  // State to track if timeout has been reached (for showing empty state)
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
       order: params.order,
@@ -61,6 +64,23 @@ export function InboxView() {
   const tableData = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
+
+  // Timeout configuration - wait 1 minute for sync to complete
+  const SYNC_TIMEOUT = 60 * 1000; // 1 minute
+
+  // Set up timeout to show empty state if no items appear
+  useEffect(() => {
+    // Only set timeout if user just connected and no items yet
+    if (!params.connected || tableData.length > 0 || hasTimedOut) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setHasTimedOut(true);
+    }, SYNC_TIMEOUT);
+
+    return () => clearTimeout(timeout);
+  }, [params.connected, tableData.length, hasTimedOut]);
 
   // Enhanced batching mechanism using usehooks-ts
   const {
@@ -286,9 +306,15 @@ export function InboxView() {
     });
   }, [params.inboxId, tableData]);
 
-  // If user is connected, and we don't have any data, we need to show a skeleton
-  if (params.connected && !tableData?.length) {
+  // If user just connected and no items yet, show skeleton while waiting for sync
+  // (realtime will push items if found, timeout will trigger empty state if not)
+  if (params.connected && !tableData?.length && !hasTimedOut) {
     return <InboxViewSkeleton />;
+  }
+
+  // If timeout reached with no items, show connected empty state
+  if (params.connected && !tableData?.length && hasTimedOut && !hasFilter) {
+    return <InboxConnectedEmpty />;
   }
 
   if (hasFilter && !tableData?.length) {

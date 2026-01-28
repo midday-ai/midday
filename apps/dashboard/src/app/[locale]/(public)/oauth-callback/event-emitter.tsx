@@ -1,25 +1,28 @@
 "use client";
 
+import { OAUTH_CHANNEL_NAME, type OAuthMessage } from "@/utils/oauth-message";
 import { useEffect } from "react";
-import type { WindowEvent } from "./schema";
+import type { OAuthStatus } from "./schema";
 
 type Props = {
-  event: WindowEvent;
+  status: OAuthStatus;
 };
 
-const CHANNEL_NAME = "midday_oauth_complete";
-
-export const EventEmitter = ({ event }: Props) => {
+export const EventEmitter = ({ status }: Props) => {
   useEffect(() => {
-    if (!event) {
+    if (!status) {
       return;
     }
+
+    const message: OAuthMessage = {
+      type: status === "success" ? "app_oauth_completed" : "app_oauth_error",
+    };
 
     let channel: BroadcastChannel | null = null;
 
     try {
-      channel = new BroadcastChannel(CHANNEL_NAME);
-      channel.postMessage(event);
+      channel = new BroadcastChannel(OAUTH_CHANNEL_NAME);
+      channel.postMessage(message);
     } catch {
       // BroadcastChannel not supported, fallback to window.opener
     }
@@ -27,7 +30,7 @@ export const EventEmitter = ({ event }: Props) => {
     // Fallback to window.opener if available
     if (window?.opener && !window.opener.closed) {
       try {
-        window.opener.postMessage(event, "*");
+        window.opener.postMessage(message, "*");
       } catch {
         // Ignore errors
       }
@@ -35,9 +38,9 @@ export const EventEmitter = ({ event }: Props) => {
 
     // Retry once after a short delay to ensure message is received
     const timeout = setTimeout(() => {
-      channel?.postMessage(event);
+      channel?.postMessage(message);
       if (window?.opener && !window.opener.closed) {
-        window.opener.postMessage(event, "*");
+        window.opener.postMessage(message, "*");
       }
     }, 100);
 
@@ -45,7 +48,7 @@ export const EventEmitter = ({ event }: Props) => {
       clearTimeout(timeout);
       channel?.close();
     };
-  }, [event]);
+  }, [status]);
 
   return null;
 };

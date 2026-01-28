@@ -141,6 +141,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
       setLoading(false);
     },
     onError: () => {
+      // Error is shown in the popup window, just reset loading state
       setLoading(false);
     },
   });

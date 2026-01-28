@@ -246,10 +246,7 @@ app.openapi(
       });
 
       // Redirect to success page
-      return c.redirect(
-        `${dashboardUrl}/all-done?event=app_oauth_completed`,
-        302,
-      );
+      return c.redirect(`${dashboardUrl}/oauth-callback?status=success`, 302);
     } catch (err) {
       logger.error("Stripe Connect OAuth callback error", {
         error: err instanceof Error ? err.message : String(err),

@@ -195,12 +195,6 @@ export function SettingsMenu() {
         description: "You can now accept payments for invoices.",
       });
     },
-    onError: () => {
-      toast({
-        title: "Failed to connect Stripe",
-        variant: "error",
-      });
-    },
   });
 
   const disconnectStripeMutation = useMutation(

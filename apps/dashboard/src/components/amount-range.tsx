@@ -1,172 +1,153 @@
 "use client";
 
-import { useSliderWithInput } from "@/hooks/use-slider-with-input";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { CurrencyInput } from "@midday/ui/currency-input";
 import { Label } from "@midday/ui/label";
-import { Slider } from "@midday/ui/slider";
-import { useQuery } from "@tanstack/react-query";
-import { parseAsArrayOf, parseAsInteger, useQueryState } from "nuqs";
-import { useEffect, useRef } from "react";
+import { RadioGroup, RadioGroupItem } from "@midday/ui/radio-group";
+import {
+  parseAsArrayOf,
+  parseAsInteger,
+  parseAsStringLiteral,
+  useQueryState,
+} from "nuqs";
+import { useState } from "react";
+
+type TypeValue = "income" | "expense" | "any";
 
 export function AmountRange() {
-  const minInputRef = useRef<HTMLInputElement>(null);
-  const maxInputRef = useRef<HTMLInputElement>(null);
-
-  const trpc = useTRPC();
-
-  const { data: items, isLoading } = useQuery(
-    trpc.transactions.getAmountRange.queryOptions(),
-  );
-
+  // URL state for filters
   const [amountRange, setAmountRange] = useQueryState(
     "amount_range",
     parseAsArrayOf(parseAsInteger),
   );
+  const [typeFilter, setTypeFilter] = useQueryState(
+    "type",
+    parseAsStringLiteral(["income", "expense"] as const),
+  );
 
-  const minValue = items?.length
-    ? Math.min(...items.map((item) => Number(item.amount) || 0))
-    : 0;
-  const maxValue = items?.length
-    ? Math.max(...items.map((item) => Number(item.amount) || 0))
-    : 0;
+  // Local state for inputs (before applying)
+  const [typeValue, setTypeValue] = useState<TypeValue>(
+    typeFilter === "income"
+      ? "income"
+      : typeFilter === "expense"
+        ? "expense"
+        : "any",
+  );
+  const [minAmount, setMinAmount] = useState<string>(
+    amountRange?.[0]?.toString() ?? "",
+  );
+  const [maxAmount, setMaxAmount] = useState<string>(
+    amountRange?.[1]?.toString() ?? "",
+  );
 
-  const {
-    sliderValue,
-    inputValues,
-    validateAndUpdateValue,
-    handleInputChange,
-    handleSliderChange,
-    setValues,
-  } = useSliderWithInput({
-    minValue,
-    maxValue,
-    initialValue: amountRange || [minValue, maxValue],
-  });
-
-  // Initialize with defaults only if amountRange is not set from URL
-  useEffect(() => {
-    if (minValue !== undefined && maxValue !== undefined && !amountRange) {
-      setValues([minValue, maxValue]);
+  const handleApplyFilters = () => {
+    // Set type filter
+    if (typeValue === "any") {
+      setTypeFilter(null);
+    } else {
+      setTypeFilter(typeValue);
     }
-  }, [minValue, maxValue, setValues, amountRange]);
 
-  // Sync sliderValue when amountRange changes from URL
-  useEffect(() => {
-    if (amountRange && amountRange.length === 2) {
-      setValues(amountRange);
+    // Set amount range
+    const min = minAmount ? Number.parseFloat(minAmount) : null;
+    const max = maxAmount ? Number.parseFloat(maxAmount) : null;
+
+    if (min !== null || max !== null) {
+      setAmountRange([min ?? 0, max ?? Number.MAX_SAFE_INTEGER]);
+    } else {
+      setAmountRange(null);
     }
-  }, [amountRange, setValues]);
-
-  if (isLoading) return null;
-
-  const handleSliderValueChange = (values: number[]) => {
-    handleSliderChange(values);
   };
-
-  const countItemsInRange = (min: number, max: number) => {
-    if (!items) return 0;
-    const actualMin = Math.min(min, max);
-    const actualMax = Math.max(min, max);
-
-    return items.filter((item) => {
-      const amount =
-        typeof item.amount === "number" ? item.amount : Number(item.amount);
-      return (
-        !Number.isNaN(amount) && amount >= actualMin && amount <= actualMax
-      );
-    }).length;
-  };
-
-  // Use sliderValue for live count as user interacts with slider
-  const countMin = sliderValue[0] ?? minValue;
-  const countMax = sliderValue[1] ?? maxValue;
-  const totalCount = countItemsInRange(countMin, countMax);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <form
-          className="flex w-full items-center justify-between gap-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (sliderValue[0] !== undefined && sliderValue[1] !== undefined) {
-              setAmountRange([sliderValue[0], sliderValue[1]]);
-            }
-          }}
+    <div className="space-y-5">
+      {/* Direction */}
+      <div className="space-y-3">
+        <Label className="text-xs text-[#878787]">Direction</Label>
+        <RadioGroup
+          value={typeValue}
+          onValueChange={(value) => setTypeValue(value as TypeValue)}
+          className="space-y-2"
         >
-          <div className="space-y-1 flex-1">
-            <Label htmlFor="min-amount" className="text-xs">
-              Min amount
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="income" id="type-in" />
+            <Label
+              htmlFor="type-in"
+              className="text-sm font-normal cursor-pointer"
+            >
+              In{" "}
+              <span className="text-[#878787]">(e.g. deposits, refunds)</span>
             </Label>
-
-            <CurrencyInput
-              className="w-full text-xs"
-              type="text"
-              inputMode="decimal"
-              value={inputValues[0] || ""}
-              onChange={(e) => handleInputChange(e, 0)}
-              onFocus={(e) => e.target.select()}
-              onBlur={() => validateAndUpdateValue(inputValues[0] ?? "", 0)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  validateAndUpdateValue(inputValues[0] ?? "", 0);
-                  maxInputRef.current?.focus();
-                }
-              }}
-              aria-label="Enter minimum amount"
-              getInputRef={minInputRef}
-            />
           </div>
-          <div className="space-y-1 flex-1">
-            <Label htmlFor="max-amount" className="text-xs">
-              Max amount
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="expense" id="type-out" />
+            <Label
+              htmlFor="type-out"
+              className="text-sm font-normal cursor-pointer"
+            >
+              Out{" "}
+              <span className="text-[#878787]">(e.g. purchases, charges)</span>
             </Label>
-
-            <CurrencyInput
-              className="w-full text-xs"
-              type="text"
-              inputMode="decimal"
-              value={inputValues[1] || ""}
-              onChange={(e) => handleInputChange(e, 1)}
-              onFocus={(e) => e.target.select()}
-              onBlur={() => validateAndUpdateValue(inputValues[1] ?? "", 1)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  validateAndUpdateValue(inputValues[1] ?? "", 1);
-                }
-              }}
-              aria-label="Enter maximum amount"
-              getInputRef={maxInputRef}
-            />
           </div>
-        </form>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="any" id="type-any" />
+            <Label
+              htmlFor="type-any"
+              className="text-sm font-normal cursor-pointer"
+            >
+              Not specified <span className="text-[#878787]">(both)</span>
+            </Label>
+          </div>
+        </RadioGroup>
       </div>
 
-      <Slider
-        value={sliderValue}
-        onValueChange={handleSliderValueChange}
-        min={minValue}
-        max={maxValue}
-        aria-label="Amount range"
-      />
+      {/* At least... */}
+      <div className="space-y-2">
+        <Label className="text-xs text-[#878787]">At least...</Label>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#878787] text-sm">
+            ≥
+          </span>
+          <CurrencyInput
+            className="w-full pl-7 text-sm"
+            type="text"
+            inputMode="decimal"
+            placeholder="0.00"
+            value={minAmount}
+            onChange={(e) => setMinAmount(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            aria-label="Minimum amount"
+          />
+        </div>
+      </div>
 
+      {/* No more than... */}
+      <div className="space-y-2">
+        <Label className="text-xs text-[#878787]">No more than...</Label>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#878787] text-sm">
+            ≤
+          </span>
+          <CurrencyInput
+            className="w-full pl-7 text-sm"
+            type="text"
+            inputMode="decimal"
+            placeholder="0.00"
+            value={maxAmount}
+            onChange={(e) => setMaxAmount(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            aria-label="Maximum amount"
+          />
+        </div>
+      </div>
+
+      {/* Apply button */}
       <Button
         className="w-full text-xs"
         variant="outline"
-        disabled={totalCount === 0}
-        onClick={() => {
-          if (sliderValue[0] !== undefined && sliderValue[1] !== undefined) {
-            setAmountRange([sliderValue[0], sliderValue[1]]);
-          }
-        }}
+        onClick={handleApplyFilters}
       >
-        {totalCount === 0
-          ? "No transactions"
-          : `Show ${totalCount} transactions`}
+        Apply
       </Button>
     </div>
   );

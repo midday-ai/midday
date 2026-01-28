@@ -1,4 +1,5 @@
 import { Inbox } from "@/components/inbox";
+import { InboxConnectedEmpty } from "@/components/inbox/inbox-empty";
 import { InboxGetStarted } from "@/components/inbox/inbox-get-started";
 import { InboxViewSkeleton } from "@/components/inbox/inbox-skeleton";
 import { InboxView } from "@/components/inbox/inbox-view";
@@ -23,20 +24,43 @@ export default async function Page(props: Props) {
   const filter = loadInboxFilterParams(searchParams);
   const params = loadInboxParams(searchParams);
 
-  const data = await queryClient.fetchInfiniteQuery(
-    trpc.inbox.get.infiniteQueryOptions({
-      order: params.order,
-      sort: params.sort,
-      ...filter,
-    }),
-  );
+  // Fetch inbox data and accounts in parallel
+  const [data, accounts] = await Promise.all([
+    queryClient.fetchInfiniteQuery(
+      trpc.inbox.get.infiniteQueryOptions({
+        order: params.order,
+        sort: params.sort,
+        ...filter,
+      }),
+    ),
+    queryClient.fetchQuery(trpc.inboxAccounts.get.queryOptions()),
+  ]);
+
+  const hasInboxItems = (data?.pages?.[0]?.data?.length ?? 0) > 0;
+  const hasConnectedAccounts = accounts && accounts.length > 0;
+  const hasFilter = Object.values(filter).some((value) => value !== null);
+
+  // No accounts and no items (and no filter) -> show get started
+  if (!hasConnectedAccounts && !hasInboxItems && !hasFilter) {
+    return <InboxGetStarted />;
+  }
+
+  // Accounts exist and have been synced, but no items (and no filter) -> show connected empty
+  // Check if at least one account has been synced (has lastAccessed set)
+  const hasSyncedAccounts = accounts?.some((a) => a.lastAccessed !== null);
 
   if (
-    !params.connected &&
-    data.pages[0]?.data.length === 0 &&
-    !Object.values(filter).some((value) => value !== null)
+    hasConnectedAccounts &&
+    hasSyncedAccounts &&
+    !hasInboxItems &&
+    !hasFilter &&
+    !params.connected
   ) {
-    return <InboxGetStarted />;
+    return (
+      <Inbox>
+        <InboxConnectedEmpty />
+      </Inbox>
+    );
   }
 
   return (

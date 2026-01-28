@@ -18,7 +18,6 @@ import {
   getSimilarTransactions,
   getTransactionById,
   getTransactions,
-  getTransactionsAmountFullRangeData,
   getTransactionsReadyForExportCount,
   moveTransactionToReview,
   searchTransactionMatch,
@@ -55,10 +54,6 @@ export const transactionsRouter = createTRPCRouter({
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return deleteTransactions(db, { ids: input, teamId: teamId! });
     }),
-
-  getAmountRange: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
-    return getTransactionsAmountFullRangeData(db, teamId!);
-  }),
 
   getReviewCount: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
     return getTransactionsReadyForExportCount(db, teamId!);

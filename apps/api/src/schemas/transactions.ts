@@ -188,7 +188,7 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Transaction type to filter by. 'income' for money received, 'expense' for money spent",
+        "Filter by transaction type. 'income' for money received, 'expense' for money spent",
       example: "expense",
       param: {
         in: "query",

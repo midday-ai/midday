@@ -22,6 +22,7 @@
     ".": "./src/index.ts",
     "./types": "./src/types.ts",
     "./logos": "./src/logos.ts",
+    "./oauth-errors": "./src/oauth-errors.ts",
     "./slack": "./src/slack/index.ts",
     "./slack/server": "./src/slack/server/index.ts",
     "./slack-notifications": "./src/slack/server/notifications/transactions.ts",

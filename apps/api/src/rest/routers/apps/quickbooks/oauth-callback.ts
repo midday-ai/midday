@@ -1,5 +1,10 @@
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
+import {
+  buildErrorRedirect,
+  buildSuccessRedirect,
+  mapOAuthError,
+} from "@api/rest/utils/oauth";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
   QUICKBOOKS_SCOPES,
@@ -95,15 +100,21 @@ app.openapi(
     const dashboardUrl =
       process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
 
+    // Try to decrypt state first to determine redirect target (apps vs settings)
+    const parsedState = decryptAccountingOAuthState(state);
+    const source = parsedState?.source;
+
     // Handle OAuth errors (user denied access, etc.)
     if (error || !code || !realmId) {
-      logger.info("QuickBooks OAuth error or cancelled", { error });
-      return c.redirect(`${dashboardUrl}/settings/apps?connected=false`, 302);
+      const errorCode = mapOAuthError(error);
+      logger.info("QuickBooks OAuth error or cancelled", { error, errorCode });
+      return c.redirect(
+        buildErrorRedirect(dashboardUrl, errorCode, "quickbooks", source),
+        302,
+      );
     }
 
-    // Decrypt and validate state - this ensures teamId hasn't been tampered with
-    const parsedState = decryptAccountingOAuthState(state);
-
+    // Validate state
     if (!parsedState || parsedState.provider !== "quickbooks") {
       throw new HTTPException(400, {
         message: "Invalid or expired state. Please try connecting again.",
@@ -156,16 +167,8 @@ app.openapi(
       });
 
       // Redirect based on source
-      if (parsedState.source === "apps") {
-        return c.redirect(
-          `${dashboardUrl}/all-done?event=app_oauth_completed`,
-          302,
-        );
-      }
-
-      // Settings flow
       return c.redirect(
-        `${dashboardUrl}/settings/apps?connected=true&provider=quickbooks`,
+        buildSuccessRedirect(dashboardUrl, "quickbooks", parsedState.source),
         302,
       );
     } catch (err) {
@@ -174,7 +177,15 @@ app.openapi(
         stack: err instanceof Error ? err.stack : undefined,
       });
 
-      return c.redirect(`${dashboardUrl}/settings/apps?connected=false`, 302);
+      return c.redirect(
+        buildErrorRedirect(
+          dashboardUrl,
+          "token_exchange_failed",
+          "quickbooks",
+          parsedState.source,
+        ),
+        302,
+      );
     }
   },
 );
