@@ -1,3 +1,5 @@
+import { format, parseISO } from "date-fns";
+
 interface InvoiceSchemaProps {
   invoiceNumber: string;
   teamName: string;
@@ -22,9 +24,7 @@ export function InvoiceSchema({
   link,
   customerId,
 }: InvoiceSchemaProps) {
-  // Extract YYYY-MM-DD from ISO string directly (avoids timezone shifts)
-  // Input: "2026-02-15T00:00:00.000Z" -> Output: "2026-02-15"
-  const formattedDueDate = dueDate.split("T")[0];
+  const formattedDueDate = format(parseISO(dueDate), "yyyy-MM-dd");
 
   const schema = {
     "@context": "http://schema.org",
@@ -49,7 +49,5 @@ export function InvoiceSchema({
     },
   };
 
-  return (
-    <script type="application/ld+json">{JSON.stringify(schema)}</script>
-  );
+  return <script type="application/ld+json">{JSON.stringify(schema)}</script>;
 }
