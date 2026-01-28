@@ -101,7 +101,7 @@ export function FileStorage() {
               <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
                 Files
               </p>
-              <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[12rem] leading-tight text-center">
+              <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[11rem] leading-tight text-center">
                 <span className="text-foreground block">
                   Everything in one place
                 </span>

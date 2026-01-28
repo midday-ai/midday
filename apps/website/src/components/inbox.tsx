@@ -107,7 +107,7 @@ export function Inbox() {
               <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
                 Inbox
               </p>
-              <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[12rem] leading-tight text-center">
+              <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[11rem] leading-tight text-center">
                 <span className="text-foreground block">Receipts matched</span>
               </h1>
 
