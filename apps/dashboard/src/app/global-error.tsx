@@ -23,12 +23,13 @@ export default function GlobalError({
   return (
     <html lang="en" className="dark">
       <body className="bg-background text-foreground antialiased">
-        <div className="min-h-screen flex flex-col items-center justify-center p-4">
-          <div className="max-w-md w-full text-center">
-            <h1 className="text-2xl font-medium mb-3">Something went wrong</h1>
-            <p className="text-[#878787] text-sm leading-relaxed mb-6">
-              We've been notified and are looking into it. If this issue
-              persists, please reach out to our support team.
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="max-w-md w-full text-center px-4">
+            <h2 className="font-medium mb-4">Something went wrong</h2>
+            <p className="text-sm text-[#878787] mb-6">
+              We've been notified and are looking into it.
+              <br />
+              If this issue persists, please reach out to our support team.
             </p>
 
             <CopyInput value={SUPPORT_EMAIL} />

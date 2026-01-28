@@ -307,7 +307,10 @@ export async function getTransactions(
     );
   }
 
-  // Amount range filter
+  // Amount range filter - behavior depends on type filter:
+  // - type="expense": filter on negative amounts (-max to -min)
+  // - type="income": filter on positive amounts (min to max)
+  // - type=null: use ABS() to include both directions
   if (
     filterAmountRange &&
     filterAmountRange.length === 2 &&
@@ -322,13 +325,32 @@ export async function getTransactions(
         [minAmount, maxAmount] = [maxAmount, minAmount];
       }
 
-      // Use COALESCE to handle multi-currency transactions
-      whereConditions.push(
-        sql`COALESCE(${transactions.baseAmount}, ${transactions.amount}) >= ${minAmount}`,
-      );
-      whereConditions.push(
-        sql`COALESCE(${transactions.baseAmount}, ${transactions.amount}) <= ${maxAmount}`,
-      );
+      if (type === "expense") {
+        // For expenses (negative amounts), filter between -maxAmount and -minAmount
+        // e.g., range [50, 100] filters amounts between -100 and -50
+        whereConditions.push(
+          sql`COALESCE(${transactions.baseAmount}, ${transactions.amount}) >= ${-maxAmount}`,
+        );
+        whereConditions.push(
+          sql`COALESCE(${transactions.baseAmount}, ${transactions.amount}) <= ${-minAmount}`,
+        );
+      } else if (type === "income") {
+        // For income (positive amounts), filter between minAmount and maxAmount
+        whereConditions.push(
+          sql`COALESCE(${transactions.baseAmount}, ${transactions.amount}) >= ${minAmount}`,
+        );
+        whereConditions.push(
+          sql`COALESCE(${transactions.baseAmount}, ${transactions.amount}) <= ${maxAmount}`,
+        );
+      } else {
+        // For "Any" type, use ABS() to include both positive and negative amounts
+        whereConditions.push(
+          sql`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount})) >= ${minAmount}`,
+        );
+        whereConditions.push(
+          sql`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount})) <= ${maxAmount}`,
+        );
+      }
     }
   }
 
@@ -934,27 +956,6 @@ export async function deleteTransactions(
     .returning({
       id: transactions.id,
     });
-}
-
-export async function getTransactionsAmountFullRangeData(
-  db: Database,
-  teamId: string,
-) {
-  // Use COALESCE(baseAmount, amount) to match the backend filter logic
-  // This ensures the frontend count matches the actual filtered results
-  return db
-    .select({
-      amount: sql<number>`COALESCE(${transactions.baseAmount}, ${transactions.amount})`,
-      currency: sql<string>`COALESCE(${transactions.baseCurrency}, ${transactions.currency})`,
-    })
-    .from(transactions)
-    .where(
-      and(
-        eq(transactions.teamId, teamId),
-        eq(transactions.internal, false),
-        ne(transactions.status, "excluded"),
-      ),
-    );
 }
 
 type GetSimilarTransactionsParams = {

@@ -31,6 +31,7 @@ export const transactionFilterParamsSchema = {
     ] as const),
   ),
   manual: parseAsStringLiteral(["exclude", "include"] as const),
+  type: parseAsStringLiteral(["income", "expense"] as const),
 };
 
 export function useTransactionFilterParams() {

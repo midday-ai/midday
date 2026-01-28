@@ -15,6 +15,8 @@ export type TransactionFilters = {
     | ("completed" | "uncompleted" | "archived" | "excluded" | "exported")[]
     | null;
   manual?: "include" | "exclude" | null;
+  /** Type filter: "income" for deposits/refunds, "expense" for purchases/charges */
+  type?: "income" | "expense" | null;
 };
 
 // Generic filter state type
@@ -43,6 +45,7 @@ export const EMPTY_FILTER_STATE: TransactionFilters = {
   recurring: null,
   statuses: null,
   manual: null,
+  type: null,
 };
 
 /**

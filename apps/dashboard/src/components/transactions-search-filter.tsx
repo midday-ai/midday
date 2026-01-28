@@ -376,6 +376,7 @@ export function TransactionsSearchFilter() {
       statuses: filter.statuses ?? undefined,
       recurring: filter.recurring ?? undefined,
       manual: filter.manual ?? undefined,
+      type: filter.type ?? undefined,
     };
 
     // Filter out undefined and null values

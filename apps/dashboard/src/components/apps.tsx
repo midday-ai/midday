@@ -1,5 +1,6 @@
 "use client";
 
+import { AppConnectionToast } from "@/components/app-connection-toast";
 import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -180,6 +181,8 @@ export function Apps() {
 
   return (
     <>
+      <AppConnectionToast />
+
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 mx-auto mt-8">
         {filteredApps.map((app) => (
           <UnifiedAppComponent

@@ -22,24 +22,26 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <div className="h-[calc(100vh-200px)] w-full">
-      <div className="mt-8 flex flex-col items-center justify-center h-full">
-        <div className="flex justify-between items-center flex-col mt-8 text-center mb-8">
-          <h2 className="font-medium mb-4">Something went wrong</h2>
-          <p className="text-sm text-[#878787]">
-            We've been notified and are looking into it.
-            <br />
-            If this issue persists, please reach out to our support team.
-          </p>
-        </div>
+    <div className="h-[calc(100vh-200px)] w-full flex items-center justify-center">
+      <div className="max-w-md w-full text-center px-4">
+        <h2 className="font-medium mb-4">Something went wrong</h2>
+        <p className="text-sm text-[#878787] mb-6">
+          We've been notified and are looking into it.
+          <br />
+          If this issue persists, please reach out to our support team.
+        </p>
 
         <CopyInput value={SUPPORT_EMAIL} />
 
-        <div className="flex space-x-4 mt-6">
-          <Button onClick={() => reset()} variant="outline">
-            Try again
-          </Button>
-        </div>
+        {error.digest && (
+          <p className="text-xs text-[#4a4a4a] mt-4">
+            Error ID: {error.digest}
+          </p>
+        )}
+
+        <Button onClick={() => reset()} variant="outline" className="mt-6">
+          Try again
+        </Button>
       </div>
     </div>
   );

@@ -9,6 +9,13 @@ interface UseAppOAuthOptions {
   onError?: (error: Error) => void;
 }
 
+/**
+ * Message payload received from OAuth popup
+ */
+interface OAuthEventMessage {
+  type: "app_oauth_completed" | "app_oauth_error";
+}
+
 const CHANNEL_NAME = "midday_oauth_complete";
 const POPUP_WIDTH = 600;
 const POPUP_HEIGHT = 800;
@@ -46,6 +53,15 @@ export function useAppOAuth({
       setIsLoading(false);
     };
 
+    const handleOAuthError = () => {
+      if (oauthCompleted) return;
+      oauthCompleted = true;
+      cleanup();
+      popup?.close();
+      onError?.(new Error("OAuth connection failed"));
+      setIsLoading(false);
+    };
+
     const cleanup = () => {
       checkInterval && clearInterval(checkInterval);
       popupClosedTimeout && clearTimeout(popupClosedTimeout);
@@ -57,10 +73,22 @@ export function useAppOAuth({
 
     cleanupRef.current = cleanup;
 
-    // Set up message listeners
+    // Set up message listeners - handle both old string format and new object format
     const messageListener = (e: MessageEvent) => {
+      // Legacy string format for backwards compatibility
       if (e.data === "app_oauth_completed") {
         handleOAuthComplete();
+        return;
+      }
+
+      // New object format with error details
+      if (typeof e.data === "object" && e.data !== null) {
+        const message = e.data as OAuthEventMessage;
+        if (message.type === "app_oauth_completed") {
+          handleOAuthComplete();
+        } else if (message.type === "app_oauth_error") {
+          handleOAuthError();
+        }
       }
     };
 

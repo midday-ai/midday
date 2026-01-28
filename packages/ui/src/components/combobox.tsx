@@ -179,13 +179,14 @@ export const Combobox = ({
               })}
 
               {onCreate &&
+                (inputValue.trim() || options?.length === 0) &&
                 !options?.find(
                   (o) => o.name.toLowerCase() === inputValue.toLowerCase(),
                 ) && (
                   <CommandItem
-                    key={inputValue}
-                    value={inputValue}
-                    onSelect={() => onCreate(inputValue)}
+                    key={inputValue || "create-new"}
+                    value={inputValue || "create-new"}
+                    onSelect={() => inputValue.trim() && onCreate(inputValue)}
                     onMouseDown={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -193,8 +194,10 @@ export const Combobox = ({
                   >
                     {CreateComponent ? (
                       <CreateComponent value={inputValue} />
-                    ) : (
+                    ) : inputValue.trim() ? (
                       `Create "${inputValue}"`
+                    ) : (
+                      "Start typing to create new"
                     )}
                   </CommandItem>
                 )}

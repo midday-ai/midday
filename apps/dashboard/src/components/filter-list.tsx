@@ -19,7 +19,8 @@ type FilterKey =
   | "assignees"
   | "owners"
   | "status"
-  | "manual";
+  | "manual"
+  | "type";
 
 type FilterValue = {
   start: string;
@@ -36,6 +37,7 @@ type FilterValue = {
   owners: string[];
   status: string;
   manual: string;
+  type: "income" | "expense";
 };
 
 interface FilterValueProps {
@@ -195,6 +197,13 @@ export function FilterList({
       case "manual": {
         const manualValue = value as FilterValue["manual"];
         return manualFilters?.find((filter) => filter.id === manualValue)?.name;
+      }
+
+      case "type": {
+        const typeValue = value as FilterValue["type"];
+        if (typeValue === "income") return "In";
+        if (typeValue === "expense") return "Out";
+        return null;
       }
 
       default:
