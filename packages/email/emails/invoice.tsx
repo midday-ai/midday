@@ -31,12 +31,11 @@ export const InvoiceEmail = ({
   customerName = "Customer",
   teamName = "Midday",
   link = "https://app.midday.ai/i/1234567890",
-  // Gmail structured data fields with mock defaults for preview
-  invoiceNumber = "INV-0042",
-  amount = 1500,
-  currency = "USD",
-  dueDate = "2026-02-15T00:00:00.000Z",
-  customerId = "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  invoiceNumber,
+  amount,
+  currency,
+  dueDate,
+  customerId,
 }: Props) => {
   const text = `You've Received an Invoice from ${teamName}`;
   const themeClasses = getEmailThemeClasses();

@@ -32,11 +32,10 @@ export const InvoiceReminderEmail = ({
   teamName = "Midday",
   invoiceNumber = "INV-0001",
   link = "https://app.midday.ai/i/1234567890",
-  // Gmail structured data fields with mock defaults for preview
-  amount = 1500,
-  currency = "USD",
-  dueDate = "2026-02-15T00:00:00.000Z",
-  customerId = "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  amount,
+  currency,
+  dueDate,
+  customerId,
 }: Props) => {
   const text = `Reminder: Payment for ${invoiceNumber}`;
   const themeClasses = getEmailThemeClasses();
