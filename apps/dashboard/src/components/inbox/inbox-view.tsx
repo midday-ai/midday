@@ -83,6 +83,11 @@ export function InboxView() {
     if (wasJustConnected && (tableData.length > 0 || hasTimedOut)) {
       setWasJustConnected(false);
     }
+    // Reset hasTimedOut when data arrives after timeout - prevents showing
+    // InboxConnectedEmpty if user later deletes all items
+    if (hasTimedOut && tableData.length > 0) {
+      setHasTimedOut(false);
+    }
   }, [wasJustConnected, tableData.length, hasTimedOut]);
 
   // Timeout configuration - wait 1 minute for sync to complete

@@ -18,7 +18,7 @@ type ProviderConfig = {
   supportsReturnTo: boolean;
 };
 
-export const OAUTH_PROVIDERS: Record<OAuthProvider, ProviderConfig> = {
+const OAUTH_PROVIDERS: Record<OAuthProvider, ProviderConfig> = {
   google: {
     name: "Google",
     icon: "Google",
