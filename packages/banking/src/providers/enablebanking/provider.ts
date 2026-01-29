@@ -1,3 +1,4 @@
+import { bankingCache, CACHE_TTL } from "../../cache";
 import type {
   DeleteAccountsRequest,
   DeleteConnectionRequest,
@@ -9,6 +10,7 @@ import type {
   GetInstitutionsRequest,
   GetTransactionsRequest,
   GetTransactionsResponse,
+  Institution,
 } from "../../types";
 import type { Provider } from "../interface";
 import { EnableBankingApi } from "./api";
@@ -32,8 +34,51 @@ export class EnableBankingProvider implements Provider {
   }
 
   async getInstitutions(params: GetInstitutionsRequest) {
+    const cacheKey = params?.countryCode || "all";
+
+    // Check cache first
+    const cached = await bankingCache.getKeyed<Institution[]>(
+      "enablebanking",
+      "institutions",
+      cacheKey,
+    );
+
+    if (cached) {
+      return cached;
+    }
+
     const response = await this.#api.getInstitutions();
-    return response.map(transformInstitution);
+    const institutions = response.map(transformInstitution);
+
+    // Cache all institutions, then filter by country if needed
+    await bankingCache.setKeyed(
+      "enablebanking",
+      "institutions",
+      "all",
+      institutions,
+      CACHE_TTL.INSTITUTIONS,
+    );
+
+    // If country code is specified, filter and cache that too
+    if (params?.countryCode) {
+      const countryCode = params.countryCode.toLowerCase();
+      const filtered = institutions.filter((inst) =>
+        // EnableBanking institutions have country in the name or ID
+        inst.id.includes(countryCode),
+      );
+
+      await bankingCache.setKeyed(
+        "enablebanking",
+        "institutions",
+        cacheKey,
+        filtered,
+        CACHE_TTL.INSTITUTIONS,
+      );
+
+      return filtered;
+    }
+
+    return institutions;
   }
 
   async getAccounts({ id }: GetAccountsRequest): Promise<GetAccountsResponse> {

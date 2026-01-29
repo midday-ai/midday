@@ -37,13 +37,13 @@ export async function enqueueBatchProcessMatching(
 export async function enqueueInitialSetup(
   payload: InboxProviderInitialSetupPayload,
 ) {
-  return triggerJob("initial-setup", payload, "inbox-provider");
+  return triggerJob("initial-inbox-setup", payload, "inbox-provider");
 }
 
 export async function enqueueSyncScheduler(
   payload: InboxProviderSyncAccountPayload,
 ) {
-  return triggerJob("sync-scheduler", payload, "inbox-provider");
+  return triggerJob("sync-inbox-account", payload, "inbox-provider");
 }
 
 export async function enqueueProcessTransactionAttachment(

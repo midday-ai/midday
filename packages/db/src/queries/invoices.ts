@@ -1584,3 +1584,94 @@ export async function getInvoicePaymentAnalysis(
     },
   };
 }
+
+// ============================================================================
+// Invoice Status Checking Queries
+// ============================================================================
+
+export type GetInvoiceForStatusCheckParams = {
+  invoiceId: string;
+};
+
+/**
+ * Get invoice data needed for status checking
+ */
+export async function getInvoiceForStatusCheck(
+  db: Database,
+  params: GetInvoiceForStatusCheckParams,
+) {
+  const [result] = await db
+    .select({
+      id: invoices.id,
+      status: invoices.status,
+      dueDate: invoices.dueDate,
+      currency: invoices.currency,
+      amount: invoices.amount,
+      teamId: invoices.teamId,
+      filePath: invoices.filePath,
+      invoiceNumber: invoices.invoiceNumber,
+      fileSize: invoices.fileSize,
+      template: invoices.template,
+      customerName: invoices.customerName,
+    })
+    .from(invoices)
+    .where(eq(invoices.id, params.invoiceId));
+
+  return result;
+}
+
+export type GetUnpaidInvoicesParams = {
+  statuses?: ("unpaid" | "overdue")[];
+};
+
+/**
+ * Get all unpaid/overdue invoices for status checking
+ */
+export async function getUnpaidInvoices(
+  db: Database,
+  params: GetUnpaidInvoicesParams = {},
+) {
+  const { statuses = ["unpaid", "overdue"] } = params;
+
+  return db
+    .select({
+      id: invoices.id,
+    })
+    .from(invoices)
+    .where(inArray(invoices.status, statuses));
+}
+
+export type UpdateInvoiceStatusParams = {
+  invoiceId: string;
+  teamId: string;
+  status: "paid" | "overdue";
+  paidAt?: string;
+};
+
+/**
+ * Update invoice status (for automated status checking)
+ * Returns the updated invoice data needed for notifications
+ */
+export async function updateInvoiceStatusOnly(
+  db: Database,
+  params: UpdateInvoiceStatusParams,
+) {
+  const { invoiceId, teamId, status, paidAt } = params;
+
+  const [result] = await db
+    .update(invoices)
+    .set({
+      status,
+      ...(paidAt && { paidAt }),
+    })
+    .where(and(eq(invoices.id, invoiceId), eq(invoices.teamId, teamId)))
+    .returning({
+      id: invoices.id,
+      invoiceNumber: invoices.invoiceNumber,
+      status: invoices.status,
+      teamId: invoices.teamId,
+      customerName: invoices.customerName,
+    });
+
+  return result;
+}

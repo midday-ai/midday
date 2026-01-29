@@ -83,8 +83,8 @@ const inboxProviderWorkerOptions: WorkerOptions = {
 
 /**
  * Inbox provider queue configuration
- * Gmail provider sync jobs
- * Jobs: initial-setup, scheduler, sync-account
+ * Gmail/Outlook provider sync jobs
+ * Jobs: initial-inbox-setup, sync-inbox-account
  */
 export const inboxProviderQueueConfig: QueueConfig = {
   name: "inbox-provider",

@@ -68,6 +68,8 @@ export const bankingCache = new BankingCache();
 export const CACHE_TTL = {
   ACCESS_TOKEN: 3600, // 1 hour
   REFRESH_TOKEN: 86400, // 24 hours
-  INSTITUTIONS: 3600, // 1 hour
+  INSTITUTIONS: 86400, // 24 hours (increased - rarely changes)
   RATES: 3600, // 1 hour
+  BALANCE: 300, // 5 minutes (for dashboard display)
+  CONNECTION_STATUS: 60, // 1 minute
 } as const;

@@ -57,6 +57,7 @@ export const getTeamById = async (db: Database, id: string) => {
       exportSettings: teams.exportSettings,
       stripeAccountId: teams.stripeAccountId,
       stripeConnectStatus: teams.stripeConnectStatus,
+      createdAt: teams.createdAt,
     })
     .from(teams)
     .where(eq(teams.id, id));

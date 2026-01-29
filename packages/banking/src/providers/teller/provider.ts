@@ -1,3 +1,4 @@
+import { bankingCache, CACHE_TTL } from "../../cache";
 import type {
   DeleteAccountsRequest,
   DeleteConnectionRequest,
@@ -5,6 +6,7 @@ import type {
   GetAccountsRequest,
   GetConnectionStatusRequest,
   GetTransactionsRequest,
+  Institution,
 } from "../../types";
 import type { Provider } from "../interface";
 import { TellerApi } from "./api";
@@ -91,9 +93,30 @@ export class TellerProvider implements Provider {
   }
 
   async getInstitutions() {
-    const response = await this.#api.getInstitutions();
+    // Check cache first (Teller doesn't support country filtering)
+    const cached = await bankingCache.getKeyed<Institution[]>(
+      "teller",
+      "institutions",
+      "all",
+    );
 
-    return response.map(transformInstitution);
+    if (cached) {
+      return cached;
+    }
+
+    const response = await this.#api.getInstitutions();
+    const institutions = response.map(transformInstitution);
+
+    // Cache the transformed institutions
+    await bankingCache.setKeyed(
+      "teller",
+      "institutions",
+      "all",
+      institutions,
+      CACHE_TTL.INSTITUTIONS,
+    );
+
+    return institutions;
   }
 
   async deleteAccounts({ accessToken }: DeleteAccountsRequest) {

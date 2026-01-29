@@ -1,3 +1,4 @@
+import { createLoggerWithContext } from "@midday/logger";
 import type {
   DeleteAccountsRequest,
   DeleteConnectionRequest,
@@ -13,6 +14,8 @@ import { EnableBankingProvider } from "./enablebanking/provider";
 import { GoCardLessProvider } from "./gocardless/provider";
 import { PlaidProvider } from "./plaid/provider";
 import { TellerProvider } from "./teller/provider";
+
+const logger = createLoggerWithContext("banking");
 
 export type ProviderParams = {
   provider: Providers;
@@ -87,10 +90,10 @@ export class Provider {
   }
 
   async getTransactions(params: GetTransactionsRequest) {
-    console.log(
-      "getTransactions:",
-      `provider: ${this.#name} id: ${params.accountId}`,
-    );
+    logger.debug("getTransactions", {
+      provider: this.#name,
+      accountId: params.accountId,
+    });
 
     const data = await this.#provider?.getTransactions(params);
 
@@ -102,7 +105,7 @@ export class Provider {
   }
 
   async getAccounts(params: GetAccountsRequest) {
-    console.log("getAccounts:", `provider: ${this.#name}`);
+    logger.debug("getAccounts", { provider: this.#name });
 
     const data = await this.#provider?.getAccounts(params);
 
@@ -114,10 +117,10 @@ export class Provider {
   }
 
   async getAccountBalance(params: GetAccountBalanceRequest) {
-    console.log(
-      "getAccountBalance:",
-      `provider: ${this.#name} id: ${params.accountId}`,
-    );
+    logger.debug("getAccountBalance", {
+      provider: this.#name,
+      accountId: params.accountId,
+    });
 
     const data = await this.#provider?.getAccountBalance(params);
 
@@ -129,7 +132,7 @@ export class Provider {
   }
 
   async getInstitutions(params: GetInstitutionsRequest) {
-    console.log("getInstitutions:", `provider: ${this.#name}`);
+    logger.debug("getInstitutions", { provider: this.#name });
 
     const data = await this.#provider?.getInstitutions(params);
 
@@ -141,13 +144,13 @@ export class Provider {
   }
 
   async deleteAccounts(params: DeleteAccountsRequest) {
-    console.log("delete:", `provider: ${this.#name}`);
+    logger.debug("deleteAccounts", { provider: this.#name });
 
     return this.#provider?.deleteAccounts(params);
   }
 
   async getConnectionStatus(params: GetConnectionStatusRequest) {
-    console.log("getConnectionStatus:", `provider: ${this.#name}`);
+    logger.debug("getConnectionStatus", { provider: this.#name });
 
     const data = await this.#provider?.getConnectionStatus(params);
 
@@ -159,7 +162,7 @@ export class Provider {
   }
 
   async deleteConnection(params: DeleteConnectionRequest) {
-    console.log("deleteConnection:", `provider: ${this.#name}`);
+    logger.debug("deleteConnection", { provider: this.#name });
 
     return this.#provider?.deleteConnection(params);
   }

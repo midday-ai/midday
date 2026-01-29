@@ -1,7 +1,11 @@
-import type { AccountType } from "../../utils/account";
-import { getFileExtension, getLogoURL } from "../../utils/logo";
+import { createLoggerWithContext } from "@midday/logger";
 import { capitalCase } from "change-case";
 import { addDays } from "date-fns";
+import type { AccountType } from "../../utils/account";
+import { normalizeBalance } from "../../utils/balance";
+import { getFileExtension, getLogoURL } from "../../utils/logo";
+
+const logger = createLoggerWithContext("gocardless");
 import type {
   Account as BaseAccount,
   Balance as BaseAccountBalance,
@@ -117,7 +121,9 @@ export const transformTransactionName = (transaction: Transaction) => {
     return capitalCase(remittanceInformation);
   }
 
-  console.log("No transaction name", transaction);
+  logger.warn("No transaction name found", {
+    transactionId: transaction.internalTransactionId,
+  });
 
   // When there is no name, we use the proprietary bank transaction code (Service Fee)
   if (transaction.proprietaryBankTransactionCode) {
@@ -327,15 +333,18 @@ export const transformAccountBalance = ({
   accountType,
 }: TransformAccountBalanceParams): GetAccountBalanceResponse => {
   const rawAmount = +(balance?.amount ?? 0);
+  const currency = balance?.currency?.toUpperCase() || "EUR";
 
-  // GoCardless stores credit card debt as negative values (e.g., -1000 = $1000 owed)
-  // Normalize to positive for consistency with other providers
-  const amount =
-    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+  // Use centralized normalization for credit card balances
+  const normalized = normalizeBalance(
+    rawAmount,
+    currency,
+    accountType as AccountType || "depository",
+  );
 
   return {
-    currency: balance?.currency.toUpperCase() || "EUR",
-    amount,
+    currency: normalized.currency,
+    amount: normalized.amount,
     available_balance: getAvailableBalance(balances),
     credit_limit: null, // GoCardless only has creditLimitIncluded boolean, not actual limit
   };

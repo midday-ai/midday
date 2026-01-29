@@ -256,3 +256,269 @@ export const getBankAccountDetails = async (
     sortCode: account.sortCode,
   };
 };
+
+// ============================================================================
+// Bank Sync Queries
+// ============================================================================
+
+export type GetBankConnectionForSyncParams = {
+  connectionId: string;
+};
+
+/**
+ * Get a bank connection by ID for sync operations.
+ * Returns provider credentials needed to call banking APIs.
+ */
+export async function getBankConnectionForSync(
+  db: Database,
+  params: GetBankConnectionForSyncParams,
+) {
+  return db.query.bankConnections.findFirst({
+    where: eq(bankConnections.id, params.connectionId),
+    columns: {
+      id: true,
+      teamId: true,
+      provider: true,
+      accessToken: true,
+      referenceId: true,
+      enrollmentId: true,
+      institutionId: true,
+      status: true,
+    },
+  });
+}
+
+export type UpdateBankConnectionStatusParams = {
+  id: string;
+  status: "connected" | "disconnected" | "unknown";
+  lastAccessed?: boolean;
+};
+
+/**
+ * Update bank connection status.
+ * Optionally updates lastAccessed timestamp.
+ */
+export async function updateBankConnectionStatus(
+  db: Database,
+  params: UpdateBankConnectionStatusParams,
+) {
+  const { id, status, lastAccessed } = params;
+
+  const [result] = await db
+    .update(bankConnections)
+    .set({
+      status,
+      ...(lastAccessed && { lastAccessed: new Date().toISOString() }),
+    })
+    .where(eq(bankConnections.id, id))
+    .returning({ id: bankConnections.id });
+
+  return result;
+}
+
+export type GetBankAccountsForSyncParams = {
+  connectionId: string;
+  /** If true, only return accounts with < 4 error retries (for background sync) */
+  excludeHighErrorAccounts?: boolean;
+};
+
+/**
+ * Get bank accounts for a connection that are ready for sync.
+ * Returns accounts with their connection info for API calls.
+ */
+export async function getBankAccountsForSync(
+  db: Database,
+  params: GetBankAccountsForSyncParams,
+) {
+  const { connectionId, excludeHighErrorAccounts } = params;
+
+  const accounts = await db.query.bankAccounts.findMany({
+    where: and(
+      eq(bankAccounts.bankConnectionId, connectionId),
+      eq(bankAccounts.enabled, true),
+      eq(bankAccounts.manual, false),
+    ),
+    columns: {
+      id: true,
+      teamId: true,
+      accountId: true,
+      type: true,
+      errorRetries: true,
+    },
+    with: {
+      bankConnection: {
+        columns: {
+          id: true,
+          provider: true,
+          accessToken: true,
+          status: true,
+        },
+      },
+    },
+  });
+
+  // Filter out accounts with high error retries if requested
+  if (excludeHighErrorAccounts) {
+    return accounts.filter(
+      (account) => (account.errorRetries ?? 0) < 4,
+    );
+  }
+
+  return accounts;
+}
+
+export type CheckAllAccountsFailedParams = {
+  connectionId: string;
+};
+
+/**
+ * Check if all enabled accounts for a connection have reached the error threshold.
+ * Used to determine if the connection should be marked as disconnected.
+ */
+export async function checkAllAccountsFailed(
+  db: Database,
+  params: CheckAllAccountsFailedParams,
+): Promise<boolean> {
+  const accounts = await db.query.bankAccounts.findMany({
+    where: and(
+      eq(bankAccounts.bankConnectionId, params.connectionId),
+      eq(bankAccounts.enabled, true),
+      eq(bankAccounts.manual, false),
+    ),
+    columns: {
+      errorRetries: true,
+    },
+  });
+
+  if (accounts.length === 0) {
+    return false;
+  }
+
+  return accounts.every((account) => (account.errorRetries ?? 0) >= 3);
+}
+
+export type UpdateBankConnectionReferenceParams = {
+  connectionId: string;
+  teamId: string;
+  referenceId: string;
+};
+
+/**
+ * Update bank connection reference ID after reconnect.
+ */
+export async function updateBankConnectionReference(
+  db: Database,
+  params: UpdateBankConnectionReferenceParams,
+) {
+  const { connectionId, teamId, referenceId } = params;
+
+  const [result] = await db
+    .update(bankConnections)
+    .set({ referenceId })
+    .where(
+      and(
+        eq(bankConnections.id, connectionId),
+        eq(bankConnections.teamId, teamId),
+      ),
+    )
+    .returning({ id: bankConnections.id });
+
+  return result;
+}
+
+export type GetExistingAccountsForReconnectParams = {
+  connectionId: string;
+  teamId: string;
+};
+
+/**
+ * Get existing bank accounts for a connection during reconnect.
+ * Returns fields needed for account matching.
+ */
+export async function getExistingAccountsForReconnect(
+  db: Database,
+  params: GetExistingAccountsForReconnectParams,
+) {
+  return db.query.bankAccounts.findMany({
+    where: and(
+      eq(bankAccounts.bankConnectionId, params.connectionId),
+      eq(bankAccounts.teamId, params.teamId),
+    ),
+    columns: {
+      id: true,
+      accountReference: true,
+      type: true,
+      currency: true,
+      name: true,
+    },
+  });
+}
+
+export type UpdateBankAccountIdParams = {
+  id: string;
+  accountId: string;
+};
+
+/**
+ * Update bank account's external account ID after reconnect matching.
+ */
+export async function updateBankAccountId(
+  db: Database,
+  params: UpdateBankAccountIdParams,
+) {
+  const [result] = await db
+    .update(bankAccounts)
+    .set({ accountId: params.accountId })
+    .where(eq(bankAccounts.id, params.id))
+    .returning({ id: bankAccounts.id });
+
+  return result;
+}
+
+// ============================================================================
+// Webhook Queries
+// ============================================================================
+
+export type GetBankConnectionByReferenceIdParams = {
+  referenceId: string;
+};
+
+/**
+ * Get a bank connection by its reference ID (Plaid item_id, GoCardless requisition_id, etc.)
+ * Used by webhooks to find connections from external provider IDs.
+ */
+export async function getBankConnectionByReferenceId(
+  db: Database,
+  params: GetBankConnectionByReferenceIdParams,
+) {
+  return db.query.bankConnections.findFirst({
+    where: eq(bankConnections.referenceId, params.referenceId),
+    columns: {
+      id: true,
+      teamId: true,
+      createdAt: true,
+    },
+  });
+}
+
+export type GetBankConnectionByEnrollmentIdParams = {
+  enrollmentId: string;
+};
+
+/**
+ * Get a bank connection by its enrollment ID (Teller).
+ * Used by Teller webhooks to find connections from enrollment IDs.
+ */
+export async function getBankConnectionByEnrollmentId(
+  db: Database,
+  params: GetBankConnectionByEnrollmentIdParams,
+) {
+  return db.query.bankConnections.findFirst({
+    where: eq(bankConnections.enrollmentId, params.enrollmentId),
+    columns: {
+      id: true,
+      teamId: true,
+      createdAt: true,
+    },
+  });
+}

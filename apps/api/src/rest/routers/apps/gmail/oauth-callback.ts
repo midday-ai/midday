@@ -8,8 +8,8 @@ import {
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { InboxConnector } from "@midday/inbox/connector";
 import { decryptOAuthState } from "@midday/inbox/utils";
+import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
-import { tasks } from "@trigger.dev/sdk";
 import { HTTPException } from "hono/http-exception";
 
 const app = new OpenAPIHono<Context>();
@@ -133,9 +133,11 @@ app.openapi(
       }
 
       // Trigger initial inbox setup job
-      await tasks.trigger("initial-inbox-setup", {
-        id: account.id,
-      });
+      await triggerJob(
+        "initial-inbox-setup",
+        { inboxAccountId: account.id },
+        "inbox-provider",
+      );
 
       // Redirect based on source
       return c.redirect(

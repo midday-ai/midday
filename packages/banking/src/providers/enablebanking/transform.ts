@@ -7,6 +7,7 @@ import type {
   Transaction,
 } from "../../types";
 import type { AccountType } from "../../utils/account";
+import { normalizeBalance } from "../../utils/balance";
 import { getLogoURL } from "../../utils/logo";
 import type {
   GetAccountDetailsResponse,
@@ -97,10 +98,8 @@ export const transformAccount = (
   const accountType = getAccountType(account.cash_account_type);
   const rawAmount = +account.balance.balance_amount.amount;
 
-  // Normalize credit card balances to positive (amount owed) for consistency
-  // Enable Banking typically returns positive values, but this ensures consistency
-  const amount =
-    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+  // Use centralized normalization for credit card balances
+  const normalized = normalizeBalance(rawAmount, account.currency, accountType);
 
   return {
     id: account.uid,
@@ -117,8 +116,8 @@ export const transformAccount = (
       provider: PROVIDER_NAME,
     },
     balance: {
-      amount,
-      currency: account.currency,
+      amount: normalized.amount,
+      currency: normalized.currency,
     },
     enrollment_id: null,
     resource_id: account.identification_hash,
@@ -169,25 +168,31 @@ export const transformBalance = ({
   accountType,
 }: TransformBalanceParams): GetAccountBalanceResponse => {
   const rawAmount = +balance.balance_amount.amount;
+  const currency = balance.balance_amount.currency;
 
-  // Normalize credit card balances to positive (amount owed) for consistency
-  const amount =
-    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+  // Use centralized normalization for credit card balances
+  const normalized = normalizeBalance(
+    rawAmount,
+    currency,
+    (accountType as AccountType) || "depository",
+  );
 
   // Check if balance_type indicates available balance
   // Only match "available" types (e.g., interimAvailable, closingAvailable)
   // Apply same normalization as amount for credit accounts
-  const availableBalance = balance.balance_type
-    ?.toLowerCase()
-    .includes("available")
-    ? accountType === "credit" && rawAmount < 0
-      ? Math.abs(rawAmount)
-      : rawAmount
-    : null;
+  let availableBalance: number | null = null;
+  if (balance.balance_type?.toLowerCase().includes("available")) {
+    const availNormalized = normalizeBalance(
+      rawAmount,
+      currency,
+      (accountType as AccountType) || "depository",
+    );
+    availableBalance = availNormalized.amount;
+  }
 
   return {
-    amount,
-    currency: balance.balance_amount.currency,
+    amount: normalized.amount,
+    currency: normalized.currency,
     available_balance: availableBalance,
     credit_limit: creditLimit?.amount ? +creditLimit.amount : null,
   };

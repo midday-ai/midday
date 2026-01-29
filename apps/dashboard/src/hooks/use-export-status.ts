@@ -1,62 +1,56 @@
-import { useRealtimeRun } from "@trigger.dev/react-hooks";
+"use client";
+
+import { useJobStatus } from "@/hooks/use-job-status";
 import { useEffect, useState } from "react";
 
 type UseExportStatusProps = {
-  runId?: string;
-  accessToken?: string;
+  jobId?: string;
 };
 
-export function useExportStatus({
-  runId: initialRunId,
-  accessToken: initialAccessToken,
-}: UseExportStatusProps = {}) {
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    initialAccessToken,
-  );
-  const [runId, setRunId] = useState<string | undefined>(initialRunId);
+export function useExportStatus({ jobId: initialJobId }: UseExportStatusProps = {}) {
+  const [jobId, setJobId] = useState<string | undefined>(initialJobId);
   const [status, setStatus] = useState<
     "FAILED" | "IN_PROGRESS" | "COMPLETED" | null
   >(null);
+  const [result, setResult] = useState<unknown>(null);
 
-  const [_, setProgress] = useState<number>(0);
-
-  const [result, setResult] = useState<any>(null);
-
-  const { run, error } = useRealtimeRun(runId, {
-    enabled: !!runId && !!accessToken,
-    accessToken,
+  const {
+    status: jobStatus,
+    progress,
+    result: jobResult,
+    error,
+  } = useJobStatus({
+    jobId,
+    enabled: !!jobId,
   });
 
   useEffect(() => {
-    if (initialRunId && initialAccessToken) {
-      setAccessToken(initialAccessToken);
-      setRunId(initialRunId);
+    if (initialJobId) {
+      setJobId(initialJobId);
       setStatus("IN_PROGRESS");
     }
-  }, [initialRunId, initialAccessToken]);
+  }, [initialJobId]);
 
   useEffect(() => {
-    if (error || run?.status === "FAILED") {
+    if (error || jobStatus === "failed") {
       setStatus("FAILED");
-      setProgress(0);
     }
 
-    if (run?.status === "COMPLETED") {
+    if (jobStatus === "completed") {
       setStatus("COMPLETED");
-      setProgress(100);
     }
-  }, [error, run]);
+  }, [error, jobStatus]);
 
   useEffect(() => {
-    if (run?.output) {
-      setResult(run.output);
+    if (jobResult) {
+      setResult(jobResult);
     }
-  }, [run]);
+  }, [jobResult]);
 
   return {
     status,
     setStatus,
-    progress: run?.metadata?.progress ?? 0,
+    progress: progress ?? 0,
     result,
   };
 }

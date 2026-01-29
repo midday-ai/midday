@@ -1,7 +1,10 @@
+import { createLoggerWithContext } from "@midday/logger";
 import { formatISO, subDays } from "date-fns";
 import { bankingCache, CACHE_TTL } from "../../cache";
 import type { GetInstitutionsRequest } from "../../types";
 import { ProviderError } from "../../utils/error";
+
+const logger = createLoggerWithContext("gocardless");
 import type {
   DeleteRequistionResponse,
   GetAccessTokenResponse,
@@ -110,7 +113,7 @@ export class GoCardLessApi {
         ),
       ]);
     } catch (error) {
-      console.log("Error saving tokens");
+      logger.warn("Error saving GoCardless tokens", { error });
     }
 
     return response.access;

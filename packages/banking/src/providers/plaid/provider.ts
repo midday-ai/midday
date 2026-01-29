@@ -1,3 +1,4 @@
+import { bankingCache, CACHE_TTL } from "../../cache";
 import type {
   DeleteAccountsRequest,
   DeleteConnectionRequest,
@@ -6,6 +7,7 @@ import type {
   GetConnectionStatusRequest,
   GetInstitutionsRequest,
   GetTransactionsRequest,
+  Institution,
 } from "../../types";
 import { getType } from "../../utils/account";
 import type { Provider } from "../interface";
@@ -87,11 +89,35 @@ export class PlaidProvider implements Provider {
   }
 
   async getInstitutions({ countryCode }: GetInstitutionsRequest) {
+    const cacheKey = countryCode || "all";
+
+    // Check cache first
+    const cached = await bankingCache.getKeyed<Institution[]>(
+      "plaid",
+      "institutions",
+      cacheKey,
+    );
+
+    if (cached) {
+      return cached;
+    }
+
     const response = await this.#api.getInstitutions({
       countryCode,
     });
 
-    return response.map(transformInstitution);
+    const institutions = response.map(transformInstitution);
+
+    // Cache the transformed institutions
+    await bankingCache.setKeyed(
+      "plaid",
+      "institutions",
+      cacheKey,
+      institutions,
+      CACHE_TTL.INSTITUTIONS,
+    );
+
+    return institutions;
   }
 
   async deleteAccounts({ accessToken }: DeleteAccountsRequest) {

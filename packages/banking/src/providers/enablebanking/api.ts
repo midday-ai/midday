@@ -1,8 +1,11 @@
 import { Buffer } from "node:buffer";
+import { createLoggerWithContext } from "@midday/logger";
 import { formatISO, subDays } from "date-fns";
 import * as jose from "jose";
 import { ProviderError } from "../../utils/error";
 import { transformSessionData } from "./transform";
+
+const logger = createLoggerWithContext("enablebanking");
 import type {
   AuthenticateRequest,
   AuthenticateResponse,
@@ -73,7 +76,7 @@ export class EnableBankingApi {
 
       return jose.base64url.encode(new Uint8Array(signature));
     } catch (error) {
-      console.error("Error in JWT signing:", error);
+      logger.error("Error in JWT signing", { error });
       throw error;
     }
   }
@@ -197,7 +200,7 @@ export class EnableBankingApi {
 
       return response;
     } catch (error) {
-      console.log(error);
+      logger.error("Failed to authenticate with EnableBanking", { error });
       throw error;
     }
   }
@@ -210,7 +213,7 @@ export class EnableBankingApi {
 
       return transformSessionData(response);
     } catch (error) {
-      console.log(error);
+      logger.error("Failed to exchange EnableBanking code", { error });
       throw new ProviderError({
         message: "Failed to exchange code",
         // @ts-ignore
@@ -287,7 +290,7 @@ export class EnableBankingApi {
 
       return accountDetails;
     } catch (error) {
-      console.log(error);
+      logger.error("Failed to get EnableBanking accounts", { error });
       throw error;
     }
   }
@@ -435,7 +438,7 @@ export class EnableBankingApi {
       }
     } catch (error) {
       // Fallback: If longest strategy fails, use default with 1-year range
-      console.error("Longest strategy failed, using default fallback:", error);
+      logger.warn("Longest strategy failed, using default fallback", { error });
 
       // Reset transactions array to avoid mixing data from failed attempt
       allTransactions = [];

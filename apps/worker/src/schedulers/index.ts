@@ -2,6 +2,7 @@ import type {
   DynamicSchedulerTemplate,
   StaticSchedulerConfig,
 } from "../types/scheduler-config";
+import { bankingDynamicSchedulerTemplates } from "./banking.config";
 import {
   inboxDynamicSchedulerTemplates,
   inboxStaticSchedulers,
@@ -30,4 +31,5 @@ export const staticSchedulerConfigs: StaticSchedulerConfig[] = [
  */
 export const dynamicSchedulerTemplates: DynamicSchedulerTemplate[] = [
   ...inboxDynamicSchedulerTemplates,
+  ...bankingDynamicSchedulerTemplates,
 ];

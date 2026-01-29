@@ -29,6 +29,11 @@ export {
 } from "./utils/account";
 export type { AccountType } from "./utils/account";
 export {
+  normalizeBalance,
+  selectDisplayBalance,
+  type NormalizedBalance,
+} from "./utils/balance";
+export {
   GOCARDLESS_COUNTRIES,
   PLAID_COUNTRIES,
   TELLER_COUNTRIES,

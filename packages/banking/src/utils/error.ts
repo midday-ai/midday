@@ -1,3 +1,7 @@
+import { createLoggerWithContext } from "@midday/logger";
+
+const logger = createLoggerWithContext("banking-error");
+
 export class ProviderError extends Error {
   code: string;
 
@@ -37,7 +41,7 @@ export class ProviderError extends Error {
       case "AccessExpiredError":
       case "AccountInactiveError":
       case "Account suspended":
-        console.log("disconnected", this.message);
+        logger.debug("Provider disconnected", { code, message: this.message });
         return "disconnected";
 
       // EnableBanking
@@ -45,14 +49,17 @@ export class ProviderError extends Error {
         return "already_authorized";
 
       default:
-        console.log("unknown", this.message);
+        logger.warn("Unknown provider error code", {
+          code,
+          message: this.message,
+        });
         return "unknown";
     }
   }
 }
 
 export function createErrorResponse(error: unknown) {
-  console.error(error);
+  logger.error("Provider error", { error });
 
   if (error instanceof ProviderError) {
     return {

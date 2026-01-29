@@ -45,3 +45,12 @@ export const createBankConnectionSchema = z.object({
 });
 
 export const deleteBankConnectionSchema = z.object({ id: z.string() });
+
+export const syncBankConnectionSchema = z.object({
+  connectionId: z.string().uuid(),
+});
+
+export const reconnectBankConnectionSchema = z.object({
+  connectionId: z.string().uuid(),
+  provider: z.enum(["gocardless", "teller", "plaid", "enablebanking"]),
+});

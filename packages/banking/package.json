@@ -2,6 +2,10 @@
   "name": "@midday/banking",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "test": "bun test src",
+    "typecheck": "tsc --noEmit"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./providers": "./src/providers/index.ts",
@@ -26,6 +30,7 @@
     "zod": "^3.25.49"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "@types/node": "^22.12.0"
   }
 }

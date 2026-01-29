@@ -4,7 +4,8 @@ import type {
   GetAccountBalanceResponse,
   Transaction as BaseTransaction,
 } from "../../types";
-import { getType } from "../../utils/account";
+import { getType, type AccountType } from "../../utils/account";
+import { normalizeBalance } from "../../utils/balance";
 import { getLogoURL } from "../../utils/logo";
 import type {
   FormatAmount,
@@ -250,14 +251,18 @@ export const transformAccountBalance = ({
   accountType,
 }: TransformAccountBalanceParams): GetAccountBalanceResponse => {
   const rawAmount = +balance.amount;
+  const currency = balance.currency.toUpperCase();
 
-  // Normalize credit card balances to positive (amount owed) for consistency
-  const amount =
-    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+  // Use centralized normalization for credit card balances
+  const normalized = normalizeBalance(
+    rawAmount,
+    currency,
+    (accountType as AccountType) || "depository",
+  );
 
   return {
-    currency: balance.currency.toUpperCase(),
-    amount,
+    currency: normalized.currency,
+    amount: normalized.amount,
     available_balance: balances?.available ? +balances.available : null,
     credit_limit: null, // Teller doesn't provide credit limit
   };

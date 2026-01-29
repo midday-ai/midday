@@ -2,6 +2,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { cn } from "@midday/ui/cn";
 import { useState } from "react";
 
+const CDN_DOMAIN =
+  process.env.NEXT_PUBLIC_STORAGE_CDN_DOMAIN ?? "cdn-engine.midday.ai";
+const DEFAULT_BANK_LOGO = `https://${CDN_DOMAIN}/default.jpg`;
+
 type Props = {
   src: string | null;
   alt: string;
@@ -25,18 +29,10 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
           onError={() => setHasError(true)}
         />
       ) : (
-        <AvatarImage
-          src="https://cdn-engine.midday.ai/default.jpg"
-          alt={alt}
-          className="object-contain"
-        />
+        <AvatarImage src={DEFAULT_BANK_LOGO} alt={alt} className="object-contain" />
       )}
       <AvatarFallback>
-        <AvatarImage
-          src="https://cdn-engine.midday.ai/default.jpg"
-          alt={alt}
-          className="object-contain"
-        />
+        <AvatarImage src={DEFAULT_BANK_LOGO} alt={alt} className="object-contain" />
       </AvatarFallback>
     </Avatar>
   );

@@ -13,263 +13,121 @@ import {
   getTransactionsSchema,
 } from "@api/schemas/banking";
 import {
+  deleteAccounts,
+  deleteConnection,
+  enableBankingOperations,
+  getAccountBalance,
+  getAccounts,
+  getConnectionStatus,
+  getTransactions,
+  goCardlessOperations,
+  healthCheck,
+  plaidOperations,
+} from "@api/services/banking";
+import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@api/trpc/init";
-import {
-  EnableBankingApi,
-  GoCardLessApi,
-  PlaidApi,
-  Provider,
-} from "@midday/banking";
-import { TRPCError } from "@trpc/server";
 
 export const bankingRouter = createTRPCRouter({
+  // Plaid operations
   createPlaidLink: protectedProcedure
     .input(createPlaidLinkSchema)
     .mutation(async ({ ctx, input }) => {
-      try {
-        const api = new PlaidApi();
-        const response = await api.linkTokenCreate({
-          userId: input.userId ?? ctx.session.user.id,
-          language: input.language,
-          accessToken: input.accessToken,
-          environment: input.environment,
-        });
-
-        return {
-          link_token: response.data.link_token,
-          expiration: response.data.expiration,
-        };
-      } catch (error) {
-        console.error("Failed to create Plaid link:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create Plaid link token",
-        });
-      }
+      return plaidOperations.createLink({
+        userId: input.userId ?? ctx.session.user.id,
+        language: input.language,
+        accessToken: input.accessToken,
+        environment: input.environment,
+      });
     }),
 
   exchangePlaidToken: protectedProcedure
     .input(exchangePlaidTokenSchema)
     .mutation(async ({ input }) => {
-      try {
-        const api = new PlaidApi();
-        const response = await api.itemPublicTokenExchange({
-          publicToken: input.publicToken,
-        });
-
-        return {
-          access_token: response.data.access_token,
-          item_id: response.data.item_id,
-        };
-      } catch (error) {
-        console.error("Failed to exchange Plaid token:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to exchange Plaid public token",
-        });
-      }
+      return plaidOperations.exchangeToken(input.publicToken);
     }),
 
+  // GoCardless operations
   createGoCardlessAgreement: protectedProcedure
     .input(createGoCardlessAgreementSchema)
     .mutation(async ({ input }) => {
-      try {
-        const api = new GoCardLessApi();
-        return api.createEndUserAgreement({
-          institutionId: input.institutionId,
-          transactionTotalDays: input.transactionTotalDays,
-        });
-      } catch (error) {
-        console.error("Failed to create GoCardless agreement:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create GoCardless agreement",
-        });
-      }
+      return goCardlessOperations.createAgreement({
+        institutionId: input.institutionId,
+        transactionTotalDays: input.transactionTotalDays,
+      });
     }),
 
   createGoCardlessLink: protectedProcedure
     .input(createGoCardlessLinkSchema)
     .mutation(async ({ input }) => {
-      try {
-        const api = new GoCardLessApi();
-        return api.buildLink({
-          institutionId: input.institutionId,
-          agreement: input.agreement,
-          redirect: input.redirect,
-          reference: input.reference,
-        });
-      } catch (error) {
-        console.error("Failed to create GoCardless link:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create GoCardless link",
-        });
-      }
+      return goCardlessOperations.createLink({
+        institutionId: input.institutionId,
+        agreement: input.agreement,
+        redirect: input.redirect,
+        reference: input.reference,
+      });
     }),
 
+  // EnableBanking operations
   createEnableBankingLink: protectedProcedure
     .input(createEnableBankingLinkSchema)
     .mutation(async ({ input }) => {
-      try {
-        const api = new EnableBankingApi();
-        return api.authenticate({
-          country: input.country,
-          institutionId: input.institutionId,
-          teamId: input.teamId,
-          validUntil: input.validUntil,
-          state: input.state,
-          type: input.type,
-        });
-      } catch (error) {
-        console.error("Failed to create EnableBanking link:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create EnableBanking link",
-        });
-      }
+      return enableBankingOperations.createLink({
+        country: input.country,
+        institutionId: input.institutionId,
+        teamId: input.teamId,
+        validUntil: input.validUntil,
+        state: input.state,
+        type: input.type,
+      });
     }),
 
   exchangeEnableBankingCode: protectedProcedure
     .input(exchangeEnableBankingCodeSchema)
     .query(async ({ input }) => {
-      try {
-        const api = new EnableBankingApi();
-        return api.exchangeCode(input.code);
-      } catch (error) {
-        console.error("Failed to exchange EnableBanking code:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to exchange EnableBanking code",
-        });
-      }
+      return enableBankingOperations.exchangeCode(input.code);
     }),
 
+  // Shared provider operations
   getAccounts: protectedProcedure
     .input(getAccountsSchema)
     .query(async ({ input }) => {
-      try {
-        const provider = new Provider({ provider: input.provider });
-        return provider.getAccounts({
-          id: input.id,
-          accessToken: input.accessToken,
-          institutionId: input.institutionId,
-        });
-      } catch (error) {
-        console.error("Failed to get accounts:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get accounts",
-        });
-      }
+      return getAccounts(input);
     }),
 
   getAccountBalance: protectedProcedure
     .input(getAccountBalanceSchema)
     .query(async ({ input }) => {
-      try {
-        const provider = new Provider({ provider: input.provider });
-        return provider.getAccountBalance({
-          accountId: input.accountId,
-          accessToken: input.accessToken,
-          accountType: input.accountType,
-        });
-      } catch (error) {
-        console.error("Failed to get account balance:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get account balance",
-        });
-      }
+      return getAccountBalance(input);
     }),
 
   deleteAccounts: protectedProcedure
     .input(deleteAccountsSchema)
     .mutation(async ({ input }) => {
-      try {
-        const provider = new Provider({ provider: input.provider });
-        return provider.deleteAccounts({
-          accountId: input.accountId,
-          accessToken: input.accessToken,
-        });
-      } catch (error) {
-        console.error("Failed to delete accounts:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to delete accounts",
-        });
-      }
+      return deleteAccounts(input);
     }),
 
   getConnectionStatus: protectedProcedure
     .input(getConnectionStatusSchema)
     .query(async ({ input }) => {
-      try {
-        const provider = new Provider({ provider: input.provider });
-        return provider.getConnectionStatus({
-          id: input.id,
-          accessToken: input.accessToken,
-        });
-      } catch (error) {
-        console.error("Failed to get connection status:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get connection status",
-        });
-      }
+      return getConnectionStatus(input);
     }),
 
   deleteConnection: protectedProcedure
     .input(deleteConnectionSchema)
     .mutation(async ({ input }) => {
-      try {
-        const provider = new Provider({ provider: input.provider });
-        return provider.deleteConnection({
-          id: input.id,
-          accessToken: input.accessToken,
-        });
-      } catch (error) {
-        console.error("Failed to delete connection:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to delete connection",
-        });
-      }
+      return deleteConnection(input);
     }),
 
   getTransactions: protectedProcedure
     .input(getTransactionsSchema)
     .query(async ({ input }) => {
-      try {
-        const provider = new Provider({ provider: input.provider });
-        return provider.getTransactions({
-          accountId: input.accountId,
-          accessToken: input.accessToken,
-          latest: input.latest,
-          accountType: input.accountType,
-        });
-      } catch (error) {
-        console.error("Failed to get transactions:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get transactions",
-        });
-      }
+      return getTransactions(input);
     }),
 
   healthCheck: publicProcedure.query(async () => {
-    try {
-      const provider = new Provider();
-      return provider.getHealthCheck();
-    } catch (error) {
-      console.error("Health check failed:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Health check failed",
-      });
-    }
+    return healthCheck();
   }),
 });

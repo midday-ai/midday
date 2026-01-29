@@ -1,4 +1,5 @@
 import { getTRPCClient } from "@/trpc/server";
+import { logger } from "@/utils/logger";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error) {
-    console.error("EnableBanking exchange error:", error);
+    logger("EnableBanking exchange error", { error });
     return NextResponse.redirect(new URL("/?error=invalid_code", redirectBase));
   }
 

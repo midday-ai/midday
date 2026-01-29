@@ -100,3 +100,23 @@ export const invoiceUpcomingNotificationSchema = z.object({});
 export type InvoiceUpcomingNotificationPayload = z.infer<
   typeof invoiceUpcomingNotificationSchema
 >;
+
+/**
+ * Check invoice status job schema
+ * Checks if an invoice has been paid by matching with transactions
+ */
+export const checkInvoiceStatusSchema = z.object({
+  invoiceId: z.string().uuid(),
+});
+
+export type CheckInvoiceStatusPayload = z.infer<typeof checkInvoiceStatusSchema>;
+
+/**
+ * Invoice status scheduler schema
+ * Scheduled job to check status of unpaid/overdue invoices
+ */
+export const invoiceStatusSchedulerSchema = z.object({});
+
+export type InvoiceStatusSchedulerPayload = z.infer<
+  typeof invoiceStatusSchedulerSchema
+>;

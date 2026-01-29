@@ -316,6 +316,7 @@
         "zod": "^3.25.49",
       },
       "devDependencies": {
+        "@types/bun": "latest",
         "@types/node": "^22.12.0",
       },
     },

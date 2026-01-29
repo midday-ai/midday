@@ -1,3 +1,4 @@
+import { createLoggerWithContext } from "@midday/logger";
 import { formatISO, subDays } from "date-fns";
 import {
   Configuration,
@@ -14,6 +15,8 @@ import { PLAID_COUNTRIES } from "../../utils/countries";
 import { ProviderError } from "../../utils/error";
 import { paginate } from "../../utils/paginate";
 import { withRetry } from "../../utils/retry";
+
+const logger = createLoggerWithContext("plaid");
 import type {
   DisconnectAccountRequest,
   GetAccountBalanceRequest,
@@ -247,7 +250,7 @@ export class PlaidApi {
     return paginate({
       delay: {
         milliseconds: 100,
-        onDelay: (message) => console.log(message),
+        onDelay: (message) => logger.debug(message),
       },
       pageSize: 500,
       fetchData: (offset, count) =>

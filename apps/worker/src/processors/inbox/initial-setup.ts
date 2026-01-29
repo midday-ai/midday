@@ -48,7 +48,7 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
 
       // Trigger initial sync
       await triggerJob(
-        "sync-scheduler",
+        "sync-inbox-account",
         {
           id: inboxAccountId,
           manualSync: true,

@@ -421,3 +421,98 @@ export async function getNetPosition(
     creditAccountCount: creditAccounts.length,
   };
 }
+
+// ============================================================================
+// Bank Sync Queries
+// ============================================================================
+
+export type UpdateBankAccountBalanceParams = {
+  id: string;
+  balance: number;
+  availableBalance?: number | null;
+  creditLimit?: number | null;
+  /** Clear error details and retries on successful sync */
+  clearErrors?: boolean;
+};
+
+/**
+ * Update bank account balance after sync.
+ * Optionally clears error state on success.
+ */
+export async function updateBankAccountBalance(
+  db: Database,
+  params: UpdateBankAccountBalanceParams,
+) {
+  const { id, balance, availableBalance, creditLimit, clearErrors } = params;
+
+  const [result] = await db
+    .update(bankAccounts)
+    .set({
+      balance,
+      availableBalance: availableBalance ?? null,
+      creditLimit: creditLimit ?? null,
+      ...(clearErrors && {
+        errorDetails: null,
+        errorRetries: null,
+      }),
+    })
+    .where(eq(bankAccounts.id, id))
+    .returning({ id: bankAccounts.id });
+
+  return result;
+}
+
+export type ClearBankAccountErrorsParams = {
+  id: string;
+};
+
+/**
+ * Clear error state for a bank account after successful operation.
+ */
+export async function clearBankAccountErrors(
+  db: Database,
+  params: ClearBankAccountErrorsParams,
+) {
+  const [result] = await db
+    .update(bankAccounts)
+    .set({
+      errorDetails: null,
+      errorRetries: null,
+    })
+    .where(eq(bankAccounts.id, params.id))
+    .returning({ id: bankAccounts.id });
+
+  return result;
+}
+
+export type IncrementBankAccountErrorsParams = {
+  id: string;
+  errorDetails: string;
+  currentRetries?: number;
+};
+
+/**
+ * Increment error retry count and store error details.
+ * Used when sync fails for an account.
+ */
+export async function incrementBankAccountErrors(
+  db: Database,
+  params: IncrementBankAccountErrorsParams,
+) {
+  const { id, errorDetails, currentRetries } = params;
+  const newRetries = (currentRetries ?? 0) + 1;
+
+  const [result] = await db
+    .update(bankAccounts)
+    .set({
+      errorDetails,
+      errorRetries: newRetries,
+    })
+    .where(eq(bankAccounts.id, id))
+    .returning({
+      id: bankAccounts.id,
+      errorRetries: bankAccounts.errorRetries,
+    });
+
+  return result;
+}
