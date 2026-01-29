@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Inbox job schemas (independent from @midday/jobs)
+ * Inbox job schemas
  */
 
 export const embedInboxSchema = z.object({
