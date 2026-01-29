@@ -72,6 +72,10 @@ const formSchema = z.object({
   zip: z.string().optional(),
   vatNumber: z.string().optional(),
   note: z.string().optional(),
+  // E-Invoice / Peppol fields
+  peppolId: z.string().optional(),
+  registrationNumber: z.string().optional(),
+  legalForm: z.enum(["LegalEntity", "NaturalPerson"]).optional(),
   tags: z
     .array(
       z.object({
@@ -161,6 +165,10 @@ export function CustomerForm({ data }: Props) {
       contact: data?.contact ?? undefined,
       note: data?.note ?? undefined,
       vatNumber: data?.vatNumber ?? undefined,
+      // E-Invoice / Peppol fields
+      peppolId: data?.peppolId ?? undefined,
+      registrationNumber: data?.registrationNumber ?? undefined,
+      legalForm: data?.legalForm as "LegalEntity" | "NaturalPerson" | undefined,
       tags:
         data?.tags?.map((tag) => ({
           id: tag?.id ?? "",
@@ -214,6 +222,10 @@ export function CustomerForm({ data }: Props) {
       phone: data.phone || null,
       zip: data.zip || null,
       vatNumber: data.vatNumber || null,
+      // E-Invoice / Peppol fields
+      peppolId: data.peppolId || null,
+      registrationNumber: data.registrationNumber || null,
+      legalForm: data.legalForm || null,
       tags: data.tags?.length
         ? data.tags.map((tag) => ({
             id: tag.id,
@@ -580,6 +592,83 @@ export function CustomerForm({ data }: Props) {
                                 {...field}
                                 value={field.value ?? ""}
                               />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="registrationNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Registration Number
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                value={field.value ?? ""}
+                                placeholder="Company registration number"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="peppolId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Peppol ID
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                value={field.value ?? ""}
+                                placeholder="e.g., 0192:123456789"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="legalForm"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Legal Form
+                            </FormLabel>
+                            <FormControl>
+                              <select
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) =>
+                                  field.onChange(e.target.value || undefined)
+                                }
+                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                              >
+                                <option value="">Select...</option>
+                                <option value="LegalEntity">
+                                  Legal Entity (Company)
+                                </option>
+                                <option value="NaturalPerson">
+                                  Natural Person (Individual)
+                                </option>
+                              </select>
                             </FormControl>
                             <FormMessage />
                           </FormItem>

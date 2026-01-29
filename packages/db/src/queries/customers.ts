@@ -78,6 +78,10 @@ export const getCustomerById = async (
       // Portal fields
       portalEnabled: customers.portalEnabled,
       portalId: customers.portalId,
+      // E-Invoice / Peppol fields
+      peppolId: customers.peppolId,
+      registrationNumber: customers.registrationNumber,
+      legalForm: customers.legalForm,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`
@@ -192,6 +196,10 @@ export const getCustomers = async (
       // Portal fields
       portalEnabled: customers.portalEnabled,
       portalId: customers.portalId,
+      // E-Invoice / Peppol fields
+      peppolId: customers.peppolId,
+      registrationNumber: customers.registrationNumber,
+      legalForm: customers.legalForm,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       // Financial metrics
@@ -342,6 +350,10 @@ export type UpsertCustomerParams = {
   vatNumber?: string | null;
   countryCode?: string | null;
   tags?: { id: string; name: string }[] | null;
+  // E-Invoice / Peppol fields
+  peppolId?: string | null;
+  registrationNumber?: string | null;
+  legalForm?: string | null;
 };
 
 export const upsertCustomer = async (
@@ -381,6 +393,10 @@ export const upsertCustomer = async (
         contact: rest.contact,
         vatNumber: rest.vatNumber,
         countryCode: rest.countryCode,
+        // E-Invoice / Peppol fields
+        peppolId: rest.peppolId,
+        registrationNumber: rest.registrationNumber,
+        legalForm: rest.legalForm,
       },
     })
     .returning();
@@ -483,6 +499,10 @@ export const upsertCustomer = async (
       contact: customers.contact,
       portalEnabled: customers.portalEnabled,
       portalId: customers.portalId,
+      // E-Invoice / Peppol fields
+      peppolId: customers.peppolId,
+      registrationNumber: customers.registrationNumber,
+      legalForm: customers.legalForm,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`

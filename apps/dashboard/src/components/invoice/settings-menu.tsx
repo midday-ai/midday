@@ -160,6 +160,18 @@ const menuItems = [
     options: booleanOptions,
     key: "includeQr",
   },
+  {
+    icon: Icons.ArrowForward,
+    label: "E-Invoice (Peppol)",
+    options: booleanOptions,
+    key: "eInvoiceEnabled",
+  },
+  {
+    icon: Icons.Email,
+    label: "E-Invoice notification",
+    options: booleanOptions,
+    key: "eInvoiceNotifyEmail",
+  },
 ];
 
 export function SettingsMenu() {

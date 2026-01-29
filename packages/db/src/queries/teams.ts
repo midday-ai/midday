@@ -57,6 +57,15 @@ export const getTeamById = async (db: Database, id: string) => {
       exportSettings: teams.exportSettings,
       stripeAccountId: teams.stripeAccountId,
       stripeConnectStatus: teams.stripeConnectStatus,
+      // Company details
+      taxId: teams.taxId,
+      registrationNumber: teams.registrationNumber,
+      addressLine1: teams.addressLine1,
+      addressLine2: teams.addressLine2,
+      city: teams.city,
+      zip: teams.zip,
+      // E-Invoice / Peppol
+      peppolId: teams.peppolId,
     })
     .from(teams)
     .where(eq(teams.id, id));
@@ -130,6 +139,15 @@ export const updateTeamById = async (
       baseCurrency: teams.baseCurrency,
       countryCode: teams.countryCode,
       fiscalYearStartMonth: teams.fiscalYearStartMonth,
+      // Company details
+      taxId: teams.taxId,
+      registrationNumber: teams.registrationNumber,
+      addressLine1: teams.addressLine1,
+      addressLine2: teams.addressLine2,
+      city: teams.city,
+      zip: teams.zip,
+      // E-Invoice / Peppol
+      peppolId: teams.peppolId,
     });
 
   return result;

@@ -937,6 +937,15 @@ export const invoices = pgTable(
     // Recurring invoice fields
     invoiceRecurringId: uuid("invoice_recurring_id"),
     recurringSequence: integer("recurring_sequence"), // Which number in the series (1, 2, 3...)
+
+    // E-Invoice tracking (Peppol)
+    eInvoiceId: text("e_invoice_id"), // DDD Invoices invoice ID
+    eInvoiceStatus: text("e_invoice_status"), // pending, sent, delivered, failed
+    eInvoiceSentAt: timestamp("e_invoice_sent_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    eInvoiceError: text("e_invoice_error"), // Error message if failed
   },
   (table) => [
     index("invoices_created_at_idx").using(
@@ -1070,6 +1079,11 @@ export const customers = pgTable(
     // Portal fields
     portalEnabled: boolean("portal_enabled").default(false),
     portalId: text("portal_id"),
+
+    // E-Invoice / Peppol fields
+    peppolId: text("peppol_id"), // Peppol participant ID for routing
+    registrationNumber: text("registration_number"), // Company registration number (useful for invoices generally)
+    legalForm: text("legal_form"), // "LegalEntity" or "NaturalPerson"
 
     fts: tsvector("fts")
       .notNull()
@@ -1614,6 +1628,18 @@ export const teams = pgTable(
     exportSettings: jsonb("export_settings"),
     stripeAccountId: text("stripe_account_id"),
     stripeConnectStatus: text("stripe_connect_status"),
+
+    // Company details (used for invoices, tax compliance, legal documents)
+    taxId: text("tax_id"), // VAT number (EU) or EIN (US)
+    registrationNumber: text("registration_number"), // Company registration number
+    addressLine1: text("address_line_1"), // Company street address
+    addressLine2: text("address_line_2"),
+    city: text(),
+    zip: text(),
+
+    // E-Invoice / Peppol
+    peppolId: text("peppol_id"), // Peppol participant ID (e.g., 0192:123456789)
+    eInvoiceConnectionKey: text("e_invoice_connection_key"), // DDD Invoices API connection key (encrypted)
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),
@@ -1870,6 +1896,10 @@ export const invoiceTemplates = pgTable(
     lineItemTaxLabel: text("line_item_tax_label"),
     paymentEnabled: boolean("payment_enabled").default(false),
     paymentTermsDays: integer("payment_terms_days").default(30),
+
+    // E-Invoice / Peppol settings
+    eInvoiceEnabled: boolean("e_invoice_enabled").default(false), // Send via Peppol when customer has peppolId
+    eInvoiceNotifyEmail: boolean("e_invoice_notify_email").default(true), // Send notification email when delivered via Peppol
   },
   (table) => [
     foreignKey({

@@ -119,6 +119,9 @@ const baseInvoiceTemplateSchema = z.object({
   locale: z.string().optional(),
   paymentEnabled: z.boolean().optional(),
   paymentTermsDays: z.number().min(0).max(365).optional(),
+  // E-Invoice / Peppol settings
+  eInvoiceEnabled: z.boolean().optional(),
+  eInvoiceNotifyEmail: z.boolean().optional(),
 });
 
 // tRPC-compatible template schema (uses z.any() for editor fields)

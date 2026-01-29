@@ -1114,6 +1114,11 @@ export type UpdateInvoiceParams = {
   recurringSequence?: number | null;
   teamId: string;
   userId?: string;
+  // E-Invoice / Peppol fields
+  eInvoiceId?: string | null;
+  eInvoiceStatus?: "pending" | "retrying" | "sent" | "delivered" | "failed" | null;
+  eInvoiceSentAt?: string | null;
+  eInvoiceError?: string | null;
 };
 
 export async function updateInvoice(
