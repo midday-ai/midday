@@ -1,4 +1,4 @@
-import { bankingCache, CACHE_TTL } from "../../cache";
+import { CACHE_TTL, bankingCache } from "../../cache";
 import type {
   DeleteAccountsRequest,
   DeleteConnectionRequest,

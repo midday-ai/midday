@@ -75,7 +75,9 @@ export const upsertTransactionsSchema = z.object({
   ),
 });
 
-export type UpsertTransactionsPayload = z.infer<typeof upsertTransactionsSchema>;
+export type UpsertTransactionsPayload = z.infer<
+  typeof upsertTransactionsSchema
+>;
 
 // ============================================================================
 // Setup & Scheduler Jobs
@@ -112,7 +114,9 @@ export const reconnectConnectionSchema = z.object({
   provider: z.string(),
 });
 
-export type ReconnectConnectionPayload = z.infer<typeof reconnectConnectionSchema>;
+export type ReconnectConnectionPayload = z.infer<
+  typeof reconnectConnectionSchema
+>;
 
 // ============================================================================
 // Notification Jobs

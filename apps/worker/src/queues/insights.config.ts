@@ -62,7 +62,9 @@ export const insightsQueueConfig: QueueConfig = {
       logger.info(`Insights job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      logger.error(`Insights job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Insights job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

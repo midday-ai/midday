@@ -1,4 +1,3 @@
-import { createLoggerWithContext } from "@midday/logger";
 import {
   EnableBankingApi,
   GoCardLessApi,
@@ -6,6 +5,7 @@ import {
   Provider,
   type Providers,
 } from "@midday/banking";
+import { createLoggerWithContext } from "@midday/logger";
 import { TRPCError } from "@trpc/server";
 
 const logger = createLoggerWithContext("banking-service");
@@ -122,7 +122,12 @@ export type GetTransactionsInput = {
   accountId: string;
   accessToken?: string;
   latest?: boolean;
-  accountType: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
+  accountType:
+    | "depository"
+    | "credit"
+    | "other_asset"
+    | "loan"
+    | "other_liability";
 };
 
 export async function getTransactions(input: GetTransactionsInput) {

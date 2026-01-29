@@ -131,9 +131,7 @@ describe("GoCardless Transform", () => {
         bookingDate: "2024-01-15",
         creditorName: "FOREIGN MERCHANT",
         transactionAmount: { amount: "-100", currency: "EUR" },
-        currencyExchange: [
-          { exchangeRate: "1.10", sourceCurrency: "USD" },
-        ],
+        currencyExchange: [{ exchangeRate: "1.10", sourceCurrency: "USD" }],
       } as Transaction;
 
       const result = transformTransaction({

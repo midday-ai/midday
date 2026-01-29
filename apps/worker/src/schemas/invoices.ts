@@ -109,7 +109,9 @@ export const checkInvoiceStatusSchema = z.object({
   invoiceId: z.string().uuid(),
 });
 
-export type CheckInvoiceStatusPayload = z.infer<typeof checkInvoiceStatusSchema>;
+export type CheckInvoiceStatusPayload = z.infer<
+  typeof checkInvoiceStatusSchema
+>;
 
 /**
  * Invoice status scheduler schema

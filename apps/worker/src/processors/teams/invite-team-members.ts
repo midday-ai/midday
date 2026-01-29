@@ -5,8 +5,8 @@ import type { Job } from "bullmq";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
 import {
-  inviteTeamMembersSchema,
   type InviteTeamMembersPayload,
+  inviteTeamMembersSchema,
 } from "../../schemas/teams";
 import { BaseProcessor } from "../base";
 

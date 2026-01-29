@@ -10,7 +10,11 @@ import {
   transformTransactionMethod,
   transformTransactionName,
 } from "./transform";
-import type { GetAccountDetailsResponse, GetTransaction, Institution } from "./types";
+import type {
+  GetAccountDetailsResponse,
+  GetTransaction,
+  Institution,
+} from "./types";
 
 describe("EnableBanking Transform", () => {
   describe("hashInstitutionId", () => {

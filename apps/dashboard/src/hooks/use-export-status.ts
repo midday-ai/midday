@@ -7,7 +7,9 @@ type UseExportStatusProps = {
   jobId?: string;
 };
 
-export function useExportStatus({ jobId: initialJobId }: UseExportStatusProps = {}) {
+export function useExportStatus({
+  jobId: initialJobId,
+}: UseExportStatusProps = {}) {
   const [jobId, setJobId] = useState<string | undefined>(initialJobId);
   const [status, setStatus] = useState<
     "FAILED" | "IN_PROGRESS" | "COMPLETED" | null

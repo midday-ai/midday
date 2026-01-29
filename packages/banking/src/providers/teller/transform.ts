@@ -1,10 +1,10 @@
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
-  GetAccountBalanceResponse,
   Transaction as BaseTransaction,
+  GetAccountBalanceResponse,
 } from "../../types";
-import { getType, type AccountType } from "../../utils/account";
+import { type AccountType, getType } from "../../utils/account";
 import { normalizeBalance } from "../../utils/balance";
 import { getLogoURL } from "../../utils/logo";
 import type {

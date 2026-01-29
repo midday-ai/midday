@@ -49,7 +49,9 @@ export const transactionsQueueConfig: QueueConfig = {
   workerOptions: transactionsWorkerOptions,
   eventHandlers: {
     onFailed: (job, err) => {
-      logger.error(`Transaction job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Transaction job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

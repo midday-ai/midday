@@ -5,10 +5,10 @@ import {
   TellerProvider,
 } from "@midday/banking";
 import {
+  type CreateInstitutionParams,
   disableInstitutions,
   getInstitutionIdsByProvider,
   upsertInstitutions,
-  type CreateInstitutionParams,
 } from "@midday/db/queries";
 import type { Job } from "bullmq";
 import type {
@@ -96,12 +96,13 @@ export class SyncInstitutionsProcessor extends BaseProcessor<InstitutionsSyncSch
       const existingIdsSet = new Set(existingIds);
 
       // Fetch institutions from provider
-      const fetchedInstitutions = await this.fetchInstitutionsFromProvider(
-        providerName,
-      );
+      const fetchedInstitutions =
+        await this.fetchInstitutionsFromProvider(providerName);
       const fetchedIdsSet = new Set(fetchedInstitutions.map((i) => i.id));
 
-      this.logger.info(`Fetched ${fetchedInstitutions.length} institutions from ${providerName}`);
+      this.logger.info(
+        `Fetched ${fetchedInstitutions.length} institutions from ${providerName}`,
+      );
 
       // Find new institutions (not in existing)
       const newInstitutions = fetchedInstitutions.filter(
@@ -222,25 +223,58 @@ export class SyncInstitutionsProcessor extends BaseProcessor<InstitutionsSyncSch
         const provider = new GoCardLessProvider();
         // GoCardless requires country code, fetch for all supported countries
         const countries = [
-          "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
-          "DE", "GR", "HU", "IS", "IE", "IT", "LV", "LI", "LT", "LU",
-          "MT", "NL", "NO", "PL", "PT", "RO", "SK", "SI", "ES", "SE", "GB",
+          "AT",
+          "BE",
+          "BG",
+          "HR",
+          "CY",
+          "CZ",
+          "DK",
+          "EE",
+          "FI",
+          "FR",
+          "DE",
+          "GR",
+          "HU",
+          "IS",
+          "IE",
+          "IT",
+          "LV",
+          "LI",
+          "LT",
+          "LU",
+          "MT",
+          "NL",
+          "NO",
+          "PL",
+          "PT",
+          "RO",
+          "SK",
+          "SI",
+          "ES",
+          "SE",
+          "GB",
         ];
-        
-        const allInstitutions: Map<string, {
-          id: string;
-          name: string;
-          logoUrl?: string | null;
-          logoSource?: string | null;
-          logoExtension?: string;
-          countries: string[];
-          availableHistory?: number | null;
-          maximumConsentValidity?: number | null;
-        }> = new Map();
+
+        const allInstitutions: Map<
+          string,
+          {
+            id: string;
+            name: string;
+            logoUrl?: string | null;
+            logoSource?: string | null;
+            logoExtension?: string;
+            countries: string[];
+            availableHistory?: number | null;
+            maximumConsentValidity?: number | null;
+          }
+        > = new Map();
 
         for (const country of countries) {
           try {
-            const institutions = await provider.getInstitutions({ countryCode: country });
+            const institutions = await provider.getInstitutions({
+              countryCode: country,
+            });
             for (const inst of institutions) {
               if (allInstitutions.has(inst.id)) {
                 // Add country to existing institution
@@ -260,9 +294,12 @@ export class SyncInstitutionsProcessor extends BaseProcessor<InstitutionsSyncSch
               }
             }
           } catch (error) {
-            this.logger.warn(`Failed to fetch GoCardless institutions for ${country}`, {
-              error: error instanceof Error ? error.message : "Unknown error",
-            });
+            this.logger.warn(
+              `Failed to fetch GoCardless institutions for ${country}`,
+              {
+                error: error instanceof Error ? error.message : "Unknown error",
+              },
+            );
           }
         }
 

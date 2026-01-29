@@ -1,12 +1,12 @@
 import { triggerJob, triggerJobAndWait } from "@midday/job-client";
 import type { Job } from "bullmq";
+import { registerDynamicScheduler } from "../../schedulers/registry";
 import {
-  initialBankSetupSchema,
   type InitialBankSetupPayload,
+  initialBankSetupSchema,
 } from "../../schemas/banking";
 import { generateCronTag } from "../../utils/generate-cron-tag";
 import { BaseProcessor } from "../base";
-import { registerDynamicScheduler } from "../../schedulers/registry";
 
 /**
  * Sets up bank sync for a new connection:

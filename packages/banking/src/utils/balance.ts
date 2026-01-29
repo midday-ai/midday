@@ -1,4 +1,4 @@
-import { CREDIT_ACCOUNT_TYPE, type AccountType } from "./account";
+import { type AccountType, CREDIT_ACCOUNT_TYPE } from "./account";
 
 /**
  * Balance normalization utilities for banking providers.

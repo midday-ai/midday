@@ -42,7 +42,9 @@ export function useReconnect({
 
   const [jobId, setJobId] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
-  const [status, setStatus] = useState<"FAILED" | "SYNCING" | "COMPLETED" | null>(null);
+  const [status, setStatus] = useState<
+    "FAILED" | "SYNCING" | "COMPLETED" | null
+  >(null);
 
   const [params, setParams] = useQueryStates({
     step: parseAsString,

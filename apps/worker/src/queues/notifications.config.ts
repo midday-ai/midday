@@ -55,7 +55,9 @@ export const notificationsQueueConfig: QueueConfig = {
       logger.info(`Notification job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      logger.error(`Notification job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Notification job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

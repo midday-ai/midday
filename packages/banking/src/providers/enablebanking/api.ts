@@ -147,10 +147,7 @@ export class EnableBankingApi {
     }
   }
 
-  async #post<TResponse>(
-    path: string,
-    body?: unknown,
-  ): Promise<TResponse> {
+  async #post<TResponse>(path: string, body?: unknown): Promise<TResponse> {
     const url = this.#buildUrl(path);
     const headers = await this.#getHeaders();
 
@@ -264,20 +261,21 @@ export class EnableBankingApi {
 
           // Find balance with highest amount
           const balances = balanceResponse.balances;
-          const balance = balances.length > 0
-            ? balances.reduce((max, current) => {
-                const currentAmount = +current.balance_amount.amount;
-                const maxAmount = +max.balance_amount.amount;
-                return currentAmount > maxAmount ? current : max;
-              })
-            : {
-                name: "",
-                balance_amount: { currency: details.currency, amount: "0" },
-                balance_type: "unknown",
-                last_change_date_time: "",
-                reference_date: "",
-                last_committed_transaction: "",
-              };
+          const balance =
+            balances.length > 0
+              ? balances.reduce((max, current) => {
+                  const currentAmount = +current.balance_amount.amount;
+                  const maxAmount = +max.balance_amount.amount;
+                  return currentAmount > maxAmount ? current : max;
+                })
+              : {
+                  name: "",
+                  balance_amount: { currency: details.currency, amount: "0" },
+                  balance_type: "unknown",
+                  last_change_date_time: "",
+                  reference_date: "",
+                  last_committed_transaction: "",
+                };
 
           return {
             ...details,
@@ -307,20 +305,21 @@ export class EnableBankingApi {
 
     // Find balance with highest amount
     const balances = balanceResponse.balances;
-    const highestBalance = balances.length > 0
-      ? balances.reduce((max, current) => {
-          const currentAmount = +current.balance_amount.amount;
-          const maxAmount = +max.balance_amount.amount;
-          return currentAmount > maxAmount ? current : max;
-        })
-      : {
-          name: "",
-          balance_amount: { currency: "USD", amount: "0" },
-          balance_type: "unknown",
-          last_change_date_time: "",
-          reference_date: "",
-          last_committed_transaction: "",
-        };
+    const highestBalance =
+      balances.length > 0
+        ? balances.reduce((max, current) => {
+            const currentAmount = +current.balance_amount.amount;
+            const maxAmount = +max.balance_amount.amount;
+            return currentAmount > maxAmount ? current : max;
+          })
+        : {
+            name: "",
+            balance_amount: { currency: "USD", amount: "0" },
+            balance_type: "unknown",
+            last_change_date_time: "",
+            reference_date: "",
+            last_committed_transaction: "",
+          };
 
     return {
       balance: highestBalance,

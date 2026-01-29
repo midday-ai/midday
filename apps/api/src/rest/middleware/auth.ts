@@ -1,5 +1,4 @@
 import { expandScopes } from "@api/utils/scopes";
-import { verifyAccessToken } from "@midday/supabase/verify-token";
 import { isValidApiKeyFormat } from "@db/utils/api-keys";
 import { apiKeyCache } from "@midday/cache/api-key-cache";
 import { userCache } from "@midday/cache/user-cache";
@@ -10,6 +9,7 @@ import {
   validateAccessToken,
 } from "@midday/db/queries";
 import { hash } from "@midday/encryption";
+import { verifyAccessToken } from "@midday/supabase/verify-token";
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 

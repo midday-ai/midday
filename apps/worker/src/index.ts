@@ -40,7 +40,10 @@ const workers = queueConfigs.map((config) => {
   // Note: BaseProcessor already captures in-process failures with full context
   // This catches failures that bypass the processor (e.g., no processor registered)
   worker.on("failed", async (job, err) => {
-    logger.error(`[Worker:${config.name}] Job failed: ${job?.name} (${job?.id})`, { error: err });
+    logger.error(
+      `[Worker:${config.name}] Job failed: ${job?.name} (${job?.id})`,
+      { error: err },
+    );
     Sentry.captureException(err, {
       tags: {
         workerName: config.name,
@@ -70,7 +73,9 @@ const workers = queueConfigs.map((config) => {
           err,
         );
       } catch (handlerError) {
-        logger.error(`[Worker:${config.name}] Error in onFailed handler:`, { error: handlerError });
+        logger.error(`[Worker:${config.name}] Error in onFailed handler:`, {
+          error: handlerError,
+        });
         Sentry.captureException(handlerError, {
           tags: {
             workerName: config.name,

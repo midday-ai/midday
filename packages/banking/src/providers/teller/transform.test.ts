@@ -8,7 +8,11 @@ import {
   transformInstitution,
   transformTransaction,
 } from "./transform";
-import type { Transaction, TransformAccount, TransformInstitution } from "./types";
+import type {
+  Transaction,
+  TransformAccount,
+  TransformInstitution,
+} from "./types";
 
 describe("Teller Transform", () => {
   describe("mapTransactionMethod", () => {

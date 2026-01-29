@@ -9,9 +9,9 @@ const logger = createLoggerWithContext("gocardless");
 import type {
   Account as BaseAccount,
   Balance as BaseAccountBalance,
+  Transaction as BaseTransaction,
   ConnectionStatus,
   GetAccountBalanceResponse,
-  Transaction as BaseTransaction,
 } from "../../types";
 import type {
   GetRequisitionResponse,
@@ -339,7 +339,7 @@ export const transformAccountBalance = ({
   const normalized = normalizeBalance(
     rawAmount,
     currency,
-    accountType as AccountType || "depository",
+    (accountType as AccountType) || "depository",
   );
 
   return {

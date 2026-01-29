@@ -58,7 +58,9 @@ export const bankingQueueConfig: QueueConfig = {
   workerOptions: bankingWorkerOptions,
   eventHandlers: {
     onFailed: (job, err) => {
-      logger.error(`Banking job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Banking job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

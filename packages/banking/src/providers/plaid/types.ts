@@ -1,10 +1,10 @@
-import type { AccountType } from "../../utils/account";
 import type {
   AccountsGetResponse,
   Institution as BaseInstitution,
   Transaction,
   TransactionsSyncResponse,
 } from "plaid";
+import type { AccountType } from "../../utils/account";
 
 export type LinkTokenCreateRequest = {
   userId: string;

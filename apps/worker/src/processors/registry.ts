@@ -85,7 +85,9 @@ for (const [jobName, processor] of Object.entries(bankingProcessors)) {
 
 // Debug: Log all registered processors
 if (isDevelopment()) {
-  logger.debug("Registered processors:", { processors: Array.from(processors.keys()) });
+  logger.debug("Registered processors:", {
+    processors: Array.from(processors.keys()),
+  });
 }
 
 /**

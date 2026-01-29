@@ -58,7 +58,9 @@ export function getRedisConnection() {
     retryStrategy: (times: number) => {
       const delay = Math.min(1000 * 2 ** times, 20000);
       if (times > 5) {
-        logger.info(`[Redis/Worker] Reconnecting in ${delay}ms (attempt ${times})`);
+        logger.info(
+          `[Redis/Worker] Reconnecting in ${delay}ms (attempt ${times})`,
+        );
       }
       return delay;
     },
@@ -68,7 +70,9 @@ export function getRedisConnection() {
     reconnectOnError: (err: Error) => {
       const msg = err.message;
       if (msg.includes("READONLY")) {
-        logger.info("[Redis/Worker] READONLY error detected (server upgrade/failover), reconnecting");
+        logger.info(
+          "[Redis/Worker] READONLY error detected (server upgrade/failover), reconnecting",
+        );
         return true;
       }
       if (msg.includes("timed out") || msg.includes("ETIMEDOUT")) {

@@ -2,8 +2,8 @@ import { upsertTransactions } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
 import {
-  upsertTransactionsSchema,
   type UpsertTransactionsPayload,
+  upsertTransactionsSchema,
 } from "../../schemas/banking";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";

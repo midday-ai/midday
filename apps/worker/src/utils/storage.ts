@@ -86,7 +86,9 @@ export async function uploadInstitutionLogo(
   const response = await fetch(sourceUrl);
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch logo from ${sourceUrl}: ${response.status}`);
+    throw new Error(
+      `Failed to fetch logo from ${sourceUrl}: ${response.status}`,
+    );
   }
 
   const buffer = Buffer.from(await response.arrayBuffer());

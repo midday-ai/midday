@@ -9,8 +9,8 @@ import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
 import { subDays } from "date-fns";
 import {
-  checkInvoiceStatusSchema,
   type CheckInvoiceStatusPayload,
+  checkInvoiceStatusSchema,
 } from "../../schemas/invoices";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
@@ -58,7 +58,10 @@ export class CheckInvoiceStatusProcessor extends BaseProcessor<CheckInvoiceStatu
     const timezone = template?.timezone || "UTC";
 
     // Find recent transactions matching invoice amount, currency, and team_id
-    const sinceDate = subDays(new TZDate(new Date(), timezone), 3).toISOString();
+    const sinceDate = subDays(
+      new TZDate(new Date(), timezone),
+      3,
+    ).toISOString();
 
     const transactions = await getMatchingTransactionsForInvoice(db, {
       teamId: invoice.teamId,
@@ -122,7 +125,8 @@ export class CheckInvoiceStatusProcessor extends BaseProcessor<CheckInvoiceStatu
     } else {
       // Check if the invoice is overdue
       const isOverdue =
-        new TZDate(invoice.dueDate, timezone) < new TZDate(new Date(), timezone);
+        new TZDate(invoice.dueDate, timezone) <
+        new TZDate(new Date(), timezone);
 
       // Update invoice status to overdue if it's past due date and currently unpaid
       if (isOverdue && invoice.status === "unpaid") {

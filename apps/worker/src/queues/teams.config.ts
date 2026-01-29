@@ -51,7 +51,9 @@ export const teamsQueueConfig: QueueConfig = {
       logger.info(`Team job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      logger.error(`Team job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Team job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

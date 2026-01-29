@@ -49,7 +49,9 @@ export const institutionsQueueConfig: QueueConfig = {
       logger.info(`Institutions job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      logger.error(`Institutions job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Institutions job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

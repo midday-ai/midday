@@ -20,9 +20,9 @@
 
 import { bankConnections, teams } from "@midday/db/schema";
 import { getWorkerDb } from "@midday/db/worker-client";
-import { and, eq, gte, inArray, isNull, or } from "drizzle-orm";
 import { Queue } from "bullmq";
 import { subDays } from "date-fns";
+import { and, eq, gte, inArray, isNull, or } from "drizzle-orm";
 
 // Generate deterministic cron pattern based on teamId
 // This distributes load across different times of day
@@ -76,11 +76,15 @@ async function main() {
   const teamIdsWithConnections = teamsWithConnections.map((t) => t.teamId);
 
   if (teamIdsWithConnections.length === 0) {
-    console.log("\n✅ No teams with bank connections found. Nothing to migrate.");
+    console.log(
+      "\n✅ No teams with bank connections found. Nothing to migrate.",
+    );
     process.exit(0);
   }
 
-  console.log(`   Found ${teamIdsWithConnections.length} teams with bank connections`);
+  console.log(
+    `   Found ${teamIdsWithConnections.length} teams with bank connections`,
+  );
 
   // Query eligible teams that have bank connections
   const eligibleTeams = await db
@@ -90,12 +94,7 @@ async function main() {
       createdAt: teams.createdAt,
     })
     .from(teams)
-    .where(
-      and(
-        planCondition,
-        inArray(teams.id, teamIdsWithConnections),
-      ),
-    );
+    .where(and(planCondition, inArray(teams.id, teamIdsWithConnections)));
 
   console.log(`   Found ${eligibleTeams.length} eligible teams\n`);
 
@@ -123,9 +122,13 @@ async function main() {
     console.log("📋 Would register the following schedulers:\n");
     for (const team of eligibleTeams) {
       const cronPattern = generateCronTag(team.id);
-      console.log(`   Team ${team.id.slice(0, 8)}... (${team.plan}) → ${cronPattern}`);
+      console.log(
+        `   Team ${team.id.slice(0, 8)}... (${team.plan}) → ${cronPattern}`,
+      );
     }
-    console.log("\n✅ Dry run complete. Run without --dry-run to apply changes.");
+    console.log(
+      "\n✅ Dry run complete. Run without --dry-run to apply changes.",
+    );
     process.exit(0);
   }
 
@@ -133,7 +136,9 @@ async function main() {
   const redisUrl = process.env.REDIS_QUEUE_URL || process.env.REDIS_URL;
 
   if (!redisUrl) {
-    console.error("❌ REDIS_QUEUE_URL or REDIS_URL environment variable is required");
+    console.error(
+      "❌ REDIS_QUEUE_URL or REDIS_URL environment variable is required",
+    );
     process.exit(1);
   }
 
@@ -171,10 +176,13 @@ async function main() {
       );
 
       successCount++;
-      console.log(`   ✅ ${team.id.slice(0, 8)}... (${team.plan}) → ${cronPattern}`);
+      console.log(
+        `   ✅ ${team.id.slice(0, 8)}... (${team.plan}) → ${cronPattern}`,
+      );
     } catch (error) {
       errorCount++;
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       errors.push({ teamId: team.id, error: errorMessage });
       console.log(`   ❌ ${team.id.slice(0, 8)}... - Error: ${errorMessage}`);
     }

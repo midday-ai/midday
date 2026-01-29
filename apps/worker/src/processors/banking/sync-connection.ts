@@ -6,12 +6,12 @@ import {
 } from "@midday/db/queries";
 import { triggerJob, triggerJobAndWait } from "@midday/job-client";
 import type { Job } from "bullmq";
+import { trpc } from "../../client/trpc";
 import {
-  syncConnectionSchema,
   type SyncConnectionPayload,
+  syncConnectionSchema,
 } from "../../schemas/banking";
 import { getDb } from "../../utils/db";
-import { trpc } from "../../client/trpc";
 import { BaseProcessor } from "../base";
 
 /**
@@ -42,11 +42,16 @@ export class SyncConnectionProcessor extends BaseProcessor<SyncConnectionPayload
     const { provider, referenceId, accessToken, teamId } = connection;
 
     // 2. Check connection status with provider
-    const connectionStatus = await trpc.bankingService.getConnectionStatus.query({
-      provider: provider as "gocardless" | "plaid" | "teller" | "enablebanking",
-      id: referenceId ?? undefined,
-      accessToken: accessToken ?? undefined,
-    });
+    const connectionStatus =
+      await trpc.bankingService.getConnectionStatus.query({
+        provider: provider as
+          | "gocardless"
+          | "plaid"
+          | "teller"
+          | "enablebanking",
+        id: referenceId ?? undefined,
+        accessToken: accessToken ?? undefined,
+      });
 
     this.logger.info("Connection status from provider", {
       connectionId,

@@ -57,7 +57,9 @@ export const inboxQueueConfig: QueueConfig = {
       logger.info(`Inbox job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      logger.error(`Inbox job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Inbox job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };
@@ -96,7 +98,9 @@ export const inboxProviderQueueConfig: QueueConfig = {
       logger.info(`Inbox provider job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      logger.error(`Inbox provider job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Inbox provider job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

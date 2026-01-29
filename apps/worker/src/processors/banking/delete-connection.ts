@@ -1,8 +1,8 @@
 import type { Job } from "bullmq";
 import { trpc } from "../../client/trpc";
 import {
-  deleteConnectionSchema,
   type DeleteConnectionPayload,
+  deleteConnectionSchema,
 } from "../../schemas/banking";
 import { BaseProcessor } from "../base";
 

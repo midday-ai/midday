@@ -45,11 +45,12 @@ export async function GET(request: NextRequest) {
 
     if (method === "reconnect" && sessionId && sessionData?.session_id) {
       const trpc = await getTRPCClient();
-      const updated = await trpc.bankConnections.updateSessionByReference.mutate({
-        previousReferenceId: sessionId,
-        referenceId: sessionData.session_id,
-        expiresAt: sessionData.expires_at ?? null,
-      });
+      const updated =
+        await trpc.bankConnections.updateSessionByReference.mutate({
+          previousReferenceId: sessionId,
+          referenceId: sessionData.session_id,
+          expiresAt: sessionData.expires_at ?? null,
+        });
 
       // Redirect to frontend which will trigger the reconnect job
       // The frontend handles job triggering to track progress via runId/accessToken

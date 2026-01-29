@@ -2,8 +2,8 @@ import { getUnpaidInvoices } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
 import {
-  invoiceStatusSchedulerSchema,
   type InvoiceStatusSchedulerPayload,
+  invoiceStatusSchedulerSchema,
 } from "../../schemas/invoices";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
@@ -42,11 +42,7 @@ export class InvoiceStatusSchedulerProcessor extends BaseProcessor<InvoiceStatus
 
     // Trigger check-invoice-status for each invoice
     const promises = invoices.map((invoice) =>
-      triggerJob(
-        "check-invoice-status",
-        { invoiceId: invoice.id },
-        "invoices",
-      ),
+      triggerJob("check-invoice-status", { invoiceId: invoice.id }, "invoices"),
     );
 
     await Promise.all(promises);

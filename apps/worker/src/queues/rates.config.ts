@@ -49,7 +49,9 @@ export const ratesQueueConfig: QueueConfig = {
       logger.info(`Rates job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      logger.error(`Rates job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Rates job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

@@ -1,6 +1,6 @@
 import { createLoggerWithContext } from "@midday/logger";
 import { formatISO, subDays } from "date-fns";
-import { bankingCache, CACHE_TTL } from "../../cache";
+import { CACHE_TTL, bankingCache } from "../../cache";
 import type { GetInstitutionsRequest } from "../../types";
 import { ProviderError } from "../../utils/error";
 
@@ -180,11 +180,12 @@ export class GoCardLessApi {
     const countryCode = params?.countryCode;
 
     // Check cache first
-    const cachedInstitutions = await bankingCache.getKeyed<GetInstitutionsResponse>(
-      "gocardless",
-      "institutions",
-      countryCode || "all",
-    );
+    const cachedInstitutions =
+      await bankingCache.getKeyed<GetInstitutionsResponse>(
+        "gocardless",
+        "institutions",
+        countryCode || "all",
+      );
 
     if (cachedInstitutions) {
       return cachedInstitutions;

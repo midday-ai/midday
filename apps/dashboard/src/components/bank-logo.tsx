@@ -29,10 +29,18 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
           onError={() => setHasError(true)}
         />
       ) : (
-        <AvatarImage src={DEFAULT_BANK_LOGO} alt={alt} className="object-contain" />
+        <AvatarImage
+          src={DEFAULT_BANK_LOGO}
+          alt={alt}
+          className="object-contain"
+        />
       )}
       <AvatarFallback>
-        <AvatarImage src={DEFAULT_BANK_LOGO} alt={alt} className="object-contain" />
+        <AvatarImage
+          src={DEFAULT_BANK_LOGO}
+          alt={alt}
+          className="object-contain"
+        />
       </AvatarFallback>
     </Avatar>
   );

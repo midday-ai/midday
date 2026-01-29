@@ -2,8 +2,8 @@ import { capitalCase } from "change-case";
 import type { Transaction, TransactionCode } from "plaid";
 import type {
   Account as BaseAccount,
-  GetAccountBalanceResponse,
   Transaction as BaseTransaction,
+  GetAccountBalanceResponse,
 } from "../../types";
 import { getType } from "../../utils/account";
 import { getLogoURL } from "../../utils/logo";

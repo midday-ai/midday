@@ -165,11 +165,12 @@ export function ReconnectProvider({
             link.searchParams.append("desktop", "true");
           }
 
-          const agreement =
-            await createGoCardlessAgreementMutation.mutateAsync({
+          const agreement = await createGoCardlessAgreementMutation.mutateAsync(
+            {
               institutionId,
               transactionTotalDays: 60,
-            });
+            },
+          );
 
           const linkData = await createGoCardlessLinkMutation.mutateAsync({
             institutionId,

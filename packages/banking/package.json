@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "test": "bun test src",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit"
   },
   "exports": {

@@ -47,7 +47,9 @@ export const customersQueueConfig: QueueConfig = {
       logger.info(`Customer job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      logger.error(`Customer job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Customer job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

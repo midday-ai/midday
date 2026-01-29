@@ -62,7 +62,9 @@ export const embeddingsQueueConfig: QueueConfig = {
       logger.info(`Embeddings job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      logger.error(`Embeddings job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Embeddings job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

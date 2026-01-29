@@ -2,8 +2,8 @@ import { markTransactionsNotified } from "@midday/db/queries";
 import { Notifications } from "@midday/notifications";
 import type { Job } from "bullmq";
 import {
-  transactionNotificationsSchema,
   type TransactionNotificationsPayload,
+  transactionNotificationsSchema,
 } from "../../schemas/banking";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";

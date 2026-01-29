@@ -62,7 +62,9 @@ export const accountingQueueConfig: QueueConfig = {
       logger.info(`Accounting job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      logger.error(`Accounting job failed: ${job?.name} (${job?.id})`, { error: err });
+      logger.error(`Accounting job failed: ${job?.name} (${job?.id})`, {
+        error: err,
+      });
     },
   },
 };

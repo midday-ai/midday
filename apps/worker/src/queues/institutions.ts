@@ -13,7 +13,9 @@ export const institutionsWorker = new Worker(
   institutionsQueueConfig.name,
   async (job) => {
     const processor =
-      institutionsProcessorMap[job.name as keyof typeof institutionsProcessorMap];
+      institutionsProcessorMap[
+        job.name as keyof typeof institutionsProcessorMap
+      ];
 
     if (!processor) {
       throw new Error(`Unknown job name: ${job.name}`);
@@ -26,9 +28,15 @@ export const institutionsWorker = new Worker(
 
 // Attach event handlers
 if (institutionsQueueConfig.eventHandlers?.onCompleted) {
-  institutionsWorker.on("completed", institutionsQueueConfig.eventHandlers.onCompleted);
+  institutionsWorker.on(
+    "completed",
+    institutionsQueueConfig.eventHandlers.onCompleted,
+  );
 }
 
 if (institutionsQueueConfig.eventHandlers?.onFailed) {
-  institutionsWorker.on("failed", institutionsQueueConfig.eventHandlers.onFailed);
+  institutionsWorker.on(
+    "failed",
+    institutionsQueueConfig.eventHandlers.onFailed,
+  );
 }
