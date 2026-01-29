@@ -1,3 +1,4 @@
+import { logger } from "@midday/logger";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import { getRedisConnection } from "../config";
 import type { QueueConfig } from "../types/queue-config";
@@ -58,10 +59,10 @@ export const accountingQueueConfig: QueueConfig = {
   workerOptions: accountingWorkerOptions,
   eventHandlers: {
     onCompleted: (job) => {
-      console.log(`Accounting job completed: ${job.name} (${job.id})`);
+      logger.info(`Accounting job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      console.error(`Accounting job failed: ${job?.name} (${job?.id})`, err);
+      logger.error(`Accounting job failed: ${job?.name} (${job?.id})`, { error: err });
     },
   },
 };

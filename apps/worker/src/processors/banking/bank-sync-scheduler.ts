@@ -21,11 +21,12 @@ export class BankSyncSchedulerProcessor extends BaseProcessor<BankSyncSchedulerP
     const { teamId } = job.data;
     const db = getDb();
 
-    // Only run in production
-    if (process.env.NODE_ENV !== "production") {
-      this.logger.info("Skipping bank sync scheduler in non-production", {
-        teamId,
-      });
+    const isEnabled =
+      process.env.BANK_SYNC_SCHEDULER_ENABLED ??
+      (process.env.NODE_ENV === "production" ? "true" : "false");
+
+    if (isEnabled !== "true") {
+      this.logger.info("Skipping bank sync scheduler (disabled)", { teamId });
       return;
     }
 

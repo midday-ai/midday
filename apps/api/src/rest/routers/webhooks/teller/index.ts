@@ -1,7 +1,11 @@
 import crypto from "node:crypto";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { getBankConnectionByEnrollmentId, getTeamById } from "@midday/db/queries";
+import {
+  getBankConnectionByEnrollmentId,
+  getTeamById,
+  isTeamEligibleForBankSync,
+} from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
 import { isAfter, subDays } from "date-fns";
@@ -94,31 +98,6 @@ const webhookBodySchema = z.object({
   ]),
 });
 
-/**
- * Checks if a team is eligible for sync operations based on:
- * 1. Teams with starter or pro plan (always eligible)
- * 2. Trial teams created during beta period (within 14 days of creation)
- */
-function isTeamEligibleForSync(team: {
-  plan: string | null;
-  createdAt: string | null;
-}): boolean {
-  // Pro and starter teams are always eligible
-  if (team.plan === "pro" || team.plan === "starter") {
-    return true;
-  }
-
-  // Trial teams are only eligible if created within the beta period (14 days)
-  if (team.plan === "trial" && team.createdAt) {
-    const teamCreatedAt = new Date(team.createdAt);
-    const fourteenDaysAgo = subDays(new Date(), 14);
-    return teamCreatedAt >= fourteenDaysAgo;
-  }
-
-  // All other cases are not eligible
-  return false;
-}
-
 // ============================================================================
 // Webhook Route
 // ============================================================================
@@ -179,7 +158,13 @@ app.post("/", async (c) => {
   }
 
   // Check if team is eligible for sync operations
-  if (!isTeamEligibleForSync({ plan: team.plan, createdAt: team.createdAt })) {
+  if (
+    !isTeamEligibleForBankSync({
+      plan: team.plan,
+      createdAt: team.createdAt,
+      canceledAt: team.canceledAt,
+    })
+  ) {
     logger.info("Teller webhook: Team not eligible for sync", {
       teamId: team.id,
       plan: team.plan,

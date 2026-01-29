@@ -1,3 +1,4 @@
+import { logger } from "@midday/logger";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import { getRedisConnection } from "../config";
 import type { QueueConfig } from "../types/queue-config";
@@ -26,14 +27,14 @@ const bankingQueueOptions: QueueOptions = {
 /**
  * Worker options for banking queue
  * - Concurrency: 5 to avoid overwhelming banking APIs
- * - Lock duration: 2 minutes for sync jobs
- * - Stall interval: 2 minutes to allow for API delays
+ * - Lock duration: 30 minutes for long-running sync jobs
+ * - Stall interval: 5 minutes to allow for API delays
  */
 const bankingWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
   concurrency: 5, // Conservative to respect API rate limits
-  lockDuration: 120000, // 2 minutes
-  stalledInterval: 120000, // 2 minutes
+  lockDuration: 30 * 60 * 1000, // 30 minutes
+  stalledInterval: 5 * 60 * 1000, // 5 minutes
   maxStalledCount: 1,
 };
 
@@ -57,7 +58,7 @@ export const bankingQueueConfig: QueueConfig = {
   workerOptions: bankingWorkerOptions,
   eventHandlers: {
     onFailed: (job, err) => {
-      console.error(`Banking job failed: ${job?.name} (${job?.id})`, err);
+      logger.error(`Banking job failed: ${job?.name} (${job?.id})`, { error: err });
     },
   },
 };

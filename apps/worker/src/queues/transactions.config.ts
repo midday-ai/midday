@@ -1,3 +1,4 @@
+import { logger } from "@midday/logger";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import { getRedisConnection } from "../config";
 import type { QueueConfig } from "../types/queue-config";
@@ -48,7 +49,7 @@ export const transactionsQueueConfig: QueueConfig = {
   workerOptions: transactionsWorkerOptions,
   eventHandlers: {
     onFailed: (job, err) => {
-      console.error(`Transaction job failed: ${job?.name} (${job?.id})`, err);
+      logger.error(`Transaction job failed: ${job?.name} (${job?.id})`, { error: err });
     },
   },
 };

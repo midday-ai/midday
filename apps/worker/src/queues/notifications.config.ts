@@ -1,3 +1,4 @@
+import { logger } from "@midday/logger";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import { getRedisConnection } from "../config";
 import { DEFAULT_JOB_OPTIONS } from "../config/job-options";
@@ -51,10 +52,10 @@ export const notificationsQueueConfig: QueueConfig = {
   workerOptions: notificationsWorkerOptions,
   eventHandlers: {
     onCompleted: (job) => {
-      console.log(`Notification job completed: ${job.name} (${job.id})`);
+      logger.info(`Notification job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      console.error(`Notification job failed: ${job?.name} (${job?.id})`, err);
+      logger.error(`Notification job failed: ${job?.name} (${job?.id})`, { error: err });
     },
   },
 };

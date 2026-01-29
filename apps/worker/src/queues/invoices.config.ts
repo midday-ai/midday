@@ -1,3 +1,4 @@
+import { logger } from "@midday/logger";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import { getRedisConnection } from "../config";
 import { DEFAULT_JOB_OPTIONS } from "../config/job-options";
@@ -43,10 +44,10 @@ export const invoicesQueueConfig: QueueConfig = {
   workerOptions: invoicesWorkerOptions,
   eventHandlers: {
     onCompleted: (job) => {
-      console.log(`Invoices job completed: ${job.name} (${job.id})`);
+      logger.info(`Invoices job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      console.error(`Invoices job failed: ${job?.name} (${job?.id})`, err);
+      logger.error(`Invoices job failed: ${job?.name} (${job?.id})`, { error: err });
     },
   },
 };

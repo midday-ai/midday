@@ -58,6 +58,7 @@ export const getTeamById = async (db: Database, id: string) => {
       stripeAccountId: teams.stripeAccountId,
       stripeConnectStatus: teams.stripeConnectStatus,
       createdAt: teams.createdAt,
+      canceledAt: teams.canceledAt,
     })
     .from(teams)
     .where(eq(teams.id, id));
@@ -135,6 +136,38 @@ export const updateTeamById = async (
 
   return result;
 };
+
+export type TeamEligibilityParams = {
+  plan: string | null;
+  createdAt: string | null;
+  canceledAt?: string | null;
+};
+
+/**
+ * Check if a team is eligible for banking sync operations.
+ * - Pro and starter teams are always eligible
+ * - Trial teams are eligible if created within the trial window and not canceled
+ */
+export function isTeamEligibleForBankSync(
+  team: TeamEligibilityParams,
+  { trialWindowDays = 30 }: { trialWindowDays?: number } = {},
+): boolean {
+  if (team.plan === "pro" || team.plan === "starter") {
+    return true;
+  }
+
+  if (team.plan === "trial" && team.createdAt && !team.canceledAt) {
+    const createdAtMs = new Date(team.createdAt).getTime();
+    if (Number.isNaN(createdAtMs)) {
+      return false;
+    }
+
+    const cutoffMs = Date.now() - trialWindowDays * 24 * 60 * 60 * 1000;
+    return createdAtMs >= cutoffMs;
+  }
+
+  return false;
+}
 
 type CreateTeamParams = {
   name: string;

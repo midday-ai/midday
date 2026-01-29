@@ -1,7 +1,6 @@
 import { getTRPCClient } from "@/trpc/server";
 import { logger } from "@/utils/logger";
 import { getSession } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -9,7 +8,6 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const requestUrl = new URL(request.url);
-  const supabase = await createClient();
 
   const {
     data: { session },
@@ -45,29 +43,22 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (method === "reconnect" && sessionId) {
-      // Update the bank connection session
-      if (sessionData?.session_id) {
-        const { data } = await supabase
-          .from("bank_connections")
-          .update({
-            expires_at: sessionData.expires_at,
-            reference_id: sessionData.session_id,
-            status: "connected",
-          })
-          .eq("reference_id", sessionId)
-          .select("id")
-          .single();
+    if (method === "reconnect" && sessionId && sessionData?.session_id) {
+      const trpc = await getTRPCClient();
+      const updated = await trpc.bankConnections.updateSessionByReference.mutate({
+        previousReferenceId: sessionId,
+        referenceId: sessionData.session_id,
+        expiresAt: sessionData.expires_at ?? null,
+      });
 
-        // Redirect to frontend which will trigger the reconnect job
-        // The frontend handles job triggering to track progress via runId/accessToken
-        return NextResponse.redirect(
-          new URL(
-            `/settings/accounts?id=${data?.id}&step=reconnect`,
-            redirectBase,
-          ),
-        );
-      }
+      // Redirect to frontend which will trigger the reconnect job
+      // The frontend handles job triggering to track progress via runId/accessToken
+      return NextResponse.redirect(
+        new URL(
+          `/settings/accounts?id=${updated?.id}&step=reconnect`,
+          redirectBase,
+        ),
+      );
     }
   } catch (error) {
     logger("EnableBanking exchange error", { error });

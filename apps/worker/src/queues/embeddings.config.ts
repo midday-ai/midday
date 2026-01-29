@@ -1,3 +1,4 @@
+import { logger } from "@midday/logger";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import { getRedisConnection } from "../config";
 import type { QueueConfig } from "../types/queue-config";
@@ -58,10 +59,10 @@ export const embeddingsQueueConfig: QueueConfig = {
   workerOptions: embeddingsWorkerOptions,
   eventHandlers: {
     onCompleted: (job) => {
-      console.log(`Embeddings job completed: ${job.name} (${job.id})`);
+      logger.info(`Embeddings job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      console.error(`Embeddings job failed: ${job?.name} (${job?.id})`, err);
+      logger.error(`Embeddings job failed: ${job?.name} (${job?.id})`, { error: err });
     },
   },
 };

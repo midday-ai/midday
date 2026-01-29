@@ -1,3 +1,4 @@
+import { logger } from "@midday/logger";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import { getRedisConnection } from "../config";
 import type { QueueConfig } from "../types/queue-config";
@@ -45,10 +46,10 @@ export const ratesQueueConfig: QueueConfig = {
   workerOptions: ratesWorkerOptions,
   eventHandlers: {
     onCompleted: (job) => {
-      console.log(`Rates job completed: ${job.name} (${job.id})`);
+      logger.info(`Rates job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      console.error(`Rates job failed: ${job?.name} (${job?.id})`, err);
+      logger.error(`Rates job failed: ${job?.name} (${job?.id})`, { error: err });
     },
   },
 };

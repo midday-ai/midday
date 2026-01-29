@@ -3,6 +3,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import {
   getBankConnectionByReferenceId,
   getTeamById,
+  isTeamEligibleForBankSync,
 } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
@@ -45,34 +46,30 @@ const webhookBodySchema = z.object({
   environment: z.enum(["sandbox", "production"]),
 });
 
-/**
- * Checks if a team is eligible for sync operations based on:
- * 1. Teams with starter or pro plan (always eligible)
- * 2. Trial teams created during beta period (within 14 days of creation)
- */
-function isTeamEligibleForSync(team: {
-  plan: string | null;
-  createdAt: string | null;
-}): boolean {
-  // Pro and starter teams are always eligible
-  if (team.plan === "pro" || team.plan === "starter") {
-    return true;
+function getClientIp(headers: {
+  header(name: string): string | undefined;
+}): string {
+  const cfIp = headers.header("cf-connecting-ip");
+  if (cfIp) {
+    return cfIp;
   }
 
-  // Trial teams are only eligible if created within the beta period (14 days)
-  if (team.plan === "trial" && team.createdAt) {
-    const teamCreatedAt = new Date(team.createdAt);
-    const fourteenDaysAgo = subDays(new Date(), 14);
-    return teamCreatedAt >= fourteenDaysAgo;
+  const realIp = headers.header("x-real-ip");
+  if (realIp) {
+    return realIp;
   }
 
-  // All other cases are not eligible
-  return false;
+  const forwarded = headers.header("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0]?.trim() ?? "";
+  }
+
+  return "";
 }
 
 app.post("/", async (c) => {
   const db = c.get("db");
-  const clientIp = c.req.header("x-forwarded-for") || "";
+  const clientIp = getClientIp(c.req);
 
   // Verify IP address is from Plaid
   if (!ALLOWED_IPS.includes(clientIp)) {
@@ -109,7 +106,13 @@ app.post("/", async (c) => {
   }
 
   // Check if team is eligible for sync operations
-  if (!isTeamEligibleForSync({ plan: team.plan, createdAt: team.createdAt })) {
+  if (
+    !isTeamEligibleForBankSync({
+      plan: team.plan,
+      createdAt: team.createdAt,
+      canceledAt: team.canceledAt,
+    })
+  ) {
     logger.info("Plaid webhook: Team not eligible for sync", {
       teamId: team.id,
       plan: team.plan,

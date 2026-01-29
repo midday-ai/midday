@@ -54,3 +54,14 @@ export const reconnectBankConnectionSchema = z.object({
   connectionId: z.string().uuid(),
   provider: z.enum(["gocardless", "teller", "plaid", "enablebanking"]),
 });
+
+export const updateBankConnectionReferenceSchema = z.object({
+  connectionId: z.string().uuid(),
+  referenceId: z.string(),
+});
+
+export const updateBankConnectionSessionSchema = z.object({
+  previousReferenceId: z.string(),
+  referenceId: z.string(),
+  expiresAt: z.string().nullable().optional(),
+});

@@ -426,6 +426,42 @@ export async function updateBankConnectionReference(
   return result;
 }
 
+export type UpdateBankConnectionSessionByReferenceParams = {
+  teamId: string;
+  previousReferenceId: string;
+  referenceId: string;
+  expiresAt?: string | null;
+  status?: "connected" | "disconnected" | "unknown";
+};
+
+/**
+ * Update bank connection session data using the previous reference ID.
+ * Used for OAuth reconnect flows where the provider issues a new session ID.
+ */
+export async function updateBankConnectionSessionByReference(
+  db: Database,
+  params: UpdateBankConnectionSessionByReferenceParams,
+) {
+  const { teamId, previousReferenceId, referenceId, expiresAt, status } = params;
+
+  const [result] = await db
+    .update(bankConnections)
+    .set({
+      referenceId,
+      status: status ?? "connected",
+      ...(expiresAt !== undefined && { expiresAt }),
+    })
+    .where(
+      and(
+        eq(bankConnections.referenceId, previousReferenceId),
+        eq(bankConnections.teamId, teamId),
+      ),
+    )
+    .returning({ id: bankConnections.id });
+
+  return result;
+}
+
 export type GetExistingAccountsForReconnectParams = {
   connectionId: string;
   teamId: string;

@@ -57,7 +57,7 @@ export class InitialBankSetupProcessor extends BaseProcessor<InitialBankSetupPay
         manualSync: true,
       },
       "banking",
-      { timeout: 300_000 }, // 5 minute timeout for initial sync
+      { timeout: 15 * 60 * 1000 }, // 15 minute timeout for initial sync
     );
 
     this.logger.info("Initial sync completed", { connectionId });

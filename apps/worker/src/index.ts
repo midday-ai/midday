@@ -2,6 +2,7 @@
 import "./instrument";
 
 import { closeWorkerDb } from "@midday/db/worker-client";
+import { logger } from "@midday/logger";
 import * as Sentry from "@sentry/bun";
 import { Worker } from "bullmq";
 import { Hono } from "hono";
@@ -29,7 +30,7 @@ const workers = queueConfigs.map((config) => {
   // Always attach error handler to prevent unhandled errors
   // See: https://docs.bullmq.io/guide/going-to-production#log-errors
   worker.on("error", (err) => {
-    console.error(`[Worker:${config.name}] Error:`, err);
+    logger.error(`[Worker:${config.name}] Error:`, { error: err });
     Sentry.captureException(err, {
       tags: { workerName: config.name, errorType: "worker_error" },
     });
@@ -39,10 +40,7 @@ const workers = queueConfigs.map((config) => {
   // Note: BaseProcessor already captures in-process failures with full context
   // This catches failures that bypass the processor (e.g., no processor registered)
   worker.on("failed", async (job, err) => {
-    console.error(
-      `[Worker:${config.name}] Job failed: ${job?.name} (${job?.id})`,
-      err,
-    );
+    logger.error(`[Worker:${config.name}] Job failed: ${job?.name} (${job?.id})`, { error: err });
     Sentry.captureException(err, {
       tags: {
         workerName: config.name,
@@ -72,10 +70,7 @@ const workers = queueConfigs.map((config) => {
           err,
         );
       } catch (handlerError) {
-        console.error(
-          `[Worker:${config.name}] Error in onFailed handler:`,
-          handlerError,
-        );
+        logger.error(`[Worker:${config.name}] Error in onFailed handler:`, { error: handlerError });
         Sentry.captureException(handlerError, {
           tags: {
             workerName: config.name,
@@ -103,7 +98,7 @@ const workers = queueConfigs.map((config) => {
 
 // Register static schedulers on startup
 registerStaticSchedulers().catch((error) => {
-  console.error("Failed to register static schedulers:", error);
+  logger.error("Failed to register static schedulers:", { error });
   process.exit(1);
 });
 
@@ -117,7 +112,7 @@ function initializeWorkbench() {
   const queues = getAllQueues();
 
   if (queues.length === 0) {
-    console.warn("No queues found when initializing Workbench");
+    logger.warn("No queues found when initializing Workbench");
     return;
   }
 
@@ -138,10 +133,9 @@ function initializeWorkbench() {
     }),
   );
 
-  console.log(
-    `Workbench initialized with ${queues.length} queues:`,
-    queues.map((q) => q.name),
-  );
+  logger.info(`Workbench initialized with ${queues.length} queues`, {
+    queues: queues.map((q) => q.name),
+  });
 }
 
 // Initialize Workbench on startup
@@ -175,42 +169,42 @@ Bun.serve({
   fetch: app.fetch,
 });
 
-console.log(`Worker server running on port ${port}`);
-console.log("Workers initialized and ready to process jobs");
+logger.info(`Worker server running on port ${port}`);
+logger.info("Workers initialized and ready to process jobs");
 
 /**
  * Graceful shutdown handlers
  * Close database connections and workers cleanly on process termination
  */
 const shutdown = async (signal: string) => {
-  console.log(`Received ${signal}, starting graceful shutdown...`);
+  logger.info(`Received ${signal}, starting graceful shutdown...`);
 
   const SHUTDOWN_TIMEOUT = 30_000; // 30 seconds max for shutdown
 
   const shutdownPromise = (async () => {
     try {
       // Stop accepting new jobs
-      console.log("Stopping workers from accepting new jobs...");
+      logger.info("Stopping workers from accepting new jobs...");
       await Promise.all(workers.map((worker) => worker.close()));
 
       // Wait a bit for in-flight jobs to complete
-      console.log("Waiting for in-flight jobs to complete...");
+      logger.info("Waiting for in-flight jobs to complete...");
       await new Promise((resolve) => setTimeout(resolve, 5000)); // 5 seconds grace period
 
       // Close database connections
-      console.log("Closing database connections...");
+      logger.info("Closing database connections...");
       await closeWorkerDb();
 
-      console.log("Graceful shutdown complete");
+      logger.info("Graceful shutdown complete");
     } catch (error) {
-      console.error("Error during shutdown:", error);
+      logger.error("Error during shutdown:", { error });
     }
   })();
 
   // Race shutdown against timeout
   const timeoutPromise = new Promise<void>((resolve) => {
     setTimeout(() => {
-      console.warn("Shutdown timeout reached, forcing exit");
+      logger.warn("Shutdown timeout reached, forcing exit");
       resolve();
     }, SHUTDOWN_TIMEOUT);
   });
@@ -227,7 +221,7 @@ process.on("SIGINT", () => shutdown("SIGINT"));
  * See: https://docs.bullmq.io/guide/going-to-production#unhandled-exceptions-and-rejections
  */
 process.on("uncaughtException", (err) => {
-  console.error("[Worker] Uncaught exception:", err);
+  logger.error("[Worker] Uncaught exception:", { error: err });
   Sentry.captureException(err, {
     tags: { errorType: "uncaught_exception" },
   });
@@ -235,7 +229,7 @@ process.on("uncaughtException", (err) => {
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("[Worker] Unhandled rejection at:", promise, "reason:", reason);
+  logger.error("[Worker] Unhandled rejection", { promise, reason });
   Sentry.captureException(
     reason instanceof Error ? reason : new Error(String(reason)),
     {

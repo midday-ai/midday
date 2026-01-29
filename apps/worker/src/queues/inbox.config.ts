@@ -1,3 +1,4 @@
+import { logger } from "@midday/logger";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import { getRedisConnection } from "../config";
 import type { QueueConfig } from "../types/queue-config";
@@ -53,10 +54,10 @@ export const inboxQueueConfig: QueueConfig = {
   workerOptions: inboxWorkerOptions,
   eventHandlers: {
     onCompleted: (job) => {
-      console.log(`Inbox job completed: ${job.name} (${job.id})`);
+      logger.info(`Inbox job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      console.error(`Inbox job failed: ${job?.name} (${job?.id})`, err);
+      logger.error(`Inbox job failed: ${job?.name} (${job?.id})`, { error: err });
     },
   },
 };
@@ -92,13 +93,10 @@ export const inboxProviderQueueConfig: QueueConfig = {
   workerOptions: inboxProviderWorkerOptions,
   eventHandlers: {
     onCompleted: (job) => {
-      console.log(`Inbox provider job completed: ${job.name} (${job.id})`);
+      logger.info(`Inbox provider job completed: ${job.name} (${job.id})`);
     },
     onFailed: (job, err) => {
-      console.error(
-        `Inbox provider job failed: ${job?.name} (${job?.id})`,
-        err,
-      );
+      logger.error(`Inbox provider job failed: ${job?.name} (${job?.id})`, { error: err });
     },
   },
 };

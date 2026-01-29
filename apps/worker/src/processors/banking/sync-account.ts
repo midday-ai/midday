@@ -7,8 +7,8 @@ import { triggerJobAndWait } from "@midday/job-client";
 import type { Job } from "bullmq";
 import { trpc } from "../../client/trpc";
 import {
-  syncAccountSchema,
   type SyncAccountPayload,
+  syncAccountSchema,
 } from "../../schemas/banking";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
@@ -162,9 +162,18 @@ export class SyncAccountProcessor extends BaseProcessor<SyncAccountPayload> {
         totalTransactions: mappedTransactions.length,
       });
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
       this.logger.error("Failed to sync transactions", {
         accountId: id,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: errorMessage,
+      });
+
+      await incrementBankAccountErrors(db, {
+        id,
+        errorDetails: errorMessage,
+        currentRetries: errorRetries,
       });
 
       throw error;
