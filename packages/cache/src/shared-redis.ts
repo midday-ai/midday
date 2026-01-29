@@ -1,5 +1,7 @@
 import { type RedisClientType, createClient } from "redis";
 
+export type { RedisClientType };
+
 let sharedRedisClient: RedisClientType | null = null;
 
 /**

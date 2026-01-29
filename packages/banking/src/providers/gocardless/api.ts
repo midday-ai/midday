@@ -1,6 +1,9 @@
 import { createLoggerWithContext } from "@midday/logger";
 import { formatISO, subDays } from "date-fns";
-import { CACHE_TTL, bankingCache } from "../../cache";
+import {
+  BANKING_CACHE_TTL,
+  bankingCache,
+} from "@midday/cache/banking-cache";
 import type { GetInstitutionsRequest } from "../../types";
 import { ProviderError } from "../../utils/error";
 
@@ -210,7 +213,7 @@ export class GoCardLessApi {
       "institutions",
       countryCode || "all",
       response,
-      CACHE_TTL.INSTITUTIONS,
+      BANKING_CACHE_TTL.INSTITUTIONS,
     );
 
     if (countryCode) {

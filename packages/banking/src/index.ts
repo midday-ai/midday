@@ -14,8 +14,12 @@ export {
 // Types
 export * from "./types";
 
-// Cache
-export { bankingCache, BankingCache, CACHE_TTL } from "./cache";
+// Cache (re-exported from @midday/cache for backwards compatibility)
+export {
+  bankingCache,
+  BANKING_CACHE_TTL,
+  BANKING_CACHE_TTL as CACHE_TTL,
+} from "@midday/cache/banking-cache";
 
 // Utilities
 export { withRetry } from "./utils/retry";

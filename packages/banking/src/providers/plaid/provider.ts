@@ -1,4 +1,7 @@
-import { CACHE_TTL, bankingCache } from "../../cache";
+import {
+  BANKING_CACHE_TTL,
+  bankingCache,
+} from "@midday/cache/banking-cache";
 import type {
   DeleteAccountsRequest,
   DeleteConnectionRequest,
@@ -114,7 +117,7 @@ export class PlaidProvider implements Provider {
       "institutions",
       cacheKey,
       institutions,
-      CACHE_TTL.INSTITUTIONS,
+      BANKING_CACHE_TTL.INSTITUTIONS,
     );
 
     return institutions;

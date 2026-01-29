@@ -12,7 +12,6 @@
     ".": "./src/index.ts",
     "./providers": "./src/providers/index.ts",
     "./types": "./src/types.ts",
-    "./cache": "./src/cache.ts",
     "./utils/retry": "./src/utils/retry.ts",
     "./utils/countries": "./src/utils/countries.ts",
     "./utils/account": "./src/utils/account.ts",

@@ -1,4 +1,7 @@
-import { CACHE_TTL, bankingCache } from "../../cache";
+import {
+  BANKING_CACHE_TTL,
+  bankingCache,
+} from "@midday/cache/banking-cache";
 import type {
   DeleteAccountsRequest,
   DeleteConnectionRequest,
@@ -56,7 +59,7 @@ export class EnableBankingProvider implements Provider {
       "institutions",
       "all",
       institutions,
-      CACHE_TTL.INSTITUTIONS,
+      BANKING_CACHE_TTL.INSTITUTIONS,
     );
 
     // If country code is specified, filter and cache that too
@@ -72,7 +75,7 @@ export class EnableBankingProvider implements Provider {
         "institutions",
         cacheKey,
         filtered,
-        CACHE_TTL.INSTITUTIONS,
+        BANKING_CACHE_TTL.INSTITUTIONS,
       );
 
       return filtered;
