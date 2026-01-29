@@ -101,11 +101,13 @@ const workers = queueConfigs.map((config) => {
   return worker;
 });
 
-// Register static schedulers on startup
-registerStaticSchedulers().catch((error) => {
-  logger.error("Failed to register static schedulers:", { error });
-  process.exit(1);
-});
+// Cleanup stale schedulers and register new ones on startup
+cleanupStaleSchedulers()
+  .then(() => registerStaticSchedulers())
+  .catch((error) => {
+    logger.error("Failed to register static schedulers:", { error });
+    process.exit(1);
+  });
 
 // Create Hono app
 const app = new Hono();
