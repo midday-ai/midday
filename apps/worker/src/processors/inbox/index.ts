@@ -22,6 +22,10 @@ export { InitialSetupProcessor } from "./initial-setup";
 /**
  * Inbox processor registry
  * Maps job names to processor instances
+ *
+ * Note: Job names match Trigger.dev job IDs for migration compatibility:
+ * - "initial-inbox-setup" (was "initial-setup")
+ * - "sync-inbox-account" (was "sync-scheduler")
  */
 export const inboxProcessors = {
   "batch-process-matching": new BatchProcessMatchingProcessor(),
@@ -31,6 +35,6 @@ export const inboxProcessors = {
   "slack-upload": new SlackUploadProcessor(),
   "whatsapp-upload": new WhatsAppUploadProcessor(),
   "no-match-scheduler": new NoMatchSchedulerProcessor(),
-  "sync-scheduler": new SyncSchedulerProcessor(),
-  "initial-setup": new InitialSetupProcessor(),
+  "sync-inbox-account": new SyncSchedulerProcessor(),
+  "initial-inbox-setup": new InitialSetupProcessor(),
 };

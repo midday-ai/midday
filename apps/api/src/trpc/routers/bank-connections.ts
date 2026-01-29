@@ -2,18 +2,20 @@ import {
   createBankConnectionSchema,
   deleteBankConnectionSchema,
   getBankConnectionsSchema,
+  reconnectBankConnectionSchema,
+  syncBankConnectionSchema,
+  updateBankConnectionReferenceSchema,
+  updateBankConnectionSessionSchema,
 } from "@api/schemas/bank-connections";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   createBankConnection,
   deleteBankConnection,
   getBankConnections,
+  updateBankConnectionReference,
+  updateBankConnectionSessionByReference,
 } from "@midday/db/queries";
-import type {
-  DeleteConnectionPayload,
-  InitialBankSetupPayload,
-} from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk";
+import { triggerJob } from "@midday/job-client";
 import { TRPCError } from "@trpc/server";
 
 export const bankConnectionsRouter = createTRPCRouter({
@@ -42,12 +44,16 @@ export const bankConnectionsRouter = createTRPCRouter({
         });
       }
 
-      const event = await tasks.trigger("initial-bank-setup", {
-        connectionId: data.id,
-        teamId: teamId!,
-      } satisfies InitialBankSetupPayload);
+      const { id: jobId } = await triggerJob(
+        "initial-bank-setup",
+        {
+          connectionId: data.id,
+          teamId: teamId!,
+        },
+        "banking",
+      );
 
-      return event;
+      return { id: jobId };
     }),
 
   delete: protectedProcedure
@@ -62,11 +68,86 @@ export const bankConnectionsRouter = createTRPCRouter({
         throw new Error("Bank connection not found");
       }
 
-      await tasks.trigger("delete-connection", {
-        referenceId: data.referenceId,
-        provider: data.provider!,
-        accessToken: data.accessToken,
-      } satisfies DeleteConnectionPayload);
+      await triggerJob(
+        "delete-connection",
+        {
+          referenceId: data.referenceId,
+          provider: data.provider!,
+          accessToken: data.accessToken,
+        },
+        "banking",
+      );
+
+      return data;
+    }),
+
+  sync: protectedProcedure
+    .input(syncBankConnectionSchema)
+    .mutation(async ({ input }) => {
+      const { id: jobId } = await triggerJob(
+        "sync-connection",
+        {
+          connectionId: input.connectionId,
+          manualSync: true,
+        },
+        "banking",
+      );
+
+      return { id: jobId };
+    }),
+
+  reconnect: protectedProcedure
+    .input(reconnectBankConnectionSchema)
+    .mutation(async ({ input, ctx: { teamId } }) => {
+      const { id: jobId } = await triggerJob(
+        "reconnect-connection",
+        {
+          teamId: teamId!,
+          connectionId: input.connectionId,
+          provider: input.provider,
+        },
+        "banking",
+      );
+
+      return { id: jobId };
+    }),
+
+  updateReference: protectedProcedure
+    .input(updateBankConnectionReferenceSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      const data = await updateBankConnectionReference(db, {
+        connectionId: input.connectionId,
+        teamId: teamId!,
+        referenceId: input.referenceId,
+      });
+
+      if (!data) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bank connection not found",
+        });
+      }
+
+      return data;
+    }),
+
+  updateSessionByReference: protectedProcedure
+    .input(updateBankConnectionSessionSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      const data = await updateBankConnectionSessionByReference(db, {
+        teamId: teamId!,
+        previousReferenceId: input.previousReferenceId,
+        referenceId: input.referenceId,
+        expiresAt: input.expiresAt ?? undefined,
+        status: "connected",
+      });
+
+      if (!data) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bank connection not found",
+        });
+      }
 
       return data;
     }),

@@ -1,4 +1,3 @@
-import { verifyAccessToken } from "@api/utils/auth";
 import { expandScopes } from "@api/utils/scopes";
 import { isValidApiKeyFormat } from "@db/utils/api-keys";
 import { apiKeyCache } from "@midday/cache/api-key-cache";
@@ -10,6 +9,7 @@ import {
   validateAccessToken,
 } from "@midday/db/queries";
 import { hash } from "@midday/encryption";
+import { verifyAccessToken } from "@midday/supabase/verify-token";
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 
@@ -33,7 +33,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   const db = c.get("db");
 
   // Handle Supabase JWT tokens (try to verify as JWT first)
-  const supabaseSession = await verifyAccessToken(token);
+  const { session: supabaseSession } = await verifyAccessToken(token);
   if (supabaseSession) {
     // Get user from database to get team info
     const user = await getUserById(db, supabaseSession.user.id);

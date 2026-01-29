@@ -2,11 +2,13 @@ import type {
   DynamicSchedulerTemplate,
   StaticSchedulerConfig,
 } from "../types/scheduler-config";
+import { bankingDynamicSchedulerTemplates } from "./banking.config";
 import {
   inboxDynamicSchedulerTemplates,
   inboxStaticSchedulers,
 } from "./inbox.config";
 import { insightsStaticSchedulers } from "./insights.config";
+import { institutionsStaticSchedulers } from "./institutions.config";
 import { invoicesStaticSchedulers } from "./invoices.config";
 import { ratesStaticSchedulers } from "./rates.config";
 
@@ -19,6 +21,7 @@ export const staticSchedulerConfigs: StaticSchedulerConfig[] = [
   ...invoicesStaticSchedulers,
   ...ratesStaticSchedulers,
   ...insightsStaticSchedulers,
+  ...institutionsStaticSchedulers,
 ];
 
 /**
@@ -28,4 +31,5 @@ export const staticSchedulerConfigs: StaticSchedulerConfig[] = [
  */
 export const dynamicSchedulerTemplates: DynamicSchedulerTemplate[] = [
   ...inboxDynamicSchedulerTemplates,
+  ...bankingDynamicSchedulerTemplates,
 ];

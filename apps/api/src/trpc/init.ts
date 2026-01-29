@@ -1,9 +1,8 @@
 import { createClient } from "@api/services/supabase";
-import { verifyAccessToken } from "@api/utils/auth";
-import type { Session } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
 import type { Database } from "@midday/db/client";
 import { db } from "@midday/db/client";
+import { type Session, verifyAccessToken } from "@midday/supabase/verify-token";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
@@ -18,6 +17,7 @@ type TRPCContext = {
   geo: ReturnType<typeof getGeoContext>;
   teamId?: string;
   forcePrimary?: boolean;
+  isServiceCall?: boolean;
 };
 
 export const createTRPCContext = async (
@@ -25,8 +25,18 @@ export const createTRPCContext = async (
   c: Context,
 ): Promise<TRPCContext> => {
   const accessToken = c.req.header("Authorization")?.split(" ")[1];
-  const session = await verifyAccessToken(accessToken);
-  const supabase = await createClient(accessToken);
+  const serviceSecret = c.req.header("x-service-secret");
+
+  // Check for service-to-service authentication
+  const isServiceCall =
+    serviceSecret === process.env.SERVICE_SECRET &&
+    !!process.env.SERVICE_SECRET;
+
+  // For service calls, we don't need user authentication
+  const { session } = isServiceCall
+    ? { session: null }
+    : await verifyAccessToken(accessToken);
+  const supabase = await createClient(isServiceCall ? undefined : accessToken);
 
   // Use the singleton database instance - no need for caching
   const geo = getGeoContext(c.req);
@@ -40,6 +50,7 @@ export const createTRPCContext = async (
     db,
     geo,
     forcePrimary,
+    isServiceCall,
   };
 };
 
@@ -81,6 +92,30 @@ export const protectedProcedure = t.procedure
       ctx: {
         teamId,
         session,
+      },
+    });
+  });
+
+/**
+ * Service procedure for internal service-to-service calls (jobs, worker, etc.)
+ * Authenticates using x-service-secret header instead of user session.
+ * Use this for internal API calls that don't have a user context.
+ */
+export const serviceProcedure = t.procedure
+  .use(withPrimaryDbMiddleware)
+  .use(async (opts) => {
+    const { isServiceCall } = opts.ctx;
+
+    if (!isServiceCall) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Service authentication required",
+      });
+    }
+
+    return opts.next({
+      ctx: {
+        isServiceCall: true,
       },
     });
   });

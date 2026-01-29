@@ -1,5 +1,6 @@
 import type { Database } from "@midday/db/client";
 import { getWorkerDb } from "@midday/db/worker-client";
+import { logger } from "@midday/logger";
 
 /**
  * Get database instance for worker jobs
@@ -17,7 +18,7 @@ export function getDb(): Database {
       dbInstance = getWorkerDb();
     } catch (error) {
       // If connection fails, log and rethrow
-      console.error("Failed to initialize database connection:", error);
+      logger.error("Failed to initialize database connection:", { error });
       throw error;
     }
   }

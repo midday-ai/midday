@@ -12,7 +12,6 @@ import {
   updateTeamMemberSchema,
 } from "@api/schemas/team";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import type { InviteTeamMembersPayload } from "@jobs/schema";
 import {
   acceptTeamInvite,
   createTeam,
@@ -35,7 +34,6 @@ import {
   updateTeamMember,
 } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
-import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const teamRouter = createTRPCRouter({
@@ -254,12 +252,16 @@ export const teamRouter = createTRPCRouter({
 
       // Only trigger email sending if there are valid invites
       if (invites.length > 0) {
-        await tasks.trigger("invite-team-members", {
-          teamId: teamId!,
-          invites,
-          ip,
-          locale: "en",
-        } satisfies InviteTeamMembersPayload);
+        await triggerJob(
+          "invite-team-members",
+          {
+            teamId: teamId!,
+            invites,
+            ip,
+            locale: "en",
+          },
+          "teams",
+        );
       }
 
       // Return information about the invitation process

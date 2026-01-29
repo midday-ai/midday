@@ -1,3 +1,5 @@
+import { logger } from "@midday/logger";
+
 /**
  * Process items in batches with error isolation
  * Each batch is processed independently - failures in one batch don't stop others
@@ -17,7 +19,7 @@ export async function processBatch<T, R>(
     } catch (error) {
       // Log error but continue processing remaining batches
       // This provides error isolation - one failed batch doesn't stop the rest
-      console.error(`Batch processing failed at index ${i}:`, error);
+      logger.error(`Batch processing failed at index ${i}:`, { error });
       throw error; // Re-throw to allow caller to decide how to handle
     }
   }

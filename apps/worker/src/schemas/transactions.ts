@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Transaction job schemas (independent from @midday/jobs)
+ * Transaction job schemas
  */
 
 export const exportTransactionsSchema = z.object({

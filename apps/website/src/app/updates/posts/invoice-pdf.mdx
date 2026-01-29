@@ -59,13 +59,11 @@ The invoice is then generated and saved to your [Vault](https://midday.ai/vault)
 We first create an API endpoint that will generate the PDF and return the PDF as Content Type `application/pdf`.
 
 ```tsx
+import { getTRPCClient } from "@/trpc/server";
 import { InvoiceTemplate, renderToStream } from "@midday/invoice";
-import { getInvoiceQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const supabase = createClient();
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
   const size = requestUrl.searchParams.get("size") as "letter" | "a4";
@@ -75,14 +73,14 @@ export async function GET(req: NextRequest) {
     return new Response("No invoice id provided", { status: 400 });
   }
 
-  const { data } = await getInvoiceQuery(supabase, id);
+  const trpc = await getTRPCClient();
+  const data = await trpc.invoice.getById.query({ id });
 
   if (!data) {
     return new Response("Invoice not found", { status: 404 });
   }
 
   const stream = await renderToStream(await InvoiceTemplate({ ...data, size }));
-
   const blob = await new Response(stream).blob();
 
   const headers: Record<string, string> = {
@@ -92,7 +90,7 @@ export async function GET(req: NextRequest) {
 
   if (!preview) {
     headers["Content-Disposition"] =
-      `attachment; filename="${data.invoice_number}.pdf"`;
+      `attachment; filename="${data.invoiceNumber}.pdf"`;
   }
 
   return new Response(blob, { headers });

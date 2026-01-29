@@ -1,6 +1,5 @@
+import { getTRPCClient } from "@/trpc/server";
 import { getSession } from "@midday/supabase/cached-queries";
-import { updateBankConnection } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -12,14 +11,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  const supabase = await createClient();
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
   const referenceId = requestUrl.searchParams.get("reference_id") ?? undefined;
   const isDesktop = requestUrl.searchParams.get("desktop");
 
-  if (id) {
-    await updateBankConnection(supabase, { id, referenceId });
+  if (id && referenceId) {
+    const trpc = await getTRPCClient();
+    await trpc.bankConnections.updateReference.mutate({
+      connectionId: id,
+      referenceId,
+    });
     // Frontend will trigger the reconnect job via useEffect when it sees step=reconnect
     // This allows the frontend to track job progress via runId/accessToken
   }

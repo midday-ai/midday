@@ -7,12 +7,6 @@ import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-// Extended account type with new balance fields (until engine types are regenerated)
-type AccountWithBalances = RouterOutputs["institutions"]["accounts"][number] & {
-  available_balance?: number | null;
-  credit_limit?: number | null;
-};
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -46,6 +40,12 @@ import { useForm } from "react-hook-form";
 import z from "zod/v3";
 import { FormatAmount } from "../format-amount";
 import { LoadingTransactionsEvent } from "../loading-transactions-event";
+
+// Extended account type with new balance fields (until engine types are regenerated)
+type AccountWithBalances = RouterOutputs["institutions"]["accounts"][number] & {
+  available_balance?: number | null;
+  credit_limit?: number | null;
+};
 
 function RowsSkeleton() {
   return (
@@ -188,8 +188,7 @@ export function SelectBankAccountsModal() {
   const trpc = useTRPC();
   const t = useI18n();
 
-  const [runId, setRunId] = useState<string>();
-  const [accessToken, setAccessToken] = useState<string>();
+  const [jobId, setJobId] = useState<string>();
   const [activeTab, setActiveTab] = useState<
     "select-accounts" | "loading" | "support"
   >("select-accounts");
@@ -236,8 +235,7 @@ export function SelectBankAccountsModal() {
       },
       onSuccess: (data) => {
         if (data?.id) {
-          setRunId(data.id);
-          setAccessToken(data.publicAccessToken);
+          setJobId(data.id);
           setActiveTab("loading");
         }
       },
@@ -448,9 +446,8 @@ export function SelectBankAccountsModal() {
 
             <TabsContent value="loading">
               <LoadingTransactionsEvent
-                accessToken={accessToken}
-                runId={runId}
-                setRunId={setRunId}
+                jobId={jobId}
+                setJobId={setJobId}
                 onClose={onClose}
                 setActiveTab={setActiveTab}
               />

@@ -1,48 +1,47 @@
-import { useRealtimeRun } from "@trigger.dev/react-hooks";
+"use client";
+
+import { useJobStatus } from "@/hooks/use-job-status";
 import { useEffect, useState } from "react";
 
 type UseSyncStatusProps = {
-  runId?: string;
-  accessToken?: string;
+  jobId?: string;
 };
 
-export function useSyncStatus({
-  runId: initialRunId,
-  accessToken: initialAccessToken,
-}: UseSyncStatusProps) {
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    initialAccessToken,
-  );
-  const [runId, setRunId] = useState<string | undefined>(initialRunId);
+export function useSyncStatus({ jobId: initialJobId }: UseSyncStatusProps) {
+  const [jobId, setJobId] = useState<string | undefined>(initialJobId);
   const [status, setStatus] = useState<
     "FAILED" | "SYNCING" | "COMPLETED" | null
   >(null);
-  const { run, error } = useRealtimeRun(runId, {
-    enabled: !!runId && !!accessToken,
-    accessToken,
+
+  const {
+    status: jobStatus,
+    result,
+    error,
+  } = useJobStatus({
+    jobId,
+    enabled: !!jobId,
   });
 
   useEffect(() => {
-    if (initialRunId && initialAccessToken) {
-      setAccessToken(initialAccessToken);
-      setRunId(initialRunId);
+    if (initialJobId) {
+      setJobId(initialJobId);
       setStatus("SYNCING");
     }
-  }, [initialRunId, initialAccessToken]);
+  }, [initialJobId]);
 
   useEffect(() => {
-    if (error || run?.status === "FAILED") {
+    if (error || jobStatus === "failed") {
       setStatus("FAILED");
     }
 
-    if (run?.status === "COMPLETED") {
+    if (jobStatus === "completed") {
       setStatus("COMPLETED");
     }
-  }, [error, run]);
+  }, [error, jobStatus]);
 
   return {
     status,
     setStatus,
-    result: run?.output,
+    result,
   };
 }

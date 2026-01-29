@@ -1,8 +1,7 @@
-import type { Database } from "@midday/supabase/types";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 export async function createClient(accessToken?: string) {
-  return createSupabaseClient<Database>(
+  return createSupabaseClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_KEY!,
     {
@@ -14,7 +13,7 @@ export async function createClient(accessToken?: string) {
 }
 
 export async function createAdminClient() {
-  return createSupabaseClient<Database>(
+  return createSupabaseClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_KEY!,
   );

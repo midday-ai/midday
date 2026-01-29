@@ -1,26 +1,21 @@
 "use client";
 
 import { createClient } from "@midday/supabase/client";
-import type { Database } from "@midday/supabase/types";
 import type {
   RealtimeChannel,
   RealtimePostgresChangesPayload,
 } from "@supabase/supabase-js";
 import { useEffect, useRef } from "react";
 
-type PublicSchema = Database[Extract<keyof Database, "public">];
-type Tables = PublicSchema["Tables"];
-type TableName = keyof Tables;
-
 type EventType = "INSERT" | "UPDATE" | "DELETE";
 
-interface UseRealtimeProps<TN extends TableName> {
+interface UseRealtimeProps<TRow extends Record<string, unknown>> {
   channelName: string;
   /** Specific events to listen for. Defaults to ["INSERT", "UPDATE"]. Don't use "*" - it causes issues with Supabase. */
   events?: EventType[];
-  table: TN;
+  table: string;
   filter?: string;
-  onEvent: (payload: RealtimePostgresChangesPayload<Tables[TN]["Row"]>) => void;
+  onEvent: (payload: RealtimePostgresChangesPayload<TRow>) => void;
 }
 
 // Singleton supabase client for realtime - avoids creating multiple instances
@@ -41,13 +36,13 @@ function getSupabaseClient() {
  * - Place in components that don't re-render frequently, or use at a parent level
  * - If changing RLS policies, may need to use a new channel name to avoid stale state
  */
-export function useRealtime<TN extends TableName>({
+export function useRealtime<TRow extends Record<string, unknown>>({
   channelName,
   events = ["INSERT", "UPDATE"],
   table,
   filter,
   onEvent,
-}: UseRealtimeProps<TN>) {
+}: UseRealtimeProps<TRow>) {
   const onEventRef = useRef(onEvent);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -77,9 +72,7 @@ export function useRealtime<TN extends TableName>({
           "postgres_changes",
           { event: "INSERT", schema: "public", table, filter },
           (payload) =>
-            onEventRef.current(
-              payload as RealtimePostgresChangesPayload<Tables[TN]["Row"]>,
-            ),
+            onEventRef.current(payload as RealtimePostgresChangesPayload<TRow>),
         );
       }
       if (events.includes("UPDATE")) {
@@ -87,9 +80,7 @@ export function useRealtime<TN extends TableName>({
           "postgres_changes",
           { event: "UPDATE", schema: "public", table, filter },
           (payload) =>
-            onEventRef.current(
-              payload as RealtimePostgresChangesPayload<Tables[TN]["Row"]>,
-            ),
+            onEventRef.current(payload as RealtimePostgresChangesPayload<TRow>),
         );
       }
       if (events.includes("DELETE")) {
@@ -97,9 +88,7 @@ export function useRealtime<TN extends TableName>({
           "postgres_changes",
           { event: "DELETE", schema: "public", table, filter },
           (payload) =>
-            onEventRef.current(
-              payload as RealtimePostgresChangesPayload<Tables[TN]["Row"]>,
-            ),
+            onEventRef.current(payload as RealtimePostgresChangesPayload<TRow>),
         );
       }
 
@@ -130,6 +119,5 @@ export function useRealtime<TN extends TableName>({
       channelRef.current = null;
     };
     // events is intentionally excluded - it's typically static and including it causes issues
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channelName, table, filter]);
 }

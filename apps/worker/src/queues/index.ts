@@ -2,6 +2,8 @@ import type { Queue } from "bullmq";
 import type { QueueConfig } from "../types/queue-config";
 import { accountingQueue } from "./accounting";
 import { accountingQueueConfig } from "./accounting.config";
+import { bankingQueue } from "./banking";
+import { bankingQueueConfig } from "./banking.config";
 import { customersQueue } from "./customers";
 import { customersQueueConfig } from "./customers.config";
 import { documentsQueue } from "./documents";
@@ -12,6 +14,8 @@ import { inboxProviderQueue, inboxQueue } from "./inbox";
 import { inboxProviderQueueConfig, inboxQueueConfig } from "./inbox.config";
 import { insightsQueue } from "./insights";
 import { insightsQueueConfig } from "./insights.config";
+import { institutionsQueue } from "./institutions";
+import { institutionsQueueConfig } from "./institutions.config";
 import { invoicesQueue } from "./invoices";
 import { invoicesQueueConfig } from "./invoices.config";
 import { notificationsQueue } from "./notifications";
@@ -40,6 +44,8 @@ export const queueConfigs: QueueConfig[] = [
   teamsQueueConfig,
   insightsQueueConfig,
   notificationsQueueConfig,
+  institutionsQueueConfig,
+  bankingQueueConfig,
 ];
 
 /**
@@ -60,5 +66,7 @@ export function getAllQueues(): Queue[] {
     teamsQueue,
     insightsQueue,
     notificationsQueue,
+    institutionsQueue,
+    bankingQueue,
   ];
 }

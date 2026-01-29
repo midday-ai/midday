@@ -723,6 +723,10 @@ export const getInvoiceByTokenSchema = z.object({
   token: z.string(),
 });
 
+export const updateInvoiceViewedSchema = z.object({
+  token: z.string(),
+});
+
 // Template schema alias for compatibility
 export const restInvoiceTemplateSchema = restUpsertInvoiceTemplateSchema;
 

@@ -1,7 +1,5 @@
 "use client";
 
-import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
-import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
@@ -17,7 +15,7 @@ import {
 } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
@@ -127,6 +125,14 @@ export function ConnectTransactionsModal() {
     removeOnUnmount: false,
   });
 
+  const createPlaidLinkMutation = useMutation(
+    trpc.banking.createPlaidLink.mutationOptions(),
+  );
+
+  const exchangePlaidTokenMutation = useMutation(
+    trpc.banking.exchangePlaidToken.mutationOptions(),
+  );
+
   const { open: openPlaid } = usePlaidLink({
     token: plaidToken,
     publicKey: "",
@@ -134,7 +140,10 @@ export function ConnectTransactionsModal() {
     clientName: "Midday",
     product: ["transactions"],
     onSuccess: async (public_token, metadata) => {
-      const { access_token, item_id } = await exchangePublicToken(public_token);
+      const { access_token, item_id } =
+        await exchangePlaidTokenMutation.mutateAsync({
+          publicToken: public_token,
+        });
 
       setParams({
         step: "account",
@@ -185,10 +194,10 @@ export function ConnectTransactionsModal() {
 
   useEffect(() => {
     async function createLinkToken() {
-      const token = await createPlaidLinkTokenAction();
+      const result = await createPlaidLinkMutation.mutateAsync({});
 
-      if (token) {
-        setPlaidToken(token);
+      if (result.link_token) {
+        setPlaidToken(result.link_token);
       }
     }
 

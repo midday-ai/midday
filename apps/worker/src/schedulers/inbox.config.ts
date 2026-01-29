@@ -31,7 +31,7 @@ export const inboxDynamicSchedulerTemplates: DynamicSchedulerTemplate[] = [
     queue: "inbox-provider",
     cronGenerator: (accountId: string) =>
       generateQuarterDailyCronTag(accountId),
-    jobName: "sync-scheduler",
+    jobName: "sync-inbox-account",
     payloadGenerator: (accountId: string) => ({
       id: accountId,
       manualSync: false,

@@ -2175,3 +2175,108 @@ export async function moveTransactionToReview(
       ),
     );
 }
+
+// ============================================================================
+// Transaction Notification Queries
+// ============================================================================
+
+export type MarkTransactionsNotifiedParams = {
+  teamId: string;
+};
+
+export type NotifiedTransaction = {
+  id: string;
+  date: string;
+  amount: number;
+  name: string;
+  currency: string;
+  category: string | null;
+  status: string;
+};
+
+/**
+ * Mark all unnotified transactions for a team as notified and return them.
+ * Used by the transaction notifications job.
+ */
+export async function markTransactionsNotified(
+  db: Database,
+  params: MarkTransactionsNotifiedParams,
+): Promise<NotifiedTransaction[]> {
+  const { teamId } = params;
+
+  const result = await db
+    .update(transactions)
+    .set({ notified: true })
+    .where(
+      and(eq(transactions.teamId, teamId), eq(transactions.notified, false)),
+    )
+    .returning({
+      id: transactions.id,
+      date: transactions.date,
+      amount: transactions.amount,
+      name: transactions.name,
+      currency: transactions.currency,
+      category: transactions.categorySlug,
+      status: transactions.status,
+    });
+
+  return result.map((tx) => ({
+    id: tx.id,
+    date: tx.date,
+    amount: Number(tx.amount),
+    name: tx.name,
+    currency: tx.currency ?? "USD",
+    category: tx.category,
+    status: tx.status ?? "posted",
+  }));
+}
+
+// ============================================================================
+// Invoice Matching Queries
+// ============================================================================
+
+export type GetMatchingTransactionsForInvoiceParams = {
+  teamId: string;
+  amount: number;
+  currency: string;
+  sinceDate: string;
+};
+
+/**
+ * Find unfulfilled transactions that match an invoice amount and currency
+ * Used for automatic invoice payment matching
+ *
+ * A transaction is considered "unfulfilled" if:
+ * - It has no attachments AND status is not 'completed'
+ */
+export async function getMatchingTransactionsForInvoice(
+  db: Database,
+  params: GetMatchingTransactionsForInvoiceParams,
+) {
+  const { teamId, amount, currency, sinceDate } = params;
+
+  return db
+    .select({
+      id: transactions.id,
+    })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.teamId, teamId),
+        // Use sql template for numeric amount comparison
+        sql`${transactions.amount} = ${amount}`,
+        eq(transactions.currency, currency.toUpperCase()),
+        gte(transactions.date, sinceDate),
+        // isFulfilled = has attachments OR status = 'completed'
+        // We want NOT fulfilled: no attachments AND status != 'completed'
+        sql`(
+          NOT EXISTS (
+            SELECT 1 FROM ${transactionAttachments}
+            WHERE ${transactionAttachments.transactionId} = ${transactions.id}
+            AND ${transactionAttachments.teamId} = ${teamId}
+          )
+          AND ${transactions.status} != 'completed'
+        )`,
+      ),
+    );
+}

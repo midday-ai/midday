@@ -15,17 +15,15 @@ const Lottie = dynamic(() => import("lottie-react"), {
 });
 
 type Props = {
-  accessToken?: string;
-  runId?: string;
-  setRunId: (runId?: string) => void;
+  jobId?: string;
+  setJobId: (jobId?: string) => void;
   onClose: () => void;
   setActiveTab: (value: "support" | "loading" | "select-accounts") => void;
 };
 
 export function LoadingTransactionsEvent({
-  accessToken,
-  runId,
-  setRunId,
+  jobId,
+  setJobId,
   onClose,
   setActiveTab,
 }: Props) {
@@ -35,8 +33,7 @@ export function LoadingTransactionsEvent({
   const { setParams } = useConnectParams();
 
   const { status } = useInitialConnectionStatus({
-    runId,
-    accessToken,
+    jobId,
   });
 
   useEffect(() => {
@@ -51,7 +48,7 @@ export function LoadingTransactionsEvent({
       queryClient.invalidateQueries();
 
       setTimeout(() => {
-        setRunId(undefined);
+        setJobId(undefined);
         setParams(null);
       }, 1000);
     }

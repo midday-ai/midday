@@ -4,6 +4,7 @@
   "private": true,
   "exports": {
     "./api-key-cache": "./src/api-key-cache.ts",
+    "./banking-cache": "./src/banking-cache.ts",
     "./user-cache": "./src/user-cache.ts",
     "./replication-cache": "./src/replication-cache.ts",
     "./team-cache": "./src/team-cache.ts",

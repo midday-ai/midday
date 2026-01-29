@@ -1,6 +1,6 @@
-import { client } from "@midday/engine-client";
+import { getTRPCClient } from "@/trpc/server";
+import { logger } from "@/utils/logger";
 import { getSession } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -8,7 +8,6 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const requestUrl = new URL(request.url);
-  const supabase = await createClient();
 
   const {
     data: { session },
@@ -27,54 +26,44 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/?error=missing_code", redirectBase));
   }
 
-  const sessionResponse = await client.auth.enablebanking.exchange.$get({
-    query: {
+  try {
+    const trpc = await getTRPCClient();
+    const sessionData = await trpc.banking.exchangeEnableBankingCode.query({
       code,
-    },
-  });
+    });
 
-  if (sessionResponse.status !== 200) {
-    return NextResponse.redirect(new URL("/?error=invalid_code", redirectBase));
-  }
-
-  if (method === "connect") {
-    const { data: sessionData } = await sessionResponse.json();
-
-    if (sessionData?.session_id) {
-      return NextResponse.redirect(
-        new URL(
-          `/?ref=${sessionData.session_id}&provider=enablebanking&step=account`,
-          redirectBase,
-        ),
-      );
+    if (method === "connect") {
+      if (sessionData?.session_id) {
+        return NextResponse.redirect(
+          new URL(
+            `/?ref=${sessionData.session_id}&provider=enablebanking&step=account`,
+            redirectBase,
+          ),
+        );
+      }
     }
-  }
 
-  if (method === "reconnect" && sessionId) {
-    const { data: sessionData } = await sessionResponse.json();
-
-    // Update the bank connection session
-    if (sessionData?.session_id) {
-      const { data } = await supabase
-        .from("bank_connections")
-        .update({
-          expires_at: sessionData.expires_at,
-          reference_id: sessionData.session_id,
-          status: "connected",
-        })
-        .eq("reference_id", sessionId)
-        .select("id")
-        .single();
+    if (method === "reconnect" && sessionId && sessionData?.session_id) {
+      const trpc = await getTRPCClient();
+      const updated =
+        await trpc.bankConnections.updateSessionByReference.mutate({
+          previousReferenceId: sessionId,
+          referenceId: sessionData.session_id,
+          expiresAt: sessionData.expires_at ?? null,
+        });
 
       // Redirect to frontend which will trigger the reconnect job
       // The frontend handles job triggering to track progress via runId/accessToken
       return NextResponse.redirect(
         new URL(
-          `/settings/accounts?id=${data?.id}&step=reconnect`,
+          `/settings/accounts?id=${updated?.id}&step=reconnect`,
           redirectBase,
         ),
       );
     }
+  } catch (error) {
+    logger("EnableBanking exchange error", { error });
+    return NextResponse.redirect(new URL("/?error=invalid_code", redirectBase));
   }
 
   return NextResponse.redirect(new URL("/", redirectBase));

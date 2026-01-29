@@ -1,5 +1,5 @@
 import { InvoiceViewWrapper } from "@/components/invoice-view-wrapper";
-import { getQueryClient, trpc } from "@/trpc/server";
+import { getQueryClient, getTRPCClient, trpc } from "@/trpc/server";
 import { decrypt } from "@midday/encryption";
 import { HtmlTemplate } from "@midday/invoice/templates/html";
 import { createClient } from "@midday/supabase/server";
@@ -67,15 +67,9 @@ type Props = {
   searchParams: Promise<SearchParams>;
 };
 
-async function updateInvoiceViewedAt(id: string) {
-  const supabase = await createClient({ admin: true });
-
-  await supabase
-    .from("invoices")
-    .update({
-      viewed_at: new Date().toISOString(),
-    })
-    .eq("id", id);
+async function markInvoiceViewed(token: string) {
+  const trpcClient = await getTRPCClient();
+  await trpcClient.invoice.markViewed.mutate({ token });
 }
 
 export default async function Page(props: Props) {
@@ -107,7 +101,7 @@ export default async function Page(props: Props) {
 
       if (decryptedEmail === invoice?.customer?.email) {
         // Only update the invoice viewed_at if the user is a viewer
-        waitUntil(updateInvoiceViewedAt(invoice.id!));
+        waitUntil(markInvoiceViewed(params.token));
       }
     } catch (error) {
       // Silently fail if decryption fails - viewer might be invalid or malformed

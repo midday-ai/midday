@@ -2,14 +2,13 @@ import {
   connectInboxAccountSchema,
   deleteInboxAccountSchema,
   exchangeCodeForAccountSchema,
-  // initialSetupInboxAccountSchema,
   syncInboxAccountSchema,
 } from "@api/schemas/inbox-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { encryptOAuthState } from "@midday/inbox/utils";
-import { schedules, tasks } from "@trigger.dev/sdk";
+import { triggerJob } from "@midday/job-client";
 import { TRPCError } from "@trpc/server";
 
 export const inboxAccountsRouter = createTRPCRouter({
@@ -75,9 +74,9 @@ export const inboxAccountsRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      if (data?.scheduleId) {
-        await schedules.del(data.scheduleId);
-      }
+      // Note: The scheduleId stored in the database is the BullMQ job key.
+      // The scheduler is automatically cleaned up when jobs complete/fail.
+      // For explicit removal, a job could be triggered to unregister the scheduler.
 
       return data;
     }),
@@ -85,25 +84,15 @@ export const inboxAccountsRouter = createTRPCRouter({
   sync: protectedProcedure
     .input(syncInboxAccountSchema)
     .mutation(async ({ input }) => {
-      const event = await tasks.trigger("sync-inbox-account", {
-        id: input.id,
-        manualSync: input.manualSync || false,
-      });
+      const { id: jobId } = await triggerJob(
+        "sync-inbox-account",
+        {
+          id: input.id,
+          manualSync: input.manualSync || false,
+        },
+        "inbox-provider",
+      );
 
-      return event;
+      return { id: jobId };
     }),
-
-  // initialSetup: protectedProcedure
-  //   .input(initialSetupInboxAccountSchema)
-  //   .mutation(async ({ input }) => {
-  //     const job = await triggerJob(
-  //       "initial-setup",
-  //       {
-  //         inboxAccountId: input.inboxAccountId,
-  //       },
-  //       "inbox-provider",
-  //     );
-
-  //     return { id: job.id };
-  //   }),
 });

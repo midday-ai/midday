@@ -1,6 +1,8 @@
+import { logger } from "@midday/logger";
 import type { Job } from "bullmq";
 import { isDevelopment } from "../utils/env";
 import { accountingProcessors } from "./accounting";
+import { bankingProcessors } from "./banking";
 import { customerProcessors } from "./customers";
 import { documentProcessors } from "./documents";
 import { embeddingsProcessors } from "./embeddings";
@@ -76,9 +78,16 @@ for (const [jobName, processor] of Object.entries(notificationProcessors)) {
   processors.set(jobName, processor);
 }
 
+// Register banking processors
+for (const [jobName, processor] of Object.entries(bankingProcessors)) {
+  processors.set(jobName, processor);
+}
+
 // Debug: Log all registered processors
 if (isDevelopment()) {
-  console.log("Registered processors:", Array.from(processors.keys()));
+  logger.debug("Registered processors:", {
+    processors: Array.from(processors.keys()),
+  });
 }
 
 /**
@@ -87,10 +96,9 @@ if (isDevelopment()) {
 export function getProcessor(jobName: string) {
   const processor = processors.get(jobName);
   if (!processor) {
-    console.error(
-      `Processor not found for job: ${jobName}. Available processors:`,
-      Array.from(processors.keys()),
-    );
+    logger.error(`Processor not found for job: ${jobName}`, {
+      availableProcessors: Array.from(processors.keys()),
+    });
   }
   return processor;
 }
