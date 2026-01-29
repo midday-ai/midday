@@ -15,6 +15,7 @@ export const createActivitySchema = z.object({
     "invoice_overdue",
     "invoice_scheduled",
     "invoice_sent",
+    "e_invoice_sent",
     "invoice_reminder_sent",
     "invoice_cancelled",
     "invoice_created",
