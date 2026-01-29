@@ -1639,7 +1639,6 @@ export const teams = pgTable(
 
     // E-Invoice / Peppol
     peppolId: text("peppol_id"), // Peppol participant ID (e.g., 0192:123456789)
-    eInvoiceConnectionKey: text("e_invoice_connection_key"), // DDD Invoices API connection key (encrypted)
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),

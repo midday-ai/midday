@@ -16,10 +16,12 @@ import { type NotificationTypes, createActivitySchema } from "./schemas";
 import { EmailService } from "./services/email-service";
 import { documentProcessed } from "./types/document-processed";
 import { documentUploaded } from "./types/document-uploaded";
+import { eInvoiceSent } from "./types/e-invoice-sent";
 import { inboxAutoMatched } from "./types/inbox-auto-matched";
 import { inboxCrossCurrencyMatched } from "./types/inbox-cross-currency-matched";
 import { inboxNeedsReview } from "./types/inbox-needs-review";
 import { inboxNew } from "./types/inbox-new";
+import { insightReady } from "./types/insight-ready";
 import { invoiceCancelled } from "./types/invoice-cancelled";
 import { invoiceCreated } from "./types/invoice-created";
 import { invoiceOverdue } from "./types/invoice-overdue";
@@ -28,7 +30,6 @@ import { invoiceRefunded } from "./types/invoice-refunded";
 import { invoiceReminderSent } from "./types/invoice-reminder-sent";
 import { invoiceScheduled } from "./types/invoice-scheduled";
 import { invoiceSent } from "./types/invoice-sent";
-import { insightReady } from "./types/insight-ready";
 import { recurringInvoiceUpcoming } from "./types/recurring-invoice-upcoming";
 import { recurringSeriesCompleted } from "./types/recurring-series-completed";
 import { recurringSeriesPaused } from "./types/recurring-series-paused";
@@ -57,6 +58,7 @@ const handlers = {
   invoice_cancelled: invoiceCancelled,
   invoice_created: invoiceCreated,
   invoice_refunded: invoiceRefunded,
+  e_invoice_sent: eInvoiceSent,
   recurring_series_completed: recurringSeriesCompleted,
   recurring_series_started: recurringSeriesStarted,
   recurring_series_paused: recurringSeriesPaused,

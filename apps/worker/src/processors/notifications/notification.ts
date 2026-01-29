@@ -290,6 +290,29 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
         break;
       }
 
+      case "e_invoice_sent": {
+        // Send notification email to customer that e-invoice was delivered via Peppol
+        await notifications.create(
+          "e_invoice_sent",
+          payload.teamId,
+          {
+            invoiceId: payload.invoiceId,
+            invoiceNumber: payload.invoiceNumber,
+            customerName: payload.customerName,
+            customerEmail: payload.customerEmail,
+          },
+          { sendEmail: true },
+        );
+
+        this.logger.info("E-invoice sent notification created", {
+          invoiceId: payload.invoiceId,
+          invoiceNumber: payload.invoiceNumber,
+          teamId: payload.teamId,
+          customerEmail: payload.customerEmail,
+        });
+        break;
+      }
+
       case "invoice_recurring_generated": {
         // Create in-app notification for recurring invoice generation
         // Note: The email is sent via the generate-invoice task, so we only do in-app here

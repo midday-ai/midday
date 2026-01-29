@@ -125,6 +125,15 @@ export const invoiceRefundedNotificationSchema = z.object({
   refundedAt: z.string().optional(),
 });
 
+export const eInvoiceSentNotificationSchema = z.object({
+  ...baseFields,
+  type: z.literal("e_invoice_sent"),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  customerName: z.string(),
+  customerEmail: z.string().email(),
+});
+
 export const invoiceRecurringGeneratedNotificationSchema = z.object({
   ...baseFields,
   type: z.literal("invoice_recurring_generated"),
@@ -173,6 +182,7 @@ export const notificationPayloadSchema = z.discriminatedUnion("type", [
   invoiceScheduledNotificationSchema,
   invoiceReminderSentNotificationSchema,
   invoiceRefundedNotificationSchema,
+  eInvoiceSentNotificationSchema,
   invoiceRecurringGeneratedNotificationSchema,
   recurringSeriesCompletedNotificationSchema,
   recurringSeriesPausedNotificationSchema,
@@ -211,6 +221,9 @@ export type InvoiceReminderSentNotification = z.infer<
 >;
 export type InvoiceRefundedNotification = z.infer<
   typeof invoiceRefundedNotificationSchema
+>;
+export type EInvoiceSentNotification = z.infer<
+  typeof eInvoiceSentNotificationSchema
 >;
 export type InvoiceRecurringGeneratedNotification = z.infer<
   typeof invoiceRecurringGeneratedNotificationSchema

@@ -5,6 +5,7 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { validatePeppolId } from "@midday/e-invoice";
 import {
   Accordion,
   AccordionContent,
@@ -73,7 +74,20 @@ const formSchema = z.object({
   vatNumber: z.string().optional(),
   note: z.string().optional(),
   // E-Invoice / Peppol fields
-  peppolId: z.string().optional(),
+  peppolId: z
+    .string()
+    .optional()
+    .refine(
+      (value) => {
+        if (!value || value.trim() === "") return true;
+        return validatePeppolId(value).valid;
+      },
+      (value) => ({
+        message:
+          validatePeppolId(value ?? "").error ||
+          "Invalid Peppol ID format (e.g., 0192:123456789)",
+      }),
+    ),
   registrationNumber: z.string().optional(),
   legalForm: z.enum(["LegalEntity", "NaturalPerson"]).optional(),
   tags: z
@@ -637,6 +651,10 @@ export function CustomerForm({ data }: Props) {
                                 placeholder="e.g., 0192:123456789"
                               />
                             </FormControl>
+                            <FormDescription>
+                              For e-invoicing via Peppol. Format: scheme:id
+                              (e.g., 0192:123456789)
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}

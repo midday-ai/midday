@@ -231,6 +231,14 @@ export const invoiceRefundedSchema = z.object({
   refundedAt: z.string().optional(),
 });
 
+export const eInvoiceSentSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  customerName: z.string(),
+  customerEmail: z.string().email(),
+});
+
 export const recurringSeriesCompletedSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
@@ -330,6 +338,7 @@ export type InvoiceReminderSentInput = z.infer<
 export type InvoiceCancelledInput = z.infer<typeof invoiceCancelledSchema>;
 export type InvoiceCreatedInput = z.infer<typeof invoiceCreatedSchema>;
 export type InvoiceRefundedInput = z.infer<typeof invoiceRefundedSchema>;
+export type EInvoiceSentInput = z.infer<typeof eInvoiceSentSchema>;
 export type RecurringSeriesCompletedInput = z.infer<
   typeof recurringSeriesCompletedSchema
 >;
@@ -371,6 +380,7 @@ export type NotificationTypes = {
   invoice_cancelled: InvoiceCancelledInput;
   invoice_created: InvoiceCreatedInput;
   invoice_refunded: InvoiceRefundedInput;
+  e_invoice_sent: EInvoiceSentInput;
   recurring_series_completed: RecurringSeriesCompletedInput;
   recurring_series_started: RecurringSeriesStartedInput;
   recurring_series_paused: RecurringSeriesPausedInput;

@@ -1,0 +1,116 @@
+---
+title: E-Invoicing with Peppol
+description: Send compliant electronic invoices via the Peppol network.
+section: invoicing
+order: 5
+---
+
+E-invoicing lets you send invoices electronically through the Peppol network—a secure, standardized way to exchange business documents across Europe and beyond.
+
+## What is Peppol?
+
+Peppol (Pan-European Public Procurement Online) is a network that enables businesses to send and receive electronic invoices in a standardized format. It's:
+
+- **Required** for invoicing government entities in many EU countries
+- **Preferred** by large enterprises for B2B transactions
+- **Compliant** with EU e-invoicing regulations (Directive 2014/55/EU)
+
+When you send an invoice via Peppol, it goes directly to your customer's accounting system—no email attachments, no manual data entry.
+
+## When to use e-invoicing
+
+Use Peppol e-invoicing when:
+
+- Invoicing government or public sector organizations
+- Your customer requires or prefers electronic invoices
+- You want to meet EU e-invoicing compliance requirements
+- You're doing business in countries with e-invoicing mandates
+
+## Enable e-invoicing
+
+E-invoicing is controlled per invoice template:
+
+1. Go to [Invoices](https://app.midday.ai/invoices)
+2. Open the invoice settings (gear icon)
+3. Enable **E-Invoice (Peppol)**
+4. Optionally enable **E-Invoice notification** to send an email when delivered
+
+When enabled, invoices will be sent via Peppol if the customer has a Peppol ID configured.
+
+## Set up customer Peppol ID
+
+For e-invoicing to work, your customer needs a Peppol ID:
+
+1. Go to [Customers](https://app.midday.ai/customers)
+2. Select or create a customer
+3. Add their **Peppol ID** in the customer details
+
+### Peppol ID format
+
+A Peppol ID consists of a scheme and identifier, separated by a colon:
+
+```
+{scheme}:{identifier}
+```
+
+Examples:
+
+| Country | Scheme | Example |
+|---------|--------|---------|
+| Norway | 0192 | 0192:123456789 |
+| Sweden | 0007 | 0007:5561234567 |
+| Germany | 9930 | 9930:DE123456789 |
+| Global (GLN) | 0088 | 0088:1234567890123 |
+
+Ask your customer for their Peppol ID—they'll know it if they receive e-invoices.
+
+## Company settings
+
+For compliant e-invoices, configure your company details:
+
+1. Go to [Settings > Company](https://app.midday.ai/settings/company)
+2. Fill in your company address
+3. Add your Tax ID / VAT number
+4. Optionally add your own Peppol ID
+
+These details appear on your e-invoices as required by regulations.
+
+## What happens when you send
+
+When you send an invoice to a customer with a Peppol ID:
+
+1. The invoice is converted to Peppol UBL format
+2. It's delivered through the Peppol network
+3. Your customer receives it in their e-invoicing system
+4. The invoice is marked as sent in Midday
+
+If e-invoicing fails after multiple attempts, the invoice is automatically sent via email with PDF attachment.
+
+## Email notifications
+
+When **E-Invoice notification** is enabled, customers receive a brief email letting them know an e-invoice was delivered to their Peppol inbox. This is optional—the e-invoice itself is delivered through Peppol, not email.
+
+## Troubleshooting
+
+### Invoice sent via email instead of Peppol
+
+Check that:
+
+- E-invoicing is enabled on the invoice template
+- The customer has a valid Peppol ID
+- The Peppol ID format is correct (scheme:identifier)
+
+### Customer not receiving e-invoices
+
+Verify the Peppol ID with your customer. They should confirm:
+
+- The ID is active and registered
+- Their system is configured to receive invoices
+
+### Invalid Peppol ID error
+
+The Peppol ID format may be incorrect. Common issues:
+
+- Missing colon separator
+- Wrong scheme code for the country
+- Identifier doesn't match scheme requirements (e.g., GLN must be 13 digits)

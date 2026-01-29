@@ -15,6 +15,7 @@ import type { LineItem } from "@midday/invoice/types";
 import type { Job } from "bullmq";
 import { DEFAULT_JOB_OPTIONS } from "../../config/job-options";
 import { invoicesQueue } from "../../queues/invoices";
+import { notificationsQueue } from "../../queues/notifications";
 import {
   type SendEInvoicePayload,
   sendEInvoiceSchema,
@@ -209,8 +210,8 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
       });
 
       // Queue notification email if enabled
-      if (sendNotificationEmail) {
-        await invoicesQueue.add(
+      if (sendNotificationEmail && customer.email) {
+        await notificationsQueue.add(
           "notification",
           {
             type: "e_invoice_sent",
@@ -218,6 +219,7 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
             invoiceNumber: invoice.invoiceNumber!,
             teamId: invoice.teamId,
             customerName: customer.name,
+            customerEmail: customer.email,
           },
           DEFAULT_JOB_OPTIONS,
         );
