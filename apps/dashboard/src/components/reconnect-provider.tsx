@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -54,6 +54,7 @@ export function ReconnectProvider({
   const { toast } = useToast();
   const { theme } = useTheme();
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { data: team } = useTeamQuery();
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
@@ -189,9 +190,9 @@ export function ReconnectProvider({
           const isDesktop = isDesktopApp();
 
           // Fetch institution to get maximumConsentValidity and name
-          const institution = await trpc.institutions.getById.query({
-            id: institutionId,
-          });
+          const institution = await queryClient.fetchQuery(
+            trpc.institutions.getById.queryOptions({ id: institutionId }),
+          );
 
           const maxConsentSeconds =
             typeof institution.maximumConsentValidity === "number"
