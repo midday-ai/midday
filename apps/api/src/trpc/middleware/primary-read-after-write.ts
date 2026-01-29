@@ -1,6 +1,6 @@
-import type { Session } from "@api/utils/auth";
 import { replicationCache } from "@midday/cache/replication-cache";
 import type { Database, DatabaseWithPrimary } from "@midday/db/client";
+import type { Session } from "@midday/supabase/verify-token";
 
 // Database middleware that handles replication lag based on mutation operations
 // For mutations: always use primary DB

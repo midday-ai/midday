@@ -1,6 +1,6 @@
-import { logger } from "@midday/logger";
 import type { Database } from "@midday/db/client";
 import { getAppByAppId } from "@midday/db/queries";
+import { logger } from "@midday/logger";
 import { z } from "zod";
 import { createSlackWebClient, ensureBotInChannel } from "../client";
 
@@ -28,7 +28,7 @@ export async function sendSlackTransactionNotifications({
     | { access_token?: string; channel_id?: string }
     | undefined;
 
-  if (!enabled || !slackConfig?.access_token) {
+  if (!enabled || !slackConfig?.access_token || !slackConfig?.channel_id) {
     return;
   }
 

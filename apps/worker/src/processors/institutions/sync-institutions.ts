@@ -308,7 +308,7 @@ export class SyncInstitutionsProcessor extends BaseProcessor<InstitutionsSyncSch
 
       case "teller": {
         const provider = new TellerProvider();
-        const institutions = await provider.getInstitutions({});
+        const institutions = await provider.getInstitutions();
         return institutions.map((inst) => ({
           id: inst.id,
           name: inst.name,

@@ -1,7 +1,7 @@
-import type { Session } from "@api/utils/auth";
 import { withRetryOnPrimary } from "@api/utils/db-retry";
 import { teamCache } from "@midday/cache/team-cache";
 import type { Database } from "@midday/db/client";
+import type { Session } from "@midday/supabase/verify-token";
 import { TRPCError } from "@trpc/server";
 
 export const withTeamPermission = async <TReturn>(opts: {

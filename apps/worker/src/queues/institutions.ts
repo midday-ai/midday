@@ -35,8 +35,18 @@ if (institutionsQueueConfig.eventHandlers?.onCompleted) {
 }
 
 if (institutionsQueueConfig.eventHandlers?.onFailed) {
-  institutionsWorker.on(
-    "failed",
-    institutionsQueueConfig.eventHandlers.onFailed,
-  );
+  institutionsWorker.on("failed", async (job, err) => {
+    await institutionsQueueConfig.eventHandlers?.onFailed?.(
+      job
+        ? {
+            name: job.name,
+            id: job.id,
+            data: job.data,
+            attemptsMade: job.attemptsMade,
+            opts: job.opts,
+          }
+        : null,
+      err,
+    );
+  });
 }

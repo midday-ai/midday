@@ -78,10 +78,6 @@ export function ReconnectProvider({
     trpc.banking.createGoCardlessLink.mutationOptions(),
   );
 
-  const getInstitutionMutation = useMutation(
-    trpc.institutions.getById.queryOptions({ id: institutionId }),
-  );
-
   const createEnableBankingLinkMutation = useMutation({
     ...trpc.banking.createEnableBankingLink.mutationOptions(),
     onError: () => {
