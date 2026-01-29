@@ -11,6 +11,7 @@ import {
   remindInvoiceSchema,
   searchInvoiceNumberSchema,
   updateInvoiceSchema,
+  updateInvoiceViewedSchema,
   updateScheduledInvoiceSchema,
 } from "@api/schemas/invoice";
 import {
@@ -43,6 +44,7 @@ import {
   getUserById,
   searchInvoiceNumber,
   updateInvoice,
+  updateInvoiceViewedAt,
 } from "@midday/db/queries";
 import { DEFAULT_TEMPLATE } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
@@ -89,6 +91,25 @@ export const invoiceRouter = createTRPCRouter({
       return getInvoiceById(db, {
         id,
       });
+    }),
+
+  markViewed: publicProcedure
+    .input(updateInvoiceViewedSchema)
+    .mutation(async ({ input, ctx: { db } }) => {
+      const { id } = (await verify(decodeURIComponent(input.token))) as {
+        id: string;
+      };
+
+      if (!id) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      await updateInvoiceViewedAt(db, {
+        id,
+        viewedAt: new Date().toISOString(),
+      });
+
+      return { success: true };
     }),
 
   paymentStatus: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {

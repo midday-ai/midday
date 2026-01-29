@@ -1,5 +1,6 @@
 import { logger } from "@midday/logger";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@midday/db/client";
+import { getAppByAppId } from "@midday/db/queries";
 import { z } from "zod";
 import { createSlackWebClient, ensureBotInChannel } from "../client";
 
@@ -11,37 +12,36 @@ const transactionSchema = z.object({
 export async function sendSlackTransactionNotifications({
   teamId,
   transactions,
-  supabase,
+  db,
 }: {
   teamId: string;
   transactions: z.infer<typeof transactionSchema>[];
-  supabase: SupabaseClient;
+  db: Database;
 }) {
-  const { data } = await supabase
-    .from("apps")
-    .select("settings, config")
-    .eq("team_id", teamId)
-    .eq("app_id", "slack")
-    .single();
+  const app = await getAppByAppId(db, { teamId, appId: "slack" });
 
-  const enabled = data?.settings?.find(
+  const enabled = (app?.settings as { id: string; value: boolean }[])?.find(
     (setting: { id: string; value: boolean }) => setting.id === "transactions",
   )?.value;
 
-  if (!enabled || !data?.config?.access_token) {
+  const slackConfig = app?.config as
+    | { access_token?: string; channel_id?: string }
+    | undefined;
+
+  if (!enabled || !slackConfig?.access_token) {
     return;
   }
 
   const client = createSlackWebClient({
-    token: data.config.access_token,
+    token: slackConfig.access_token,
   });
 
   try {
     // Ensure bot is in channel before sending message (auto-joins public channels)
-    await ensureBotInChannel({ client, channelId: data.config.channel_id });
+    await ensureBotInChannel({ client, channelId: slackConfig.channel_id });
 
     await client.chat.postMessage({
-      channel: data.config.channel_id,
+      channel: slackConfig.channel_id,
       text: `You got ${transactions.length} new transaction${transactions.length === 1 ? "" : "s"}`,
       blocks: [
         {

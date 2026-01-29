@@ -6,18 +6,14 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "typecheck": "tsc --noEmit",
-    "db:generate": "supabase gen types --lang=typescript --project-id $PROJECT_ID --schema public > src/types/db.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@midday/banking": "workspace:*",
-    "@supabase/supabase-js": "^2.87.0",
-    "@supabase/postgrest-js": "^2.87.0",
+    "@supabase/supabase-js": "^2.93.3",
     "@supabase/ssr": "^0.8.0",
-    "date-fns": "^4.1.0",
-    "react": "19.2.3",
-    "server-only": "^0.0.1",
-    "supabase": "^2.65.6"
+    "jose": "^6.1.3",
+    "react": "19.2.4",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
@@ -27,12 +23,11 @@
     "./client": "./src/client/client.ts",
     "./client-query": "./src/queries/client.ts",
     "./job": "./src/client/job.ts",
-    "./mutations": "./src/mutations/index.ts",
     "./middleware": "./src/client/middleware.ts",
-    "./queries": "./src/queries/index.ts",
     "./cached-queries": "./src/queries/cached-queries.ts",
     "./storage": "./src/utils/storage.ts",
     "./types": "./src/types/index.ts",
-    "./account-matching": "./src/utils/account-matching.ts"
+    "./account-matching": "./src/utils/account-matching.ts",
+    "./verify-token": "./src/utils/verify-token.ts"
   }
 }

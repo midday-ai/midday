@@ -1,5 +1,5 @@
-import { verifyAccessToken } from "@api/utils/auth";
 import { expandScopes } from "@api/utils/scopes";
+import { verifyAccessToken } from "@midday/supabase/verify-token";
 import { isValidApiKeyFormat } from "@db/utils/api-keys";
 import { apiKeyCache } from "@midday/cache/api-key-cache";
 import { userCache } from "@midday/cache/user-cache";
@@ -33,7 +33,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   const db = c.get("db");
 
   // Handle Supabase JWT tokens (try to verify as JWT first)
-  const supabaseSession = await verifyAccessToken(token);
+  const { session: supabaseSession } = await verifyAccessToken(token);
   if (supabaseSession) {
     // Get user from database to get team info
     const user = await getUserById(db, supabaseSession.user.id);

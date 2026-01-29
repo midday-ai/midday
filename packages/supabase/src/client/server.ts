@@ -1,6 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "../types";
 
 const conWarn = console.warn;
 const conLog = console.log;
@@ -52,7 +51,7 @@ export async function createClient(options?: CreateClientOptions) {
       }
     : {};
 
-  return createServerClient<Database>(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     key,
     {

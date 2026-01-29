@@ -1163,6 +1163,29 @@ export async function updateInvoice(
   return result;
 }
 
+export type UpdateInvoiceViewedAtParams = {
+  id: string;
+  viewedAt: string;
+};
+
+/**
+ * Update invoice viewed_at timestamp.
+ */
+export async function updateInvoiceViewedAt(
+  db: Database,
+  params: UpdateInvoiceViewedAtParams,
+) {
+  const { id, viewedAt } = params;
+
+  const [result] = await db
+    .update(invoices)
+    .set({ viewedAt })
+    .where(eq(invoices.id, id))
+    .returning({ id: invoices.id });
+
+  return result;
+}
+
 export type GetMostActiveClientParams = {
   teamId: string;
 };

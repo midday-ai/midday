@@ -1,9 +1,8 @@
 import { createClient } from "@api/services/supabase";
-import { verifyAccessToken } from "@api/utils/auth";
-import type { Session } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
 import type { Database } from "@midday/db/client";
 import { db } from "@midday/db/client";
+import { type Session, verifyAccessToken } from "@midday/supabase/verify-token";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
@@ -27,12 +26,16 @@ export const createTRPCContext = async (
 ): Promise<TRPCContext> => {
   const accessToken = c.req.header("Authorization")?.split(" ")[1];
   const serviceSecret = c.req.header("x-service-secret");
-  
+
   // Check for service-to-service authentication
-  const isServiceCall = serviceSecret === process.env.SERVICE_SECRET && !!process.env.SERVICE_SECRET;
-  
+  const isServiceCall =
+    serviceSecret === process.env.SERVICE_SECRET &&
+    !!process.env.SERVICE_SECRET;
+
   // For service calls, we don't need user authentication
-  const session = isServiceCall ? null : await verifyAccessToken(accessToken);
+  const { session } = isServiceCall
+    ? { session: null }
+    : await verifyAccessToken(accessToken);
   const supabase = await createClient(isServiceCall ? undefined : accessToken);
 
   // Use the singleton database instance - no need for caching

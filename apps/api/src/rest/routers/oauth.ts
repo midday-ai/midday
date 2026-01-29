@@ -11,8 +11,8 @@ import {
   oauthTokenResponseSchema,
 } from "@api/schemas/oauth-flow";
 import { resend } from "@api/services/resend";
-import { verifyAccessToken } from "@api/utils/auth";
 import { validateClientCredentials } from "@api/utils/oauth";
+import { verifyAccessToken } from "@midday/supabase/verify-token";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import type { Database } from "@midday/db/client";
@@ -205,7 +205,7 @@ app.openapi(
 
     // Verify user authentication
     const accessToken = authHeader?.split(" ")[1];
-    const session = await verifyAccessToken(accessToken);
+    const { session } = await verifyAccessToken(accessToken);
 
     if (!session) {
       throw new HTTPException(401, {
