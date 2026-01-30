@@ -1,7 +1,6 @@
 "use client";
 
 import { useTRPC } from "@/trpc/client";
-import type { BankAccountWithPaymentInfo } from "@midday/db/queries";
 import { cn } from "@midday/ui/cn";
 import {
   SlashCommand,
@@ -22,8 +21,8 @@ import {
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { format } from "date-fns";
-import { useMemo, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useFormContext, useWatch } from "react-hook-form";
 import tippy, { type Instance } from "tippy.js";
 import {
   formatBankPaymentDetails,
@@ -50,33 +49,38 @@ export function InvoiceEditor({
   tabIndex,
 }: InvoiceEditorProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const [content, setContent] = useState<JSONContent | null | undefined>(
-    initialContent,
-  );
+  const [isEmpty, setIsEmpty] = useState(!initialContent);
 
-  // Get tRPC client
+  // Refs to avoid stale closures in TipTap callbacks
+  const contentRef = useRef<JSONContent | null>(initialContent ?? null);
+  const onBlurRef = useRef(onBlur);
+  const onChangeRef = useRef(onChange);
+  onBlurRef.current = onBlur;
+  onChangeRef.current = onChange;
+
+  // Get tRPC client and form context
   const trpc = useTRPC();
+  const { control } = useFormContext();
 
-  // Get invoice form context
-  const { watch } = useFormContext();
-  const dueDate = watch("dueDate");
-  const amount = watch("amount");
-  const invoiceNumber = watch("invoiceNumber");
-  const customerName = watch("customerName");
-  const currency = watch("template.currency");
-  const dateFormat = watch("template.dateFormat") || "MM/dd/yyyy";
+  // Watch form values for slash commands (useWatch triggers re-renders)
+  const dueDate = useWatch({ control, name: "dueDate" });
+  const amount = useWatch({ control, name: "amount" });
+  const invoiceNumber = useWatch({ control, name: "invoiceNumber" });
+  const customerName = useWatch({ control, name: "customerName" });
+  const currency = useWatch({ control, name: "template.currency" });
+  const dateFormat =
+    useWatch({ control, name: "template.dateFormat" }) || "MM/dd/yyyy";
 
   // Fetch bank accounts with payment info
   const { data: bankAccounts = [] } = useQuery({
     ...trpc.bankAccounts.getWithPaymentInfo.queryOptions(),
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
-  // Build slash command items based on available data
+  // Build slash command items
   const slashCommandItems = useMemo((): SlashCommandItem[] => {
     const items: SlashCommandItem[] = [];
 
-    // Bank Account option with submenu (only if accounts exist)
     if (bankAccounts.length > 0) {
       items.push({
         id: "bank-account",
@@ -87,56 +91,49 @@ export function InvoiceEditor({
           label: account.name,
           description: account.bankName || formatBankPreview(account),
           command: ({ editor, range }) => {
-            const formattedDetails = formatBankPaymentDetails(account);
             editor
               .chain()
               .focus()
               .deleteRange(range)
-              .insertContent(formattedDetails)
+              .insertContent(formatBankPaymentDetails(account))
               .run();
           },
         })),
-        command: () => {
-          // No-op for parent - submenu handles it
-        },
+        command: () => {},
       });
     }
 
-    // Due Date (use invoice's date format)
     items.push({
       id: "due-date",
       label: "Due Date",
       command: ({ editor, range }) => {
-        const formattedDate = dueDate
-          ? format(new Date(dueDate), dateFormat)
-          : "";
         editor
           .chain()
           .focus()
           .deleteRange(range)
-          .insertContent(formattedDate)
+          .insertContent(dueDate ? format(new Date(dueDate), dateFormat) : "")
           .run();
       },
     });
 
-    // Amount
     items.push({
       id: "amount",
       label: "Amount",
       command: ({ editor, range }) => {
-        const formattedAmount =
-          formatAmount({ amount: amount || 0, currency: currency || "USD" }) ||
-          "";
         editor
           .chain()
           .focus()
           .deleteRange(range)
-          .insertContent(formattedAmount)
+          .insertContent(
+            formatAmount({
+              amount: amount || 0,
+              currency: currency || "USD",
+            }) || "",
+          )
           .run();
       },
     });
 
-    // Invoice Number
     items.push({
       id: "invoice-number",
       label: "Invoice #",
@@ -150,7 +147,6 @@ export function InvoiceEditor({
       },
     });
 
-    // Customer Name (only show if customer is selected)
     if (customerName) {
       items.push({
         id: "customer",
@@ -177,6 +173,10 @@ export function InvoiceEditor({
     customerName,
   ]);
 
+  // Ref for slash commands (updated synchronously to avoid race conditions)
+  const slashCommandItemsRef = useRef(slashCommandItems);
+  slashCommandItemsRef.current = slashCommandItems;
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -189,7 +189,7 @@ export function InvoiceEditor({
       Placeholder.configure({ placeholder }),
       SlashCommand.configure({
         suggestion: {
-          items: () => slashCommandItems,
+          items: () => slashCommandItemsRef.current,
           render: () => {
             let component: ReactRenderer<SlashMenuRef> | null = null;
             let popup: Instance[] | null = null;
@@ -197,15 +197,10 @@ export function InvoiceEditor({
             return {
               onStart: (props) => {
                 component = new ReactRenderer(SlashMenu, {
-                  props: {
-                    ...props,
-                    items: slashCommandItems,
-                  },
+                  props: { ...props, items: slashCommandItemsRef.current },
                   editor: props.editor,
                 });
-
                 if (!props.clientRect) return;
-
                 popup = tippy("body", {
                   getReferenceClientRect: props.clientRect as () => DOMRect,
                   appendTo: () => document.body,
@@ -216,29 +211,24 @@ export function InvoiceEditor({
                   placement: "bottom-start",
                 });
               },
-
               onUpdate: (props) => {
                 component?.updateProps({
                   ...props,
-                  items: slashCommandItems,
+                  items: slashCommandItemsRef.current,
                 });
-
-                if (!props.clientRect) return;
-
-                popup?.[0]?.setProps({
-                  getReferenceClientRect: props.clientRect as () => DOMRect,
-                });
+                if (props.clientRect) {
+                  popup?.[0]?.setProps({
+                    getReferenceClientRect: props.clientRect as () => DOMRect,
+                  });
+                }
               },
-
               onKeyDown: (props) => {
                 if (props.event.key === "Escape") {
                   popup?.[0]?.hide();
                   return true;
                 }
-
                 return component?.ref?.onKeyDown(props) ?? false;
               },
-
               onExit: () => {
                 popup?.[0]?.destroy();
                 component?.destroy();
@@ -250,30 +240,48 @@ export function InvoiceEditor({
     ],
     content: initialContent,
     immediatelyRender: false,
+    onFocus: () => setIsFocused(true),
     onBlur: () => {
       setIsFocused(false);
-      if (content !== initialContent) {
-        onBlur?.(content ?? null);
-      }
-      onBlur?.(content ?? null);
+      onBlurRef.current?.(contentRef.current);
     },
-    onFocus: () => setIsFocused(true),
     onUpdate: ({ editor }) => {
-      const json = editor.getJSON();
       const newIsEmpty = editor.state.doc.textContent.length === 0;
-      setContent(newIsEmpty ? null : json);
-      onChange?.(newIsEmpty ? null : json);
+      const newContent = newIsEmpty ? null : editor.getJSON();
+      contentRef.current = newContent;
+      setIsEmpty(newIsEmpty);
+      onChangeRef.current?.(newContent);
     },
   });
 
-  const showStripedBackground = !disablePlaceholder && !content && !isFocused;
+  // Sync editor when initialContent prop changes (e.g., form reloads fresh data)
+  useEffect(() => {
+    if (!editor || editor.isFocused) return;
+
+    const editorIsEmpty = editor.state.doc.textContent.length === 0;
+    const newIsEmpty = !initialContent;
+
+    // Skip if both empty
+    if (editorIsEmpty && newIsEmpty) return;
+
+    // Update if empty state differs or content differs
+    if (
+      editorIsEmpty !== newIsEmpty ||
+      JSON.stringify(editor.getJSON()) !== JSON.stringify(initialContent)
+    ) {
+      editor.commands.setContent(initialContent ?? "");
+      contentRef.current = initialContent ?? null;
+      setIsEmpty(newIsEmpty);
+    }
+  }, [initialContent, editor]);
+
+  const showStripedBackground = !disablePlaceholder && isEmpty && !isFocused;
 
   if (!editor) return null;
 
   return (
     <div
       className={cn(
-        // Hide placeholder text when not focused (TipTap placeholder uses ::before)
         !isFocused &&
           "[&_.ProseMirror_p.is-editor-empty:first-child::before]:content-['']",
       )}
