@@ -4,6 +4,7 @@ import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { parseDateAsUTC } from "@/utils/date";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
   NEW_EVENT_ID,
@@ -403,9 +404,8 @@ const createNewEvent = (
   let baseDate: Date;
   let dateStr: string;
   if (selectedDate) {
-    // Use TZDate with UTC to ensure date-only strings are parsed as calendar dates
-    // without timezone shift
-    baseDate = new TZDate(selectedDate, "UTC");
+    // Parse as UTC calendar date to avoid timezone shift
+    baseDate = parseDateAsUTC(selectedDate);
     dateStr = selectedDate; // Use the original date string directly
   } else {
     const timezone = getUserTimezone(user);
@@ -722,9 +722,8 @@ export function TrackerSchedule() {
 
   const getBaseDate = useCallback(() => {
     if (selectedDate) {
-      // Use TZDate with UTC to ensure date-only strings are parsed as calendar dates
-      // without timezone shift
-      return new TZDate(selectedDate, "UTC");
+      // Parse as UTC calendar date to avoid timezone shift
+      return parseDateAsUTC(selectedDate);
     }
 
     // Get "today" in user's timezone, not browser timezone
@@ -767,9 +766,9 @@ export function TrackerSchedule() {
       );
       const isNextDay = stopHour < startHour;
 
-      // For next day calculation, use TZDate to properly add a day
+      // For next day calculation, use parseDateAsUTC to properly add a day
       const nextDayDate = selectedDate
-        ? new TZDate(selectedDate, "UTC")
+        ? parseDateAsUTC(selectedDate)
         : baseDate;
       const stopDateStr = isNextDay
         ? format(addDays(nextDayDate, 1), "yyyy-MM-dd")
@@ -1286,8 +1285,8 @@ export function TrackerSchedule() {
             // This is the first part of the entry (ends at midnight in user timezone)
             // Calculate end of day in user timezone, then convert back to UTC
             const timezone = getUserTimezone(user);
-            // Use TZDate with UTC to avoid timezone shift when adding days
-            const currentDateUTC = new TZDate(currentSelectedDate, "UTC");
+            // Parse as UTC calendar date to avoid timezone shift when adding days
+            const currentDateUTC = parseDateAsUTC(currentSelectedDate);
             const nextDay = format(addDays(currentDateUTC, 1), "yyyy-MM-dd");
             const endOfDayUtc = userTimeToUTC(nextDay, "00:00", timezone);
 

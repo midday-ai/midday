@@ -14,6 +14,7 @@ import {
   setHours,
   setMinutes,
 } from "date-fns";
+import { parseDateAsUTC } from "./date";
 
 export const NEW_EVENT_ID = "new-event";
 
@@ -218,10 +219,8 @@ export const createNewEvent = (
   selectedDate?: string | null,
   timezone?: string,
 ): TrackerRecord => {
-  // Use TZDate with UTC to ensure date-only strings are parsed without timezone shift
-  const baseDate = selectedDate
-    ? new TZDate(selectedDate, "UTC")
-    : new UTCDate();
+  // Parse as UTC calendar date to avoid timezone shift
+  const baseDate = selectedDate ? parseDateAsUTC(selectedDate) : new UTCDate();
   // Use the original date string directly if available
   const dateStr = selectedDate || format(baseDate, "yyyy-MM-dd");
 
@@ -236,9 +235,13 @@ export const createNewEvent = (
       );
       const endDate = addMinutes(startDate, 15);
 
+      // When selectedDate is null, compute date from tzBaseDate (user's local date)
+      // to avoid UTC date mismatch (e.g., 11 PM local vs 4 AM UTC next day)
+      const tzDateStr = selectedDate || format(tzBaseDate, "yyyy-MM-dd");
+
       return {
         id: NEW_EVENT_ID,
-        date: dateStr,
+        date: tzDateStr,
         description: null,
         duration: 15 * 60, // 15 minutes in seconds
         start: new Date(startDate.getTime()),
@@ -344,13 +347,13 @@ export function getTrackerDates(
   selectedDate: string | null,
 ): Date[] {
   if (range) {
-    // Use TZDate with UTC to ensure date-only strings are parsed without timezone shift
-    return sortDates(range).map((dateString) => new TZDate(dateString, "UTC"));
+    // Parse as UTC calendar dates to avoid timezone shift
+    return sortDates(range).map((dateString) => parseDateAsUTC(dateString));
   }
 
   if (selectedDate) {
-    // Use TZDate with UTC to ensure the date is interpreted as-is without timezone shift
-    return [new TZDate(selectedDate, "UTC")];
+    // Parse as UTC calendar date to avoid timezone shift
+    return [parseDateAsUTC(selectedDate)];
   }
 
   return [new Date()];
