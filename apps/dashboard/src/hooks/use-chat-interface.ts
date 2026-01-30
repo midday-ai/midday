@@ -27,16 +27,19 @@ export function useChatInterface() {
     extractChatId(pathname),
   );
 
+  // Clear artifact-type and reset title when navigating away from chat pages
+  const handleNavigateAway = () => {
+    setSelectedType(null);
+    document.title = "Overview | Midday";
+  };
+
   // Extract chatId from pathname when it changes
   useEffect(() => {
     const id = extractChatId(pathname);
     setChatIdState(id);
 
-    // Clear artifact-type when navigating away from chat pages
     if (!id) {
-      setSelectedType(null);
-      // Reset document title when navigating away from chat
-      document.title = "Overview | Midday";
+      handleNavigateAway();
     }
   }, [pathname, setSelectedType]);
 
@@ -46,11 +49,8 @@ export function useChatInterface() {
       const id = extractChatId(window.location.pathname);
       setChatIdState(id);
 
-      // Clear artifact-type when navigating away from chat pages
       if (!id) {
-        setSelectedType(null);
-        // Reset document title when navigating away from chat
-        document.title = "Overview | Midday";
+        handleNavigateAway();
       }
     };
 
