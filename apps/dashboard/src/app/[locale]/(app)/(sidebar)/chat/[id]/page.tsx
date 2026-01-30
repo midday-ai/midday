@@ -1,0 +1,53 @@
+import { ChatInterface } from "@/components/chat/chat-interface";
+import { Widgets } from "@/components/widgets";
+import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
+import { Provider as ChatProvider } from "@ai-sdk-tools/store";
+import { geolocation } from "@vercel/functions";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Chat | Midday",
+};
+
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function ChatPage(props: Props) {
+  const { id } = await props.params;
+
+  const headersList = await headers();
+  const geo = geolocation({
+    headers: headersList,
+  });
+
+  const queryClient = getQueryClient();
+
+  // Fetch widget preferences directly for initial data (no prefetch needed)
+  const widgetPreferences = await queryClient.fetchQuery(
+    trpc.widgets.getWidgetPreferences.queryOptions(),
+  );
+
+  // Prefetch suggested actions (metrics are prefetched client-side to respect localStorage)
+  prefetch(trpc.suggestedActions.list.queryOptions({ limit: 6 }));
+
+  const chat = await queryClient.fetchQuery(
+    trpc.chats.get.queryOptions({ chatId: id }),
+  );
+
+  if (!chat) {
+    redirect("/");
+  }
+
+  return (
+    <HydrateClient>
+      <ChatProvider initialMessages={chat} key={id}>
+        <Widgets initialPreferences={widgetPreferences} />
+
+        <ChatInterface geo={geo} />
+      </ChatProvider>
+    </HydrateClient>
+  );
+}

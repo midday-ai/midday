@@ -2,53 +2,55 @@ import { usePathname } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 
+// Helper to extract chat ID from pathname with /chat/ prefix
+function extractChatId(pathname: string): string | null {
+  const segments = pathname.split("/").filter(Boolean);
+  const chatIndex = segments.indexOf("chat");
+
+  // If "chat" segment exists and there's an ID after it
+  if (chatIndex !== -1) {
+    const id = segments[chatIndex + 1];
+    if (id) {
+      return id;
+    }
+  }
+
+  return null;
+}
+
 export function useChatInterface() {
   const pathname = usePathname();
   const [, setSelectedType] = useQueryState("artifact-type", parseAsString);
 
   // Initialize state immediately from pathname to avoid blink on refresh
-  const getInitialChatId = () => {
-    const segments = pathname.split("/").filter(Boolean);
-    const potentialChatId =
-      segments.length === 1 ? segments[0] : segments[1] || null;
-    return potentialChatId || null;
+  const [chatId, setChatIdState] = useState<string | null>(() =>
+    extractChatId(pathname),
+  );
+
+  // Clear artifact-type and reset title when navigating away from chat pages
+  const handleNavigateAway = () => {
+    setSelectedType(null);
+    document.title = "Overview | Midday";
   };
 
-  const [chatId, setChatIdState] = useState<string | null>(getInitialChatId);
-
-  // Extract chatId from pathname
+  // Extract chatId from pathname when it changes
   useEffect(() => {
-    const segments = pathname.split("/").filter(Boolean);
+    const id = extractChatId(pathname);
+    setChatIdState(id);
 
-    // If we have segments, the chatId is either:
-    // - segments[0] if no locale (e.g., /chatId)
-    // - segments[1] if locale exists (e.g., /en/chatId)
-    // For simplicity, let's assume if there's only 1 segment, it's the chatId
-    const potentialChatId =
-      segments.length === 1 ? segments[0] : segments[1] || null;
-    setChatIdState(potentialChatId || null);
-
-    // Clear artifact-type when navigating away from chat pages
-    if (!potentialChatId) {
-      setSelectedType(null);
-      // Reset document title when navigating away from chat
-      document.title = "Overview | Midday";
+    if (!id) {
+      handleNavigateAway();
     }
   }, [pathname, setSelectedType]);
 
   // Listen to popstate events for browser back/forward
   useEffect(() => {
     const handlePopState = () => {
-      const segments = window.location.pathname.split("/").filter(Boolean);
-      const potentialChatId =
-        segments.length === 1 ? segments[0] : segments[1] || null;
-      setChatIdState(potentialChatId || null);
+      const id = extractChatId(window.location.pathname);
+      setChatIdState(id);
 
-      // Clear artifact-type when navigating away from chat pages
-      if (!potentialChatId) {
-        setSelectedType(null);
-        // Reset document title when navigating away from chat
-        document.title = "Overview | Midday";
+      if (!id) {
+        handleNavigateAway();
       }
     };
 
@@ -60,14 +62,17 @@ export function useChatInterface() {
   const isChatPage = Boolean(chatId);
 
   const setChatId = (id: string) => {
-    // Always replace with just the chat ID - no nesting
     // Preserve query parameters when updating the URL
     const currentSearch = window.location.search;
     const segments = pathname.split("/").filter(Boolean);
-    const locale = segments[0];
+
+    // Check if first segment is a locale (2 chars like 'en', 'sv', etc.)
+    const hasLocale = segments[0]?.length === 2;
+    const locale = hasLocale ? segments[0] : null;
+
     const newPath = locale
-      ? `/${locale}/${id}${currentSearch}`
-      : `/${id}${currentSearch}`;
+      ? `/${locale}/chat/${id}${currentSearch}`
+      : `/chat/${id}${currentSearch}`;
 
     window.history.pushState({}, "", newPath);
     setChatIdState(id);

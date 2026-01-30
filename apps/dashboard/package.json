@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@ai-sdk-tools/artifacts": "^1.2.0",
-    "@ai-sdk-tools/devtools": "^1.2.0",
     "@ai-sdk-tools/store": "^1.2.0",
     "@ai-sdk/openai": "2.0.62",
     "@ai-sdk/react": "2.0.82",

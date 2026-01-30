@@ -215,7 +215,7 @@ export function ChatHistoryDropdown() {
   });
 
   const handleChatSelect = (chatId: string) => {
-    router.push(`/${chatId}`);
+    router.push(`/chat/${chatId}`);
     setIsOpen(false);
   };
 
