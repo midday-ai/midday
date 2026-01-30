@@ -436,6 +436,7 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
       contentType: inbox.contentType,
       date: inbox.date,
       status: inbox.status,
+      type: inbox.type,
       createdAt: inbox.createdAt,
       website: inbox.website,
       senderEmail: inbox.senderEmail,
