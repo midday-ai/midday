@@ -8,8 +8,11 @@ function extractChatId(pathname: string): string | null {
   const chatIndex = segments.indexOf("chat");
 
   // If "chat" segment exists and there's an ID after it
-  if (chatIndex !== -1 && segments[chatIndex + 1]) {
-    return segments[chatIndex + 1];
+  if (chatIndex !== -1) {
+    const id = segments[chatIndex + 1];
+    if (id) {
+      return id;
+    }
   }
 
   return null;

@@ -1,7 +1,6 @@
 import { ChatInterface } from "@/components/chat/chat-interface";
 import { Widgets } from "@/components/widgets";
 import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
-import { AIDevtools } from "@ai-sdk-tools/devtools";
 import { Provider as ChatProvider } from "@ai-sdk-tools/store";
 import { geolocation } from "@vercel/functions";
 import type { Metadata } from "next";
@@ -33,18 +32,6 @@ export default async function Overview() {
         <Widgets initialPreferences={widgetPreferences} />
 
         <ChatInterface geo={geo} />
-
-        {process.env.NODE_ENV === "development" && (
-          <AIDevtools
-            config={{
-              streamCapture: {
-                enabled: true,
-                endpoint: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
-                autoConnect: true,
-              },
-            }}
-          />
-        )}
       </ChatProvider>
     </HydrateClient>
   );
