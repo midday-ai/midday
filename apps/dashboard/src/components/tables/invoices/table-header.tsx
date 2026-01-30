@@ -76,7 +76,8 @@ export function DataTableHeader<TData>({
                 | { sticky?: boolean; className?: string }
                 | undefined;
               const isSticky = meta?.sticky;
-              const canReorder = !NON_REORDERABLE_COLUMNS.invoices.has(columnId);
+              const canReorder =
+                !NON_REORDERABLE_COLUMNS.invoices.has(columnId);
               const isActions = columnId === "actions";
 
               if (!isVisible(columnId)) return null;
@@ -85,7 +86,9 @@ export function DataTableHeader<TData>({
               const hasNonStickyVisible = headers.some((h) => {
                 if (h.column.id === "actions") return false;
                 if (!isVisible(h.column.id)) return false;
-                const hMeta = h.column.columnDef.meta as { sticky?: boolean } | undefined;
+                const hMeta = h.column.columnDef.meta as
+                  | { sticky?: boolean }
+                  | undefined;
                 return !hMeta?.sticky;
               });
               const actionsFullWidth = isActions && !hasNonStickyVisible;
@@ -94,12 +97,21 @@ export function DataTableHeader<TData>({
               const isLastBeforeActions =
                 headerIndex === headers.length - 2 &&
                 headers[headers.length - 1]?.column.id === "actions";
-              const shouldFlex = (isLastBeforeActions && !isSticky) || actionsFullWidth;
+              const shouldFlex =
+                (isLastBeforeActions && !isSticky) || actionsFullWidth;
 
               const headerStyle = {
                 width: actionsFullWidth ? undefined : header.getSize(),
-                minWidth: actionsFullWidth ? undefined : isSticky ? header.getSize() : header.column.columnDef.minSize,
-                maxWidth: actionsFullWidth ? undefined : isSticky ? header.getSize() : undefined,
+                minWidth: actionsFullWidth
+                  ? undefined
+                  : isSticky
+                    ? header.getSize()
+                    : header.column.columnDef.minSize,
+                maxWidth: actionsFullWidth
+                  ? undefined
+                  : isSticky
+                    ? header.getSize()
+                    : undefined,
                 ...(!actionsFullWidth && getStickyStyle(columnId)),
                 ...(shouldFlex && { flex: 1 }),
               };
@@ -117,20 +129,48 @@ export function DataTableHeader<TData>({
                   : `${stickyClass} bg-background z-10`;
 
                 return (
-                  <TableHead key={header.id} className={finalClassName} style={headerStyle}>
-                    {renderHeaderContent(header, columnId, sortColumn, sortValue, createSortQuery, table, tableScroll)}
-                    {header.column.getCanResize() && <ResizeHandle header={header} />}
+                  <TableHead
+                    key={header.id}
+                    className={finalClassName}
+                    style={headerStyle}
+                  >
+                    {renderHeaderContent(
+                      header,
+                      columnId,
+                      sortColumn,
+                      sortValue,
+                      createSortQuery,
+                      table,
+                      tableScroll,
+                    )}
+                    {header.column.getCanResize() && (
+                      <ResizeHandle header={header} />
+                    )}
                   </TableHead>
                 );
               }
 
               // Draggable columns
               return (
-                <DraggableHeader key={header.id} id={columnId} style={headerStyle}>
+                <DraggableHeader
+                  key={header.id}
+                  id={columnId}
+                  style={headerStyle}
+                >
                   <div className="flex items-center flex-1 min-w-0 overflow-hidden">
-                    {renderHeaderContent(header, columnId, sortColumn, sortValue, createSortQuery, table, tableScroll)}
+                    {renderHeaderContent(
+                      header,
+                      columnId,
+                      sortColumn,
+                      sortValue,
+                      createSortQuery,
+                      table,
+                      tableScroll,
+                    )}
                   </div>
-                  {header.column.getCanResize() && <ResizeHandle header={header} />}
+                  {header.column.getCanResize() && (
+                    <ResizeHandle header={header} />
+                  )}
                 </DraggableHeader>
               );
             })}

@@ -76,7 +76,9 @@ export function DataTableHeader<TData>({
               const hasNonStickyVisible = headers.some((h) => {
                 if (h.column.id === "actions") return false;
                 if (!isVisible(h.column.id)) return false;
-                const hMeta = h.column.columnDef.meta as { sticky?: boolean } | undefined;
+                const hMeta = h.column.columnDef.meta as
+                  | { sticky?: boolean }
+                  | undefined;
                 return !hMeta?.sticky;
               });
               const actionsFullWidth = isActions && !hasNonStickyVisible;
@@ -85,12 +87,21 @@ export function DataTableHeader<TData>({
               const isLastBeforeActions =
                 headerIndex === headers.length - 2 &&
                 headers[headers.length - 1]?.column.id === "actions";
-              const shouldFlex = (isLastBeforeActions && !isSticky) || actionsFullWidth;
+              const shouldFlex =
+                (isLastBeforeActions && !isSticky) || actionsFullWidth;
 
               const headerStyle = {
                 width: actionsFullWidth ? undefined : header.getSize(),
-                minWidth: actionsFullWidth ? undefined : isSticky ? header.getSize() : header.column.columnDef.minSize,
-                maxWidth: actionsFullWidth ? undefined : isSticky ? header.getSize() : undefined,
+                minWidth: actionsFullWidth
+                  ? undefined
+                  : isSticky
+                    ? header.getSize()
+                    : header.column.columnDef.minSize,
+                maxWidth: actionsFullWidth
+                  ? undefined
+                  : isSticky
+                    ? header.getSize()
+                    : undefined,
                 ...(!actionsFullWidth && getStickyStyle(columnId)),
                 ...(shouldFlex && { flex: 1 }),
               };
@@ -108,20 +119,32 @@ export function DataTableHeader<TData>({
                   : `${stickyClass} bg-background z-10`;
 
                 return (
-                  <TableHead key={header.id} className={finalClassName} style={headerStyle}>
+                  <TableHead
+                    key={header.id}
+                    className={finalClassName}
+                    style={headerStyle}
+                  >
                     {renderHeaderContent(header, columnId, table, tableScroll)}
-                    {header.column.getCanResize() && <ResizeHandle header={header} />}
+                    {header.column.getCanResize() && (
+                      <ResizeHandle header={header} />
+                    )}
                   </TableHead>
                 );
               }
 
               // Draggable columns
               return (
-                <DraggableHeader key={header.id} id={columnId} style={headerStyle}>
+                <DraggableHeader
+                  key={header.id}
+                  id={columnId}
+                  style={headerStyle}
+                >
                   <div className="flex items-center flex-1 min-w-0 overflow-hidden">
                     {renderHeaderContent(header, columnId, table, tableScroll)}
                   </div>
-                  {header.column.getCanResize() && <ResizeHandle header={header} />}
+                  {header.column.getCanResize() && (
+                    <ResizeHandle header={header} />
+                  )}
                 </DraggableHeader>
               );
             })}
