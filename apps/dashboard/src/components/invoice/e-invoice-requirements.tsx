@@ -43,12 +43,12 @@ export function EInvoiceRequirements({
   const eInvoiceNotifyEmail = watch("template.eInvoiceNotifyEmail") === true;
 
   // Fetch e-invoice requirements
-  const { data: requirements, isLoading } = useQuery(
-    trpc.invoice.checkEInvoiceRequirements.queryOptions(
-      { customerId: customerId || undefined },
-      { staleTime: 30000 }, // Cache for 30 seconds
-    ),
-  );
+  const { data: requirements, isLoading } = useQuery({
+    ...trpc.invoice.checkEInvoiceRequirements.queryOptions({
+      customerId: customerId || undefined,
+    }),
+    staleTime: 30000, // Cache for 30 seconds
+  });
 
   const updateTemplateMutation = useMutation(
     trpc.invoiceTemplate.upsert.mutationOptions({
@@ -61,25 +61,49 @@ export function EInvoiceRequirements({
   );
 
   const handleEnableChange = (checked: boolean) => {
+    const previousValue = eInvoiceEnabled;
     setValue("template.eInvoiceEnabled", checked, {
       shouldValidate: true,
       shouldDirty: true,
     });
-    updateTemplateMutation.mutate({
-      id: templateId,
-      eInvoiceEnabled: checked,
-    });
+    updateTemplateMutation.mutate(
+      {
+        id: templateId,
+        eInvoiceEnabled: checked,
+      },
+      {
+        onError: () => {
+          // Revert form state on failure
+          setValue("template.eInvoiceEnabled", previousValue, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        },
+      },
+    );
   };
 
   const handleNotifyEmailChange = (checked: boolean) => {
+    const previousValue = eInvoiceNotifyEmail;
     setValue("template.eInvoiceNotifyEmail", checked, {
       shouldValidate: true,
       shouldDirty: true,
     });
-    updateTemplateMutation.mutate({
-      id: templateId,
-      eInvoiceNotifyEmail: checked,
-    });
+    updateTemplateMutation.mutate(
+      {
+        id: templateId,
+        eInvoiceNotifyEmail: checked,
+      },
+      {
+        onError: () => {
+          // Revert form state on failure
+          setValue("template.eInvoiceNotifyEmail", previousValue, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        },
+      },
+    );
   };
 
   if (isLoading) {
