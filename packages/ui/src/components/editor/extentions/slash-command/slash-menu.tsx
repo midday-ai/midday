@@ -1,6 +1,5 @@
 "use client";
 
-import type { Editor, Range } from "@tiptap/react";
 import {
   forwardRef,
   useCallback,
@@ -18,12 +17,10 @@ export type SlashMenuRef = {
 type SlashMenuProps = {
   items: SlashCommandItem[];
   command: (item: SlashCommandItem | SlashCommandSubItem) => void;
-  editor: Editor;
-  range: Range;
 };
 
 export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
-  ({ items, command, editor, range }, ref) => {
+  ({ items, command }, ref) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
     const [submenuSelectedIndex, setSubmenuSelectedIndex] = useState(0);
@@ -38,7 +35,9 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
         if (!item) return;
 
         if (item.hasSubmenu && item.submenuItems?.length) {
-          // Open submenu
+          // Open submenu - also update selectedIndex to ensure currentItem
+          // is correct on touch devices where onMouseEnter doesn't fire before onClick
+          setSelectedIndex(index);
           setActiveSubmenu(item.id);
           setSubmenuSelectedIndex(0);
         } else {
