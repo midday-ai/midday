@@ -158,13 +158,13 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
     return (
       <div className="relative">
         {/* Main menu */}
-        <div className="z-50 min-w-[180px] overflow-hidden rounded-md border border-border bg-background p-1 text-popover-foreground shadow-md">
+        <div className="z-50 min-w-[180px] overflow-hidden border border-border bg-background p-1 text-popover-foreground shadow-md">
           {items.map((item, index) => (
             <button
               key={item.id}
               type="button"
               className={cn(
-                "flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-[11px] outline-none cursor-pointer",
+                "flex w-full items-center justify-between px-2 py-1.5 text-[11px] outline-none cursor-pointer",
                 index === selectedIndex
                   ? "bg-accent text-accent-foreground"
                   : "hover:bg-accent hover:text-accent-foreground",
@@ -198,13 +198,13 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
         {activeSubmenu &&
           currentItem?.submenuItems &&
           currentItem.submenuItems.length > 0 && (
-            <div className="absolute left-full top-0 ml-1 z-50 min-w-[200px] max-h-[300px] overflow-y-auto overflow-hidden rounded-md border border-border bg-background p-1 text-popover-foreground shadow-md">
+            <div className="absolute left-full top-0 ml-1 z-50 min-w-[200px] max-h-[300px] overflow-y-auto overflow-hidden border border-border bg-background p-1 text-popover-foreground shadow-md">
               {currentItem.submenuItems.map((subItem, index) => (
                 <button
                   key={subItem.id}
                   type="button"
                   className={cn(
-                    "flex w-full flex-col items-start rounded-sm px-2 py-1.5 text-[11px] outline-none cursor-pointer",
+                    "flex w-full flex-col items-start px-2 py-1.5 text-[11px] outline-none cursor-pointer",
                     index === submenuSelectedIndex
                       ? "bg-accent text-accent-foreground"
                       : "hover:bg-accent hover:text-accent-foreground",
