@@ -97,11 +97,13 @@ export type GetInboxParams = {
     | "analyzing"
     | "suggested_match"
     | "no_match"
+    | "other"
     | null;
+  tab?: "all" | "other" | null;
 };
 
 export async function getInbox(db: Database, params: GetInboxParams) {
-  const { teamId, cursor, order, sort, pageSize = 20, q, status } = params;
+  const { teamId, cursor, order, sort, pageSize = 20, q, status, tab } = params;
 
   const whereConditions: SQL[] = [
     eq(inbox.teamId, teamId),
@@ -157,6 +159,22 @@ export async function getInbox(db: Database, params: GetInboxParams) {
     whereConditions.push(eq(inbox.status, status));
   }
 
+  // Apply tab filter
+  if (tab === "other") {
+    // Show only "other" type documents (non-financial)
+    whereConditions.push(
+      or(eq(inbox.type, "other"), eq(inbox.status, "other")) as SQL,
+    );
+  } else {
+    // "all" tab (default) shows invoices/receipts only, excludes "other" documents
+    whereConditions.push(
+      and(
+        or(sql`${inbox.type} IS NULL`, ne(inbox.type, "other")),
+        ne(inbox.status, "other"),
+      ) as SQL,
+    );
+  }
+
   // Apply search query filter
   if (q) {
     // If the query is a number, search by amount
@@ -189,6 +207,7 @@ export async function getInbox(db: Database, params: GetInboxParams) {
       contentType: inbox.contentType,
       date: inbox.date,
       status: inbox.status,
+      type: inbox.type,
       createdAt: inbox.createdAt,
       website: inbox.website,
       senderEmail: inbox.senderEmail,
@@ -1888,7 +1907,7 @@ export type UpdateInboxWithProcessedDataParams = {
   taxAmount?: number;
   taxRate?: number;
   taxType?: string;
-  type?: "invoice" | "expense" | null;
+  type?: "invoice" | "expense" | "other" | null;
   invoiceNumber?: string;
   status?:
     | "pending"
@@ -1897,7 +1916,8 @@ export type UpdateInboxWithProcessedDataParams = {
     | "processing"
     | "done"
     | "deleted"
-    | "analyzing";
+    | "analyzing"
+    | "other";
 };
 
 export async function updateInboxWithProcessedData(

@@ -254,6 +254,40 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
         `Document processing timed out after ${TIMEOUTS.DOCUMENT_PROCESSING}ms`,
       );
 
+      // Check if document is classified as "other" (non-financial document)
+      if (result.document_type === "other") {
+        await updateInboxWithProcessedData(db, {
+          id: inboxData.id,
+          displayName: result.name ?? inboxData.displayName,
+          type: "other",
+          status: "other",
+        });
+
+        this.logger.info(
+          "Document classified as other (non-financial), skipping matching",
+          {
+            inboxId: inboxData.id,
+            fileName: file.name,
+          },
+        );
+
+        // Send message to Slack about non-financial document
+        try {
+          await ensureBotInChannel({ client: slackClient, channelId });
+          await slackClient.chat.postMessage({
+            channel: channelId,
+            thread_ts: messageTs,
+            text: `This document doesn't appear to be an invoice or receipt. It has been saved to your inbox under "Other" documents.`,
+          });
+        } catch (error) {
+          this.logger.warn("Failed to send Slack message for other document", {
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+
+        return; // Skip embedding and transaction matching for non-financial documents
+      }
+
       // Update inbox with extracted data
       const updatedInbox = await updateInboxWithProcessedData(db, {
         id: inboxData.id,

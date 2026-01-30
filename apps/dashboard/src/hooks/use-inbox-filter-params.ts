@@ -8,7 +8,9 @@ export const inboxFilterParamsSchema = {
     "pending",
     "suggested_match",
     "no_match",
+    "other",
   ]),
+  tab: parseAsStringLiteral(["all", "other"]),
 };
 
 export function useInboxFilterParams() {

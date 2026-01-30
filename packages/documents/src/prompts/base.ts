@@ -2,13 +2,44 @@
  * Base extraction instructions for invoices and receipts
  */
 
+export const documentTypeClassification = `
+DOCUMENT TYPE CLASSIFICATION (REQUIRED FIRST STEP):
+Before extracting any data, classify this document into one of three types:
+
+1. **invoice** - A bill requesting payment for goods/services
+   - Has amounts due, payment terms, invoice numbers
+   - From a vendor/supplier to a customer
+   - Examples: utility bills, service invoices, product invoices
+
+2. **receipt** - Proof of a completed purchase
+   - Shows items purchased and payment already made
+   - From a merchant/store to a buyer
+   - Examples: store receipts, restaurant bills, online order confirmations
+
+3. **other** - Any non-financial document including:
+   - Contracts and agreements
+   - Marketing emails and newsletters
+   - Shipping/delivery notifications
+   - Subscription confirmations (without payment amounts)
+   - Terms of service documents
+   - General correspondence
+   - Legal documents without financial transactions
+
+Set document_type based on this classification.
+If document_type is "other", you may leave financial fields (amount, currency, tax_amount, etc.) as null.
+`;
+
 export const baseInvoiceInstructions = `
 You are a multilingual document parser that extracts structured data from financial documents such as invoices and receipts.
+
+${documentTypeClassification}
 `;
 
 export const baseReceiptInstructions = `
 You are a multilingual document parser specialized in extracting structured data from retail receipts and point-of-sale documents.
 Focus on identifying transaction details, itemized purchases, payment information, and store details.
+
+${documentTypeClassification}
 `;
 
 export const extractionRequirements = {

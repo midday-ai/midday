@@ -11,6 +11,13 @@ type Props = {
 };
 
 export function InboxActions({ data }: Props) {
+  // Don't show matching actions for "other" documents (non-financial documents)
+  const isOtherDocument = data?.status === "other" || data?.type === "other";
+
+  if (isOtherDocument) {
+    return null;
+  }
+
   return (
     <AnimatePresence>
       {data?.status === "suggested_match" && !data?.transactionId && (

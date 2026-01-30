@@ -11,7 +11,16 @@ export const taxTypeSchema = z.enum([
   "custom_tax",
 ]);
 
+export const documentTypeSchema = z.enum(["invoice", "receipt", "other"]);
+
 export const invoiceSchema = z.object({
+  document_type: documentTypeSchema.describe(
+    "Classify this document type FIRST before extracting data:\n" +
+      "- 'invoice': A bill requesting payment with amounts due, from vendor to customer\n" +
+      "- 'receipt': Proof of completed purchase showing items and payment made\n" +
+      "- 'other': Any non-financial document (contracts, agreements, newsletters, shipping notifications, confirmations without amounts, terms of service, correspondence)\n" +
+      "If 'other', financial fields (amount, currency, etc.) may be left as null.",
+  ),
   invoice_number: z
     .string()
     .nullable()
@@ -26,8 +35,9 @@ export const invoiceSchema = z.object({
     .describe("Payment due date in ISO 8601 format (YYYY-MM-DD)"),
   currency: z
     .string()
-    .describe("Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK)"),
-  total_amount: z.number().describe("Total amount for the invoice"),
+    .nullable()
+    .describe("Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK). Null if document_type is 'other'."),
+  total_amount: z.number().nullable().describe("Total amount for the invoice. Null if document_type is 'other'."),
   tax_amount: z.number().nullable().describe("Tax amount for the invoice"),
   tax_rate: z
     .number()
@@ -87,16 +97,24 @@ export const invoiceSchema = z.object({
 });
 
 export const receiptSchema = z.object({
+  document_type: documentTypeSchema.describe(
+    "Classify this document type FIRST before extracting data:\n" +
+      "- 'invoice': A bill requesting payment with amounts due, from vendor to customer\n" +
+      "- 'receipt': Proof of completed purchase showing items and payment made\n" +
+      "- 'other': Any non-financial document (contracts, agreements, newsletters, shipping notifications, confirmations without amounts, terms of service, correspondence)\n" +
+      "If 'other', financial fields (amount, currency, etc.) may be left as null.",
+  ),
   date: z
     .string()
     .nullable()
     .describe("Date of receipt in ISO 8601 format (YYYY-MM-DD)"),
   currency: z
     .string()
-    .describe("Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK)"),
-  total_amount: z.number().describe("Total amount including tax"),
+    .nullable()
+    .describe("Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK). Null if document_type is 'other'."),
+  total_amount: z.number().nullable().describe("Total amount including tax. Null if document_type is 'other'."),
   subtotal_amount: z.number().nullable().describe("Subtotal amount before tax"),
-  tax_amount: z.number().describe("Tax amount"),
+  tax_amount: z.number().nullable().describe("Tax amount. Null if document_type is 'other'."),
   tax_rate: z
     .number()
     .optional()

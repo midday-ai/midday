@@ -181,6 +181,43 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
         `Document processing timed out after ${TIMEOUTS.DOCUMENT_PROCESSING}ms`,
       );
 
+      // Check if document is classified as "other" (non-financial document)
+      if (result.document_type === "other") {
+        await updateInboxWithProcessedData(db, {
+          id: inboxData.id,
+          displayName: result.name ?? undefined,
+          type: "other",
+          status: "other",
+        });
+
+        this.logger.info(
+          "Document classified as other (non-financial), skipping matching",
+          {
+            inboxId: inboxData.id,
+          },
+        );
+
+        // Update reaction to indicate document received but not financial
+        await updateReaction(REACTION_EMOJIS.SUCCESS);
+
+        // Send message to WhatsApp about non-financial document
+        try {
+          await whatsappClient.sendMessage(
+            phoneNumber,
+            "This document doesn't appear to be an invoice or receipt. It has been saved to your inbox under 'Other' documents.",
+          );
+        } catch (error) {
+          this.logger.warn(
+            "Failed to send WhatsApp message for other document",
+            {
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+          );
+        }
+
+        return; // Skip embedding and transaction matching for non-financial documents
+      }
+
       // Update inbox with extracted data
       const updatedInbox = await updateInboxWithProcessedData(db, {
         id: inboxData.id,

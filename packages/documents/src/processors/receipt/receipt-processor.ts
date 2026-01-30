@@ -135,6 +135,7 @@ export class ReceiptProcessor extends BaseExtractionEngine<
       ...result.data,
       website,
       type: "expense",
+      document_type: result.data.document_type,
       date: result.data.date,
       amount: result.data.total_amount,
       currency: result.data.currency,

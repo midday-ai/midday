@@ -202,6 +202,7 @@ export function InboxDetails() {
   });
 
   const isProcessing = data?.status === "processing" || data?.status === "new";
+  const isOtherDocument = data?.status === "other" || data?.type === "other";
 
   useEffect(() => {
     setShowFallback(false);

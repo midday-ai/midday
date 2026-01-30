@@ -17,6 +17,7 @@ export type GetInvoiceOrReceiptResponse = {
   tax_rate?: number | null;
   tax_type?: string | null;
   invoice_number?: string | null;
+  document_type?: "invoice" | "receipt" | "other";
   metadata?: Record<string, string | number | boolean | null>;
 };
 

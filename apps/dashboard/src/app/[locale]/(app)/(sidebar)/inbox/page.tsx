@@ -31,6 +31,7 @@ export default async function Page(props: Props) {
         order: params.order,
         sort: params.sort,
         ...filter,
+        tab: filter.tab ?? "all", // Default to "all" tab
       }),
     ),
     queryClient.fetchQuery(trpc.inboxAccounts.get.queryOptions()),
