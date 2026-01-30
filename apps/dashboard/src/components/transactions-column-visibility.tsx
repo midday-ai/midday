@@ -20,11 +20,7 @@ export function TransactionsColumnVisibility() {
       <PopoverContent className="w-[200px] p-0" align="end" sideOffset={8}>
         <div className="flex flex-col p-4 space-y-2 max-h-[352px] overflow-auto">
           {columns
-            .filter(
-              (column) =>
-                column.columnDef.enableHiding !== false &&
-                column.id !== "status",
-            )
+            .filter((column) => column.columnDef.enableHiding !== false)
             .map((column) => {
               return (
                 <div key={column.id} className="flex items-center space-x-2">
