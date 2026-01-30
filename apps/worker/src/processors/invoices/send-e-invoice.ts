@@ -307,7 +307,7 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
 
     // Get invoice to find file path
     const invoice = await getInvoiceById(db, { id: invoiceId });
-    if (!invoice?.filePath) {
+    if (!invoice?.filePath || invoice.filePath.length === 0) {
       this.logger.error("Cannot fall back to email: invoice has no file path", {
         invoiceId,
       });
@@ -322,7 +322,7 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
       "send-invoice-email",
       {
         invoiceId,
-        filename: filename!,
+        filename,
         fullPath,
       },
       DEFAULT_JOB_OPTIONS,
