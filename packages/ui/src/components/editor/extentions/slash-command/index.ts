@@ -34,9 +34,4 @@ export const SlashCommand = Extension.create<SlashCommandOptions>({
 
 export { SlashMenu } from "./slash-menu";
 export type { SlashMenuRef } from "./slash-menu";
-export type {
-  SlashCommandItem,
-  SlashCommandSubItem,
-  SlashCommandContext,
-  BankAccountForSlashCommand,
-} from "./types";
+export type { SlashCommandItem, SlashCommandSubItem } from "./types";

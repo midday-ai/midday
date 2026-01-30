@@ -224,7 +224,12 @@ export function InvoiceEditor({
               },
               onKeyDown: (props) => {
                 if (props.event.key === "Escape") {
-                  popup?.[0]?.hide();
+                  // Delegate to SlashMenu first (e.g., to close submenu only)
+                  const handled = component?.ref?.onKeyDown(props) ?? false;
+                  if (!handled) {
+                    // SlashMenu didn't handle it (no submenu open), close entire popup
+                    popup?.[0]?.hide();
+                  }
                   return true;
                 }
                 return component?.ref?.onKeyDown(props) ?? false;

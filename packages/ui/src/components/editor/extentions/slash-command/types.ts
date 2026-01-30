@@ -18,21 +18,3 @@ export type SlashCommandSubItem = {
   description?: string;
   command: (props: { editor: Editor; range: Range }) => void;
 };
-
-export type SlashCommandContext = {
-  // Invoice data for dynamic inserts
-  dueDate?: string;
-  amount?: string;
-  invoiceNumber?: string;
-  customerName?: string;
-  // Bank accounts with payment info
-  bankAccounts?: BankAccountForSlashCommand[];
-};
-
-export type BankAccountForSlashCommand = {
-  id: string;
-  name: string;
-  bankName: string | null;
-  // Formatted payment details ready to insert
-  formattedDetails: string;
-};
