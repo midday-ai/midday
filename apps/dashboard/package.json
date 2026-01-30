@@ -88,6 +88,7 @@
     "resend": "^6.5.2",
     "server-only": "^0.0.1",
     "sharp": "0.34.5",
+    "tippy.js": "^6.3.7",
     "tus-js-client": "4.3.1",
     "use-places-autocomplete": "^4.0.1",
     "usehooks-ts": "^3.1.1",

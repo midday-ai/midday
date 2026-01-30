@@ -256,3 +256,85 @@ export const getBankAccountDetails = async (
     sortCode: account.sortCode,
   };
 };
+
+export type GetBankAccountsWithPaymentInfoParams = {
+  teamId: string;
+};
+
+export type BankAccountWithPaymentInfo = {
+  id: string;
+  name: string;
+  bankName: string | null;
+  currency: string | null;
+  // Decrypted payment info
+  iban: string | null;
+  accountNumber: string | null;
+  // Non-encrypted payment info
+  routingNumber: string | null;
+  wireRoutingNumber: string | null;
+  bic: string | null;
+  sortCode: string | null;
+};
+
+/**
+ * Get bank accounts that have payment information (IBAN, routing numbers, etc.)
+ * Returns decrypted sensitive fields for use in invoice payment details.
+ * Only returns accounts that have at least one payment field populated.
+ */
+export const getBankAccountsWithPaymentInfo = async (
+  db: Database,
+  params: GetBankAccountsWithPaymentInfoParams,
+): Promise<BankAccountWithPaymentInfo[]> => {
+  const { teamId } = params;
+
+  const accounts = await db.query.bankAccounts.findMany({
+    where: and(
+      eq(bankAccounts.teamId, teamId),
+      eq(bankAccounts.enabled, true),
+    ),
+    columns: {
+      id: true,
+      name: true,
+      currency: true,
+      iban: true,
+      accountNumber: true,
+      routingNumber: true,
+      wireRoutingNumber: true,
+      bic: true,
+      sortCode: true,
+    },
+    with: {
+      bankConnection: {
+        columns: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  // Filter to only accounts with payment info and decrypt sensitive fields
+  return accounts
+    .filter((account) => {
+      // Must have at least one of: IBAN, or (routing + account number), or sort code
+      const hasIban = !!account.iban;
+      const hasUsPaymentInfo = !!(account.routingNumber && account.accountNumber);
+      const hasUkPaymentInfo = !!(account.sortCode && account.accountNumber);
+      return hasIban || hasUsPaymentInfo || hasUkPaymentInfo;
+    })
+    .map((account) => ({
+      id: account.id,
+      name: account.name || "Unknown Account",
+      bankName: account.bankConnection?.name || null,
+      currency: account.currency,
+      // Decrypt sensitive fields
+      iban: account.iban ? decrypt(account.iban) : null,
+      accountNumber: account.accountNumber
+        ? decrypt(account.accountNumber)
+        : null,
+      // Non-sensitive fields returned as-is
+      routingNumber: account.routingNumber,
+      wireRoutingNumber: account.wireRoutingNumber,
+      bic: account.bic,
+      sortCode: account.sortCode,
+    }));
+};
