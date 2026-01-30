@@ -1,4 +1,5 @@
 import { getI18n } from "@midday/email/locales";
+import { encrypt } from "@midday/encryption";
 import { getAppUrl } from "@midday/utils/envs";
 import type { NotificationHandler } from "../base";
 import { eInvoiceSentSchema } from "../schemas";
@@ -35,7 +36,9 @@ export const eInvoiceSent: NotificationHandler = {
         customerName: data.customerName,
         teamName: team.name,
         invoiceNumber: data.invoiceNumber,
-        link: `${getAppUrl()}/invoices`,
+        link: `${getAppUrl()}/i/${encodeURIComponent(
+          data.token,
+        )}?viewer=${encodeURIComponent(encrypt(data.customerEmail))}`,
       },
     };
   },

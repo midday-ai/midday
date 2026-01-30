@@ -297,6 +297,7 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
           payload.teamId,
           {
             invoiceId: payload.invoiceId,
+            token: payload.token,
             invoiceNumber: payload.invoiceNumber,
             customerName: payload.customerName,
             customerEmail: payload.customerEmail,

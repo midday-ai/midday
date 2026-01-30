@@ -235,6 +235,7 @@ export const invoiceRefundedSchema = z.object({
 export const eInvoiceSentSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
+  token: z.string(),
   invoiceNumber: z.string(),
   customerName: z.string(),
   customerEmail: z.string().email(),

@@ -194,9 +194,16 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
       const result = await sendViaPeppol(client, dddInvoice);
 
       // Update invoice with success status
+      // Include main invoice fields (status, sentTo, sentAt) like send-invoice-email.ts
+      // so the invoice appears as sent in the UI and reports
       await updateInvoice(db, {
         id: invoiceId,
         teamId: invoice.teamId,
+        // Main invoice status fields
+        status: "unpaid",
+        sentTo: customer.email,
+        sentAt: new Date().toISOString(),
+        // E-invoice specific fields
         eInvoiceId: result.invoiceId,
         eInvoiceStatus: "sent",
         eInvoiceSentAt: new Date().toISOString(),
@@ -210,12 +217,13 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
       });
 
       // Queue notification email if enabled
-      if (sendNotificationEmail && customer.email) {
+      if (sendNotificationEmail && customer.email && invoice.token) {
         await notificationsQueue.add(
           "notification",
           {
             type: "e_invoice_sent",
             invoiceId,
+            token: invoice.token,
             invoiceNumber: invoice.invoiceNumber!,
             teamId: invoice.teamId,
             customerName: customer.name,
@@ -231,14 +239,17 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
         error instanceof Error ? error.message : "Unknown error";
 
       // Check if this is the last retry attempt
+      // Note: attemptsMade is 0 on first attempt, 1 on second, etc.
+      // So on attempt N (1-indexed), attemptsMade = N-1
       const attemptsMade = job.attemptsMade;
       const maxAttempts = job.opts?.attempts ?? 1;
-      const isLastAttempt = attemptsMade >= maxAttempts;
+      const currentAttempt = attemptsMade + 1;
+      const isLastAttempt = currentAttempt >= maxAttempts;
 
       this.logger.error("E-invoice delivery failed", {
         invoiceId,
         error: errorMessage,
-        attemptsMade,
+        currentAttempt,
         maxAttempts,
         isLastAttempt,
       });
@@ -249,7 +260,7 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
           id: invoiceId,
           teamId: invoice.teamId,
           eInvoiceStatus: "failed",
-          eInvoiceError: `Failed after ${attemptsMade} attempts: ${errorMessage}`,
+          eInvoiceError: `Failed after ${maxAttempts} attempts: ${errorMessage}`,
         });
 
         // Fall back to email delivery only after all retries exhausted
@@ -260,7 +271,7 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
           id: invoiceId,
           teamId: invoice.teamId,
           eInvoiceStatus: "retrying",
-          eInvoiceError: `Attempt ${attemptsMade}/${maxAttempts} failed: ${errorMessage}`,
+          eInvoiceError: `Attempt ${currentAttempt}/${maxAttempts} failed: ${errorMessage}`,
         });
 
         // Re-throw to let BullMQ retry with exponential backoff

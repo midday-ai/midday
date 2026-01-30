@@ -129,6 +129,7 @@ export const eInvoiceSentNotificationSchema = z.object({
   ...baseFields,
   type: z.literal("e_invoice_sent"),
   invoiceId: z.string().uuid(),
+  token: z.string(),
   invoiceNumber: z.string(),
   customerName: z.string(),
   customerEmail: z.string().email(),
