@@ -43,6 +43,7 @@ import { addDays, parseISO } from "date-fns";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { SelectCurrency } from "../select-currency";
+import { EInvoiceRequirements } from "./e-invoice-requirements";
 
 const dateFormats = [
   { value: "dd/MM/yyyy", label: "DD/MM/YYYY" },
@@ -516,40 +517,7 @@ export function SettingsMenu() {
               <span className="text-xs">E-Invoice (Peppol)</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent className="p-0">
-              <DropdownMenuCheckboxItem
-                className="text-xs"
-                checked={watch("template.eInvoiceEnabled") === true}
-                onCheckedChange={(checked) => {
-                  setValue("template.eInvoiceEnabled", checked, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  });
-                  updateTemplateMutation.mutate({
-                    id: templateId,
-                    eInvoiceEnabled: checked,
-                  });
-                }}
-                onSelect={(event) => event.preventDefault()}
-              >
-                Enable e-invoicing
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                className="text-xs"
-                checked={watch("template.eInvoiceNotifyEmail") === true}
-                onCheckedChange={(checked) => {
-                  setValue("template.eInvoiceNotifyEmail", checked, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  });
-                  updateTemplateMutation.mutate({
-                    id: templateId,
-                    eInvoiceNotifyEmail: checked,
-                  });
-                }}
-                onSelect={(event) => event.preventDefault()}
-              >
-                Send notification email
-              </DropdownMenuCheckboxItem>
+              <EInvoiceRequirements templateId={templateId} />
             </DropdownMenuSubContent>
           </DropdownMenuSub>
 

@@ -58,11 +58,11 @@ export function CompanyAddress() {
 
   const onSubmit = form.handleSubmit((formData) => {
     updateTeamMutation.mutate({
-      addressLine1: formData.addressLine1 || undefined,
-      addressLine2: formData.addressLine2 || undefined,
-      city: formData.city || undefined,
-      zip: formData.zip || undefined,
-      countryCode: formData.countryCode || undefined,
+      addressLine1: formData.addressLine1 || null,
+      addressLine2: formData.addressLine2 || null,
+      city: formData.city || null,
+      zip: formData.zip || null,
+      countryCode: formData.countryCode || null,
     });
   });
 

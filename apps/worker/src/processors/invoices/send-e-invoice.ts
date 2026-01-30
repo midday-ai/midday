@@ -218,21 +218,31 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
 
       // Queue notification email if enabled
       if (sendNotificationEmail && customer.email && invoice.token) {
-        await notificationsQueue.add(
-          "notification",
-          {
-            type: "e_invoice_sent",
-            invoiceId,
-            token: invoice.token,
-            invoiceNumber: invoice.invoiceNumber!,
-            teamId: invoice.teamId,
-            customerName: customer.name,
-            customerEmail: customer.email,
-          },
-          DEFAULT_JOB_OPTIONS,
-        );
+        // Validate required fields for notification (invoiceNumber is required by eInvoiceSentSchema)
+        if (!invoice.invoiceNumber) {
+          this.logger.warn(
+            "Skipping e-invoice notification: invoice number is missing",
+            { invoiceId },
+          );
+        } else {
+          await notificationsQueue.add(
+            "notification",
+            {
+              type: "e_invoice_sent",
+              invoiceId,
+              token: invoice.token,
+              invoiceNumber: invoice.invoiceNumber,
+              teamId: invoice.teamId,
+              customerName: customer.name,
+              customerEmail: customer.email,
+            },
+            DEFAULT_JOB_OPTIONS,
+          );
 
-        this.logger.debug("Queued e-invoice notification email", { invoiceId });
+          this.logger.debug("Queued e-invoice notification email", {
+            invoiceId,
+          });
+        }
       }
     } catch (error) {
       const errorMessage =
