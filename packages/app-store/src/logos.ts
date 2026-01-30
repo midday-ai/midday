@@ -14,7 +14,6 @@ export { Logo as GoogleDriveLogo } from "./google-drive/assets/logo";
 export { Logo as DropboxLogo } from "./dropbox/assets/logo";
 export { Logo as PolarLogo } from "./polar/assets/logo";
 export { Logo as DeelLogo } from "./deel/assets/logo";
-export { Logo as EInvoiceLogo } from "./e-invoice/assets/logo";
 export { Logo as CursorMcpLogo } from "./cursor-mcp/assets/logo";
 export { Logo as ClaudeMcpLogo } from "./claude-mcp/assets/logo";
 export { Logo as RaycastMcpLogo } from "./raycast-mcp/assets/logo";

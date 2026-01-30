@@ -9,7 +9,6 @@ import n8nMcpApp from "./n8n-mcp/config";
 import makeMcpApp from "./make-mcp/config";
 import deelApp from "./deel/config";
 import dropboxApp from "./dropbox/config";
-import eInvoiceApp from "./e-invoice/config";
 import fortnoxApp from "./fortnox/config-client";
 import gmailApp from "./gmail/config-client";
 import googleDriveApp from "./google-drive/config";
@@ -42,7 +41,6 @@ export const apps = [
   stripeApp,
   polarApp,
   deelApp,
-  eInvoiceApp,
   cursorMcpApp,
   claudeMcpApp,
   perplexityMcpApp,

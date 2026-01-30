@@ -151,7 +151,8 @@ export function Invoicing() {
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     Create one-off, recurring, scheduled, or web invoices
-                    depending on how you bill your customers.
+                    depending on how you bill your customers. Send via email or
+                    e-invoice through Peppol.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
@@ -179,6 +180,14 @@ export function Invoicing() {
                         Invoice templates
                       </span>
                     </div>
+                    <Link
+                      href="/docs/e-invoicing"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                    >
+                      <span className="font-sans text-sm text-foreground">
+                        E-invoicing (Peppol)
+                      </span>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -254,6 +263,7 @@ export function Invoicing() {
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>

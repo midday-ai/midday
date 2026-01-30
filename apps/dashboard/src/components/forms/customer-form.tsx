@@ -25,6 +25,13 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
@@ -670,24 +677,24 @@ export function CustomerForm({ data }: Props) {
                             <FormLabel className="text-xs text-[#878787] font-normal">
                               Legal Form
                             </FormLabel>
-                            <FormControl>
-                              <select
-                                {...field}
-                                value={field.value ?? ""}
-                                onChange={(e) =>
-                                  field.onChange(e.target.value || undefined)
-                                }
-                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                              >
-                                <option value="">Select...</option>
-                                <option value="LegalEntity">
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value ?? ""}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="LegalEntity">
                                   Legal Entity (Company)
-                                </option>
-                                <option value="NaturalPerson">
+                                </SelectItem>
+                                <SelectItem value="NaturalPerson">
                                   Natural Person (Individual)
-                                </option>
-                              </select>
-                            </FormControl>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}

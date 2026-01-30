@@ -160,18 +160,6 @@ const menuItems = [
     options: booleanOptions,
     key: "includeQr",
   },
-  {
-    icon: Icons.ArrowForward,
-    label: "E-Invoice (Peppol)",
-    options: booleanOptions,
-    key: "eInvoiceEnabled",
-  },
-  {
-    icon: Icons.Email,
-    label: "E-Invoice notification",
-    options: booleanOptions,
-    key: "eInvoiceNotifyEmail",
-  },
 ];
 
 export function SettingsMenu() {
@@ -520,6 +508,50 @@ export function SettingsMenu() {
               </DropdownMenuSub>
             );
           })}
+
+          {/* E-Invoice (Peppol) */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.ArrowForward className="mr-2 size-4" />
+              <span className="text-xs">E-Invoice (Peppol)</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="p-0">
+              <DropdownMenuCheckboxItem
+                className="text-xs"
+                checked={watch("template.eInvoiceEnabled") === true}
+                onCheckedChange={(checked) => {
+                  setValue("template.eInvoiceEnabled", checked, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                  updateTemplateMutation.mutate({
+                    id: templateId,
+                    eInvoiceEnabled: checked,
+                  });
+                }}
+                onSelect={(event) => event.preventDefault()}
+              >
+                Enable e-invoicing
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                className="text-xs"
+                checked={watch("template.eInvoiceNotifyEmail") === true}
+                onCheckedChange={(checked) => {
+                  setValue("template.eInvoiceNotifyEmail", checked, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                  updateTemplateMutation.mutate({
+                    id: templateId,
+                    eInvoiceNotifyEmail: checked,
+                  });
+                }}
+                onSelect={(event) => event.preventDefault()}
+              >
+                Send notification email
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
 
           {/* Payment Terms */}
           <DropdownMenuSub>

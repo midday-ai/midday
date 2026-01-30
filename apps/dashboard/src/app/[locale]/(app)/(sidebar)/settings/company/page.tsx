@@ -1,5 +1,4 @@
 import { CompanyAddress } from "@/components/company-address";
-import { CompanyCountry } from "@/components/company-country";
 import { CompanyEInvoice } from "@/components/company-e-invoice";
 import { CompanyFiscalYear } from "@/components/company-fiscal-year";
 import { CompanyTaxInfo } from "@/components/company-tax-info";
@@ -17,7 +16,6 @@ export default async function CompanySettings() {
     <HydrateClient>
       <div className="space-y-12">
         <CompanyAddress />
-        <CompanyCountry />
         <CompanyFiscalYear />
         <CompanyTaxInfo />
         <CompanyEInvoice />

@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 const title = "Invoicing";
 const description =
-  "Create professional invoices in seconds. Track payments, send reminders, and get paid faster with invoicing software built for small business owners.";
+  "Create professional invoices in seconds. Track payments, send reminders, and get paid faster. E-invoicing via Peppol for EU compliance in 46+ countries.";
 
 export const metadata: Metadata = {
   title,
@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     "online invoicing",
     "invoice generator",
     "billing software",
+    "e-invoicing",
+    "peppol",
+    "electronic invoicing",
   ],
   openGraph: {
     title,
