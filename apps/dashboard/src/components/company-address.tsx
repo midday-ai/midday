@@ -62,7 +62,7 @@ export function CompanyAddress() {
       addressLine2: formData.addressLine2 || null,
       city: formData.city || null,
       zip: formData.zip || null,
-      countryCode: formData.countryCode || null,
+      countryCode: formData.countryCode || undefined,
     });
   });
 
