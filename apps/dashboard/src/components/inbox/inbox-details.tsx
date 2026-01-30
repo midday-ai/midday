@@ -312,22 +312,25 @@ export function InboxDetails() {
                   )}
                 </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  onClick={handleRetryMatching}
-                  disabled={retryMatchingMutation.isPending}
-                >
-                  {retryMatchingMutation.isPending ? (
-                    <>
-                      <Icons.Refresh className="mr-2 size-4 animate-spin" />
-                      <span className="text-xs">Processing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Icons.Refresh className="mr-2 size-4" />
-                      <span className="text-xs">Retry Matching</span>
-                    </>
-                  )}
-                </DropdownMenuItem>
+                {/* Hide retry matching for "other" (non-financial) documents */}
+                {!isOtherDocument && (
+                  <DropdownMenuItem
+                    onClick={handleRetryMatching}
+                    disabled={retryMatchingMutation.isPending}
+                  >
+                    {retryMatchingMutation.isPending ? (
+                      <>
+                        <Icons.Refresh className="mr-2 size-4 animate-spin" />
+                        <span className="text-xs">Processing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Icons.Refresh className="mr-2 size-4" />
+                        <span className="text-xs">Retry Matching</span>
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                )}
 
                 <DropdownMenuItem>
                   <DialogTrigger className="w-full text-left flex items-center">

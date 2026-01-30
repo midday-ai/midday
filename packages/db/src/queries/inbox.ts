@@ -308,6 +308,7 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
       contentType: inbox.contentType,
       date: inbox.date,
       status: inbox.status,
+      type: inbox.type,
       createdAt: inbox.createdAt,
       website: inbox.website,
       senderEmail: inbox.senderEmail,
@@ -373,6 +374,7 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
         contentType: inbox.contentType,
         date: inbox.date,
         status: inbox.status,
+        type: inbox.type,
         createdAt: inbox.createdAt,
         website: inbox.website,
         senderEmail: inbox.senderEmail,
@@ -1067,7 +1069,8 @@ export type UpdateInboxParams = {
     | "done"
     | "pending"
     | "analyzing"
-    | "suggested_match";
+    | "suggested_match"
+    | "other";
   contentType?: string;
 };
 

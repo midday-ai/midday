@@ -244,7 +244,8 @@ export async function getInboxByStatus(
       | "suggested_match"
       | "no_match"
       | "done"
-      | "deleted";
+      | "deleted"
+      | "other";
   },
 ) {
   const { teamId, status } = params;

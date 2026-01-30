@@ -258,7 +258,7 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
       if (result.document_type === "other") {
         await updateInboxWithProcessedData(db, {
           id: inboxData.id,
-          displayName: result.name ?? inboxData.displayName,
+          displayName: result.name ?? (fileName || "Untitled"),
           type: "other",
           status: "other",
         });
@@ -283,6 +283,20 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
           this.logger.warn("Failed to send Slack message for other document", {
             error: error instanceof Error ? error.message : "Unknown error",
           });
+        }
+
+        // Replace hourglass with checkmark emoji for "other" documents
+        await removeProcessingReaction();
+        if (reactionAdded && messageTimestamp) {
+          try {
+            await slackClient.reactions.add({
+              channel: channelId,
+              timestamp: messageTimestamp,
+              name: "white_check_mark",
+            });
+          } catch {
+            // Ignore - reaction might already exist
+          }
         }
 
         return; // Skip embedding and transaction matching for non-financial documents

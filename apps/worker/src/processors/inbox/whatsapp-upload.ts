@@ -185,7 +185,7 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
       if (result.document_type === "other") {
         await updateInboxWithProcessedData(db, {
           id: inboxData.id,
-          displayName: result.name ?? undefined,
+          displayName: result.name ?? (caption || finalFileName),
           type: "other",
           status: "other",
         });
