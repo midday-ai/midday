@@ -294,7 +294,9 @@ export function MainMenu({ onSelect, isExpanded = false }: Props) {
             const isActive =
               (pathname === "/" && item.path === "/") ||
               (item.path === "/" && isChatPage) ||
-              (pathname !== "/" && !isChatPage && item.path.startsWith(`/${part}`));
+              (pathname !== "/" &&
+                !isChatPage &&
+                item.path.startsWith(`/${part}`));
 
             return (
               <Item
