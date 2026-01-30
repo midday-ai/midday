@@ -1,5 +1,5 @@
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import { tz } from "@date-fns/tz";
+import { TZDate, tz } from "@date-fns/tz";
 import { UTCDate, utc } from "@date-fns/utc";
 import {
   addDays,
@@ -218,7 +218,12 @@ export const createNewEvent = (
   selectedDate?: string | null,
   timezone?: string,
 ): TrackerRecord => {
-  const baseDate = selectedDate ? parseISO(selectedDate) : new UTCDate();
+  // Use TZDate with UTC to ensure date-only strings are parsed without timezone shift
+  const baseDate = selectedDate
+    ? new TZDate(selectedDate, "UTC")
+    : new UTCDate();
+  // Use the original date string directly if available
+  const dateStr = selectedDate || format(baseDate, "yyyy-MM-dd");
 
   if (timezone && timezone !== "UTC") {
     try {
@@ -233,7 +238,7 @@ export const createNewEvent = (
 
       return {
         id: NEW_EVENT_ID,
-        date: format(tzBaseDate, "yyyy-MM-dd"),
+        date: dateStr,
         description: null,
         duration: 15 * 60, // 15 minutes in seconds
         start: new Date(startDate.getTime()),
@@ -263,7 +268,7 @@ export const createNewEvent = (
 
   return {
     id: NEW_EVENT_ID,
-    date: format(startDate, "yyyy-MM-dd"),
+    date: dateStr,
     description: null,
     duration: 15 * 60, // 15 minutes in seconds
     start: startDate,
@@ -339,11 +344,13 @@ export function getTrackerDates(
   selectedDate: string | null,
 ): Date[] {
   if (range) {
-    return sortDates(range).map((dateString) => parseISO(dateString));
+    // Use TZDate with UTC to ensure date-only strings are parsed without timezone shift
+    return sortDates(range).map((dateString) => new TZDate(dateString, "UTC"));
   }
 
   if (selectedDate) {
-    return [parseISO(selectedDate)];
+    // Use TZDate with UTC to ensure the date is interpreted as-is without timezone shift
+    return [new TZDate(selectedDate, "UTC")];
   }
 
   return [new Date()];

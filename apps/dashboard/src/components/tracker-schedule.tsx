@@ -401,20 +401,25 @@ const createNewEvent = (
 ): TrackerRecord => {
   // Get base date for event
   let baseDate: Date;
+  let dateStr: string;
   if (selectedDate) {
-    baseDate = parseISO(selectedDate);
+    // Use TZDate with UTC to ensure date-only strings are parsed as calendar dates
+    // without timezone shift
+    baseDate = new TZDate(selectedDate, "UTC");
+    dateStr = selectedDate; // Use the original date string directly
   } else {
     const timezone = getUserTimezone(user);
     try {
       const now = new Date();
       const userTzDate = new TZDate(now, timezone);
       baseDate = startOfDay(userTzDate);
+      dateStr = format(userTzDate, "yyyy-MM-dd"); // Format in user's timezone
     } catch (error) {
       console.warn("Today calculation failed, using system date:", error);
       baseDate = new Date();
+      dateStr = format(baseDate, "yyyy-MM-dd");
     }
   }
-  const dateStr = format(baseDate, "yyyy-MM-dd");
   const timezone = getUserTimezone(user);
 
   // Convert slot to time
@@ -437,7 +442,7 @@ const createNewEvent = (
 
   return {
     id: NEW_EVENT_ID,
-    date: format(baseDate, "yyyy-MM-dd"),
+    date: dateStr,
     description: null,
     duration: 15 * 60,
     start: startDate.toISOString(),
@@ -717,7 +722,9 @@ export function TrackerSchedule() {
 
   const getBaseDate = useCallback(() => {
     if (selectedDate) {
-      return parseISO(selectedDate);
+      // Use TZDate with UTC to ensure date-only strings are parsed as calendar dates
+      // without timezone shift
+      return new TZDate(selectedDate, "UTC");
     }
 
     // Get "today" in user's timezone, not browser timezone
@@ -743,8 +750,11 @@ export function TrackerSchedule() {
       description?: string;
     }) => {
       const baseDate = getBaseDate();
-      const dateStr = format(baseDate, "yyyy-MM-dd");
       const timezone = getUserTimezone(user);
+
+      // Use selectedDate directly if available to avoid timezone conversion issues
+      // Otherwise format baseDate (which is already timezone-aware from getBaseDate)
+      const dateStr = selectedDate || format(baseDate, "yyyy-MM-dd");
 
       // Handle next day stop time (e.g., 23:00-01:00)
       const startHour = Number.parseInt(
@@ -757,8 +767,12 @@ export function TrackerSchedule() {
       );
       const isNextDay = stopHour < startHour;
 
+      // For next day calculation, use TZDate to properly add a day
+      const nextDayDate = selectedDate
+        ? new TZDate(selectedDate, "UTC")
+        : baseDate;
       const stopDateStr = isNextDay
-        ? format(addDays(baseDate, 1), "yyyy-MM-dd")
+        ? format(addDays(nextDayDate, 1), "yyyy-MM-dd")
         : dateStr;
 
       // Convert user timezone input to UTC for storage
@@ -845,8 +859,8 @@ export function TrackerSchedule() {
         const start = Math.min(dragStartSlot, slot);
         const end = Math.max(dragStartSlot, slot);
 
-        // Use timezone-aware time creation instead of browser timezone
-        const dateStr = format(getBaseDate(), "yyyy-MM-dd");
+        // Use selectedDate directly if available to avoid timezone conversion issues
+        const dateStr = selectedDate || format(getBaseDate(), "yyyy-MM-dd");
         const timezone = getUserTimezone(user);
         const startHour = Math.floor(start / 4);
         const startMinute = (start % 4) * 15;
@@ -1015,8 +1029,8 @@ export function TrackerSchedule() {
           formattedStartTimeStr = `${start.substring(0, 2)}:${start.substring(2)}`;
         }
 
-        // Use timezone-aware parsing instead of browser timezone
-        const dateStr = format(baseDate, "yyyy-MM-dd");
+        // Use selectedDate directly if available to avoid timezone conversion issues
+        const dateStr = selectedDate || format(baseDate, "yyyy-MM-dd");
         const timezone = getUserTimezone(user);
         const startTime = userTimeToUTC(
           dateStr,
@@ -1065,8 +1079,8 @@ export function TrackerSchedule() {
               if (/^\d{4}$/.test(start))
                 formattedStart = `${start.substring(0, 2)}:${start.substring(2)}`;
 
-              // Use timezone-aware parsing instead of browser timezone
-              const dateStr = format(baseDate, "yyyy-MM-dd");
+              // Use selectedDate directly if available to avoid timezone conversion issues
+              const dateStr = selectedDate || format(baseDate, "yyyy-MM-dd");
               const timezone = getUserTimezone(user);
               const parsedStart = userTimeToUTC(
                 dateStr,
@@ -1095,8 +1109,8 @@ export function TrackerSchedule() {
               if (/^\d{4}$/.test(end))
                 formattedEnd = `${end.substring(0, 2)}:${end.substring(2)}`;
 
-              // Use timezone-aware parsing instead of browser timezone
-              const dateStr = format(baseDate, "yyyy-MM-dd");
+              // Use selectedDate directly if available to avoid timezone conversion issues
+              const dateStr = selectedDate || format(baseDate, "yyyy-MM-dd");
               const timezone = getUserTimezone(user);
               const parsedEnd = userTimeToUTC(dateStr, formattedEnd, timezone);
 
@@ -1272,10 +1286,9 @@ export function TrackerSchedule() {
             // This is the first part of the entry (ends at midnight in user timezone)
             // Calculate end of day in user timezone, then convert back to UTC
             const timezone = getUserTimezone(user);
-            const nextDay = format(
-              addDays(parseISO(currentSelectedDate), 1),
-              "yyyy-MM-dd",
-            );
+            // Use TZDate with UTC to avoid timezone shift when adding days
+            const currentDateUTC = new TZDate(currentSelectedDate, "UTC");
+            const nextDay = format(addDays(currentDateUTC, 1), "yyyy-MM-dd");
             const endOfDayUtc = userTimeToUTC(nextDay, "00:00", timezone);
 
             const firstPartDuration = Math.round(
