@@ -762,6 +762,10 @@ export async function getInboxSearch(
     const whereConditions: SQL[] = [
       eq(inbox.teamId, teamId),
       ne(inbox.status, "deleted"),
+      // Exclude "other" documents (non-financial) from matching search
+      // These documents skip embedding/matching in the worker processors
+      ne(inbox.status, "other"),
+      or(sql`${inbox.type} IS NULL`, ne(inbox.type, "other")) as SQL,
       // Exclude items that are already matched to other transactions
       sql`${inbox.transactionId} IS NULL`,
     ];
@@ -1573,6 +1577,7 @@ export async function getInboxByFilePath(
       status: inbox.status,
       createdAt: inbox.createdAt,
       contentType: inbox.contentType,
+      displayName: inbox.displayName,
     })
     .from(inbox)
     .where(
@@ -1594,6 +1599,7 @@ export async function getInboxByFilePath(
       status: item.status,
       createdAt: item.createdAt,
       contentType: item.contentType,
+      displayName: item.displayName,
     };
   }
 
@@ -1604,6 +1610,7 @@ export async function getInboxByFilePath(
       status: inbox.status,
       createdAt: inbox.createdAt,
       contentType: inbox.contentType,
+      displayName: inbox.displayName,
     })
     .from(inbox)
     .where(
@@ -1625,6 +1632,7 @@ export async function getInboxByFilePath(
     status: result.status,
     createdAt: result.createdAt,
     contentType: result.contentType,
+    displayName: result.displayName,
   };
 }
 

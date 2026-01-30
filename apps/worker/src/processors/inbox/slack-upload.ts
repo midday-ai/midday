@@ -276,7 +276,7 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
           await ensureBotInChannel({ client: slackClient, channelId });
           await slackClient.chat.postMessage({
             channel: channelId,
-            thread_ts: messageTs,
+            thread_ts: messageTimestamp,
             text: `This document doesn't appear to be an invoice or receipt. It has been saved to your inbox under "Other" documents.`,
           });
         } catch (error) {
@@ -479,7 +479,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
 
           await slackClient.chat.postMessage({
             channel: channelId,
-            thread_ts: threadId,
+            thread_ts: messageTimestamp,
             text: `${updatedInbox.displayName}: ${formatCurrency(updatedInbox.amount)}`,
             unfurl_links: false,
             unfurl_media: false,

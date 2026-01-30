@@ -19,7 +19,10 @@ export function useInboxFilterParams() {
   return {
     params,
     setParams,
-    hasFilter: Object.values(params).some((value) => value !== null),
+    // Exclude 'tab' from filter check since it's a navigation param, not a filter
+    hasFilter: Object.entries(params).some(
+      ([key, value]) => key !== "tab" && value !== null,
+    ),
   };
 }
 
