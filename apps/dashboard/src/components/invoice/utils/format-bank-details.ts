@@ -73,9 +73,7 @@ export function formatBankPaymentDetails(
  * Format bank account for display in the slash command menu
  * Returns a shorter preview string
  */
-export function formatBankPreview(
-  account: BankAccountWithPaymentInfo,
-): string {
+export function formatBankPreview(account: BankAccountWithPaymentInfo): string {
   if (account.iban) {
     // Show masked IBAN (first 4 + last 4)
     const iban = account.iban;
