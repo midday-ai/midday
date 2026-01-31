@@ -43,6 +43,7 @@ import { addDays, parseISO } from "date-fns";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { SelectCurrency } from "../select-currency";
+import { EInvoiceRequirements } from "./e-invoice-requirements";
 
 const dateFormats = [
   { value: "dd/MM/yyyy", label: "DD/MM/YYYY" },
@@ -508,6 +509,17 @@ export function SettingsMenu() {
               </DropdownMenuSub>
             );
           })}
+
+          {/* E-Invoice (Peppol) */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.ArrowForward className="mr-2 size-4" />
+              <span className="text-xs">E-Invoice (Peppol)</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="p-0">
+              <EInvoiceRequirements templateId={templateId} />
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
 
           {/* Payment Terms */}
           <DropdownMenuSub>

@@ -354,6 +354,12 @@ export async function getInvoiceById(
       paymentIntentId: invoices.paymentIntentId,
       refundedAt: invoices.refundedAt,
       teamId: invoices.teamId,
+      // E-Invoice / Peppol
+      eInvoiceId: invoices.eInvoiceId,
+      eInvoiceStatus: invoices.eInvoiceStatus,
+      eInvoiceSentAt: invoices.eInvoiceSentAt,
+      eInvoiceError: invoices.eInvoiceError,
+      eInvoiceFailedStep: invoices.eInvoiceFailedStep,
       customer: {
         id: customers.id,
         name: customers.name,
@@ -1114,6 +1120,12 @@ export type UpdateInvoiceParams = {
   recurringSequence?: number | null;
   teamId: string;
   userId?: string;
+  // E-Invoice / Peppol fields
+  eInvoiceId?: string | null;
+  eInvoiceStatus?: "pending" | "retrying" | "sent" | "delivered" | "failed" | null;
+  eInvoiceSentAt?: string | null;
+  eInvoiceError?: string | null;
+  eInvoiceFailedStep?: number | null;
 };
 
 export async function updateInvoice(

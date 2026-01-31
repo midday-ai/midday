@@ -1,0 +1,412 @@
+import {
+  getCustomerById,
+  getInvoiceById,
+  getTeamById,
+  updateInvoice,
+  updateTeamById,
+} from "@midday/db/queries";
+import {
+  DDDError,
+  type MiddayInvoiceData,
+  createDDDClient,
+  registerTeamWithDDD,
+  sendViaPeppol,
+  transformToDDDInvoice,
+  validateForPeppol,
+} from "@midday/e-invoice";
+import type { LineItem } from "@midday/invoice/types";
+import type { Job } from "bullmq";
+import { DEFAULT_JOB_OPTIONS } from "../../config/job-options";
+import { invoicesQueue } from "../../queues/invoices";
+import { notificationsQueue } from "../../queues/notifications";
+import {
+  type SendEInvoicePayload,
+  sendEInvoiceSchema,
+} from "../../schemas/invoices";
+import { getDb } from "../../utils/db";
+import { BaseProcessor } from "../base";
+
+/**
+ * Send E-Invoice Processor
+ * Handles sending invoices via the Peppol network using DDD Invoices API
+ *
+ * Flow:
+ * 1. Fetch invoice, customer, and team data
+ * 2. Validate that all required e-invoice fields are present
+ * 3. Transform to DDD Invoices format
+ * 4. Send via Peppol network
+ * 5. Update invoice with e-invoice status
+ * 6. On failure, fall back to email delivery
+ */
+export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
+  protected getPayloadSchema() {
+    return sendEInvoiceSchema;
+  }
+
+  async process(job: Job<SendEInvoicePayload>): Promise<void> {
+    const { invoiceId, sendNotificationEmail } = job.data;
+    const db = getDb();
+
+    this.logger.info("Starting e-invoice delivery", {
+      jobId: job.id,
+      invoiceId,
+      sendNotificationEmail,
+    });
+
+    // Fetch invoice data
+    const invoice = await getInvoiceById(db, { id: invoiceId });
+    if (!invoice) {
+      this.logger.error("Invoice not found", { invoiceId });
+      throw new Error(`Invoice not found: ${invoiceId}`);
+    }
+
+    // Fetch full customer data (including e-invoice fields)
+    if (!invoice.customerId) {
+      this.logger.error("Invoice has no customer", { invoiceId });
+      await this.fallbackToEmail(invoiceId, invoice.teamId, "No customer");
+      return;
+    }
+
+    const customer = await getCustomerById(db, {
+      id: invoice.customerId,
+      teamId: invoice.teamId,
+    });
+    if (!customer) {
+      this.logger.error("Customer not found", {
+        invoiceId,
+        customerId: invoice.customerId,
+      });
+      await this.fallbackToEmail(
+        invoiceId,
+        invoice.teamId,
+        "Customer not found",
+      );
+      return;
+    }
+
+    // Fetch team data
+    const team = await getTeamById(db, invoice.teamId);
+    if (!team) {
+      this.logger.error("Team not found", {
+        invoiceId,
+        teamId: invoice.teamId,
+      });
+      await this.fallbackToEmail(invoiceId, invoice.teamId, "Team not found");
+      return;
+    }
+
+    // Get or create team's DDD connection key (just-in-time registration)
+    let connectionKey = team.dddConnectionKey;
+
+    if (!connectionKey) {
+      // Check if team has required company details for DDD registration
+      if (
+        !team.name ||
+        !team.countryCode ||
+        !team.addressLine1 ||
+        !team.zip ||
+        !team.city
+      ) {
+        this.logger.warn(
+          "Team missing required company details for e-invoicing",
+          {
+            invoiceId,
+            teamId: team.id,
+            hasName: !!team.name,
+            hasCountryCode: !!team.countryCode,
+            hasAddress: !!team.addressLine1,
+            hasZip: !!team.zip,
+            hasCity: !!team.city,
+          },
+        );
+        await this.fallbackToEmail(
+          invoiceId,
+          invoice.teamId,
+          "Missing company details for e-invoicing",
+        );
+        return;
+      }
+
+      try {
+        // Register team with DDD (just-in-time)
+        this.logger.info("Registering team with DDD Invoices", {
+          invoiceId,
+          teamId: team.id,
+          teamName: team.name,
+        });
+
+        connectionKey = await registerTeamWithDDD({
+          name: team.name,
+          countryCode: team.countryCode,
+          taxId: team.taxId,
+          registrationNumber: team.registrationNumber,
+          addressLine1: team.addressLine1,
+          zip: team.zip,
+          city: team.city,
+          email: team.email,
+        });
+
+        // Store connection key for future use
+        await updateTeamById(db, {
+          id: team.id,
+          data: { dddConnectionKey: connectionKey },
+        });
+
+        this.logger.info("Team registered with DDD Invoices successfully", {
+          invoiceId,
+          teamId: team.id,
+        });
+      } catch (registrationError) {
+        const errorMessage =
+          registrationError instanceof Error
+            ? registrationError.message
+            : "Unknown registration error";
+
+        this.logger.error("DDD registration failed", {
+          invoiceId,
+          teamId: team.id,
+          error: errorMessage,
+        });
+
+        await this.fallbackToEmail(
+          invoiceId,
+          invoice.teamId,
+          `DDD registration failed: ${errorMessage}`,
+        );
+        return;
+      }
+    }
+
+    // Check if customer has Peppol ID
+    const peppolId = customer.peppolId;
+    if (!peppolId) {
+      this.logger.warn("Customer has no Peppol ID", {
+        invoiceId,
+        customerId: customer.id,
+      });
+      await this.fallbackToEmail(invoiceId, invoice.teamId, "No Peppol ID");
+      return;
+    }
+
+    // Prepare data for transformation
+    const middayData: MiddayInvoiceData = {
+      invoice: {
+        id: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        issueDate: invoice.issueDate,
+        dueDate: invoice.dueDate,
+        amount: invoice.amount,
+        vat: invoice.vat,
+        tax: invoice.tax,
+        currency: invoice.currency,
+        note: invoice.note,
+        lineItems: (invoice.lineItems as LineItem[]) || [],
+      },
+      customer: {
+        name: customer.name,
+        email: customer.email,
+        countryCode: customer.countryCode,
+        vatNumber: customer.vatNumber,
+        peppolId: peppolId,
+        registrationNumber: customer.registrationNumber,
+        legalForm: customer.legalForm,
+        addressLine1: customer.addressLine1,
+        addressLine2: customer.addressLine2,
+        city: customer.city,
+        zip: customer.zip,
+        country: customer.country,
+      },
+      team: {
+        name: team.name,
+        countryCode: team.countryCode,
+        taxId: team.taxId,
+        peppolId: team.peppolId,
+        registrationNumber: team.registrationNumber,
+        addressLine1: team.addressLine1,
+        addressLine2: team.addressLine2,
+        city: team.city,
+        zip: team.zip,
+      },
+    };
+
+    // Validate data for Peppol
+    const validation = validateForPeppol(middayData);
+    if (!validation.valid) {
+      this.logger.error("E-invoice validation failed", {
+        invoiceId,
+        errors: validation.errors,
+      });
+      await this.fallbackToEmail(
+        invoiceId,
+        invoice.teamId,
+        `Validation failed: ${validation.errors.join(", ")}`,
+      );
+      return;
+    }
+
+    // Update invoice status to pending
+    await updateInvoice(db, {
+      id: invoiceId,
+      teamId: invoice.teamId,
+      eInvoiceStatus: "pending",
+    });
+
+    try {
+      // Create DDD client and send via Peppol
+      const client = createDDDClient({ connectionKey });
+      const dddInvoice = transformToDDDInvoice(middayData);
+
+      this.logger.info("Sending invoice via Peppol", {
+        invoiceId,
+        buyerName: dddInvoice.BuyerName,
+        buyerId: dddInvoice.BuyerId,
+        amount: dddInvoice.DocTotalAmount,
+        currency: dddInvoice.DocCurrencyCode,
+      });
+
+      const result = await sendViaPeppol(client, dddInvoice);
+
+      // Update invoice with success status
+      // Include main invoice fields (status, sentTo, sentAt) like send-invoice-email.ts
+      // so the invoice appears as sent in the UI and reports
+      await updateInvoice(db, {
+        id: invoiceId,
+        teamId: invoice.teamId,
+        // Main invoice status fields
+        status: "unpaid",
+        sentTo: customer.email,
+        sentAt: new Date().toISOString(),
+        // E-invoice specific fields
+        eInvoiceId: result.invoiceId,
+        eInvoiceStatus: "sent",
+        eInvoiceSentAt: new Date().toISOString(),
+        eInvoiceError: null,
+      });
+
+      this.logger.info("E-invoice sent successfully", {
+        invoiceId,
+        dddInvoiceId: result.invoiceId,
+        peppolXmlUrl: result.peppolXmlUrl,
+      });
+
+      // Queue notification email if enabled
+      if (sendNotificationEmail && customer.email && invoice.token) {
+        // Validate required fields for notification (invoiceNumber is required by eInvoiceSentSchema)
+        if (!invoice.invoiceNumber) {
+          this.logger.warn(
+            "Skipping e-invoice notification: invoice number is missing",
+            { invoiceId },
+          );
+        } else {
+          await notificationsQueue.add(
+            "notification",
+            {
+              type: "e_invoice_sent",
+              invoiceId,
+              token: invoice.token,
+              invoiceNumber: invoice.invoiceNumber,
+              teamId: invoice.teamId,
+              customerName: customer.name,
+              customerEmail: customer.email,
+            },
+            DEFAULT_JOB_OPTIONS,
+          );
+
+          this.logger.debug("Queued e-invoice notification email", {
+            invoiceId,
+          });
+        }
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
+      // Extract failed step from DDDError if available
+      const failedStep = error instanceof DDDError ? error.step : undefined;
+
+      // Check if this is the last retry attempt
+      // Note: attemptsMade is 0 on first attempt, 1 on second, etc.
+      // So on attempt N (1-indexed), attemptsMade = N-1
+      const attemptsMade = job.attemptsMade;
+      const maxAttempts = job.opts?.attempts ?? 1;
+      const currentAttempt = attemptsMade + 1;
+      const isLastAttempt = currentAttempt >= maxAttempts;
+
+      this.logger.error("E-invoice delivery failed", {
+        invoiceId,
+        error: errorMessage,
+        failedStep,
+        currentAttempt,
+        maxAttempts,
+        isLastAttempt,
+      });
+
+      if (isLastAttempt) {
+        // Update invoice with permanent failure status
+        await updateInvoice(db, {
+          id: invoiceId,
+          teamId: invoice.teamId,
+          eInvoiceStatus: "failed",
+          eInvoiceError: `Failed after ${maxAttempts} attempts: ${errorMessage}`,
+          eInvoiceFailedStep: failedStep ?? null,
+        });
+
+        // Fall back to email delivery only after all retries exhausted
+        await this.fallbackToEmail(invoiceId, invoice.teamId, errorMessage);
+      } else {
+        // Update invoice status to show retry in progress
+        await updateInvoice(db, {
+          id: invoiceId,
+          teamId: invoice.teamId,
+          eInvoiceStatus: "retrying",
+          eInvoiceError: `Attempt ${currentAttempt}/${maxAttempts} failed: ${errorMessage}`,
+          eInvoiceFailedStep: failedStep ?? null,
+        });
+
+        // Re-throw to let BullMQ retry with exponential backoff
+        throw error;
+      }
+    }
+  }
+
+  /**
+   * Fall back to email delivery when e-invoice fails
+   */
+  private async fallbackToEmail(
+    invoiceId: string,
+    teamId: string,
+    reason: string,
+  ): Promise<void> {
+    this.logger.info("Falling back to email delivery", {
+      invoiceId,
+      reason,
+    });
+
+    const db = getDb();
+
+    // Get invoice to find file path
+    const invoice = await getInvoiceById(db, { id: invoiceId });
+    if (!invoice?.filePath || invoice.filePath.length === 0) {
+      this.logger.error("Cannot fall back to email: invoice has no file path", {
+        invoiceId,
+      });
+      return;
+    }
+
+    const filename = invoice.filePath[invoice.filePath.length - 1];
+    const fullPath = invoice.filePath.join("/");
+
+    // Queue email delivery
+    await invoicesQueue.add(
+      "send-invoice-email",
+      {
+        invoiceId,
+        filename,
+        fullPath,
+      },
+      DEFAULT_JOB_OPTIONS,
+    );
+
+    this.logger.info("Queued fallback email delivery", { invoiceId });
+  }
+}

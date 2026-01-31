@@ -108,6 +108,13 @@ export const allNotificationTypes: NotificationType[] = [
     order: 1,
   },
   {
+    type: "e_invoice_sent",
+    channels: ["email"],
+    showInSettings: false, // Not a user setting, controlled by invoice template
+    category: "invoices",
+    order: 1,
+  },
+  {
     type: "recurring_series_completed",
     channels: ["in_app"],
     showInSettings: true,

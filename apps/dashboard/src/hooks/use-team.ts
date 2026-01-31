@@ -49,6 +49,9 @@ export function useTeamMutation() {
         queryClient.invalidateQueries({
           queryKey: trpc.team.current.queryKey(),
         });
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.checkEInvoiceRequirements.queryKey(),
+        });
       },
     }),
   );

@@ -155,15 +155,6 @@ const appExtensions: Record<
       "Global workforce support",
     ],
   },
-  "e-invoice": {
-    slug: "e-invoice",
-    features: [
-      "Peppol network support",
-      "European compliance",
-      "Send & receive e-invoices",
-      "Automated processing",
-    ],
-  },
   "cursor-mcp": {
     slug: "cursor-mcp",
     features: [

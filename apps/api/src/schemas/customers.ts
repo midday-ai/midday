@@ -276,6 +276,19 @@ export const customerResponseSchema = z.object({
     description: "When the customer was last enriched",
     example: "2024-05-01T12:34:56.789Z",
   }),
+  // E-Invoice / Peppol fields
+  peppolId: z.string().nullable().openapi({
+    description: "Peppol participant ID for e-invoicing",
+    example: "0192:123456789",
+  }),
+  registrationNumber: z.string().nullable().openapi({
+    description: "Company registration number",
+    example: "12345678",
+  }),
+  legalForm: z.string().nullable().openapi({
+    description: "Legal form of the customer (LegalEntity or NaturalPerson)",
+    example: "LegalEntity",
+  }),
 });
 
 export const customersResponseSchema = z.object({
@@ -450,6 +463,24 @@ export const upsertCustomerSchema = z.object({
     description: "Primary contact person's name at the customer organization",
     example: "John Smith",
   }),
+  // E-Invoice / Peppol fields
+  peppolId: z.string().nullable().optional().openapi({
+    description:
+      "Peppol participant ID for e-invoicing (format: scheme:identifier, e.g., 0192:123456789)",
+    example: "0192:123456789",
+  }),
+  registrationNumber: z.string().nullable().optional().openapi({
+    description: "Company registration number",
+    example: "12345678",
+  }),
+  legalForm: z
+    .enum(["LegalEntity", "NaturalPerson"])
+    .nullable()
+    .optional()
+    .openapi({
+      description: "Legal form of the customer for e-invoicing",
+      example: "LegalEntity",
+    }),
   tags: z
     .array(
       z.object({

@@ -100,3 +100,15 @@ export const invoiceUpcomingNotificationSchema = z.object({});
 export type InvoiceUpcomingNotificationPayload = z.infer<
   typeof invoiceUpcomingNotificationSchema
 >;
+
+/**
+ * Send e-invoice (Peppol) job schema
+ * Handles sending invoices via the Peppol network
+ */
+export const sendEInvoiceSchema = z.object({
+  invoiceId: z.string().uuid(),
+  /** Send notification email when delivered (from template setting) */
+  sendNotificationEmail: z.boolean().default(true),
+});
+
+export type SendEInvoicePayload = z.infer<typeof sendEInvoiceSchema>;

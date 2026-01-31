@@ -5,6 +5,7 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { validatePeppolId } from "@midday/e-invoice";
 import {
   Accordion,
   AccordionContent,
@@ -24,6 +25,13 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
@@ -72,6 +80,23 @@ const formSchema = z.object({
   zip: z.string().optional(),
   vatNumber: z.string().optional(),
   note: z.string().optional(),
+  // E-Invoice / Peppol fields
+  peppolId: z
+    .string()
+    .optional()
+    .refine(
+      (value) => {
+        if (!value || value.trim() === "") return true;
+        return validatePeppolId(value).valid;
+      },
+      (value) => ({
+        message:
+          validatePeppolId(value ?? "").error ||
+          "Invalid Peppol ID format (e.g., 0192:123456789)",
+      }),
+    ),
+  registrationNumber: z.string().optional(),
+  legalForm: z.enum(["LegalEntity", "NaturalPerson"]).optional(),
   tags: z
     .array(
       z.object({
@@ -161,6 +186,10 @@ export function CustomerForm({ data }: Props) {
       contact: data?.contact ?? undefined,
       note: data?.note ?? undefined,
       vatNumber: data?.vatNumber ?? undefined,
+      // E-Invoice / Peppol fields
+      peppolId: data?.peppolId ?? undefined,
+      registrationNumber: data?.registrationNumber ?? undefined,
+      legalForm: data?.legalForm as "LegalEntity" | "NaturalPerson" | undefined,
       tags:
         data?.tags?.map((tag) => ({
           id: tag?.id ?? "",
@@ -214,6 +243,10 @@ export function CustomerForm({ data }: Props) {
       phone: data.phone || null,
       zip: data.zip || null,
       vatNumber: data.vatNumber || null,
+      // E-Invoice / Peppol fields
+      peppolId: data.peppolId || null,
+      registrationNumber: data.registrationNumber || null,
+      legalForm: data.legalForm || null,
       tags: data.tags?.length
         ? data.tags.map((tag) => ({
             id: tag.id,
@@ -581,6 +614,87 @@ export function CustomerForm({ data }: Props) {
                                 value={field.value ?? ""}
                               />
                             </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="registrationNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Registration Number
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                value={field.value ?? ""}
+                                placeholder="Company registration number"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="peppolId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Peppol ID
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                value={field.value ?? ""}
+                                placeholder="e.g., 0192:123456789"
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              For e-invoicing via Peppol. Format: scheme:id
+                              (e.g., 0192:123456789)
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="legalForm"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Legal Form
+                            </FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value ?? ""}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="LegalEntity">
+                                  Legal Entity (Company)
+                                </SelectItem>
+                                <SelectItem value="NaturalPerson">
+                                  Natural Person (Individual)
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}

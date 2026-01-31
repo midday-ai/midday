@@ -42,6 +42,9 @@ type InvoiceTemplateParams = {
   includePdf?: boolean;
   paymentEnabled?: boolean;
   paymentTermsDays?: number;
+  // E-Invoice / Peppol settings
+  eInvoiceEnabled?: boolean;
+  eInvoiceNotifyEmail?: boolean;
 };
 
 type CreateInvoiceTemplateParams = {
@@ -100,6 +103,9 @@ const templateSelectFields = {
   sendCopy: invoiceTemplates.sendCopy,
   paymentEnabled: invoiceTemplates.paymentEnabled,
   paymentTermsDays: invoiceTemplates.paymentTermsDays,
+  // E-Invoice / Peppol settings
+  eInvoiceEnabled: invoiceTemplates.eInvoiceEnabled,
+  eInvoiceNotifyEmail: invoiceTemplates.eInvoiceNotifyEmail,
 };
 
 /**

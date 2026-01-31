@@ -786,4 +786,60 @@ export const invoiceRouter = createTRPCRouter({
       return getNewCustomersCount(db, { teamId: teamId! });
     },
   ),
+
+  /**
+   * Check if all requirements are met for e-invoicing via Peppol.
+   * Returns a structured object with status for each requirement.
+   */
+  checkEInvoiceRequirements: protectedProcedure
+    .input(
+      z.object({
+        customerId: z.string().uuid().optional(),
+      }),
+    )
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      // Fetch team data
+      const team = await getTeamById(db, teamId!);
+
+      // Fetch customer data if customerId provided
+      const customer = input.customerId
+        ? await getCustomerById(db, {
+            id: input.customerId,
+            teamId: teamId!,
+          })
+        : null;
+
+      // Check company requirements
+      const company = {
+        hasAddress: !!(team?.addressLine1 && team?.city && team?.zip),
+        hasCountry: !!team?.countryCode,
+        hasTaxId: !!team?.taxId,
+      };
+
+      // Check customer requirements (only if customer is selected)
+      const customerRequirements = customer
+        ? {
+            hasPeppolId: !!customer.peppolId,
+            hasCountry: !!customer.countryCode,
+          }
+        : null;
+
+      // Can enable e-invoicing if all company requirements are met
+      const canEnable =
+        company.hasAddress && company.hasCountry && company.hasTaxId;
+
+      // Can send e-invoice if all requirements including customer are met
+      const canSend =
+        canEnable &&
+        customerRequirements !== null &&
+        customerRequirements.hasPeppolId &&
+        customerRequirements.hasCountry;
+
+      return {
+        company,
+        customer: customerRequirements,
+        canEnable,
+        canSend,
+      };
+    }),
 });

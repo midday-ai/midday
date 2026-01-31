@@ -114,6 +114,36 @@ export const updateTeamByIdSchema = z.object({
     .openapi({
       description: "Export settings for transactions",
     }),
+  // Company details
+  taxId: z.string().nullable().optional().openapi({
+    description: "VAT number (EU) or EIN (US)",
+    example: "DE123456789",
+  }),
+  registrationNumber: z.string().nullable().optional().openapi({
+    description: "Company registration number",
+    example: "HRB 12345",
+  }),
+  addressLine1: z.string().nullable().optional().openapi({
+    description: "Company street address",
+    example: "123 Main Street",
+  }),
+  addressLine2: z.string().nullable().optional().openapi({
+    description: "Additional address line",
+    example: "Suite 100",
+  }),
+  city: z.string().nullable().optional().openapi({
+    description: "City",
+    example: "Berlin",
+  }),
+  zip: z.string().nullable().optional().openapi({
+    description: "ZIP or postal code",
+    example: "10115",
+  }),
+  // E-Invoice / Peppol
+  peppolId: z.string().nullable().optional().openapi({
+    description: "Peppol participant ID for e-invoicing",
+    example: "0192:123456789",
+  }),
 });
 
 export const createTeamSchema = z.object({

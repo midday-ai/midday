@@ -1,8 +1,16 @@
-import { getInvoiceById, updateInvoice } from "@midday/db/queries";
+import {
+  getCustomerById,
+  getInvoiceById,
+  getInvoiceTemplateById,
+  updateInvoice,
+} from "@midday/db/queries";
 import { PdfTemplate, renderToBuffer } from "@midday/invoice";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
-import { DEFAULT_JOB_OPTIONS } from "../../config/job-options";
+import {
+  DEFAULT_JOB_OPTIONS,
+  EINVOICE_JOB_OPTIONS,
+} from "../../config/job-options";
 import { documentsQueue } from "../../queues/documents";
 import { invoicesQueue } from "../../queues/invoices";
 import type { GenerateInvoicePayload } from "../../schemas/invoices";
@@ -12,7 +20,7 @@ import { BaseProcessor } from "../base";
 /**
  * Generate Invoice Processor
  * Handles PDF generation and storage upload for invoices
- * Optionally triggers email sending via send-invoice-email job
+ * Routes to either email or e-invoice (Peppol) based on template settings and customer data
  */
 export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePayload> {
   async process(job: Job<GenerateInvoicePayload>): Promise<void> {
@@ -85,19 +93,39 @@ export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePaylo
       throw new Error("Failed to update invoice with file info");
     }
 
-    // Queue email sending if delivery type is create_and_send
+    // Determine delivery method if create_and_send
     if (deliveryType === "create_and_send") {
-      await invoicesQueue.add(
-        "send-invoice-email",
-        {
-          invoiceId,
-          filename,
-          fullPath,
-        },
-        DEFAULT_JOB_OPTIONS,
-      );
+      const useEInvoice = await this.shouldUseEInvoice(invoiceData);
 
-      this.logger.debug("Queued send-invoice-email job", { invoiceId });
+      if (useEInvoice.enabled) {
+        // Route to e-invoice (Peppol) delivery with extended retries
+        await invoicesQueue.add(
+          "send-e-invoice",
+          {
+            invoiceId,
+            sendNotificationEmail: useEInvoice.sendNotificationEmail,
+          },
+          EINVOICE_JOB_OPTIONS,
+        );
+
+        this.logger.debug("Queued send-e-invoice job", {
+          invoiceId,
+          sendNotificationEmail: useEInvoice.sendNotificationEmail,
+        });
+      } else {
+        // Route to traditional email delivery
+        await invoicesQueue.add(
+          "send-invoice-email",
+          {
+            invoiceId,
+            filename,
+            fullPath,
+          },
+          DEFAULT_JOB_OPTIONS,
+        );
+
+        this.logger.debug("Queued send-invoice-email job", { invoiceId });
+      }
     }
 
     // Queue document processing for classification
@@ -117,5 +145,71 @@ export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePaylo
       fullPath,
       deliveryType,
     });
+  }
+
+  /**
+   * Determine if e-invoice (Peppol) should be used for this invoice
+   *
+   * Conditions:
+   * 1. Platform has DDD_INVOICES_API_KEY configured
+   * 2. Template has eInvoiceEnabled = true
+   * 3. Customer has peppolId set
+   */
+  private async shouldUseEInvoice(invoiceData: {
+    templateId: string | null;
+    customerId: string | null;
+    teamId: string;
+  }): Promise<{ enabled: boolean; sendNotificationEmail: boolean }> {
+    const db = getDb();
+
+    // Default: don't use e-invoice
+    const result = { enabled: false, sendNotificationEmail: true };
+
+    // Check platform has e-invoice API key configured
+    if (!process.env.DDD_INVOICES_API_KEY) {
+      return result;
+    }
+
+    // Check template settings
+    if (!invoiceData.templateId) {
+      return result;
+    }
+
+    const template = await getInvoiceTemplateById(db, {
+      id: invoiceData.templateId,
+      teamId: invoiceData.teamId,
+    });
+    if (!template) {
+      return result;
+    }
+
+    const eInvoiceEnabled = template.eInvoiceEnabled;
+    if (!eInvoiceEnabled) {
+      return result;
+    }
+
+    result.sendNotificationEmail = template.eInvoiceNotifyEmail ?? true;
+
+    // Check customer has Peppol ID
+    if (!invoiceData.customerId) {
+      return result;
+    }
+
+    const customer = await getCustomerById(db, {
+      id: invoiceData.customerId,
+      teamId: invoiceData.teamId,
+    });
+    if (!customer) {
+      return result;
+    }
+
+    const peppolId = customer.peppolId;
+    if (!peppolId) {
+      return result;
+    }
+
+    // All conditions met - use e-invoice
+    result.enabled = true;
+    return result;
   }
 }
