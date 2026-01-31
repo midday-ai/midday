@@ -372,7 +372,7 @@ export function transformToDDDInvoice(data: MiddayInvoiceData): DDDInvoice {
     BuyerBudgetNum: null,
 
     // Seller (Team) information - required for Peppol
-    SellerName: team.name,
+    SellerName: team.name ?? undefined,
     SellerCountryCode: team.countryCode?.toUpperCase() || "US",
     SellerTaxNum: team.taxId || null,
     SellerRegNum: team.registrationNumber || null,
