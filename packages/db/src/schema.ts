@@ -947,6 +947,7 @@ export const invoices = pgTable(
       mode: "string",
     }),
     eInvoiceError: text("e_invoice_error"), // Error message if failed
+    eInvoiceFailedStep: smallint("e_invoice_failed_step"), // DDD step that failed (35, 55, or 80)
   },
   (table) => [
     index("invoices_created_at_idx").using(
@@ -1640,6 +1641,7 @@ export const teams = pgTable(
 
     // E-Invoice / Peppol
     peppolId: text("peppol_id"), // Peppol participant ID (e.g., 0192:123456789)
+    dddConnectionKey: text("ddd_connection_key"), // DDD Invoices connection key for this team
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),

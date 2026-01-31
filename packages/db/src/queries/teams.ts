@@ -66,6 +66,7 @@ export const getTeamById = async (db: Database, id: string) => {
       zip: teams.zip,
       // E-Invoice / Peppol
       peppolId: teams.peppolId,
+      dddConnectionKey: teams.dddConnectionKey,
     })
     .from(teams)
     .where(eq(teams.id, id));
@@ -148,6 +149,7 @@ export const updateTeamById = async (
       zip: teams.zip,
       // E-Invoice / Peppol
       peppolId: teams.peppolId,
+      dddConnectionKey: teams.dddConnectionKey,
     });
 
   return result;

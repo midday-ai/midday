@@ -71,12 +71,23 @@ export interface DDDInvoice {
   BuyerIsBudget?: boolean;
   BuyerBudgetNum?: string | null;
 
+  // Seller (Team/Company) information - required for Peppol
+  SellerName?: string;
+  SellerCountryCode?: string;
+  SellerTaxNum?: string | null; // VAT number
+  SellerRegNum?: string | null; // Registration/org number
+  SellerPostCode?: string | null;
+  SellerStreet?: string | null;
+  SellerCity?: string | null;
+  SellerId?: string | null; // Seller's Peppol ID (optional)
+
   // Document information
   DocNumber?: string | null; // Invoice number (auto-generated if null)
   DocIssueDate?: string | null; // ISO date (auto-set if null)
   DocDueDate?: string | null;
   DocTotalAmount: number;
   DocTotalVatAmount?: number;
+  DocTotalVatAmountCC?: number; // VAT amount in company currency
   DocStartDate?: string;
   DocEndDate?: string;
   DocDeliveryDate?: string | null;

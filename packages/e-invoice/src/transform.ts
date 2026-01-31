@@ -371,6 +371,16 @@ export function transformToDDDInvoice(data: MiddayInvoiceData): DDDInvoice {
     BuyerIsBudget: false,
     BuyerBudgetNum: null,
 
+    // Seller (Team) information - required for Peppol
+    SellerName: team.name,
+    SellerCountryCode: team.countryCode?.toUpperCase() || "US",
+    SellerTaxNum: team.taxId || null,
+    SellerRegNum: team.registrationNumber || null,
+    SellerPostCode: team.zip || null,
+    SellerStreet: team.addressLine1 || null,
+    SellerCity: team.city || null,
+    SellerId: team.peppolId || null,
+
     // Document information
     DocNumber: invoice.invoiceNumber || null, // DDD will auto-generate if null
     DocIssueDate: formatDate(invoice.issueDate),
@@ -437,6 +447,23 @@ export function validateForPeppol(data: MiddayInvoiceData): {
   // Customer must have country code
   if (!data.customer.countryCode) {
     errors.push("Customer country code is required");
+  }
+
+  // Seller (team) must have required fields for Peppol
+  if (!data.team.name) {
+    errors.push("Team/company name is required");
+  }
+  if (!data.team.countryCode) {
+    errors.push("Team/company country code is required");
+  }
+  if (!data.team.zip) {
+    warnings.push("Team/company postal code is recommended for Peppol");
+  }
+  if (!data.team.addressLine1) {
+    warnings.push("Team/company address is recommended for Peppol");
+  }
+  if (!data.team.city) {
+    warnings.push("Team/company city is recommended for Peppol");
   }
 
   // Invoice must have amount

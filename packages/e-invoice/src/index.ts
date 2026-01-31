@@ -10,10 +10,17 @@ export {
   createDDDClient,
   sendViaPeppol,
   PEPPOL_STEPS,
+  DDDError,
   type DDDClient,
   type DDDClientConfig,
   type DDDSaveOptions,
 } from "./client";
+
+// Registration
+export {
+  registerTeamWithDDD,
+  type TeamRegistrationData,
+} from "./registration";
 
 // Transform utilities
 export {

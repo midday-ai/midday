@@ -90,6 +90,9 @@ export function InvoiceDetails() {
     invoiceRecurringId,
     recurring,
     recurringSequence,
+    // E-Invoice / Peppol
+    eInvoiceStatus,
+    eInvoiceFailedStep,
   } = data;
 
   return (
@@ -228,6 +231,36 @@ export function InvoiceDetails() {
             <div className="flex justify-between items-center">
               <span className="text-sm text-[#606060]">Sent to</span>
               <span className="text-sm">{sentTo}</span>
+            </div>
+          )}
+
+          {sentAt && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">Delivery</span>
+              <span className="text-sm">
+                {eInvoiceStatus === "sent" || eInvoiceStatus === "delivered" ? (
+                  <span className="text-green-600 dark:text-green-500">
+                    Peppol e-invoice
+                  </span>
+                ) : eInvoiceStatus === "failed" ? (
+                  <span
+                    className="text-yellow-600 dark:text-yellow-500"
+                    title={
+                      eInvoiceFailedStep === 35
+                        ? "E-invoice validation failed"
+                        : eInvoiceFailedStep === 55
+                          ? "E-invoice document generation failed"
+                          : eInvoiceFailedStep === 80
+                            ? "Peppol network delivery failed"
+                            : "E-invoice processing failed"
+                    }
+                  >
+                    Email (e-invoice failed)
+                  </span>
+                ) : (
+                  <span>Email</span>
+                )}
+              </span>
             </div>
           )}
 

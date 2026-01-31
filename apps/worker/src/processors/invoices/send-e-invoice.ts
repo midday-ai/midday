@@ -3,10 +3,13 @@ import {
   getInvoiceById,
   getTeamById,
   updateInvoice,
+  updateTeamById,
 } from "@midday/db/queries";
 import {
+  DDDError,
   type MiddayInvoiceData,
   createDDDClient,
+  registerTeamWithDDD,
   sendViaPeppol,
   transformToDDDInvoice,
   validateForPeppol,
@@ -92,16 +95,86 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
       return;
     }
 
-    // Check if e-invoice API key is configured (platform-level)
-    const connectionKey = process.env.DDD_INVOICES_API_KEY;
+    // Get or create team's DDD connection key (just-in-time registration)
+    let connectionKey = team.dddConnectionKey;
+
     if (!connectionKey) {
-      this.logger.error("DDD_INVOICES_API_KEY environment variable not set");
-      await this.fallbackToEmail(
-        invoiceId,
-        invoice.teamId,
-        "E-invoice service not configured",
-      );
-      return;
+      // Check if team has required company details for DDD registration
+      if (
+        !team.name ||
+        !team.countryCode ||
+        !team.addressLine1 ||
+        !team.zip ||
+        !team.city
+      ) {
+        this.logger.warn(
+          "Team missing required company details for e-invoicing",
+          {
+            invoiceId,
+            teamId: team.id,
+            hasName: !!team.name,
+            hasCountryCode: !!team.countryCode,
+            hasAddress: !!team.addressLine1,
+            hasZip: !!team.zip,
+            hasCity: !!team.city,
+          },
+        );
+        await this.fallbackToEmail(
+          invoiceId,
+          invoice.teamId,
+          "Missing company details for e-invoicing",
+        );
+        return;
+      }
+
+      try {
+        // Register team with DDD (just-in-time)
+        this.logger.info("Registering team with DDD Invoices", {
+          invoiceId,
+          teamId: team.id,
+          teamName: team.name,
+        });
+
+        connectionKey = await registerTeamWithDDD({
+          name: team.name,
+          countryCode: team.countryCode,
+          taxId: team.taxId,
+          registrationNumber: team.registrationNumber,
+          addressLine1: team.addressLine1,
+          zip: team.zip,
+          city: team.city,
+          email: team.email,
+        });
+
+        // Store connection key for future use
+        await updateTeamById(db, {
+          id: team.id,
+          data: { dddConnectionKey: connectionKey },
+        });
+
+        this.logger.info("Team registered with DDD Invoices successfully", {
+          invoiceId,
+          teamId: team.id,
+        });
+      } catch (registrationError) {
+        const errorMessage =
+          registrationError instanceof Error
+            ? registrationError.message
+            : "Unknown registration error";
+
+        this.logger.error("DDD registration failed", {
+          invoiceId,
+          teamId: team.id,
+          error: errorMessage,
+        });
+
+        await this.fallbackToEmail(
+          invoiceId,
+          invoice.teamId,
+          `DDD registration failed: ${errorMessage}`,
+        );
+        return;
+      }
     }
 
     // Check if customer has Peppol ID
@@ -248,6 +321,9 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
 
+      // Extract failed step from DDDError if available
+      const failedStep = error instanceof DDDError ? error.step : undefined;
+
       // Check if this is the last retry attempt
       // Note: attemptsMade is 0 on first attempt, 1 on second, etc.
       // So on attempt N (1-indexed), attemptsMade = N-1
@@ -259,6 +335,7 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
       this.logger.error("E-invoice delivery failed", {
         invoiceId,
         error: errorMessage,
+        failedStep,
         currentAttempt,
         maxAttempts,
         isLastAttempt,
@@ -271,6 +348,7 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
           teamId: invoice.teamId,
           eInvoiceStatus: "failed",
           eInvoiceError: `Failed after ${maxAttempts} attempts: ${errorMessage}`,
+          eInvoiceFailedStep: failedStep ?? null,
         });
 
         // Fall back to email delivery only after all retries exhausted
@@ -282,6 +360,7 @@ export class SendEInvoiceProcessor extends BaseProcessor<SendEInvoicePayload> {
           teamId: invoice.teamId,
           eInvoiceStatus: "retrying",
           eInvoiceError: `Attempt ${currentAttempt}/${maxAttempts} failed: ${errorMessage}`,
+          eInvoiceFailedStep: failedStep ?? null,
         });
 
         // Re-throw to let BullMQ retry with exponential backoff

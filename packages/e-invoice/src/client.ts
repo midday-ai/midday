@@ -12,6 +12,22 @@ import type {
   ReturnDocType,
 } from "./types";
 
+/**
+ * Custom error class for DDD API errors
+ * Includes the step that failed for better error reporting
+ */
+export class DDDError extends Error {
+  public readonly step?: number;
+  public readonly code?: number;
+
+  constructor(message: string, step?: number, code?: number) {
+    super(message);
+    this.name = "DDDError";
+    this.step = step;
+    this.code = code;
+  }
+}
+
 const DDD_API_URL =
   process.env.DDD_INVOICES_API_URL || "https://api.dddinvoices.com";
 
@@ -175,8 +191,9 @@ export async function sendViaPeppol(
   });
 
   if (response.Result?.Status !== "OK") {
-    throw new Error(
+    throw new DDDError(
       `Peppol delivery failed: ${response.Result?.Reason || "Unknown error"}`,
+      response.Result?.Step,
     );
   }
 
