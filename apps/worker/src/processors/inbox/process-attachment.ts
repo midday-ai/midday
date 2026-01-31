@@ -316,7 +316,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       if (result.document_type === "other") {
         await updateInboxWithProcessedData(db, {
           id: inboxData.id,
-          displayName: result.name ?? inboxData.displayName,
+          displayName: result.name ?? inboxData.displayName ?? undefined,
           type: "other",
           status: "other",
         });

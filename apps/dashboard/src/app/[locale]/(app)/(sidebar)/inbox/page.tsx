@@ -39,7 +39,10 @@ export default async function Page(props: Props) {
 
   const hasInboxItems = (data?.pages?.[0]?.data?.length ?? 0) > 0;
   const hasConnectedAccounts = accounts && accounts.length > 0;
-  const hasFilter = Object.values(filter).some((value) => value !== null);
+  // Exclude 'tab' from filter check since it's a navigation param, not a filter
+  const hasFilter = Object.entries(filter).some(
+    ([key, value]) => key !== "tab" && value !== null,
+  );
 
   // No accounts and no items (and no filter) -> show get started
   if (!hasConnectedAccounts && !hasInboxItems && !hasFilter) {
