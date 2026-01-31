@@ -97,6 +97,11 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
           customerName: invoice.customer.name,
           customerEmail,
           token: invoice.token,
+          // Gmail structured data fields
+          amount: invoice.amount ?? undefined,
+          currency: invoice.currency ?? undefined,
+          dueDate: invoice.dueDate ?? undefined,
+          customerId: invoice.customer?.id,
         },
         {
           sendEmail: true,
