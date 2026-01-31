@@ -65,6 +65,7 @@ export function InboxView() {
       order: params.order,
       sort: params.sort,
       ...filter,
+      tab: filter.tab ?? "all", // Default to "all" tab
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,

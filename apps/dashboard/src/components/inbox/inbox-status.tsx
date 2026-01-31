@@ -20,6 +20,27 @@ export function InboxStatus({ item }: Props) {
     return null;
   }
 
+  // Show status for "other" (non-financial) documents
+  if (item.status === "other" || item.type === "other") {
+    return (
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex space-x-1.5 items-center px-1.5 py-0.5 text-[10px] cursor-default border text-muted-foreground">
+              <span>Document</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={10} className="text-xs">
+            <p>
+              This document isn't an invoice or receipt — <br />
+              no transaction matching required
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
   if (item.status === "analyzing") {
     return (
       <TooltipProvider delayDuration={0}>

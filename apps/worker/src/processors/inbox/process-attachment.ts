@@ -307,9 +307,31 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         jobId: job.id,
         inboxId: inboxData.id,
         resultType: result.type,
+        documentType: result.document_type,
         hasAmount: !!result.amount,
         duration: `${docProcessingDuration}ms`,
       });
+
+      // Check if document is classified as "other" (non-financial document)
+      if (result.document_type === "other") {
+        await updateInboxWithProcessedData(db, {
+          id: inboxData.id,
+          displayName: result.name ?? inboxData.displayName ?? undefined,
+          type: "other",
+          status: "other",
+        });
+
+        this.logger.info(
+          "Document classified as other (non-financial), skipping matching",
+          {
+            jobId: job.id,
+            inboxId: inboxData.id,
+            fileName,
+          },
+        );
+
+        return; // Skip embedding and transaction matching for non-financial documents
+      }
 
       await updateInboxWithProcessedData(db, {
         id: inboxData.id,

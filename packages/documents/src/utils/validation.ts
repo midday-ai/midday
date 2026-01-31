@@ -275,17 +275,19 @@ export function mergeExtractionResults(
   secondary: Partial<InvoiceData>,
 ): InvoiceData {
   return {
+    document_type:
+      primary.document_type || secondary.document_type || "invoice",
     invoice_number: primary.invoice_number || secondary.invoice_number || null,
     invoice_date: primary.invoice_date || secondary.invoice_date || null,
     due_date: primary.due_date || secondary.due_date || null,
-    currency: primary.currency || secondary.currency || "USD", // Default to USD if missing
+    currency: primary.currency || secondary.currency || null,
     total_amount:
       primary.total_amount !== null && primary.total_amount !== undefined
         ? primary.total_amount
         : secondary.total_amount !== null &&
             secondary.total_amount !== undefined
           ? secondary.total_amount
-          : 0,
+          : null,
     tax_amount: primary.tax_amount || secondary.tax_amount || null,
     tax_rate: primary.tax_rate || secondary.tax_rate || null,
     tax_type: primary.tax_type || secondary.tax_type || null,
@@ -447,15 +449,17 @@ export function mergeReceiptExtractionResults(
   secondary: Partial<ReceiptData>,
 ): ReceiptData {
   return {
+    document_type:
+      primary.document_type || secondary.document_type || "receipt",
     date: primary.date || secondary.date || null,
-    currency: primary.currency || secondary.currency || "USD",
+    currency: primary.currency || secondary.currency || null,
     total_amount:
       primary.total_amount !== null && primary.total_amount !== undefined
         ? primary.total_amount
         : secondary.total_amount !== null &&
             secondary.total_amount !== undefined
           ? secondary.total_amount
-          : 0,
+          : null,
     subtotal_amount:
       primary.subtotal_amount || secondary.subtotal_amount || null,
     tax_amount:
@@ -463,7 +467,7 @@ export function mergeReceiptExtractionResults(
         ? primary.tax_amount
         : secondary.tax_amount !== null && secondary.tax_amount !== undefined
           ? secondary.tax_amount
-          : 0,
+          : null,
     tax_rate: primary.tax_rate || secondary.tax_rate,
     tax_type: primary.tax_type || secondary.tax_type || null,
     store_name: primary.store_name || secondary.store_name || null,

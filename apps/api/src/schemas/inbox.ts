@@ -7,9 +7,10 @@ export const getInboxSchema = z.object({
   pageSize: z.coerce.number().min(1).max(100).optional(),
   q: z.string().nullable().optional(),
   status: z
-    .enum(["done", "pending", "suggested_match", "no_match"])
+    .enum(["done", "pending", "suggested_match", "no_match", "other"])
     .nullable()
     .optional(),
+  tab: z.enum(["all", "other"]).nullable().optional(),
 });
 
 export const inboxItemResponseSchema = z
@@ -202,6 +203,7 @@ export const updateInboxSchema = z.object({
       "deleted",
       "analyzing",
       "suggested_match",
+      "other",
     ])
     .optional(),
   displayName: z.string().optional(),
@@ -237,6 +239,7 @@ export const getInboxByStatusSchema = z.object({
       "no_match",
       "done",
       "deleted",
+      "other",
     ])
     .optional(),
 });
