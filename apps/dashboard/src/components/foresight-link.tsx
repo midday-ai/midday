@@ -48,7 +48,12 @@ export function ForesightLink({
   });
 
   return (
-    <Link {...linkProps} ref={elementRef} className={className} prefetch={false}>
+    <Link
+      {...linkProps}
+      ref={elementRef}
+      className={className}
+      prefetch={false}
+    >
       {children}
     </Link>
   );
