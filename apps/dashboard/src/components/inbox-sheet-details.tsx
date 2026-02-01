@@ -27,7 +27,7 @@ export function InboxSheetDetails() {
       id: params.inboxId!,
     }),
     enabled: isOpen,
-    staleTime: 0,
+    staleTime: 30 * 1000, // 30 seconds - prevents excessive refetches when reopening
     initialData: () => {
       const pages = queryClient
         .getQueriesData({ queryKey: trpc.inbox.get.infiniteQueryKey() })

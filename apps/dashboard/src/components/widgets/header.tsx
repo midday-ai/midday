@@ -2,6 +2,7 @@
 
 import { MetricsFilter } from "@/components/metrics/components/metrics-filter";
 import { Customize } from "@/components/widgets/customize";
+import { useForesightMetricsPrefetch } from "@/hooks/use-foresight-prefetch";
 import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
@@ -31,6 +32,7 @@ export function WidgetsHeader() {
   const [greeting, setGreeting] = useState(() =>
     getTimeBasedGreeting(user?.timezone ?? undefined),
   );
+  const { elementRef: metricsTabRef } = useForesightMetricsPrefetch();
 
   useEffect(() => {
     // Update greeting immediately when user timezone changes
@@ -83,6 +85,7 @@ export function WidgetsHeader() {
               Overview
             </TabsTrigger>
             <TabsTrigger
+              ref={metricsTabRef}
               value="metrics"
               className={cn(
                 "group relative flex items-center gap-1.5 px-3 py-1.5 text-[14px] transition-all whitespace-nowrap border border-transparent h-9 min-h-9",

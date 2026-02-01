@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
-import Link from "next/link";
+import { ForesightLink } from "./foresight-link";
 import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
 
@@ -61,17 +61,17 @@ export function UserMenu({ onlySignOut }: Props) {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <Link prefetch href="/account">
+              <ForesightLink href="/account" name="user-menu-account">
                 <DropdownMenuItem className="text-xs">Account</DropdownMenuItem>
-              </Link>
+              </ForesightLink>
 
-              <Link prefetch href="/account/support">
+              <ForesightLink href="/account/support" name="user-menu-support">
                 <DropdownMenuItem className="text-xs">Support</DropdownMenuItem>
-              </Link>
+              </ForesightLink>
 
-              <Link prefetch href="/account/teams">
+              <ForesightLink href="/account/teams" name="user-menu-teams">
                 <DropdownMenuItem className="text-xs">Teams</DropdownMenuItem>
-              </Link>
+              </ForesightLink>
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />

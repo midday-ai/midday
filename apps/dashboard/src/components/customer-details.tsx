@@ -134,7 +134,7 @@ export function CustomerDetails() {
     ...trpc.customers.getById.queryOptions({ id: customerId! }),
     enabled: isOpen,
     placeholderData: keepPreviousData,
-    staleTime: 0, // Always refetch when component mounts
+    staleTime: 30 * 1000, // 30 seconds - prevents excessive refetches when reopening
   });
 
   // Mutation for re-enriching customer
