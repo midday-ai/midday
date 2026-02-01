@@ -29,21 +29,26 @@ interface ForesightLinkProps
 export function ForesightLink({
   children,
   className,
-  ...props
+  // Destructure Foresight-specific props to prevent them from being passed to Link/DOM
+  hitSlop,
+  name,
+  meta,
+  reactivateAfter,
+  ...linkProps
 }: ForesightLinkProps) {
   const router = useRouter();
   const { elementRef } = useForesight<HTMLAnchorElement>({
     callback: () => {
-      router.prefetch(props.href.toString());
+      router.prefetch(linkProps.href.toString());
     },
-    hitSlop: props.hitSlop ?? DEFAULT_HIT_SLOP,
-    name: props.name,
-    meta: props.meta,
-    reactivateAfter: props.reactivateAfter,
+    hitSlop: hitSlop ?? DEFAULT_HIT_SLOP,
+    name,
+    meta,
+    reactivateAfter,
   });
 
   return (
-    <Link {...props} ref={elementRef} className={className} prefetch={false}>
+    <Link {...linkProps} ref={elementRef} className={className} prefetch={false}>
       {children}
     </Link>
   );

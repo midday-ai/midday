@@ -27,8 +27,6 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
       httpBatchLink({
         url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
         transformer: superjson,
-        // Limit batch size to prevent oversized requests
-        maxURLLength: 2048,
         async headers() {
           const supabase = await createClient();
           const cookieStore = await cookies();
@@ -116,8 +114,6 @@ export async function getTRPCClient() {
       httpBatchLink({
         url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
         transformer: superjson,
-        // Limit batch size to prevent oversized requests
-        maxURLLength: 2048,
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
           "x-user-timezone": await getTimezone(),

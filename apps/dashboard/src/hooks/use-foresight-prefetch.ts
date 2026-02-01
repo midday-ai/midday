@@ -88,7 +88,7 @@ export function useForesightChatPrefetch() {
     );
   }, [queryClient, trpc]);
 
-  const { elementRef } = useForesight<HTMLDivElement>({
+  const { elementRef } = useForesight<HTMLButtonElement>({
     callback: prefetchChatData,
     name: "chat-input",
     hitSlop: { top: 150, right: 150, bottom: 150, left: 150 },
