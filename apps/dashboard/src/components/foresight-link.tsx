@@ -5,6 +5,7 @@ import type { ForesightRegisterOptions } from "js.foresight";
 import type { LinkProps } from "next/link";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 
 // Default hitSlop extends the detection area around links
 // This triggers prefetch earlier when cursor is heading toward a link
@@ -37,10 +38,17 @@ export function ForesightLink({
   ...linkProps
 }: ForesightLinkProps) {
   const router = useRouter();
+
+  // Memoize href string to ensure stable dependency for useCallback
+  // (href can be a UrlObject, so we convert to string for comparison)
+  const hrefString = linkProps.href.toString();
+
+  const handlePrefetch = useCallback(() => {
+    router.prefetch(hrefString);
+  }, [router, hrefString]);
+
   const { elementRef } = useForesight<HTMLAnchorElement>({
-    callback: () => {
-      router.prefetch(linkProps.href.toString());
-    },
+    callback: handlePrefetch,
     hitSlop: hitSlop ?? DEFAULT_HIT_SLOP,
     name,
     meta,

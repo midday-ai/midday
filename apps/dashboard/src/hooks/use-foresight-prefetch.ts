@@ -11,6 +11,12 @@ import { useCallback, useRef } from "react";
  * Prefetches data when cursor trajectory indicates user is heading toward an element.
  */
 
+// Module-level constants to avoid creating new object references on each render
+// (useForesight includes hitSlop in its dependency array)
+const METRICS_HIT_SLOP = { top: 100, right: 100, bottom: 100, left: 100 };
+const CHAT_HIT_SLOP = { top: 150, right: 150, bottom: 150, left: 150 };
+const SEARCH_HIT_SLOP = { top: 100, right: 100, bottom: 100, left: 100 };
+
 /**
  * Prefetch metrics data when cursor heads toward Metrics tab
  */
@@ -62,7 +68,7 @@ export function useForesightMetricsPrefetch() {
   const { elementRef } = useForesight<HTMLButtonElement>({
     callback: prefetchMetrics,
     name: "metrics-tab",
-    hitSlop: { top: 100, right: 100, bottom: 100, left: 100 },
+    hitSlop: METRICS_HIT_SLOP,
   });
 
   return { elementRef, prefetchMetrics };
@@ -80,10 +86,11 @@ export function useForesightChatPrefetch() {
     if (hasPrefetched.current) return;
     hasPrefetched.current = true;
 
-    // Prefetch chat history
+    // Prefetch chat history - must match ChatHistoryDropdown query params exactly
     queryClient.prefetchQuery(
       trpc.chats.list.queryOptions({
-        limit: 50,
+        limit: 20,
+        search: undefined,
       }),
     );
   }, [queryClient, trpc]);
@@ -91,7 +98,7 @@ export function useForesightChatPrefetch() {
   const { elementRef } = useForesight<HTMLButtonElement>({
     callback: prefetchChatData,
     name: "chat-input",
-    hitSlop: { top: 150, right: 150, bottom: 150, left: 150 },
+    hitSlop: CHAT_HIT_SLOP,
   });
 
   return { elementRef, prefetchChatData };
@@ -120,7 +127,7 @@ export function useForesightSearchPrefetch() {
   const { elementRef } = useForesight<HTMLButtonElement>({
     callback: prefetchSearchData,
     name: "search-button",
-    hitSlop: { top: 100, right: 100, bottom: 100, left: 100 },
+    hitSlop: SEARCH_HIT_SLOP,
   });
 
   return { elementRef, prefetchSearchData };
