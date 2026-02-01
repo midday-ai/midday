@@ -55,7 +55,7 @@ export function TransactionDetails() {
   const { data, isLoading, isFetching } = useQuery({
     ...trpc.transactions.getById.queryOptions({ id: transactionId! }),
     enabled: Boolean(transactionId),
-    staleTime: 0, // Always consider data stale so it always refetches
+    staleTime: 30 * 1000, // 30 seconds - prevents excessive refetches when reopening
     initialData: () => {
       const pages = queryClient
         .getQueriesData({ queryKey: trpc.transactions.get.infiniteQueryKey() })

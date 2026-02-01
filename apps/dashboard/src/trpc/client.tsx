@@ -51,6 +51,8 @@ export function TRPCReactProvider(
         httpBatchLink({
           url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
           transformer: superjson,
+          // Limit batch size to prevent oversized requests
+          maxURLLength: 2048,
           async headers() {
             const supabase = createClient();
 

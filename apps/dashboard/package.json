@@ -61,6 +61,7 @@
     "framer-motion": "^12.23.25",
     "geist": "^1.5.1",
     "html2canvas": "^1.4.1",
+    "js.foresight": "^3.4.0",
     "jspdf": "^3.0.4",
     "little-date": "^1.2.1",
     "lottie-react": "^2.4.1",

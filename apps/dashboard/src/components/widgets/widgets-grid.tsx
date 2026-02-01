@@ -27,31 +27,9 @@ import { CSS } from "@dnd-kit/utilities";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
+import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
-import { AccountBalancesWidget } from "./account-balances";
-import { BillableHoursWidget } from "./billable-hours";
-import { CashFlowWidget } from "./cash-flow";
-import { CategoryExpensesWidget } from "./category-expenses";
-import { CustomerLifetimeValueWidget } from "./customer-lifetime-value";
-import { GrowthRateWidget } from "./growth-rate";
-import { InboxWidget } from "./inbox";
-import { InsightsWidget } from "./insights";
-import { InvoicePaymentScoreWidget } from "./invoice-payment-score";
-import { MonthlySpendingWidget } from "./monthly-spending";
-import { NetPositionWidget } from "./net-position";
-import { OutstandingInvoicesWidget } from "./outstanding-invoices";
-import { OverdueInvoicesAlertWidget } from "./overdue-invoices-alert";
-import { ProfitAnalysisWidget } from "./profit-analysis";
-import { ProfitMarginWidget } from "./profit-margin";
-import { RecurringExpensesWidget } from "./recurring-expenses";
-import { RevenueForecastWidget } from "./revenue-forecast";
-import { RevenueSummaryWidget } from "./revenue-summary";
-import { RunwayWidget } from "./runway";
-import { TaxSummaryWidget } from "./tax-summary";
-import { TimeTrackerWidget } from "./time-tracker";
-import { TopCustomerWidget } from "./top-customer";
-import { VaultWidget } from "./vault";
 import { WidgetErrorFallback } from "./widget-error-fallback";
 import {
   useAvailableWidgets,
@@ -59,6 +37,160 @@ import {
   usePrimaryWidgets,
   useWidgetActions,
 } from "./widget-provider";
+
+// Placeholder that reserves space during dynamic import to prevent layout shift
+// This is minimal - just the container shell. The widget's own WidgetSkeleton
+// handles the full loading state with title/icon once the chunk loads.
+function WidgetPlaceholder() {
+  return (
+    <div className="dark:bg-[#0c0c0c] bg-background border dark:border-[#1d1d1d] border-[#e6e6e6] h-[210px]" />
+  );
+}
+
+// Dynamic imports for widget components to reduce initial bundle size
+// Widgets are loaded on-demand when they appear in the user's dashboard
+const AccountBalancesWidget = dynamic(
+  () =>
+    import("./account-balances").then((mod) => ({
+      default: mod.AccountBalancesWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const BillableHoursWidget = dynamic(
+  () =>
+    import("./billable-hours").then((mod) => ({
+      default: mod.BillableHoursWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const CashFlowWidget = dynamic(
+  () => import("./cash-flow").then((mod) => ({ default: mod.CashFlowWidget })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const CategoryExpensesWidget = dynamic(
+  () =>
+    import("./category-expenses").then((mod) => ({
+      default: mod.CategoryExpensesWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const CustomerLifetimeValueWidget = dynamic(
+  () =>
+    import("./customer-lifetime-value").then((mod) => ({
+      default: mod.CustomerLifetimeValueWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const GrowthRateWidget = dynamic(
+  () =>
+    import("./growth-rate").then((mod) => ({ default: mod.GrowthRateWidget })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const InboxWidget = dynamic(
+  () => import("./inbox").then((mod) => ({ default: mod.InboxWidget })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const InsightsWidget = dynamic(
+  () => import("./insights").then((mod) => ({ default: mod.InsightsWidget })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const InvoicePaymentScoreWidget = dynamic(
+  () =>
+    import("./invoice-payment-score").then((mod) => ({
+      default: mod.InvoicePaymentScoreWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const MonthlySpendingWidget = dynamic(
+  () =>
+    import("./monthly-spending").then((mod) => ({
+      default: mod.MonthlySpendingWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const NetPositionWidget = dynamic(
+  () =>
+    import("./net-position").then((mod) => ({
+      default: mod.NetPositionWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const OutstandingInvoicesWidget = dynamic(
+  () =>
+    import("./outstanding-invoices").then((mod) => ({
+      default: mod.OutstandingInvoicesWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const OverdueInvoicesAlertWidget = dynamic(
+  () =>
+    import("./overdue-invoices-alert").then((mod) => ({
+      default: mod.OverdueInvoicesAlertWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const ProfitAnalysisWidget = dynamic(
+  () =>
+    import("./profit-analysis").then((mod) => ({
+      default: mod.ProfitAnalysisWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const ProfitMarginWidget = dynamic(
+  () =>
+    import("./profit-margin").then((mod) => ({
+      default: mod.ProfitMarginWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const RecurringExpensesWidget = dynamic(
+  () =>
+    import("./recurring-expenses").then((mod) => ({
+      default: mod.RecurringExpensesWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const RevenueForecastWidget = dynamic(
+  () =>
+    import("./revenue-forecast").then((mod) => ({
+      default: mod.RevenueForecastWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const RevenueSummaryWidget = dynamic(
+  () =>
+    import("./revenue-summary").then((mod) => ({
+      default: mod.RevenueSummaryWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const RunwayWidget = dynamic(
+  () => import("./runway").then((mod) => ({ default: mod.RunwayWidget })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const TaxSummaryWidget = dynamic(
+  () =>
+    import("./tax-summary").then((mod) => ({ default: mod.TaxSummaryWidget })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const TimeTrackerWidget = dynamic(
+  () =>
+    import("./time-tracker").then((mod) => ({
+      default: mod.TimeTrackerWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const TopCustomerWidget = dynamic(
+  () =>
+    import("./top-customer").then((mod) => ({
+      default: mod.TopCustomerWidget,
+    })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
+const VaultWidget = dynamic(
+  () => import("./vault").then((mod) => ({ default: mod.VaultWidget })),
+  { loading: () => <WidgetPlaceholder />, ssr: false },
+);
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 type WidgetPreferences = RouterOutputs["widgets"]["getWidgetPreferences"];

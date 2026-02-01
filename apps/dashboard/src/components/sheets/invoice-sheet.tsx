@@ -31,7 +31,7 @@ export function InvoiceSheet() {
       },
       {
         enabled: !!invoiceId,
-        staleTime: 0,
+        staleTime: 30 * 1000, // 30 seconds - prevents excessive refetches when reopening
       },
     ),
   );

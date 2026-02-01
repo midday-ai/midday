@@ -14,32 +14,56 @@ const connectionConfig = {
   connectionTimeoutMillis: 15000,
   maxUses: isDevelopment ? 100 : 0,
   allowExitOnIdle: true,
+  // Statement timeout to prevent long-running queries from blocking connections
+  statement_timeout: 30000, // 30 seconds
 };
 
-const primaryPool = new Pool({
-  connectionString: process.env.DATABASE_PRIMARY_URL!,
-  ...connectionConfig,
-});
+// Helper to set up pool error handling
+const setupPoolErrorHandling = (pool: Pool, name: string) => {
+  pool.on("error", (err) => {
+    console.error(`[DB Pool ${name}] Unexpected error:`, err.message);
+  });
 
-const fraPool = new Pool({
-  connectionString: process.env.DATABASE_FRA_URL!,
-  ...connectionConfig,
-});
+  pool.on("connect", (client) => {
+    // Set statement timeout on each new connection
+    client.query("SET statement_timeout = '30s'").catch(() => {
+      // Ignore errors - some poolers don't support this
+    });
+  });
 
-const sjcPool = new Pool({
-  connectionString: process.env.DATABASE_SJC_URL!,
-  ...connectionConfig,
-});
+  return pool;
+};
 
-const iadPool = new Pool({
-  connectionString: process.env.DATABASE_IAD_URL!,
-  ...connectionConfig,
-});
+const primaryPool = setupPoolErrorHandling(
+  new Pool({
+    connectionString: process.env.DATABASE_PRIMARY_URL!,
+    ...connectionConfig,
+  }),
+  "primary",
+);
 
-const hasReplicas = Boolean(
-  process.env.DATABASE_FRA_URL &&
-    process.env.DATABASE_SJC_URL &&
-    process.env.DATABASE_IAD_URL,
+const fraPool = setupPoolErrorHandling(
+  new Pool({
+    connectionString: process.env.DATABASE_FRA_URL!,
+    ...connectionConfig,
+  }),
+  "fra",
+);
+
+const sjcPool = setupPoolErrorHandling(
+  new Pool({
+    connectionString: process.env.DATABASE_SJC_URL!,
+    ...connectionConfig,
+  }),
+  "sjc",
+);
+
+const iadPool = setupPoolErrorHandling(
+  new Pool({
+    connectionString: process.env.DATABASE_IAD_URL!,
+    ...connectionConfig,
+  }),
+  "iad",
 );
 
 export const primaryDb = drizzle(primaryPool, {
@@ -103,3 +127,74 @@ export type DatabaseWithPrimary = Database & {
   $primary?: Database;
   usePrimaryOnly?: () => Database;
 };
+
+// Health check and pool stats for monitoring
+export const dbHealthCheck = async () => {
+  const checkPool = async (pool: Pool, name: string) => {
+    const start = Date.now();
+    try {
+      const client = await pool.connect();
+      await client.query("SELECT 1");
+      client.release();
+      return {
+        name,
+        healthy: true,
+        latencyMs: Date.now() - start,
+        totalConnections: pool.totalCount,
+        idleConnections: pool.idleCount,
+        waitingRequests: pool.waitingCount,
+      };
+    } catch (error) {
+      return {
+        name,
+        healthy: false,
+        latencyMs: Date.now() - start,
+        error: error instanceof Error ? error.message : "Unknown error",
+        totalConnections: pool.totalCount,
+        idleConnections: pool.idleCount,
+        waitingRequests: pool.waitingCount,
+      };
+    }
+  };
+
+  const [primary, fra, sjc, iad] = await Promise.all([
+    checkPool(primaryPool, "primary"),
+    checkPool(fraPool, "fra"),
+    checkPool(sjcPool, "sjc"),
+    checkPool(iadPool, "iad"),
+  ]);
+
+  return {
+    primary,
+    replicas: { fra, sjc, iad },
+    currentRegion: process.env.FLY_REGION || "unknown",
+    activeReplicaIndex: replicaIndex,
+  };
+};
+
+// Get pool stats without health check (faster, no query)
+export const getPoolStats = () => ({
+  primary: {
+    total: primaryPool.totalCount,
+    idle: primaryPool.idleCount,
+    waiting: primaryPool.waitingCount,
+  },
+  replicas: {
+    fra: {
+      total: fraPool.totalCount,
+      idle: fraPool.idleCount,
+      waiting: fraPool.waitingCount,
+    },
+    sjc: {
+      total: sjcPool.totalCount,
+      idle: sjcPool.idleCount,
+      waiting: sjcPool.waitingCount,
+    },
+    iad: {
+      total: iadPool.totalCount,
+      idle: iadPool.idleCount,
+      waiting: iadPool.waitingCount,
+    },
+  },
+  currentRegion: process.env.FLY_REGION || "unknown",
+});
