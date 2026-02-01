@@ -1,5 +1,6 @@
 "use client";
 
+import { useForesightChatPrefetch } from "@/hooks/use-foresight-prefetch";
 import { useTRPC } from "@/trpc/client";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { cn } from "@midday/ui/cn";
@@ -76,9 +77,11 @@ export function ChatHistory() {
 
 export function ChatHistoryButton() {
   const { isOpen, setIsOpen } = useChatHistoryContext();
+  const { elementRef: historyButtonRef } = useForesightChatPrefetch();
 
   return (
     <button
+      ref={historyButtonRef}
       type="button"
       data-chat-history-button
       onClick={() => setIsOpen(!isOpen)}

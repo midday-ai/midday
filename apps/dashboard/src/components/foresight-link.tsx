@@ -6,6 +6,10 @@ import type { LinkProps } from "next/link";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+// Default hitSlop extends the detection area around links
+// This triggers prefetch earlier when cursor is heading toward a link
+const DEFAULT_HIT_SLOP = { top: 50, right: 50, bottom: 50, left: 50 };
+
 interface ForesightLinkProps
   extends Omit<LinkProps, "prefetch">,
     Omit<ForesightRegisterOptions, "element" | "callback"> {
@@ -32,7 +36,7 @@ export function ForesightLink({
     callback: () => {
       router.prefetch(props.href.toString());
     },
-    hitSlop: props.hitSlop,
+    hitSlop: props.hitSlop ?? DEFAULT_HIT_SLOP,
     name: props.name,
     meta: props.meta,
     reactivateAfter: props.reactivateAfter,

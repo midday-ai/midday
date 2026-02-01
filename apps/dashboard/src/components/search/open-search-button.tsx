@@ -1,14 +1,17 @@
 "use client";
 
+import { useForesightSearchPrefetch } from "@/hooks/use-foresight-prefetch";
 import { useSearchStore } from "@/store/search";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 
 export function OpenSearchButton() {
   const { setOpen } = useSearchStore();
+  const { elementRef: searchButtonRef } = useForesightSearchPrefetch();
 
   return (
     <Button
+      ref={searchButtonRef}
       variant="outline"
       className="relative min-w-[250px] w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64 border-0 p-0 hover:bg-transparent font-normal no-drag hidden md:flex"
       onClick={() => setOpen()}
