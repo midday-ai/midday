@@ -9,6 +9,7 @@ interface CustomerData {
   email?: string | null;
   phone?: string | null;
   website?: string | null;
+  vatNumber?: string | null;
 }
 
 export const transformCustomerToContent = (customer?: CustomerData | null) => {
@@ -72,6 +73,13 @@ export const transformCustomerToContent = (customer?: CustomerData | null) => {
     content.push({
       type: "paragraph",
       content: [{ text: customer.phone, type: "text" }],
+    });
+  }
+
+  if (customer.vatNumber) {
+    content.push({
+      type: "paragraph",
+      content: [{ text: customer.vatNumber, type: "text" }],
     });
   }
 
