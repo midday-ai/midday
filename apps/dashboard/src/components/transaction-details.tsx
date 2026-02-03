@@ -52,11 +52,14 @@ export function TransactionDetails() {
     },
   });
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.transactions.getById.queryOptions({ id: transactionId! }),
     enabled: Boolean(transactionId),
     staleTime: 30 * 1000, // 30 seconds - prevents excessive refetches when reopening
-    initialData: () => {
+    // Use placeholderData instead of initialData to show cached list data while fetching
+    // This ensures React Query always fetches fresh data (including suggestion details)
+    // while still providing immediate UI feedback from the list cache
+    placeholderData: () => {
       const pages = queryClient
         .getQueriesData({ queryKey: trpc.transactions.get.infiniteQueryKey() })
         // @ts-expect-error

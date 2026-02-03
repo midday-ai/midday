@@ -39,7 +39,7 @@ export function ProductEditSheet() {
       { id: productId! },
       {
         enabled: isOpen,
-        initialData: () => {
+        placeholderData: () => {
           const pages = queryClient
             .getQueriesData({ queryKey: trpc.invoiceProducts.get.queryKey() })
             // @ts-expect-error
