@@ -37,7 +37,7 @@ export function CustomerEditSheet() {
       {
         enabled: isOpen,
         staleTime: 30 * 1000, // 30 seconds - prevents excessive refetches when reopening
-        initialData: () => {
+        placeholderData: () => {
           const pages = queryClient
             .getQueriesData({ queryKey: trpc.customers.get.infiniteQueryKey() })
             // @ts-expect-error

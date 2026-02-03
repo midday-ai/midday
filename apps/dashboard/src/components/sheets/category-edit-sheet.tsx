@@ -36,7 +36,7 @@ export function CategoryEditSheet() {
       { id: categoryId! },
       {
         enabled: isOpen,
-        initialData: () => {
+        placeholderData: () => {
           const pages = queryClient
             .getQueriesData({
               queryKey: trpc.transactionCategories.get.queryKey(),

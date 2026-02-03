@@ -45,7 +45,7 @@ export function TrackerUpdateSheet() {
       {
         enabled: isOpen,
         staleTime: 30 * 1000, // 30 seconds - prevents excessive refetches when reopening
-        initialData: () => {
+        placeholderData: () => {
           const pages = queryClient
             .getQueriesData({
               queryKey: trpc.trackerProjects.get.infiniteQueryKey(),

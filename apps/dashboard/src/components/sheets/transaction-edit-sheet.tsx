@@ -17,7 +17,7 @@ export function TransactionEditSheet() {
   const { data: transaction } = useQuery({
     ...trpc.transactions.getById.queryOptions({ id: editTransaction! }),
     enabled: isOpen && Boolean(editTransaction),
-    initialData: () => {
+    placeholderData: () => {
       const pages = queryClient
         .getQueriesData({ queryKey: trpc.transactions.get.infiniteQueryKey() })
         // @ts-expect-error
