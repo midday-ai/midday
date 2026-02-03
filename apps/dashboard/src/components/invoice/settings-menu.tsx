@@ -371,12 +371,18 @@ export function SettingsMenu() {
   };
 
   const handlePaymentTermsChange = (days: number) => {
-    setValue("template.paymentTermsDays", days, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+    const currentPaymentTermsDays = watch("template.paymentTermsDays");
+    const valueChanged = currentPaymentTermsDays !== days;
 
-    // Update due date based on issue date + new payment terms
+    if (valueChanged) {
+      setValue("template.paymentTermsDays", days, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+
+    // Always update due date based on issue date + payment terms
+    // This ensures clicking the same option still recalculates the due date
     const issueDate = watch("issueDate");
     if (issueDate) {
       const issueDateParsed = parseISO(issueDate);
@@ -387,10 +393,13 @@ export function SettingsMenu() {
       });
     }
 
-    updateTemplateMutation.mutate({
-      id: templateId,
-      paymentTermsDays: days,
-    });
+    // Only call the API if the value actually changed
+    if (valueChanged) {
+      updateTemplateMutation.mutate({
+        id: templateId,
+        paymentTermsDays: days,
+      });
+    }
   };
 
   const handleCustomPaymentTermsSubmit = () => {
@@ -526,12 +535,12 @@ export function SettingsMenu() {
                   key={option.value}
                   className="text-xs"
                   checked={paymentTermsDays === option.value}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      handlePaymentTermsChange(option.value);
-                    }
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    // Always recalculate dueDate when clicking any option
+                    // This ensures clicking the already-selected option still updates the dueDate
+                    handlePaymentTermsChange(option.value);
                   }}
-                  onSelect={(event) => event.preventDefault()}
                 >
                   {option.label}
                 </DropdownMenuCheckboxItem>

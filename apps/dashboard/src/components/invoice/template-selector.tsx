@@ -1,6 +1,7 @@
 "use client";
 
 import { useTRPC } from "@/trpc/client";
+import { localDateToUTCMidnight } from "@midday/invoice/recurring";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { addDays, parseISO } from "date-fns";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { CreateTemplateDialog } from "./create-template-dialog";
@@ -46,6 +48,18 @@ export function TemplateSelector() {
     setValue("noteDetails", template.noteDetails ?? null, {
       shouldDirty: true,
     });
+
+    // Recalculate dueDate based on the new template's paymentTermsDays
+    const paymentTermsDays = template.paymentTermsDays ?? 30;
+    const issueDate = watch("issueDate");
+    if (issueDate) {
+      const issueDateParsed = parseISO(issueDate);
+      const newDueDate = addDays(issueDateParsed, paymentTermsDays);
+      setValue("dueDate", localDateToUTCMidnight(newDueDate), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
   };
 
   const handleTemplateCreated = async (newTemplate: {
