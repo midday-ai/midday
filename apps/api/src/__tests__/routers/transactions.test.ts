@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import { OpenAPIHono } from "@hono/zod-openapi";
-import { createMiddleware } from "hono/factory";
-import type { Context } from "../../rest/types";
+import { transactionsRouter } from "../../rest/routers/transactions";
 import {
   createMalformedTransactionResponse,
   createMinimalTransactionResponse,
@@ -12,10 +10,8 @@ import {
   createTransactionsListResponse,
   createValidTransactionResponse,
 } from "../factories/transaction";
+import { createTestApp } from "../helpers";
 import { mocks } from "../setup";
-
-// Import router - mocks are already set up via preload
-import { transactionsRouter } from "../../rest/routers/transactions";
 
 // Type for response JSON
 interface TransactionListResponse {
@@ -41,34 +37,7 @@ interface TransactionResponse {
 }
 
 function createApp() {
-  const app = new OpenAPIHono<Context>();
-
-  app.use(
-    "*",
-    createMiddleware<Context>(async (c, next) => {
-      c.set("teamId", "test-team-id");
-      c.set("db", {} as Context["Variables"]["db"]);
-      c.set("session", {
-        user: {
-          id: "test-user-id",
-          email: "test@example.com",
-        },
-      });
-      // Set all scopes for testing (grants full access)
-      c.set("scopes", [
-        "transactions.read",
-        "transactions.write",
-        "invoices.read",
-        "invoices.write",
-        "customers.read",
-        "customers.write",
-        "bank_accounts.read",
-        "bank_accounts.write",
-      ] as Context["Variables"]["scopes"]);
-      await next();
-    }),
-  );
-
+  const app = createTestApp();
   app.route("/transactions", transactionsRouter);
   return app;
 }

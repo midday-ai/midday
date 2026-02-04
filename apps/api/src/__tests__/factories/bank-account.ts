@@ -64,9 +64,3 @@ export function createBankAccountInput(
     ...overrides,
   };
 }
-
-export function createBankAccountsListResponse(
-  accounts: BankAccountResponse[] = [],
-): BankAccountResponse[] {
-  return accounts;
-}

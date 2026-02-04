@@ -31,7 +31,6 @@ export {
   createValidBankAccountResponse,
   createMinimalBankAccountResponse,
   createBankAccountInput,
-  createBankAccountsListResponse,
 } from "./bank-account";
 
 export {

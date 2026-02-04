@@ -160,7 +160,11 @@ export type FormatAmount = {
   accountType: AccountType;
 };
 
-export type TransformAccountBalance = GetAccountBalanceResponse;
+// Input type for transformAccountBalance - the raw balance from Teller API
+export type TransformAccountBalance = {
+  currency: string;
+  amount: number;
+};
 
 export type GetInstitutionsResponse = Institution[];
 

@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import {
-  createBankAccountsListResponse,
   createMinimalBankAccountResponse,
   createValidBankAccountResponse,
 } from "../factories/bank-account";
@@ -17,15 +16,13 @@ const createCaller = createCallerFactory(bankAccountsRouter);
 describe("tRPC: bankAccounts.get", () => {
   beforeEach(() => {
     mocks.getBankAccounts.mockReset();
-    mocks.getBankAccounts.mockImplementation(() =>
-      createBankAccountsListResponse(),
-    );
+    mocks.getBankAccounts.mockImplementation(() => []);
   });
 
   test("returns bank accounts list", async () => {
-    mocks.getBankAccounts.mockImplementation(() =>
-      createBankAccountsListResponse([createValidBankAccountResponse()]),
-    );
+    mocks.getBankAccounts.mockImplementation(() => [
+      createValidBankAccountResponse(),
+    ]);
 
     const caller = createCaller(createTestContext());
     const result = await caller.get({});
@@ -34,9 +31,9 @@ describe("tRPC: bankAccounts.get", () => {
   });
 
   test("handles minimal bank account data", async () => {
-    mocks.getBankAccounts.mockImplementation(() =>
-      createBankAccountsListResponse([createMinimalBankAccountResponse()]),
-    );
+    mocks.getBankAccounts.mockImplementation(() => [
+      createMinimalBankAccountResponse(),
+    ]);
 
     const caller = createCaller(createTestContext());
     const result = await caller.get({});
@@ -45,9 +42,7 @@ describe("tRPC: bankAccounts.get", () => {
   });
 
   test("handles empty list", async () => {
-    mocks.getBankAccounts.mockImplementation(() =>
-      createBankAccountsListResponse([]),
-    );
+    mocks.getBankAccounts.mockImplementation(() => []);
 
     const caller = createCaller(createTestContext());
     const result = await caller.get({});
@@ -56,9 +51,7 @@ describe("tRPC: bankAccounts.get", () => {
   });
 
   test("filters by enabled status", async () => {
-    mocks.getBankAccounts.mockImplementation(() =>
-      createBankAccountsListResponse([]),
-    );
+    mocks.getBankAccounts.mockImplementation(() => []);
 
     const caller = createCaller(createTestContext());
     await caller.get({ enabled: true });

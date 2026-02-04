@@ -1,11 +1,7 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import { OpenAPIHono } from "@hono/zod-openapi";
-import { createMiddleware } from "hono/factory";
-import type { Context } from "../../rest/types";
-import { mocks } from "../setup";
-
-// Import router - mocks are already set up via preload
 import { invoicesRouter } from "../../rest/routers/invoices";
+import { createTestApp } from "../helpers";
+import { mocks } from "../setup";
 
 // Type for response JSON
 interface InvoiceListResponse {
@@ -26,27 +22,7 @@ interface InvoiceResponse {
 }
 
 function createApp() {
-  const app = new OpenAPIHono<Context>();
-
-  app.use(
-    "*",
-    createMiddleware<Context>(async (c, next) => {
-      c.set("teamId", "test-team-id");
-      c.set("db", {} as Context["Variables"]["db"]);
-      c.set("session", {
-        user: {
-          id: "test-user-id",
-          email: "test@example.com",
-        },
-      });
-      c.set("scopes", [
-        "invoices.read",
-        "invoices.write",
-      ] as Context["Variables"]["scopes"]);
-      await next();
-    }),
-  );
-
+  const app = createTestApp();
   app.route("/invoices", invoicesRouter);
   return app;
 }
