@@ -200,7 +200,6 @@ export const transformAccount = ({
   subtype,
   institution,
   balance,
-  balances,
   last_four,
   accountDetails,
 }: TransformAccountParams): BaseAccount => {
@@ -225,27 +224,25 @@ export const transformAccount = ({
     wire_routing_number: accountDetails?.routing_numbers?.wire || null,
     account_number: accountDetails?.account_number || null,
     sort_code: accountDetails?.routing_numbers?.bacs || null,
-    // Credit account balances - Teller provides available via /balances endpoint
-    available_balance: balances?.available ? +balances.available : null,
+    available_balance: null, // Not available without expensive /balances endpoint
     credit_limit: null, // Teller doesn't provide credit limit
   };
 };
 
 type TransformAccountBalanceParams = {
   balance: TransformAccountBalance;
-  balances?: { available: string | null; ledger: string | null } | null;
   accountType?: string;
 };
 
 /**
  * Transform Teller balance to internal format.
+ * Balance is derived from running_balance in transactions (free API call).
  *
  * Teller typically returns positive values for credit card debt.
  * Normalization is added for safety and consistency with other providers.
  */
 export const transformAccountBalance = ({
   balance,
-  balances,
   accountType,
 }: TransformAccountBalanceParams): GetAccountBalanceResponse => {
   const rawAmount = +balance.amount;
@@ -257,7 +254,7 @@ export const transformAccountBalance = ({
   return {
     currency: balance.currency.toUpperCase(),
     amount,
-    available_balance: balances?.available ? +balances.available : null,
+    available_balance: null, // Not available without paid /balances endpoint
     credit_limit: null, // Teller doesn't provide credit limit
   };
 };

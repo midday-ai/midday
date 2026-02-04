@@ -124,7 +124,6 @@ export type Account = DepositoryAccount | CreditAccount;
 
 export type TransformAccount = Account & {
   balance: GetAccountBalanceResponse;
-  balances?: GetAccountBalancesResponse | null; // Full balance with available/ledger
 };
 
 export type GetAccountsResponse = TransformAccount[];
@@ -136,17 +135,8 @@ export interface GetAccountBalanceRequest extends AuthenticatedRequest {
 export type GetAccountBalanceResponse = {
   currency: string;
   amount: number;
-};
-
-// Full balance response from /accounts/:id/balances endpoint
-export type GetAccountBalancesResponse = {
-  account_id: string;
-  ledger: string | null; // Total amount of funds in the account
-  available: string | null; // Ledger balance net any pending inflows or outflows
-  links: {
-    self: string;
-    account: string;
-  };
+  available_balance: number | null;
+  credit_limit: number | null;
 };
 
 export type TransformTransaction = {
@@ -159,7 +149,11 @@ export type FormatAmount = {
   accountType: AccountType;
 };
 
-export type TransformAccountBalance = GetAccountBalanceResponse;
+// Input type for transformAccountBalance - the raw balance from Teller API
+export type TransformAccountBalance = {
+  currency: string;
+  amount: number;
+};
 
 export type GetInstitutionsResponse = Institution[];
 

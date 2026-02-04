@@ -9,7 +9,6 @@ import type {
   DisconnectAccountRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
-  GetAccountBalancesResponse,
   GetAccountDetailsRequest,
   GetAccountDetailsResponse,
   GetAccountsResponse,
@@ -52,34 +51,9 @@ export class TellerApi {
           accessToken,
         });
 
-        // Fetch full balances for available_balance
-        const balances = await this.getAccountBalances({
-          accountId: account.id,
-          accessToken,
-        });
-
-        return { ...account, balance, balances };
+        return { ...account, balance };
       }),
     );
-  }
-
-  /**
-   * Get full account balances including ledger and available.
-   * Returns null if balances are not available.
-   */
-  async getAccountBalances({
-    accountId,
-    accessToken,
-  }: GetAccountBalanceRequest): Promise<GetAccountBalancesResponse | null> {
-    try {
-      return await this.#get<GetAccountBalancesResponse>(
-        `/accounts/${accountId}/balances`,
-        accessToken,
-      );
-    } catch {
-      // Balances endpoint may not be available for all institutions
-      return null;
-    }
   }
 
   async getTransactions({
@@ -100,6 +74,16 @@ export class TellerApi {
     return result.filter((transaction) => transaction.status !== "pending");
   }
 
+  /**
+   * Get account balance from transaction running_balance (FREE).
+   *
+   * Uses running_balance from posted transactions which is included for free
+   * with transaction data. Works for both depository and credit account types.
+   *
+   * Note: If no transactions have running_balance, returns 0. This is rare and
+   * only happens with new accounts or some uncommon institutions. If customers
+   * report issues, we can add a fallback to the paid /balances endpoint.
+   */
   async getAccountBalance({
     accountId,
     accessToken,
@@ -107,7 +91,7 @@ export class TellerApi {
     const transactions = await this.getTransactions({
       accountId,
       accessToken,
-      count: 20,
+      count: 50,
     });
 
     const amount = transactions.find(
@@ -117,6 +101,8 @@ export class TellerApi {
     return {
       currency: "USD",
       amount: +(amount ?? 0),
+      available_balance: null, // Not available without paid /balances endpoint
+      credit_limit: null, // Teller doesn't provide credit limit
     };
   }
 
