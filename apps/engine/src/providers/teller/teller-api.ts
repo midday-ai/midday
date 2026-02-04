@@ -101,6 +101,8 @@ export class TellerApi {
     return {
       currency: "USD",
       amount: +(amount ?? 0),
+      available_balance: null, // Not available without paid /balances endpoint
+      credit_limit: null, // Teller doesn't provide credit limit
     };
   }
 

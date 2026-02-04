@@ -254,6 +254,8 @@ export const transformAccountBalance = ({
   return {
     currency: balance.currency.toUpperCase(),
     amount,
+    available_balance: null, // Not available without paid /balances endpoint
+    credit_limit: null, // Teller doesn't provide credit limit
   };
 };
 

@@ -135,6 +135,8 @@ export interface GetAccountBalanceRequest extends AuthenticatedRequest {
 export type GetAccountBalanceResponse = {
   currency: string;
   amount: number;
+  available_balance: number | null;
+  credit_limit: number | null;
 };
 
 // Full balance response from /accounts/:id/balances endpoint
