@@ -139,17 +139,6 @@ export type GetAccountBalanceResponse = {
   credit_limit: number | null;
 };
 
-// Full balance response from /accounts/:id/balances endpoint
-export type GetAccountBalancesResponse = {
-  account_id: string;
-  ledger: string | null; // Total amount of funds in the account
-  available: string | null; // Ledger balance net any pending inflows or outflows
-  links: {
-    self: string;
-    account: string;
-  };
-};
-
 export type TransformTransaction = {
   transaction: Transaction;
   accountType: AccountType;
