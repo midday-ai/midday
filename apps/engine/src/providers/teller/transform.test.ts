@@ -304,8 +304,6 @@ test("Transform account balance - credit with positive (stays positive)", () => 
   ).toEqual({
     currency: "USD",
     amount: 150000,
-    available_balance: null,
-    credit_limit: null,
   });
 });
 
@@ -322,7 +320,5 @@ test("Transform account balance - credit with negative (normalized to positive)"
   ).toEqual({
     currency: "USD",
     amount: 150000,
-    available_balance: null,
-    credit_limit: null,
   });
 });

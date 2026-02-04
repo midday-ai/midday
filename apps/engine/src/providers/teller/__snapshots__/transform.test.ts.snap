@@ -158,8 +158,6 @@ exports[`Transform accounts 1`] = `
   "available_balance": null,
   "balance": {
     "amount": 2011100,
-    "available_balance": null,
-    "credit_limit": null,
     "currency": "USD",
   },
   "bic": null,
@@ -188,8 +186,6 @@ exports[`Transform accounts 1`] = `
 exports[`Transform account balance - depository 1`] = `
 {
   "amount": 2011100,
-  "available_balance": null,
-  "credit_limit": null,
   "currency": "USD",
 }
 `;

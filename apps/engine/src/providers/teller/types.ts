@@ -124,7 +124,6 @@ export type Account = DepositoryAccount | CreditAccount;
 
 export type TransformAccount = Account & {
   balance: GetAccountBalanceResponse;
-  balances?: GetAccountBalancesResponse | null; // Full balance with available/ledger
 };
 
 export type GetAccountsResponse = TransformAccount[];
