@@ -128,7 +128,7 @@ export function EmailPasswordSignIn({ className }: Props) {
 
   if (mode === "signup") {
     return (
-      <Form {...signUpForm}>
+      <Form key="signup" {...signUpForm}>
         <form
           onSubmit={signUpForm.handleSubmit(onSignUp)}
           className="w-full"
@@ -217,7 +217,7 @@ export function EmailPasswordSignIn({ className }: Props) {
   }
 
   return (
-    <Form {...signInForm}>
+    <Form key="signin" {...signInForm}>
       <form onSubmit={signInForm.handleSubmit(onSignIn)} className="w-full">
         <div className={cn("flex flex-col space-y-4", className)}>
           <FormField
