@@ -487,6 +487,20 @@ export async function deleteTeamMember(
   return deleted;
 }
 
+export async function getTeamMemberRole(
+  db: Database,
+  teamId: string,
+  userId: string,
+): Promise<"owner" | "member" | null> {
+  const result = await db
+    .select({ role: usersOnTeam.role })
+    .from(usersOnTeam)
+    .where(and(eq(usersOnTeam.teamId, teamId), eq(usersOnTeam.userId, userId)))
+    .limit(1);
+
+  return result[0]?.role ?? null;
+}
+
 type UpdateTeamMemberParams = {
   userId: string;
   teamId: string;

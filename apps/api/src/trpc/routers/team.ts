@@ -27,6 +27,7 @@ import {
   getInvitesByEmail,
   getTeamById,
   getTeamInvites,
+  getTeamMemberRole,
   getTeamMembersByTeamId,
   getTeamsByUserId,
   hasTeamAccess,
@@ -206,7 +207,23 @@ export const teamRouter = createTRPCRouter({
 
   deleteMember: protectedProcedure
     .input(deleteTeamMemberSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
+    .mutation(async ({ ctx: { db, session, teamId }, input }) => {
+      if (input.teamId !== teamId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have access to this team",
+        });
+      }
+
+      const callerRole = await getTeamMemberRole(db, teamId!, session.user.id);
+
+      if (callerRole !== "owner") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only team owners can remove members",
+        });
+      }
+
       return deleteTeamMember(db, {
         teamId: input.teamId,
         userId: input.userId,
@@ -215,7 +232,23 @@ export const teamRouter = createTRPCRouter({
 
   updateMember: protectedProcedure
     .input(updateTeamMemberSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
+    .mutation(async ({ ctx: { db, session, teamId }, input }) => {
+      if (input.teamId !== teamId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have access to this team",
+        });
+      }
+
+      const callerRole = await getTeamMemberRole(db, teamId!, session.user.id);
+
+      if (callerRole !== "owner") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only team owners can update member roles",
+        });
+      }
+
       return updateTeamMember(db, input);
     }),
 
