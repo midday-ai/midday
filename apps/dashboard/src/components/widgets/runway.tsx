@@ -56,7 +56,7 @@ export function RunwayWidget() {
     <BaseWidget
       title="Cash Runway"
       icon={<Icons.Time className="size-4" />}
-      description="Your cash runway in months"
+      description="Based on last 6 months"
       onClick={() => {
         handleToolCall({
           toolName: "getRunway",
