@@ -4486,16 +4486,25 @@ export async function getChartDataByLinkId(db: Database, linkId: string) {
         }),
       };
     case "runway": {
-      const runwayData = await getRunway(db, {
-        teamId,
-        currency,
-      });
-      const burnRateData = await getBurnRate(db, {
-        teamId,
-        from,
-        to,
-        currency,
-      });
+      // Use the same fixed 6-month trailing window that getRunway uses
+      // internally so the burn-rate average and runway number are consistent.
+      const burnRateToDate = endOfMonth(new UTCDate());
+      const burnRateFromDate = startOfMonth(subMonths(burnRateToDate, 5));
+      const burnRateFrom = format(burnRateFromDate, "yyyy-MM-dd");
+      const burnRateTo = format(burnRateToDate, "yyyy-MM-dd");
+
+      const [runwayData, burnRateData] = await Promise.all([
+        getRunway(db, {
+          teamId,
+          currency,
+        }),
+        getBurnRate(db, {
+          teamId,
+          from: burnRateFrom,
+          to: burnRateTo,
+          currency,
+        }),
+      ]);
       return {
         type: "runway" as const,
         data: {
