@@ -26,7 +26,7 @@ const GAP = 32; // gap-8 = 2rem = 32px
  * grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 3xl:grid-cols-6
  */
 function getColumnCount(width: number): number {
-  if (width >= 1792) return 6; // 3xl
+  if (width >= 1800) return 6; // 3xl
   if (width >= 1024) return 4; // lg
   if (width >= 768) return 3; // md
   if (width >= 640) return 2; // sm
