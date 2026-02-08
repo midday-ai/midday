@@ -10,7 +10,7 @@ import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
 import { cn } from "@midday/ui/cn";
 import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ShareMetricButton } from "../components/share-metric-button";
 
@@ -23,7 +23,7 @@ interface RunwayCardProps {
   wiggleClass?: string;
 }
 
-export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
+export function RunwayCard({ currency, locale }: RunwayCardProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
@@ -39,10 +39,18 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
   const displayRunwayRef = useRef<number>(0);
   const hasInitializedRef = useRef<boolean>(false);
 
+  // Fixed 6-month trailing window for burn rate (matches backend getRunway logic)
+  const burnRateWindow = useMemo(() => {
+    const to = endOfMonth(new Date());
+    const from = startOfMonth(subMonths(to, 6));
+    return {
+      from: format(from, "yyyy-MM-dd"),
+      to: format(to, "yyyy-MM-dd"),
+    };
+  }, []);
+
   const { data: runwayData } = useQuery(
     trpc.reports.runway.queryOptions({
-      from,
-      to,
       currency: currency,
     }),
   );
@@ -54,11 +62,11 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
     }),
   );
 
-  // Fetch burn rate data for calculations
+  // Fetch burn rate data for chart projections (same 6-month window as runway)
   const { data: burnRateData } = useQuery(
     trpc.reports.burnRate.queryOptions({
-      from,
-      to,
+      from: burnRateWindow.from,
+      to: burnRateWindow.to,
       currency: currency,
     }),
   );
@@ -157,16 +165,6 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
     // If currentRunway is undefined/null/NaN, preserve the previous value (this indicates loading)
   }, [currentRunway]);
 
-  const dateRangeDisplay = useMemo(() => {
-    try {
-      const fromDate = parseISO(from);
-      const toDate = parseISO(to);
-      return `${format(fromDate, "MMM d")} - ${format(toDate, "MMM d, yyyy")}`;
-    } catch {
-      return "";
-    }
-  }, [from, to]);
-
   // Check if we have no data due to missing bank accounts or cash balance
   const hasNoData = runwayChartData.length === 0;
 
@@ -184,8 +182,8 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
           <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
             <ShareMetricButton
               type="runway"
-              from={from}
-              to={to}
+              from={burnRateWindow.from}
+              to={burnRateWindow.to}
               currency={currency}
             />
           </div>
@@ -202,7 +200,9 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
           />{" "}
           months
         </p>
-        <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
+        <p className="text-xs mt-1 text-muted-foreground">
+          Based on last 6 months
+        </p>
       </div>
       <div className="h-80">
         {hasNoData ? (

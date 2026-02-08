@@ -106,8 +106,6 @@ export const getBurnRateTool = tool({
         }),
         getRunway(db, {
           teamId,
-          from: finalFrom,
-          to: finalTo,
           currency: finalCurrency ?? undefined,
         }),
         getSpending(db, {

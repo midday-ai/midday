@@ -99,8 +99,6 @@ export const getCashFlowStressTestTool = tool({
           }),
           getRunway(db, {
             teamId,
-            from: finalFrom,
-            to: finalTo,
             currency: finalCurrency ?? undefined,
           }),
         ]);

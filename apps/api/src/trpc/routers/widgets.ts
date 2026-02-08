@@ -49,8 +49,6 @@ export const widgetsRouter = createTRPCRouter({
     .query(async ({ ctx: { db, teamId }, input }) => {
       const runway = await getRunway(db, {
         teamId: teamId!,
-        from: input.from,
-        to: input.to,
         currency: input.currency,
       });
 
@@ -59,8 +57,6 @@ export const widgetsRouter = createTRPCRouter({
         toolCall: {
           toolName: "getBurnRateAnalysis",
           toolParams: {
-            from: input.from,
-            to: input.to,
             currency: input.currency,
           },
         },

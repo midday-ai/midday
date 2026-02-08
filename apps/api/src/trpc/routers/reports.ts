@@ -78,8 +78,6 @@ export const reportsRouter = createTRPCRouter({
     .query(async ({ ctx: { db, teamId }, input }) => {
       return getRunway(db, {
         teamId: teamId!,
-        from: input.from,
-        to: input.to,
         currency: input.currency,
       });
     }),

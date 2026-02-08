@@ -177,12 +177,10 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
-    const { from, to, currency } = c.req.valid("query");
+    const { currency } = c.req.valid("query");
 
     const results = await getRunway(db, {
       teamId,
-      from,
-      to,
       currency,
     });
 

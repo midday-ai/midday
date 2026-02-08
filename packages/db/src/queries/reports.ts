@@ -1177,16 +1177,27 @@ export async function getSpending(
 
 export type GetRunwayParams = {
   teamId: string;
-  from: string;
-  to: string;
   currency?: string;
 };
 
+/**
+ * Calculate cash runway using a fixed trailing 6-month window for burn rate.
+ *
+ * Runway is a forward-looking metric (how many months can we survive?) and
+ * should not fluctuate based on an arbitrary user-selected date range.
+ * The burn rate is always averaged over the last 6 months to smooth out
+ * seasonal variance while remaining recent enough to reflect current
+ * spending patterns.
+ */
 export async function getRunway(db: Database, params: GetRunwayParams) {
-  const { teamId, from, to, currency: inputCurrency } = params;
+  const { teamId, currency: inputCurrency } = params;
 
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+  // Fixed 6-month trailing window for burn rate calculation
+  const toDate = endOfMonth(new UTCDate());
+  const fromDate = startOfMonth(subMonths(toDate, 6));
+
+  const burnRateFrom = format(fromDate, "yyyy-MM-dd");
+  const burnRateTo = format(toDate, "yyyy-MM-dd");
 
   // Step 1: Get the target currency (cached)
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
@@ -1215,27 +1226,15 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
 
   const totalBalance = balanceResult[0]?.totalBalance || 0;
 
-  // Step 3: Calculate number of months in the date range
-  const fromYear = fromDate.getFullYear();
-  const fromMonth = fromDate.getMonth();
-  const toYear = toDate.getFullYear();
-  const toMonth = toDate.getMonth();
-
-  const numberOfMonths = (toYear - fromYear) * 12 + (toMonth - fromMonth);
-
-  if (numberOfMonths <= 0) {
-    return 0;
-  }
-
-  // Step 4: Get burn rate data using our existing getBurnRate function
+  // Step 3: Get burn rate data over the fixed 6-month window
   const burnRateData = await getBurnRate(db, {
     teamId,
-    from,
-    to,
+    from: burnRateFrom,
+    to: burnRateTo,
     currency: inputCurrency,
   });
 
-  // Step 5: Calculate average burn rate
+  // Step 4: Calculate average burn rate
   if (burnRateData.length === 0) {
     return 0;
   }
@@ -1243,7 +1242,7 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
   const totalBurnRate = burnRateData.reduce((sum, item) => sum + item.value, 0);
   const avgBurnRate = Math.round(totalBurnRate / burnRateData.length);
 
-  // Step 6: Calculate runway
+  // Step 5: Calculate runway
   if (avgBurnRate === 0) {
     return 0;
   }
@@ -4488,8 +4487,6 @@ export async function getChartDataByLinkId(db: Database, linkId: string) {
     case "runway": {
       const runwayData = await getRunway(db, {
         teamId,
-        from,
-        to,
         currency,
       });
       const burnRateData = await getBurnRate(db, {

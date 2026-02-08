@@ -401,13 +401,6 @@ export class InsightsService {
     const from = formatDateForQuery(period.periodStart);
     const to = formatDateForQuery(period.periodEnd);
 
-    // Runway needs a multi-month lookback for burn rate calculation
-    // Use last 3 months ending at period end
-    const runwayFromDate = new Date(period.periodEnd);
-    runwayFromDate.setMonth(runwayFromDate.getMonth() - 3);
-    const runwayFrom = formatDateForQuery(runwayFromDate);
-    const runwayTo = to;
-
     const [
       revenueData,
       profitData,
@@ -448,8 +441,6 @@ export class InsightsService {
       }).catch(() => null),
       getRunway(this.db, {
         teamId,
-        from: runwayFrom,
-        to: runwayTo,
         currency,
       }).catch(() => 0),
       getSpending(this.db, { teamId, from, to, currency }).catch(() => []),

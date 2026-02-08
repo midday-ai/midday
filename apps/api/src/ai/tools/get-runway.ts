@@ -84,11 +84,10 @@ export const getRunwayTool = tool({
       const targetCurrency = finalCurrency || "USD";
 
       // Fetch runway, cash balance, and burn rate data in parallel
+      // Runway uses a fixed 6-month trailing window internally (independent of date range)
       const [runway, balanceResult, burnRateData] = await Promise.all([
         getRunway(db, {
           teamId,
-          from: finalFrom,
-          to: finalTo,
           currency: finalCurrency ?? undefined,
         }),
         getCashBalance(db, {
