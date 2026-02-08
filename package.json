@@ -57,5 +57,12 @@
     "typescript": "^5.9.3",
     "uuid": "^13.0.0",
     "zod": "^4.3.5"
-  }
+  },
+  "trustedDependencies": [
+    "@biomejs/biome",
+    "@depot/cli",
+    "@sentry/cli",
+    "core-js",
+    "protobufjs"
+  ]
 }

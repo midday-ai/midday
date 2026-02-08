@@ -76,20 +76,37 @@ export function ExportBar() {
   // Fetch connected accounting providers
   const { data: connectedApps } = useQuery(trpc.apps.get.queryOptions());
 
-  // Find the first connected accounting provider
-  const connectedProvider = useMemo(() => {
+  // Find all connected accounting providers
+  const connectedProviders = useMemo(() => {
     const accountingProviderIds = ["xero", "quickbooks", "fortnox"];
-    const providers =
+    return (
       connectedApps?.filter((app) =>
         accountingProviderIds.includes(app.app_id),
-      ) ?? [];
-    return providers[0];
+      ) ?? []
+    );
   }, [connectedApps]);
 
-  // Default to connected provider if available, otherwise file export
+  // Track which provider is selected for the primary export button
+  const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
+    null,
+  );
+
+  // Set default selected provider when connected providers change
   useEffect(() => {
-    setExportPreference(connectedProvider ? "accounting" : "file");
-  }, [connectedProvider]);
+    if (connectedProviders.length > 0 && !selectedProviderId) {
+      setSelectedProviderId(connectedProviders[0].app_id);
+      setExportPreference("accounting");
+    } else if (connectedProviders.length === 0) {
+      setSelectedProviderId(null);
+      setExportPreference("file");
+    }
+  }, [connectedProviders, selectedProviderId]);
+
+  // The currently selected provider for the primary button
+  const activeProvider = useMemo(
+    () => connectedProviders.find((p) => p.app_id === selectedProviderId),
+    [connectedProviders, selectedProviderId],
+  );
 
   // Accounting export mutation
   const accountingExportMutation = useMutation(
@@ -222,12 +239,13 @@ export function ExportBar() {
     }
   }, [shouldShow]);
 
-  const ProviderIcon = connectedProvider
-    ? PROVIDER_ICONS[connectedProvider.app_id]
+  const ProviderIcon = activeProvider
+    ? PROVIDER_ICONS[activeProvider.app_id]
     : null;
 
-  // Select accounting export (just sets preference, doesn't trigger export)
-  const selectAccountingExport = () => {
+  // Select accounting export for a specific provider
+  const selectAccountingExport = (providerId: string) => {
+    setSelectedProviderId(providerId);
     setExportPreference("accounting");
   };
 
@@ -238,7 +256,7 @@ export function ExportBar() {
 
   // Execute accounting export
   const executeAccountingExport = () => {
-    if (!connectedProvider) return;
+    if (!activeProvider) return;
     if (transactionIdsForExport.length === 0) return;
 
     // Save the count and IDs at export time to prevent flickering
@@ -247,7 +265,7 @@ export function ExportBar() {
     setIsExporting(true);
     accountingExportMutation.mutate({
       transactionIds: transactionIdsForExport,
-      providerId: connectedProvider.app_id as "xero" | "quickbooks" | "fortnox",
+      providerId: activeProvider.app_id as "xero" | "quickbooks" | "fortnox",
     });
   };
 
@@ -259,7 +277,7 @@ export function ExportBar() {
   // Handle primary export button click based on preference
   const handlePrimaryExport = () => {
     // If no accounting provider connected, always use file export
-    if (!connectedProvider) {
+    if (!activeProvider) {
       executeFileExport();
       return;
     }
@@ -338,7 +356,7 @@ export function ExportBar() {
                       className="rounded-r-none gap-2"
                     >
                       {/* Show provider icon only for accounting export */}
-                      {connectedProvider &&
+                      {activeProvider &&
                         exportPreference === "accounting" &&
                         ProviderIcon && <ProviderIcon className="size-4" />}
                       <span>Export</span>
@@ -353,13 +371,23 @@ export function ExportBar() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" sideOffset={10}>
-                        {connectedProvider && ProviderIcon ? (
-                          <DropdownMenuItem onClick={selectAccountingExport}>
-                            <ProviderIcon className="size-4 mr-2" />
-                            Export to {PROVIDER_NAMES[connectedProvider.app_id]}
-                          </DropdownMenuItem>
-                        ) : (
-                          // Show connect options when no provider is connected
+                        {/* Show all connected providers */}
+                        {connectedProviders.map((provider) => {
+                          const Icon = PROVIDER_ICONS[provider.app_id];
+                          return (
+                            <DropdownMenuItem
+                              key={provider.app_id}
+                              onClick={() =>
+                                selectAccountingExport(provider.app_id)
+                              }
+                            >
+                              {Icon && <Icon className="size-4 mr-2" />}
+                              Export to {PROVIDER_NAMES[provider.app_id]}
+                            </DropdownMenuItem>
+                          );
+                        })}
+                        {/* Show connect options for unconnected providers */}
+                        {connectedProviders.length === 0 &&
                           ACCOUNTING_PROVIDERS.map((provider) => {
                             const Icon = PROVIDER_ICONS[provider.id];
                             return (
@@ -370,8 +398,7 @@ export function ExportBar() {
                                 </Link>
                               </DropdownMenuItem>
                             );
-                          })
-                        )}
+                          })}
                         <DropdownMenuItem onClick={selectFileExport}>
                           <Icons.FolderZip className="size-4 mr-2" />
                           Export to file
