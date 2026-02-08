@@ -38,6 +38,53 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
     Ok(())
 }
 
+/// Prompt the user to download and install an update.
+/// Shared by both manual and silent update flows.
+#[cfg(desktop)]
+async fn prompt_and_install_update(app: &tauri::AppHandle, update: tauri_plugin_updater::Update) {
+    use tauri_plugin_dialog::{DialogExt, MessageDialogKind, MessageDialogButtons};
+
+    let answer = app.dialog()
+        .message(format!("A new version {} is available. Would you like to update now?", update.version))
+        .title("Update Available")
+        .kind(MessageDialogKind::Info)
+        .buttons(MessageDialogButtons::OkCancel)
+        .blocking_show();
+
+    if answer {
+        let _ = update.download_and_install(
+            |_chunk_length, _content_length| {},
+            || {
+                println!("Update download finished");
+            }
+        ).await;
+    }
+}
+
+/// Silent update check — only shows a dialog when an update is available.
+/// Used on startup and by the periodic background timer.
+#[cfg(desktop)]
+async fn silent_update_check(app: tauri::AppHandle) {
+    use tauri_plugin_updater::UpdaterExt;
+
+    if let Ok(updater) = app.updater() {
+        match updater.check().await {
+            Ok(Some(update)) => {
+                println!("Update available: {}", update.version);
+                prompt_and_install_update(&app, update).await;
+            }
+            Ok(None) => {
+                println!("No updates available");
+            }
+            Err(e) => {
+                println!("Silent update check failed: {}", e);
+            }
+        }
+    }
+}
+
+/// Manual update check (triggered from tray menu).
+/// Shows dialogs for all outcomes: update available, up-to-date, and errors.
 #[tauri::command]
 async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
     use tauri_plugin_dialog::{DialogExt, MessageDialogKind, MessageDialogButtons};
@@ -45,33 +92,12 @@ async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
     
     #[cfg(desktop)]
     {
-        // Try to check for updates
         if let Ok(updater) = app.updater() {
             match updater.check().await {
                 Ok(Some(update)) => {
-                    // Update available - show update dialog
-                    let answer = app.dialog()
-                        .message(format!("A new version {} is available. Would you like to update now?", update.version))
-                        .title("Update Available")
-                        .kind(MessageDialogKind::Info)
-                        .buttons(MessageDialogButtons::OkCancel)
-                        .blocking_show();
-                    
-                    if answer {
-                        // User wants to update - provide required callbacks
-                        let _ = update.download_and_install(
-                            |_chunk_length, _content_length| {
-                                // Progress callback - could show progress here
-                            },
-                            || {
-                                // Download finished callback
-                                println!("Update download finished");
-                            }
-                        ).await;
-                    }
+                    prompt_and_install_update(&app, update).await;
                 }
                 Ok(None) => {
-                    // No update available - show current version info
                     let version = app.package_info().version.to_string();
                     app.dialog()
                         .message(format!("Midday\nversion {}\n\nYou're up to date!", version))
@@ -81,7 +107,6 @@ async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
                         .blocking_show();
                 }
                 Err(e) => {
-                    // Error checking for updates
                     app.dialog()
                         .message(format!("Failed to check for updates: {}", e))
                         .title("Update Check Failed")
@@ -91,7 +116,6 @@ async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
                 }
             }
         } else {
-            // Updater not available
             app.dialog()
                 .message("Update checking is not available in this build.")
                 .title("Updates Not Available")
@@ -103,7 +127,6 @@ async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
     
     #[cfg(not(desktop))]
     {
-        // Mobile platforms don't support auto-updates
         app.dialog()
             .message("Updates are managed through your app store.")
             .title("Check App Store")
@@ -401,6 +424,27 @@ pub fn run() {
             // Add updater plugin conditionally for desktop
             #[cfg(desktop)]
             app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
+
+            // Check for updates on startup (after a short delay) and every 4 hours
+            #[cfg(desktop)]
+            {
+                let app_handle_for_updates = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    // Wait 5 seconds after startup before first check
+                    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                    println!("Running startup update check...");
+                    silent_update_check(app_handle_for_updates.clone()).await;
+
+                    // Then check every 4 hours
+                    let mut interval = tokio::time::interval(std::time::Duration::from_secs(4 * 60 * 60));
+                    interval.tick().await; // skip the immediate first tick
+                    loop {
+                        interval.tick().await;
+                        println!("Running periodic update check...");
+                        silent_update_check(app_handle_for_updates.clone()).await;
+                    }
+                });
+            }
 
             let app_url_clone = app_url.clone();
             let app_handle = app.handle().clone();
