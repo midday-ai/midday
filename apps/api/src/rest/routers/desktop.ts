@@ -4,8 +4,7 @@ import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 const app = new OpenAPIHono<Context>();
 
 const GITHUB_REPO = "midday-ai/midday";
-const GITHUB_LATEST_JSON_URL = `https://github.com/${GITHUB_REPO}/releases/latest/download/latest.json`;
-const GITHUB_RELEASE_URL_PREFIX = `https://github.com/${GITHUB_REPO}/releases/download/`;
+const GITHUB_API_LATEST_RELEASE = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
 const errorResponseSchema = z.object({
   error: z.string(),
@@ -44,8 +43,8 @@ function getGitHubHeaders(): Record<string, string> {
     "User-Agent": "Midday-Desktop-Updater",
   };
 
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  if (process.env.GITHUB_RELEASE_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.GITHUB_RELEASE_TOKEN}`;
   }
 
   return headers;
@@ -83,15 +82,44 @@ app.openapi(
     },
   }),
   async (c) => {
-    const response = await fetch(GITHUB_LATEST_JSON_URL, {
-      headers: getGitHubHeaders(),
+    // Fetch the latest release metadata via GitHub API (works for private repos)
+    const releaseRes = await fetch(GITHUB_API_LATEST_RELEASE, {
+      headers: {
+        ...getGitHubHeaders(),
+        Accept: "application/vnd.github+json",
+      },
     });
 
-    if (!response.ok) {
+    if (!releaseRes.ok) {
       return c.json({ error: "Failed to fetch update info" }, 502);
     }
 
-    const data = await response.json();
+    const release = (await releaseRes.json()) as {
+      assets?: { name: string; url: string }[];
+    };
+
+    // Find the latest.json asset in the release
+    const latestJsonAsset = release.assets?.find(
+      (a) => a.name === "latest.json",
+    );
+
+    if (!latestJsonAsset) {
+      return c.json({ error: "No latest.json asset found in release" }, 502);
+    }
+
+    // Download the asset content via its API URL
+    const assetRes = await fetch(latestJsonAsset.url, {
+      headers: {
+        ...getGitHubHeaders(),
+        Accept: "application/octet-stream",
+      },
+    });
+
+    if (!assetRes.ok) {
+      return c.json({ error: "Failed to fetch update info" }, 502);
+    }
+
+    const data = await assetRes.json();
     const parsed = updateManifestSchema.safeParse(data);
 
     if (!parsed.success) {
@@ -165,8 +193,24 @@ app.openapi(
   async (c) => {
     const { url } = c.req.valid("query");
 
-    // Only allow URLs from our GitHub repository
-    if (!url.startsWith(GITHUB_RELEASE_URL_PREFIX)) {
+    // Parse and normalize the URL to prevent path-traversal bypasses
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+    } catch {
+      return c.json({ error: "Invalid download URL" }, 400);
+    }
+
+    // Allow both github.com release URLs and api.github.com asset URLs
+    const isGitHubRelease =
+      parsed.origin === "https://github.com" &&
+      parsed.pathname.startsWith(`/${GITHUB_REPO}/releases/download/`);
+
+    const isGitHubApiAsset =
+      parsed.origin === "https://api.github.com" &&
+      parsed.pathname.startsWith(`/repos/${GITHUB_REPO}/releases/assets/`);
+
+    if (!isGitHubRelease && !isGitHubApiAsset) {
       return c.json({ error: "Invalid download URL" }, 400);
     }
 
