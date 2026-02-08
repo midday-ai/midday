@@ -59,7 +59,6 @@ export class SendInvoiceReminderProcessor extends BaseProcessor<SendInvoiceRemin
           amount: invoice.amount ?? undefined,
           currency: invoice.currency ?? undefined,
           dueDate: invoice.dueDate ?? undefined,
-          customerId: invoice.customer?.id,
         },
         {
           sendEmail: true,

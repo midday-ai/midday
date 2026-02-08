@@ -24,7 +24,6 @@ interface Props {
   amount?: number;
   currency?: string;
   dueDate?: string;
-  customerId?: string;
 }
 
 export const InvoiceEmail = ({
@@ -35,7 +34,6 @@ export const InvoiceEmail = ({
   amount,
   currency,
   dueDate,
-  customerId,
 }: Props) => {
   const text = `You've Received an Invoice from ${teamName}`;
   const themeClasses = getEmailThemeClasses();
@@ -56,7 +54,6 @@ export const InvoiceEmail = ({
           currency={currency}
           dueDate={dueDate}
           link={link}
-          customerId={customerId}
         />
       )}
       <Body
