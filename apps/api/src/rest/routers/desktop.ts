@@ -130,7 +130,9 @@ app.openapi(
 
     // Build the proxy base URL from the incoming request
     const requestUrl = new URL(c.req.url);
-    const proxyBase = `${requestUrl.protocol}//${requestUrl.host}/desktop/update/download`;
+    const protocol =
+      c.req.header("x-forwarded-proto") ?? requestUrl.protocol.replace(":", "");
+    const proxyBase = `${protocol}://${requestUrl.host}/desktop/update/download`;
 
     // Rewrite each platform's download URL to go through our proxy
     for (const [platform, entry] of Object.entries(manifest.platforms)) {
