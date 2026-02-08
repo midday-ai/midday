@@ -2,6 +2,7 @@
 
 import { InvoiceStatus } from "@/components/invoice-status";
 import { downloadFile } from "@/lib/download";
+import { saveFile } from "@/lib/save-file";
 import { useTRPC } from "@/trpc/client";
 import { TZDate } from "@date-fns/tz";
 import { Button } from "@midday/ui/button";
@@ -20,7 +21,6 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { saveAs } from "file-saver";
 import { AnimatePresence, motion } from "framer-motion";
 import JSZip from "jszip";
 import Image from "next/image";
@@ -151,7 +151,7 @@ export function PortalContent({ portalId }: Props) {
       });
 
       const timestamp = new Date().toISOString().split("T")[0];
-      saveAs(zipBlob, `invoices-${timestamp}.zip`);
+      await saveFile(zipBlob, `invoices-${timestamp}.zip`);
     } catch (error) {
       console.error("Failed to create invoice ZIP:", error);
     } finally {

@@ -25,8 +25,9 @@ export async function GET(req: NextRequest) {
   }
 
   if (isDesktop === "true") {
+    const scheme = process.env.NEXT_PUBLIC_DESKTOP_SCHEME || "midday";
     return NextResponse.redirect(
-      `midday://settings/accounts?id=${id}&step=reconnect`,
+      `${scheme}://settings/accounts?id=${id}&step=reconnect`,
     );
   }
 

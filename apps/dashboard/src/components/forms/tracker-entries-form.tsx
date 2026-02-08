@@ -7,8 +7,8 @@ import { NEW_EVENT_ID, parseTimeWithMidnightCrossing } from "@/utils/tracker";
 import { TZDate } from "@date-fns/tz";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { Textarea } from "@midday/ui/textarea";
 import { TimeRangeInput } from "@midday/ui/time-range-input";
 import { startOfDay } from "date-fns";
 import { useEffect } from "react";
@@ -131,7 +131,7 @@ export function TrackerEntriesForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onCreate)}
-        className="mb-12 mt-6 space-y-4"
+        className="mb-4 mt-6 space-y-4"
       >
         <TimeRangeInput
           value={{ start: form.watch("start"), stop: form.watch("stop") }}
@@ -197,7 +197,13 @@ export function TrackerEntriesForm({
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="Description" {...field} />
+                <Textarea
+                  {...field}
+                  value={field.value || ""}
+                  placeholder="Description"
+                  rows={3}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
               </FormControl>
             </FormItem>
           )}

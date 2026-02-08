@@ -224,6 +224,23 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
+      // Prevent removing the last owner
+      const targetRole = await getTeamMemberRole(db, teamId!, input.userId);
+
+      if (targetRole === "owner") {
+        const teamMembers = await getTeamMembersByTeamId(db, teamId!);
+        const totalOwners = teamMembers?.filter(
+          (member) => member.role === "owner",
+        ).length;
+
+        if (totalOwners === 1) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Cannot remove the last team owner",
+          });
+        }
+      }
+
       return deleteTeamMember(db, {
         teamId: input.teamId,
         userId: input.userId,
@@ -247,6 +264,25 @@ export const teamRouter = createTRPCRouter({
           code: "FORBIDDEN",
           message: "Only team owners can update member roles",
         });
+      }
+
+      // Prevent demoting the last owner to member
+      if (input.role === "member") {
+        const targetRole = await getTeamMemberRole(db, teamId!, input.userId);
+
+        if (targetRole === "owner") {
+          const teamMembers = await getTeamMembersByTeamId(db, teamId!);
+          const totalOwners = teamMembers?.filter(
+            (member) => member.role === "owner",
+          ).length;
+
+          if (totalOwners === 1) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "Cannot demote the last team owner",
+            });
+          }
+        }
       }
 
       return updateTeamMember(db, input);

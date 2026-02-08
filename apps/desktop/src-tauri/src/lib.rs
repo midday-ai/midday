@@ -361,9 +361,13 @@ fn is_external_url(url: &str, app_url: &str) -> bool {
 
 fn handle_deep_link_event(app_handle: &tauri::AppHandle, urls: Vec<String>) {
     for url in &urls {
-        if url.starts_with("midday://") {
-            // Extract the path from the deep link
-            let path = url.strip_prefix("midday://").unwrap_or("");
+        // Only handle midday schemes (midday://, midday-dev://, midday-staging://)
+        if let Some(idx) = url.find("://") {
+            let scheme = &url[..idx];
+            if !scheme.contains("midday") {
+                continue;
+            }
+            let path = &url[idx + 3..];
 
             // Remove any leading slashes
             let clean_path = path.trim_start_matches('/');
@@ -390,6 +394,8 @@ pub fn run() {
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_upload::init())
+        .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![show_window, check_for_updates])
         .setup(move |app| {
             // Add updater plugin conditionally for desktop
@@ -449,16 +455,27 @@ pub fn run() {
                 }
             }
 
-            // Register deep links at runtime for development
-            #[cfg(debug_assertions)]
+            // Register deep links at runtime for development (Linux/Windows only).
+            // macOS does not support runtime registration — the scheme is registered
+            // via Info.plist when the .app bundle is installed in /Applications.
+            #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
             {
-                let _ = app_handle.deep_link().register_all();
+                match app_handle.deep_link().register_all() {
+                    Ok(_) => println!("🔗 Deep link schemes registered successfully"),
+                    Err(e) => eprintln!("🔗 Failed to register deep link schemes: {}", e),
+                }
+            }
+
+            // Log deep link URLs if the app was launched via a deep link
+            if let Ok(urls) = app_handle.deep_link().get_current() {
+                println!("🔗 Current deep link URLs on launch: {:?}", urls);
             }
 
             // Handle deep link events
             app_handle.deep_link().on_open_url(move |event| {
                 let url_strings: Vec<String> =
                     event.urls().iter().map(|url| url.to_string()).collect();
+                println!("🔗 Deep link received: {:?}", url_strings);
                 handle_deep_link_event(&app_handle_for_deep_links, url_strings);
             });
 

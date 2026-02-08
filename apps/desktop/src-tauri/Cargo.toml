@@ -1,6 +1,6 @@
 [package]
 name = "Midday"
-version = "0.3.0"
+version = "0.4.0"
 description = ""
 authors = ["Midday Labs AB"]
 edition = "2024"
@@ -29,6 +29,8 @@ image = "0.24"
 tauri-plugin-updater = "2"
 tauri-plugin-dialog = "2.2.2"
 tauri-plugin-process = "2.2.1"
+tauri-plugin-upload = "2"
+tauri-plugin-fs = "2"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"
