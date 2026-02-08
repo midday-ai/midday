@@ -12,8 +12,8 @@
     "./schema": "./src/schema.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.33",
-    "@fast-csv/format": "5.0.5",
+    "@ai-sdk/google": "catalog:",
+    "@fast-csv/format": "catalog:",
     "@midday/db": "workspace:*",
     "@midday/email": "workspace:*",
     "@midday/encryption": "workspace:*",
@@ -21,15 +21,15 @@
     "@midday/engine-client": "workspace:*",
     "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
-    "@sindresorhus/slugify": "^3.0.0",
+    "@sindresorhus/slugify": "catalog:",
     "@zip.js/zip.js": "^2.8.10",
-    "ai": "5.0.87",
-    "camelcase-keys": "^10.0.1",
-    "heic-convert": "1.2.4",
-    "node-xlsx": "^0.24.0",
-    "sharp": "0.34.5",
+    "ai": "catalog:",
+    "camelcase-keys": "catalog:",
+    "heic-convert": "catalog:",
+    "node-xlsx": "catalog:",
+    "sharp": "catalog:",
     "trigger.dev": "4.1.2",
-    "zod": "^4.1.13"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "latest",

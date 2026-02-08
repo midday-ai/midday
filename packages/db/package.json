@@ -31,7 +31,7 @@
     "./utils/invoice-recurring": "./src/utils/invoice-recurring.ts"
   },
   "dependencies": {
-    "@date-fns/tz": "^1.4.1",
+    "@date-fns/tz": "catalog:",
     "@date-fns/utc": "^2.1.1",
     "@midday/cache": "workspace:*",
     "@midday/categories": "workspace:*",
@@ -40,11 +40,11 @@
     "@midday/invoice": "workspace:*",
     "@midday/logger": "workspace:*",
     "@midday/utils": "workspace:*",
-    "@sindresorhus/slugify": "^3.0.0",
+    "@sindresorhus/slugify": "catalog:",
     "@types/pg": "^8.15.6",
     "drizzle-orm": "^0.45.0",
-    "camelcase-keys": "^10.0.1",
-    "nanoid": "^5.1.6",
+    "camelcase-keys": "catalog:",
+    "nanoid": "catalog:",
     "pg": "^8.16.3",
     "snakecase-keys": "^9.0.2"
   },

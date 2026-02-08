@@ -11,6 +11,6 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "jose": "^6.1.3"
+    "jose": "catalog:"
   }
 }

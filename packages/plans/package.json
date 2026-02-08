@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.29",
-    "typescript": "^5.9.3"
+    "typescript": "catalog:"
   },
   "exports": {
     ".": "./src/index.ts"

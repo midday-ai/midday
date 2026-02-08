@@ -5,9 +5,9 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "hono": "4.11.4"
+    "hono": "catalog:"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "catalog:"
   }
 }

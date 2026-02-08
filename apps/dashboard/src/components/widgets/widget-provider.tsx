@@ -147,7 +147,6 @@ export const createWidgetStore = (initialPreferences?: WidgetPreferences) => {
       }),
       {
         name: "widget-store",
-        skipHydration: true,
       },
     ),
   );

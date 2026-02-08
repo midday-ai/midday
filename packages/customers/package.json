@@ -19,11 +19,11 @@
     "@midday/logger": "workspace:*",
     "ai": "^6.0.39",
     "exa-js": "^2.0.12",
-    "zod": "^4.3.5"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@types/node": "^25.0.9",
-    "typescript": "^5.9.3"
+    "typescript": "catalog:"
   }
 }

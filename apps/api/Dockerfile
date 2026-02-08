@@ -1,5 +1,5 @@
 # Base image with Bun
-FROM oven/bun:1.2.22 AS base
+FROM oven/bun:1.3.9 AS base
 
 # Install turbo CLI globally using Bun
 FROM base AS turbo-cli
@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y \
 
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
-# Don't copy the lockfile, allow Bun to generate a fresh one
+COPY bunfig.toml .
 RUN bun install
 
 # Copy the full source code
