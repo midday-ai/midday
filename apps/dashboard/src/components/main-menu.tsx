@@ -3,9 +3,9 @@
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ForesightLink } from "./foresight-link";
 
 const icons = {
   "/": () => <Icons.Overview size={20} />,
@@ -123,11 +123,11 @@ const ChildItem = ({
   const showChild = isExpanded && shouldShow;
 
   return (
-    <ForesightLink
+    <Link
       href={child.path}
+      prefetch
       onClick={() => onSelect?.()}
       className="block group/child"
-      name={`nav-child-${child.name.toLowerCase().replace(/\s+/g, "-")}`}
     >
       <div className="relative">
         {/* Child item text */}
@@ -158,7 +158,7 @@ const ChildItem = ({
           </span>
         </div>
       </div>
-    </ForesightLink>
+    </Link>
   );
 };
 
@@ -185,11 +185,11 @@ const Item = ({
 
   return (
     <div className="group">
-      <ForesightLink
+      <Link
         href={item.path}
+        prefetch
         onClick={() => onSelect?.()}
         className="group"
-        name={`nav-${item.name.toLowerCase()}`}
       >
         <div className="relative">
           {/* Background that expands */}
@@ -238,7 +238,7 @@ const Item = ({
             </div>
           )}
         </div>
-      </ForesightLink>
+      </Link>
 
       {/* Children */}
       {hasChildren && (

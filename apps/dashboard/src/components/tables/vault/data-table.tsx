@@ -83,7 +83,7 @@ export function DataTable({ initialSettings }: Props) {
   } = useSuspenseInfiniteQuery(
     trpc.documents.get.infiniteQueryOptions(
       {
-        pageSize: 20,
+        pageSize: 24,
         ...filter,
       },
       {

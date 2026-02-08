@@ -42,7 +42,7 @@ export function usePrefetchMetrics() {
           trpc.reports.burnRate.queryOptions({ from, to, currency }),
         ),
         queryClient.prefetchQuery(
-          trpc.reports.runway.queryOptions({ from, to, currency }),
+          trpc.reports.runway.queryOptions({ currency }),
         ),
         queryClient.prefetchQuery(
           trpc.reports.spending.queryOptions({ from, to, currency }),

@@ -7,6 +7,7 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
 import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
+import { UTCDate } from "@date-fns/utc";
 import { cn } from "@midday/ui/cn";
 import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
@@ -15,12 +16,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RunwayCardProps {
-  from: string;
-  to: string;
   currency?: string;
   locale?: string;
-  isCustomizing: boolean;
-  wiggleClass?: string;
 }
 
 export function RunwayCard({ currency, locale }: RunwayCardProps) {
@@ -40,9 +37,10 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
   const hasInitializedRef = useRef<boolean>(false);
 
   // Fixed 6-month trailing window for burn rate (matches backend getRunway logic)
+  // subMonths(to, 5) + startOfMonth gives 6 months inclusive of current month
   const burnRateWindow = useMemo(() => {
-    const to = endOfMonth(new Date());
-    const from = startOfMonth(subMonths(to, 6));
+    const to = endOfMonth(new UTCDate());
+    const from = startOfMonth(subMonths(to, 5));
     return {
       from: format(from, "yyyy-MM-dd"),
       to: format(to, "yyyy-MM-dd"),

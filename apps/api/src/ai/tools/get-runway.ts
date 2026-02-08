@@ -4,9 +4,11 @@ import { runwayArtifact } from "@api/ai/artifacts/runway";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
+import { UTCDate } from "@date-fns/utc";
 import { db } from "@midday/db/client";
 import { getBurnRate, getCashBalance, getRunway } from "@midday/db/queries";
 import { tool } from "ai";
+import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";
 
 const getRunwaySchema = z.object({
@@ -83,6 +85,14 @@ export const getRunwayTool = tool({
 
       const targetCurrency = finalCurrency || "USD";
 
+      // Fixed 6-month trailing window for burn rate — matches the window used
+      // inside getRunway so that chart projections are consistent with the
+      // headline runway number.
+      const burnRateToDate = endOfMonth(new UTCDate());
+      const burnRateFromDate = startOfMonth(subMonths(burnRateToDate, 5));
+      const burnRateFrom = format(burnRateFromDate, "yyyy-MM-dd");
+      const burnRateTo = format(burnRateToDate, "yyyy-MM-dd");
+
       // Fetch runway, cash balance, and burn rate data in parallel
       // Runway uses a fixed 6-month trailing window internally (independent of date range)
       const [runway, balanceResult, burnRateData] = await Promise.all([
@@ -96,8 +106,8 @@ export const getRunwayTool = tool({
         }),
         getBurnRate(db, {
           teamId,
-          from: finalFrom,
-          to: finalTo,
+          from: burnRateFrom,
+          to: burnRateTo,
           currency: finalCurrency ?? undefined,
         }),
       ]);

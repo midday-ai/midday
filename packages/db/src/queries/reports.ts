@@ -1193,8 +1193,9 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
   const { teamId, currency: inputCurrency } = params;
 
   // Fixed 6-month trailing window for burn rate calculation
+  // subMonths(toDate, 5) + startOfMonth gives 6 months inclusive of current month
   const toDate = endOfMonth(new UTCDate());
-  const fromDate = startOfMonth(subMonths(toDate, 6));
+  const fromDate = startOfMonth(subMonths(toDate, 5));
 
   const burnRateFrom = format(fromDate, "yyyy-MM-dd");
   const burnRateTo = format(toDate, "yyyy-MM-dd");
