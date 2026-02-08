@@ -1,4 +1,4 @@
-name: Fly Deploy
+name: Production Deployment - API
 permissions:
   contents: read
 on:
@@ -12,10 +12,10 @@ on:
       - "!packages/ui/**"
 jobs:
   deploy:
-    name: 🚀 Deploy to Fly API Production
+    name: 🚀 Deploy API to Railway Production
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    concurrency: fly-api-production
+    concurrency: railway-api-production
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -33,7 +33,9 @@ jobs:
       - name: 🪐 Check TypeScript
         run: bun run typecheck
         working-directory: ./apps/api
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly.toml
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: 🚀 Deploy to Railway
+        run: railway up --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

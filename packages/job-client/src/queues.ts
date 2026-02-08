@@ -20,7 +20,8 @@ function getConnectionOptions() {
 
   const url = new URL(redisUrl);
   const isProduction =
-    process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
+    process.env.NODE_ENV === "production" ||
+    process.env.RAILWAY_ENVIRONMENT === "production";
 
   return {
     host: url.hostname,
@@ -31,7 +32,7 @@ function getConnectionOptions() {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
     // Network settings
-    family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
+    family: 4,
     keepAlive: 30000,
     lazyConnect: false,
     // TLS for production (rediss://)

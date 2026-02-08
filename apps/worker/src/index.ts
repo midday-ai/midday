@@ -231,7 +231,7 @@ process.on("uncaughtException", (err) => {
   Sentry.captureException(err, {
     tags: { errorType: "uncaught_exception" },
   });
-  // Don't exit - let the process manager (Fly.io) handle restarts
+  // Don't exit - let the process manager (Railway) handle restarts
 });
 
 process.on("unhandledRejection", (reason, promise) => {
@@ -242,5 +242,5 @@ process.on("unhandledRejection", (reason, promise) => {
       tags: { errorType: "unhandled_rejection" },
     },
   );
-  // Don't exit - let the process manager handle restarts
+  // Don't exit - let the process manager (Railway) handle restarts
 });

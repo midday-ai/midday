@@ -55,8 +55,9 @@ We are working on the documentation to get started with Midday for local develop
 ### Hosting
 
 - Supabase (database, storage, realtime, auth)
-- Vercel (Website, Dashboard)
-- Fly.io (API/tRPC)
+- Railway (API, Worker, Dashboard)
+- Vercel (Website)
+- Cloudflare (Engine, CDN/Proxy)
 
 ### Services
 

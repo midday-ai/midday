@@ -151,6 +151,7 @@
         "react-use-draggable-scroll": "^0.4.7",
         "react-zoom-pan-pinch": "^3.7.0",
         "recharts": "2.15.3",
+        "redis": "^5.10.0",
         "resend": "catalog:",
         "server-only": "^0.0.1",
         "sharp": "catalog:",

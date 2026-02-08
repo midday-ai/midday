@@ -18,13 +18,14 @@ export function getSharedRedisClient(): RedisClientType {
   }
 
   const isProduction =
-    process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
+    process.env.NODE_ENV === "production" ||
+    process.env.RAILWAY_ENVIRONMENT === "production";
 
   sharedRedisClient = createClient({
     url: redisUrl,
     pingInterval: 60 * 1000, // 1-minute ping to detect stale connections
     socket: {
-      family: isProduction ? 6 : 4, // IPv6 for Fly.io 6PN internal network
+      family: 4,
       connectTimeout: isProduction ? 10000 : 5000,
       keepAlive: true, // TCP keepalive for connection health
       noDelay: true, // Disable Nagle's algorithm for lower latency

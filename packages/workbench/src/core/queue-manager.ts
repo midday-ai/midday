@@ -724,7 +724,7 @@ export class QueueManager {
             computedAt: now,
           };
         })(),
-        45000, // 45 second timeout (before Fly.io's 60s proxy timeout)
+        45000, // 45 second timeout (before proxy timeout)
         "Metrics computation timed out after 45 seconds",
       );
     });

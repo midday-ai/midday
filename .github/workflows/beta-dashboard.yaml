@@ -1,7 +1,5 @@
 name: Beta Deployment - Dashboard
 env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
   NODE_OPTIONS: "--max-old-space-size=8192"
@@ -16,6 +14,7 @@ jobs:
   deploy-beta:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    concurrency: railway-dashboard-beta
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -33,15 +32,9 @@ jobs:
       - name: 🪐 Check TypeScript
         run: bun run typecheck
         working-directory: ./apps/dashboard
-      - name: 📤 Pull Vercel Environment Information
-        run: bunx vercel pull --yes --environment=beta --token=${{ secrets.VERCEL_TOKEN }}
-      - name: 🏗 Build Project Artifacts
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: 🚀 Deploy to Railway Beta
+        run: railway up --service ${{ secrets.RAILWAY_DASHBOARD_SERVICE_ID }} --environment staging
         env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        run: bunx vercel build --target=beta --token=${{ secrets.VERCEL_TOKEN }}
-      - name: 🚀 Deploy to Vercel
-        run: |
-          bunx vercel deploy --prebuilt --target=beta --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
-          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` beta.midday.ai
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

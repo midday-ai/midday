@@ -48,13 +48,13 @@ export const primaryDb = drizzle(primaryPool, {
 });
 
 const getReplicaIndexForRegion = () => {
-  switch (process.env.FLY_REGION) {
-    case "fra":
-      return 0;
-    case "iad":
-      return 1;
-    case "sjc":
-      return 2;
+  switch (process.env.RAILWAY_REPLICA_REGION) {
+    case "europe-west4-drams3a":
+      return 0; // fra replica
+    case "us-east4-eqdc4a":
+      return 1; // iad replica
+    case "us-west2":
+      return 2; // sjc replica
     default:
       return 0;
   }
