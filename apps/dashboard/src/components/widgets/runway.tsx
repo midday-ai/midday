@@ -13,12 +13,10 @@ export function RunwayWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, currency } = useMetricsFilter();
+  const { currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
     ...trpc.widgets.getRunway.queryOptions({
-      from,
-      to,
       currency,
     }),
     ...WIDGET_POLLING_CONFIG,
@@ -58,13 +56,11 @@ export function RunwayWidget() {
     <BaseWidget
       title="Cash Runway"
       icon={<Icons.Time className="size-4" />}
-      description="Your cash runway in months"
+      description="Based on last 6 months"
       onClick={() => {
         handleToolCall({
           toolName: "getRunway",
           toolParams: {
-            from,
-            to,
             currency,
             showCanvas: true,
           },

@@ -4,7 +4,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 export function AppsSkeleton() {
   return (
     <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 mx-auto mt-8">
-      {Array.from({ length: 8 }).map((_, index) => (
+      {Array.from({ length: 12 }).map((_, index) => (
         <Card key={index.toString()} className="w-full flex flex-col">
           <div className="p-6">
             <Skeleton className="h-10 w-10 rounded-full" />

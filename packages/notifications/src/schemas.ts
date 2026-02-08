@@ -200,7 +200,6 @@ export const invoiceSentSchema = z.object({
   amount: z.number().optional(),
   currency: z.string().optional(),
   dueDate: z.string().optional(),
-  customerId: z.string().uuid().optional(),
 });
 
 export const invoiceReminderSentSchema = z.object({
@@ -214,7 +213,6 @@ export const invoiceReminderSentSchema = z.object({
   amount: z.number().optional(),
   currency: z.string().optional(),
   dueDate: z.string().optional(),
-  customerId: z.string().uuid().optional(),
 });
 
 export const invoiceCancelledSchema = z.object({

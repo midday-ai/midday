@@ -101,7 +101,6 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
           amount: invoice.amount ?? undefined,
           currency: invoice.currency ?? undefined,
           dueDate: invoice.dueDate ?? undefined,
-          customerId: invoice.customer?.id,
         },
         {
           sendEmail: true,

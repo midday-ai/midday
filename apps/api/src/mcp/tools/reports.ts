@@ -122,8 +122,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     async (params) => {
       const result = await getRunway(db, {
         teamId,
-        from: params.from,
-        to: params.to,
         currency: params.currency,
       });
 

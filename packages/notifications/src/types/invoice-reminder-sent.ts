@@ -44,7 +44,6 @@ export const invoiceReminderSent: NotificationHandler = {
         amount: data.amount,
         currency: data.currency,
         dueDate: data.dueDate,
-        customerId: data.customerId,
       },
     };
   },

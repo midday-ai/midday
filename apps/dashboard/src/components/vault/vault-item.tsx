@@ -12,7 +12,7 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { VaultItemActions } from "./vault-item-actions";
 
 type Props = {
@@ -31,7 +31,7 @@ type Props = {
   small?: boolean;
 };
 
-export function VaultItem({ data, small }: Props) {
+export const VaultItem = memo(function VaultItem({ data, small }: Props) {
   const { setParams } = useDocumentParams();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -225,4 +225,4 @@ export function VaultItem({ data, small }: Props) {
       </div>
     </div>
   );
-}
+});

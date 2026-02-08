@@ -7,7 +7,6 @@ interface InvoiceSchemaProps {
   currency: string;
   dueDate: string;
   link: string;
-  customerId?: string;
 }
 
 /**
@@ -22,14 +21,12 @@ export function InvoiceSchema({
   currency,
   dueDate,
   link,
-  customerId,
 }: InvoiceSchemaProps) {
   const formattedDueDate = format(parseISO(dueDate), "yyyy-MM-dd");
 
   const schema = {
     "@context": "http://schema.org",
     "@type": "Invoice",
-    ...(customerId && { accountId: customerId }),
     confirmationNumber: invoiceNumber,
     broker: {
       "@type": "Organization",

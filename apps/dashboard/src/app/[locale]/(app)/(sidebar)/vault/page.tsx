@@ -27,7 +27,7 @@ export default async function Page(props: Props) {
   prefetch(
     trpc.documents.get.infiniteQueryOptions({
       ...filter,
-      pageSize: 20,
+      pageSize: 24,
     }),
   );
 
