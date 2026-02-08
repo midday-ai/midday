@@ -4,6 +4,7 @@ import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
 import { chatRouter } from "./chat";
 import { customersRouter } from "./customers";
+import { desktopRouter } from "./desktop";
 import { documentsRouter } from "./documents";
 import { filesRouter } from "./files";
 import { inboxRouter } from "./inbox";
@@ -32,6 +33,7 @@ routers.route("/webhook", webhookRouter);
 routers.route("/files", filesRouter);
 routers.route("/apps", appsRouter);
 routers.route("/invoice-payments", invoicePaymentsRouter);
+routers.route("/desktop", desktopRouter);
 
 // Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);
