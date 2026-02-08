@@ -1507,6 +1507,19 @@ export async function updateTransaction(
     return null;
   }
 
+  // If status is being changed from "exported" to something else, delete accounting sync records
+  // This ensures transactions are properly unmarked as exported
+  if (dataToUpdate.status !== undefined && dataToUpdate.status !== "exported") {
+    await db
+      .delete(accountingSyncRecords)
+      .where(
+        and(
+          eq(accountingSyncRecords.transactionId, id),
+          eq(accountingSyncRecords.teamId, teamId),
+        ),
+      );
+  }
+
   if (dataToUpdate.categorySlug) {
     createActivity(db, {
       teamId,
@@ -1719,6 +1732,19 @@ export async function updateTransactions(
   } else {
     // If no fields to update, just return the transaction IDs
     results = ids.map((id) => ({ id }));
+  }
+
+  // If status is being changed from "exported" to something else, delete accounting sync records
+  // This ensures transactions are properly unmarked as exported
+  if (input.status !== undefined && input.status !== "exported") {
+    await db
+      .delete(accountingSyncRecords)
+      .where(
+        and(
+          eq(accountingSyncRecords.teamId, teamId),
+          inArray(accountingSyncRecords.transactionId, ids),
+        ),
+      );
   }
 
   // Create activities for transaction updates

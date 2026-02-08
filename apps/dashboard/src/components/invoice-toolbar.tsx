@@ -1,6 +1,7 @@
 "use client";
 
 import { downloadFile } from "@/lib/download";
+import { saveFile } from "@/lib/save-file";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
@@ -11,7 +12,6 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { saveAs } from "file-saver";
 import { motion } from "framer-motion";
 import JSZip from "jszip";
 import { useEffect, useRef, useState } from "react";
@@ -113,7 +113,7 @@ export default function InvoiceToolbar({
           compressionOptions: { level: 9 },
         });
 
-        saveAs(zipBlob, `${invoiceNumber}-invoice-and-receipt.zip`);
+        await saveFile(zipBlob, `${invoiceNumber}-invoice-and-receipt.zip`);
       } else {
         // Download invoice only
         await downloadFile(

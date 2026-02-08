@@ -8,6 +8,14 @@
       "icons/dev/128x128@2x.png",
       "icons/dev/icon.icns",
       "icons/production/icon.ico"
-    ]
+    ],
+    "createUpdaterArtifacts": false
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["midday-dev"]
+      }
+    }
   }
 }

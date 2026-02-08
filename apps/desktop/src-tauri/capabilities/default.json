@@ -27,7 +27,18 @@
     "core:resources:default",
     "core:menu:default",
     "core:tray:default",
-    "core:path:default"
+    "core:path:default",
+    "upload:default",
+    "dialog:default",
+    "dialog:allow-save",
+    "opener:default",
+    "fs:allow-download-write",
+    "fs:allow-exists",
+    "fs:allow-open",
+    "fs:allow-write",
+    "fs:allow-create",
+    "fs:allow-truncate",
+    "fs:scope"
   ],
   "remote": {
     "urls": [

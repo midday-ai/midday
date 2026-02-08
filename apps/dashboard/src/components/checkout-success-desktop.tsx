@@ -1,5 +1,6 @@
 "use client";
 
+import { getDesktopSchemeUrl } from "@midday/desktop-client/platform";
 import Image from "next/image";
 import appIcon from "public/appicon.png";
 import { useEffect, useRef } from "react";
@@ -12,13 +13,14 @@ export function CheckoutSuccessDesktop({
   redirectPath,
 }: CheckoutSuccessDesktopProps) {
   const hasRunned = useRef(false);
+  const schemeUrl = getDesktopSchemeUrl();
 
   useEffect(() => {
     if (redirectPath && !hasRunned.current) {
-      window.location.replace(`midday://${redirectPath}`);
+      window.location.replace(`${schemeUrl}${redirectPath}`);
       hasRunned.current = true;
     }
-  }, [redirectPath]);
+  }, [redirectPath, schemeUrl]);
 
   return (
     <div>
@@ -34,7 +36,7 @@ export function CheckoutSuccessDesktop({
         <p>Checkout successful</p>
         <p className="mb-4">
           If Midday dosen't open in a few seconds,{" "}
-          <a className="underline" href={`midday://${redirectPath}`}>
+          <a className="underline" href={`${schemeUrl}${redirectPath}`}>
             click here
           </a>
           .

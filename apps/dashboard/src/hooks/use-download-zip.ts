@@ -1,6 +1,6 @@
+import { saveFile } from "@/lib/save-file";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
-import { saveAs } from "file-saver";
 import JSZip from "jszip";
 
 function getFilenameFromPath(path: string): string {
@@ -80,7 +80,7 @@ async function zipAndDownloadFiles(
     },
   });
 
-  saveAs(zipBlob, `download-${Date.now()}.zip`);
+  await saveFile(zipBlob, `download-${Date.now()}.zip`);
 }
 
 export function useDownloadZip() {

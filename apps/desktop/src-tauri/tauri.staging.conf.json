@@ -9,5 +9,12 @@
       "icons/staging/128x128@2x.png",
       "icons/staging/icon.icns"
     ]
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["midday-staging"]
+      }
+    }
   }
 }

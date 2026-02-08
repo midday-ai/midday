@@ -1,4 +1,3 @@
-import { invoke } from "@midday/desktop-client/core";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 
 export async function downloadFile(url: string, filename: string) {
@@ -13,26 +12,35 @@ export async function downloadFile(url: string, filename: string) {
     return;
   }
 
+  // Desktop mode - fetch through the webview (which has cookies/session),
+  // then save the blob natively to ~/Downloads via Tauri fs plugin.
+  const downloadUrl =
+    url.startsWith("http://") || url.startsWith("https://")
+      ? url
+      : `${window.location.origin}${url}`;
+
+  const response = await fetch(downloadUrl);
+
+  if (!response.ok) {
+    throw new Error(
+      `Download failed: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const blob = await response.blob();
+  console.log("[downloadFile] Fetched blob:", {
+    size: blob.size,
+    type: blob.type,
+    filename,
+  });
+
+  const { nativeSaveFile } = await import("@midday/desktop-client/core");
+
   try {
-    // Desktop mode - open download URL in default browser
-    // The browser will have access to user's authentication and handle the download
-    console.log("Opening download in browser:", { url, filename });
-
-    // Check if URL is already absolute (starts with http:// or https://)
-    // If relative, prepend window.location.origin
-    const downloadUrl =
-      url.startsWith("http://") || url.startsWith("https://")
-        ? url
-        : `${window.location.origin}${url}`;
-
-    // Use Tauri's opener plugin via invoke to open URL in default browser
-    await invoke("plugin:opener|open_url", {
-      url: downloadUrl,
-    });
-
-    console.log("Download opened in browser:", downloadUrl);
+    await nativeSaveFile(blob, filename);
+    console.log("[downloadFile] File download completed successfully");
   } catch (error) {
-    console.error("Failed to open download in browser:", error);
+    console.error("[downloadFile] Failed to save file:", error);
     throw error;
   }
 }

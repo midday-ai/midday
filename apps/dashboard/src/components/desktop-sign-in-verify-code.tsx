@@ -1,5 +1,6 @@
 "use client";
 
+import { getDesktopSchemeUrl } from "@midday/desktop-client/platform";
 import Image from "next/image";
 import appIcon from "public/appicon.png";
 import { useEffect, useRef } from "react";
@@ -12,13 +13,14 @@ export function DesktopSignInVerifyCode({
   code,
 }: DesktopSignInVerifyCodeProps) {
   const hasRunned = useRef(false);
+  const schemeUrl = getDesktopSchemeUrl();
 
   useEffect(() => {
     if (code && !hasRunned.current) {
-      window.location.replace(`midday://api/auth/callback?code=${code}`);
+      window.location.replace(`${schemeUrl}api/auth/callback?code=${code}`);
       hasRunned.current = true;
     }
-  }, [code]);
+  }, [code, schemeUrl]);
 
   return (
     <div>
@@ -36,7 +38,7 @@ export function DesktopSignInVerifyCode({
           If Midday dosen't open in a few seconds,{" "}
           <a
             className="underline"
-            href={`midday://api/auth/callback?code=${code}`}
+            href={`${schemeUrl}api/auth/callback?code=${code}`}
           >
             click here
           </a>

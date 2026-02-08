@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
   const [type, method, sessionId] = state?.split(":") ?? [];
 
   const isDesktop = type === "desktop";
-  const redirectBase = isDesktop ? "midday://" : requestUrl.origin;
+  const scheme = process.env.NEXT_PUBLIC_DESKTOP_SCHEME || "midday";
+  const redirectBase = isDesktop ? `${scheme}://` : requestUrl.origin;
 
   if (!code) {
     return NextResponse.redirect(new URL("/?error=missing_code", redirectBase));
