@@ -121,11 +121,11 @@
     "@tiptap/starter-kit": "^2.12.0",
     "@tiptap/suggestion": "^2.12.0",
     "@uidotdev/usehooks": "^2.4.1",
-    "ai": "5.0.87",
+    "ai": "catalog:",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.1.1",
-    "date-fns": "^4.1.0",
+    "date-fns": "catalog:",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.25",
     "input-otp": "^1.4.2",
@@ -146,8 +146,8 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "typescript": "^5.9.3"
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:"
   }
 }

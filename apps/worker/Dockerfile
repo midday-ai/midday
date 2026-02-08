@@ -29,10 +29,10 @@ COPY --from=builder /app/out/worker/json/ .
 
 # Copy full source from worker pruned workspace
 COPY --from=builder /app/out/worker/full/ .
+COPY bunfig.toml .
 
 # Remove any lockfile that might have been copied
 RUN rm -f bun.lock
-# Generate a fresh lockfile
 RUN bun install
 
 # Build workbench package (required - exports from dist/)

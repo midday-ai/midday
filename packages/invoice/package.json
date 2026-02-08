@@ -28,9 +28,9 @@
   "dependencies": {
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
-    "@react-pdf/renderer": "^4.3.1",
-    "date-fns": "^4.1.0",
-    "jose": "^6.1.3",
+    "@react-pdf/renderer": "catalog:",
+    "date-fns": "catalog:",
+    "jose": "catalog:",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {

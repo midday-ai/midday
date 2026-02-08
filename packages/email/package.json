@@ -23,13 +23,13 @@
     "@react-email/components": "1.0.6",
     "@react-email/render": "2.0.4",
     "@react-email/tailwind": "2.0.3",
-    "date-fns": "^4.1.0",
+    "date-fns": "catalog:",
     "react-email": "5.2.5",
     "responsive-react-email": "^0.0.5"
   },
   "devDependencies": {
     "@react-email/preview-server": "5.2.5",
     "@types/node": "^25.1.0",
-    "typescript": "^5.9.3"
+    "typescript": "catalog:"
   }
 }

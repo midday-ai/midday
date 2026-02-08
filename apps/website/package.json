@@ -26,8 +26,8 @@
     "next": "16.1.5",
     "next-mdx-remote": "^5.0.0",
     "nuqs": "^2.8.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "remark-gfm": "^4.0.1",
     "streamdown": "^2.1.0",
     "sugar-high": "^0.9.5"

@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@midday/logger": "workspace:*",
-    "bullmq": "^5.65.1"
+    "bullmq": "catalog:"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "typescript": "^5.9.3"
+    "typescript": "catalog:"
   }
 }

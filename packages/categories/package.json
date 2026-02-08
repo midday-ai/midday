@@ -16,14 +16,14 @@
     "migrate:run": "tsx scripts/migrate.ts --command migrate"
   },
   "dependencies": {
-    "zod": "^4.1.13",
-    "ai": "5.0.87",
-    "@ai-sdk/google": "^2.0.33",
+    "zod": "catalog:",
+    "ai": "catalog:",
+    "@ai-sdk/google": "catalog:",
     "@midday/logger": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^25.0.3",
-    "typescript": "^5.9.3"
+    "typescript": "catalog:"
   }
 }

@@ -26,7 +26,7 @@
       "@db/*": ["../../packages/db/src/*"],
       "@midday/job-client": ["../../packages/job-client/src/index.ts"]
     },
-    "types": ["bun-types"]
+    "types": ["bun"]
   },
   "exclude": ["node_modules"],
   "include": ["src/**/*.ts", "../../types"]

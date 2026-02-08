@@ -21,11 +21,11 @@
     "@midday/logger": "workspace:*",
     "intuit-oauth": "^4.2.2",
     "xero-node": "^13.3.0",
-    "zod": "^4.1.13"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@types/bun": "latest",
-    "typescript": "^5.9.3"
+    "typescript": "catalog:"
   }
 }
