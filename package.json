@@ -1,7 +1,7 @@
 {
   "name": "midday",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
@@ -27,5 +27,5 @@
     "turbo": "2.7.0",
     "typescript": "^5.9.3"
   },
-  "packageManager": "bun@1.2.22"
+  "packageManager": "bun@1.3.9"
 }

@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: v1.2.23
+          bun-version: v1.3.9
       - name: Install dependencies
         run: bun install
       - name: 🧪 Run tests
