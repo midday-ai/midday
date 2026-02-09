@@ -111,6 +111,6 @@ app.route("/", routers);
 export default {
   port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,
   fetch: app.fetch,
-  host: "::", // Listen on all interfaces
+  host: "0.0.0.0", // Listen on all interfaces
   idleTimeout: 60,
 };

@@ -5,14 +5,13 @@
     "dockerfilePath": "apps/api/Dockerfile"
   },
   "deploy": {
-    "startCommand": "bun run src/index.ts",
     "healthcheckPath": "/health",
-    "healthcheckTimeout": 10,
+    "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",
     "multiRegionConfig": {
       "europe-west4-drams3a": { "numReplicas": 3 },
       "us-east4-eqdc4a": { "numReplicas": 2 },
-      "us-west2": { "numReplicas": 2 }
+      "us-west2": { "numReplicas": 1 }
     }
   }
 }
