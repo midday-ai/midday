@@ -4,48 +4,45 @@ const KEY_PREFIX = "next-cache:";
 const TAG_PREFIX = "next-tag:";
 
 let client = null;
-let initFailed = false;
 
-async function getClient() {
+function getClient() {
   // Once created with autoReconnect + enableOfflineQueue, always return the
-  // client — Bun handles reconnection and queues commands while disconnected.
+  // same client — Bun handles reconnection and queues commands while disconnected.
   if (client) return client;
-  if (initFailed) return null;
 
   // Skip during build phase
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
 
-  try {
-    client = new RedisClient(
-      process.env.REDIS_URL ?? "redis://localhost:6379",
-      {
-        connectionTimeout: 10_000,
-        autoReconnect: true,
-        maxRetries: 10,
-        enableOfflineQueue: true,
-        enableAutoPipelining: true,
-      },
-    );
+  client = new RedisClient(
+    process.env.REDIS_URL ?? "redis://localhost:6379",
+    {
+      connectionTimeout: 10_000,
+      autoReconnect: true,
+      maxRetries: 10,
+      enableOfflineQueue: true,
+      enableAutoPipelining: true,
+    },
+  );
 
-    client.onclose = (err) => {
-      if (err) {
-        console.error("[Next Cache Redis] Connection closed:", err.message);
-      }
-    };
+  client.onclose = (err) => {
+    if (err) {
+      console.error("[Next Cache Redis] Connection closed:", err.message);
+    }
+  };
 
-    await client.connect();
-    return client;
-  } catch {
-    client = null;
-    initFailed = true;
-    return null;
-  }
+  // Connect eagerly but don't await — if the initial connect fails,
+  // autoReconnect + enableOfflineQueue will handle recovery gracefully.
+  client.connect().catch((err) => {
+    console.error("[Next Cache Redis] Initial connection error:", err.message);
+  });
+
+  return client;
 }
 
 /** @type {import("next/dist/server/lib/cache-handlers/types").CacheHandler} */
 const cacheHandler = {
   async get(cacheKey, softTags) {
-    const redis = await getClient();
+    const redis = getClient();
     if (!redis) return undefined;
 
     try {
@@ -93,7 +90,7 @@ const cacheHandler = {
   },
 
   async set(cacheKey, pendingEntry) {
-    const redis = await getClient();
+    const redis = getClient();
     if (!redis) return;
 
     try {
@@ -137,7 +134,7 @@ const cacheHandler = {
   async refreshTags() {},
 
   async getExpiration(tags) {
-    const redis = await getClient();
+    const redis = getClient();
     if (!redis) return 0;
 
     try {
@@ -157,7 +154,7 @@ const cacheHandler = {
   },
 
   async updateTags(tags) {
-    const redis = await getClient();
+    const redis = getClient();
     if (!redis) return;
 
     try {

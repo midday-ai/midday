@@ -1,5 +1,8 @@
 name: Staging
 
+permissions:
+  contents: read
+
 on:
   push:
     branches-ignore:

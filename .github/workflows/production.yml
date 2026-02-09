@@ -1,5 +1,8 @@
 name: Production
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -99,8 +102,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency: railway-api-production
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -143,8 +144,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency: railway-worker-production
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
 
