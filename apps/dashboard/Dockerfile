@@ -27,12 +27,9 @@ RUN bun install
 # Copy full source from pruned workspace
 COPY --from=builder /app/out/full/ .
 
-# Build the engine package (dependency)
-RUN cd packages/engine && bun run build || true
-
-# Build the dashboard
+# Build the dashboard and its dependencies (including @midday/engine)
 ENV NODE_ENV=production
-RUN cd apps/dashboard && bun run build
+RUN bunx turbo run build --filter=@midday/dashboard
 
 # Runner stage - minimal image
 FROM base AS runner
