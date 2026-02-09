@@ -1,13 +1,14 @@
+import { getUrl } from "@/utils/environment";
 import { client } from "@midday/engine-client";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
+  const origin = getUrl();
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const state = searchParams.get("state");
-  const requestUrl = new URL(request.url);
   const supabase = await createClient();
 
   const {
@@ -15,14 +16,14 @@ export async function GET(request: NextRequest) {
   } = await getSession();
 
   if (!session) {
-    return NextResponse.redirect(new URL("/", requestUrl.origin));
+    return NextResponse.redirect(new URL("/", origin));
   }
 
   const [type, method, sessionId] = state?.split(":") ?? [];
 
   const isDesktop = type === "desktop";
   const scheme = process.env.NEXT_PUBLIC_DESKTOP_SCHEME || "midday";
-  const redirectBase = isDesktop ? `${scheme}://` : requestUrl.origin;
+  const redirectBase = isDesktop ? `${scheme}://` : origin;
 
   if (!code) {
     return NextResponse.redirect(new URL("/?error=missing_code", redirectBase));
@@ -68,7 +69,6 @@ export async function GET(request: NextRequest) {
         .single();
 
       // Redirect to frontend which will trigger the reconnect job
-      // The frontend handles job triggering to track progress via runId/accessToken
       return NextResponse.redirect(
         new URL(
           `/settings/accounts?id=${data?.id}&step=reconnect`,

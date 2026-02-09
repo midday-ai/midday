@@ -1,15 +1,17 @@
+import { getUrl } from "@/utils/environment";
 import { getSession } from "@midday/supabase/cached-queries";
 import { updateBankConnection } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
+  const origin = getUrl();
   const {
     data: { session },
   } = await getSession();
 
   if (!session) {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/", origin));
   }
 
   const supabase = await createClient();
@@ -20,8 +22,6 @@ export async function GET(req: NextRequest) {
 
   if (id) {
     await updateBankConnection(supabase, { id, referenceId });
-    // Frontend will trigger the reconnect job via useEffect when it sees step=reconnect
-    // This allows the frontend to track job progress via runId/accessToken
   }
 
   if (isDesktop === "true") {
@@ -32,6 +32,6 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.redirect(
-    `${requestUrl.origin}/settings/accounts?id=${id}&step=reconnect`,
+    `${origin}/settings/accounts?id=${id}&step=reconnect`,
   );
 }
