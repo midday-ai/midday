@@ -2,6 +2,8 @@
   "extends": "@midday/tsconfig/base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "paths": {
       "@db/*": ["../db/src/*"],
       "@api/*": ["../../apps/api/src/*"]
