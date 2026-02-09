@@ -17,27 +17,12 @@ RUN turbo prune @midday/dashboard --docker
 FROM base AS installer
 WORKDIR /app
 
-# Install build dependencies for native modules (canvas needs node-gyp + system libs)
-RUN apt-get update && apt-get install -y \
-    nodejs \
-    npm \
-    python3 \
-    python3-pip \
-    build-essential \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libjpeg-dev \
-    libgif-dev \
-    librsvg2-dev \
-    pkg-config \
-    && rm -rf /var/lib/apt/lists/*
-
 # Copy package.json files from pruned workspace
 COPY --from=builder /app/out/json/ .
 COPY bunfig.toml .
 
 # Install dependencies
-RUN bun install --trust
+RUN bun install
 
 # Copy full source from pruned workspace
 COPY --from=builder /app/out/full/ .
@@ -50,16 +35,6 @@ RUN bunx turbo run build --filter=@midday/dashboard --only
 # Runner stage - minimal image
 FROM base AS runner
 WORKDIR /app
-
-# Install runtime libraries for canvas
-RUN apt-get update && apt-get install -y \
-    libcairo2 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libjpeg62-turbo \
-    libgif7 \
-    librsvg2-2 \
-    && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 
