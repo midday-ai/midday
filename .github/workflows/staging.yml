@@ -1,0 +1,222 @@
+name: Staging
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: staging-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Detect which services/packages changed
+  # ---------------------------------------------------------------------------
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      dashboard: ${{ steps.filter.outputs.dashboard }}
+      worker: ${{ steps.filter.outputs.worker }}
+      engine: ${{ steps.filter.outputs.engine }}
+      website: ${{ steps.filter.outputs.website }}
+      jobs: ${{ steps.filter.outputs.jobs }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'packages/**'
+              - '!packages/email/**'
+              - '!packages/ui/**'
+            dashboard:
+              - 'apps/dashboard/**'
+              - 'packages/**'
+            worker:
+              - 'apps/worker/**'
+              - 'packages/**'
+              - '!packages/email/**'
+              - '!packages/ui/**'
+            engine:
+              - 'apps/engine/**'
+            website:
+              - 'apps/website/**'
+              - 'packages/ui/**'
+              - 'packages/app-store/**'
+            jobs:
+              - 'packages/jobs/**'
+
+  # ---------------------------------------------------------------------------
+  # Validate — tests, linting, type-checking (turbo handles parallelism)
+  # ---------------------------------------------------------------------------
+  validate:
+    name: Validate
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.api == 'true' ||
+      needs.detect-changes.outputs.dashboard == 'true' ||
+      needs.detect-changes.outputs.worker == 'true' ||
+      needs.detect-changes.outputs.engine == 'true' ||
+      needs.detect-changes.outputs.website == 'true' ||
+      needs.detect-changes.outputs.jobs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NODE_OPTIONS: "--max-old-space-size=8192"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - name: Validate affected packages
+        run: |
+          BASE_SHA=${{ github.event.pull_request.base.sha || github.event.before }}
+          bunx turbo test lint typecheck --filter="...[${BASE_SHA}]"
+
+  # ---------------------------------------------------------------------------
+  # Deploy API to Railway staging
+  # ---------------------------------------------------------------------------
+  deploy-api-staging:
+    name: Deploy API (staging)
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.api == 'true' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency: railway-api-staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --service ${{ secrets.RAILWAY_API_STAGING_SERVICE_ID }} --environment staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy Dashboard to Railway staging
+  # ---------------------------------------------------------------------------
+  deploy-dashboard-staging:
+    name: Deploy Dashboard (staging)
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.dashboard == 'true' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency: railway-dashboard-staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --service ${{ secrets.RAILWAY_DASHBOARD_SERVICE_ID }} --environment staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy Worker to Railway staging
+  # ---------------------------------------------------------------------------
+  deploy-worker-staging:
+    name: Deploy Worker (staging)
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.worker == 'true' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency: railway-worker-staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --service ${{ secrets.RAILWAY_WORKER_STAGING_SERVICE_ID }} --environment staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy Engine to Cloudflare staging
+  # ---------------------------------------------------------------------------
+  deploy-engine-staging:
+    name: Deploy Engine (staging)
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.engine == 'true' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          packageManager: bun
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: "apps/engine"
+          wranglerVersion: "4.33.2"
+          command: deploy --minify src/index.ts --env staging
+
+  # ---------------------------------------------------------------------------
+  # Deploy Jobs to Trigger.dev staging
+  # ---------------------------------------------------------------------------
+  deploy-jobs-staging:
+    name: Deploy Jobs (staging)
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.jobs == 'true' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Deploy to Trigger.dev
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: |
+          TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@4.1.2 deploy --env staging
+        working-directory: packages/jobs
+
+  # ---------------------------------------------------------------------------
+  # Deploy Website preview to Vercel
+  # ---------------------------------------------------------------------------
+  deploy-website-preview:
+    name: Deploy Website (preview)
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.website == 'true' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Pull Vercel environment
+        run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}

@@ -1,0 +1,264 @@
+name: Production
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: production-${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Detect which services/packages changed
+  # ---------------------------------------------------------------------------
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      dashboard: ${{ steps.filter.outputs.dashboard }}
+      worker: ${{ steps.filter.outputs.worker }}
+      engine: ${{ steps.filter.outputs.engine }}
+      website: ${{ steps.filter.outputs.website }}
+      email: ${{ steps.filter.outputs.email }}
+      jobs: ${{ steps.filter.outputs.jobs }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'packages/**'
+              - '!packages/email/**'
+              - '!packages/ui/**'
+            dashboard:
+              - 'apps/dashboard/**'
+              - 'packages/**'
+            worker:
+              - 'apps/worker/**'
+              - 'packages/**'
+              - '!packages/email/**'
+              - '!packages/ui/**'
+            engine:
+              - 'apps/engine/**'
+            website:
+              - 'apps/website/**'
+              - 'packages/ui/**'
+              - 'packages/app-store/**'
+            email:
+              - 'packages/email/**'
+            jobs:
+              - 'packages/jobs/**'
+
+  # ---------------------------------------------------------------------------
+  # Validate — tests, linting, type-checking (turbo handles parallelism)
+  # ---------------------------------------------------------------------------
+  validate:
+    name: Validate
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.api == 'true' ||
+      needs.detect-changes.outputs.dashboard == 'true' ||
+      needs.detect-changes.outputs.worker == 'true' ||
+      needs.detect-changes.outputs.engine == 'true' ||
+      needs.detect-changes.outputs.website == 'true' ||
+      needs.detect-changes.outputs.email == 'true' ||
+      needs.detect-changes.outputs.jobs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NODE_OPTIONS: "--max-old-space-size=8192"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - name: Validate affected packages
+        run: |
+          BASE_SHA=${{ github.event.before }}
+          bunx turbo test lint typecheck --filter="...[${BASE_SHA}]"
+
+  # ---------------------------------------------------------------------------
+  # Deploy API to Railway
+  # ---------------------------------------------------------------------------
+  deploy-api:
+    name: Deploy API
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency: railway-api-production
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy Dashboard to Railway
+  # ---------------------------------------------------------------------------
+  deploy-dashboard:
+    name: Deploy Dashboard
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.dashboard == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency: railway-dashboard-production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --service ${{ secrets.RAILWAY_DASHBOARD_SERVICE_ID }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy Worker to Railway
+  # ---------------------------------------------------------------------------
+  deploy-worker:
+    name: Deploy Worker
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.worker == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency: railway-worker-production
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --service ${{ secrets.RAILWAY_WORKER_SERVICE_ID }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy Engine to Cloudflare
+  # ---------------------------------------------------------------------------
+  deploy-engine:
+    name: Deploy Engine
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.engine == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          packageManager: bun
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: "apps/engine"
+          wranglerVersion: "4.33.2"
+          command: deploy --minify src/index.ts --env production
+
+  # ---------------------------------------------------------------------------
+  # Deploy Website to Vercel
+  # ---------------------------------------------------------------------------
+  deploy-website:
+    name: Deploy Website
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.website == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+      NODE_OPTIONS: "--max-old-space-size=4096"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Pull Vercel environment
+        run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Pull Vercel project config
+        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        run: |
+          bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $(cat domain.txt) midday.ai
+
+  # ---------------------------------------------------------------------------
+  # Deploy Email to Vercel
+  # ---------------------------------------------------------------------------
+  deploy-email:
+    name: Deploy Email
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.email == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Pull Vercel environment
+        run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Pull Vercel project config
+        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        run: |
+          bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $(cat domain.txt) email.midday.ai
+
+  # ---------------------------------------------------------------------------
+  # Deploy Jobs to Trigger.dev
+  # ---------------------------------------------------------------------------
+  deploy-jobs:
+    name: Deploy Jobs
+    needs: [detect-changes, validate]
+    if: needs.detect-changes.outputs.jobs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Deploy to Trigger.dev
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: |
+          TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@4.1.2 deploy
+        working-directory: packages/jobs
