@@ -865,7 +865,7 @@ export function TestimonialsSection({
             </div>
           </div>
         </div>
-        <div className="text-center mt-8">
+        <div className="text-center mt-6 sm:mt-8">
           <Link
             href="/testimonials"
             className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"

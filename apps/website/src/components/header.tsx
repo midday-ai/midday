@@ -2,11 +2,11 @@
 
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion } from "motion/react";
 import { HeaderIntegrationsPreview } from "./header-integrations-preview";
 import type { Testimonial } from "./sections/testimonials-section";
 import { defaultTestimonials } from "./sections/testimonials-section";
@@ -441,9 +441,13 @@ export function Header({
                                 const testimonial =
                                   defaultTestimonials[currentTestimonialIndex];
                                 if (!testimonial) return null;
-                                const firstSentenceEnd = testimonial.content.match(/[.!?]\s/);
+                                const firstSentenceEnd =
+                                  testimonial.content.match(/[.!?]\s/);
                                 const firstSentence = firstSentenceEnd
-                                  ? testimonial.content.substring(0, firstSentenceEnd.index! + 1)
+                                  ? testimonial.content.substring(
+                                      0,
+                                      firstSentenceEnd.index! + 1,
+                                    )
                                   : testimonial.content;
                                 return (
                                   <div className="relative font-serif text-sm xl:text-base 2xl:text-lg leading-tight text-center px-2 line-clamp-3 w-full z-10">

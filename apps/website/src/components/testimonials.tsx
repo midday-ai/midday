@@ -20,7 +20,7 @@ const allTestimonials: Testimonial[] = [
     title: "",
     company: "Awwwocado",
     country: "Netherlands",
-    image: "/stories/vitalie-cover.jpg",
+    image: "/stories/vitalie.jpg",
     content:
       "All in one platform for freelancers looking to create clear insights on income and expenses.",
     fullContent:
