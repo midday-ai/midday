@@ -149,7 +149,7 @@ export function Testimonials() {
             <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
               Customer Stories
             </h1>
-            <p className="font-sans text-base text-muted-foreground leading-relaxed mb-8">
+            <p className="font-sans text-base text-muted-foreground leading-normal sm:leading-relaxed mb-8">
               See how founders and small teams use Midday to manage their
               finances and run their businesses.
             </p>
@@ -199,7 +199,7 @@ export function Testimonials() {
                   </div>
 
                   {/* Big Quote */}
-                  <blockquote className="font-sans text-lg sm:text-xl lg:text-2xl text-foreground leading-relaxed">
+                  <blockquote className="font-sans text-lg sm:text-xl lg:text-2xl text-foreground leading-normal sm:leading-relaxed">
                     &quot;{testimonial.content}&quot;
                   </blockquote>
                 </div>
