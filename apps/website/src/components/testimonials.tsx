@@ -143,17 +143,20 @@ export function Testimonials() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="bg-background pt-32 pb-12">
-        <div className="max-w-[1400px] mx-auto mb-8 px-4">
+      <div className="bg-background pt-32 pb-24">
+        <div className="max-w-[1400px] mx-auto mb-16 px-4">
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
               Customer Stories
             </h1>
-            <p className="font-sans text-base text-muted-foreground leading-relaxed">
+            <p className="font-sans text-base text-muted-foreground leading-relaxed mb-8">
               See how founders and small teams use Midday to manage their
               finances and run their businesses.
             </p>
           </div>
+        </div>
+        <div className="max-w-[1400px] mx-auto">
+          <div className="h-px w-full border-t border-border" />
         </div>
       </div>
 
