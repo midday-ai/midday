@@ -10,6 +10,7 @@ import { routers } from "./rest/routers";
 import type { Context } from "./rest/types";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
+import { logger } from "@midday/logger";
 import { httpLogger } from "./utils/logger";
 
 const app = new OpenAPIHono<Context>();
@@ -55,6 +56,14 @@ app.use(
   trpcServer({
     router: appRouter,
     createContext: createTRPCContext,
+    onError: ({ error, path }) => {
+      logger.error(`[tRPC] ${path}`, {
+        message: error.message,
+        code: error.code,
+        cause: error.cause instanceof Error ? error.cause.message : undefined,
+        stack: error.stack,
+      });
+    },
   }),
 );
 
