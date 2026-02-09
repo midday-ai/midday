@@ -11,6 +11,42 @@ import { HeaderIntegrationsPreview } from "./header-integrations-preview";
 import type { Testimonial } from "./sections/testimonials-section";
 import { defaultTestimonials } from "./sections/testimonials-section";
 
+// All testimonials for header rotation (includes default + new ones)
+const headerTestimonials: Testimonial[] = [
+  ...defaultTestimonials,
+  {
+    name: "Vitalie Rosescu",
+    title: "",
+    company: "Awwwocado",
+    country: "Netherlands",
+    image: "/stories/vitalie.jpg",
+    content:
+      "All in one platform for freelancers looking to create clear insights on income and expenses.",
+    fullContent:
+      "Company\nAwwwocado is a Webflow development business.\n\nChallenge\nWhat I lacked in other software is the overview of which invoices were paid and which were pending, and seeing my overall income. Existing tools didn't give a clear picture of finances.\n\nImpact\nHaving a clear overview of income, invoices, and expenses in one place made managing the business much easier.\n\nFavorite features\nInvoices, because it's a big time saver.\nA clean share link for customers is very nice.\nExpenses being taken from my inbox and being able to upload expenses is a huge one.\nThe invoice template is clean out of the box and very customizable.",
+  },
+  {
+    name: "Nick Speer",
+    title: "",
+    company: "Speer Technologies",
+    country: "United States",
+    content:
+      "Midday is bookkeeping software without the fluff. It's a ledger with modern tooling and integrations.",
+    fullContent:
+      "Company\nSpeer Technologies is an AI consulting firm in the US. We accelerate our clients' AI initiatives from problem discovery to production across industries including Finance, Healthcare, and Defense.\n\nChallenge\nI was spending too much time on weekends cleaning up my books, juggling invoices, and clicking around clunky software. It felt like another job, and the other solutions didn't work the way I wanted.\n\nImpact\nAfter switching from QuickBooks to Midday, it felt like I was in control of my books. I could see every transaction and expense as it came in and manage it without feeling overwhelmed.\n\nFavorite features\nAuto-categorization is far better than other programs, which saves time from manually organizing books. From there, I can export data and get insights into exact spending categories.",
+  },
+  {
+    name: "Ivo Dukov",
+    title: "",
+    company: "Smarch",
+    country: "Bulgaria",
+    content:
+      "Everything lives in one place now — customers, invoices, documents, and financial analytics.",
+    fullContent:
+      "Company\nSmarch is a software development agency specializing in e-commerce, web applications, and custom backend systems.\n\nChallenge\nBefore Midday, I was manually creating PDF invoices, piecing together bank reports to understand how the company was doing, and collecting financial documents every time accounting needed something. It was scattered and tedious.\n\nImpact\nEverything lives in one place now. I set up invoice templates once, have all clients organized, get real analytics on company performance, and keep documents in a proper vault. What used to take hours of admin work is now streamlined and mostly automatic.\n\nFavorite features\nInvoice templates. They eliminate repetitive work when billing multiple clients.",
+  },
+];
+
 interface HeaderProps {
   transparent?: boolean;
   hideMenuItems?: boolean;
@@ -222,7 +258,7 @@ export function Header({
                   prefetchFeatures();
                   // Rotate to next testimonial
                   setCurrentTestimonialIndex(
-                    (prev) => (prev + 1) % defaultTestimonials.length,
+                    (prev) => (prev + 1) % headerTestimonials.length,
                   );
                   setIsFeaturesOpen(true);
                 }}
@@ -439,7 +475,7 @@ export function Header({
                               </span>
                               {(() => {
                                 const testimonial =
-                                  defaultTestimonials[currentTestimonialIndex];
+                                  headerTestimonials[currentTestimonialIndex];
                                 if (!testimonial) return null;
                                 const firstSentenceEnd =
                                   testimonial.content.match(/[.!?]\s/);
@@ -469,7 +505,7 @@ export function Header({
                               </div>
                               {(() => {
                                 const testimonial =
-                                  defaultTestimonials[currentTestimonialIndex];
+                                  headerTestimonials[currentTestimonialIndex];
                                 if (!testimonial?.image) return null;
                                 return (
                                   <div className="flex items-center gap-1.5 flex-shrink-0">
