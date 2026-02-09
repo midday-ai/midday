@@ -137,8 +137,9 @@ describe("XeroProvider", () => {
 
       // Verify the API was called with SPEND type
       const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock.calls[0];
-      expect(call[1].bankTransactions[0].type).toBe(
+        mockAccountingApi.updateOrCreateBankTransactions.mock
+          .calls[0] as unknown[];
+      expect((call[1] as any).bankTransactions[0].type).toBe(
         originalXeroNode.BankTransaction.TypeEnum.SPEND,
       );
     });
@@ -180,8 +181,9 @@ describe("XeroProvider", () => {
 
       // Verify the API was called with RECEIVE type
       const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock.calls[0];
-      expect(call[1].bankTransactions[0].type).toBe(
+        mockAccountingApi.updateOrCreateBankTransactions.mock
+          .calls[0] as unknown[];
+      expect((call[1] as any).bankTransactions[0].type).toBe(
         originalXeroNode.BankTransaction.TypeEnum.RECEIVE,
       );
     });
@@ -250,8 +252,9 @@ describe("XeroProvider", () => {
       });
 
       const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock.calls[0];
-      expect(call[1].bankTransactions[0].lineItems[0].accountCode).toBe("200");
+        mockAccountingApi.updateOrCreateBankTransactions.mock
+          .calls[0] as unknown[];
+      expect((call[1] as any).bankTransactions[0].lineItems[0].accountCode).toBe("200");
     });
 
     test("sets lineAmountTypes to Inclusive", async () => {
@@ -281,8 +284,9 @@ describe("XeroProvider", () => {
       });
 
       const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock.calls[0];
-      expect(call[1].bankTransactions[0].lineAmountTypes).toBe(
+        mockAccountingApi.updateOrCreateBankTransactions.mock
+          .calls[0] as unknown[];
+      expect((call[1] as any).bankTransactions[0].lineAmountTypes).toBe(
         originalXeroNode.LineAmountTypes.Inclusive,
       );
     });
@@ -315,8 +319,9 @@ describe("XeroProvider", () => {
       });
 
       const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock.calls[0];
-      expect(call[1].bankTransactions[0].contact).toEqual({
+        mockAccountingApi.updateOrCreateBankTransactions.mock
+          .calls[0] as unknown[];
+      expect((call[1] as any).bankTransactions[0].contact).toEqual({
         name: "Starbucks",
       });
     });
@@ -333,8 +338,8 @@ describe("XeroProvider", () => {
         currency: "USD",
       }));
 
-      mockAccountingApi.updateOrCreateBankTransactions.mockImplementation(
-        async (_tenantId: string, req: { bankTransactions: unknown[] }) => ({
+      (mockAccountingApi.updateOrCreateBankTransactions as any).mockImplementation(
+        async (_tenantId: any, req: any) => ({
           body: {
             bankTransactions: req.bankTransactions.map(
               (_: unknown, idx: number) => ({
@@ -453,7 +458,7 @@ describe("XeroProvider", () => {
       // Verify filename was sanitized
       const call =
         mockAccountingApi.createBankTransactionAttachmentByFileName.mock
-          .calls[0];
+          .calls[0] as unknown[];
       // The fileName parameter should have .pdf extension
       expect(call[2]).toBe("document.pdf");
     });
