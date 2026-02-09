@@ -18,7 +18,7 @@ export function IntegrationsGrid({ apps, activeCategory }: IntegrationsGridProps
           <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
             Integrations
           </h1>
-          <p className="font-sans text-base text-muted-foreground leading-relaxed">
+          <p className="font-sans text-base text-muted-foreground leading-normal">
             Connect Midday with the tools you already use. From email and
             messaging to accounting software, our integrations help you
             streamline your financial workflow.

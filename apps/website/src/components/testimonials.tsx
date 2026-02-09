@@ -149,7 +149,7 @@ export function Testimonials() {
             <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
               Customer Stories
             </h1>
-            <p className="font-sans text-base text-muted-foreground leading-normal sm:leading-relaxed mb-8">
+            <p className="font-sans text-base text-muted-foreground leading-normal mb-8">
               See how founders and small teams use Midday to manage their
               finances and run their businesses.
             </p>
