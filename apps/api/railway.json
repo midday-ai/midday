@@ -5,13 +5,11 @@
     "dockerfilePath": "apps/api/Dockerfile"
   },
   "deploy": {
-    "healthcheckPath": "/health",
-    "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",
     "multiRegionConfig": {
       "europe-west4-drams3a": { "numReplicas": 3 },
       "us-east4-eqdc4a": { "numReplicas": 2 },
-      "us-west2": { "numReplicas": 1 }
+      "us-west2": { "numReplicas": 2 }
     }
   }
 }
