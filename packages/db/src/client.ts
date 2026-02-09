@@ -14,6 +14,7 @@ const connectionConfig = {
   connectionTimeoutMillis: 15000,
   maxUses: isDevelopment ? 100 : 0,
   allowExitOnIdle: true,
+  ssl: isDevelopment ? false : { rejectUnauthorized: false },
 };
 
 const primaryPool = new Pool({

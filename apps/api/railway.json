@@ -7,9 +7,9 @@
   "deploy": {
     "restartPolicyType": "ON_FAILURE",
     "multiRegionConfig": {
-      "europe-west4-drams3a": { "numReplicas": 2 },
-      "us-east4-eqdc4a": { "numReplicas": 2 },
-      "us-west2": { "numReplicas": 2 }
+      "europe-west4-drams3a": { "numReplicas": 1 },
+      "us-east4-eqdc4a": { "numReplicas": 1 },
+      "us-west2": { "numReplicas": 1 }
     }
   }
 }
