@@ -7,9 +7,6 @@ on:
   push:
     branches-ignore:
       - main
-  pull_request:
-    branches:
-      - main
 
 concurrency:
   group: staging-${{ github.ref }}
@@ -88,7 +85,7 @@ jobs:
 
       - name: Validate affected packages
         run: |
-          BASE_SHA=${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE_SHA=$(git merge-base HEAD origin/main)
           bunx turbo test lint typecheck --filter="...[${BASE_SHA}]"
 
   # ---------------------------------------------------------------------------
