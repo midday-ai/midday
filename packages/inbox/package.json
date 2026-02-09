@@ -14,7 +14,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "test": "bun test src"
+    "test": "bun test --exit src"
   },
   "dependencies": {
     "@microsoft/microsoft-graph-client": "^3.0.7",

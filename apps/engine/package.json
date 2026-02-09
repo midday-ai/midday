@@ -7,7 +7,7 @@
     "deploy": "wrangler deploy --minify src/index.ts",
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "test": "bun test src",
+    "test": "bun test --exit src",
     "lint:fix": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",

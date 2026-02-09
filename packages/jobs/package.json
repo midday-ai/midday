@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "trigger dev",
     "deploy": "trigger deploy",
-    "test": "bun test src",
+    "test": "bun test --exit src",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
