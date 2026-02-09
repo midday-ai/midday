@@ -78,14 +78,14 @@ jobs:
       NODE_OPTIONS: "--max-old-space-size=8192"
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: ./.github/actions/setup
 
       - name: Validate affected packages
         run: |
-          BASE_SHA=$(git merge-base HEAD origin/main)
+          git fetch --no-tags --depth=200 origin main
+          git fetch --no-tags --deepen=200
+          BASE_SHA=$(git merge-base HEAD origin/main 2>/dev/null || echo "${{ github.event.before }}")
           bunx turbo test lint typecheck --filter="...[${BASE_SHA}]"
 
   # ---------------------------------------------------------------------------

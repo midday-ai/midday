@@ -83,14 +83,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 50
 
       - uses: ./.github/actions/setup
 
       - name: Validate affected packages
         run: |
-          BASE_SHA=${{ github.event.before }}
-          bunx turbo test lint typecheck --filter="...[${BASE_SHA}]"
+          bunx turbo test lint typecheck --filter="...[${{ github.event.before }}]"
 
   # ---------------------------------------------------------------------------
   # Deploy API to Railway
