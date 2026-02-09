@@ -17,6 +17,18 @@ RUN turbo prune @midday/dashboard --docker
 FROM base AS installer
 WORKDIR /app
 
+# Install build dependencies for native modules (canvas, etc.)
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy package.json files from pruned workspace
 COPY --from=builder /app/out/json/ .
 COPY bunfig.toml .
