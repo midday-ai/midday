@@ -15,9 +15,5 @@
     "./chat-feedback-cache": "./src/chat-feedback-cache.ts",
     "./suggested-actions-cache": "./src/suggested-actions-cache.ts",
     "./widget-preferences-cache": "./src/widget-preferences-cache.ts"
-  },
-  "dependencies": {
-    "redis": "5.10.0",
-    "@types/redis": "^4.0.11"
   }
 }

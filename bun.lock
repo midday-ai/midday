@@ -151,7 +151,6 @@
         "react-use-draggable-scroll": "^0.4.7",
         "react-zoom-pan-pinch": "^3.7.0",
         "recharts": "2.15.3",
-        "redis": "^5.10.0",
         "resend": "catalog:",
         "server-only": "^0.0.1",
         "sharp": "catalog:",
@@ -326,10 +325,6 @@
     "packages/cache": {
       "name": "@midday/cache",
       "version": "0.0.1",
-      "dependencies": {
-        "@types/redis": "^4.0.11",
-        "redis": "5.10.0",
-      },
     },
     "packages/categories": {
       "name": "@midday/categories",
@@ -2212,8 +2207,6 @@
     "@types/react-dom": ["@types/react-dom@19.2.3", "", { "peerDependencies": { "@types/react": "^19.2.0" } }, "sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ=="],
 
     "@types/readdir-glob": ["@types/readdir-glob@1.1.5", "", { "dependencies": { "@types/node": "*" } }, "sha512-raiuEPUYqXu+nvtY2Pe8s8FEmZ3x5yAH4VkLdihcPdalvsHltomrRC9BzuStrJ9yk06470hS0Crw0f1pXqD+Hg=="],
-
-    "@types/redis": ["@types/redis@4.0.11", "", { "dependencies": { "redis": "*" } }, "sha512-bI+gth8La8Wg/QCR1+V1fhrL9+LZUSWfcqpOj2Kc80ZQ4ffbdL173vQd5wovmoV9i071FU9oP2g6etLuEwb6Rg=="],
 
     "@types/retry": ["@types/retry@0.12.0", "", {}, "sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA=="],
 

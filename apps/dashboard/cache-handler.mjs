@@ -1,4 +1,4 @@
-import { createClient } from "redis";
+import { RedisClient } from "bun";
 
 const KEY_PREFIX = "next-cache:";
 const TAG_PREFIX = "next-tag:";
@@ -6,18 +6,16 @@ const TAG_PREFIX = "next-tag:";
 let client = null;
 
 async function getClient() {
-  if (client?.isReady) return client;
+  if (client?.connected) return client;
   if (client) return null; // Already tried and failed
 
   // Skip during build phase
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
 
   try {
-    client = createClient({
-      url: process.env.REDIS_URL ?? "redis://localhost:6379",
-    });
-
-    client.on("error", () => {});
+    client = new RedisClient(
+      process.env.REDIS_URL ?? "redis://localhost:6379",
+    );
 
     await client.connect();
     return client;
@@ -84,18 +82,21 @@ const cacheHandler = {
 
       const data = Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)));
 
-      await redis.set(
+      const serialized = JSON.stringify({
+        value: data.toString("base64"),
+        tags: entry.tags,
+        stale: entry.stale,
+        timestamp: entry.timestamp,
+        expire: entry.expire,
+        revalidate: entry.revalidate,
+      });
+
+      await redis.send("SET", [
         `${KEY_PREFIX}${cacheKey}`,
-        JSON.stringify({
-          value: data.toString("base64"),
-          tags: entry.tags,
-          stale: entry.stale,
-          timestamp: entry.timestamp,
-          expire: entry.expire,
-          revalidate: entry.revalidate,
-        }),
-        { EX: entry.expire },
-      );
+        serialized,
+        "EX",
+        entry.expire.toString(),
+      ]);
     } catch {
       // Silently fail
     }
@@ -131,9 +132,12 @@ const cacheHandler = {
       const now = Date.now();
       await Promise.all(
         tags.map((tag) =>
-          redis.set(`${TAG_PREFIX}${tag}`, now.toString(), {
-            EX: 60 * 60 * 24 * 30,
-          }),
+          redis.send("SET", [
+            `${TAG_PREFIX}${tag}`,
+            now.toString(),
+            "EX",
+            (60 * 60 * 24 * 30).toString(),
+          ]),
         ),
       );
     } catch {
