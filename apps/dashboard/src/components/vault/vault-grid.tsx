@@ -46,9 +46,8 @@ export function VaultGrid() {
   useScrollHeader(parentRef);
 
   // Responsive column count based on viewport width
-  const [columnCount, setColumnCount] = useState(() =>
-    typeof window !== "undefined" ? getColumnCount(window.innerWidth) : 4,
-  );
+  // Default to 4 on both server and client to avoid hydration mismatch
+  const [columnCount, setColumnCount] = useState(4);
 
   useEffect(() => {
     const handleResize = () => {

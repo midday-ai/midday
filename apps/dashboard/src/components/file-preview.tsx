@@ -5,8 +5,14 @@ import { useFileUrl } from "@/hooks/use-file-url";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useMemo, useState } from "react";
+
+const PdfThumbnail = dynamic(
+  () => import("@/components/pdf-thumbnail").then((mod) => mod.PdfThumbnail),
+  { ssr: false },
+);
 
 type Props = {
   mimeType: string;
@@ -31,63 +37,62 @@ export function FilePreview({
   lazy = false,
   fixedSize,
 }: Props) {
-  // Determine endpoint based on mime type
-  const endpoint = useMemo(() => {
-    if (mimeType.startsWith("image/")) return "proxy";
-    if (
-      mimeType.startsWith("application/pdf") ||
-      mimeType.startsWith("application/octet-stream")
-    ) {
-      return "preview";
-    }
-    return null;
-  }, [mimeType]);
+  const isPdf =
+    mimeType.startsWith("application/pdf") ||
+    mimeType.startsWith("application/octet-stream");
+  const isImage = mimeType.startsWith("image/");
 
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
+  // Get authenticated URL for both images and PDFs
   const {
     url: src,
     isLoading,
     hasFileKey,
   } = useFileUrl(
-    endpoint === "preview"
+    isPdf || isImage
       ? {
-          type: "url",
-          url: `/api/files/preview?filePath=vault/${filePath}`,
+          type: "proxy",
+          filePath: `vault/${filePath}`,
         }
-      : endpoint
-        ? {
-            type: endpoint,
-            filePath,
-          }
-        : null,
+      : null,
   );
 
-  if (!endpoint) {
+  // PDF thumbnails - rendered client-side
+  if (isPdf) {
+    if (isLoading || !hasFileKey || !src) {
+      return <Skeleton className="w-full h-full" />;
+    }
+
+    return (
+      <PdfThumbnail
+        url={src}
+        cacheKey={filePath}
+        width={fixedSize?.width ?? 60}
+        height={fixedSize?.height}
+      />
+    );
+  }
+
+  // Non-image, non-PDF files
+  if (!isImage) {
     return <FilePreviewIcon mimetype={mimeType} />;
   }
 
-  // For local preview routes, hasFileKey is false (uses session auth)
-  // For external API routes, we need hasFileKey to be true
-  const isLocalPreview = endpoint === "preview";
-  const needsFileKey = !isLocalPreview;
-
-  if (isLoading || (needsFileKey && !hasFileKey) || !src) {
+  // Images
+  if (isLoading || !hasFileKey || !src) {
     return <Skeleton className="w-full h-full" />;
   }
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      {/* Show skeleton while image is loading */}
       {imageLoading && !imageError && (
         <Skeleton className="absolute inset-0 w-full h-full" />
       )}
 
-      {/* Show error preview if image fails to load */}
       {imageError && <ErrorPreview />}
 
-      {/* Next.js Image - only render when not in error state */}
       {!imageError && (
         <Image
           src={src}
@@ -97,7 +102,7 @@ export function FilePreview({
                 width: fixedSize.width,
                 height: fixedSize.height,
                 sizes: `${fixedSize.width}px`,
-                unoptimized: true, // Disable optimization for fixed-size thumbnails to avoid multiple variants
+                unoptimized: true,
               }
             : {
                 fill: true,

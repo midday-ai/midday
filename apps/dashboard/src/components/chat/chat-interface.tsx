@@ -9,7 +9,7 @@ import type { UIChatMessage } from "@midday/api/ai/types";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { Conversation, ConversationContent } from "@midday/ui/conversation";
-import type { Geo } from "@vercel/functions";
+import type { Geo } from "@/utils/geo";
 import { DefaultChatTransport, generateId } from "ai";
 import dynamic from "next/dynamic";
 import { parseAsString, useQueryState } from "nuqs";

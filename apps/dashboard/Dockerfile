@@ -17,27 +17,12 @@ RUN turbo prune @midday/dashboard --docker
 FROM base AS installer
 WORKDIR /app
 
-# Install build dependencies for native modules (canvas for PDF previews)
-RUN apt-get update && apt-get install -y \
-    nodejs \
-    npm \
-    python3 \
-    build-essential \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libjpeg-dev \
-    libgif-dev \
-    librsvg2-dev \
-    pkg-config \
-    && rm -rf /var/lib/apt/lists/*
-
 # Copy package.json files from pruned workspace
 COPY --from=builder /app/out/json/ .
 COPY bunfig.toml .
 
-# Install dependencies and rebuild canvas native module
+# Install dependencies
 RUN bun install
-RUN npm rebuild canvas --build-from-source
 
 # Copy full source from pruned workspace
 COPY --from=builder /app/out/full/ .
@@ -67,16 +52,6 @@ RUN bunx turbo run build --filter=@midday/dashboard --only
 FROM oven/bun:1.3.9 AS runner
 WORKDIR /app
 
-# Install runtime libraries for canvas
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libcairo2 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libjpeg62-turbo \
-    libgif7 \
-    librsvg2-2 \
-    && rm -rf /var/lib/apt/lists/*
-
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
@@ -89,9 +64,6 @@ COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/.next/standalone
 COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/.next/static ./apps/dashboard/.next/static
 COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/public ./apps/dashboard/public
 COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/cache-handler.mjs ./apps/dashboard/cache-handler.mjs
-
-# Copy canvas native module for PDF preview rendering
-COPY --from=installer /app/node_modules/canvas ./node_modules/canvas
 
 USER nextjs
 

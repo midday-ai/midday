@@ -2,7 +2,7 @@ import { ChatInterface } from "@/components/chat/chat-interface";
 import { Widgets } from "@/components/widgets";
 import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
 import { Provider as ChatProvider } from "@ai-sdk-tools/store";
-import { geolocation } from "@vercel/functions";
+import { geolocation } from "@/utils/geo";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -12,9 +12,7 @@ export const metadata: Metadata = {
 
 export default async function Overview() {
   const headersList = await headers();
-  const geo = geolocation({
-    headers: headersList,
-  });
+  const geo = geolocation(headersList);
 
   const queryClient = getQueryClient();
 

@@ -2,7 +2,7 @@ import { ChatInterface } from "@/components/chat/chat-interface";
 import { Widgets } from "@/components/widgets";
 import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
 import { Provider as ChatProvider } from "@ai-sdk-tools/store";
-import { geolocation } from "@vercel/functions";
+import { geolocation } from "@/utils/geo";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -19,9 +19,7 @@ export default async function ChatPage(props: Props) {
   const { id } = await props.params;
 
   const headersList = await headers();
-  const geo = geolocation({
-    headers: headersList,
-  });
+  const geo = geolocation(headersList);
 
   const queryClient = getQueryClient();
 

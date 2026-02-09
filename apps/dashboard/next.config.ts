@@ -40,7 +40,7 @@ const config = {
     "@midday/invoice",
     "@midday/api",
   ],
-  serverExternalPackages: ["@react-pdf/renderer", "canvas", "pino"],
+  serverExternalPackages: ["@react-pdf/renderer", "pino"],
   typescript: {
     ignoreBuildErrors: true,
   },
