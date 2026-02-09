@@ -870,7 +870,7 @@ export function TestimonialsSection({
             href="/testimonials"
             className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
           >
-            View all testimonials
+            View all customer stories
           </Link>
         </div>
       </div>
