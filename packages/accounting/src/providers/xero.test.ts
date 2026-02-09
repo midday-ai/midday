@@ -136,9 +136,8 @@ describe("XeroProvider", () => {
       expect(result.results[0]?.providerTransactionId).toBe("bt-123");
 
       // Verify the API was called with SPEND type
-      const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock
-          .calls[0] as unknown[];
+      const call = mockAccountingApi.updateOrCreateBankTransactions.mock
+        .calls[0] as unknown[];
       expect((call[1] as any).bankTransactions[0].type).toBe(
         originalXeroNode.BankTransaction.TypeEnum.SPEND,
       );
@@ -180,9 +179,8 @@ describe("XeroProvider", () => {
       expect(result.results[0]?.providerTransactionId).toBe("bt-456");
 
       // Verify the API was called with RECEIVE type
-      const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock
-          .calls[0] as unknown[];
+      const call = mockAccountingApi.updateOrCreateBankTransactions.mock
+        .calls[0] as unknown[];
       expect((call[1] as any).bankTransactions[0].type).toBe(
         originalXeroNode.BankTransaction.TypeEnum.RECEIVE,
       );
@@ -251,10 +249,11 @@ describe("XeroProvider", () => {
         jobId: "test-job-4",
       });
 
-      const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock
-          .calls[0] as unknown[];
-      expect((call[1] as any).bankTransactions[0].lineItems[0].accountCode).toBe("200");
+      const call = mockAccountingApi.updateOrCreateBankTransactions.mock
+        .calls[0] as unknown[];
+      expect(
+        (call[1] as any).bankTransactions[0].lineItems[0].accountCode,
+      ).toBe("200");
     });
 
     test("sets lineAmountTypes to Inclusive", async () => {
@@ -283,9 +282,8 @@ describe("XeroProvider", () => {
         jobId: "test-job-5",
       });
 
-      const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock
-          .calls[0] as unknown[];
+      const call = mockAccountingApi.updateOrCreateBankTransactions.mock
+        .calls[0] as unknown[];
       expect((call[1] as any).bankTransactions[0].lineAmountTypes).toBe(
         originalXeroNode.LineAmountTypes.Inclusive,
       );
@@ -318,9 +316,8 @@ describe("XeroProvider", () => {
         jobId: "test-job-6",
       });
 
-      const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock
-          .calls[0] as unknown[];
+      const call = mockAccountingApi.updateOrCreateBankTransactions.mock
+        .calls[0] as unknown[];
       expect((call[1] as any).bankTransactions[0].contact).toEqual({
         name: "Starbucks",
       });
@@ -338,17 +335,17 @@ describe("XeroProvider", () => {
         currency: "USD",
       }));
 
-      (mockAccountingApi.updateOrCreateBankTransactions as any).mockImplementation(
-        async (_tenantId: any, req: any) => ({
-          body: {
-            bankTransactions: req.bankTransactions.map(
-              (_: unknown, idx: number) => ({
-                bankTransactionID: `bt-batch-${idx}`,
-              }),
-            ),
-          },
-        }),
-      );
+      (
+        mockAccountingApi.updateOrCreateBankTransactions as any
+      ).mockImplementation(async (_tenantId: any, req: any) => ({
+        body: {
+          bankTransactions: req.bankTransactions.map(
+            (_: unknown, idx: number) => ({
+              bankTransactionID: `bt-batch-${idx}`,
+            }),
+          ),
+        },
+      }));
 
       const result = await provider.syncTransactions({
         transactions,
@@ -456,9 +453,8 @@ describe("XeroProvider", () => {
       });
 
       // Verify filename was sanitized
-      const call =
-        mockAccountingApi.createBankTransactionAttachmentByFileName.mock
-          .calls[0] as unknown[];
+      const call = mockAccountingApi.createBankTransactionAttachmentByFileName
+        .mock.calls[0] as unknown[];
       // The fileName parameter should have .pdf extension
       expect(call[2]).toBe("document.pdf");
     });

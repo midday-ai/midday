@@ -161,8 +161,7 @@ describe("FortnoxProvider", () => {
 
       // Verify voucher API was called with expense structure
       const voucherCall = (mockFetchFn.mock.calls as FetchCall[]).find(
-        (call) =>
-          call[0].includes("/vouchers") && call[1]?.method === "POST",
+        (call) => call[0].includes("/vouchers") && call[1]?.method === "POST",
       );
       expect(voucherCall).toBeDefined();
 
@@ -226,12 +225,9 @@ describe("FortnoxProvider", () => {
       expect(result.success).toBe(true);
 
       const voucherCall = (mockFetchFn.mock.calls as FetchCall[]).find(
-        (call) =>
-          call[0].includes("/vouchers") && call[1]?.method === "POST",
+        (call) => call[0].includes("/vouchers") && call[1]?.method === "POST",
       );
-      const body = JSON.parse(
-        voucherCall![1]!.body as string,
-      );
+      const body = JSON.parse(voucherCall![1]!.body as string);
 
       // Income: Debit bank account (1930), Credit income account (3010)
       const debitRow = body.Voucher.VoucherRows.find(
@@ -335,12 +331,9 @@ describe("FortnoxProvider", () => {
       });
 
       const voucherCall = (mockFetchFn.mock.calls as FetchCall[]).find(
-        (call) =>
-          call[0].includes("/vouchers") && call[1]?.method === "POST",
+        (call) => call[0].includes("/vouchers") && call[1]?.method === "POST",
       );
-      const body = JSON.parse(
-        voucherCall![1]!.body as string,
-      );
+      const body = JSON.parse(voucherCall![1]!.body as string);
 
       const creditRow = body.Voucher.VoucherRows.find(
         (r: { Credit: number }) => r.Credit > 0,
@@ -407,8 +400,7 @@ describe("FortnoxProvider", () => {
 
       // Verify voucher creation calls were made with earlier date first
       const voucherCalls = (mockFetchFn.mock.calls as FetchCall[]).filter(
-        (call) =>
-          call[0].includes("/vouchers") && call[1]?.method === "POST",
+        (call) => call[0].includes("/vouchers") && call[1]?.method === "POST",
       );
 
       const firstCall = voucherCalls[0];
@@ -507,15 +499,14 @@ describe("FortnoxProvider", () => {
       expect(result.attachmentId).toBe("file-123");
 
       // Verify inbox upload was called
-      const inboxCall = (mockFetchFn.mock.calls as FetchCall[]).find(
-        (call) => call[0].includes("/inbox"),
+      const inboxCall = (mockFetchFn.mock.calls as FetchCall[]).find((call) =>
+        call[0].includes("/inbox"),
       );
       expect(inboxCall).toBeDefined();
 
       // Verify file connection was created
       const connectionCall = (mockFetchFn.mock.calls as FetchCall[]).find(
-        (call) =>
-          call[0].includes("/voucherfileconnections"),
+        (call) => call[0].includes("/voucherfileconnections"),
       );
       expect(connectionCall).toBeDefined();
     });
@@ -557,8 +548,8 @@ describe("FortnoxProvider", () => {
       });
 
       // Verify the filename was extended
-      const inboxCall = (mockFetchFn.mock.calls as FetchCall[]).find(
-        (call) => call[0].includes("/inbox"),
+      const inboxCall = (mockFetchFn.mock.calls as FetchCall[]).find((call) =>
+        call[0].includes("/inbox"),
       );
       // FormData includes the filename, check it was sanitized
       expect(inboxCall).toBeDefined();
