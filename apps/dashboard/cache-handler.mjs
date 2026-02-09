@@ -1,38 +1,49 @@
 import { createClient } from "redis";
 
-const client = createClient({
-  url: process.env.REDIS_URL ?? "redis://localhost:6379",
-});
-
-client.on("error", (err) => {
-  console.error("[CacheHandler] Redis error:", err.message);
-});
-
-await client.connect().catch((err) => {
-  console.warn("[CacheHandler] Failed to connect to Redis:", err.message);
-});
-
 const KEY_PREFIX = "next-cache:";
 const TAG_PREFIX = "next-tag:";
+
+let client = null;
+
+async function getClient() {
+  if (client?.isReady) return client;
+  if (client) return null; // Already tried and failed
+
+  // Skip during build phase
+  if (process.env.NEXT_PHASE === "phase-production-build") return null;
+
+  try {
+    client = createClient({
+      url: process.env.REDIS_URL ?? "redis://localhost:6379",
+    });
+
+    client.on("error", () => {});
+
+    await client.connect();
+    return client;
+  } catch {
+    client = null;
+    return null;
+  }
+}
 
 /** @type {import("next/dist/server/lib/cache-handlers/types").CacheHandler} */
 const cacheHandler = {
   async get(cacheKey, softTags) {
-    if (!client.isReady) return undefined;
+    const redis = await getClient();
+    if (!redis) return undefined;
 
     try {
-      const stored = await client.get(`${KEY_PREFIX}${cacheKey}`);
+      const stored = await redis.get(`${KEY_PREFIX}${cacheKey}`);
       if (!stored) return undefined;
 
       const data = JSON.parse(stored);
 
-      // Check if entry has expired
       const now = Date.now();
       if (now > data.timestamp + data.revalidate * 1000) {
         return undefined;
       }
 
-      // Reconstruct the ReadableStream from stored data
       return {
         value: new ReadableStream({
           start(controller) {
@@ -52,12 +63,12 @@ const cacheHandler = {
   },
 
   async set(cacheKey, pendingEntry) {
-    if (!client.isReady) return;
+    const redis = await getClient();
+    if (!redis) return;
 
     try {
       const entry = await pendingEntry;
 
-      // Read the stream to get the data
       const reader = entry.value.getReader();
       const chunks = [];
 
@@ -71,10 +82,9 @@ const cacheHandler = {
         reader.releaseLock();
       }
 
-      // Combine chunks and serialize for Redis storage
       const data = Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)));
 
-      await client.set(
+      await redis.set(
         `${KEY_PREFIX}${cacheKey}`,
         JSON.stringify({
           value: data.toString("base64"),
@@ -87,44 +97,42 @@ const cacheHandler = {
         { EX: entry.expire },
       );
     } catch {
-      // Silently fail - cache miss is better than a crash
+      // Silently fail
     }
   },
 
-  async refreshTags() {
-    // No-op - tag state is stored in Redis and always fresh
-  },
+  async refreshTags() {},
 
   async getExpiration(tags) {
-    if (!client.isReady) return 0;
+    const redis = await getClient();
+    if (!redis) return 0;
 
     try {
       const timestamps = await Promise.all(
-        tags.map((tag) => client.get(`${TAG_PREFIX}${tag}`)),
+        tags.map((tag) => redis.get(`${TAG_PREFIX}${tag}`)),
       );
 
-      const maxTimestamp = Math.max(
+      return Math.max(
         ...timestamps
           .filter(Boolean)
           .map((ts) => Number.parseInt(/** @type {string} */ (ts), 10)),
         0,
       );
-
-      return maxTimestamp;
     } catch {
       return 0;
     }
   },
 
   async updateTags(tags) {
-    if (!client.isReady) return;
+    const redis = await getClient();
+    if (!redis) return;
 
     try {
       const now = Date.now();
       await Promise.all(
         tags.map((tag) =>
-          client.set(`${TAG_PREFIX}${tag}`, now.toString(), {
-            EX: 60 * 60 * 24 * 30, // 30 days
+          redis.set(`${TAG_PREFIX}${tag}`, now.toString(), {
+            EX: 60 * 60 * 24 * 30,
           }),
         ),
       );
