@@ -64,14 +64,14 @@ export async function GET(req: NextRequest) {
         .eq("user_id", userId);
 
       if (count === 0 && !returnTo?.startsWith("teams/invite/")) {
-        return NextResponse.redirect(`${requestUrl.origin}/teams/create`);
+        return NextResponse.redirect(`${origin}/teams/create`);
       }
     }
   }
 
   if (returnTo) {
-    return NextResponse.redirect(`${requestUrl.origin}/${returnTo}`);
+    return NextResponse.redirect(`${origin}/${returnTo}`);
   }
 
-  return NextResponse.redirect(requestUrl.origin);
+  return NextResponse.redirect(origin);
 }
