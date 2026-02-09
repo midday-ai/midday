@@ -473,13 +473,13 @@ export function Header({
                                 if (!testimonial?.image) return null;
                                 return (
                                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                                    <div className="w-6 h-6 flex items-center justify-center bg-background overflow-hidden rounded-full">
+                                    <div className="w-6 h-6 flex items-center justify-center bg-background overflow-hidden">
                                       <Image
                                         src={testimonial.image}
                                         alt={testimonial.name}
                                         width={24}
                                         height={24}
-                                        className="w-full h-full object-cover rounded-full opacity-70"
+                                        className="w-full h-full object-cover opacity-70"
                                         style={{ filter: "grayscale(100%)" }}
                                       />
                                     </div>
