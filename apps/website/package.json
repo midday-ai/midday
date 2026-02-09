@@ -8,8 +8,7 @@
     "dev": "TZ=UTC next dev --turbopack -p 3000",
     "lint": "biome check .",
     "lint:fix": "biome format --write .",
-    "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "start": "next start"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.12",
