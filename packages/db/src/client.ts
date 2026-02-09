@@ -14,7 +14,7 @@ const connectionConfig = {
   connectionTimeoutMillis: 15000,
   maxUses: isDevelopment ? 100 : 0,
   allowExitOnIdle: true,
-  ssl: !isDevelopment,
+  ssl: isDevelopment ? false : { rejectUnauthorized: false },
 };
 
 // Primary pool — DATABASE_PRIMARY_URL should point to the Supabase pooler
