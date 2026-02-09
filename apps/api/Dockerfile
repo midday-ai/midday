@@ -35,7 +35,7 @@ ENV NODE_ENV=production
 # Copy only what's needed at runtime
 COPY --from=installer /app/node_modules ./node_modules
 COPY --from=installer /app/apps/api ./apps/api
-COPY --from=installer /app/apps/engine/dist ./apps/engine/dist
+COPY --from=installer /app/apps/engine ./apps/engine
 COPY --from=installer /app/packages ./packages
 COPY --from=installer /app/package.json ./package.json
 
