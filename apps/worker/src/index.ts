@@ -171,7 +171,7 @@ const port = Number.parseInt(process.env.PORT || "8080", 10);
 
 Bun.serve({
   port,
-  hostname: "::",
+  hostname: "0.0.0.0",
   fetch: app.fetch,
 });
 

@@ -8,10 +8,7 @@
     "healthcheckPath": "/health",
     "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",
-    "multiRegionConfig": {
-      "europe-west4-drams3a": { "numReplicas": 2 },
-      "us-east4-eqdc4a": { "numReplicas": 2 },
-      "us-west2": { "numReplicas": 2 }
-    }
+    "region": "europe-west4-drams3a",
+    "numReplicas": 3
   }
 }
