@@ -34,7 +34,7 @@ COPY --from=builder /app/out/json/ .
 COPY bunfig.toml .
 
 # Install dependencies
-RUN bun install
+RUN bun install --trust
 
 # Copy full source from pruned workspace
 COPY --from=builder /app/out/full/ .
