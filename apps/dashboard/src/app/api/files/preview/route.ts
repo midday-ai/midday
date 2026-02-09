@@ -1,4 +1,3 @@
-import { getPdfImage } from "@/utils/pdf-to-img";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
@@ -93,7 +92,8 @@ export const GET = async (req: NextRequest) => {
   }
 
   try {
-    // Convert PDF to image using legacy implementation
+    // Dynamic import to avoid loading canvas at build time
+    const { getPdfImage } = await import("@/utils/pdf-to-img");
     const imageBuffer = await getPdfImage(pdfBuffer);
 
     if (!imageBuffer) {
