@@ -56,7 +56,9 @@ export default function ComparePage() {
             Compare Midday to alternatives
           </h1>
           <p className="font-sans text-base text-muted-foreground max-w-2xl mx-auto">
-            Midday is built for founders and small teams who want clarity over their finances without the complexity of traditional accounting software.
+            Midday is built for founders and small teams who want clarity over
+            their finances without the complexity of traditional accounting
+            software.
           </p>
         </div>
 
@@ -94,7 +96,8 @@ export default function ComparePage() {
             Ready to try Midday?
           </h2>
           <p className="font-sans text-base text-muted-foreground mb-6 max-w-xl mx-auto">
-            Start your 14-day free trial and see why founders are switching to Midday.
+            Start your 14-day free trial and see why founders are switching to
+            Midday.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild className="btn-inverse h-11 px-6">

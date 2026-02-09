@@ -197,8 +197,9 @@ export function MCP() {
                 Midday, everywhere
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Connect Claude, ChatGPT, Perplexity, Cursor, and more to your Midday data.
-                Ask questions and get answers from your actual business data.
+                Connect Claude, ChatGPT, Perplexity, Cursor, and more to your
+                Midday data. Ask questions and get answers from your actual
+                business data.
               </p>
             </div>
 
@@ -237,8 +238,9 @@ export function MCP() {
                 Midday, everywhere
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Connect Claude, ChatGPT, Perplexity, Cursor, and more to your Midday data.
-                Ask questions and get answers from your actual business data.
+                Connect Claude, ChatGPT, Perplexity, Cursor, and more to your
+                Midday data. Ask questions and get answers from your actual
+                business data.
               </p>
             </div>
 

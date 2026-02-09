@@ -3,12 +3,12 @@ import "./instrument";
 
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { Scalar } from "@scalar/hono-api-reference";
-import { cors } from "hono/cors";
-import { secureHeaders } from "hono/secure-headers";
 import { primaryDb } from "@midday/db/client";
 import { logger } from "@midday/logger";
+import { Scalar } from "@scalar/hono-api-reference";
 import { sql } from "drizzle-orm";
+import { cors } from "hono/cors";
+import { secureHeaders } from "hono/secure-headers";
 import { routers } from "./rest/routers";
 import type { Context } from "./rest/types";
 import { createTRPCContext } from "./trpc/init";

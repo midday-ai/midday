@@ -119,7 +119,11 @@ export const inboxStatusEnum = pgEnum("inbox_status", [
   "other",
 ]);
 
-export const inboxTypeEnum = pgEnum("inbox_type", ["invoice", "expense", "other"]);
+export const inboxTypeEnum = pgEnum("inbox_type", [
+  "invoice",
+  "expense",
+  "other",
+]);
 export const inboxBlocklistTypeEnum = pgEnum("inbox_blocklist_type", [
   "email",
   "domain",

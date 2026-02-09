@@ -11,7 +11,9 @@
       "node_modules/**",
       ".turbo",
       ".next",
-      ".next/**"
+      ".next/**",
+      ".react-email",
+      ".react-email/**"
     ]
   },
   "linter": {

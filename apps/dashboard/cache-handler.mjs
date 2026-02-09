@@ -13,16 +13,13 @@ function getClient() {
   // Skip during build phase
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
 
-  client = new RedisClient(
-    process.env.REDIS_URL ?? "redis://localhost:6379",
-    {
-      connectionTimeout: 10_000,
-      autoReconnect: true,
-      maxRetries: 10,
-      enableOfflineQueue: true,
-      enableAutoPipelining: true,
-    },
-  );
+  client = new RedisClient(process.env.REDIS_URL ?? "redis://localhost:6379", {
+    connectionTimeout: 10_000,
+    autoReconnect: true,
+    maxRetries: 10,
+    enableOfflineQueue: true,
+    enableAutoPipelining: true,
+  });
 
   client.onclose = (err) => {
     if (err) {

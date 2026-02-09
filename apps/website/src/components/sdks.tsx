@@ -78,9 +78,7 @@ function ScrambledText() {
   );
 }
 
-function CodeBlock({
-  code,
-}: { code: string; language?: string }) {
+function CodeBlock({ code }: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {

@@ -90,9 +90,7 @@ export function ComparisonPage({ competitor }: Props) {
 
         {/* Feature Comparison */}
         <section id="features" className="scroll-mt-24 mb-16 lg:mb-24">
-          <FeatureComparison
-            competitor={competitor}
-          />
+          <FeatureComparison competitor={competitor} />
         </section>
 
         {/* Divider */}
@@ -195,13 +193,18 @@ export function ComparisonPage({ competitor }: Props) {
                 Ready to make the switch?
               </h2>
               <p className="font-sans text-base text-muted-foreground mb-8 max-w-xl mx-auto">
-                Start your 14-day free trial. No credit card required until you're ready to upgrade.
+                Start your 14-day free trial. No credit card required until
+                you're ready to upgrade.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button asChild className="btn-inverse h-11 px-6">
                   <a href="https://app.midday.ai/">Start your free trial</a>
                 </Button>
-                <Button asChild variant="outline" className="bg-background h-11 px-6">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="bg-background h-11 px-6"
+                >
                   <Link href="/pricing">View pricing</Link>
                 </Button>
               </div>

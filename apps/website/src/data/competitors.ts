@@ -130,7 +130,11 @@ export const competitors: Competitor[] = [
         category: "Core Features",
         features: [
           { name: "Bank connections", midday: true, competitor: true },
-          { name: "Transaction categorization", midday: true, competitor: true },
+          {
+            name: "Transaction categorization",
+            midday: true,
+            competitor: true,
+          },
           { name: "Invoicing", midday: true, competitor: true },
           { name: "Receipt capture", midday: true, competitor: true },
           { name: "Time tracking", midday: true, competitor: "Add-on" },
@@ -143,8 +147,16 @@ export const competitors: Competitor[] = [
         features: [
           { name: "Modern interface", midday: true, competitor: false },
           { name: "Mobile app", midday: true, competitor: true },
-          { name: "No accounting knowledge required", midday: true, competitor: false },
-          { name: "Quick setup (under 5 min)", midday: true, competitor: false },
+          {
+            name: "No accounting knowledge required",
+            midday: true,
+            competitor: false,
+          },
+          {
+            name: "Quick setup (under 5 min)",
+            midday: true,
+            competitor: false,
+          },
         ],
       },
     ],
@@ -275,15 +287,27 @@ export const competitors: Competitor[] = [
           { name: "Invoicing", midday: true, competitor: true },
           { name: "Time tracking", midday: true, competitor: true },
           { name: "Expense tracking", midday: true, competitor: true },
-          { name: "Bank connections", midday: "25,000+ banks", competitor: "Limited" },
+          {
+            name: "Bank connections",
+            midday: "25,000+ banks",
+            competitor: "Limited",
+          },
           { name: "AI-powered insights", midday: true, competitor: false },
-          { name: "Receipt matching", midday: "Automatic", competitor: "Manual" },
+          {
+            name: "Receipt matching",
+            midday: "Automatic",
+            competitor: "Manual",
+          },
         ],
       },
       {
         category: "Workflow",
         features: [
-          { name: "Weekly financial summaries", midday: true, competitor: false },
+          {
+            name: "Weekly financial summaries",
+            midday: true,
+            competitor: false,
+          },
           { name: "Unified dashboard", midday: true, competitor: false },
           { name: "Project-based billing", midday: true, competitor: true },
           { name: "Recurring invoices", midday: true, competitor: true },
@@ -332,11 +356,13 @@ export const competitors: Competitor[] = [
     switchingSteps: [
       {
         title: "Export invoices and clients",
-        description: "Download your client list and invoice history from FreshBooks.",
+        description:
+          "Download your client list and invoice history from FreshBooks.",
       },
       {
         title: "Create your Midday account",
-        description: "Sign up and connect your bank accounts for automatic transaction sync.",
+        description:
+          "Sign up and connect your bank accounts for automatic transaction sync.",
       },
       {
         title: "Import your customer data",
@@ -344,7 +370,8 @@ export const competitors: Competitor[] = [
       },
       {
         title: "Set up your invoice template",
-        description: "Customize your invoice design and payment terms in Midday.",
+        description:
+          "Customize your invoice design and payment terms in Midday.",
       },
     ],
     faq: [
@@ -409,13 +436,21 @@ export const competitors: Competitor[] = [
           { name: "Expense claims", midday: true, competitor: true },
           { name: "Time tracking", midday: "Built-in", competitor: "Add-on" },
           { name: "AI insights", midday: true, competitor: false },
-          { name: "Receipt capture", midday: "Automatic", competitor: "Manual" },
+          {
+            name: "Receipt capture",
+            midday: "Automatic",
+            competitor: "Manual",
+          },
         ],
       },
       {
         category: "Ease of Use",
         features: [
-          { name: "No accounting knowledge needed", midday: true, competitor: false },
+          {
+            name: "No accounting knowledge needed",
+            midday: true,
+            competitor: false,
+          },
           { name: "Quick setup", midday: true, competitor: false },
           { name: "Weekly summaries", midday: true, competitor: false },
           { name: "Clean dashboard", midday: true, competitor: false },
@@ -464,7 +499,8 @@ export const competitors: Competitor[] = [
     switchingSteps: [
       {
         title: "Export your Xero data",
-        description: "Download your contacts and transaction history as CSV files.",
+        description:
+          "Download your contacts and transaction history as CSV files.",
       },
       {
         title: "Sign up for Midday",
@@ -476,7 +512,8 @@ export const competitors: Competitor[] = [
       },
       {
         title: "Let Midday sync automatically",
-        description: "Your transactions will flow in automatically. No more manual reconciliation.",
+        description:
+          "Your transactions will flow in automatically. No more manual reconciliation.",
       },
     ],
     faq: [
@@ -538,7 +575,11 @@ export const competitors: Competitor[] = [
         features: [
           { name: "Invoicing", midday: true, competitor: true },
           { name: "Expense tracking", midday: true, competitor: true },
-          { name: "Bank connections", midday: "Global", competitor: "US/Canada" },
+          {
+            name: "Bank connections",
+            midday: "Global",
+            competitor: "US/Canada",
+          },
           { name: "Receipt scanning", midday: true, competitor: true },
           { name: "Time tracking", midday: true, competitor: false },
           { name: "AI insights", midday: true, competitor: false },
@@ -584,7 +625,8 @@ export const competitors: Competitor[] = [
     switchingSteps: [
       {
         title: "Export from Wave",
-        description: "Download your customer list and transaction data from Wave.",
+        description:
+          "Download your customer list and transaction data from Wave.",
       },
       {
         title: "Create your Midday account",
@@ -596,7 +638,8 @@ export const competitors: Competitor[] = [
       },
       {
         title: "Enjoy premium features",
-        description: "Access time tracking, AI insights, and global bank support.",
+        description:
+          "Access time tracking, AI insights, and global bank support.",
       },
     ],
     faq: [
@@ -659,7 +702,11 @@ export const competitors: Competitor[] = [
           { name: "Invoicing", midday: true, competitor: true },
           { name: "Expense tracking", midday: true, competitor: true },
           { name: "Bank feeds", midday: true, competitor: true },
-          { name: "Time tracking", midday: "Built-in", competitor: "Separate app" },
+          {
+            name: "Time tracking",
+            midday: "Built-in",
+            competitor: "Separate app",
+          },
           { name: "AI insights", midday: true, competitor: "Basic" },
           { name: "Receipt capture", midday: true, competitor: true },
         ],
@@ -785,7 +832,11 @@ export const competitors: Competitor[] = [
         features: [
           { name: "Bank connections", midday: true, competitor: false },
           { name: "Expense tracking", midday: true, competitor: true },
-          { name: "Transaction categorization", midday: true, competitor: false },
+          {
+            name: "Transaction categorization",
+            midday: true,
+            competitor: false,
+          },
           { name: "AI insights", midday: true, competitor: false },
           { name: "Cash flow visibility", midday: true, competitor: false },
           { name: "Weekly summaries", midday: true, competitor: false },
@@ -1006,7 +1057,11 @@ export const competitors: Competitor[] = [
         category: "Financial Tracking",
         features: [
           { name: "Bank connections", midday: true, competitor: true },
-          { name: "Transaction categorization", midday: true, competitor: true },
+          {
+            name: "Transaction categorization",
+            midday: true,
+            competitor: true,
+          },
           { name: "Spending insights", midday: true, competitor: true },
           { name: "Cash flow tracking", midday: true, competitor: "Limited" },
           { name: "Business categorization", midday: true, competitor: false },
@@ -1033,7 +1088,8 @@ export const competitors: Competitor[] = [
           features: ["Personal budgets", "Bill tracking", "Credit monitoring"],
         },
       ],
-      competitorNote: "Mint is being sunset - Credit Karma now handles some features",
+      competitorNote:
+        "Mint is being sunset - Credit Karma now handles some features",
     },
     switchingSteps: [
       {
@@ -1042,7 +1098,8 @@ export const competitors: Competitor[] = [
       },
       {
         title: "Sign up for Midday",
-        description: "Create your account and connect your business bank accounts.",
+        description:
+          "Create your account and connect your business bank accounts.",
       },
       {
         title: "Set up business categories",
@@ -1157,7 +1214,8 @@ export const competitors: Competitor[] = [
     switchingSteps: [
       {
         title: "Export your Toggl data",
-        description: "Download your projects, clients, and time entries as CSV.",
+        description:
+          "Download your projects, clients, and time entries as CSV.",
       },
       {
         title: "Create your Midday account",
@@ -1169,7 +1227,8 @@ export const competitors: Competitor[] = [
       },
       {
         title: "Start tracking with context",
-        description: "See your time alongside invoices, expenses, and cash flow.",
+        description:
+          "See your time alongside invoices, expenses, and cash flow.",
       },
     ],
     faq: [
@@ -1283,7 +1342,8 @@ export const competitors: Competitor[] = [
     switchingSteps: [
       {
         title: "Export your Clockify data",
-        description: "Download your time entries, projects, and clients as CSV.",
+        description:
+          "Download your time entries, projects, and clients as CSV.",
       },
       {
         title: "Create your Midday account",
@@ -1356,10 +1416,22 @@ export const competitors: Competitor[] = [
         category: "Financial Management",
         features: [
           { name: "Bank connections", midday: true, competitor: true },
-          { name: "Transaction categorization", midday: "Automatic + AI", competitor: "Done by bookkeeper" },
+          {
+            name: "Transaction categorization",
+            midday: "Automatic + AI",
+            competitor: "Done by bookkeeper",
+          },
           { name: "Real-time visibility", midday: true, competitor: false },
-          { name: "Financial reports", midday: "Instant", competitor: "Monthly" },
-          { name: "Tax-ready books", midday: "Export anytime", competitor: true },
+          {
+            name: "Financial reports",
+            midday: "Instant",
+            competitor: "Monthly",
+          },
+          {
+            name: "Tax-ready books",
+            midday: "Export anytime",
+            competitor: true,
+          },
         ],
       },
       {
@@ -1390,11 +1462,7 @@ export const competitors: Competitor[] = [
           name: "Bookkeeping + Tax",
           price: "$499",
           period: "/month",
-          features: [
-            "Everything in Bookkeeping",
-            "Tax filing",
-            "Tax advisory",
-          ],
+          features: ["Everything in Bookkeeping", "Tax filing", "Tax advisory"],
         },
       ],
       competitorNote: "Prices for businesses with <$20k monthly expenses",
@@ -1474,8 +1542,16 @@ export const competitors: Competitor[] = [
       {
         category: "Financial Management",
         features: [
-          { name: "Multi-bank support", midday: "25,000+ banks", competitor: "Qonto only" },
-          { name: "Transaction categorization", midday: true, competitor: true },
+          {
+            name: "Multi-bank support",
+            midday: "25,000+ banks",
+            competitor: "Qonto only",
+          },
+          {
+            name: "Transaction categorization",
+            midday: true,
+            competitor: true,
+          },
           { name: "Expense tracking", midday: true, competitor: true },
           { name: "Receipt capture", midday: true, competitor: true },
           { name: "Team cards", midday: false, competitor: true },
@@ -1526,7 +1602,8 @@ export const competitors: Competitor[] = [
     switchingSteps: [
       {
         title: "Keep your current bank",
-        description: "No need to switch banks - Midday connects to your existing accounts.",
+        description:
+          "No need to switch banks - Midday connects to your existing accounts.",
       },
       {
         title: "Sign up for Midday",
@@ -1755,7 +1832,11 @@ export const competitors: Competitor[] = [
           name: "Premium",
           price: "$66",
           period: "/month",
-          features: ["Priority support", "Multiple companies", "Advanced reports"],
+          features: [
+            "Priority support",
+            "Multiple companies",
+            "Advanced reports",
+          ],
         },
       ],
       competitorNote: "Payment processing: 2.9% + $0.25 per transaction",
@@ -1763,7 +1844,8 @@ export const competitors: Competitor[] = [
     switchingSteps: [
       {
         title: "Export client and invoice data",
-        description: "Download your clients and invoice history from HoneyBook.",
+        description:
+          "Download your clients and invoice history from HoneyBook.",
       },
       {
         title: "Sign up for Midday",
@@ -1835,7 +1917,11 @@ export const competitors: Competitor[] = [
       {
         category: "Core Features",
         features: [
-          { name: "Bank connections", midday: "Global", competitor: "UK-focused" },
+          {
+            name: "Bank connections",
+            midday: "Global",
+            competitor: "UK-focused",
+          },
           { name: "Invoicing", midday: true, competitor: true },
           { name: "Expense tracking", midday: true, competitor: true },
           { name: "Time tracking", midday: true, competitor: true },
@@ -1846,11 +1932,19 @@ export const competitors: Competitor[] = [
       {
         category: "Accounting",
         features: [
-          { name: "VAT returns", midday: "Export for accountant", competitor: true },
+          {
+            name: "VAT returns",
+            midday: "Export for accountant",
+            competitor: true,
+          },
           { name: "MTD compatible", midday: "Via export", competitor: true },
           { name: "Self-assessment", midday: "Export ready", competitor: true },
           { name: "Weekly summaries", midday: true, competitor: false },
-          { name: "No accounting knowledge needed", midday: true, competitor: false },
+          {
+            name: "No accounting knowledge needed",
+            midday: true,
+            competitor: false,
+          },
         ],
       },
     ],
@@ -1874,7 +1968,8 @@ export const competitors: Competitor[] = [
     switchingSteps: [
       {
         title: "Export from FreeAgent",
-        description: "Download your contacts, invoices, and transaction history.",
+        description:
+          "Download your contacts, invoices, and transaction history.",
       },
       {
         title: "Sign up for Midday",
@@ -1997,7 +2092,8 @@ export const competitors: Competitor[] = [
     switchingSteps: [
       {
         title: "Keep your current cards",
-        description: "No need to switch - Midday works with your existing accounts.",
+        description:
+          "No need to switch - Midday works with your existing accounts.",
       },
       {
         title: "Sign up for Midday",

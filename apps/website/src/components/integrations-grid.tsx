@@ -9,7 +9,10 @@ interface IntegrationsGridProps {
   activeCategory: string;
 }
 
-export function IntegrationsGrid({ apps, activeCategory }: IntegrationsGridProps) {
+export function IntegrationsGrid({
+  apps,
+  activeCategory,
+}: IntegrationsGridProps) {
   return (
     <div className="pt-32 pb-24">
       {/* Header */}
@@ -30,10 +33,11 @@ export function IntegrationsGrid({ apps, activeCategory }: IntegrationsGridProps
       <div className="max-w-[1400px] mx-auto mb-12">
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => {
-            const href = category.id === "all" 
-              ? "/integrations" 
-              : `/integrations/category/${category.id}`;
-            
+            const href =
+              category.id === "all"
+                ? "/integrations"
+                : `/integrations/category/${category.id}`;
+
             return (
               <Link
                 key={category.id}

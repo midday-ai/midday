@@ -42,14 +42,14 @@
     "@midday/utils": "workspace:*",
     "@sindresorhus/slugify": "catalog:",
     "@types/pg": "^8.15.6",
-    "drizzle-orm": "^0.45.0",
     "camelcase-keys": "catalog:",
+    "drizzle-orm": "^0.45.0",
     "nanoid": "catalog:",
     "pg": "^8.16.3",
     "snakecase-keys": "^9.0.2"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.8",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.8"
   }
 }

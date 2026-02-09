@@ -410,11 +410,9 @@ function JobRow({ job, selected, onSelect, onClick }: JobRowProps) {
   };
 
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
-      onKeyDown={(e) => e.key === "Enter" && onClick()}
-      role="button"
-      tabIndex={0}
       className="group grid w-full grid-cols-12 items-center gap-4 py-3 text-left text-sm cursor-default"
     >
       <div className="col-span-5 flex min-w-0 items-center gap-3">
@@ -448,6 +446,6 @@ function JobRow({ job, selected, onSelect, onClick }: JobRowProps) {
       <div className="col-span-1 flex justify-end">
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
       </div>
-    </div>
+    </button>
   );
 }

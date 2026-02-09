@@ -209,8 +209,10 @@ Header Value: Bearer ${key}`;
                       Add an MCP server
                     </span>
                     <p className="font-sans text-sm text-muted-foreground mt-1">
-                      Go to <strong>Tools → Add a tool → New tool → Model
-                      Context Protocol</strong>
+                      Go to{" "}
+                      <strong>
+                        Tools → Add a tool → New tool → Model Context Protocol
+                      </strong>
                     </p>
                   </div>
                 </li>

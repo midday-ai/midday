@@ -42,9 +42,7 @@ export function Meta({
             {issueDateLabel ? `${issueDateLabel}:` : ""}
           </Text>
           <Text style={{ fontSize: 9 }}>
-            {issueDate
-              ? format(new TZDate(issueDate, "UTC"), dateFormat)
-              : ""}
+            {issueDate ? format(new TZDate(issueDate, "UTC"), dateFormat) : ""}
           </Text>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center" }}>

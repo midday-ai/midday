@@ -228,8 +228,7 @@ function numberAppearsInText(
   const writtenPatterns = [
     // Hundreds of thousands
     {
-      pattern:
-        /(\w+)\s+hundred\s+(\w+)(?:-(\w+))?\s+thousand/i,
+      pattern: /(\w+)\s+hundred\s+(\w+)(?:-(\w+))?\s+thousand/i,
       parse: (m: RegExpMatchArray) => {
         const h = wordToNumber(m[1]!) * 100;
         const t = wordToNumber(m[2]!);

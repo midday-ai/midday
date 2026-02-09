@@ -1,7 +1,7 @@
 "use client";
 
-import { HeroChatInput } from "./hero-chat-input";
 import { useDocsChat } from "./docs-chat-provider";
+import { HeroChatInput } from "./hero-chat-input";
 
 export function DocsHomeHero() {
   const { sendMessage } = useDocsChat();

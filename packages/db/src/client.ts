@@ -42,10 +42,10 @@ const replicaUrl = currentRegion
 
 // Only create ONE replica pool for the current region, fall back to primary
 const replicaDb = replicaUrl
-  ? drizzle(
-      new Pool({ connectionString: replicaUrl, ...connectionConfig }),
-      { schema, casing: "snake_case" },
-    )
+  ? drizzle(new Pool({ connectionString: replicaUrl, ...connectionConfig }), {
+      schema,
+      casing: "snake_case",
+    })
   : primaryDb;
 
 export const db = withReplicas(

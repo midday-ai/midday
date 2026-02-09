@@ -6,4 +6,3 @@ export default {
   ...baseConfig,
   images: [require("./assets/xero.jpg")],
 };
-

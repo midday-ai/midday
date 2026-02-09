@@ -74,7 +74,10 @@ export function PricingComparison({ competitor }: Props) {
           </h3>
           <div className="space-y-4">
             {competitor.pricing.competitor.map((tier) => (
-              <div key={tier.name} className="border border-border p-6 opacity-75">
+              <div
+                key={tier.name}
+                className="border border-border p-6 opacity-75"
+              >
                 <div className="flex items-baseline justify-between mb-4">
                   <h4 className="font-sans text-base text-muted-foreground">
                     {tier.name}

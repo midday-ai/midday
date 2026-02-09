@@ -52,7 +52,11 @@ export type InsightFacts = {
   quarterPace: string | null;
 
   // Activity
-  largestPayment: { customer: string; amount: string; rawAmount: number } | null;
+  largestPayment: {
+    customer: string;
+    amount: string;
+    rawAmount: number;
+  } | null;
 
   // Alerts/warnings
   hasAlerts: boolean;

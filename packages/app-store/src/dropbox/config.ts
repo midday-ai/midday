@@ -11,4 +11,3 @@ export default {
   description: null,
   images: [],
 };
-

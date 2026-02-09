@@ -202,7 +202,6 @@ pre div {
   background-color: transparent !important;
 }
 
-
 /* Respect user's motion preferences for accessibility and performance */
 @media (prefers-reduced-motion: reduce) {
   *,

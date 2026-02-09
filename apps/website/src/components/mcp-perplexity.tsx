@@ -125,10 +125,8 @@ export function MCPPerplexity() {
                   Requirements:
                 </span>{" "}
                 Perplexity Mac app with MCP support enabled. Go to{" "}
-                <span className="font-medium">
-                  Settings → MCP Servers
-                </span>{" "}
-                to add a new server.
+                <span className="font-medium">Settings → MCP Servers</span> to
+                add a new server.
               </p>
             </div>
 

@@ -2,11 +2,11 @@
 
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion } from "motion/react";
 import { HeaderIntegrationsPreview } from "./header-integrations-preview";
 
 interface HeaderProps {
