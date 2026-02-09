@@ -413,7 +413,7 @@ function VideoTestimonialCardMobile({
   );
 }
 
-const defaultTestimonials: Testimonial[] = [
+export const defaultTestimonials: Testimonial[] = [
   {
     name: "Paweł Michalski",
     title: "",

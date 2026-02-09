@@ -20,7 +20,7 @@ const allTestimonials: Testimonial[] = [
     title: "",
     company: "Awwwocado",
     country: "Netherlands",
-    image: "/stories/Vitalie.jpg",
+    image: "/stories/vitalie-cover.jpg",
     content:
       "All in one platform for freelancers looking to create clear insights on income and expenses.",
     fullContent:
@@ -199,7 +199,7 @@ export function Testimonials() {
                   </div>
 
                   {/* Big Quote */}
-                  <blockquote className="font-serif text-xl sm:text-2xl lg:text-3xl text-foreground leading-relaxed">
+                  <blockquote className="font-sans text-lg sm:text-xl lg:text-2xl text-foreground leading-relaxed">
                     &quot;{testimonial.content}&quot;
                   </blockquote>
                 </div>

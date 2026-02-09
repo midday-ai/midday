@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { HeaderIntegrationsPreview } from "./header-integrations-preview";
+import type { Testimonial } from "./sections/testimonials-section";
+import { defaultTestimonials } from "./sections/testimonials-section";
 
 interface HeaderProps {
   transparent?: boolean;
@@ -57,6 +59,7 @@ export function Header({
   const headerRef = useRef<HTMLDivElement>(null);
   const featuresPrefetched = useRef(false);
   const appsPrefetched = useRef(false);
+  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
 
   // Prefetch feature pages on hover (only once)
   const prefetchFeatures = useCallback(() => {
@@ -149,10 +152,6 @@ export function Header({
         ? featuresDropdown.offsetHeight
         : featuresListRef.current.offsetHeight;
       setFeaturesDropdownHeight(featuresHeight);
-
-      if (preAccountingRef.current) {
-        preAccountingRef.current.style.height = `${featuresListRef.current.offsetHeight}px`;
-      }
     }
   }, [isFeaturesOpen]);
 
@@ -221,6 +220,10 @@ export function Header({
                     clearTimeout(featuresTimeoutRef.current);
                   }
                   prefetchFeatures();
+                  // Rotate to next testimonial
+                  setCurrentTestimonialIndex(
+                    (prev) => (prev + 1) % defaultTestimonials.length,
+                  );
                   setIsFeaturesOpen(true);
                 }}
                 onMouseLeave={() => {
@@ -358,15 +361,16 @@ export function Header({
                           </div>
                         </div>
 
-                        {/* Column 3 & 4 - Pre-accounting Preview */}
-                        <div className="lg:col-span-2 flex items-start justify-end">
+                        {/* Column 3 & 4 - Preview Cards */}
+                        <div className="lg:col-span-2 flex items-start justify-end gap-4 flex-nowrap">
+                          {/* Pre-accounting Preview */}
                           <Link
                             ref={preAccountingRef}
                             href="/pre-accounting"
                             onClick={() => setIsFeaturesOpen(false)}
-                            className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
+                            className="w-full max-w-[320px] lg:w-[320px] lg:max-w-none xl:w-[350px] 2xl:w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
                           >
-                            <div className="flex-1 flex items-center justify-center bg-background p-4">
+                            <div className="h-[214px] flex items-center justify-center bg-background p-4">
                               <Image
                                 src="/images/accounting-light.png"
                                 alt="Pre-accounting"
@@ -420,6 +424,64 @@ export function Header({
                                   />
                                 </div>
                               </div>
+                            </div>
+                          </Link>
+
+                          {/* Customer Stories Preview */}
+                          <Link
+                            href="/testimonials"
+                            onClick={() => setIsFeaturesOpen(false)}
+                            className="w-full max-w-[320px] lg:w-[320px] lg:max-w-none xl:w-[350px] 2xl:w-[400px] h-[277px] border border-border overflow-visible cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
+                          >
+                            <div className="flex-1 flex items-center justify-center bg-background p-4 relative overflow-visible">
+                              <span className="absolute top-[89%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-[20rem] xl:text-[22rem] 2xl:text-[24rem] text-muted-foreground opacity-10 pointer-events-none select-none z-0 whitespace-nowrap leading-none font-serif">
+                                &rdquo;
+                              </span>
+                              {(() => {
+                                const testimonial =
+                                  defaultTestimonials[currentTestimonialIndex];
+                                if (!testimonial) return null;
+                                const firstSentenceEnd = testimonial.content.match(/[.!?]\s/);
+                                const firstSentence = firstSentenceEnd
+                                  ? testimonial.content.substring(0, firstSentenceEnd.index! + 1)
+                                  : testimonial.content;
+                                return (
+                                  <div className="relative font-serif text-sm xl:text-base 2xl:text-lg leading-tight text-center px-2 line-clamp-3 w-full z-10">
+                                    <span className="text-primary">
+                                      &ldquo;{firstSentence}&rdquo;
+                                    </span>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                            <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
+                              <div className="flex-1">
+                                <span className="font-sans text-xs text-foreground block">
+                                  Customer Stories
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  See how founders use Midday
+                                </span>
+                              </div>
+                              {(() => {
+                                const testimonial =
+                                  defaultTestimonials[currentTestimonialIndex];
+                                if (!testimonial?.image) return null;
+                                return (
+                                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                                    <div className="w-6 h-6 flex items-center justify-center bg-background overflow-hidden rounded-full">
+                                      <Image
+                                        src={testimonial.image}
+                                        alt={testimonial.name}
+                                        width={24}
+                                        height={24}
+                                        className="w-full h-full object-cover rounded-full opacity-70"
+                                        style={{ filter: "grayscale(100%)" }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </Link>
                         </div>
