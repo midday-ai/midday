@@ -18,7 +18,7 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Detect which services/packages changed
+  # Detect which services/packages changed (for deploy gating)
   # ---------------------------------------------------------------------------
   detect-changes:
     name: Detect changes
@@ -60,18 +60,10 @@ jobs:
               - 'packages/jobs/**'
 
   # ---------------------------------------------------------------------------
-  # Validate — tests, linting, type-checking (turbo handles parallelism)
+  # Validate — runs in parallel with detect-changes (turbo handles scoping)
   # ---------------------------------------------------------------------------
   validate:
     name: Validate
-    needs: detect-changes
-    if: |
-      needs.detect-changes.outputs.api == 'true' ||
-      needs.detect-changes.outputs.dashboard == 'true' ||
-      needs.detect-changes.outputs.worker == 'true' ||
-      needs.detect-changes.outputs.engine == 'true' ||
-      needs.detect-changes.outputs.website == 'true' ||
-      needs.detect-changes.outputs.jobs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -96,60 +88,62 @@ jobs:
   deploy-api-staging:
     name: Deploy API (staging)
     needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.api == 'true' && github.event_name == 'push'
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency: railway-api-staging
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
       - name: Deploy to Railway
-        run: railway up --service ${{ secrets.RAILWAY_API_STAGING_SERVICE_ID }} --environment staging
+        run: npx @railway/cli up --service ${{ secrets.RAILWAY_API_STAGING_SERVICE_ID }} --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
   # ---------------------------------------------------------------------------
-  # Deploy Dashboard to Railway staging
+  # Deploy Dashboard to Railway staging (waits for API when both change)
   # ---------------------------------------------------------------------------
   deploy-dashboard-staging:
     name: Deploy Dashboard (staging)
-    needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.dashboard == 'true' && github.event_name == 'push'
+    needs: [detect-changes, validate, deploy-api-staging]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.dashboard == 'true' &&
+      (needs.deploy-api-staging.result == 'success' || needs.deploy-api-staging.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency: railway-dashboard-staging
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
       - name: Deploy to Railway
-        run: railway up --service ${{ secrets.RAILWAY_DASHBOARD_SERVICE_ID }} --environment staging
+        run: npx @railway/cli up --service ${{ secrets.RAILWAY_DASHBOARD_SERVICE_ID }} --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
   # ---------------------------------------------------------------------------
-  # Deploy Worker to Railway staging
+  # Deploy Worker to Railway staging (waits for API when both change)
   # ---------------------------------------------------------------------------
   deploy-worker-staging:
     name: Deploy Worker (staging)
-    needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.worker == 'true' && github.event_name == 'push'
+    needs: [detect-changes, validate, deploy-api-staging]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.worker == 'true' &&
+      (needs.deploy-api-staging.result == 'success' || needs.deploy-api-staging.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency: railway-worker-staging
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
       - name: Deploy to Railway
-        run: railway up --service ${{ secrets.RAILWAY_WORKER_STAGING_SERVICE_ID }} --environment staging
+        run: npx @railway/cli up --service ${{ secrets.RAILWAY_WORKER_STAGING_SERVICE_ID }} --environment staging
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -159,7 +153,10 @@ jobs:
   deploy-engine-staging:
     name: Deploy Engine (staging)
     needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.engine == 'true' && github.event_name == 'push'
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.engine == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -182,7 +179,10 @@ jobs:
   deploy-jobs-staging:
     name: Deploy Jobs (staging)
     needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.jobs == 'true' && github.event_name == 'push'
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.jobs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -203,7 +203,10 @@ jobs:
   deploy-website-preview:
     name: Deploy Website (preview)
     needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.website == 'true' && github.event_name == 'push'
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.website == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:

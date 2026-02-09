@@ -18,7 +18,7 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Detect which services/packages changed
+  # Detect which services/packages changed (for deploy gating)
   # ---------------------------------------------------------------------------
   detect-changes:
     name: Detect changes
@@ -63,19 +63,10 @@ jobs:
               - 'packages/jobs/**'
 
   # ---------------------------------------------------------------------------
-  # Validate — tests, linting, type-checking (turbo handles parallelism)
+  # Validate — runs in parallel with detect-changes (turbo handles scoping)
   # ---------------------------------------------------------------------------
   validate:
     name: Validate
-    needs: detect-changes
-    if: |
-      needs.detect-changes.outputs.api == 'true' ||
-      needs.detect-changes.outputs.dashboard == 'true' ||
-      needs.detect-changes.outputs.worker == 'true' ||
-      needs.detect-changes.outputs.engine == 'true' ||
-      needs.detect-changes.outputs.website == 'true' ||
-      needs.detect-changes.outputs.email == 'true' ||
-      needs.detect-changes.outputs.jobs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -97,60 +88,62 @@ jobs:
   deploy-api:
     name: Deploy API
     needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.api == 'true'
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency: railway-api-production
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
       - name: Deploy to Railway
-        run: railway up --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
+        run: npx @railway/cli up --service ${{ secrets.RAILWAY_API_SERVICE_ID }}
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
   # ---------------------------------------------------------------------------
-  # Deploy Dashboard to Railway
+  # Deploy Dashboard to Railway (waits for API when both change)
   # ---------------------------------------------------------------------------
   deploy-dashboard:
     name: Deploy Dashboard
-    needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.dashboard == 'true'
+    needs: [detect-changes, validate, deploy-api]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.dashboard == 'true' &&
+      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency: railway-dashboard-production
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
       - name: Deploy to Railway
-        run: railway up --service ${{ secrets.RAILWAY_DASHBOARD_SERVICE_ID }}
+        run: npx @railway/cli up --service ${{ secrets.RAILWAY_DASHBOARD_SERVICE_ID }}
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
   # ---------------------------------------------------------------------------
-  # Deploy Worker to Railway
+  # Deploy Worker to Railway (waits for API when both change)
   # ---------------------------------------------------------------------------
   deploy-worker:
     name: Deploy Worker
-    needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.worker == 'true'
+    needs: [detect-changes, validate, deploy-api]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.worker == 'true' &&
+      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency: railway-worker-production
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
       - name: Deploy to Railway
-        run: railway up --service ${{ secrets.RAILWAY_WORKER_SERVICE_ID }}
+        run: npx @railway/cli up --service ${{ secrets.RAILWAY_WORKER_SERVICE_ID }}
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -160,7 +153,10 @@ jobs:
   deploy-engine:
     name: Deploy Engine
     needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.engine == 'true'
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.engine == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -183,7 +179,10 @@ jobs:
   deploy-website:
     name: Deploy Website
     needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.website == 'true'
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.website == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -215,7 +214,10 @@ jobs:
   deploy-email:
     name: Deploy Email
     needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.email == 'true'
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.email == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -246,7 +248,10 @@ jobs:
   deploy-jobs:
     name: Deploy Jobs
     needs: [detect-changes, validate]
-    if: needs.detect-changes.outputs.jobs == 'true'
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.jobs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

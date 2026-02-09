@@ -10,16 +10,17 @@ runs:
         bun-version: v1.3.9
 
     - name: Cache dependencies
+      id: cache
       uses: actions/cache@v4
       with:
         path: |
           node_modules
           **/node_modules
-          .turbo
         key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
         restore-keys: |
           ${{ runner.os }}-bun-
 
     - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
       run: bun install
