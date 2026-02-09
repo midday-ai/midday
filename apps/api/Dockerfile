@@ -31,6 +31,7 @@ FROM oven/bun:1.3.9 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PORT=8080
 
 # Copy only what's needed at runtime
 COPY --from=installer /app/node_modules ./node_modules
