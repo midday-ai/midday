@@ -15,17 +15,6 @@ RUN turbo prune @midday/api --docker
 FROM base AS installer
 WORKDIR /app
 
-# Install build dependencies for native modules (canvas, etc.)
-RUN apt-get update && apt-get install -y \
-    python3 \
-    build-essential \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libjpeg-dev \
-    libgif-dev \
-    librsvg2-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install dependencies
 COPY --from=builder /app/out/json/ .
 COPY bunfig.toml .
@@ -37,24 +26,18 @@ COPY --from=builder /app/out/full/ .
 # Build engine types
 RUN bunx turbo run build --filter=@midday/engine --only
 
-# Runner stage - clean image with only runtime deps
+# Runner stage - clean image
 FROM oven/bun:1.3.9 AS runner
 WORKDIR /app
 
-# Install runtime libraries for canvas
-RUN apt-get update && apt-get install -y \
-    libcairo2 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libjpeg62-turbo \
-    libgif7 \
-    librsvg2-2 \
-    && rm -rf /var/lib/apt/lists/*
-
 ENV NODE_ENV=production
 
-# Copy the full workspace from installer (API needs source + node_modules at runtime)
-COPY --from=installer /app /app
+# Copy only what's needed at runtime
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/apps/api ./apps/api
+COPY --from=installer /app/apps/engine/dist ./apps/engine/dist
+COPY --from=installer /app/packages ./packages
+COPY --from=installer /app/package.json ./package.json
 
 WORKDIR /app/apps/api
 
