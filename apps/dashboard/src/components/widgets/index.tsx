@@ -25,9 +25,9 @@ function SuggestedActionsSkeleton() {
   return (
     <div className="w-[calc(100%+16px)] md:w-full -mx-4 md:mx-0 md:px-6 mt-10 mb-8 flex items-center justify-center">
       <div className="flex gap-3 overflow-x-auto scrollbar-hide w-full md:w-auto pl-4 md:pl-0">
-        {skeletonWidths.map((width) => (
+        {skeletonWidths.map((width, index) => (
           <Skeleton
-            key={`suggested-actions-skeleton-${width}`}
+            key={`suggested-actions-skeleton-${index.toString()}`}
             className={`${width} h-[34px] border border-[#e6e6e6] dark:border-[#1d1d1d] flex-shrink-0`}
           />
         ))}

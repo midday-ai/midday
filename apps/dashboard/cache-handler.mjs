@@ -4,10 +4,13 @@ const KEY_PREFIX = "next-cache:";
 const TAG_PREFIX = "next-tag:";
 
 let client = null;
+let initFailed = false;
 
 async function getClient() {
-  if (client?.connected) return client;
-  if (client) return null; // Already tried and failed
+  // Once created with autoReconnect + enableOfflineQueue, always return the
+  // client — Bun handles reconnection and queues commands while disconnected.
+  if (client) return client;
+  if (initFailed) return null;
 
   // Skip during build phase
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
@@ -15,12 +18,26 @@ async function getClient() {
   try {
     client = new RedisClient(
       process.env.REDIS_URL ?? "redis://localhost:6379",
+      {
+        connectionTimeout: 10_000,
+        autoReconnect: true,
+        maxRetries: 10,
+        enableOfflineQueue: true,
+        enableAutoPipelining: true,
+      },
     );
+
+    client.onclose = (err) => {
+      if (err) {
+        console.error("[Next Cache Redis] Connection closed:", err.message);
+      }
+    };
 
     await client.connect();
     return client;
   } catch {
     client = null;
+    initFailed = true;
     return null;
   }
 }
@@ -38,8 +55,23 @@ const cacheHandler = {
       const data = JSON.parse(stored);
 
       const now = Date.now();
-      if (now > data.timestamp + data.revalidate * 1000) {
+      if (
+        typeof data.revalidate === "number" &&
+        data.revalidate > 0 &&
+        now > data.timestamp + data.revalidate * 1000
+      ) {
         return undefined;
+      }
+
+      // Check if any of the entry's tags or softTags have been invalidated
+      // since this entry was cached. revalidateTag() stores the invalidation
+      // timestamp via updateTags(), so we compare it against the entry's timestamp.
+      const allTags = [...(data.tags ?? []), ...(softTags ?? [])];
+      if (allTags.length > 0) {
+        const expiration = await this.getExpiration(allTags);
+        if (expiration > data.timestamp) {
+          return undefined;
+        }
       }
 
       return {
