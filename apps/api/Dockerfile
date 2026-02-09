@@ -1,26 +1,23 @@
 # Base image with Bun
 FROM oven/bun:1.3.9 AS base
 
-# Install turbo CLI globally using Bun
+# Install turbo CLI globally
 FROM base AS turbo-cli
 RUN bun add -g turbo
 
-# Builder stage
+# Builder stage - prune API workspace
 FROM turbo-cli AS builder
 WORKDIR /app
-# Copy all files
 COPY . .
-# Use turbo CLI from Bun global install to prune workspaces
 RUN turbo prune @midday/api --docker
 
-# Installer stage
+# Installer stage - install deps and build
 FROM base AS installer
 WORKDIR /app
 
 # Install build dependencies for native modules (canvas, etc.)
 RUN apt-get update && apt-get install -y \
     python3 \
-    python3-pip \
     build-essential \
     libcairo2-dev \
     libpango1.0-dev \
@@ -29,28 +26,38 @@ RUN apt-get update && apt-get install -y \
     librsvg2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# First install the dependencies (as they change less often)
+# Install dependencies
 COPY --from=builder /app/out/json/ .
 COPY bunfig.toml .
 RUN bun install
 
-# Copy the full source code
+# Copy full source
 COPY --from=builder /app/out/full/ .
 
-# Build engine types (included in pruned workspace)
+# Build engine types
 RUN bunx turbo run build --filter=@midday/engine --only
 
-# Runner stage (same as installer to avoid another copy)
-FROM installer AS runner
+# Runner stage - clean image with only runtime deps
+FROM oven/bun:1.3.9 AS runner
+WORKDIR /app
 
-# Set the API directory as working directory
-WORKDIR /app/apps/api
+# Install runtime libraries for canvas
+RUN apt-get update && apt-get install -y \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libjpeg62-turbo \
+    libgif7 \
+    librsvg2-2 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set environment variables
 ENV NODE_ENV=production
 
-# Expose the port the API runs on
+# Copy the full workspace from installer (API needs source + node_modules at runtime)
+COPY --from=installer /app /app
+
+WORKDIR /app/apps/api
+
 EXPOSE 8080
 
-# Run the API directly with Bun
 CMD ["bun", "src/index.ts"]
