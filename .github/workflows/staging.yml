@@ -22,7 +22,7 @@ jobs:
   # ---------------------------------------------------------------------------
   detect-changes:
     name: Detect changes
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 5
     outputs:
       api: ${{ steps.filter.outputs.api }}
@@ -64,7 +64,7 @@ jobs:
   # ---------------------------------------------------------------------------
   validate:
     name: Validate
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 20
     env:
       NODE_OPTIONS: "--max-old-space-size=8192"
@@ -92,7 +92,7 @@ jobs:
       always() &&
       needs.validate.result == 'success' &&
       needs.detect-changes.outputs.api == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
     concurrency: railway-api-staging
     steps:
@@ -114,7 +114,7 @@ jobs:
       needs.validate.result == 'success' &&
       needs.detect-changes.outputs.dashboard == 'true' &&
       (needs.deploy-api-staging.result == 'success' || needs.deploy-api-staging.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
     concurrency: railway-dashboard-staging
     steps:
@@ -136,7 +136,7 @@ jobs:
       needs.validate.result == 'success' &&
       needs.detect-changes.outputs.worker == 'true' &&
       (needs.deploy-api-staging.result == 'success' || needs.deploy-api-staging.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
     concurrency: railway-worker-staging
     steps:
@@ -157,7 +157,7 @@ jobs:
       always() &&
       needs.validate.result == 'success' &&
       needs.detect-changes.outputs.engine == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -183,7 +183,7 @@ jobs:
       always() &&
       needs.validate.result == 'success' &&
       needs.detect-changes.outputs.jobs == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -207,7 +207,7 @@ jobs:
       always() &&
       needs.validate.result == 'success' &&
       needs.detect-changes.outputs.website == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

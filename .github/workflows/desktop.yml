@@ -10,7 +10,7 @@ on:
 
 jobs:
   draft:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
     outputs:
       version: ${{ steps.read_version.outputs.value }}
