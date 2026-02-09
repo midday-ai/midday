@@ -32,7 +32,7 @@ ENV NODE_ENV=production
 RUN bunx turbo run build --filter=@midday/engine --only
 RUN bunx turbo run build --filter=@midday/dashboard --only
 
-# Runner stage - minimal image
+# Runner stage
 FROM base AS runner
 WORKDIR /app
 
@@ -57,4 +57,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["bun", "apps/dashboard/server.js"]
+CMD ["bun", "run", "apps/dashboard/server.js"]
