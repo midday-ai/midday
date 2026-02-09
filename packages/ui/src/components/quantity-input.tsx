@@ -28,9 +28,9 @@ export function QuantityInput({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [rawValue, setRawValue] = React.useState(String(value));
 
-  const handleInput: React.ChangeEventHandler<HTMLInputElement> = ({
+  const handleInput = ({
     currentTarget: el,
-  }) => {
+  }: { currentTarget: HTMLInputElement }) => {
     const input = el.value;
     setRawValue(input);
 

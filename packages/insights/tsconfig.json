@@ -1,5 +1,12 @@
 {
   "extends": "@midday/tsconfig/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "paths": {
+      "@db/*": ["../db/src/*"],
+      "@api/*": ["../../apps/api/src/*"]
+    }
+  },
   "include": ["src", "../../types"],
   "exclude": ["node_modules"]
 }
