@@ -65,7 +65,8 @@
       "cache": false
     },
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": false
     },
     "dev": {
       "inputs": ["$TURBO_DEFAULT$", ".env"],
