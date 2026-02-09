@@ -145,6 +145,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@types/react-syntax-highlighter": "^15.5.13",
     "autoprefixer": "^10.4.23",
     "react": "catalog:",
     "react-dom": "catalog:",

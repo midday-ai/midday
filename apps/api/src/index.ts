@@ -3,10 +3,8 @@ import "./instrument";
 
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { primaryDb } from "@midday/db/client";
 import { logger } from "@midday/logger";
 import { Scalar } from "@scalar/hono-api-reference";
-import { sql } from "drizzle-orm";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { routers } from "./rest/routers";
@@ -69,13 +67,8 @@ app.use(
   }),
 );
 
-app.get("/health", async (c) => {
-  try {
-    await primaryDb.execute(sql`SELECT 1`);
-    return c.json({ status: "ok" }, 200);
-  } catch {
-    return c.json({ status: "error" }, 503);
-  }
+app.get("/health", (c) => {
+  return c.json({ status: "ok" }, 200);
 });
 
 app.doc("/openapi", {
