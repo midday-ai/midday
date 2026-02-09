@@ -3,6 +3,7 @@
 import { Icons } from "@midday/ui/icons";
 import type Hls from "hls.js";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -863,6 +864,14 @@ export function TestimonialsSection({
               })}
             </div>
           </div>
+        </div>
+        <div className="text-center mt-8">
+          <Link
+            href="/testimonials"
+            className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+          >
+            View all testimonials
+          </Link>
         </div>
       </div>
     </section>
