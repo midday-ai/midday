@@ -32,29 +32,25 @@ ENV NODE_ENV=production
 RUN bunx turbo run build --filter=@midday/engine --only
 RUN bunx turbo run build --filter=@midday/dashboard --only
 
-# Runner stage
-FROM base AS runner
+# Runner stage - clean bun image, no turbo
+FROM oven/bun:1.3.9 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# Create non-root user
-RUN groupadd --system --gid 1001 nodejs
-RUN useradd --system --uid 1001 --gid nodejs nextjs
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-log-init -g nodejs nextjs
 
 # Copy standalone output
-COPY --from=installer /app/apps/dashboard/.next/standalone ./
-COPY --from=installer /app/apps/dashboard/.next/static ./apps/dashboard/.next/static
-COPY --from=installer /app/apps/dashboard/public ./apps/dashboard/public
-
-# Copy cache handler
-COPY --from=installer /app/apps/dashboard/cache-handler.mjs ./apps/dashboard/cache-handler.mjs
+COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/.next/static ./apps/dashboard/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/public ./apps/dashboard/public
+COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/cache-handler.mjs ./apps/dashboard/cache-handler.mjs
 
 USER nextjs
 
 EXPOSE 3000
 
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
-CMD ["bun", "--bun", "apps/dashboard/server.js"]
+CMD ["bun", "apps/dashboard/server.js"]
