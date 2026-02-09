@@ -6,11 +6,13 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
+import { primaryDb } from "@midday/db/client";
+import { logger } from "@midday/logger";
+import { sql } from "drizzle-orm";
 import { routers } from "./rest/routers";
 import type { Context } from "./rest/types";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
-import { logger } from "@midday/logger";
 import { httpLogger } from "./utils/logger";
 
 const app = new OpenAPIHono<Context>();
@@ -67,8 +69,13 @@ app.use(
   }),
 );
 
-app.get("/health", (c) => {
-  return c.json({ status: "ok" }, 200);
+app.get("/health", async (c) => {
+  try {
+    await primaryDb.execute(sql`SELECT 1`);
+    return c.json({ status: "ok" }, 200);
+  } catch {
+    return c.json({ status: "error" }, 503);
+  }
 });
 
 app.doc("/openapi", {

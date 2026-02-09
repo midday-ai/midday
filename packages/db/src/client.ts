@@ -17,71 +17,41 @@ const connectionConfig = {
   ssl: !isDevelopment,
 };
 
+// Primary pool — DATABASE_PRIMARY_URL should point to the Supabase pooler
 const primaryPool = new Pool({
   connectionString: process.env.DATABASE_PRIMARY_URL!,
   ...connectionConfig,
 });
-
-const fraPool = new Pool({
-  connectionString: process.env.DATABASE_FRA_URL!,
-  ...connectionConfig,
-});
-
-const sjcPool = new Pool({
-  connectionString: process.env.DATABASE_SJC_URL!,
-  ...connectionConfig,
-});
-
-const iadPool = new Pool({
-  connectionString: process.env.DATABASE_IAD_URL!,
-  ...connectionConfig,
-});
-
-const hasReplicas = Boolean(
-  process.env.DATABASE_FRA_URL &&
-    process.env.DATABASE_SJC_URL &&
-    process.env.DATABASE_IAD_URL,
-);
 
 export const primaryDb = drizzle(primaryPool, {
   schema,
   casing: "snake_case",
 });
 
-const getReplicaIndexForRegion = () => {
-  switch (process.env.RAILWAY_REPLICA_REGION) {
-    case "europe-west4-drams3a":
-      return 0; // fra replica
-    case "us-east4-eqdc4a":
-      return 1; // iad replica
-    case "us-west2":
-      return 2; // sjc replica
-    default:
-      return 0;
-  }
+// Map Railway region → replica URL (only create the pool this instance needs)
+const replicaUrlForRegion: Record<string, string | undefined> = {
+  "europe-west4-drams3a": process.env.DATABASE_FRA_URL,
+  "us-east4-eqdc4a": process.env.DATABASE_IAD_URL,
+  "us-west2": process.env.DATABASE_SJC_URL,
 };
 
-// Create the database instance once and export it
-const replicaIndex = getReplicaIndexForRegion();
+const currentRegion = process.env.RAILWAY_REPLICA_REGION;
+const replicaUrl = currentRegion
+  ? replicaUrlForRegion[currentRegion]
+  : undefined;
+
+// Only create ONE replica pool for the current region, fall back to primary
+const replicaDb = replicaUrl
+  ? drizzle(
+      new Pool({ connectionString: replicaUrl, ...connectionConfig }),
+      { schema, casing: "snake_case" },
+    )
+  : primaryDb;
 
 export const db = withReplicas(
   primaryDb,
-  [
-    // Order of replicas is important
-    drizzle(fraPool, {
-      schema,
-      casing: "snake_case",
-    }),
-    drizzle(iadPool, {
-      schema,
-      casing: "snake_case",
-    }),
-    drizzle(sjcPool, {
-      schema,
-      casing: "snake_case",
-    }),
-  ],
-  (replicas) => replicas[replicaIndex]!,
+  [replicaDb],
+  (replicas) => replicas[0]!,
 );
 
 // Keep connectDb for backward compatibility, but just return the singleton
