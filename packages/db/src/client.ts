@@ -17,12 +17,6 @@ const connectionConfig = {
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
 };
 
-// Supabase dedicated pooler (db.*.supabase.co:6543) requires IPv6
-// Supabase shared pooler (*.pooler.supabase.com) works with IPv4
-// Use family: 6 for dedicated pooler URLs, family: 0 (auto) for pooler URLs
-const isDirectSupabase = (url?: string) =>
-  url?.includes("db.") && url?.includes("supabase.co");
-
 const primaryPool = new Pool({
   connectionString: process.env.DATABASE_PRIMARY_URL!,
   ...connectionConfig,
@@ -31,19 +25,16 @@ const primaryPool = new Pool({
 const fraPool = new Pool({
   connectionString: process.env.DATABASE_FRA_URL!,
   ...connectionConfig,
-  ...(isDirectSupabase(process.env.DATABASE_FRA_URL) && { family: 6 }),
 });
 
 const sjcPool = new Pool({
   connectionString: process.env.DATABASE_SJC_URL!,
   ...connectionConfig,
-  ...(isDirectSupabase(process.env.DATABASE_SJC_URL) && { family: 6 }),
 });
 
 const iadPool = new Pool({
   connectionString: process.env.DATABASE_IAD_URL!,
   ...connectionConfig,
-  ...(isDirectSupabase(process.env.DATABASE_IAD_URL) && { family: 6 }),
 });
 
 const hasReplicas = Boolean(
