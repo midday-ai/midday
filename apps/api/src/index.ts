@@ -5,6 +5,7 @@ import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { logger } from "@midday/logger";
 import { Scalar } from "@scalar/hono-api-reference";
+import * as Sentry from "@sentry/bun";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { routers } from "./rest/routers";
@@ -63,6 +64,13 @@ app.use(
         cause: error.cause instanceof Error ? error.cause.message : undefined,
         stack: error.stack,
       });
+
+      // Send to Sentry (skip client errors like NOT_FOUND, UNAUTHORIZED)
+      if (error.code === "INTERNAL_SERVER_ERROR") {
+        Sentry.captureException(error, {
+          tags: { source: "trpc", path: path ?? "unknown" },
+        });
+      }
     },
   }),
 );
@@ -116,6 +124,38 @@ app.get(
 );
 
 app.route("/", routers);
+
+// Global error handler — captures unhandled route errors to Sentry
+app.onError((err, c) => {
+  Sentry.captureException(err, {
+    tags: { source: "hono", path: c.req.path, method: c.req.method },
+  });
+  logger.error(`[Hono] ${c.req.method} ${c.req.path}`, {
+    message: err.message,
+    stack: err.stack,
+  });
+  return c.json({ error: "Internal Server Error" }, 500);
+});
+
+/**
+ * Unhandled exception and rejection handlers
+ */
+process.on("uncaughtException", (err) => {
+  console.error("[API] Uncaught exception:", err);
+  Sentry.captureException(err, {
+    tags: { errorType: "uncaught_exception" },
+  });
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("[API] Unhandled rejection at:", promise, "reason:", reason);
+  Sentry.captureException(
+    reason instanceof Error ? reason : new Error(String(reason)),
+    {
+      tags: { errorType: "unhandled_rejection" },
+    },
+  );
+});
 
 export default {
   port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,

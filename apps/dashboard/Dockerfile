@@ -43,6 +43,16 @@ ARG NEXT_PUBLIC_GOOGLE_API_KEY
 ARG NEXT_PUBLIC_DESKTOP_SCHEME
 ARG NEXT_PUBLIC_WHATSAPP_NUMBER
 
+# Sentry source map upload (build-time only)
+ARG SENTRY_AUTH_TOKEN
+ARG SENTRY_ORG
+ARG SENTRY_PROJECT
+
+# Release tracking (Railway provides the git SHA automatically)
+ARG RAILWAY_GIT_COMMIT_SHA
+ENV NEXT_PUBLIC_SENTRY_RELEASE=$RAILWAY_GIT_COMMIT_SHA
+ENV CI=true
+
 # Build engine types (dependency) then dashboard only
 ENV NODE_ENV=production
 RUN bunx turbo run build --filter=@midday/engine --only
