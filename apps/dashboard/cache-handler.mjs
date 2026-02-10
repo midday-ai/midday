@@ -3,6 +3,32 @@ import { RedisClient } from "bun";
 const KEY_PREFIX = "next-cache:";
 const TAG_PREFIX = "next-tag:";
 
+/**
+ * Map Railway region identifiers to per-region cache Redis env vars.
+ * Set via Railway variable references, e.g.:
+ *   REDIS_CACHE_US_WEST=${{cache-us-west.REDIS_URL}}
+ *   REDIS_CACHE_US_EAST=${{cache-us-east.REDIS_URL}}
+ *   REDIS_CACHE_EU_WEST=${{cache-eu-west.REDIS_URL}}
+ */
+const REGION_REDIS_MAP = {
+  "us-west2": "REDIS_CACHE_US_WEST",
+  "us-east4-eqdc4a": "REDIS_CACHE_US_EAST",
+  "europe-west4-drams3a": "REDIS_CACHE_EU_WEST",
+};
+
+function resolveRedisUrl() {
+  const region = process.env.RAILWAY_REPLICA_REGION;
+
+  if (region) {
+    const envVar = REGION_REDIS_MAP[region];
+    const regionUrl = envVar ? process.env[envVar] : undefined;
+
+    if (regionUrl) return regionUrl;
+  }
+
+  return process.env.REDIS_URL ?? "redis://localhost:6379";
+}
+
 let client = null;
 
 function getClient() {
@@ -13,7 +39,7 @@ function getClient() {
   // Skip during build phase
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
 
-  client = new RedisClient(process.env.REDIS_URL ?? "redis://localhost:6379", {
+  client = new RedisClient(resolveRedisUrl(), {
     connectionTimeout: 10_000,
     autoReconnect: true,
     maxRetries: 10,

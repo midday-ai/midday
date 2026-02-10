@@ -9,6 +9,39 @@ try {
 }
 
 /**
+ * Map Railway region identifiers to per-region cache Redis env vars.
+ * In Railway, each region has its own Redis cache service. The env vars
+ * are set via Railway variable references, e.g.:
+ *   REDIS_CACHE_US_WEST=${{cache-us-west.REDIS_URL}}
+ *   REDIS_CACHE_US_EAST=${{cache-us-east.REDIS_URL}}
+ *   REDIS_CACHE_EU_WEST=${{cache-eu-west.REDIS_URL}}
+ */
+const REGION_REDIS_MAP: Record<string, string> = {
+  "us-west2": "REDIS_CACHE_US_WEST",
+  "us-east4-eqdc4a": "REDIS_CACHE_US_EAST",
+  "europe-west4-drams3a": "REDIS_CACHE_EU_WEST",
+};
+
+/**
+ * Resolve the Redis URL for the current replica's region.
+ * Falls back to REDIS_URL for local development and non-Railway environments.
+ */
+function resolveRedisUrl(): string | undefined {
+  const region = process.env.RAILWAY_REPLICA_REGION;
+
+  if (region) {
+    const envVar = REGION_REDIS_MAP[region];
+    const regionUrl = envVar ? process.env[envVar] : undefined;
+
+    if (regionUrl) {
+      return regionUrl;
+    }
+  }
+
+  return process.env.REDIS_URL;
+}
+
+/**
  * Get or create a shared Redis client instance.
  * Returns null in non-Bun runtimes where RedisClient is unavailable.
  */
@@ -21,10 +54,12 @@ export function getSharedRedisClient(): any {
     return null;
   }
 
-  const redisUrl = process.env.REDIS_URL;
+  const redisUrl = resolveRedisUrl();
 
   if (!redisUrl) {
-    throw new Error("REDIS_URL environment variable is required");
+    throw new Error(
+      "Redis URL not found. Set per-region REDIS_CACHE_* env vars or REDIS_URL.",
+    );
   }
 
   const isProduction =
