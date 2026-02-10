@@ -18,52 +18,44 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Detect which services/packages changed (for deploy gating)
+  # Detect which services are affected (turbo dependency graph)
   # ---------------------------------------------------------------------------
   detect-changes:
     name: Detect changes
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 5
+    env:
+      TURBO_SCM_BASE: ${{ github.event.before }}
     outputs:
-      api: ${{ steps.filter.outputs.api }}
-      dashboard: ${{ steps.filter.outputs.dashboard }}
-      worker: ${{ steps.filter.outputs.worker }}
-      engine: ${{ steps.filter.outputs.engine }}
-      website: ${{ steps.filter.outputs.website }}
-      email: ${{ steps.filter.outputs.email }}
-      jobs: ${{ steps.filter.outputs.jobs }}
+      api: ${{ steps.affected.outputs.api }}
+      dashboard: ${{ steps.affected.outputs.dashboard }}
+      worker: ${{ steps.affected.outputs.worker }}
+      engine: ${{ steps.affected.outputs.engine }}
+      website: ${{ steps.affected.outputs.website }}
+      email: ${{ steps.affected.outputs.email }}
+      jobs: ${{ steps.affected.outputs.jobs }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
         with:
-          filters: |
-            api:
-              - 'apps/api/**'
-              - 'packages/**'
-              - '!packages/email/**'
-              - '!packages/ui/**'
-            dashboard:
-              - 'apps/dashboard/**'
-              - 'packages/**'
-            worker:
-              - 'apps/worker/**'
-              - 'packages/**'
-              - '!packages/email/**'
-              - '!packages/ui/**'
-            engine:
-              - 'apps/engine/**'
-            website:
-              - 'apps/website/**'
-              - 'packages/ui/**'
-              - 'packages/app-store/**'
-            email:
-              - 'packages/email/**'
-            jobs:
-              - 'packages/jobs/**'
+          fetch-depth: 50
+
+      - uses: ./.github/actions/setup
+
+      - name: Detect affected services
+        id: affected
+        run: |
+          AFFECTED=$(bunx turbo build --affected --dry-run=json 2>/dev/null | jq -r '.packages[]' 2>/dev/null || echo "")
+          echo "Affected packages: $AFFECTED"
+          echo "api=$(echo "$AFFECTED" | grep -q '@midday/api' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "dashboard=$(echo "$AFFECTED" | grep -q '@midday/dashboard' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "worker=$(echo "$AFFECTED" | grep -q '@midday/worker' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "engine=$(echo "$AFFECTED" | grep -q '@midday/engine' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "website=$(echo "$AFFECTED" | grep -q '@midday/website' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "email=$(echo "$AFFECTED" | grep -q '@midday/email' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "jobs=$(echo "$AFFECTED" | grep -q '@midday/jobs' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
   # ---------------------------------------------------------------------------
-  # Validate — runs in parallel with detect-changes (turbo handles scoping)
+  # Validate — runs in parallel with detect-changes
   # ---------------------------------------------------------------------------
   validate:
     name: Validate
@@ -71,6 +63,7 @@ jobs:
     timeout-minutes: 20
     env:
       NODE_OPTIONS: "--max-old-space-size=8192"
+      TURBO_SCM_BASE: ${{ github.event.before }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -79,16 +72,16 @@ jobs:
       - uses: ./.github/actions/setup
 
       - name: Lint
-        run: bunx turbo lint --filter="...[${{ github.event.before }}]"
+        run: bunx turbo lint --affected
 
       - name: Build required type dependencies
         run: bunx turbo build --filter=workbench --filter=@midday/engine
 
       - name: Typecheck
-        run: bunx turbo typecheck --filter="...[${{ github.event.before }}]"
+        run: bunx turbo typecheck --affected
 
       - name: Test
-        run: bunx turbo test --filter="...[${{ github.event.before }}]"
+        run: bunx turbo test --affected
 
   # ---------------------------------------------------------------------------
   # Deploy API to Railway
