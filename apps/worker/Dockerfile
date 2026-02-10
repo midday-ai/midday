@@ -25,12 +25,12 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /app/out/worker/json/ .
 COPY bunfig.toml .
 
-# Copy full source from worker pruned workspace
-COPY --from=builder /app/out/worker/full/ .
-
-# Remove any lockfile that might have been copied
+# Install dependencies (before copying full source to maximize cache hits)
 RUN rm -f bun.lock
 RUN bun install
+
+# Copy full source from worker pruned workspace
+COPY --from=builder /app/out/worker/full/ .
 
 # Build engine types and workbench
 RUN bunx turbo run build --filter=@midday/engine --only
