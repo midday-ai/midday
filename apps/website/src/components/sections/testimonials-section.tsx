@@ -439,7 +439,7 @@ export const defaultTestimonials: Testimonial[] = [
   {
     name: "Richard Poelderl",
     title: "",
-    company: "Conduct.bln",
+    company: "Conduct",
     country: "Germany",
     image: "/stories/richard.jpeg",
     content:

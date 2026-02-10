@@ -5,15 +5,15 @@ import type { Testimonial } from "./sections/testimonials-section";
 
 const allTestimonials: Testimonial[] = [
   {
-    name: "Paweł Michalski",
+    name: "Ciarán Harris",
     title: "",
-    company: "VC Leaders",
-    country: "Poland",
-    image: "/stories/pawel.jpeg",
+    company: "CogniStream",
+    country: "Ireland",
+    image: "/stories/ciaran.jpeg",
     content:
-      "Invoice reconciliation used to take a full day each month and was always stressful. With Midday, that work is mostly gone and we finally have a clear financial overview.",
+      "Financial admin stopped being a source of friction. Midday actually works the way you'd expect modern software to work.",
     fullContent:
-      "Company\nVC Leaders is an educational platform helping venture capitalists build better VC firms.\n\nChallenge\nMonthly invoice reconciliation was slow and painful. Missing invoices, manual checks, and no time left to properly categorize or analyze spending. The process regularly took more than a full day.\n\nImpact\nMidday reduced invoice reconciliation time by 1–2 man-days per month and made financial visibility much clearer through dashboards.\n\nFavorite features\nClear financial overview, accounts payable tracking, invoice reconciliation, and a clean, intuitive interface.",
+      "Company\nCogniStream is an AI-moderated qualitative research platform. We have natural voice conversations with customers, analyse not just what they say but how they feel when they say it, and help businesses make confident decisions faster. I'm Ciarán Harris, CEO and Co-Founder, a two-time founder with over 25 years of research experience for global giants.\n\nChallenge\nI tried using Xero. It couldn't connect to my bank account reliably, the interface felt like it hadn't been updated in a decade, and just getting up and running was painful. It never worked out of the box. The real kicker? My accountant also used Xero, but he preferred I send him everything as a CSV anyway. That completely negated the point. As a founder, you need financial admin to just work so you can focus on building the business. It wasn't working.\n\nImpact\nFinancial admin stopped being a source of friction. Midday actually works the way you'd expect modern software to work. I check in every few days to keep on top of things, and every few weeks I'll do a more involved session to get through receipt scanning and matching ahead of VAT returns. It removed the single biggest pain point from my week-to-week financial admin, and everything else it does is a genuinely useful bonus on top of that.\n\nFavorite features\nReceipt scanning and matching, without question. That's the feature that removes the most friction from running the business day to day. Before, receipts were scattered and matching them to transactions was tedious. Now it's handled. That one feature alone justified the switch. The AI assistant is a nice bonus too, being able to ask a natural language question about your finances and get detailed results is genuinely useful.",
   },
   {
     name: "Vitalie Rosescu",
@@ -25,6 +25,17 @@ const allTestimonials: Testimonial[] = [
       "All in one platform for freelancers looking to create clear insights on income and expenses.",
     fullContent:
       "Company\nAwwwocado is a Webflow development business.\n\nChallenge\nWhat I lacked in other software is the overview of which invoices were paid and which were pending, and seeing my overall income. Existing tools didn't give a clear picture of finances.\n\nImpact\nHaving a clear overview of income, invoices, and expenses in one place made managing the business much easier.\n\nFavorite features\nInvoices, because it's a big time saver.\nA clean share link for customers is very nice.\nExpenses being taken from my inbox and being able to upload expenses is a huge one.\nThe invoice template is clean out of the box and very customizable.",
+  },
+  {
+    name: "Paweł Michalski",
+    title: "",
+    company: "VC Leaders",
+    country: "Poland",
+    image: "/stories/pawel.jpeg",
+    content:
+      "Invoice reconciliation used to take a full day each month and was always stressful. With Midday, that work is mostly gone and we finally have a clear financial overview.",
+    fullContent:
+      "Company\nVC Leaders is an educational platform helping venture capitalists build better VC firms.\n\nChallenge\nMonthly invoice reconciliation was slow and painful. Missing invoices, manual checks, and no time left to properly categorize or analyze spending. The process regularly took more than a full day.\n\nImpact\nMidday reduced invoice reconciliation time by 1–2 man-days per month and made financial visibility much clearer through dashboards.\n\nFavorite features\nClear financial overview, accounts payable tracking, invoice reconciliation, and a clean, intuitive interface.",
   },
   {
     name: "Facu Montanaro",
@@ -50,7 +61,7 @@ const allTestimonials: Testimonial[] = [
   {
     name: "Richard Poelderl",
     title: "",
-    company: "Conduct.bln",
+    company: "Conduct",
     country: "Germany",
     image: "/stories/richard.jpeg",
     content:
