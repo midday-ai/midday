@@ -63,7 +63,7 @@
     "protobufjs"
   ],
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "@biomejs/biome": "2.3.14",
     "@manypkg/cli": "^0.25.1",
     "turbo": "2.8.3",
     "typescript": "^5.9.3"
