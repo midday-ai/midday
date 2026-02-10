@@ -277,7 +277,6 @@ function MorphingDialogContent({
         stiffness: 200,
         damping: 24,
       }}
-      // biome-ignore lint/a11y/useSemanticElements: motion.div cannot be replaced with dialog element
       role="dialog"
       aria-modal="true"
       aria-labelledby={`motion-ui-morphing-dialog-title-${uniqueId}`}
@@ -295,7 +294,7 @@ export type MorphingDialogContainerProps = {
 };
 
 function MorphingDialogContainer({ children }: MorphingDialogContainerProps) {
-  const { isOpen, uniqueId, setIsOpen } = useMorphingDialog();
+  const { isOpen, uniqueId } = useMorphingDialog();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -445,6 +444,7 @@ function MorphingDialogImage({
   const { uniqueId } = useMorphingDialog();
 
   return (
+    // biome-ignore lint/performance/noImgElement: motion.img required for layout animations
     <motion.img
       src={src}
       alt={alt}

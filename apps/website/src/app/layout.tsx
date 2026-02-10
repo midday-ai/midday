@@ -120,7 +120,6 @@ export default function Layout({ children }: { children: ReactElement }) {
         <link rel="dns-prefetch" href="https://cdn.midday.ai" />
         <script
           type="application/ld+json"
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
           }}

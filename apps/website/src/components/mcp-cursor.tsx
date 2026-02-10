@@ -25,10 +25,7 @@ function CodeBlock({ code }: { code: string }) {
     <div className="relative group">
       <div className="bg-[#fafafa] dark:bg-[#0c0c0c] border border-border rounded-none overflow-hidden">
         <pre className="overflow-x-auto p-4 text-sm font-mono">
-          <code
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: Syntax highlighting requires innerHTML
-            dangerouslySetInnerHTML={{ __html: codeHTML }}
-          />
+          <code dangerouslySetInnerHTML={{ __html: codeHTML }} />
         </pre>
       </div>
       <button
@@ -142,12 +139,14 @@ export function MCPCursor() {
             {/* Install Button */}
             <div className="space-y-4 mb-12">
               <a href={cursorDeepLink} className="inline-block">
+                {/* biome-ignore lint/performance/noImgElement: External deeplink badge images cannot use next/image */}
                 <img
                   src="https://cursor.com/deeplink/mcp-install-dark.png"
                   alt="Add Midday MCP server to Cursor"
                   height={32}
                   className="h-8 dark:hidden"
                 />
+                {/* biome-ignore lint/performance/noImgElement: External deeplink badge images cannot use next/image */}
                 <img
                   src="https://cursor.com/deeplink/mcp-install-light.png"
                   alt="Add Midday MCP server to Cursor"

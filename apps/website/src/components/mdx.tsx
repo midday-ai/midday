@@ -71,7 +71,6 @@ interface CodeProps {
 
 function Code({ children, ...props }: CodeProps) {
   const codeHTML = highlight(children);
-  // biome-ignore lint/security/noDangerouslySetInnerHtml: Syntax highlighting requires innerHTML
   return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />;
 }
 

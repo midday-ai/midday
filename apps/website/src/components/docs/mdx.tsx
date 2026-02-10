@@ -88,7 +88,6 @@ function InlineCode({ children, className, ...props }: CodeProps) {
     return (
       <code
         className={className}
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: Syntax highlighting requires innerHTML
         dangerouslySetInnerHTML={{ __html: codeHTML }}
         {...props}
       />

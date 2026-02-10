@@ -26,10 +26,7 @@ function CodeBlock({ code }: { code: string }) {
     <div className="relative group">
       <div className="bg-[#fafafa] dark:bg-[#0c0c0c] border border-border rounded-none overflow-hidden">
         <pre className="overflow-x-auto p-4 text-sm font-mono">
-          <code
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: Syntax highlighting requires innerHTML
-            dangerouslySetInnerHTML={{ __html: codeHTML }}
-          />
+          <code dangerouslySetInnerHTML={{ __html: codeHTML }} />
         </pre>
       </div>
       <button
@@ -71,6 +68,7 @@ export function MCPClaude() {
               "mcp-remote@latest",
               "https://api.midday.ai/mcp",
               "--header",
+              // biome-ignore lint/suspicious/noTemplateCurlyInString: Intentional shell variable reference in MCP config
               "Authorization:${AUTH_HEADER}",
             ],
             env: {

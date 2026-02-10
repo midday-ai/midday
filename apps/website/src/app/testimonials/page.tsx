@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { Testimonials } from "@/components/testimonials";
-import type { Metadata } from "next";
 
 const title = "Customer Stories";
 const description =

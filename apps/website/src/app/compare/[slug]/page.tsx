@@ -133,14 +133,12 @@ export default async function Page({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(webPageJsonLd).replace(/</g, "\\u003c"),
         }}
       />
       <script
         type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c"),
         }}

@@ -4,7 +4,6 @@ import { Icons } from "@midday/ui/icons";
 import type Hls from "hls.js";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
