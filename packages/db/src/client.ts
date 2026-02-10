@@ -28,7 +28,12 @@ export const primaryDb = drizzle(primaryPool, {
   casing: "snake_case",
 });
 
-// Map Railway region → replica URL (only create the pool this instance needs)
+/**
+ * Map Railway region → replica URL (only create the pool this instance needs).
+ *
+ * RAILWAY_REPLICA_REGION is a system-provided variable injected at runtime
+ * by Railway for every deployment (see https://docs.railway.com/variables/reference).
+ */
 const replicaUrlForRegion: Record<string, string | undefined> = {
   "europe-west4-drams3a": process.env.DATABASE_FRA_URL,
   "us-east4-eqdc4a": process.env.DATABASE_IAD_URL,
@@ -39,6 +44,18 @@ const currentRegion = process.env.RAILWAY_REPLICA_REGION;
 const replicaUrl = currentRegion
   ? replicaUrlForRegion[currentRegion]
   : undefined;
+
+if (!isDevelopment) {
+  if (!currentRegion) {
+    console.warn(
+      "[DB] RAILWAY_REPLICA_REGION not set — all reads will use the primary database",
+    );
+  } else if (!replicaUrl) {
+    console.warn(
+      `[DB] RAILWAY_REPLICA_REGION="${currentRegion}" but no matching DATABASE_*_URL found — falling back to primary`,
+    );
+  }
+}
 
 // Only create ONE replica pool for the current region, fall back to primary
 const replicaDb = replicaUrl

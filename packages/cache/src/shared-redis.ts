@@ -15,6 +15,9 @@ try {
  *   REDIS_CACHE_US_WEST=${{cache-us-west.REDIS_URL}}
  *   REDIS_CACHE_US_EAST=${{cache-us-east.REDIS_URL}}
  *   REDIS_CACHE_EU_WEST=${{cache-eu-west.REDIS_URL}}
+ *
+ * RAILWAY_REPLICA_REGION is a system-provided variable injected at runtime
+ * by Railway for every deployment (see https://docs.railway.com/variables/reference).
  */
 const REGION_REDIS_MAP: Record<string, string> = {
   "us-west2": "REDIS_CACHE_US_WEST",
@@ -24,9 +27,14 @@ const REGION_REDIS_MAP: Record<string, string> = {
 
 /**
  * Resolve the Redis URL for the current replica's region.
- * Falls back to REDIS_URL for local development and non-Railway environments.
+ *
+ * Resolution order:
+ *  1. RAILWAY_REPLICA_REGION → mapped REDIS_CACHE_* env var (best: co-located cache)
+ *  2. Any available REDIS_CACHE_* env var (fallback: at least a working cache)
+ *  3. REDIS_URL (generic fallback for local dev / non-Railway environments)
  */
 function resolveRedisUrl(): string | undefined {
+  // 1. Prefer the region-local cache (lowest latency)
   const region = process.env.RAILWAY_REPLICA_REGION;
 
   if (region) {
@@ -36,8 +44,26 @@ function resolveRedisUrl(): string | undefined {
     if (regionUrl) {
       return regionUrl;
     }
+
+    console.warn(
+      `[Redis] RAILWAY_REPLICA_REGION="${region}" but no matching REDIS_CACHE_* env var found (expected ${envVar ?? "unknown"})`,
+    );
   }
 
+  // 2. Fall back to any available regional cache (better than no cache)
+  for (const envVarName of Object.values(REGION_REDIS_MAP)) {
+    const url = process.env[envVarName];
+    if (url) {
+      if (region === undefined) {
+        console.warn(
+          `[Redis] RAILWAY_REPLICA_REGION not set, falling back to ${envVarName}`,
+        );
+      }
+      return url;
+    }
+  }
+
+  // 3. Generic fallback for local dev / non-Railway environments
   return process.env.REDIS_URL;
 }
 
