@@ -74,7 +74,6 @@ export class EnableBankingApi {
           name: "RSASSA-PKCS1-v1_5",
           hash: { name: "SHA-256" },
         },
-        // @ts-expect-error
         privateKey,
         new TextEncoder().encode(data),
       );
