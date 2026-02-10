@@ -1,4 +1,4 @@
-import { Cache } from "drizzle-orm/cache";
+import { Cache } from "drizzle-orm/cache/core";
 import { getSharedRedisClient } from "./shared-redis";
 
 const KEY_PREFIX = "drizzle:";
