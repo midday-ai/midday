@@ -71,16 +71,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 200
+          fetch-depth: 2
 
       - uses: ./.github/actions/setup
 
       - name: Validate affected packages
         run: |
-          git fetch --no-tags --depth=200 origin main
-          BASE_SHA=$(git merge-base HEAD origin/main 2>/dev/null || git rev-parse origin/main)
-          echo "Comparing against: $BASE_SHA"
-          bunx turbo test lint typecheck --filter="...[${BASE_SHA}]" --concurrency=4
+          bunx turbo test lint typecheck --filter="...[HEAD~1]" --concurrency=4
 
   # ---------------------------------------------------------------------------
   # Deploy API to Railway staging
