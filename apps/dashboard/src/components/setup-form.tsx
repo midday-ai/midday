@@ -1,8 +1,5 @@
 "use client";
 
-import { useUserMutation } from "@/hooks/use-user";
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import {
   Form,
   FormControl,
@@ -18,6 +15,9 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { z } from "zod/v3";
+import { useUserMutation } from "@/hooks/use-user";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 import { AvatarUpload } from "./avatar-upload";
 
 const formSchema = z.object({

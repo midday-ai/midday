@@ -190,7 +190,7 @@ class WidgetPreferencesCache extends RedisCache {
       throw new Error("Primary widgets cannot exceed 7");
     }
 
-    const currentPreferences = await this.getWidgetPreferences(teamId, userId);
+    const _currentPreferences = await this.getWidgetPreferences(teamId, userId);
 
     // Calculate available widgets (all widgets not in primary)
     const availableWidgets = DEFAULT_WIDGET_ORDER.filter(

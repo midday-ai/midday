@@ -24,7 +24,7 @@ import {
   upsertTrackerProject,
 } from "@midday/db/queries";
 import { z } from "zod";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools, hasScope } from "../types";
+import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 
 // Annotations for write operations
 const WRITE_ANNOTATIONS = {

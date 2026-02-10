@@ -1,19 +1,5 @@
 "use client";
 
-import {
-  invoiceFilterOutputSchema,
-  invoiceFilterSchema,
-} from "@/app/api/ai/filters/invoices/schema";
-import type { InvoiceFilterSchema } from "@/app/api/ai/filters/invoices/schema";
-import {
-  mapStringArrayToIds,
-  normalizeString,
-  useAIFilter,
-  validateEnumArray,
-} from "@/hooks/use-ai-filter";
-import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -33,6 +19,20 @@ import { useQuery } from "@tanstack/react-query";
 import { formatISO } from "date-fns";
 import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import type { InvoiceFilterSchema } from "@/app/api/ai/filters/invoices/schema";
+import {
+  invoiceFilterOutputSchema,
+  invoiceFilterSchema,
+} from "@/app/api/ai/filters/invoices/schema";
+import {
+  mapStringArrayToIds,
+  normalizeString,
+  useAIFilter,
+  validateEnumArray,
+} from "@/hooks/use-ai-filter";
+import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { DateRangeFilter } from "./date-range-filter";
 import { FilterList } from "./filter-list";
 

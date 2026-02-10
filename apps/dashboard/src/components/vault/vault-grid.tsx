@@ -1,12 +1,5 @@
 "use client";
 
-import { VaultItem } from "@/components/vault/vault-item";
-import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
-import { useDocumentParams } from "@/hooks/use-document-params";
-import { useRealtime } from "@/hooks/use-realtime";
-import { useScrollHeader } from "@/hooks/use-scroll-header";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import {
   useQueryClient,
   useSuspenseInfiniteQuery,
@@ -14,6 +7,13 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
+import { VaultItem } from "@/components/vault/vault-item";
+import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
+import { useDocumentParams } from "@/hooks/use-document-params";
+import { useRealtime } from "@/hooks/use-realtime";
+import { useScrollHeader } from "@/hooks/use-scroll-header";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { NoResults } from "./empty-states";
 import { VaultGetStarted } from "./vault-get-started";
 

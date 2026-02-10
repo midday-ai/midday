@@ -1,8 +1,6 @@
 // @ts-nocheck
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
 import { format, parseISO } from "date-fns";
 import {
   Bar,
@@ -14,6 +12,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useUserQuery } from "@/hooks/use-user";
+import { formatAmount } from "@/utils/format";
 import {
   commonChartConfig,
   createCompactTickFormatter,

@@ -1,7 +1,7 @@
 "use client";
 
-import type { PeriodOption } from "@/utils/metrics-date-utils";
 import { create } from "zustand";
+import type { PeriodOption } from "@/utils/metrics-date-utils";
 
 const STORAGE_KEY_BASE = "metrics-filter-preferences";
 

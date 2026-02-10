@@ -1,17 +1,20 @@
 "use client";
 
-import { useAudioRecording } from "@/hooks/use-audio-recording";
-import { useChatStore } from "@/store/chat";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Spinner } from "@midday/ui/spinner";
 import { useCallback } from "react";
+import { useAudioRecording } from "@/hooks/use-audio-recording";
+import { useChatStore } from "@/store/chat";
 
 // Custom Record Icon with smooth animation
 const RecordIcon = ({
   size = 16,
   isRecording = false,
-}: { size?: number; isRecording?: boolean }) => {
+}: {
+  size?: number;
+  isRecording?: boolean;
+}) => {
   return (
     <svg
       width={size}

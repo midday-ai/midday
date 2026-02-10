@@ -3,7 +3,6 @@ import {
   type SupportedToolName,
   ToolCallIndicator,
 } from "@midday/ui/tool-call-indicator";
-import React from "react";
 
 export const ThinkingMessage = () => {
   return (

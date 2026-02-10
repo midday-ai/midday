@@ -1,8 +1,8 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -22,16 +22,12 @@ function useIsMobile() {
   return { isMobile, isTablet };
 }
 
-export function BurnrateAnimation({
-  onComplete,
-}: {
-  onComplete?: () => void;
-}) {
+export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
   const { isMobile, isTablet } = useIsMobile();
   const [showGraph, setShowGraph] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
-  const [pathLength, setPathLength] = useState(0);
+  const [_pathLength, setPathLength] = useState(0);
   const [areaOpacity, setAreaOpacity] = useState(0);
   const [showAverageLine, setShowAverageLine] = useState(false);
 

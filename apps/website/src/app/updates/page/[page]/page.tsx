@@ -1,12 +1,12 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 import { baseUrl } from "@/app/sitemap";
 import { CustomMDX } from "@/components/mdx";
 import { Pagination } from "@/components/pagination";
 import { PostStatus } from "@/components/post-status";
 import { getBlogPosts } from "@/lib/blog";
-import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
 
 const POSTS_PER_PAGE = 3;
 

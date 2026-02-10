@@ -1,9 +1,5 @@
 "use client";
 
-import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
-import { SelectCurrency } from "@/components/select-currency";
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import {
   Form,
@@ -20,6 +16,10 @@ import { getDefaultFiscalYearStartMonth } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { use, useEffect, useRef, useState } from "react";
 import { z } from "zod/v3";
+import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
+import { SelectCurrency } from "@/components/select-currency";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 import { CountrySelector } from "../country-selector";
 import { SelectFiscalMonth } from "../select-fiscal-month";
 

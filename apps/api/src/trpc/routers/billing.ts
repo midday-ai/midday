@@ -147,7 +147,7 @@ export const billingRouter = createTRPCRouter({
             status: "ready",
             downloadUrl: invoice.url,
           };
-        } catch (invoiceError) {
+        } catch (_invoiceError) {
           // Invoice might still be generating
           return {
             status: "generating",
@@ -189,7 +189,7 @@ export const billingRouter = createTRPCRouter({
             status: "ready",
             downloadUrl: invoice.url,
           };
-        } catch (invoiceError) {
+        } catch (_invoiceError) {
           return {
             status: "generating",
           };

@@ -7,8 +7,8 @@ import {
   applyInvoiceFixes,
   validateInvoiceConsistency,
 } from "../../utils/cross-field-validation";
-import { detectInvoiceFormat } from "../../utils/format-detection";
 import type { DocumentFormat } from "../../utils/format-detection";
+import { detectInvoiceFormat } from "../../utils/format-detection";
 import {
   calculateExtractionConfidence,
   mergeInvoiceResults,

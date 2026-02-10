@@ -1,7 +1,7 @@
 "use client";
 
-import { SkeletonGrid } from "@/components/canvas/base/skeleton";
 import { cn } from "@midday/ui/cn";
+import { SkeletonGrid } from "@/components/canvas/base/skeleton";
 
 export type GridLayout = "1/1" | "2/2" | "2/3" | "4/4";
 
@@ -56,7 +56,7 @@ export function CanvasGrid({
           "grid-cols-4": config.columns === 4,
         })}
       >
-        {displayItems.map((item, index) => (
+        {displayItems.map((item, _index) => (
           <div
             key={item.id}
             className="border p-3 bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d]"

@@ -1,12 +1,12 @@
-import { getQueryClient, trpc } from "@/trpc/server";
-import { logger } from "@/utils/logger";
 import { setupAnalytics } from "@midday/events/server";
 import { createClient } from "@midday/supabase/server";
 import {
-  DEFAULT_SERVER_ERROR_MESSAGE,
   createSafeActionClient,
+  DEFAULT_SERVER_ERROR_MESSAGE,
 } from "next-safe-action";
 import { z } from "zod";
+import { getQueryClient, trpc } from "@/trpc/server";
+import { logger } from "@/utils/logger";
 
 export const actionClient = createSafeActionClient({
   handleServerError(e) {

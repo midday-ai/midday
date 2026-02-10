@@ -1,7 +1,5 @@
 "use client";
 
-import { revalidateAfterCheckout } from "@/actions/revalidate-action";
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { SubmitButton } from "@midday/ui/submit-button";
 import {
@@ -15,6 +13,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
+import { revalidateAfterCheckout } from "@/actions/revalidate-action";
+import { useTRPC } from "@/trpc/client";
 
 // Polling timeout in milliseconds (30 seconds)
 const POLLING_TIMEOUT_MS = 30_000;

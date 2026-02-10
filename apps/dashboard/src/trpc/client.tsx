@@ -1,14 +1,14 @@
 "use client";
 
-import { Cookies } from "@/utils/constants";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { createClient } from "@midday/supabase/client";
 import type { QueryClient } from "@tanstack/react-query";
-import { QueryClientProvider, isServer } from "@tanstack/react-query";
+import { isServer, QueryClientProvider } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import { useState } from "react";
 import superjson from "superjson";
+import { Cookies } from "@/utils/constants";
 import { makeQueryClient } from "./query-client";
 
 // Helper to get cookie value by name

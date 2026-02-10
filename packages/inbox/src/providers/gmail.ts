@@ -2,7 +2,7 @@ import type { Database } from "@midday/db/client";
 import { updateInboxAccount } from "@midday/db/queries";
 import { encrypt } from "@midday/encryption";
 import { ensureFileExtension } from "@midday/utils";
-import type { Credentials, OAuth2Client } from "google-auth-library";
+import type { Credentials } from "google-auth-library";
 import { type Auth, type gmail_v1, google } from "googleapis";
 import { decodeBase64Url } from "../attachments";
 import { InboxAuthError, InboxSyncError } from "../errors";

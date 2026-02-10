@@ -1,7 +1,7 @@
+import { Activity, AlertCircle, CheckCircle, Layers } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useOverview } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
-import { Activity, AlertCircle, CheckCircle, Layers } from "lucide-react";
 
 interface OverviewPageProps {
   onQueueSelect: (queue: string) => void;

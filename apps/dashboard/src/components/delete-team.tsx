@@ -1,7 +1,5 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +25,8 @@ import { useMutation } from "@tanstack/react-query";
 import { AlertTriangle, ExternalLink, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 
 export function DeleteTeam() {
   const [value, setValue] = useState("");

@@ -60,7 +60,7 @@ function createLoggerAdapter(pinoLogger: pino.Logger, prefixContext?: string) {
         } else {
           pinoLogger.info(fullMessage);
         }
-      } catch (error) {
+      } catch (_error) {
         // Silently ignore logger stream errors to prevent crashes
         // This can happen when pino-pretty transport's stream is closing
       }
@@ -75,7 +75,7 @@ function createLoggerAdapter(pinoLogger: pino.Logger, prefixContext?: string) {
         } else {
           pinoLogger.error(fullMessage);
         }
-      } catch (error) {
+      } catch (_error) {
         // Silently ignore logger stream errors to prevent crashes
         // This can happen when pino-pretty transport's stream is closing
       }
@@ -90,7 +90,7 @@ function createLoggerAdapter(pinoLogger: pino.Logger, prefixContext?: string) {
         } else {
           pinoLogger.warn(fullMessage);
         }
-      } catch (error) {
+      } catch (_error) {
         // Silently ignore logger stream errors to prevent crashes
         // This can happen when pino-pretty transport's stream is closing
       }
@@ -105,7 +105,7 @@ function createLoggerAdapter(pinoLogger: pino.Logger, prefixContext?: string) {
         } else {
           pinoLogger.debug(fullMessage);
         }
-      } catch (error) {
+      } catch (_error) {
         // Silently ignore logger stream errors to prevent crashes
         // This can happen when pino-pretty transport's stream is closing
       }

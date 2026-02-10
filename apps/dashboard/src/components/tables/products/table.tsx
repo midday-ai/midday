@@ -1,7 +1,5 @@
 "use client";
 
-import { useProductParams } from "@/hooks/use-product-params";
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import {
   Table,
@@ -23,7 +21,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React from "react";
+import { useProductParams } from "@/hooks/use-product-params";
+import { useTRPC } from "@/trpc/client";
 import { columns } from "./columns";
 import { Header } from "./header";
 

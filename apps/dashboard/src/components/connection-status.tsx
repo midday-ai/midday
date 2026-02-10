@@ -1,12 +1,5 @@
 "use client";
 
-import { BankLogo } from "@/components/bank-logo";
-import { useTRPC } from "@/trpc/client";
-import {
-  type ConnectionIssue,
-  buildConnectionIssues,
-  getHighestSeverity,
-} from "@/utils/connection-status";
 import { Button } from "@midday/ui/button";
 import {
   HoverCard,
@@ -17,6 +10,13 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { BankLogo } from "@/components/bank-logo";
+import { useTRPC } from "@/trpc/client";
+import {
+  buildConnectionIssues,
+  type ConnectionIssue,
+  getHighestSeverity,
+} from "@/utils/connection-status";
 
 function IssueLogo({ issue }: { issue: ConnectionIssue }) {
   if (issue.type === "bank") {

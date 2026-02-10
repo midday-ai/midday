@@ -5,9 +5,9 @@ import { Icons } from "@midday/ui/icons";
 import {
   AnimatePresence,
   MotionConfig,
+  motion,
   type Transition,
   type Variant,
-  motion,
 } from "motion/react";
 import React, {
   useCallback,
@@ -137,7 +137,7 @@ function MorphingDialogTrigger({
   const rotation = rotationMatch?.[1] || null;
 
   const transformTemplate = useCallback(
-    (transform: string, generatedTransform: string) => {
+    (_transform: string, generatedTransform: string) => {
       // Preserve rotation from style prop if present
       // generatedTransform contains the layout animation transform
       // We need to append our rotation to it

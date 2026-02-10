@@ -1,18 +1,6 @@
 "use client";
 
-import { FormatAmount } from "@/components/format-amount";
-import { InvoiceStatus } from "@/components/invoice-status";
-import { useCustomerParams } from "@/hooks/use-customer-params";
-import { useDocumentParams } from "@/hooks/use-document-params";
-import { useFileUrl } from "@/hooks/use-file-url";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { useTransactionParams } from "@/hooks/use-transaction-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { downloadFile } from "@/lib/download";
-import { useSearchStore } from "@/store/search";
-import { useTRPC } from "@/trpc/client";
-import { Window, emit, invoke, listen } from "@midday/desktop-client/core";
+import { emit, invoke, listen, Window } from "@midday/desktop-client/core";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import {
   Command,
@@ -28,11 +16,22 @@ import { formatDate } from "@midday/utils/format";
 import { useQuery } from "@tanstack/react-query";
 import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useDebounceValue } from "usehooks-ts";
-import { useCopyToClipboard } from "usehooks-ts";
+import { useCopyToClipboard, useDebounceValue } from "usehooks-ts";
+import { FormatAmount } from "@/components/format-amount";
+import { InvoiceStatus } from "@/components/invoice-status";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useDocumentParams } from "@/hooks/use-document-params";
+import { useFileUrl } from "@/hooks/use-file-url";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { downloadFile } from "@/lib/download";
+import { useSearchStore } from "@/store/search";
+import { useTRPC } from "@/trpc/client";
 import { FilePreviewIcon } from "../file-preview-icon";
 import { TrackerTimer } from "../tracker-timer";
 
@@ -92,7 +91,10 @@ function CopyButton({ path }: { path: string }) {
 function DownloadButton({
   href,
   filename,
-}: { href: string; filename?: string }) {
+}: {
+  href: string;
+  filename?: string;
+}) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const isFileDownload = href.includes("/files/download/file");
@@ -328,7 +330,10 @@ const useSearchNavigation = () => {
 const SearchResultItemDisplay = ({
   item,
   dateFormat,
-}: { item: SearchItem; dateFormat?: string }) => {
+}: {
+  item: SearchItem;
+  dateFormat?: string;
+}) => {
   const nav = useSearchNavigation();
 
   let icon: ReactNode | undefined;

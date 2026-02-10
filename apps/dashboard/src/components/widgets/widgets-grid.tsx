@@ -1,10 +1,7 @@
 "use client";
 
-import { ErrorBoundary } from "@/components/error-boundary";
-import { useRealtime } from "@/hooks/use-realtime";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import {
+  closestCenter,
   DndContext,
   type DragEndEvent,
   DragOverlay,
@@ -12,17 +9,16 @@ import {
   KeyboardSensor,
   PointerSensor,
   type UniqueIdentifier,
-  closestCenter,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
   rectSortingStrategy,
+  SortableContext,
   sortableKeyboardCoordinates,
+  useSortable,
 } from "@dnd-kit/sortable";
-import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -30,6 +26,10 @@ import type { inferRouterOutputs } from "@trpc/server";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { useRealtime } from "@/hooks/use-realtime";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { WidgetErrorFallback } from "./widget-error-fallback";
 import {
   useAvailableWidgets,

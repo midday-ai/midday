@@ -109,7 +109,11 @@ function ClientLogo({
   id,
   size = "md",
   variant = "default",
-}: { id: string; size?: "sm" | "md"; variant?: string }) {
+}: {
+  id: string;
+  size?: "sm" | "md";
+  variant?: string;
+}) {
   const logos: Record<string, React.ComponentType<{ id?: string }>> = {
     cursor: CursorMcpLogo,
     claude: ClaudeMcpLogo,

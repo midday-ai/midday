@@ -1,10 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
-import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
 
 const SUPPORTED_NOTIFICATION_TYPES = [
   "invoice_paid",

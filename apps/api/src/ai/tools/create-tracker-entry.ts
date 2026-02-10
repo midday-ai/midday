@@ -134,7 +134,7 @@ export const createTrackerEntryTool = tool({
           const createTZDate = tz(userTimezone);
           const baseDate = createTZDate(new Date(`${entryDate}T00:00:00`));
           startTime = setMinutes(setHours(baseDate, 9), 0);
-        } catch (error) {
+        } catch (_error) {
           // Fallback to UTC if timezone conversion fails
           startTime = new Date(`${entryDate}T09:00:00.000Z`);
         }

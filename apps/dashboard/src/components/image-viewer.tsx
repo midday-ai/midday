@@ -1,10 +1,10 @@
 "use client";
 
-import { useImageLoadState } from "@/hooks/use-image-load-state";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import { useImageLoadState } from "@/hooks/use-image-load-state";
 
 function ErrorImage() {
   return (

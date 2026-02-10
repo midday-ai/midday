@@ -252,13 +252,14 @@ export const getProfitAnalysisTool = tool({
           : 0;
 
       // Calculate expenses for current period
-      const currentMonthlyExpenses = currentMonthRevenue - currentMonthlyProfit;
+      const _currentMonthlyExpenses =
+        currentMonthRevenue - currentMonthlyProfit;
       const previousMonthRevenue =
         revenueMonthlyData.length > 0
           ? revenueMonthlyData[revenueMonthlyData.length - 1]?.previous.value ||
             0
           : 0;
-      const previousMonthlyExpenses =
+      const _previousMonthlyExpenses =
         previousMonthRevenue - previousMonthlyProfit;
 
       // Calculate period totals (current vs previous)

@@ -1,8 +1,8 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { MaterialIcon } from "./icon-mapping";
 
 interface AccountNode {
@@ -316,7 +316,7 @@ export function TransactionFlowAnimation({
             style={{ display: "block" }}
           >
             {/* Account nodes horizontally at the top */}
-            {accountNodes.map((node, index) => (
+            {accountNodes.map((node, _index) => (
               <g key={node.id}>
                 <rect
                   x={node.x - 18}

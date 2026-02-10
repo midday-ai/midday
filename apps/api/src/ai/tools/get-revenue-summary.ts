@@ -8,7 +8,7 @@ import { db } from "@midday/db/client";
 import { getReports } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
-import { endOfMonth, format, parseISO, startOfMonth } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { z } from "zod";
 
 const getRevenueSummarySchema = z.object({

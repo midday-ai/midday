@@ -1,12 +1,12 @@
 "use client";
 
-import type { docsNavigation } from "@/lib/docs";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type RefObject, useEffect, useRef, useState } from "react";
+import type { docsNavigation } from "@/lib/docs";
 
 type DocsNavPanelProps = {
   navigation: typeof docsNavigation;

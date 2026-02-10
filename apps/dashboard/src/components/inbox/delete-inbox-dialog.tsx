@@ -1,9 +1,5 @@
 "use client";
 
-import { revalidateInbox } from "@/actions/revalidate-action";
-import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
-import { useInboxParams } from "@/hooks/use-inbox-params";
-import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +14,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { revalidateInbox } from "@/actions/revalidate-action";
+import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
+import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useTRPC } from "@/trpc/client";
 
 type Props = {
   id: string;

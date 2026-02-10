@@ -4,8 +4,8 @@ import {
   CASH_ACCOUNT_TYPES,
   CREDIT_ACCOUNT_TYPE,
   DEBT_ACCOUNT_TYPES,
-  LOAN_ACCOUNT_TYPE,
   getType,
+  LOAN_ACCOUNT_TYPE,
 } from "./account";
 
 describe("getType function", () => {

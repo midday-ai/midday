@@ -1,11 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 import {
   ChevronDown,
   ChevronRight,
@@ -19,6 +11,14 @@ import {
   Sun,
 } from "lucide-react";
 import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 type NavItem = "runs" | "schedulers" | "queues" | "test";
 

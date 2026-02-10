@@ -1,7 +1,5 @@
 "use client";
 
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -25,6 +23,8 @@ import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 import { z } from "zod/v3";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 const formSchema = z.object({
   name: z.string().min(1, "Template name is required"),

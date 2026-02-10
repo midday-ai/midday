@@ -1,8 +1,8 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { type IconMap, MaterialIcon } from "./icon-mapping";
 
 interface Widget {
@@ -72,11 +72,7 @@ const widgets: Widget[] = [
   },
 ];
 
-export function WidgetsAnimation({
-  onComplete,
-}: {
-  onComplete?: () => void;
-}) {
+export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
   const [showWidgets, setShowWidgets] = useState(false);
   const [isWiggling, setIsWiggling] = useState(false);
   const [cardOrder, setCardOrder] = useState<string[]>(
@@ -84,7 +80,7 @@ export function WidgetsAnimation({
   );
 
   const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
-  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const _intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const clearAllTimeouts = () => {
     timeoutRefs.current.forEach(clearTimeout);
@@ -270,7 +266,7 @@ export function WidgetsAnimation({
     >
       {/* Widget Grid - 3 rows, 2 columns */}
       <div className="flex-1 grid grid-cols-2 gap-4 md:gap-5 relative auto-rows-fr">
-        {cardOrder.map((widgetId, displayIdx) => {
+        {cardOrder.map((widgetId, _displayIdx) => {
           const widget = widgets.find((w) => w.id === widgetId)!;
           const originalIdx = widgets.findIndex((w) => w.id === widgetId);
 

@@ -1,7 +1,5 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
@@ -32,6 +30,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff, Loader2, MoreHorizontal } from "lucide-react";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { FormatAmount } from "./format-amount";
 import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
 
@@ -68,7 +68,11 @@ function MaskedValue({
   value,
   revealed,
   maskLength = 4,
-}: { value: string; revealed: boolean; maskLength?: number }) {
+}: {
+  value: string;
+  revealed: boolean;
+  maskLength?: number;
+}) {
   if (revealed) {
     return <span className="font-mono text-xs">{value}</span>;
   }

@@ -60,7 +60,7 @@ type ProcessResult = {
  */
 export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRecurringSchedulerPayload> {
   async process(
-    job: Job<InvoiceRecurringSchedulerPayload>,
+    _job: Job<InvoiceRecurringSchedulerPayload>,
   ): Promise<ProcessResult> {
     // Kill switch - can be toggled without deploy via environment variable
     if (process.env.DISABLE_RECURRING_INVOICES === "true") {

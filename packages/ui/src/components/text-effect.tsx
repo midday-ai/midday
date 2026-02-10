@@ -1,11 +1,11 @@
 "use client";
-import { AnimatePresence, motion } from "framer-motion";
 import type {
   TargetAndTransition,
   Transition,
   Variant,
   Variants,
 } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import { cn } from "../utils";
 

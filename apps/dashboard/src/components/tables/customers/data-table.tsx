@@ -1,5 +1,17 @@
 "use client";
 
+import { closestCenter, DndContext } from "@dnd-kit/core";
+import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { VirtualRow } from "@/components/tables/core";
 import { useCustomerFilterParams } from "@/hooks/use-customer-filter-params";
 import { useCustomerParams } from "@/hooks/use-customer-params";
@@ -16,18 +28,6 @@ import { useCustomersStore } from "@/store/customers";
 import { useTRPC } from "@/trpc/client";
 import { STICKY_COLUMNS, SUMMARY_GRID_HEIGHTS } from "@/utils/table-configs";
 import type { TableSettings } from "@/utils/table-settings";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
 import { columns } from "./columns";
 import { EmptyState, NoResults } from "./empty-states";
 import { DataTableHeader } from "./table-header";

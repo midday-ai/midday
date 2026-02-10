@@ -7,7 +7,7 @@ import { getPopularity, getTellerData, matchLogoURL } from "./utils";
 
 export async function getEnableBankingInstitutions() {
   const provider = new EnableBankingApi({
-    // @ts-ignore
+    // @ts-expect-error
     envs: {
       ENABLEBANKING_APPLICATION_ID: process.env.ENABLEBANKING_APPLICATION_ID!,
       ENABLE_BANKING_KEY_CONTENT: process.env.ENABLE_BANKING_KEY_CONTENT!,
@@ -38,7 +38,7 @@ export async function getEnableBankingInstitutions() {
 
 export async function getGoCardLessInstitutions() {
   const provider = new GoCardLessApi({
-    // @ts-ignore
+    // @ts-expect-error
     envs: {
       GOCARDLESS_SECRET_ID: process.env.GOCARDLESS_SECRET_ID!,
       GOCARDLESS_SECRET_KEY: process.env.GOCARDLESS_SECRET_KEY!,
@@ -77,7 +77,7 @@ export async function getTellerInstitutions() {
 
 export async function getPlaidInstitutions() {
   const provider = new PlaidApi({
-    // @ts-ignore
+    // @ts-expect-error
     envs: {
       PLAID_CLIENT_ID: process.env.PLAID_CLIENT_ID!,
       PLAID_SECRET: process.env.PLAID_SECRET!,

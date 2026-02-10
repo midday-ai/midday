@@ -1,10 +1,10 @@
 "use client";
 
-import { RESOURCES } from "@/utils/scopes";
 import type { Scope } from "@api/utils/scopes";
 import { FormDescription } from "@midday/ui/form";
 import { RadioGroup, RadioGroupItem } from "@midday/ui/radio-group";
 import { ScrollArea } from "@midday/ui/scroll-area";
+import { RESOURCES } from "@/utils/scopes";
 
 type Props = {
   selectedScopes: Scope[];

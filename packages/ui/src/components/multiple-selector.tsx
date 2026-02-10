@@ -371,7 +371,7 @@ const MultipleSelector = React.forwardRef<
             e.preventDefault();
             e.stopPropagation();
           }}
-          onSelect={(value: string) => {
+          onSelect={(_value: string) => {
             if (selected.length >= maxSelected) {
               onMaxSelected?.(selected.length);
               return;
@@ -560,7 +560,7 @@ const MultipleSelector = React.forwardRef<
               }}
             >
               {isLoading ? (
-                <>{loadingIndicator}</>
+                loadingIndicator
               ) : (
                 <>
                   {EmptyItem()}

@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { Invoicing } from "@/components/invoicing";
-import type { Metadata } from "next";
 
 const title = "Invoicing";
 const description =

@@ -1,6 +1,5 @@
 "use client";
 
-import { verifyOtpAction } from "@/actions/verify-otp-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
@@ -9,11 +8,12 @@ import { Input } from "@midday/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import { Spinner } from "@midday/ui/spinner";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { useAction } from "next-safe-action/hooks";
 import { useSearchParams } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v3";
+import { verifyOtpAction } from "@/actions/verify-otp-action";
 
 const formSchema = z.object({
   email: z.string().email(),

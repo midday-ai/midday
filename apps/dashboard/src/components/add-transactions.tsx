@@ -1,6 +1,5 @@
 "use client";
 
-import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -10,6 +9,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
+import { useTransactionParams } from "@/hooks/use-transaction-params";
 
 export function AddTransactions() {
   const [_, setParams] = useQueryStates({

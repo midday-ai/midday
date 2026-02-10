@@ -1,11 +1,11 @@
-import { createGoCardLessLinkAction } from "@/actions/institutions/create-gocardless-link";
-import { getUrl } from "@/utils/environment";
 import {
   getDesktopSchemeUrl,
   isDesktopApp,
 } from "@midday/desktop-client/platform";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
+import { createGoCardLessLinkAction } from "@/actions/institutions/create-gocardless-link";
+import { getUrl } from "@/utils/environment";
 import { BankConnectButton } from "./bank-connect-button";
 
 type Props = {

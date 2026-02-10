@@ -1,6 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
 import {
@@ -13,6 +12,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
+import { useTRPC } from "@/trpc/client";
 
 type Props = {
   order: RouterOutputs["billing"]["orders"]["data"][number];
@@ -28,7 +28,7 @@ export function ActionsMenu({ order }: Props) {
     update: (props: any) => void;
   } | null>(null);
   const [shouldPoll, setShouldPoll] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [_progress, setProgress] = useState(0);
   const [pollCount, setPollCount] = useState(0);
 
   // Use React Query for polling invoice status
@@ -159,7 +159,7 @@ export function ActionsMenu({ order }: Props) {
           setShouldPoll(true);
         }
       },
-      onError: (error) => {
+      onError: (_error) => {
         toast({
           title: "Download failed",
           description: "Unable to download invoice. Please try again later.",

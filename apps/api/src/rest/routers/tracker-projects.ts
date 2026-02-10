@@ -8,7 +8,7 @@ import {
   upsertTrackerProjectSchema,
 } from "@api/schemas/tracker-projects";
 import { validateResponse } from "@api/utils/validate-response";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
   deleteTrackerProject,
   getTrackerProjectById,

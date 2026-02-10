@@ -5,7 +5,6 @@ import { capitalCase } from "change-case";
 import { addDays } from "date-fns";
 import type {
   Account as BaseAccount,
-  Balance as BaseAccountBalance,
   Transaction as BaseTransaction,
   ConnectionStatus,
   GetAccountBalanceResponse,

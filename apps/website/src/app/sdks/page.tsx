@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { SDKs } from "@/components/sdks";
-import type { Metadata } from "next";
 
 const title = "SDKs";
 const description =

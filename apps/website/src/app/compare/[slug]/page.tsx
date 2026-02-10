@@ -1,8 +1,8 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { baseUrl } from "@/app/sitemap";
 import { ComparisonPage } from "@/components/comparison-page";
 import { getAllCompetitorSlugs, getCompetitorBySlug } from "@/data/competitors";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 interface Props {
   params: Promise<{ slug: string }>;

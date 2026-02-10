@@ -23,7 +23,9 @@
       "import": "./dist/adapters/fastify.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "npm run build:ui && npm run build:lib",
     "build:lib": "tsc",

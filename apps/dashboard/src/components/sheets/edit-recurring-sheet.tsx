@@ -1,17 +1,13 @@
 "use client";
 
-import { FormatAmount } from "@/components/format-amount";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import { TZDate } from "@date-fns/tz";
 import {
-  type InvoiceRecurringEndType,
-  type InvoiceRecurringFrequency,
-  type RecurringConfig,
   calculatePreviewDates,
   formatOrdinal,
+  type InvoiceRecurringEndType,
+  type InvoiceRecurringFrequency,
   localDateToUTCMidnight,
+  type RecurringConfig,
   validateRecurringConfig,
 } from "@midday/invoice/recurring";
 import { Button } from "@midday/ui/button";
@@ -34,6 +30,10 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, getDate, getDay } from "date-fns";
 import * as React from "react";
+import { FormatAmount } from "@/components/format-amount";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 
 const DAY_NAMES = [
   "Sunday",
@@ -339,7 +339,7 @@ export function EditRecurringSheet() {
                         setConfig((prev) => ({
                           ...prev,
                           frequencyInterval:
-                            Number.parseInt(e.target.value) || 1,
+                            Number.parseInt(e.target.value, 10) || 1,
                         }))
                       }
                       placeholder="14"
@@ -430,7 +430,8 @@ export function EditRecurringSheet() {
                             onChange={(e) =>
                               setConfig((prev) => ({
                                 ...prev,
-                                endCount: Number.parseInt(e.target.value) || 1,
+                                endCount:
+                                  Number.parseInt(e.target.value, 10) || 1,
                               }))
                             }
                             className="w-20"

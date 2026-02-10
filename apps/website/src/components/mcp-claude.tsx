@@ -1,7 +1,6 @@
 "use client";
 
 import { ClaudeMcpLogo } from "@midday/app-store/logos";
-import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import Link from "next/link";

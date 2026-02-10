@@ -1,9 +1,9 @@
 "use client";
 
-import type { Competitor } from "@/data/competitors";
-import { middayDifferentiators } from "@/data/competitors";
 import { Button } from "@midday/ui/button";
 import Link from "next/link";
+import type { Competitor } from "@/data/competitors";
+import { middayDifferentiators } from "@/data/competitors";
 import { ComparisonHero } from "./sections/comparison-hero";
 import { CompetitorFAQ } from "./sections/competitor-faq";
 import { FeatureComparison } from "./sections/feature-comparison";

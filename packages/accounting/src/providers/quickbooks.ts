@@ -616,7 +616,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
   /**
    * Get bank accounts from QuickBooks
    */
-  async getAccounts(tenantId: string): Promise<AccountingAccount[]> {
+  async getAccounts(_tenantId: string): Promise<AccountingAccount[]> {
     return this.withRetry(async () => {
       // Query for bank accounts
       const response = await this.apiCall<{

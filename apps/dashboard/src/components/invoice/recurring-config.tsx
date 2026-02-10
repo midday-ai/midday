@@ -1,18 +1,16 @@
 "use client";
 
-import { FormatAmount } from "@/components/format-amount";
-import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
 import {
-  type InvoiceRecurringEndType,
-  type InvoiceRecurringFrequency,
-  type RecurringConfig,
   calculatePreviewDates,
   calculateSummary,
   formatDayOfWeek,
   formatOrdinal,
   formatShortDate,
+  type InvoiceRecurringEndType,
+  type InvoiceRecurringFrequency,
   localDateToUTCMidnight,
+  type RecurringConfig,
 } from "@midday/invoice/recurring";
 import { Calendar } from "@midday/ui/calendar";
 import { Input } from "@midday/ui/input";
@@ -29,6 +27,8 @@ import {
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
+import { FormatAmount } from "@/components/format-amount";
+import { useUserQuery } from "@/hooks/use-user";
 
 // Re-export canonical types for consumers
 export type { RecurringConfig };
@@ -270,7 +270,9 @@ export function RecurringConfigPanel({
               min={1}
               value={config.frequencyInterval ?? 1}
               onChange={(e) =>
-                handleCustomIntervalChange(Number.parseInt(e.target.value) || 1)
+                handleCustomIntervalChange(
+                  Number.parseInt(e.target.value, 10) || 1,
+                )
               }
               className="w-20"
             />
@@ -342,7 +344,7 @@ export function RecurringConfigPanel({
               min={1}
               value={config.endCount ?? 12}
               onChange={(e) =>
-                handleEndCountChange(Number.parseInt(e.target.value) || 12)
+                handleEndCountChange(Number.parseInt(e.target.value, 10) || 12)
               }
               disabled={config.endType !== "after_count"}
               className="w-16"

@@ -1,7 +1,5 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
-import { getDatePresets } from "@/utils/date-presets";
 import { Calendar } from "@midday/ui/calendar";
 import {
   Select,
@@ -11,6 +9,8 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { formatISO, parseISO } from "date-fns";
+import { useUserQuery } from "@/hooks/use-user";
+import { getDatePresets } from "@/utils/date-presets";
 
 interface DateRangeFilterProps {
   start: string | null | undefined;

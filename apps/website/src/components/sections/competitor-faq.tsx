@@ -1,7 +1,7 @@
 "use client";
 
-import type { Competitor } from "@/data/competitors";
 import { useState } from "react";
+import type { Competitor } from "@/data/competitors";
 
 interface Props {
   competitor: Competitor;

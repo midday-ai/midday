@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type { ProviderInitConfig } from "../types";
 import { XERO_SCOPES, XeroProvider } from "./xero";
 

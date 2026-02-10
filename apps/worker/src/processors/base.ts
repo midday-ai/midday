@@ -3,11 +3,11 @@ import * as Sentry from "@sentry/bun";
 import type { Job } from "bullmq";
 import type { ZodSchema } from "zod";
 import {
-  NonRetryableError,
   classifyError,
   getMaxRetries,
   getRetryDelay,
   isNonRetryableError,
+  NonRetryableError,
 } from "../utils/error-classification";
 
 /**
@@ -114,7 +114,7 @@ export abstract class BaseProcessor<TData = unknown> {
           hasResult: result !== undefined,
           resultType: typeof result,
         });
-      } catch (logError) {
+      } catch (_logError) {
         // Silently ignore logger errors - job already completed successfully
         // This prevents stream encoding errors from affecting job completion
       }
@@ -302,7 +302,7 @@ export abstract class BaseProcessor<TData = unknown> {
    * @param job - The BullMQ job
    * @returns true if job should be processed, false if it should be skipped
    */
-  protected async shouldProcess(job: Job<TData>): Promise<boolean> {
+  protected async shouldProcess(_job: Job<TData>): Promise<boolean> {
     // Default: always process
     // Subclasses can override to implement idempotency checks
     return true;

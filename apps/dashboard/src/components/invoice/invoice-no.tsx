@@ -1,8 +1,5 @@
 "use client";
 
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useTemplateUpdate } from "@/hooks/use-template-update";
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import {
   Tooltip,
@@ -13,6 +10,9 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
+import { useTRPC } from "@/trpc/client";
 import { Input } from "./input";
 import { LabelInput } from "./label-input";
 

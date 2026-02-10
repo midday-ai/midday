@@ -1,7 +1,5 @@
 "use client";
 
-import { useUserMutation, useUserQuery } from "@/hooks/use-user";
-import { useI18n } from "@/locales/client";
 import { getTimezones } from "@midday/location/timezones";
 import {
   Card,
@@ -14,6 +12,8 @@ import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
 import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
 import { useEffect, useState } from "react";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 
 export function ChangeTimezone() {
   const t = useI18n();
@@ -42,7 +42,7 @@ export function ChangeTimezone() {
 
   const isAutoSyncEnabled = user?.timezoneAutoSync !== false;
   const currentTimezone = user?.timezone || currentBrowserTimezone;
-  const currentTimezoneName =
+  const _currentTimezoneName =
     timezoneItems.find((item) => item.value === currentTimezone)?.label ||
     currentTimezone;
 

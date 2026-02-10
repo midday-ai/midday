@@ -1,6 +1,6 @@
-import { getColorFromName, getRandomColor } from "@/utils/categories";
 import { Input } from "@midday/ui/input";
 import { useState } from "react";
+import { getColorFromName, getRandomColor } from "@/utils/categories";
 import { ColorPicker } from "./color-picker";
 
 type Props = {

@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCPClaude } from "@/components/mcp-claude";
-import type { Metadata } from "next";
 
 const title = "Claude MCP Integration";
 const description =

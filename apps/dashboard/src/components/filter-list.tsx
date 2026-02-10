@@ -1,9 +1,9 @@
-import { formatAccountName } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { format, parseISO } from "date-fns";
 import { formatDateRange } from "little-date";
+import { formatAccountName } from "@/utils/format";
 
 type FilterKey =
   | "start"

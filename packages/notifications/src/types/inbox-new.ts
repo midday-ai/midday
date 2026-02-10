@@ -23,7 +23,7 @@ export const inboxNew: NotificationHandler<InboxNewInput> = {
   combine: {
     findExisting: async (
       db: Database,
-      data: InboxNewInput,
+      _data: InboxNewInput,
       user: UserData,
     ): Promise<Activity | null> => {
       return findRecentActivity(db, {

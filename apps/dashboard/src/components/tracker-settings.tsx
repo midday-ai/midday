@@ -1,6 +1,5 @@
 "use client";
 
-import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 
 export function TrackerSettings() {
   const { data: user } = useUserQuery();

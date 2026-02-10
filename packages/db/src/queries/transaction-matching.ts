@@ -11,6 +11,7 @@ import {
 } from "../schema";
 
 const logger = createLoggerWithContext("matching");
+
 import {
   and,
   cosineDistance,
@@ -24,10 +25,10 @@ import {
 } from "drizzle-orm";
 import {
   CALIBRATION_LIMITS,
-  EMBEDDING_THRESHOLDS,
   calculateAmountScore,
   calculateCurrencyScore,
   calculateDateScore,
+  EMBEDDING_THRESHOLDS,
   isCrossCurrencyMatch,
 } from "../utils/transaction-matching";
 
@@ -1343,7 +1344,7 @@ export async function findMatches(
             // Unproven merchant - conservative 85% cap until pattern is established
             confidenceScore = Math.min(confidenceScore, 0.85);
           }
-        } catch (error) {
+        } catch (_error) {
           // If merchant analysis fails, apply conservative cap
           confidenceScore = Math.min(confidenceScore, 0.85);
         }
@@ -1942,7 +1943,7 @@ export async function findInboxMatches(
           // Unproven merchant - conservative 85% cap until pattern is established
           confidenceScore = Math.min(confidenceScore, 0.85);
         }
-      } catch (error) {
+      } catch (_error) {
         // If merchant analysis fails, apply conservative cap
         confidenceScore = Math.min(confidenceScore, 0.85);
       }

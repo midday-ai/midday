@@ -1,7 +1,5 @@
 "use client";
 
-import { useSyncStatus } from "@/hooks/use-sync-status";
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Badge } from "@midday/ui/badge";
@@ -28,8 +26,9 @@ import {
 } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useTRPC } from "@/trpc/client";
 import { ConnectEmailModal } from "./connect-email-modal";
 import { ConnectGmail } from "./connect-gmail";
 import { ConnectOutlook } from "./connect-outlook";

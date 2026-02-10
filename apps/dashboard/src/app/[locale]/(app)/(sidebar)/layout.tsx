@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { ExportStatus } from "@/components/export-status";
 import { GlobalTimerProvider } from "@/components/global-timer-provider";
 import { Header } from "@/components/header";
@@ -6,12 +7,11 @@ import { Sidebar } from "@/components/sidebar";
 import { TimezoneDetector } from "@/components/timezone-detector";
 import { TrialGuard } from "@/components/trial-guard";
 import {
-  HydrateClient,
   batchPrefetch,
   getQueryClient,
+  HydrateClient,
   trpc,
 } from "@/trpc/server";
-import { redirect } from "next/navigation";
 
 export default async function Layout({
   children,

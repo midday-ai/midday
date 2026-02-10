@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  horizontalListSortingStrategy,
+  SortableContext,
+} from "@dnd-kit/sortable";
+import { Button } from "@midday/ui/button";
+import { Checkbox } from "@midday/ui/checkbox";
+import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
+import type { Header, Table } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { useMemo } from "react";
 import { HorizontalPagination } from "@/components/horizontal-pagination";
 import {
   ACTIONS_FULL_WIDTH_HEADER_CLASS,
@@ -15,16 +25,6 @@ import {
   SORT_FIELD_MAPS,
   STICKY_COLUMNS,
 } from "@/utils/table-configs";
-import {
-  SortableContext,
-  horizontalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
-import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
-import type { Header, Table } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp } from "lucide-react";
-import { useMemo } from "react";
 
 interface Props<TData> {
   table?: Table<TData>;

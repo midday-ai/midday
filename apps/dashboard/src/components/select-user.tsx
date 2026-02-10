@@ -1,8 +1,8 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { Spinner } from "@midday/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 import { AssignedUser } from "./assigned-user";
 
 type User = {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   Card,
@@ -13,6 +12,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import Link from "next/link";
+import { useTRPC } from "@/trpc/client";
 
 // Provider display information
 const PROVIDER_INFO = {

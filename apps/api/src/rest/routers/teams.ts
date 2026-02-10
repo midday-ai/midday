@@ -7,7 +7,7 @@ import {
   updateTeamByIdSchema,
 } from "@api/schemas/team";
 import { validateResponse } from "@api/utils/validate-response";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
   getTeamById,
   getTeamMembers,

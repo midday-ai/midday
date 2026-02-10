@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { Inbox } from "@/components/inbox";
-import type { Metadata } from "next";
 
 const title = "Receipt Inbox";
 const description =

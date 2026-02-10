@@ -1,4 +1,3 @@
-import { useI18n } from "@/locales/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
@@ -28,13 +27,12 @@ import {
 } from "@midday/ui/select";
 import { useToast } from "@midday/ui/use-toast";
 import type { ColumnDef, FilterFn, Row } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
-import { Loader2 } from "lucide-react";
-import * as React from "react";
+import { Loader2, MoreHorizontal } from "lucide-react";
+import { useI18n } from "@/locales/client";
 import "@tanstack/react-table";
-import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useTRPC } from "@/trpc/client";
 
 type TeamMember = RouterOutputs["team"]["members"][number];
 

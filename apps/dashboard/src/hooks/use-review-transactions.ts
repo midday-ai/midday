@@ -1,8 +1,8 @@
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTRPC } from "@/trpc/client";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 /**
  * Hook to fetch review transactions (fulfilled but not exported) with user-applied filters.

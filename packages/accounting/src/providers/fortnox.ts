@@ -1118,12 +1118,12 @@ export class FortnoxProvider extends BaseAccountingProvider {
         ? [
             // Expense: Debit expense account, Credit bank account
             {
-              Account: Number.parseInt(contraAccount),
+              Account: Number.parseInt(contraAccount, 10),
               Debit: amount,
               Credit: 0,
             },
             {
-              Account: Number.parseInt(bankAccountCode),
+              Account: Number.parseInt(bankAccountCode, 10),
               Debit: 0,
               Credit: amount,
             },
@@ -1131,12 +1131,12 @@ export class FortnoxProvider extends BaseAccountingProvider {
         : [
             // Income: Debit bank account, Credit income account
             {
-              Account: Number.parseInt(bankAccountCode),
+              Account: Number.parseInt(bankAccountCode, 10),
               Debit: amount,
               Credit: 0,
             },
             {
-              Account: Number.parseInt(contraAccount),
+              Account: Number.parseInt(contraAccount, 10),
               Debit: 0,
               Credit: amount,
             },

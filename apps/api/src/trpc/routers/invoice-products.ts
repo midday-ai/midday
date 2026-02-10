@@ -54,7 +54,7 @@ export const invoiceProductsRouter = createTRPCRouter({
           teamId: teamId!,
           createdBy: session.user.id,
         });
-      } catch (error) {
+      } catch (_error) {
         throw new TRPCError({
           code: "CONFLICT",
         });
@@ -79,7 +79,7 @@ export const invoiceProductsRouter = createTRPCRouter({
           ...input,
           teamId: teamId!,
         });
-      } catch (error: any) {
+      } catch (_error: any) {
         throw new TRPCError({
           code: "CONFLICT",
         });

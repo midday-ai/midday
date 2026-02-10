@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { validateResponse } from "@api/utils/validate-response";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   createSlackWebClient,
   ensureBotInChannel,
@@ -11,10 +11,10 @@ import type { Database } from "@midday/db/client";
 import {
   confirmSuggestedMatch,
   declineSuggestedMatch,
+  getAppBySlackTeamId,
   getInboxById,
   getSuggestionByInboxAndTransaction,
 } from "@midday/db/queries";
-import { getAppBySlackTeamId } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
 
@@ -141,7 +141,8 @@ async function verifySlackInteraction(req: Request): Promise<unknown> {
 
   const currentTime = Math.floor(Date.now() / 1000);
   if (
-    Math.abs(currentTime - Number.parseInt(timestamp)) > fiveMinutesInSeconds
+    Math.abs(currentTime - Number.parseInt(timestamp, 10)) >
+    fiveMinutesInSeconds
   ) {
     throw new Error("Request is too old");
   }

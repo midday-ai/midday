@@ -1,5 +1,5 @@
-import { artifact, getWriter } from "@ai-sdk-tools/artifacts";
 import { openai } from "@ai-sdk/openai";
+import { artifact, getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { metricsBreakdownSummaryArtifact } from "@api/ai/artifacts/metrics-breakdown";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
@@ -17,8 +17,7 @@ import {
   getTransactions,
 } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
-import { generateText } from "ai";
-import { tool } from "ai";
+import { generateText, tool } from "ai";
 import {
   eachMonthOfInterval,
   endOfMonth,

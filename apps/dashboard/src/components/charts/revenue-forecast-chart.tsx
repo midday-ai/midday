@@ -1,6 +1,5 @@
 "use client";
 
-import { formatAmount } from "@/utils/format";
 import { format, parseISO } from "date-fns";
 import { useMemo } from "react";
 import {
@@ -14,12 +13,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { formatAmount } from "@/utils/format";
+import type { BaseChartProps } from "./chart-utils";
 import {
   commonChartConfig,
   createCompactTickFormatter,
   useChartMargin,
 } from "./chart-utils";
-import type { BaseChartProps } from "./chart-utils";
 import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
 // Breakdown of revenue sources for the bottom-up forecast

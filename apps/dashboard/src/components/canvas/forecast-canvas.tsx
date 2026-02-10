@@ -1,5 +1,8 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { forecastArtifact } from "@api/ai/artifacts/forecast";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasChart,
@@ -15,9 +18,6 @@ import {
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
 import { useUserQuery } from "@/hooks/use-user";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { forecastArtifact } from "@api/ai/artifacts/forecast";
-import { parseAsInteger, useQueryState } from "nuqs";
 import { RevenueForecastChart } from "../charts";
 
 export function ForecastCanvas() {
@@ -25,7 +25,7 @@ export function ForecastCanvas() {
   const [artifact] = useArtifact(forecastArtifact, { version });
   const { data, status } = artifact;
   const { data: user } = useUserQuery();
-  const isLoading = status === "loading";
+  const _isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
   const locale = user?.locale ?? undefined;

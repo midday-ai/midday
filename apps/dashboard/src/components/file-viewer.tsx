@@ -1,8 +1,8 @@
 "use client";
 
-import { useFileUrl } from "@/hooks/use-file-url";
 import { Skeleton } from "@midday/ui/skeleton";
 import dynamic from "next/dynamic";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { FilePreviewIcon } from "./file-preview-icon";
 
 const DynamicImageViewer = dynamic(

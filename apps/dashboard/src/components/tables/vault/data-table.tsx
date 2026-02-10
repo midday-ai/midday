@@ -1,5 +1,18 @@
 "use client";
 
+import { closestCenter, DndContext } from "@dnd-kit/core";
+import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { toast } from "@midday/ui/use-toast";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseInfiniteQuery,
+} from "@tanstack/react-query";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
+import { AnimatePresence } from "framer-motion";
+import { useCallback, useMemo, useRef } from "react";
+import { useCopyToClipboard, useDebounceCallback } from "usehooks-ts";
 import { VirtualRow } from "@/components/tables/core";
 import { NoResults } from "@/components/vault/empty-states";
 import { VaultGetStarted } from "@/components/vault/vault-get-started";
@@ -17,19 +30,6 @@ import { useDocumentsStore } from "@/store/vault";
 import { useTRPC } from "@/trpc/client";
 import { STICKY_COLUMNS } from "@/utils/table-configs";
 import type { TableSettings } from "@/utils/table-settings";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { toast } from "@midday/ui/use-toast";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseInfiniteQuery,
-} from "@tanstack/react-query";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
-import { AnimatePresence } from "framer-motion";
-import { useCallback, useMemo, useRef } from "react";
-import { useCopyToClipboard, useDebounceCallback } from "usehooks-ts";
 import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";

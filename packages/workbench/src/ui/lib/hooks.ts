@@ -1,4 +1,3 @@
-import type { JobStatus, RunInfoList } from "@/core/types";
 import {
   useInfiniteQuery,
   useMutation,
@@ -6,6 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import * as React from "react";
+import type { JobStatus } from "@/core/types";
 import { api } from "./api";
 
 /** Type for dashboard config returned by the API */
@@ -336,8 +336,10 @@ export function useCleanQueue() {
     mutationFn: ({
       queueName,
       status,
-    }: { queueName: string; status: JobStatus }) =>
-      api.cleanQueue(queueName, status),
+    }: {
+      queueName: string;
+      status: JobStatus;
+    }) => api.cleanQueue(queueName, status),
     onSuccess: (_, { queueName }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.jobsAll(queueName) });
       queryClient.invalidateQueries({ queryKey: queryKeys.runsAll });

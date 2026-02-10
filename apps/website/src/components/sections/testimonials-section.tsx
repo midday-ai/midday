@@ -3,8 +3,8 @@
 import { Icons } from "@midday/ui/icons";
 import type Hls from "hls.js";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { MaterialIcon } from "../homepage/icon-mapping";
 import {
@@ -490,50 +490,48 @@ export function TestimonialsSection({
         {customHeader ? (
           customHeader
         ) : (
-          <>
-            <div className="flex flex-col gap-4 items-center">
-              <div className="flex flex-col gap-4 items-center text-center max-w-3xl">
-                <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  {title}
-                </h2>
-                <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal">
-                  {subtitle}
-                </p>
-              </div>
-
-              {showStars && (
-                <div className="flex items-center justify-center mb-6 sm:mb-10">
-                  <div className="flex gap-1">
-                    <MaterialIcon
-                      name="star"
-                      className="text-muted-foreground"
-                      size={16}
-                    />
-                    <MaterialIcon
-                      name="star"
-                      className="text-muted-foreground"
-                      size={16}
-                    />
-                    <MaterialIcon
-                      name="star"
-                      className="text-muted-foreground"
-                      size={16}
-                    />
-                    <MaterialIcon
-                      name="star"
-                      className="text-muted-foreground"
-                      size={16}
-                    />
-                    <MaterialIcon
-                      name="star_half"
-                      className="text-muted-foreground"
-                      size={16}
-                    />
-                  </div>
-                </div>
-              )}
+          <div className="flex flex-col gap-4 items-center">
+            <div className="flex flex-col gap-4 items-center text-center max-w-3xl">
+              <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
+                {title}
+              </h2>
+              <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal">
+                {subtitle}
+              </p>
             </div>
-          </>
+
+            {showStars && (
+              <div className="flex items-center justify-center mb-6 sm:mb-10">
+                <div className="flex gap-1">
+                  <MaterialIcon
+                    name="star"
+                    className="text-muted-foreground"
+                    size={16}
+                  />
+                  <MaterialIcon
+                    name="star"
+                    className="text-muted-foreground"
+                    size={16}
+                  />
+                  <MaterialIcon
+                    name="star"
+                    className="text-muted-foreground"
+                    size={16}
+                  />
+                  <MaterialIcon
+                    name="star"
+                    className="text-muted-foreground"
+                    size={16}
+                  />
+                  <MaterialIcon
+                    name="star_half"
+                    className="text-muted-foreground"
+                    size={16}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Desktop Testimonials Grid */}

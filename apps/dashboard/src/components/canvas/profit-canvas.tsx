@@ -1,5 +1,8 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { profitArtifact } from "@api/ai/artifacts/profit";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasChart,
@@ -15,9 +18,6 @@ import {
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
 import { useUserQuery } from "@/hooks/use-user";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { profitArtifact } from "@api/ai/artifacts/profit";
-import { parseAsInteger, useQueryState } from "nuqs";
 import { ProfitChart } from "../charts";
 
 export function ProfitCanvas() {
@@ -25,7 +25,7 @@ export function ProfitCanvas() {
   const [artifact] = useArtifact(profitArtifact, { version });
   const { data, status } = artifact;
   const { data: user } = useUserQuery();
-  const isLoading = status === "loading";
+  const _isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
   const locale = user?.locale ?? undefined;

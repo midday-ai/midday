@@ -1,6 +1,6 @@
 import {
-  type InsightSlots,
   getToneGuidance,
+  type InsightSlots,
   selectPrimaryAction,
 } from "./slots";
 

@@ -13,6 +13,7 @@ import {
 } from "../schema";
 
 const logger = createLoggerWithContext("inbox");
+
 import {
   and,
   asc,
@@ -178,7 +179,7 @@ export async function getInbox(db: Database, params: GetInboxParams) {
   // Apply search query filter
   if (q) {
     // If the query is a number, search by amount
-    if (!Number.isNaN(Number.parseInt(q))) {
+    if (!Number.isNaN(Number.parseInt(q, 10))) {
       whereConditions.push(sql`${inbox.amount}::text LIKE '%' || ${q} || '%'`);
     } else {
       // Use both FTS and ILIKE for better special character support

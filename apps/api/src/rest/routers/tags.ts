@@ -7,7 +7,7 @@ import {
   updateTagSchema,
 } from "@api/schemas/tags";
 import { validateResponse } from "@api/utils/validate-response";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
   createTag,
   deleteTag,

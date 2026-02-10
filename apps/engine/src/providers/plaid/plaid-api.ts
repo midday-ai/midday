@@ -163,7 +163,7 @@ export class PlaidApi {
         transactions = data.transactions;
       } else {
         // Get all transactions using /transactions/sync
-        let cursor = undefined;
+        let cursor;
         let hasMore = true;
 
         while (hasMore) {

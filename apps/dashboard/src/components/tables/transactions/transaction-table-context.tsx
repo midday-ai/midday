@@ -1,8 +1,8 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
-import { type ReactNode, createContext, useContext, useMemo } from "react";
+import { createContext, type ReactNode, useContext, useMemo } from "react";
+import { useTRPC } from "@/trpc/client";
 
 type TeamMember = {
   user: {

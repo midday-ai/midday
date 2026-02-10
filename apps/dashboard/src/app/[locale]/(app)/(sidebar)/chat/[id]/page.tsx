@@ -1,11 +1,11 @@
-import { ChatInterface } from "@/components/chat/chat-interface";
-import { Widgets } from "@/components/widgets";
-import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
-import { geolocation } from "@/utils/geo";
 import { Provider as ChatProvider } from "@ai-sdk-tools/store";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { ChatInterface } from "@/components/chat/chat-interface";
+import { Widgets } from "@/components/widgets";
+import { getQueryClient, HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { geolocation } from "@/utils/geo";
 
 export const metadata: Metadata = {
   title: "Chat | Midday",

@@ -1,10 +1,10 @@
 "use client";
 
-import { useUpload } from "@/hooks/use-upload";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Spinner } from "@midday/ui/spinner";
 import { nanoid } from "nanoid";
 import { useRef, useState } from "react";
+import { useUpload } from "@/hooks/use-upload";
 
 type Props = {
   logoUrl?: string | null;
@@ -48,14 +48,12 @@ export const LogoUpload = ({ logoUrl: initialLogoUrl, onUpload }: Props) => {
       {isLoading ? (
         <Spinner className="h-4 w-4" />
       ) : (
-        <>
-          <AvatarImage
-            src={logo ?? undefined}
-            alt="Logo"
-            width={64}
-            height={64}
-          />
-        </>
+        <AvatarImage
+          src={logo ?? undefined}
+          alt="Logo"
+          width={64}
+          height={64}
+        />
       )}
 
       <input

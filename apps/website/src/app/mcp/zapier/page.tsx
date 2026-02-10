@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCPZapier } from "@/components/mcp-zapier";
-import type { Metadata } from "next";
 
 const title = "Zapier MCP Integration";
 const description =

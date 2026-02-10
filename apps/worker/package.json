@@ -21,6 +21,7 @@
     "@midday/documents": "workspace:*",
     "@midday/email": "workspace:*",
     "@midday/engine": "workspace:*",
+    "@midday/health": "workspace:*",
     "@midday/engine-client": "workspace:*",
     "@midday/import": "workspace:*",
     "@midday/insights": "workspace:*",

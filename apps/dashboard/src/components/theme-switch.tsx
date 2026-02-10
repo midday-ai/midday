@@ -1,9 +1,5 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-
 import {
   Select,
   SelectContent,
@@ -12,6 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
+import { Monitor, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 type Theme = "dark" | "system" | "light";
 

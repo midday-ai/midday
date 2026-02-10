@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader } from "@midday/ui/loader";
 import { AnimatedStatus } from "@/components/animated-status";
 import {
   getArtifactSectionMessageForStatus,
@@ -10,12 +11,11 @@ import {
 import {
   type ArtifactStage,
   type ArtifactType,
-  TOOL_TO_ARTIFACT_MAP,
   getArtifactTypeFromTool,
+  TOOL_TO_ARTIFACT_MAP,
 } from "@/lib/artifact-config";
 import { getToolIcon } from "@/lib/tool-config";
 import type { AgentStatus } from "@/types/agents";
-import { Loader } from "@midday/ui/loader";
 
 interface ChatStatusIndicatorsProps {
   agentStatus: AgentStatus | null;

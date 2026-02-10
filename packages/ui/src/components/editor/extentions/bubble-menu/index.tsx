@@ -26,36 +26,34 @@ export function BubbleMenu({
     <div>
       <TiptapBubbleMenu editor={editor} tippyOptions={tippyOptions}>
         <div className="flex w-fit max-w-[90vw] overflow-hidden rounded-full border border-border bg-background text-mono font-regular">
-          <>
-            <BubbleMenuItem
-              editor={editor}
-              action={() => editor.chain().focus().toggleBold().run()}
-              isActive={editor.isActive("bold")}
-            >
-              <MdOutlineFormatBold className="size-4" />
-              <span className="sr-only">Bold</span>
-            </BubbleMenuItem>
+          <BubbleMenuItem
+            editor={editor}
+            action={() => editor.chain().focus().toggleBold().run()}
+            isActive={editor.isActive("bold")}
+          >
+            <MdOutlineFormatBold className="size-4" />
+            <span className="sr-only">Bold</span>
+          </BubbleMenuItem>
 
-            <BubbleMenuItem
-              editor={editor}
-              action={() => editor.chain().focus().toggleItalic().run()}
-              isActive={editor.isActive("italic")}
-            >
-              <MdOutlineFormatItalic className="size-4" />
-              <span className="sr-only">Italic</span>
-            </BubbleMenuItem>
+          <BubbleMenuItem
+            editor={editor}
+            action={() => editor.chain().focus().toggleItalic().run()}
+            isActive={editor.isActive("italic")}
+          >
+            <MdOutlineFormatItalic className="size-4" />
+            <span className="sr-only">Italic</span>
+          </BubbleMenuItem>
 
-            <BubbleMenuItem
-              editor={editor}
-              action={() => editor.chain().focus().toggleStrike().run()}
-              isActive={editor.isActive("strike")}
-            >
-              <MdOutlineFormatStrikethrough className="size-4" />
-              <span className="sr-only">Strike</span>
-            </BubbleMenuItem>
+          <BubbleMenuItem
+            editor={editor}
+            action={() => editor.chain().focus().toggleStrike().run()}
+            isActive={editor.isActive("strike")}
+          >
+            <MdOutlineFormatStrikethrough className="size-4" />
+            <span className="sr-only">Strike</span>
+          </BubbleMenuItem>
 
-            <LinkItem editor={editor} open={openLink} setOpen={setOpenLink} />
-          </>
+          <LinkItem editor={editor} open={openLink} setOpen={setOpenLink} />
         </div>
       </TiptapBubbleMenu>
     </div>

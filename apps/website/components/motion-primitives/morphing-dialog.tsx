@@ -5,9 +5,9 @@ import { Cross2Icon } from "@radix-ui/react-icons";
 import {
   AnimatePresence,
   MotionConfig,
+  motion,
   type Transition,
   type Variant,
-  motion,
 } from "motion/react";
 import React, {
   useCallback,

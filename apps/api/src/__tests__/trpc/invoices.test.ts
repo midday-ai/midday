@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, test } from "bun:test";
+// Import after mocking (mocks are set up via preload)
+import { createCallerFactory } from "../../trpc/init";
+import { invoiceRouter } from "../../trpc/routers/invoice";
 import {
   createInvoicesListResponse,
   createMinimalInvoiceResponse,
@@ -7,10 +10,6 @@ import {
 } from "../factories/invoice";
 import { createTestContext } from "../helpers/test-context";
 import { mocks } from "../setup";
-
-// Import after mocking (mocks are set up via preload)
-import { createCallerFactory } from "../../trpc/init";
-import { invoiceRouter } from "../../trpc/routers/invoice";
 
 // Create a test caller
 const createCaller = createCallerFactory(invoiceRouter);

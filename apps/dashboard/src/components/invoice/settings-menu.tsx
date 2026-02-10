@@ -1,7 +1,5 @@
 "use client";
 
-import { useAppOAuth } from "@/hooks/use-app-oauth";
-import { useTRPC } from "@/trpc/client";
 import { localDateToUTCMidnight } from "@midday/invoice/recurring";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import {
@@ -42,6 +40,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, parseISO } from "date-fns";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { useAppOAuth } from "@/hooks/use-app-oauth";
+import { useTRPC } from "@/trpc/client";
 import { SelectCurrency } from "../select-currency";
 
 const dateFormats = [
@@ -72,7 +72,7 @@ const paymentTermsOptions = [
   { value: 90, label: "Net 90" },
 ];
 
-function getPaymentTermsLabel(days: number | undefined): string {
+function _getPaymentTermsLabel(days: number | undefined): string {
   if (days === undefined || days === null) return "Net 30";
   const preset = paymentTermsOptions.find((opt) => opt.value === days);
   if (preset) return preset.label;
@@ -593,45 +593,43 @@ export function SettingsMenu() {
           <DropdownMenuSeparator />
 
           {stripeStatus?.connected ? (
-            <>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <Icons.Tax className="mr-2 size-4" />
-                  <span className="text-xs">Accept payments</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="p-0">
-                  {booleanOptions.map((option, optionIndex) => (
-                    <DropdownMenuCheckboxItem
-                      key={optionIndex.toString()}
-                      className="text-xs"
-                      checked={paymentEnabled === option.value}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setValue("template.paymentEnabled", option.value, {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                          });
-                          updateTemplateMutation.mutate({
-                            id: templateId,
-                            paymentEnabled: option.value,
-                          });
-                        }
-                      }}
-                      onSelect={(event) => event.preventDefault()}
-                    >
-                      {option.label}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => setDisconnectDialogOpen(true)}
-                    className="text-xs cursor-pointer text-destructive focus:text-destructive"
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Icons.Tax className="mr-2 size-4" />
+                <span className="text-xs">Accept payments</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="p-0">
+                {booleanOptions.map((option, optionIndex) => (
+                  <DropdownMenuCheckboxItem
+                    key={optionIndex.toString()}
+                    className="text-xs"
+                    checked={paymentEnabled === option.value}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setValue("template.paymentEnabled", option.value, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                        updateTemplateMutation.mutate({
+                          id: templateId,
+                          paymentEnabled: option.value,
+                        });
+                      }
+                    }}
+                    onSelect={(event) => event.preventDefault()}
                   >
-                    Disconnect Stripe
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-            </>
+                    {option.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setDisconnectDialogOpen(true)}
+                  className="text-xs cursor-pointer text-destructive focus:text-destructive"
+                >
+                  Disconnect Stripe
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           ) : (
             <DropdownMenuItem
               onClick={() => stripeOAuth.connect()}

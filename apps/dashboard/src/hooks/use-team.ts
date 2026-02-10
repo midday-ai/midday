@@ -1,11 +1,11 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 export function useTeamQuery() {
   const trpc = useTRPC();

@@ -1,20 +1,20 @@
 "use client";
 
-import { FormatAmount } from "@/components/format-amount";
-import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { FormatAmount } from "@/components/format-amount";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function OverdueInvoicesAlertWidget() {
   const trpc = useTRPC();
-  const router = useRouter();
+  const _router = useRouter();
   const t = useI18n();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
@@ -81,7 +81,7 @@ export function OverdueInvoicesAlertWidget() {
 
     return t("overdue_invoices.description", {
       count,
-      // @ts-ignore
+      // @ts-expect-error
       days: daysOverdue,
       dayText,
     });

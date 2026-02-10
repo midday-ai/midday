@@ -11,12 +11,12 @@ import {
 } from "@api/schemas/documents";
 import { createAdminClient } from "@api/services/supabase";
 import { validateResponse } from "@api/utils/validate-response";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 const errorResponseSchema = z.object({
   error: z.string(),
 });
+
 import {
   deleteDocument,
   getDocumentById,
@@ -211,7 +211,7 @@ app.openapi(
       };
 
       return c.json(validateResponse(result, preSignedUrlResponseSchema), 200);
-    } catch (error) {
+    } catch (_error) {
       return c.json({ error: "Failed to generate pre-signed URL" }, 500);
     }
   },

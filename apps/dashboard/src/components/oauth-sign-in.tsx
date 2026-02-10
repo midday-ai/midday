@@ -1,9 +1,9 @@
 "use client";
 
-import { type OAuthProvider, useOAuthSignIn } from "@/hooks/use-oauth-sign-in";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { type OAuthProvider, useOAuthSignIn } from "@/hooks/use-oauth-sign-in";
 
 type Props = {
   provider: OAuthProvider;

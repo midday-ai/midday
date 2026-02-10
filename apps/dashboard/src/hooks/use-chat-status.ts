@@ -1,5 +1,9 @@
 "use client";
 
+import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
+import { useDataPart } from "@ai-sdk-tools/store";
+import type { ChatStatus, ToolUIPart, UIMessage } from "ai";
+import { useMemo } from "react";
 import type { ArtifactStage, ArtifactType } from "@/lib/artifact-config";
 import { getSectionFromStage } from "@/lib/artifact-config";
 import {
@@ -8,10 +12,6 @@ import {
   hasInsightToolRunning,
 } from "@/lib/chat-utils";
 import type { AgentStatus } from "@/types/agents";
-import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
-import { useDataPart } from "@ai-sdk-tools/store";
-import type { ChatStatus, ToolUIPart, UIMessage } from "ai";
-import { useMemo } from "react";
 
 interface ChatStatusResult {
   agentStatus: AgentStatus | null;

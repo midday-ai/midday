@@ -37,7 +37,7 @@ export async function verifyAccessToken(
         full_name: supabasePayload.user_metadata?.full_name,
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

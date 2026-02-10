@@ -1,12 +1,6 @@
 "use client";
 
-import { Skeleton } from "@/components/canvas/base/skeleton";
-import {
-  generateCanvasPdf,
-  generateCanvasPdfBlob,
-} from "@/utils/canvas-to-pdf";
 import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +10,10 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
 import { useTheme } from "next-themes";
+import {
+  generateCanvasPdf,
+  generateCanvasPdfBlob,
+} from "@/utils/canvas-to-pdf";
 import { ArtifactTabs } from "../artifact-tabs";
 
 interface CanvasHeaderProps {

@@ -1,13 +1,13 @@
 "use client";
 
-import { ApiKeyForm } from "@/components/forms/api-key-form";
-import { useTokenModalStore } from "@/store/token-modal";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
+import { ApiKeyForm } from "@/components/forms/api-key-form";
+import { useTokenModalStore } from "@/store/token-modal";
 
 export function EditApiKeyModal() {
   const { setData, data, type } = useTokenModalStore();

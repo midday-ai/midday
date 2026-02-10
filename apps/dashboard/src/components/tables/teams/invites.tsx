@@ -1,7 +1,5 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { SubmitButton } from "@midday/ui/submit-button";
 import {
@@ -9,6 +7,8 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 
 export function Invites() {
   const t = useI18n();

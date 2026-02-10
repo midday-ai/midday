@@ -1,7 +1,7 @@
 "use client";
 
-import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import { useEffect, useRef } from "react";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 
 export function TimezoneDetector() {
   const { data: user } = useUserQuery();
@@ -31,7 +31,7 @@ export function TimezoneDetector() {
     try {
       // Detect browser timezone using native API
       detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    } catch (error) {
+    } catch (_error) {
       hasAttemptedDetection.current = true;
       return;
     }

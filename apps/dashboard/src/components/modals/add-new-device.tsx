@@ -1,15 +1,15 @@
 "use client";
 
-import { mfaVerifyAction } from "@/actions/mfa-verify-action";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import { Spinner } from "@midday/ui/spinner";
-import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
+import { mfaVerifyAction } from "@/actions/mfa-verify-action";
 
 export function AddNewDeviceModal() {
   const supabase = createClient();

@@ -1,10 +1,10 @@
+import { notFound } from "next/navigation";
+import type { SearchParams } from "nuqs";
 import {
   type AppOAuthErrorCode,
   getErrorDescription,
   getErrorTitle,
 } from "@/utils/app-oauth-errors";
-import { notFound } from "next/navigation";
-import type { SearchParams } from "nuqs";
 import { EventEmitter } from "./event-emitter";
 import { searchParamsSchema } from "./schema";
 

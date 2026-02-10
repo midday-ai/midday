@@ -1,7 +1,7 @@
 "use client";
 
-import { OAUTH_CHANNEL_NAME, type OAuthMessage } from "@/utils/oauth-message";
 import { useEffect } from "react";
+import { OAUTH_CHANNEL_NAME, type OAuthMessage } from "@/utils/oauth-message";
 import type { OAuthStatus } from "./schema";
 
 type Props = {

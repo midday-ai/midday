@@ -1,9 +1,5 @@
 "use client";
 
-import { useGlobalTimerStatus } from "@/hooks/use-global-timer-status";
-import { useTimerStore } from "@/store/timer";
-import { useTRPC } from "@/trpc/client";
-import { secondsToHoursAndMinutes } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -15,6 +11,10 @@ import { useToast } from "@midday/ui/use-toast";
 import NumberFlow from "@number-flow/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useGlobalTimerStatus } from "@/hooks/use-global-timer-status";
+import { useTimerStore } from "@/store/timer";
+import { useTRPC } from "@/trpc/client";
+import { secondsToHoursAndMinutes } from "@/utils/format";
 
 interface TrackerTimerProps {
   projectId: string;

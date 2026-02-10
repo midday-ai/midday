@@ -80,4 +80,3 @@ declare module "intuit-oauth" {
 
   export = OAuthClient;
 }
-

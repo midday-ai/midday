@@ -20,7 +20,8 @@ export async function verifySlackWebhook(req: Request) {
 
   const currentTime = Math.floor(Date.now() / 1000);
   if (
-    Math.abs(currentTime - Number.parseInt(timestamp)) > fiveMinutesInSeconds
+    Math.abs(currentTime - Number.parseInt(timestamp, 10)) >
+    fiveMinutesInSeconds
   ) {
     throw new Error("Request is too old");
   }

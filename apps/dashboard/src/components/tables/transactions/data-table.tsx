@@ -1,5 +1,25 @@
 "use client";
 
+import { closestCenter, DndContext } from "@dnd-kit/core";
+import { Table, TableBody } from "@midday/ui/table";
+import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
+import { toast } from "@midday/ui/use-toast";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseInfiniteQuery,
+} from "@tanstack/react-query";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { useDebounceCallback } from "usehooks-ts";
 import { VirtualRow } from "@/components/tables/core";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { useRealtime } from "@/hooks/use-realtime";
@@ -23,26 +43,6 @@ import {
 import { useTRPC } from "@/trpc/client";
 import { STICKY_COLUMNS } from "@/utils/table-configs";
 import type { TableSettings } from "@/utils/table-settings";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import { Table, TableBody } from "@midday/ui/table";
-import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
-import { toast } from "@midday/ui/use-toast";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseInfiniteQuery,
-} from "@tanstack/react-query";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
-import { useHotkeys } from "react-hotkeys-hook";
-import { useDebounceCallback } from "usehooks-ts";
 import { BulkEditBar } from "./bulk-edit-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";

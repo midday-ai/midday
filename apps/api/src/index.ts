@@ -3,6 +3,12 @@ import "./instrument";
 
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import {
+  buildDependenciesResponse,
+  buildReadinessResponse,
+  checkDependencies,
+} from "@midday/health/checker";
+import { apiDependencies } from "@midday/health/probes";
 import { logger } from "@midday/logger";
 import { Scalar } from "@scalar/hono-api-reference";
 import * as Sentry from "@sentry/bun";
@@ -77,6 +83,18 @@ app.use(
 
 app.get("/health", (c) => {
   return c.json({ status: "ok" }, 200);
+});
+
+app.get("/health/ready", async (c) => {
+  const results = await checkDependencies(apiDependencies(), 1);
+  const response = buildReadinessResponse(results);
+  return c.json(response, response.status === "ok" ? 200 : 503);
+});
+
+app.get("/health/dependencies", async (c) => {
+  const results = await checkDependencies(apiDependencies());
+  const response = buildDependenciesResponse(results);
+  return c.json(response, response.status === "ok" ? 200 : 503);
 });
 
 app.doc("/openapi", {
@@ -158,7 +176,7 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 export default {
-  port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,
+  port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
   fetch: app.fetch,
   host: "0.0.0.0", // Listen on all interfaces
   idleTimeout: 60,

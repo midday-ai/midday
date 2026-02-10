@@ -1,4 +1,3 @@
-import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -16,6 +15,7 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 
 const statusFilters = [
   { id: "all", name: "All" },

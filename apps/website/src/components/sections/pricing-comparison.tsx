@@ -1,7 +1,7 @@
 "use client";
 
-import type { Competitor } from "@/data/competitors";
 import { Button } from "@midday/ui/button";
+import type { Competitor } from "@/data/competitors";
 
 interface Props {
   competitor: Competitor;

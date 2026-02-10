@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import type { SearchParams } from "nuqs";
+import { Suspense } from "react";
 import { Inbox } from "@/components/inbox";
 import { InboxConnectedEmpty } from "@/components/inbox/inbox-empty";
 import { InboxGetStarted } from "@/components/inbox/inbox-get-started";
@@ -5,10 +8,7 @@ import { InboxViewSkeleton } from "@/components/inbox/inbox-skeleton";
 import { InboxView } from "@/components/inbox/inbox-view";
 import { loadInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { loadInboxParams } from "@/hooks/use-inbox-params";
-import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
-import type { Metadata } from "next";
-import type { SearchParams } from "nuqs";
-import { Suspense } from "react";
+import { getQueryClient, HydrateClient, trpc } from "@/trpc/server";
 
 export const metadata: Metadata = {
   title: "Inbox | Midday",

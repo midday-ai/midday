@@ -1,23 +1,28 @@
 "use client";
 
+import {
+  Area,
+  CartesianGrid,
+  ComposedChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { formatAmount } from "@/utils/format";
-import { Area, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { CartesianGrid, ComposedChart } from "recharts";
 import {
   ChartLegend,
   StyledArea,
   StyledLine,
   StyledTooltip,
-  StyledXAxis,
-  StyledYAxis,
 } from "./base-charts";
-import { commonChartConfig } from "./chart-utils";
+import type { BaseChartProps } from "./chart-utils";
 import {
+  commonChartConfig,
   createMonthsTickFormatter,
   createYAxisTickFormatter,
   useChartMargin,
 } from "./chart-utils";
-import type { BaseChartProps } from "./chart-utils";
 import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
 interface RunwayData {

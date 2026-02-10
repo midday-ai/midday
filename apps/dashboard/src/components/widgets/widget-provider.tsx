@@ -2,7 +2,7 @@
 
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import type { inferRouterOutputs } from "@trpc/server";
-import { type ReactNode, createContext, useContext, useRef } from "react";
+import { createContext, type ReactNode, useContext, useRef } from "react";
 import { useStore } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";

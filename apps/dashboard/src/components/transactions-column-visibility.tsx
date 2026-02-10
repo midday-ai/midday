@@ -1,10 +1,10 @@
 "use client";
 
-import { useTransactionsStore } from "@/store/transactions";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { useTransactionsStore } from "@/store/transactions";
 
 export function TransactionsColumnVisibility() {
   const { columns } = useTransactionsStore();

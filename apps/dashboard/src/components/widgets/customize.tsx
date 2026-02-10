@@ -1,10 +1,10 @@
 "use client";
 
-import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
-import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { usePathname } from "next/navigation";
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useIsCustomizing, useWidgetActions } from "./widget-provider";
 
 export function Customize() {

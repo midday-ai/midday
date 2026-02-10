@@ -1,11 +1,5 @@
 "use client";
 
-import { revalidateInbox } from "@/actions/revalidate-action";
-import { Portal } from "@/components/portal";
-import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
-import { useInboxParams } from "@/hooks/use-inbox-params";
-import { useInboxStore } from "@/store/inbox";
-import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +18,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { revalidateInbox } from "@/actions/revalidate-action";
+import { Portal } from "@/components/portal";
+import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
+import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useInboxStore } from "@/store/inbox";
+import { useTRPC } from "@/trpc/client";
 
 export function InboxBulkActions() {
   const { selectedIds, clearSelection } = useInboxStore();

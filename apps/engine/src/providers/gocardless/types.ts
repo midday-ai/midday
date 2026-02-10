@@ -1,4 +1,4 @@
-import type { Balance, Providers } from "../types";
+import type { Providers } from "../types";
 
 export type Transaction = {
   transactionAmount: { amount: string; currency: string };

@@ -1,8 +1,8 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { baseUrl } from "@/app/sitemap";
 import { IntegrationsGrid } from "@/components/integrations-grid";
 import { categories, getAppsByCategory } from "@/data/apps";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 interface Props {
   params: Promise<{ category: string }>;

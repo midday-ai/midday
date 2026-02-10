@@ -1,7 +1,7 @@
 "use client";
 
-import { formatAmount } from "@/utils/format";
 import { ReferenceLine, Tooltip } from "recharts";
+import { formatAmount } from "@/utils/format";
 import {
   BaseChart,
   ChartLegend,
@@ -11,8 +11,8 @@ import {
   StyledXAxis,
   StyledYAxis,
 } from "./base-charts";
-import { createYAxisTickFormatter, useChartMargin } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
+import { createYAxisTickFormatter, useChartMargin } from "./chart-utils";
 
 interface RevenueData {
   month: string;

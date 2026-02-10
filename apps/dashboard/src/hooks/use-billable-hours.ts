@@ -1,6 +1,6 @@
-import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { formatISO } from "date-fns";
+import { useTRPC } from "@/trpc/client";
 
 type UseBillableHoursParams = {
   date: Date | string;

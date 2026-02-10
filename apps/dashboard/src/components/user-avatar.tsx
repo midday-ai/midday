@@ -1,6 +1,5 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
 import {
   Card,
   CardDescription,
@@ -8,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { useUserQuery } from "@/hooks/use-user";
 import { AvatarUpload } from "./avatar-upload";
 
 export function UserAvatar() {

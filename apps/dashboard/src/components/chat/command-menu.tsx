@@ -1,13 +1,13 @@
 "use client";
 
-import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useChatStore } from "@/store/chat";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { type RefObject, useEffect, useRef } from "react";
 import { useOnClickOutside } from "usehooks-ts";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useChatStore } from "@/store/chat";
 
 export function CommandMenu() {
   const commandListRef = useRef<HTMLDivElement>(null);

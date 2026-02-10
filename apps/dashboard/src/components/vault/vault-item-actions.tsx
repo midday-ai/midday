@@ -1,13 +1,13 @@
 "use client";
 
-import { useFileUrl } from "@/hooks/use-file-url";
-import { downloadFile } from "@/lib/download";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
+import { useFileUrl } from "@/hooks/use-file-url";
+import { downloadFile } from "@/lib/download";
+import { useTRPC } from "@/trpc/client";
 import { DeleteVaultFileDialog } from "./delete-vault-file-dialog";
 
 type Props = {

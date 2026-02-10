@@ -1,9 +1,9 @@
 "use client";
 
-import { useForesightSearchPrefetch } from "@/hooks/use-foresight-prefetch";
-import { useSearchStore } from "@/store/search";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { useForesightSearchPrefetch } from "@/hooks/use-foresight-prefetch";
+import { useSearchStore } from "@/store/search";
 
 export function OpenSearchButton() {
   const { setOpen } = useSearchStore();

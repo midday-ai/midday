@@ -1,9 +1,9 @@
 "use client";
 
-import { useConnectParams } from "@/hooks/use-connect-params";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { useRouter } from "next/navigation";
+import { useConnectParams } from "@/hooks/use-connect-params";
 
 export function ConnectBankMessage() {
   const { setParams } = useConnectParams();

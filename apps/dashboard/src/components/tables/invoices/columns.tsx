@@ -1,10 +1,5 @@
 "use client";
 
-import { FormatAmount } from "@/components/format-amount";
-import { InvoiceStatus } from "@/components/invoice-status";
-import { useCustomerParams } from "@/hooks/use-customer-params";
-import { getDueDateStatus } from "@/utils/format";
-import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { TZDate } from "@date-fns/tz";
 import { getFrequencyShortLabel } from "@midday/invoice/recurring";
@@ -12,12 +7,21 @@ import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Checkbox } from "@midday/ui/checkbox";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
-import { TooltipProvider } from "@midday/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { formatDate } from "@midday/utils/format";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format, formatDistanceToNow } from "date-fns";
 import type { MouseEvent } from "react";
+import { FormatAmount } from "@/components/format-amount";
+import { InvoiceStatus } from "@/components/invoice-status";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { getDueDateStatus } from "@/utils/format";
+import { getWebsiteLogo } from "@/utils/logos";
 import { ActionsMenu } from "./actions-menu";
 
 /**

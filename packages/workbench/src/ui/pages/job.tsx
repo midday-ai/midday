@@ -1,12 +1,3 @@
-import { EmptyState } from "@/components/shared/empty-state";
-import { JsonViewer } from "@/components/shared/json-viewer";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useJob, usePromoteJob, useRemoveJob, useRetryJob } from "@/lib/hooks";
-import { cn, formatAbsoluteTime, formatDuration } from "@/lib/utils";
-import type { JobSearch } from "@/router";
 import { useNavigate } from "@tanstack/react-router";
 import {
   AlertCircle,
@@ -20,7 +11,6 @@ import {
   Download,
   ExternalLink,
   FastForward,
-  Flame,
   Hash,
   Info,
   Layers,
@@ -32,6 +22,15 @@ import {
   XCircle,
 } from "lucide-react";
 import * as React from "react";
+import { EmptyState } from "@/components/shared/empty-state";
+import { JsonViewer } from "@/components/shared/json-viewer";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useJob, usePromoteJob, useRemoveJob, useRetryJob } from "@/lib/hooks";
+import { cn, formatAbsoluteTime, formatDuration } from "@/lib/utils";
+import type { JobSearch } from "@/router";
 
 interface JobPageProps {
   queueName: string;

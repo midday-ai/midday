@@ -30,7 +30,9 @@ export function QuantityInput({
 
   const handleInput = ({
     currentTarget: el,
-  }: { currentTarget: HTMLInputElement }) => {
+  }: {
+    currentTarget: HTMLInputElement;
+  }) => {
     const input = el.value;
     setRawValue(input);
 

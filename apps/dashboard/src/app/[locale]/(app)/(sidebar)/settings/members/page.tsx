@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { TeamMembers } from "@/components/team-members";
 import { prefetch, trpc } from "@/trpc/server";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Members | Midday",

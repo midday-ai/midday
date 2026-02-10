@@ -1,11 +1,11 @@
 "use client";
 
-import { useAudioPlayerStore } from "@/store/audio-player";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useAudioPlayerStore } from "@/store/audio-player";
 import { AudioWaveform } from "./audio-waveform";
 
 function formatTime(seconds: number): string {

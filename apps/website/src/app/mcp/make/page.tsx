@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCPMake } from "@/components/mcp-make";
-import type { Metadata } from "next";
 
 const title = "Make MCP Integration";
 const description =

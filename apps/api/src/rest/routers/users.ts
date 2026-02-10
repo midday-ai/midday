@@ -1,7 +1,7 @@
 import type { Context } from "@api/rest/types";
 import { updateUserSchema, userSchema } from "@api/schemas/users";
 import { validateResponse } from "@api/utils/validate-response";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { getUserById, updateUser } from "@midday/db/queries";
 import { generateFileKey } from "@midday/encryption";
 import { withRequiredScope } from "../middleware";

@@ -1,10 +1,5 @@
 "use client";
 
-import { BulkActions } from "@/components/bulk-actions";
-import { Portal } from "@/components/portal";
-import { useTransactionTab } from "@/hooks/use-transaction-tab";
-import { useTransactionsStore } from "@/store/transactions";
-import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +17,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { BulkActions } from "@/components/bulk-actions";
+import { Portal } from "@/components/portal";
+import { useTransactionTab } from "@/hooks/use-transaction-tab";
+import { useTransactionsStore } from "@/store/transactions";
+import { useTRPC } from "@/trpc/client";
 
 export function BulkEditBar() {
   const trpc = useTRPC();

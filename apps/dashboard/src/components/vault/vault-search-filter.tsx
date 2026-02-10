@@ -1,15 +1,5 @@
 "use client";
 
-import {
-  vaultFilterOutputSchema,
-  vaultFilterSchema,
-} from "@/app/api/ai/filters/vault/schema";
-import type { VaultFilterSchema } from "@/app/api/ai/filters/vault/schema";
-import { FilterList } from "@/components/filter-list";
-import { normalizeString, useAIFilter } from "@/hooks/use-ai-filter";
-import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -30,6 +20,16 @@ import { useQuery } from "@tanstack/react-query";
 import { formatISO, parseISO } from "date-fns";
 import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import type { VaultFilterSchema } from "@/app/api/ai/filters/vault/schema";
+import {
+  vaultFilterOutputSchema,
+  vaultFilterSchema,
+} from "@/app/api/ai/filters/vault/schema";
+import { FilterList } from "@/components/filter-list";
+import { normalizeString, useAIFilter } from "@/hooks/use-ai-filter";
+import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 
 export function VaultSearchFilter() {
   const inputRef = useRef<HTMLInputElement>(null);

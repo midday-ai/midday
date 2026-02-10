@@ -5,7 +5,6 @@ import { capitalCase } from "change-case";
 import type { Transaction, TransactionCode } from "plaid";
 import type {
   Account as BaseAccount,
-  Balance as BaseBalance,
   Transaction as BaseTransaction,
   GetAccountBalanceResponse,
 } from "../types";

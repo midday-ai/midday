@@ -1,4 +1,3 @@
-import { getTaxRateAction } from "@/actions/ai/get-tax-rate";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -11,6 +10,7 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
+import { getTaxRateAction } from "@/actions/ai/get-tax-rate";
 
 type Props = {
   name?: string;

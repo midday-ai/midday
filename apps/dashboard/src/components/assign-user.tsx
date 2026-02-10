@@ -1,4 +1,3 @@
-import { useTRPC } from "@/trpc/client";
 import {
   Select,
   SelectContent,
@@ -8,6 +7,7 @@ import {
 } from "@midday/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useTRPC } from "@/trpc/client";
 import { AssignedUser } from "./assigned-user";
 
 type User = {

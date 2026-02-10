@@ -1,6 +1,6 @@
-import { MDXRemote } from "next-mdx-remote/rsc";
 import Image from "next/image";
 import Link from "next/link";
+import { MDXRemote } from "next-mdx-remote/rsc";
 import React from "react";
 import { highlight } from "sugar-high";
 
@@ -12,7 +12,7 @@ interface TableProps {
 }
 
 function Table({ data }: TableProps) {
-  const headers = data.headers.map((header, index) => (
+  const headers = data.headers.map((header, _index) => (
     <th key={header}>{header}</th>
   ));
 
@@ -82,8 +82,8 @@ function slugify(str: string): string {
     .trim()
     .replace(/\s+/g, "-")
     .replace(/&/g, "-and-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-");
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-");
 }
 
 function createHeading(level: number) {

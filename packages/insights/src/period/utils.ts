@@ -409,10 +409,10 @@ function setHourInTimezone(date: Date, hour: number, timezone: string): Date {
       parts.find((p) => p.type === type)?.value ?? "0";
 
     // The current UTC time formatted in target timezone
-    const tzYear = Number.parseInt(getPart("year"), 10);
-    const tzMonth = Number.parseInt(getPart("month"), 10);
-    const tzDay = Number.parseInt(getPart("day"), 10);
-    const tzHour = Number.parseInt(getPart("hour"), 10);
+    const _tzYear = Number.parseInt(getPart("year"), 10);
+    const _tzMonth = Number.parseInt(getPart("month"), 10);
+    const _tzDay = Number.parseInt(getPart("day"), 10);
+    const _tzHour = Number.parseInt(getPart("hour"), 10);
 
     // Calculate the offset: what UTC time gives us the target local time?
     // We need to find UTC time such that when converted to timezone, it equals our target

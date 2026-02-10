@@ -938,8 +938,8 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
   protected mergeResultsWithConfidence(
     primary: z.infer<T>,
     secondary: Partial<z.infer<T>>,
-    primaryConfidence: number,
-    secondaryConfidence: number,
+    _primaryConfidence: number,
+    _secondaryConfidence: number,
   ): z.infer<T> {
     // Default implementation uses regular merge
     // Subclasses can override for confidence-weighted merging

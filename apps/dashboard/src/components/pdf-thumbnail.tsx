@@ -1,9 +1,9 @@
 "use client";
 
-import { FilePreviewIcon } from "@/components/file-preview-icon";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useEffect, useRef, useState } from "react";
 import { pdfjs } from "react-pdf";
+import { FilePreviewIcon } from "@/components/file-preview-icon";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 

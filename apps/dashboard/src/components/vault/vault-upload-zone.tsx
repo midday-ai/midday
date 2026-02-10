@@ -1,14 +1,14 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
-import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { type FileRejection, useDropzone } from "react-dropzone";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import { resumableUpload } from "@/utils/upload";
 
 type UploadResult = {
   filename: string;

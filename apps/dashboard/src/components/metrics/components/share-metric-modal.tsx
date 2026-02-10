@@ -1,10 +1,5 @@
 "use client";
 
-import { CopyInput } from "@/components/copy-input";
-import { OpenURL } from "@/components/open-url";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
-import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import {
@@ -25,6 +20,11 @@ import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { FaLinkedinIn } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import { CopyInput } from "@/components/copy-input";
+import { OpenURL } from "@/components/open-url";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import { getUrl } from "@/utils/environment";
 import type { ReportType } from "../utils/chart-types";
 
 interface ShareMetricModalProps {

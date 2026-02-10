@@ -1,10 +1,12 @@
 export { BaseCanvas } from "./base-canvas";
-export { CanvasHeader } from "./canvas-header";
-export { CanvasGrid } from "./canvas-grid";
 export { CanvasChart } from "./canvas-chart";
+export { CanvasGrid } from "./canvas-grid";
+export { CanvasHeader } from "./canvas-header";
 export { CanvasSection } from "./canvas-section";
-export { Skeleton } from "./skeleton";
-export { SkeletonLine } from "./skeleton";
-export { SkeletonCard } from "./skeleton";
-export { SkeletonChart } from "./skeleton";
-export { SkeletonGrid } from "./skeleton";
+export {
+  Skeleton,
+  SkeletonCard,
+  SkeletonChart,
+  SkeletonGrid,
+  SkeletonLine,
+} from "./skeleton";

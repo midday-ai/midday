@@ -1,12 +1,12 @@
-import { getChartDisplayName } from "@/components/metrics/utils/chart-types";
-import { PublicMetricView } from "@/components/public-metric-view";
-import { getQueryClient, trpc } from "@/trpc/server";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { format, parseISO } from "date-fns";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getChartDisplayName } from "@/components/metrics/utils/chart-types";
+import { PublicMetricView } from "@/components/public-metric-view";
+import { getQueryClient, trpc } from "@/trpc/server";
 
 // Cache the page for 1 hour (3600 seconds)
 export const revalidate = 3600;

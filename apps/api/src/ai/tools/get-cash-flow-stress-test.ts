@@ -81,7 +81,7 @@ export const getCashFlowStressTestTool = tool({
       }
 
       const targetCurrency = finalCurrency || "USD";
-      const locale = appContext.locale || "en-US";
+      const _locale = appContext.locale || "en-US";
 
       // Fetch required data in parallel
       const [cashFlowData, balanceResult, baseCaseRunwayFromQuery] =

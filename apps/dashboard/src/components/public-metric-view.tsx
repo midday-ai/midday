@@ -1,5 +1,11 @@
 "use client";
 
+import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
+import NumberFlow from "@number-flow/react";
+import { useQuery } from "@tanstack/react-query";
+import { format, parseISO } from "date-fns";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatedNumber } from "@/components/animated-number";
 import { BurnRateChart } from "@/components/charts/burn-rate-chart";
 import {
@@ -14,12 +20,6 @@ import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import type { ReportType } from "@/components/metrics/utils/chart-types";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
-import NumberFlow from "@number-flow/react";
-import { useQuery } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
-import { useEffect, useMemo, useRef, useState } from "react";
 
 interface Report {
   id: string;

@@ -1,9 +1,9 @@
 import {
-  REACTION_EMOJIS,
   createWhatsAppClient,
   formatDocumentProcessedSuccess,
   formatExtractionFailedMessage,
   formatProcessingErrorMessage,
+  REACTION_EMOJIS,
 } from "@midday/app-store/whatsapp/server";
 import {
   createInbox,

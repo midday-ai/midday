@@ -1,7 +1,6 @@
 import {
   BANNED_WORDS,
   CRITICAL_RUNWAY_BANNED_WORDS,
-  type InsightFacts,
   extractFacts,
   formatNumberForSpeech,
   getHeadlineFact,
@@ -10,6 +9,7 @@ import {
   getRevenueDescriptionSpoken,
   getRunwayDescription,
   getToneGuidanceFromFacts,
+  type InsightFacts,
 } from "./shared-data";
 /**
  * Audio script prompt - TTS-optimized spoken summary

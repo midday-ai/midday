@@ -32,7 +32,7 @@ type ProcessResult = {
  */
 export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceUpcomingNotificationPayload> {
   async process(
-    job: Job<InvoiceUpcomingNotificationPayload>,
+    _job: Job<InvoiceUpcomingNotificationPayload>,
   ): Promise<ProcessResult> {
     // Kill switch - can be toggled without deploy via environment variable
     if (process.env.DISABLE_UPCOMING_NOTIFICATIONS === "true") {

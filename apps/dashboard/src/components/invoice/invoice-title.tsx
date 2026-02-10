@@ -1,7 +1,7 @@
 "use client";
 
-import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useFormContext } from "react-hook-form";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { Input } from "./input";
 
 export function InvoiceTitle() {

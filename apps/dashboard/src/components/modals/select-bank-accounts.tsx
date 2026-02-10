@@ -1,18 +1,19 @@
 "use client";
 
+import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { sendSupportAction } from "@/actions/send-support-action";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@api/trpc/routers/_app";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 // Extended account type with new balance fields (until engine types are regenerated)
 type AccountWithBalances = RouterOutputs["institutions"]["accounts"][number] & {
   available_balance?: number | null;
   credit_limit?: number | null;
 };
+
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -37,8 +38,7 @@ import { Tabs, TabsContent } from "@midday/ui/tabs";
 import { Textarea } from "@midday/ui/textarea";
 import { useToast } from "@midday/ui/use-toast";
 import { getInitials } from "@midday/utils/format";
-import { useQuery } from "@tanstack/react-query";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
@@ -319,131 +319,127 @@ export function SelectBankAccountsModal() {
         <div className="p-4">
           <Tabs defaultValue="select-accounts" value={activeTab}>
             <TabsContent value="select-accounts">
-              <>
-                <DialogHeader className="mb-8">
-                  <DialogTitle>Select Accounts</DialogTitle>
-                  <DialogDescription>
-                    Select the accounts to receive transactions. You can enable
-                    or disable them later in settings if needed. Note: Initial
-                    loading may take some time.
-                  </DialogDescription>
-                </DialogHeader>
+              <DialogHeader className="mb-8">
+                <DialogTitle>Select Accounts</DialogTitle>
+                <DialogDescription>
+                  Select the accounts to receive transactions. You can enable or
+                  disable them later in settings if needed. Note: Initial
+                  loading may take some time.
+                </DialogDescription>
+              </DialogHeader>
 
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6 h-[300px] overflow-auto pb-[100px] relative scrollbar-hide"
-                  >
-                    {isLoading && <RowsSkeleton />}
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6 h-[300px] overflow-auto pb-[100px] relative scrollbar-hide"
+                >
+                  {isLoading && <RowsSkeleton />}
 
-                    {data?.map((account) => {
-                      // Get the last 4 digits of IBAN or account identifier for display
-                      const accountIdentifier = account.iban?.slice(-4);
+                  {data?.map((account) => {
+                    // Get the last 4 digits of IBAN or account identifier for display
+                    const accountIdentifier = account.iban?.slice(-4);
 
-                      return (
-                        <FormField
-                          key={account.id}
-                          control={form.control}
-                          name="accounts"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={account.id}
-                                className="flex justify-between"
-                              >
-                                <FormLabel className="flex items-center space-x-4 w-full mr-8">
-                                  <Avatar className="size-[34px]">
-                                    <AvatarFallback className="text-[11px]">
-                                      {getInitials(account.name)}
-                                    </AvatarFallback>
-                                  </Avatar>
+                    return (
+                      <FormField
+                        key={account.id}
+                        control={form.control}
+                        name="accounts"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={account.id}
+                              className="flex justify-between"
+                            >
+                              <FormLabel className="flex items-center space-x-4 w-full mr-8">
+                                <Avatar className="size-[34px]">
+                                  <AvatarFallback className="text-[11px]">
+                                    {getInitials(account.name)}
+                                  </AvatarFallback>
+                                </Avatar>
 
-                                  <div className="flex flex-col flex-1 min-w-0">
-                                    <div className="flex items-center justify-between">
-                                      <p className="font-medium leading-none text-sm truncate">
-                                        {account.name}
-                                      </p>
-                                      {accountIdentifier && (
-                                        <span className="text-xs text-[#878787] font-normal shrink-0">
-                                          ····{accountIdentifier}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center justify-between mt-1">
-                                      <span className="text-xs text-[#878787] font-normal">
-                                        {t(`account_type.${account.type}`)}
+                                <div className="flex flex-col flex-1 min-w-0">
+                                  <div className="flex items-center justify-between">
+                                    <p className="font-medium leading-none text-sm truncate">
+                                      {account.name}
+                                    </p>
+                                    {accountIdentifier && (
+                                      <span className="text-xs text-[#878787] font-normal shrink-0">
+                                        ····{accountIdentifier}
                                       </span>
-                                      <span className="text-sm font-medium">
-                                        <FormatAmount
-                                          amount={account.balance.amount}
-                                          currency={account.balance.currency}
-                                        />
-                                      </span>
-                                    </div>
+                                    )}
                                   </div>
-                                </FormLabel>
-
-                                <div>
-                                  <FormControl>
-                                    <Switch
-                                      checked={
-                                        field.value?.find(
-                                          (value) =>
-                                            value.accountId === account.id,
-                                        )?.enabled
-                                      }
-                                      onCheckedChange={(checked) => {
-                                        return field.onChange(
-                                          field.value.map((value) => {
-                                            if (
-                                              value.accountId === account.id
-                                            ) {
-                                              return {
-                                                ...value,
-                                                enabled: checked,
-                                              };
-                                            }
-
-                                            return value;
-                                          }),
-                                        );
-                                      }}
-                                    />
-                                  </FormControl>
+                                  <div className="flex items-center justify-between mt-1">
+                                    <span className="text-xs text-[#878787] font-normal">
+                                      {t(`account_type.${account.type}`)}
+                                    </span>
+                                    <span className="text-sm font-medium">
+                                      <FormatAmount
+                                        amount={account.balance.amount}
+                                        currency={account.balance.currency}
+                                      />
+                                    </span>
+                                  </div>
                                 </div>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      );
-                    })}
+                              </FormLabel>
 
-                    <div className="fixed bottom-0 left-0 right-0 z-10 bg-background pt-4 px-6 pb-6">
-                      <SubmitButton
-                        className="w-full"
-                        type="submit"
-                        isSubmitting={connectBankConnectionMutation.isPending}
-                        disabled={
-                          connectBankConnectionMutation.isPending ||
-                          !form.formState.isValid
-                        }
+                              <div>
+                                <FormControl>
+                                  <Switch
+                                    checked={
+                                      field.value?.find(
+                                        (value) =>
+                                          value.accountId === account.id,
+                                      )?.enabled
+                                    }
+                                    onCheckedChange={(checked) => {
+                                      return field.onChange(
+                                        field.value.map((value) => {
+                                          if (value.accountId === account.id) {
+                                            return {
+                                              ...value,
+                                              enabled: checked,
+                                            };
+                                          }
+
+                                          return value;
+                                        }),
+                                      );
+                                    }}
+                                  />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    );
+                  })}
+
+                  <div className="fixed bottom-0 left-0 right-0 z-10 bg-background pt-4 px-6 pb-6">
+                    <SubmitButton
+                      className="w-full"
+                      type="submit"
+                      isSubmitting={connectBankConnectionMutation.isPending}
+                      disabled={
+                        connectBankConnectionMutation.isPending ||
+                        !form.formState.isValid
+                      }
+                    >
+                      Save
+                    </SubmitButton>
+
+                    <div className="flex justify-center mt-4">
+                      <button
+                        type="button"
+                        className="text-xs text-[#878787]"
+                        onClick={() => setActiveTab("support")}
                       >
-                        Save
-                      </SubmitButton>
-
-                      <div className="flex justify-center mt-4">
-                        <button
-                          type="button"
-                          className="text-xs text-[#878787]"
-                          onClick={() => setActiveTab("support")}
-                        >
-                          Need support
-                        </button>
-                      </div>
+                        Need support
+                      </button>
                     </div>
-                  </form>
-                </Form>
-              </>
+                  </div>
+                </form>
+              </Form>
             </TabsContent>
 
             <TabsContent value="loading">

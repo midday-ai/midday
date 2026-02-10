@@ -1,10 +1,10 @@
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { db } from "@midday/db/client";
 import {
-  type Insight,
   getInsightByPeriod,
   getLatestInsight,
   hasEarlierInsight,
+  type Insight,
 } from "@midday/db/queries";
 import { getPeriodLabel } from "@midday/insights";
 import { formatAmount } from "@midday/utils/format";

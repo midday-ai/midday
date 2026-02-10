@@ -1,3 +1,15 @@
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearch,
+} from "@tanstack/react-router";
+import * as React from "react";
+import { z } from "zod";
 import { AppSidebar, type NavItem } from "@/components/app-sidebar";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { HeaderSearch } from "@/components/layout/header-search";
@@ -10,18 +22,6 @@ import { QueuePage } from "@/pages/queue";
 import { RunsPage } from "@/pages/runs";
 import { SchedulersPage } from "@/pages/schedulers";
 import { TestPage } from "@/pages/test";
-import {
-  Outlet,
-  createRootRoute,
-  createRoute,
-  createRouter,
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearch,
-} from "@tanstack/react-router";
-import * as React from "react";
-import { z } from "zod";
 
 // Context for sharing search state across routes
 interface SearchContextValue {

@@ -1,10 +1,5 @@
 "use client";
 
-import { FilePreview } from "@/components/file-preview";
-import { VaultItemTags } from "@/components/vault/vault-item-tags";
-import { useDocumentParams } from "@/hooks/use-document-params";
-import { useTRPC } from "@/trpc/client";
-import { isStaleProcessing } from "@/utils/document";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import { Button } from "@midday/ui/button";
@@ -13,6 +8,11 @@ import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { memo, useEffect, useState } from "react";
+import { FilePreview } from "@/components/file-preview";
+import { VaultItemTags } from "@/components/vault/vault-item-tags";
+import { useDocumentParams } from "@/hooks/use-document-params";
+import { useTRPC } from "@/trpc/client";
+import { isStaleProcessing } from "@/utils/document";
 import { VaultItemActions } from "./vault-item-actions";
 
 type Props = {

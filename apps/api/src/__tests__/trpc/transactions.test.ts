@@ -1,17 +1,16 @@
 import { beforeEach, describe, expect, test } from "bun:test";
+// Import after mocking (mocks are set up via preload)
+import { createCallerFactory } from "../../trpc/init";
+import { transactionsRouter } from "../../trpc/routers/transactions";
 import {
   createMinimalTransactionResponse,
   createTransactionInput,
-  createTransactionWithCategory,
   createTransactionsListResponse,
+  createTransactionWithCategory,
   createValidTransactionResponse,
 } from "../factories/transaction";
 import { createTestContext } from "../helpers/test-context";
 import { mocks } from "../setup";
-
-// Import after mocking (mocks are set up via preload)
-import { createCallerFactory } from "../../trpc/init";
-import { transactionsRouter } from "../../trpc/routers/transactions";
 
 // Create a test caller
 const createCaller = createCallerFactory(transactionsRouter);

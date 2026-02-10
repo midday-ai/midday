@@ -1,7 +1,5 @@
 "use client";
 
-import { useForesightChatPrefetch } from "@/hooks/use-foresight-prefetch";
-import { useTRPC } from "@/trpc/client";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -11,16 +9,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import {
+  createContext,
   type ReactNode,
   type RefObject,
-  createContext,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
-import { useDebounceCallback } from "usehooks-ts";
-import { useOnClickOutside } from "usehooks-ts";
+import { useDebounceCallback, useOnClickOutside } from "usehooks-ts";
+import { useForesightChatPrefetch } from "@/hooks/use-foresight-prefetch";
+import { useTRPC } from "@/trpc/client";
 
 const ChatHistoryContext = createContext<{
   isOpen: boolean;
@@ -53,11 +52,7 @@ function ChatHistorySkeleton() {
   );
 }
 
-export function ChatHistoryProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function ChatHistoryProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

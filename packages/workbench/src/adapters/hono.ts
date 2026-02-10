@@ -86,9 +86,9 @@ export function workbench(options: WorkbenchOptions | Queue[]): Hono {
     // Strip known client-side routes to get the mount path
     // Routes: /, /metrics, /schedulers, /flows, /flows/:queueName/:jobId, /test, /queues/:name, /queues/:name/jobs/:id
     const clientRoutes = [
-      /\/queues\/[^\/]+\/jobs\/[^\/]+\/?$/,
-      /\/queues\/[^\/]+\/?$/,
-      /\/flows\/[^\/]+\/[^\/]+\/?$/,
+      /\/queues\/[^/]+\/jobs\/[^/]+\/?$/,
+      /\/queues\/[^/]+\/?$/,
+      /\/flows\/[^/]+\/[^/]+\/?$/,
       /\/schedulers\/?$/,
       /\/flows\/?$/,
       /\/metrics\/?$/,

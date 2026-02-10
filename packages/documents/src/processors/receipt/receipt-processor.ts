@@ -7,8 +7,8 @@ import {
   applyReceiptFixes,
   validateReceiptConsistency,
 } from "../../utils/cross-field-validation";
-import { detectReceiptFormat } from "../../utils/format-detection";
 import type { DocumentFormat } from "../../utils/format-detection";
+import { detectReceiptFormat } from "../../utils/format-detection";
 import {
   calculateReceiptExtractionConfidence,
   mergeReceiptResults,

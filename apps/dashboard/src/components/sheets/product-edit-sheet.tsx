@@ -1,8 +1,5 @@
 "use client";
 
-import { useProductParams } from "@/hooks/use-product-params";
-import { useTeamQuery } from "@/hooks/use-team";
-import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +20,9 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useProductParams } from "@/hooks/use-product-params";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useTRPC } from "@/trpc/client";
 import { ProductForm } from "../forms/product-form";
 
 export function ProductEditSheet() {

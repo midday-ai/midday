@@ -1,11 +1,11 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { Icons } from "@midday/ui/icons";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
+import { useEffect, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { type IconMap, MaterialIcon } from "./icon-mapping";
 
 export function AssistantQuestionAnimation({
@@ -14,7 +14,7 @@ export function AssistantQuestionAnimation({
   onComplete?: () => void;
 }) {
   const { resolvedTheme } = useTheme();
-  const isLightMode = resolvedTheme !== "dark";
+  const _isLightMode = resolvedTheme !== "dark";
   const [showUserMessage, setShowUserMessage] = useState(false);
   const [displayedSegments, setDisplayedSegments] = useState<
     Array<{

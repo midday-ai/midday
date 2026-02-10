@@ -1,6 +1,5 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import { Icons } from "@midday/ui/icons";
@@ -15,7 +14,8 @@ import {
 import { format, formatISO, parseISO } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { type PresetOption, getPresetOptions } from "../utils/date-presets";
+import { useUserQuery } from "@/hooks/use-user";
+import { getPresetOptions } from "../utils/date-presets";
 
 interface MetricsDatePickerProps {
   from: string;

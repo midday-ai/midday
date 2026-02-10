@@ -1687,8 +1687,8 @@ export async function getProfitMargin(
     revenueType = "net",
   } = params;
 
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+  const _fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const _toDate = endOfMonth(new UTCDate(parseISO(to)));
 
   // Get target currency
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
@@ -4225,7 +4225,7 @@ export async function getBalanceSheet(
     // Update equity total with adjusted retained earnings
     const adjustedEquityTotal =
       capitalInvestment - ownerDraws + adjustedRetainedEarnings;
-    const adjustedTotalLiabilitiesAndEquity =
+    const _adjustedTotalLiabilitiesAndEquity =
       totalLiabilities + adjustedEquityTotal;
 
     return {

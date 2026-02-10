@@ -40,7 +40,7 @@ export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePaylo
     this.logger.debug("Generating PDF", { invoiceId });
 
     // Generate PDF buffer
-    // @ts-ignore - Template JSONB type differs from EditorDoc in components
+    // @ts-expect-error - Template JSONB type differs from EditorDoc in components
     const buffer = await renderToBuffer(await PdfTemplate(invoice));
 
     const filename = `${invoiceData.invoiceNumber}.pdf`;

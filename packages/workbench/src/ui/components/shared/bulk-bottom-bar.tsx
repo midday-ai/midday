@@ -1,11 +1,10 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+import { Loader2, MoreVertical, RotateCcw, Trash2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { JobStatus } from "@/core/types";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, MoreVertical, RotateCcw, Trash2, Zap } from "lucide-react";
-import * as React from "react";
 import { Portal } from "./portal";
 
 export interface BulkSelection {

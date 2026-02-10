@@ -1,8 +1,8 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
 import { CategoriesSkeleton } from "@/components/tables/categories/skeleton";
 import { DataTable } from "@/components/tables/categories/table";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
-import type { Metadata } from "next";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Categories | Midday",

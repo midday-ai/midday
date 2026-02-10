@@ -1,7 +1,7 @@
 import { cn } from "@midday/ui/cn";
-import { MDXRemote } from "next-mdx-remote/rsc";
 import Image from "next/image";
 import Link from "next/link";
+import { MDXRemote } from "next-mdx-remote/rsc";
 import type {
   AnchorHTMLAttributes,
   ComponentProps,
@@ -18,8 +18,8 @@ function slugify(str: string): string {
     .trim()
     .replace(/\s+/g, "-")
     .replace(/&/g, "-and-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-");
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-");
 }
 
 function createHeading(level: number) {

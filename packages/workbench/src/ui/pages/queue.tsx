@@ -1,3 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { ChevronRight, FileText, Pause, Play, RefreshCw } from "lucide-react";
+import * as React from "react";
 import {
   BulkBottomBar,
   type BulkSelection,
@@ -12,7 +15,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { JobInfo, JobStatus } from "@/core/types";
 import {
-  queryKeys,
   useBulkDelete,
   useBulkPromote,
   useBulkRetry,
@@ -22,11 +24,8 @@ import {
   useRefresh,
   useResumeQueue,
 } from "@/lib/hooks";
-import { cn, truncate } from "@/lib/utils";
+import { truncate } from "@/lib/utils";
 import type { QueueSearch } from "@/router";
-import { useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, FileText, Pause, Play, RefreshCw } from "lucide-react";
-import * as React from "react";
 
 interface QueuePageProps {
   queueName: string;
@@ -50,7 +49,7 @@ export function QueuePage({
   onSearchChange,
   onJobSelect,
 }: QueuePageProps) {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   // Selection state for bulk actions
   const [selection, setSelection] = React.useState<Map<string, BulkSelection>>(
@@ -105,12 +104,12 @@ export function QueuePage({
     [data],
   );
 
-  const total = data?.pages[0]?.total ?? 0;
+  const _total = data?.pages[0]?.total ?? 0;
 
   // Server-side cache refresh
   const refreshMutation = useRefresh();
 
-  const refresh = () => {
+  const _refresh = () => {
     refreshMutation.mutate();
   };
 
@@ -121,7 +120,7 @@ export function QueuePage({
     });
   };
 
-  const loading = isLoading || isRefetching || refreshMutation.isPending;
+  const _loading = isLoading || isRefetching || refreshMutation.isPending;
 
   // Selection helpers
   const isSelected = (jobId: string) => selection.has(jobId);

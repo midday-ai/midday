@@ -1,9 +1,9 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { MaterialIcon } from "./icon-mapping";
 
 export function InboxMatchAnimation({

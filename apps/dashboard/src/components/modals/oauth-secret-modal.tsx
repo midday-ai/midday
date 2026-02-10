@@ -1,6 +1,5 @@
 "use client";
 
-import { useOAuthSecretModalStore } from "@/store/oauth-secret-modal";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -11,6 +10,7 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import { Label } from "@midday/ui/label";
+import { useOAuthSecretModalStore } from "@/store/oauth-secret-modal";
 import { CopyInput } from "../copy-input";
 
 export function OAuthSecretModal() {

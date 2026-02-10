@@ -1,8 +1,8 @@
+import type { Metadata } from "next";
 import { InboxBlocklistSettings } from "@/components/inbox/inbox-blocklist-settings";
 import { InboxConnectedAccounts } from "@/components/inbox/inbox-connected-accounts";
 import { InboxEmailSettings } from "@/components/inbox/inbox-email-settings";
 import { prefetch, trpc } from "@/trpc/server";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Inbox Settings | Midday",

@@ -1,10 +1,10 @@
 "use client";
 
-import { useInvoiceStore } from "@/store/invoice";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { useInvoiceStore } from "@/store/invoice";
 
 export function InvoiceColumnVisibility() {
   const { columns } = useInvoiceStore();

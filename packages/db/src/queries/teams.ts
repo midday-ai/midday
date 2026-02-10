@@ -7,17 +7,7 @@ import {
   getTaxTypeForCountry,
 } from "@midday/categories";
 import { subDays } from "date-fns";
-import {
-  and,
-  asc,
-  eq,
-  gt,
-  gte,
-  inArray,
-  isNotNull,
-  isNull,
-  or,
-} from "drizzle-orm";
+import { and, eq, gt, gte, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import type { Database } from "../client";
 import {
   bankConnections,

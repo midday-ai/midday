@@ -18,7 +18,7 @@ import {
   getRevenueDescription,
   getRunwayDescription,
 } from "./shared-data";
-import { type InsightSlots, getNotableContext, getToneGuidance } from "./slots";
+import { getNotableContext, getToneGuidance, type InsightSlots } from "./slots";
 
 /**
  * Build the summary generation prompt

@@ -1,7 +1,5 @@
 "use client";
 
-import { useCustomerParams } from "@/hooks/use-customer-params";
-import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +20,8 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useTRPC } from "@/trpc/client";
 import { CustomerForm } from "../forms/customer-form";
 
 export function CustomerEditSheet() {

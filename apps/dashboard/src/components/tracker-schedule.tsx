@@ -1,20 +1,5 @@
 "use client";
 
-import { useLatestProjectId } from "@/hooks/use-latest-project-id";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
-import { parseDateAsUTC } from "@/utils/date";
-import { secondsToHoursAndMinutes } from "@/utils/format";
-import {
-  NEW_EVENT_ID,
-  calculateDuration,
-  createSafeDate,
-  formatHour,
-  getDates,
-  getSlotFromDate,
-  isValidTimeSlot,
-} from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { TZDate, tz } from "@date-fns/tz";
 import { UTCDate } from "@date-fns/utc";
@@ -34,11 +19,25 @@ import {
   endOfDay,
   format,
   isValid,
-  parseISO,
   startOfDay,
 } from "date-fns";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { useLatestProjectId } from "@/hooks/use-latest-project-id";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import { parseDateAsUTC } from "@/utils/date";
+import { secondsToHoursAndMinutes } from "@/utils/format";
+import {
+  calculateDuration,
+  createSafeDate,
+  formatHour,
+  getDates,
+  getSlotFromDate,
+  isValidTimeSlot,
+  NEW_EVENT_ID,
+} from "@/utils/tracker";
 import { TrackerEntriesForm } from "./forms/tracker-entries-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
@@ -965,15 +964,11 @@ export function TrackerSchedule() {
   }, [handleMouseUp]);
 
   // Keyboard shortcuts
-  useHotkeys(
-    "backspace",
-    () => {
-      if (selectedEvent && selectedEvent.id !== NEW_EVENT_ID) {
-        handleDeleteEvent(selectedEvent.id);
-      }
-    },
-    [selectedEvent, handleDeleteEvent],
-  );
+  useHotkeys("backspace", () => {
+    if (selectedEvent && selectedEvent.id !== NEW_EVENT_ID) {
+      handleDeleteEvent(selectedEvent.id);
+    }
+  }, [selectedEvent, handleDeleteEvent]);
 
   const handleEventResizeStart = useCallback(
     (e: React.MouseEvent, event: TrackerRecord, type: "top" | "bottom") => {

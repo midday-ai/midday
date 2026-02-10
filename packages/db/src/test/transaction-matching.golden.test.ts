@@ -41,7 +41,7 @@ describe("Golden Dataset Tests", () => {
         );
         const dateScore = calculateDateScore(inbox.date, transaction.date);
         // Allow for small variations in scoring (±5%)
-        const tolerance = 0.05;
+        const _tolerance = 0.05;
         expect(amountScore).toBeCloseTo(expectedScores.amountScore, 1);
         expect(currencyScore).toBeCloseTo(expectedScores.currencyScore, 1);
         expect(dateScore).toBeCloseTo(expectedScores.dateScore, 1);

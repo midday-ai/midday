@@ -13,6 +13,7 @@ import { generateObject, generateText } from "ai";
 import { z } from "zod/v4";
 
 const logger = createLoggerWithContext("insights:generator");
+
 import type {
   ExpenseAnomaly,
   InsightActivity,

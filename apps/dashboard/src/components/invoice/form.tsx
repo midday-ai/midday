@@ -1,7 +1,3 @@
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
-import { getUrl } from "@/utils/environment";
 import { isDateInFutureUTC } from "@midday/invoice/recurring";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -12,6 +8,10 @@ import { differenceInDays } from "date-fns";
 import { useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useDebounceValue } from "usehooks-ts";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import { getUrl } from "@/utils/environment";
 import { OpenURL } from "../open-url";
 import { CustomerDetails } from "./customer-details";
 import { EditBlock } from "./edit-block";
@@ -125,7 +125,7 @@ export function Form() {
 
         // Don't show toast or close form here - createInvoiceMutation will handle that
       },
-      onError: (error) => {
+      onError: (_error) => {
         toast({
           title: "Recurring Invoice Failed",
           description: "An unexpected error occurred. Please try again.",

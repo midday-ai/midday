@@ -2,7 +2,6 @@
 
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -661,14 +660,14 @@ declare(strict_types=1);
 
 require 'vendor/autoload.php';
 
-use Midday\Midday;
-use Midday\Midday\Models\Operations;
+use MiddayMidday;
+use MiddayMiddayModelsOperations;
 
-$sdk = Midday\Midday::builder()
+$sdk = MiddayMidday::builder()
     ->setSecurity('MIDDAY_API_KEY')
     ->build();
 
-$request = new Operations\ListTransactionsRequest(
+$request = new OperationsListTransactionsRequest(
     pageSize: 50,
 );
 

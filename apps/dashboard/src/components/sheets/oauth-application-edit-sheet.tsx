@@ -1,12 +1,5 @@
 "use client";
 
-import { OAuthApplicationForm } from "@/components/forms/oauth-application-form";
-import { DeleteOAuthApplicationModal } from "@/components/modals/delete-oauth-application-modal";
-import { OAuthApplicationStatusBadge } from "@/components/oauth-application-status-badge";
-import { useOAuthApplicationParams } from "@/hooks/use-oauth-application-params";
-import { useTRPC } from "@/trpc/client";
-import { Badge } from "@midday/ui/badge";
-import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +13,11 @@ import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
+import { OAuthApplicationForm } from "@/components/forms/oauth-application-form";
+import { DeleteOAuthApplicationModal } from "@/components/modals/delete-oauth-application-modal";
+import { OAuthApplicationStatusBadge } from "@/components/oauth-application-status-badge";
+import { useOAuthApplicationParams } from "@/hooks/use-oauth-application-params";
+import { useTRPC } from "@/trpc/client";
 
 export function OAuthApplicationEditSheet() {
   const trpc = useTRPC();

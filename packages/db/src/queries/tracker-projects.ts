@@ -6,8 +6,8 @@ import {
   customers,
   tags,
   teams,
-  trackerProjectTags,
   trackerProjects,
+  trackerProjectTags,
 } from "../schema";
 import { createActivity } from "./activities";
 

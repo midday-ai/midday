@@ -7,8 +7,8 @@ import {
 import { separateBlocklistEntries } from "@midday/db/utils/blocklist";
 import { InboxConnector } from "@midday/inbox/connector";
 import {
-  InboxSyncError,
   assertInboxAuthError,
+  InboxSyncError,
   isInboxAuthError,
 } from "@midday/inbox/errors";
 import { triggerJob } from "@midday/job-client";

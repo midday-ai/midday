@@ -1,4 +1,3 @@
-import { ThemeSwitch } from "@/components/theme-switch";
 import {
   Card,
   CardContent,
@@ -6,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { ThemeSwitch } from "@/components/theme-switch";
 
 export function ChangeTheme() {
   return (

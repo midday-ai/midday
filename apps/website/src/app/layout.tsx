@@ -1,14 +1,14 @@
 import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
-import { ThemeProvider } from "@/components/theme-provider";
 import { Provider as Analytics } from "@midday/events/client";
 import type { Metadata } from "next";
 import { Hedvig_Letters_Sans, Hedvig_Letters_Serif } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactElement } from "react";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
+import { ThemeProvider } from "@/components/theme-provider";
 import { baseUrl } from "./sitemap";
 
 const hedvigSans = Hedvig_Letters_Sans({

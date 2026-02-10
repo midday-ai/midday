@@ -35,8 +35,8 @@ import {
   exchangeRates,
   invoiceRecurring,
   invoiceStatusEnum,
-  invoiceTemplates,
   invoices,
+  invoiceTemplates,
   teams,
   trackerEntries,
   trackerProjects,
@@ -165,7 +165,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
   // Apply search query filter
   if (q) {
     // If the query is a number, search by amount
-    if (!Number.isNaN(Number.parseInt(q))) {
+    if (!Number.isNaN(Number.parseInt(q, 10))) {
       whereConditions.push(
         sql`${invoices.amount}::text = ${Number(q).toString()}`,
       );
@@ -545,7 +545,7 @@ export async function getPaymentStatus(
 
     // Weight: recent invoices (last 90 days) get higher weight
     const daysSinceDue = Math.abs(
-      (new Date().getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
+      (Date.now() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
     );
     const weight = daysSinceDue <= 90 ? 1.5 : 1.0;
 
@@ -1130,7 +1130,7 @@ export async function updateInvoice(
 
   // Log activity if not draft
   if (rest.status !== "draft" && userId) {
-    let priority: number | undefined = undefined;
+    let priority: number | undefined;
     let activityType: (typeof activityTypeEnum.enumValues)[number] | null =
       null;
 

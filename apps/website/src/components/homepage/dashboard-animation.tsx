@@ -1,8 +1,8 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 
 export function DashboardAnimation({
   onComplete,

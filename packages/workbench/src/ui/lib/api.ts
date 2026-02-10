@@ -10,7 +10,6 @@ import type {
   OverviewStats,
   PaginatedResponse,
   QueueInfo,
-  RunInfo,
   RunInfoList,
   SchedulerInfo,
   SearchResult,

@@ -1,8 +1,8 @@
-import { ErrorBoundary } from "@/components/error-boundary";
-import { isMonthlyBreakdownType } from "@/lib/metrics-breakdown-constants";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback } from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { isMonthlyBreakdownType } from "@/lib/metrics-breakdown-constants";
 import { BalanceSheetCanvas } from "./balance-sheet-canvas";
 import { CanvasErrorFallback } from "./base/canvas-error-fallback";
 import { BurnRateCanvas } from "./burn-rate-canvas";

@@ -5,7 +5,7 @@ import {
   buildSuccessRedirect,
   mapOAuthError,
 } from "@api/rest/utils/oauth";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { InboxConnector } from "@midday/inbox/connector";
 import { decryptOAuthState } from "@midday/inbox/utils";
 import { logger } from "@midday/logger";

@@ -1,14 +1,14 @@
 // Re-export types
+
+export { QueueManager } from "./core/queue-manager";
 export type {
-  WorkbenchOptions,
-  QueueInfo,
   JobInfo,
   JobStatus,
   OverviewStats,
   PaginatedResponse,
+  QueueInfo,
   SearchResult,
+  WorkbenchOptions,
 } from "./core/types";
-
 // Re-export core functionality
 export { WorkbenchCore } from "./core/workbench";
-export { QueueManager } from "./core/queue-manager";

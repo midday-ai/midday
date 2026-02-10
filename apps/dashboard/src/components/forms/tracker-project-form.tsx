@@ -1,13 +1,5 @@
 "use client";
 
-import { SearchCustomers } from "@/components/search-customers";
-import { SelectTags } from "@/components/select-tags";
-import { useCustomerParams } from "@/hooks/use-customer-params";
-import { useLatestProjectId } from "@/hooks/use-latest-project-id";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
@@ -36,6 +28,14 @@ import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { z } from "zod/v3";
+import { SearchCustomers } from "@/components/search-customers";
+import { SelectTags } from "@/components/select-tags";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useLatestProjectId } from "@/hooks/use-latest-project-id";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 const formSchema = z.object({
   id: z.string().uuid().optional(),

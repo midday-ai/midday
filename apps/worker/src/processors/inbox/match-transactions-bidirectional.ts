@@ -147,13 +147,13 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
 
     // Process inbox items in smaller batches for better performance
     const BATCH_SIZE = 10;
-    const phase2StartProgress = phase1Progress;
-    const phase2ProgressRange = 60; // 60% for phase 2
+    const _phase2StartProgress = phase1Progress;
+    const _phase2ProgressRange = 60; // 60% for phase 2
 
     for (let i = 0; i < unmatchedInboxItems.length; i += BATCH_SIZE) {
       const batch = unmatchedInboxItems.slice(i, i + BATCH_SIZE);
-      const batchIndex = Math.floor(i / BATCH_SIZE);
-      const totalBatches = Math.ceil(unmatchedInboxItems.length / BATCH_SIZE);
+      const _batchIndex = Math.floor(i / BATCH_SIZE);
+      const _totalBatches = Math.ceil(unmatchedInboxItems.length / BATCH_SIZE);
 
       await Promise.allSettled(
         batch.map(async (inboxItem) => {

@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
-import * as React from "react";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { createAppRouter } from "./router";
 

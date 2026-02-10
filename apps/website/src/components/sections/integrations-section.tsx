@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { AppLogo } from "@/components/app-logo";
 import { apps } from "@/data/apps";
-import Link from "next/link";
 
 interface IntegrationsSectionProps {
   title?: string;
@@ -18,7 +18,11 @@ function IntegrationPill({
   id,
   name,
   slug,
-}: { id: string; name: string; slug: string }) {
+}: {
+  id: string;
+  name: string;
+  slug: string;
+}) {
   return (
     <Link
       href={`/integrations/${slug}`}

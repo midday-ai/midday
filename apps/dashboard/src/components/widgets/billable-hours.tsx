@@ -1,10 +1,10 @@
 "use client";
 
+import { Icons } from "@midday/ui/icons";
+import { useRouter } from "next/navigation";
 import { FormatAmount } from "@/components/format-amount";
 import { useBillableHours } from "@/hooks/use-billable-hours";
 import { useI18n } from "@/locales/client";
-import { Icons } from "@midday/ui/icons";
-import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";

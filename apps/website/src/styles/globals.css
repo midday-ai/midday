@@ -132,7 +132,7 @@
 
 .updates p code span {
   font-family: var(--font-geist-mono);
-  color: #eb5757 !important;
+  color: #eb5757;
   font-size: 85%;
   font-weight: 600;
 }
@@ -190,7 +190,7 @@ pre {
 
 pre code {
   font-size: 13px;
-  font-weight: 500 !important;
+  font-weight: 500;
 }
 
 .sh__line,
@@ -198,8 +198,8 @@ pre code span,
 pre code div,
 pre span,
 pre div {
-  background: transparent !important;
-  background-color: transparent !important;
+  background: transparent;
+  background-color: transparent;
 }
 
 /* Respect user's motion preferences for accessibility and performance */
@@ -207,14 +207,14 @@ pre div {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
   }
 
   /* Keep essential animations but simplify */
   video {
-    animation: none !important;
+    animation: none;
   }
 }

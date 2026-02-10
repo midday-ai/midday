@@ -1,5 +1,3 @@
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
@@ -24,9 +22,10 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { toast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef, FilterFn, Row } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { Loader2, MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 
 const teamNameFilterFn: FilterFn<RouterOutputs["team"]["list"][number]> = (
   row: Row<RouterOutputs["team"]["list"][number]>,

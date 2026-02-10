@@ -11,13 +11,13 @@ import { WhatsAppUploadProcessor } from "./whatsapp-upload";
  * Export all inbox processors (for type imports)
  */
 export { BatchProcessMatchingProcessor } from "./batch-process-matching";
+export { InitialSetupProcessor } from "./initial-setup";
 export { MatchTransactionsBidirectionalProcessor } from "./match-transactions-bidirectional";
+export { NoMatchSchedulerProcessor } from "./no-match-scheduler";
 export { ProcessAttachmentProcessor } from "./process-attachment";
 export { SlackUploadProcessor } from "./slack-upload";
-export { WhatsAppUploadProcessor } from "./whatsapp-upload";
-export { NoMatchSchedulerProcessor } from "./no-match-scheduler";
 export { SyncSchedulerProcessor } from "./sync-scheduler";
-export { InitialSetupProcessor } from "./initial-setup";
+export { WhatsAppUploadProcessor } from "./whatsapp-upload";
 
 /**
  * Inbox processor registry

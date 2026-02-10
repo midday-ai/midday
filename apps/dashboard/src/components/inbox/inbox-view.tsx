@@ -1,13 +1,5 @@
 "use client";
 
-import { LoadMore } from "@/components/load-more";
-import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
-import { useInboxParams } from "@/hooks/use-inbox-params";
-import { useMatchSound } from "@/hooks/use-match-sound";
-import { useRealtime } from "@/hooks/use-realtime";
-import { useUserQuery } from "@/hooks/use-user";
-import { useInboxStore } from "@/store/inbox";
-import { useTRPC } from "@/trpc/client";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import {
   useQueryClient,
@@ -18,6 +10,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
 import { useBoolean, useCounter, useDebounceCallback } from "usehooks-ts";
+import { LoadMore } from "@/components/load-more";
+import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
+import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useMatchSound } from "@/hooks/use-match-sound";
+import { useRealtime } from "@/hooks/use-realtime";
+import { useUserQuery } from "@/hooks/use-user";
+import { useInboxStore } from "@/store/inbox";
+import { useTRPC } from "@/trpc/client";
 import { InboxBulkActions } from "./inbox-bulk-actions";
 import { InboxDetails } from "./inbox-details";
 import { InboxConnectedEmpty, NoResults } from "./inbox-empty";

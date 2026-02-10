@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import {
-  type RecurringInvoiceParams,
   advanceToFutureDate,
   calculateFirstScheduledDate,
   calculateNextScheduledDate,
   calculateUpcomingDates,
+  type RecurringInvoiceParams,
   shouldMarkCompleted,
 } from "../utils/invoice-recurring";
 

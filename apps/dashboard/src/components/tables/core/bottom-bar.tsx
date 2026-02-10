@@ -1,9 +1,9 @@
 "use client";
 
-import { Portal } from "@/components/portal";
 import { Button } from "@midday/ui/button";
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
+import { Portal } from "@/components/portal";
 
 interface BottomBarProps {
   /** Number of selected items */

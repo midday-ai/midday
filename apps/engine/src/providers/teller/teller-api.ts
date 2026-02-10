@@ -31,7 +31,7 @@ export class TellerApi {
     try {
       await fetch(`${this.#baseUrl}/health`);
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -125,7 +125,7 @@ export class TellerApi {
         `/accounts/${accountId}/details`,
         accessToken,
       );
-    } catch (error) {
+    } catch (_error) {
       // Account details may not be available for all institutions
       // or may require microdeposit verification
       return null;

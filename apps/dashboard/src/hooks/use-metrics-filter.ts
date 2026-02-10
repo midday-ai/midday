@@ -1,14 +1,14 @@
 "use client";
 
-import { useTeamQuery } from "@/hooks/use-team";
-import { useMetricsFilterStore } from "@/store/metrics-filter";
-import {
-  type PeriodOption,
-  getPeriodDateRange,
-} from "@/utils/metrics-date-utils";
 import { useQueryStates } from "nuqs";
 import { parseAsString } from "nuqs/server";
 import { useEffect, useMemo } from "react";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useMetricsFilterStore } from "@/store/metrics-filter";
+import {
+  getPeriodDateRange,
+  type PeriodOption,
+} from "@/utils/metrics-date-utils";
 
 // Default values for metrics filters
 const DEFAULT_PERIOD: PeriodOption = "1-year";

@@ -43,7 +43,7 @@ export const chatsRouter = createTRPCRouter({
           userId: scopedUserId,
           limit: 1,
         });
-      } catch (error) {
+      } catch (_error) {
         // If getMessages fails, the chat doesn't belong to the user
         throw new TRPCError({
           code: "FORBIDDEN",

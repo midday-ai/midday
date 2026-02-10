@@ -1,9 +1,8 @@
+import type { Metadata } from "next";
 import { ManageSubscription } from "@/components/manage-subscription";
 import { Orders } from "@/components/orders";
 import { Plans } from "@/components/plans";
-import { prefetch, trpc } from "@/trpc/server";
-import { getQueryClient } from "@/trpc/server";
-import type { Metadata } from "next";
+import { getQueryClient, prefetch, trpc } from "@/trpc/server";
 
 export const metadata: Metadata = {
   title: "Billing | Midday",

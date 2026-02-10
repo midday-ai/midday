@@ -1,6 +1,3 @@
-import { useDocumentParams } from "@/hooks/use-document-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import { TZDate } from "@date-fns/tz";
 import { Badge } from "@midday/ui/badge";
 import { Combobox } from "@midday/ui/combobox";
@@ -10,6 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
+import { useDocumentParams } from "@/hooks/use-document-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 

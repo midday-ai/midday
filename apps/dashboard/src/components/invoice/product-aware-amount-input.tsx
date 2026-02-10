@@ -1,9 +1,9 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 import type { NumericFormatProps } from "react-number-format";
+import { useTRPC } from "@/trpc/client";
 import { AmountInput } from "./amount-input";
 
 type Props = Omit<NumericFormatProps, "value" | "onChange"> & {

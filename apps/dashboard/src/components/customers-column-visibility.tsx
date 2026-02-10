@@ -1,10 +1,10 @@
 "use client";
 
-import { useCustomersStore } from "@/store/customers";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { useCustomersStore } from "@/store/customers";
 
 export function CustomersColumnVisibility() {
   const { columns } = useCustomersStore();

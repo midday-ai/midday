@@ -1,6 +1,6 @@
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { config } from "@midday/app-store/slack";
 import {
   createSlackWebClient,

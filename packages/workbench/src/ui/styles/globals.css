@@ -106,20 +106,23 @@
   .no-transitions *,
   .no-transitions *::before,
   .no-transitions *::after {
-    transition: none !important;
-    animation: none !important;
+    transition: none;
+    animation: none;
   }
 
   html {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      Oxygen, Ubuntu, sans-serif;
+    font-family:
+      "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 
   /* Apply serif font to all headings */
@@ -155,8 +158,8 @@
   .recharts-bar-rectangle,
   .recharts-area,
   .recharts-curve {
-    outline: none !important;
-    box-shadow: none !important;
+    outline: none;
+    box-shadow: none;
   }
 
   .recharts-wrapper:focus,
@@ -168,20 +171,20 @@
   .recharts-sector:focus,
   .recharts-bar-rectangle:focus,
   .recharts-area:focus {
-    outline: none !important;
-    box-shadow: none !important;
+    outline: none;
+    box-shadow: none;
   }
 
   /* Remove default stroke on active dots */
   .recharts-active-dot circle {
-    stroke: none !important;
+    stroke: none;
   }
 
   /* Prevent focus visible styles on chart elements */
   .recharts-wrapper:focus-visible,
   .recharts-wrapper *:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
+    outline: none;
+    box-shadow: none;
   }
 
   /* Remove hover effects on chart elements */
@@ -189,8 +192,8 @@
   .recharts-area:hover,
   .recharts-bar-rectangle:active,
   .recharts-area:active {
-    opacity: 1 !important;
-    fill-opacity: 1 !important;
+    opacity: 1;
+    fill-opacity: 1;
   }
 
   /* Dotted background for flow diagrams */
@@ -205,7 +208,7 @@
 
   /* React Flow overrides for clean look */
   .react-flow__background {
-    background-color: transparent !important;
+    background-color: transparent;
   }
 
   .react-flow__pane {
@@ -228,11 +231,13 @@
 }
 
 @theme inline {
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, sans-serif;
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, sans-serif;
   --font-serif: "Playfair Display", Georgia, serif;
-  --font-mono: "Geist Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono",
-    Menlo, monospace;
+  --font-mono:
+    "Geist Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Menlo,
+    monospace;
 
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));

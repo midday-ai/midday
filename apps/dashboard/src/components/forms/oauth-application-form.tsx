@@ -1,12 +1,5 @@
 "use client";
 
-import { useOAuthApplicationParams } from "@/hooks/use-oauth-application-params";
-import { useUpload } from "@/hooks/use-upload";
-import { useUserQuery } from "@/hooks/use-user";
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useOAuthSecretModalStore } from "@/store/oauth-secret-modal";
-import { useTRPC } from "@/trpc/client";
-import { RESOURCES } from "@/utils/scopes";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   SCOPES,
@@ -44,6 +37,13 @@ import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useFieldArray } from "react-hook-form";
 import { z } from "zod/v3";
+import { useOAuthApplicationParams } from "@/hooks/use-oauth-application-params";
+import { useUpload } from "@/hooks/use-upload";
+import { useUserQuery } from "@/hooks/use-user";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useOAuthSecretModalStore } from "@/store/oauth-secret-modal";
+import { useTRPC } from "@/trpc/client";
+import { RESOURCES } from "@/utils/scopes";
 import { LogoUpload } from "../logo-upload";
 import { ScopeSelector } from "../scope-selector";
 
@@ -345,7 +345,7 @@ export function OAuthApplicationForm({ data }: Props) {
       form.setValue("screenshots", [...currentScreenshots, ...uploadedUrls], {
         shouldDirty: true,
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Upload failed",
         description: "Failed to upload screenshots. Please try again.",

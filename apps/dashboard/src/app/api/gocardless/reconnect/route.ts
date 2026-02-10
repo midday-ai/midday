@@ -1,8 +1,8 @@
-import { getUrl } from "@/utils/environment";
 import { getSession } from "@midday/supabase/cached-queries";
 import { updateBankConnection } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
+import { getUrl } from "@/utils/environment";
 
 export async function GET(req: NextRequest) {
   const origin = getUrl();

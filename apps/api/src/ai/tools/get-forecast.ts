@@ -1,5 +1,5 @@
-import { getWriter } from "@ai-sdk-tools/artifacts";
 import { openai } from "@ai-sdk/openai";
+import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { forecastArtifact } from "@api/ai/artifacts/forecast";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
@@ -7,9 +7,8 @@ import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getRevenueForecast } from "@midday/db/queries";
-import { formatAmount, formatDate } from "@midday/utils/format";
-import { generateText } from "ai";
-import { tool } from "ai";
+import { formatAmount } from "@midday/utils/format";
+import { generateText, tool } from "ai";
 import { format, parseISO } from "date-fns";
 import { z } from "zod";
 

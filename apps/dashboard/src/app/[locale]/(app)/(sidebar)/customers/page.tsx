@@ -1,3 +1,7 @@
+import type { Metadata } from "next";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import type { SearchParams } from "nuqs";
+import { Suspense } from "react";
 import { CollapsibleSummary } from "@/components/collapsible-summary";
 import { CustomerSummarySkeleton } from "@/components/customer-summary-skeleton";
 import { CustomersHeader } from "@/components/customers-header";
@@ -11,12 +15,8 @@ import { CustomersSkeleton } from "@/components/tables/customers/skeleton";
 import { TopRevenueClient } from "@/components/top-revenue-client";
 import { loadCustomerFilterParams } from "@/hooks/use-customer-filter-params";
 import { loadSortParams } from "@/hooks/use-sort-params";
-import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
+import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 import { getInitialTableSettings } from "@/utils/columns";
-import type { Metadata } from "next";
-import { ErrorBoundary } from "next/dist/client/components/error-boundary";
-import type { SearchParams } from "nuqs";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Customers | Midday",

@@ -1,18 +1,18 @@
 "use client";
 
-import { hideConnectFlowAction } from "@/actions/hide-connect-flow-action";
-import { AddAccountButton } from "@/components/add-account-button";
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
 import { useQuery } from "@tanstack/react-query";
-import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
-import OverViewScreenOneLight from "public/assets/overview-1-light.png";
+import { useAction } from "next-safe-action/hooks";
 import OverViewScreenOne from "public/assets/overview-1.png";
-import OverViewScreenTwoLight from "public/assets/overview-2-light.png";
+import OverViewScreenOneLight from "public/assets/overview-1-light.png";
 import OverViewScreenTwo from "public/assets/overview-2.png";
+import OverViewScreenTwoLight from "public/assets/overview-2-light.png";
 import { Fragment, useEffect, useState } from "react";
+import { hideConnectFlowAction } from "@/actions/hide-connect-flow-action";
+import { AddAccountButton } from "@/components/add-account-button";
+import { useTRPC } from "@/trpc/client";
 
 const images = [
   { id: 1, src: OverViewScreenOne, src2: OverViewScreenOneLight },

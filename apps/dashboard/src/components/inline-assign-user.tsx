@@ -1,11 +1,11 @@
 "use client";
 
-import { AssignedUser } from "@/components/assigned-user";
-import { useTransactionTableContextOptional } from "@/components/tables/transactions/transaction-table-context";
-import { useTRPC } from "@/trpc/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { AssignedUser } from "@/components/assigned-user";
+import { useTransactionTableContextOptional } from "@/components/tables/transactions/transaction-table-context";
+import { useTRPC } from "@/trpc/client";
 
 type User = {
   id: string;

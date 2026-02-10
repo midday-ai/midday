@@ -1,4 +1,3 @@
-import { useTRPC } from "@/trpc/client";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +11,8 @@ import { Label } from "@midday/ui/label";
 import MultipleSelector from "@midday/ui/multiple-selector";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useState } from "react";
+import { useState } from "react";
+import { useTRPC } from "@/trpc/client";
 
 type Option = {
   id?: string;

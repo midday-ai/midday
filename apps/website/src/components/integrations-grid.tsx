@@ -1,8 +1,8 @@
+import { cn } from "@midday/ui/cn";
+import Link from "next/link";
 import { AppLogo } from "@/components/app-logo";
 import type { WebsiteApp } from "@/data/apps";
 import { categories, getCategoryName } from "@/data/apps";
-import { cn } from "@midday/ui/cn";
-import Link from "next/link";
 
 interface IntegrationsGridProps {
   apps: WebsiteApp[];

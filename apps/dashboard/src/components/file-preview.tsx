@@ -1,13 +1,13 @@
 "use client";
 
-import { FilePreviewIcon } from "@/components/file-preview-icon";
-import { useFileUrl } from "@/hooks/use-file-url";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { FilePreviewIcon } from "@/components/file-preview-icon";
+import { useFileUrl } from "@/hooks/use-file-url";
 
 const PdfThumbnail = dynamic(
   () => import("@/components/pdf-thumbnail").then((mod) => mod.PdfThumbnail),

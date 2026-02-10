@@ -92,7 +92,7 @@ export async function audioExists(
   teamId: string,
   insightId: string,
 ): Promise<boolean> {
-  const path = getAudioPath(teamId, insightId);
+  const _path = getAudioPath(teamId, insightId);
 
   const { data, error } = await supabase.storage
     .from(BUCKET)

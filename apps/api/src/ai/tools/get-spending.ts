@@ -1,16 +1,18 @@
-import { getWriter } from "@ai-sdk-tools/artifacts";
 import { openai } from "@ai-sdk/openai";
+import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { spendingArtifact } from "@api/ai/artifacts/spending";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
-import { getSpending, getSpendingForPeriod } from "@midday/db/queries";
-import { getTransactions } from "@midday/db/queries";
+import {
+  getSpending,
+  getSpendingForPeriod,
+  getTransactions,
+} from "@midday/db/queries";
 import { formatAmount, formatDate } from "@midday/utils/format";
-import { generateText } from "ai";
-import { tool } from "ai";
+import { generateText, tool } from "ai";
 import { endOfMonth, parseISO, startOfMonth } from "date-fns";
 import { z } from "zod";
 

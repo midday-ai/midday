@@ -1,13 +1,13 @@
-import { Cookies } from "@/utils/constants";
-import { getUrl } from "@/utils/environment";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { addSeconds, addYears } from "date-fns";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { Cookies } from "@/utils/constants";
+import { getUrl } from "@/utils/environment";
 
 export async function GET(req: NextRequest) {
   const cookieStore = await cookies();

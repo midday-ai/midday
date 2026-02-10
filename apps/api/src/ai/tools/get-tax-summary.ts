@@ -9,8 +9,13 @@ import { db } from "@midday/db/client";
 import { getTaxSummary } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
-import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
-import { parseISO } from "date-fns";
+import {
+  endOfMonth,
+  format,
+  parseISO,
+  startOfMonth,
+  subMonths,
+} from "date-fns";
 import { z } from "zod";
 
 const getTaxSummarySchema = z.object({
@@ -103,9 +108,9 @@ export const getTaxSummaryTool = tool({
       // Fetch tax data for current period (both paid and collected)
       const [
         paidTaxData,
-        collectedTaxData,
+        _collectedTaxData,
         prevPaidTaxData,
-        prevCollectedTaxData,
+        _prevCollectedTaxData,
       ] = await Promise.all([
         getTaxSummary(db, {
           teamId,

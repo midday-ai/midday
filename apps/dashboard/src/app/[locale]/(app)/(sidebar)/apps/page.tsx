@@ -1,21 +1,21 @@
-import { Apps } from "@/components/apps";
-import { AppsHeader } from "@/components/apps-header";
-import { AppsSkeleton } from "@/components/apps.skeleton";
-import {
-  HydrateClient,
-  batchPrefetch,
-  getQueryClient,
-  trpc,
-} from "@/trpc/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Apps } from "@/components/apps";
+import { AppsSkeleton } from "@/components/apps.skeleton";
+import { AppsHeader } from "@/components/apps-header";
+import {
+  batchPrefetch,
+  getQueryClient,
+  HydrateClient,
+  trpc,
+} from "@/trpc/server";
 
 export const metadata: Metadata = {
   title: "Apps | Midday",
 };
 
 export default async function Page() {
-  const queryClient = getQueryClient();
+  const _queryClient = getQueryClient();
 
   batchPrefetch([
     trpc.apps.get.queryOptions(),

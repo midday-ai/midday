@@ -125,7 +125,7 @@ export async function saveImageFromURL(
 
     const fullPath = path.resolve(path.join("tasks", "logos", fileName));
 
-    // @ts-ignore
+    // @ts-expect-error
     fs.writeFile(fullPath, buffer, (err) => {
       if (err) {
         throw new Error(`Failed to save image: ${err.message}`);

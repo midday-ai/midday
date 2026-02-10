@@ -1,7 +1,5 @@
 "use client";
 
-import { useTeamQuery } from "@/hooks/use-team";
-import { useI18n } from "@/locales/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { Icons } from "@midday/ui/icons";
@@ -12,6 +10,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useI18n } from "@/locales/client";
 import { AnimatedNumber } from "./animated-number";
 import { FormatAmount } from "./format-amount";
 

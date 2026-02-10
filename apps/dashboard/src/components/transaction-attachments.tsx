@@ -1,9 +1,5 @@
 "use client";
 
-import { useUpload } from "@/hooks/use-upload";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
-import { formatAmount } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
@@ -13,6 +9,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { parseISO } from "date-fns";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { useUpload } from "@/hooks/use-upload";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import { formatAmount } from "@/utils/format";
 import { type Attachment, AttachmentItem } from "./attachment-item";
 import { SelectAttachment } from "./select-attachment";
 

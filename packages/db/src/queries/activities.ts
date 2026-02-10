@@ -1,8 +1,8 @@
-import { and, desc, eq, gte, inArray, lte, ne, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte, ne } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import type { Database, DatabaseOrTransaction } from "../client";
-import { activities } from "../schema";
 import type { activityStatusEnum, activityTypeEnum } from "../schema";
+import { activities } from "../schema";
 
 /**
  * Activity type returned from database queries

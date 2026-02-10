@@ -18,6 +18,9 @@ import {
 } from "drizzle-orm";
 import type { Database, DatabaseOrTransaction } from "../client";
 import {
+  bankAccounts,
+  bankConnections,
+  customers,
   type ExpenseAnomaly,
   type InsightActivity,
   type InsightAnomaly,
@@ -25,14 +28,11 @@ import {
   type InsightMetric,
   type InsightMilestone,
   type InsightPredictions,
-  bankAccounts,
-  bankConnections,
-  customers,
   inbox,
   type insightPeriodTypeEnum,
   type insightStatusEnum,
-  insightUserStatus,
   insights,
+  insightUserStatus,
   invoices,
   trackerEntries,
   trackerProjects,

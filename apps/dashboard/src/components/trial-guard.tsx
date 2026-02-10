@@ -1,7 +1,7 @@
 "use client";
 
-import { shouldShowUpgradeContent } from "@/utils/trial";
 import { usePathname } from "next/navigation";
+import { shouldShowUpgradeContent } from "@/utils/trial";
 import { UpgradeContent } from "./upgrade-content";
 
 type TrialGuardProps = {

@@ -1,13 +1,13 @@
 "use client";
 
-import { MetricsFilter } from "@/components/metrics/components/metrics-filter";
-import { Customize } from "@/components/widgets/customize";
-import { useForesightMetricsPrefetch } from "@/hooks/use-foresight-prefetch";
-import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
 import { TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useEffect, useState } from "react";
+import { MetricsFilter } from "@/components/metrics/components/metrics-filter";
+import { Customize } from "@/components/widgets/customize";
+import { useForesightMetricsPrefetch } from "@/hooks/use-foresight-prefetch";
+import { useUserQuery } from "@/hooks/use-user";
 import { useIsCustomizing } from "./widget-provider";
 
 function getTimeBasedGreeting(timezone?: string): string {

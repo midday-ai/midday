@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import * as React from "react";
+import { cn } from "@/lib/utils";
 
 export type SortDirection = "asc" | "desc";
 

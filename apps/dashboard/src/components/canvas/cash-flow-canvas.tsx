@@ -1,5 +1,8 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { cashFlowArtifact } from "@api/ai/artifacts/cash-flow";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasChart,
@@ -15,9 +18,6 @@ import {
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
 import { useUserQuery } from "@/hooks/use-user";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { cashFlowArtifact } from "@api/ai/artifacts/cash-flow";
-import { parseAsInteger, useQueryState } from "nuqs";
 import { CashFlowChart } from "../charts";
 
 export function CashFlowCanvas() {

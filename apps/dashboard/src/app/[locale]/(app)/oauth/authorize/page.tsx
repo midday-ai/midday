@@ -1,12 +1,11 @@
-import { OAuthConsentScreen } from "@/components/oauth/oauth-consent-screen";
-import { OAuthErrorMessage } from "@/components/oauth/oauth-error-message";
-import { loadOAuthParams } from "@/hooks/use-oauth-params";
-import { HydrateClient, getQueryClient } from "@/trpc/server";
-import { trpc } from "@/trpc/server";
-import { categorizeOAuthError, validateOAuthParams } from "@/utils/oauth-utils";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
+import { OAuthConsentScreen } from "@/components/oauth/oauth-consent-screen";
+import { OAuthErrorMessage } from "@/components/oauth/oauth-error-message";
+import { loadOAuthParams } from "@/hooks/use-oauth-params";
+import { getQueryClient, HydrateClient, trpc } from "@/trpc/server";
+import { categorizeOAuthError, validateOAuthParams } from "@/utils/oauth-utils";
 
 export const metadata: Metadata = {
   title: "Authorize API Access | Midday",

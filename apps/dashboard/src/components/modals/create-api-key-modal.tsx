@@ -1,7 +1,5 @@
 "use client";
 
-import { ApiKeyForm } from "@/components/forms/api-key-form";
-import { useTokenModalStore } from "@/store/token-modal";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -11,6 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
+import { ApiKeyForm } from "@/components/forms/api-key-form";
+import { useTokenModalStore } from "@/store/token-modal";
 import { CopyInput } from "../copy-input";
 
 export function CreateApiKeyModal() {

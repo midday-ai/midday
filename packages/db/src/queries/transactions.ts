@@ -36,8 +36,8 @@ import {
   transactionEmbeddings,
   type transactionFrequencyEnum,
   transactionMatchSuggestions,
-  transactionTags,
   transactions,
+  transactionTags,
   users,
 } from "../schema";
 import { createActivity } from "./activities";

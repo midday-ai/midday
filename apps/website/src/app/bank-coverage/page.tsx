@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { BankCoverage } from "@/components/bank-coverage";
-import type { Metadata } from "next";
 
 const title = "Bank Coverage";
 const description =

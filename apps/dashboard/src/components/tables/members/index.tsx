@@ -1,8 +1,5 @@
 "use client";
 
-import { InviteTeamMembersModal } from "@/components/modals/invite-team-members-modal";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Dialog } from "@midday/ui/dialog";
@@ -16,8 +13,10 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import * as React from "react";
 import { useState } from "react";
+import { InviteTeamMembersModal } from "@/components/modals/invite-team-members-modal";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { columns } from "./columns";
 
 export function DataTable() {

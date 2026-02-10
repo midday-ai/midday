@@ -1,12 +1,12 @@
-import { SelectTeamTable } from "@/components/tables/select-team/table";
-import { TeamInvites } from "@/components/team-invites";
-import { UserMenu } from "@/components/user-menu";
-import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { SelectTeamTable } from "@/components/tables/select-team/table";
+import { TeamInvites } from "@/components/team-invites";
+import { UserMenu } from "@/components/user-menu";
+import { getQueryClient, HydrateClient, trpc } from "@/trpc/server";
 
 export const metadata: Metadata = {
   title: "Teams | Midday",

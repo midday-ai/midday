@@ -2,9 +2,9 @@
 
 import { CopyInput } from "@/components/copy-input";
 import "@/styles/globals.css";
-import { SUPPORT_EMAIL } from "@/utils/constants";
 import { Button } from "@midday/ui/button";
 import { useEffect } from "react";
+import { SUPPORT_EMAIL } from "@/utils/constants";
 
 export default function GlobalError({
   error,

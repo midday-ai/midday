@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCPCursor } from "@/components/mcp-cursor";
-import type { Metadata } from "next";
 
 const title = "Cursor MCP Integration";
 const description =

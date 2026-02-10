@@ -1,11 +1,5 @@
 "use client";
 
-import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
-import { useDocumentParams } from "@/hooks/use-document-params";
-import { useFileUrl } from "@/hooks/use-file-url";
-import { downloadFile } from "@/lib/download";
-import { isStaleProcessing } from "@/utils/document";
-import { formatSize } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import { Badge } from "@midday/ui/badge";
@@ -23,6 +17,12 @@ import { Skeleton } from "@midday/ui/skeleton";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
+import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
+import { useDocumentParams } from "@/hooks/use-document-params";
+import { useFileUrl } from "@/hooks/use-file-url";
+import { downloadFile } from "@/lib/download";
+import { isStaleProcessing } from "@/utils/document";
+import { formatSize } from "@/utils/format";
 
 export type Document = RouterOutputs["documents"]["get"]["data"][number];
 

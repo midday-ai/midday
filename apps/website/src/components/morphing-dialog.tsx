@@ -4,7 +4,7 @@ import { cn } from "@midday/ui/cn";
 import { Dialog, DialogTrigger } from "@midday/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { type Transition, type Variants, motion } from "motion/react";
+import { motion, type Transition, type Variants } from "motion/react";
 import Image from "next/image";
 import type { ComponentProps, ReactNode } from "react";
 
@@ -209,11 +209,7 @@ export const MorphingDialogDescription = ({
   );
 };
 
-export const MorphingDialogClose = ({
-  className,
-}: {
-  className?: string;
-}) => (
+export const MorphingDialogClose = ({ className }: { className?: string }) => (
   <DialogPrimitive.Close
     className={cn(
       "absolute right-6 top-6 opacity-70 hover:opacity-100 transition-opacity focus:outline-none disabled:pointer-events-none",

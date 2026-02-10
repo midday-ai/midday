@@ -2,7 +2,6 @@ import { describe, expect, test } from "bun:test";
 import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
 import {
-  type RecurringConfig,
   calculatePreviewDates,
   calculateSummary,
   formatDayOfWeek,
@@ -18,6 +17,7 @@ import {
   isDateInFutureUTC,
   isValidRecurringConfig,
   localDateToUTCMidnight,
+  type RecurringConfig,
   validateRecurringConfig,
 } from "./recurring";
 

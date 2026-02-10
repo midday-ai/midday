@@ -1,19 +1,19 @@
 "use client";
 
-import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useInsightFromUrl } from "@/hooks/use-insight-from-url";
-import { useOverviewTab } from "@/hooks/use-overview-tab";
-import { usePrefetchMetrics } from "@/hooks/use-prefetch-metrics";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
 import type { inferRouterOutputs } from "@trpc/server";
 import { Suspense } from "react";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useInsightFromUrl } from "@/hooks/use-insight-from-url";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
+import { usePrefetchMetrics } from "@/hooks/use-prefetch-metrics";
 import { MetricsView } from "../metrics/metrics-view";
 import { SuggestedActions } from "../suggested-actions";
 import { WidgetsHeader } from "./header";
-import { WidgetProvider, useIsCustomizing } from "./widget-provider";
+import { useIsCustomizing, WidgetProvider } from "./widget-provider";
 import { WidgetsGrid } from "./widgets-grid";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;

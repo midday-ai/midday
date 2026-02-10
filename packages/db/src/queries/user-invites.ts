@@ -1,4 +1,4 @@
-import { and, eq, inArray, or, sql } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { teams, userInvites, users, usersOnTeam } from "../schema";
 

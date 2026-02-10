@@ -1,8 +1,8 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 type Props = {
   value: number;

@@ -1,8 +1,8 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ProductsSkeleton } from "@/components/tables/products/skeleton";
 import { DataTable } from "@/components/tables/products/table";
 import { prefetch, trpc } from "@/trpc/server";
-import type { Metadata } from "next";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Products | Midday",

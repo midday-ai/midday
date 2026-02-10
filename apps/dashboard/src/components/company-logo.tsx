@@ -1,7 +1,5 @@
 "use client";
 
-import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
-import { useUpload } from "@/hooks/use-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
   Card,
@@ -13,6 +11,8 @@ import {
 import { Spinner } from "@midday/ui/spinner";
 import { stripSpecialCharacters } from "@midday/utils";
 import { useRef } from "react";
+import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
+import { useUpload } from "@/hooks/use-upload";
 
 export function CompanyLogo() {
   const inputRef = useRef<HTMLInputElement>(null);

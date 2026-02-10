@@ -1,7 +1,5 @@
 "use client";
 
-import { useAudioPlayerStore } from "@/store/audio-player";
-import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -13,6 +11,8 @@ import {
 } from "@midday/ui/tooltip";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
+import { useAudioPlayerStore } from "@/store/audio-player";
+import { useTRPC } from "@/trpc/client";
 
 interface ChatMessageActionsProps {
   messageId: string;

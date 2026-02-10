@@ -1,0 +1,19 @@
+{
+  "name": "@midday/health",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./checker": "./src/checker.ts",
+    "./probes": "./src/probes.ts",
+    "./registry": "./src/registry.ts"
+  },
+  "dependencies": {
+    "@midday/cache": "workspace:*",
+    "@midday/db": "workspace:*"
+  }
+}

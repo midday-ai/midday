@@ -2,9 +2,9 @@
 
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 export function Footer() {

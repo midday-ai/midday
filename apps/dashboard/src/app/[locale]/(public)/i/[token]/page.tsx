@@ -1,11 +1,11 @@
-import { InvoiceViewWrapper } from "@/components/invoice-view-wrapper";
-import { getQueryClient, trpc } from "@/trpc/server";
 import { decrypt } from "@midday/encryption";
 import { HtmlTemplate } from "@midday/invoice/templates/html";
 import { createClient } from "@midday/supabase/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { SearchParams } from "nuqs";
+import { InvoiceViewWrapper } from "@/components/invoice-view-wrapper";
+import { getQueryClient, trpc } from "@/trpc/server";
 
 export async function generateMetadata(props: {
   params: Promise<{ token: string }>;
@@ -50,7 +50,7 @@ export async function generateMetadata(props: {
         follow: false,
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       title: "Invoice Not Found",
       robots: {
@@ -109,7 +109,7 @@ export default async function Page(props: Props) {
         // Fire and forget - don't block the page render
         updateInvoiceViewedAt(invoice.id!).catch(() => {});
       }
-    } catch (error) {
+    } catch (_error) {
       // Silently fail if decryption fails - viewer might be invalid or malformed
       // This is expected when accessing the invoice without a valid viewer parameter
     }

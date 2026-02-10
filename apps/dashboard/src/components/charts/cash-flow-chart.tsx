@@ -1,6 +1,5 @@
 "use client";
 
-import { formatAmount } from "@/utils/format";
 import {
   Bar,
   CartesianGrid,
@@ -12,14 +11,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { formatAmount } from "@/utils/format";
 import { ChartLegend } from "./base-charts";
+import type { BaseChartProps } from "./chart-utils";
 import {
   commonChartConfig,
   createYAxisTickFormatter,
   getZeroInclusiveDomain,
   useChartMargin,
 } from "./chart-utils";
-import type { BaseChartProps } from "./chart-utils";
 
 interface CashFlowData {
   month: string;

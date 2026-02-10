@@ -3,8 +3,8 @@ import { and, desc, eq, gte, inArray, like, lte, not, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import type { Database } from "../client";
 import {
-  documentTagAssignments,
   documents,
+  documentTagAssignments,
   transactionAttachments,
 } from "../schema";
 

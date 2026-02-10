@@ -1,11 +1,7 @@
 "use client";
 
-import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import {
@@ -19,6 +15,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
+import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 
 type Props = {
   isExpanded?: boolean;

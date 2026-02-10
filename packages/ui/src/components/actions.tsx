@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/utils";
 import type { ComponentProps } from "react";
+import { cn } from "@/utils";
 import { Button } from "./button";
 import {
   Tooltip,

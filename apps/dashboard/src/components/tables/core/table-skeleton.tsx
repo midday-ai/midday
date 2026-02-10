@@ -1,6 +1,5 @@
 "use client";
 
-import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import {
@@ -17,8 +16,9 @@ import type {
   VisibilityState,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { SkeletonCell } from "./skeleton-cell";
-import { type TableColumnMeta, getColumnId, getHeaderLabel } from "./types";
+import { getColumnId, getHeaderLabel, type TableColumnMeta } from "./types";
 
 interface TableSkeletonProps<TData> {
   /** Column definitions with skeleton config in meta */

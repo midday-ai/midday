@@ -1,9 +1,5 @@
 "use client";
 
-import { useOAuthParams } from "@/hooks/use-oauth-params";
-import { useTeamQuery } from "@/hooks/use-team";
-import { useTRPC } from "@/trpc/client";
-import { getScopeDescription } from "@/utils/scopes";
 import { Button } from "@midday/ui/button";
 import {
   Card,
@@ -28,6 +24,10 @@ import { AlertTriangle, Check, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useOAuthParams } from "@/hooks/use-oauth-params";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useTRPC } from "@/trpc/client";
+import { getScopeDescription } from "@/utils/scopes";
 
 export function OAuthConsentScreen() {
   const router = useRouter();

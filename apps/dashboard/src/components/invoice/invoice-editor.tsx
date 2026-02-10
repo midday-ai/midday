@@ -1,6 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import {
   SlashCommand,
@@ -24,6 +23,7 @@ import { format } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import tippy, { type Instance } from "tippy.js";
+import { useTRPC } from "@/trpc/client";
 import {
   formatBankPaymentDetails,
   formatBankPreview,

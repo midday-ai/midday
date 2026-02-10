@@ -16,12 +16,12 @@ import outlookApp from "./outlook/config-client";
 import perplexityMcpApp from "./perplexity-mcp/config";
 import polarApp from "./polar/config";
 import quickBooksApp from "./quick-books/config-client";
-import raycastMcpApp from "./raycast-mcp/config";
 import raycastApp from "./raycast/config";
+import raycastMcpApp from "./raycast-mcp/config";
 // Import client config for dashboard (includes images)
 import slackApp from "./slack/config-client";
-import stripePaymentsApp from "./stripe-payments/config-client";
 import stripeApp from "./stripe/config";
+import stripePaymentsApp from "./stripe-payments/config-client";
 import whatsappApp from "./whatsapp/config-client";
 import xeroApp from "./xero/config-client";
 import zapierMcpApp from "./zapier-mcp/config";
