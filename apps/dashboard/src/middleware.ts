@@ -12,7 +12,6 @@ const I18nMiddleware = createI18nMiddleware({
 });
 
 export async function middleware(request: NextRequest) {
-  // @ts-expect-error-error - NextRequest type with current bun version is not compatible with NextResponse type
   const response = await updateSession(request, I18nMiddleware(request));
   const supabase = await createClient();
   const nextUrl = request.nextUrl;
