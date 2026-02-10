@@ -148,7 +148,8 @@ export async function getInvoiceTemplate(db: Database, teamId: string) {
         eq(invoiceTemplates.isDefault, true),
       ),
     )
-    .limit(1);
+    .limit(1)
+    .$withCache({ config: { ex: 10 * 60 } }); // 10 min TTL — templates rarely change
 
   if (defaultTemplate) {
     return defaultTemplate;
@@ -160,7 +161,8 @@ export async function getInvoiceTemplate(db: Database, teamId: string) {
     .from(invoiceTemplates)
     .where(eq(invoiceTemplates.teamId, teamId))
     .orderBy(invoiceTemplates.createdAt)
-    .limit(1);
+    .limit(1)
+    .$withCache({ config: { ex: 10 * 60 } });
 
   return firstTemplate;
 }
