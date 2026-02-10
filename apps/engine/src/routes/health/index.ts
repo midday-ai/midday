@@ -63,7 +63,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
 
     return c.json(
       {
-        message: "Service unhelthy",
+        message: "Service unhealthy",
         code: "bad_request",
       },
       400,
