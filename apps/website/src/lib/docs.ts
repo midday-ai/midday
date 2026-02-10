@@ -32,10 +32,15 @@ function parseFrontmatter(fileContent: string) {
     if (key) {
       let value = valueArr.join(": ").trim();
       value = value.replace(/^['"](.*)['"]$/, "$1");
-      if (key.trim() === "order") {
+      const trimmedKey = key.trim();
+      if (trimmedKey === "order") {
         metadata.order = Number.parseInt(value, 10);
-      } else {
-        metadata[key.trim() as keyof DocMetadata] = value;
+      } else if (
+        trimmedKey === "title" ||
+        trimmedKey === "description" ||
+        trimmedKey === "section"
+      ) {
+        metadata[trimmedKey] = value;
       }
     }
   }

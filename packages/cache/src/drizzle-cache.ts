@@ -49,7 +49,9 @@ export class BunRedisCache extends Cache {
     if (!redis) return undefined;
 
     try {
-      const cacheKey = isTag ? `${KEY_PREFIX}tag:${key}` : `${KEY_PREFIX}${key}`;
+      const cacheKey = isTag
+        ? `${KEY_PREFIX}tag:${key}`
+        : `${KEY_PREFIX}${key}`;
       const data = await redis.get(cacheKey);
       if (!data) return undefined;
       return JSON.parse(data);
@@ -75,13 +77,20 @@ export class BunRedisCache extends Cache {
         : `${KEY_PREFIX}${hashedQuery}`;
 
       // Store the cached response
-      await redis.send("SETEX", [cacheKey, ttl.toString(), JSON.stringify(response)]);
+      await redis.send("SETEX", [
+        cacheKey,
+        ttl.toString(),
+        JSON.stringify(response),
+      ]);
 
       // Track which cache keys belong to which tables (for invalidation)
       for (const table of tables) {
         await redis.send("SADD", [`${TABLE_PREFIX}${table}`, cacheKey]);
         // Set expiry on the table tracking set slightly longer than the data TTL
-        await redis.send("EXPIRE", [`${TABLE_PREFIX}${table}`, (ttl + 120).toString()]);
+        await redis.send("EXPIRE", [
+          `${TABLE_PREFIX}${table}`,
+          (ttl + 120).toString(),
+        ]);
       }
     } catch {
       // Silently fail — cache errors shouldn't break queries
@@ -114,7 +123,7 @@ export class BunRedisCache extends Cache {
           const tableName =
             typeof table === "string"
               ? table
-              : table[Symbol.for("drizzle:Name")] ?? String(table);
+              : (table[Symbol.for("drizzle:Name")] ?? String(table));
 
           const tableKey = `${TABLE_PREFIX}${tableName}`;
 

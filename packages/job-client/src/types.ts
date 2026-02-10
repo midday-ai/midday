@@ -25,4 +25,3 @@ export interface JobStatusResponse {
 export interface JobTriggerResponse {
   id: string;
 }
-

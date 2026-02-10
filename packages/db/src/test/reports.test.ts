@@ -1318,7 +1318,7 @@ describe("Report Calculations", () => {
       expect(result.expenses.length).toBeGreaterThan(0);
 
       // Check structure
-      const expense = result.expenses[0];
+      const expense = result.expenses[0]!;
       expect(expense.name).toBe("Monthly Subscription");
       expect(expense.frequency).toBe("monthly");
       expect(expense.amount).toBe(50); // -50 GBP
@@ -1629,7 +1629,7 @@ describe("Category Exclusion Logic", () => {
       taxRate: null,
       taxAmount: null,
       recurring: false,
-      frequency: null as const,
+      frequency: null,
       method: "card_purchase",
       internalId: "ex-1",
     },
@@ -1649,7 +1649,7 @@ describe("Category Exclusion Logic", () => {
       taxRate: null,
       taxAmount: null,
       recurring: false,
-      frequency: null as const,
+      frequency: null,
       method: "transfer",
       internalId: "ex-2",
     },
@@ -1669,7 +1669,7 @@ describe("Category Exclusion Logic", () => {
       taxRate: null,
       taxAmount: null,
       recurring: false,
-      frequency: null as const,
+      frequency: null,
       method: "transfer",
       internalId: "ex-3",
     },
@@ -1689,7 +1689,7 @@ describe("Category Exclusion Logic", () => {
       taxRate: null,
       taxAmount: null,
       recurring: false,
-      frequency: null as const,
+      frequency: null,
       method: "card_purchase",
       internalId: "ex-4",
     },
