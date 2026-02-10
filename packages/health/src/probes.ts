@@ -43,7 +43,7 @@ export function redisCacheProbe(): Dependency {
   };
 }
 
-/** Supabase: HEAD request to verify auth/storage API is reachable */
+/** Supabase: GET auth health (requires apikey header) */
 export function supabaseProbe(): Dependency {
   return {
     name: "supabase",
@@ -54,7 +54,15 @@ export function supabaseProbe(): Dependency {
       const url =
         process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
       if (!url) throw new Error("SUPABASE_URL not set");
+      const apikey =
+        process.env.SUPABASE_SERVICE_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      const headers: Record<string, string> = {};
+      if (apikey) {
+        headers.apikey = apikey;
+      }
       const res = await fetch(`${url}/auth/v1/health`, {
+        headers,
         signal: AbortSignal.timeout(3_000),
       });
       return res.ok;
@@ -88,7 +96,7 @@ export function redisQueueProbe(): Dependency {
 // Tier 2 — Important services
 // ---------------------------------------------------------------------------
 
-/** Engine service: GET /health */
+/** Engine service: GET /health (reachable if response received, even if sub-services are degraded) */
 export function engineProbe(): Dependency {
   return {
     name: "engine",
@@ -101,7 +109,9 @@ export function engineProbe(): Dependency {
       const res = await fetch(`${url}/health`, {
         signal: AbortSignal.timeout(5_000),
       });
-      return res.ok;
+      // Engine returns 400 when a sub-provider is down but the service itself
+      // is reachable and processing requests — treat that as healthy.
+      return res.status < 500;
     },
   };
 }
@@ -213,11 +223,13 @@ function oauthTokenProbe(name: string, tokenUrl: string): Dependency {
     cacheTtlMs: 300_000, // 5 minutes
     timeoutMs: 5_000,
     probe: async () => {
+      // Use POST — some OAuth token endpoints reject HEAD/GET with 501.
+      // An empty POST will get 400 (invalid_request) which proves reachability.
       const res = await fetch(tokenUrl, {
-        method: "HEAD",
+        method: "POST",
         signal: AbortSignal.timeout(5_000),
       }).catch(() => null);
-      // 405 Method Not Allowed is fine — endpoint is reachable
+      // Any non-network response means the endpoint is reachable
       return res !== null && res.status < 500;
     },
   };
