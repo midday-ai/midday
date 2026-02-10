@@ -20,7 +20,7 @@ const connectionConfig = {
 // Drizzle query cache (Railway Redis, private network)
 // Uses explicit strategy — only queries with .$withCache() are cached.
 // Mutations auto-invalidate cached queries for affected tables.
-let cacheInstance: InstanceType<typeof import("@midday/cache/drizzle-cache").BunRedisCache> | undefined;
+let cacheInstance: any;
 
 try {
   const { BunRedisCache } = require("@midday/cache/drizzle-cache");
