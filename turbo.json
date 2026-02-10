@@ -81,7 +81,6 @@
       "dependsOn": ["^topo"]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
       "outputs": []
     }
   }
