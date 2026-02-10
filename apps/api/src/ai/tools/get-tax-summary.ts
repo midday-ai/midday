@@ -45,7 +45,9 @@ export const getTaxSummaryTool = tool({
         text: "Unable to retrieve tax summary: Team ID not found in context.",
       };
       return {
-        totalTaxLiability: 0,
+        totalTaxPaid: 0,
+        totalTaxCollected: 0,
+        netTaxLiability: 0,
         totalTaxableIncome: 0,
         currency: currency || appContext.baseCurrency || "USD",
       };
@@ -105,12 +107,12 @@ export const getTaxSummaryTool = tool({
       const prevFrom = format(prevFromDate, "yyyy-MM-dd");
       const prevTo = format(prevToDate, "yyyy-MM-dd");
 
-      // Fetch tax data for current period (both paid and collected)
+      // Fetch paid and collected tax data for current and previous period
       const [
         paidTaxData,
-        _collectedTaxData,
+        collectedTaxData,
         prevPaidTaxData,
-        _prevCollectedTaxData,
+        prevCollectedTaxData,
       ] = await Promise.all([
         getTaxSummary(db, {
           teamId,
@@ -142,11 +144,22 @@ export const getTaxSummaryTool = tool({
         }),
       ]);
 
-      // Combine paid and collected tax (for most businesses, we focus on paid tax)
-      const currentTotalTax = paidTaxData.summary.totalTaxAmount;
+      // Tax paid on expenses (outgoing)
+      const currentPaidTax = paidTaxData.summary.totalTaxAmount;
+      // Tax collected from customers (incoming, e.g. VAT/GST on sales)
+      const currentCollectedTax = collectedTaxData.summary.totalTaxAmount;
+      // Net tax liability: collected minus paid (positive = you owe, negative = credit)
+      const currentNetTax = currentCollectedTax - currentPaidTax;
+
+      const currentTotalTax = currentPaidTax;
       const currentTotalTaxableIncome =
         paidTaxData.summary.totalTransactionAmount;
-      const prevTotalTax = prevPaidTaxData.summary.totalTaxAmount;
+
+      const prevPaidTax = prevPaidTaxData.summary.totalTaxAmount;
+      const prevCollectedTax = prevCollectedTaxData.summary.totalTaxAmount;
+      const prevNetTax = prevCollectedTax - prevPaidTax;
+
+      const prevTotalTax = prevPaidTax;
       const prevTotalTaxableIncome =
         prevPaidTaxData.summary.totalTransactionAmount;
 
@@ -230,26 +243,44 @@ export const getTaxSummaryTool = tool({
       }
 
       // Generate simplified summary text
-      const formattedCurrentTax = formatAmount({
-        amount: currentTotalTax,
+      const formattedPaidTax = formatAmount({
+        amount: currentPaidTax,
+        currency: targetCurrency,
+        locale,
+      });
+      const formattedCollectedTax = formatAmount({
+        amount: currentCollectedTax,
+        currency: targetCurrency,
+        locale,
+      });
+      const formattedNetTax = formatAmount({
+        amount: Math.abs(currentNetTax),
         currency: targetCurrency,
         locale,
       });
 
-      let summaryText = `Your total tax liability for this period is ${formattedCurrentTax} with an effective tax rate of ${effectiveTaxRate.toFixed(2)}%.`;
+      let summaryText = `Tax paid: ${formattedPaidTax}. Tax collected: ${formattedCollectedTax}.`;
 
-      if (prevTotalTax > 0) {
-        const taxChange = currentTotalTax - prevTotalTax;
-        const taxChangePercent =
-          prevTotalTax > 0
-            ? ((taxChange / prevTotalTax) * 100).toFixed(1)
-            : "0";
-        const changeDirection = taxChange >= 0 ? "increased" : "decreased";
-        summaryText += ` Compared to the previous period, your tax liability has ${changeDirection} by ${Math.abs(Number.parseFloat(taxChangePercent))}%.`;
+      if (currentCollectedTax > 0 || currentPaidTax > 0) {
+        const netDirection = currentNetTax > 0 ? "owe" : "are owed";
+        summaryText += ` Net: you ${netDirection} ${formattedNetTax}.`;
+      }
+
+      summaryText += ` Effective tax rate: ${effectiveTaxRate.toFixed(2)}%.`;
+
+      if (prevTotalTax > 0 || prevCollectedTax > 0) {
+        const netChange = currentNetTax - prevNetTax;
+        const changeDirection = netChange >= 0 ? "increased" : "decreased";
+        const formattedChange = formatAmount({
+          amount: Math.abs(netChange),
+          currency: targetCurrency,
+          locale,
+        });
+        summaryText += ` Compared to the previous period, your net tax liability has ${changeDirection} by ${formattedChange}.`;
       }
 
       if (categoryData.length > 0 && categoryData[0]) {
-        summaryText += ` The largest tax category is ${categoryData[0].category}, representing ${categoryData[0].percentage.toFixed(1)}% of your total tax liability.`;
+        summaryText += ` The largest tax category is ${categoryData[0].category}, representing ${categoryData[0].percentage.toFixed(1)}% of your total tax paid.`;
       }
 
       // Update artifact with analysis if showCanvas is true
@@ -284,7 +315,9 @@ export const getTaxSummaryTool = tool({
       yield { text: summaryText };
 
       return {
-        totalTaxLiability: currentTotalTax,
+        totalTaxPaid: currentPaidTax,
+        totalTaxCollected: currentCollectedTax,
+        netTaxLiability: currentNetTax,
         totalTaxableIncome: currentTotalTaxableIncome,
         currency: targetCurrency,
         effectiveTaxRate,
@@ -294,7 +327,9 @@ export const getTaxSummaryTool = tool({
         text: `Failed to retrieve tax summary: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
       return {
-        totalTaxLiability: 0,
+        totalTaxPaid: 0,
+        totalTaxCollected: 0,
+        netTaxLiability: 0,
         totalTaxableIncome: 0,
         currency: currency || appContext.baseCurrency || "USD",
       };
