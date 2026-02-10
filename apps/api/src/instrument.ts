@@ -1,34 +1,55 @@
 import * as Sentry from "@sentry/bun";
 
-// Only initialize Sentry in production
 if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
-  // Ensure to call this before importing any other modules!
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
 
-    // Associate errors with deploys via git commit SHA (provided by Railway)
     release: process.env.RAILWAY_GIT_COMMIT_SHA,
 
+    // Use Railway environment name so staging and production are separate in Sentry
+    environment:
+      process.env.RAILWAY_ENVIRONMENT_NAME ||
+      process.env.NODE_ENV ||
+      "production",
+
     integrations: [
-      // Send console.error calls as logs to Sentry
       Sentry.consoleLoggingIntegration({ levels: ["error"] }),
     ],
 
-    // Adds request headers and IP for users, for more info visit:
-    // https://docs.sentry.io/platforms/javascript/guides/bun/configuration/options/#sendDefaultPii
     sendDefaultPii: true,
-
-    // Add Performance Monitoring by setting tracesSampleRate
-    // Set tracesSampleRate to 1.0 to capture 100% of transactions
-    // We recommend adjusting this value in production
-    // Learn more at
-    // https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
-    tracesSampleRate: 0.5,
-
-    // Enable logs to be sent to Sentry
     enableLogs: true,
 
-    // Set environment
-    environment: process.env.NODE_ENV || "production",
+    // Sample 10% of transactions for performance monitoring
+    tracesSampleRate: 0.1,
+
+    // Drop noisy transactions that don't provide value
+    beforeSendTransaction(event) {
+      const url = event.request?.url || event.transaction || "";
+
+      if (
+        url.includes("/health") ||
+        url.includes("/openapi") ||
+        event.request?.method === "OPTIONS"
+      ) {
+        return null;
+      }
+
+      return event;
+    },
+
+    // Filter out expected client errors from error reporting
+    beforeSend(event) {
+      // Don't send network/timeout errors from health checks
+      const message = event.exception?.values?.[0]?.value || "";
+      if (message.includes("ECONNREFUSED") || message.includes("ETIMEDOUT")) {
+        // Only drop if it's from a health check context
+        const transaction = event.transaction || "";
+        if (transaction.includes("/health")) {
+          return null;
+        }
+      }
+
+      return event;
+    },
   });
 }

@@ -8,6 +8,8 @@
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",
+    "deploymentOverlapSeconds": 0,
+    "drainingSeconds": 30,
     "multiRegionConfig": {
       "europe-west4-drams3a": { "numReplicas": 2 },
       "us-east4-eqdc4a": { "numReplicas": 2 },

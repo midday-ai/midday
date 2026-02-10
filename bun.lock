@@ -327,6 +327,9 @@
     "packages/cache": {
       "name": "@midday/cache",
       "version": "0.0.1",
+      "dependencies": {
+        "@midday/logger": "workspace:*",
+      },
     },
     "packages/categories": {
       "name": "@midday/categories",

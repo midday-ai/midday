@@ -1,4 +1,7 @@
+import { createLoggerWithContext } from "@midday/logger";
 import { getSharedRedisClient } from "./shared-redis";
+
+const logger = createLoggerWithContext("redis-cache");
 
 export class RedisCache {
   private prefix: string;
@@ -41,10 +44,10 @@ export class RedisCache {
       const value = await this.redis.get(this.getKey(key));
       return this.parseValue<T>(value);
     } catch (error) {
-      console.error(
-        `Redis get error for ${this.prefix} cache, key "${key}":`,
-        error,
-      );
+      logger.error(`Get error for ${this.prefix} cache`, {
+        key,
+        error: error instanceof Error ? error.message : String(error),
+      });
       return undefined;
     }
   }
@@ -65,10 +68,10 @@ export class RedisCache {
         await this.redis.set(redisKey, serializedValue);
       }
     } catch (error) {
-      console.error(
-        `Redis set error for ${this.prefix} cache, key "${key}":`,
-        error,
-      );
+      logger.error(`Set error for ${this.prefix} cache`, {
+        key,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -76,10 +79,10 @@ export class RedisCache {
     try {
       await this.redis.del(this.getKey(key));
     } catch (error) {
-      console.error(
-        `Redis delete error for ${this.prefix} cache, key "${key}":`,
-        error,
-      );
+      logger.error(`Delete error for ${this.prefix} cache`, {
+        key,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 

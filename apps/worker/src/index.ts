@@ -213,6 +213,10 @@ const shutdown = async (signal: string) => {
       console.log("Closing database connections...");
       await closeWorkerDb();
 
+      // Flush pending Sentry events before exit
+      console.log("Flushing Sentry events...");
+      await Sentry.close(2000);
+
       console.log("Graceful shutdown complete");
     } catch (error) {
       console.error("Error during shutdown:", error);

@@ -1,3 +1,4 @@
+import { createLoggerWithContext } from "@midday/logger";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
 import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -6,12 +7,14 @@ import { Pool } from "pg";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
+const logger = createLoggerWithContext("db");
+
 const isDevelopment = process.env.NODE_ENV === "development";
 
 const connectionConfig = {
   max: isDevelopment ? 8 : 12,
   idleTimeoutMillis: isDevelopment ? 5000 : 60000,
-  connectionTimeoutMillis: 15000,
+  connectionTimeoutMillis: 5000,
   maxUses: isDevelopment ? 100 : 0,
   allowExitOnIdle: true,
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
@@ -47,12 +50,12 @@ const replicaUrl = currentRegion
 
 if (!isDevelopment) {
   if (!currentRegion) {
-    console.warn(
-      "[DB] RAILWAY_REPLICA_REGION not set — all reads will use the primary database",
+    logger.warn(
+      "RAILWAY_REPLICA_REGION not set — all reads will use the primary database",
     );
   } else if (!replicaUrl) {
-    console.warn(
-      `[DB] RAILWAY_REPLICA_REGION="${currentRegion}" but no matching DATABASE_*_URL found — falling back to primary`,
+    logger.warn(
+      `RAILWAY_REPLICA_REGION="${currentRegion}" but no matching DATABASE_*_URL found — falling back to primary`,
     );
   }
 }

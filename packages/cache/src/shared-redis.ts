@@ -1,3 +1,7 @@
+import { createLoggerWithContext } from "@midday/logger";
+
+const logger = createLoggerWithContext("redis");
+
 let sharedRedisClient: any = null;
 let RedisClientClass: any = null;
 
@@ -45,8 +49,8 @@ function resolveRedisUrl(): string | undefined {
       return regionUrl;
     }
 
-    console.warn(
-      `[Redis] RAILWAY_REPLICA_REGION="${region}" but no matching REDIS_CACHE_* env var found (expected ${envVar ?? "unknown"})`,
+    logger.warn(
+      `RAILWAY_REPLICA_REGION="${region}" but no matching REDIS_CACHE_* env var found (expected ${envVar ?? "unknown"})`,
     );
   }
 
@@ -55,8 +59,8 @@ function resolveRedisUrl(): string | undefined {
     const url = process.env[envVarName];
     if (url) {
       if (region === undefined) {
-        console.warn(
-          `[Redis] RAILWAY_REPLICA_REGION not set, falling back to ${envVarName}`,
+        logger.warn(
+          `RAILWAY_REPLICA_REGION not set, falling back to ${envVarName}`,
         );
       }
       return url;
@@ -102,13 +106,13 @@ export function getSharedRedisClient(): any {
 
   sharedRedisClient.onclose = (err: Error) => {
     if (err) {
-      console.error("[Redis] Connection closed:", err.message);
+      logger.error("Connection closed", { error: err.message });
     }
   };
 
   // Connect eagerly so the client is ready for first use
   sharedRedisClient.connect().catch((err: Error) => {
-    console.error("[Redis] Initial connection error:", err.message);
+    logger.error("Initial connection error", { error: err.message });
   });
 
   return sharedRedisClient;
