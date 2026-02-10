@@ -96,7 +96,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy to Railway
-        run: npx @railway/cli up --service ${{ secrets.RAILWAY_API_STAGING_SERVICE_ID }} --environment production
+        run: npx @railway/cli up --service api --environment production
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -118,7 +118,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy to Railway
-        run: npx @railway/cli up --service ${{ secrets.RAILWAY_DASHBOARD_SERVICE_ID }} --environment staging
+        run: npx @railway/cli up --service dashboard --environment production
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -140,7 +140,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy to Railway
-        run: npx @railway/cli up --service ${{ secrets.RAILWAY_WORKER_STAGING_SERVICE_ID }} --environment staging
+        run: npx @railway/cli up --service worker --environment production
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
