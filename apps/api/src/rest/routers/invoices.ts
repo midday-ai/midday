@@ -32,10 +32,13 @@ import {
 import { calculateTotal } from "@midday/invoice/calculate";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import { decodeJobId, getQueue, triggerJob } from "@midday/job-client";
+import { createLoggerWithContext } from "@midday/logger";
 import { addDays } from "date-fns";
 import { HTTPException } from "hono/http-exception";
 import { v4 as uuidv4 } from "uuid";
 import { withRequiredScope } from "../middleware";
+
+const logger = createLoggerWithContext("rest:invoices");
 
 const app = new OpenAPIHono<Context>();
 
@@ -570,10 +573,9 @@ app.openapi(
           }
         } catch {
           // Best effort cleanup - log but don't fail on cleanup errors
-          console.error(
-            "Failed to clean up orphaned scheduled job:",
-            scheduledRun.id,
-          );
+          logger.error("Failed to clean up orphaned scheduled job", {
+            jobId: scheduledRun.id,
+          });
         }
 
         throw new HTTPException(404, {

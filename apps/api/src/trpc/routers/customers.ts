@@ -27,7 +27,10 @@ import {
   upsertCustomer,
 } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
+import { createLoggerWithContext } from "@midday/logger";
 import { TRPCError } from "@trpc/server";
+
+const logger = createLoggerWithContext("trpc:customers");
 
 export const customersRouter = createTRPCRouter({
   get: protectedProcedure
@@ -87,7 +90,9 @@ export const customersRouter = createTRPCRouter({
           );
         } catch (error) {
           // Log but don't fail the customer creation
-          console.error("Failed to trigger customer enrichment:", error);
+          logger.error("Failed to trigger customer enrichment", {
+            error: error instanceof Error ? error.message : String(error),
+          });
           // Reset status since job wasn't queued
           await updateCustomerEnrichmentStatus(db, {
             customerId: customer.id,

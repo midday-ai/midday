@@ -159,14 +159,16 @@ app.onError((err, c) => {
  * Unhandled exception and rejection handlers
  */
 process.on("uncaughtException", (err) => {
-  console.error("[API] Uncaught exception:", err);
+  logger.error("Uncaught exception", { error: err.message, stack: err.stack });
   Sentry.captureException(err, {
     tags: { errorType: "uncaught_exception" },
   });
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("[API] Unhandled rejection at:", promise, "reason:", reason);
+  logger.error("Unhandled rejection", {
+    reason: reason instanceof Error ? reason.message : String(reason),
+  });
   Sentry.captureException(
     reason instanceof Error ? reason : new Error(String(reason)),
     {

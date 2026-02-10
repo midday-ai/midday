@@ -9,8 +9,11 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { encryptOAuthState } from "@midday/inbox/utils";
+import { createLoggerWithContext } from "@midday/logger";
 import { schedules, tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
+
+const logger = createLoggerWithContext("trpc:inbox-accounts");
 
 export const inboxAccountsRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -38,7 +41,9 @@ export const inboxAccountsRouter = createTRPCRouter({
         const connector = new InboxConnector(input.provider, db);
         return connector.connect(state);
       } catch (error) {
-        console.error(error);
+        logger.error("Failed to connect to inbox account", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to connect to inbox account",
@@ -59,7 +64,9 @@ export const inboxAccountsRouter = createTRPCRouter({
 
         return account;
       } catch (error) {
-        console.error(error);
+        logger.error("Failed to exchange code for account", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to exchange code for account",

@@ -36,8 +36,11 @@ import {
   updateTeamMember,
 } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
+import { createLoggerWithContext } from "@midday/logger";
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
+
+const logger = createLoggerWithContext("trpc:team");
 
 export const teamRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -70,7 +73,8 @@ export const teamRouter = createTRPCRouter({
     .mutation(async ({ ctx: { db, session }, input }) => {
       const requestId = `trpc_team_create_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      console.log(`[${requestId}] TRPC team creation request`, {
+      logger.info("Team creation request", {
+        requestId,
         userId: session.user.id,
         userEmail: session.user.email,
         teamName: input.name,
@@ -87,14 +91,16 @@ export const teamRouter = createTRPCRouter({
           email: session.user.email!,
         });
 
-        console.log(`[${requestId}] TRPC team creation successful`, {
+        logger.info("Team creation successful", {
+          requestId,
           teamId,
           userId: session.user.id,
         });
 
         return teamId;
       } catch (error) {
-        console.error(`[${requestId}] TRPC team creation failed`, {
+        logger.error("Team creation failed", {
+          requestId,
           error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           userId: session.user.id,

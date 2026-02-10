@@ -23,8 +23,10 @@ import {
   generateInsightAudio,
   isAudioEnabled,
 } from "@midday/insights/audio";
+import { createLoggerWithContext } from "@midday/logger";
 import { TRPCError } from "@trpc/server";
 
+const logger = createLoggerWithContext("trpc:insights");
 const AUDIO_BUCKET = "vault";
 
 export const insightsRouter = createTRPCRouter({
@@ -152,7 +154,9 @@ export const insightsRouter = createTRPCRouter({
             audioPath,
           });
         } catch (error) {
-          console.error("Failed to generate audio:", error);
+          logger.error("Failed to generate audio", {
+            error: error instanceof Error ? error.message : String(error),
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Failed to generate audio",

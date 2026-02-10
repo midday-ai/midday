@@ -12,9 +12,7 @@ if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
       process.env.NODE_ENV ||
       "production",
 
-    integrations: [
-      Sentry.consoleLoggingIntegration({ levels: ["error"] }),
-    ],
+    integrations: [Sentry.consoleLoggingIntegration({ levels: ["error"] })],
 
     sendDefaultPii: true,
     enableLogs: true,

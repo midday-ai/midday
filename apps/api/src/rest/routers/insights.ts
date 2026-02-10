@@ -23,7 +23,10 @@ import {
   isAudioEnabled,
   verifyAudioToken,
 } from "@midday/insights/audio";
+import { createLoggerWithContext } from "@midday/logger";
 import { withRequiredScope } from "../middleware";
+
+const logger = createLoggerWithContext("rest:insights");
 
 const AUDIO_BUCKET = "vault";
 
@@ -253,7 +256,9 @@ app.openapi(
           audioPath,
         });
       } catch (error) {
-        console.error("Failed to generate audio:", error);
+        logger.error("Failed to generate audio", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         return c.json({ error: "Failed to generate audio" }, 500);
       }
     }
@@ -386,7 +391,9 @@ app.openapi(
           audioPath,
         });
       } catch (error) {
-        console.error("Failed to generate audio:", error);
+        logger.error("Failed to generate audio", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         return c.json({ error: "Failed to generate audio" }, 500);
       }
     }

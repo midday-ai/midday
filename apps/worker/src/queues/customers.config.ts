@@ -1,6 +1,9 @@
+import { createLoggerWithContext } from "@midday/logger";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import { getRedisConnection } from "../config";
 import type { QueueConfig } from "../types/queue-config";
+
+const logger = createLoggerWithContext("worker:queue:customers");
 
 /**
  * Queue options for customers queue
@@ -43,10 +46,14 @@ export const customersQueueConfig: QueueConfig = {
   workerOptions: customersWorkerOptions,
   eventHandlers: {
     onCompleted: (job) => {
-      console.log(`Customer job completed: ${job.name} (${job.id})`);
+      logger.info("Job completed", { jobName: job.name, jobId: job.id });
     },
     onFailed: (job, err) => {
-      console.error(`Customer job failed: ${job?.name} (${job?.id})`, err);
+      logger.error("Job failed", {
+        jobName: job?.name,
+        jobId: job?.id,
+        error: err.message,
+      });
     },
   },
 };

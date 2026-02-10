@@ -87,7 +87,9 @@ export const inboxRouter = createTRPCRouter({
           });
         } catch (error) {
           // Log error but don't fail the deletion if file doesn't exist in storage
-          console.error("Failed to delete file from storage:", error);
+          logger.error("Failed to delete file from storage", {
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       }
 
@@ -118,10 +120,10 @@ export const inboxRouter = createTRPCRouter({
             });
           } catch (error) {
             // Log error but don't fail the deletion if file doesn't exist in storage
-            console.error(
-              `Failed to delete file from storage for ${result.id}:`,
-              error,
-            );
+            logger.error("Failed to delete file from storage", {
+              inboxId: result.id,
+              error: error instanceof Error ? error.message : String(error),
+            });
           }
         }
 
@@ -133,7 +135,10 @@ export const inboxRouter = createTRPCRouter({
           });
         } catch (error) {
           // Log error but continue with other items
-          console.error(`Failed to delete embedding for ${result.id}:`, error);
+          logger.error("Failed to delete embedding", {
+            inboxId: result.id,
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       }
 
