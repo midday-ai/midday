@@ -1,3 +1,4 @@
+import type { BunRedisCache } from "@midday/cache/drizzle-cache";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
@@ -20,7 +21,7 @@ const connectionConfig = {
 // Drizzle query cache (Railway Redis, private network)
 // Uses explicit strategy — only queries with .$withCache() are cached.
 // Mutations auto-invalidate cached queries for affected tables.
-let cacheInstance: any;
+let cacheInstance: BunRedisCache | undefined;
 
 try {
   const { BunRedisCache } = require("@midday/cache/drizzle-cache");
