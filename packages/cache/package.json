@@ -2,6 +2,11 @@
   "name": "@midday/cache",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit"
+  },
   "exports": {
     "./api-key-cache": "./src/api-key-cache.ts",
     "./user-cache": "./src/user-cache.ts",

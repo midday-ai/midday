@@ -8,6 +8,7 @@
     "dev": "TZ=UTC next dev --turbopack -p 3000",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
     "start": "next start"
   },
   "dependencies": {

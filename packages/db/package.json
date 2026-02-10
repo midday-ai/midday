@@ -12,7 +12,8 @@
     "test:all-matching": "bun test src/test/transaction-matching*.test.ts",
     "test:reports": "bun test src/test/reports.test.ts",
     "test:watch": "bun test --watch",
-    "validate-golden": "bun run src/test/validate-golden-dataset.ts"
+    "validate-golden": "bun run src/test/validate-golden-dataset.ts",
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
     "./client": "./src/client.ts",

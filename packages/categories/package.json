@@ -10,6 +10,8 @@
     "./embeddings": "./src/embeddings.ts"
   },
   "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "migrate": "tsx scripts/migrate.ts",
     "migrate:preview": "tsx scripts/migrate.ts --command preview",

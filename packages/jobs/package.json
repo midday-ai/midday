@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "trigger dev",
     "deploy": "trigger deploy",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "test": "bun test --exit src",
     "typecheck": "tsc --noEmit"
   },
