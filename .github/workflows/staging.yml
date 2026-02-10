@@ -96,7 +96,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy to Railway
-        run: npx @railway/cli up --service ${{ secrets.RAILWAY_API_STAGING_SERVICE_ID }} --environment staging
+        run: npx @railway/cli up --service ${{ secrets.RAILWAY_API_STAGING_SERVICE_ID }} --environment production
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
