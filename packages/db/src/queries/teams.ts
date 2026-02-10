@@ -59,8 +59,7 @@ export const getTeamById = async (db: Database, id: string) => {
       stripeConnectStatus: teams.stripeConnectStatus,
     })
     .from(teams)
-    .where(eq(teams.id, id))
-    .$withCache();
+    .where(eq(teams.id, id));
 
   return result;
 };

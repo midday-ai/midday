@@ -31,8 +31,7 @@ export const getUserById = async (db: Database, id: string) => {
     })
     .from(users)
     .leftJoin(teams, eq(users.teamId, teams.id))
-    .where(eq(users.id, id))
-    .$withCache();
+    .where(eq(users.id, id));
 
   return result;
 };
