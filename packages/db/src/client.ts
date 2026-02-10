@@ -17,6 +17,18 @@ const connectionConfig = {
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
 };
 
+// Drizzle query cache (Railway Redis, private network)
+// Uses explicit strategy — only queries with .$withCache() are cached.
+// Mutations auto-invalidate cached queries for affected tables.
+let cacheInstance: InstanceType<typeof import("@midday/cache/drizzle-cache").BunRedisCache> | undefined;
+
+try {
+  const { BunRedisCache } = require("@midday/cache/drizzle-cache");
+  cacheInstance = new BunRedisCache();
+} catch {
+  // Cache unavailable (non-Bun runtime or missing dependency)
+}
+
 // Primary pool — DATABASE_PRIMARY_URL should point to the Supabase pooler
 const primaryPool = new Pool({
   connectionString: process.env.DATABASE_PRIMARY_URL!,
@@ -26,6 +38,7 @@ const primaryPool = new Pool({
 export const primaryDb = drizzle(primaryPool, {
   schema,
   casing: "snake_case",
+  ...(cacheInstance ? { cache: cacheInstance } : {}),
 });
 
 // Map Railway region → replica URL (only create the pool this instance needs)
@@ -45,6 +58,7 @@ const replicaDb = replicaUrl
   ? drizzle(new Pool({ connectionString: replicaUrl, ...connectionConfig }), {
       schema,
       casing: "snake_case",
+      ...(cacheInstance ? { cache: cacheInstance } : {}),
     })
   : primaryDb;
 
