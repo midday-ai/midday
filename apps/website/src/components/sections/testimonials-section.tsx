@@ -3,6 +3,7 @@
 import { Icons } from "@midday/ui/icons";
 import type Hls from "hls.js";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -412,7 +413,7 @@ function VideoTestimonialCardMobile({
   );
 }
 
-const defaultTestimonials: Testimonial[] = [
+export const defaultTestimonials: Testimonial[] = [
   {
     name: "Paweł Michalski",
     title: "",
@@ -438,7 +439,7 @@ const defaultTestimonials: Testimonial[] = [
   {
     name: "Richard Poelderl",
     title: "",
-    company: "Conduct.bln",
+    company: "Conduct",
     country: "Germany",
     image: "/stories/richard.jpeg",
     content:
@@ -863,6 +864,14 @@ export function TestimonialsSection({
               })}
             </div>
           </div>
+        </div>
+        <div className="text-center mt-6 sm:mt-8">
+          <Link
+            href="/testimonials"
+            className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+          >
+            View all customer stories
+          </Link>
         </div>
       </div>
     </section>
