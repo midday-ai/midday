@@ -71,15 +71,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - uses: ./.github/actions/setup
+
+      - name: Lint
+        run: bunx turbo lint --filter="...[origin/main]"
 
       - name: Build required type dependencies
         run: bunx turbo build --filter=workbench --filter=@midday/engine
 
-      - name: Validate affected packages
-        run: bunx turbo test lint typecheck --filter="...[HEAD~1]"
+      - name: Typecheck
+        run: bunx turbo typecheck --filter="...[origin/main]"
+
+      - name: Test
+        run: bunx turbo test --filter="...[origin/main]"
 
   # ---------------------------------------------------------------------------
   # Deploy API to Railway staging
