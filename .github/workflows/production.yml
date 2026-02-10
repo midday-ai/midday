@@ -78,9 +78,11 @@ jobs:
 
       - uses: ./.github/actions/setup
 
+      - name: Build required type dependencies
+        run: bunx turbo build --filter=workbench --filter=@midday/engine
+
       - name: Validate affected packages
-        run: |
-          bunx turbo test lint typecheck --filter="...[${{ github.event.before }}]"
+        run: bunx turbo test lint typecheck --filter="...[${{ github.event.before }}]"
 
   # ---------------------------------------------------------------------------
   # Deploy API to Railway
