@@ -1,4 +1,22 @@
-import type { Database, DatabaseOrTransaction } from "@db/client";
+import {
+  differenceInDays,
+  endOfQuarter,
+  format,
+  getQuarter,
+  startOfQuarter,
+} from "date-fns";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  isNotNull,
+  isNull,
+  lte,
+  sql,
+} from "drizzle-orm";
+import type { Database, DatabaseOrTransaction } from "../client";
 import {
   type ExpenseAnomaly,
   type InsightActivity,
@@ -19,25 +37,7 @@ import {
   trackerEntries,
   trackerProjects,
   transactions,
-} from "@db/schema";
-import {
-  differenceInDays,
-  endOfQuarter,
-  format,
-  getQuarter,
-  startOfQuarter,
-} from "date-fns";
-import {
-  and,
-  count,
-  desc,
-  eq,
-  gte,
-  isNotNull,
-  isNull,
-  lte,
-  sql,
-} from "drizzle-orm";
+} from "../schema";
 
 /**
  * Insight type returned from database queries

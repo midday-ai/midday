@@ -1,6 +1,6 @@
-import type { Database } from "@db/client";
-import { inboxAccounts } from "@db/schema";
 import { and, eq } from "drizzle-orm";
+import type { Database } from "../client";
+import { inboxAccounts } from "../schema";
 
 export async function getInboxAccounts(db: Database, teamId: string) {
   return db

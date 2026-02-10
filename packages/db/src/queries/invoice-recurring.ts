@@ -1,12 +1,14 @@
 import { UTCDate } from "@date-fns/utc";
-import type { Database, DatabaseOrTransaction } from "@db/client";
+import { addMonths, endOfMonth, format, parseISO } from "date-fns";
+import { and, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import type { Database, DatabaseOrTransaction } from "../client";
 import {
   customers,
   invoiceRecurring,
   invoiceRecurringStatusEnum,
   invoices,
   teams,
-} from "@db/schema";
+} from "../schema";
 import {
   type InvoiceRecurringEndType,
   type InvoiceRecurringFrequency,
@@ -16,9 +18,7 @@ import {
   calculateNextScheduledDate,
   calculateUpcomingDates,
   shouldMarkCompleted,
-} from "@db/utils/invoice-recurring";
-import { addMonths, endOfMonth, format, parseISO } from "date-fns";
-import { and, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
+} from "../utils/invoice-recurring";
 
 export type CreateInvoiceRecurringParams = {
   teamId: string;

@@ -1,5 +1,4 @@
 import { UTCDate } from "@date-fns/utc";
-import type { Database } from "@db/client";
 import {
   CONTRA_REVENUE_CATEGORIES,
   REVENUE_CATEGORIES,
@@ -31,6 +30,7 @@ import {
   sql,
 } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import type { Database } from "../client";
 import {
   InvalidReportTypeError,
   ReportExpiredError,

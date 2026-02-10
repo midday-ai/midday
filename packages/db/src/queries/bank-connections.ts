@@ -1,8 +1,8 @@
-import type { Database } from "@db/client";
-import { bankAccounts, bankConnections } from "@db/schema";
 import { chatCache } from "@midday/cache/chat-cache";
 import { decrypt, encrypt } from "@midday/encryption";
 import { and, eq } from "drizzle-orm";
+import type { Database } from "../client";
+import { bankAccounts, bankConnections } from "../schema";
 
 export type GetBankConnectionsParams = {
   teamId: string;

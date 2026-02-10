@@ -1,12 +1,12 @@
-import type { Database } from "@db/client";
+import { buildSearchQuery } from "@midday/db/utils/search-query";
+import { and, desc, eq, gte, inArray, like, lte, not, sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm/sql/sql";
+import type { Database } from "../client";
 import {
   documentTagAssignments,
   documents,
   transactionAttachments,
-} from "@db/schema";
-import { buildSearchQuery } from "@midday/db/utils/search-query";
-import { and, desc, eq, gte, inArray, like, lte, not, sql } from "drizzle-orm";
-import type { SQL } from "drizzle-orm/sql/sql";
+} from "../schema";
 
 export type GetDocumentQueryParams = {
   teamId: string;

@@ -1,5 +1,3 @@
-import type { Database } from "@db/client";
-import { bankAccounts, teams } from "@db/schema";
 import { chatCache } from "@midday/cache/chat-cache";
 import {
   CASH_ACCOUNT_TYPES,
@@ -8,6 +6,8 @@ import {
 import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import type { Database } from "../client";
+import { bankAccounts, teams } from "../schema";
 
 export type CreateBankAccountParams = {
   name: string;

@@ -1,7 +1,7 @@
-import type { Database } from "@db/client";
-import { customers, invoices } from "@db/schema";
 import { parseISO } from "date-fns";
 import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import type { Database } from "../client";
+import { customers, invoices } from "../schema";
 
 /**
  * Revenue concentration data for a period

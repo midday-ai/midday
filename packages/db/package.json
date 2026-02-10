@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "lint": "biome check .",
-    "lint:fix": "biome format --write .",
+    "lint:fix": "biome check --write .",
     "test": "bun test --exit",
     "test:matching": "bun test src/test/transaction-matching.test.ts",
     "test:performance": "bun test src/test/transaction-matching.performance.test.ts",

@@ -14,8 +14,8 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "lint:fix": "biome format --write .",
-    "typecheck": "echo 'skipped — waiting for @db path alias migration'",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
     "eval": "bunx evalite watch",
     "eval:run": "bunx evalite"
   },

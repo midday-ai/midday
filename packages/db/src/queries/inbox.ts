@@ -1,4 +1,6 @@
-import type { Database } from "@db/client";
+import { createLoggerWithContext } from "@midday/logger";
+import { parseISO } from "date-fns";
+import type { Database } from "../client";
 import {
   inbox,
   inboxAccounts,
@@ -8,9 +10,7 @@ import {
   transactionEmbeddings,
   transactionMatchSuggestions,
   transactions,
-} from "@db/schema";
-import { createLoggerWithContext } from "@midday/logger";
-import { parseISO } from "date-fns";
+} from "../schema";
 
 const logger = createLoggerWithContext("inbox");
 import {

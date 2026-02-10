@@ -1,6 +1,6 @@
-import type { Database } from "@db/client";
-import { transactionCategories } from "@db/schema";
 import { and, asc, desc, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import type { Database } from "../client";
+import { transactionCategories } from "../schema";
 import { generateCategoryEmbedding } from "../utils/embeddings";
 import { createActivity } from "./activities";
 

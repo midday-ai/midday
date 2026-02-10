@@ -21,7 +21,6 @@
     "baseUrl": ".",
     "paths": {
       "@worker/*": ["src/*"],
-      "@db/*": ["../../packages/db/src/*"],
       "@api/*": ["../../apps/api/src/*"],
       "@documents/*": ["../../packages/documents/src/*"],
       "@supabase/*": ["../../packages/supabase/src/*"]

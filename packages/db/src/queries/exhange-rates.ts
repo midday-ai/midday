@@ -1,6 +1,6 @@
-import type { Database } from "@db/client";
-import { exchangeRates } from "@db/schema";
 import { and, eq, inArray, sql } from "drizzle-orm";
+import type { Database } from "../client";
+import { exchangeRates } from "../schema";
 
 export type ExchangeRateData = {
   base: string;

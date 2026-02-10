@@ -1,4 +1,9 @@
-import type { Database } from "@db/client";
+import { buildSearchQuery } from "@midday/db/utils/search-query";
+import { generateToken } from "@midday/invoice/token";
+import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm/sql/sql";
+import { nanoid } from "nanoid";
+import type { Database } from "../client";
 import {
   customerTags,
   customers,
@@ -7,12 +12,7 @@ import {
   tags,
   teams,
   trackerProjects,
-} from "@db/schema";
-import { buildSearchQuery } from "@midday/db/utils/search-query";
-import { generateToken } from "@midday/invoice/token";
-import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
-import type { SQL } from "drizzle-orm/sql/sql";
-import { nanoid } from "nanoid";
+} from "../schema";
 import { createActivity } from "./activities";
 
 type GetCustomerByIdParams = {

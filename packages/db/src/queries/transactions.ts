@@ -1,19 +1,3 @@
-import type { Database } from "@db/client";
-import {
-  accountingSyncRecords,
-  bankAccounts,
-  bankConnections,
-  inbox,
-  tags,
-  transactionAttachments,
-  transactionCategories,
-  transactionEmbeddings,
-  type transactionFrequencyEnum,
-  transactionMatchSuggestions,
-  transactionTags,
-  transactions,
-  users,
-} from "@db/schema";
 import {
   CONTRA_REVENUE_CATEGORIES,
   REVENUE_CATEGORIES,
@@ -40,6 +24,22 @@ import {
 } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import { nanoid } from "nanoid";
+import type { Database } from "../client";
+import {
+  accountingSyncRecords,
+  bankAccounts,
+  bankConnections,
+  inbox,
+  tags,
+  transactionAttachments,
+  transactionCategories,
+  transactionEmbeddings,
+  type transactionFrequencyEnum,
+  transactionMatchSuggestions,
+  transactionTags,
+  transactions,
+  users,
+} from "../schema";
 import { createActivity } from "./activities";
 import { type Attachment, createAttachments } from "./transaction-attachments";
 

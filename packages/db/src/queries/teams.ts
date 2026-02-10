@@ -1,11 +1,3 @@
-import type { Database } from "@db/client";
-import {
-  bankConnections,
-  teams,
-  transactionCategories,
-  users,
-  usersOnTeam,
-} from "@db/schema";
 import { chatCache } from "@midday/cache/chat-cache";
 import { teamCache } from "@midday/cache/team-cache";
 import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
@@ -26,6 +18,14 @@ import {
   isNull,
   or,
 } from "drizzle-orm";
+import type { Database } from "../client";
+import {
+  bankConnections,
+  teams,
+  transactionCategories,
+  users,
+  usersOnTeam,
+} from "../schema";
 
 export const hasTeamAccess = async (
   db: Database,

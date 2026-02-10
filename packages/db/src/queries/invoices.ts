@@ -1,18 +1,4 @@
 import { UTCDate } from "@date-fns/utc";
-import type { Database, DatabaseOrTransaction } from "@db/client";
-import {
-  type activityTypeEnum,
-  customers,
-  exchangeRates,
-  invoiceRecurring,
-  invoiceStatusEnum,
-  invoiceTemplates,
-  invoices,
-  teams,
-  trackerEntries,
-  trackerProjects,
-  users,
-} from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { generateToken } from "@midday/invoice/token";
 import type { EditorDoc, LineItem } from "@midday/invoice/types";
@@ -42,6 +28,20 @@ import {
 } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import { v4 as uuidv4 } from "uuid";
+import type { Database, DatabaseOrTransaction } from "../client";
+import {
+  type activityTypeEnum,
+  customers,
+  exchangeRates,
+  invoiceRecurring,
+  invoiceStatusEnum,
+  invoiceTemplates,
+  invoices,
+  teams,
+  trackerEntries,
+  trackerProjects,
+  users,
+} from "../schema";
 import { logActivity } from "../utils/log-activity";
 
 export type Template = {

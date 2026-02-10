@@ -1,14 +1,14 @@
 import { createHash } from "node:crypto";
-import type { Database } from "@db/client";
+import { hash } from "@midday/encryption";
+import { and, desc, eq, gt, gte, lte } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import type { Database } from "../client";
 import {
   oauthAccessTokens,
   oauthApplications,
   oauthAuthorizationCodes,
   users,
-} from "@db/schema";
-import { hash } from "@midday/encryption";
-import { and, desc, eq, gt, gte, lte } from "drizzle-orm";
-import { nanoid } from "nanoid";
+} from "../schema";
 
 export type CreateAuthorizationCodeParams = {
   applicationId: string;
