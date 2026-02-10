@@ -94,7 +94,7 @@ export function ExportBar() {
   // Set default selected provider when connected providers change
   useEffect(() => {
     if (connectedProviders.length > 0 && !selectedProviderId) {
-      setSelectedProviderId(connectedProviders[0].app_id);
+      setSelectedProviderId(connectedProviders[0]!.app_id);
       setExportPreference("accounting");
     } else if (connectedProviders.length === 0) {
       setSelectedProviderId(null);
@@ -118,8 +118,8 @@ export function ExportBar() {
             runId: data.id,
             exportType: "accounting",
             providerName:
-              PROVIDER_NAMES[connectedProvider?.app_id ?? ""] ??
-              connectedProvider?.app_id,
+              PROVIDER_NAMES[activeProvider?.app_id ?? ""] ??
+              activeProvider?.app_id,
           });
           setRowSelection("review", {});
         }
@@ -129,8 +129,8 @@ export function ExportBar() {
         setExportingTransactionIds([]);
         setExportingCount(null);
         showMutationError(
-          PROVIDER_NAMES[connectedProvider?.app_id ?? ""] ??
-            connectedProvider?.app_id ??
+          PROVIDER_NAMES[activeProvider?.app_id ?? ""] ??
+            activeProvider?.app_id ??
             "accounting software",
         );
       },
