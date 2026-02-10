@@ -80,7 +80,7 @@ jobs:
 
       - name: Validate affected packages
         run: |
-          bunx turbo test lint typecheck --filter="...[${{ github.event.before }}]"
+          bunx turbo test lint typecheck --filter="...[${{ github.event.before }}]" --concurrency=4
 
   # ---------------------------------------------------------------------------
   # Deploy API to Railway
