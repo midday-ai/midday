@@ -68,9 +68,9 @@ export default function ComparePage() {
             <Link
               key={competitor.id}
               href={`/compare/${competitor.slug}`}
-              className="border border-border p-6 hover:border-primary transition-colors group"
+              className="border border-border p-6 hover:border-foreground/20 transition-all duration-200"
             >
-              <h2 className="font-sans text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
+              <h2 className="font-sans text-lg text-foreground mb-2">
                 {competitor.name} Alternative
               </h2>
               <p className="font-sans text-sm text-muted-foreground mb-4 line-clamp-2">
@@ -91,21 +91,23 @@ export default function ComparePage() {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center border border-border p-8 lg:p-12">
-          <h2 className="font-serif text-2xl text-foreground mb-4">
-            Ready to try Midday?
-          </h2>
-          <p className="font-sans text-base text-muted-foreground mb-6 max-w-xl mx-auto">
-            Start your 14-day free trial and see why founders are switching to
-            Midday.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild className="btn-inverse h-11 px-6">
-              <a href="https://app.midday.ai/">Start your free trial</a>
-            </Button>
-            <Button asChild variant="outline" className="h-11 px-6">
-              <Link href="/pricing">View pricing</Link>
-            </Button>
+        <div className="bg-background border border-border p-8 lg:p-12 text-center relative before:absolute before:inset-0 before:bg-[repeating-linear-gradient(-60deg,rgba(219,219,219,0.4),rgba(219,219,219,0.4)_1px,transparent_1px,transparent_6px)] dark:before:bg-[repeating-linear-gradient(-60deg,rgba(44,44,44,0.4),rgba(44,44,44,0.4)_1px,transparent_1px,transparent_6px)] before:pointer-events-none">
+          <div className="relative z-10">
+            <h2 className="font-serif text-2xl text-foreground mb-4">
+              Ready to try Midday?
+            </h2>
+            <p className="font-sans text-base text-muted-foreground mb-6 max-w-xl mx-auto">
+              Start your 14-day free trial and see why founders are switching to
+              Midday.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild className="btn-inverse h-11 px-6">
+                <a href="https://app.midday.ai/">Start your free trial</a>
+              </Button>
+              <Button asChild variant="outline" className="h-11 px-6">
+                <Link href="/pricing">View pricing</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

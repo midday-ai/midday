@@ -32,9 +32,8 @@ export function ComparisonHero({
         <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
           Best {competitor.name} Alternative for Founders
         </h1>
-        <p className="font-sans text-base text-muted-foreground mb-8 max-w-2xl">
-          {competitor.description} Compare features, pricing, and see why teams
-          are switching to Midday.
+        <p className="font-sans text-base text-muted-foreground leading-normal mb-8 max-w-2xl">
+          {competitor.description} Compare features, pricing, and see why teams are switching to Midday.
         </p>
 
         {/* CTA Buttons */}

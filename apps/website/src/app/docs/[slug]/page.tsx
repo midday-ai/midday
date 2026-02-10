@@ -93,7 +93,7 @@ export default async function DocPage({ params }: { params: Params }) {
             {doc.metadata.title}
           </h1>
           {doc.metadata.description && (
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-base lg:text-sm xl:text-base text-muted-foreground leading-relaxed">
               {doc.metadata.description}
             </p>
           )}

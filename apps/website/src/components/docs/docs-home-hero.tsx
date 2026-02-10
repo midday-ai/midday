@@ -15,7 +15,7 @@ export function DocsHomeHero() {
         <h1 className="text-3xl md:text-5xl font-serif tracking-tight mb-3 md:mb-4">
           How can we help?
         </h1>
-        <p className="text-muted-foreground text-sm md:text-lg max-w-lg mx-auto leading-relaxed mb-8 md:mb-10 px-4 md:px-0">
+        <p className="text-muted-foreground text-base lg:text-sm xl:text-base max-w-lg mx-auto leading-relaxed mb-8 md:mb-10 px-4 md:px-0">
           Learn how to run your business smarter with Midday.
         </p>
         <HeroChatInput onSubmit={sendMessage} />

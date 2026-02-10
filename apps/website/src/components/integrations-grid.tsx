@@ -17,11 +17,11 @@ export function IntegrationsGrid({
     <div className="pt-32 pb-24">
       {/* Header */}
       <div className="max-w-[1400px] mx-auto mb-16">
-        <div className="max-w-2xl">
+        <div className="max-w-2xl mx-auto text-center">
           <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
             Integrations
           </h1>
-          <p className="font-sans text-base text-muted-foreground leading-relaxed">
+          <p className="font-sans text-base text-muted-foreground leading-normal">
             Connect Midday with the tools you already use. From email and
             messaging to accounting software, our integrations help you
             streamline your financial workflow.
@@ -31,7 +31,7 @@ export function IntegrationsGrid({
 
       {/* Category Filter */}
       <div className="max-w-[1400px] mx-auto mb-12">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 justify-center">
           {categories.map((category) => {
             const href =
               category.id === "all"
@@ -76,12 +76,12 @@ export function IntegrationsGrid({
                 </div>
                 <div className="flex gap-1">
                   {app.beta && (
-                    <span className="text-xs font-sans text-foreground bg-secondary px-2 py-1">
+                    <span className="font-sans text-xs text-primary bg-muted px-2 py-1">
                       Beta
                     </span>
                   )}
                   {!app.active && (
-                    <span className="text-xs font-sans text-muted-foreground bg-secondary px-2 py-1">
+                    <span className="font-sans text-xs text-muted-foreground bg-muted px-2 py-1">
                       Coming soon
                     </span>
                   )}

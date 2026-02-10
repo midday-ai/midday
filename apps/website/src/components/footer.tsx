@@ -61,6 +61,7 @@ export function Footer() {
                   { href: "/download", label: "Download" },
                   { href: "/pre-accounting", label: "Pre-accounting" },
                   { href: "/integrations", label: "Apps & Integrations" },
+                  { href: "/testimonials", label: "Customer Stories" },
                 ].map((item) => (
                   <Link
                     key={item.href}
