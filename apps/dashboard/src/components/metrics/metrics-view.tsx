@@ -1,11 +1,11 @@
 "use client";
 
+import { useMemo, useRef } from "react";
+import { useOnClickOutside } from "usehooks-ts";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
-import { useMemo, useRef } from "react";
-import { useOnClickOutside } from "usehooks-ts";
 import { BurnRateCard } from "./cards/burn-rate-card";
 import { CategoryExpensesCard } from "./cards/category-expenses-card";
 import { ExpensesCard } from "./cards/expenses-card";

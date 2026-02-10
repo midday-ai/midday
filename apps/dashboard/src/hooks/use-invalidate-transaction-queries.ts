@@ -1,7 +1,7 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 export function useInvalidateTransactionQueries() {
   const trpc = useTRPC();

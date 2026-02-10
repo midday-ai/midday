@@ -1,8 +1,8 @@
 "use client";
 
-import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 
 export function NoResults() {
   const { setParams } = useInboxFilterParams();

@@ -1,19 +1,5 @@
 "use client";
 
-import {
-  trackerFilterOutputSchema,
-  trackerFilterSchema,
-} from "@/app/api/ai/filters/tracker/schema";
-import type { TrackerFilterSchema } from "@/app/api/ai/filters/tracker/schema";
-import {
-  mapStringArrayToIds,
-  normalizeString,
-  useAIFilter,
-  validateEnumArray,
-} from "@/hooks/use-ai-filter";
-import { useTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -34,6 +20,19 @@ import { useQuery } from "@tanstack/react-query";
 import { formatISO, parseISO } from "date-fns";
 import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import type { TrackerFilterSchema } from "@/app/api/ai/filters/tracker/schema";
+import {
+  trackerFilterOutputSchema,
+  trackerFilterSchema,
+} from "@/app/api/ai/filters/tracker/schema";
+import {
+  mapStringArrayToIds,
+  normalizeString,
+  useAIFilter,
+} from "@/hooks/use-ai-filter";
+import { useTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { FilterList } from "./filter-list";
 
 const statusFilters = [

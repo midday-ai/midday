@@ -1,8 +1,8 @@
 import { getInsightByPeriod, getTeamsForInsights } from "@midday/db/queries";
 import {
-  type PeriodType,
   getEnabledTeamIds,
   getPreviousCompletePeriod,
+  type PeriodType,
 } from "@midday/insights";
 import type { Job } from "bullmq";
 import { insightsQueue } from "../../queues/insights";

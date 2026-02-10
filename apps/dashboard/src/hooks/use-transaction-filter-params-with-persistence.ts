@@ -1,11 +1,11 @@
 "use client";
 
+import { useCallback } from "react";
 import {
   EMPTY_FILTER_STATE,
   type FilterHookReturn,
   type TransactionFilters,
 } from "@/utils/transaction-filters";
-import { useCallback } from "react";
 import { useTransactionFilterParams } from "./use-transaction-filter-params";
 
 export function useTransactionFilterParamsWithPersistence(): FilterHookReturn<TransactionFilters> {

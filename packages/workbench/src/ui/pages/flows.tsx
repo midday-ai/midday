@@ -1,8 +1,3 @@
-import { EmptyState } from "@/components/shared/empty-state";
-import { RelativeTime } from "@/components/shared/relative-time";
-import { StatusBadge } from "@/components/shared/status-badge";
-import type { FlowSummary } from "@/core/types";
-import { useFlows } from "@/lib/hooks";
 import { useNavigate } from "@tanstack/react-router";
 import {
   AlertCircle,
@@ -11,6 +6,11 @@ import {
   Network,
   XCircle,
 } from "lucide-react";
+import { EmptyState } from "@/components/shared/empty-state";
+import { RelativeTime } from "@/components/shared/relative-time";
+import { StatusBadge } from "@/components/shared/status-badge";
+import type { FlowSummary } from "@/core/types";
+import { useFlows } from "@/lib/hooks";
 
 interface FlowsPageProps {
   onFlowSelect: (queueName: string, jobId: string) => void;

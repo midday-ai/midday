@@ -1,4 +1,3 @@
-import type { Scope } from "@api/utils/scopes";
 import { SCOPES } from "@api/utils/scopes";
 import { z } from "@hono/zod-openapi";
 

@@ -1,6 +1,6 @@
-import { NotificationsSettingsList } from "@/components/notifications-settings-list";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { NotificationsSettingsList } from "@/components/notifications-settings-list";
 
 export const metadata: Metadata = {
   title: "Notifications | Midday",

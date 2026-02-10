@@ -1,7 +1,7 @@
 import type { Context } from "@api/rest/types";
 import { globalSearchSchema, searchResponseSchema } from "@api/schemas/search";
 import { validateResponse } from "@api/utils/validate-response";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { globalSearchQuery } from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 

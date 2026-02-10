@@ -1,9 +1,5 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
-import { usePendingUploadsStore } from "@/store/pending-uploads";
-import { useTRPC } from "@/trpc/client";
-import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
@@ -11,6 +7,10 @@ import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { useUserQuery } from "@/hooks/use-user";
+import { usePendingUploadsStore } from "@/store/pending-uploads";
+import { useTRPC } from "@/trpc/client";
+import { resumableUpload } from "@/utils/upload";
 
 // Shared toast ID for coordinating between upload zone and data table
 export const PROCESSING_TOAST_ID = "transactions-processing";
@@ -174,7 +174,7 @@ export function TransactionsUploadZone({ children }: Props) {
         variant: "spinner",
         duration: Number.POSITIVE_INFINITY, // Persistent until updated
       });
-    } catch (error) {
+    } catch (_error) {
       // Refresh inbox to show current state after error
       queryClient.invalidateQueries({
         queryKey: trpc.inbox.get.queryKey(),

@@ -2,7 +2,7 @@ import type { Bindings } from "@engine/common/bindings";
 import { ErrorSchema } from "@engine/common/schema";
 import { Provider } from "@engine/providers";
 import { getHealthCheck } from "@engine/utils/search";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { HealthSchema } from "./schema";
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { Icons } from "@midday/ui/icons";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { MaterialIcon } from "./icon-mapping";
 
 export function CommandPanelAnimation({
@@ -11,7 +11,7 @@ export function CommandPanelAnimation({
 }: {
   onComplete?: () => void;
 }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [_searchQuery, _setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [showTransaction, setShowTransaction] = useState(false);
   const [showInvoice, setShowInvoice] = useState(false);

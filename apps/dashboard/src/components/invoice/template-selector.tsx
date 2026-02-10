@@ -1,6 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { localDateToUTCMidnight } from "@midday/invoice/recurring";
 import { cn } from "@midday/ui/cn";
 import {
@@ -18,6 +17,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, parseISO } from "date-fns";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { useTRPC } from "@/trpc/client";
 import { CreateTemplateDialog } from "./create-template-dialog";
 
 export function TemplateSelector() {

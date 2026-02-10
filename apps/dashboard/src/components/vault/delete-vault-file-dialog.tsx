@@ -1,6 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,10 +10,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@midday/ui/alert-dialog";
-import { Icons } from "@midday/ui/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useTRPC } from "@/trpc/client";
 
 type Props = {
   id: string;

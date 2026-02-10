@@ -1,7 +1,7 @@
-import type { Database } from "@db/client";
-import { WhatsAppAlreadyConnectedToAnotherTeamError } from "@db/errors";
-import { apps, usersOnTeam } from "@db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
+import type { Database } from "../client";
+import { WhatsAppAlreadyConnectedToAnotherTeamError } from "../errors";
+import { apps, usersOnTeam } from "../schema";
 
 export type CreateAppParams = {
   teamId: string;

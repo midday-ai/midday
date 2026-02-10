@@ -1,18 +1,14 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { MaterialIcon } from "./icon-mapping";
 
-export function FileGridAnimation({
-  onComplete,
-}: {
-  onComplete?: () => void;
-}) {
+export function FileGridAnimation({ onComplete }: { onComplete?: () => void }) {
   const { resolvedTheme } = useTheme();
-  const isLightMode = resolvedTheme !== "dark";
+  const _isLightMode = resolvedTheme !== "dark";
   const [query, setQuery] = useState("");
   const [firstCardLoaded, setFirstCardLoaded] = useState(false);
   const [showCards, setShowCards] = useState(false);

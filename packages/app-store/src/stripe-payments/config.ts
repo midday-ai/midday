@@ -6,4 +6,3 @@ export default {
   ...baseConfig,
   images: [] as string[],
 };
-

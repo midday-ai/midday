@@ -1,14 +1,14 @@
 "use client";
 
+import { useToast } from "@midday/ui/use-toast";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
 import {
   type AppOAuthErrorCode,
   formatProviderName,
   getErrorDescription,
   getErrorTitle,
 } from "@/utils/app-oauth-errors";
-import { useToast } from "@midday/ui/use-toast";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
 
 /**
  * Component that watches URL search params for OAuth connection status

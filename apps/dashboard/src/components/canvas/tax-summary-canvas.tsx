@@ -1,5 +1,9 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
+import { getDefaultTaxType } from "@midday/utils";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasChart,
@@ -18,10 +22,6 @@ import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-
 import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
-import { getDefaultTaxType } from "@midday/utils";
-import { parseAsInteger, useQueryState } from "nuqs";
 
 function getTaxTerminology(
   countryCode: string | undefined,
@@ -83,7 +83,7 @@ export function TaxSummaryCanvas() {
   const [artifact] = useArtifact(taxSummaryArtifact, { version });
   const { data, status } = artifact;
   const { data: user } = useUserQuery();
-  const isLoading = status === "loading";
+  const _isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
   const locale = user?.locale ?? undefined;

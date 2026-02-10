@@ -1,13 +1,13 @@
 import { ExportTransactionsProcessor } from "./export-transactions";
 import { SyncAttachmentsProcessor } from "./sync-attachments";
 
-// Re-export base class for extension
-export { AccountingProcessorBase } from "./base";
 export type {
   AccountingProviderId,
   InitializedProvider,
   TransactionForMapping,
 } from "./base";
+// Re-export base class for extension
+export { AccountingProcessorBase } from "./base";
 
 /**
  * Accounting processors - maps job names to processor instances

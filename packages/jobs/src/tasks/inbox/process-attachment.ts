@@ -3,11 +3,11 @@ import { processAttachmentSchema } from "@jobs/schema";
 import {
   createInbox,
   getInboxByFilePath,
+  getTeamById,
   groupRelatedInboxItems,
   updateInbox,
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
-import { getTeamById } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask, tasks } from "@trigger.dev/sdk";

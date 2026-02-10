@@ -407,7 +407,7 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
    */
   isTokenExpired(expiresAt: Date, bufferSeconds = 60): boolean {
     const bufferMs = bufferSeconds * 1000;
-    return new Date().getTime() >= expiresAt.getTime() - bufferMs;
+    return Date.now() >= expiresAt.getTime() - bufferMs;
   }
 
   /**

@@ -1,15 +1,14 @@
 "use client";
 
-import { useUpload } from "@/hooks/use-upload";
-import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useRef, useState } from "react";
-import { forwardRef } from "react";
+import { forwardRef, useRef, useState } from "react";
+import { useUpload } from "@/hooks/use-upload";
+import { useTRPC } from "@/trpc/client";
 
 type Props = {
   userId: string;

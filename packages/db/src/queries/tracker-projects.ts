@@ -1,14 +1,14 @@
-import type { Database } from "@db/client";
+import { buildSearchQuery } from "@midday/db/utils/search-query";
+import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm/sql/sql";
+import type { Database } from "../client";
 import {
   customers,
   tags,
   teams,
-  trackerProjectTags,
   trackerProjects,
-} from "@db/schema";
-import { buildSearchQuery } from "@midday/db/utils/search-query";
-import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
-import type { SQL } from "drizzle-orm/sql/sql";
+  trackerProjectTags,
+} from "../schema";
 import { createActivity } from "./activities";
 
 export type GetTrackerProjectsParams = {

@@ -20,7 +20,6 @@
       ],
       "passThroughEnv": [
         "SUPABASE_SERVICE_KEY",
-        "SUPABASE_API_KEY",
         "RESEND_API_KEY",
         "RESEND_AUDIENCE_ID",
         "GOCARDLESS_SECRET_ID",
@@ -31,7 +30,6 @@
         "POLAR_ACCESS_TOKEN",
         "POLAR_ENVIRONMENT",
         "FILE_KEY_SECRET",
-        "API_ROUTE_SECRET",
         "TELLER_CERTIFICATE",
         "TELLER_CERTIFICATE_PRIVATE_KEY",
         "ENGINE_API_KEY",
@@ -39,8 +37,6 @@
         "PLAID_SECRET",
         "GITHUB_TOKEN",
         "PLAIN_API_KEY",
-        "BASELIME_SERVICE",
-        "BASELIME_API_KEY",
         "OPENAI_API_KEY",
         "OPENPANEL_SECRET_KEY",
         "SLACK_CLIENT_SECRET",
@@ -59,7 +55,6 @@
         "OUTLOOK_REDIRECT_URI",
         "MIDDAY_ENCRYPTION_KEY",
         "NEXT_PUBLIC_URL",
-        "VERCEL_TARGET_ENV",
         "SENTRY_AUTH_TOKEN",
         "SENTRY_ORG",
         "SENTRY_PROJECT",
@@ -86,7 +81,6 @@
       "dependsOn": ["^topo"]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
       "outputs": []
     }
   }

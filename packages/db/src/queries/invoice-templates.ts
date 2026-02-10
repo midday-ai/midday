@@ -1,6 +1,6 @@
-import type { Database } from "@db/client";
-import { invoiceTemplates } from "@db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
+import type { Database } from "../client";
+import { invoiceTemplates } from "../schema";
 
 type InvoiceTemplateParams = {
   customerLabel?: string;

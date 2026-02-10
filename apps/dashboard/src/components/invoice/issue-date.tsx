@@ -1,5 +1,3 @@
-import { useTemplateUpdate } from "@/hooks/use-template-update";
-import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
 import { localDateToUTCMidnight } from "@midday/invoice/recurring";
 import { Calendar } from "@midday/ui/calendar";
@@ -7,6 +5,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
+import { useUserQuery } from "@/hooks/use-user";
 import { LabelInput } from "./label-input";
 
 export function IssueDate() {

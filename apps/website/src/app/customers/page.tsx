@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { Customers } from "@/components/customers";
-import type { Metadata } from "next";
 
 const title = "Customer Management";
 const description =

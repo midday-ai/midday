@@ -1,11 +1,11 @@
-import type { Database } from "@db/client";
+import { and, eq, inArray, sql } from "drizzle-orm";
+import type { Database } from "../client";
 import {
   accountingSyncRecords,
   inbox,
   transactionAttachments,
   transactions,
-} from "@db/schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+} from "../schema";
 import { createActivity } from "./activities";
 
 export type Attachment = {

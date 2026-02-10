@@ -20,4 +20,3 @@ export const recurringSeriesCompleted: NotificationHandler = {
     },
   }),
 };
-

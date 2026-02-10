@@ -1,6 +1,5 @@
 import type { ExtractTablesWithRelations } from "drizzle-orm";
-import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
-import type { PgDatabase } from "drizzle-orm/pg-core";
+import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import type { TablesRelationalConfig } from "drizzle-orm/relations";
 
 export type ReplicatedDatabase<Q extends PgDatabase<any, any, any>> = Q & {

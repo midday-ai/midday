@@ -1,13 +1,5 @@
 "use client";
 
-import { InputColor } from "@/components/input-color";
-import { SelectParentCategory } from "@/components/select-parent-category";
-import { SelectTaxType } from "@/components/select-tax-type";
-import { TaxRateInput } from "@/components/tax-rate-input";
-import { useCategoryParams } from "@/hooks/use-category-params";
-import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   Form,
@@ -24,6 +16,14 @@ import { taxTypes } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { z } from "zod/v3";
+import { InputColor } from "@/components/input-color";
+import { SelectParentCategory } from "@/components/select-parent-category";
+import { SelectTaxType } from "@/components/select-tax-type";
+import { TaxRateInput } from "@/components/tax-rate-input";
+import { useCategoryParams } from "@/hooks/use-category-params";
+import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 const formSchema = z.object({
   id: z.string().uuid(),

@@ -1,6 +1,6 @@
-import type { Database } from "@db/client";
-import { inboxBlocklist } from "@db/schema";
 import { and, eq } from "drizzle-orm";
+import type { Database } from "../client";
+import { inboxBlocklist } from "../schema";
 
 export type GetInboxBlocklistParams = {
   teamId: string;

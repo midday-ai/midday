@@ -1,3 +1,7 @@
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import type { SearchParams } from "nuqs";
+import { Suspense } from "react";
 import { OpenTrackerSheet } from "@/components/open-tracker-sheet";
 import { ScrollableContent } from "@/components/scrollable-content";
 import { DataTable } from "@/components/tables/tracker";
@@ -8,10 +12,6 @@ import { loadSortParams } from "@/hooks/use-sort-params";
 import { loadTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
 import { prefetch, trpc } from "@/trpc/server";
 import { Cookies } from "@/utils/constants";
-import type { Metadata } from "next";
-import { cookies } from "next/headers";
-import type { SearchParams } from "nuqs";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Tracker | Midday",

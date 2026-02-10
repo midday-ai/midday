@@ -1,5 +1,6 @@
 const isProduction =
-  process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
+  process.env.NODE_ENV === "production" ||
+  process.env.RAILWAY_ENVIRONMENT === "production";
 
 /**
  * Parse Redis URL and return connection options for BullMQ
@@ -48,7 +49,7 @@ export function getRedisConnection() {
     enableReadyCheck: false,
     // Network settings
     lazyConnect: false,
-    family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
+    family: 4,
     keepAlive: 30000, // TCP keep-alive every 30s
     connectTimeout: isProduction ? 15000 : 5000,
     // BullMQ recommended retry strategy: exponential backoff

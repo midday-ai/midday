@@ -2,8 +2,15 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import("next").NextConfig} */
 const config = {
+  output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
+  cacheHandlers:
+    process.env.NODE_ENV === "production"
+      ? {
+          default: require.resolve("./cache-handler.mjs"),
+        }
+      : undefined,
   experimental: {
     optimizePackageImports: [
       "lucide-react",

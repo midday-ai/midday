@@ -9,27 +9,27 @@ body {
 
 .skeleton-box {
   background-color: hsl(var(--border));
-  color: hsl(var(--border)) !important;
-  user-select: none !important;
-  cursor: default !important;
+  color: hsl(var(--border));
+  user-select: none;
+  cursor: default;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  border-color: transparent !important;
+  border-color: transparent;
 }
 
 .skeleton-circle {
   background-color: hsl(var(--border));
-  border-radius: 1000px !important;
-  color: hsl(var(--border)) !important;
-  user-select: none !important;
-  cursor: default !important;
+  border-radius: 1000px;
+  color: hsl(var(--border));
+  user-select: none;
+  cursor: default;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  border-color: transparent !important;
+  border-color: transparent;
 }
 
 .skeleton-circle > *,
 .skeleton-box > *,
 .skeleton-line > * {
-  opacity: 0 !important;
+  opacity: 0;
 }
 
 .pin-field-container {
@@ -94,10 +94,10 @@ body {
 
 /* Desktop App */
 html.desktop {
-  background: transparent !important;
+  background: transparent;
   user-select: none;
   -webkit-user-select: none;
-  overscroll-behavior: none !important;
+  overscroll-behavior: none;
   border-radius: 10px;
   overflow: hidden;
   height: 100vh;
@@ -111,8 +111,8 @@ html.desktop {
 
 html.desktop body {
   position: relative;
-  background: hsl(var(--background)) !important;
-  overscroll-behavior: none !important;
+  background: hsl(var(--background));
+  overscroll-behavior: none;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -147,7 +147,7 @@ html.desktop body::-webkit-scrollbar {
 .desktop div,
 .desktop a,
 .desktop button {
-  cursor: default !important;
+  cursor: default;
 }
 
 .color-picker .react-colorful {
@@ -209,8 +209,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .tiptap {
-  font-size: 11px !important;
-  line-height: 18px !important;
+  font-size: 11px;
+  line-height: 18px;
 }
 
 .dark .dotted-bg {
@@ -413,21 +413,21 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 /* Chat input positioning for small viewport heights on homepage */
 @media (max-height: 860px) {
   .chat-input-wrapper-static {
-    position: relative !important;
-    bottom: auto !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
+    position: relative;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: 100%;
     margin-top: auto;
     margin-bottom: 0;
   }
 
   .chat-input-static {
-    position: relative !important;
-    bottom: 30px !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
+    position: relative;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    width: 100%;
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
   }
@@ -438,9 +438,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
   /* Allow scrolling when chat input is not fixed */
   .chat-interface-container-scrollable {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    height: auto !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: auto;
     min-height: calc(100vh - 764px);
   }
 }
@@ -450,9 +450,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .recharts-wrapper .recharts-xAxis .recharts-cartesian-axis-tick text,
 .recharts-wrapper .recharts-yAxis .recharts-cartesian-axis-tick text {
   position: relative;
-  z-index: 10 !important;
-  user-select: none !important;
-  pointer-events: none !important;
+  z-index: 10;
+  user-select: none;
+  pointer-events: none;
   isolation: isolate;
 }
 
@@ -463,9 +463,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 /* Dark mode support for chart selection overlay */
 .dark .chart-selection-overlay {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .dark .chart-selection-border {
-  border-left-color: #999999 !important;
+  border-left-color: #999999;
 }

@@ -1,5 +1,3 @@
-import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -13,6 +11,8 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserQuery } from "@/hooks/use-user";
 
 type Props = {
   className?: string;

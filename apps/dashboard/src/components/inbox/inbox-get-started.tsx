@@ -1,5 +1,14 @@
 "use client";
 
+import { getInboxEmail } from "@midday/inbox";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@midday/ui/accordion";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { revalidateInbox } from "@/actions/revalidate-action";
 import { AppConnectionToast } from "@/components/app-connection-toast";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
@@ -10,15 +19,6 @@ import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import { getInboxEmail } from "@midday/inbox";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@midday/ui/accordion";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { CopyInput } from "../copy-input";
 import { UploadZone } from "./inbox-upload-zone";
 

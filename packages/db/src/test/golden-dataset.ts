@@ -597,8 +597,8 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
 
 // Helper function to capture current algorithm scores for regression testing
 export function captureAlgorithmBaseline(
-  inbox: any,
-  transaction: any,
+  _inbox: any,
+  _transaction: any,
   embeddingScore = 0.85,
 ): any {
   // This would use the actual algorithm functions to capture current behavior
@@ -618,7 +618,7 @@ export function captureAlgorithmBaseline(
 }
 
 // Export function to generate test data for database seeding
-export async function exportGoldenDataset(db: Database) {
+export async function exportGoldenDataset(_db: Database) {
   console.log("Exporting golden dataset from real user feedback...");
 
   try {

@@ -1,16 +1,16 @@
 "use client";
 
-import { AppConnectionToast } from "@/components/app-connection-toast";
-import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
-import { isOAuthMessage } from "@/utils/oauth-message";
 import { apps as appStoreApps } from "@midday/app-store";
 import type { UnifiedApp } from "@midday/app-store/types";
 import { Button } from "@midday/ui/button";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { AppConnectionToast } from "@/components/app-connection-toast";
+import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import { isOAuthMessage } from "@/utils/oauth-message";
 import { UnifiedAppComponent } from "./unified-app";
 
 export function Apps() {

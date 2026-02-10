@@ -5,9 +5,9 @@ import { Icons } from "@midday/ui/icons";
 import {
   AnimatePresence,
   MotionConfig,
+  motion,
   type Transition,
   type Variant,
-  motion,
 } from "motion/react";
 import React, {
   useCallback,
@@ -137,7 +137,7 @@ function MorphingDialogTrigger({
   const rotation = rotationMatch?.[1] || null;
 
   const transformTemplate = useCallback(
-    (transform: string, generatedTransform: string) => {
+    (_transform: string, generatedTransform: string) => {
       // Preserve rotation from style prop if present
       // generatedTransform contains the layout animation transform
       // We need to append our rotation to it
@@ -277,7 +277,6 @@ function MorphingDialogContent({
         stiffness: 200,
         damping: 24,
       }}
-      // biome-ignore lint/a11y/useSemanticElements: motion.div cannot be replaced with dialog element
       role="dialog"
       aria-modal="true"
       aria-labelledby={`motion-ui-morphing-dialog-title-${uniqueId}`}
@@ -295,7 +294,7 @@ export type MorphingDialogContainerProps = {
 };
 
 function MorphingDialogContainer({ children }: MorphingDialogContainerProps) {
-  const { isOpen, uniqueId, setIsOpen } = useMorphingDialog();
+  const { isOpen, uniqueId } = useMorphingDialog();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -445,6 +444,7 @@ function MorphingDialogImage({
   const { uniqueId } = useMorphingDialog();
 
   return (
+    // biome-ignore lint/performance/noImgElement: motion.img required for layout animations
     <motion.img
       src={src}
       alt={alt}

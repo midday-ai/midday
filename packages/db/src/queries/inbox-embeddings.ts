@@ -1,6 +1,6 @@
-import type { Database } from "@db/client";
-import { inbox, inboxEmbeddings } from "@db/schema";
 import { and, eq } from "drizzle-orm";
+import type { Database } from "../client";
+import { inbox, inboxEmbeddings } from "../schema";
 
 export type GetInboxForEmbeddingParams = {
   inboxId: string;

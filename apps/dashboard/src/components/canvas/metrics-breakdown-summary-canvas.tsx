@@ -1,19 +1,5 @@
 "use client";
 
-import {
-  BaseCanvas,
-  CanvasHeader,
-  CanvasSection,
-} from "@/components/canvas/base";
-import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import {
-  formatCurrencyAmount,
-  shouldShowSummarySkeleton,
-} from "@/components/canvas/utils";
-import { useTransactionParams } from "@/hooks/use-transaction-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { isMonthlyBreakdownType } from "@/lib/metrics-breakdown-constants";
-import { formatAmount } from "@/utils/format";
 import { useArtifact, useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { metricsBreakdownSummaryArtifact } from "@api/ai/artifacts/metrics-breakdown";
 import { cn } from "@midday/ui/cn";
@@ -28,6 +14,20 @@ import {
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import {
+  BaseCanvas,
+  CanvasHeader,
+  CanvasSection,
+} from "@/components/canvas/base";
+import { CanvasContent } from "@/components/canvas/base/canvas-content";
+import {
+  formatCurrencyAmount,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
+import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { isMonthlyBreakdownType } from "@/lib/metrics-breakdown-constants";
+import { formatAmount } from "@/utils/format";
 
 export function MetricsBreakdownSummaryCanvas() {
   const [selectedType] = useQueryState("artifact-type", parseAsString);

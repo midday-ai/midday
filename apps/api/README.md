@@ -8,9 +8,11 @@ The API requires the following environment variables:
 ```bash
 # Local development (Docker):
 REDIS_URL=redis://localhost:6379
+REDIS_QUEUE_URL=redis://localhost:6379
 
-# Production (Upstash Redis via Fly.io):
-# REDIS_URL=rediss://:password@fly-midday-redis.upstash.io:6379
+# Production:
+# REDIS_URL=rediss://:password@...upstash.io:6379 (Upstash - multi-region cache)
+# REDIS_QUEUE_URL=redis://...railway.internal:6379 (Railway Redis - queue)
 ```
 
 #### Local Development Setup
@@ -27,8 +29,10 @@ REDIS_URL=redis://localhost:6379
 
 #### Database Configuration
 ```bash
-DATABASE_URL=postgresql://...
-DATABASE_READ_URL=postgresql://... # Optional: read replica URL
+DATABASE_PRIMARY_URL=postgresql://...
+DATABASE_FRA_URL=postgresql://...  # EU replica
+DATABASE_IAD_URL=postgresql://...  # US East replica
+DATABASE_SJC_URL=postgresql://...  # US West replica
 ```
 
 ### Development
@@ -57,16 +61,15 @@ The API uses Redis for distributed caching across multiple server instances:
 
 The Redis client automatically configures itself based on the environment:
 
-**Production (Fly.io):**
-- Handles IPv6 connections
+**Production (Railway):**
+- Standard IPv4 connections
 - Longer connection timeouts (10s)
-- Higher retry attempts (10)
-- TLS support for Upstash Redis
+- TLS support for Upstash Redis (cache)
+- Railway internal networking for queue Redis
 
 **Development (Local):**
 - IPv4 connections
 - Shorter timeouts (5s)
-- Fewer retries (3)
-- No idle timeout
+- No TLS
 
 This ensures cache consistency across multiple stateful servers and eliminates the "No procedure found" TRPC errors caused by cache misses.

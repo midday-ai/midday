@@ -2,8 +2,8 @@ import type { Database } from "@midday/db/client";
 import { createLoggerWithContext } from "@midday/logger";
 
 const logger = createLoggerWithContext("insights");
+
 import {
-  type InsightHistoryData,
   computeHistoricalContext,
   computeMomentum,
   computeRecovery,
@@ -26,40 +26,30 @@ import {
   getSpendingForPeriod,
   getUpcomingDueRecurringByTeam,
   getUpcomingInvoicesForInsight,
+  type InsightHistoryData,
 } from "@midday/db/queries";
 import {
   ContentGenerator,
-  type ContentGeneratorOptions,
   type YearOverYearContext,
 } from "./content/generator";
 import {
   addActivityMetrics,
   calculateAllMetrics,
-  createMetric,
   detectAnomalies,
   detectExpenseAnomalies,
   selectTopMetrics,
 } from "./metrics";
-import {
-  formatDateForQuery,
-  getPreviousCompletePeriod,
-  getPreviousPeriod,
-} from "./period";
+import { formatDateForQuery, getPreviousPeriod } from "./period";
 import type {
-  ExpenseAnomaly,
   GenerateInsightParams,
   InsightActivity,
-  InsightAnomaly,
-  InsightContent,
   InsightContext,
   InsightGenerationResult,
-  InsightMetric,
   InsightPredictions,
   MetricData,
   MomentumContext,
   MoneyOnTable,
   PeriodInfo,
-  PeriodType,
   PreviousPredictionsContext,
 } from "./types";
 
@@ -266,7 +256,7 @@ export class InsightsService {
       );
 
       // Fetch invoice data in parallel (these can't be derived from history)
-      const [upcomingInvoicesData, overdueData] = await Promise.all([
+      const [upcomingInvoicesData, _overdueData] = await Promise.all([
         // Get invoices due next week for predictions
         getUpcomingInvoicesForInsight(this.db, {
           teamId,
@@ -565,7 +555,7 @@ export class InsightsService {
    */
   private async buildActivitySummary(
     teamId: string,
-    period: PeriodInfo,
+    _period: PeriodInfo,
     currency: string,
     activityData: {
       invoicesSent: number;
@@ -763,32 +753,6 @@ export function isTeamEnabledForInsights(teamId: string): boolean {
   return enabledIds.includes(teamId);
 }
 
-// Re-export all types
-export type {
-  AnomalySeverity,
-  CategorySpending,
-  ChangeDirection,
-  DraftInvoiceDetail,
-  ExpenseAnomaly,
-  GenerateInsightParams,
-  InsightActivity,
-  InsightAnomaly,
-  InsightContent,
-  InsightContext,
-  InsightGenerationResult,
-  InsightMetric,
-  InsightMilestone,
-  InsightPredictions,
-  MetricCategory,
-  MetricData,
-  MomentumContext,
-  MoneyOnTable,
-  OverdueInvoiceDetail,
-  PeriodInfo,
-  PeriodType,
-  PreviousPredictionsContext,
-} from "./types";
-
 // Re-export constants
 export {
   ANOMALY_THRESHOLDS,
@@ -796,11 +760,18 @@ export {
   DEFAULT_TOP_METRICS_COUNT,
   EXPENSE_ANOMALY_THRESHOLDS,
   MAX_METRICS_PER_CATEGORY,
-  type MetricDefinition,
   METRIC_DEFINITIONS,
+  type MetricDefinition,
   PERIOD_TYPE_LABELS,
   SCORING_WEIGHTS,
 } from "./constants";
+// Re-export content utilities
+export {
+  type AnomalySlot,
+  ContentGenerator,
+  type ContentGeneratorOptions,
+  createContentGenerator,
+} from "./content";
 
 // Re-export metrics utilities
 export {
@@ -834,11 +805,28 @@ export {
   getPreviousCompletePeriod,
   getPreviousPeriod,
 } from "./period";
-
-// Re-export content utilities
-export {
-  type AnomalySlot,
-  ContentGenerator,
-  type ContentGeneratorOptions,
-  createContentGenerator,
-} from "./content";
+// Re-export all types
+export type {
+  AnomalySeverity,
+  CategorySpending,
+  ChangeDirection,
+  DraftInvoiceDetail,
+  ExpenseAnomaly,
+  GenerateInsightParams,
+  InsightActivity,
+  InsightAnomaly,
+  InsightContent,
+  InsightContext,
+  InsightGenerationResult,
+  InsightMetric,
+  InsightMilestone,
+  InsightPredictions,
+  MetricCategory,
+  MetricData,
+  MomentumContext,
+  MoneyOnTable,
+  OverdueInvoiceDetail,
+  PeriodInfo,
+  PeriodType,
+  PreviousPredictionsContext,
+} from "./types";

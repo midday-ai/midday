@@ -1,9 +1,9 @@
 "use client";
 
-import { Category } from "@/components/category";
-import { SelectCategory } from "@/components/select-category";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useState } from "react";
+import { Category } from "@/components/category";
+import { SelectCategory } from "@/components/select-category";
 
 type Selected = {
   id: string;

@@ -1,3 +1,12 @@
+import { Link } from "@tanstack/react-router";
+import {
+  Activity,
+  AlertTriangle,
+  Clock,
+  Hourglass,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 import { SummaryCard } from "@/components/metrics/summary-card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,18 +23,9 @@ import {
   YAxis,
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { FailingJobType, HourlyBucket, SlowestJob } from "@/core/types";
+import type { FailingJobType, SlowestJob } from "@/core/types";
 import { useMetrics } from "@/lib/hooks";
 import { cn, formatDuration } from "@/lib/utils";
-import { Link } from "@tanstack/react-router";
-import {
-  Activity,
-  AlertTriangle,
-  Clock,
-  Hourglass,
-  TrendingUp,
-  Zap,
-} from "lucide-react";
 
 // Chart configuration using theme variables
 const throughputChartConfig = {

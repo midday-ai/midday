@@ -1,6 +1,7 @@
 import { createLoggerWithContext } from "@midday/logger";
 
 const logger = createLoggerWithContext("api");
+
 import type { ZodSchema } from "zod";
 
 export const validateResponse = <T>(data: any, schema: ZodSchema<T>): T => {

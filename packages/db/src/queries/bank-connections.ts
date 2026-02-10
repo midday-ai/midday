@@ -1,8 +1,8 @@
-import type { Database } from "@db/client";
-import { bankAccounts, bankConnections } from "@db/schema";
 import { chatCache } from "@midday/cache/chat-cache";
 import { decrypt, encrypt } from "@midday/encryption";
 import { and, eq } from "drizzle-orm";
+import type { Database } from "../client";
+import { bankAccounts, bankConnections } from "../schema";
 
 export type GetBankConnectionsParams = {
   teamId: string;
@@ -288,10 +288,7 @@ export const getBankAccountsWithPaymentInfo = async (
   const { teamId } = params;
 
   const accounts = await db.query.bankAccounts.findMany({
-    where: and(
-      eq(bankAccounts.teamId, teamId),
-      eq(bankAccounts.enabled, true),
-    ),
+    where: and(eq(bankAccounts.teamId, teamId), eq(bankAccounts.enabled, true)),
     columns: {
       id: true,
       name: true,
@@ -317,7 +314,9 @@ export const getBankAccountsWithPaymentInfo = async (
     .filter((account) => {
       // Must have at least one of: IBAN, or (routing + account number), or sort code
       const hasIban = !!account.iban;
-      const hasUsPaymentInfo = !!(account.routingNumber && account.accountNumber);
+      const hasUsPaymentInfo = !!(
+        account.routingNumber && account.accountNumber
+      );
       const hasUkPaymentInfo = !!(account.sortCode && account.accountNumber);
       return hasIban || hasUsPaymentInfo || hasUkPaymentInfo;
     })

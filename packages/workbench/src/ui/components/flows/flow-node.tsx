@@ -1,5 +1,3 @@
-import type { FlowNode as FlowNodeType } from "@/core/types";
-import { cn } from "@/lib/utils";
 import { Handle, Position } from "@xyflow/react";
 import {
   CheckCircle2,
@@ -10,6 +8,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { memo } from "react";
+import type { FlowNode as FlowNodeType } from "@/core/types";
+import { cn } from "@/lib/utils";
 
 export interface FlowNodeData extends Record<string, unknown> {
   flowNode: FlowNodeType;

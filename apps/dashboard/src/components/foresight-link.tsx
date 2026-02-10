@@ -1,11 +1,11 @@
 "use client";
 
-import { useForesight } from "@/hooks/use-foresight";
 import type { ForesightRegisterOptions } from "js.foresight";
 import type { LinkProps } from "next/link";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { useForesight } from "@/hooks/use-foresight";
 
 // Default hitSlop extends the detection area around links
 // This triggers prefetch earlier when cursor is heading toward a link

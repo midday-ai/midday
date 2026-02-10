@@ -36,8 +36,15 @@ export const invoiceSchema = z.object({
   currency: z
     .string()
     .nullable()
-    .describe("Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK). Null if document_type is 'other'."),
-  total_amount: z.number().nullable().describe("Total amount for the invoice. Null if document_type is 'other'."),
+    .describe(
+      "Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK). Null if document_type is 'other'.",
+    ),
+  total_amount: z
+    .number()
+    .nullable()
+    .describe(
+      "Total amount for the invoice. Null if document_type is 'other'.",
+    ),
   tax_amount: z.number().nullable().describe("Tax amount for the invoice"),
   tax_rate: z
     .number()
@@ -111,10 +118,18 @@ export const receiptSchema = z.object({
   currency: z
     .string()
     .nullable()
-    .describe("Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK). Null if document_type is 'other'."),
-  total_amount: z.number().nullable().describe("Total amount including tax. Null if document_type is 'other'."),
+    .describe(
+      "Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK). Null if document_type is 'other'.",
+    ),
+  total_amount: z
+    .number()
+    .nullable()
+    .describe("Total amount including tax. Null if document_type is 'other'."),
   subtotal_amount: z.number().nullable().describe("Subtotal amount before tax"),
-  tax_amount: z.number().nullable().describe("Tax amount. Null if document_type is 'other'."),
+  tax_amount: z
+    .number()
+    .nullable()
+    .describe("Tax amount. Null if document_type is 'other'."),
   tax_rate: z
     .number()
     .optional()

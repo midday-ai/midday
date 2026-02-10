@@ -1,14 +1,5 @@
 "use client";
 
-import { CopyInput } from "@/components/copy-input";
-import { OpenURL } from "@/components/open-url";
-import { useCustomerParams } from "@/hooks/use-customer-params";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useRealtime } from "@/hooks/use-realtime";
-import { useUserQuery } from "@/hooks/use-user";
-import { downloadFile } from "@/lib/download";
-import { useTRPC } from "@/trpc/client";
-import { getWebsiteLogo } from "@/utils/logos";
 import { TZDate } from "@date-fns/tz";
 import {
   Accordion,
@@ -49,6 +40,15 @@ import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { CopyInput } from "@/components/copy-input";
+import { OpenURL } from "@/components/open-url";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useRealtime } from "@/hooks/use-realtime";
+import { useUserQuery } from "@/hooks/use-user";
+import { downloadFile } from "@/lib/download";
+import { useTRPC } from "@/trpc/client";
+import { getWebsiteLogo } from "@/utils/logos";
 import { CustomerDetailsSkeleton } from "./customer-details.loading";
 import { FormatAmount } from "./format-amount";
 import { InvoiceStatus } from "./invoice-status";

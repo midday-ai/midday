@@ -168,7 +168,7 @@ export async function convertHeicToJpeg(
     let decodedImage: ArrayBuffer;
     try {
       decodedImage = await convert({
-        // @ts-ignore - heic-convert types are incomplete
+        // @ts-expect-error - heic-convert types are incomplete
         buffer: new Uint8Array(inputBuffer),
         format: "JPEG",
         quality: 0.8, // Reduced from 1.0 to save memory - still good quality for AI classification

@@ -1,10 +1,5 @@
 "use client";
 
-import { useMetricsFilter } from "@/hooks/use-metrics-filter";
-import { useTeamQuery } from "@/hooks/use-team";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
-import type { PeriodOption } from "@/utils/metrics-date-utils";
 import { Button } from "@midday/ui/button";
 import { Calendar, CalendarDayButton } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
@@ -28,6 +23,11 @@ import { useQuery } from "@tanstack/react-query";
 import { format, formatISO, parseISO } from "date-fns";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import type { PeriodOption } from "@/utils/metrics-date-utils";
 
 const PERIOD_OPTIONS: Array<{ value: PeriodOption; label: string }> = [
   { value: "3-months", label: "3 months" },

@@ -15,8 +15,8 @@ import {
   UnsupportedFileTypeError,
 } from "../../utils/error-classification";
 import {
-  MAX_HEIC_FILE_SIZE,
   convertHeicToJpeg,
+  MAX_HEIC_FILE_SIZE,
 } from "../../utils/image-processing";
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";

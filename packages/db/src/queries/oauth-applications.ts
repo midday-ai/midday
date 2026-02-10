@@ -1,9 +1,9 @@
-import type { Database } from "@db/client";
-import { oauthApplications, users } from "@db/schema";
 import { hash } from "@midday/encryption";
 import slugify from "@sindresorhus/slugify";
 import { and, desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import type { Database } from "../client";
+import { oauthApplications, users } from "../schema";
 
 async function generateUniqueSlug(db: Database, name: string): Promise<string> {
   const baseSlug = slugify(name, { lowercase: true });

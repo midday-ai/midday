@@ -124,7 +124,7 @@ export const startsWithPeriod = createScorer<InsightSlots, string>({
   name: "Format: starts with period",
   description: "Audio should open with the period (Week X, January, etc.)",
   scorer: ({ input, output }) => {
-    const firstWord = output.trim().split(/\s+/)[0]?.toLowerCase();
+    const _firstWord = output.trim().split(/\s+/)[0]?.toLowerCase();
 
     // Check for week number or month name
     if (/^week\b/i.test(output)) return 1;
@@ -228,8 +228,7 @@ function numberAppearsInText(
   const writtenPatterns = [
     // Hundreds of thousands
     {
-      pattern:
-        /(\w+)\s+hundred\s+(\w+)(?:-(\w+))?\s+thousand/i,
+      pattern: /(\w+)\s+hundred\s+(\w+)(?:-(\w+))?\s+thousand/i,
       parse: (m: RegExpMatchArray) => {
         const h = wordToNumber(m[1]!) * 100;
         const t = wordToNumber(m[2]!);

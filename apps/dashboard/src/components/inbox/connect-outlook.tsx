@@ -1,10 +1,10 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useTRPC } from "@/trpc/client";
 
 export function ConnectOutlook() {
   const trpc = useTRPC();

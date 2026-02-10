@@ -7,8 +7,11 @@ import {
 } from "@midday/app-store/slack/server";
 import { sendMatchNotification } from "@midday/app-store/whatsapp/server";
 import type { Database } from "@midday/db/client";
-import { getWhatsAppConnections } from "@midday/db/queries";
-import { getAppByAppId, getApps } from "@midday/db/queries";
+import {
+  getAppByAppId,
+  getApps,
+  getWhatsAppConnections,
+} from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
 
 const logger = createLoggerWithContext("provider-notifications");

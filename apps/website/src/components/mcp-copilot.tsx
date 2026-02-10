@@ -27,10 +27,7 @@ function CodeBlock({ code }: { code: string }) {
     <div className="relative group">
       <div className="bg-[#fafafa] dark:bg-[#0c0c0c] border border-border rounded-none overflow-hidden">
         <pre className="overflow-x-auto p-4 text-sm font-mono">
-          <code
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: Syntax highlighting requires innerHTML
-            dangerouslySetInnerHTML={{ __html: codeHTML }}
-          />
+          <code dangerouslySetInnerHTML={{ __html: codeHTML }} />
         </pre>
       </div>
       <button
@@ -209,8 +206,10 @@ Header Value: Bearer ${key}`;
                       Add an MCP server
                     </span>
                     <p className="font-sans text-sm text-muted-foreground mt-1">
-                      Go to <strong>Tools → Add a tool → New tool → Model
-                      Context Protocol</strong>
+                      Go to{" "}
+                      <strong>
+                        Tools → Add a tool → New tool → Model Context Protocol
+                      </strong>
                     </p>
                   </div>
                 </li>

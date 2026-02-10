@@ -1,8 +1,6 @@
 import type { Context } from "@api/rest/types";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
-  REACTION_EMOJIS,
-  type WhatsAppWebhookPayload,
   createWhatsAppClient,
   extractInboxIdFromMessage,
   formatAlreadyConnectedMessage,
@@ -17,10 +15,11 @@ import {
   formatUnsupportedFileTypeMessage,
   formatWelcomeMessage,
   isAllowedMimeType,
-  isSupportedMediaType,
   parseMatchButtonId,
+  REACTION_EMOJIS,
   triggerWhatsAppUploadJob,
   verifyWebhookSignature,
+  type WhatsAppWebhookPayload,
 } from "@midday/app-store/whatsapp/server";
 import { WhatsAppAlreadyConnectedToAnotherTeamError } from "@midday/db/errors";
 import {
@@ -29,8 +28,9 @@ import {
   declineSuggestedMatch,
   getAppByWhatsAppNumber,
   getSuggestionByInboxAndTransaction,
+  getTeamById,
+  getTeamByInboxId,
 } from "@midday/db/queries";
-import { getTeamById, getTeamByInboxId } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
 
@@ -252,7 +252,7 @@ async function handleWebhook(c: any, payload: WhatsAppWebhookPayload) {
 async function handleTextMessage(
   db: any,
   phoneNumber: string,
-  messageId: string,
+  _messageId: string,
   text: string,
   displayName?: string,
 ) {
@@ -406,7 +406,7 @@ async function handleMediaMessage(
 async function handleButtonReply(
   db: any,
   phoneNumber: string,
-  messageId: string,
+  _messageId: string,
   buttonId: string,
 ) {
   const parsed = parseMatchButtonId(buttonId);

@@ -20,7 +20,7 @@ export async function publishAppHome({
   };
 }) {
   try {
-    const team = await getTeamById(db, teamId);
+    const _team = await getTeamById(db, teamId);
     const config = slackApp.config || {};
     const settings = slackApp.settings || {};
 

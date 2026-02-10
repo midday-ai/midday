@@ -1,8 +1,8 @@
 "use client";
 
-import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 
 export function OpenTrackerSheet() {
   const { setParams } = useTrackerParams();

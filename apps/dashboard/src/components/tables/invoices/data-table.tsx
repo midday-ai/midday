@@ -1,5 +1,12 @@
 "use client";
 
+import { closestCenter, DndContext } from "@dnd-kit/core";
+import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
+import { AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { VirtualRow } from "@/components/tables/core";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
@@ -15,13 +22,6 @@ import { useInvoiceStore } from "@/store/invoice";
 import { useTRPC } from "@/trpc/client";
 import { STICKY_COLUMNS, SUMMARY_GRID_HEIGHTS } from "@/utils/table-configs";
 import type { TableSettings } from "@/utils/table-settings";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
-import { AnimatePresence } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef } from "react";
 import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { EmptyState, NoResults } from "./empty-states";

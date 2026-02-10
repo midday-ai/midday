@@ -1,5 +1,8 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { businessHealthScoreArtifact } from "@api/ai/artifacts/business-health-score";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasChart,
@@ -14,9 +17,6 @@ import {
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
 import { BusinessHealthScoreChart } from "@/components/charts/business-health-score-chart";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { businessHealthScoreArtifact } from "@api/ai/artifacts/business-health-score";
-import { parseAsInteger, useQueryState } from "nuqs";
 
 export function HealthReportCanvas() {
   const [version] = useQueryState("version", parseAsInteger.withDefault(0));
@@ -24,7 +24,7 @@ export function HealthReportCanvas() {
     version,
   });
   const { data, status } = artifact;
-  const isLoading = status === "loading";
+  const _isLoading = status === "loading";
   const stage = data?.stage;
 
   // Use artifact data or fallback to empty/default values
@@ -113,7 +113,7 @@ export function HealthReportCanvas() {
             data.analysis.recommendations.length > 0 && (
               <CanvasSection title="Recommendations" isLoading={false}>
                 <ul className="list-disc list-inside space-y-2 text-[12px] leading-[17px] font-sans text-black dark:text-white">
-                  {data.analysis.recommendations.map((rec, index) => (
+                  {data.analysis.recommendations.map((rec, _index) => (
                     <li key={rec}>{rec}</li>
                   ))}
                 </ul>

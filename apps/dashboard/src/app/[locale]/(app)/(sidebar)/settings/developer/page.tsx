@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CreateApiKeyModal } from "@/components/modals/create-api-key-modal";
 import { DeleteApiKeyModal } from "@/components/modals/delete-api-key-modal";
 import { EditApiKeyModal } from "@/components/modals/edit-api-key-modal";
@@ -7,7 +8,6 @@ import { OAuthApplicationEditSheet } from "@/components/sheets/oauth-application
 import { DataTable } from "@/components/tables/api-keys";
 import { OAuthDataTable } from "@/components/tables/oauth-applications";
 import { batchPrefetch, trpc } from "@/trpc/server";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Developer | Midday",

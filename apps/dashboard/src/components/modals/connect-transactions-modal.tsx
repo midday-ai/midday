@@ -1,10 +1,5 @@
 "use client";
 
-import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
-import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
-import { useConnectParams } from "@/hooks/use-connect-params";
-import { useTeamQuery } from "@/hooks/use-team";
-import { useTRPC } from "@/trpc/client";
 import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Button } from "@midday/ui/button";
@@ -22,6 +17,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import { useDebounceValue, useScript } from "usehooks-ts";
+import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
+import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
+import { useConnectParams } from "@/hooks/use-connect-params";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useTRPC } from "@/trpc/client";
 import { BankLogo } from "../bank-logo";
 import { ConnectBankProvider } from "../connect-bank-provider";
 import { CountrySelector } from "../country-selector";

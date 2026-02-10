@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { BaseCurrency } from "@/components/base-currency/base-currency";
 import { CompanyCountry } from "@/components/company-country";
 import { CompanyEmail } from "@/components/company-email";
@@ -7,7 +8,6 @@ import { CompanyName } from "@/components/company-name";
 import { DeleteTeam } from "@/components/delete-team";
 import { TeamIdSection } from "@/components/team-id-section";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Team Settings | Midday",

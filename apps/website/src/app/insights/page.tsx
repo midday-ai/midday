@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { Insights } from "@/components/insights";
-import type { Metadata } from "next";
 
 const title = "Financial Insights";
 const description =

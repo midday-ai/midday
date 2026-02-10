@@ -2,7 +2,6 @@
 
 import { Icons } from "@midday/ui/icons";
 import { useRouter } from "next/navigation";
-import { parseAsString, useQueryState } from "nuqs";
 import { useCallback } from "react";
 import { BaseCanvas } from "./base-canvas";
 import { CanvasContent } from "./canvas-content";

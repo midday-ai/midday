@@ -1,10 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { DesktopProvider } from "@/components/desktop-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
 import { TRPCReactProvider } from "@/trpc/client";
-import type { ReactNode } from "react";
 
 type ProviderProps = {
   locale: string;

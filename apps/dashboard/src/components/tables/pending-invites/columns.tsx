@@ -1,5 +1,3 @@
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -12,6 +10,8 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef, FilterFn, Row } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 
 type TeamInvite = RouterOutputs["team"]["teamInvites"][number];
 

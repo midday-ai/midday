@@ -217,7 +217,8 @@ function calculateAmountDifferenceScore(
 
   // Handle invoice (positive) to payment (negative) scenarios
   // This applies to all match types, not just cross-currency
-  const sameSign = (amount1 > 0 && amount2 > 0) || (amount1 < 0 && amount2 < 0);
+  const _sameSign =
+    (amount1 > 0 && amount2 > 0) || (amount1 < 0 && amount2 < 0);
   const oppositeSigns =
     (amount1 > 0 && amount2 < 0) || (amount1 < 0 && amount2 > 0);
 

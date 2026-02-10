@@ -10,20 +10,20 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "lint:fix": "biome format --write .",
+    "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.10",
     "@exalabs/ai-sdk": "^1.0.5",
     "@midday/logger": "workspace:*",
-    "ai": "^6.0.39",
+    "ai": "^6.0.41",
     "exa-js": "^2.0.12",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^25.0.9",
+    "@types/node": "^24.10.1",
     "typescript": "catalog:"
   }
 }

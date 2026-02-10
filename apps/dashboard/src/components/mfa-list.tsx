@@ -1,7 +1,7 @@
-import { getI18n } from "@/locales/server";
 import { createClient } from "@midday/supabase/server";
 import { Skeleton } from "@midday/ui/skeleton";
 import { format } from "date-fns";
+import { getI18n } from "@/locales/server";
 import { RemoveMFAButton } from "./remove-mfa-button";
 
 export function MFAListSkeleton() {

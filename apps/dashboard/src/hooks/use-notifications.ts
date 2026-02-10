@@ -1,12 +1,12 @@
 "use client";
 
-import { useRealtime } from "@/hooks/use-realtime";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { useCallback, useMemo } from "react";
+import { useRealtime } from "@/hooks/use-realtime";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 
 // Infer types from tRPC router
 type RouterOutputs = inferRouterOutputs<AppRouter>;
@@ -31,7 +31,7 @@ export function getMetadataProperty(activity: Activity, key: string): any {
 }
 
 // Get ISO timestamp for 24 hours ago
-function get24HoursAgo(): string {
+function _get24HoursAgo(): string {
   return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 }
 

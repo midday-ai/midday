@@ -1,6 +1,6 @@
-import type { TableId } from "@/utils/table-settings";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { RefObject } from "react";
+import type { TableId } from "@/utils/table-settings";
 
 /**
  * Skeleton types for rendering loading states

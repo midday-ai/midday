@@ -1,5 +1,5 @@
-import { getWriter } from "@ai-sdk-tools/artifacts";
 import { openai } from "@ai-sdk/openai";
+import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { cashFlowArtifact } from "@api/ai/artifacts/cash-flow";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
@@ -8,8 +8,7 @@ import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getCashFlow } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
-import { generateText } from "ai";
-import { tool } from "ai";
+import { generateText, tool } from "ai";
 import { z } from "zod";
 
 const getCashFlowSchema = z.object({
@@ -112,9 +111,9 @@ export const getCashFlowTool = tool({
       const periodType = result.summary.period;
 
       // Calculate cumulative cash flow for chart
-      let cumulativeFlow = 0;
+      let _cumulativeFlow = 0;
       const monthlyDataWithCumulative = result.monthlyData.map((item) => {
-        cumulativeFlow += item.netCashFlow;
+        _cumulativeFlow += item.netCashFlow;
         return {
           month: item.month,
           netCashFlow: item.netCashFlow,

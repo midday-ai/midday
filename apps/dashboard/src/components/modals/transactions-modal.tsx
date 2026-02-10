@@ -1,16 +1,16 @@
 "use client";
 
-import { hideConnectFlowAction } from "@/actions/hide-connect-flow-action";
-import { AddAccountButton } from "@/components/add-account-button";
 import { cn } from "@midday/ui/cn";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
-import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
-import TransactionsScreenOneLight from "public/assets/transactions-1-light.png";
+import { useAction } from "next-safe-action/hooks";
 import TransactionsScreenOne from "public/assets/transactions-1.png";
-import TransactionsScreenTwoLight from "public/assets/transactions-2-light.png";
+import TransactionsScreenOneLight from "public/assets/transactions-1-light.png";
 import TransactionsScreenTwo from "public/assets/transactions-2.png";
+import TransactionsScreenTwoLight from "public/assets/transactions-2-light.png";
 import { Fragment, useState } from "react";
+import { hideConnectFlowAction } from "@/actions/hide-connect-flow-action";
+import { AddAccountButton } from "@/components/add-account-button";
 
 const images = [
   { id: 1, src: TransactionsScreenOne, src2: TransactionsScreenOneLight },

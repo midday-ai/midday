@@ -1,10 +1,9 @@
 "use client";
 
-import { useCategoryParams } from "@/hooks/use-category-params";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import React from "react";
+import { useCategoryParams } from "@/hooks/use-category-params";
 import { CategoryForm } from "../forms/category-form";
 
 export function CategoryCreateSheet() {

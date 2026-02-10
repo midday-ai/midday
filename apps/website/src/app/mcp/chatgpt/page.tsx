@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCPChatGPT } from "@/components/mcp-chatgpt";
-import type { Metadata } from "next";
 
 const title = "ChatGPT MCP Integration";
 const description =

@@ -14,7 +14,7 @@ import { BaseProcessor } from "../base";
  * that are unlikely to ever find matches due to the age of the data.
  */
 export class NoMatchSchedulerProcessor extends BaseProcessor<NoMatchSchedulerPayload> {
-  async process(job: Job<NoMatchSchedulerPayload>): Promise<{
+  async process(_job: Job<NoMatchSchedulerPayload>): Promise<{
     updatedCount: number;
     cutoffDate: string;
   }> {

@@ -1,5 +1,5 @@
-import type { FlowNode as FlowNodeType } from "@/core/types";
 import { type Edge, type Node, ReactFlow } from "@xyflow/react";
+import type { FlowNode as FlowNodeType } from "@/core/types";
 import "@xyflow/react/dist/style.css";
 import dagre from "dagre";
 import { useCallback, useMemo } from "react";

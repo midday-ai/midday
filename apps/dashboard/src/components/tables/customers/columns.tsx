@@ -1,8 +1,5 @@
 "use client";
 
-import { FormatAmount } from "@/components/format-amount";
-import { useCustomerParams } from "@/hooks/use-customer-params";
-import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Badge } from "@midday/ui/badge";
@@ -13,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
 import {
   Tooltip,
@@ -26,17 +22,14 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNowStrict } from "date-fns";
 import Link from "next/link";
 import { memo, useCallback } from "react";
+import { FormatAmount } from "@/components/format-amount";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { getWebsiteLogo } from "@/utils/logos";
 
 export type Customer = RouterOutputs["customers"]["get"]["data"][number];
 
 const NameCell = memo(
-  ({
-    name,
-    website,
-  }: {
-    name: string | null;
-    website: string | null;
-  }) => {
+  ({ name, website }: { name: string | null; website: string | null }) => {
     if (!name) return "-";
 
     // Logo from logo.dev based on website domain

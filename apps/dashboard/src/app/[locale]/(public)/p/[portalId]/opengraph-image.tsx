@@ -1,6 +1,6 @@
-import { getQueryClient, trpc } from "@/trpc/server";
 import { formatAmount } from "@midday/utils/format";
 import { ImageResponse } from "next/og";
+import { getQueryClient, trpc } from "@/trpc/server";
 
 export const contentType = "image/png";
 

@@ -1,5 +1,5 @@
-import { BankAccountList } from "@/components/bank-account-list";
 import { Suspense } from "react";
+import { BankAccountList } from "@/components/bank-account-list";
 import { BankAccountListSkeleton } from "./bank-account-list-skeleton";
 
 export function ConnectedAccounts() {

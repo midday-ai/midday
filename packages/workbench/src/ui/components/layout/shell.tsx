@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
 import type * as React from "react";
+import { cn } from "@/lib/utils";
 
 interface ShellProps {
   children: React.ReactNode;

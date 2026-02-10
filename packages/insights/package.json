@@ -14,17 +14,17 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "lint:fix": "biome format --write .",
+    "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "eval": "bunx evalite watch",
     "eval:run": "bunx evalite"
   },
   "dependencies": {
-    "@midday/db": "workspace:*",
-    "@midday/logger": "workspace:*",
     "@ai-sdk/openai": "catalog:",
     "@elevenlabs/elevenlabs-js": "^2.30.0",
-    "@supabase/supabase-js": "^2.49.4",
+    "@midday/db": "workspace:*",
+    "@midday/logger": "workspace:*",
+    "@supabase/supabase-js": "^2.87.0",
     "ai": "catalog:",
     "date-fns": "catalog:",
     "jose": "catalog:",

@@ -1,6 +1,5 @@
 "use client";
 
-import { FormatAmount } from "@/components/format-amount";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
@@ -15,6 +14,7 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
 import { memo, useCallback } from "react";
+import { FormatAmount } from "@/components/format-amount";
 
 export type Product = RouterOutputs["invoiceProducts"]["get"][number];
 

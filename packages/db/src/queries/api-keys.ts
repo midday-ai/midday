@@ -1,8 +1,8 @@
-import type { Database } from "@db/client";
-import { apiKeys, users } from "@db/schema";
-import { generateApiKey } from "@db/utils/api-keys";
 import { encrypt, hash } from "@midday/encryption";
 import { and, eq } from "drizzle-orm";
+import type { Database } from "../client";
+import { apiKeys, users } from "../schema";
+import { generateApiKey } from "../utils/api-keys";
 
 export type ApiKey = {
   id: string;

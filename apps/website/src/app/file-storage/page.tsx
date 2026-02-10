@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { FileStorage } from "@/components/file-storage";
-import type { Metadata } from "next";
 
 const title = "Document Vault";
 const description =

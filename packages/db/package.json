@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "lint": "biome check .",
-    "lint:fix": "biome format --write .",
-    "test": "bun test",
+    "lint:fix": "biome check --write .",
+    "test": "bun test --exit",
     "test:matching": "bun test src/test/transaction-matching.test.ts",
     "test:performance": "bun test src/test/transaction-matching.performance.test.ts",
     "test:integration": "bun test src/test/transaction-matching.integration.test.ts",
@@ -12,7 +12,8 @@
     "test:all-matching": "bun test src/test/transaction-matching*.test.ts",
     "test:reports": "bun test src/test/reports.test.ts",
     "test:watch": "bun test --watch",
-    "validate-golden": "bun run src/test/validate-golden-dataset.ts"
+    "validate-golden": "bun run src/test/validate-golden-dataset.ts",
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
     "./client": "./src/client.ts",
@@ -42,14 +43,14 @@
     "@midday/utils": "workspace:*",
     "@sindresorhus/slugify": "catalog:",
     "@types/pg": "^8.15.6",
-    "drizzle-orm": "^0.45.0",
     "camelcase-keys": "catalog:",
+    "drizzle-orm": "^0.45.0",
     "nanoid": "catalog:",
     "pg": "^8.16.3",
     "snakecase-keys": "^9.0.2"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.8",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.8"
   }
 }

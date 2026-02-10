@@ -1,6 +1,6 @@
-import { baseUrl } from "@/app/sitemap";
 import type { Metadata } from "next";
 import Image from "next/image";
+import { baseUrl } from "@/app/sitemap";
 
 const title = "Story";
 const description =

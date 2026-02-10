@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  PROVIDER_ATTACHMENT_CONFIG,
   ensureFileExtension,
+  PROVIDER_ATTACHMENT_CONFIG,
   resolveMimeType,
 } from "./utils";
 

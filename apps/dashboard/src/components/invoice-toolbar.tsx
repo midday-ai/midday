@@ -1,7 +1,5 @@
 "use client";
 
-import { downloadFile } from "@/lib/download";
-import { saveFile } from "@/lib/save-file";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
@@ -17,6 +15,8 @@ import JSZip from "jszip";
 import { useEffect, useRef, useState } from "react";
 import { MdContentCopy, MdOutlineFileDownload } from "react-icons/md";
 import { useCopyToClipboard } from "usehooks-ts";
+import { downloadFile } from "@/lib/download";
+import { saveFile } from "@/lib/save-file";
 import { PaymentModal } from "./invoice/payment-modal";
 
 type Props = {

@@ -2,6 +2,11 @@
 import "./instrument";
 
 import { closeWorkerDb } from "@midday/db/worker-client";
+import {
+  buildReadinessResponse,
+  checkDependencies,
+} from "@midday/health/checker";
+import { workerDependencies } from "@midday/health/probes";
 import * as Sentry from "@sentry/bun";
 import { Worker } from "bullmq";
 import { Hono } from "hono";
@@ -157,6 +162,13 @@ app.get("/health", (c) => {
   return c.json({ status: "ok" }, 200);
 });
 
+// Readiness check - verifies core dependencies (DB, Redis queue)
+app.get("/health/ready", async (c) => {
+  const results = await checkDependencies(workerDependencies(), 1);
+  const response = buildReadinessResponse(results);
+  return c.json(response, response.status === "ok" ? 200 : 503);
+});
+
 // Dashboard info endpoint
 app.get("/info", (c) => {
   const queues = getAllQueues();
@@ -171,7 +183,7 @@ const port = Number.parseInt(process.env.PORT || "8080", 10);
 
 Bun.serve({
   port,
-  hostname: "::",
+  hostname: "0.0.0.0",
   fetch: app.fetch,
 });
 
@@ -231,7 +243,7 @@ process.on("uncaughtException", (err) => {
   Sentry.captureException(err, {
     tags: { errorType: "uncaught_exception" },
   });
-  // Don't exit - let the process manager (Fly.io) handle restarts
+  // Don't exit - let the process manager (Railway) handle restarts
 });
 
 process.on("unhandledRejection", (reason, promise) => {
@@ -242,5 +254,5 @@ process.on("unhandledRejection", (reason, promise) => {
       tags: { errorType: "unhandled_rejection" },
     },
   );
-  // Don't exit - let the process manager handle restarts
+  // Don't exit - let the process manager (Railway) handle restarts
 });

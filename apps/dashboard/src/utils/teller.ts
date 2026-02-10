@@ -15,7 +15,7 @@ export const validateTellerSignature = (params: {
 
   const threeMinutesAgo = Math.floor(Date.now() / 1000) - 3 * 60;
 
-  if (Number.parseInt(timestamp) < threeMinutesAgo) {
+  if (Number.parseInt(timestamp, 10) < threeMinutesAgo) {
     return false;
   }
 

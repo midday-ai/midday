@@ -1,9 +1,5 @@
 "use client";
 
-import { useDocumentParams } from "@/hooks/use-document-params";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import { useTRPC } from "@/trpc/client";
-import { LocalStorageKeys } from "@/utils/constants";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -12,6 +8,10 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDocumentParams } from "@/hooks/use-document-params";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useTRPC } from "@/trpc/client";
+import { LocalStorageKeys } from "@/utils/constants";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 

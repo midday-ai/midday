@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCPRaycast } from "@/components/mcp-raycast";
-import type { Metadata } from "next";
 
 const title = "Raycast MCP Integration";
 const description =

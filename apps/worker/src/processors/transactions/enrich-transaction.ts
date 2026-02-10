@@ -1,8 +1,8 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import {
-  type UpdateTransactionEnrichmentParams,
   getTransactionsForEnrichment,
   markTransactionsAsEnriched,
+  type UpdateTransactionEnrichmentParams,
   updateTransactionEnrichments,
 } from "@midday/db/queries";
 import { generateObject } from "ai";

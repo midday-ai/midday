@@ -1,7 +1,5 @@
 "use client";
 
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   Card,
@@ -29,13 +27,14 @@ import {
 import { SubmitButton } from "@midday/ui/submit-button";
 import {
   useMutation,
-  useQuery,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useFieldArray } from "react-hook-form";
 import { z } from "zod/v3";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 const formSchema = z.object({
   entries: z.array(
@@ -63,7 +62,7 @@ const formSchema = z.object({
           // Domain validation regex pattern (RFC 1035 compliant)
           // Validates: alphanumeric, hyphens, dots, with at least one dot and valid TLD
           const domainPattern =
-            /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+            /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
 
           if (!domainPattern.test(trimmed)) {
             ctx.addIssue({

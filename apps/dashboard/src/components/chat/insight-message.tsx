@@ -1,11 +1,11 @@
 "use client";
 
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
-import type { InsightData } from "@/lib/chat-utils";
 import { formatAmount } from "@midday/utils/format";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
+import type { InsightData } from "@/lib/chat-utils";
 
 interface InsightMessageProps {
   insight: InsightData;

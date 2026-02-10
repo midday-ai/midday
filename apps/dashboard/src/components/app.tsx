@@ -1,4 +1,3 @@
-import { useTRPC } from "@/trpc/client";
 import {
   Accordion,
   AccordionContent,
@@ -13,6 +12,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
+import { useTRPC } from "@/trpc/client";
 import { AppSettings } from "./app-settings";
 
 export function App({

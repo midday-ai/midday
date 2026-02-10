@@ -1,4 +1,4 @@
-import type { DatabaseOrTransaction } from "@db/client";
+import type { DatabaseOrTransaction } from "../client";
 import { createActivity } from "../queries/activities";
 import type { activityTypeEnum } from "../schema";
 

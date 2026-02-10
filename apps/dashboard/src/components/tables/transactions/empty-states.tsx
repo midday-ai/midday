@@ -1,9 +1,9 @@
 "use client";
 
-import { AddAccountButton } from "@/components/add-account-button";
-import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { AddAccountButton } from "@/components/add-account-button";
+import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 
 export function NoResults() {
   const { clearAllFilters } = useTransactionFilterParamsWithPersistence();

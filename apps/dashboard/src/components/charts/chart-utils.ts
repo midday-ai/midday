@@ -2,7 +2,6 @@
  * Shared utilities for chart styling and data formatting
  */
 
-import { formatAmount } from "@/utils/format";
 import { parseISO } from "date-fns";
 
 // Tailwind classes for chart styling
@@ -58,7 +57,10 @@ export const createCompactTickFormatter = () => {
 };
 
 // Currency-aware Y-axis tick formatter (e.g., "14k", "16k") - no currency symbol
-export const createYAxisTickFormatter = (currency: string, locale?: string) => {
+export const createYAxisTickFormatter = (
+  _currency: string,
+  _locale?: string,
+) => {
   return (value: number): string => {
     const absValue = Math.abs(value);
     const sign = value < 0 ? "-" : "";

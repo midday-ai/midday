@@ -1,7 +1,7 @@
-import { useConfig, useTagValues } from "@/lib/hooks";
-import { cn } from "@/lib/utils";
 import { Search, X } from "lucide-react";
 import * as React from "react";
+import { useConfig, useTagValues } from "@/lib/hooks";
+import { cn } from "@/lib/utils";
 
 export interface ParsedFilters {
   status?: string;

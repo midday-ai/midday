@@ -1,7 +1,7 @@
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { validateResponse } from "@api/utils/validate-response";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   createSlackWebClient,
   fileShare,
@@ -9,7 +9,6 @@ import {
   verifySlackWebhook,
 } from "@midday/app-store/slack/server";
 import { getAppBySlackTeamId } from "@midday/db/queries";
-import { triggerJob } from "@midday/job-client";
 import { createLoggerWithContext } from "@midday/logger";
 import type { FileShareMessageEvent } from "@slack/web-api";
 import { HTTPException } from "hono/http-exception";

@@ -55,7 +55,7 @@ async function main() {
       .documents()
       .import(documents, { action: "upsert" });
   } catch (error) {
-    // @ts-ignore
+    // @ts-expect-error
     console.log(error.importResults);
   }
 }

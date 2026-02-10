@@ -1,8 +1,5 @@
 "use client";
 
-import { useTemplateUpdate } from "@/hooks/use-template-update";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import {
   getFrequencyLabel,
   localDateToUTCMidnight,
@@ -30,20 +27,21 @@ import {
   addMonths,
   differenceInMilliseconds,
   format,
-  getHours,
   getMinutes,
   parseISO,
   setHours,
   setMinutes,
   startOfDay,
-  startOfTomorrow,
 } from "date-fns";
 import * as React from "react";
 import { useFormContext } from "react-hook-form";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import {
+  getDefaultRecurringConfig,
   type RecurringConfig,
   RecurringConfigPanel,
-  getDefaultRecurringConfig,
 } from "./recurring-config";
 
 type Props = {

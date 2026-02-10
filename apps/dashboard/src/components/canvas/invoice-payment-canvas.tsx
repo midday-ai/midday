@@ -1,5 +1,8 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { invoicePaymentAnalysisArtifact } from "@api/ai/artifacts/invoice-payment-analysis";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasChart,
@@ -15,9 +18,6 @@ import {
 } from "@/components/canvas/utils";
 import { InvoicePaymentChart } from "@/components/charts/invoice-payment-chart";
 import { useUserQuery } from "@/hooks/use-user";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { invoicePaymentAnalysisArtifact } from "@api/ai/artifacts/invoice-payment-analysis";
-import { parseAsInteger, useQueryState } from "nuqs";
 
 export function InvoicePaymentCanvas() {
   const [version] = useQueryState("version", parseAsInteger.withDefault(0));
@@ -26,7 +26,7 @@ export function InvoicePaymentCanvas() {
   });
   const { data, status } = artifact;
   const { data: user } = useUserQuery();
-  const isLoading = status === "loading";
+  const _isLoading = status === "loading";
   const stage = data?.stage;
   const locale = user?.locale ?? undefined;
 

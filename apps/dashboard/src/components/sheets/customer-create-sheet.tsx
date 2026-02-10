@@ -1,10 +1,9 @@
 "use client";
 
-import { useCustomerParams } from "@/hooks/use-customer-params";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import React from "react";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 import { CustomerForm } from "../forms/customer-form";
 
 export function CustomerCreateSheet() {

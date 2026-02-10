@@ -1,8 +1,8 @@
 "use client";
 
-import { OAUTH_CHANNEL_NAME, isOAuthMessage } from "@/utils/oauth-message";
 import { createClient } from "@midday/supabase/client";
 import { useEffect, useRef, useState } from "react";
+import { isOAuthMessage, OAUTH_CHANNEL_NAME } from "@/utils/oauth-message";
 
 interface UseAppOAuthOptions {
   installUrlEndpoint: string;

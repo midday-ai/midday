@@ -1,11 +1,11 @@
-import { isTeamEligibleForSync } from "@/utils/check-team-eligibility";
-import { validateTellerSignature } from "@/utils/teller";
 import type { SyncConnectionPayload } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/server";
 import { tasks } from "@trigger.dev/sdk";
 import { isAfter, subDays } from "date-fns";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { isTeamEligibleForSync } from "@/utils/check-team-eligibility";
+import { validateTellerSignature } from "@/utils/teller";
 
 const webhookSchema = z.object({
   id: z.string(),

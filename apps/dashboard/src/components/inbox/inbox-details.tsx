@@ -1,25 +1,16 @@
-import { FileViewer } from "@/components/file-viewer";
-import { FormatAmount } from "@/components/format-amount";
-import { useFileUrl } from "@/hooks/use-file-url";
-import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
-import { useInboxParams } from "@/hooks/use-inbox-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { downloadFile } from "@/lib/download";
-import { useTRPC } from "@/trpc/client";
-import { getUrl } from "@/utils/environment";
-import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { DialogTrigger } from "@midday/ui/dialog";
 import {
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
-import { DropdownMenu, DropdownMenuTrigger } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -37,6 +28,16 @@ import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useCopyToClipboard } from "usehooks-ts";
+import { FileViewer } from "@/components/file-viewer";
+import { FormatAmount } from "@/components/format-amount";
+import { useFileUrl } from "@/hooks/use-file-url";
+import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
+import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { downloadFile } from "@/lib/download";
+import { useTRPC } from "@/trpc/client";
+import { getUrl } from "@/utils/environment";
+import { getWebsiteLogo } from "@/utils/logos";
 import { EditInboxModal } from "../modals/edit-inbox-modal";
 import { DeleteInboxDialog } from "./delete-inbox-dialog";
 import { InboxActions } from "./inbox-actions";

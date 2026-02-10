@@ -1,7 +1,5 @@
 "use client";
 
-import { useCategoryParams } from "@/hooks/use-category-params";
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import {
   Table,
@@ -22,6 +20,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import React from "react";
+import { useCategoryParams } from "@/hooks/use-category-params";
+import { useTRPC } from "@/trpc/client";
 import {
   type CategoriesTableMeta,
   columns,

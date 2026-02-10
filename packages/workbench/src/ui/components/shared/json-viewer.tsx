@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
 import { Check, ChevronRight, Copy } from "lucide-react";
 import * as React from "react";
+import { cn } from "@/lib/utils";
 
 interface JsonViewerProps {
   data: unknown;
@@ -164,7 +164,7 @@ function JsonNode({ data, level, defaultExpanded, keyName }: JsonNodeProps) {
         {expanded && (
           <div className="ml-4 mt-1 space-y-1 border-l border-border pl-3">
             {data.map((item, index) => (
-              <div key={index}>
+              <div key={index.toString()}>
                 <JsonNode
                   data={item}
                   level={level + 1}

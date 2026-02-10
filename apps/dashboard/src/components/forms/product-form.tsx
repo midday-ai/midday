@@ -1,10 +1,5 @@
 "use client";
 
-import { SelectCurrency } from "@/components/select-currency";
-import { useProductParams } from "@/hooks/use-product-params";
-import { useTeamQuery } from "@/hooks/use-team";
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { CurrencyInput } from "@midday/ui/currency-input";
@@ -23,6 +18,11 @@ import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod/v3";
+import { SelectCurrency } from "@/components/select-currency";
+import { useProductParams } from "@/hooks/use-product-params";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 const formSchema = z.object({
   id: z.string().uuid().optional(),

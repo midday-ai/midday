@@ -1,7 +1,7 @@
-import { baseUrl } from "@/app/sitemap";
-import { DocsHomeHero } from "@/components/docs/docs-home-hero";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { baseUrl } from "@/app/sitemap";
+import { DocsHomeHero } from "@/components/docs/docs-home-hero";
 
 const title = "Documentation";
 const description =

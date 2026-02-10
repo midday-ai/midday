@@ -339,7 +339,7 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
           await ensureBotInChannel({ client: slackClient, channelId });
 
           // Determine document type for message
-          const documentType =
+          const _documentType =
             updatedInbox.type === "invoice" ? "invoice" : "receipt";
           const documentTypeLabel =
             updatedInbox.type === "invoice" ? "invoice" : "receipt";

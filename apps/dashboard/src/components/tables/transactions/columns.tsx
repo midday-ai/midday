@@ -1,12 +1,5 @@
 "use client";
 
-import { FormatAmount } from "@/components/format-amount";
-import { InlineAssignUser } from "@/components/inline-assign-user";
-import { InlineSelectCategory } from "@/components/inline-select-category";
-import { InlineSelectTags } from "@/components/inline-select-tags";
-import { TransactionBankAccount } from "@/components/transaction-bank-account";
-import { TransactionMethod } from "@/components/transaction-method";
-import { TransactionStatus } from "@/components/transaction-status";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
@@ -25,6 +18,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { formatDate } from "@midday/utils/format";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useCallback } from "react";
+import { FormatAmount } from "@/components/format-amount";
+import { InlineAssignUser } from "@/components/inline-assign-user";
+import { InlineSelectCategory } from "@/components/inline-select-category";
+import { InlineSelectTags } from "@/components/inline-select-tags";
+import { TransactionBankAccount } from "@/components/transaction-bank-account";
+import { TransactionMethod } from "@/components/transaction-method";
+import { TransactionStatus } from "@/components/transaction-status";
 
 type Transaction = RouterOutputs["transactions"]["get"]["data"][number];
 
@@ -59,8 +59,11 @@ const DateCell = memo(
     date,
     format,
     noSort,
-  }: { date: string; format?: string | null; noSort?: boolean }) =>
-    formatDate(date, format, noSort),
+  }: {
+    date: string;
+    format?: string | null;
+    noSort?: boolean;
+  }) => formatDate(date, format, noSort),
 );
 
 DateCell.displayName = "DateCell";
@@ -112,13 +115,7 @@ const DescriptionCell = memo(
 DescriptionCell.displayName = "DescriptionCell";
 
 const AmountCell = memo(
-  ({
-    amount,
-    currency,
-  }: {
-    amount: number;
-    currency: string;
-  }) => (
+  ({ amount, currency }: { amount: number; currency: string }) => (
     <span className={cn("text-sm", amount > 0 && "text-[#00C969]")}>
       <FormatAmount amount={amount} currency={currency} />
     </span>

@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { openai } from "@ai-sdk/openai";
 import { Agent, type AgentConfig } from "@ai-sdk-tools/agents";
 import { RedisProvider } from "@ai-sdk-tools/memory/redis";
-import { openai } from "@ai-sdk/openai";
 import type { ChatUserContext } from "@midday/cache/chat-cache";
 import { getSharedRedisClient } from "@midday/cache/shared-redis";
 

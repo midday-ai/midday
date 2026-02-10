@@ -1,10 +1,10 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { PaymentScoreVisualizer } from "./payment-score-visualizer";
 
 export function InvoicePaymentScoreSkeleton() {

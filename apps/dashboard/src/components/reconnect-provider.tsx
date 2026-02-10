@@ -1,7 +1,3 @@
-import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
-import { reconnectEnableBankingLinkAction } from "@/actions/institutions/reconnect-enablebanking-link";
-import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
-import { getUrl } from "@/utils/environment";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -18,6 +14,10 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import { useScript } from "usehooks-ts";
+import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
+import { reconnectEnableBankingLinkAction } from "@/actions/institutions/reconnect-enablebanking-link";
+import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
+import { getUrl } from "@/utils/environment";
 
 /**
  * Callback type for when a provider reconnect flow completes.

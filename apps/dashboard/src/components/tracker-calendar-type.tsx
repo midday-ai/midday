@@ -1,10 +1,10 @@
 "use client";
 
-import { setWeeklyCalendarAction } from "@/actions/set-weekly-calendar-action";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { cn } from "@midday/ui/cn";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useAction } from "next-safe-action/hooks";
+import { setWeeklyCalendarAction } from "@/actions/set-weekly-calendar-action";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 
 const options = [
   {

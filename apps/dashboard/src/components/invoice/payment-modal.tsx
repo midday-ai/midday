@@ -1,7 +1,5 @@
 "use client";
 
-import { useSuccessSound } from "@/hooks/use-success-sound";
-import { downloadFile } from "@/lib/download";
 import { fromStripeAmount } from "@midday/invoice/currency";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -23,6 +21,8 @@ import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
+import { useSuccessSound } from "@/hooks/use-success-sound";
+import { downloadFile } from "@/lib/download";
 
 function StripeLogo({ className }: { className?: string }) {
   return (
@@ -380,7 +380,7 @@ export function PaymentModal({
     onOpenChange(newOpen);
   };
 
-  const handleSuccess = (paymentIntentId: string) => {
+  const handleSuccess = (_paymentIntentId: string) => {
     playSuccessSound();
     setPaymentSuccess(true);
     onSuccess?.();

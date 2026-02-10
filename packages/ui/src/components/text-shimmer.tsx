@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import React, { useMemo, type JSX } from "react";
+import React, { type JSX, useMemo } from "react";
 import { cn } from "../utils";
 
 export type TextShimmerProps = {

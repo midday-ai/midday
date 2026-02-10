@@ -1,7 +1,7 @@
 import type { Context } from "@api/rest/types";
 import { resend } from "@api/services/resend";
 import { createAdminClient } from "@api/services/supabase";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { getTeamByInboxId } from "@midday/db/queries";
 import { getAllowedAttachments } from "@midday/documents";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
@@ -12,10 +12,10 @@ import { nanoid } from "nanoid";
 import {
   ALLOWED_FORWARDING_EMAILS,
   FORWARD_FROM_EMAIL,
-  POSTMARK_IP_RANGE,
-  type UploadResult,
   filterAttachments,
+  POSTMARK_IP_RANGE,
   triggerProcessingJobs,
+  type UploadResult,
   uploadAttachment,
 } from "./utils";
 

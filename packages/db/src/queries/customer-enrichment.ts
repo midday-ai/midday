@@ -1,6 +1,6 @@
-import type { Database } from "@db/client";
-import { customers } from "@db/schema";
 import { and, eq } from "drizzle-orm";
+import type { Database } from "../client";
+import { customers } from "../schema";
 
 export type CustomerForEnrichment = {
   id: string;

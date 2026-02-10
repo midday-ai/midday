@@ -1,5 +1,18 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { spendingArtifact } from "@api/ai/artifacts/spending";
+import { cn } from "@midday/ui/cn";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@midday/ui/table";
+import Link from "next/link";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasHeader,
@@ -14,19 +27,6 @@ import {
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { spendingArtifact } from "@api/ai/artifacts/spending";
-import { cn } from "@midday/ui/cn";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@midday/ui/table";
-import Link from "next/link";
-import { parseAsInteger, useQueryState } from "nuqs";
 
 export function SpendingCanvas() {
   const [version] = useQueryState("version", parseAsInteger.withDefault(0));
@@ -35,7 +35,7 @@ export function SpendingCanvas() {
   const { data: user } = useUserQuery();
   const { setParams } = useTransactionParams();
 
-  const isLoading = status === "loading";
+  const _isLoading = status === "loading";
   const stage = data?.stage;
 
   const transactions = data?.transactions || [];

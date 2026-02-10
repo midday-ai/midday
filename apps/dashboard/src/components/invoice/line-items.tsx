@@ -1,12 +1,12 @@
 "use client";
 
-import { useTemplateUpdate } from "@/hooks/use-template-update";
-import { formatAmount } from "@/utils/format";
 import { calculateLineItemTotal } from "@midday/invoice/calculate";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Reorder, useDragControls } from "framer-motion";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
+import { formatAmount } from "@/utils/format";
 import type { InvoiceFormValues } from "./form-context";
 import { LabelInput } from "./label-input";
 import { PercentInput } from "./percent-input";

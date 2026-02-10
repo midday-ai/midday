@@ -14,8 +14,8 @@ export { EmbedTransactionProcessor } from "./embed-transaction";
 export { EnrichTransactionProcessor } from "./enrich-transaction";
 export { ExportTransactionsProcessor } from "./export";
 export { ImportTransactionsProcessor } from "./import-transactions";
-export { ProcessExportProcessor } from "./process-export";
 export { ProcessTransactionAttachmentProcessor } from "./process-attachment";
+export { ProcessExportProcessor } from "./process-export";
 export { UpdateAccountBaseCurrencyProcessor } from "./update-account-base-currency";
 export { UpdateBaseCurrencyProcessor } from "./update-base-currency";
 

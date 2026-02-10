@@ -1,8 +1,8 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { baseUrl } from "@/app/sitemap";
 import { IntegrationDetailPage } from "@/components/integration-detail-page";
 import { getAllSlugs, getAppBySlug } from "@/data/apps";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 interface Props {
   params: Promise<{ slug: string }>;

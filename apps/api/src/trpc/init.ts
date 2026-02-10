@@ -1,11 +1,11 @@
 import { createClient } from "@api/services/supabase";
-import { verifyAccessToken } from "@api/utils/auth";
 import type { Session } from "@api/utils/auth";
+import { verifyAccessToken } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
 import type { Database } from "@midday/db/client";
 import { db } from "@midday/db/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { TRPCError, initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
 import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";

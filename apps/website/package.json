@@ -7,9 +7,8 @@
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "TZ=UTC next dev --turbopack -p 3000",
     "lint": "biome check .",
-    "lint:fix": "biome format --write .",
-    "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "lint:fix": "biome check --write .",
+    "start": "next start"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.12",
@@ -34,7 +33,7 @@
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^25.0.9",
-    "@types/react": "19.2.8"
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.13"
   }
 }

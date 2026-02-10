@@ -1,8 +1,8 @@
 "use client";
 
+import { Controller, useFormContext } from "react-hook-form";
 import { InvoiceEditor } from "@/components/invoice/invoice-editor";
 import { useTemplateUpdate } from "@/hooks/use-template-update";
-import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 export function PaymentDetails() {

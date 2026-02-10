@@ -45,7 +45,7 @@ export async function extractTextFromPdf(
     }
 
     return extractedText;
-  } catch (error) {
+  } catch (_error) {
     // Return null on any error (corrupted PDF, image-based PDF, etc.)
     return null;
   }

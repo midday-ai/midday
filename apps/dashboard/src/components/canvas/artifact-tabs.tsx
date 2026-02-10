@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  METRICS_BREAKDOWN_MONTHLY_PATTERN,
-  getBaseBreakdownType,
-  isMonthlyBreakdownType,
-} from "@/lib/metrics-breakdown-constants";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { cn } from "@midday/ui/cn";
 import {
@@ -18,6 +13,11 @@ import { format, parseISO } from "date-fns";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import {
+  getBaseBreakdownType,
+  isMonthlyBreakdownType,
+  METRICS_BREAKDOWN_MONTHLY_PATTERN,
+} from "@/lib/metrics-breakdown-constants";
 
 const ARTIFACT_TYPE_LABELS: Record<string, string> = {
   "revenue-canvas": "Revenue",

@@ -1,10 +1,10 @@
-import { getQueryClient, trpc } from "@/trpc/server";
-import { formatSize } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { notFound, redirect } from "next/navigation";
+import { getQueryClient, trpc } from "@/trpc/server";
+import { formatSize } from "@/utils/format";
 
 type Props = {
   params: Promise<{ shortId: string }>;

@@ -11,7 +11,7 @@ import { BaseProcessor } from "../base";
  * Fetches rates from the engine API and upserts them to the database
  */
 export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload> {
-  async process(job: Job<RatesSchedulerPayload>): Promise<{
+  async process(_job: Job<RatesSchedulerPayload>): Promise<{
     totalProcessed: number;
     batchesProcessed: number;
   }> {

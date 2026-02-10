@@ -11,28 +11,28 @@
     "generate-insight": "bun run scripts/generate-test-insight.ts"
   },
   "dependencies": {
-    "workbench": "workspace:*",
+    "@ai-sdk/openai": "catalog:",
     "@fast-csv/format": "catalog:",
     "@hono/node-server": "^1.19.7",
     "@midday/accounting": "workspace:*",
+    "@midday/app-store": "workspace:*",
     "@midday/customers": "workspace:*",
     "@midday/db": "workspace:*",
     "@midday/documents": "workspace:*",
     "@midday/email": "workspace:*",
     "@midday/engine": "workspace:*",
+    "@midday/health": "workspace:*",
     "@midday/engine-client": "workspace:*",
     "@midday/import": "workspace:*",
     "@midday/insights": "workspace:*",
     "@midday/invoice": "workspace:*",
-    "@midday/location": "workspace:*",
-    "@midday/app-store": "workspace:*",
     "@midday/job-client": "workspace:*",
     "@midday/jobs": "workspace:*",
+    "@midday/location": "workspace:*",
     "@midday/logger": "workspace:*",
     "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",
-    "@ai-sdk/openai": "catalog:",
     "@sentry/bun": "catalog:",
     "@types/archiver": "^7.0.0",
     "archiver": "^7.0.1",
@@ -44,12 +44,13 @@
     "node-xlsx": "catalog:",
     "papaparse": "catalog:",
     "sharp": "catalog:",
+    "workbench": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/heic-convert": "1.2.3",
     "@types/papaparse": "^5.5.1",
-    "@types/react": "^19.2.7"
+    "@types/react": "^19.2.13"
   }
 }

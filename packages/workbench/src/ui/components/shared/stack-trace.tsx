@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Check, ChevronDown, Copy } from "lucide-react";
 import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface StackTraceProps {
   error?: string;
@@ -72,7 +72,10 @@ export function StackTrace({ error, stacktrace, className }: StackTraceProps) {
         <div className="border-t border-destructive/20 p-4">
           <pre className="font-mono text-xs text-muted-foreground overflow-auto max-h-64 whitespace-pre-wrap">
             {stacktrace.map((line, i) => (
-              <div key={i} className="hover:bg-destructive/10 px-1 -mx-1">
+              <div
+                key={i.toString()}
+                className="hover:bg-destructive/10 px-1 -mx-1"
+              >
                 {formatStackLine(line)}
               </div>
             ))}

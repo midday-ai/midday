@@ -1,14 +1,13 @@
 "use client";
 
-import { useChatInterface } from "@/hooks/use-chat-interface";
-import { extractBankAccountRequired } from "@/lib/chat-utils";
-import { useAudioPlayerStore } from "@/store/audio-player";
 import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useStickToBottomContext } from "use-stick-to-bottom";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { extractBankAccountRequired } from "@/lib/chat-utils";
+import { useAudioPlayerStore } from "@/store/audio-player";
 
 type SuggestionsData = {
   prompts: string[];

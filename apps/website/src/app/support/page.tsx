@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { SupportForm } from "@/components/support-form";
-import type { Metadata } from "next";
 
 const title = "Support";
 const description =

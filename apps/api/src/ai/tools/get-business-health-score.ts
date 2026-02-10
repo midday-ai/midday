@@ -7,12 +7,7 @@ import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getCashFlow, getExpenses, getReports } from "@midday/db/queries";
 import { tool } from "ai";
-import {
-  eachMonthOfInterval,
-  endOfMonth,
-  format,
-  startOfMonth,
-} from "date-fns";
+import { eachMonthOfInterval, format } from "date-fns";
 import { z } from "zod";
 
 const getBusinessHealthScoreSchema = z.object({
@@ -85,7 +80,7 @@ export const getBusinessHealthScoreTool = tool({
       }
 
       const targetCurrency = finalCurrency || "USD";
-      const locale = appContext.locale || "en-US";
+      const _locale = appContext.locale || "en-US";
 
       // Fetch all required data in parallel
       const [revenueResult, expensesResult, cashFlowResult, profitResult] =
@@ -130,7 +125,7 @@ export const getBusinessHealthScoreTool = tool({
       const last12Months = revenueData.slice(-12);
       const last12MonthsExpenses = expensesData.slice(-12);
       const last12MonthsCashFlow = cashFlowMonthlyData.slice(-12);
-      const last12MonthsProfit = profitData.slice(-12);
+      const _last12MonthsProfit = profitData.slice(-12);
 
       // Calculate Revenue Score (0-100)
       // Based on: growth rate, consistency, and total revenue

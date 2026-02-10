@@ -1,11 +1,11 @@
 import {
   type CustomerEnrichmentResult,
-  type VerifiedEnrichmentData,
   companyTypeOptions,
   employeeCountOptions,
   fundingStageOptions,
   industryOptions,
   revenueOptions,
+  type VerifiedEnrichmentData,
 } from "./schema";
 
 export type VerifyOptions = {

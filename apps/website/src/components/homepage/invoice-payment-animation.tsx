@@ -1,8 +1,8 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 
 interface Invoice {
   id: string;
@@ -151,7 +151,7 @@ export function InvoicePaymentAnimation({
   const [visibleBars, setVisibleBars] = useState<number[]>([]);
 
   const [openAmount] = useState("$36,500.75");
-  const [overdueAmount, setOverdueAmount] = useState("$12,500.50");
+  const [overdueAmount, _setOverdueAmount] = useState("$12,500.50");
   const [paidAmount, setPaidAmount] = useState("$126,500.75");
   const [openCount] = useState(6);
   const [overdueCount, setOverdueCount] = useState(12);

@@ -1,8 +1,8 @@
 "use client";
 
-import type { Competitor } from "@/data/competitors";
 import { Button } from "@midday/ui/button";
 import Link from "next/link";
+import type { Competitor } from "@/data/competitors";
 
 interface Differentiator {
   title: string;
@@ -20,7 +20,11 @@ interface Props {
   sections: Section[];
 }
 
-export function ComparisonHero({ competitor, differentiators, sections }: Props) {
+export function ComparisonHero({
+  competitor,
+  differentiators,
+  sections,
+}: Props) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
       {/* Main Content */}
@@ -29,7 +33,8 @@ export function ComparisonHero({ competitor, differentiators, sections }: Props)
           Best {competitor.name} Alternative for Founders
         </h1>
         <p className="font-sans text-base text-muted-foreground leading-normal mb-8 max-w-2xl">
-          {competitor.description} Compare features, pricing, and see why teams are switching to Midday.
+          {competitor.description} Compare features, pricing, and see why teams
+          are switching to Midday.
         </p>
 
         {/* CTA Buttons */}
@@ -45,10 +50,7 @@ export function ComparisonHero({ competitor, differentiators, sections }: Props)
         {/* Key Differentiators */}
         <div className="flex flex-wrap gap-3">
           {differentiators.map((diff) => (
-            <div
-              key={diff.title}
-              className="border border-border px-3 py-1.5"
-            >
+            <div key={diff.title} className="border border-border px-3 py-1.5">
               <span className="font-sans text-sm text-foreground">
                 {diff.title}
               </span>

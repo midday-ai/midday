@@ -1,11 +1,11 @@
-import { AskAiBar } from "@/components/docs/ask-ai-bar";
-import { FloatingChatInput } from "@/components/docs/floating-chat-input";
-import { DocsMDX } from "@/components/docs/mdx";
-import { docsNavigation, getAllDocSlugs, getDocBySlug } from "@/lib/docs";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AskAiBar } from "@/components/docs/ask-ai-bar";
+import { FloatingChatInput } from "@/components/docs/floating-chat-input";
+import { DocsMDX } from "@/components/docs/mdx";
+import { docsNavigation, getAllDocSlugs, getDocBySlug } from "@/lib/docs";
 
 export async function generateStaticParams() {
   const slugs = getAllDocSlugs();
@@ -16,7 +16,9 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({
   params,
-}: { params: Params }): Promise<Metadata | undefined> {
+}: {
+  params: Params;
+}): Promise<Metadata | undefined> {
   const { slug } = await params;
   const doc = getDocBySlug(slug);
 

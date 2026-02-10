@@ -1,6 +1,5 @@
 "use client";
 
-import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import {
   Card,
   CardContent,
@@ -9,6 +8,7 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { Switch } from "@midday/ui/switch";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 
 export function WeekSettings() {
   const { data: user } = useUserQuery();

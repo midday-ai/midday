@@ -1,6 +1,5 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -21,6 +20,7 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
+import { useI18n } from "@/locales/client";
 
 export interface CategoriesTableMeta {
   deleteCategory: (id: string) => void;

@@ -1,8 +1,8 @@
 import {
   type ApiAccount,
   type DbAccount,
-  type MatchingResult,
   findMatchingAccount,
+  type MatchingResult,
 } from "@midday/supabase/account-matching";
 import { createClient } from "@midday/supabase/job";
 import { logger } from "@trigger.dev/sdk";

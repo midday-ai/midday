@@ -1,6 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -12,6 +11,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { useTRPC } from "@/trpc/client";
 import { columns } from "./columns";
 import { DataTableHeader } from "./table-header";
 

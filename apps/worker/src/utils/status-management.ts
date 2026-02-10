@@ -22,7 +22,7 @@ export type StatusTransition<T extends string> = {
  * Uses a transaction to ensure both operations succeed or fail together
  */
 export async function updateStatusAtomically<T extends string>(
-  db: Database,
+  _db: Database,
   table: { update: (data: unknown) => unknown },
   id: string,
   newStatus: T,

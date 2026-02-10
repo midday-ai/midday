@@ -1,9 +1,9 @@
 "use client";
 
-import type { docsNavigation } from "@/lib/docs";
 import { Icons } from "@midday/ui/icons";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { docsNavigation } from "@/lib/docs";
 import { useDocsChat } from "./docs-chat-provider";
 import { DocsNavPanel } from "./docs-nav-panel";
 

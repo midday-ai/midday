@@ -1,11 +1,11 @@
 import type { Context } from "@api/rest/types";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { updateTeamById } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { getPlanByProductId } from "@midday/plans";
 import {
-  WebhookVerificationError,
   validateEvent,
+  WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
 import { HTTPException } from "hono/http-exception";
 

@@ -1,7 +1,7 @@
-import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { calculateTotal } from "@midday/invoice/calculate";
 import { useCallback, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { AnimatedNumber } from "../animated-number";
 import { FormatAmount } from "../format-amount";
 import { AmountInput } from "./amount-input";

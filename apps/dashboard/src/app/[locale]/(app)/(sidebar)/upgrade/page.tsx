@@ -1,9 +1,9 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import { OpenURL } from "@/components/open-url";
 import { Plans } from "@/components/plans";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { getTrialDaysLeft } from "@/utils/trial";
-import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Upgrade | Midday",

@@ -8,9 +8,9 @@ import {
 import { enrichmentSchema } from "@jobs/utils/enrichment-schema";
 import { processBatch } from "@jobs/utils/process-batch";
 import {
-  type UpdateTransactionEnrichmentParams,
   getTransactionsForEnrichment,
   markTransactionsAsEnriched,
+  type UpdateTransactionEnrichmentParams,
   updateTransactionEnrichments,
 } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";

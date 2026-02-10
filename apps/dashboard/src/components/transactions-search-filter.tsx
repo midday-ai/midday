@@ -1,22 +1,5 @@
 "use client";
 
-import {
-  transactionFilterOutputSchema,
-  transactionsFilterSchema,
-} from "@/app/api/ai/filters/transactions/schema";
-import type { TransactionsFilterSchema } from "@/app/api/ai/filters/transactions/schema";
-import {
-  mapStringArrayToIds,
-  normalizeEnum,
-  normalizeString,
-  useAIFilter,
-  validateEnumArray,
-  validateNumberRange,
-} from "@/hooks/use-ai-filter";
-import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
-import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
-import { useTRPC } from "@/trpc/client";
-import { formatAccountName } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -35,6 +18,23 @@ import { useQuery } from "@tanstack/react-query";
 import { formatISO } from "date-fns";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import type { TransactionsFilterSchema } from "@/app/api/ai/filters/transactions/schema";
+import {
+  transactionFilterOutputSchema,
+  transactionsFilterSchema,
+} from "@/app/api/ai/filters/transactions/schema";
+import {
+  mapStringArrayToIds,
+  normalizeEnum,
+  normalizeString,
+  useAIFilter,
+  validateEnumArray,
+  validateNumberRange,
+} from "@/hooks/use-ai-filter";
+import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
+import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
+import { useTRPC } from "@/trpc/client";
+import { formatAccountName } from "@/utils/format";
 import { AmountRange } from "./amount-range";
 import { DateRangeFilter } from "./date-range-filter";
 import { FilterList } from "./filter-list";

@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { Assistant } from "@/components/assistant";
-import type { Metadata } from "next";
 
 const title = "AI Assistant";
 const description =

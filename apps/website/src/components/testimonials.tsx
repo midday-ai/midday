@@ -177,7 +177,11 @@ export function Testimonials() {
           {allTestimonials.map((testimonial, index) => (
             <div
               key={`testimonial-${testimonial.name}-${index}`}
-              className={index === 0 ? "" : "border-t border-border pt-12 sm:pt-16 lg:pt-20"}
+              className={
+                index === 0
+                  ? ""
+                  : "border-t border-border pt-12 sm:pt-16 lg:pt-20"
+              }
             >
               <div className="max-w-3xl mx-auto space-y-8 sm:space-y-10">
                 {/* Quote Section */}
@@ -202,7 +206,8 @@ export function Testimonials() {
                         {testimonial.company}
                         {testimonial.country && (
                           <span className="text-muted-foreground/70">
-                            {" "}· {testimonial.country}
+                            {" "}
+                            · {testimonial.country}
                           </span>
                         )}
                       </p>

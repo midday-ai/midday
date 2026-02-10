@@ -1,15 +1,14 @@
 import {
+  createDocumentTagSchema,
+  deleteDocumentTagSchema,
+} from "@api/schemas/document-tags";
+import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
   createDocumentTag,
   createDocumentTagEmbedding,
   deleteDocumentTag,
   getDocumentTags,
 } from "@midday/db/queries";
-
-import {
-  createDocumentTagSchema,
-  deleteDocumentTagSchema,
-} from "@api/schemas/document-tags";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { Embed } from "@midday/documents/embed";
 import slugify from "@sindresorhus/slugify";
 

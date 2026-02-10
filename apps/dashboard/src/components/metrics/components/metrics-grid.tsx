@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  closestCenter,
   DndContext,
   type DragEndEvent,
   DragOverlay,
@@ -8,18 +9,16 @@ import {
   KeyboardSensor,
   PointerSensor,
   type UniqueIdentifier,
-  closestCenter,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
+  SortableContext,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { useRef, useState } from "react";
 import type { ChartId } from "../utils/chart-types";
-import { SortableChartCard } from "./sortable-chart-card";
 
 interface MetricsGridProps {
   orderedCharts: ChartId[];
@@ -110,37 +109,35 @@ export function MetricsGrid({
             })}
           </SortableContext>
         ) : (
-          <>
-            {orderedCharts.map((chartId, index) => {
-              if (index === 0) {
-                // First chart: full-width
-                return (
-                  <div key={chartId} className="w-full">
-                    {renderChart(chartId, index)}
-                  </div>
-                );
-              }
-              if ((index - 1) % 2 === 0) {
-                // Start of a pair (index 1, 3, 5, etc.): create two-column row
-                const nextChartId = orderedCharts[index + 1];
-                return (
-                  <div
-                    key={`row-${chartId}`}
-                    className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-                  >
-                    {renderChart(chartId, index)}
-                    {nextChartId ? (
-                      renderChart(nextChartId, index + 1)
-                    ) : (
-                      <div /> // Empty placeholder if odd number of charts
-                    )}
-                  </div>
-                );
-              }
-              // Second chart in pair: already rendered above
-              return null;
-            })}
-          </>
+          orderedCharts.map((chartId, index) => {
+            if (index === 0) {
+              // First chart: full-width
+              return (
+                <div key={chartId} className="w-full">
+                  {renderChart(chartId, index)}
+                </div>
+              );
+            }
+            if ((index - 1) % 2 === 0) {
+              // Start of a pair (index 1, 3, 5, etc.): create two-column row
+              const nextChartId = orderedCharts[index + 1];
+              return (
+                <div
+                  key={`row-${chartId}`}
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                >
+                  {renderChart(chartId, index)}
+                  {nextChartId ? (
+                    renderChart(nextChartId, index + 1)
+                  ) : (
+                    <div /> // Empty placeholder if odd number of charts
+                  )}
+                </div>
+              );
+            }
+            // Second chart in pair: already rendered above
+            return null;
+          })
         )}
 
         {/* Drag Overlay */}

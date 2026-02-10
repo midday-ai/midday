@@ -1,6 +1,5 @@
 "use client";
 
-import type { ArtifactType } from "@/lib/artifact-config";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -11,6 +10,7 @@ import {
 } from "@midday/ui/tooltip";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback } from "react";
+import type { ArtifactType } from "@/lib/artifact-config";
 
 interface ArtifactToggleIconProps {
   artifactType: ArtifactType;

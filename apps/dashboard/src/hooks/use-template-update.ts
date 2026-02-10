@@ -1,8 +1,8 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
+import { useTRPC } from "@/trpc/client";
 
 /**
  * Hook for updating invoice templates with automatic templateId injection.

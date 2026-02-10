@@ -1,6 +1,3 @@
-import { useAppOAuth } from "@/hooks/use-app-oauth";
-import { useTRPC } from "@/trpc/client";
-import { getScopeDescription } from "@/utils/scopes";
 import type { UnifiedApp } from "@midday/app-store/types";
 import { openUrl } from "@midday/desktop-client/core";
 import { isDesktopApp } from "@midday/desktop-client/platform";
@@ -27,7 +24,10 @@ import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useAppOAuth } from "@/hooks/use-app-oauth";
+import { useTRPC } from "@/trpc/client";
+import { getScopeDescription } from "@/utils/scopes";
 import { AppSettings } from "./app-settings";
 import { MemoizedReactMarkdown } from "./markdown";
 
@@ -56,7 +56,10 @@ interface UnifiedAppProps {
 function CarouselWithDots({
   images,
   appName,
-}: { images: string[]; appName: string }) {
+}: {
+  images: string[];
+  appName: string;
+}) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
@@ -272,7 +275,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
           },
         });
       }
-    } catch (error) {
+    } catch (_error) {
       setLoading(false);
     }
   };

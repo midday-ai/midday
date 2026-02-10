@@ -1,5 +1,3 @@
-import { useTRPC } from "@/trpc/client";
-import { formatAccountName } from "@/utils/format";
 import {
   ComboboxDropdown,
   type ComboboxItem,
@@ -8,6 +6,8 @@ import type { PopoverContent } from "@midday/ui/popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { useTRPC } from "@/trpc/client";
+import { formatAccountName } from "@/utils/format";
 import { TransactionBankAccount } from "./transaction-bank-account";
 
 type SelectedItem = ComboboxItem & {

@@ -1,7 +1,7 @@
 "use client";
 
-import type { Competitor } from "@/data/competitors";
 import { useState } from "react";
+import type { Competitor } from "@/data/competitors";
 
 interface Props {
   competitor: Competitor;
@@ -25,7 +25,10 @@ export function CompetitorFAQ({ competitor }: Props) {
 
       <div className="max-w-3xl mx-auto space-y-4">
         {competitor.faq.map((faq, index) => (
-          <div key={faq.question} className="border border-border bg-background">
+          <div
+            key={faq.question}
+            className="border border-border bg-background"
+          >
             <button
               type="button"
               onClick={() => toggleFAQ(index)}

@@ -1,9 +1,5 @@
 "use client";
 
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useTokenModalStore } from "@/store/token-modal";
-import { useTRPC } from "@/trpc/client";
-import { RESOURCES } from "@/utils/scopes";
 import {
   SCOPES,
   type Scope,
@@ -26,6 +22,10 @@ import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod/v3";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTokenModalStore } from "@/store/token-modal";
+import { useTRPC } from "@/trpc/client";
+import { RESOURCES } from "@/utils/scopes";
 import { ScopeSelector } from "../scope-selector";
 
 const formSchema = z.object({

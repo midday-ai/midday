@@ -1,8 +1,5 @@
 "use client";
 
-import { useReconnect } from "@/hooks/use-reconnect";
-import { useTRPC } from "@/trpc/client";
-import { connectionStatus } from "@/utils/connection-status";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -13,6 +10,9 @@ import {
 } from "@midday/ui/tooltip";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
+import { useReconnect } from "@/hooks/use-reconnect";
+import { useTRPC } from "@/trpc/client";
+import { connectionStatus } from "@/utils/connection-status";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
 import { DeleteConnection } from "./delete-connection";
@@ -41,7 +41,10 @@ type BankConnection = NonNullable<
 function ConnectionState({
   connection,
   isSyncing,
-}: { connection: BankConnection; isSyncing: boolean }) {
+}: {
+  connection: BankConnection;
+  isSyncing: boolean;
+}) {
   const { show, expired } = connectionStatus(connection);
 
   if (isSyncing) {

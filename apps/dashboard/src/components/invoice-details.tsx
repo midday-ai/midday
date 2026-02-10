@@ -1,12 +1,5 @@
 "use client";
 
-import { useFileUrl } from "@/hooks/use-file-url";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { downloadFile } from "@/lib/download";
-import { useTRPC } from "@/trpc/client";
-import { getUrl } from "@/utils/environment";
-import { getWebsiteLogo } from "@/utils/logos";
 import { TZDate } from "@date-fns/tz";
 import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import {
@@ -19,16 +12,22 @@ import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { SubmitButton } from "@midday/ui/submit-button";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { useFileUrl } from "@/hooks/use-file-url";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { downloadFile } from "@/lib/download";
+import { useTRPC } from "@/trpc/client";
+import { getUrl } from "@/utils/environment";
+import { getWebsiteLogo } from "@/utils/logos";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
+import { InvoiceActivity } from "./invoice/activity";
 import { InvoiceActions } from "./invoice-actions";
 import { InvoiceDetailsSkeleton } from "./invoice-details-skeleton";
 import { InvoiceNote } from "./invoice-note";
 import { InvoiceStatus } from "./invoice-status";
-import { InvoiceActivity } from "./invoice/activity";
 import { OpenURL } from "./open-url";
 
 export function InvoiceDetails() {

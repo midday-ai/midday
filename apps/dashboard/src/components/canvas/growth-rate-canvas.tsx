@@ -1,5 +1,8 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { growthRateArtifact } from "@api/ai/artifacts/growth-rate";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasChart,
@@ -15,9 +18,6 @@ import {
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
 import { useUserQuery } from "@/hooks/use-user";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { growthRateArtifact } from "@api/ai/artifacts/growth-rate";
-import { parseAsInteger, useQueryState } from "nuqs";
 import { GrowthRateChart } from "../charts/growth-rate-chart";
 
 export function GrowthRateCanvas() {
@@ -25,7 +25,7 @@ export function GrowthRateCanvas() {
   const [artifact] = useArtifact(growthRateArtifact, { version });
   const { data, status } = artifact;
   const { data: user } = useUserQuery();
-  const isLoading = status === "loading";
+  const _isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
   const locale = user?.locale ?? undefined;

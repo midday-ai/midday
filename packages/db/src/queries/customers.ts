@@ -1,18 +1,18 @@
-import type { Database } from "@db/client";
+import { buildSearchQuery } from "@midday/db/utils/search-query";
+import { generateToken } from "@midday/invoice/token";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm/sql/sql";
+import { nanoid } from "nanoid";
+import type { Database } from "../client";
 import {
-  customerTags,
   customers,
+  customerTags,
   exchangeRates,
   invoices,
   tags,
   teams,
   trackerProjects,
-} from "@db/schema";
-import { buildSearchQuery } from "@midday/db/utils/search-query";
-import { generateToken } from "@midday/invoice/token";
-import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
-import type { SQL } from "drizzle-orm/sql/sql";
-import { nanoid } from "nanoid";
+} from "../schema";
 import { createActivity } from "./activities";
 
 type GetCustomerByIdParams = {
@@ -130,7 +130,7 @@ export const getCustomers = async (
   // Apply search query filter
   if (q) {
     // If the query is a number, search by numeric fields if any
-    if (!Number.isNaN(Number.parseInt(q))) {
+    if (!Number.isNaN(Number.parseInt(q, 10))) {
       // Add numeric search logic if needed
     } else {
       const query = buildSearchQuery(q);

@@ -1,9 +1,9 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { MaterialIcon } from "./icon-mapping";
 
 interface Invoice {
@@ -74,11 +74,11 @@ export function CustomerStatementAnimation({
   const [showHeader, setShowHeader] = useState(false);
   const [showLogo, setShowLogo] = useState(false);
   const [showGeneral, setShowGeneral] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
+  const [_showDetails, _setShowDetails] = useState(false);
   const [showStatement, setShowStatement] = useState(false);
   const [showCards, setShowCards] = useState(false);
   const [showTable, setShowTable] = useState(false);
-  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
+  const [invoices, _setInvoices] = useState<Invoice[]>(initialInvoices);
 
   const [containerRef, shouldPlay] = usePlayOnceOnVisible(
     () => {

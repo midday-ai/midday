@@ -1,12 +1,12 @@
 "use client";
 
-import { useTemplateUpdate } from "@/hooks/use-template-update";
-import { useUpload } from "@/hooks/use-upload";
-import { useUserQuery } from "@/hooks/use-user";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
 import { useFormContext } from "react-hook-form";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
+import { useUpload } from "@/hooks/use-upload";
+import { useUserQuery } from "@/hooks/use-user";
 
 export function Logo() {
   const { watch, setValue } = useFormContext();
@@ -33,7 +33,7 @@ export function Logo() {
         });
 
         updateTemplate({ logoUrl: url });
-      } catch (error) {
+      } catch (_error) {
         toast({
           title: "Something went wrong, please try again.",
           variant: "error",

@@ -14,9 +14,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@midday/db": "workspace:*",
     "@midday/email": "workspace:*",
     "@midday/inbox": "workspace:*",
-    "@midday/db": "workspace:*",
     "nanoid": "catalog:",
     "resend": "catalog:",
     "zod": "catalog:"

@@ -1,13 +1,13 @@
-import type { Database } from "@db/client";
-import { inbox, transactionMatchSuggestions } from "@db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
+import type { Database } from "../client";
+import { inbox, transactionMatchSuggestions } from "../schema";
 import { createActivity } from "./activities";
 import { matchTransaction, updateInbox } from "./inbox";
 import { checkInboxEmbeddingExists } from "./inbox-embeddings";
 import {
-  type MatchResult,
   createMatchSuggestion,
   findMatches,
+  type MatchResult,
 } from "./transaction-matching";
 
 // Type guard to check if result has a suggestion

@@ -1,18 +1,16 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { AlertCircle, Clock, Timer } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { RelativeTime } from "@/components/shared/relative-time";
 import { SortableHeader, useSort } from "@/components/shared/sortable-header";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  queryKeys,
   useDelayedSchedulers,
   useRefresh,
   useRepeatableSchedulers,
 } from "@/lib/hooks";
-import { cn, formatDuration } from "@/lib/utils";
+import { formatDuration } from "@/lib/utils";
 import type { SchedulersSearch } from "@/router";
-import { useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, Clock, RefreshCw, Timer } from "lucide-react";
 
 interface SchedulersPageProps {
   search: SchedulersSearch;
@@ -23,7 +21,7 @@ export function SchedulersPage({
   search,
   onSearchChange,
 }: SchedulersPageProps) {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   // Sort hooks
   const { currentSort: repeatableSort, handleSort: handleRepeatableSort } =
@@ -51,7 +49,7 @@ export function SchedulersPage({
   // Server-side cache refresh
   const refreshMutation = useRefresh();
 
-  const loading =
+  const _loading =
     repeatableLoading ||
     delayedLoading ||
     repeatableRefetching ||
@@ -59,7 +57,7 @@ export function SchedulersPage({
     refreshMutation.isPending;
   const error = repeatableError || delayedError;
 
-  const refresh = () => {
+  const _refresh = () => {
     refreshMutation.mutate();
   };
 

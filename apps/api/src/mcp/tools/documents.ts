@@ -1,7 +1,7 @@
 import { getDocumentsSchema } from "@api/schemas/documents";
 import { getDocumentById, getDocuments } from "@midday/db/queries";
 import { z } from "zod";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools, hasScope } from "../types";
+import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 
 export const registerDocumentTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;

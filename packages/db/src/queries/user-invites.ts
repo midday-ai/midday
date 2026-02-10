@@ -1,6 +1,6 @@
-import type { Database } from "@db/client";
-import { teams, userInvites, users, usersOnTeam } from "@db/schema";
-import { and, eq, inArray, or, sql } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
+import type { Database } from "../client";
+import { teams, userInvites, users, usersOnTeam } from "../schema";
 
 export async function getUserInvites(db: Database, email: string) {
   return db.query.userInvites.findMany({

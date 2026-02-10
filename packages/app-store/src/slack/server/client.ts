@@ -29,7 +29,10 @@ export const getSlackInstaller = (): InstallProvider => {
 export const createSlackApp = ({
   token,
   botId,
-}: { token: string; botId: string }) => {
+}: {
+  token: string;
+  botId: string;
+}) => {
   if (!SLACK_SIGNING_SECRET) {
     throw new Error("SLACK_SIGNING_SECRET is required");
   }
@@ -41,18 +44,17 @@ export const createSlackApp = ({
   });
 };
 
-export const createSlackWebClient = ({
-  token,
-}: {
-  token: string;
-}) => {
+export const createSlackWebClient = ({ token }: { token: string }) => {
   return new WebClient(token);
 };
 
 export const downloadFile = async ({
   privateDownloadUrl,
   token,
-}: { privateDownloadUrl: string; token: string }) => {
+}: {
+  privateDownloadUrl: string;
+  token: string;
+}) => {
   const response = await fetch(privateDownloadUrl, {
     method: "GET",
     headers: {

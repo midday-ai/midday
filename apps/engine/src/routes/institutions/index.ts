@@ -3,7 +3,7 @@ import { ErrorSchema } from "@engine/common/schema";
 import type { Providers } from "@engine/providers/types";
 import { createErrorResponse } from "@engine/utils/error";
 import { SearchClient } from "@engine/utils/search";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
   InstitutionByIdParamsSchema,
@@ -161,7 +161,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           .collections("institutions")
           .documents(id)
           .update({
-            // @ts-ignore
+            // @ts-expect-error
             popularity: (original?.popularity ?? 0) + 1,
           });
 

@@ -38,7 +38,7 @@ beforeEach(() => {
       text: () => Promise.resolve(""),
     }),
   );
-  globalThis.fetch = mockFetchFn as typeof fetch;
+  globalThis.fetch = mockFetchFn as unknown as typeof fetch;
 });
 
 afterEach(() => {

@@ -1,13 +1,13 @@
-import { LoginAccordion } from "@/components/login-accordion";
-import { LoginVideoBackground } from "@/components/login-video-background";
-import { OAuthSignIn } from "@/components/oauth-sign-in";
-import { OTPSignIn } from "@/components/otp-sign-in";
-import { Cookies } from "@/utils/constants";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { userAgent } from "next/server";
+import { LoginAccordion } from "@/components/login-accordion";
+import { LoginVideoBackground } from "@/components/login-video-background";
+import { OAuthSignIn } from "@/components/oauth-sign-in";
+import { OTPSignIn } from "@/components/otp-sign-in";
+import { Cookies } from "@/utils/constants";
 
 export const metadata: Metadata = {
   title: "Login | Midday",

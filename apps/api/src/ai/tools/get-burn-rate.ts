@@ -1,5 +1,5 @@
-import { getWriter } from "@ai-sdk-tools/artifacts";
 import { openai } from "@ai-sdk/openai";
+import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { burnRateArtifact } from "@api/ai/artifacts/burn-rate";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
@@ -8,8 +8,7 @@ import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getBurnRate, getRunway, getSpending } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
-import { generateText } from "ai";
-import { tool } from "ai";
+import { generateText, tool } from "ai";
 import {
   eachMonthOfInterval,
   endOfMonth,

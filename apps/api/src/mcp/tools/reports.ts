@@ -27,7 +27,7 @@ import {
   getSpending,
   getTaxSummary,
 } from "@midday/db/queries";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools, hasScope } from "../types";
+import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 
 export const registerReportTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;

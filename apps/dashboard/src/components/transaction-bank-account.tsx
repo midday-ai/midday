@@ -1,5 +1,5 @@
-import { BankLogo } from "@/components/bank-logo";
 import { cn } from "@midday/ui/cn";
+import { BankLogo } from "@/components/bank-logo";
 
 type Props = {
   logoUrl?: string;

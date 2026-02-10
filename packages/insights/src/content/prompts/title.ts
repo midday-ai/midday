@@ -17,7 +17,7 @@ import {
   getProfitDescription,
   getRunwayDescription,
 } from "./shared-data";
-import { type InsightSlots, getNotableContext, getToneGuidance } from "./slots";
+import { getNotableContext, getToneGuidance, type InsightSlots } from "./slots";
 
 /**
  * Build the title generation prompt
@@ -185,7 +185,7 @@ function buildDataSection(slots: InsightSlots): string {
 
 function buildExamples(
   weekType: string,
-  isFirstInsight: boolean,
+  _isFirstInsight: boolean,
   isLowRunway = false,
 ): string {
   // Personal examples that lead with context, use "your/you", and feel conversational

@@ -1,14 +1,5 @@
 "use client";
 
-import { AssignUser } from "@/components/assign-user";
-import { SelectAccount } from "@/components/select-account";
-import { SelectCategory } from "@/components/select-category";
-import { SelectCurrency } from "@/components/select-currency";
-import { TransactionAttachments } from "@/components/transaction-attachments";
-import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
-import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { utc } from "@date-fns/utc";
 import { uniqueCurrencies } from "@midday/location/currencies";
@@ -31,6 +22,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatISO } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
+import { AssignUser } from "@/components/assign-user";
+import { SelectAccount } from "@/components/select-account";
+import { SelectCategory } from "@/components/select-category";
+import { SelectCurrency } from "@/components/select-currency";
+import { TransactionAttachments } from "@/components/transaction-attachments";
+import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
+import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 
 type Transaction = RouterOutputs["transactions"]["getById"];
 
@@ -522,7 +522,7 @@ export function TransactionEditForm({ transaction }: Props) {
               <TransactionAttachments
                 id={transaction.id}
                 data={transaction.attachments}
-                onUpload={(files) => {
+                onUpload={(_files) => {
                   // Note: Attachments are handled by TransactionAttachments component
                   // The component manages its own state and updates the transaction
                 }}

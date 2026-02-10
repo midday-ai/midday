@@ -15,6 +15,10 @@
     "strict": true,
     "target": "ES2022",
     "baseUrl": ".",
-    "typeRoots": ["./node_modules/@types", "../../types"]
+    "typeRoots": [
+      "./node_modules/@types",
+      "../../node_modules/@types",
+      "../../types"
+    ]
   }
 }

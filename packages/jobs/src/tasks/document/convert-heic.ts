@@ -30,7 +30,7 @@ export const convertHeic = schemaTask({
     const buffer = await data.arrayBuffer();
 
     const decodedImage = await convert({
-      // @ts-ignore
+      // @ts-expect-error
       buffer: new Uint8Array(buffer),
       format: "JPEG",
       quality: 1,

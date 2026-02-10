@@ -1,12 +1,12 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { formatDate } from "@midday/utils/format";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { useTRPC } from "@/trpc/client";
 import { FormatAmount } from "../../format-amount";
 import { OrderStatus } from "../../order-status";
 import { ActionsMenu } from "./actions-menu";

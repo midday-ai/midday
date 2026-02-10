@@ -1,7 +1,6 @@
 {
   "extends": "@midday/tsconfig/base.json",
   "compilerOptions": {
-    "typeRoots": ["./node_modules/@types", "../../types"],
     "types": ["bun", "node"]
   },
   "include": ["src"],

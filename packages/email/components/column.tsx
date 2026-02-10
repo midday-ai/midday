@@ -1,4 +1,4 @@
-import { Img, Row, Section, Text } from "@react-email/components";
+import { Img, Section, Text } from "@react-email/components";
 import { getEmailThemeClasses } from "./theme";
 
 type Props = {

@@ -1,18 +1,18 @@
 "use client";
 
-import { updateTableSettingsAction } from "@/actions/update-table-settings-action";
-import {
-  TABLE_SETTINGS_COOKIE,
-  type TableId,
-  type TableSettings,
-  mergeWithDefaults,
-} from "@/utils/table-settings";
 import type {
   ColumnOrderState,
   ColumnSizingState,
   VisibilityState,
 } from "@tanstack/react-table";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { updateTableSettingsAction } from "@/actions/update-table-settings-action";
+import {
+  mergeWithDefaults,
+  TABLE_SETTINGS_COOKIE,
+  type TableId,
+  type TableSettings,
+} from "@/utils/table-settings";
 
 interface UseTableSettingsProps {
   tableId: TableId;

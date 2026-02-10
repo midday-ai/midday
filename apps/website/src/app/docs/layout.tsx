@@ -1,6 +1,6 @@
-import { DocsChatProvider } from "@/components/docs/docs-chat-provider";
 import type { ReactNode } from "react";
 import { Suspense } from "react";
+import { DocsChatProvider } from "@/components/docs/docs-chat-provider";
 
 export const metadata = {
   title: "Documentation",

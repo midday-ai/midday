@@ -1,10 +1,10 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useRef } from "react";
 import { useForesight } from "@/hooks/use-foresight";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useRef } from "react";
 
 /**
  * Hook for predictive data prefetching using ForesightJS.

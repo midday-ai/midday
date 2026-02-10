@@ -1,11 +1,11 @@
-import { baseUrl } from "@/app/sitemap";
-import { CustomMDX } from "@/components/mdx";
-import { PostAuthor } from "@/components/post-author";
-import { getBlogPosts } from "@/lib/blog";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { baseUrl } from "@/app/sitemap";
+import { CustomMDX } from "@/components/mdx";
+import { PostAuthor } from "@/components/post-author";
+import { getBlogPosts } from "@/lib/blog";
 
 // Force static generation
 export const dynamic = "force-static";
@@ -89,7 +89,6 @@ export default async function Page({ params }: Props) {
       <script
         type="application/ld+json"
         suppressHydrationWarning
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
         }}

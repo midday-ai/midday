@@ -12,7 +12,7 @@ import type {
   NotificationResult,
   UserData,
 } from "./base";
-import { type NotificationTypes, createActivitySchema } from "./schemas";
+import { createActivitySchema, type NotificationTypes } from "./schemas";
 import { EmailService } from "./services/email-service";
 import { documentProcessed } from "./types/document-processed";
 import { documentUploaded } from "./types/document-uploaded";
@@ -20,6 +20,7 @@ import { inboxAutoMatched } from "./types/inbox-auto-matched";
 import { inboxCrossCurrencyMatched } from "./types/inbox-cross-currency-matched";
 import { inboxNeedsReview } from "./types/inbox-needs-review";
 import { inboxNew } from "./types/inbox-new";
+import { insightReady } from "./types/insight-ready";
 import { invoiceCancelled } from "./types/invoice-cancelled";
 import { invoiceCreated } from "./types/invoice-created";
 import { invoiceOverdue } from "./types/invoice-overdue";
@@ -28,7 +29,6 @@ import { invoiceRefunded } from "./types/invoice-refunded";
 import { invoiceReminderSent } from "./types/invoice-reminder-sent";
 import { invoiceScheduled } from "./types/invoice-scheduled";
 import { invoiceSent } from "./types/invoice-sent";
-import { insightReady } from "./types/insight-ready";
 import { recurringInvoiceUpcoming } from "./types/recurring-invoice-upcoming";
 import { recurringSeriesCompleted } from "./types/recurring-series-completed";
 import { recurringSeriesPaused } from "./types/recurring-series-paused";
@@ -83,7 +83,7 @@ export class Notifications {
       locale?: string | null;
     }>,
     teamId: string,
-    teamInfo: { name: string | null; inboxId: string | null },
+    _teamInfo: { name: string | null; inboxId: string | null },
   ): UserData[] {
     return teamMembers.map((member) => ({
       id: member.id,
@@ -142,7 +142,7 @@ export class Notifications {
                 }
               }
             }
-          } catch (error) {
+          } catch (_error) {
             // If combining fails, fall through to create new activity
             // Error is silently handled - creating a new activity is the safe fallback
           }
@@ -391,45 +391,43 @@ export class Notifications {
 
 // Export types and base classes for extending
 export type {
-  NotificationHandler,
-  UserData,
   EmailInput,
+  NotificationHandler,
   NotificationOptions,
   NotificationResult,
+  UserData,
 } from "./base";
-export { userSchema, transactionSchema, invoiceSchema } from "./base";
-
-// Export schemas and types
-export {
-  transactionsCreatedSchema,
-  transactionsExportedSchema,
-  documentUploadedSchema,
-  documentProcessedSchema,
-  inboxNewSchema,
-  inboxAutoMatchedSchema,
-  inboxNeedsReviewSchema,
-  inboxCrossCurrencyMatchedSchema,
-  invoicePaidSchema,
-  invoiceOverdueSchema,
-  invoiceScheduledSchema,
-  invoiceSentSchema,
-  invoiceReminderSentSchema,
-  invoiceCancelledSchema,
-  invoiceCreatedSchema,
-  invoiceRefundedSchema,
-  recurringSeriesCompletedSchema,
-  recurringSeriesStartedSchema,
-  recurringSeriesPausedSchema,
-  recurringInvoiceUpcomingSchema,
-} from "./schemas";
-export type { NotificationTypes } from "./schemas";
-
+export { invoiceSchema, transactionSchema, userSchema } from "./base";
+export type { NotificationType } from "./notification-types";
 // Export notification type definitions and utilities
 export {
-  getAllNotificationTypes,
-  getUserSettingsNotificationTypes,
-  getNotificationTypeByType,
-  shouldShowInSettings,
   allNotificationTypes,
+  getAllNotificationTypes,
+  getNotificationTypeByType,
+  getUserSettingsNotificationTypes,
+  shouldShowInSettings,
 } from "./notification-types";
-export type { NotificationType } from "./notification-types";
+export type { NotificationTypes } from "./schemas";
+// Export schemas and types
+export {
+  documentProcessedSchema,
+  documentUploadedSchema,
+  inboxAutoMatchedSchema,
+  inboxCrossCurrencyMatchedSchema,
+  inboxNeedsReviewSchema,
+  inboxNewSchema,
+  invoiceCancelledSchema,
+  invoiceCreatedSchema,
+  invoiceOverdueSchema,
+  invoicePaidSchema,
+  invoiceRefundedSchema,
+  invoiceReminderSentSchema,
+  invoiceScheduledSchema,
+  invoiceSentSchema,
+  recurringInvoiceUpcomingSchema,
+  recurringSeriesCompletedSchema,
+  recurringSeriesPausedSchema,
+  recurringSeriesStartedSchema,
+  transactionsCreatedSchema,
+  transactionsExportedSchema,
+} from "./schemas";

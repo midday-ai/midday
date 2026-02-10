@@ -1,19 +1,19 @@
 "use client";
 
-import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useInsightFromUrl } from "@/hooks/use-insight-from-url";
-import { useOverviewTab } from "@/hooks/use-overview-tab";
-import { usePrefetchMetrics } from "@/hooks/use-prefetch-metrics";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
 import type { inferRouterOutputs } from "@trpc/server";
 import { Suspense } from "react";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useInsightFromUrl } from "@/hooks/use-insight-from-url";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
+import { usePrefetchMetrics } from "@/hooks/use-prefetch-metrics";
 import { MetricsView } from "../metrics/metrics-view";
 import { SuggestedActions } from "../suggested-actions";
 import { WidgetsHeader } from "./header";
-import { WidgetProvider, useIsCustomizing } from "./widget-provider";
+import { useIsCustomizing, WidgetProvider } from "./widget-provider";
 import { WidgetsGrid } from "./widgets-grid";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
@@ -25,9 +25,9 @@ function SuggestedActionsSkeleton() {
   return (
     <div className="w-[calc(100%+16px)] md:w-full -mx-4 md:mx-0 md:px-6 mt-10 mb-8 flex items-center justify-center">
       <div className="flex gap-3 overflow-x-auto scrollbar-hide w-full md:w-auto pl-4 md:pl-0">
-        {skeletonWidths.map((width) => (
+        {skeletonWidths.map((width, index) => (
           <Skeleton
-            key={`suggested-actions-skeleton-${width}`}
+            key={`suggested-actions-skeleton-${index.toString()}`}
             className={`${width} h-[34px] border border-[#e6e6e6] dark:border-[#1d1d1d] flex-shrink-0`}
           />
         ))}

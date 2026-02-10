@@ -1,3 +1,8 @@
+import type {
+  InsightActivity,
+  InsightContent,
+  InsightMetric,
+} from "@midday/db/schema";
 /**
  * Reusable audio generation for insights
  *
@@ -6,11 +11,6 @@
  * - Can be called from worker if eager generation is needed
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type {
-  InsightActivity,
-  InsightContent,
-  InsightMetric,
-} from "@midday/db/schema";
 import { generateAudio, isAudioEnabled } from "./generator";
 import { buildAudioScript } from "./script";
 import { uploadInsightAudio } from "./storage";

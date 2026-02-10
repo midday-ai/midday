@@ -1,5 +1,10 @@
 "use client";
 
+import { Message, MessageAvatar, MessageContent } from "@midday/ui/message";
+import { Response } from "@midday/ui/response";
+import type { UIMessage } from "ai";
+import { PaperclipIcon } from "lucide-react";
+import Image from "next/image";
 import { ArtifactToggleIcon } from "@/components/chat/artifact-toggle-icon";
 import { ChatMessageActions } from "@/components/chat/chat-message-actions";
 import { ConnectBankMessage } from "@/components/chat/connect-bank-message";
@@ -11,11 +16,6 @@ import {
   extractBankAccountRequired,
   extractInsightData,
 } from "@/lib/chat-utils";
-import { Message, MessageAvatar, MessageContent } from "@midday/ui/message";
-import { Response } from "@midday/ui/response";
-import type { UIMessage } from "ai";
-import { PaperclipIcon } from "lucide-react";
-import Image from "next/image";
 
 interface ChatMessagesProps {
   messages: UIMessage[];

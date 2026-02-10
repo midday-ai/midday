@@ -375,3 +375,5 @@ process.env.DATABASE_SJC_URL =
   process.env.DATABASE_SJC_URL || "postgres://test:test@localhost:5432/test";
 process.env.DATABASE_IAD_URL =
   process.env.DATABASE_IAD_URL || "postgres://test:test@localhost:5432/test";
+process.env.MIDDAY_DASHBOARD_URL =
+  process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";

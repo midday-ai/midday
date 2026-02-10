@@ -3,7 +3,15 @@ import "./instrument";
 
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import {
+  buildDependenciesResponse,
+  buildReadinessResponse,
+  checkDependencies,
+} from "@midday/health/checker";
+import { apiDependencies } from "@midday/health/probes";
+import { logger } from "@midday/logger";
 import { Scalar } from "@scalar/hono-api-reference";
+import * as Sentry from "@sentry/bun";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { routers } from "./rest/routers";
@@ -55,11 +63,38 @@ app.use(
   trpcServer({
     router: appRouter,
     createContext: createTRPCContext,
+    onError: ({ error, path }) => {
+      logger.error(`[tRPC] ${path}`, {
+        message: error.message,
+        code: error.code,
+        cause: error.cause instanceof Error ? error.cause.message : undefined,
+        stack: error.stack,
+      });
+
+      // Send to Sentry (skip client errors like NOT_FOUND, UNAUTHORIZED)
+      if (error.code === "INTERNAL_SERVER_ERROR") {
+        Sentry.captureException(error, {
+          tags: { source: "trpc", path: path ?? "unknown" },
+        });
+      }
+    },
   }),
 );
 
 app.get("/health", (c) => {
   return c.json({ status: "ok" }, 200);
+});
+
+app.get("/health/ready", async (c) => {
+  const results = await checkDependencies(apiDependencies(), 1);
+  const response = buildReadinessResponse(results);
+  return c.json(response, response.status === "ok" ? 200 : 503);
+});
+
+app.get("/health/dependencies", async (c) => {
+  const results = await checkDependencies(apiDependencies());
+  const response = buildDependenciesResponse(results);
+  return c.json(response, response.status === "ok" ? 200 : 503);
 });
 
 app.doc("/openapi", {
@@ -108,9 +143,41 @@ app.get(
 
 app.route("/", routers);
 
+// Global error handler — captures unhandled route errors to Sentry
+app.onError((err, c) => {
+  Sentry.captureException(err, {
+    tags: { source: "hono", path: c.req.path, method: c.req.method },
+  });
+  logger.error(`[Hono] ${c.req.method} ${c.req.path}`, {
+    message: err.message,
+    stack: err.stack,
+  });
+  return c.json({ error: "Internal Server Error" }, 500);
+});
+
+/**
+ * Unhandled exception and rejection handlers
+ */
+process.on("uncaughtException", (err) => {
+  console.error("[API] Uncaught exception:", err);
+  Sentry.captureException(err, {
+    tags: { errorType: "uncaught_exception" },
+  });
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("[API] Unhandled rejection at:", promise, "reason:", reason);
+  Sentry.captureException(
+    reason instanceof Error ? reason : new Error(String(reason)),
+    {
+      tags: { errorType: "unhandled_rejection" },
+    },
+  );
+});
+
 export default {
-  port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,
+  port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
   fetch: app.fetch,
-  host: "::", // Listen on all interfaces
+  host: "0.0.0.0", // Listen on all interfaces
   idleTimeout: 60,
 };

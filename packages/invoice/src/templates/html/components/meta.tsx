@@ -38,10 +38,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
                 </span>
                 <span className="text-[11px] flex-shrink-0">
                   {issueDate
-                    ? format(
-                        new TZDate(issueDate, "UTC"),
-                        template.dateFormat,
-                      )
+                    ? format(new TZDate(issueDate, "UTC"), template.dateFormat)
                     : ""}
                 </span>
               </div>
@@ -57,10 +54,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
                 </span>
                 <span className="text-[11px] flex-shrink-0">
                   {dueDate
-                    ? format(
-                        new TZDate(dueDate, "UTC"),
-                        template.dateFormat,
-                      )
+                    ? format(new TZDate(dueDate, "UTC"), template.dateFormat)
                     : ""}
                 </span>
               </div>

@@ -1,7 +1,7 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { IntegrationsGrid } from "@/components/integrations-grid";
 import { apps } from "@/data/apps";
-import type { Metadata } from "next";
 
 const title = "Integrations";
 const description =

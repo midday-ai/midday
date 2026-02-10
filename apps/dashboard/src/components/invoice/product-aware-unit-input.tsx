@@ -1,8 +1,8 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
+import { useTRPC } from "@/trpc/client";
 import { Input } from "./input";
 
 type Props = {
@@ -55,7 +55,7 @@ export function ProductAwareUnitInput({
     <Input
       {...props}
       name={name}
-      onBlur={(e) => {
+      onBlur={(_e) => {
         // Update product with new unit
         handleUnitBlur();
       }}

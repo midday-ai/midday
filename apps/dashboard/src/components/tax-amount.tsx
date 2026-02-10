@@ -1,6 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { CurrencyInput } from "@midday/ui/currency-input";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
@@ -20,6 +19,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
+import { useTRPC } from "@/trpc/client";
 import { FormatAmount } from "./format-amount";
 
 type TaxAmountProps = {

@@ -32,7 +32,7 @@ export class EnableBankingProvider implements Provider {
     return this.#api.getHealthCheck();
   }
 
-  async getInstitutions(params: GetInstitutionsRequest) {
+  async getInstitutions(_params: GetInstitutionsRequest) {
     const response = await this.#api.getInstitutions();
     return response.map(transformInstitution);
   }
@@ -84,7 +84,7 @@ export class EnableBankingProvider implements Provider {
     await this.#api.deleteSession(params.id);
   }
 
-  async deleteAccounts(params: DeleteAccountsRequest) {
+  async deleteAccounts(_params: DeleteAccountsRequest) {
     return;
   }
 }

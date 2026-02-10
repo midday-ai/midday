@@ -3,7 +3,7 @@ import { ErrorSchema } from "@engine/common/schema";
 import { Provider } from "@engine/providers";
 import { GoCardLessApi } from "@engine/providers/gocardless/gocardless-api";
 import { createErrorResponse } from "@engine/utils/error";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
   ConnectionByReferenceParamsSchema,

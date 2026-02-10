@@ -1,7 +1,7 @@
-import type { useI18n } from "@/locales/client";
 import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import { formatAmount } from "@midday/utils/format";
 import { format, parseISO } from "date-fns";
+import type { useI18n } from "@/locales/client";
 
 type UseI18nReturn = ReturnType<typeof useI18n>;
 
@@ -54,7 +54,7 @@ const handleTransactionsCreated: NotificationDescriptionHandler = (
   return t("notifications.transactions_created.title_many", { count });
 };
 
-const handleInboxNew: NotificationDescriptionHandler = (metadata, user, t) => {
+const handleInboxNew: NotificationDescriptionHandler = (metadata, _user, t) => {
   const count = metadata?.totalCount || 1;
   const type = metadata?.type;
   const provider = metadata?.provider ?? "";
@@ -120,7 +120,7 @@ const handleInvoicePaid: NotificationDescriptionHandler = (
 
 const handleInvoiceOverdue: NotificationDescriptionHandler = (
   metadata,
-  user,
+  _user,
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
@@ -166,7 +166,7 @@ const handleInvoiceScheduled: NotificationDescriptionHandler = (
 
 const handleInvoiceSent: NotificationDescriptionHandler = (
   metadata,
-  user,
+  _user,
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
@@ -187,7 +187,7 @@ const handleInvoiceSent: NotificationDescriptionHandler = (
 
 const handleInvoiceReminderSent: NotificationDescriptionHandler = (
   metadata,
-  user,
+  _user,
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
@@ -208,7 +208,7 @@ const handleInvoiceReminderSent: NotificationDescriptionHandler = (
 
 const handleInvoiceCancelled: NotificationDescriptionHandler = (
   metadata,
-  user,
+  _user,
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
@@ -271,7 +271,7 @@ const handleInvoiceCreated: NotificationDescriptionHandler = (
 
 const handleInvoiceRefunded: NotificationDescriptionHandler = (
   metadata,
-  user,
+  _user,
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
@@ -293,7 +293,7 @@ const handleInvoiceRefunded: NotificationDescriptionHandler = (
 
 const handleRecurringSeriesStarted: NotificationDescriptionHandler = (
   metadata,
-  user,
+  _user,
   t,
 ) => {
   const customerName = metadata?.customerName;
@@ -332,7 +332,7 @@ const handleRecurringSeriesStarted: NotificationDescriptionHandler = (
 
 const handleRecurringSeriesCompleted: NotificationDescriptionHandler = (
   metadata,
-  user,
+  _user,
   t,
 ) => {
   const customerName = metadata?.customerName;
@@ -357,7 +357,7 @@ const handleRecurringSeriesCompleted: NotificationDescriptionHandler = (
 
 const handleRecurringSeriesPaused: NotificationDescriptionHandler = (
   metadata,
-  user,
+  _user,
   t,
 ) => {
   const customerName = metadata?.customerName;

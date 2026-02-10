@@ -1,10 +1,10 @@
 import type { Database } from "@midday/db/client";
+import type { MatchResult } from "@midday/db/queries";
 import {
   getInboxById,
   getTransactionById,
   hasSuggestion,
 } from "@midday/db/queries";
-import type { MatchResult } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
 import { Notifications } from "@midday/notifications";
 import { sendToProviders } from "./provider-notifications";

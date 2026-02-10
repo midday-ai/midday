@@ -1,6 +1,5 @@
 "use client";
 
-import { useInboxParams } from "@/hooks/use-inbox-params";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -9,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { useInboxParams } from "@/hooks/use-inbox-params";
 
 export function InboxOrdering() {
   const { params, setParams } = useInboxParams();

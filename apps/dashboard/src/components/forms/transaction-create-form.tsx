@@ -1,16 +1,5 @@
 "use client";
 
-import { AssignUser } from "@/components/assign-user";
-import { SelectAccount } from "@/components/select-account";
-import { SelectCategory } from "@/components/select-category";
-import { SelectCurrency } from "@/components/select-currency";
-import { TransactionAttachments } from "@/components/transaction-attachments";
-import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
-import { useTeamQuery } from "@/hooks/use-team";
-import { useTransactionParams } from "@/hooks/use-transaction-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import { utc } from "@date-fns/utc";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import {
@@ -44,6 +33,17 @@ import { format, formatISO } from "date-fns";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { z } from "zod/v3";
+import { AssignUser } from "@/components/assign-user";
+import { SelectAccount } from "@/components/select-account";
+import { SelectCategory } from "@/components/select-category";
+import { SelectCurrency } from "@/components/select-currency";
+import { TransactionAttachments } from "@/components/transaction-attachments";
+import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 
 const formSchema = z.object({
   name: z.string().min(1),
@@ -72,7 +72,7 @@ const formSchema = z.object({
 
 export function TransactionCreateForm() {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const invalidateTransactionQueries = useInvalidateTransactionQueries();
   const { setParams } = useTransactionParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -117,7 +117,7 @@ export function TransactionCreateForm() {
   const attachments = form.watch("attachments");
   const bankAccountId = form.watch("bankAccountId");
   const transactionType = form.watch("transactionType");
-  const amount = form.watch("amount");
+  const _amount = form.watch("amount");
 
   useEffect(() => {
     if (!bankAccountId && accounts?.length) {

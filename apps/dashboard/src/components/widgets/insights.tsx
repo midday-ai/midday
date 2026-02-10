@@ -1,8 +1,5 @@
 "use client";
 
-import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useAudioPlayerStore } from "@/store/audio-player";
-import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -15,6 +12,9 @@ import {
   useTransform,
 } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useAudioPlayerStore } from "@/store/audio-player";
+import { useTRPC } from "@/trpc/client";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 /**

@@ -1,7 +1,7 @@
 "use client";
 
-import { formatAmount } from "@/utils/format";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { formatAmount } from "@/utils/format";
 
 interface CategoryData {
   category: string;

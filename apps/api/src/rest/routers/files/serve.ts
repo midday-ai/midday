@@ -1,7 +1,7 @@
 import type { Context } from "@api/rest/types";
 import { proxyFileSchema } from "@api/schemas/files";
 import { createAdminClient } from "@api/services/supabase";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { withDatabase } from "../../middleware/db";
 import { withFileAuth } from "../../middleware/file-auth";

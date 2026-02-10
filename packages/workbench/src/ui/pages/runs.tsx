@@ -1,3 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { ChevronRight, FileText, RefreshCw, X } from "lucide-react";
+import * as React from "react";
 import {
   BulkBottomBar,
   type BulkSelection,
@@ -6,7 +9,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { RelativeTime } from "@/components/shared/relative-time";
 import { SortableHeader, useSort } from "@/components/shared/sortable-header";
 import { StatusBadge, StatusDot } from "@/components/shared/status-badge";
-import { SmartSearch, parseSearchQuery } from "@/components/smart-search";
+import { parseSearchQuery, SmartSearch } from "@/components/smart-search";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -16,7 +19,6 @@ import {
 } from "@/components/ui/tooltip";
 import type { JobStatus, RunInfoList } from "@/core/types";
 import {
-  queryKeys,
   useActivityStats,
   useBulkDelete,
   useBulkPromote,
@@ -24,11 +26,8 @@ import {
   useRefresh,
   useRuns,
 } from "@/lib/hooks";
-import { cn, formatDuration, truncate } from "@/lib/utils";
+import { formatDuration, truncate } from "@/lib/utils";
 import type { RunsSearch } from "@/router";
-import { useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, FileText, RefreshCw, X } from "lucide-react";
-import * as React from "react";
 
 interface RunsPageProps {
   search: RunsSearch;
@@ -43,7 +42,7 @@ export function RunsPage({
   onJobSelect,
   onQueueSelect,
 }: RunsPageProps) {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   // Selection state for bulk actions
   const [selection, setSelection] = React.useState<Map<string, BulkSelection>>(
@@ -140,11 +139,11 @@ export function RunsPage({
   // Server-side cache refresh
   const refreshMutation = useRefresh();
 
-  const refresh = () => {
+  const _refresh = () => {
     refreshMutation.mutate();
   };
 
-  const loading = isLoading || isRefetching || refreshMutation.isPending;
+  const _loading = isLoading || isRefetching || refreshMutation.isPending;
 
   // Selection helpers
   const selectionKey = (queueName: string, jobId: string) =>

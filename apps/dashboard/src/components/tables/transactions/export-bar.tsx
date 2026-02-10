@@ -1,17 +1,5 @@
 "use client";
 
-import { ExportTransactionsModal } from "@/components/modals/export-transactions-modal";
-import { Portal } from "@/components/portal";
-import {
-  type AccountingJobResult,
-  useAccountingError,
-} from "@/hooks/use-accounting-error";
-import { useJobStatus } from "@/hooks/use-job-status";
-import { useSuccessSound } from "@/hooks/use-success-sound";
-import { useTransactionTab } from "@/hooks/use-transaction-tab";
-import { useExportStore } from "@/store/export";
-import { useTransactionsStore } from "@/store/transactions";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -25,6 +13,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ExportTransactionsModal } from "@/components/modals/export-transactions-modal";
+import { Portal } from "@/components/portal";
+import {
+  type AccountingJobResult,
+  useAccountingError,
+} from "@/hooks/use-accounting-error";
+import { useJobStatus } from "@/hooks/use-job-status";
+import { useSuccessSound } from "@/hooks/use-success-sound";
+import { useTransactionTab } from "@/hooks/use-transaction-tab";
+import { useExportStore } from "@/store/export";
+import { useTransactionsStore } from "@/store/transactions";
+import { useTRPC } from "@/trpc/client";
 
 const PROVIDER_NAMES: Record<string, string> = {
   xero: "Xero",
@@ -94,7 +94,7 @@ export function ExportBar() {
   // Set default selected provider when connected providers change
   useEffect(() => {
     if (connectedProviders.length > 0 && !selectedProviderId) {
-      setSelectedProviderId(connectedProviders[0].app_id);
+      setSelectedProviderId(connectedProviders[0]!.app_id);
       setExportPreference("accounting");
     } else if (connectedProviders.length === 0) {
       setSelectedProviderId(null);
@@ -118,8 +118,8 @@ export function ExportBar() {
             runId: data.id,
             exportType: "accounting",
             providerName:
-              PROVIDER_NAMES[connectedProvider?.app_id ?? ""] ??
-              connectedProvider?.app_id,
+              PROVIDER_NAMES[activeProvider?.app_id ?? ""] ??
+              activeProvider?.app_id,
           });
           setRowSelection("review", {});
         }
@@ -129,8 +129,8 @@ export function ExportBar() {
         setExportingTransactionIds([]);
         setExportingCount(null);
         showMutationError(
-          PROVIDER_NAMES[connectedProvider?.app_id ?? ""] ??
-            connectedProvider?.app_id ??
+          PROVIDER_NAMES[activeProvider?.app_id ?? ""] ??
+            activeProvider?.app_id ??
             "accounting software",
         );
       },

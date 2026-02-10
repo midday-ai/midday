@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import * as React from "react";
 import {
   Area,
@@ -12,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { cn } from "@/lib/utils";
 
 // Chart config type
 export type ChartConfig = {

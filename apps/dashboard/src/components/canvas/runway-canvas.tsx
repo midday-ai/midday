@@ -1,5 +1,8 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { runwayArtifact } from "@api/ai/artifacts/runway";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasChart,
@@ -16,16 +19,13 @@ import {
 } from "@/components/canvas/utils";
 import { RunwayChart } from "@/components/charts/runway-chart";
 import { useUserQuery } from "@/hooks/use-user";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { runwayArtifact } from "@api/ai/artifacts/runway";
-import { parseAsInteger, useQueryState } from "nuqs";
 
 export function RunwayCanvas() {
   const [version] = useQueryState("version", parseAsInteger.withDefault(0));
   const [artifact] = useArtifact(runwayArtifact, { version });
   const { data, status } = artifact;
   const { data: user } = useUserQuery();
-  const isLoading = status === "loading";
+  const _isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
   const locale = user?.locale ?? undefined;

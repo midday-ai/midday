@@ -2,23 +2,23 @@
  * Content module - AI-powered content generation
  */
 export {
-  ContentGenerator,
-  createContentGenerator,
   type ContentGenerationContext,
+  ContentGenerator,
   type ContentGeneratorOptions,
+  createContentGenerator,
   type YearOverYearContext,
 } from "./generator";
 
 export { getFallbackContent } from "./prompts";
 
 export {
+  type AnomalySlot,
   buildActionsPrompt,
   buildAudioPrompt,
   buildStoryPrompt,
   buildSummaryPrompt,
   buildTitlePrompt,
   computeSlots,
-  type AnomalySlot,
   type InsightSlots,
   type WeekHighlight,
   type WeekType,

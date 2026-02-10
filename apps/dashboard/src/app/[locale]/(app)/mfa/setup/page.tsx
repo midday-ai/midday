@@ -1,5 +1,5 @@
-import { SetupMfa } from "@/components/setup-mfa";
 import type { Metadata } from "next";
+import { SetupMfa } from "@/components/setup-mfa";
 
 export const metadata: Metadata = {
   title: "Setup MFA | Midday",

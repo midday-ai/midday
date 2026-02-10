@@ -1,8 +1,8 @@
 "use client";
 
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { useTRPC } from "@/trpc/client";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { InvoiceSummary } from "./invoice-summary";
 
 export function InvoicesOpen() {

@@ -1,6 +1,5 @@
 import { Skeleton } from "@midday/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { OrdersTableHeader } from "./table-header";
 
 export function OrdersSkeleton() {

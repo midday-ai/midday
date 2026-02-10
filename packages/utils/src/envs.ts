@@ -1,18 +1,25 @@
 export function getAppUrl() {
-  // Allow explicit override via DASHBOARD_URL env var (useful for worker/non-Vercel deployments)
+  // Allow explicit override via DASHBOARD_URL env var
   if (process.env.DASHBOARD_URL) {
     return process.env.DASHBOARD_URL;
   }
 
-  if (
-    process.env.VERCEL_ENV === "production" ||
-    process.env.NODE_ENV === "production"
-  ) {
-    return "https://app.midday.ai";
+  // When running in Railway, use RAILWAY_ENVIRONMENT as the source of truth
+  // (NODE_ENV is always "production" in Docker builds, even for staging)
+  if (process.env.RAILWAY_ENVIRONMENT) {
+    if (process.env.RAILWAY_ENVIRONMENT === "production") {
+      return "https://app.midday.ai";
+    }
+
+    // Non-production Railway environment (staging, etc.)
+    if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+      return `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`;
+    }
   }
 
-  if (process.env.VERCEL_ENV === "preview") {
-    return `https://${process.env.VERCEL_URL}`;
+  // Non-Railway production (e.g. other hosting platforms)
+  if (process.env.NODE_ENV === "production") {
+    return "https://app.midday.ai";
   }
 
   return "http://localhost:3001";
@@ -26,21 +33,6 @@ export function getEmailUrl() {
   return "https://midday.ai";
 }
 
-export function getWebsiteUrl() {
-  if (
-    process.env.VERCEL_ENV === "production" ||
-    process.env.NODE_ENV === "production"
-  ) {
-    return "https://midday.ai";
-  }
-
-  if (process.env.VERCEL_ENV === "preview") {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-
-  return "http://localhost:3000";
-}
-
 export function getCdnUrl() {
   return "https://cdn.midday.ai";
 }
@@ -51,10 +43,20 @@ export function getApiUrl() {
     return process.env.API_URL;
   }
 
-  if (
-    process.env.VERCEL_ENV === "production" ||
-    process.env.NODE_ENV === "production"
-  ) {
+  // When running in Railway, use RAILWAY_ENVIRONMENT as the source of truth
+  // (NODE_ENV is always "production" in Docker builds, even for staging)
+  if (process.env.RAILWAY_ENVIRONMENT) {
+    if (process.env.RAILWAY_ENVIRONMENT === "production") {
+      return "https://api.midday.ai";
+    }
+
+    // Non-production Railway environment (staging, etc.)
+    // Fall through to localhost — override with API_URL env var in staging
+    return "http://localhost:3002";
+  }
+
+  // Non-Railway production (e.g. other hosting platforms)
+  if (process.env.NODE_ENV === "production") {
     return "https://api.midday.ai";
   }
 

@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import type { SearchParams } from "nuqs/server";
+import { Suspense } from "react";
 import { AddTransactions } from "@/components/add-transactions";
 import { ScrollableContent } from "@/components/scrollable-content";
 import { DataTable } from "@/components/tables/transactions/data-table";
@@ -9,11 +12,8 @@ import { TransactionsUploadZone } from "@/components/transactions-upload-zone";
 import { loadSortParams } from "@/hooks/use-sort-params";
 import { loadTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { loadTransactionTab } from "@/hooks/use-transaction-tab";
-import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
+import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 import { getInitialTableSettings } from "@/utils/columns";
-import type { Metadata } from "next";
-import type { SearchParams } from "nuqs/server";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Transactions | Midday",

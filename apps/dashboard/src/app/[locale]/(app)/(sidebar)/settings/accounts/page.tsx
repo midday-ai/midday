@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { ConnectedAccounts } from "@/components/connected-accounts";
 import { prefetch, trpc } from "@/trpc/server";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Bank Connections | Midday",

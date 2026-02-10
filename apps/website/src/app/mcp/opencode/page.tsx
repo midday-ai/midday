@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCPOpenCode } from "@/components/mcp-opencode";
-import type { Metadata } from "next";
 
 const title = "OpenCode MCP Integration";
 const description =

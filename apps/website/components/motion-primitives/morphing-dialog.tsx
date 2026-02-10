@@ -5,9 +5,9 @@ import { Cross2Icon } from "@radix-ui/react-icons";
 import {
   AnimatePresence,
   MotionConfig,
+  motion,
   type Transition,
   type Variant,
-  motion,
 } from "motion/react";
 import React, {
   useCallback,
@@ -209,7 +209,6 @@ function MorphingDialogContent({
       layoutId={`dialog-${uniqueId}`}
       className={cn("overflow-hidden", className)}
       style={style}
-      // biome-ignore lint/a11y/useSemanticElements: motion.div cannot be replaced with dialog element
       role="dialog"
       aria-modal="true"
       aria-labelledby={`motion-ui-morphing-dialog-title-${uniqueId}`}
@@ -362,6 +361,7 @@ function MorphingDialogImage({
   const { uniqueId } = useMorphingDialog();
 
   return (
+    // biome-ignore lint/performance/noImgElement: Third-party dialog component
     <motion.img
       src={src}
       alt={alt}

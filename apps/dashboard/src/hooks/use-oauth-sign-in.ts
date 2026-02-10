@@ -1,11 +1,11 @@
 "use client";
 
-import { getUrl } from "@/utils/environment";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import { createClient } from "@midday/supabase/client";
 import type { Provider } from "@supabase/supabase-js";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { getUrl } from "@/utils/environment";
 
 export type OAuthProvider = "google" | "apple" | "github" | "azure";
 

@@ -1,10 +1,5 @@
 "use client";
 
-import { useBillableHours } from "@/hooks/use-billable-hours";
-import { useCalendarDates } from "@/hooks/use-calendar-dates";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import { TZDate } from "@date-fns/tz";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -19,10 +14,14 @@ import {
   subMonths,
   subWeeks,
 } from "date-fns";
-import { useRef, useState } from "react";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useOnClickOutside } from "usehooks-ts";
+import { useBillableHours } from "@/hooks/use-billable-hours";
+import { useCalendarDates } from "@/hooks/use-calendar-dates";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { CalendarHeader } from "./tracker/calendar-header";
 import { CalendarMonthView } from "./tracker/calendar-month-view";
 import { CalendarWeekView } from "./tracker/calendar-week-view";

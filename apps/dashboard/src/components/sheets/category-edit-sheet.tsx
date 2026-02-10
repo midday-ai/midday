@@ -1,7 +1,5 @@
 "use client";
 
-import { useCategoryParams } from "@/hooks/use-category-params";
-import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +20,8 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCategoryParams } from "@/hooks/use-category-params";
+import { useTRPC } from "@/trpc/client";
 import { CategoryEditForm } from "../forms/category-edit-form";
 
 export function CategoryEditSheet() {

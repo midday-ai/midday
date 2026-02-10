@@ -1,7 +1,7 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 import { AddAccountButton } from "./add-account-button";
 import { BankConnections } from "./bank-connections";
 import { ManualAccounts } from "./manual-accounts";

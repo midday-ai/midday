@@ -94,7 +94,7 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
     }
   }
 
-  function handlePasswordCancel() {
+  function _handlePasswordCancel() {
     if (pendingCallback) {
       pendingCallback(null);
       setPasswordCancelled(true);

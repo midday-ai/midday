@@ -1,12 +1,12 @@
 "use client";
 
-import { secondsToHoursAndMinutes } from "@/utils/format";
 import type { BillableHoursResult } from "@midday/db/queries";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@midday/ui/hover-card";
+import { secondsToHoursAndMinutes } from "@/utils/format";
 import { FormatAmount } from "./format-amount";
 
 type Props = {

@@ -1,7 +1,7 @@
 "use client";
 
-import { useSortParams } from "@/hooks/use-sort-params";
 import { useCallback } from "react";
+import { useSortParams } from "@/hooks/use-sort-params";
 
 /**
  * Hook for managing sort query state

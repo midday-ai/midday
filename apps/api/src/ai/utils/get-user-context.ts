@@ -1,9 +1,5 @@
 import type { Database } from "@db/client";
-import {
-  type ChatTeamContext,
-  type ChatUserContext,
-  chatCache,
-} from "@midday/cache/chat-cache";
+import { type ChatUserContext, chatCache } from "@midday/cache/chat-cache";
 import { getBankAccounts, getTeamById, getUserById } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";

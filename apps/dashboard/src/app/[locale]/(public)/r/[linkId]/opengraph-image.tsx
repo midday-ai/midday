@@ -1,9 +1,9 @@
-import { getChartDisplayName } from "@/components/metrics/utils/chart-types";
-import { getQueryClient, trpc } from "@/trpc/server";
 import { isValidLogoUrl } from "@midday/invoice";
 import { format, parseISO } from "date-fns";
 import { notFound } from "next/navigation";
 import { ImageResponse } from "next/og";
+import { getChartDisplayName } from "@/components/metrics/utils/chart-types";
+import { getQueryClient, trpc } from "@/trpc/server";
 
 export const contentType = "image/png";
 

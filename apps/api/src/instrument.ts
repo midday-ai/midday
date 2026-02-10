@@ -6,6 +6,9 @@ if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
 
+    // Associate errors with deploys via git commit SHA (provided by Railway)
+    release: process.env.RAILWAY_GIT_COMMIT_SHA,
+
     integrations: [
       // Send console.error calls as logs to Sentry
       Sentry.consoleLoggingIntegration({ levels: ["error"] }),

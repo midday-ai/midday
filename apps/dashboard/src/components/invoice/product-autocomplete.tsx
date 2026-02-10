@@ -1,8 +1,5 @@
 "use client";
 
-import { useProductParams } from "@/hooks/use-product-params";
-import { useTRPC } from "@/trpc/client";
-import { formatAmount } from "@/utils/format";
 import { extractTextFromValue } from "@midday/invoice";
 import type { InvoiceProduct } from "@midday/invoice/types";
 import { cn } from "@midday/ui/cn";
@@ -15,6 +12,9 @@ import {
   useState,
 } from "react";
 import { useFormContext } from "react-hook-form";
+import { useProductParams } from "@/hooks/use-product-params";
+import { useTRPC } from "@/trpc/client";
+import { formatAmount } from "@/utils/format";
 
 type Props = {
   index: number;

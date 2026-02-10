@@ -1,6 +1,5 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import {
   DropdownMenu,
@@ -11,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { useUserQuery } from "@/hooks/use-user";
 import { ForesightLink } from "./foresight-link";
 import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";

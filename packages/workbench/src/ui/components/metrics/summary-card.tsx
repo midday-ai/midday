@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import type * as React from "react";
+import { cn } from "@/lib/utils";
 
 interface SparklineProps {
   data: number[];

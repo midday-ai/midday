@@ -1,56 +1,47 @@
 # Base image with Bun
 FROM oven/bun:1.3.9 AS base
 
-# Install turbo CLI globally using Bun
+# Install turbo CLI globally
 FROM base AS turbo-cli
 RUN bun add -g turbo
 
-# Builder stage
+# Builder stage - prune API workspace
 FROM turbo-cli AS builder
 WORKDIR /app
-# Copy all files
 COPY . .
-# Use turbo CLI from Bun global install to prune workspaces
 RUN turbo prune @midday/api --docker
 
-# Installer stage
+# Installer stage - install deps and build
 FROM base AS installer
 WORKDIR /app
 
-# Install build dependencies for native modules (canvas, etc.)
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    build-essential \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libjpeg-dev \
-    libgif-dev \
-    librsvg2-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# First install the dependencies (as they change less often)
+# Install dependencies
 COPY --from=builder /app/out/json/ .
 COPY bunfig.toml .
 RUN bun install
 
-# Copy the full source code
+# Copy full source
 COPY --from=builder /app/out/full/ .
 
-# Copy the prebuilt engine dist from the build context (assumes CI built it)
-COPY apps/engine/dist /app/apps/engine/dist
+# Build engine types
+RUN bunx turbo run build --filter=@midday/engine --only
 
-# Runner stage (same as installer to avoid another copy)
-FROM installer AS runner
+# Runner stage - clean image
+FROM oven/bun:1.3.9 AS runner
+WORKDIR /app
 
-# Set the API directory as working directory
+ENV NODE_ENV=production
+ENV PORT=8080
+
+# Copy only what's needed at runtime
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/apps/api ./apps/api
+COPY --from=installer /app/apps/engine ./apps/engine
+COPY --from=installer /app/packages ./packages
+COPY --from=installer /app/package.json ./package.json
+
 WORKDIR /app/apps/api
 
-# Set environment variables
-ENV NODE_ENV=production
+EXPOSE 8080
 
-# Expose the port the API runs on
-EXPOSE 3000
-
-# Run the API directly with Bun
-CMD ["bun", "run", "src/index.ts"]
+CMD ["bun", "src/index.ts"]

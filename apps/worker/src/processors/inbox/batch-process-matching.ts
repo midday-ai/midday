@@ -36,7 +36,7 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
     // Process in smaller batches for better performance and error isolation
     const BATCH_SIZE = 5;
     const totalBatches = Math.ceil(inboxIds.length / BATCH_SIZE);
-    const progressPerBatch = 100 / totalBatches;
+    const _progressPerBatch = 100 / totalBatches;
 
     for (let i = 0; i < inboxIds.length; i += BATCH_SIZE) {
       const batch = inboxIds.slice(i, i + BATCH_SIZE);

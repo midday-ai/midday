@@ -1,6 +1,6 @@
-import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { TZDate } from "@date-fns/tz";
 import { addMonths, formatISO, subMonths } from "date-fns";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 
 export function handleMonthChange(direction: number, currentDate: TZDate) {
   const { setParams } = useTrackerParams();

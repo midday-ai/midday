@@ -1,9 +1,5 @@
 "use client";
 
-import { useLatestProjectId } from "@/hooks/use-latest-project-id";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { NEW_EVENT_ID, parseTimeWithMidnightCrossing } from "@/utils/tracker";
 import { TZDate } from "@date-fns/tz";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
@@ -14,6 +10,10 @@ import { startOfDay } from "date-fns";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v3";
+import { useLatestProjectId } from "@/hooks/use-latest-project-id";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { NEW_EVENT_ID, parseTimeWithMidnightCrossing } from "@/utils/tracker";
 import { AssignUser } from "../assign-user";
 import { TrackerSelectProject } from "../tracker-select-project";
 

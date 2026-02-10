@@ -1,8 +1,8 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
+import { useI18n } from "@/locales/client";
 
 export function InvoiceStatus({
   status,

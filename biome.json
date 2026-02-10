@@ -1,36 +1,58 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "files": {
-    "ignore": [
-      "dist",
-      "dist/**",
-      "node_modules",
-      "node_modules/**",
-      ".turbo",
-      ".next",
-      ".next/**"
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/node_modules",
+      "!**/.turbo",
+      "!**/.next",
+      "!**/.react-email",
+      "!**/.wrangler"
     ]
   },
+  "css": {
+    "parser": {
+      "cssModules": true,
+      "tailwindDirectives": true
+    }
+  },
   "linter": {
-    "ignore": [".wrangler", "node_modules"],
     "enabled": true,
     "rules": {
       "recommended": true,
       "a11y": {
         "noSvgWithoutTitle": "off",
-        "useKeyWithClickEvents": "off"
+        "useKeyWithClickEvents": "off",
+        "noStaticElementInteractions": "off",
+        "useSemanticElements": "off",
+        "useAriaPropsSupportedByRole": "off"
       },
       "style": {
         "noNonNullAssertion": "off"
       },
       "correctness": {
-        "useExhaustiveDependencies": "off"
+        "useExhaustiveDependencies": "off",
+        "noUnusedFunctionParameters": "off",
+        "noUnusedVariables": "warn",
+        "useHookAtTopLevel": "warn"
       },
       "suspicious": {
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noNonNullAssertedOptionalChain": "warn",
+        "noUnknownAtRules": "off",
+        "noTemplateCurlyInString": "warn",
+        "noDuplicateElseIf": "warn",
+        "noImplicitAnyLet": "warn",
+        "noDocumentCookie": "warn",
+        "useIterableCallbackReturn": "warn"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "performance": {
+        "noImgElement": "warn"
       }
     }
   },

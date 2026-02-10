@@ -1,7 +1,5 @@
 "use client";
 
-import { useTransactionTableContextOptional } from "@/components/tables/transactions/transaction-table-context";
-import { useTRPC } from "@/trpc/client";
 import { Badge } from "@midday/ui/badge";
 import { cn } from "@midday/ui/cn";
 import {
@@ -16,6 +14,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useState } from "react";
+import { useTransactionTableContextOptional } from "@/components/tables/transactions/transaction-table-context";
+import { useTRPC } from "@/trpc/client";
 
 type Tag = {
   id: string;

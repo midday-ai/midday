@@ -10,7 +10,7 @@ import {
   getInsightsForUser,
   getLatestInsight,
 } from "@midday/db/queries";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools, hasScope } from "../types";
+import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 
 export const registerInsightTools: RegisterTools = (server, ctx) => {
   const { db, teamId, userId } = ctx;

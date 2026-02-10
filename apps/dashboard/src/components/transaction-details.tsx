@@ -1,9 +1,5 @@
 "use client";
 
-import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
-import { useTransactionParams } from "@/hooks/use-transaction-params";
-import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
-import { useTRPC } from "@/trpc/client";
 import {
   Accordion,
   AccordionContent,
@@ -27,6 +23,10 @@ import { toast } from "@midday/ui/use-toast";
 import { getTaxTypeLabel } from "@midday/utils/tax";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
+import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
+import { useTRPC } from "@/trpc/client";
 import { AssignUser } from "./assign-user";
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
@@ -219,7 +219,7 @@ export function TransactionDetails() {
 
   const updateTransactionsMutation = useMutation(
     trpc.transactions.updateMany.mutationOptions({
-      onSuccess: (_, data) => {
+      onSuccess: (_, _data) => {
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
         });

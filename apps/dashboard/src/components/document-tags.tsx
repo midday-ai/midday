@@ -1,9 +1,9 @@
 "use client";
 
-import { VaultSelectTags } from "@/components/vault/vault-select-tags";
-import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { VaultSelectTags } from "@/components/vault/vault-select-tags";
+import { useTRPC } from "@/trpc/client";
 
 type Tag = NonNullable<
   RouterOutputs["documents"]["getById"]

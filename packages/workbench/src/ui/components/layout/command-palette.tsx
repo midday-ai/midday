@@ -1,15 +1,3 @@
-import { parseSearchQuery } from "@/components/smart-search";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command";
-import { useConfig, useSearch, useTagValues } from "@/lib/hooks";
-import { formatRelativeTime, truncate } from "@/lib/utils";
 import {
   ArrowRight,
   BarChart3,
@@ -24,6 +12,18 @@ import {
   Sun,
 } from "lucide-react";
 import * as React from "react";
+import { parseSearchQuery } from "@/components/smart-search";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
+import { useConfig, useSearch, useTagValues } from "@/lib/hooks";
+import { formatRelativeTime, truncate } from "@/lib/utils";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -114,7 +114,7 @@ export function CommandPalette({
   };
 
   // Parse search query for tag autocomplete
-  const parsedQuery = React.useMemo(() => {
+  const _parsedQuery = React.useMemo(() => {
     return parseSearchQuery(inputValue);
   }, [inputValue]);
 
@@ -188,7 +188,7 @@ export function CommandPalette({
       .slice(0, 10);
   }, [tokenType, tokenPrefix, tagValues]);
 
-  const hasResults =
+  const _hasResults =
     filteredNavigation.length > 0 ||
     filteredQueues.length > 0 ||
     jobResults.length > 0 ||

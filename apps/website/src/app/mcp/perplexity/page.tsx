@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCPPerplexity } from "@/components/mcp-perplexity";
-import type { Metadata } from "next";
 
 const title = "Perplexity MCP Integration";
 const description =

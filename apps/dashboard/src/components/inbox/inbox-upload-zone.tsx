@@ -1,8 +1,5 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
-import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
@@ -10,6 +7,9 @@ import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import { resumableUpload } from "@/utils/upload";
 
 type UploadResult = {
   filename: string;
@@ -151,7 +151,7 @@ export function UploadZone({ children, onUploadComplete }: Props) {
       setToastId(undefined);
       dismiss(toastId);
       onUploadComplete?.(inboxItems[0]?.id);
-    } catch (error) {
+    } catch (_error) {
       // Refresh inbox to show current state after error
       queryClient.invalidateQueries({
         queryKey: trpc.inbox.get.queryKey(),

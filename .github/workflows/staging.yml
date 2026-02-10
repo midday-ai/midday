@@ -1,0 +1,226 @@
+name: Staging
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+concurrency:
+  group: staging-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Detect which services are affected (turbo dependency graph)
+  # ---------------------------------------------------------------------------
+  detect-changes:
+    name: Detect changes
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 5
+    env:
+      TURBO_SCM_BASE: origin/main
+    outputs:
+      api: ${{ steps.affected.outputs.api }}
+      dashboard: ${{ steps.affected.outputs.dashboard }}
+      worker: ${{ steps.affected.outputs.worker }}
+      engine: ${{ steps.affected.outputs.engine }}
+      website: ${{ steps.affected.outputs.website }}
+      jobs: ${{ steps.affected.outputs.jobs }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - name: Detect affected services
+        id: affected
+        run: |
+          AFFECTED=$(bunx turbo build --affected --dry-run=json 2>/dev/null | jq -r '.packages[]' 2>/dev/null || echo "")
+          echo "Affected packages: $AFFECTED"
+          echo "api=$(echo "$AFFECTED" | grep -q '@midday/api' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "dashboard=$(echo "$AFFECTED" | grep -q '@midday/dashboard' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "worker=$(echo "$AFFECTED" | grep -q '@midday/worker' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "engine=$(echo "$AFFECTED" | grep -q '@midday/engine' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "website=$(echo "$AFFECTED" | grep -q '@midday/website' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "jobs=$(echo "$AFFECTED" | grep -q '@midday/jobs' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+  # ---------------------------------------------------------------------------
+  # Validate — runs in parallel with detect-changes
+  # ---------------------------------------------------------------------------
+  validate:
+    name: Validate
+    runs-on: blacksmith-16vcpu-ubuntu-2404
+    timeout-minutes: 20
+    env:
+      NODE_OPTIONS: "--max-old-space-size=8192"
+      TURBO_SCM_BASE: origin/main
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - name: Lint
+        run: bunx turbo lint --affected
+
+      - name: Build required type dependencies
+        run: bunx turbo build --filter=workbench --filter=@midday/engine
+
+      - name: Typecheck
+        run: bunx turbo typecheck --affected
+
+      - name: Test
+        run: bunx turbo test --affected
+
+  # ---------------------------------------------------------------------------
+  # Deploy API to Railway staging
+  # ---------------------------------------------------------------------------
+  deploy-api-staging:
+    name: Deploy API (staging)
+    needs: [detect-changes, validate]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.api == 'true'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 20
+    concurrency: railway-api-staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Railway
+        run: npx @railway/cli up --service api --environment staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy Dashboard to Railway staging (waits for API when both change)
+  # ---------------------------------------------------------------------------
+  deploy-dashboard-staging:
+    name: Deploy Dashboard (staging)
+    needs: [detect-changes, validate, deploy-api-staging]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.dashboard == 'true' &&
+      (needs.deploy-api-staging.result == 'success' || needs.deploy-api-staging.result == 'skipped')
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 20
+    concurrency: railway-dashboard-staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Railway
+        run: npx @railway/cli up --service dashboard --environment staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy Worker to Railway staging (waits for API when both change)
+  # ---------------------------------------------------------------------------
+  deploy-worker-staging:
+    name: Deploy Worker (staging)
+    needs: [detect-changes, validate, deploy-api-staging]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.worker == 'true' &&
+      (needs.deploy-api-staging.result == 'success' || needs.deploy-api-staging.result == 'skipped')
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 20
+    concurrency: railway-worker-staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Railway
+        run: npx @railway/cli up --service worker --environment staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy Engine to Cloudflare staging
+  # ---------------------------------------------------------------------------
+  deploy-engine-staging:
+    name: Deploy Engine (staging)
+    needs: [detect-changes, validate]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.engine == 'true'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          packageManager: bun
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: "apps/engine"
+          wranglerVersion: "4.33.2"
+          command: deploy --minify src/index.ts --env staging
+
+  # ---------------------------------------------------------------------------
+  # Deploy Jobs to Trigger.dev staging
+  # ---------------------------------------------------------------------------
+  deploy-jobs-staging:
+    name: Deploy Jobs (staging)
+    needs: [detect-changes, validate]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.jobs == 'true'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Deploy to Trigger.dev
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: |
+          TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@4.1.2 deploy --env staging
+        working-directory: packages/jobs
+
+  # ---------------------------------------------------------------------------
+  # Deploy Website preview to Vercel
+  # ---------------------------------------------------------------------------
+  deploy-website-preview:
+    name: Deploy Website (preview)
+    needs: [detect-changes, validate]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.website == 'true'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Pull Vercel environment
+        run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}

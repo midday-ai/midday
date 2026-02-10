@@ -1,6 +1,6 @@
-import type { Database } from "@db/client";
-import { transactionEmbeddings, transactions } from "@db/schema";
 import { and, eq, inArray, isNull } from "drizzle-orm";
+import type { Database } from "../client";
+import { transactionEmbeddings, transactions } from "../schema";
 
 export type GetTransactionsForEmbeddingParams = {
   transactionIds: string[];

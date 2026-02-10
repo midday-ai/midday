@@ -4,7 +4,6 @@ import { getLogoURL } from "@engine/utils/logo";
 import { capitalCase } from "change-case";
 import type {
   Account,
-  Balance,
   ConnectionStatus,
   GetAccountBalanceResponse,
   Transaction,

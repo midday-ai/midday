@@ -1,11 +1,5 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
-import {
-  getCategoryDisplayTitle,
-  getNotificationDisplayInfoWithFallback,
-} from "@/utils/notification-definitions";
 import {
   Accordion,
   AccordionContent,
@@ -15,6 +9,12 @@ import {
 import { Skeleton } from "@midday/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
+import {
+  getCategoryDisplayTitle,
+  getNotificationDisplayInfoWithFallback,
+} from "@/utils/notification-definitions";
 import { NotificationSetting } from "./notification-setting";
 
 export function NotificationSettingsSkeleton() {

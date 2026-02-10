@@ -1,7 +1,7 @@
-import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { CurrencyInput } from "@midday/ui/currency-input";
 import { useRef } from "react";
 import { useController, useFormContext } from "react-hook-form";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 
 export function TaxInput() {
   const { control } = useFormContext();

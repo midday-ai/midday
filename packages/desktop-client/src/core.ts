@@ -1,8 +1,7 @@
 export { invoke } from "@tauri-apps/api/core";
-export { Window, getCurrentWindow } from "@tauri-apps/api/window";
+export { emit, listen } from "@tauri-apps/api/event";
+export { getCurrentWindow, Window } from "@tauri-apps/api/window";
 export { openUrl } from "@tauri-apps/plugin-opener";
-export { listen } from "@tauri-apps/api/event";
-export { emit } from "@tauri-apps/api/event";
 
 /**
  * Download a file from a URL directly to the user's ~/Downloads folder.

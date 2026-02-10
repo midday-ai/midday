@@ -1,7 +1,5 @@
 "use client";
 
-import { CopyInput } from "@/components/copy-input";
-import { useTeamQuery } from "@/hooks/use-team";
 import {
   Card,
   CardContent,
@@ -10,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { CopyInput } from "@/components/copy-input";
+import { useTeamQuery } from "@/hooks/use-team";
 
 export function TeamIdSection() {
   const { data: team } = useTeamQuery();

@@ -1,5 +1,5 @@
-import { baseUrl } from "@/app/sitemap";
 import type { Metadata } from "next";
+import { baseUrl } from "@/app/sitemap";
 
 const title = "Terms and Conditions";
 const description =

@@ -1,19 +1,18 @@
 import "server-only";
 
-import { Cookies } from "@/utils/constants";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { getCountryCode, getLocale, getTimezone } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
-import { HydrationBoundary } from "@tanstack/react-query";
-import { dehydrate } from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import {
-  type TRPCQueryOptions,
   createTRPCOptionsProxy,
+  type TRPCQueryOptions,
 } from "@trpc/tanstack-react-query";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import superjson from "superjson";
+import { Cookies } from "@/utils/constants";
 import { makeQueryClient } from "./query-client";
 
 // IMPORTANT: Create a stable getter for the query client that

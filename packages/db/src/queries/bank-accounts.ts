@@ -1,13 +1,12 @@
-import type { Database } from "@db/client";
-import { bankAccounts, teams } from "@db/schema";
 import { chatCache } from "@midday/cache/chat-cache";
 import {
   CASH_ACCOUNT_TYPES,
   CREDIT_ACCOUNT_TYPE,
 } from "@midday/engine/account";
-import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
-import { sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import type { Database } from "../client";
+import { bankAccounts, teams } from "../schema";
 
 export type CreateBankAccountParams = {
   name: string;

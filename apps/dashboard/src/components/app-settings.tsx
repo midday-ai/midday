@@ -1,7 +1,7 @@
-import { useTRPC } from "@/trpc/client";
 import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 type AppSettingsItem = {
   id: string;

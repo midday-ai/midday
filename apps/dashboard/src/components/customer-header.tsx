@@ -1,6 +1,6 @@
-import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import Link from "next/link";
+import { getWebsiteLogo } from "@/utils/logos";
 import { InvoiceStatus } from "./invoice-status";
 
 type Props = {

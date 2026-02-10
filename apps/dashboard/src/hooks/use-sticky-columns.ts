@@ -1,8 +1,8 @@
-import type { StickyColumnConfig } from "@/components/tables/core";
-import { STICKY_COLUMNS } from "@/utils/table-configs";
 import { cn } from "@midday/ui/cn";
 import type { VisibilityState } from "@tanstack/react-table";
 import { useCallback, useMemo } from "react";
+import type { StickyColumnConfig } from "@/components/tables/core";
+import { STICKY_COLUMNS } from "@/utils/table-configs";
 
 interface TableColumn {
   id: string;

@@ -79,7 +79,7 @@ export function useChartSelection({
       // Handle different date formats
       if (typeof dateValue === "string") {
         // Try to parse month names (e.g., "Jan", "Feb")
-        const monthMap: Record<string, string> = {
+        const _monthMap: Record<string, string> = {
           Jan: "01",
           Feb: "02",
           Mar: "03",

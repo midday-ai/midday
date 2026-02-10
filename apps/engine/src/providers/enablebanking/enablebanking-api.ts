@@ -74,7 +74,6 @@ export class EnableBankingApi {
           name: "RSASSA-PKCS1-v1_5",
           hash: { name: "SHA-256" },
         },
-        // @ts-ignore
         privateKey,
         new TextEncoder().encode(data),
       );
@@ -182,7 +181,7 @@ export class EnableBankingApi {
       console.log(error);
       throw new ProviderError({
         message: "Failed to exchange code",
-        // @ts-ignore
+        // @ts-expect-error
         code: error.response?.data?.error ?? "ENABLEBANKING_ERROR",
       });
     }
@@ -196,7 +195,7 @@ export class EnableBankingApi {
     try {
       await this.#get<{ message: string }>("/application");
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

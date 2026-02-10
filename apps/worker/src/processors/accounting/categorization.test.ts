@@ -376,7 +376,7 @@ describe("status update logic", () => {
   // These tests document the expected behavior of status updates
   // in the SyncAttachmentsProcessor
 
-  function determineStatus(uploadedCount: number, failedCount: number) {
+  function determineStatus(_uploadedCount: number, failedCount: number) {
     if (failedCount > 0) {
       return "partial";
     }

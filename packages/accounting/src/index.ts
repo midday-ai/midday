@@ -8,13 +8,13 @@ import type {
   ProviderInitConfig,
 } from "./types";
 
+export * from "./provider";
+export { FORTNOX_SCOPES, FortnoxProvider } from "./providers/fortnox";
+export { QUICKBOOKS_SCOPES, QuickBooksProvider } from "./providers/quickbooks";
+export { XERO_SCOPES, XeroProvider } from "./providers/xero";
 // Re-export types
 export * from "./types";
-export * from "./provider";
 export * from "./utils";
-export { XeroProvider, XERO_SCOPES } from "./providers/xero";
-export { QuickBooksProvider, QUICKBOOKS_SCOPES } from "./providers/quickbooks";
-export { FortnoxProvider, FORTNOX_SCOPES } from "./providers/fortnox";
 
 /**
  * OAuth environment variable mapping for each provider

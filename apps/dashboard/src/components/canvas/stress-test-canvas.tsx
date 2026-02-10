@@ -1,5 +1,8 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { cashFlowStressTestArtifact } from "@api/ai/artifacts/cash-flow-stress-test";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasChart,
@@ -15,9 +18,6 @@ import {
 } from "@/components/canvas/utils";
 import { StressTestChart } from "@/components/charts/stress-test-chart";
 import { useUserQuery } from "@/hooks/use-user";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { cashFlowStressTestArtifact } from "@api/ai/artifacts/cash-flow-stress-test";
-import { parseAsInteger, useQueryState } from "nuqs";
 
 export function StressTestCanvas() {
   const [version] = useQueryState("version", parseAsInteger.withDefault(0));
@@ -26,7 +26,7 @@ export function StressTestCanvas() {
   });
   const { data, status } = artifact;
   const { data: user } = useUserQuery();
-  const isLoading = status === "loading";
+  const _isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
   const locale = user?.locale ?? undefined;

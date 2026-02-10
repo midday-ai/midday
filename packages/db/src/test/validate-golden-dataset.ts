@@ -65,7 +65,7 @@ let correctPredictions = 0;
 let totalPredictions = 0;
 const confidenceGaps: number[] = [];
 
-GOLDEN_DATASET.forEach((goldenCase, index) => {
+GOLDEN_DATASET.forEach((goldenCase, _index) => {
   const { inbox, transaction, expectedScores, userFeedback, id } = goldenCase;
 
   // Calculate actual scores

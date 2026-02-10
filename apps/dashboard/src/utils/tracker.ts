@@ -1,5 +1,5 @@
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import { TZDate, tz } from "@date-fns/tz";
+import { tz } from "@date-fns/tz";
 import { UTCDate, utc } from "@date-fns/utc";
 import {
   addDays,
@@ -203,7 +203,7 @@ export const calculateDuration = (
 export const formatHour = (
   hour: number,
   timeFormat?: number | null,
-  timezone?: string,
+  _timezone?: string,
 ) => {
   // Create a simple date with the hour - no timezone conversion needed for labels
   const date = new Date(2024, 0, 1, hour, 0, 0, 0); // Use arbitrary date, just set the hour

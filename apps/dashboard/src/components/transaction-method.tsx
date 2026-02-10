@@ -1,7 +1,7 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { useI18n } from "@/locales/client";
 
 type Props = {
   method: RouterOutputs["transactions"]["get"]["data"][number]["method"];

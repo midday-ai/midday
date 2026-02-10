@@ -1,11 +1,7 @@
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="h-screen p-2">
       <header className="absolute top-0 left-0 z-30 w-full">

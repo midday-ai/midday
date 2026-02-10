@@ -1,14 +1,14 @@
 "use client";
 
-import { Editor } from "@/components/invoice/editor";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useTemplateUpdate } from "@/hooks/use-template-update";
-import { useTRPC } from "@/trpc/client";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import { useQuery } from "@tanstack/react-query";
 import type { JSONContent } from "@tiptap/react";
 import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
+import { Editor } from "@/components/invoice/editor";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
+import { useTRPC } from "@/trpc/client";
 import { SelectCustomer } from "../select-customer";
 import { LabelInput } from "./label-input";
 

@@ -1,8 +1,8 @@
-import { baseUrl } from "@/app/sitemap";
-import { competitors } from "@/data/competitors";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { baseUrl } from "@/app/sitemap";
+import { competitors } from "@/data/competitors";
 
 const year = new Date().getFullYear();
 const title = `Compare Midday to QuickBooks, Xero, FreshBooks & More (${year})`;

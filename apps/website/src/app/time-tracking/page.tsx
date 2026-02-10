@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { TimeTracking } from "@/components/time-tracking";
-import type { Metadata } from "next";
 
 const title = "Time Tracking";
 const description =

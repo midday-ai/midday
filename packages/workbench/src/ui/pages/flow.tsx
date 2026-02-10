@@ -1,9 +1,3 @@
-import { FlowGraph } from "@/components/flows";
-import { EmptyState } from "@/components/shared/empty-state";
-import { StatusBadge } from "@/components/shared/status-badge";
-import type { FlowNode } from "@/core/types";
-import { useFlow } from "@/lib/hooks";
-import { cn, formatDuration } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import {
   AlertCircle,
@@ -14,6 +8,12 @@ import {
   Network,
   XCircle,
 } from "lucide-react";
+import { FlowGraph } from "@/components/flows";
+import { EmptyState } from "@/components/shared/empty-state";
+import { StatusBadge } from "@/components/shared/status-badge";
+import type { FlowNode } from "@/core/types";
+import { useFlow } from "@/lib/hooks";
+import { formatDuration } from "@/lib/utils";
 
 interface FlowPageProps {
   queueName: string;

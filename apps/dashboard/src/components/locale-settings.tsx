@@ -1,7 +1,5 @@
 "use client";
 
-import { useUserMutation, useUserQuery } from "@/hooks/use-user";
-import { useI18n } from "@/locales/client";
 import { countries } from "@midday/location/countries-intl";
 import {
   Card,
@@ -11,6 +9,8 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 
 export function LocaleSettings() {
   const t = useI18n();

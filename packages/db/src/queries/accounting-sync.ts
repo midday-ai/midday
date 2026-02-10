@@ -1,11 +1,11 @@
-import type { Database } from "@db/client";
+import { and, eq, gte, inArray, notInArray, sql } from "drizzle-orm";
+import type { Database } from "../client";
 import {
   accountingSyncRecords,
   transactionAttachments,
   transactionCategories,
   transactions,
-} from "@db/schema";
-import { and, eq, gte, inArray, notInArray, sql } from "drizzle-orm";
+} from "../schema";
 
 export type AccountingSyncRecord = {
   id: string;

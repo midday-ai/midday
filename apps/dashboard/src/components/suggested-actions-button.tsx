@@ -1,9 +1,9 @@
 "use client";
 
-import { useChatStore } from "@/store/chat";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import type React from "react";
+import { useChatStore } from "@/store/chat";
 
 export function SuggestedActionsButton() {
   const { showCommands, setShowCommands } = useChatStore();

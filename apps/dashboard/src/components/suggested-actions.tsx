@@ -1,13 +1,13 @@
 "use client";
 
-import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useTRPC } from "@/trpc/client";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 

@@ -1,7 +1,7 @@
-import type { Database } from "@db/client";
-import { shortLinks, teams } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import type { Database } from "../client";
+import { shortLinks, teams } from "../schema";
 
 export type ShortLink = {
   id: string;

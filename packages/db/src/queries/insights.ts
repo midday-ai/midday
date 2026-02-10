@@ -1,25 +1,3 @@
-import type { Database, DatabaseOrTransaction } from "@db/client";
-import {
-  type ExpenseAnomaly,
-  type InsightActivity,
-  type InsightAnomaly,
-  type InsightContent,
-  type InsightMetric,
-  type InsightMilestone,
-  type InsightPredictions,
-  bankAccounts,
-  bankConnections,
-  customers,
-  inbox,
-  type insightPeriodTypeEnum,
-  type insightStatusEnum,
-  insightUserStatus,
-  insights,
-  invoices,
-  trackerEntries,
-  trackerProjects,
-  transactions,
-} from "@db/schema";
 import {
   differenceInDays,
   endOfQuarter,
@@ -38,6 +16,28 @@ import {
   lte,
   sql,
 } from "drizzle-orm";
+import type { Database, DatabaseOrTransaction } from "../client";
+import {
+  bankAccounts,
+  bankConnections,
+  customers,
+  type ExpenseAnomaly,
+  type InsightActivity,
+  type InsightAnomaly,
+  type InsightContent,
+  type InsightMetric,
+  type InsightMilestone,
+  type InsightPredictions,
+  inbox,
+  type insightPeriodTypeEnum,
+  type insightStatusEnum,
+  insights,
+  insightUserStatus,
+  invoices,
+  trackerEntries,
+  trackerProjects,
+  transactions,
+} from "../schema";
 
 /**
  * Insight type returned from database queries

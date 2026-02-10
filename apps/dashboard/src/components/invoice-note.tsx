@@ -1,10 +1,10 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
+import { useTRPC } from "@/trpc/client";
 
 type Props = {
   id: string;

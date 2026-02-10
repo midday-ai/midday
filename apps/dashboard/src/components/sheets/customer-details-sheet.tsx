@@ -1,6 +1,5 @@
-import { useCustomerParams } from "@/hooks/use-customer-params";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
-import React from "react";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 import { CustomerDetails } from "../customer-details";
 
 export function CustomerDetailsSheet() {

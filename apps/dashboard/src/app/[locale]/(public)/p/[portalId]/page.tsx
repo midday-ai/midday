@@ -1,6 +1,6 @@
-import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getQueryClient, HydrateClient, trpc } from "@/trpc/server";
 import { PortalContent } from "./portal-content";
 
 export async function generateMetadata(props: {
@@ -46,7 +46,7 @@ export async function generateMetadata(props: {
         follow: false,
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       title: "Portal Not Found",
       robots: {

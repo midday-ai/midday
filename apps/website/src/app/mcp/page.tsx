@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCP } from "@/components/mcp";
-import type { Metadata } from "next";
 
 const title = "AI Integrations via MCP";
 const description =

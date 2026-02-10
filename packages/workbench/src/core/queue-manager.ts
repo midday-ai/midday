@@ -16,7 +16,6 @@ import type {
   OverviewStats,
   PaginatedResponse,
   QueueInfo,
-  QueueMetrics,
   RunInfo,
   RunInfoList,
   SchedulerInfo,
@@ -149,7 +148,7 @@ export class QueueManager {
       return jobs.filter(
         (job): job is Job => job !== null && job !== undefined,
       );
-    } catch (error) {
+    } catch (_error) {
       // Fallback to regular getJobs on error
       const jobs = await queue.getJobs([status], 0, limit * 2);
       return jobs.filter(
@@ -724,7 +723,7 @@ export class QueueManager {
             computedAt: now,
           };
         })(),
-        45000, // 45 second timeout (before Fly.io's 60s proxy timeout)
+        45000, // 45 second timeout (before proxy timeout)
         "Metrics computation timed out after 45 seconds",
       );
     });
@@ -1787,7 +1786,7 @@ export class QueueManager {
    */
   private async jobToInfo(
     job: Job,
-    fields: "list" | "full" = "full",
+    _fields: "list" | "full" = "full",
     knownState?: JobStatus,
   ): Promise<JobInfo | RunInfoList> {
     // Use known state if provided (avoids expensive Redis getState() call)

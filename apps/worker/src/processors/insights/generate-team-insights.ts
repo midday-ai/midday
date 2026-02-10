@@ -6,11 +6,11 @@ import {
 } from "@midday/db/queries";
 import type { InsightMetric } from "@midday/db/schema";
 import {
-  type PeriodType,
   createInsightsService,
   formatDateForQuery,
   getPeriodInfo,
   getPeriodLabel,
+  type PeriodType,
 } from "@midday/insights";
 import {
   buildAudioUrl,

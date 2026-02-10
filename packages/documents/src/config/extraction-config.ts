@@ -1,8 +1,8 @@
 import type { z } from "zod/v4";
 import {
-  type PromptComponents,
   createInvoicePromptComponents,
   createReceiptPromptComponents,
+  type PromptComponents,
 } from "../prompts/factory";
 import { invoiceSchema, receiptSchema } from "../schema";
 import type { DocumentFormat } from "../utils/format-detection";

@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCPCopilot } from "@/components/mcp-copilot";
-import type { Metadata } from "next";
 
 const title = "Microsoft Copilot MCP Integration";
 const description =

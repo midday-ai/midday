@@ -1,54 +1,57 @@
 # Base image with Bun
 FROM oven/bun:1.3.9 AS base
 
-# Install turbo CLI globally using Bun
+# Install turbo CLI globally
 FROM base AS turbo-cli
 RUN bun add -g turbo
 
 # Builder stage - prune worker workspace
 FROM turbo-cli AS builder
 WORKDIR /app
-# Copy all files
 COPY . .
-# Prune worker workspace
 RUN turbo prune @midday/worker --docker --out-dir=out/worker
 
-# Installer stage
+# Installer stage - install deps and build
 FROM base AS installer
 WORKDIR /app
 
-# Install build dependencies for native modules if needed
+# Install build dependencies for native modules
 RUN apt-get update && apt-get install -y \
     python3 \
-    python3-pip \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy package.json files from worker pruned workspace
 COPY --from=builder /app/out/worker/json/ .
-
-# Copy full source from worker pruned workspace
-COPY --from=builder /app/out/worker/full/ .
 COPY bunfig.toml .
 
-# Remove any lockfile that might have been copied
+# Install dependencies (before copying full source to maximize cache hits)
 RUN rm -f bun.lock
 RUN bun install
 
-# Build workbench package (required - exports from dist/)
+# Copy full source from worker pruned workspace
+COPY --from=builder /app/out/worker/full/ .
+
+# Build engine types and workbench
+RUN bunx turbo run build --filter=@midday/engine --only
 RUN cd packages/workbench && bun run build
 
-# Runner stage
-FROM installer AS runner
+# Runner stage - clean image
+FROM oven/bun:1.3.9 AS runner
+WORKDIR /app
 
-# Set the worker directory as working directory
+ENV NODE_ENV=production
+ENV PORT=8080
+
+# Copy workspace from installer
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/apps/worker ./apps/worker
+COPY --from=installer /app/apps/engine ./apps/engine
+COPY --from=installer /app/packages ./packages
+COPY --from=installer /app/package.json ./package.json
+
 WORKDIR /app/apps/worker
 
-# Set environment variables
-ENV NODE_ENV=production
-
-# Expose worker port
 EXPOSE 8080
 
-# Run the worker directly with Bun
-CMD ["bun", "run", "src/index.ts"]
+CMD ["bun", "src/index.ts"]

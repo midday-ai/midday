@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCPN8n } from "@/components/mcp-n8n";
-import type { Metadata } from "next";
 
 const title = "n8n MCP Integration";
 const description =

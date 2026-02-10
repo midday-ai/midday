@@ -15,4 +15,3 @@ export const baseConfig = {
   settings: [],
   config: {},
 };
-

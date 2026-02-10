@@ -1,7 +1,7 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 type UseJobStatusProps = {
   /** Composite job ID (e.g., "accounting:21") containing queue info */

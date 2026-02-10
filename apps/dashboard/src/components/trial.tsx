@@ -1,9 +1,9 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
-import { getTrialDaysLeft, isTrialExpired } from "@/utils/trial";
 import { Button } from "@midday/ui/button";
 import Link from "next/link";
+import { useUserQuery } from "@/hooks/use-user";
+import { getTrialDaysLeft, isTrialExpired } from "@/utils/trial";
 import { FeedbackForm } from "./feedback-form";
 
 export function Trial() {

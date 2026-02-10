@@ -1,9 +1,9 @@
+import { Button } from "@midday/ui/button";
+import Link from "next/link";
 import { AppLogo } from "@/components/app-logo";
 import { CustomMDX } from "@/components/mdx";
 import type { WebsiteApp } from "@/data/apps";
 import { apps, getCategoryName } from "@/data/apps";
-import { Button } from "@midday/ui/button";
-import Link from "next/link";
 
 interface Props {
   app: WebsiteApp;

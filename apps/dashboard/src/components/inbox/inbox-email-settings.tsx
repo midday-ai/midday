@@ -1,9 +1,9 @@
 "use client";
 
-import { CopyInput } from "@/components/copy-input";
-import { useUserQuery } from "@/hooks/use-user";
 import { getInboxEmail } from "@midday/inbox";
 import { Card, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
+import { CopyInput } from "@/components/copy-input";
+import { useUserQuery } from "@/hooks/use-user";
 
 export function InboxEmailSettings() {
   const { data: user } = useUserQuery();

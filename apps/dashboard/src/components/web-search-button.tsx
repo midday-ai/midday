@@ -1,9 +1,8 @@
 "use client";
 
-import { useChatStore } from "@/store/chat";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import React from "react";
+import { useChatStore } from "@/store/chat";
 
 export function WebSearchButton() {
   const { isWebSearch, setIsWebSearch } = useChatStore();

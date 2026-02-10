@@ -1,7 +1,5 @@
 "use client";
 
-import { sendSupportSchema } from "@/actions/schema";
-import { sendSupportAction } from "@/actions/send-support-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -26,6 +24,8 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { sendSupportSchema } from "@/actions/schema";
+import { sendSupportAction } from "@/actions/send-support-action";
 
 export function SupportForm() {
   const { toast } = useToast();

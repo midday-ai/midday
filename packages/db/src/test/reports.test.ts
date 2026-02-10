@@ -1,10 +1,8 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import { REVENUE_CATEGORIES } from "@midday/categories";
-import { and, eq, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import {
   getBalanceSheet,
-  getBurnRate,
   getCashFlow,
   getExpenses,
   getProfit,
@@ -13,15 +11,10 @@ import {
   getSpending,
   getTaxSummary,
 } from "../queries/reports";
-import {
-  inbox,
-  invoices,
-  teams,
-  transactionCategories,
-  transactions,
-} from "../schema";
+import { inbox, invoices, transactionCategories } from "../schema";
+
 // Mock getCashBalance function
-const mockGetCombinedAccountBalance = async () => {
+const _mockGetCombinedAccountBalance = async () => {
   return { balance: 0, currency: "GBP" };
 };
 
@@ -311,7 +304,7 @@ function createMockDatabase(mockData: {
           // Handle invoices queries
           if (isInvoicesQuery(table)) {
             return {
-              where: (conditions: any) => {
+              where: (_conditions: any) => {
                 // Return empty array for invoices (no test data needed for balance sheet)
                 return Promise.resolve([]);
               },
@@ -321,7 +314,7 @@ function createMockDatabase(mockData: {
           // Handle inbox queries
           if (isInboxQuery(table)) {
             return {
-              where: (conditions: any) => {
+              where: (_conditions: any) => {
                 // Return empty array for inbox (no test data needed for balance sheet)
                 return Promise.resolve([]);
               },
@@ -330,7 +323,7 @@ function createMockDatabase(mockData: {
 
           // Handle transaction queries
           return {
-            innerJoin: (joinTable: any, joinCondition: any) => {
+            innerJoin: (_joinTable: any, _joinCondition: any) => {
               return {
                 where: (conditions: any) => {
                   const allConditions = Array.isArray(conditions)
@@ -347,9 +340,9 @@ function createMockDatabase(mockData: {
                   });
 
                   return {
-                    groupBy: (groupBy: any) => {
+                    groupBy: (_groupBy: any) => {
                       return {
-                        having: (having: any) => {
+                        having: (_having: any) => {
                           // For spending queries - aggregate by category
                           const grouped = new Map<string, any>();
                           const targetCurrency = "GBP";
@@ -386,7 +379,7 @@ function createMockDatabase(mockData: {
                 },
               };
             },
-            leftJoin: (joinTable: any, joinCondition: any) => {
+            leftJoin: (_joinTable: any, _joinCondition: any) => {
               return {
                 where: (conditions: any) => {
                   const allConditions = Array.isArray(conditions)
@@ -402,12 +395,12 @@ function createMockDatabase(mockData: {
                   });
 
                   return {
-                    groupBy: (groupBy: any) => {
+                    groupBy: (_groupBy: any) => {
                       // Handle recurring expenses query FIRST (has name, frequency, categorySlug, amount, count)
                       // This must be checked before balance sheet pattern since both have categorySlug
                       if (fields.name && fields.amount && fields.count) {
                         return {
-                          orderBy: (orderBy: any) => {
+                          orderBy: (_orderBy: any) => {
                             const grouped = new Map<string, any>();
                             const targetCurrency = "GBP";
 
@@ -485,7 +478,7 @@ function createMockDatabase(mockData: {
                       }
 
                       return {
-                        orderBy: (orderBy: any) => {
+                        orderBy: (_orderBy: any) => {
                           // Handle monthly aggregation
                           if (fields.month && fields.value) {
                             const grouped = new Map<string, number>();
@@ -691,9 +684,9 @@ function createMockDatabase(mockData: {
               const joined = joinCategories(filtered);
 
               return {
-                groupBy: (groupBy: any) => {
+                groupBy: (_groupBy: any) => {
                   return {
-                    orderBy: (orderBy: any) => {
+                    orderBy: (_orderBy: any) => {
                       if (fields.month && fields.value) {
                         const grouped = new Map<string, number>();
                         const targetCurrency = "GBP";
@@ -755,7 +748,7 @@ function createMockDatabase(mockData: {
         findMany: async () => Promise.resolve([]),
       },
     },
-    executeOnReplica: async (query: any) => {
+    executeOnReplica: async (_query: any) => {
       // Mock raw SQL execution for tax summary queries
       // Return empty array - tax summary will process it
       return Promise.resolve([]);
@@ -1318,7 +1311,7 @@ describe("Report Calculations", () => {
       expect(result.expenses.length).toBeGreaterThan(0);
 
       // Check structure
-      const expense = result.expenses[0];
+      const expense = result.expenses[0]!;
       expect(expense.name).toBe("Monthly Subscription");
       expect(expense.frequency).toBe("monthly");
       expect(expense.amount).toBe(50); // -50 GBP
@@ -1629,7 +1622,7 @@ describe("Category Exclusion Logic", () => {
       taxRate: null,
       taxAmount: null,
       recurring: false,
-      frequency: null as const,
+      frequency: null,
       method: "card_purchase",
       internalId: "ex-1",
     },
@@ -1649,7 +1642,7 @@ describe("Category Exclusion Logic", () => {
       taxRate: null,
       taxAmount: null,
       recurring: false,
-      frequency: null as const,
+      frequency: null,
       method: "transfer",
       internalId: "ex-2",
     },
@@ -1669,7 +1662,7 @@ describe("Category Exclusion Logic", () => {
       taxRate: null,
       taxAmount: null,
       recurring: false,
-      frequency: null as const,
+      frequency: null,
       method: "transfer",
       internalId: "ex-3",
     },
@@ -1689,7 +1682,7 @@ describe("Category Exclusion Logic", () => {
       taxRate: null,
       taxAmount: null,
       recurring: false,
-      frequency: null as const,
+      frequency: null,
       method: "card_purchase",
       internalId: "ex-4",
     },

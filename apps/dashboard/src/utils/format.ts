@@ -104,7 +104,10 @@ export function calculateAvgBurnRate(data: BurnRateData[] | null) {
 export function formatAccountName({
   name = "",
   currency,
-}: { name?: string; currency?: string | null }) {
+}: {
+  name?: string;
+  currency?: string | null;
+}) {
   if (currency) {
     return `${name} (${currency})`;
   }

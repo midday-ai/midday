@@ -1,8 +1,5 @@
 "use client";
 
-import { useCustomerParams } from "@/hooks/use-customer-params";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   Command,
@@ -15,6 +12,9 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTRPC } from "@/trpc/client";
 
 export function SelectCustomer() {
   const trpc = useTRPC();

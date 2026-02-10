@@ -1,6 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -15,6 +14,7 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
+import { useTRPC } from "@/trpc/client";
 
 interface ConnectWhatsAppProps {
   showTrigger?: boolean;

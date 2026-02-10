@@ -1,8 +1,8 @@
+import type { MetadataRoute } from "next";
 import { categories, getAllSlugs } from "@/data/apps";
 import { getAllCompetitorSlugs } from "@/data/competitors";
 import { getBlogPosts } from "@/lib/blog";
 import { getAllDocSlugs } from "@/lib/docs";
-import type { MetadataRoute } from "next";
 
 export const baseUrl = "https://midday.ai";
 

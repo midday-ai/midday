@@ -1,7 +1,7 @@
 import { CATEGORIES } from "@midday/categories";
 import { getTags, getTeamById } from "@midday/db/queries";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { type McpContext, hasScope } from "./types";
+import { hasScope, type McpContext } from "./types";
 
 export function registerResources(server: McpServer, ctx: McpContext): void {
   const { db, teamId } = ctx;

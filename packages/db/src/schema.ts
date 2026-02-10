@@ -1,5 +1,4 @@
-import type { UIChatMessage } from "@api/ai/types";
-import { type SQL, relations, sql } from "drizzle-orm";
+import { relations, type SQL, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -119,7 +118,11 @@ export const inboxStatusEnum = pgEnum("inbox_status", [
   "other",
 ]);
 
-export const inboxTypeEnum = pgEnum("inbox_type", ["invoice", "expense", "other"]);
+export const inboxTypeEnum = pgEnum("inbox_type", [
+  "invoice",
+  "expense",
+  "other",
+]);
 export const inboxBlocklistTypeEnum = pgEnum("inbox_blocklist_type", [
   "email",
   "domain",

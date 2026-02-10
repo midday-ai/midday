@@ -1,5 +1,8 @@
 "use client";
 
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { expensesArtifact } from "@api/ai/artifacts/expenses";
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   BaseCanvas,
   CanvasChart,
@@ -16,16 +19,13 @@ import {
 } from "@/components/canvas/utils";
 import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
 import { useUserQuery } from "@/hooks/use-user";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { expensesArtifact } from "@api/ai/artifacts/expenses";
-import { parseAsInteger, useQueryState } from "nuqs";
 
 export function CategoryExpensesCanvas() {
   const [version] = useQueryState("version", parseAsInteger.withDefault(0));
   const [artifact] = useArtifact(expensesArtifact, { version });
   const { data, status } = artifact;
   const { data: user } = useUserQuery();
-  const isLoading = status === "loading";
+  const _isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
   const locale = user?.locale ?? undefined;
@@ -56,7 +56,7 @@ export function CategoryExpensesCanvas() {
 
   // Get top 4 categories for metrics cards
   const topCategories = largestCategories.slice(0, 4);
-  const totalExpenses = metrics?.totalExpenses || 0;
+  const _totalExpenses = metrics?.totalExpenses || 0;
   const categoryCoverage = metrics?.categoryCoverage;
   const optimizationPotential = metrics?.optimizationPotential;
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { MaterialIcon } from "./icon-mapping";
 
 interface Transaction {
@@ -251,9 +251,9 @@ export function BulkReconciliationAnimation({
     }, maxCheckTime + 100); // After the last item is checked, plus a small delay
     reconcileTimers.push(actionBarTimer);
 
-    let done: NodeJS.Timeout | undefined;
+    let _done: NodeJS.Timeout | undefined;
     if (onComplete) {
-      done = setTimeout(() => {
+      _done = setTimeout(() => {
         onComplete();
       }, 10000);
     }
@@ -407,7 +407,7 @@ export function BulkReconciliationAnimation({
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((transaction, index) => (
+                {transactions.map((transaction, _index) => (
                   <tr
                     key={transaction.id}
                     className="h-[28px] md:h-[32px] border-b border-border bg-background hover:bg-secondary transition-colors"

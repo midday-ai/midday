@@ -1,8 +1,3 @@
-import { FormatAmount } from "@/components/format-amount";
-import { InboxStatus } from "@/components/inbox/inbox-status";
-import { useInboxParams } from "@/hooks/use-inbox-params";
-import { useUserQuery } from "@/hooks/use-user";
-import { useInboxStore } from "@/store/inbox";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { cn } from "@midday/ui/cn";
@@ -16,6 +11,11 @@ import {
 import { formatDate } from "@midday/utils/format";
 import { getTaxTypeLabel } from "@midday/utils/tax";
 import { forwardRef } from "react";
+import { FormatAmount } from "@/components/format-amount";
+import { InboxStatus } from "@/components/inbox/inbox-status";
+import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useInboxStore } from "@/store/inbox";
 
 type Props = {
   item: RouterOutputs["inbox"]["get"]["data"][number];

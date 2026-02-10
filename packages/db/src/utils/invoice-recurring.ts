@@ -11,16 +11,16 @@ import {
 // Re-export canonical types from @midday/invoice
 // This ensures a single source of truth for recurring invoice types
 export type {
-  InvoiceRecurringFrequency,
   InvoiceRecurringEndType,
+  InvoiceRecurringFrequency,
   InvoiceRecurringStatus,
 } from "@midday/invoice/recurring";
 
 export {
-  RECURRING_FREQUENCIES,
-  RECURRING_END_TYPES,
-  RECURRING_STATUSES,
   isDateInFutureUTC,
+  RECURRING_END_TYPES,
+  RECURRING_FREQUENCIES,
+  RECURRING_STATUSES,
 } from "@midday/invoice/recurring";
 
 // Import types and utilities for local use

@@ -215,7 +215,7 @@ export function createTransactionsListResponse(
   return {
     data: transactions,
     meta: {
-      cursor: meta.cursor ?? null,
+      cursor: meta.cursor,
       hasNextPage: meta.hasNextPage ?? false,
       hasPreviousPage: meta.hasPreviousPage ?? false,
     },

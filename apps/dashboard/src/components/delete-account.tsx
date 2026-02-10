@@ -1,6 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { createClient } from "@midday/supabase/client";
 import {
   AlertDialog,
@@ -27,6 +26,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTRPC } from "@/trpc/client";
 
 export function DeleteAccount() {
   const supabase = createClient();

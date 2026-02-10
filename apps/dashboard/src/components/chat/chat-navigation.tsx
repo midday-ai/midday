@@ -1,11 +1,11 @@
 "use client";
 
-import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useChatActions } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 
 export function ChatNavigation() {
   const router = useRouter();

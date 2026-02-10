@@ -1,10 +1,10 @@
 "use client";
 
-import { useAppOAuth } from "@/hooks/use-app-oauth";
-import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAppOAuth } from "@/hooks/use-app-oauth";
+import { useTRPC } from "@/trpc/client";
 
 export function ConnectSlack() {
   const trpc = useTRPC();
