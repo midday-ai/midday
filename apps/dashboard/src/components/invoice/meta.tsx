@@ -5,7 +5,7 @@ import { IssueDate } from "./issue-date";
 
 export function Meta() {
   return (
-    <div>
+    <div className="w-full min-w-0 overflow-hidden">
       <InvoiceTitle />
 
       <div className="flex flex-col gap-0.5">
