@@ -168,6 +168,7 @@ process.on("uncaughtException", (err) => {
 process.on("unhandledRejection", (reason, promise) => {
   logger.error("Unhandled rejection", {
     reason: reason instanceof Error ? reason.message : String(reason),
+    stack: reason instanceof Error ? reason.stack : undefined,
   });
   Sentry.captureException(
     reason instanceof Error ? reason : new Error(String(reason)),
