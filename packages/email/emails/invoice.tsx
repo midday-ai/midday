@@ -39,8 +39,9 @@ interface Props {
   dateFormat?: string | null;
 }
 
-const DEFAULT_EMAIL_BODY =
-  "If you have any questions, just reply to this email.";
+function defaultEmailBody(teamName: string) {
+  return `If you have any questions, just reply to this email.\n\nThanks,\n${teamName}`;
+}
 
 function formatInvoiceAmount(amount: number, currency: string, locale: string) {
   try {
@@ -79,7 +80,7 @@ export const InvoiceEmail = ({
   dateFormat,
 }: Props) => {
   const heading = emailHeading || `Invoice from ${teamName}`;
-  const body = emailBody || DEFAULT_EMAIL_BODY;
+  const body = emailBody || defaultEmailBody(teamName);
   const buttonText = emailButtonText || "View invoice";
   const text = heading;
   const dueDateLbl = dueDateLabel || "Due";
@@ -192,16 +193,12 @@ export const InvoiceEmail = ({
             className={`text-[13px] ${themeClasses.mutedText}`}
             style={{ color: lightStyles.mutedText.color }}
           >
-            {body}
-          </Text>
-
-          <Text
-            className={`text-[13px] ${themeClasses.mutedText}`}
-            style={{ color: lightStyles.mutedText.color }}
-          >
-            Thanks,
-            <br />
-            {teamName}
+            {body.split("\n").map((line, i, arr) => (
+              <span key={i}>
+                {line}
+                {i < arr.length - 1 && <br />}
+              </span>
+            ))}
           </Text>
         </Container>
       </Body>

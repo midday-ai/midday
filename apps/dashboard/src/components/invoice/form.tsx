@@ -488,6 +488,11 @@ export function Form() {
                   createRecurringInvoiceMutation.isPending ||
                   draftInvoiceMutation.isPending
                 }
+                className={
+                  draftInvoiceMutation.isPending
+                    ? "disabled:opacity-100 disabled:cursor-wait"
+                    : undefined
+                }
               />
             </div>
           </div>

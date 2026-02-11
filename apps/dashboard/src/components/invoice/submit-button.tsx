@@ -47,9 +47,10 @@ import {
 type Props = {
   isSubmitting: boolean;
   disabled?: boolean;
+  className?: string;
 };
 
-export function SubmitButton({ isSubmitting, disabled }: Props) {
+export function SubmitButton({ isSubmitting, disabled, className }: Props) {
   const { watch, setValue, formState } = useFormContext();
   const { data: user } = useUserQuery();
 
@@ -392,6 +393,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
         <BaseSubmitButton
           isSubmitting={isSubmitting}
           disabled={!isValid || disabled}
+          className={className}
         >
           {selectedOption === "scheduled" && scheduleDate && scheduleTime
             ? `Schedule (${format(scheduleDate, "MMM d")} ${scheduleTime})`
@@ -406,7 +408,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
             <DropdownMenuTrigger asChild>
               <Button
                 disabled={!isValid || isSubmitting || disabled}
-                className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
+                className={`size-9 p-0 [&[data-state=open]>svg]:rotate-180 ${className ?? ""}`}
               >
                 <Icons.ChevronDown className="size-4 transition-transform duration-200" />
               </Button>
@@ -447,7 +449,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
             <DropdownMenuTrigger asChild>
               <Button
                 disabled={!isValid || isSubmitting || disabled}
-                className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
+                className={`size-9 p-0 [&[data-state=open]>svg]:rotate-180 ${className ?? ""}`}
               >
                 <Icons.ChevronDown className="size-4 transition-transform duration-200" />
               </Button>

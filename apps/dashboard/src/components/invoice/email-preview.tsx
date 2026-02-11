@@ -10,35 +10,67 @@ import { SavingBar } from "@/components/saving-bar";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useUserQuery } from "@/hooks/use-user";
+import { downloadFile } from "@/lib/download";
 
 function EditableText({
   value,
   onChange,
   className,
   tag: Tag = "span",
+  multiline = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   className?: string;
-  tag?: "span" | "p" | "h2";
+  tag?: "span" | "p" | "h2" | "div";
+  multiline?: boolean;
 }) {
   const ref = useRef<HTMLElement>(null);
   const lastSavedValue = useRef(value);
 
   useEffect(() => {
-    if (ref.current && ref.current.textContent !== value) {
-      ref.current.textContent = value;
+    if (!ref.current) return;
+    const current = multiline ? ref.current.innerText : ref.current.textContent;
+    if (current !== value) {
+      if (multiline) {
+        ref.current.innerHTML = value
+          .split("\n")
+          .map((l) => l || "<br>")
+          .join("<br>");
+      } else {
+        ref.current.textContent = value;
+      }
       lastSavedValue.current = value;
     }
-  }, [value]);
+  }, [value, multiline]);
 
   const handleBlur = useCallback(() => {
-    const text = ref.current?.textContent?.trim() || "";
+    if (!ref.current) return;
+    const text = multiline
+      ? ref.current.innerText.replace(/\n{3,}/g, "\n\n").trim()
+      : ref.current.textContent?.trim() || "";
     if (text !== lastSavedValue.current) {
       lastSavedValue.current = text;
       onChange(text);
     }
-  }, [onChange]);
+  }, [onChange, multiline]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        if (multiline) {
+          // Insert a clean <br> instead of browser-default <div> wrappers
+          e.preventDefault();
+          document.execCommand("insertLineBreak");
+        } else {
+          // Single-line: no newlines allowed, commit on Enter
+          e.preventDefault();
+          ref.current?.blur();
+        }
+      }
+    },
+    [multiline],
+  );
 
   return (
     <Tag
@@ -46,10 +78,9 @@ function EditableText({
       contentEditable
       suppressContentEditableWarning
       onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
       className={`outline-none cursor-text ${className ?? ""}`}
-    >
-      {value}
-    </Tag>
+    />
   );
 }
 
@@ -74,6 +105,7 @@ export function EmailPreview() {
   const invoiceNoLabel =
     (watch("template.invoiceNoLabel") as string) || "Invoice";
   const includePdf = watch("template.includePdf") as boolean;
+  const token = watch("token") as string | null;
 
   const emailSubject = watch("template.emailSubject") as string | null;
   const emailHeading = watch("template.emailHeading") as string | null;
@@ -100,7 +132,8 @@ export function EmailPreview() {
   const displaySubject = emailSubject || `${teamName} sent you an invoice`;
   const displayHeading = emailHeading || `Invoice from ${teamName}`;
   const displayBody =
-    emailBody || "If you have any questions, just reply to this email.";
+    emailBody ||
+    `If you have any questions, just reply to this email.\n\nThanks,\n${teamName}`;
   const displayButtonText = emailButtonText || "View invoice";
 
   const handleClose = () => {
@@ -237,32 +270,38 @@ export function EmailPreview() {
               {/* Divider */}
               <hr className="border-t border-border my-0" />
 
-              {/* Body */}
-              <div className="text-[13px] text-[#606060] dark:text-[#878787] leading-relaxed mt-4">
-                <EditableText
-                  tag="p"
-                  value={displayBody}
-                  onChange={handleBodyChange}
-                />
-              </div>
-
-              {/* Sign-off */}
-              <p className="text-[13px] text-[#606060] dark:text-[#878787] leading-relaxed mt-4">
-                Thanks,
-                <br />
-                {teamName}
-              </p>
+              {/* Body & sign-off */}
+              <EditableText
+                tag="div"
+                multiline
+                value={displayBody}
+                onChange={handleBodyChange}
+                className="text-[13px] text-[#606060] dark:text-[#878787] leading-relaxed mt-4"
+              />
             </div>
           </div>
 
           {/* PDF attachment indicator */}
           {includePdf && (
-            <div className="mx-6 mb-4 flex items-center gap-2 px-3 py-2 border border-border">
+            <button
+              type="button"
+              onClick={() => {
+                if (!token) return;
+                const filename = invoiceNumber
+                  ? `invoice-${invoiceNumber}.pdf`
+                  : "invoice.pdf";
+                downloadFile(
+                  `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${token}`,
+                  filename,
+                );
+              }}
+              className="mx-6 mb-4 flex items-center gap-2 px-3 py-2 border border-border hover:bg-accent transition-colors cursor-pointer text-left w-auto"
+            >
               <Icons.Attachments className="size-4 text-[#878787]" />
               <span className="text-xs text-[#606060] dark:text-[#878787]">
                 {invoiceNumber ? `invoice-${invoiceNumber}.pdf` : "invoice.pdf"}
               </span>
-            </div>
+            </button>
           )}
 
           {/* Description */}
