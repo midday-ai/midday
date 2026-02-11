@@ -81,6 +81,9 @@ app.use(
   }),
 );
 
+app.get("/favicon.ico", (c) => c.body(null, 204));
+app.get("/robots.txt", (c) => c.body(null, 204));
+
 app.get("/health", (c) => {
   return c.json({ status: "ok" }, 200);
 });
