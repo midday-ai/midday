@@ -101,6 +101,10 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
           amount: invoice.amount ?? undefined,
           currency: invoice.currency ?? undefined,
           dueDate: invoice.dueDate ?? undefined,
+          // Custom email content from template
+          emailSubject: (template?.emailSubject as string) ?? undefined,
+          emailBody: (template?.emailBody as string) ?? undefined,
+          emailButtonText: (template?.emailButtonText as string) ?? undefined,
         },
         {
           sendEmail: true,

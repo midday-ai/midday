@@ -27,13 +27,16 @@ export const invoiceSent: NotificationHandler = {
       data.token,
     )}?viewer=${encodeURIComponent(encrypt(data.customerEmail))}`;
 
+    // Use custom subject from template if provided, otherwise use default i18n subject
+    const subject = data.emailSubject || t("invoice.sent.subject", {
+      teamName: team.name,
+    });
+
     return {
       template: "invoice",
       emailType: "customer",
       to: [data.customerEmail],
-      subject: t("invoice.sent.subject", {
-        teamName: team.name,
-      }),
+      subject,
       from: `${team.name} <middaybot@midday.ai>`,
       data: {
         customerName: data.customerName,
@@ -44,6 +47,10 @@ export const invoiceSent: NotificationHandler = {
         amount: data.amount,
         currency: data.currency,
         dueDate: data.dueDate,
+        // Custom email content
+        emailSubject: data.emailSubject,
+        emailBody: data.emailBody,
+        emailButtonText: data.emailButtonText,
       },
     };
   },

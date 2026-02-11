@@ -10,11 +10,14 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { useDebounceValue } from "usehooks-ts";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
+import { useInvoiceEditorStore } from "@/store/invoice-editor";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { OpenURL } from "../open-url";
+import { SavingBar } from "../saving-bar";
 import { CustomerDetails } from "./customer-details";
 import { EditBlock } from "./edit-block";
+import { EmailPreview } from "./email-preview";
 import type { InvoiceFormValues } from "./form-context";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
@@ -34,6 +37,7 @@ export function Form() {
 
   const form = useFormContext();
   const token = form.watch("token");
+  const deliveryType = form.watch("template.deliveryType");
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -179,43 +183,60 @@ export function Form() {
     ],
   });
 
-  const isDirty = form.formState.isDirty;
   const invoiceNumberValid = !form.getFieldState("invoiceNumber").error;
   const [debouncedValue] = useDebounceValue(formValues, 500);
 
+  // Auto-save: only save when form values have genuinely changed from what was loaded/last saved.
+  // Uses a zustand snapshot store instead of isDirty (which is unreliable with computed fields).
+  //
+  // After each form.reset(), the store is marked as uninitialized. The first debounce tick
+  // captures the fully hydrated state (after Summary and other child effects have settled)
+  // as the baseline. Subsequent ticks compare against that baseline.
   useEffect(() => {
-    if (isDirty && form.watch("customerId") && invoiceNumberValid) {
-      const currentFormValues = form.getValues();
-      draftInvoiceMutation.mutate(
-        // @ts-expect-error
-        transformFormValuesToDraft(currentFormValues),
-      );
+    const currentFormValues = form.getValues();
+    const store = useInvoiceEditorStore.getState();
 
-      // If invoice is part of a recurring series, also update the series template
-      const invoiceRecurringId = currentFormValues.invoiceRecurringId;
-      if (invoiceRecurringId) {
-        // Remove deliveryType from template since "recurring" is not a valid API deliveryType
-        const { deliveryType: _, ...templateWithoutDeliveryType } =
-          currentFormValues.template;
-
-        updateRecurringTemplateMutation.mutate({
-          id: invoiceRecurringId,
-          lineItems: currentFormValues.lineItems,
-          template: templateWithoutDeliveryType,
-          paymentDetails: currentFormValues.paymentDetails,
-          fromDetails: currentFormValues.fromDetails,
-          noteDetails: currentFormValues.noteDetails,
-          vat: currentFormValues.vat,
-          tax: currentFormValues.tax,
-          discount: currentFormValues.discount,
-          subtotal: currentFormValues.subtotal,
-          topBlock: currentFormValues.topBlock,
-          bottomBlock: currentFormValues.bottomBlock,
-          amount: currentFormValues.amount,
-        });
-      }
+    // First debounce after a reset: capture the settled values as baseline, don't save
+    if (!store.initialized) {
+      store.initialize(currentFormValues);
+      return;
     }
-  }, [debouncedValue, isDirty, invoiceNumberValid]);
+
+    if (!store.hasChanged(currentFormValues)) return;
+    if (!currentFormValues.customerId || !invoiceNumberValid) return;
+
+    draftInvoiceMutation.mutate(
+      // @ts-expect-error
+      transformFormValuesToDraft(currentFormValues),
+    );
+
+    // Update snapshot so subsequent checks compare against what we just saved
+    store.setSnapshot(currentFormValues);
+
+    // If invoice is part of a recurring series, also update the series template
+    const { invoiceRecurringId } = currentFormValues;
+    if (invoiceRecurringId) {
+      // Remove deliveryType from template since "recurring" is not a valid API deliveryType
+      const { deliveryType: _, ...templateWithoutDeliveryType } =
+        currentFormValues.template;
+
+      updateRecurringTemplateMutation.mutate({
+        id: invoiceRecurringId,
+        lineItems: currentFormValues.lineItems,
+        template: templateWithoutDeliveryType,
+        paymentDetails: currentFormValues.paymentDetails,
+        fromDetails: currentFormValues.fromDetails,
+        noteDetails: currentFormValues.noteDetails,
+        vat: currentFormValues.vat,
+        tax: currentFormValues.tax,
+        discount: currentFormValues.discount,
+        subtotal: currentFormValues.subtotal,
+        topBlock: currentFormValues.topBlock,
+        bottomBlock: currentFormValues.bottomBlock,
+        amount: currentFormValues.amount,
+      });
+    }
+  }, [debouncedValue, invoiceNumberValid]);
 
   // Submit the form and the draft invoice
   const handleSubmit = async (values: InvoiceFormValues) => {
@@ -383,6 +404,8 @@ export function Form() {
             <EditBlock name="bottomBlock" />
           </div>
         </div>
+
+        <SavingBar isPending={draftInvoiceMutation.isPending} />
       </ScrollArea>
 
       <div className="absolute bottom-4 w-full border-t border-border pt-4 px-6">
@@ -394,6 +417,18 @@ export function Form() {
             </div>
 
             <div className="flex gap-2">
+              {deliveryType === "create_and_send" && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  type="button"
+                  onClick={() => setParams({ emailPreview: true })}
+                  title="Preview email"
+                >
+                  <Icons.Email className="size-3" />
+                </Button>
+              )}
+
               {token && (
                 <OpenURL href={`${getUrl()}/i/${token}`}>
                   <Button variant="outline" size="icon" type="button">
@@ -417,6 +452,7 @@ export function Form() {
           </div>
         </div>
       </div>
+      <EmailPreview />
     </form>
   );
 }

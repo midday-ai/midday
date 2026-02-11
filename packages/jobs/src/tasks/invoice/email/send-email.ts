@@ -77,6 +77,14 @@ export const sendInvoiceEmail = schemaTask({
     }
 
     if (invoice.invoice_number && invoice.customer?.name) {
+      // Extract email template fields
+      // @ts-expect-error template is a jsonb field
+      const emailSubject = invoice.template?.emailSubject;
+      // @ts-expect-error template is a jsonb field
+      const emailBody = invoice.template?.emailBody;
+      // @ts-expect-error template is a jsonb field
+      const emailButtonText = invoice.template?.emailButtonText;
+
       try {
         await notifications.create(
           "invoice_sent",
@@ -87,6 +95,10 @@ export const sendInvoiceEmail = schemaTask({
             customerName: invoice.customer?.name,
             customerEmail,
             token: invoice.token,
+            // Custom email content from template
+            emailSubject: emailSubject ?? undefined,
+            emailBody: emailBody ?? undefined,
+            emailButtonText: emailButtonText ?? undefined,
           },
           {
             sendEmail: true,

@@ -100,6 +100,9 @@ const templateSelectFields = {
   sendCopy: invoiceTemplates.sendCopy,
   paymentEnabled: invoiceTemplates.paymentEnabled,
   paymentTermsDays: invoiceTemplates.paymentTermsDays,
+  emailSubject: invoiceTemplates.emailSubject,
+  emailBody: invoiceTemplates.emailBody,
+  emailButtonText: invoiceTemplates.emailButtonText,
 };
 
 /**
