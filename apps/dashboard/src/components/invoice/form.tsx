@@ -2,6 +2,12 @@ import { isDateInFutureUTC } from "@midday/invoice/recurring";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { differenceInDays } from "date-fns";
@@ -13,7 +19,7 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useInvoiceEditorStore } from "@/store/invoice-editor";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
-import { OpenURL } from "../open-url";
+
 import { SavingBar } from "../saving-bar";
 import { CustomerDetails } from "./customer-details";
 import { EditBlock } from "./edit-block";
@@ -417,25 +423,53 @@ export function Form() {
             </div>
 
             <div className="flex gap-2">
-              {deliveryType === "create_and_send" && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  type="button"
-                  onClick={() => setParams({ emailPreview: true })}
-                  title="Preview email"
-                >
-                  <Icons.Email className="size-3" />
-                </Button>
-              )}
+              <TooltipProvider delayDuration={100}>
+                {deliveryType === "create_and_send" && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        type="button"
+                        onClick={() => setParams({ emailPreview: true })}
+                      >
+                        <Icons.ForwardToInbox className="size-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      sideOffset={8}
+                      className="text-[10px] px-2 py-1"
+                    >
+                      Preview email
+                    </TooltipContent>
+                  </Tooltip>
+                )}
 
-              {token && (
-                <OpenURL href={`${getUrl()}/i/${token}`}>
-                  <Button variant="outline" size="icon" type="button">
-                    <Icons.ExternalLink className="size-3" />
-                  </Button>
-                </OpenURL>
-              )}
+                {token && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        type="button"
+                        onClick={() => {
+                          window.open(`${getUrl()}/i/${token}`, "_blank");
+                        }}
+                      >
+                        <Icons.ExternalLink className="size-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      sideOffset={8}
+                      className="text-[10px] px-2 py-1"
+                    >
+                      Preview invoice
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </TooltipProvider>
 
               <SubmitButton
                 isSubmitting={

@@ -10,19 +10,6 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useUserQuery } from "@/hooks/use-user";
 
-const DEFAULT_EMAIL_SUBJECT = "Invoice from {teamName}";
-const DEFAULT_EMAIL_BODY =
-  "If you have any questions, just reply to this email.";
-const DEFAULT_EMAIL_BUTTON_TEXT = "View invoice";
-
-function resolveTemplate(template: string, vars: Record<string, string>) {
-  let result = template;
-  for (const [key, value] of Object.entries(vars)) {
-    result = result.replaceAll(`{${key}}`, value);
-  }
-  return result;
-}
-
 function EditableText({
   value,
   onChange,
@@ -80,12 +67,13 @@ export function EmailPreview() {
   const amount = watch("amount") as number | null;
   const currency = (watch("template.currency") as string) || "USD";
   const dueDate = watch("dueDate") as string | null;
-  const dueDateLabel = (watch("template.dueDateLabel") as string) || "Due Date";
+  const dueDateLabel = (watch("template.dueDateLabel") as string) || "Due";
   const invoiceNoLabel =
-    (watch("template.invoiceNoLabel") as string) || "Invoice No";
-  const dateFormat = (watch("template.dateFormat") as string) || "MM/dd/yyyy";
+    (watch("template.invoiceNoLabel") as string) || "Invoice";
+  const includePdf = watch("template.includePdf") as boolean;
 
   const emailSubject = watch("template.emailSubject") as string | null;
+  const emailHeading = watch("template.emailHeading") as string | null;
   const emailBody = watch("template.emailBody") as string | null;
   const emailButtonText = watch("template.emailButtonText") as string | null;
 
@@ -96,26 +84,25 @@ export function EmailPreview() {
         )
       : null;
 
-  const formatDueDate = (date: string, fmt: string) => {
+  const formatDueDate = (date: string) => {
     try {
-      const d = new Date(date);
-      const day = String(d.getUTCDate()).padStart(2, "0");
-      const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-      const year = String(d.getUTCFullYear());
-      return fmt.replace("dd", day).replace("MM", month).replace("yyyy", year);
+      return new Date(date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
     } catch {
       return date;
     }
   };
-  const formattedDueDate = dueDate ? formatDueDate(dueDate, dateFormat) : null;
+  const formattedDueDate = dueDate ? formatDueDate(dueDate) : null;
 
-  const vars = { teamName, customerName };
-  const displaySubject = resolveTemplate(
-    emailSubject || DEFAULT_EMAIL_SUBJECT,
-    vars,
-  );
-  const displayBody = resolveTemplate(emailBody || DEFAULT_EMAIL_BODY, vars);
-  const displayButtonText = emailButtonText || DEFAULT_EMAIL_BUTTON_TEXT;
+  // Display values — plain text, no template variable resolution
+  const displaySubject = emailSubject || `${teamName} sent you an invoice`;
+  const displayHeading = emailHeading || `Invoice from ${teamName}`;
+  const displayBody =
+    emailBody || "If you have any questions, just reply to this email.";
+  const displayButtonText = emailButtonText || "View invoice";
 
   const [isSaving, setIsSaving] = useState(false);
   const savingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -133,6 +120,12 @@ export function EmailPreview() {
   const handleSubjectChange = (text: string) => {
     setValue("template.emailSubject", text, { shouldDirty: true });
     updateTemplate({ emailSubject: text });
+    flashSaved();
+  };
+
+  const handleHeadingChange = (text: string) => {
+    setValue("template.emailHeading", text, { shouldDirty: true });
+    updateTemplate({ emailHeading: text });
     flashSaved();
   };
 
@@ -182,11 +175,11 @@ export function EmailPreview() {
                 />
               </div>
               <div className="min-w-0">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-sm font-medium">{teamName}</span>
-                  <span className="text-xs text-[#878787]">
-                    &lt;middaybot@midday.ai&gt;
-                  </span>
+                <div className="text-sm font-medium">
+                  <EditableText
+                    value={displaySubject}
+                    onChange={handleSubjectChange}
+                  />
                 </div>
                 <div className="text-xs text-[#878787]">to {customerName}</div>
               </div>
@@ -213,12 +206,12 @@ export function EmailPreview() {
                 )}
               </div>
 
-              {/* Title */}
+              {/* Heading */}
               <h2 className="text-[21px] font-normal text-center text-[#0e0e0e] dark:text-[#fefefe] mb-[30px]">
                 <EditableText
                   tag="span"
-                  value={displaySubject}
-                  onChange={handleSubjectChange}
+                  value={displayHeading}
+                  onChange={handleHeadingChange}
                 />
               </h2>
 
@@ -276,8 +269,18 @@ export function EmailPreview() {
             </div>
           </div>
 
+          {/* PDF attachment indicator */}
+          {includePdf && (
+            <div className="mx-6 mb-4 flex items-center gap-2 px-3 py-2 border border-border">
+              <Icons.Attachments className="size-4 text-[#878787]" />
+              <span className="text-xs text-[#606060] dark:text-[#878787]">
+                {invoiceNumber ? `invoice-${invoiceNumber}.pdf` : "invoice.pdf"}
+              </span>
+            </div>
+          )}
+
           {/* Description */}
-          <p className="text-[11px] text-[#4C4C4C] dark:text-[#606060] mx-6 mb-6 text-center">
+          <p className="text-[11px] text-[#878787] mx-6 mb-6 text-center">
             This is the email your customer will receive. Labels, dates and
             currency are based on your invoice template. Click on any text to
             customize it.

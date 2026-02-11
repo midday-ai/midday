@@ -1875,6 +1875,7 @@ export const invoiceTemplates = pgTable(
     paymentEnabled: boolean("payment_enabled").default(false),
     paymentTermsDays: integer("payment_terms_days").default(30),
     emailSubject: text("email_subject"),
+    emailHeading: text("email_heading"),
     emailBody: text("email_body"),
     emailButtonText: text("email_button_text"),
   },

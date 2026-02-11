@@ -55,6 +55,7 @@ export const DEFAULT_TEMPLATE_SETTINGS = {
   paymentTermsDays: 30,
   // Email content settings
   emailSubject: null,
+  emailHeading: null,
   emailBody: null,
   emailButtonText: null,
 } as const;

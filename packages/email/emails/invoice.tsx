@@ -26,7 +26,7 @@ interface Props {
   currency?: string;
   dueDate?: string;
   // Customizable email content (falls back to defaults if not provided)
-  emailSubject?: string | null;
+  emailHeading?: string | null;
   emailBody?: string | null;
   emailButtonText?: string | null;
   // Template labels and logo
@@ -69,14 +69,14 @@ export const InvoiceEmail = ({
   amount,
   currency,
   dueDate,
-  emailSubject,
+  emailHeading,
   emailBody,
   emailButtonText,
   logoUrl,
   dueDateLabel,
   invoiceNoLabel,
 }: Props) => {
-  const heading = emailSubject || `Invoice from ${teamName}`;
+  const heading = emailHeading || `Invoice from ${teamName}`;
   const body = emailBody || DEFAULT_EMAIL_BODY;
   const buttonText = emailButtonText || "View invoice";
   const text = heading;

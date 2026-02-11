@@ -352,6 +352,7 @@ export const invoiceRouter = createTRPCRouter({
           template?.paymentEnabled ?? defaultTemplate.paymentEnabled,
         paymentTermsDays: template?.paymentTermsDays ?? 30,
         emailSubject: template?.emailSubject ?? null,
+        emailHeading: template?.emailHeading ?? null,
         emailBody: template?.emailBody ?? null,
         emailButtonText: template?.emailButtonText ?? null,
       };

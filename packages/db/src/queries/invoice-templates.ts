@@ -101,6 +101,7 @@ const templateSelectFields = {
   paymentEnabled: invoiceTemplates.paymentEnabled,
   paymentTermsDays: invoiceTemplates.paymentTermsDays,
   emailSubject: invoiceTemplates.emailSubject,
+  emailHeading: invoiceTemplates.emailHeading,
   emailBody: invoiceTemplates.emailBody,
   emailButtonText: invoiceTemplates.emailButtonText,
 };

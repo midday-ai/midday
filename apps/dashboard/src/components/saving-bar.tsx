@@ -34,7 +34,7 @@ export function SavingBar({ isPending }: SavingBarProps) {
     <AnimatePresence>
       {status !== "idle" && (
         <motion.div
-          className="sticky bottom-4 flex justify-center pointer-events-none z-10 -mt-12"
+          className="sticky bottom-1 flex justify-center pointer-events-none z-10 -mt-12"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 20, opacity: 0 }}

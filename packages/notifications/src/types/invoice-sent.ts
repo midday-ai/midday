@@ -27,7 +27,7 @@ export const invoiceSent: NotificationHandler = {
       data.token,
     )}?viewer=${encodeURIComponent(encrypt(data.customerEmail))}`;
 
-    // Use custom subject from template if provided, otherwise use default i18n subject
+    // Subject line: use custom plain-text subject if provided, otherwise i18n default
     const subject =
       data.emailSubject ||
       t("invoice.sent.subject", {
@@ -49,8 +49,8 @@ export const invoiceSent: NotificationHandler = {
         amount: data.amount,
         currency: data.currency,
         dueDate: data.dueDate,
-        // Custom email content
-        emailSubject: data.emailSubject,
+        // Custom email content (emailHeading = in-body heading, separate from subject)
+        emailHeading: data.emailHeading,
         emailBody: data.emailBody,
         emailButtonText: data.emailButtonText,
         // Template labels and logo

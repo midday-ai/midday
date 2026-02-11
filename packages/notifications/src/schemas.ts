@@ -202,6 +202,7 @@ export const invoiceSentSchema = z.object({
   dueDate: z.string().optional(),
   // Customizable email content from template
   emailSubject: z.string().optional().nullable(),
+  emailHeading: z.string().optional().nullable(),
   emailBody: z.string().optional().nullable(),
   emailButtonText: z.string().optional().nullable(),
   // Template labels and logo

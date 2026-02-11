@@ -120,6 +120,7 @@ const baseInvoiceTemplateSchema = z.object({
   paymentEnabled: z.boolean().optional(),
   paymentTermsDays: z.number().min(0).max(365).optional(),
   emailSubject: z.string().optional().nullable(),
+  emailHeading: z.string().optional().nullable(),
   emailBody: z.string().optional().nullable(),
   emailButtonText: z.string().optional().nullable(),
 });

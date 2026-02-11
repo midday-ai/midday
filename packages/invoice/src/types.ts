@@ -115,6 +115,7 @@ export type Template = {
   locale: string;
   paymentEnabled?: boolean;
   emailSubject?: string | null;
+  emailHeading?: string | null;
   emailBody?: string | null;
   emailButtonText?: string | null;
 };
