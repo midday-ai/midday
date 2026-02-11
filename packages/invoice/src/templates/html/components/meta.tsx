@@ -16,7 +16,19 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
 
   return (
     <div className="mb-2">
-      <h2 className="text-[21px] font-serif mb-1 w-fit min-w-[100px]">
+      <h2
+        lang="en"
+        className="text-[21px] font-serif mb-1 min-w-[100px] w-full max-w-full"
+        style={{
+          overflow: "hidden",
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          wordBreak: "normal",
+          overflowWrap: "break-word",
+          hyphens: "auto",
+        }}
+      >
         {template.title}
       </h2>
       <div className="flex flex-col gap-0.5">

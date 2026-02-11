@@ -135,7 +135,7 @@ export default async function Page() {
             className="flex items-center gap-2 hover:opacity-80 active:opacity-80 transition-opacity duration-200 pointer-events-auto"
           >
             <div className="w-6 h-6">
-              <Icons.LogoSmall className="w-full h-full text-foreground" />
+              <Icons.LogoSmall className="w-full h-full text-foreground lg:text-white" />
             </div>
           </Link>
         </div>

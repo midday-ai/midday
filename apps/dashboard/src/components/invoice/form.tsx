@@ -346,9 +346,13 @@ export function Form() {
         hideScrollbar
       >
         <div className="p-8 pb-4 h-full flex flex-col bg-[#fcfcfc] dark:bg-[#0f0f0f]">
-          <div className="flex justify-between">
-            <Meta />
-            <Logo />
+          <div className="flex justify-between items-start">
+            <div className="flex-1 min-w-0 mr-5">
+              <Meta />
+            </div>
+            <div className="flex-shrink-0">
+              <Logo />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-6 mt-8 mb-4">

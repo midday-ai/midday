@@ -50,16 +50,20 @@ export function HtmlTemplate({ data, width, height }: Props) {
         className="p-4 sm:p-6 md:p-8 h-full flex flex-col"
         style={{ minHeight: height - 5 }}
       >
-        <div className="flex justify-between">
-          <Meta
-            template={template}
-            invoiceNumber={invoiceNumber}
-            issueDate={issueDate}
-            dueDate={dueDate}
-          />
+        <div className="flex justify-between items-start">
+          <div className="flex-1 min-w-0 mr-5">
+            <Meta
+              template={template}
+              invoiceNumber={invoiceNumber}
+              issueDate={issueDate}
+              dueDate={dueDate}
+            />
+          </div>
 
           {template.logoUrl && (
-            <Logo logo={template.logoUrl} customerName={customerName || ""} />
+            <div className="flex-shrink-0">
+              <Logo logo={template.logoUrl} customerName={customerName || ""} />
+            </div>
           )}
         </div>
 

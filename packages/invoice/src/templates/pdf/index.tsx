@@ -112,22 +112,25 @@ export async function PdfTemplate(
             marginBottom: 20,
             flexDirection: "row",
             justifyContent: "space-between",
+            alignItems: "flex-start",
           }}
         >
-          <Meta
-            invoiceNoLabel={template.invoiceNoLabel}
-            issueDateLabel={template.issueDateLabel}
-            dueDateLabel={template.dueDateLabel}
-            invoiceNo={invoiceNumber}
-            issueDate={issueDate}
-            dueDate={dueDate}
-            timezone={template.timezone}
-            dateFormat={template.dateFormat}
-            title={title}
-          />
+          <View style={{ flex: 1, minWidth: 0, marginRight: 20 }}>
+            <Meta
+              invoiceNoLabel={template.invoiceNoLabel}
+              issueDateLabel={template.issueDateLabel}
+              dueDateLabel={template.dueDateLabel}
+              invoiceNo={invoiceNumber}
+              issueDate={issueDate}
+              dueDate={dueDate}
+              timezone={template.timezone}
+              dateFormat={template.dateFormat}
+              title={title}
+            />
+          </View>
 
           {template?.logoUrl && (
-            <div style={{ maxWidth: "300px" }}>
+            <View style={{ maxWidth: 300, flexShrink: 0 }}>
               <Image
                 src={template.logoUrl}
                 style={{
@@ -135,7 +138,7 @@ export async function PdfTemplate(
                   objectFit: "contain",
                 }}
               />
-            </div>
+            </View>
           )}
         </View>
 
