@@ -164,14 +164,14 @@ export function polarProbe(): Dependency {
     probe: async () => {
       const token = process.env.POLAR_ACCESS_TOKEN;
       if (!token) return false;
-      const env = process.env.POLAR_ENVIRONMENT === "sandbox" ? "sandbox." : "";
-      const res = await fetch(
-        `https://${env}api.polar.sh/v1/products?limit=1`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: AbortSignal.timeout(5_000),
-        },
-      );
+      const baseUrl =
+        process.env.POLAR_ENVIRONMENT === "sandbox"
+          ? "https://sandbox-api.polar.sh"
+          : "https://api.polar.sh";
+      const res = await fetch(`${baseUrl}/v1/products?limit=1`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(5_000),
+      });
       return res.ok;
     },
   };
@@ -331,7 +331,7 @@ export function plainProbe(): Dependency {
     probe: async () => {
       const key = process.env.PLAIN_API_KEY;
       if (!key) return false;
-      const res = await fetch("https://core-api.uk.plain.com/graphql", {
+      const res = await fetch("https://core-api.uk.plain.com/graphql/v1", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${key}`,

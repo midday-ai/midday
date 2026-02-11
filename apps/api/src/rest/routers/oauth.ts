@@ -27,9 +27,12 @@ import {
 } from "@midday/db/queries";
 import { AppInstalledEmail } from "@midday/email/emails/app-installed";
 import { render } from "@midday/email/render";
+import { createLoggerWithContext } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
 import { rateLimiter } from "hono-rate-limiter";
 import { z } from "zod";
+
+const logger = createLoggerWithContext("rest:oauth");
 
 const app = new OpenAPIHono<Context>();
 
@@ -299,7 +302,9 @@ app.openapi(
       }
     } catch (error) {
       // Log error but don't fail the OAuth flow
-      console.error("Failed to send app installation email:", error);
+      logger.error("Failed to send app installation email", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
 
     // Build success redirect URL

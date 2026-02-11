@@ -1,3 +1,7 @@
+import { createLoggerWithContext } from "@midday/logger";
+
+const logger = createLoggerWithContext("worker:config");
+
 const isProduction =
   process.env.NODE_ENV === "production" ||
   process.env.RAILWAY_ENVIRONMENT === "production";
@@ -57,7 +61,7 @@ export function getRedisConnection() {
     retryStrategy: (times: number) => {
       const delay = Math.min(1000 * 2 ** times, 20000);
       if (times > 5) {
-        console.log(
+        logger.info(
           `[Redis/Worker] Reconnecting in ${delay}ms (attempt ${times})`,
         );
       }
@@ -69,13 +73,13 @@ export function getRedisConnection() {
     reconnectOnError: (err: Error) => {
       const msg = err.message;
       if (msg.includes("READONLY")) {
-        console.log(
+        logger.info(
           "[Redis/Worker] READONLY error detected (server upgrade/failover), reconnecting",
         );
         return true;
       }
       if (msg.includes("timed out") || msg.includes("ETIMEDOUT")) {
-        console.log("[Redis/Worker] Timeout error detected, reconnecting");
+        logger.info("[Redis/Worker] Timeout error detected, reconnecting");
         return true;
       }
       return false;

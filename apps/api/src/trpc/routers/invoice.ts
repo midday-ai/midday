@@ -48,10 +48,13 @@ import { DEFAULT_TEMPLATE } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import { decodeJobId, getQueue, triggerJob } from "@midday/job-client";
+import { createLoggerWithContext } from "@midday/logger";
 import { TRPCError } from "@trpc/server";
 import { addDays, format, parseISO } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
+
+const logger = createLoggerWithContext("trpc:invoice");
 
 // Use the shared default template from @midday/invoice
 const defaultTemplate = DEFAULT_TEMPLATE;
@@ -499,7 +502,9 @@ export const invoiceRouter = createTRPCRouter({
               await existingJob.remove().catch((err) => {
                 // Log but don't fail - the old job will eventually be cleaned up or run (harmlessly)
                 // since we've already created the new job and will update the invoice
-                console.error("Failed to remove old scheduled job:", err);
+                logger.error("Failed to remove old scheduled job", {
+                  error: err instanceof Error ? err.message : String(err),
+                });
               });
             }
           }
@@ -536,7 +541,9 @@ export const invoiceRouter = createTRPCRouter({
               await job.remove();
             }
           } catch (err) {
-            console.error("Failed to clean up orphaned scheduled job:", err);
+            logger.error("Failed to clean up orphaned scheduled job", {
+              error: err instanceof Error ? err.message : String(err),
+            });
           }
 
           throw new TRPCError({
@@ -685,7 +692,9 @@ export const invoiceRouter = createTRPCRouter({
         const newJob = await queue.getJob(newRawJobId);
         if (newJob) {
           await newJob.remove().catch((err) => {
-            console.error("Failed to clean up orphaned scheduled job:", err);
+            logger.error("Failed to clean up orphaned scheduled job", {
+              error: err instanceof Error ? err.message : String(err),
+            });
           });
         }
 
@@ -705,7 +714,9 @@ export const invoiceRouter = createTRPCRouter({
         await existingJob.remove().catch((err) => {
           // Log but don't fail - the old job will be detected as stale by the processor
           // since it verifies job.id matches invoice.scheduledJobId before processing
-          console.error("Failed to remove old scheduled job:", err);
+          logger.error("Failed to remove old scheduled job", {
+            error: err instanceof Error ? err.message : String(err),
+          });
         });
       }
 

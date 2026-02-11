@@ -23,8 +23,11 @@ import {
 import { calculateNextScheduledDate } from "@midday/db/utils/invoice-recurring";
 import { isDateInFutureUTC } from "@midday/invoice/recurring";
 import { decodeJobId, getQueue } from "@midday/job-client";
+import { createLoggerWithContext } from "@midday/logger";
 import { Notifications } from "@midday/notifications";
 import { TRPCError } from "@trpc/server";
+
+const logger = createLoggerWithContext("trpc:invoice-recurring");
 
 export const invoiceRecurringRouter = createTRPCRouter({
   create: protectedProcedure
@@ -197,9 +200,9 @@ export const invoiceRecurringRouter = createTRPCRouter({
             endCount: recurringData.endCount ?? undefined,
           })
           .catch((error) => {
-            console.error(
-              "Failed to send recurring_series_started notification:",
-              error,
+            logger.error(
+              "Failed to send recurring_series_started notification",
+              { error: error instanceof Error ? error.message : String(error) },
             );
           });
       }

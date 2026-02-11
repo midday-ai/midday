@@ -1,3 +1,4 @@
+import { createLoggerWithContext } from "@midday/logger";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
 import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -6,12 +7,14 @@ import { Pool } from "pg";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
+const logger = createLoggerWithContext("db");
+
 const isDevelopment = process.env.NODE_ENV === "development";
 
 const connectionConfig = {
   max: isDevelopment ? 8 : 12,
   idleTimeoutMillis: isDevelopment ? 5000 : 60000,
-  connectionTimeoutMillis: 15000,
+  connectionTimeoutMillis: 5000,
   maxUses: isDevelopment ? 100 : 0,
   allowExitOnIdle: true,
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
@@ -28,7 +31,12 @@ export const primaryDb = drizzle(primaryPool, {
   casing: "snake_case",
 });
 
-// Map Railway region → replica URL (only create the pool this instance needs)
+/**
+ * Map Railway region → replica URL (only create the pool this instance needs).
+ *
+ * RAILWAY_REPLICA_REGION is a system-provided variable injected at runtime
+ * by Railway for every deployment (see https://docs.railway.com/variables/reference).
+ */
 const replicaUrlForRegion: Record<string, string | undefined> = {
   "europe-west4-drams3a": process.env.DATABASE_FRA_URL,
   "us-east4-eqdc4a": process.env.DATABASE_IAD_URL,
@@ -39,6 +47,18 @@ const currentRegion = process.env.RAILWAY_REPLICA_REGION;
 const replicaUrl = currentRegion
   ? replicaUrlForRegion[currentRegion]
   : undefined;
+
+if (!isDevelopment) {
+  if (!currentRegion) {
+    logger.warn(
+      "RAILWAY_REPLICA_REGION not set — all reads will use the primary database",
+    );
+  } else if (!replicaUrl) {
+    logger.warn(
+      `RAILWAY_REPLICA_REGION="${currentRegion}" but no matching DATABASE_*_URL found — falling back to primary`,
+    );
+  }
+}
 
 // Only create ONE replica pool for the current region, fall back to primary
 const replicaDb = replicaUrl

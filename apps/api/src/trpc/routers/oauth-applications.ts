@@ -29,6 +29,9 @@ import {
 import { AppInstalledEmail } from "@midday/email/emails/app-installed";
 import { AppReviewRequestEmail } from "@midday/email/emails/app-review-request";
 import { render } from "@midday/email/render";
+import { createLoggerWithContext } from "@midday/logger";
+
+const logger = createLoggerWithContext("trpc:oauth-applications");
 
 export const oauthApplicationsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -193,7 +196,9 @@ export const oauthApplicationsRouter = createTRPCRouter({
         }
       } catch (error) {
         // Log error but don't fail the OAuth flow
-        console.error("Failed to send app installation email:", error);
+        logger.error("Failed to send app installation email", {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
 
       // Build success redirect URL
@@ -359,7 +364,9 @@ export const oauthApplicationsRouter = createTRPCRouter({
           }
         } catch (error) {
           // Log error but don't fail the mutation
-          console.error("Failed to send application review request:", error);
+          logger.error("Failed to send application review request", {
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       }
 

@@ -16,6 +16,15 @@ const REGION_REDIS_MAP = {
   "europe-west4-drams3a": "REDIS_CACHE_EU_WEST",
 };
 
+/**
+ * Resolve the Redis URL for the current replica's region.
+ *
+ * Resolution order:
+ *  1. RAILWAY_REPLICA_REGION → mapped REDIS_CACHE_* env var (co-located cache)
+ *  2. Any available REDIS_CACHE_* env var (fallback: at least a working cache)
+ *  3. REDIS_URL (generic fallback)
+ *  4. localhost for local development
+ */
 function resolveRedisUrl() {
   const region = process.env.RAILWAY_REPLICA_REGION;
 
@@ -24,6 +33,12 @@ function resolveRedisUrl() {
     const regionUrl = envVar ? process.env[envVar] : undefined;
 
     if (regionUrl) return regionUrl;
+  }
+
+  // Fall back to any available regional cache
+  for (const envVarName of Object.values(REGION_REDIS_MAP)) {
+    const url = process.env[envVarName];
+    if (url) return url;
   }
 
   return process.env.REDIS_URL ?? "redis://localhost:6379";

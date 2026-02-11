@@ -5,8 +5,11 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { api } from "@api/utils/polar";
 import { getTeamById } from "@midday/db/queries";
+import { createLoggerWithContext } from "@midday/logger";
 import { getDiscount, getPlans } from "@midday/plans";
 import { z } from "zod";
+
+const logger = createLoggerWithContext("trpc:billing");
 
 export const billingRouter = createTRPCRouter({
   createCheckout: protectedProcedure
@@ -154,7 +157,9 @@ export const billingRouter = createTRPCRouter({
           };
         }
       } catch (error) {
-        console.error("Failed to get invoice download URL:", error);
+        logger.error("Failed to get invoice download URL", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         throw new Error(
           error instanceof Error ? error.message : "Failed to download invoice",
         );
@@ -195,7 +200,9 @@ export const billingRouter = createTRPCRouter({
           };
         }
       } catch (error) {
-        console.error("Failed to check invoice status:", error);
+        logger.error("Failed to check invoice status", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         throw new Error(
           error instanceof Error
             ? error.message

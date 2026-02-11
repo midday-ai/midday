@@ -81,6 +81,9 @@ app.use(
   }),
 );
 
+app.get("/favicon.ico", (c) => c.body(null, 204));
+app.get("/robots.txt", (c) => c.body(null, 204));
+
 app.get("/health", (c) => {
   return c.json({ status: "ok" }, 200);
 });
@@ -159,14 +162,17 @@ app.onError((err, c) => {
  * Unhandled exception and rejection handlers
  */
 process.on("uncaughtException", (err) => {
-  console.error("[API] Uncaught exception:", err);
+  logger.error("Uncaught exception", { error: err.message, stack: err.stack });
   Sentry.captureException(err, {
     tags: { errorType: "uncaught_exception" },
   });
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("[API] Unhandled rejection at:", promise, "reason:", reason);
+  logger.error("Unhandled rejection", {
+    reason: reason instanceof Error ? reason.message : String(reason),
+    stack: reason instanceof Error ? reason.stack : undefined,
+  });
   Sentry.captureException(
     reason instanceof Error ? reason : new Error(String(reason)),
     {

@@ -182,22 +182,26 @@ export abstract class BaseProcessor<TData = unknown> {
         stack: errorStack,
       });
 
-      // Send error to Sentry with context
-      Sentry.captureException(error, {
-        tags: {
-          jobName: job.name,
-          errorCategory: classified.category,
-          retryable: String(shouldRetry),
-        },
-        extra: {
-          jobId: job.id,
-          attempt: job.attemptsMade + 1,
-          maxAttempts: job.opts.attempts,
-          remainingAttempts,
-          duration: `${duration}ms`,
-          payload: JSON.stringify(job.data),
-        },
-      });
+      // Only send to Sentry on final attempt or non-retryable errors
+      // Avoids noise from retryable failures that will succeed on retry
+      if (!shouldRetry || remainingAttempts <= 0) {
+        Sentry.captureException(error, {
+          tags: {
+            jobName: job.name,
+            errorCategory: classified.category,
+            retryable: String(shouldRetry),
+            finalAttempt: String(remainingAttempts <= 0),
+          },
+          extra: {
+            jobId: job.id,
+            attempt: job.attemptsMade + 1,
+            maxAttempts: job.opts.attempts,
+            remainingAttempts,
+            duration: `${duration}ms`,
+            payload: JSON.stringify(job.data),
+          },
+        });
+      }
 
       // For non-retryable errors, remove the job from retry queue
       // This prevents unnecessary retries and reduces Redis storage

@@ -3,6 +3,10 @@
  * Extracted common logic from inbox processors for better maintainability
  */
 
+import { createLoggerWithContext } from "@midday/logger";
+
+const logger = createLoggerWithContext("worker:inbox-processing");
+
 /**
  * Validate file path and extract filename
  */
@@ -35,6 +39,6 @@ export function validateFileSize(size: number): void {
   // Warn about very large files (optional)
   const sizeInMB = size / (1024 * 1024);
   if (sizeInMB > 100) {
-    console.warn(`Large file detected: ${sizeInMB.toFixed(2)}MB`);
+    logger.warn(`Large file detected: ${sizeInMB.toFixed(2)}MB`);
   }
 }

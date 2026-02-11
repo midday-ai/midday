@@ -2,6 +2,9 @@
   "name": "@midday/cache",
   "version": "0.0.1",
   "private": true,
+  "dependencies": {
+    "@midday/logger": "workspace:*"
+  },
   "scripts": {
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
