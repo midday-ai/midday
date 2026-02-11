@@ -57,6 +57,9 @@ export const invoiceSent: NotificationHandler = {
         logoUrl: data.logoUrl,
         dueDateLabel: data.dueDateLabel,
         invoiceNoLabel: data.invoiceNoLabel,
+        // Formatting
+        locale: data.locale,
+        dateFormat: data.dateFormat,
       },
     };
   },

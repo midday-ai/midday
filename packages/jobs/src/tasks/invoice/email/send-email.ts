@@ -92,6 +92,10 @@ export const sendInvoiceEmail = schemaTask({
       const dueDateLabel = invoice.template?.dueDateLabel;
       // @ts-expect-error template is a jsonb field
       const invoiceNoLabel = invoice.template?.invoiceNoLabel;
+      // @ts-expect-error template is a jsonb field
+      const locale = invoice.template?.locale;
+      // @ts-expect-error template is a jsonb field
+      const dateFormat = invoice.template?.dateFormat;
 
       try {
         await notifications.create(
@@ -112,6 +116,9 @@ export const sendInvoiceEmail = schemaTask({
             logoUrl: logoUrl ?? undefined,
             dueDateLabel: dueDateLabel ?? undefined,
             invoiceNoLabel: invoiceNoLabel ?? undefined,
+            // Formatting
+            locale: locale ?? undefined,
+            dateFormat: dateFormat ?? undefined,
           },
           {
             sendEmail: true,

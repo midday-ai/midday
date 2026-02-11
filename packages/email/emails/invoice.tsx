@@ -7,6 +7,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { format } from "date-fns";
 import { InvoiceSchema } from "../components/invoice-schema";
 import { Logo } from "../components/logo";
 import {
@@ -33,14 +34,17 @@ interface Props {
   logoUrl?: string | null;
   dueDateLabel?: string | null;
   invoiceNoLabel?: string | null;
+  // Formatting — should match the invoice template settings
+  locale?: string | null;
+  dateFormat?: string | null;
 }
 
 const DEFAULT_EMAIL_BODY =
   "If you have any questions, just reply to this email.";
 
-function formatAmount(amount: number, currency: string) {
+function formatInvoiceAmount(amount: number, currency: string, locale: string) {
   try {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
     }).format(amount);
@@ -49,13 +53,9 @@ function formatAmount(amount: number, currency: string) {
   }
 }
 
-function formatDueDate(dueDate: string) {
+function formatInvoiceDueDate(dueDate: string, dateFormat: string) {
   try {
-    return new Date(dueDate).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    return format(new Date(dueDate), dateFormat);
   } catch {
     return dueDate;
   }
@@ -75,6 +75,8 @@ export const InvoiceEmail = ({
   logoUrl,
   dueDateLabel,
   invoiceNoLabel,
+  locale,
+  dateFormat,
 }: Props) => {
   const heading = emailHeading || `Invoice from ${teamName}`;
   const body = emailBody || DEFAULT_EMAIL_BODY;
@@ -82,10 +84,16 @@ export const InvoiceEmail = ({
   const text = heading;
   const dueDateLbl = dueDateLabel || "Due";
   const invoiceNoLbl = invoiceNoLabel || "Invoice";
+  const resolvedLocale = locale || "en-US";
+  const resolvedDateFormat = dateFormat || "MM/dd/yyyy";
 
   const formattedAmount =
-    amount !== undefined && currency ? formatAmount(amount, currency) : null;
-  const formattedDueDate = dueDate ? formatDueDate(dueDate) : null;
+    amount !== undefined && currency
+      ? formatInvoiceAmount(amount, currency, resolvedLocale)
+      : null;
+  const formattedDueDate = dueDate
+    ? formatInvoiceDueDate(dueDate, resolvedDateFormat)
+    : null;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 

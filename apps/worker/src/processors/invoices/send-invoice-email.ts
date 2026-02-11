@@ -102,14 +102,17 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
           currency: invoice.currency ?? undefined,
           dueDate: invoice.dueDate ?? undefined,
           // Custom email content from template
-          emailSubject: (template?.emailSubject as string) ?? undefined,
-          emailHeading: (template?.emailHeading as string) ?? undefined,
-          emailBody: (template?.emailBody as string) ?? undefined,
-          emailButtonText: (template?.emailButtonText as string) ?? undefined,
+          emailSubject: template?.emailSubject ?? undefined,
+          emailHeading: template?.emailHeading ?? undefined,
+          emailBody: template?.emailBody ?? undefined,
+          emailButtonText: template?.emailButtonText ?? undefined,
           // Template labels and logo
-          logoUrl: (template?.logoUrl as string) ?? undefined,
-          dueDateLabel: (template?.dueDateLabel as string) ?? undefined,
-          invoiceNoLabel: (template?.invoiceNoLabel as string) ?? undefined,
+          logoUrl: template?.logoUrl ?? undefined,
+          dueDateLabel: template?.dueDateLabel ?? undefined,
+          invoiceNoLabel: template?.invoiceNoLabel ?? undefined,
+          // Formatting
+          locale: template?.locale ?? undefined,
+          dateFormat: template?.dateFormat ?? undefined,
         },
         {
           sendEmail: true,

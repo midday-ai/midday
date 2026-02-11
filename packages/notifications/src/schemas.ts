@@ -209,6 +209,9 @@ export const invoiceSentSchema = z.object({
   logoUrl: z.string().optional().nullable(),
   dueDateLabel: z.string().optional().nullable(),
   invoiceNoLabel: z.string().optional().nullable(),
+  // Formatting — should match the invoice template
+  locale: z.string().optional().nullable(),
+  dateFormat: z.string().optional().nullable(),
 });
 
 export const invoiceReminderSentSchema = z.object({

@@ -3,6 +3,7 @@
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
+import { format } from "date-fns";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { SavingBar } from "@/components/saving-bar";
@@ -66,6 +67,8 @@ export function EmailPreview() {
   const invoiceNumber = watch("invoiceNumber") as string | null;
   const amount = watch("amount") as number | null;
   const currency = (watch("template.currency") as string) || "USD";
+  const locale = (watch("template.locale") as string) || "en-US";
+  const dateFormat = (watch("template.dateFormat") as string) || "MM/dd/yyyy";
   const dueDate = watch("dueDate") as string | null;
   const dueDateLabel = (watch("template.dueDateLabel") as string) || "Due";
   const invoiceNoLabel =
@@ -79,23 +82,19 @@ export function EmailPreview() {
 
   const formattedAmount =
     amount != null
-      ? new Intl.NumberFormat("en-US", { style: "currency", currency }).format(
+      ? new Intl.NumberFormat(locale, { style: "currency", currency }).format(
           amount,
         )
       : null;
 
-  const formatDueDate = (date: string) => {
+  let formattedDueDate: string | null = null;
+  if (dueDate) {
     try {
-      return new Date(date).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
+      formattedDueDate = format(new Date(dueDate), dateFormat);
     } catch {
-      return date;
+      formattedDueDate = dueDate;
     }
-  };
-  const formattedDueDate = dueDate ? formatDueDate(dueDate) : null;
+  }
 
   // Display values — plain text, no template variable resolution
   const displaySubject = emailSubject || `${teamName} sent you an invoice`;
