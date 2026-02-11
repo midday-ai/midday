@@ -12,7 +12,7 @@ import { useUserQuery } from "@/hooks/use-user";
 
 const DEFAULT_EMAIL_SUBJECT = "Invoice from {teamName}";
 const DEFAULT_EMAIL_BODY =
-  "If you have any questions, just reply to this email.\n\nThanks,\n{teamName}";
+  "If you have any questions, just reply to this email.";
 const DEFAULT_EMAIL_BUTTON_TEXT = "View invoice";
 
 function resolveTemplate(template: string, vars: Record<string, string>) {
@@ -81,7 +81,8 @@ export function EmailPreview() {
   const currency = (watch("template.currency") as string) || "USD";
   const dueDate = watch("dueDate") as string | null;
   const dueDateLabel = (watch("template.dueDateLabel") as string) || "Due Date";
-  const invoiceNoLabel = (watch("template.invoiceNoLabel") as string) || "Invoice No";
+  const invoiceNoLabel =
+    (watch("template.invoiceNoLabel") as string) || "Invoice No";
   const dateFormat = (watch("template.dateFormat") as string) || "MM/dd/yyyy";
 
   const emailSubject = watch("template.emailSubject") as string | null;
@@ -90,7 +91,9 @@ export function EmailPreview() {
 
   const formattedAmount =
     amount != null
-      ? new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount)
+      ? new Intl.NumberFormat("en-US", { style: "currency", currency }).format(
+          amount,
+        )
       : null;
 
   const formatDueDate = (date: string, fmt: string) => {
@@ -99,10 +102,7 @@ export function EmailPreview() {
       const day = String(d.getUTCDate()).padStart(2, "0");
       const month = String(d.getUTCMonth() + 1).padStart(2, "0");
       const year = String(d.getUTCFullYear());
-      return fmt
-        .replace("dd", day)
-        .replace("MM", month)
-        .replace("yyyy", year);
+      return fmt.replace("dd", day).replace("MM", month).replace("yyyy", year);
     } catch {
       return date;
     }
@@ -183,16 +183,12 @@ export function EmailPreview() {
               </div>
               <div className="min-w-0">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-sm font-medium">
-                    {teamName}
-                  </span>
+                  <span className="text-sm font-medium">{teamName}</span>
                   <span className="text-xs text-[#878787]">
                     &lt;middaybot@midday.ai&gt;
                   </span>
                 </div>
-                <div className="text-xs text-[#878787]">
-                  to {customerName}
-                </div>
+                <div className="text-xs text-[#878787]">to {customerName}</div>
               </div>
             </div>
           </div>
@@ -263,17 +259,29 @@ export function EmailPreview() {
               <hr className="border-t border-border my-0" />
 
               {/* Body */}
-              <div className="text-[13px] text-[#606060] dark:text-[#878787] leading-relaxed mt-4 whitespace-pre-line">
+              <div className="text-[13px] text-[#606060] dark:text-[#878787] leading-relaxed mt-4">
                 <EditableText
                   tag="p"
                   value={displayBody}
                   onChange={handleBodyChange}
-                  className="whitespace-pre-line"
                 />
               </div>
+
+              {/* Sign-off */}
+              <p className="text-[13px] text-[#606060] dark:text-[#878787] leading-relaxed mt-4">
+                Thanks,
+                <br />
+                {teamName}
+              </p>
             </div>
           </div>
 
+          {/* Description */}
+          <p className="text-[11px] text-[#4C4C4C] dark:text-[#606060] mx-6 mb-6 text-center">
+            This is the email your customer will receive. Labels, dates and
+            currency are based on your invoice template. Click on any text to
+            customize it.
+          </p>
         </div>
 
         <SavingBar isPending={isSaving} />

@@ -29,6 +29,10 @@ interface Props {
   emailSubject?: string | null;
   emailBody?: string | null;
   emailButtonText?: string | null;
+  // Template labels and logo
+  logoUrl?: string | null;
+  dueDateLabel?: string | null;
+  invoiceNoLabel?: string | null;
 }
 
 const DEFAULT_EMAIL_BODY =
@@ -68,11 +72,16 @@ export const InvoiceEmail = ({
   emailSubject,
   emailBody,
   emailButtonText,
+  logoUrl,
+  dueDateLabel,
+  invoiceNoLabel,
 }: Props) => {
   const heading = emailSubject || `Invoice from ${teamName}`;
   const body = emailBody || DEFAULT_EMAIL_BODY;
   const buttonText = emailButtonText || "View invoice";
   const text = heading;
+  const dueDateLbl = dueDateLabel || "Due";
+  const invoiceNoLbl = invoiceNoLabel || "Invoice";
 
   const formattedAmount =
     amount !== undefined && currency ? formatAmount(amount, currency) : null;
@@ -109,7 +118,22 @@ export const InvoiceEmail = ({
             borderColor: lightStyles.container.borderColor,
           }}
         >
-          <Logo />
+          {logoUrl ? (
+            <Section className="mt-[32px]">
+              <img
+                src={logoUrl}
+                alt={teamName}
+                style={{
+                  height: 40,
+                  width: "auto",
+                  margin: "0 auto",
+                  display: "block",
+                }}
+              />
+            </Section>
+          ) : (
+            <Logo />
+          )}
           <Heading
             className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
@@ -133,7 +157,7 @@ export const InvoiceEmail = ({
                   className={`text-[14px] m-0 p-0 ${themeClasses.mutedText}`}
                   style={{ color: lightStyles.mutedText.color }}
                 >
-                  Due {formattedDueDate}
+                  {dueDateLbl} {formattedDueDate}
                 </Text>
               )}
               {invoiceNumber && (
@@ -141,7 +165,7 @@ export const InvoiceEmail = ({
                   className={`text-[13px] m-0 p-0 ${themeClasses.mutedText}`}
                   style={{ color: lightStyles.mutedText.color }}
                 >
-                  Invoice #{invoiceNumber}
+                  {invoiceNoLbl} #{invoiceNumber}
                 </Text>
               )}
             </Section>

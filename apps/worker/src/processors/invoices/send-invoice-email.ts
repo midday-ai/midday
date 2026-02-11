@@ -105,6 +105,10 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
           emailSubject: (template?.emailSubject as string) ?? undefined,
           emailBody: (template?.emailBody as string) ?? undefined,
           emailButtonText: (template?.emailButtonText as string) ?? undefined,
+          // Template labels and logo
+          logoUrl: (template?.logoUrl as string) ?? undefined,
+          dueDateLabel: (template?.dueDateLabel as string) ?? undefined,
+          invoiceNoLabel: (template?.invoiceNoLabel as string) ?? undefined,
         },
         {
           sendEmail: true,

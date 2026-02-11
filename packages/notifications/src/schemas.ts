@@ -204,6 +204,10 @@ export const invoiceSentSchema = z.object({
   emailSubject: z.string().optional().nullable(),
   emailBody: z.string().optional().nullable(),
   emailButtonText: z.string().optional().nullable(),
+  // Template labels and logo
+  logoUrl: z.string().optional().nullable(),
+  dueDateLabel: z.string().optional().nullable(),
+  invoiceNoLabel: z.string().optional().nullable(),
 });
 
 export const invoiceReminderSentSchema = z.object({

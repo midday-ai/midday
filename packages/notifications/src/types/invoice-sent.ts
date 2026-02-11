@@ -28,9 +28,11 @@ export const invoiceSent: NotificationHandler = {
     )}?viewer=${encodeURIComponent(encrypt(data.customerEmail))}`;
 
     // Use custom subject from template if provided, otherwise use default i18n subject
-    const subject = data.emailSubject || t("invoice.sent.subject", {
-      teamName: team.name,
-    });
+    const subject =
+      data.emailSubject ||
+      t("invoice.sent.subject", {
+        teamName: team.name,
+      });
 
     return {
       template: "invoice",
@@ -51,6 +53,10 @@ export const invoiceSent: NotificationHandler = {
         emailSubject: data.emailSubject,
         emailBody: data.emailBody,
         emailButtonText: data.emailButtonText,
+        // Template labels and logo
+        logoUrl: data.logoUrl,
+        dueDateLabel: data.dueDateLabel,
+        invoiceNoLabel: data.invoiceNoLabel,
       },
     };
   },

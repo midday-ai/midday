@@ -84,6 +84,12 @@ export const sendInvoiceEmail = schemaTask({
       const emailBody = invoice.template?.emailBody;
       // @ts-expect-error template is a jsonb field
       const emailButtonText = invoice.template?.emailButtonText;
+      // @ts-expect-error template is a jsonb field
+      const logoUrl = invoice.template?.logoUrl;
+      // @ts-expect-error template is a jsonb field
+      const dueDateLabel = invoice.template?.dueDateLabel;
+      // @ts-expect-error template is a jsonb field
+      const invoiceNoLabel = invoice.template?.invoiceNoLabel;
 
       try {
         await notifications.create(
@@ -99,6 +105,10 @@ export const sendInvoiceEmail = schemaTask({
             emailSubject: emailSubject ?? undefined,
             emailBody: emailBody ?? undefined,
             emailButtonText: emailButtonText ?? undefined,
+            // Template labels and logo
+            logoUrl: logoUrl ?? undefined,
+            dueDateLabel: dueDateLabel ?? undefined,
+            invoiceNoLabel: invoiceNoLabel ?? undefined,
           },
           {
             sendEmail: true,
