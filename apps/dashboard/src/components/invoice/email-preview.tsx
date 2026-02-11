@@ -30,19 +30,11 @@ function EditableText({
 
   useEffect(() => {
     if (!ref.current) return;
-    const current = multiline ? ref.current.innerText : ref.current.textContent;
-    if (current !== value) {
-      if (multiline) {
-        ref.current.innerHTML = value
-          .split("\n")
-          .map((l) => l || "<br>")
-          .join("<br>");
-      } else {
-        ref.current.textContent = value;
-      }
+    if (ref.current.textContent !== value) {
+      ref.current.textContent = value;
       lastSavedValue.current = value;
     }
-  }, [value, multiline]);
+  }, [value]);
 
   const handleBlur = useCallback(() => {
     if (!ref.current) return;
@@ -79,7 +71,7 @@ function EditableText({
       suppressContentEditableWarning
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
-      className={`outline-none cursor-text ${className ?? ""}`}
+      className={`outline-none cursor-text ${multiline ? "whitespace-pre-wrap" : ""} ${className ?? ""}`}
     />
   );
 }
