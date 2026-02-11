@@ -168,12 +168,10 @@ export function polarProbe(): Dependency {
         process.env.POLAR_ENVIRONMENT === "sandbox"
           ? "https://sandbox-api.polar.sh"
           : "https://api.polar.sh";
-      const res = await fetch(`${baseUrl}/v1/products?limit=1`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: AbortSignal.timeout(5_000),
-        },
-      );
+      const res = await fetch(`${baseUrl}/v1/products?limit=1`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(5_000),
+      });
       return res.ok;
     },
   };
