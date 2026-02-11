@@ -177,12 +177,6 @@ process.on("unhandledRejection", (reason, promise) => {
   );
 });
 
-// Flush pending Sentry events before exit
-process.on("SIGTERM", async () => {
-  await Sentry.close(2000);
-  process.exit(0);
-});
-
 export default {
   port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
   fetch: app.fetch,
