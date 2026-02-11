@@ -4,43 +4,11 @@ const KEY_PREFIX = "next-cache:";
 const TAG_PREFIX = "next-tag:";
 
 /**
- * Map Railway region identifiers to per-region cache Redis env vars.
- * Set via Railway variable references, e.g.:
- *   REDIS_CACHE_US_WEST=${{cache-us-west.REDIS_URL}}
- *   REDIS_CACHE_US_EAST=${{cache-us-east.REDIS_URL}}
- *   REDIS_CACHE_EU_WEST=${{cache-eu-west.REDIS_URL}}
- */
-const REGION_REDIS_MAP = {
-  "us-west2": "REDIS_CACHE_US_WEST",
-  "us-east4-eqdc4a": "REDIS_CACHE_US_EAST",
-  "europe-west4-drams3a": "REDIS_CACHE_EU_WEST",
-};
-
-/**
- * Resolve the Redis URL for the current replica's region.
+ * Resolve the Redis URL.
  *
- * Resolution order:
- *  1. RAILWAY_REPLICA_REGION → mapped REDIS_CACHE_* env var (co-located cache)
- *  2. Any available REDIS_CACHE_* env var (fallback: at least a working cache)
- *  3. REDIS_URL (generic fallback)
- *  4. localhost for local development
+ * All regions share a single Upstash Redis instance via REDIS_URL.
  */
 function resolveRedisUrl() {
-  const region = process.env.RAILWAY_REPLICA_REGION;
-
-  if (region) {
-    const envVar = REGION_REDIS_MAP[region];
-    const regionUrl = envVar ? process.env[envVar] : undefined;
-
-    if (regionUrl) return regionUrl;
-  }
-
-  // Fall back to any available regional cache
-  for (const envVarName of Object.values(REGION_REDIS_MAP)) {
-    const url = process.env[envVarName];
-    if (url) return url;
-  }
-
   return process.env.REDIS_URL ?? "redis://localhost:6379";
 }
 
