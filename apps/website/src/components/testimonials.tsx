@@ -53,6 +53,7 @@ const allTestimonials: Testimonial[] = [
     title: "",
     company: "Speer Technologies",
     country: "United States",
+    image: "/stories/speer.jpeg",
     content:
       "Midday is bookkeeping software without the fluff. It's a ledger with modern tooling and integrations.",
     fullContent:
