@@ -214,10 +214,14 @@ export function Form() {
     draftInvoiceMutation.mutate(
       // @ts-expect-error
       transformFormValuesToDraft(currentFormValues),
+      {
+        onSuccess: () => {
+          // Only update snapshot after a confirmed save so that failed mutations
+          // leave hasChanged() === true, allowing the next debounce tick to retry.
+          store.setSnapshot(currentFormValues);
+        },
+      },
     );
-
-    // Update snapshot so subsequent checks compare against what we just saved
-    store.setSnapshot(currentFormValues);
 
     // If invoice is part of a recurring series, also update the series template
     const { invoiceRecurringId } = currentFormValues;
@@ -411,7 +415,10 @@ export function Form() {
           </div>
         </div>
 
-        <SavingBar isPending={draftInvoiceMutation.isPending} />
+        <SavingBar
+          isPending={draftInvoiceMutation.isPending}
+          isError={draftInvoiceMutation.isError}
+        />
       </ScrollArea>
 
       <div className="absolute bottom-4 w-full border-t border-border pt-4 px-6">
