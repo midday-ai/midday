@@ -56,11 +56,6 @@ const invoiceSizes = [
   { value: "letter", label: "Letter" },
 ];
 
-const booleanOptions = [
-  { value: true, label: "Yes" },
-  { value: false, label: "No" },
-];
-
 const paymentTermsOptions = [
   { value: 0, label: "Due on Receipt" },
   { value: 7, label: "Net 7" },
@@ -109,63 +104,18 @@ const invoiceItems = [
 ];
 
 const taxItems = [
-  {
-    icon: Icons.Tax,
-    label: "Sales tax",
-    options: booleanOptions,
-    key: "includeTax",
-  },
-  {
-    icon: Icons.Vat,
-    label: "VAT",
-    options: booleanOptions,
-    key: "includeVat",
-  },
-  {
-    icon: Icons.ListAlt,
-    label: "Line item tax",
-    options: booleanOptions,
-    key: "includeLineItemTax",
-  },
-  {
-    icon: Icons.ConfirmationNumber,
-    label: "Discount",
-    options: booleanOptions,
-    key: "includeDiscount",
-  },
-  {
-    icon: Icons.Decimals,
-    label: "Decimals",
-    options: booleanOptions,
-    key: "includeDecimals",
-  },
-  {
-    icon: Icons.Straighten,
-    label: "Units",
-    options: booleanOptions,
-    key: "includeUnits",
-  },
-  {
-    icon: Icons.QrCode,
-    label: "QR code",
-    options: booleanOptions,
-    key: "includeQr",
-  },
+  { icon: Icons.Tax, label: "Sales tax", key: "includeTax" },
+  { icon: Icons.Vat, label: "VAT", key: "includeVat" },
+  { icon: Icons.ListAlt, label: "Line item tax", key: "includeLineItemTax" },
+  { icon: Icons.ConfirmationNumber, label: "Discount", key: "includeDiscount" },
+  { icon: Icons.Decimals, label: "Decimals", key: "includeDecimals" },
+  { icon: Icons.Straighten, label: "Units", key: "includeUnits" },
+  { icon: Icons.QrCode, label: "QR code", key: "includeQr" },
 ];
 
 const emailItems = [
-  {
-    icon: Icons.AttachEmail,
-    label: "Attach PDF",
-    options: booleanOptions,
-    key: "includePdf",
-  },
-  {
-    icon: Icons.ForwardToInbox,
-    label: "Send copy (BCC)",
-    options: booleanOptions,
-    key: "sendCopy",
-  },
+  { icon: Icons.AttachEmail, label: "Attach PDF", key: "includePdf" },
+  { icon: Icons.ForwardToInbox, label: "Send copy (BCC)", key: "sendCopy" },
 ];
 
 export function SettingsMenu() {

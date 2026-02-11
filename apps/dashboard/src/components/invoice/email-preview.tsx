@@ -4,7 +4,7 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
 import { format } from "date-fns";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { SavingBar } from "@/components/saving-bar";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
@@ -57,7 +57,7 @@ export function EmailPreview() {
   const { emailPreview, setParams } = useInvoiceParams();
   const { watch, setValue } = useFormContext();
   const { data: user } = useUserQuery();
-  const { updateTemplate } = useTemplateUpdate();
+  const { updateTemplate, isPending, isError } = useTemplateUpdate();
 
   const isOpen = emailPreview === true;
 
@@ -103,15 +103,6 @@ export function EmailPreview() {
     emailBody || "If you have any questions, just reply to this email.";
   const displayButtonText = emailButtonText || "View invoice";
 
-  const [isSaving, setIsSaving] = useState(false);
-  const savingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const flashSaved = () => {
-    setIsSaving(true);
-    if (savingTimeout.current !== null) clearTimeout(savingTimeout.current);
-    savingTimeout.current = setTimeout(() => setIsSaving(false), 600);
-  };
-
   const handleClose = () => {
     setParams({ emailPreview: null });
   };
@@ -119,25 +110,21 @@ export function EmailPreview() {
   const handleSubjectChange = (text: string) => {
     setValue("template.emailSubject", text, { shouldDirty: true });
     updateTemplate({ emailSubject: text });
-    flashSaved();
   };
 
   const handleHeadingChange = (text: string) => {
     setValue("template.emailHeading", text, { shouldDirty: true });
     updateTemplate({ emailHeading: text });
-    flashSaved();
   };
 
   const handleBodyChange = (text: string) => {
     setValue("template.emailBody", text, { shouldDirty: true });
     updateTemplate({ emailBody: text });
-    flashSaved();
   };
 
   const handleButtonTextChange = (text: string) => {
     setValue("template.emailButtonText", text, { shouldDirty: true });
     updateTemplate({ emailButtonText: text });
-    flashSaved();
   };
 
   return (
@@ -286,7 +273,7 @@ export function EmailPreview() {
           </p>
         </div>
 
-        <SavingBar isPending={isSaving} />
+        <SavingBar isPending={isPending} isError={isError} />
       </SheetContent>
     </Sheet>
   );
