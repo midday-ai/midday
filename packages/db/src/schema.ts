@@ -941,6 +941,12 @@ export const invoices = pgTable(
     // Recurring invoice fields
     invoiceRecurringId: uuid("invoice_recurring_id"),
     recurringSequence: integer("recurring_sequence"), // Which number in the series (1, 2, 3...)
+
+    // E-invoice tracking fields
+    eInvoiceStatus: text("e_invoice_status"), // null = not e-invoiced, "processing", "sent", "error"
+    eInvoiceSiloEntryId: text("e_invoice_silo_entry_id"), // Invopop silo entry UUID
+    eInvoiceJobId: text("e_invoice_job_id"), // Invopop transform job UUID
+    eInvoiceFaults: jsonb("e_invoice_faults").$type<{ message: string }[]>(), // Array of fault objects from Invopop
   },
   (table) => [
     index("invoices_created_at_idx").using(
@@ -1074,6 +1080,9 @@ export const customers = pgTable(
     // Portal fields
     portalEnabled: boolean("portal_enabled").default(false),
     portalId: text("portal_id"),
+
+    // E-invoice fields
+    peppolId: text("peppol_id"), // Peppol participant ID for B2B e-invoicing
 
     fts: tsvector("fts")
       .notNull()
@@ -1618,6 +1627,18 @@ export const teams = pgTable(
     exportSettings: jsonb("export_settings"),
     stripeAccountId: text("stripe_account_id"),
     stripeConnectStatus: text("stripe_connect_status"),
+
+    // Company address fields (for e-invoicing / GOBL supplier)
+    addressLine1: text("address_line_1"),
+    addressLine2: text("address_line_2"),
+    city: text(),
+    state: text(),
+    zip: text(),
+    vatNumber: text("vat_number"),
+    taxId: text("tax_id"),
+
+    // Peppol participant ID (provided by user or assigned during registration)
+    peppolId: text("peppol_id"),
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),
@@ -3999,4 +4020,48 @@ export const insightUserStatusRelations = relations(
       references: [users.id],
     }),
   }),
+);
+
+// ---------------------------------------------------------------------------
+// E-Invoice Registrations
+// ---------------------------------------------------------------------------
+
+export const eInvoiceRegistrations = pgTable(
+  "e_invoice_registrations",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    provider: text().notNull(), // "peppol", "verifactu", "sdi", etc.
+    status: text().notNull().default("pending"), // pending, processing, registered, error
+    siloEntryId: text("silo_entry_id"), // Invopop silo entry ID for the org.party
+    peppolId: text("peppol_id"), // Assigned Peppol participant ID after registration
+    peppolScheme: text("peppol_scheme"), // Peppol scheme ID (e.g. "0208" for BE)
+    registrationUrl: text("registration_url"), // URL for proof of ownership form
+    faults: jsonb().$type<{ message: string }[]>(), // Error details from Invopop
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    }).defaultNow(),
+  },
+  (table) => [
+    index("e_invoice_registrations_team_id_idx").on(table.teamId),
+    index("e_invoice_registrations_team_provider_idx").on(
+      table.teamId,
+      table.provider,
+    ),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "e_invoice_registrations_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("E-invoice registrations can be managed by team members", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
 );

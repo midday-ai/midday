@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HeroImage } from "./hero-image";
+import { EInvoiceFlowAnimation } from "./homepage/e-invoice-flow-animation";
 import { InvoicePaymentAnimation } from "./homepage/invoice-payment-animation";
 import { InvoicePromptAnimation } from "./homepage/invoice-prompt-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
@@ -250,6 +251,67 @@ export function Invoicing() {
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
                     <InvoicePaymentAnimation onComplete={undefined} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Third Section - E-Invoicing */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
+              {/* Left: Title and Subtitle */}
+              <div className="flex items-center">
+                <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
+                  <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
+                    E-invoicing for complete operations
+                  </h2>
+                  <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
+                    Run invoicing as a complete business workflow: create,
+                    validate, deliver, and track compliant invoices from one
+                    place, with Peppol coverage across 30+ countries.
+                  </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">
+                        End-to-end workflow
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">
+                        Peppol network
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">
+                        30+ countries
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">
+                        Audit-ready records
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">
+                        Automatic validation
+                      </span>
+                    </div>
+                  </div>
+                  <div className="pt-4">
+                    <Link
+                      href="/docs/e-invoicing"
+                      className="font-sans text-sm text-primary hover:underline"
+                    >
+                      Learn more about e-invoicing &rarr;
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Animation */}
+              <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background">
+                <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
+                  <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
+                    <EInvoiceFlowAnimation onCompleteAction={undefined} />
                   </div>
                 </div>
               </div>

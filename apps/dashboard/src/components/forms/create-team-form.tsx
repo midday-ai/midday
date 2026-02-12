@@ -14,6 +14,7 @@ import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { getDefaultFiscalYearStartMonth } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { use, useEffect, useRef, useState } from "react";
 import { z } from "zod/v3";
 import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
@@ -23,6 +24,14 @@ import { useTRPC } from "@/trpc/client";
 import { CountrySelector } from "../country-selector";
 import { SelectFiscalMonth } from "../select-fiscal-month";
 
+const SearchAddressInput = dynamic(
+  () =>
+    import("@/components/search-address-input").then(
+      (mod) => mod.SearchAddressInput,
+    ),
+  { ssr: false },
+);
+
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Team name must be at least 2 characters.",
@@ -30,6 +39,13 @@ const formSchema = z.object({
   countryCode: z.string(),
   baseCurrency: z.string(),
   fiscalYearStartMonth: z.number().int().min(1).max(12).nullable().optional(),
+  // Optional company address
+  addressLine1: z.string().optional(),
+  addressLine2: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zip: z.string().optional(),
+  vatNumber: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -185,6 +201,13 @@ export function CreateTeamForm({
       countryCode: values.countryCode,
       fiscalYearStartMonth: values.fiscalYearStartMonth,
       switchTeam: true, // Automatically switch to the new team
+      // Optional address fields
+      addressLine1: values.addressLine1,
+      addressLine2: values.addressLine2,
+      city: values.city,
+      state: values.state,
+      zip: values.zip,
+      vatNumber: values.vatNumber,
     });
   }
 
@@ -280,6 +303,89 @@ export function CreateTeamForm({
             </FormItem>
           )}
         />
+
+        <div className="mt-4 border-b border-border pb-4 space-y-4">
+          <div className="text-xs text-[#666] font-normal">
+            Company address (optional)
+          </div>
+
+          <SearchAddressInput
+            placeholder="Search for an address..."
+            onSelect={(result) => {
+              if (result.address_line_1) {
+                form.setValue("addressLine1", result.address_line_1);
+              }
+              if (result.city) {
+                form.setValue("city", result.city);
+              }
+              if (result.state) {
+                form.setValue("state", result.state);
+              }
+              if (result.zip) {
+                form.setValue("zip", result.zip);
+              }
+              if (result.country_code) {
+                form.setValue("countryCode", result.country_code);
+              }
+            }}
+          />
+
+          <FormField
+            control={form.control}
+            name="addressLine1"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input {...field} placeholder="Street address" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex gap-2">
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <Input {...field} placeholder="City" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="zip"
+              render={({ field }) => (
+                <FormItem className="w-[120px]">
+                  <FormControl>
+                    <Input {...field} placeholder="ZIP" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="vatNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input {...field} placeholder="VAT number (optional)" />
+                </FormControl>
+                <FormDescription>
+                  Required for e-invoicing. You can add this later in settings.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <SubmitButton
           className="mt-6 w-full"

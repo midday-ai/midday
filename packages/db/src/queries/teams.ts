@@ -47,6 +47,15 @@ export const getTeamById = async (db: Database, id: string) => {
       exportSettings: teams.exportSettings,
       stripeAccountId: teams.stripeAccountId,
       stripeConnectStatus: teams.stripeConnectStatus,
+      // Company address fields
+      addressLine1: teams.addressLine1,
+      addressLine2: teams.addressLine2,
+      city: teams.city,
+      state: teams.state,
+      zip: teams.zip,
+      vatNumber: teams.vatNumber,
+      taxId: teams.taxId,
+      peppolId: teams.peppolId,
     })
     .from(teams)
     .where(eq(teams.id, id));
@@ -134,6 +143,13 @@ type CreateTeamParams = {
   fiscalYearStartMonth?: number | null;
   logoUrl?: string;
   switchTeam?: boolean;
+  // Optional company address fields
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  vatNumber?: string;
 };
 
 // Helper function to create system categories for a new team
@@ -259,6 +275,13 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
           fiscalYearStartMonth: params.fiscalYearStartMonth,
           logoUrl: params.logoUrl,
           email: params.email,
+          // Optional company address fields
+          addressLine1: params.addressLine1,
+          addressLine2: params.addressLine2,
+          city: params.city,
+          state: params.state,
+          zip: params.zip,
+          vatNumber: params.vatNumber,
         })
         .returning({ id: teams.id });
 

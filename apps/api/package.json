@@ -30,6 +30,7 @@
     "@midday/categories": "workspace:*",
     "@midday/db": "workspace:*",
     "@midday/documents": "workspace:*",
+    "@midday/e-invoice": "workspace:*",
     "@midday/encryption": "workspace:*",
     "@midday/engine": "workspace:*",
     "@midday/engine-client": "workspace:*",

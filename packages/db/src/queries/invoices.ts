@@ -1112,6 +1112,11 @@ export type UpdateInvoiceParams = {
   fileSize?: number | null;
   invoiceRecurringId?: string | null;
   recurringSequence?: number | null;
+  // E-invoice tracking fields
+  eInvoiceStatus?: string | null;
+  eInvoiceSiloEntryId?: string | null;
+  eInvoiceJobId?: string | null;
+  eInvoiceFaults?: unknown | null;
   teamId: string;
   userId?: string;
 };

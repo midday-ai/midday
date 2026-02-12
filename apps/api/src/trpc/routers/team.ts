@@ -23,6 +23,7 @@ import {
   deleteTeamMember,
   getAvailablePlans,
   getBankConnections,
+  getEInvoiceRegistration,
   getInboxAccounts,
   getInvitesByEmail,
   getTeamById,
@@ -35,10 +36,12 @@ import {
   updateTeamById,
   updateTeamMember,
 } from "@midday/db/queries";
+import { eInvoiceRegistrations } from "@midday/db/schema";
 import { triggerJob } from "@midday/job-client";
 import { createLoggerWithContext } from "@midday/logger";
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 
 const logger = createLoggerWithContext("trpc:team");
 
@@ -402,6 +405,74 @@ export const teamRouter = createTRPCRouter({
           provider: a.provider,
         })),
       };
+    },
+  ),
+
+  // E-Invoice registration
+  eInvoiceRegistration: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      if (!teamId) return null;
+
+      return getEInvoiceRegistration(db, { teamId, provider: "peppol" });
+    },
+  ),
+
+  registerForEInvoice: protectedProcedure.mutation(
+    async ({ ctx: { db, teamId } }) => {
+      if (!teamId) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      const team = await getTeamById(db, teamId);
+      if (!team?.addressLine1 || !team?.vatNumber || !team?.countryCode) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Complete company address and VAT number are required",
+        });
+      }
+
+      // Check if already registered or pending
+      const existing = await getEInvoiceRegistration(db, {
+        teamId,
+        provider: "peppol",
+      });
+
+      if (existing?.status === "registered") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Already registered for e-invoicing",
+        });
+      }
+
+      if (existing?.status === "processing") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Registration is already in progress",
+        });
+      }
+
+      // Create or update registration record
+      if (existing) {
+        await db
+          .update(eInvoiceRegistrations)
+          .set({
+            status: "pending",
+            faults: null,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(eInvoiceRegistrations.id, existing.id));
+      } else {
+        await db.insert(eInvoiceRegistrations).values({
+          teamId,
+          provider: "peppol",
+          status: "pending",
+        });
+      }
+
+      // Trigger the registration worker job
+      await triggerJob("register-supplier", { teamId }, "invoices");
+
+      return { status: "pending" };
     },
   ),
 });

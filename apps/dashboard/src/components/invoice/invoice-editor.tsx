@@ -77,6 +77,12 @@ export function InvoiceEditor({
     staleTime: 1000 * 60 * 5,
   });
 
+  // Fetch team data for company info slash command
+  const { data: team } = useQuery({
+    ...trpc.team.current.queryOptions(),
+    staleTime: 1000 * 60 * 5,
+  });
+
   // Build slash command items
   const slashCommandItems = useMemo((): SlashCommandItem[] => {
     const items: SlashCommandItem[] = [];
@@ -162,6 +168,35 @@ export function InvoiceEditor({
       });
     }
 
+    // Company info slash command
+    if (team?.name && (team?.addressLine1 || team?.vatNumber)) {
+      const companyLines: string[] = [];
+      if (team.name) companyLines.push(team.name);
+      if (team.addressLine1) companyLines.push(team.addressLine1);
+      if (team.addressLine2) companyLines.push(team.addressLine2);
+
+      const cityLine = [team.city, team.state, team.zip]
+        .filter(Boolean)
+        .join(", ");
+      if (cityLine) companyLines.push(cityLine);
+
+      if (team.vatNumber) companyLines.push(`VAT: ${team.vatNumber}`);
+      if (team.email) companyLines.push(team.email);
+
+      items.push({
+        id: "company-info",
+        label: "Company Info",
+        command: ({ editor, range }) => {
+          editor
+            .chain()
+            .focus()
+            .deleteRange(range)
+            .insertContent(companyLines.join("\n"))
+            .run();
+        },
+      });
+    }
+
     return items;
   }, [
     bankAccounts,
@@ -171,6 +206,7 @@ export function InvoiceEditor({
     currency,
     invoiceNumber,
     customerName,
+    team,
   ]);
 
   // Ref for slash commands (updated synchronously to avoid race conditions)
