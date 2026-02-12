@@ -84,13 +84,17 @@ function EditableMultilineText({
     el.style.height = `${el.scrollHeight}px`;
   }, []);
 
+  // Sync value from props and resize to fit content
   useEffect(() => {
     if (!ref.current) return;
     if (ref.current.value !== value) {
       ref.current.value = value;
       lastSavedValue.current = value;
-      resize();
     }
+    // Always resize — on mount the value is already set via defaultValue
+    // so the comparison above is false, but the textarea still needs
+    // to expand beyond rows={1} to show all its content.
+    resize();
   }, [value, resize]);
 
   const handleBlur = useCallback(() => {
