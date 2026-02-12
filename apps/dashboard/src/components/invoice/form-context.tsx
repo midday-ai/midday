@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { FormProvider } from "react-hook-form";
 import { z } from "zod/v3";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useInvoiceEditorStore } from "@/store/invoice-editor";
 
 export const invoiceTemplateSchema = z.object({
   id: z.string().uuid().optional(),
@@ -49,6 +50,10 @@ export const invoiceTemplateSchema = z.object({
   timezone: z.string().optional(),
   paymentEnabled: z.boolean().optional(),
   paymentTermsDays: z.number().min(0).max(365).optional(),
+  emailSubject: z.string().optional().nullable(),
+  emailHeading: z.string().optional().nullable(),
+  emailBody: z.string().optional().nullable(),
+  emailButtonText: z.string().optional().nullable(),
 });
 
 export const lineItemSchema = z.object({
@@ -265,6 +270,11 @@ export function FormContext({
       },
       customerId: data?.customerId ?? defaultSettings?.customerId ?? undefined,
     });
+
+    // Signal that a reset happened. The auto-save effect will capture the
+    // baseline snapshot on the first debounce tick — after all child effects
+    // (Summary, etc.) have finished normalizing values.
+    useInvoiceEditorStore.getState().markReset();
   }, [data, defaultSettings]);
 
   return <FormProvider {...form}>{children}</FormProvider>;

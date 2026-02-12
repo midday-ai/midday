@@ -2,10 +2,12 @@ import {
   Body,
   Container,
   Heading,
+  Hr,
   Preview,
   Section,
   Text,
 } from "@react-email/components";
+import { format } from "date-fns";
 import { InvoiceSchema } from "../components/invoice-schema";
 import { Logo } from "../components/logo";
 import {
@@ -14,6 +16,11 @@ import {
   getEmailInlineStyles,
   getEmailThemeClasses,
 } from "../components/theme";
+import {
+  DEFAULT_EMAIL_BUTTON_TEXT,
+  defaultEmailBody,
+  defaultEmailHeading,
+} from "../defaults";
 
 interface Props {
   customerName: string;
@@ -24,6 +31,36 @@ interface Props {
   amount?: number;
   currency?: string;
   dueDate?: string;
+  // Customizable email content (falls back to defaults if not provided)
+  emailHeading?: string | null;
+  emailBody?: string | null;
+  emailButtonText?: string | null;
+  // Template labels and logo
+  logoUrl?: string | null;
+  dueDateLabel?: string | null;
+  invoiceNoLabel?: string | null;
+  // Formatting — should match the invoice template settings
+  locale?: string | null;
+  dateFormat?: string | null;
+}
+
+function formatInvoiceAmount(amount: number, currency: string, locale: string) {
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+    }).format(amount);
+  } catch {
+    return `${amount} ${currency}`;
+  }
+}
+
+function formatInvoiceDueDate(dueDate: string, dateFormat: string) {
+  try {
+    return format(new Date(dueDate), dateFormat);
+  } catch {
+    return dueDate;
+  }
 }
 
 export const InvoiceEmail = ({
@@ -34,8 +71,31 @@ export const InvoiceEmail = ({
   amount,
   currency,
   dueDate,
+  emailHeading,
+  emailBody,
+  emailButtonText,
+  logoUrl,
+  dueDateLabel,
+  invoiceNoLabel,
+  locale,
+  dateFormat,
 }: Props) => {
-  const text = `You've Received an Invoice from ${teamName}`;
+  const heading = emailHeading || defaultEmailHeading(teamName);
+  const body = emailBody || defaultEmailBody(teamName);
+  const buttonText = emailButtonText || DEFAULT_EMAIL_BUTTON_TEXT;
+  const text = heading;
+  const dueDateLbl = dueDateLabel || "Due";
+  const invoiceNoLbl = invoiceNoLabel || "Invoice";
+  const resolvedLocale = locale || "en-US";
+  const resolvedDateFormat = dateFormat || "MM/dd/yyyy";
+
+  const formattedAmount =
+    amount !== undefined && currency
+      ? formatInvoiceAmount(amount, currency, resolvedLocale)
+      : null;
+  const formattedDueDate = dueDate
+    ? formatInvoiceDueDate(dueDate, resolvedDateFormat)
+    : null;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -68,35 +128,79 @@ export const InvoiceEmail = ({
             borderColor: lightStyles.container.borderColor,
           }}
         >
-          <Logo />
+          {logoUrl ? (
+            <Section className="mt-[32px]">
+              <img
+                src={logoUrl}
+                alt={teamName}
+                style={{
+                  height: 40,
+                  width: "auto",
+                  margin: "0 auto",
+                  display: "block",
+                }}
+              />
+            </Section>
+          ) : (
+            <Logo />
+          )}
           <Heading
             className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
-            You've Received an Invoice <br /> from {teamName}
+            {heading}
           </Heading>
 
-          <br />
+          {formattedAmount && (
+            <Text
+              className="text-[32px] font-normal text-center m-0 p-0"
+              style={{ color: lightStyles.text.color }}
+            >
+              {formattedAmount}
+            </Text>
+          )}
 
-          <span
-            className={`font-medium ${themeClasses.text}`}
-            style={{ color: lightStyles.text.color }}
-          >
-            Hi {customerName},
-          </span>
-          <Text
-            className={themeClasses.text}
-            style={{ color: lightStyles.text.color }}
-          >
-            Please review your invoice and make sure to pay it on time. If you
-            have any questions, feel free to reply to this email.
-          </Text>
+          {(formattedDueDate || invoiceNumber) && (
+            <Section className="text-center mt-[8px]">
+              {formattedDueDate && (
+                <Text
+                  className={`text-[14px] m-0 p-0 ${themeClasses.mutedText}`}
+                  style={{ color: lightStyles.mutedText.color }}
+                >
+                  {dueDateLbl} {formattedDueDate}
+                </Text>
+              )}
+              {invoiceNumber && (
+                <Text
+                  className={`text-[13px] m-0 p-0 ${themeClasses.mutedText}`}
+                  style={{ color: lightStyles.mutedText.color }}
+                >
+                  {invoiceNoLbl} #{invoiceNumber}
+                </Text>
+              )}
+            </Section>
+          )}
 
-          <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href={link}>View invoice</Button>
+          <Section className="text-center mt-[40px] mb-[40px]">
+            <Button href={link}>{buttonText}</Button>
           </Section>
 
-          <br />
+          <Hr
+            className="border-t my-0"
+            style={{ borderColor: lightStyles.container.borderColor }}
+          />
+
+          <Text
+            className={`text-[13px] ${themeClasses.mutedText}`}
+            style={{ color: lightStyles.mutedText.color }}
+          >
+            {body.split("\n").map((line, i, arr) => (
+              <span key={i}>
+                {line}
+                {i < arr.length - 1 && <br />}
+              </span>
+            ))}
+          </Text>
         </Container>
       </Body>
     </EmailThemeProvider>

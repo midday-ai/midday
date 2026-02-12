@@ -77,6 +77,26 @@ export const sendInvoiceEmail = schemaTask({
     }
 
     if (invoice.invoice_number && invoice.customer?.name) {
+      // Extract email template fields
+      // @ts-expect-error template is a jsonb field
+      const emailSubject = invoice.template?.emailSubject;
+      // @ts-expect-error template is a jsonb field
+      const emailHeading = invoice.template?.emailHeading;
+      // @ts-expect-error template is a jsonb field
+      const emailBody = invoice.template?.emailBody;
+      // @ts-expect-error template is a jsonb field
+      const emailButtonText = invoice.template?.emailButtonText;
+      // @ts-expect-error template is a jsonb field
+      const logoUrl = invoice.template?.logoUrl;
+      // @ts-expect-error template is a jsonb field
+      const dueDateLabel = invoice.template?.dueDateLabel;
+      // @ts-expect-error template is a jsonb field
+      const invoiceNoLabel = invoice.template?.invoiceNoLabel;
+      // @ts-expect-error template is a jsonb field
+      const locale = invoice.template?.locale;
+      // @ts-expect-error template is a jsonb field
+      const dateFormat = invoice.template?.dateFormat;
+
       try {
         await notifications.create(
           "invoice_sent",
@@ -87,6 +107,18 @@ export const sendInvoiceEmail = schemaTask({
             customerName: invoice.customer?.name,
             customerEmail,
             token: invoice.token,
+            // Custom email content from template
+            emailSubject: emailSubject ?? undefined,
+            emailHeading: emailHeading ?? undefined,
+            emailBody: emailBody ?? undefined,
+            emailButtonText: emailButtonText ?? undefined,
+            // Template labels and logo
+            logoUrl: logoUrl ?? undefined,
+            dueDateLabel: dueDateLabel ?? undefined,
+            invoiceNoLabel: invoiceNoLabel ?? undefined,
+            // Formatting
+            locale: locale ?? undefined,
+            dateFormat: dateFormat ?? undefined,
           },
           {
             sendEmail: true,

@@ -200,6 +200,18 @@ export const invoiceSentSchema = z.object({
   amount: z.number().optional(),
   currency: z.string().optional(),
   dueDate: z.string().optional(),
+  // Customizable email content from template
+  emailSubject: z.string().optional().nullable(),
+  emailHeading: z.string().optional().nullable(),
+  emailBody: z.string().optional().nullable(),
+  emailButtonText: z.string().optional().nullable(),
+  // Template labels and logo
+  logoUrl: z.string().optional().nullable(),
+  dueDateLabel: z.string().optional().nullable(),
+  invoiceNoLabel: z.string().optional().nullable(),
+  // Formatting — should match the invoice template
+  locale: z.string().optional().nullable(),
+  dateFormat: z.string().optional().nullable(),
 });
 
 export const invoiceReminderSentSchema = z.object({

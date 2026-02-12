@@ -9,6 +9,7 @@ import {
 import { FormContext } from "@/components/invoice/form-context";
 import { InvoiceContent } from "@/components/invoice-content";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useInvoiceEditorStore } from "@/store/invoice-editor";
 import { useTRPC } from "@/trpc/client";
 
 export function InvoiceSheet() {
@@ -45,6 +46,9 @@ export function InvoiceSheet() {
       queryClient.invalidateQueries({
         queryKey: trpc.invoice.defaultSettings.queryKey(),
       });
+
+      // Clear the draft snapshot so the next open starts fresh
+      useInvoiceEditorStore.getState().reset();
     }
 
     setParams(null);

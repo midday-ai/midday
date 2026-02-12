@@ -9,9 +9,14 @@ Customize your invoices to match your brand and include all the details your cus
 
 ## Access invoice settings
 
-1. Go to [Settings](https://app.midday.ai/settings)
-2. Find the Invoice section
-3. Configure your preferences
+Invoice settings are available directly in the invoice editor. Click the **gear icon** in the bottom toolbar to open the settings menu. Settings are organized into four categories:
+
+- **Invoice** — Size, currency, date format, payment terms
+- **Tax & Pricing** — Sales tax, VAT, line item tax, discount, decimals, units, QR code
+- **Email** — PDF attachment, send copy (BCC)
+- **Payments** — Accept online payments via Stripe
+
+Each category opens a sub-menu with the relevant options. Changes are saved automatically to your current template.
 
 ## Branding
 
@@ -194,18 +199,42 @@ This saves time if you invoice the same items repeatedly.
 
 ## Email settings
 
-### Invoice emails
+### What the email includes
 
-When you send an invoice, the email includes:
+When you send an invoice via **Create & Send**, the customer receives an email with:
 
-- Your branding
-- Invoice summary
-- PDF attachment
-- Pay button (if Stripe is connected)
+- Your invoice template logo (or the Midday logo if none is set)
+- A heading (customizable, defaults to "Invoice from [Company Name]")
+- The invoice amount, due date, and invoice number
+- A **View invoice** button linking to the online invoice
+- A body message with your sign-off
+- A PDF attachment (if enabled in settings)
+- A **Pay** button (if Stripe is connected)
 
-### Customize email content
+All labels (like "Due Date" and "Invoice No") match the labels configured in your invoice template.
 
-The default email works well for most cases. The subject includes your company name and invoice number.
+### Preview and customize the email
+
+When **Create & Send** is selected as your delivery method, an email preview button appears in the invoice editor toolbar. Click it to open a preview of the exact email your customer will receive.
+
+From the preview, you can click on any text to edit it directly:
+
+- **Subject line** — The email subject your customer sees in their inbox (defaults to "[Company Name] sent you an invoice")
+- **Heading** — The title inside the email body (defaults to "Invoice from [Company Name]")
+- **Body text** — Customize the message below the invoice details
+- **Button label** — Change the call-to-action text (defaults to "View invoice")
+
+The subject line and heading are independent — customizing one does not affect the other.
+
+Changes save automatically to your current template, so they apply to all future invoices using that template.
+
+### PDF attachment
+
+Toggle **Attach PDF** in the **Email** settings category to include or exclude the invoice PDF as an email attachment. When enabled, the email preview shows the attached filename.
+
+### Send copy (BCC)
+
+Toggle **Send copy (BCC)** to receive a copy of every invoice email sent to customers. The copy is sent to your account email address.
 
 ## Reminders
 

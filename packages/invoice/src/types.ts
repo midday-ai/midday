@@ -114,6 +114,10 @@ export type Template = {
   deliveryType: "create" | "create_and_send" | "scheduled";
   locale: string;
   paymentEnabled?: boolean;
+  emailSubject?: string | null;
+  emailHeading?: string | null;
+  emailBody?: string | null;
+  emailButtonText?: string | null;
 };
 
 export interface EditorDoc {

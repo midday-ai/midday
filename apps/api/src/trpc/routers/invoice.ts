@@ -351,6 +351,10 @@ export const invoiceRouter = createTRPCRouter({
         paymentEnabled:
           template?.paymentEnabled ?? defaultTemplate.paymentEnabled,
         paymentTermsDays: template?.paymentTermsDays ?? 30,
+        emailSubject: template?.emailSubject ?? null,
+        emailHeading: template?.emailHeading ?? null,
+        emailBody: template?.emailBody ?? null,
+        emailButtonText: template?.emailButtonText ?? null,
       };
 
       // Calculate due date based on payment terms (default 30 days)

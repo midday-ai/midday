@@ -27,13 +27,18 @@ export const invoiceSent: NotificationHandler = {
       data.token,
     )}?viewer=${encodeURIComponent(encrypt(data.customerEmail))}`;
 
+    // Subject line: use custom plain-text subject if provided, otherwise i18n default
+    const subject =
+      data.emailSubject ||
+      t("invoice.sent.subject", {
+        teamName: team.name,
+      });
+
     return {
       template: "invoice",
       emailType: "customer",
       to: [data.customerEmail],
-      subject: t("invoice.sent.subject", {
-        teamName: team.name,
-      }),
+      subject,
       from: `${team.name} <middaybot@midday.ai>`,
       data: {
         customerName: data.customerName,
@@ -44,6 +49,17 @@ export const invoiceSent: NotificationHandler = {
         amount: data.amount,
         currency: data.currency,
         dueDate: data.dueDate,
+        // Custom email content (emailHeading = in-body heading, separate from subject)
+        emailHeading: data.emailHeading,
+        emailBody: data.emailBody,
+        emailButtonText: data.emailButtonText,
+        // Template labels and logo
+        logoUrl: data.logoUrl,
+        dueDateLabel: data.dueDateLabel,
+        invoiceNoLabel: data.invoiceNoLabel,
+        // Formatting
+        locale: data.locale,
+        dateFormat: data.dateFormat,
       },
     };
   },

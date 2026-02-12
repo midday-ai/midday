@@ -56,11 +56,6 @@ const invoiceSizes = [
   { value: "letter", label: "Letter" },
 ];
 
-const booleanOptions = [
-  { value: true, label: "Yes" },
-  { value: false, label: "No" },
-];
-
 const paymentTermsOptions = [
   { value: 0, label: "Due on Receipt" },
   { value: 7, label: "Net 7" },
@@ -84,36 +79,12 @@ function isCustomPaymentTerms(days: number | undefined): boolean {
   return !paymentTermsOptions.some((opt) => opt.value === days);
 }
 
-const menuItems = [
-  {
-    icon: Icons.DateFormat,
-    label: "Date format",
-    options: dateFormats,
-    key: "dateFormat",
-  },
+const invoiceItems = [
   {
     icon: Icons.CropFree,
     label: "Invoice size",
     options: invoiceSizes,
     key: "size",
-  },
-  {
-    icon: Icons.Tax,
-    label: "Add sales tax",
-    options: booleanOptions,
-    key: "includeTax",
-  },
-  {
-    icon: Icons.ListAlt,
-    label: "Line item tax",
-    options: booleanOptions,
-    key: "includeLineItemTax",
-  },
-  {
-    icon: Icons.Vat,
-    label: "Add VAT",
-    options: booleanOptions,
-    key: "includeVat",
   },
   {
     icon: Icons.CurrencyOutline,
@@ -125,40 +96,35 @@ const menuItems = [
     key: "currency",
   },
   {
-    icon: Icons.ConfirmationNumber,
-    label: "Add discount",
-    options: booleanOptions,
-    key: "includeDiscount",
+    icon: Icons.DateFormat,
+    label: "Date format",
+    options: dateFormats,
+    key: "dateFormat",
   },
+];
+
+const taxItems = [
+  { icon: Icons.Tax, label: "Sales tax", key: "includeTax" },
+  { icon: Icons.Vat, label: "VAT", key: "includeVat" },
+  { icon: Icons.ListAlt, label: "Line item tax", key: "includeLineItemTax" },
+  { icon: Icons.ConfirmationNumber, label: "Discount", key: "includeDiscount" },
+  { icon: Icons.Decimals, label: "Decimals", key: "includeDecimals" },
+  { icon: Icons.Straighten, label: "Units", key: "includeUnits" },
+  { icon: Icons.QrCode, label: "QR code", key: "includeQr" },
+];
+
+const emailItems = [
   {
     icon: Icons.AttachEmail,
-    label: "Attach PDF in email",
-    options: booleanOptions,
+    label: "Attach PDF",
+    hint: null,
     key: "includePdf",
   },
   {
-    icon: Icons.OutgoingMail,
-    label: "Send copy (BCC)",
-    options: booleanOptions,
+    icon: Icons.ForwardToInbox,
+    label: "Send copy",
+    hint: "(BCC)",
     key: "sendCopy",
-  },
-  {
-    icon: Icons.Straighten,
-    label: "Add units",
-    options: booleanOptions,
-    key: "includeUnits",
-  },
-  {
-    icon: Icons.Decimals,
-    label: "Decimals",
-    options: booleanOptions,
-    key: "includeDecimals",
-  },
-  {
-    icon: Icons.QrCode,
-    label: "Add QR code",
-    options: booleanOptions,
-    key: "includeQr",
   },
 ];
 
@@ -451,195 +417,274 @@ export function SettingsMenu() {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          {menuItems.map((item, index) => {
-            const watchKey = `template.${item.key}`;
+          {/* Invoice → sub-menu with size, currency, date format, payment terms */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.ReceiptLong className="mr-2 size-4" />
+              <span className="text-xs">Invoice</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-44">
+              {invoiceItems.map((item) => {
+                const watchKey = `template.${item.key}`;
 
-            if (item.key === "currency") {
-              return (
-                <DropdownMenuSub key={index.toString()}>
-                  <DropdownMenuSubTrigger>
-                    <item.icon className="mr-2 size-4" />
-                    <span className="text-xs">{item.label}</span>
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="p-0">
-                    <SelectCurrency
-                      headless
-                      className="text-xs"
-                      currencies={uniqueCurrencies}
-                      value={watch(watchKey)}
-                      onChange={(value) => {
-                        setValue(watchKey, value, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        });
-                        updateTemplateMutation.mutate({
-                          id: templateId,
-                          [item.key]: value,
-                        });
-                      }}
-                    />
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-              );
-            }
+                if (item.key === "currency") {
+                  return (
+                    <DropdownMenuSub key={item.key}>
+                      <DropdownMenuSubTrigger>
+                        <item.icon className="mr-2 size-4" />
+                        <span className="text-xs">{item.label}</span>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="p-0">
+                        <SelectCurrency
+                          headless
+                          className="text-xs"
+                          currencies={uniqueCurrencies}
+                          value={watch(watchKey)}
+                          onChange={(value) => {
+                            setValue(watchKey, value, {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            });
+                            updateTemplateMutation.mutate({
+                              id: templateId,
+                              [item.key]: value,
+                            });
+                          }}
+                        />
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                  );
+                }
 
-            return (
-              <DropdownMenuSub key={index.toString()}>
+                return (
+                  <DropdownMenuSub key={item.key}>
+                    <DropdownMenuSubTrigger>
+                      <item.icon className="mr-2 size-4" />
+                      <span className="text-xs">{item.label}</span>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="p-0">
+                      {item.options.map((option, optionIndex) => (
+                        <DropdownMenuCheckboxItem
+                          key={optionIndex.toString()}
+                          className="text-xs"
+                          checked={watch(watchKey) === option.value}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setValue(watchKey, option.value, {
+                                shouldValidate: true,
+                                shouldDirty: true,
+                              });
+                              updateTemplateMutation.mutate({
+                                id: templateId,
+                                [item.key]: option.value,
+                              });
+                            }
+                          }}
+                          onSelect={(event) => event.preventDefault()}
+                        >
+                          {option.label}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                );
+              })}
+
+              {/* Payment Terms */}
+              <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
-                  <item.icon className="mr-2 size-4" />
-                  <span className="text-xs">{item.label}</span>
+                  <Icons.CalendarMonth className="mr-2 size-4" />
+                  <span className="text-xs">Payment terms</span>
                 </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="p-0 max-h-48 overflow-y-auto">
-                  {item.options.map((option, optionIndex) => (
+                <DropdownMenuSubContent
+                  className="p-0 max-h-[300px] overflow-y-auto"
+                  sideOffset={2}
+                  alignOffset={-5}
+                  collisionPadding={8}
+                >
+                  {paymentTermsOptions.map((option) => (
                     <DropdownMenuCheckboxItem
-                      key={optionIndex.toString()}
+                      key={option.value}
                       className="text-xs"
-                      checked={watch(watchKey) === option.value}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setValue(watchKey, option.value, {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                          });
-
-                          updateTemplateMutation.mutate({
-                            id: templateId,
-                            [item.key]: option.value,
-                          });
-                        }
+                      checked={paymentTermsDays === option.value}
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        handlePaymentTermsChange(option.value);
                       }}
-                      onSelect={(event) => event.preventDefault()}
                     >
                       {option.label}
                     </DropdownMenuCheckboxItem>
                   ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-            );
-          })}
-
-          {/* Payment Terms */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.CalendarMonth className="mr-2 size-4" />
-              <span className="text-xs">Payment terms</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent
-              className="p-0 max-h-[300px] overflow-y-auto"
-              sideOffset={2}
-              alignOffset={-5}
-              collisionPadding={8}
-            >
-              {paymentTermsOptions.map((option) => (
-                <DropdownMenuCheckboxItem
-                  key={option.value}
-                  className="text-xs"
-                  checked={paymentTermsDays === option.value}
-                  onSelect={(event) => {
-                    event.preventDefault();
-                    // Always recalculate dueDate when clicking any option
-                    // This ensures clicking the already-selected option still updates the dueDate
-                    handlePaymentTermsChange(option.value);
-                  }}
-                >
-                  {option.label}
-                </DropdownMenuCheckboxItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="text-xs">
-                  {isCustomPaymentTerms(paymentTermsDays)
-                    ? `Custom (${paymentTermsDays} days)`
-                    : "Custom"}
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="p-2">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min={0}
-                      max={365}
-                      value={customPaymentDays}
-                      onChange={(e) => setCustomPaymentDays(e.target.value)}
-                      placeholder={String(paymentTermsDays ?? 30)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          handleCustomPaymentTermsSubmit();
-                        }
-                        e.stopPropagation();
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-16 h-7 text-xs"
-                    />
-                    <span className="text-xs text-muted-foreground">days</span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 px-2 text-xs"
-                      onClick={handleCustomPaymentTermsSubmit}
-                      disabled={
-                        !customPaymentDays ||
-                        Number.isNaN(Number.parseInt(customPaymentDays, 10))
-                      }
-                    >
-                      Set
-                    </Button>
-                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="text-xs">
+                      {isCustomPaymentTerms(paymentTermsDays)
+                        ? `Custom (${paymentTermsDays} days)`
+                        : "Custom"}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="p-2">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={365}
+                          value={customPaymentDays}
+                          onChange={(e) => setCustomPaymentDays(e.target.value)}
+                          placeholder={String(paymentTermsDays ?? 30)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleCustomPaymentTermsSubmit();
+                            }
+                            e.stopPropagation();
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-16 h-7 text-xs"
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          days
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 px-2 text-xs"
+                          onClick={handleCustomPaymentTermsSubmit}
+                          disabled={
+                            !customPaymentDays ||
+                            Number.isNaN(Number.parseInt(customPaymentDays, 10))
+                          }
+                        >
+                          Set
+                        </Button>
+                      </div>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
 
-          {/* Accept Payments Section */}
-          <DropdownMenuSeparator />
-
-          {stripeStatus?.connected ? (
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <Icons.Tax className="mr-2 size-4" />
-                <span className="text-xs">Accept payments</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="p-0">
-                {booleanOptions.map((option, optionIndex) => (
+          {/* Tax & Pricing → sub-menu with direct toggles */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Tax className="mr-2 size-4" />
+              <span className="text-xs">Tax & Pricing</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-44">
+              {taxItems.map((item) => {
+                const watchKey = `template.${item.key}`;
+                const isChecked = watch(watchKey) === true;
+                return (
                   <DropdownMenuCheckboxItem
-                    key={optionIndex.toString()}
+                    key={item.key}
                     className="text-xs"
-                    checked={paymentEnabled === option.value}
+                    checked={isChecked}
                     onCheckedChange={(checked) => {
-                      if (checked) {
-                        setValue("template.paymentEnabled", option.value, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        });
-                        updateTemplateMutation.mutate({
-                          id: templateId,
-                          paymentEnabled: option.value,
-                        });
-                      }
+                      setValue(watchKey, checked, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                      updateTemplateMutation.mutate({
+                        id: templateId,
+                        [item.key]: checked,
+                      });
                     }}
                     onSelect={(event) => event.preventDefault()}
                   >
-                    {option.label}
+                    <item.icon className="mr-2 size-4" />
+                    {item.label}
                   </DropdownMenuCheckboxItem>
-                ))}
-                <DropdownMenuSeparator />
+                );
+              })}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          {/* Email → sub-menu with direct toggles */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Email className="mr-2 size-4" />
+              <span className="text-xs">Email</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-48">
+              {emailItems.map((item) => {
+                const watchKey = `template.${item.key}`;
+                const isChecked = watch(watchKey) === true;
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={item.key}
+                    className="text-xs"
+                    checked={isChecked}
+                    onCheckedChange={(checked) => {
+                      setValue(watchKey, checked, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                      updateTemplateMutation.mutate({
+                        id: templateId,
+                        [item.key]: checked,
+                      });
+                    }}
+                    onSelect={(event) => event.preventDefault()}
+                  >
+                    <item.icon className="mr-2 size-4 shrink-0" />
+                    <span className="whitespace-nowrap">
+                      {item.label}
+                      {item.hint && (
+                        <span className="text-[10px] text-muted-foreground ml-1">
+                          {item.hint}
+                        </span>
+                      )}
+                    </span>
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          {/* Payments → sub-menu */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.CurrencyOutline className="mr-2 size-4" />
+              <span className="text-xs">Payments</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-44">
+              {stripeStatus?.connected ? (
+                <>
+                  <DropdownMenuCheckboxItem
+                    className="text-xs"
+                    checked={paymentEnabled === true}
+                    onCheckedChange={(checked) => {
+                      setValue("template.paymentEnabled", checked, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                      updateTemplateMutation.mutate({
+                        id: templateId,
+                        paymentEnabled: checked,
+                      });
+                    }}
+                    onSelect={(event) => event.preventDefault()}
+                  >
+                    Accept payments
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setDisconnectDialogOpen(true)}
+                    className="text-xs cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    Disconnect Stripe
+                  </DropdownMenuItem>
+                </>
+              ) : (
                 <DropdownMenuItem
-                  onClick={() => setDisconnectDialogOpen(true)}
-                  className="text-xs cursor-pointer text-destructive focus:text-destructive"
+                  onClick={() => stripeOAuth.connect()}
+                  className="text-xs cursor-pointer"
+                  disabled={stripeOAuth.isLoading}
                 >
-                  Disconnect Stripe
+                  {stripeOAuth.isLoading ? "Connecting..." : "Connect Stripe"}
                 </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          ) : (
-            <DropdownMenuItem
-              onClick={() => stripeOAuth.connect()}
-              className="text-xs cursor-pointer"
-              disabled={stripeOAuth.isLoading}
-            >
-              <Icons.Tax className="mr-2 size-4" />
-              {stripeOAuth.isLoading ? "Connecting..." : "Connect Stripe"}
-            </DropdownMenuItem>
-          )}
+              )}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
 
           {templateId && (
             <>

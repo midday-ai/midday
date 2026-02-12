@@ -7,10 +7,16 @@ order: 2
 
 Customize your invoice template to reflect your brand and save time on each invoice.
 
-## Access invoice settings
+## Access template settings
 
-1. Go to [Settings](https://app.midday.ai/settings)
-2. Find the Invoice section
+Template settings are available directly in the invoice editor. Click the **gear icon** in the bottom toolbar to open the settings menu, organized into categories:
+
+- **Invoice** — Size, currency, date format, payment terms
+- **Tax & Pricing** — Tax, VAT, discounts, decimals, units, QR code
+- **Email** — PDF attachment, send copy
+- **Payments** — Stripe online payments
+
+You can also manage templates (rename, duplicate, set as default, delete) from the same menu.
 
 ## Branding
 
@@ -92,9 +98,44 @@ Add standard text that appears on all invoices:
 - Terms and conditions
 - Return policy
 
+## Email template
+
+Each template stores its own email content. When you send an invoice via **Create & Send**, the customer receives an email based on these settings.
+
+### Customize the email
+
+Click the email preview button in the invoice editor toolbar (visible when **Create & Send** is selected) to open a live preview. You can edit:
+
+- **Subject line** — The email subject your customer sees in their inbox (defaults to "[Company Name] sent you an invoice")
+- **Heading** — The title inside the email body (defaults to "Invoice from [Company Name]")
+- **Body text** — The message below the invoice details
+- **Button label** — The call-to-action button text (defaults to "View invoice")
+
+The subject line and heading are independent — customizing one does not affect the other. Click directly on any text in the preview to edit it. Changes save automatically to the current template.
+
+### What the email shows
+
+The email automatically includes data from the invoice:
+
+- Your template logo
+- Invoice amount and currency
+- Due date (using your template's date format and label)
+- Invoice number (using your template's label)
+- A sign-off with your company name
+
+These values update automatically based on each invoice — you don't need to edit them manually.
+
+### Email options
+
+In the **Email** settings category:
+
+- **Attach PDF** — Include the invoice as a PDF attachment
+- **Send copy (BCC)** — Send yourself a copy of every invoice email
+
 ## Tips
 
 - Set up your template before creating your first invoice
 - Use a professional logo—it makes a big difference
 - Include clear payment instructions to get paid faster
+- Customize your email template once — it applies to all invoices using that template
 - Review and update annually or when business details change
