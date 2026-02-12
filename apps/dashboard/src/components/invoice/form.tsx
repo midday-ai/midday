@@ -9,7 +9,11 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { differenceInDays } from "date-fns";
 import { useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -48,6 +52,12 @@ export function Form() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  // Track in-flight template upsert mutations (fired by SettingsMenu, labels, etc.)
+  // so the SavingBar reacts immediately instead of waiting for the 500ms debounce.
+  const templateUpsertCount = useIsMutating({
+    mutationKey: trpc.invoiceTemplate.upsert.mutationKey(),
+  });
 
   const draftInvoiceMutation = useMutation(
     trpc.invoice.draft.mutationOptions({
@@ -448,7 +458,7 @@ export function Form() {
         </div>
 
         <SavingBar
-          isPending={draftInvoiceMutation.isPending}
+          isPending={draftInvoiceMutation.isPending || templateUpsertCount > 0}
           isError={draftInvoiceMutation.isError}
         />
       </ScrollArea>

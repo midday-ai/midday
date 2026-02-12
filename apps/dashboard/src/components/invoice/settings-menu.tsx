@@ -114,8 +114,18 @@ const taxItems = [
 ];
 
 const emailItems = [
-  { icon: Icons.AttachEmail, label: "Attach PDF", key: "includePdf" },
-  { icon: Icons.ForwardToInbox, label: "Send copy (BCC)", key: "sendCopy" },
+  {
+    icon: Icons.AttachEmail,
+    label: "Attach PDF",
+    hint: null,
+    key: "includePdf",
+  },
+  {
+    icon: Icons.ForwardToInbox,
+    label: "Send copy",
+    hint: "(BCC)",
+    key: "sendCopy",
+  },
 ];
 
 export function SettingsMenu() {
@@ -594,7 +604,7 @@ export function SettingsMenu() {
               <Icons.Email className="mr-2 size-4" />
               <span className="text-xs">Email</span>
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-44">
+            <DropdownMenuSubContent className="w-48">
               {emailItems.map((item) => {
                 const watchKey = `template.${item.key}`;
                 const isChecked = watch(watchKey) === true;
@@ -615,8 +625,15 @@ export function SettingsMenu() {
                     }}
                     onSelect={(event) => event.preventDefault()}
                   >
-                    <item.icon className="mr-2 size-4" />
-                    {item.label}
+                    <item.icon className="mr-2 size-4 shrink-0" />
+                    <span className="whitespace-nowrap">
+                      {item.label}
+                      {item.hint && (
+                        <span className="text-[10px] text-muted-foreground ml-1">
+                          {item.hint}
+                        </span>
+                      )}
+                    </span>
                   </DropdownMenuCheckboxItem>
                 );
               })}
