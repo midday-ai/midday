@@ -15,8 +15,9 @@ interface InvoiceEditorState {
    *  form values (post-Summary, post-all child effects) as the baseline. */
   initialize: (values: unknown) => void;
 
-  /** Capture a new snapshot after a successful save */
-  setSnapshot: (values: unknown) => void;
+  /** Capture a new snapshot after a successful save.
+   *  Accepts either the form values object or a pre-serialized JSON string. */
+  setSnapshot: (valuesOrSerialized: unknown) => void;
 
   /** Returns true if the current values differ from the snapshot.
    *  Returns false if not yet initialized (prevents saving during hydration). */
@@ -39,8 +40,13 @@ export const useInvoiceEditorStore = create<InvoiceEditorState>()(
       set({ snapshot: JSON.stringify(values), initialized: true });
     },
 
-    setSnapshot: (values) => {
-      set({ snapshot: JSON.stringify(values) });
+    setSnapshot: (valuesOrSerialized) => {
+      set({
+        snapshot:
+          typeof valuesOrSerialized === "string"
+            ? valuesOrSerialized
+            : JSON.stringify(valuesOrSerialized),
+      });
     },
 
     hasChanged: (values) => {

@@ -211,6 +211,13 @@ export function Form() {
     if (!store.hasChanged(currentFormValues)) return;
     if (!currentFormValues.customerId || !invoiceNumberValid) return;
 
+    // Serialize now — getValues() returns a shallow copy so nested objects
+    // (e.g. template) are shared mutable refs into the form's internal state.
+    // If the user edits a field between mutation start and onSuccess,
+    // JSON.stringify would capture the unsaved mutation, causing the next
+    // hasChanged() check to silently skip the save.
+    const serialized = JSON.stringify(currentFormValues);
+
     draftInvoiceMutation.mutate(
       // @ts-expect-error
       transformFormValuesToDraft(currentFormValues),
@@ -218,7 +225,7 @@ export function Form() {
         onSuccess: () => {
           // Only update snapshot after a confirmed save so that failed mutations
           // leave hasChanged() === true, allowing the next debounce tick to retry.
-          store.setSnapshot(currentFormValues);
+          store.setSnapshot(serialized);
         },
       },
     );
