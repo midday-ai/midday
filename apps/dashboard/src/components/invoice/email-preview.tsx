@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  DEFAULT_EMAIL_BUTTON_TEXT,
+  defaultEmailBody,
+  defaultEmailHeading,
+  defaultEmailSubject,
+} from "@midday/email/defaults";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
@@ -166,13 +172,13 @@ export function EmailPreview() {
     }
   }
 
-  // Display values — plain text, no template variable resolution
-  const displaySubject = emailSubject || `${teamName} sent you an invoice`;
-  const displayHeading = emailHeading || `Invoice from ${teamName}`;
-  const displayBody =
-    emailBody ||
-    `If you have any questions, just reply to this email.\n\nThanks,\n${teamName}`;
-  const displayButtonText = emailButtonText || "View invoice";
+  // Display values — plain text, no template variable resolution.
+  // Defaults are imported from @midday/email/defaults so they stay in sync
+  // with the actual email template the customer receives.
+  const displaySubject = emailSubject || defaultEmailSubject(teamName);
+  const displayHeading = emailHeading || defaultEmailHeading(teamName);
+  const displayBody = emailBody || defaultEmailBody(teamName);
+  const displayButtonText = emailButtonText || DEFAULT_EMAIL_BUTTON_TEXT;
 
   const handleClose = () => {
     setParams({ emailPreview: null });

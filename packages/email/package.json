@@ -5,6 +5,7 @@
   "main": "index.ts",
   "exports": {
     "./emails/*": "./emails/*.tsx",
+    "./defaults": "./defaults.ts",
     "./locales": "./locales/index.ts",
     "./render": "./render.ts"
   },

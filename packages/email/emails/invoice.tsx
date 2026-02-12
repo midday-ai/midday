@@ -16,6 +16,11 @@ import {
   getEmailInlineStyles,
   getEmailThemeClasses,
 } from "../components/theme";
+import {
+  DEFAULT_EMAIL_BUTTON_TEXT,
+  defaultEmailBody,
+  defaultEmailHeading,
+} from "../defaults";
 
 interface Props {
   customerName: string;
@@ -37,10 +42,6 @@ interface Props {
   // Formatting — should match the invoice template settings
   locale?: string | null;
   dateFormat?: string | null;
-}
-
-function defaultEmailBody(teamName: string) {
-  return `If you have any questions, just reply to this email.\n\nThanks,\n${teamName}`;
 }
 
 function formatInvoiceAmount(amount: number, currency: string, locale: string) {
@@ -79,9 +80,9 @@ export const InvoiceEmail = ({
   locale,
   dateFormat,
 }: Props) => {
-  const heading = emailHeading || `Invoice from ${teamName}`;
+  const heading = emailHeading || defaultEmailHeading(teamName);
   const body = emailBody || defaultEmailBody(teamName);
-  const buttonText = emailButtonText || "View invoice";
+  const buttonText = emailButtonText || DEFAULT_EMAIL_BUTTON_TEXT;
   const text = heading;
   const dueDateLbl = dueDateLabel || "Due";
   const invoiceNoLbl = invoiceNoLabel || "Invoice";
