@@ -390,9 +390,9 @@ export function Form() {
     });
   };
 
-  // Prevent form from submitting when pressing enter
+  // Prevent form from submitting when pressing enter, but allow newlines in textareas
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !(e.target instanceof HTMLTextAreaElement)) {
       e.preventDefault();
     }
   };
