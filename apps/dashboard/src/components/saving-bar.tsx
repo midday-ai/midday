@@ -33,6 +33,13 @@ export function SavingBar({ isPending, isError = false }: SavingBarProps) {
         isError ? 3000 : 1500,
       );
     }
+
+    return () => {
+      if (timeout.current !== null) {
+        clearTimeout(timeout.current);
+        timeout.current = null;
+      }
+    };
   }, [isPending, isError]);
 
   return (

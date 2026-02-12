@@ -218,40 +218,65 @@ export function Form() {
     // hasChanged() check to silently skip the save.
     const serialized = JSON.stringify(currentFormValues);
 
+    // If invoice is part of a recurring series, both the draft AND the
+    // recurring template must save successfully before we mark the snapshot
+    // as saved. Otherwise a recurring-template failure would be masked by
+    // the draft's onSuccess updating the snapshot, and hasChanged() would
+    // return false on the next tick — silently dropping the retry.
+    const { invoiceRecurringId } = currentFormValues;
+    const needsRecurringUpdate = !!invoiceRecurringId;
+
+    // Track which mutations have completed for this save cycle
+    let draftOk = false;
+    let recurringOk = !needsRecurringUpdate; // true when no recurring update needed
+
+    const maybeCommitSnapshot = () => {
+      if (draftOk && recurringOk) {
+        store.setSnapshot(serialized);
+      }
+    };
+
     draftInvoiceMutation.mutate(
       // @ts-expect-error
       transformFormValuesToDraft(currentFormValues),
       {
         onSuccess: () => {
-          // Only update snapshot after a confirmed save so that failed mutations
-          // leave hasChanged() === true, allowing the next debounce tick to retry.
-          store.setSnapshot(serialized);
+          draftOk = true;
+          maybeCommitSnapshot();
         },
       },
     );
 
-    // If invoice is part of a recurring series, also update the series template
-    const { invoiceRecurringId } = currentFormValues;
-    if (invoiceRecurringId) {
+    if (needsRecurringUpdate) {
       // Remove deliveryType from template since "recurring" is not a valid API deliveryType
       const { deliveryType: _, ...templateWithoutDeliveryType } =
         currentFormValues.template;
 
-      updateRecurringTemplateMutation.mutate({
-        id: invoiceRecurringId,
-        lineItems: currentFormValues.lineItems,
-        template: templateWithoutDeliveryType,
-        paymentDetails: currentFormValues.paymentDetails,
-        fromDetails: currentFormValues.fromDetails,
-        noteDetails: currentFormValues.noteDetails,
-        vat: currentFormValues.vat,
-        tax: currentFormValues.tax,
-        discount: currentFormValues.discount,
-        subtotal: currentFormValues.subtotal,
-        topBlock: currentFormValues.topBlock,
-        bottomBlock: currentFormValues.bottomBlock,
-        amount: currentFormValues.amount,
-      });
+      updateRecurringTemplateMutation.mutate(
+        {
+          id: invoiceRecurringId,
+          lineItems: currentFormValues.lineItems,
+          template: templateWithoutDeliveryType,
+          paymentDetails: currentFormValues.paymentDetails,
+          fromDetails: currentFormValues.fromDetails,
+          noteDetails: currentFormValues.noteDetails,
+          vat: currentFormValues.vat,
+          tax: currentFormValues.tax,
+          discount: currentFormValues.discount,
+          subtotal: currentFormValues.subtotal,
+          topBlock: currentFormValues.topBlock,
+          bottomBlock: currentFormValues.bottomBlock,
+          amount: currentFormValues.amount,
+        },
+        {
+          onSuccess: () => {
+            recurringOk = true;
+            maybeCommitSnapshot();
+          },
+          // onError intentionally omitted — recurringOk stays false,
+          // snapshot is never committed, and the next debounce tick retries.
+        },
+      );
     }
   }, [debouncedValue, invoiceNumberValid]);
 

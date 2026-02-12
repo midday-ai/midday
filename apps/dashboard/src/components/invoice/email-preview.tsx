@@ -12,18 +12,17 @@ import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 
+/** Single-line inline editable text (contentEditable — ideal for span/h2). */
 function EditableText({
   value,
   onChange,
   className,
   tag: Tag = "span",
-  multiline = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   className?: string;
   tag?: "span" | "p" | "h2" | "div";
-  multiline?: boolean;
 }) {
   const ref = useRef<HTMLElement>(null);
   const lastSavedValue = useRef(value);
@@ -38,31 +37,19 @@ function EditableText({
 
   const handleBlur = useCallback(() => {
     if (!ref.current) return;
-    const text = multiline
-      ? ref.current.innerText.replace(/\n{3,}/g, "\n\n").trim()
-      : ref.current.textContent?.trim() || "";
+    const text = ref.current.textContent?.trim() || "";
     if (text !== lastSavedValue.current) {
       lastSavedValue.current = text;
       onChange(text);
     }
-  }, [onChange, multiline]);
+  }, [onChange]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
-        if (multiline) {
-          // Insert a clean <br> instead of browser-default <div> wrappers
-          e.preventDefault();
-          document.execCommand("insertLineBreak");
-        } else {
-          // Single-line: no newlines allowed, commit on Enter
-          e.preventDefault();
-          ref.current?.blur();
-        }
-      }
-    },
-    [multiline],
-  );
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      ref.current?.blur();
+    }
+  }, []);
 
   return (
     <Tag
@@ -71,7 +58,62 @@ function EditableText({
       suppressContentEditableWarning
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
-      className={`outline-none cursor-text ${multiline ? "whitespace-pre-wrap" : ""} ${className ?? ""}`}
+      className={`outline-none cursor-text ${className ?? ""}`}
+    />
+  );
+}
+
+/** Multiline editable text using a plain <textarea> — handles newlines natively. */
+function EditableMultilineText({
+  value,
+  onChange,
+  className,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const lastSavedValue = useRef(value);
+
+  // Auto-resize to fit content
+  const resize = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    if (ref.current.value !== value) {
+      ref.current.value = value;
+      lastSavedValue.current = value;
+      resize();
+    }
+  }, [value, resize]);
+
+  const handleBlur = useCallback(() => {
+    if (!ref.current) return;
+    const text = ref.current.value.replace(/\n{3,}/g, "\n\n").trim();
+    if (text !== lastSavedValue.current) {
+      lastSavedValue.current = text;
+      onChange(text);
+    }
+  }, [onChange]);
+
+  const handleInput = useCallback(() => {
+    resize();
+  }, [resize]);
+
+  return (
+    <textarea
+      ref={ref}
+      defaultValue={value}
+      onBlur={handleBlur}
+      onInput={handleInput}
+      rows={1}
+      className={`outline-none cursor-text resize-none w-full bg-transparent overflow-hidden ${className ?? ""}`}
     />
   );
 }
@@ -263,9 +305,7 @@ export function EmailPreview() {
               <hr className="border-t border-border my-0" />
 
               {/* Body & sign-off */}
-              <EditableText
-                tag="div"
-                multiline
+              <EditableMultilineText
                 value={displayBody}
                 onChange={handleBodyChange}
                 className="text-[13px] text-[#606060] dark:text-[#878787] leading-relaxed mt-4"
