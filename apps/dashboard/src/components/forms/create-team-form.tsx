@@ -1,6 +1,6 @@
 "use client";
 
-import { uniqueCurrencies } from "@midday/location/currencies";
+import { currencies, uniqueCurrencies } from "@midday/location/currencies";
 import {
   Form,
   FormControl,
@@ -14,37 +14,29 @@ import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { getDefaultFiscalYearStartMonth } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
+import { AnimatePresence, motion } from "motion/react";
 import { use, useEffect, useRef, useState } from "react";
 import { z } from "zod/v3";
 import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
+import { SearchAddressInput } from "@/components/search-address-input";
 import { SelectCurrency } from "@/components/select-currency";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 import { CountrySelector } from "../country-selector";
 import { SelectFiscalMonth } from "../select-fiscal-month";
 
-const SearchAddressInput = dynamic(
-  () =>
-    import("@/components/search-address-input").then(
-      (mod) => mod.SearchAddressInput,
-    ),
-  { ssr: false },
-);
-
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Team name must be at least 2 characters.",
   }),
-  countryCode: z.string(),
+  countryCode: z.string().min(1, { message: "Country is required." }),
   baseCurrency: z.string(),
   fiscalYearStartMonth: z.number().int().min(1).max(12).nullable().optional(),
-  // Optional company address
-  addressLine1: z.string().optional(),
+  addressLine1: z.string().min(1, { message: "Street address is required." }),
   addressLine2: z.string().optional(),
-  city: z.string().optional(),
+  city: z.string().min(1, { message: "City is required." }),
   state: z.string().optional(),
-  zip: z.string().optional(),
+  zip: z.string().min(1, { message: "Postal code is required." }),
   vatNumber: z.string().optional(),
 });
 
@@ -64,6 +56,7 @@ export function CreateTeamForm({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
+  const [showAddressFields, setShowAddressFields] = useState(false);
   const isSubmittedRef = useRef(false);
 
   const createTeamMutation = useMutation(
@@ -92,13 +85,21 @@ export function CreateTeamForm({
     },
   });
 
-  // Update fiscal year when country changes
+  // Auto-update currency and fiscal year when country changes
   const selectedCountryCode = form.watch("countryCode");
   useEffect(() => {
+    if (!selectedCountryCode) return;
+
     const defaultFiscalYear =
       getDefaultFiscalYearStartMonth(selectedCountryCode);
     if (defaultFiscalYear !== form.getValues("fiscalYearStartMonth")) {
       form.setValue("fiscalYearStartMonth", defaultFiscalYear);
+    }
+
+    const countryCurrency =
+      currencies[selectedCountryCode as keyof typeof currencies];
+    if (countryCurrency) {
+      form.setValue("baseCurrency", countryCurrency);
     }
   }, [selectedCountryCode, form]);
 
@@ -118,14 +119,12 @@ export function CreateTeamForm({
       baseCurrency: values.baseCurrency,
       countryCode: values.countryCode,
       fiscalYearStartMonth: values.fiscalYearStartMonth,
-      switchTeam: true, // Automatically switch to the new team
-      // Optional address fields
+      switchTeam: true,
       addressLine1: values.addressLine1,
       addressLine2: values.addressLine2,
       city: values.city,
       state: values.state,
       zip: values.zip,
-      vatNumber: values.vatNumber,
     });
   }
 
@@ -136,7 +135,7 @@ export function CreateTeamForm({
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem className="mt-4 w-full">
+            <FormItem className="mt-4 w-full border-b border-border pb-4">
               <FormLabel className="text-xs text-[#666] font-normal">
                 Company name
               </FormLabel>
@@ -151,81 +150,13 @@ export function CreateTeamForm({
                   {...field}
                 />
               </FormControl>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="countryCode"
-          render={({ field }) => (
-            <FormItem className="mt-4 w-full">
-              <FormLabel className="text-xs text-[#666] font-normal">
-                Country
-              </FormLabel>
-              <FormControl className="w-full">
-                <CountrySelector
-                  defaultValue={field.value ?? ""}
-                  onSelect={(code, name) => {
-                    field.onChange(name);
-                    form.setValue("countryCode", code);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="baseCurrency"
-          render={({ field }) => (
-            <FormItem className="mt-4 border-b border-border pb-4">
-              <FormLabel className="text-xs text-[#666] font-normal">
-                Base currency
-              </FormLabel>
-              <FormControl>
-                <SelectCurrency currencies={uniqueCurrencies} {...field} />
-              </FormControl>
-
-              <FormDescription>
-                If you have multiple accounts in different currencies, this will
-                be the default currency for your company. You can change it
-                later.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="fiscalYearStartMonth"
-          render={({ field }) => (
-            <FormItem className="mt-4 border-b border-border pb-4">
-              <FormLabel className="text-xs text-[#666] font-normal">
-                Fiscal year starts
-              </FormLabel>
-              <FormControl>
-                <SelectFiscalMonth {...field} />
-              </FormControl>
-
-              <FormDescription>
-                When does your company's fiscal year begin? This determines
-                default date ranges for reports. You can change it later.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
         <div className="mt-4 border-b border-border pb-4 space-y-4">
-          <div className="text-xs text-[#666] font-normal">
-            Company address (optional)
-          </div>
+          <div className="text-xs text-[#666] font-normal">Company address</div>
 
           <SearchAddressInput
             placeholder="Search for an address..."
@@ -245,65 +176,128 @@ export function CreateTeamForm({
               if (result.country_code) {
                 form.setValue("countryCode", result.country_code);
               }
+              setShowAddressFields(true);
             }}
           />
 
-          <FormField
-            control={form.control}
-            name="addressLine1"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} placeholder="Street address" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {!showAddressFields && (
+            <button
+              type="button"
+              className="text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => setShowAddressFields(true)}
+            >
+              Enter address manually
+            </button>
+          )}
 
-          <div className="flex gap-2">
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormControl>
-                    <Input {...field} placeholder="City" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="zip"
-              render={({ field }) => (
-                <FormItem className="w-[120px]">
-                  <FormControl>
-                    <Input {...field} placeholder="ZIP" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <AnimatePresence>
+            {showAddressFields && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.15 }}
+                className="space-y-4 overflow-hidden"
+              >
+                <FormField
+                  control={form.control}
+                  name="countryCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <CountrySelector
+                          defaultValue={field.value ?? ""}
+                          onSelect={(code) => {
+                            field.onChange(code);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          <FormField
-            control={form.control}
-            name="vatNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} placeholder="VAT number (optional)" />
-                </FormControl>
-                <FormDescription>
-                  Required for e-invoicing. You can add this later in settings.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
+                <FormField
+                  control={form.control}
+                  name="addressLine1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...field} placeholder="Street address" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input {...field} placeholder="City" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="zip"
+                    render={({ field }) => (
+                      <FormItem className="w-[120px]">
+                        <FormControl>
+                          <Input {...field} placeholder="ZIP" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </motion.div>
             )}
-          />
+          </AnimatePresence>
         </div>
+
+        <FormField
+          control={form.control}
+          name="baseCurrency"
+          render={({ field }) => (
+            <FormItem className="mt-4 border-b border-border pb-4">
+              <FormLabel className="text-xs text-[#666] font-normal">
+                Base currency
+              </FormLabel>
+              <FormControl>
+                <SelectCurrency currencies={uniqueCurrencies} {...field} />
+              </FormControl>
+              <FormDescription>
+                Auto-set from your country. You can change it later.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="fiscalYearStartMonth"
+          render={({ field }) => (
+            <FormItem className="mt-4 border-b border-border pb-4">
+              <FormLabel className="text-xs text-[#666] font-normal">
+                Fiscal year starts
+              </FormLabel>
+              <FormControl>
+                <SelectFiscalMonth {...field} />
+              </FormControl>
+              <FormDescription>
+                Auto-set from your country. You can change it later.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <SubmitButton
           className="mt-6 w-full"

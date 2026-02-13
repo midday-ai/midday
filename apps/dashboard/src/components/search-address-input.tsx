@@ -197,7 +197,7 @@ export function SearchAddressInput({
             onFocus={() => setOpen(true)}
             placeholder={placeholder}
             disabled={disabled || !ready}
-            className="border border-border px-3 py-1 text-sm h-9"
+            className="border border-border px-3 py-1 text-sm h-9 disabled:opacity-100"
             autoComplete="off"
           />
         </div>
