@@ -14,6 +14,7 @@ const prefetchRoutes = new Set([
   "/invoices",
   "/tracker",
   "/vault",
+  "/apps",
 ]);
 
 const icons = {
