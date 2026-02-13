@@ -162,7 +162,7 @@ export const WidgetStoreContext = createContext<WidgetStoreApi | undefined>(
 // Provider component
 export interface WidgetProviderProps {
   children: ReactNode;
-  initialPreferences: WidgetPreferences;
+  initialPreferences?: WidgetPreferences;
 }
 
 export const WidgetProvider = ({

@@ -32,7 +32,6 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
         async headers() {
-          // Parallelize independent async calls
           const [supabase, cookieStore, headersList] = await Promise.all([
             createClient(),
             cookies(),
