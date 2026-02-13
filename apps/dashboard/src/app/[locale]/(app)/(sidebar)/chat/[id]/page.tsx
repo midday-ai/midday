@@ -23,12 +23,11 @@ export default async function ChatPage(props: Props) {
 
   const queryClient = getQueryClient();
 
-  // Fetch widget preferences directly for initial data (no prefetch needed)
+  // Fetch widget preferences so the dashboard renders with data immediately
   const widgetPreferences = await queryClient.fetchQuery(
     trpc.widgets.getWidgetPreferences.queryOptions(),
   );
 
-  // Prefetch suggested actions (metrics are prefetched client-side to respect localStorage)
   prefetch(trpc.suggestedActions.list.queryOptions({ limit: 6 }));
 
   const chat = await queryClient.fetchQuery(

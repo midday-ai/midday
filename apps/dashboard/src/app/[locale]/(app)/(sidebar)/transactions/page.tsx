@@ -65,30 +65,30 @@ export default async function Transactions(props: Props) {
   return (
     <HydrateClient>
       <ScrollableContent>
-        <TransactionsUploadZone>
-          <div className="flex justify-between items-center py-6">
-            <TransactionsSearchFilter />
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex items-center gap-2">
-                <TransactionsColumnVisibility />
-                <AddTransactions />
-              </div>
-              <TransactionTabs />
+        <div className="flex justify-between items-center py-6">
+          <TransactionsSearchFilter />
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2">
+              <TransactionsColumnVisibility />
+              <AddTransactions />
             </div>
+            <TransactionTabs />
           </div>
+        </div>
 
-          <Suspense
-            fallback={
-              <Loading
-                columnVisibility={initialSettings.columns}
-                columnSizing={initialSettings.sizing}
-                columnOrder={initialSettings.order}
-              />
-            }
-          >
+        <Suspense
+          fallback={
+            <Loading
+              columnVisibility={initialSettings.columns}
+              columnSizing={initialSettings.sizing}
+              columnOrder={initialSettings.order}
+            />
+          }
+        >
+          <TransactionsUploadZone>
             <DataTable initialSettings={initialSettings} initialTab={tab} />
-          </Suspense>
-        </TransactionsUploadZone>
+          </TransactionsUploadZone>
+        </Suspense>
       </ScrollableContent>
     </HydrateClient>
   );

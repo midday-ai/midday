@@ -16,7 +16,7 @@ export default async function Overview() {
 
   const queryClient = getQueryClient();
 
-  // Fetch widget preferences directly for initial data (no prefetch needed)
+  // Fetch widget preferences so the dashboard renders with data immediately
   const widgetPreferences = await queryClient.fetchQuery(
     trpc.widgets.getWidgetPreferences.queryOptions(),
   );
