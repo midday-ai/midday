@@ -4,7 +4,6 @@ import copilotMcpApp from "./copilot-mcp/config";
 import cursorMcpApp from "./cursor-mcp/config";
 import deelApp from "./deel/config";
 import dropboxApp from "./dropbox/config";
-import eInvoiceApp from "./e-invoice/config";
 import fortnoxApp from "./fortnox/config-client";
 import gmailApp from "./gmail/config-client";
 import googleDriveApp from "./google-drive/config";
@@ -42,7 +41,6 @@ export const apps = [
   stripeApp,
   polarApp,
   deelApp,
-  eInvoiceApp,
   cursorMcpApp,
   claudeMcpApp,
   perplexityMcpApp,

@@ -67,15 +67,7 @@ export function EInvoiceRegistration() {
         <CardTitle>E-Invoicing</CardTitle>
         <CardDescription>
           Send compliant electronic invoices via the Peppol network, accepted
-          for B2B invoicing in over 30 countries worldwide.{" "}
-          <a
-            href="https://midday.ai/docs/e-invoicing"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline"
-          >
-            Learn more
-          </a>
+          for B2B invoicing in over 30 countries worldwide.
         </CardDescription>
       </CardHeader>
 
@@ -95,11 +87,16 @@ export function EInvoiceRegistration() {
             </p>
           </div>
         ) : status === "processing" ? (
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Verification in progress</p>
-            <p className="text-sm text-muted-foreground">
-              This can take up to 72 hours. We'll notify you when it's ready.
-            </p>
+          <div className="space-y-3">
+            <div className="px-3 py-3 border border-border">
+              <p className="text-sm font-medium mb-1">
+                Verification in progress
+              </p>
+              <p className="text-sm text-muted-foreground">
+                This can take up to 72 hours. We'll notify you when it's
+                ready.
+              </p>
+            </div>
             {registration?.registrationUrl && (
               <a
                 href={registration.registrationUrl}

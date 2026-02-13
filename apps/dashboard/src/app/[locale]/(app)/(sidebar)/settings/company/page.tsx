@@ -16,7 +16,7 @@ export default async function CompanySettings() {
 
   return (
     <HydrateClient>
-      <div className="space-y-12 pb-32">
+      <div className="space-y-12">
         <CompanyLogo />
         <CompanyName />
         <CompanyEmail />

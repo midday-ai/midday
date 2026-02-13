@@ -6,7 +6,6 @@ export { Logo as CopilotMcpLogo } from "./copilot-mcp/assets/logo";
 export { Logo as CursorMcpLogo } from "./cursor-mcp/assets/logo";
 export { Logo as DeelLogo } from "./deel/assets/logo";
 export { Logo as DropboxLogo } from "./dropbox/assets/logo";
-export { Logo as EInvoiceLogo } from "./e-invoice/assets/logo";
 export { Logo as FortnoxLogo } from "./fortnox/assets/logo";
 export { Logo as GmailLogo } from "./gmail/assets/logo";
 export { Logo as GoogleDriveLogo } from "./google-drive/assets/logo";
