@@ -15,18 +15,19 @@ function resolveRedisUrl() {
 let client = null;
 
 function getClient() {
-  // Once created with autoReconnect + enableOfflineQueue, always return the
-  // same client — Bun handles reconnection and queues commands while disconnected.
+  // Once created with autoReconnect, always return the same client.
+  // enableOfflineQueue is disabled so cache ops fail fast instead of
+  // hanging when Redis is unreachable — preventing action response timeouts.
   if (client) return client;
 
   // Skip during build phase
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
 
   client = new RedisClient(resolveRedisUrl(), {
-    connectionTimeout: 10_000,
+    connectionTimeout: 5_000,
     autoReconnect: true,
-    maxRetries: 10,
-    enableOfflineQueue: true,
+    maxRetries: 5,
+    enableOfflineQueue: false,
     enableAutoPipelining: true,
   });
 
@@ -37,7 +38,8 @@ function getClient() {
   };
 
   // Connect eagerly but don't await — if the initial connect fails,
-  // autoReconnect + enableOfflineQueue will handle recovery gracefully.
+  // autoReconnect will handle recovery. With enableOfflineQueue off,
+  // commands issued while disconnected will reject immediately.
   client.connect().catch((err) => {
     console.error("[Next Cache Redis] Initial connection error:", err.message);
   });
