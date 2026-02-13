@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useMemo, useState } from "react";
 import { AnimatedNumber } from "@/components/animated-number";
+import { formatChartMonth } from "@/components/charts/chart-utils";
 import { RevenueForecastChart } from "@/components/charts/revenue-forecast-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
@@ -57,10 +58,11 @@ export function RevenueForecastCard({
 
     const historical = revenueForecastData.historical || [];
     const forecast = revenueForecastData.forecast || [];
+    const totalMonths = historical.length + forecast.length;
 
     return [
       ...historical.map((item, index) => ({
-        month: format(parseISO(item.date), "MMM"),
+        month: formatChartMonth(item.date, totalMonths),
         actual: item.value,
         // Set forecasted value on the last historical point to same as actual to connect the lines
         forecasted: index === historical.length - 1 ? item.value : null,
@@ -72,7 +74,7 @@ export function RevenueForecastCard({
         breakdown: null,
       })),
       ...forecast.map((item) => ({
-        month: format(parseISO(item.date), "MMM"),
+        month: formatChartMonth(item.date, totalMonths),
         actual: null,
         forecasted: item.value,
         date: item.date,

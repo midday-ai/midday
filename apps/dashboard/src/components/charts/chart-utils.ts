@@ -2,7 +2,7 @@
  * Shared utilities for chart styling and data formatting
  */
 
-import { parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 // Tailwind classes for chart styling
 export const chartClasses = {
@@ -184,6 +184,15 @@ export const useChartMargin = (
     marginLeft,
   };
 };
+
+/**
+ * Formats a date string for use as a chart X-axis label.
+ * Includes the year (e.g., "Jan '23") when the dataset spans more than 12 months
+ * to prevent duplicate labels which cause Recharts tooltip mismatches on hover.
+ */
+export function formatChartMonth(dateStr: string, totalMonths: number): string {
+  return format(parseISO(dateStr), totalMonths > 12 ? "MMM ''yy" : "MMM");
+}
 
 // Common chart props interface
 export interface BaseChartProps {

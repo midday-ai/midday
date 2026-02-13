@@ -23,6 +23,11 @@ export default async function ChatPage(props: Props) {
 
   const queryClient = getQueryClient();
 
+  // Fetch widget preferences so the dashboard renders with data immediately
+  const widgetPreferences = await queryClient.fetchQuery(
+    trpc.widgets.getWidgetPreferences.queryOptions(),
+  );
+
   prefetch(trpc.suggestedActions.list.queryOptions({ limit: 6 }));
 
   const chat = await queryClient.fetchQuery(
@@ -36,7 +41,7 @@ export default async function ChatPage(props: Props) {
   return (
     <HydrateClient>
       <ChatProvider initialMessages={chat} key={id}>
-        <Widgets />
+        <Widgets initialPreferences={widgetPreferences} />
 
         <ChatInterface geo={geo} />
       </ChatProvider>

@@ -1,7 +1,6 @@
 // @ts-nocheck
 "use client";
 
-import { format, parseISO } from "date-fns";
 import {
   Bar,
   CartesianGrid,
@@ -17,6 +16,7 @@ import { formatAmount } from "@/utils/format";
 import {
   commonChartConfig,
   createCompactTickFormatter,
+  formatChartMonth,
   useChartMargin,
 } from "./chart-utils";
 import { SelectableChartWrapper } from "./selectable-chart-wrapper";
@@ -84,13 +84,15 @@ export function StackedBarChart({
 }) {
   const tickFormatter = createCompactTickFormatter();
 
+  const totalMonths = data.result.length;
+
   const formattedData = data.result.map((item) => ({
     ...item,
     value: item.value,
     recurring: item.recurring,
     total: item.total,
     meta: data.meta,
-    date: format(parseISO(item.date), "MMM"),
+    date: formatChartMonth(item.date, totalMonths),
   }));
 
   // Calculate margin using the utility hook

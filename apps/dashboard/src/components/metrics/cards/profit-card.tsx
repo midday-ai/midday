@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useMemo, useState } from "react";
 import { AnimatedNumber } from "@/components/animated-number";
+import { formatChartMonth } from "@/components/charts/chart-utils";
 import { ProfitChart } from "@/components/charts/profit-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
@@ -61,8 +62,10 @@ export function ProfitCard({
     const average =
       currentValues.reduce((sum, val) => sum + val, 0) / currentValues.length;
 
+    const totalMonths = profitData.result.length;
+
     return profitData.result.map((item) => ({
-      month: format(parseISO(item.current.date), "MMM"),
+      month: formatChartMonth(item.current.date, totalMonths),
       profit: item.current.value,
       lastYearProfit: item.previous.value,
       average,

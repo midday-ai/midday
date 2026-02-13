@@ -74,12 +74,12 @@ const CustomTooltip = ({
         <p className="mb-1 text-[#707070] dark:text-[#666666]">{label}</p>
         {typeof thisYear === "number" && (
           <p className="text-black dark:text-white">
-            This Year: {formatCurrency(thisYear)}
+            Current: {formatCurrency(thisYear)}
           </p>
         )}
         {typeof lastYear === "number" && (
           <p className="text-black dark:text-white">
-            Last Year: {formatCurrency(lastYear)}
+            Previous: {formatCurrency(lastYear)}
           </p>
         )}
         {typeof average === "number" && (

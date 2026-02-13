@@ -2,10 +2,10 @@
 
 import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
 import { useMemo, useState } from "react";
 import { AnimatedNumber } from "@/components/animated-number";
 import { BurnRateChart } from "@/components/charts/burn-rate-chart";
+import { formatChartMonth } from "@/components/charts/chart-utils";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useChatStore } from "@/store/chat";
@@ -57,8 +57,10 @@ export function BurnRateCard({
     const values = burnRateData.map((item) => item.value);
     const average = values.reduce((sum, val) => sum + val, 0) / values.length;
 
+    const totalMonths = burnRateData.length;
+
     return burnRateData.map((item) => ({
-      month: format(parseISO(item.date), "MMM"),
+      month: formatChartMonth(item.date, totalMonths),
       amount: item.value,
       average,
       currentBurn: item.value,

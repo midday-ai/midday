@@ -1,24 +1,23 @@
 "use client";
 
+import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Suspense, useEffect } from "react";
+import type { inferRouterOutputs } from "@trpc/server";
+import { Suspense } from "react";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useInsightFromUrl } from "@/hooks/use-insight-from-url";
 import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { usePrefetchMetrics } from "@/hooks/use-prefetch-metrics";
-import { useTRPC } from "@/trpc/client";
 import { MetricsView } from "../metrics/metrics-view";
 import { SuggestedActions } from "../suggested-actions";
 import { WidgetsHeader } from "./header";
-import {
-  useIsCustomizing,
-  useWidgetActions,
-  WidgetProvider,
-} from "./widget-provider";
+import { useIsCustomizing, WidgetProvider } from "./widget-provider";
 import { WidgetsGrid } from "./widgets-grid";
+
+type RouterOutputs = inferRouterOutputs<AppRouter>;
+type WidgetPreferences = RouterOutputs["widgets"]["getWidgetPreferences"];
 
 function SuggestedActionsSkeleton() {
   const skeletonWidths = ["w-28", "w-32", "w-36", "w-28", "w-32", "w-28"];
@@ -35,48 +34,6 @@ function SuggestedActionsSkeleton() {
       </div>
     </div>
   );
-}
-
-function WidgetsHeaderSkeleton() {
-  return (
-    <div className="flex justify-between items-end mb-6">
-      <div>
-        <Skeleton className="h-[36px] w-48 mb-2" />
-        <Skeleton className="h-[14px] w-64" />
-      </div>
-      <div className="flex items-center gap-2">
-        <Skeleton className="h-9 w-[140px]" />
-      </div>
-    </div>
-  );
-}
-
-function WidgetGridSkeleton() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
-      {Array.from({ length: 8 }).map((_, index) => (
-        <div
-          key={`widget-skeleton-${index.toString()}`}
-          className="h-[210px] border border-[#e6e6e6] dark:border-[#1d1d1d]"
-        />
-      ))}
-    </div>
-  );
-}
-
-function WidgetsGridWithPreferences() {
-  const trpc = useTRPC();
-  const { setWidgetPreferences } = useWidgetActions();
-
-  const { data: preferences } = useSuspenseQuery(
-    trpc.widgets.getWidgetPreferences.queryOptions(),
-  );
-
-  useEffect(() => {
-    setWidgetPreferences(preferences);
-  }, [preferences, setWidgetPreferences]);
-
-  return <WidgetsGrid />;
 }
 
 function WidgetsContent() {
@@ -102,13 +59,9 @@ function WidgetsContent() {
           isHome && "widgets-container-spacing",
         )}
       >
-        <Suspense fallback={<WidgetsHeaderSkeleton />}>
-          <WidgetsHeader />
-        </Suspense>
+        <WidgetsHeader />
         <TabsContent value="overview">
-          <Suspense fallback={<WidgetGridSkeleton />}>
-            <WidgetsGridWithPreferences />
-          </Suspense>
+          <WidgetsGrid />
           {!isCustomizing && (
             <Suspense fallback={<SuggestedActionsSkeleton />}>
               <SuggestedActions />
@@ -123,9 +76,13 @@ function WidgetsContent() {
   );
 }
 
-export function Widgets() {
+interface WidgetsProps {
+  initialPreferences: WidgetPreferences;
+}
+
+export function Widgets({ initialPreferences }: WidgetsProps) {
   return (
-    <WidgetProvider>
+    <WidgetProvider initialPreferences={initialPreferences}>
       <WidgetsContent />
     </WidgetProvider>
   );
