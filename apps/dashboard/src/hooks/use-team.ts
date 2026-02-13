@@ -1,34 +1,36 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 
-export function useUserQuery() {
+export function useTeamQuery() {
   const trpc = useTRPC();
-  // useQuery instead of useSuspenseQuery so components outside a Suspense
-  // boundary don't blank the page during hydration. Data is always
-  // pre-fetched by the (sidebar) layout which awaits user.me.
-  const result = useQuery(trpc.user.me.queryOptions());
-  return result as typeof result & { data: NonNullable<typeof result.data> };
+  return useSuspenseQuery(trpc.team.current.queryOptions());
 }
 
-export function useUserMutation() {
+export function useTeamMutation() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation(
-    trpc.user.update.mutationOptions({
+    trpc.team.update.mutationOptions({
       onMutate: async (newData) => {
         // Cancel outgoing refetches
         await queryClient.cancelQueries({
-          queryKey: trpc.user.me.queryKey(),
+          queryKey: trpc.team.current.queryKey(),
         });
 
         // Get current data
-        const previousData = queryClient.getQueryData(trpc.user.me.queryKey());
+        const previousData = queryClient.getQueryData(
+          trpc.team.current.queryKey(),
+        );
 
         // Optimistically update
-        queryClient.setQueryData(trpc.user.me.queryKey(), (old: any) => ({
+        queryClient.setQueryData(trpc.team.current.queryKey(), (old: any) => ({
           ...old,
           ...newData,
         }));
@@ -38,14 +40,14 @@ export function useUserMutation() {
       onError: (_, __, context) => {
         // Rollback on error
         queryClient.setQueryData(
-          trpc.user.me.queryKey(),
+          trpc.team.current.queryKey(),
           context?.previousData,
         );
       },
       onSettled: () => {
         // Refetch after error or success
         queryClient.invalidateQueries({
-          queryKey: trpc.user.me.queryKey(),
+          queryKey: trpc.team.current.queryKey(),
         });
       },
     }),
