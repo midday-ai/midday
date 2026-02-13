@@ -478,11 +478,6 @@ type PaymentStatusResult = {
   paymentStatus: string;
 };
 
-type DbPaymentStatusResult = {
-  score: number;
-  payment_status: string;
-};
-
 export async function getPaymentStatus(
   db: Database,
   teamId: string,
@@ -1118,6 +1113,11 @@ export type UpdateInvoiceParams = {
   fileSize?: number | null;
   invoiceRecurringId?: string | null;
   recurringSequence?: number | null;
+  // E-invoice tracking fields
+  eInvoiceStatus?: string | null;
+  eInvoiceSiloEntryId?: string | null;
+  eInvoiceJobId?: string | null;
+  eInvoiceFaults?: { message: string }[] | null;
   teamId: string;
   userId?: string;
 };
