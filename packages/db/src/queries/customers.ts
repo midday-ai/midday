@@ -78,8 +78,6 @@ export const getCustomerById = async (
       // Portal fields
       portalEnabled: customers.portalEnabled,
       portalId: customers.portalId,
-      // E-invoice fields
-      peppolId: customers.peppolId,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`

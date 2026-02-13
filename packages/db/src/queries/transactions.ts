@@ -1941,7 +1941,7 @@ export async function upsertTransactions(
   db: Database,
   params: UpsertTransactionsParams,
 ): Promise<Array<{ id: string }>> {
-  const { transactions: transactionsData } = params;
+  const { transactions: transactionsData, teamId } = params;
 
   const upserted = await db
     .insert(transactions)

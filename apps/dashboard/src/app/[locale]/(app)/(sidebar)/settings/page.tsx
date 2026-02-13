@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { BaseCurrency } from "@/components/base-currency/base-currency";
 import { CompanyCountry } from "@/components/company-country";
+import { CompanyEmail } from "@/components/company-email";
 import { CompanyFiscalYear } from "@/components/company-fiscal-year";
+import { CompanyLogo } from "@/components/company-logo";
+import { CompanyName } from "@/components/company-name";
 import { DeleteTeam } from "@/components/delete-team";
 import { TeamIdSection } from "@/components/team-id-section";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
@@ -16,6 +19,9 @@ export default async function Account() {
   return (
     <HydrateClient>
       <div className="space-y-12">
+        <CompanyLogo />
+        <CompanyName />
+        <CompanyEmail />
         <CompanyCountry />
         <BaseCurrency />
         <CompanyFiscalYear />

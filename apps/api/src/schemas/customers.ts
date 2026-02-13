@@ -450,11 +450,6 @@ export const upsertCustomerSchema = z.object({
     description: "Primary contact person's name at the customer organization",
     example: "John Smith",
   }),
-  peppolId: z.string().nullable().optional().openapi({
-    description:
-      "Peppol participant ID for B2B e-invoicing delivery via the Peppol network",
-    example: "0208:0316597904",
-  }),
   tags: z
     .array(
       z.object({

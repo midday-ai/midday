@@ -38,11 +38,9 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, parseISO } from "date-fns";
-import Link from "next/link";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useAppOAuth } from "@/hooks/use-app-oauth";
-import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useTRPC } from "@/trpc/client";
 import { SelectCurrency } from "../select-currency";
 
@@ -146,15 +144,6 @@ export function SettingsMenu() {
   const isDefault = watch("template.isDefault");
   const paymentEnabled = watch("template.paymentEnabled");
   const paymentTermsDays = watch("template.paymentTermsDays");
-
-  // E-invoice readiness (single query)
-  const selectedCustomerId = watch("customerId");
-  const { data: eInvoiceReadiness } = useQuery(
-    trpc.invoice.eInvoiceReadiness.queryOptions({
-      customerId: selectedCustomerId ?? undefined,
-    }),
-  );
-  const { setParams: setCustomerParams } = useCustomerParams();
 
   // Stripe Connect status
   const { data: stripeStatus } = useQuery(
@@ -694,115 +683,6 @@ export function SettingsMenu() {
                   {stripeOAuth.isLoading ? "Connecting..." : "Connect Stripe"}
                 </DropdownMenuItem>
               )}
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-
-          {/* E-Invoice section */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-xs">
-              <Icons.DescriptionOutline className="mr-2 size-4" />
-              E-Invoice
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent
-              className="w-[240px]"
-              sideOffset={2}
-              alignOffset={-5}
-              collisionPadding={16}
-            >
-              <div className="px-2 py-1.5">
-                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                  Requirements
-                </span>
-              </div>
-              <DropdownMenuSeparator />
-              <div className="py-1">
-                {[
-                  {
-                    done: eInvoiceReadiness?.checks.companyAddress ?? false,
-                    label: "Company address",
-                    href: "/settings/company#address",
-                  },
-                  {
-                    done: eInvoiceReadiness?.checks.vatNumber ?? false,
-                    label: "VAT number",
-                    href: "/settings/company#vat",
-                  },
-                  {
-                    done: eInvoiceReadiness?.checks.registration ?? false,
-                    label: "E-invoice setup",
-                    href: "/settings/company#e-invoicing",
-                  },
-                  {
-                    done: eInvoiceReadiness?.checks.customerAddress ?? false,
-                    label: "Customer address",
-                    href: null,
-                    openCustomer: true,
-                  },
-                  {
-                    done: eInvoiceReadiness?.checks.customerVat ?? false,
-                    label: "Customer VAT",
-                    href: null,
-                    openCustomer: true,
-                  },
-                ].map((item) => {
-                  const inner = (
-                    <div className="flex items-center gap-2 w-full">
-                      <div
-                        className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full ${
-                          item.done ? "bg-primary" : "border border-border"
-                        }`}
-                      >
-                        {item.done && (
-                          <span className="text-primary-foreground text-[8px] leading-none">
-                            ✓
-                          </span>
-                        )}
-                      </div>
-                      <span
-                        className={
-                          item.done
-                            ? "text-muted-foreground"
-                            : "text-foreground"
-                        }
-                      >
-                        {item.label}
-                      </span>
-                    </div>
-                  );
-
-                  if (!item.done && item.href) {
-                    return (
-                      <DropdownMenuItem
-                        key={item.label}
-                        asChild
-                        className="text-xs cursor-pointer"
-                      >
-                        <Link href={item.href}>{inner}</Link>
-                      </DropdownMenuItem>
-                    );
-                  }
-
-                  if (!item.done && item.openCustomer && selectedCustomerId) {
-                    return (
-                      <DropdownMenuItem
-                        key={item.label}
-                        className="text-xs cursor-pointer"
-                        onClick={() => {
-                          setCustomerParams({ customerId: selectedCustomerId });
-                        }}
-                      >
-                        {inner}
-                      </DropdownMenuItem>
-                    );
-                  }
-
-                  return (
-                    <div key={item.label} className="px-2 py-1.5 text-xs">
-                      {inner}
-                    </div>
-                  );
-                })}
-              </div>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
 

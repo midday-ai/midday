@@ -11,7 +11,6 @@ export * from "./document-tag-assignments";
 export * from "./document-tag-embedings";
 export * from "./document-tags";
 export * from "./documents";
-export * from "./e-invoice-registrations";
 export * from "./exhange-rates";
 export * from "./inbox";
 export * from "./inbox-accounts";

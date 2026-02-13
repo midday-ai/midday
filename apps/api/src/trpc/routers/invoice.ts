@@ -27,7 +27,6 @@ import {
   getAverageDaysToPayment,
   getAverageInvoiceSize,
   getCustomerById,
-  getEInvoiceRegistration,
   getInactiveClientsCount,
   getInvoiceById,
   getInvoiceSummary,
@@ -59,47 +58,6 @@ const logger = createLoggerWithContext("trpc:invoice");
 
 // Use the shared default template from @midday/invoice
 const defaultTemplate = DEFAULT_TEMPLATE;
-
-/**
- * Build TipTap JSON fromDetails content from structured team data.
- * Returns null if team has no address data.
- */
-function buildFromDetailsFromTeam(
-  team: {
-    name?: string | null;
-    addressLine1?: string | null;
-    addressLine2?: string | null;
-    city?: string | null;
-    state?: string | null;
-    zip?: string | null;
-    vatNumber?: string | null;
-    email?: string | null;
-  } | null,
-): object | null {
-  if (!team?.addressLine1 && !team?.vatNumber) return null;
-
-  const lines: string[] = [];
-  if (team.name) lines.push(team.name);
-  if (team.addressLine1) lines.push(team.addressLine1);
-  if (team.addressLine2) lines.push(team.addressLine2);
-
-  const cityLine = [team.city, team.state, team.zip].filter(Boolean).join(", ");
-  if (cityLine) lines.push(cityLine);
-
-  if (team.vatNumber) lines.push(`VAT: ${team.vatNumber}`);
-  if (team.email) lines.push(team.email);
-
-  if (lines.length === 0) return null;
-
-  // Build TipTap JSON content
-  return {
-    type: "doc",
-    content: lines.map((line) => ({
-      type: "paragraph",
-      content: [{ type: "text", text: line }],
-    })),
-  };
-}
 
 export const invoiceRouter = createTRPCRouter({
   get: protectedProcedure
@@ -384,10 +342,7 @@ export const invoiceRouter = createTRPCRouter({
         deliveryType: template?.deliveryType ?? defaultTemplate.deliveryType,
         taxRate: template?.taxRate ?? defaultTemplate.taxRate,
         vatRate: template?.vatRate ?? defaultTemplate.vatRate,
-        fromDetails:
-          template?.fromDetails ??
-          buildFromDetailsFromTeam(team ?? null) ??
-          defaultTemplate.fromDetails,
+        fromDetails: template?.fromDetails ?? defaultTemplate.fromDetails,
         paymentDetails:
           template?.paymentDetails ?? defaultTemplate.paymentDetails,
         noteDetails: template?.noteDetails ?? defaultTemplate.noteDetails,
@@ -846,50 +801,4 @@ export const invoiceRouter = createTRPCRouter({
       return getNewCustomersCount(db, { teamId: teamId! });
     },
   ),
-
-  eInvoiceReadiness: protectedProcedure
-    .input(
-      z.object({
-        customerId: z.string().uuid().optional().nullable(),
-      }),
-    )
-    .query(async ({ ctx: { db, teamId }, input }) => {
-      if (!teamId) {
-        return {
-          ready: false,
-          checks: {
-            companyAddress: false,
-            vatNumber: false,
-            country: false,
-            registration: false,
-            customerAddress: false,
-            customerVat: false,
-          },
-          registrationStatus: null,
-        };
-      }
-
-      const [team, registration, customer] = await Promise.all([
-        getTeamById(db, teamId),
-        getEInvoiceRegistration(db, { teamId, provider: "peppol" }),
-        input.customerId
-          ? getCustomerById(db, { id: input.customerId, teamId })
-          : Promise.resolve(null),
-      ]);
-
-      const checks = {
-        companyAddress: Boolean(team?.addressLine1),
-        vatNumber: Boolean(team?.vatNumber),
-        country: Boolean(team?.countryCode),
-        registration: registration?.status === "registered",
-        customerAddress: Boolean(customer?.addressLine1),
-        customerVat: Boolean(customer?.vatNumber),
-      };
-
-      return {
-        ready: Object.values(checks).every(Boolean),
-        checks,
-        registrationStatus: registration?.status ?? null,
-      };
-    }),
 });

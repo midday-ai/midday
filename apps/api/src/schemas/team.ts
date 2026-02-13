@@ -114,35 +114,6 @@ export const updateTeamByIdSchema = z.object({
     .openapi({
       description: "Export settings for transactions",
     }),
-  // Company address fields
-  addressLine1: z.string().nullable().optional().openapi({
-    description: "First line of the company address",
-    example: "123 Main Street",
-  }),
-  addressLine2: z.string().nullable().optional().openapi({
-    description: "Second line of the company address",
-    example: "Suite 400",
-  }),
-  city: z.string().nullable().optional().openapi({
-    description: "City of the company address",
-    example: "Stockholm",
-  }),
-  state: z.string().nullable().optional().openapi({
-    description: "State or province of the company address",
-    example: "Stockholm",
-  }),
-  zip: z.string().nullable().optional().openapi({
-    description: "ZIP or postal code of the company address",
-    example: "111 22",
-  }),
-  vatNumber: z.string().nullable().optional().openapi({
-    description: "VAT number or tax ID of the company",
-    example: "SE556123456701",
-  }),
-  taxId: z.string().nullable().optional().openapi({
-    description: "Secondary tax identifier (e.g. CIF in Spain)",
-    example: "B85905495",
-  }),
 });
 
 export const createTeamSchema = z.object({
@@ -179,31 +150,6 @@ export const createTeamSchema = z.object({
     description:
       "Whether to automatically switch the user to the newly created team",
     example: true,
-  }),
-  // Optional company address fields (collected at team creation)
-  addressLine1: z.string().optional().openapi({
-    description: "First line of the company address",
-    example: "123 Main Street",
-  }),
-  addressLine2: z.string().optional().openapi({
-    description: "Second line of the company address",
-    example: "Suite 400",
-  }),
-  city: z.string().optional().openapi({
-    description: "City of the company address",
-    example: "Stockholm",
-  }),
-  state: z.string().optional().openapi({
-    description: "State or province of the company address",
-    example: "Stockholm",
-  }),
-  zip: z.string().optional().openapi({
-    description: "ZIP or postal code of the company address",
-    example: "111 22",
-  }),
-  vatNumber: z.string().optional().openapi({
-    description: "VAT number or tax ID of the company",
-    example: "SE556123456701",
   }),
 });
 

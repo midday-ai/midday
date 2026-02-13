@@ -254,25 +254,6 @@ export function fortnoxProbe(): Dependency {
   return oauthTokenProbe("fortnox", "https://apps.fortnox.se/oauth-v1/token");
 }
 
-/** Invopop: e-invoicing API ping */
-export function invopopProbe(): Dependency {
-  return {
-    name: "invopop",
-    tier: 3,
-    cacheTtlMs: 300_000, // 5 minutes
-    timeoutMs: 5_000,
-    probe: async () => {
-      const key = process.env.INVOPOP_API_KEY;
-      if (!key) return false;
-      const res = await fetch("https://api.invopop.com/utils/v1/ping", {
-        headers: { Authorization: `Bearer ${key}` },
-        signal: AbortSignal.timeout(5_000),
-      });
-      return res.ok;
-    },
-  };
-}
-
 // ---------------------------------------------------------------------------
 // Tier 4 — Optional services
 // ---------------------------------------------------------------------------
@@ -407,7 +388,6 @@ export function apiDependencies(): Dependency[] {
     xeroProbe(),
     quickbooksProbe(),
     fortnoxProbe(),
-    invopopProbe(),
     // Tier 4 — Optional
     googleAiProbe(),
     mistralProbe(),
@@ -426,8 +406,6 @@ export function workerDependencies(): Dependency[] {
     engineProbe(),
     resendProbe(),
     openaiProbe(),
-    // Tier 3 — Integrations
-    invopopProbe(),
     // Tier 4 — Optional
     googleAiProbe(),
     mistralProbe(),

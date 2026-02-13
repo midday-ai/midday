@@ -97,14 +97,6 @@ const sections = [
     ],
   },
   {
-    title: "E-Invoicing",
-    links: [
-      { title: "Overview", href: "/docs/e-invoicing" },
-      { title: "Setup Guide", href: "/docs/e-invoicing-setup" },
-      { title: "Supported Countries", href: "/docs/e-invoicing-countries" },
-    ],
-  },
-  {
     title: "Time Tracking",
     links: [
       { title: "Create Project", href: "/docs/create-project" },
