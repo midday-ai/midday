@@ -1,32 +1,14 @@
 import type { Context } from "@api/rest/types";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import {
-  getEInvoiceRegistration,
-  getInvoiceById,
-  updateEInvoiceRegistration,
-  updateInvoice,
-} from "@midday/db/queries";
+import { getInvoiceById, updateInvoice } from "@midday/db/queries";
+import { eInvoiceRegistrations } from "@midday/db/schema";
+import { fetchEntry } from "@midday/e-invoice/client";
 import { parseInvoiceKey } from "@midday/e-invoice/gobl";
-import {
-  extractPeppolIdFromEntry,
-  parsePartyKey,
-} from "@midday/e-invoice/registration";
-import type {
-  InvopopFault,
-  InvopopWebhookPayload,
-} from "@midday/e-invoice/types";
+import { parsePartyKey } from "@midday/e-invoice/registration";
+import type { InvopopWebhookPayload } from "@midday/e-invoice/types";
 import { logger } from "@midday/logger";
+import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-
-/**
- * Convert Invopop fault objects to the typed format stored in our DB.
- */
-function toFaultMessages(faults?: InvopopFault[]): { message: string }[] {
-  if (!faults || faults.length === 0) return [];
-  return faults.map((f) => ({
-    message: f.message || f.code || "Unknown error",
-  }));
-}
 
 const app = new OpenAPIHono<Context>();
 
@@ -95,13 +77,124 @@ app.openapi(
     });
 
     try {
+      // Determine if this is an invoice or party registration callback
       const invoiceId = payload.key ? parseInvoiceKey(payload.key) : null;
       const teamId = payload.key ? parsePartyKey(payload.key) : null;
 
       if (teamId) {
-        await handlePartyWebhook(db, teamId, payload);
+        // --- Party registration callback ---
+        const isError =
+          payload.event === "error" ||
+          (payload.faults && payload.faults.length > 0);
+
+        if (isError) {
+          logger.warn("Peppol registration failed", {
+            teamId,
+            faults: payload.faults,
+          });
+
+          await db
+            .update(eInvoiceRegistrations)
+            .set({
+              status: "error",
+              faults: payload.faults || [],
+              updatedAt: new Date().toISOString(),
+            })
+            .where(
+              and(
+                eq(eInvoiceRegistrations.teamId, teamId),
+                eq(eInvoiceRegistrations.provider, "peppol"),
+              ),
+            );
+        } else {
+          logger.info("Peppol registration succeeded", { teamId });
+
+          // Fetch the silo entry to get the assigned Peppol participant ID
+          let peppolId: string | null = null;
+          let peppolScheme: string | null = null;
+
+          if (payload.silo_entry_id) {
+            try {
+              const apiKey = process.env.INVOPOP_API_KEY;
+              if (apiKey) {
+                const entry = await fetchEntry(apiKey, payload.silo_entry_id);
+                // The Peppol ID is in the org.party inboxes after registration
+                const partyData = entry.data as
+                  | Record<string, unknown>
+                  | undefined;
+                const doc = (partyData?.doc ?? partyData) as
+                  | Record<string, unknown>
+                  | undefined;
+                const inboxes = doc?.inboxes as
+                  | Array<{ key?: string; scheme?: string; code?: string }>
+                  | undefined;
+                const peppolInbox = inboxes?.find((i) => i.key === "peppol");
+                if (peppolInbox) {
+                  peppolId = peppolInbox.code ?? null;
+                  peppolScheme = peppolInbox.scheme ?? null;
+                }
+              }
+            } catch (err) {
+              logger.warn("Failed to fetch Peppol ID from silo entry", {
+                error: err instanceof Error ? err.message : String(err),
+              });
+            }
+          }
+
+          await db
+            .update(eInvoiceRegistrations)
+            .set({
+              status: "registered",
+              faults: null,
+              ...(peppolId && { peppolId }),
+              ...(peppolScheme && { peppolScheme }),
+              updatedAt: new Date().toISOString(),
+            })
+            .where(
+              and(
+                eq(eInvoiceRegistrations.teamId, teamId),
+                eq(eInvoiceRegistrations.provider, "peppol"),
+              ),
+            );
+        }
       } else if (invoiceId) {
-        await handleInvoiceWebhook(db, invoiceId, payload);
+        // --- Invoice e-invoice callback ---
+        const invoice = await getInvoiceById(db, { id: invoiceId });
+
+        if (!invoice) {
+          logger.warn("Invopop webhook: invoice not found", { invoiceId });
+          return c.json({ received: true });
+        }
+
+        const isError =
+          payload.event === "error" ||
+          (payload.faults && payload.faults.length > 0);
+
+        if (isError) {
+          logger.warn("E-invoice submission failed", {
+            invoiceId,
+            faults: payload.faults,
+          });
+
+          await updateInvoice(db, {
+            id: invoiceId,
+            teamId: invoice.teamId,
+            eInvoiceStatus: "error",
+            eInvoiceFaults: payload.faults || [],
+          });
+        } else {
+          logger.info("E-invoice submission succeeded", {
+            invoiceId,
+            siloEntryId: payload.silo_entry_id,
+          });
+
+          await updateInvoice(db, {
+            id: invoiceId,
+            teamId: invoice.teamId,
+            eInvoiceStatus: "sent",
+            eInvoiceFaults: null,
+          });
+        }
       } else {
         logger.warn("Invopop webhook: unrecognized key format", {
           key: payload.key,
@@ -113,125 +206,11 @@ app.openapi(
         webhookId: payload.id,
         key: payload.key,
       });
+      // Return 200 to avoid retries for events we partially processed
     }
 
     return c.json({ received: true });
   },
 );
-
-// ---------------------------------------------------------------------------
-// Party registration callback
-// ---------------------------------------------------------------------------
-
-async function handlePartyWebhook(
-  db: Parameters<typeof getEInvoiceRegistration>[0],
-  teamId: string,
-  payload: InvopopWebhookPayload,
-) {
-  const registration = await getEInvoiceRegistration(db, {
-    teamId,
-    provider: "peppol",
-  });
-
-  if (!registration) {
-    logger.warn("Invopop webhook: registration not found", { teamId });
-    return;
-  }
-
-  const isError =
-    payload.event === "failed" || (payload.faults && payload.faults.length > 0);
-
-  if (isError) {
-    logger.warn("Peppol registration failed", {
-      teamId,
-      faults: payload.faults,
-    });
-
-    await updateEInvoiceRegistration(db, {
-      id: registration.id,
-      status: "error",
-      faults: toFaultMessages(payload.faults),
-    });
-    return;
-  }
-
-  logger.info("Peppol registration succeeded", { teamId });
-
-  let peppolId: string | null = null;
-  let peppolScheme: string | null = null;
-
-  if (payload.silo_entry_id) {
-    const apiKey = process.env.INVOPOP_API_KEY;
-    if (apiKey) {
-      try {
-        const result = await extractPeppolIdFromEntry(
-          apiKey,
-          payload.silo_entry_id,
-        );
-        peppolId = result.peppolId;
-        peppolScheme = result.peppolScheme;
-      } catch (err) {
-        logger.warn("Failed to fetch Peppol ID from silo entry", {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }
-  }
-
-  await updateEInvoiceRegistration(db, {
-    id: registration.id,
-    status: "registered",
-    faults: null,
-    peppolId,
-    peppolScheme,
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Invoice e-invoice callback
-// ---------------------------------------------------------------------------
-
-async function handleInvoiceWebhook(
-  db: Parameters<typeof getInvoiceById>[0],
-  invoiceId: string,
-  payload: InvopopWebhookPayload,
-) {
-  const invoice = await getInvoiceById(db, { id: invoiceId });
-
-  if (!invoice) {
-    logger.warn("Invopop webhook: invoice not found", { invoiceId });
-    return;
-  }
-
-  const isError =
-    payload.event === "failed" || (payload.faults && payload.faults.length > 0);
-
-  if (isError) {
-    logger.warn("E-invoice submission failed", {
-      invoiceId,
-      faults: payload.faults,
-    });
-
-    await updateInvoice(db, {
-      id: invoiceId,
-      teamId: invoice.teamId,
-      eInvoiceStatus: "error",
-      eInvoiceFaults: toFaultMessages(payload.faults),
-    });
-    return;
-  }
-
-  logger.info("E-invoice submission succeeded", {
-    invoiceId,
-    siloEntryId: payload.silo_entry_id,
-  });
-
-  await updateInvoice(db, {
-    id: invoiceId,
-    teamId: invoice.teamId,
-    eInvoiceStatus: "sent",
-    eInvoiceFaults: null,
-  });
-}
 
 export { app as invopopWebhookRouter };

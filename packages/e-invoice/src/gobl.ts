@@ -137,22 +137,10 @@ export function validateEInvoiceRequirements(
       message: "Customer name is required",
     });
   }
-  if (!data.customer.countryCode) {
+  if (!data.customer.email) {
     issues.push({
-      field: "customer.countryCode",
-      message: "Customer country is required",
-    });
-  }
-  if (!data.customer.addressLine1) {
-    issues.push({
-      field: "customer.address",
-      message: "Customer address is required",
-    });
-  }
-  if (!data.customer.vatNumber) {
-    issues.push({
-      field: "customer.vatNumber",
-      message: "Customer VAT number is required for Peppol",
+      field: "customer.email",
+      message: "Customer email is required",
     });
   }
 

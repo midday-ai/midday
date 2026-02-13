@@ -14,7 +14,7 @@
  * 6. Webhook fires on completion -> update registration status
  */
 
-import { createEntry, createJob, fetchEntry } from "./client";
+import { createEntry, createJob } from "./client";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -128,34 +128,6 @@ export async function submitRegistration(
   return {
     siloEntryId: entry.id,
     jobId: job.id,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Peppol ID extraction
-// ---------------------------------------------------------------------------
-
-/**
- * Fetch a silo entry and extract the assigned Peppol participant ID and scheme.
- * Returns null values if the entry doesn't contain Peppol inbox data.
- */
-export async function extractPeppolIdFromEntry(
-  apiKey: string,
-  siloEntryId: string,
-): Promise<{ peppolId: string | null; peppolScheme: string | null }> {
-  const entry = await fetchEntry(apiKey, siloEntryId);
-  const partyData = entry.data as Record<string, unknown> | undefined;
-  const doc = (partyData?.doc ?? partyData) as
-    | Record<string, unknown>
-    | undefined;
-  const inboxes = doc?.inboxes as
-    | Array<{ key?: string; scheme?: string; code?: string }>
-    | undefined;
-  const peppolInbox = inboxes?.find((i) => i.key === "peppol");
-
-  return {
-    peppolId: peppolInbox?.code ?? null,
-    peppolScheme: peppolInbox?.scheme ?? null,
   };
 }
 

@@ -1,10 +1,8 @@
-import {
-  getEInvoiceRegistration,
-  getTeamById,
-  updateEInvoiceRegistration,
-} from "@midday/db/queries";
+import { getTeamById } from "@midday/db/queries";
+import { eInvoiceRegistrations } from "@midday/db/schema";
 import { submitRegistration } from "@midday/e-invoice/registration";
 import type { Job } from "bullmq";
+import { and, eq } from "drizzle-orm";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
 
@@ -95,18 +93,19 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
 
       // Update the registration record in the DB
       // The webhook will handle status updates (processing -> registered/error)
-      const registration = await getEInvoiceRegistration(db, {
-        teamId,
-        provider: "peppol",
-      });
-
-      if (registration) {
-        await updateEInvoiceRegistration(db, {
-          id: registration.id,
+      await db
+        .update(eInvoiceRegistrations)
+        .set({
           status: "processing",
           siloEntryId: result.siloEntryId,
-        });
-      }
+          updatedAt: new Date().toISOString(),
+        })
+        .where(
+          and(
+            eq(eInvoiceRegistrations.teamId, teamId),
+            eq(eInvoiceRegistrations.provider, "peppol"),
+          ),
+        );
     } catch (error) {
       this.logger.error("Failed to submit supplier registration", {
         teamId,
@@ -115,23 +114,25 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
 
       // Update registration status to error
       try {
-        const registration = await getEInvoiceRegistration(db, {
-          teamId,
-          provider: "peppol",
-        });
-
-        if (registration) {
-          await updateEInvoiceRegistration(db, {
-            id: registration.id,
+        await db
+          .update(eInvoiceRegistrations)
+          .set({
             status: "error",
             faults: [
               {
                 message:
                   error instanceof Error ? error.message : "Unknown error",
+                provider: "invopop",
               },
             ],
-          });
-        }
+            updatedAt: new Date().toISOString(),
+          })
+          .where(
+            and(
+              eq(eInvoiceRegistrations.teamId, teamId),
+              eq(eInvoiceRegistrations.provider, "peppol"),
+            ),
+          );
       } catch {
         // Don't mask the original error
       }

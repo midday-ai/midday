@@ -278,6 +278,30 @@ export const docsNavigation: DocSection[] = [
     ],
   },
   {
+    title: "E-Invoicing",
+    slug: "e-invoicing",
+    docs: [
+      {
+        slug: "e-invoicing",
+        title: "Overview",
+        description: "What is e-invoicing",
+        order: 1,
+      },
+      {
+        slug: "e-invoicing-setup",
+        title: "Setup Guide",
+        description: "Get started with e-invoicing",
+        order: 2,
+      },
+      {
+        slug: "e-invoicing-countries",
+        title: "Supported Countries",
+        description: "Country requirements & status",
+        order: 3,
+      },
+    ],
+  },
+  {
     title: "Time Tracking",
     slug: "time-tracking",
     docs: [

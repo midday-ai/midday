@@ -71,6 +71,7 @@ const formSchema = z.object({
   countryCode: z.string().optional(),
   zip: z.string().optional(),
   vatNumber: z.string().optional(),
+  peppolId: z.string().optional(),
   note: z.string().optional(),
   tags: z
     .array(
@@ -161,6 +162,7 @@ export function CustomerForm({ data }: Props) {
       contact: data?.contact ?? undefined,
       note: data?.note ?? undefined,
       vatNumber: data?.vatNumber ?? undefined,
+      peppolId: data?.peppolId ?? undefined,
       tags:
         data?.tags?.map((tag) => ({
           id: tag?.id ?? "",
@@ -214,6 +216,7 @@ export function CustomerForm({ data }: Props) {
       phone: data.phone || null,
       zip: data.zip || null,
       vatNumber: data.vatNumber || null,
+      peppolId: data.peppolId || null,
       tags: data.tags?.length
         ? data.tags.map((tag) => ({
             id: tag.id,
@@ -581,6 +584,33 @@ export function CustomerForm({ data }: Props) {
                                 value={field.value ?? ""}
                               />
                             </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="peppolId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Peppol ID
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                value={field.value ?? ""}
+                                placeholder="e.g. 0208:0316597904"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription className="text-xs">
+                              Required for e-invoice delivery via the Peppol
+                              network.
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}

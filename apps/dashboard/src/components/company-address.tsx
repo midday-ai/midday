@@ -19,11 +19,9 @@ import {
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
 import { z } from "zod/v3";
 import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 import { useZodForm } from "@/hooks/use-zod-form";
-import { CountrySelector } from "./country-selector";
 
 const SearchAddressInput = dynamic(
   () =>
@@ -34,7 +32,6 @@ const SearchAddressInput = dynamic(
 );
 
 const formSchema = z.object({
-  countryCode: z.string().optional(),
   addressLine1: z.string().optional(),
   addressLine2: z.string().optional(),
   city: z.string().optional(),
@@ -46,18 +43,8 @@ export function CompanyAddress() {
   const { data } = useTeamQuery();
   const updateTeamMutation = useTeamMutation();
 
-  const hasExistingAddress = Boolean(data?.addressLine1);
-  const [showFields, setShowFields] = useState(hasExistingAddress);
-
-  useEffect(() => {
-    if (hasExistingAddress) {
-      setShowFields(true);
-    }
-  }, [hasExistingAddress]);
-
   const form = useZodForm(formSchema, {
     defaultValues: {
-      countryCode: data?.countryCode ?? "",
       addressLine1: data?.addressLine1 ?? "",
       addressLine2: data?.addressLine2 ?? "",
       city: data?.city ?? "",
@@ -77,13 +64,13 @@ export function CompanyAddress() {
           <CardHeader>
             <CardTitle>Company address</CardTitle>
             <CardDescription>
-              Your company address and country are used for invoices and
-              e-invoicing compliance.
+              Your company address is used for invoices and e-invoicing
+              compliance.
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <div className="max-w-[400px]">
+            <div>
               <SearchAddressInput
                 placeholder="Search for an address..."
                 onSelect={(result) => {
@@ -99,129 +86,93 @@ export function CompanyAddress() {
                   if (result.zip) {
                     form.setValue("zip", result.zip);
                   }
-                  if (result.country_code) {
-                    form.setValue("countryCode", result.country_code);
-                  }
-                  setShowFields(true);
                 }}
               />
             </div>
 
-            <button
-              type="button"
-              className="text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => setShowFields(!showFields)}
-            >
-              {showFields ? "Hide details" : "Enter address manually"}
-            </button>
+            <FormField
+              control={form.control}
+              name="addressLine1"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address line 1</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Street address"
+                      className="max-w-[400px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            {showFields && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="countryCode"
-                  render={({ field }) => (
-                    <FormItem className="max-w-[300px]">
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <CountrySelector
-                          defaultValue={field.value ?? ""}
-                          onSelect={(code) => {
-                            field.onChange(code);
-                            form.setValue("countryCode", code);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control}
+              name="addressLine2"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address line 2</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Suite, apartment, etc."
+                      className="max-w-[400px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="addressLine1"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address line 1</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Street address"
-                          className="max-w-[400px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <div className="flex gap-4 max-w-[400px]">
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="City" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={form.control}
-                  name="addressLine2"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address line 2</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Suite, apartment, etc."
-                          className="max-w-[400px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>State / Province</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="State" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-                <div className="flex gap-4 max-w-[400px]">
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>City</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="City" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="state"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>State / Province</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="State" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="zip"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Postal code</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="ZIP / Postal code"
-                          className="max-w-[200px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
+            <FormField
+              control={form.control}
+              name="zip"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Postal code</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="ZIP / Postal code"
+                      className="max-w-[200px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </CardContent>
 
           <CardFooter className="flex justify-end">

@@ -20,6 +20,7 @@
     "@midday/customers": "workspace:*",
     "@midday/db": "workspace:*",
     "@midday/documents": "workspace:*",
+    "@midday/e-invoice": "workspace:*",
     "@midday/email": "workspace:*",
     "@midday/health": "workspace:*",
     "@midday/import": "workspace:*",

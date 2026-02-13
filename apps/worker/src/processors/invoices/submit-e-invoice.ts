@@ -93,10 +93,7 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
 
     // Fetch customer data
     const customer = invoice.customerId
-      ? await getCustomerById(db, {
-          id: invoice.customerId,
-          teamId: invoice.teamId,
-        })
+      ? await getCustomerById(db, invoice.customerId)
       : null;
 
     if (!customer) {
@@ -175,7 +172,8 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
         teamId: team.id,
         eInvoiceStatus: "error",
         eInvoiceFaults: issues.map((i) => ({
-          message: `${i.field}: ${i.message}`,
+          message: i.message,
+          code: i.field,
         })),
       });
       return;
@@ -242,6 +240,7 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
         eInvoiceFaults: [
           {
             message: error instanceof Error ? error.message : "Unknown error",
+            provider: "invopop",
           },
         ],
       });
