@@ -71,11 +71,7 @@ class IORedisAdapter {
     return this.redis.zrange(key, start, stop);
   }
 
-  async zrevrange(
-    key: string,
-    start: number,
-    stop: number,
-  ): Promise<string[]> {
+  async zrevrange(key: string, start: number, stop: number): Promise<string[]> {
     return this.redis.zrevrange(key, start, stop);
   }
 
