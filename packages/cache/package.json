@@ -22,6 +22,7 @@
     "./chat-cache": "./src/chat-cache.ts",
     "./chat-feedback-cache": "./src/chat-feedback-cache.ts",
     "./suggested-actions-cache": "./src/suggested-actions-cache.ts",
-    "./widget-preferences-cache": "./src/widget-preferences-cache.ts"
+    "./widget-preferences-cache": "./src/widget-preferences-cache.ts",
+    "./ioredis-adapter": "./src/ioredis-adapter.ts"
   }
 }
