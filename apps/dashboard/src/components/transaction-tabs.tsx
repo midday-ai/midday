@@ -39,11 +39,12 @@ export function TransactionTabs() {
             )}
           >
             Review
-            {reviewCount > 0 && (
-              <span className="ml-1 text-xs text-[#878787]">
-                ({reviewCount})
-              </span>
-            )}
+            <span
+              className="ml-1 text-xs text-[#878787]"
+              suppressHydrationWarning
+            >
+              {reviewCount > 0 ? `(${reviewCount})` : ""}
+            </span>
           </TabsTrigger>
         </TabsList>
       </div>
