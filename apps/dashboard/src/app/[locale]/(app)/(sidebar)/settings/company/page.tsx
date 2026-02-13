@@ -19,7 +19,9 @@ export default async function CompanySettings() {
       <div className="space-y-12">
         <CompanyLogo />
         <CompanyName />
-        <CompanyEmail />
+        <div id="email" className="scroll-mt-8">
+          <CompanyEmail />
+        </div>
         <div id="address" className="scroll-mt-8">
           <CompanyAddress />
         </div>

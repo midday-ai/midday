@@ -16,6 +16,9 @@ import { useTRPC } from "@/trpc/client";
 
 const requirements = [
   { key: "address", label: "Company address", hash: "#address" },
+  { key: "city", label: "City", hash: "#address" },
+  { key: "zip", label: "Postal code", hash: "#address" },
+  { key: "email", label: "Company email", hash: "#email" },
   { key: "vat", label: "VAT number", hash: "#vat" },
   { key: "country", label: "Country", hash: "#address" },
 ] as const;
@@ -54,6 +57,9 @@ export function EInvoiceRegistration() {
 
   const completedFields: Record<string, boolean> = {
     address: Boolean(team?.addressLine1),
+    city: Boolean(team?.city),
+    zip: Boolean(team?.zip),
+    email: Boolean(team?.email),
     vat: Boolean(team?.vatNumber),
     country: Boolean(team?.countryCode),
   };
@@ -93,8 +99,7 @@ export function EInvoiceRegistration() {
                 Verification in progress
               </p>
               <p className="text-sm text-muted-foreground">
-                This can take up to 72 hours. We'll notify you when it's
-                ready.
+                This can take up to 72 hours. We'll notify you when it's ready.
               </p>
             </div>
             {registration?.registrationUrl && (
@@ -107,6 +112,14 @@ export function EInvoiceRegistration() {
                 Complete verification form &rarr;
               </a>
             )}
+          </div>
+        ) : status === "pending" ? (
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Setup pending</p>
+            <p className="text-sm text-muted-foreground">
+              Your registration request is waiting to be processed. If this
+              persists, you can retry below.
+            </p>
           </div>
         ) : status === "error" ? (
           <div className="space-y-1">
@@ -173,7 +186,7 @@ export function EInvoiceRegistration() {
         )}
       </CardContent>
 
-      {(!status || status === "error") && (
+      {(!status || status === "error" || status === "pending") && (
         <CardFooter className="flex justify-end">
           <SubmitButton
             isSubmitting={registerMutation.isPending}
@@ -181,7 +194,9 @@ export function EInvoiceRegistration() {
             onClick={() => registerMutation.mutate()}
             type="button"
           >
-            {status === "error" ? "Retry setup" : "Set up e-invoicing"}
+            {status === "error" || status === "pending"
+              ? "Retry setup"
+              : "Set up e-invoicing"}
           </SubmitButton>
         </CardFooter>
       )}

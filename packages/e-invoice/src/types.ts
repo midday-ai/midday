@@ -255,6 +255,15 @@ export interface GOBLPayment {
     ext?: Record<string, string>;
   };
   terms?: {
+    key?: string;
+    due_dates?: {
+      date: string;
+      amount?: string;
+      percent?: string;
+      notes?: string;
+      currency?: string;
+    }[];
+    notes?: string;
     detail?: string;
   };
 }

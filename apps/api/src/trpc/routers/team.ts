@@ -415,10 +415,18 @@ export const teamRouter = createTRPCRouter({
       }
 
       const team = await getTeamById(db, teamId);
-      if (!team?.addressLine1 || !team?.vatNumber || !team?.countryCode) {
+      if (
+        !team?.addressLine1 ||
+        !team?.city ||
+        !team?.zip ||
+        !team?.vatNumber ||
+        !team?.countryCode ||
+        !team?.email
+      ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Complete company address and VAT number are required",
+          message:
+            "Complete company address, city, postal code, email, and VAT number are required",
         });
       }
 
@@ -443,22 +451,52 @@ export const teamRouter = createTRPCRouter({
       }
 
       // Create or update registration record
+      let registrationId: string;
+
       if (existing) {
         await updateEInvoiceRegistration(db, {
           id: existing.id,
           status: "pending",
           faults: null,
         });
+        registrationId = existing.id;
       } else {
-        await createEInvoiceRegistration(db, {
+        const created = await createEInvoiceRegistration(db, {
           teamId,
           provider: "peppol",
           status: "pending",
         });
+
+        if (!created) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create registration record",
+          });
+        }
+
+        registrationId = created.id;
       }
 
-      // Trigger the registration worker job
-      await triggerJob("register-supplier", { teamId }, "invoices");
+      // Trigger the registration worker job — roll back status on failure
+      try {
+        await triggerJob("register-supplier", { teamId }, "invoices");
+      } catch (err) {
+        await updateEInvoiceRegistration(db, {
+          id: registrationId,
+          status: "error",
+          faults: [
+            {
+              message: "Failed to start registration. Please try again later.",
+            },
+          ],
+        });
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to start registration job",
+          cause: err,
+        });
+      }
 
       return { status: "pending" };
     },

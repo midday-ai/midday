@@ -859,11 +859,16 @@ export const invoiceRouter = createTRPCRouter({
           ready: false,
           checks: {
             companyAddress: false,
+            companyCity: false,
+            companyZip: false,
+            companyEmail: false,
             vatNumber: false,
             country: false,
             registration: false,
             customerAddress: false,
             customerVat: false,
+            customerName: false,
+            customerEmail: false,
           },
           registrationStatus: null,
         };
@@ -879,11 +884,16 @@ export const invoiceRouter = createTRPCRouter({
 
       const checks = {
         companyAddress: Boolean(team?.addressLine1),
+        companyCity: Boolean(team?.city),
+        companyZip: Boolean(team?.zip),
+        companyEmail: Boolean(team?.email),
         vatNumber: Boolean(team?.vatNumber),
         country: Boolean(team?.countryCode),
         registration: registration?.status === "registered",
         customerAddress: Boolean(customer?.addressLine1),
         customerVat: Boolean(customer?.vatNumber),
+        customerName: Boolean(customer?.name),
+        customerEmail: Boolean(customer?.email),
       };
 
       return {

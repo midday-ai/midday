@@ -262,7 +262,7 @@ function buildLines(lineItems: MiddayLineItem[]): GOBLLine[] {
 
     // Add tax information if available
     const taxRate = item.taxRate ?? item.vat ?? item.tax;
-    if (taxRate != null && taxRate > 0) {
+    if (taxRate != null) {
       line.taxes = [
         {
           cat: "VAT",
@@ -297,6 +297,23 @@ export function toGOBL(data: MiddayInvoiceData): GOBLInvoice {
   if (data.issueDate) {
     // GOBL expects YYYY-MM-DD format
     invoice.issue_date = data.issueDate.slice(0, 10);
+  }
+
+  // Set payment due date (Peppol BIS 3.0 BT-9 — required when amount due > 0)
+  if (data.dueDate) {
+    invoice.payment = {
+      ...invoice.payment,
+      terms: {
+        ...invoice.payment?.terms,
+        key: "due-date",
+        due_dates: [
+          {
+            date: data.dueDate.slice(0, 10),
+            percent: "100%",
+          },
+        ],
+      },
+    };
   }
 
   // Set invoice number as code
