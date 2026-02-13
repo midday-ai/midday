@@ -73,7 +73,6 @@ RUN groupadd --system --gid 1001 nodejs && \
 COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/.next/standalone ./
 COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/.next/static ./apps/dashboard/.next/static
 COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/public ./apps/dashboard/public
-COPY --from=installer --chown=nextjs:nodejs /app/apps/dashboard/cache-handler.mjs ./apps/dashboard/cache-handler.mjs
 
 USER nextjs
 

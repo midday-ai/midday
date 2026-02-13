@@ -12,12 +12,6 @@ const config = {
   generateBuildId: () =>
     process.env.RAILWAY_GIT_COMMIT_SHA || crypto.randomUUID(),
   deploymentId: process.env.RAILWAY_GIT_COMMIT_SHA,
-  cacheHandlers:
-    process.env.NODE_ENV === "production"
-      ? {
-          default: require.resolve("./cache-handler.mjs"),
-        }
-      : undefined,
   experimental: {
     optimizePackageImports: [
       "lucide-react",
