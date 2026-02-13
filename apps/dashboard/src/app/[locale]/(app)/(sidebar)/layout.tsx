@@ -53,6 +53,7 @@ export default async function Layout({
   batchPrefetch([
     trpc.user.me.queryOptions(),
     trpc.team.current.queryOptions(),
+    trpc.team.list.queryOptions(),
     trpc.invoice.defaultSettings.queryOptions(),
     trpc.search.global.queryOptions({ searchTerm: "" }),
   ]);

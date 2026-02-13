@@ -2,10 +2,26 @@
 
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import { Skeleton } from "@midday/ui/skeleton";
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { MainMenu } from "./main-menu";
 import { TeamDropdown } from "./team-dropdown";
+
+function TeamDropdownSkeleton({ isExpanded }: { isExpanded: boolean }) {
+  return (
+    <div className="relative h-[32px]">
+      <div className="fixed left-[19px] bottom-4 w-[32px] h-[32px]">
+        <Skeleton className="w-[32px] h-[32px] rounded-none" />
+      </div>
+      {isExpanded && (
+        <div className="fixed left-[62px] bottom-4 h-[32px] flex items-center">
+          <Skeleton className="h-4 w-24" />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -35,7 +51,9 @@ export function Sidebar() {
         <MainMenu isExpanded={isExpanded} />
       </div>
 
-      <TeamDropdown isExpanded={isExpanded} />
+      <Suspense fallback={<TeamDropdownSkeleton isExpanded={isExpanded} />}>
+        <TeamDropdown isExpanded={isExpanded} />
+      </Suspense>
     </aside>
   );
 }
