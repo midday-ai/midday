@@ -6,6 +6,7 @@ import { addSeconds, addYears } from "date-fns";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { getTRPCClient } from "@/trpc/server";
 import { Cookies } from "@/utils/constants";
 import { getUrl } from "@/utils/environment";
 
@@ -37,8 +38,6 @@ export async function GET(req: NextRequest) {
     } = await getSession();
 
     if (session) {
-      const userId = session.user.id;
-
       // Set cookie to force primary database reads for new users (10 seconds)
       // This prevents replication lag issues when user record hasn't replicated yet
       cookieStore.set(Cookies.ForcePrimary, "true", {
@@ -59,14 +58,15 @@ export async function GET(req: NextRequest) {
         return NextResponse.redirect(`${origin}/teams`);
       }
 
-      // If user have no teams, redirect to team creation
-      const { count } = await supabase
-        .from("users_on_team")
-        .select("*", { count: "exact" })
-        .eq("user_id", userId);
+      const trpcClient = await getTRPCClient();
+      const user = await trpcClient.user.me.query();
 
-      if (count === 0 && !returnTo?.startsWith("teams/invite/")) {
-        return NextResponse.redirect(`${origin}/teams/create`);
+      if (!user?.fullName) {
+        return NextResponse.redirect(`${origin}/setup`);
+      }
+
+      if (!user.teamId) {
+        return NextResponse.redirect(`${origin}/teams`);
       }
     }
   }
