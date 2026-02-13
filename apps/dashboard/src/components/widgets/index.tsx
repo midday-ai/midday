@@ -37,6 +37,20 @@ function SuggestedActionsSkeleton() {
   );
 }
 
+function WidgetsHeaderSkeleton() {
+  return (
+    <div className="flex justify-between items-end mb-6">
+      <div>
+        <Skeleton className="h-[36px] w-48 mb-2" />
+        <Skeleton className="h-[14px] w-64" />
+      </div>
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-9 w-[140px]" />
+      </div>
+    </div>
+  );
+}
+
 function WidgetGridSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
@@ -88,7 +102,9 @@ function WidgetsContent() {
           isHome && "widgets-container-spacing",
         )}
       >
-        <WidgetsHeader />
+        <Suspense fallback={<WidgetsHeaderSkeleton />}>
+          <WidgetsHeader />
+        </Suspense>
         <TabsContent value="overview">
           <Suspense fallback={<WidgetGridSkeleton />}>
             <WidgetsGridWithPreferences />
