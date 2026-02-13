@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
-import { getCountryCode, getLocale, getTimezone } from "@midday/location";
+import { getLocationHeaders } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
@@ -9,7 +9,7 @@ import {
   createTRPCOptionsProxy,
   type TRPCQueryOptions,
 } from "@trpc/tanstack-react-query";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { cache } from "react";
 import superjson from "superjson";
 import { Cookies } from "@/utils/constants";
@@ -32,27 +32,33 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
         async headers() {
-          const supabase = await createClient();
-          const cookieStore = await cookies();
+          // Parallelize independent async calls
+          const [supabase, cookieStore, headersList] = await Promise.all([
+            createClient(),
+            cookies(),
+            headers(),
+          ]);
 
           const {
             data: { session },
           } = await supabase.auth.getSession();
 
-          const headers: Record<string, string> = {
+          const location = getLocationHeaders(headersList);
+
+          const result: Record<string, string> = {
             Authorization: `Bearer ${session?.access_token}`,
-            "x-user-timezone": await getTimezone(),
-            "x-user-locale": await getLocale(),
-            "x-user-country": await getCountryCode(),
+            "x-user-timezone": location.timezone,
+            "x-user-locale": location.locale,
+            "x-user-country": location.country,
           };
 
           // Pass force-primary cookie as header to API for replication lag handling
           const forcePrimary = cookieStore.get(Cookies.ForcePrimary);
           if (forcePrimary?.value === "true") {
-            headers["x-force-primary"] = "true";
+            result["x-force-primary"] = "true";
           }
 
-          return headers;
+          return result;
         },
       }),
       loggerLink({
@@ -106,12 +112,18 @@ export function batchPrefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
  * For queries, use the `trpc` proxy with `queryOptions` instead
  */
 export async function getTRPCClient() {
-  const supabase = await createClient();
-  const cookieStore = await cookies();
+  // Parallelize independent async calls
+  const [supabase, cookieStore, headersList] = await Promise.all([
+    createClient(),
+    cookies(),
+    headers(),
+  ]);
 
   const {
     data: { session },
   } = await supabase.auth.getSession();
+
+  const location = getLocationHeaders(headersList);
 
   return createTRPCClient<AppRouter>({
     links: [
@@ -120,9 +132,9 @@ export async function getTRPCClient() {
         transformer: superjson,
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
-          "x-user-timezone": await getTimezone(),
-          "x-user-locale": await getLocale(),
-          "x-user-country": await getCountryCode(),
+          "x-user-timezone": location.timezone,
+          "x-user-locale": location.locale,
+          "x-user-country": location.country,
           ...(cookieStore.get(Cookies.ForcePrimary)?.value === "true" && {
             "x-force-primary": "true",
           }),

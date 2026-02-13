@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { ExportStatus } from "@/components/export-status";
 import { GlobalTimerProvider } from "@/components/global-timer-provider";
 import { Header } from "@/components/header";
@@ -13,22 +14,12 @@ import {
   trpc,
 } from "@/trpc/server";
 
-export default async function Layout({
+async function AuthenticatedContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const queryClient = getQueryClient();
-
-  // NOTE: These are used in the global sheets
-  batchPrefetch([
-    trpc.team.current.queryOptions(),
-    trpc.invoice.defaultSettings.queryOptions(),
-    trpc.search.global.queryOptions({ searchTerm: "" }),
-  ]);
-
-  // NOTE: Right now we want to fetch the user and hydrate the client
-  // Next steps would be to prefetch and suspense
   const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
   if (!user) {
@@ -44,19 +35,38 @@ export default async function Layout({
   }
 
   return (
+    <TrialGuard
+      plan={user.team?.plan}
+      createdAt={user.team?.createdAt}
+      user={{ fullName: user.fullName }}
+    >
+      <div className="px-4 md:px-8">{children}</div>
+    </TrialGuard>
+  );
+}
+
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  batchPrefetch([
+    trpc.user.me.queryOptions(),
+    trpc.team.current.queryOptions(),
+    trpc.invoice.defaultSettings.queryOptions(),
+    trpc.search.global.queryOptions({ searchTerm: "" }),
+  ]);
+
+  return (
     <HydrateClient>
       <div className="relative">
         <Sidebar />
 
         <div className="md:ml-[70px] pb-4">
           <Header />
-          <TrialGuard
-            plan={user.team?.plan}
-            createdAt={user.team?.createdAt}
-            user={{ fullName: user.fullName }}
-          >
-            <div className="px-4 md:px-8">{children}</div>
-          </TrialGuard>
+          <Suspense>
+            <AuthenticatedContent>{children}</AuthenticatedContent>
+          </Suspense>
         </div>
 
         <ExportStatus />

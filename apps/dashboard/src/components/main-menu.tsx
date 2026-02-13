@@ -7,6 +7,15 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 
+// Only prefetch high-traffic routes to reduce unnecessary network requests on load
+const prefetchRoutes = new Set([
+  "/transactions",
+  "/inbox",
+  "/invoices",
+  "/tracker",
+  "/vault",
+]);
+
 const icons = {
   "/": () => <Icons.Overview size={20} />,
   "/transactions": () => <Icons.Transactions size={20} />,
@@ -125,7 +134,7 @@ const ChildItem = ({
   return (
     <Link
       href={child.path}
-      prefetch
+      prefetch={false}
       onClick={() => onSelect?.()}
       className="block group/child"
     >
@@ -187,7 +196,7 @@ const Item = ({
     <div className="group">
       <Link
         href={item.path}
-        prefetch
+        prefetch={prefetchRoutes.has(item.path)}
         onClick={() => onSelect?.()}
         className="group"
       >
