@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { isValidPeppolId } from "@midday/e-invoice/constants";
 import { isValidEmailList } from "@midday/utils";
 
 export const getCustomersSchema = z
@@ -450,11 +451,18 @@ export const upsertCustomerSchema = z.object({
     description: "Primary contact person's name at the customer organization",
     example: "John Smith",
   }),
-  peppolId: z.string().nullable().optional().openapi({
-    description:
-      "Peppol participant ID for B2B e-invoicing delivery via the Peppol network",
-    example: "0208:0316597904",
-  }),
+  peppolId: z
+    .string()
+    .nullable()
+    .optional()
+    .refine((val) => !val || isValidPeppolId(val), {
+      message: "Must be in scheme:code format, e.g. 0208:0316597904",
+    })
+    .openapi({
+      description:
+        "Peppol participant ID in scheme:code format (e.g. 0208:0316597904) for B2B e-invoicing delivery via the Peppol network",
+      example: "0208:0316597904",
+    }),
   tags: z
     .array(
       z.object({

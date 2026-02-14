@@ -1,6 +1,7 @@
 "use client";
 
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { isValidPeppolId } from "@midday/e-invoice/constants";
 import {
   Accordion,
   AccordionContent,
@@ -71,7 +72,12 @@ const formSchema = z.object({
   countryCode: z.string().optional(),
   zip: z.string().optional(),
   vatNumber: z.string().optional(),
-  peppolId: z.string().optional(),
+  peppolId: z
+    .string()
+    .optional()
+    .refine((val) => !val || isValidPeppolId(val), {
+      message: "Must be in scheme:code format, e.g. 0208:0316597904",
+    }),
   note: z.string().optional(),
   tags: z
     .array(

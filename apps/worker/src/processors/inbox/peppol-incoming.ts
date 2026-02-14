@@ -102,7 +102,27 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
       siloEntryId,
     });
 
-    // Step 4: Get PDF from Invopop
+    // Step 4: Deduplicate — bail early before any expensive I/O if this
+    // document was already ingested (e.g. duplicate webhook delivery).
+    const referenceId = `peppol_${siloEntryId}`;
+    const existingInbox = await getInboxByReferenceId(db, {
+      referenceId,
+      teamId,
+    });
+
+    if (existingInbox) {
+      this.logger.info(
+        "Inbox item already exists for this Peppol document, skipping duplicate",
+        {
+          referenceId,
+          inboxId: existingInbox.id,
+          status: existingInbox.status,
+        },
+      );
+      return;
+    }
+
+    // Step 5: Get PDF from Invopop
     const pdfAttachment = findPdfAttachment(entry);
 
     if (!pdfAttachment) {
@@ -125,7 +145,7 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
 
     const pdfBuffer = await fetchEntryFile(apiKey, entry.id, pdfAttachment.id);
 
-    // Step 5: Upload PDF to storage
+    // Step 6: Upload PDF to storage
     const fileName = `peppol_${siloEntryId}.pdf`;
     const filePath = [teamId, "inbox", fileName];
     const filePathStr = filePath.join("/");
@@ -150,30 +170,7 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
       throw new Error(`Failed to upload PDF: ${uploadError.message}`);
     }
 
-    // Step 6: Create inbox item (idempotent via referenceId)
-    const referenceId = `peppol_${siloEntryId}`;
-
-    // Guard against duplicate webhook deliveries: check if this document was
-    // already ingested.  createInbox returns the *existing* row on referenceId
-    // conflicts (rather than null), so the old `!inboxData` check never
-    // triggered and duplicates slipped through the full pipeline.
-    const existingInbox = await getInboxByReferenceId(db, {
-      referenceId,
-      teamId,
-    });
-
-    if (existingInbox) {
-      this.logger.info(
-        "Inbox item already exists for this Peppol document, skipping duplicate",
-        {
-          referenceId,
-          inboxId: existingInbox.id,
-          status: existingInbox.status,
-        },
-      );
-      return;
-    }
-
+    // Step 7: Create inbox item
     const inboxData = await createInbox(db, {
       displayName: parsed.supplierName,
       teamId,
@@ -196,12 +193,10 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
     });
 
     if (!inboxData) {
-      // Narrow race: another delivery squeezed in between our check and the
-      // insert.  createInbox's onConflictDoNothing already prevented a
-      // duplicate row — safe to bail out.
-      this.logger.info("Inbox item created by concurrent delivery, skipping", {
-        referenceId,
-      });
+      // createInbox should always return a row (it fetches the existing one on
+      // conflict).  If it somehow doesn't, bail — the dedup check above
+      // already guarantees we won't reach here under normal conditions.
+      this.logger.warn("createInbox returned no data", { referenceId });
       return;
     }
 
@@ -211,7 +206,7 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
       referenceId,
     });
 
-    // Step 7: Update inbox with extracted data (skip OCR — GOBL is authoritative)
+    // Step 8: Update inbox with extracted data (skip OCR — GOBL is authoritative)
     await updateInboxWithProcessedData(db, {
       id: inboxData.id,
       amount: parsed.amount ?? undefined,
@@ -236,7 +231,7 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
       });
     }
 
-    // Step 8: Trigger document classification
+    // Step 9: Trigger document classification
     await triggerJob(
       "process-document",
       {
@@ -247,7 +242,7 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
       "documents",
     );
 
-    // Step 9: Trigger embedding and wait for completion
+    // Step 10: Trigger embedding and wait for completion
     this.logger.info("Triggering embed-inbox job", {
       inboxId: inboxData.id,
       teamId,
@@ -263,7 +258,7 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
       { timeout: 60000 },
     );
 
-    // Step 10: Trigger matching
+    // Step 11: Trigger matching
     await triggerJob(
       "batch-process-matching",
       {
