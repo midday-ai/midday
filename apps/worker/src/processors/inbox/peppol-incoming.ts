@@ -105,13 +105,16 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
     const pdfAttachment = findPdfAttachment(entry);
 
     if (!pdfAttachment) {
-      // Invopop's receive workflow typically generates a PDF, but if it's
-      // not available yet we skip this document. It will not be retried —
-      // PDF generation from GOBL data can be added as a future enhancement.
-      this.logger.warn("No PDF attachment found in silo entry, skipping", {
+      // Invopop's receive workflow generates a PDF asynchronously — it may
+      // not be attached yet when this job first runs.  Throw so BullMQ
+      // retries with back-off until the PDF becomes available.
+      this.logger.warn("No PDF attachment found in silo entry, will retry", {
         siloEntryId,
+        attempt: job.attemptsMade,
       });
-      return;
+      throw new Error(
+        `PDF attachment not yet available for silo entry ${siloEntryId}`,
+      );
     }
 
     this.logger.info("Downloading PDF from Invopop", {

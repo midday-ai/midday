@@ -1,0 +1,76 @@
+{
+  "name": "Register Peppol party",
+  "description": "Onboards participants before they can issue or receive invoices",
+  "schema": "org/party",
+  "steps": [
+    {
+      "id": "0adf46e0-8fdb-11f0-a8fb-61ec9e5a76ba",
+      "name": "Register Party for Approval",
+      "provider": "peppol.register.approval"
+    },
+    {
+      "id": "0e44b900-8fdb-11f0-a8fb-61ec9e5a76ba",
+      "name": "Set State",
+      "provider": "silo.state",
+      "summary": "Set state to `processing`{.state .processing}",
+      "config": {
+        "state": "processing"
+      }
+    },
+    {
+      "id": "12aaf950-8fdb-11f0-a8fb-61ec9e5a76ba",
+      "name": "Wait for Approval",
+      "provider": "peppol.wait.approval"
+    },
+    {
+      "id": "7a5a4db0-0fae-11f0-b37b-0be1c251a274",
+      "name": "Register Peppol Party",
+      "provider": "peppol.register",
+      "config": {
+        "disable": false,
+        "doc_groups": ["ubl-invoice"],
+        "visibility": "smp+sml+peppol"
+      }
+    },
+    {
+      "id": "7c2fa9f0-0fae-11f0-b37b-0be1c251a274",
+      "name": "Set State",
+      "provider": "silo.state",
+      "summary": "Set state to `registered`{.state .registered}",
+      "config": {
+        "state": "registered"
+      }
+    },
+    {
+      "id": "b2c3d4e0-0002-11f0-b002-000000000001",
+      "name": "Send Webhook",
+      "provider": "webhook",
+      "config": {
+        "bearer_token": "INVOPOP_WEBHOOK_SECRET",
+        "callback_url": "https://<YOUR_API_HOST>/webhooks/invopop",
+        "event": "success"
+      }
+    }
+  ],
+  "rescue": [
+    {
+      "id": "a34e83f0-25dc-11f0-b641-350e77c28eed",
+      "name": "Set State",
+      "provider": "silo.state",
+      "summary": "Set state to `error`{.state .error}",
+      "config": {
+        "state": "error"
+      }
+    },
+    {
+      "id": "b2c3d4e0-0002-11f0-b002-000000000002",
+      "name": "Send Webhook",
+      "provider": "webhook",
+      "config": {
+        "bearer_token": "INVOPOP_WEBHOOK_SECRET",
+        "callback_url": "https://<YOUR_API_HOST>/webhooks/invopop",
+        "event": "failed"
+      }
+    }
+  ]
+}
