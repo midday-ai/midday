@@ -3,6 +3,11 @@ import {
   getTeamById,
   updateEInvoiceRegistrationByTeam,
 } from "@midday/db/queries";
+import { fetchEntry } from "@midday/e-invoice/client";
+import {
+  extractPeppolId,
+  extractRegistrationUrl,
+} from "@midday/e-invoice/parsers";
 import { submitRegistration } from "@midday/e-invoice/registration";
 import type { Job } from "bullmq";
 import { getDb } from "../../utils/db";
@@ -119,12 +124,67 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
         });
       } else {
         // Job already existed (409 conflict) — the registration workflow is
-        // already in flight or completed. Do NOT overwrite the status; the
-        // webhook will reconcile the final state.
+        // already in flight or completed. Fetch the silo entry to reconcile
+        // the local DB with Invopop's actual state, since the original
+        // webhook may have been missed.
         this.logger.info(
-          "Registration job already exists (conflict), skipping status update",
+          "Registration job already exists (conflict), reconciling state",
           { teamId, siloEntryId: result.siloEntryId },
         );
+
+        try {
+          const entry = await fetchEntry(apiKey, result.siloEntryId);
+          const registrationUrl = extractRegistrationUrl(entry);
+          const { peppolId, peppolScheme } = extractPeppolId(entry);
+
+          if (peppolId) {
+            // Registration is already complete in Invopop
+            await updateEInvoiceRegistrationByTeam(db, {
+              teamId,
+              provider: "peppol",
+              status: "registered",
+              faults: null,
+              siloEntryId: result.siloEntryId,
+              peppolId,
+              ...(peppolScheme && { peppolScheme }),
+            });
+            this.logger.info("Reconciled: registration already complete", {
+              teamId,
+              peppolId,
+            });
+          } else {
+            // Still in progress — update to processing with any available URL
+            await updateEInvoiceRegistrationByTeam(db, {
+              teamId,
+              provider: "peppol",
+              status: "processing",
+              faults: null,
+              siloEntryId: result.siloEntryId,
+              ...(registrationUrl && { registrationUrl }),
+            });
+            this.logger.info("Reconciled: registration still processing", {
+              teamId,
+              registrationUrl,
+            });
+          }
+        } catch (reconcileErr) {
+          // If reconciliation fails, at least mark as processing so the UI
+          // isn't stuck on "pending"
+          this.logger.warn("Failed to reconcile state from Invopop", {
+            teamId,
+            error:
+              reconcileErr instanceof Error
+                ? reconcileErr.message
+                : String(reconcileErr),
+          });
+
+          await updateEInvoiceRegistrationByTeam(db, {
+            teamId,
+            provider: "peppol",
+            status: "processing",
+            siloEntryId: result.siloEntryId,
+          });
+        }
       }
     } catch (error) {
       this.logger.error("Failed to submit supplier registration", {

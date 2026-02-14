@@ -188,6 +188,7 @@ export async function handleInvoiceCallback(
 
   const isError =
     payload.event === "error" || (payload.faults && payload.faults.length > 0);
+  const isProcessing = payload.event === "processing";
 
   if (isError) {
     logger.warn("E-invoice submission failed", {
@@ -200,6 +201,17 @@ export async function handleInvoiceCallback(
       teamId: invoice.teamId,
       eInvoiceStatus: "error",
       eInvoiceFaults: mapFaults(payload.faults),
+    });
+  } else if (isProcessing) {
+    logger.info("E-invoice submission processing", {
+      invoiceId,
+      siloEntryId: payload.silo_entry_id,
+    });
+
+    await updateInvoice(db, {
+      id: invoiceId,
+      teamId: invoice.teamId,
+      eInvoiceStatus: "processing",
     });
   } else {
     logger.info("E-invoice submission succeeded", {

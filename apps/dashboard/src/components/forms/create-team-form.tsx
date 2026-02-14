@@ -32,11 +32,11 @@ const formSchema = z.object({
   countryCode: z.string().min(1, { message: "Country is required." }),
   baseCurrency: z.string(),
   fiscalYearStartMonth: z.number().int().min(1).max(12).nullable().optional(),
-  addressLine1: z.string().min(1, { message: "Street address is required." }),
+  addressLine1: z.string().optional(),
   addressLine2: z.string().optional(),
-  city: z.string().min(1, { message: "City is required." }),
+  city: z.string().optional(),
   state: z.string().optional(),
-  zip: z.string().min(1, { message: "Postal code is required." }),
+  zip: z.string().optional(),
   vatNumber: z.string().optional(),
 });
 

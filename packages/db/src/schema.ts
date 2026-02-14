@@ -269,6 +269,11 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "transactions_exported",
   "customer_created",
   "insight_ready",
+
+  // E-invoice registration activities
+  "e_invoice_registration_processing",
+  "e_invoice_registration_complete",
+  "e_invoice_registration_error",
 ]);
 
 export const activitySourceEnum = pgEnum("activity_source", [

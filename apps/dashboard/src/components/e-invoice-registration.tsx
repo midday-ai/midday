@@ -11,6 +11,7 @@ import {
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 
@@ -20,12 +21,13 @@ const requirements = [
   { key: "zip", label: "Postal code", hash: "#address" },
   { key: "email", label: "Company email", hash: "#email" },
   { key: "vat", label: "VAT number", hash: "#vat" },
-  { key: "country", label: "Country", hash: "#address" },
+  { key: "country", label: "Country", href: "/settings" },
 ] as const;
 
 export function EInvoiceRegistration() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { toast } = useToast();
   const { data: team } = useTeamQuery();
 
@@ -89,7 +91,8 @@ export function EInvoiceRegistration() {
               </p>
             )}
             <p className="text-sm text-muted-foreground">
-              Invoices are automatically submitted for e-invoicing when sent.
+              Invoices sent to customers with a Peppol ID will be automatically
+              delivered via the Peppol network.
             </p>
           </div>
         ) : status === "processing" ? (
@@ -98,37 +101,47 @@ export function EInvoiceRegistration() {
               <p className="text-sm font-medium mb-1">
                 Verification in progress
               </p>
-              <p className="text-sm text-muted-foreground">
-                This can take up to 72 hours. We'll notify you when it's ready.
+              <p className="text-sm text-muted-foreground mb-2">
+                Your registration is being reviewed by the Peppol network
+                authority. This typically takes 1-3 business days. You'll
+                receive an email when verification is complete.
               </p>
+
+              {registration?.registrationUrl && (
+                <a
+                  href={registration.registrationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary underline"
+                >
+                  Complete verification form &rarr;
+                </a>
+              )}
             </div>
-            {registration?.registrationUrl && (
-              <a
-                href={registration.registrationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary underline"
-              >
-                Complete verification form &rarr;
-              </a>
-            )}
           </div>
         ) : status === "pending" ? (
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Setup pending</p>
+          <div className="px-3 py-3 border border-border">
+            <p className="text-sm font-medium mb-1">Submitting registration</p>
             <p className="text-sm text-muted-foreground">
-              Your registration request is waiting to be processed. If this
-              persists, you can retry below.
+              Your Peppol network registration is being submitted. This usually
+              takes a few moments. If it stays in this state for more than a few
+              minutes, you can retry.
             </p>
           </div>
         ) : status === "error" ? (
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Setup failed</p>
+          <div className="px-3 py-3 border border-border">
+            <p className="text-sm font-medium mb-1">
+              Registration could not be completed
+            </p>
             {registration?.faults?.map((fault, index) => (
               <p key={`fault-${index}`} className="text-sm text-destructive">
                 {fault.message}
               </p>
             ))}
+            <p className="text-sm text-muted-foreground mt-2">
+              This is usually a temporary issue. You can retry, or contact
+              support if the problem persists.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -161,11 +174,15 @@ export function EInvoiceRegistration() {
                         type="button"
                         className="text-sm text-foreground hover:underline text-left"
                         onClick={() => {
-                          const el = document.querySelector(req.hash);
-                          el?.scrollIntoView({
-                            behavior: "smooth",
-                            block: "center",
-                          });
+                          if ("href" in req) {
+                            router.push(req.href);
+                          } else {
+                            const el = document.querySelector(req.hash);
+                            el?.scrollIntoView({
+                              behavior: "smooth",
+                              block: "center",
+                            });
+                          }
                         }}
                       >
                         {req.label}
