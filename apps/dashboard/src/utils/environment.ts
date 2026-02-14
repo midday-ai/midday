@@ -1,10 +1,22 @@
-export function getUrl() {
-  if (process.env.NEXT_PUBLIC_URL) {
-    return process.env.NEXT_PUBLIC_URL;
+function normalizeUrl(value?: string) {
+  if (!value) {
+    return null;
   }
 
-  if (process.env.VERCEL_TARGET_ENV === "preview") {
-    return `https://${process.env.VERCEL_URL}`;
+  return value.trim().replace(/\/+$/, "");
+}
+
+export function getUrl() {
+  const publicUrl = normalizeUrl(process.env.NEXT_PUBLIC_URL);
+
+  if (publicUrl) {
+    return publicUrl;
+  }
+
+  const vercelUrl = normalizeUrl(process.env.VERCEL_URL);
+
+  if (vercelUrl) {
+    return `https://${vercelUrl}`;
   }
 
   return "http://localhost:3001";

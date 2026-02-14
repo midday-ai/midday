@@ -1,5 +1,6 @@
 "use client";
 
+import { resendSignUpConfirmationAction } from "@/actions/resend-sign-up-confirmation-action";
 import { signInWithPasswordAction } from "@/actions/sign-in-with-password-action";
 import { signUpWithPasswordAction } from "@/actions/sign-up-with-password-action";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,16 +41,30 @@ type Props = {
   className?: string;
 };
 
+type SignUpStatus =
+  | "confirmation_required"
+  | "ready_to_sign_in"
+  | "account_exists";
+
 export function EmailPasswordSignIn({ className }: Props) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [successStatus, setSuccessStatus] = useState<SignUpStatus | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState<
+    string | null
+  >(null);
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("return_to");
 
   const signIn = useAction(signInWithPasswordAction, {
     onError: ({ error }) => {
-      setErrorMessage(error.serverError || "Failed to sign in");
+      const message = error.serverError || "Failed to sign in";
+      setErrorMessage(message);
+
+      if (!message.toLowerCase().includes("email not confirmed")) {
+        setPendingConfirmationEmail(null);
+      }
     },
   });
 
@@ -57,11 +72,31 @@ export function EmailPasswordSignIn({ className }: Props) {
     onSuccess: ({ data }) => {
       if (data?.success) {
         setSuccessMessage(data.message);
+        setSuccessStatus(data.status);
         setErrorMessage(null);
+
+        if (data.status !== "confirmation_required") {
+          setPendingConfirmationEmail(null);
+        }
       }
     },
     onError: ({ error }) => {
       setErrorMessage(error.serverError || "Failed to create account");
+    },
+  });
+
+  const resendConfirmation = useAction(resendSignUpConfirmationAction, {
+    onSuccess: ({ data }) => {
+      if (data?.success) {
+        setSuccessMessage(data.message);
+        setSuccessStatus("confirmation_required");
+        setErrorMessage(null);
+      }
+    },
+    onError: ({ error }) => {
+      setErrorMessage(
+        error.serverError || "Failed to resend confirmation email",
+      );
     },
   });
 
@@ -84,6 +119,9 @@ export function EmailPasswordSignIn({ className }: Props) {
 
   const onSignIn = (values: z.infer<typeof signInSchema>) => {
     setErrorMessage(null);
+    setSuccessMessage(null);
+    setSuccessStatus(null);
+    setPendingConfirmationEmail(values.email);
     signIn.execute({
       ...values,
       redirectTo: `${window.location.origin}/${returnTo || ""}`,
@@ -93,13 +131,29 @@ export function EmailPasswordSignIn({ className }: Props) {
   const onSignUp = (values: z.infer<typeof signUpSchema>) => {
     setErrorMessage(null);
     setSuccessMessage(null);
+    setSuccessStatus(null);
+    setPendingConfirmationEmail(values.email);
     signUp.execute(values);
+  };
+
+  const onResendConfirmation = () => {
+    if (!pendingConfirmationEmail) {
+      return;
+    }
+
+    setErrorMessage(null);
+
+    resendConfirmation.execute({
+      email: pendingConfirmationEmail,
+    });
   };
 
   const toggleMode = () => {
     setMode(mode === "signin" ? "signup" : "signin");
     setErrorMessage(null);
     setSuccessMessage(null);
+    setSuccessStatus(null);
+    setPendingConfirmationEmail(null);
     signInForm.reset();
     signUpForm.reset();
   };
@@ -112,10 +166,26 @@ export function EmailPasswordSignIn({ className }: Props) {
             {successMessage}
           </p>
         </div>
+
+        {successStatus === "confirmation_required" &&
+          pendingConfirmationEmail && (
+            <button
+              type="button"
+              onClick={onResendConfirmation}
+              disabled={resendConfirmation.isExecuting}
+              className="text-sm text-primary underline font-medium disabled:opacity-60"
+            >
+              {resendConfirmation.isExecuting
+                ? "Sending..."
+                : "Resend confirmation email"}
+            </button>
+          )}
+
         <button
           type="button"
           onClick={() => {
             setSuccessMessage(null);
+            setSuccessStatus(null);
             setMode("signin");
           }}
           className="text-sm text-primary underline font-medium"
@@ -129,10 +199,7 @@ export function EmailPasswordSignIn({ className }: Props) {
   if (mode === "signup") {
     return (
       <Form key="signup" {...signUpForm}>
-        <form
-          onSubmit={signUpForm.handleSubmit(onSignUp)}
-          className="w-full"
-        >
+        <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="w-full">
           <div className={cn("flex flex-col space-y-4", className)}>
             <FormField
               control={signUpForm.control}
@@ -160,11 +227,7 @@ export function EmailPasswordSignIn({ className }: Props) {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
-                      placeholder="Password"
-                      type="password"
-                      {...field}
-                    />
+                    <Input placeholder="Password" type="password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -256,6 +319,20 @@ export function EmailPasswordSignIn({ className }: Props) {
           {errorMessage && (
             <p className="text-sm text-red-500">{errorMessage}</p>
           )}
+
+          {errorMessage?.toLowerCase().includes("email not confirmed") &&
+            pendingConfirmationEmail && (
+              <button
+                type="button"
+                onClick={onResendConfirmation}
+                disabled={resendConfirmation.isExecuting}
+                className="text-sm text-primary underline font-medium disabled:opacity-60 w-fit"
+              >
+                {resendConfirmation.isExecuting
+                  ? "Sending..."
+                  : "Resend confirmation email"}
+              </button>
+            )}
 
           <div className="flex justify-end">
             <Link

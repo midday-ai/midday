@@ -21,7 +21,7 @@ export const signUpWithPasswordAction = actionClient
   .action(async ({ parsedInput: { email, password } }) => {
     const supabase = await createClient();
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -30,11 +30,44 @@ export const signUpWithPasswordAction = actionClient
     });
 
     if (error) {
+      const message = error.message.toLowerCase();
+
+      if (message.includes("already registered")) {
+        return {
+          success: true,
+          status: "account_exists" as const,
+          message:
+            "If an account already exists for this email, sign in or reset your password.",
+        };
+      }
+
       throw new Error(error.message);
+    }
+
+    const hasSession = Boolean(data.session);
+    const hasIdentities = (data.user?.identities?.length ?? 0) > 0;
+
+    // Supabase may return a user with no identities for existing addresses when confirmations are enabled.
+    if (!hasSession && !hasIdentities) {
+      return {
+        success: true,
+        status: "account_exists" as const,
+        message:
+          "If an account already exists for this email, sign in or reset your password.",
+      };
+    }
+
+    if (hasSession) {
+      return {
+        success: true,
+        status: "ready_to_sign_in" as const,
+        message: "Account created. You can sign in now.",
+      };
     }
 
     return {
       success: true,
+      status: "confirmation_required" as const,
       message:
         "Check your email for a confirmation link to complete your registration.",
     };
