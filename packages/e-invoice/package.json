@@ -13,7 +13,8 @@
     "./gobl": "./src/gobl.ts",
     "./parsers": "./src/parsers.ts",
     "./registration": "./src/registration.ts",
-    "./types": "./src/types.ts"
+    "./types": "./src/types.ts",
+    "./constants": "./src/constants.ts"
   },
   "dependencies": {
     "zod": "catalog:"

@@ -45,6 +45,7 @@ import {
   searchInvoiceNumber,
   updateInvoice,
 } from "@midday/db/queries";
+import { E_INVOICE_PROVIDER_PEPPOL } from "@midday/e-invoice/constants";
 import { DEFAULT_TEMPLATE } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
@@ -877,7 +878,10 @@ export const invoiceRouter = createTRPCRouter({
 
       const [team, registration, customer] = await Promise.all([
         getTeamById(db, teamId),
-        getEInvoiceRegistration(db, { teamId, provider: "peppol" }),
+        getEInvoiceRegistration(db, {
+          teamId,
+          provider: E_INVOICE_PROVIDER_PEPPOL,
+        }),
         input.customerId
           ? getCustomerById(db, { id: input.customerId, teamId })
           : Promise.resolve(null),

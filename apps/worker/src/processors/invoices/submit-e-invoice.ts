@@ -11,6 +11,7 @@ import {
   fetchEntryByKey,
   isConflictError,
 } from "@midday/e-invoice/client";
+import { E_INVOICE_PROVIDER_PEPPOL } from "@midday/e-invoice/constants";
 import type { MiddayInvoiceData, MiddayLineItem } from "@midday/e-invoice/gobl";
 import {
   invoiceKey,
@@ -99,7 +100,7 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
     // Check Peppol registration status
     const registration = await getEInvoiceRegistration(db, {
       teamId: team.id,
-      provider: "peppol",
+      provider: E_INVOICE_PROVIDER_PEPPOL,
     });
 
     if (!registration || registration.status !== "registered") {
@@ -250,17 +251,13 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
         }
       }
 
-      // Step 2: Mark as processing before job creation so state is consistent
-      // even if the process crashes between job creation and DB update.
-      // The conflict handler (409) below is safe because it won't regress status.
-      await updateInvoice(db, {
-        id: invoiceId,
-        teamId: team.id,
-        eInvoiceStatus: "processing",
-        eInvoiceSiloEntryId: entry.id,
-      });
-
-      // Step 3: Create job to run workflow
+      // Step 2: Create job to run workflow.
+      // IMPORTANT: We set eInvoiceStatus to "processing" only AFTER a
+      // successful createJob call — never before.  Setting it eagerly
+      // before createJob would introduce a race: a concurrent retry that
+      // hits a 409 on createJob (job already exists) would have already
+      // overwritten a terminal "sent" status back to "processing" in the
+      // unconditional update, leaving the invoice stuck.
       try {
         const transformJob = await createJob(apiKey, workflowId, entry.id, key);
 
@@ -270,10 +267,14 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
           workflowId,
         });
 
-        // Store the job ID now that we have it
+        // Job created successfully — now it's safe to mark as processing.
+        // If the process crashes between createJob and this update, the
+        // webhook callback will still reconcile the final state.
         await updateInvoice(db, {
           id: invoiceId,
           teamId: team.id,
+          eInvoiceStatus: "processing",
+          eInvoiceSiloEntryId: entry.id,
           eInvoiceJobId: transformJob.id,
         });
       } catch (jobError) {

@@ -5,6 +5,23 @@ import { cn } from "@midday/ui/cn";
 import { format } from "date-fns";
 import { useUserQuery } from "@/hooks/use-user";
 
+const FRIENDLY_FAULTS: Record<string, string> = {
+  "recipient-not-found": "Recipient not found on Peppol",
+  "recipient-not-registered": "Recipient not registered on Peppol",
+  "document-rejected": "Rejected by recipient",
+  "validation-error": "Validation failed",
+  "schema-error": "Invalid invoice format",
+};
+
+function getFaultLabel(
+  fault?: { code?: string; message?: string } | null,
+): string {
+  if (!fault) return "E-invoice failed";
+  const friendly = fault.code ? FRIENDLY_FAULTS[fault.code] : undefined;
+  const label = friendly ?? fault.message ?? fault.code;
+  return label ? `E-invoice failed: ${label}` : "E-invoice failed";
+}
+
 type ActivityItemProps = {
   label: string;
   date?: string | null;
@@ -109,7 +126,7 @@ export function InvoiceActivity({ data }: Props) {
       )}
       {data?.eInvoiceStatus === "error" && (
         <ActivityItem
-          label="E-invoice failed"
+          label={getFaultLabel(data?.eInvoiceFaults?.[0])}
           date={data?.updatedAt}
           completed
           timeFormat={user?.timeFormat}

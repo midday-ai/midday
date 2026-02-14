@@ -5,6 +5,7 @@ import {
   updateInvoice,
 } from "@midday/db/queries";
 import { fetchEntry } from "@midday/e-invoice/client";
+import { E_INVOICE_PROVIDER_PEPPOL } from "@midday/e-invoice/constants";
 import {
   extractPeppolId,
   extractRegistrationUrl,
@@ -58,7 +59,7 @@ export async function handlePartyError(
 
   await updateEInvoiceRegistrationByTeam(db, {
     teamId,
-    provider: "peppol",
+    provider: E_INVOICE_PROVIDER_PEPPOL,
     status: "error",
     faults,
   });
@@ -95,7 +96,7 @@ export async function handlePartyProcessing(
 
   await updateEInvoiceRegistrationByTeam(db, {
     teamId,
-    provider: "peppol",
+    provider: E_INVOICE_PROVIDER_PEPPOL,
     status: "processing",
     faults: null,
     ...(registrationUrl && { registrationUrl }),
@@ -146,7 +147,7 @@ export async function handlePartyRegistered(
 
   await updateEInvoiceRegistrationByTeam(db, {
     teamId,
-    provider: "peppol",
+    provider: E_INVOICE_PROVIDER_PEPPOL,
     status: "registered",
     faults: null,
     peppolId,

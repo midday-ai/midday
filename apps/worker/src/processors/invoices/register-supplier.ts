@@ -4,6 +4,7 @@ import {
   updateEInvoiceRegistrationByTeam,
 } from "@midday/db/queries";
 import { fetchEntry } from "@midday/e-invoice/client";
+import { E_INVOICE_PROVIDER_PEPPOL } from "@midday/e-invoice/constants";
 import {
   extractPeppolId,
   extractRegistrationUrl,
@@ -81,7 +82,7 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
     // Retries or duplicate triggers must not regress a "registered" team.
     const existing = await getEInvoiceRegistration(db, {
       teamId,
-      provider: "peppol",
+      provider: E_INVOICE_PROVIDER_PEPPOL,
     });
 
     if (existing?.status === "registered") {
@@ -118,7 +119,7 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
         // now that we know this is not a duplicate.
         await updateEInvoiceRegistrationByTeam(db, {
           teamId,
-          provider: "peppol",
+          provider: E_INVOICE_PROVIDER_PEPPOL,
           status: "processing",
           siloEntryId: result.siloEntryId,
         });
@@ -141,7 +142,7 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
             // Registration is already complete in Invopop
             await updateEInvoiceRegistrationByTeam(db, {
               teamId,
-              provider: "peppol",
+              provider: E_INVOICE_PROVIDER_PEPPOL,
               status: "registered",
               faults: null,
               siloEntryId: result.siloEntryId,
@@ -156,7 +157,7 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
             // Still in progress — update to processing with any available URL
             await updateEInvoiceRegistrationByTeam(db, {
               teamId,
-              provider: "peppol",
+              provider: E_INVOICE_PROVIDER_PEPPOL,
               status: "processing",
               faults: null,
               siloEntryId: result.siloEntryId,
@@ -180,7 +181,7 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
 
           await updateEInvoiceRegistrationByTeam(db, {
             teamId,
-            provider: "peppol",
+            provider: E_INVOICE_PROVIDER_PEPPOL,
             status: "processing",
             siloEntryId: result.siloEntryId,
           });
@@ -196,7 +197,7 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
       try {
         await updateEInvoiceRegistrationByTeam(db, {
           teamId,
-          provider: "peppol",
+          provider: E_INVOICE_PROVIDER_PEPPOL,
           status: "error",
           faults: [
             {

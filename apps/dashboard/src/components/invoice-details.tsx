@@ -1,6 +1,7 @@
 "use client";
 
 import { TZDate } from "@date-fns/tz";
+import { friendlyFaultMessage } from "@midday/e-invoice/constants";
 import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import {
   Accordion,
@@ -242,7 +243,12 @@ export function InvoiceDetails() {
                   <span className="text-[#606060]">Processing</span>
                 )}
                 {data.eInvoiceStatus === "error" && (
-                  <span className="text-destructive">Failed</span>
+                  <span
+                    className="text-destructive"
+                    title={data.eInvoiceFaults?.[0]?.message ?? undefined}
+                  >
+                    {friendlyFaultMessage(data.eInvoiceFaults?.[0])}
+                  </span>
                 )}
               </span>
             </div>
