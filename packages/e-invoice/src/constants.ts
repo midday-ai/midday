@@ -32,8 +32,7 @@ export function friendlyFaultMessage(
   fault: { code?: string; message?: string } | undefined | null,
 ): string {
   if (!fault) return "Unknown error";
-  if (fault.code && FAULT_MESSAGES[fault.code]) {
-    return FAULT_MESSAGES[fault.code];
-  }
+  const mapped = fault.code ? FAULT_MESSAGES[fault.code] : undefined;
+  if (mapped) return mapped;
   return fault.message ?? fault.code ?? "Unknown error";
 }

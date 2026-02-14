@@ -122,7 +122,7 @@ stateDiagram-v2
 ```mermaid
 stateDiagram-v2
     [*] --> null: Invoice created
-    null --> processing: Worker submits to Invopop
+    null --> processing: Worker submits to Invopop, job created
     processing --> sent: Invopop confirms delivery
     processing --> error: Submission or delivery failed
     error --> [*]

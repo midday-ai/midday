@@ -128,12 +128,11 @@ sequenceDiagram
     G-->>W: issues[] (empty = valid)
     W->>G: toGOBL(data)
     G-->>W: GOBLInvoice
-    W->>DB: eInvoiceStatus = "processing"
     W->>C: createEntry(gobl, key, "invoices")
     C-->>W: SiloEntry
     W->>C: createJob(workflowId, entryId, key)
     C-->>W: Job (202 Accepted)
-    W->>DB: store siloEntryId + jobId
+    W->>DB: eInvoiceStatus = "processing", siloEntryId, jobId
     Note over I: Invopop processes invoice
     I->>WH: POST /webhooks/invopop
     WH->>DB: eInvoiceStatus = "sent" or "error"
