@@ -163,17 +163,9 @@ describe("validateEInvoiceRequirements", () => {
     expect(issues.some((i) => i.field === "customer.countryCode")).toBe(true);
   });
 
-  test("returns issue for missing customer Peppol ID", () => {
+  test("does not return a peppolId issue (checked as delivery pre-condition, not validation)", () => {
     const data = createInvoiceData({
       customer: createCustomer({ peppolId: null }),
-    });
-    const issues = validateEInvoiceRequirements(data);
-    expect(issues.some((i) => i.field === "customer.peppolId")).toBe(true);
-  });
-
-  test("returns no peppolId issue when customer has a Peppol ID", () => {
-    const data = createInvoiceData({
-      customer: createCustomer({ peppolId: "0208:0316597904" }),
     });
     const issues = validateEInvoiceRequirements(data);
     expect(issues.some((i) => i.field === "customer.peppolId")).toBe(false);

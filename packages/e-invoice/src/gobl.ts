@@ -156,12 +156,6 @@ export function validateEInvoiceRequirements(
       message: "Customer country is required",
     });
   }
-  if (!data.customer.peppolId) {
-    issues.push({
-      field: "customer.peppolId",
-      message: "Customer Peppol ID is required",
-    });
-  }
 
   // Line items
   if (!data.lineItems || data.lineItems.length === 0) {

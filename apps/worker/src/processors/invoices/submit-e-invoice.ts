@@ -123,6 +123,19 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
       throw new Error(`Customer not found for invoice: ${invoiceId}`);
     }
 
+    // Skip e-invoice delivery when the customer has no Peppol ID.
+    // This is an email-only customer — not an error condition.
+    if (!customer.peppolId) {
+      this.logger.info(
+        "Customer has no Peppol ID, skipping e-invoice delivery",
+        {
+          invoiceId,
+          customerId: customer.id,
+        },
+      );
+      return;
+    }
+
     // Build line items from invoice data
     const rawLineItems =
       (invoice.lineItems as Record<string, unknown>[] | null) ?? [];
