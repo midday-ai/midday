@@ -1,5 +1,6 @@
 import { useQueryStates } from "nuqs";
 import { createLoader, parseAsString, parseAsStringLiteral } from "nuqs/server";
+import { startTransition } from "react";
 
 export const inboxFilterParamsSchema = {
   q: parseAsString,
@@ -14,7 +15,9 @@ export const inboxFilterParamsSchema = {
 };
 
 export function useInboxFilterParams() {
-  const [params, setParams] = useQueryStates(inboxFilterParamsSchema);
+  const [params, setParams] = useQueryStates(inboxFilterParamsSchema, {
+    startTransition,
+  });
 
   return {
     params,

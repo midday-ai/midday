@@ -4,13 +4,11 @@ import {
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { Suspense } from "react";
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useTRPC } from "@/trpc/client";
 import { InboxConnectedEmpty } from "./inbox-empty";
 import { InboxGetStarted } from "./inbox-get-started";
-import { InboxViewSkeleton } from "./inbox-skeleton";
 import { InboxView } from "./inbox-view";
 import { Inbox } from "./index";
 
@@ -48,7 +46,10 @@ export function InboxContent() {
   // Accounts exist and have been synced, but no items (and no filter) -> show connected empty
   const hasSyncedAccounts = accounts?.some((a) => a.lastAccessed !== null);
 
+  const isAllTab = !filter.tab || filter.tab === "all";
+
   if (
+    isAllTab &&
     hasConnectedAccounts &&
     hasSyncedAccounts &&
     !hasInboxItems &&
@@ -64,9 +65,7 @@ export function InboxContent() {
 
   return (
     <Inbox>
-      <Suspense fallback={<InboxViewSkeleton />}>
-        <InboxView />
-      </Suspense>
+      <InboxView />
     </Inbox>
   );
 }

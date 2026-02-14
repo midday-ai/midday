@@ -5,6 +5,7 @@ import {
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
+import { startTransition } from "react";
 
 export const inboxParamsSchema = {
   inboxId: parseAsString,
@@ -19,7 +20,9 @@ export const inboxParamsSchema = {
 };
 
 export function useInboxParams() {
-  const [params, setParams] = useQueryStates(inboxParamsSchema);
+  const [params, setParams] = useQueryStates(inboxParamsSchema, {
+    startTransition,
+  });
 
   return {
     params,

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
 import { InboxContent } from "@/components/inbox/inbox-content";
+import { InboxHeader } from "@/components/inbox/inbox-header";
 import { InboxViewSkeleton } from "@/components/inbox/inbox-skeleton";
 import { loadInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { loadInboxParams } from "@/hooks/use-inbox-params";
@@ -32,6 +33,7 @@ export default async function Page(props: Props) {
 
   return (
     <HydrateClient>
+      <InboxHeader />
       <Suspense fallback={<InboxViewSkeleton />}>
         <InboxContent />
       </Suspense>

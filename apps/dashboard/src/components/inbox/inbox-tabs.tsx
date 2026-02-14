@@ -3,10 +3,12 @@
 import { cn } from "@midday/ui/cn";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useQueryState } from "nuqs";
+import { startTransition } from "react";
 
 export function InboxTabs() {
   const [currentTab, setTab] = useQueryState("tab", {
     defaultValue: "all",
+    startTransition,
   });
 
   return (
