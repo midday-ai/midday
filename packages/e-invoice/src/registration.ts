@@ -61,7 +61,7 @@ export function buildPartyDocument(data: TeamRegistrationData): {
     country?: string;
   }[];
   emails?: { addr: string }[];
-  inboxes?: { key: string; code: string }[];
+  inboxes?: { key: string; scheme?: string; code: string }[];
 } {
   const party: Record<string, unknown> = {
     $schema: "https://gobl.org/draft-0/org/party",
@@ -92,9 +92,20 @@ export function buildPartyDocument(data: TeamRegistrationData): {
     party.emails = [{ addr: data.email }];
   }
 
-  // Pre-existing Peppol ID
+  // Pre-existing Peppol ID — parse scheme:code from combined format
   if (data.peppolId) {
-    party.inboxes = [{ key: "peppol", code: data.peppolId }];
+    const colonIdx = data.peppolId.indexOf(":");
+    if (colonIdx > 0) {
+      party.inboxes = [
+        {
+          key: "peppol",
+          scheme: data.peppolId.slice(0, colonIdx),
+          code: data.peppolId.slice(colonIdx + 1),
+        },
+      ];
+    } else {
+      party.inboxes = [{ key: "peppol", code: data.peppolId }];
+    }
   }
 
   return party as ReturnType<typeof buildPartyDocument>;

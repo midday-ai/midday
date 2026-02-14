@@ -63,8 +63,12 @@ export function extractRegistrationUrl(entry: InvopopSiloEntry): string | null {
   const meta = entry.meta as InvopopMeta[] | undefined;
   if (!meta) return null;
 
+  // Invopop docs show the meta key is typically "link" with src identifying
+  // the provider (e.g. "peppol", "gov-es", "verifactu"). We check for the
+  // documented key first, then fall back to any meta with a link_url.
   const regMeta = meta.find(
     (m) =>
+      m.key === "link" ||
       m.key === "peppol-register-link" ||
       m.key === "register-link" ||
       m.link_url,

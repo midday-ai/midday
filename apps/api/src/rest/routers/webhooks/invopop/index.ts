@@ -2,7 +2,7 @@ import type { Context } from "@api/rest/types";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { parseInvoiceKey } from "@midday/e-invoice/gobl";
 import { parsePartyKey } from "@midday/e-invoice/registration";
-import type { InvopopWebhookPayload } from "@midday/e-invoice/types";
+import { invopopWebhookPayloadSchema } from "@midday/e-invoice/types";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
 import {
@@ -64,13 +64,24 @@ app.openapi(
       throw new HTTPException(401, { message: "Unauthorized" });
     }
 
-    let payload: InvopopWebhookPayload;
+    const rawBody = await c.req.json().catch(() => null);
 
-    try {
-      payload = await c.req.json();
-    } catch {
+    if (!rawBody) {
       throw new HTTPException(400, { message: "Invalid JSON payload" });
     }
+
+    const parsed = invopopWebhookPayloadSchema.safeParse(rawBody);
+
+    if (!parsed.success) {
+      logger.warn("Invopop webhook: payload validation failed", {
+        errors: parsed.error.flatten().fieldErrors,
+      });
+      throw new HTTPException(400, {
+        message: `Invalid webhook payload: ${parsed.error.issues.map((i) => i.message).join(", ")}`,
+      });
+    }
+
+    const payload = parsed.data;
 
     logger.info("Invopop webhook received", {
       id: payload.id,

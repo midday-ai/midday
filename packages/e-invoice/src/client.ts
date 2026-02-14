@@ -140,7 +140,6 @@ export async function createEntry(
 ): Promise<InvopopSiloEntry> {
   return request<InvopopSiloEntry>(apiKey, "POST", "/silo/v1/entries", {
     data,
-    content_type: "application/json",
     ...(key && { key }),
     ...(folder && { folder }),
   });

@@ -125,6 +125,22 @@ describe("extractPeppolId", () => {
 // ---------------------------------------------------------------------------
 
 describe("extractRegistrationUrl", () => {
+  test("extracts URL from meta with 'link' key (Invopop documented format)", () => {
+    const entry = createSiloEntry({
+      meta: [
+        {
+          id: "m1",
+          src: "peppol",
+          key: "link",
+          link_url: "https://peppol.invopop.com/reg/abc",
+        },
+      ],
+    });
+    expect(extractRegistrationUrl(entry)).toBe(
+      "https://peppol.invopop.com/reg/abc",
+    );
+  });
+
   test("extracts URL from meta with peppol-register-link key", () => {
     const entry = createSiloEntry({
       meta: [

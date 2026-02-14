@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 // ---------------------------------------------------------------------------
 // Invopop API response types
 // ---------------------------------------------------------------------------
@@ -5,6 +7,22 @@
 export interface InvopopPingResponse {
   ping: "pong";
 }
+
+// ---------------------------------------------------------------------------
+// Shared Zod schemas (used for runtime validation at API boundaries)
+// ---------------------------------------------------------------------------
+
+export const invopopFaultSchema = z.object({
+  provider: z.string().optional(),
+  code: z.string().optional(),
+  message: z.string().optional(),
+});
+
+export type InvopopFault = z.infer<typeof invopopFaultSchema>;
+
+// ---------------------------------------------------------------------------
+// API response interfaces
+// ---------------------------------------------------------------------------
 
 export interface InvopopSiloEntry {
   id: string;
@@ -23,12 +41,6 @@ export interface InvopopSiloEntry {
   attachments?: InvopopFile[];
   meta?: InvopopMeta[];
   data?: Record<string, unknown>;
-}
-
-export interface InvopopFault {
-  provider?: string;
-  code?: string;
-  message?: string;
 }
 
 export interface InvopopFile {
@@ -131,16 +143,24 @@ export interface InvopopValidationError {
 // Invopop webhook payload
 // ---------------------------------------------------------------------------
 
-export interface InvopopWebhookPayload {
-  id: string;
-  event?: string;
-  transform_job_id?: string;
-  silo_entry_id?: string;
-  owner_id?: string;
-  key?: string;
-  args?: Record<string, string>;
-  faults?: InvopopFault[];
-}
+/**
+ * Zod schema for the Invopop webhook payload.
+ * Used for runtime validation at the webhook endpoint.
+ *
+ * @see https://docs.invopop.com/guides/webhooks
+ */
+export const invopopWebhookPayloadSchema = z.object({
+  id: z.string(),
+  event: z.string().optional(),
+  transform_job_id: z.string().optional(),
+  silo_entry_id: z.string().optional(),
+  owner_id: z.string().optional(),
+  key: z.string().optional(),
+  args: z.record(z.string(), z.string()).optional(),
+  faults: z.array(invopopFaultSchema).optional(),
+});
+
+export type InvopopWebhookPayload = z.infer<typeof invopopWebhookPayloadSchema>;
 
 // ---------------------------------------------------------------------------
 // GOBL types (simplified for Midday's needs)

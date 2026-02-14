@@ -70,11 +70,18 @@ describe("buildPartyDocument", () => {
     expect(doc.emails).toEqual([{ addr: "billing@acme.com" }]);
   });
 
-  test("includes Peppol inbox when peppolId is provided", () => {
+  test("includes Peppol inbox with parsed scheme and code when peppolId has colon format", () => {
     const doc = buildPartyDocument(
       createTeamData({ peppolId: "0007:5567321234" }),
     );
-    expect(doc.inboxes).toEqual([{ key: "peppol", code: "0007:5567321234" }]);
+    expect(doc.inboxes).toEqual([
+      { key: "peppol", scheme: "0007", code: "5567321234" },
+    ]);
+  });
+
+  test("includes Peppol inbox without scheme when peppolId has no colon", () => {
+    const doc = buildPartyDocument(createTeamData({ peppolId: "5567321234" }));
+    expect(doc.inboxes).toEqual([{ key: "peppol", code: "5567321234" }]);
   });
 
   test("omits inboxes when peppolId is null", () => {

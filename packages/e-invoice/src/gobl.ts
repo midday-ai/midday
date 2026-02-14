@@ -9,6 +9,7 @@
 
 import type {
   GOBLAddress,
+  GOBLInbox,
   GOBLInvoice,
   GOBLLine,
   GOBLParty,
@@ -208,6 +209,39 @@ function buildTaxId(
   return taxId;
 }
 
+/**
+ * Parse a Peppol participant ID into separate scheme and code.
+ * Peppol IDs consist of two parts: scheme (e.g. "0208") and code
+ * (e.g. "0316597904"), typically stored as "0208:0316597904".
+ * If no colon is present, returns the whole string as code with no scheme.
+ */
+function parsePeppolId(peppolId: string): { scheme?: string; code: string } {
+  const colonIdx = peppolId.indexOf(":");
+  if (colonIdx > 0) {
+    return {
+      scheme: peppolId.slice(0, colonIdx),
+      code: peppolId.slice(colonIdx + 1),
+    };
+  }
+  return { code: peppolId };
+}
+
+function buildPeppolInbox(
+  peppolId: string,
+  schemeOverride?: string | null,
+): GOBLInbox {
+  const parsed = parsePeppolId(peppolId);
+  return {
+    key: "peppol",
+    ...(schemeOverride
+      ? { scheme: schemeOverride }
+      : parsed.scheme
+        ? { scheme: parsed.scheme }
+        : {}),
+    code: parsed.code,
+  };
+}
+
 function buildSupplier(
   team: MiddayTeam,
   registration?: PeppolRegistration | null,
@@ -229,15 +263,7 @@ function buildSupplier(
   // Add Peppol inbox from registration (or team's peppolId)
   const peppolId = registration?.peppolId ?? team.peppolId;
   if (peppolId) {
-    party.inboxes = [
-      {
-        key: "peppol",
-        ...(registration?.peppolScheme && {
-          scheme: registration.peppolScheme,
-        }),
-        code: peppolId,
-      },
-    ];
+    party.inboxes = [buildPeppolInbox(peppolId, registration?.peppolScheme)];
   }
 
   return party;
@@ -258,9 +284,9 @@ function buildCustomer(customer: MiddayCustomer): GOBLParty {
     party.emails = [{ addr: customer.email }];
   }
 
-  // Peppol inbox
+  // Peppol inbox — parse scheme:code from the combined peppolId
   if (customer.peppolId) {
-    party.inboxes = [{ key: "peppol", code: customer.peppolId }];
+    party.inboxes = [buildPeppolInbox(customer.peppolId)];
   }
 
   return party;

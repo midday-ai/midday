@@ -14,5 +14,8 @@
     "./parsers": "./src/parsers.ts",
     "./registration": "./src/registration.ts",
     "./types": "./src/types.ts"
+  },
+  "dependencies": {
+    "zod": "catalog:"
   }
 }

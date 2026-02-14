@@ -244,7 +244,7 @@ describe("toGOBL", () => {
     expect(result.supplier.emails?.[0]?.addr).toBe("billing@acme.com");
   });
 
-  test("builds supplier Peppol inbox from registration", () => {
+  test("builds supplier Peppol inbox from registration, parsing scheme:code", () => {
     const data = createInvoiceData({
       supplierRegistration: {
         peppolId: "0007:5567321234",
@@ -252,8 +252,9 @@ describe("toGOBL", () => {
       },
     });
     const result = toGOBL(data);
+    // peppolScheme override takes precedence; code is parsed from the combined peppolId
     expect(result.supplier.inboxes).toEqual([
-      { key: "peppol", scheme: "0007", code: "0007:5567321234" },
+      { key: "peppol", scheme: "0007", code: "5567321234" },
     ]);
   });
 
