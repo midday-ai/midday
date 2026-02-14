@@ -1729,6 +1729,30 @@ export async function getExistingInboxAttachmentsByReferenceIds(
   return results;
 }
 
+/**
+ * Look up an inbox item by its unique referenceId.
+ * Returns the row if it exists, or null otherwise.
+ * Useful for deduplicating before calling createInbox.
+ */
+export async function getInboxByReferenceId(
+  db: Database,
+  params: { referenceId: string; teamId: string },
+) {
+  const { referenceId, teamId } = params;
+
+  const [result] = await db
+    .select({
+      id: inbox.id,
+      status: inbox.status,
+      createdAt: inbox.createdAt,
+    })
+    .from(inbox)
+    .where(and(eq(inbox.referenceId, referenceId), eq(inbox.teamId, teamId)))
+    .limit(1);
+
+  return result ?? null;
+}
+
 export type CreateInboxParams = {
   displayName: string;
   teamId: string;

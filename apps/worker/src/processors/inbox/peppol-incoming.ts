@@ -1,5 +1,6 @@
 import {
   createInbox,
+  getInboxByReferenceId,
   getRegistrationByPeppolId,
   groupRelatedInboxItems,
   updateInboxWithProcessedData,
@@ -149,8 +150,29 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
       throw new Error(`Failed to upload PDF: ${uploadError.message}`);
     }
 
-    // Step 6: Create inbox item
+    // Step 6: Create inbox item (idempotent via referenceId)
     const referenceId = `peppol_${siloEntryId}`;
+
+    // Guard against duplicate webhook deliveries: check if this document was
+    // already ingested.  createInbox returns the *existing* row on referenceId
+    // conflicts (rather than null), so the old `!inboxData` check never
+    // triggered and duplicates slipped through the full pipeline.
+    const existingInbox = await getInboxByReferenceId(db, {
+      referenceId,
+      teamId,
+    });
+
+    if (existingInbox) {
+      this.logger.info(
+        "Inbox item already exists for this Peppol document, skipping duplicate",
+        {
+          referenceId,
+          inboxId: existingInbox.id,
+          status: existingInbox.status,
+        },
+      );
+      return;
+    }
 
     const inboxData = await createInbox(db, {
       displayName: parsed.supplierName,
@@ -174,10 +196,12 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
     });
 
     if (!inboxData) {
-      this.logger.info(
-        "Inbox item already exists (referenceId conflict), skipping",
-        { referenceId },
-      );
+      // Narrow race: another delivery squeezed in between our check and the
+      // insert.  createInbox's onConflictDoNothing already prevented a
+      // duplicate row — safe to bail out.
+      this.logger.info("Inbox item created by concurrent delivery, skipping", {
+        referenceId,
+      });
       return;
     }
 
