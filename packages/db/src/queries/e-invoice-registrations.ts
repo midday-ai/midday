@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import type { Database, DatabaseOrTransaction } from "../client";
 import { eInvoiceRegistrations } from "../schema";
 
@@ -30,6 +30,7 @@ export const getEInvoiceRegistration = async (
         eq(eInvoiceRegistrations.provider, params.provider),
       ),
     )
+    .orderBy(desc(eInvoiceRegistrations.updatedAt))
     .limit(1);
 
   return result ?? null;
@@ -100,25 +101,37 @@ export const updateEInvoiceRegistrationByTeam = async (
 };
 
 // ---------------------------------------------------------------------------
-// Create
+// Upsert (atomic insert-or-update keyed on team_id + provider)
 // ---------------------------------------------------------------------------
 
-type CreateEInvoiceRegistrationParams = {
+type UpsertEInvoiceRegistrationParams = {
   teamId: string;
   provider: string;
   status?: string;
+  faults?: Fault[] | null;
 };
 
-export const createEInvoiceRegistration = async (
+export const upsertEInvoiceRegistration = async (
   db: DatabaseOrTransaction,
-  params: CreateEInvoiceRegistrationParams,
+  params: UpsertEInvoiceRegistrationParams,
 ) => {
+  const status = params.status ?? "pending";
+
   const [result] = await db
     .insert(eInvoiceRegistrations)
     .values({
       teamId: params.teamId,
       provider: params.provider,
-      status: params.status ?? "pending",
+      status,
+      faults: params.faults ?? null,
+    })
+    .onConflictDoUpdate({
+      target: [eInvoiceRegistrations.teamId, eInvoiceRegistrations.provider],
+      set: {
+        status,
+        faults: params.faults ?? null,
+        updatedAt: new Date().toISOString(),
+      },
     })
     .returning();
 

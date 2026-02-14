@@ -4091,7 +4091,7 @@ export const eInvoiceRegistrations = pgTable(
   },
   (table) => [
     index("e_invoice_registrations_team_id_idx").on(table.teamId),
-    index("e_invoice_registrations_team_provider_idx").on(
+    unique("e_invoice_registrations_team_provider_unique").on(
       table.teamId,
       table.provider,
     ),

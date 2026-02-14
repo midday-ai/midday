@@ -18,7 +18,6 @@ import { teamCache } from "@midday/cache/team-cache";
 import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
 import {
   acceptTeamInvite,
-  createEInvoiceRegistration,
   createTeam,
   createTeamInvites,
   declineTeamInvite,
@@ -40,6 +39,7 @@ import {
   updateEInvoiceRegistration,
   updateTeamById,
   updateTeamMember,
+  upsertEInvoiceRegistration,
 } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
 import { tasks } from "@trigger.dev/sdk";
@@ -430,7 +430,7 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
-      // Check if already registered or pending
+      // Check if already registered or processing (guard before upsert)
       const existing = await getEInvoiceRegistration(db, {
         teamId,
         provider: "peppol",
@@ -450,32 +450,23 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
-      // Create or update registration record
-      let registrationId: string;
+      // Atomic upsert — the unique constraint on (team_id, provider) prevents
+      // duplicate rows even if concurrent requests pass the guard above.
+      const registration = await upsertEInvoiceRegistration(db, {
+        teamId,
+        provider: "peppol",
+        status: "pending",
+        faults: null,
+      });
 
-      if (existing) {
-        await updateEInvoiceRegistration(db, {
-          id: existing.id,
-          status: "pending",
-          faults: null,
+      if (!registration) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create registration record",
         });
-        registrationId = existing.id;
-      } else {
-        const created = await createEInvoiceRegistration(db, {
-          teamId,
-          provider: "peppol",
-          status: "pending",
-        });
-
-        if (!created) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create registration record",
-          });
-        }
-
-        registrationId = created.id;
       }
+
+      const registrationId = registration.id;
 
       // Trigger the registration worker job — roll back status on failure
       try {

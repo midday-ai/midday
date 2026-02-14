@@ -8,10 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { CopyInput } from "@/components/copy-input";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 
@@ -72,7 +74,14 @@ export function EInvoiceRegistration() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>E-Invoicing</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>E-Invoicing</CardTitle>
+          {status === "registered" && (
+            <div className="text-green-600 bg-green-100 text-[10px] dark:bg-green-900 dark:text-green-300 px-3 py-1 rounded-full font-mono">
+              Active
+            </div>
+          )}
+        </div>
         <CardDescription>
           Send compliant electronic invoices via the Peppol network, accepted
           for B2B invoicing in over 30 countries worldwide.
@@ -81,15 +90,25 @@ export function EInvoiceRegistration() {
 
       <CardContent>
         {isLoading ? (
-          <div className="text-sm text-muted-foreground">Loading...</div>
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-[140px]" />
+            <Skeleton className="h-10 w-[300px]" />
+            <Skeleton className="h-4 w-full max-w-[420px]" />
+          </div>
         ) : status === "registered" ? (
-          <div className="space-y-1">
-            <p className="text-sm font-medium">E-invoicing is active</p>
+          <div className="space-y-4">
             {registration?.peppolId && (
-              <p className="text-sm text-muted-foreground">
-                Peppol ID: {registration.peppolId}
-              </p>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">
+                  Peppol ID
+                </p>
+                <CopyInput
+                  value={`${registration.peppolScheme ? `${registration.peppolScheme}:` : ""}${registration.peppolId}`}
+                  className="max-w-[300px] font-mono"
+                />
+              </div>
             )}
+
             <p className="text-sm text-muted-foreground">
               Invoices sent to customers with a Peppol ID will be automatically
               delivered via the Peppol network.
