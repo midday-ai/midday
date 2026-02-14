@@ -19,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/customers",
     "/docs",
     "/download",
+    "/e-invoicing",
     "/file-storage",
     "/inbox",
     "/insights",

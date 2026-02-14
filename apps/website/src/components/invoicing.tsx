@@ -297,7 +297,7 @@ export function Invoicing() {
                   </div>
                   <div className="pt-4">
                     <Link
-                      href="/docs/e-invoicing"
+                      href="/e-invoicing"
                       className="font-sans text-sm text-primary hover:underline"
                     >
                       Learn more about e-invoicing &rarr;
