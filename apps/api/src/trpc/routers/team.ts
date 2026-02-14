@@ -41,6 +41,7 @@ import {
   updateTeamMember,
   upsertEInvoiceRegistration,
 } from "@midday/db/queries";
+import { E_INVOICE_PROVIDER_PEPPOL } from "@midday/e-invoice/constants";
 import { triggerJob } from "@midday/job-client";
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
