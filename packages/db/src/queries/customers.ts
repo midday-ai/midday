@@ -345,6 +345,7 @@ export type UpsertCustomerParams = {
   contact?: string | null;
   vatNumber?: string | null;
   countryCode?: string | null;
+  peppolId?: string | null;
   tags?: { id: string; name: string }[] | null;
 };
 
@@ -385,6 +386,7 @@ export const upsertCustomer = async (
         contact: rest.contact,
         vatNumber: rest.vatNumber,
         countryCode: rest.countryCode,
+        peppolId: rest.peppolId,
       },
     })
     .returning();

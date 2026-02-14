@@ -951,7 +951,10 @@ export const invoices = pgTable(
     eInvoiceStatus: text("e_invoice_status"), // null = not e-invoiced, "processing", "sent", "error"
     eInvoiceSiloEntryId: text("e_invoice_silo_entry_id"), // Invopop silo entry UUID
     eInvoiceJobId: text("e_invoice_job_id"), // Invopop transform job UUID
-    eInvoiceFaults: jsonb("e_invoice_faults").$type<{ message: string }[]>(), // Array of fault objects from Invopop
+    eInvoiceFaults:
+      jsonb("e_invoice_faults").$type<
+        { message: string; [key: string]: unknown }[]
+      >(), // Array of fault objects from Invopop
   },
   (table) => [
     index("invoices_created_at_idx").using(
@@ -4072,7 +4075,7 @@ export const eInvoiceRegistrations = pgTable(
     peppolId: text("peppol_id"), // Assigned Peppol participant ID after registration
     peppolScheme: text("peppol_scheme"), // Peppol scheme ID (e.g. "0208" for BE)
     registrationUrl: text("registration_url"), // URL for proof of ownership form
-    faults: jsonb().$type<{ message: string }[]>(), // Error details from Invopop
+    faults: jsonb().$type<{ message: string; [key: string]: unknown }[]>(), // Error details from Invopop
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .defaultNow()
       .notNull(),

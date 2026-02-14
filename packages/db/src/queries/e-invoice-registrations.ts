@@ -1,6 +1,16 @@
 import { and, eq } from "drizzle-orm";
-import type { Database } from "../client";
+import type { Database, DatabaseOrTransaction } from "../client";
 import { eInvoiceRegistrations } from "../schema";
+
+// ---------------------------------------------------------------------------
+// Shared field type for Invopop-compatible fault objects
+// ---------------------------------------------------------------------------
+
+type Fault = { message: string; [key: string]: unknown };
+
+// ---------------------------------------------------------------------------
+// Read
+// ---------------------------------------------------------------------------
 
 type GetEInvoiceRegistrationParams = {
   teamId: string;
@@ -25,10 +35,14 @@ export const getEInvoiceRegistration = async (
   return result ?? null;
 };
 
+// ---------------------------------------------------------------------------
+// Update by id
+// ---------------------------------------------------------------------------
+
 type UpdateEInvoiceRegistrationParams = {
   id: string;
   status: string;
-  faults?: { message: string }[] | null;
+  faults?: Fault[] | null;
   siloEntryId?: string | null;
   peppolId?: string | null;
   peppolScheme?: string | null;
@@ -36,7 +50,7 @@ type UpdateEInvoiceRegistrationParams = {
 };
 
 export const updateEInvoiceRegistration = async (
-  db: Database,
+  db: DatabaseOrTransaction,
   params: UpdateEInvoiceRegistrationParams,
 ) => {
   const { id, ...fields } = params;
@@ -50,6 +64,45 @@ export const updateEInvoiceRegistration = async (
     .where(eq(eInvoiceRegistrations.id, id));
 };
 
+// ---------------------------------------------------------------------------
+// Update by teamId + provider (used by webhook / worker where id is unknown)
+// ---------------------------------------------------------------------------
+
+type UpdateEInvoiceRegistrationByTeamParams = {
+  teamId: string;
+  provider: string;
+  status: string;
+  faults?: Fault[] | null;
+  siloEntryId?: string | null;
+  peppolId?: string | null;
+  peppolScheme?: string | null;
+  registrationUrl?: string | null;
+};
+
+export const updateEInvoiceRegistrationByTeam = async (
+  db: DatabaseOrTransaction,
+  params: UpdateEInvoiceRegistrationByTeamParams,
+) => {
+  const { teamId, provider, ...fields } = params;
+
+  await db
+    .update(eInvoiceRegistrations)
+    .set({
+      ...fields,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(
+      and(
+        eq(eInvoiceRegistrations.teamId, teamId),
+        eq(eInvoiceRegistrations.provider, provider),
+      ),
+    );
+};
+
+// ---------------------------------------------------------------------------
+// Create
+// ---------------------------------------------------------------------------
+
 type CreateEInvoiceRegistrationParams = {
   teamId: string;
   provider: string;
@@ -57,7 +110,7 @@ type CreateEInvoiceRegistrationParams = {
 };
 
 export const createEInvoiceRegistration = async (
-  db: Database,
+  db: DatabaseOrTransaction,
   params: CreateEInvoiceRegistrationParams,
 ) => {
   const [result] = await db

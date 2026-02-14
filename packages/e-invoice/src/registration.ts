@@ -120,6 +120,7 @@ export async function submitRegistration(
     apiKey,
     partyDoc as unknown as Record<string, unknown>,
     key,
+    "suppliers",
   );
 
   // Step 2: Run party registration workflow

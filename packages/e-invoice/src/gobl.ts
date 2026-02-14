@@ -143,6 +143,18 @@ export function validateEInvoiceRequirements(
       message: "Customer email is required",
     });
   }
+  if (!data.customer.addressLine1) {
+    issues.push({
+      field: "customer.address",
+      message: "Customer address is required for Peppol e-invoicing",
+    });
+  }
+  if (!data.customer.countryCode) {
+    issues.push({
+      field: "customer.countryCode",
+      message: "Customer country is required for Peppol e-invoicing",
+    });
+  }
 
   // Line items
   if (!data.lineItems || data.lineItems.length === 0) {
@@ -325,12 +337,10 @@ export function toGOBL(data: MiddayInvoiceData): GOBLInvoice {
   const customer = buildCustomer(data.customer);
   invoice.customer = customer;
 
-  // Add EN 16931 addon when Peppol is involved (supplier or customer has Peppol ID)
-  const hasPeppol =
-    data.supplierRegistration?.peppolId ||
-    data.team.peppolId ||
-    data.customer.peppolId;
-  if (hasPeppol) {
+  // Always add EN 16931 addon when the supplier is registered for Peppol.
+  // Per Invopop docs: "ensure you add the eu-en16931-v2017 addon to enable
+  // validations and extensions needed for Peppol".
+  if (data.supplierRegistration) {
     invoice.$addons = ["eu-en16931-v2017"];
   }
 

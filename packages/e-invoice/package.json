@@ -5,11 +5,13 @@
   "scripts": {
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
+    "test": "bun test --exit src",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
     "./client": "./src/client.ts",
     "./gobl": "./src/gobl.ts",
+    "./parsers": "./src/parsers.ts",
     "./registration": "./src/registration.ts",
     "./types": "./src/types.ts"
   }

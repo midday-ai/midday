@@ -1,8 +1,9 @@
-import { getTeamById } from "@midday/db/queries";
-import { eInvoiceRegistrations } from "@midday/db/schema";
+import {
+  getTeamById,
+  updateEInvoiceRegistrationByTeam,
+} from "@midday/db/queries";
 import { submitRegistration } from "@midday/e-invoice/registration";
 import type { Job } from "bullmq";
-import { and, eq } from "drizzle-orm";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
 
@@ -91,21 +92,14 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
         jobId: result.jobId,
       });
 
-      // Update the registration record in the DB
-      // The webhook will handle status updates (processing -> registered/error)
-      await db
-        .update(eInvoiceRegistrations)
-        .set({
-          status: "processing",
-          siloEntryId: result.siloEntryId,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(
-          and(
-            eq(eInvoiceRegistrations.teamId, teamId),
-            eq(eInvoiceRegistrations.provider, "peppol"),
-          ),
-        );
+      // Update the registration record via query function
+      // The webhook will handle subsequent status updates (processing -> registered/error)
+      await updateEInvoiceRegistrationByTeam(db, {
+        teamId,
+        provider: "peppol",
+        status: "processing",
+        siloEntryId: result.siloEntryId,
+      });
     } catch (error) {
       this.logger.error("Failed to submit supplier registration", {
         teamId,
@@ -114,25 +108,17 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
 
       // Update registration status to error
       try {
-        await db
-          .update(eInvoiceRegistrations)
-          .set({
-            status: "error",
-            faults: [
-              {
-                message:
-                  error instanceof Error ? error.message : "Unknown error",
-                provider: "invopop",
-              },
-            ],
-            updatedAt: new Date().toISOString(),
-          })
-          .where(
-            and(
-              eq(eInvoiceRegistrations.teamId, teamId),
-              eq(eInvoiceRegistrations.provider, "peppol"),
-            ),
-          );
+        await updateEInvoiceRegistrationByTeam(db, {
+          teamId,
+          provider: "peppol",
+          status: "error",
+          faults: [
+            {
+              message: error instanceof Error ? error.message : "Unknown error",
+              provider: "invopop",
+            },
+          ],
+        });
       } catch {
         // Don't mask the original error
       }

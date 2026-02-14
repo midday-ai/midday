@@ -93,7 +93,10 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
 
     // Fetch customer data
     const customer = invoice.customerId
-      ? await getCustomerById(db, invoice.customerId)
+      ? await getCustomerById(db, {
+          id: invoice.customerId,
+          teamId: invoice.teamId,
+        })
       : null;
 
     if (!customer) {
@@ -202,6 +205,7 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
         apiKey,
         goblInvoice as unknown as Record<string, unknown>,
         key,
+        "invoices",
       );
 
       this.logger.info("Silo entry created", {

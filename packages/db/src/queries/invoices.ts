@@ -383,6 +383,11 @@ export async function getInvoiceById(
         name: invoiceTemplates.name,
         isDefault: invoiceTemplates.isDefault,
       },
+      // E-invoice fields
+      eInvoiceStatus: invoices.eInvoiceStatus,
+      eInvoiceSiloEntryId: invoices.eInvoiceSiloEntryId,
+      eInvoiceJobId: invoices.eInvoiceJobId,
+      eInvoiceFaults: invoices.eInvoiceFaults,
       // Recurring invoice data
       invoiceRecurringId: invoices.invoiceRecurringId,
       recurringSequence: invoices.recurringSequence,
@@ -1117,7 +1122,7 @@ export type UpdateInvoiceParams = {
   eInvoiceStatus?: string | null;
   eInvoiceSiloEntryId?: string | null;
   eInvoiceJobId?: string | null;
-  eInvoiceFaults?: unknown | null;
+  eInvoiceFaults?: { message: string; [key: string]: unknown }[] | null;
   teamId: string;
   userId?: string;
 };

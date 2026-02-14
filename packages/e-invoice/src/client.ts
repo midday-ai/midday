@@ -129,16 +129,20 @@ export async function buildDocument(
  * Create a new silo entry from GOBL data.
  * The data is validated, calculated, and stored.
  * Use `key` for idempotency (e.g. "midday-invoice-{invoiceId}").
+ * Use `folder` to organise entries in the Invopop console
+ * (e.g. "invoices", "suppliers").
  */
 export async function createEntry(
   apiKey: string,
   data: Record<string, unknown>,
   key?: string,
+  folder?: string,
 ): Promise<InvopopSiloEntry> {
   return request<InvopopSiloEntry>(apiKey, "POST", "/silo/v1/entries", {
     data,
     content_type: "application/json",
     ...(key && { key }),
+    ...(folder && { folder }),
   });
 }
 

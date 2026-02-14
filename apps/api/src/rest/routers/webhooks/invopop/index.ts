@@ -1,14 +1,16 @@
 import type { Context } from "@api/rest/types";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { getInvoiceById, updateInvoice } from "@midday/db/queries";
-import { eInvoiceRegistrations } from "@midday/db/schema";
-import { fetchEntry } from "@midday/e-invoice/client";
 import { parseInvoiceKey } from "@midday/e-invoice/gobl";
 import { parsePartyKey } from "@midday/e-invoice/registration";
 import type { InvopopWebhookPayload } from "@midday/e-invoice/types";
 import { logger } from "@midday/logger";
-import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
+import {
+  handleInvoiceCallback,
+  handlePartyError,
+  handlePartyProcessing,
+  handlePartyRegistered,
+} from "./handlers";
 
 const app = new OpenAPIHono<Context>();
 
@@ -77,124 +79,24 @@ app.openapi(
     });
 
     try {
-      // Determine if this is an invoice or party registration callback
       const invoiceId = payload.key ? parseInvoiceKey(payload.key) : null;
       const teamId = payload.key ? parsePartyKey(payload.key) : null;
 
       if (teamId) {
-        // --- Party registration callback ---
         const isError =
           payload.event === "error" ||
           (payload.faults && payload.faults.length > 0);
+        const isProcessing = payload.event === "processing";
 
         if (isError) {
-          logger.warn("Peppol registration failed", {
-            teamId,
-            faults: payload.faults,
-          });
-
-          await db
-            .update(eInvoiceRegistrations)
-            .set({
-              status: "error",
-              faults: payload.faults || [],
-              updatedAt: new Date().toISOString(),
-            })
-            .where(
-              and(
-                eq(eInvoiceRegistrations.teamId, teamId),
-                eq(eInvoiceRegistrations.provider, "peppol"),
-              ),
-            );
+          await handlePartyError(db, teamId, payload);
+        } else if (isProcessing) {
+          await handlePartyProcessing(db, teamId, payload);
         } else {
-          logger.info("Peppol registration succeeded", { teamId });
-
-          // Fetch the silo entry to get the assigned Peppol participant ID
-          let peppolId: string | null = null;
-          let peppolScheme: string | null = null;
-
-          if (payload.silo_entry_id) {
-            try {
-              const apiKey = process.env.INVOPOP_API_KEY;
-              if (apiKey) {
-                const entry = await fetchEntry(apiKey, payload.silo_entry_id);
-                // The Peppol ID is in the org.party inboxes after registration
-                const partyData = entry.data as
-                  | Record<string, unknown>
-                  | undefined;
-                const doc = (partyData?.doc ?? partyData) as
-                  | Record<string, unknown>
-                  | undefined;
-                const inboxes = doc?.inboxes as
-                  | Array<{ key?: string; scheme?: string; code?: string }>
-                  | undefined;
-                const peppolInbox = inboxes?.find((i) => i.key === "peppol");
-                if (peppolInbox) {
-                  peppolId = peppolInbox.code ?? null;
-                  peppolScheme = peppolInbox.scheme ?? null;
-                }
-              }
-            } catch (err) {
-              logger.warn("Failed to fetch Peppol ID from silo entry", {
-                error: err instanceof Error ? err.message : String(err),
-              });
-            }
-          }
-
-          await db
-            .update(eInvoiceRegistrations)
-            .set({
-              status: "registered",
-              faults: null,
-              ...(peppolId && { peppolId }),
-              ...(peppolScheme && { peppolScheme }),
-              updatedAt: new Date().toISOString(),
-            })
-            .where(
-              and(
-                eq(eInvoiceRegistrations.teamId, teamId),
-                eq(eInvoiceRegistrations.provider, "peppol"),
-              ),
-            );
+          await handlePartyRegistered(db, teamId, payload);
         }
       } else if (invoiceId) {
-        // --- Invoice e-invoice callback ---
-        const invoice = await getInvoiceById(db, { id: invoiceId });
-
-        if (!invoice) {
-          logger.warn("Invopop webhook: invoice not found", { invoiceId });
-          return c.json({ received: true });
-        }
-
-        const isError =
-          payload.event === "error" ||
-          (payload.faults && payload.faults.length > 0);
-
-        if (isError) {
-          logger.warn("E-invoice submission failed", {
-            invoiceId,
-            faults: payload.faults,
-          });
-
-          await updateInvoice(db, {
-            id: invoiceId,
-            teamId: invoice.teamId,
-            eInvoiceStatus: "error",
-            eInvoiceFaults: payload.faults || [],
-          });
-        } else {
-          logger.info("E-invoice submission succeeded", {
-            invoiceId,
-            siloEntryId: payload.silo_entry_id,
-          });
-
-          await updateInvoice(db, {
-            id: invoiceId,
-            teamId: invoice.teamId,
-            eInvoiceStatus: "sent",
-            eInvoiceFaults: null,
-          });
-        }
+        await handleInvoiceCallback(db, invoiceId, payload);
       } else {
         logger.warn("Invopop webhook: unrecognized key format", {
           key: payload.key,
@@ -206,7 +108,6 @@ app.openapi(
         webhookId: payload.id,
         key: payload.key,
       });
-      // Return 200 to avoid retries for events we partially processed
     }
 
     return c.json({ received: true });
