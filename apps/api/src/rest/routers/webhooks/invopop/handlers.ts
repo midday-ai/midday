@@ -15,6 +15,7 @@ import type {
   InvopopWebhookPayload,
 } from "@midday/e-invoice/types";
 import { logger } from "@midday/logger";
+import { Notifications } from "@midday/notifications";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -53,12 +54,33 @@ export async function handlePartyError(
     faults: payload.faults,
   });
 
+  const faults = mapFaults(payload.faults);
+
   await updateEInvoiceRegistrationByTeam(db, {
     teamId,
     provider: "peppol",
     status: "error",
-    faults: mapFaults(payload.faults),
+    faults,
   });
+
+  // Notify team owners — fire and forget
+  const notifications = new Notifications(db);
+  notifications
+    .create(
+      "e_invoice_registration_error",
+      teamId,
+      {
+        teamId,
+        errorMessage: faults[0]?.message ?? "Registration failed",
+      },
+      { sendEmail: true },
+    )
+    .catch((err) =>
+      logger.warn("Failed to send e-invoice error notification", {
+        teamId,
+        error: err instanceof Error ? err.message : String(err),
+      }),
+    );
 }
 
 export async function handlePartyProcessing(
@@ -78,6 +100,22 @@ export async function handlePartyProcessing(
     faults: null,
     ...(registrationUrl && { registrationUrl }),
   });
+
+  // Notify team owners — fire and forget so the webhook returns 200 quickly
+  const notifications = new Notifications(db);
+  notifications
+    .create(
+      "e_invoice_registration_processing",
+      teamId,
+      { teamId, registrationUrl: registrationUrl ?? undefined },
+      { sendEmail: true },
+    )
+    .catch((err) =>
+      logger.warn("Failed to send e-invoice processing notification", {
+        teamId,
+        error: err instanceof Error ? err.message : String(err),
+      }),
+    );
 }
 
 export async function handlePartyRegistered(
@@ -114,6 +152,22 @@ export async function handlePartyRegistered(
     peppolId,
     ...(peppolScheme && { peppolScheme }),
   });
+
+  // Notify team owners — fire and forget
+  const notifications = new Notifications(db);
+  notifications
+    .create(
+      "e_invoice_registration_complete",
+      teamId,
+      { teamId, peppolId },
+      { sendEmail: true },
+    )
+    .catch((err) =>
+      logger.warn("Failed to send e-invoice registered notification", {
+        teamId,
+        error: err instanceof Error ? err.message : String(err),
+      }),
+    );
 }
 
 // ---------------------------------------------------------------------------

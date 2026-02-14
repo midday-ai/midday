@@ -1,5 +1,8 @@
 import type { Database } from "@midday/db/client";
 import { shouldSendNotification } from "@midday/db/queries";
+import EInvoiceErrorEmail from "@midday/email/emails/e-invoice-error";
+import EInvoiceRegisteredEmail from "@midday/email/emails/e-invoice-registered";
+import EInvoiceVerificationEmail from "@midday/email/emails/e-invoice-verification";
 import InsightsWeeklyEmail from "@midday/email/emails/insights-weekly";
 import InvoiceEmail from "@midday/email/emails/invoice";
 import InvoiceOverdueEmail from "@midday/email/emails/invoice-overdue";
@@ -169,6 +172,9 @@ export class EmailService {
       transactions: TransactionsEmail,
       "transactions-exported": TransactionsExportedEmail,
       "upcoming-invoices": UpcomingInvoicesEmail,
+      "e-invoice-verification": EInvoiceVerificationEmail,
+      "e-invoice-registered": EInvoiceRegisteredEmail,
+      "e-invoice-error": EInvoiceErrorEmail,
     };
 
     const template = templates[templateName as keyof typeof templates];
