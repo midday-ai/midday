@@ -20,7 +20,7 @@ import { useInboxStore } from "@/store/inbox";
 import { useTRPC } from "@/trpc/client";
 import { InboxBulkActions } from "./inbox-bulk-actions";
 import { InboxDetails } from "./inbox-details";
-import { InboxConnectedEmpty, NoResults } from "./inbox-empty";
+import { InboxConnectedEmpty, InboxOtherEmpty, NoResults } from "./inbox-empty";
 import { InboxItem } from "./inbox-item";
 import { InboxViewSkeleton } from "./inbox-skeleton";
 
@@ -221,19 +221,32 @@ export function InboxView() {
   }, [tableData]);
 
   useEffect(() => {
-    if (!params.inboxId && tableData.length > 0) {
+    if (tableData.length > 0) {
+      const currentInList = tableData.some(
+        (item) => item.id === params.inboxId,
+      );
+
+      // Auto-select first item if nothing selected or current selection isn't in the list
+      if (!params.inboxId || !currentInList) {
+        setParams({
+          ...params,
+          inboxId: tableData.at(0)?.id,
+        });
+      }
+    } else if (params.inboxId) {
+      // Clear selection when list is empty
       setParams({
         ...params,
-        inboxId: tableData.at(0)?.id,
+        inboxId: null,
       });
     }
   }, [tableData, params.inboxId, setParams]);
 
-  // Clear lastClickedIndex when sort/filter params change
+  // Clear lastClickedIndex when sort/filter/tab params change
   // since item positions in tableData will change
   useEffect(() => {
     setLastClickedIndex(null);
-  }, [params.sort, params.order, filter.q, filter.status]);
+  }, [params.sort, params.order, filter.q, filter.status, filter.tab]);
 
   // Arrow key navigation
   useHotkeys(
@@ -338,9 +351,16 @@ export function InboxView() {
     return <InboxViewSkeleton />;
   }
 
-  // If timeout reached with no items, show connected empty state
-  if (hasTimedOut && !tableData?.length && !hasFilter) {
+  // If timeout reached with no items, show connected empty state (only on "all" tab)
+  const isAllTab = !filter.tab || filter.tab === "all";
+
+  if (isAllTab && hasTimedOut && !tableData?.length && !hasFilter) {
     return <InboxConnectedEmpty />;
+  }
+
+  // Show empty state for "other" tab when no items
+  if (!isAllTab && !tableData?.length && !hasFilter) {
+    return <InboxOtherEmpty />;
   }
 
   if (hasFilter && !tableData?.length) {
