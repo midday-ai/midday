@@ -48,6 +48,11 @@ ARG SENTRY_AUTH_TOKEN
 ARG SENTRY_ORG
 ARG SENTRY_PROJECT
 
+# Server Action encryption key — must be identical across all replicas/regions
+# to prevent "Failed to find Server Action" errors. Base64-encoded, 32 bytes.
+ARG NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+ENV NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=$NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+
 # Release tracking (Railway provides the git SHA automatically)
 ARG RAILWAY_GIT_COMMIT_SHA
 ENV NEXT_PUBLIC_SENTRY_RELEASE=$RAILWAY_GIT_COMMIT_SHA
