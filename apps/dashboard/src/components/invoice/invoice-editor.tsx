@@ -87,6 +87,35 @@ export function InvoiceEditor({
   const slashCommandItems = useMemo((): SlashCommandItem[] => {
     const items: SlashCommandItem[] = [];
 
+    // Company info slash command (first for easy access)
+    if (team?.name) {
+      const companyLines: string[] = [];
+      if (team.name) companyLines.push(team.name);
+      if (team.addressLine1) companyLines.push(team.addressLine1);
+      if (team.addressLine2) companyLines.push(team.addressLine2);
+
+      const cityLine = [team.city, team.state, team.zip]
+        .filter(Boolean)
+        .join(", ");
+      if (cityLine) companyLines.push(cityLine);
+
+      if (team.vatNumber) companyLines.push(`VAT: ${team.vatNumber}`);
+      if (team.email) companyLines.push(team.email);
+
+      items.push({
+        id: "company-info",
+        label: "Company Info",
+        command: ({ editor, range }) => {
+          editor
+            .chain()
+            .focus()
+            .deleteRange(range)
+            .insertContent(companyLines.join("\n"))
+            .run();
+        },
+      });
+    }
+
     if (bankAccounts.length > 0) {
       items.push({
         id: "bank-account",
@@ -163,35 +192,6 @@ export function InvoiceEditor({
             .focus()
             .deleteRange(range)
             .insertContent(customerName)
-            .run();
-        },
-      });
-    }
-
-    // Company info slash command
-    if (team?.name && (team?.addressLine1 || team?.vatNumber)) {
-      const companyLines: string[] = [];
-      if (team.name) companyLines.push(team.name);
-      if (team.addressLine1) companyLines.push(team.addressLine1);
-      if (team.addressLine2) companyLines.push(team.addressLine2);
-
-      const cityLine = [team.city, team.state, team.zip]
-        .filter(Boolean)
-        .join(", ");
-      if (cityLine) companyLines.push(cityLine);
-
-      if (team.vatNumber) companyLines.push(`VAT: ${team.vatNumber}`);
-      if (team.email) companyLines.push(team.email);
-
-      items.push({
-        id: "company-info",
-        label: "Company Info",
-        command: ({ editor, range }) => {
-          editor
-            .chain()
-            .focus()
-            .deleteRange(range)
-            .insertContent(companyLines.join("\n"))
             .run();
         },
       });

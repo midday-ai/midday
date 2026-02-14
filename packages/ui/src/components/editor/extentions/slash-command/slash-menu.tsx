@@ -155,7 +155,10 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
     }
 
     return (
-      <div className="relative">
+      <div
+        className="relative"
+        style={{ pointerEvents: "auto", cursor: "default" }}
+      >
         {/* Main menu */}
         <div className="z-50 min-w-[180px] overflow-hidden border border-border bg-background p-1 text-popover-foreground shadow-md">
           {items.map((item, index) => (
@@ -168,6 +171,7 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
                   ? "bg-accent text-accent-foreground"
                   : "hover:bg-accent hover:text-accent-foreground",
               )}
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => selectItem(index)}
               onMouseEnter={() => {
                 setSelectedIndex(index);
@@ -208,6 +212,7 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
                       ? "bg-accent text-accent-foreground"
                       : "hover:bg-accent hover:text-accent-foreground",
                   )}
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => selectSubmenuItem(index)}
                   onMouseEnter={() => setSubmenuSelectedIndex(index)}
                 >
