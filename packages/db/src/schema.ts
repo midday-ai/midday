@@ -274,6 +274,10 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "e_invoice_registration_processing",
   "e_invoice_registration_complete",
   "e_invoice_registration_error",
+
+  // E-invoice delivery activities
+  "e_invoice_sent",
+  "e_invoice_error",
 ]);
 
 export const activitySourceEnum = pgEnum("activity_source", [

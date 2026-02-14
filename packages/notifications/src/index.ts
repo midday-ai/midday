@@ -16,9 +16,11 @@ import { createActivitySchema, type NotificationTypes } from "./schemas";
 import { EmailService } from "./services/email-service";
 import { documentProcessed } from "./types/document-processed";
 import { documentUploaded } from "./types/document-uploaded";
+import { eInvoiceDeliveryError } from "./types/e-invoice-delivery-error";
 import { eInvoiceRegistrationComplete } from "./types/e-invoice-registration-complete";
 import { eInvoiceRegistrationError } from "./types/e-invoice-registration-error";
 import { eInvoiceRegistrationProcessing } from "./types/e-invoice-registration-processing";
+import { eInvoiceSent } from "./types/e-invoice-sent";
 import { inboxAutoMatched } from "./types/inbox-auto-matched";
 import { inboxCrossCurrencyMatched } from "./types/inbox-cross-currency-matched";
 import { inboxNeedsReview } from "./types/inbox-needs-review";
@@ -68,6 +70,8 @@ const handlers = {
   e_invoice_registration_processing: eInvoiceRegistrationProcessing,
   e_invoice_registration_complete: eInvoiceRegistrationComplete,
   e_invoice_registration_error: eInvoiceRegistrationError,
+  e_invoice_sent: eInvoiceSent,
+  e_invoice_error: eInvoiceDeliveryError,
 } as const;
 
 export class Notifications {

@@ -190,18 +190,37 @@ export async function handleInvoiceCallback(
     payload.event === "error" || (payload.faults && payload.faults.length > 0);
   const isProcessing = payload.event === "processing";
 
+  const notifications = new Notifications(db);
+
   if (isError) {
     logger.warn("E-invoice submission failed", {
       invoiceId,
       faults: payload.faults,
     });
 
+    const faults = mapFaults(payload.faults);
+
     await updateInvoice(db, {
       id: invoiceId,
       teamId: invoice.teamId,
       eInvoiceStatus: "error",
-      eInvoiceFaults: mapFaults(payload.faults),
+      eInvoiceFaults: faults,
     });
+
+    // In-app notification — fire and forget
+    notifications
+      .create("e_invoice_error", invoice.teamId, {
+        invoiceId,
+        invoiceNumber: invoice.invoiceNumber ?? undefined,
+        customerName: invoice.customerName ?? undefined,
+        errorMessage: faults[0]?.message ?? "E-invoice delivery failed",
+      })
+      .catch((err) =>
+        logger.warn("Failed to send e-invoice error notification", {
+          invoiceId,
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
   } else if (isProcessing) {
     logger.info("E-invoice submission processing", {
       invoiceId,
@@ -225,5 +244,19 @@ export async function handleInvoiceCallback(
       eInvoiceStatus: "sent",
       eInvoiceFaults: null,
     });
+
+    // In-app notification — fire and forget
+    notifications
+      .create("e_invoice_sent", invoice.teamId, {
+        invoiceId,
+        invoiceNumber: invoice.invoiceNumber ?? undefined,
+        customerName: invoice.customerName ?? undefined,
+      })
+      .catch((err) =>
+        logger.warn("Failed to send e-invoice sent notification", {
+          invoiceId,
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
   }
 }

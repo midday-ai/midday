@@ -714,6 +714,38 @@ const handleInboxCrossCurrencyMatched: NotificationDescriptionHandler = (
   return t("notifications.inbox_cross_currency_matched.title");
 };
 
+const handleEInvoiceSent: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  _t,
+) => {
+  const invoiceNumber = metadata?.invoiceNumber;
+  const customerName = metadata?.customerName;
+  if (invoiceNumber && customerName) {
+    return `Invoice ${invoiceNumber} delivered via Peppol to ${customerName}`;
+  }
+  if (invoiceNumber) {
+    return `Invoice ${invoiceNumber} delivered via Peppol`;
+  }
+  return "E-invoice delivered via Peppol";
+};
+
+const handleEInvoiceError: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  _t,
+) => {
+  const invoiceNumber = metadata?.invoiceNumber;
+  const customerName = metadata?.customerName;
+  if (invoiceNumber && customerName) {
+    return `E-invoice delivery failed for ${invoiceNumber} to ${customerName}`;
+  }
+  if (invoiceNumber) {
+    return `E-invoice delivery failed for ${invoiceNumber}`;
+  }
+  return "E-invoice delivery failed";
+};
+
 const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   transactions_created: handleTransactionsCreated,
   inbox_new: handleInboxNew,
@@ -733,6 +765,8 @@ const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   recurring_series_completed: handleRecurringSeriesCompleted,
   recurring_series_paused: handleRecurringSeriesPaused,
   recurring_invoice_upcoming: handleRecurringInvoiceUpcoming,
+  e_invoice_sent: handleEInvoiceSent,
+  e_invoice_error: handleEInvoiceError,
 };
 
 export function getNotificationDescription(

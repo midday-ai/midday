@@ -230,6 +230,21 @@ export function InvoiceDetails() {
             </div>
           )}
 
+          {data.eInvoiceStatus && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">E-invoice</span>
+              <span className="text-sm">
+                {data.eInvoiceStatus === "sent" && "Delivered via Peppol"}
+                {data.eInvoiceStatus === "processing" && (
+                  <span className="text-[#606060]">Processing</span>
+                )}
+                {data.eInvoiceStatus === "error" && (
+                  <span className="text-destructive">Failed</span>
+                )}
+              </span>
+            </div>
+          )}
+
           <div className="flex justify-between items-center">
             <span className="text-sm text-[#606060]">Invoice no.</span>
             <span className="text-sm">

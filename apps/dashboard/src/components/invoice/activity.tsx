@@ -91,6 +91,30 @@ export function InvoiceActivity({ data }: Props) {
           timeFormat={user?.timeFormat}
         />
       )}
+      {data?.eInvoiceStatus === "processing" && (
+        <ActivityItem
+          label="E-invoice processing"
+          date={data?.updatedAt}
+          completed={false}
+          timeFormat={user?.timeFormat}
+        />
+      )}
+      {data?.eInvoiceStatus === "sent" && (
+        <ActivityItem
+          label="Delivered via Peppol"
+          date={data?.updatedAt}
+          completed
+          timeFormat={user?.timeFormat}
+        />
+      )}
+      {data?.eInvoiceStatus === "error" && (
+        <ActivityItem
+          label="E-invoice failed"
+          date={data?.updatedAt}
+          completed
+          timeFormat={user?.timeFormat}
+        />
+      )}
       {data?.viewedAt && (
         <ActivityItem
           label="Viewed"

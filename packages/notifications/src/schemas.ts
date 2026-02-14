@@ -39,6 +39,8 @@ export const createActivitySchema = z.object({
     "e_invoice_registration_processing",
     "e_invoice_registration_complete",
     "e_invoice_registration_error",
+    "e_invoice_sent",
+    "e_invoice_error",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
@@ -402,6 +404,27 @@ export type EInvoiceRegistrationErrorInput = z.infer<
   typeof eInvoiceRegistrationErrorSchema
 >;
 
+// E-invoice delivery schemas
+export const eInvoiceSentSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string().optional(),
+  customerName: z.string().optional(),
+});
+
+export const eInvoiceDeliveryErrorSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string().optional(),
+  customerName: z.string().optional(),
+  errorMessage: z.string().optional(),
+});
+
+export type EInvoiceSentInput = z.infer<typeof eInvoiceSentSchema>;
+export type EInvoiceDeliveryErrorInput = z.infer<
+  typeof eInvoiceDeliveryErrorSchema
+>;
+
 // Notification types map - all available notification types with their data structures
 export type NotificationTypes = {
   transactions_created: TransactionsCreatedInput;
@@ -430,4 +453,6 @@ export type NotificationTypes = {
   e_invoice_registration_processing: EInvoiceRegistrationProcessingInput;
   e_invoice_registration_complete: EInvoiceRegistrationCompleteInput;
   e_invoice_registration_error: EInvoiceRegistrationErrorInput;
+  e_invoice_sent: EInvoiceSentInput;
+  e_invoice_error: EInvoiceDeliveryErrorInput;
 };
