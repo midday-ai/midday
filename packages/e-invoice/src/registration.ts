@@ -14,7 +14,12 @@
  * 6. Webhook fires on completion -> update registration status
  */
 
-import { createEntry, createJob } from "./client";
+import {
+  createEntry,
+  createJob,
+  fetchEntryByKey,
+  isConflictError,
+} from "./client";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -111,25 +116,38 @@ export async function submitRegistration(
   apiKey: string,
   partyWorkflowId: string,
   data: TeamRegistrationData,
-): Promise<{ siloEntryId: string; jobId: string }> {
+): Promise<{ siloEntryId: string; jobId: string | null }> {
   const partyDoc = buildPartyDocument(data);
   const key = partyKey(data.teamId);
 
   // Step 1: Create silo entry with org.party
-  const entry = await createEntry(
-    apiKey,
-    partyDoc as unknown as Record<string, unknown>,
-    key,
-    "suppliers",
-  );
+  let entry: Awaited<ReturnType<typeof createEntry>>;
+
+  try {
+    entry = await createEntry(apiKey, partyDoc, key, "suppliers");
+  } catch (err) {
+    if (isConflictError(err)) {
+      // Entry already exists for this key (retry / duplicate trigger).
+      // Fetch the existing entry so we can still attempt to create the job.
+      entry = await fetchEntryByKey(apiKey, key);
+    } else {
+      throw err;
+    }
+  }
 
   // Step 2: Run party registration workflow
-  const job = await createJob(apiKey, partyWorkflowId, entry.id, key);
-
-  return {
-    siloEntryId: entry.id,
-    jobId: job.id,
-  };
+  try {
+    const job = await createJob(apiKey, partyWorkflowId, entry.id, key);
+    return { siloEntryId: entry.id, jobId: job.id };
+  } catch (err) {
+    if (isConflictError(err)) {
+      // Job already exists for this key — the registration workflow is
+      // already in progress. Return the entry ID; the webhook will
+      // reconcile the final status.
+      return { siloEntryId: entry.id, jobId: null };
+    }
+    throw err;
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -39,6 +39,9 @@ app.openapi(
       401: {
         description: "Invalid or missing authorization",
       },
+      500: {
+        description: "Webhook processing failed (provider should retry)",
+      },
     },
   }),
   async (c) => {
@@ -107,6 +110,10 @@ app.openapi(
         error: err instanceof Error ? err.message : String(err),
         webhookId: payload.id,
         key: payload.key,
+      });
+
+      throw new HTTPException(500, {
+        message: "Failed to process webhook",
       });
     }
 

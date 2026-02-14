@@ -733,6 +733,18 @@ export function SettingsMenu() {
                     href: "/settings/company#e-invoicing",
                   },
                   {
+                    done: eInvoiceReadiness?.checks.customerName ?? false,
+                    label: "Customer name",
+                    href: null,
+                    openCustomer: true,
+                  },
+                  {
+                    done: eInvoiceReadiness?.checks.customerEmail ?? false,
+                    label: "Customer email",
+                    href: null,
+                    openCustomer: true,
+                  },
+                  {
                     done: eInvoiceReadiness?.checks.customerAddress ?? false,
                     label: "Customer address",
                     href: null,
@@ -741,6 +753,12 @@ export function SettingsMenu() {
                   {
                     done: eInvoiceReadiness?.checks.customerVat ?? false,
                     label: "Customer VAT",
+                    href: null,
+                    openCustomer: true,
+                  },
+                  {
+                    done: eInvoiceReadiness?.checks.customerPeppolId ?? false,
+                    label: "Customer Peppol ID",
                     href: null,
                     openCustomer: true,
                   },

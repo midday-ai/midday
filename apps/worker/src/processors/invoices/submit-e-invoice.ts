@@ -5,7 +5,12 @@ import {
   getTeamById,
   updateInvoice,
 } from "@midday/db/queries";
-import { createEntry, createJob } from "@midday/e-invoice/client";
+import {
+  createEntry,
+  createJob,
+  fetchEntryByKey,
+  isConflictError,
+} from "@midday/e-invoice/client";
 import type { MiddayInvoiceData, MiddayLineItem } from "@midday/e-invoice/gobl";
 import {
   invoiceKey,
@@ -39,6 +44,17 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
     if (!invoice) {
       this.logger.error("Invoice not found", { invoiceId });
       throw new Error(`Invoice not found: ${invoiceId}`);
+    }
+
+    // Guard: skip if a prior submission already reached a terminal state.
+    // Retries or duplicate triggers must not regress a "sent" invoice back to
+    // "processing" / "error".
+    if (invoice.eInvoiceStatus === "sent") {
+      this.logger.info(
+        "E-invoice already sent, skipping duplicate submission",
+        { invoiceId },
+      );
+      return;
     }
 
     // Fetch team for e-invoice settings and company data
@@ -192,44 +208,71 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
       regime: goblInvoice.$regime,
     });
 
-    // Update status to processing
-    await updateInvoice(db, {
-      id: invoiceId,
-      teamId: team.id,
-      eInvoiceStatus: "processing",
-    });
-
     try {
       // Step 1: Create silo entry (synchronous validation + storage)
-      const entry = await createEntry(
-        apiKey,
-        goblInvoice as unknown as Record<string, unknown>,
-        key,
-        "invoices",
-      );
+      let entry: Awaited<ReturnType<typeof createEntry>>;
 
-      this.logger.info("Silo entry created", {
-        invoiceId,
-        entryId: entry.id,
-        state: entry.state,
-      });
+      try {
+        entry = await createEntry(apiKey, goblInvoice, key, "invoices");
+
+        this.logger.info("Silo entry created", {
+          invoiceId,
+          entryId: entry.id,
+          state: entry.state,
+        });
+      } catch (entryError) {
+        if (isConflictError(entryError)) {
+          // Entry already exists for this key (retry / duplicate trigger).
+          // Fetch the existing entry so we can still attempt to create the job.
+          this.logger.warn(
+            "Silo entry already exists (409 conflict), fetching existing entry",
+            { invoiceId, key },
+          );
+          entry = await fetchEntryByKey(apiKey, key);
+        } else {
+          throw entryError;
+        }
+      }
 
       // Step 2: Create job to run workflow
-      const transformJob = await createJob(apiKey, workflowId, entry.id, key);
+      try {
+        const transformJob = await createJob(apiKey, workflowId, entry.id, key);
 
-      this.logger.info("Transform job created", {
-        invoiceId,
-        jobId: transformJob.id,
-        workflowId,
-      });
+        this.logger.info("Transform job created", {
+          invoiceId,
+          jobId: transformJob.id,
+          workflowId,
+        });
 
-      // Store the Invopop IDs for tracking via webhook
-      await updateInvoice(db, {
-        id: invoiceId,
-        teamId: team.id,
-        eInvoiceSiloEntryId: entry.id,
-        eInvoiceJobId: transformJob.id,
-      });
+        // We successfully created a new job — safe to mark as "processing"
+        // now that we know this is not a duplicate.
+        await updateInvoice(db, {
+          id: invoiceId,
+          teamId: team.id,
+          eInvoiceStatus: "processing",
+          eInvoiceSiloEntryId: entry.id,
+          eInvoiceJobId: transformJob.id,
+        });
+      } catch (jobError) {
+        if (isConflictError(jobError)) {
+          // Job already exists for this key — the submission is already in
+          // flight. Store the entry ID but do NOT touch the status; the
+          // webhook will reconcile the final state. Overwriting here would
+          // regress a "sent" status back to "processing" on retries.
+          this.logger.warn(
+            "Transform job already exists (409 conflict), submission already in progress",
+            { invoiceId, key, entryId: entry.id },
+          );
+
+          await updateInvoice(db, {
+            id: invoiceId,
+            teamId: team.id,
+            eInvoiceSiloEntryId: entry.id,
+          });
+        } else {
+          throw jobError;
+        }
+      }
     } catch (error) {
       this.logger.error("Failed to submit e-invoice to Invopop", {
         invoiceId,

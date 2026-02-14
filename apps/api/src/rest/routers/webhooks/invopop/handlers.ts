@@ -92,12 +92,26 @@ export async function handlePartyRegistered(
     ? extractPeppolId(entry)
     : { peppolId: null, peppolScheme: null };
 
+  if (!peppolId) {
+    // Don't persist "registered" without identifiers — throw so the webhook
+    // returns 500 and Invopop retries later when the silo entry is available.
+    logger.warn("Peppol registration callback missing peppolId, will retry", {
+      teamId,
+      siloEntryId: payload.silo_entry_id,
+      hadEntry: entry !== null,
+    });
+
+    throw new Error(
+      "Cannot complete registration: peppolId could not be extracted",
+    );
+  }
+
   await updateEInvoiceRegistrationByTeam(db, {
     teamId,
     provider: "peppol",
     status: "registered",
     faults: null,
-    ...(peppolId && { peppolId }),
+    peppolId,
     ...(peppolScheme && { peppolScheme }),
   });
 }

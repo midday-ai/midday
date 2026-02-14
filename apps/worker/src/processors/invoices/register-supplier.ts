@@ -1,4 +1,5 @@
 import {
+  getEInvoiceRegistration,
   getTeamById,
   updateEInvoiceRegistrationByTeam,
 } from "@midday/db/queries";
@@ -71,6 +72,21 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
       );
     }
 
+    // Guard: skip if a prior registration already reached a terminal state.
+    // Retries or duplicate triggers must not regress a "registered" team.
+    const existing = await getEInvoiceRegistration(db, {
+      teamId,
+      provider: "peppol",
+    });
+
+    if (existing?.status === "registered") {
+      this.logger.info(
+        "Team already registered for Peppol, skipping duplicate registration",
+        { teamId },
+      );
+      return;
+    }
+
     try {
       const result = await submitRegistration(apiKey, partyWorkflowId, {
         teamId,
@@ -92,14 +108,24 @@ export class RegisterSupplierProcessor extends BaseProcessor<RegisterSupplierPay
         jobId: result.jobId,
       });
 
-      // Update the registration record via query function
-      // The webhook will handle subsequent status updates (processing -> registered/error)
-      await updateEInvoiceRegistrationByTeam(db, {
-        teamId,
-        provider: "peppol",
-        status: "processing",
-        siloEntryId: result.siloEntryId,
-      });
+      if (result.jobId) {
+        // We successfully created a new job — safe to mark as "processing"
+        // now that we know this is not a duplicate.
+        await updateEInvoiceRegistrationByTeam(db, {
+          teamId,
+          provider: "peppol",
+          status: "processing",
+          siloEntryId: result.siloEntryId,
+        });
+      } else {
+        // Job already existed (409 conflict) — the registration workflow is
+        // already in flight or completed. Do NOT overwrite the status; the
+        // webhook will reconcile the final state.
+        this.logger.info(
+          "Registration job already exists (conflict), skipping status update",
+          { teamId, siloEntryId: result.siloEntryId },
+        );
+      }
     } catch (error) {
       this.logger.error("Failed to submit supplier registration", {
         teamId,

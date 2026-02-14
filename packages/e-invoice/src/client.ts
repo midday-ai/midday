@@ -110,9 +110,9 @@ export async function ping(apiKey: string): Promise<boolean> {
  */
 export async function buildDocument(
   apiKey: string,
-  data: Record<string, unknown>,
+  data: Record<string, unknown> | object,
 ): Promise<GOBLBuildResponse> {
-  const body: GOBLBuildRequest = { data };
+  const body: GOBLBuildRequest = { data: data as Record<string, unknown> };
   return request<GOBLBuildResponse>(
     apiKey,
     "POST",
@@ -134,7 +134,7 @@ export async function buildDocument(
  */
 export async function createEntry(
   apiKey: string,
-  data: Record<string, unknown>,
+  data: Record<string, unknown> | object,
   key?: string,
   folder?: string,
 ): Promise<InvopopSiloEntry> {
@@ -158,6 +158,18 @@ export async function fetchEntry(
   );
 }
 
+/** Fetch an existing silo entry by its idempotency key. */
+export async function fetchEntryByKey(
+  apiKey: string,
+  key: string,
+): Promise<InvopopSiloEntry> {
+  return request<InvopopSiloEntry>(
+    apiKey,
+    "GET",
+    `/silo/v1/entries/key/${encodeURIComponent(key)}`,
+  );
+}
+
 /**
  * Update an existing silo entry.
  * Can provide full replacement data or use patch content types.
@@ -165,7 +177,7 @@ export async function fetchEntry(
 export async function updateEntry(
   apiKey: string,
   entryId: string,
-  data: Record<string, unknown>,
+  data: Record<string, unknown> | object,
 ): Promise<InvopopSiloEntry> {
   return request<InvopopSiloEntry>(
     apiKey,
@@ -226,5 +238,18 @@ export async function fetchJob(
 // ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Error helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Check if an error is a 409 Conflict (idempotency key already used).
+ * Useful for callers that want to recover from duplicate submissions
+ * rather than treating them as fatal errors.
+ */
+export function isConflictError(err: unknown): boolean {
+  return err instanceof InvopopApiError && err.status === 409;
+}
 
 export { InvopopApiError, InvopopValidationApiError };
