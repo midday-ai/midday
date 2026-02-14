@@ -14,7 +14,7 @@ import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { getDefaultFiscalYearStartMonth } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { use, useEffect, useRef, useState } from "react";
 import { z } from "zod/v3";
 import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
