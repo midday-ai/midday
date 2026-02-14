@@ -40,6 +40,9 @@ export function InvoiceDetails() {
   const { data, isLoading } = useQuery({
     ...trpc.invoice.getById.queryOptions({ id: invoiceId! }),
     enabled: isOpen,
+    refetchInterval: (query) => {
+      return query.state.data?.eInvoiceStatus === "processing" ? 5000 : false;
+    },
   });
 
   // Fetch upcoming invoices for recurring series

@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import type { Context } from "@api/rest/types";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { parseInvoiceKey } from "@midday/e-invoice/gobl";
@@ -59,7 +60,11 @@ app.openapi(
     }
 
     const expectedAuth = `Bearer ${webhookSecret}`;
-    if (!authHeader || authHeader !== expectedAuth) {
+    if (
+      !authHeader ||
+      authHeader.length !== expectedAuth.length ||
+      !timingSafeEqual(Buffer.from(authHeader), Buffer.from(expectedAuth))
+    ) {
       logger.warn("Invopop webhook: invalid authorization");
       throw new HTTPException(401, { message: "Unauthorized" });
     }

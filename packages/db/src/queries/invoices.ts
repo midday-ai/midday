@@ -216,6 +216,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       bottomBlock: invoices.bottomBlock,
       scheduledAt: invoices.scheduledAt,
       scheduledJobId: invoices.scheduledJobId,
+      eInvoiceStatus: invoices.eInvoiceStatus,
       customer: {
         id: customers.id,
         name: customers.name,

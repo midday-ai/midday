@@ -44,6 +44,7 @@ import {
 import { triggerJob } from "@midday/job-client";
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 export const teamRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -427,6 +428,31 @@ export const teamRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message:
             "Complete company address, city, postal code, email, and VAT number are required",
+        });
+      }
+
+      // Validate formats using Zod for consistency with the rest of the codebase
+      const formatValidation = z
+        .object({
+          email: z
+            .string()
+            .email("Company email must be a valid email address"),
+          countryCode: z
+            .string()
+            .length(2, "Country code must be a 2-letter ISO code")
+            .regex(/^[A-Z]{2}$/i, "Country code must be a 2-letter ISO code"),
+          vatNumber: z.string().trim().min(1, "VAT number cannot be empty"),
+        })
+        .safeParse({
+          email: team.email,
+          countryCode: team.countryCode,
+          vatNumber: team.vatNumber,
+        });
+
+      if (!formatValidation.success) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: formatValidation.error.issues[0]?.message ?? "Invalid input",
         });
       }
 

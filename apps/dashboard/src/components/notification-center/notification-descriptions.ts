@@ -717,33 +717,79 @@ const handleInboxCrossCurrencyMatched: NotificationDescriptionHandler = (
 const handleEInvoiceSent: NotificationDescriptionHandler = (
   metadata,
   _user,
-  _t,
+  t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
   const customerName = metadata?.customerName;
   if (invoiceNumber && customerName) {
-    return `Invoice ${invoiceNumber} delivered via Peppol to ${customerName}`;
+    return t("notifications.e_invoice_sent.with_customer", {
+      invoiceNumber,
+      customerName,
+    });
   }
   if (invoiceNumber) {
-    return `Invoice ${invoiceNumber} delivered via Peppol`;
+    return t("notifications.e_invoice_sent.without_customer", {
+      invoiceNumber,
+    });
   }
-  return "E-invoice delivered via Peppol";
+  return t("notifications.e_invoice_sent.title");
 };
 
 const handleEInvoiceError: NotificationDescriptionHandler = (
   metadata,
   _user,
-  _t,
+  t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
   const customerName = metadata?.customerName;
   if (invoiceNumber && customerName) {
-    return `E-invoice delivery failed for ${invoiceNumber} to ${customerName}`;
+    return t("notifications.e_invoice_error.with_customer", {
+      invoiceNumber,
+      customerName,
+    });
   }
   if (invoiceNumber) {
-    return `E-invoice delivery failed for ${invoiceNumber}`;
+    return t("notifications.e_invoice_error.without_customer", {
+      invoiceNumber,
+    });
   }
-  return "E-invoice delivery failed";
+  return t("notifications.e_invoice_error.title");
+};
+
+const handleEInvoiceRegistrationProcessing: NotificationDescriptionHandler = (
+  _metadata,
+  _user,
+  t,
+) => {
+  return t("notifications.e_invoice_registration_processing.title");
+};
+
+const handleEInvoiceRegistrationComplete: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  t,
+) => {
+  const peppolId = metadata?.peppolId;
+  if (peppolId) {
+    return t("notifications.e_invoice_registration_complete.with_peppol_id", {
+      peppolId,
+    });
+  }
+  return t("notifications.e_invoice_registration_complete.title");
+};
+
+const handleEInvoiceRegistrationError: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  t,
+) => {
+  const errorMessage = metadata?.errorMessage;
+  if (errorMessage) {
+    return t("notifications.e_invoice_registration_error.with_message", {
+      errorMessage,
+    });
+  }
+  return t("notifications.e_invoice_registration_error.title");
 };
 
 const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
@@ -767,6 +813,9 @@ const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   recurring_invoice_upcoming: handleRecurringInvoiceUpcoming,
   e_invoice_sent: handleEInvoiceSent,
   e_invoice_error: handleEInvoiceError,
+  e_invoice_registration_processing: handleEInvoiceRegistrationProcessing,
+  e_invoice_registration_complete: handleEInvoiceRegistrationComplete,
+  e_invoice_registration_error: handleEInvoiceRegistrationError,
 };
 
 export function getNotificationDescription(

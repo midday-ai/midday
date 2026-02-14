@@ -33,9 +33,13 @@ export function EInvoiceRegistration() {
   const { toast } = useToast();
   const { data: team } = useTeamQuery();
 
-  const { data: registration, isLoading } = useQuery(
-    trpc.team.eInvoiceRegistration.queryOptions(),
-  );
+  const { data: registration, isLoading } = useQuery({
+    ...trpc.team.eInvoiceRegistration.queryOptions(),
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === "pending" || status === "processing" ? 5000 : false;
+    },
+  });
 
   const registerMutation = useMutation(
     trpc.team.registerForEInvoice.mutationOptions({

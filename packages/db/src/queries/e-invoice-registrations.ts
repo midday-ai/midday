@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, notInArray } from "drizzle-orm";
 import type { Database, DatabaseOrTransaction } from "../client";
 import { eInvoiceRegistrations } from "../schema";
 
@@ -132,6 +132,10 @@ export const upsertEInvoiceRegistration = async (
         faults: params.faults ?? null,
         updatedAt: new Date().toISOString(),
       },
+      where: notInArray(eInvoiceRegistrations.status, [
+        "registered",
+        "processing",
+      ]),
     })
     .returning();
 

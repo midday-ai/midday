@@ -46,13 +46,16 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
       throw new Error(`Invoice not found: ${invoiceId}`);
     }
 
-    // Guard: skip if a prior submission already reached a terminal state.
+    // Guard: skip if a prior submission already reached a terminal or in-flight state.
     // Retries or duplicate triggers must not regress a "sent" invoice back to
-    // "processing" / "error".
-    if (invoice.eInvoiceStatus === "sent") {
+    // "processing" / "error", and must not re-submit while already in flight.
+    if (
+      invoice.eInvoiceStatus === "sent" ||
+      invoice.eInvoiceStatus === "processing"
+    ) {
       this.logger.info(
-        "E-invoice already sent, skipping duplicate submission",
-        { invoiceId },
+        "E-invoice already sent or processing, skipping duplicate submission",
+        { invoiceId, currentStatus: invoice.eInvoiceStatus },
       );
       return;
     }
@@ -247,7 +250,17 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
         }
       }
 
-      // Step 2: Create job to run workflow
+      // Step 2: Mark as processing before job creation so state is consistent
+      // even if the process crashes between job creation and DB update.
+      // The conflict handler (409) below is safe because it won't regress status.
+      await updateInvoice(db, {
+        id: invoiceId,
+        teamId: team.id,
+        eInvoiceStatus: "processing",
+        eInvoiceSiloEntryId: entry.id,
+      });
+
+      // Step 3: Create job to run workflow
       try {
         const transformJob = await createJob(apiKey, workflowId, entry.id, key);
 
@@ -257,13 +270,10 @@ export class SubmitEInvoiceProcessor extends BaseProcessor<SubmitEInvoicePayload
           workflowId,
         });
 
-        // We successfully created a new job — safe to mark as "processing"
-        // now that we know this is not a duplicate.
+        // Store the job ID now that we have it
         await updateInvoice(db, {
           id: invoiceId,
           teamId: team.id,
-          eInvoiceStatus: "processing",
-          eInvoiceSiloEntryId: entry.id,
           eInvoiceJobId: transformJob.id,
         });
       } catch (jobError) {
