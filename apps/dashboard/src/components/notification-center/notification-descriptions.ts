@@ -792,6 +792,27 @@ const handleEInvoiceRegistrationError: NotificationDescriptionHandler = (
   return t("notifications.e_invoice_registration_error.title");
 };
 
+const handleEInvoiceReceived: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  t,
+) => {
+  const supplierName = metadata?.supplierName;
+  const invoiceNumber = metadata?.invoiceNumber;
+  if (supplierName && invoiceNumber) {
+    return t("notifications.e_invoice_received.with_supplier", {
+      supplierName,
+      invoiceNumber,
+    });
+  }
+  if (supplierName) {
+    return t("notifications.e_invoice_received.without_number", {
+      supplierName,
+    });
+  }
+  return t("notifications.e_invoice_received.title");
+};
+
 const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   transactions_created: handleTransactionsCreated,
   inbox_new: handleInboxNew,
@@ -816,6 +837,7 @@ const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   e_invoice_registration_processing: handleEInvoiceRegistrationProcessing,
   e_invoice_registration_complete: handleEInvoiceRegistrationComplete,
   e_invoice_registration_error: handleEInvoiceRegistrationError,
+  e_invoice_received: handleEInvoiceReceived,
 };
 
 export function getNotificationDescription(

@@ -235,8 +235,40 @@ export async function fetchJob(
 }
 
 // ---------------------------------------------------------------------------
-// Exports
+// Silo Entry Files
 // ---------------------------------------------------------------------------
+
+/**
+ * Download a file attached to a silo entry.
+ * Returns the raw binary data as an ArrayBuffer.
+ * Used for downloading PDF or XML attachments from incoming e-invoices.
+ */
+export async function fetchEntryFile(
+  apiKey: string,
+  entryId: string,
+  fileId: string,
+): Promise<ArrayBuffer> {
+  const res = await fetch(
+    `${BASE_URL}/silo/v1/entries/${entryId}/files/${fileId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    },
+  );
+
+  if (!res.ok) {
+    throw new InvopopApiError(
+      `Failed to download file: ${res.status} ${res.statusText}`,
+      res.status,
+      null,
+    );
+  }
+
+  return res.arrayBuffer();
+}
 
 // ---------------------------------------------------------------------------
 // Error helpers

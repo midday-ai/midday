@@ -17,13 +17,14 @@ Technical documentation for Midday's e-invoicing integration via [Invopop](https
 
 ## Overview
 
-The `@midday/e-invoice` package handles converting Midday invoices into [GOBL](https://gobl.org) format and submitting them to [Invopop](https://invopop.com) for compliant electronic invoicing via the [Peppol](https://peppol.org) network. It also manages supplier (company) registration as a Peppol participant.
+The `@midday/e-invoice` package handles converting Midday invoices into [GOBL](https://gobl.org) format and submitting them to [Invopop](https://invopop.com) for compliant electronic invoicing via the [Peppol](https://peppol.org) network. It also manages supplier (company) registration as a Peppol participant and parsing incoming e-invoices received through the Peppol network.
 
 ### Key Features
 
 - GOBL invoice transformation from Midday's data model
-- Invopop REST API client (silo entries, transform jobs, workflows)
+- Invopop REST API client (silo entries, transform jobs, workflows, file downloads)
 - Peppol supplier registration with proof-of-ownership flow
+- Incoming e-invoice parsing (GOBL bill/invoice to inbox-compatible data)
 - Response parsers for webhook payloads and silo entry data
 - Pre-submission validation of required e-invoicing fields
 - Idempotency keys to prevent duplicate submissions
@@ -55,12 +56,14 @@ flowchart TB
     subgraph worker [Worker - BullMQ]
         SE[SubmitEInvoiceProcessor]
         RS[RegisterSupplierProcessor]
+        PI[PeppolIncomingProcessor]
     end
 
     subgraph einvoice ["@midday/e-invoice"]
         GOBL[gobl.ts - GOBL Transformer]
         CLIENT[client.ts - Invopop API Client]
         REG[registration.ts - Party Registration]
+        INC[incoming.ts - Incoming Parser]
         PARSE[parsers.ts - Response Parsers]
     end
 
@@ -73,6 +76,7 @@ flowchart TB
     subgraph db ["@midday/db"]
         INV[(invoices)]
         EREG[(e_invoice_registrations)]
+        INBOX[(inbox)]
     end
 
     UI -->|"register / send"| TRPC
@@ -87,7 +91,11 @@ flowchart TB
     PEPPOL -->|webhook| WH
     JOBS -->|webhook| WH
     WH --> PARSE
+    WH -->|"queue peppol-incoming"| PI
     WH -->|update status| db
+    PI --> INC
+    PI --> CLIENT
+    PI -->|"create inbox item"| INBOX
     SE -->|update status| INV
     RS -->|update status| EREG
 ```
@@ -98,15 +106,18 @@ flowchart TB
 
 ```
 packages/e-invoice/src/
-  client.ts         Invopop REST API client (silo entries, jobs, workflows)
+  client.ts         Invopop REST API client (silo entries, jobs, workflows, file downloads)
   gobl.ts           GOBL invoice transformer and validation
+  incoming.ts       Incoming e-invoice parser (GOBL bill/invoice → inbox data)
   registration.ts   Peppol supplier registration (org.party builder)
-  parsers.ts        Response parsers (faults, Peppol ID, registration URL)
+  parsers.ts        Response parsers (faults, Peppol ID, registration URL, PDF attachments)
   types.ts          TypeScript types for Invopop API and GOBL documents
+  constants.ts      Shared constants (provider names)
 
   gobl.test.ts          Tests for validation, transformation, key helpers
+  incoming.test.ts      Tests for GOBL invoice parsing, amount extraction, line item summary
   registration.test.ts  Tests for party document builder, key helpers
-  parsers.test.ts       Tests for mapFaults, extractPeppolId, extractRegistrationUrl
+  parsers.test.ts       Tests for mapFaults, extractPeppolId, extractRegistrationUrl, findPdfAttachment
 ```
 
 ---
@@ -165,6 +176,32 @@ sequenceDiagram
     WH->>DB: status = "registered", peppolId
 ```
 
+### Incoming E-Invoice (Receive)
+
+```mermaid
+sequenceDiagram
+    participant P as Peppol Network
+    participant I as Invopop
+    participant WH as Webhook Handler
+    participant W as Worker: peppol-incoming
+    participant IN as incoming.ts
+    participant DB as Database / Inbox
+
+    P->>I: Deliver UBL/CII document
+    I->>I: peppol.import → ubl/cii.import → GOBL
+    I->>WH: POST /webhooks/invopop (silo_entry_id)
+    WH->>W: Queue peppol-incoming job
+    WH-->>I: 200 OK
+    W->>I: fetchEntry(siloEntryId)
+    I-->>W: SiloEntry (GOBL + PDF)
+    W->>IN: parseIncomingGOBL(entry)
+    IN-->>W: ParsedIncomingInvoice
+    W->>DB: getRegistrationByPeppolId(customerPeppolId)
+    DB-->>W: teamId
+    W->>DB: Upload PDF → vault, createInbox()
+    W->>DB: embed-inbox → batch-process-matching
+```
+
 ---
 
 ## Database Schema
@@ -204,6 +241,7 @@ sequenceDiagram
 | `INVOPOP_WORKFLOW_ID` | Yes | Workflow ID for invoice submission |
 | `INVOPOP_PARTY_WORKFLOW_ID` | Yes | Workflow ID for supplier registration |
 | `INVOPOP_WEBHOOK_SECRET` | Yes | Bearer token for webhook authentication |
+| `INVOPOP_RECEIVE_WORKFLOW_ID` | No | Workflow ID for receiving incoming documents |
 
 ---
 
@@ -226,10 +264,17 @@ sequenceDiagram
 | `buildDocument(apiKey, data)` | Validate and calculate GOBL without storing. |
 | `createEntry(apiKey, data, key?, folder?)` | Create silo entry (validated + stored). |
 | `fetchEntry(apiKey, entryId)` | Fetch silo entry by UUID. |
+| `fetchEntryFile(apiKey, entryId, fileId)` | Download a file attachment from a silo entry. Returns `ArrayBuffer`. |
 | `updateEntry(apiKey, entryId, data)` | Patch an existing silo entry. |
 | `fetchWorkflows(apiKey, schema?)` | List workflows in workspace. |
 | `createJob(apiKey, workflowId, entryId, key?)` | Create transform job (returns 202). |
 | `fetchJob(apiKey, jobId)` | Fetch job status. |
+
+### `incoming.ts`
+
+| Function | Description |
+|----------|-------------|
+| `parseIncomingGOBL(entry)` | Parse a GOBL `bill/invoice` from a silo entry into `ParsedIncomingInvoice`. Returns `null` if not a valid invoice. |
 
 ### `registration.ts`
 
@@ -247,6 +292,7 @@ sequenceDiagram
 | `mapFaults(faults?)` | Map Invopop faults to DB-compatible format (ensures `message` is always a string). |
 | `extractPeppolId(entry)` | Extract Peppol participant ID and scheme from silo entry. |
 | `extractRegistrationUrl(entry)` | Extract proof-of-ownership URL from silo entry meta. |
+| `findPdfAttachment(entry)` | Find the first PDF file in a silo entry's attachments. Returns `InvopopFile \| null`. |
 
 ---
 

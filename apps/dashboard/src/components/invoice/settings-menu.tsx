@@ -751,6 +751,12 @@ export function SettingsMenu() {
                     openCustomer: true,
                   },
                   {
+                    done: eInvoiceReadiness?.checks.customerCountry ?? false,
+                    label: "Customer country",
+                    href: null,
+                    openCustomer: true,
+                  },
+                  {
                     done: eInvoiceReadiness?.checks.customerVat ?? false,
                     label: "Customer VAT",
                     href: null,

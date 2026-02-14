@@ -2,6 +2,7 @@ import { BatchProcessMatchingProcessor } from "./batch-process-matching";
 import { InitialSetupProcessor } from "./initial-setup";
 import { MatchTransactionsBidirectionalProcessor } from "./match-transactions-bidirectional";
 import { NoMatchSchedulerProcessor } from "./no-match-scheduler";
+import { PeppolIncomingProcessor } from "./peppol-incoming";
 import { ProcessAttachmentProcessor } from "./process-attachment";
 import { SlackUploadProcessor } from "./slack-upload";
 import { SyncSchedulerProcessor } from "./sync-scheduler";
@@ -14,6 +15,7 @@ export { BatchProcessMatchingProcessor } from "./batch-process-matching";
 export { InitialSetupProcessor } from "./initial-setup";
 export { MatchTransactionsBidirectionalProcessor } from "./match-transactions-bidirectional";
 export { NoMatchSchedulerProcessor } from "./no-match-scheduler";
+export { PeppolIncomingProcessor } from "./peppol-incoming";
 export { ProcessAttachmentProcessor } from "./process-attachment";
 export { SlackUploadProcessor } from "./slack-upload";
 export { SyncSchedulerProcessor } from "./sync-scheduler";
@@ -27,6 +29,7 @@ export const inboxProcessors = {
   "batch-process-matching": new BatchProcessMatchingProcessor(),
   "match-transactions-bidirectional":
     new MatchTransactionsBidirectionalProcessor(),
+  "peppol-incoming": new PeppolIncomingProcessor(),
   "process-attachment": new ProcessAttachmentProcessor(),
   "slack-upload": new SlackUploadProcessor(),
   "whatsapp-upload": new WhatsAppUploadProcessor(),

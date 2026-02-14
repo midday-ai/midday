@@ -5,7 +5,12 @@
  * responses (silo entries, faults) into Midday's DB-compatible format.
  */
 
-import type { InvopopFault, InvopopMeta, InvopopSiloEntry } from "./types";
+import type {
+  InvopopFault,
+  InvopopFile,
+  InvopopMeta,
+  InvopopSiloEntry,
+} from "./types";
 
 // ---------------------------------------------------------------------------
 // Fault mapping
@@ -75,4 +80,17 @@ export function extractRegistrationUrl(entry: InvopopSiloEntry): string | null {
   );
 
   return regMeta?.link_url ?? null;
+}
+
+/**
+ * Find the first PDF attachment in a silo entry.
+ * Returns null if no PDF is available.
+ * Used when processing incoming e-invoices to download the PDF.
+ */
+export function findPdfAttachment(entry: InvopopSiloEntry): InvopopFile | null {
+  if (!entry.attachments) return null;
+
+  return (
+    entry.attachments.find((file) => file.mime === "application/pdf") ?? null
+  );
 }

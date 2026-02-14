@@ -14,6 +14,7 @@ export { Logo as MiddayDesktopLogo } from "./midday-desktop/assets/logo";
 export { Logo as N8nMcpLogo } from "./n8n-mcp/assets/logo";
 export { Logo as OpenCodeMcpLogo } from "./opencode-mcp/assets/logo";
 export { Logo as OutlookLogo } from "./outlook/assets/logo";
+export { Logo as PeppolLogo } from "./peppol/assets/logo";
 export { Logo as PerplexityMcpLogo } from "./perplexity-mcp/assets/logo";
 export { Logo as PolarLogo } from "./polar/assets/logo";
 export { Logo as QuickBooksLogo } from "./quick-books/assets/logo";

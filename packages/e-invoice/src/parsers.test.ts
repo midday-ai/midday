@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { extractPeppolId, extractRegistrationUrl, mapFaults } from "./parsers";
+import {
+  extractPeppolId,
+  extractRegistrationUrl,
+  findPdfAttachment,
+  mapFaults,
+} from "./parsers";
 import type { InvopopSiloEntry } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -192,5 +197,52 @@ describe("extractRegistrationUrl", () => {
       meta: [{ id: "m1", key: "unrelated" }],
     });
     expect(extractRegistrationUrl(entry)).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findPdfAttachment
+// ---------------------------------------------------------------------------
+
+describe("findPdfAttachment", () => {
+  test("finds a PDF attachment", () => {
+    const entry = createSiloEntry({
+      attachments: [
+        { id: "f1", name: "invoice.xml", mime: "application/xml" },
+        { id: "f2", name: "invoice.pdf", mime: "application/pdf" },
+      ],
+    });
+    const result = findPdfAttachment(entry);
+    expect(result).not.toBeNull();
+    expect(result!.id).toBe("f2");
+    expect(result!.mime).toBe("application/pdf");
+  });
+
+  test("returns the first PDF when multiple exist", () => {
+    const entry = createSiloEntry({
+      attachments: [
+        { id: "f1", name: "first.pdf", mime: "application/pdf" },
+        { id: "f2", name: "second.pdf", mime: "application/pdf" },
+      ],
+    });
+    const result = findPdfAttachment(entry);
+    expect(result!.id).toBe("f1");
+  });
+
+  test("returns null when no attachments", () => {
+    const entry = createSiloEntry({ attachments: undefined });
+    expect(findPdfAttachment(entry)).toBeNull();
+  });
+
+  test("returns null when no PDF in attachments", () => {
+    const entry = createSiloEntry({
+      attachments: [{ id: "f1", name: "invoice.xml", mime: "application/xml" }],
+    });
+    expect(findPdfAttachment(entry)).toBeNull();
+  });
+
+  test("returns null for empty attachments array", () => {
+    const entry = createSiloEntry({ attachments: [] });
+    expect(findPdfAttachment(entry)).toBeNull();
   });
 });

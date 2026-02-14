@@ -12,6 +12,7 @@ import middayDesktopApp from "./midday-desktop/config";
 import n8nMcpApp from "./n8n-mcp/config";
 import opencodeMcpApp from "./opencode-mcp/config";
 import outlookApp from "./outlook/config-client";
+import peppolApp from "./peppol/config";
 import perplexityMcpApp from "./perplexity-mcp/config";
 import polarApp from "./polar/config";
 import quickBooksApp from "./quick-books/config-client";
@@ -34,6 +35,7 @@ export const apps = [
   fortnoxApp,
   whatsappApp,
   stripePaymentsApp,
+  peppolApp,
   middayDesktopApp,
   raycastApp,
   googleDriveApp,

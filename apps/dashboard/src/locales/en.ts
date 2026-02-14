@@ -232,6 +232,12 @@ export default {
         "E-invoice delivery failed for {invoiceNumber} to {customerName}",
       without_customer: "E-invoice delivery failed for {invoiceNumber}",
     },
+    e_invoice_received: {
+      title: "E-invoice received via Peppol",
+      with_supplier:
+        "E-invoice {invoiceNumber} received from {supplierName}",
+      without_number: "E-invoice received from {supplierName}",
+    },
     e_invoice_registration_processing: {
       title: "E-invoicing setup is being verified",
     },

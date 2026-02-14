@@ -91,6 +91,16 @@ const appExtensions: Record<
       "Keyboard-first workflow",
     ],
   },
+  peppol: {
+    slug: "peppol",
+    features: [
+      "Send compliant e-invoices via Peppol",
+      "Receive incoming invoices to inbox",
+      "Automatic data extraction from GOBL",
+      "AI-powered transaction matching",
+    ],
+    installUrl: "/settings/company#e-invoicing",
+  },
   "stripe-payments": {
     slug: "stripe-payments",
     features: [
@@ -292,6 +302,7 @@ export const categories = [
   { id: "storage", name: "Storage" },
   { id: "apps", name: "Apps" },
   { id: "ai-automation", name: "AI & Automation" },
+  { id: "e-invoicing", name: "E-Invoicing" },
 ];
 
 export function getAppBySlug(slug: string): WebsiteApp | undefined {

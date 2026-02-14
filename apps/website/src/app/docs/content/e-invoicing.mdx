@@ -5,13 +5,16 @@ section: e-invoicing
 order: 1
 ---
 
-Midday supports e-invoicing through the [Peppol network](https://peppol.org/), a global standard for electronic document exchange used by businesses and governments in over 30 countries. When you send an invoice, Midday automatically converts it to the compliant UBL format, validates it against tax rules, and delivers it through the Peppol network.
+Midday supports e-invoicing through the [Peppol network](https://peppol.org/), a global standard for electronic document exchange used by businesses and governments in over 30 countries. You can both **send and receive** e-invoices through Peppol with a single registration.
+
+When you send an invoice, Midday automatically converts it to the compliant UBL format, validates it against tax rules, and delivers it through the Peppol network. When another business sends you an e-invoice via Peppol, it arrives directly in your Midday inbox with all data pre-extracted — no manual data entry needed.
 
 ## How it works
 
 1. **Complete your company details** — Add your business address, VAT number, and country in Settings > Company
 2. **Register for e-invoicing** — One-time Peppol registration with identity verification (up to 72 hours)
 3. **Send invoices as usual** — When your customer has a Peppol ID, the invoice is automatically delivered via the Peppol network in addition to email
+4. **Receive e-invoices automatically** — Once registered, e-invoices sent to your Peppol ID appear in your inbox
 
 Behind the scenes, Midday handles:
 
@@ -19,6 +22,7 @@ Behind the scenes, Midday handles:
 - Validating all fields against the relevant tax regime
 - Generating a Peppol BIS Billing UBL 3.0 compliant document
 - Delivering through the Peppol network to your customer's Access Point
+- Receiving incoming e-invoices and routing them to your inbox with structured data
 
 ## Supported countries
 
@@ -67,6 +71,17 @@ Your customers need:
 - **Address and VAT** — For the invoice to pass validation
 
 See the [Setup Guide](/docs/e-invoicing-setup) for step-by-step instructions.
+
+## Receiving e-invoices
+
+Once you're registered for e-invoicing, your business is discoverable on the Peppol network. When another business sends you an e-invoice via Peppol, it arrives directly in your [Inbox](https://app.midday.ai/inbox):
+
+- **Automatic data extraction** — Supplier name, amounts, dates, invoice number, and tax details are extracted from the structured e-invoice data (no OCR needed)
+- **PDF stored** — The invoice PDF is saved to your vault for viewing and record-keeping
+- **Transaction matching** — The e-invoice enters the same AI-powered matching pipeline as your other inbox items, automatically matching to bank transactions
+- **Peppol badge** — Incoming e-invoices are marked with a Peppol icon in your inbox so you can easily identify them
+
+No additional setup is required beyond the initial Peppol registration. Any Peppol participant worldwide can send you e-invoices.
 
 ## Country-specific compliance (planned)
 

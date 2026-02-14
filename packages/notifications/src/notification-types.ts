@@ -177,6 +177,13 @@ export const allNotificationTypes: NotificationType[] = [
     category: "e_invoicing",
     order: 5,
   },
+  {
+    type: "e_invoice_received",
+    channels: ["in_app"],
+    showInSettings: false,
+    category: "e_invoicing",
+    order: 6,
+  },
 ];
 
 // Get all notification types (including hidden ones)

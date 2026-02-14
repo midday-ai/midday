@@ -41,6 +41,9 @@ This approach means Midday only integrates with one format (GOBL) and one API (I
 | Register processor | `apps/worker/src/processors/invoices/register-supplier.ts` | Supplier registration job |
 | Dashboard UI | `apps/dashboard/src/components/e-invoice-registration.tsx` | Registration UI |
 | Dashboard UI | `apps/dashboard/src/components/invoice/settings-menu.tsx` | Readiness checklist |
+| Incoming parser | `packages/e-invoice/src/incoming.ts` | Parse received GOBL documents |
+| Incoming processor | `apps/worker/src/processors/inbox/peppol-incoming.ts` | Process incoming Peppol documents |
+| Inbox source icon | `apps/dashboard/src/components/inbox/inbox-source-icon.tsx` | Peppol source badge |
 
 ---
 
@@ -92,6 +95,33 @@ The e-invoice submission only happens when:
 - The team has complete company data (address, VAT, country)
 - The team is registered for Peppol (`status: "registered"`)
 - The invoice has a customer
+
+### 5. Receiving E-Invoices
+
+Once registered with `smp+sml+peppol` visibility (configured in the Invopop party registration workflow), the team can also receive e-invoices from other Peppol participants. Incoming documents are automatically routed to the team's inbox:
+
+1. External sender transmits a Peppol document (UBL/CII) to the team's Peppol participant ID
+2. Invopop receives the document and runs the **Receive Invoice workflow** (`peppol.import` -> `ubl.import`/`cii.import` -> webhook)
+3. The webhook fires to `/api/webhooks/invopop` with the `silo_entry_id`
+4. The webhook handler detects it as an incoming document (no `midday-*` key prefix) and queues a `peppol-incoming` worker job
+5. The worker fetches the GOBL document, parses it, looks up the team by Peppol ID, downloads the PDF, uploads it to storage, and creates an inbox item
+6. The inbox item goes through the standard embedding + transaction matching pipeline
+7. An in-app notification is sent to the team
+
+Receiving requires:
+- `INVOPOP_API_KEY` configured
+- The team is registered for Peppol (`status: "registered"`)
+- The Peppol app's "Incoming Workflow" is set in Invopop Console
+- The party registration workflow uses `smp+sml+peppol` visibility
+
+### Invopop Console Setup for Receiving
+
+These manual steps are required in the Invopop Console:
+
+1. **Connect format apps**: Ensure OASIS UBL and UN/CEFACT CII apps are connected
+2. **Create "Receive Invoice" workflow** with steps: `peppol.import` (branching to `ubl.import` or `cii.import`) -> `silo.folder(expenses)` -> `silo.state(received)` -> `webhook` (pointing to your `/api/webhooks/invopop` endpoint)
+3. **Configure Peppol app**: Set the "Incoming Workflow" to the receive workflow created above
+4. **Verify registration visibility**: Confirm the `peppol.register` step in the party registration workflow uses `smp+sml+peppol` visibility
 
 ---
 

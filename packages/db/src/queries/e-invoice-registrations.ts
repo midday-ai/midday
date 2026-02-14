@@ -37,6 +37,32 @@ export const getEInvoiceRegistration = async (
 };
 
 // ---------------------------------------------------------------------------
+// Read by Peppol ID (for incoming document routing)
+// ---------------------------------------------------------------------------
+
+type GetRegistrationByPeppolIdParams = {
+  peppolId: string;
+};
+
+export const getRegistrationByPeppolId = async (
+  db: Database,
+  params: GetRegistrationByPeppolIdParams,
+) => {
+  const [result] = await db
+    .select()
+    .from(eInvoiceRegistrations)
+    .where(
+      and(
+        eq(eInvoiceRegistrations.peppolId, params.peppolId),
+        eq(eInvoiceRegistrations.status, "registered"),
+      ),
+    )
+    .limit(1);
+
+  return result ?? null;
+};
+
+// ---------------------------------------------------------------------------
 // Update by id
 // ---------------------------------------------------------------------------
 
