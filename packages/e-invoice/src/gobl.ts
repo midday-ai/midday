@@ -146,13 +146,19 @@ export function validateEInvoiceRequirements(
   if (!data.customer.addressLine1) {
     issues.push({
       field: "customer.address",
-      message: "Customer address is required for Peppol e-invoicing",
+      message: "Customer address is required",
     });
   }
   if (!data.customer.countryCode) {
     issues.push({
       field: "customer.countryCode",
-      message: "Customer country is required for Peppol e-invoicing",
+      message: "Customer country is required",
+    });
+  }
+  if (!data.customer.peppolId) {
+    issues.push({
+      field: "customer.peppolId",
+      message: "Customer Peppol ID is required",
     });
   }
 

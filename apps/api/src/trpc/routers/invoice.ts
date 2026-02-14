@@ -867,6 +867,7 @@ export const invoiceRouter = createTRPCRouter({
             registration: false,
             customerAddress: false,
             customerVat: false,
+            customerPeppolId: false,
             customerName: false,
             customerEmail: false,
           },
@@ -892,6 +893,7 @@ export const invoiceRouter = createTRPCRouter({
         registration: registration?.status === "registered",
         customerAddress: Boolean(customer?.addressLine1),
         customerVat: Boolean(customer?.vatNumber),
+        customerPeppolId: Boolean(customer?.peppolId),
         customerName: Boolean(customer?.name),
         customerEmail: Boolean(customer?.email),
       };

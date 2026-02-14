@@ -42,7 +42,7 @@ function createCustomer(overrides?: Partial<MiddayCustomer>): MiddayCustomer {
     state: null,
     zip: "411 03",
     vatNumber: "SE559876543201",
-    peppolId: null,
+    peppolId: "0208:0316597904",
     ...overrides,
   };
 }
@@ -161,6 +161,22 @@ describe("validateEInvoiceRequirements", () => {
     });
     const issues = validateEInvoiceRequirements(data);
     expect(issues.some((i) => i.field === "customer.countryCode")).toBe(true);
+  });
+
+  test("returns issue for missing customer Peppol ID", () => {
+    const data = createInvoiceData({
+      customer: createCustomer({ peppolId: null }),
+    });
+    const issues = validateEInvoiceRequirements(data);
+    expect(issues.some((i) => i.field === "customer.peppolId")).toBe(true);
+  });
+
+  test("returns no peppolId issue when customer has a Peppol ID", () => {
+    const data = createInvoiceData({
+      customer: createCustomer({ peppolId: "0208:0316597904" }),
+    });
+    const issues = validateEInvoiceRequirements(data);
+    expect(issues.some((i) => i.field === "customer.peppolId")).toBe(false);
   });
 
   test("returns issue for empty line items", () => {
