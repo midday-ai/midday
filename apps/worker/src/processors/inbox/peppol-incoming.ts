@@ -102,8 +102,10 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
       siloEntryId,
     });
 
-    // Step 4: Deduplicate — bail early before any expensive I/O if this
+    // Step 4: Fast-path dedup — bail early before expensive I/O if this
     // document was already ingested (e.g. duplicate webhook delivery).
+    // NOTE: This check is an optimisation only; the atomic dedup guarantee
+    // comes from the ON CONFLICT in createInbox (Step 7).
     const referenceId = `peppol_${siloEntryId}`;
     const existingInbox = await getInboxByReferenceId(db, {
       referenceId,
@@ -170,7 +172,9 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
       throw new Error(`Failed to upload PDF: ${uploadError.message}`);
     }
 
-    // Step 7: Create inbox item
+    // Step 7: Create inbox item — returnExistingOnConflict: false makes the
+    // INSERT's ON CONFLICT act as an atomic dedup lock.  If another job already
+    // created this referenceId, createInbox returns null and we bail out.
     const inboxData = await createInbox(db, {
       displayName: parsed.supplierName,
       teamId,
@@ -190,13 +194,17 @@ export class PeppolIncomingProcessor extends BaseProcessor<PeppolIncomingPayload
         },
       },
       status: "processing",
+      returnExistingOnConflict: false,
     });
 
     if (!inboxData) {
-      // createInbox should always return a row (it fetches the existing one on
-      // conflict).  If it somehow doesn't, bail — the dedup check above
-      // already guarantees we won't reach here under normal conditions.
-      this.logger.warn("createInbox returned no data", { referenceId });
+      // The INSERT was skipped because this referenceId already exists in the
+      // DB — a concurrent job won the race.  Bail to avoid duplicate
+      // downstream processing (update, classify, embed, match, etc.).
+      this.logger.info(
+        "Inbox item already exists (atomic dedup via ON CONFLICT), skipping",
+        { referenceId, teamId },
+      );
       return;
     }
 

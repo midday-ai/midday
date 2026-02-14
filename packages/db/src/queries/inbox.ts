@@ -1773,6 +1773,13 @@ export type CreateInboxParams = {
     | "processing"
     | "archived"
     | "deleted";
+  /**
+   * When true (default), if an INSERT is skipped due to a referenceId
+   * conflict the existing row is fetched and returned.  When false, null is
+   * returned instead — callers can use this as an atomic dedup signal: a
+   * non-null return means "I created the row", null means "it already existed".
+   */
+  returnExistingOnConflict?: boolean;
 };
 
 export async function createInbox(db: Database, params: CreateInboxParams) {
@@ -1789,6 +1796,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
     inboxAccountId,
     meta,
     status = "new",
+    returnExistingOnConflict = true,
   } = params;
 
   // If we have a referenceId, use ON CONFLICT to handle race conditions
@@ -1839,8 +1847,17 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
         inboxAccountId: inbox.inboxAccountId,
       });
 
-    // If insert was skipped due to conflict, fetch the existing row
+    // If insert was skipped due to conflict, another row with this
+    // referenceId already exists.
     if (!result) {
+      if (!returnExistingOnConflict) {
+        logger.info(
+          "Insert skipped due to referenceId conflict (returnExistingOnConflict=false)",
+          { referenceId, teamId },
+        );
+        return undefined;
+      }
+
       logger.info(
         "Insert skipped due to referenceId conflict, fetching existing row",
         {
