@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { createClient } from "@api/services/supabase";
 import type { Session } from "@api/utils/auth";
 import { verifyAccessToken } from "@api/utils/auth";
@@ -28,11 +29,15 @@ export const createTRPCContext = async (
   const accessToken = c.req.header("Authorization")?.split(" ")[1];
   const internalKey = c.req.header("x-internal-key");
 
-  // Check for internal service-to-service authentication
+  // Check for internal service-to-service authentication (constant-time comparison)
   const isInternalRequest =
     !!internalKey &&
     !!process.env.INTERNAL_API_KEY &&
-    internalKey === process.env.INTERNAL_API_KEY;
+    internalKey.length === process.env.INTERNAL_API_KEY.length &&
+    timingSafeEqual(
+      Buffer.from(internalKey),
+      Buffer.from(process.env.INTERNAL_API_KEY),
+    );
 
   const session = await verifyAccessToken(accessToken);
   const supabase = await createClient(accessToken);
