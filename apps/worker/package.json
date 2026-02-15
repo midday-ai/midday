@@ -13,7 +13,7 @@
   "dependencies": {
     "@ai-sdk/openai": "catalog:",
     "@fast-csv/format": "catalog:",
-    "@hono/node-server": "^1.19.7",
+    "@hono/node-server": "^1.19.9",
     "@midday/accounting": "workspace:*",
     "@midday/app-store": "workspace:*",
     "@midday/customers": "workspace:*",
@@ -37,7 +37,7 @@
     "@types/archiver": "^7.0.0",
     "archiver": "^7.0.1",
     "bullmq": "catalog:",
-    "camelcase-keys": "^9.1.3",
+    "camelcase-keys": "^10.0.2",
     "date-fns": "catalog:",
     "heic-convert": "catalog:",
     "hono": "catalog:",
@@ -50,7 +50,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/heic-convert": "1.2.3",
-    "@types/papaparse": "^5.5.1",
-    "@types/react": "^19.2.13"
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "^19.2.14"
   }
 }
