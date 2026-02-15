@@ -2,6 +2,7 @@
 
 import { cn } from "@midday/ui/cn";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
+import { useEffect, useState } from "react";
 import { useReviewTransactions } from "@/hooks/use-review-transactions";
 import { useTransactionTab } from "@/hooks/use-transaction-tab";
 
@@ -9,6 +10,12 @@ export function TransactionTabs() {
   const { tab, setTab } = useTransactionTab();
   const { transactionIds } = useReviewTransactions();
   const reviewCount = transactionIds.length;
+
+  // Defer count to client-only to avoid hydration mismatch –
+  // the server and client query caches may disagree on the count
+  // during the first render.
+  const [clientCount, setClientCount] = useState(0);
+  useEffect(() => setClientCount(reviewCount), [reviewCount]);
 
   const handleValueChange = (value: string) => {
     if (value === "all" || value === "review") {
@@ -39,9 +46,9 @@ export function TransactionTabs() {
             )}
           >
             Review
-            {reviewCount > 0 && (
+            {clientCount > 0 && (
               <span className="ml-1 text-xs text-[#878787]">
-                ({reviewCount})
+                ({clientCount})
               </span>
             )}
           </TabsTrigger>

@@ -58,7 +58,9 @@
         "SENTRY_AUTH_TOKEN",
         "SENTRY_ORG",
         "SENTRY_PROJECT",
-        "NEXT_PUBLIC_SENTRY_DSN"
+        "SENTRY_RELEASE",
+        "NEXT_PUBLIC_SENTRY_DSN",
+        "GIT_COMMIT_SHA"
       ]
     },
     "start": {

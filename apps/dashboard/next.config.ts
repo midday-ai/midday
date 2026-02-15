@@ -9,9 +9,8 @@ const config = {
   // Use git commit SHA as build ID so all multi-region replicas share the same ID.
   // Without this, each replica generates a different build ID, causing
   // "Failed to find Server Action" errors when requests hit different replicas.
-  generateBuildId: () =>
-    process.env.RAILWAY_GIT_COMMIT_SHA || crypto.randomUUID(),
-  deploymentId: process.env.RAILWAY_GIT_COMMIT_SHA,
+  generateBuildId: () => process.env.GIT_COMMIT_SHA || crypto.randomUUID(),
+  deploymentId: process.env.GIT_COMMIT_SHA,
   experimental: {
     optimizePackageImports: [
       "lucide-react",
@@ -64,6 +63,11 @@ const config = {
 // Only apply Sentry configuration in production
 const isProduction = process.env.NODE_ENV === "production";
 
+// Resolve the release tag: prefer explicit SENTRY_RELEASE, fall back to the git SHA.
+// Coerce empty strings to undefined so Sentry CLI won't receive an invalid --release "".
+const sentryRelease =
+  process.env.SENTRY_RELEASE || process.env.GIT_COMMIT_SHA || undefined;
+
 export default isProduction
   ? withSentryConfig(config, {
       org: process.env.SENTRY_ORG,
@@ -74,10 +78,17 @@ export default isProduction
       // Only print logs for uploading source maps in CI
       silent: !process.env.CI,
 
-      // Upload source maps for better stack traces
+      // Upload a larger set of source maps for prettier stack traces (includes app router chunks)
       widenClientFileUpload: true,
 
-      // Tree-shake Sentry logger statements to reduce bundle size
-      disableLogger: true,
+      // Tie uploaded source maps to the deploy's git SHA so Debug IDs match at runtime.
+      // Only include release config when we actually have a value — passing an empty
+      // string causes the Sentry CLI to fail with "invalid value for --release".
+      ...(sentryRelease ? { release: { name: sentryRelease } } : {}),
+
+      // Delete source maps after upload so they aren't publicly accessible
+      sourcemaps: {
+        deleteSourcemapsAfterUpload: true,
+      },
     })
   : config;
