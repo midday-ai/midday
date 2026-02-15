@@ -32,8 +32,7 @@ RUN bun install
 # Copy full source from worker pruned workspace
 COPY --from=builder /app/out/worker/full/ .
 
-# Build engine types and workbench
-RUN bunx turbo run build --filter=@midday/engine --only
+# Build workbench
 RUN cd packages/workbench && bun run build
 
 # Runner stage - clean image
@@ -46,7 +45,6 @@ ENV PORT=8080
 # Copy workspace from installer
 COPY --from=installer /app/node_modules ./node_modules
 COPY --from=installer /app/apps/worker ./apps/worker
-COPY --from=installer /app/apps/engine ./apps/engine
 COPY --from=installer /app/packages ./packages
 COPY --from=installer /app/package.json ./package.json
 

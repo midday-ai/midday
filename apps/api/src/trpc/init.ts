@@ -18,6 +18,7 @@ type TRPCContext = {
   geo: ReturnType<typeof getGeoContext>;
   teamId?: string;
   forcePrimary?: boolean;
+  isInternalRequest?: boolean;
 };
 
 export const createTRPCContext = async (
@@ -25,6 +26,14 @@ export const createTRPCContext = async (
   c: Context,
 ): Promise<TRPCContext> => {
   const accessToken = c.req.header("Authorization")?.split(" ")[1];
+  const internalKey = c.req.header("x-internal-key");
+
+  // Check for internal service-to-service authentication
+  const isInternalRequest =
+    !!internalKey &&
+    !!process.env.INTERNAL_API_KEY &&
+    internalKey === process.env.INTERNAL_API_KEY;
+
   const session = await verifyAccessToken(accessToken);
   const supabase = await createClient(accessToken);
 
@@ -40,6 +49,7 @@ export const createTRPCContext = async (
     db,
     geo,
     forcePrimary,
+    isInternalRequest,
   };
 };
 
@@ -82,5 +92,25 @@ export const protectedProcedure = t.procedure
         teamId,
         session,
       },
+    });
+  });
+
+/**
+ * Internal procedure for service-to-service calls.
+ * Authenticates via x-internal-key header (INTERNAL_API_KEY) instead of user session.
+ * Used by Trigger.dev jobs, BullMQ workers, and other internal services.
+ * Allows either a valid user session OR a valid internal API key.
+ */
+export const internalProcedure = t.procedure
+  .use(withPrimaryDbMiddleware)
+  .use(async (opts) => {
+    const { session, isInternalRequest } = opts.ctx;
+
+    if (!session && !isInternalRequest) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return opts.next({
+      ctx: opts.ctx,
     });
   });

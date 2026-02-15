@@ -1,5 +1,5 @@
 import { upsertExchangeRates } from "@midday/db/queries";
-import { client } from "@midday/engine-client";
+import { trpc } from "@midday/trpc";
 import type { Job } from "bullmq";
 import type { RatesSchedulerPayload } from "../../schemas/rates";
 import { getDb } from "../../utils/db";
@@ -28,17 +28,7 @@ export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload
     this.logger.info("Starting rates scheduler");
 
     // Fetch rates from engine API
-    const ratesResponse = await client.rates.$get();
-
-    if (!ratesResponse.ok) {
-      this.logger.error("Failed to get rates from engine API", {
-        status: ratesResponse.status,
-        statusText: ratesResponse.statusText,
-      });
-      throw new Error("Failed to get rates from engine API");
-    }
-
-    const { data: ratesData } = await ratesResponse.json();
+    const { data: ratesData } = await trpc.banking.rates.query();
 
     // Transform rates data to match database schema
     const exchangeRateData = ratesData.flatMap((rate) => {

@@ -1,0 +1,178 @@
+import { EnableBankingProvider } from "./providers/enablebanking/enablebanking-provider";
+import { GoCardLessProvider } from "./providers/gocardless/gocardless-provider";
+import { PlaidProvider } from "./providers/plaid/plaid-provider";
+import { TellerProvider } from "./providers/teller/teller-provider";
+import type {
+  DeleteAccountsRequest,
+  DeleteConnectionRequest,
+  GetAccountBalanceRequest,
+  GetAccountsRequest,
+  GetConnectionStatusRequest,
+  GetHealthCheckResponse,
+  GetInstitutionsRequest,
+  GetTransactionsRequest,
+  ProviderParams,
+} from "./types";
+import { logger } from "./utils/logger";
+
+export class Provider {
+  #name?: string;
+
+  #provider:
+    | PlaidProvider
+    | TellerProvider
+    | GoCardLessProvider
+    | EnableBankingProvider
+    | null = null;
+
+  constructor(params?: ProviderParams) {
+    this.#name = params?.provider;
+
+    switch (params?.provider) {
+      case "gocardless":
+        this.#provider = new GoCardLessProvider();
+        break;
+      case "teller":
+        this.#provider = new TellerProvider();
+        break;
+      case "plaid":
+        this.#provider = new PlaidProvider();
+        break;
+      case "enablebanking":
+        this.#provider = new EnableBankingProvider();
+        break;
+      default:
+    }
+  }
+
+  async getHealthCheck(): Promise<GetHealthCheckResponse> {
+    const teller = new TellerProvider();
+    const plaid = new PlaidProvider();
+    const gocardless = new GoCardLessProvider();
+    const enablebanking = new EnableBankingProvider();
+
+    try {
+      const [
+        isPlaidHealthy,
+        isGocardlessHealthy,
+        isTellerHealthy,
+        isEnableBankingHealthy,
+      ] = await Promise.all([
+        plaid.getHealthCheck(),
+        gocardless.getHealthCheck(),
+        teller.getHealthCheck(),
+        enablebanking.getHealthCheck(),
+      ]);
+
+      return {
+        plaid: {
+          healthy: isPlaidHealthy,
+        },
+        gocardless: {
+          healthy: isGocardlessHealthy,
+        },
+        teller: {
+          healthy: isTellerHealthy,
+        },
+        enablebanking: {
+          healthy: isEnableBankingHealthy,
+        },
+      };
+    } catch {
+      throw Error("Something went wrong");
+    }
+  }
+
+  async getTransactions(params: GetTransactionsRequest) {
+    logger(
+      "getTransactions:",
+      `provider: ${this.#name} id: ${params.accountId}`,
+    );
+
+    const data = await this.#provider?.getTransactions(params);
+
+    if (data) {
+      return data;
+    }
+
+    return [];
+  }
+
+  async getAccounts(params: GetAccountsRequest) {
+    logger("getAccounts:", `provider: ${this.#name}`);
+
+    const data = await this.#provider?.getAccounts(params);
+
+    if (data) {
+      return data;
+    }
+
+    return [];
+  }
+
+  async getAccountBalance(params: GetAccountBalanceRequest) {
+    logger(
+      "getAccountBalance:",
+      `provider: ${this.#name} id: ${params.accountId}`,
+    );
+
+    const data = await this.#provider?.getAccountBalance(params);
+
+    if (data) {
+      return data;
+    }
+
+    return null;
+  }
+
+  async getInstitutions(params: GetInstitutionsRequest) {
+    logger("getInstitutions:", `provider: ${this.#name}`);
+
+    const data = await this.#provider?.getInstitutions(params);
+
+    if (data) {
+      return data;
+    }
+
+    return [];
+  }
+
+  async deleteAccounts(params: DeleteAccountsRequest) {
+    logger("delete:", `provider: ${this.#name}`);
+
+    return this.#provider?.deleteAccounts(params);
+  }
+
+  async getConnectionStatus(params: GetConnectionStatusRequest) {
+    logger("getConnectionStatus:", `provider: ${this.#name}`);
+
+    const data = await this.#provider?.getConnectionStatus(params);
+
+    if (data) {
+      return data;
+    }
+
+    return { status: "connected" as const };
+  }
+
+  async deleteConnection(params: DeleteConnectionRequest) {
+    logger("deleteConnection:", `provider: ${this.#name}`);
+
+    return this.#provider?.deleteConnection(params);
+  }
+}
+
+export type {
+  FetchInstitutionsResult,
+  InstitutionRecord,
+} from "./institutions";
+export { fetchAllInstitutions } from "./institutions";
+export { EnableBankingApi } from "./providers/enablebanking/enablebanking-api";
+export { GoCardLessApi } from "./providers/gocardless/gocardless-api";
+export { PlaidApi } from "./providers/plaid/plaid-api";
+export { TellerApi } from "./providers/teller/teller-api";
+// Re-export types, provider APIs, and institution sync
+export type * from "./types";
+export { createErrorResponse, ProviderError } from "./utils/error";
+export { getFileExtension, getLogoURL } from "./utils/logo";
+export { getRates } from "./utils/rates";

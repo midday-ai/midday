@@ -1,7 +1,7 @@
-import { client } from "@midday/engine-client";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
+import { getTRPCClient } from "@/trpc/server";
 import { getUrl } from "@/utils/environment";
 
 export async function GET(request: NextRequest) {
@@ -29,23 +29,23 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/?error=missing_code", redirectBase));
   }
 
-  const sessionResponse = await client.auth.enablebanking.exchange.$get({
-    query: {
-      code,
-    },
-  });
+  const trpc = await getTRPCClient();
 
-  if (sessionResponse.status !== 200) {
+  let sessionData:
+    | { data?: { session_id?: string; expires_at?: string } }
+    | undefined;
+
+  try {
+    sessionData = await trpc.banking.enablebankingExchange.mutate({ code });
+  } catch {
     return NextResponse.redirect(new URL("/?error=invalid_code", redirectBase));
   }
 
   if (method === "connect") {
-    const { data: sessionData } = await sessionResponse.json();
-
-    if (sessionData?.session_id) {
+    if (sessionData?.data?.session_id) {
       return NextResponse.redirect(
         new URL(
-          `/?ref=${sessionData.session_id}&provider=enablebanking&step=account`,
+          `/?ref=${sessionData.data.session_id}&provider=enablebanking&step=account`,
           redirectBase,
         ),
       );
@@ -53,15 +53,13 @@ export async function GET(request: NextRequest) {
   }
 
   if (method === "reconnect" && sessionId) {
-    const { data: sessionData } = await sessionResponse.json();
-
     // Update the bank connection session
-    if (sessionData?.session_id) {
+    if (sessionData?.data?.session_id) {
       const { data } = await supabase
         .from("bank_connections")
         .update({
-          expires_at: sessionData.expires_at,
-          reference_id: sessionData.session_id,
+          expires_at: sessionData.data.expires_at,
+          reference_id: sessionData.data.session_id,
           status: "connected",
         })
         .eq("reference_id", sessionId)

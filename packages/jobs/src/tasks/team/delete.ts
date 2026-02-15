@@ -1,5 +1,5 @@
 import { deleteTeamSchema } from "@jobs/schema";
-import { client } from "@midday/engine-client";
+import { trpc } from "@midday/trpc";
 import { logger, schedules, schemaTask } from "@trigger.dev/sdk";
 import { bankSyncScheduler } from "../bank/scheduler/bank-scheduler";
 
@@ -13,16 +13,14 @@ export const deleteTeam = schemaTask({
   run: async ({ teamId, connections }) => {
     // Delete connections in providers
     const connectionPromises = connections.map(async (connection) => {
-      return client.connections.delete.$delete({
-        json: {
-          id: connection.referenceId!,
-          provider: connection.provider as
-            | "gocardless"
-            | "teller"
-            | "plaid"
-            | "enablebanking",
-          accessToken: connection.accessToken ?? undefined,
-        },
+      return trpc.banking.deleteConnection.mutate({
+        id: connection.referenceId!,
+        provider: connection.provider as
+          | "gocardless"
+          | "teller"
+          | "plaid"
+          | "enablebanking",
+        accessToken: connection.accessToken ?? undefined,
       });
     });
 

@@ -72,6 +72,11 @@ export const connectionStatusEnum = pgEnum("connection_status", [
   "unknown",
 ]);
 
+export const institutionStatusEnum = pgEnum("institution_status", [
+  "active",
+  "removed",
+]);
+
 export const documentProcessingStatusEnum = pgEnum(
   "document_processing_status",
   ["pending", "processing", "completed", "failed"],
@@ -1330,6 +1335,33 @@ export const reports = pgTable(
       for: "update",
       to: ["public"],
     }),
+  ],
+);
+
+export const institutions = pgTable(
+  "institutions",
+  {
+    id: text().primaryKey().notNull(),
+    name: text().notNull(),
+    logo: text(),
+    provider: bankProvidersEnum().notNull(),
+    countries: text().array().notNull(),
+    availableHistory: integer("available_history"),
+    maximumConsentValidity: integer("maximum_consent_validity"),
+    popularity: integer().default(0).notNull(),
+    type: text(),
+    status: institutionStatusEnum().default("active").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("institutions_country_idx").using("gin", table.countries),
+    index("institutions_name_idx").on(table.name),
+    index("institutions_status_idx").on(table.status),
   ],
 );
 

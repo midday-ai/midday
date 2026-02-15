@@ -13,6 +13,7 @@
     "./registry": "./src/registry.ts"
   },
   "dependencies": {
+    "@midday/banking": "workspace:*",
     "@midday/cache": "workspace:*",
     "@midday/db": "workspace:*"
   }

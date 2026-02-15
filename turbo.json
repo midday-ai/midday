@@ -32,7 +32,6 @@
         "FILE_KEY_SECRET",
         "TELLER_CERTIFICATE",
         "TELLER_CERTIFICATE_PRIVATE_KEY",
-        "ENGINE_API_KEY",
         "PLAID_CLIENT_ID",
         "PLAID_SECRET",
         "GITHUB_TOKEN",

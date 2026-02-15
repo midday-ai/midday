@@ -1,4 +1,4 @@
-import { client } from "@midday/engine-client";
+import { trpc } from "@midday/trpc";
 import type { Job } from "bullmq";
 import type { DeleteTeamPayload } from "../../schemas/teams";
 import { BaseProcessor } from "../base";
@@ -65,16 +65,14 @@ export class DeleteTeamProcessor extends BaseProcessor<DeleteTeamPayload> {
       }
 
       try {
-        await client.connections.delete.$delete({
-          json: {
-            id: connection.referenceId,
-            provider: connection.provider as
-              | "gocardless"
-              | "teller"
-              | "plaid"
-              | "enablebanking",
-            accessToken: connection.accessToken ?? undefined,
-          },
+        await trpc.banking.deleteConnection.mutate({
+          id: connection.referenceId,
+          provider: connection.provider as
+            | "gocardless"
+            | "teller"
+            | "plaid"
+            | "enablebanking",
+          accessToken: connection.accessToken ?? undefined,
         });
         return true;
       } catch (error) {

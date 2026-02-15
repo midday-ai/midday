@@ -1,0 +1,368 @@
+import {
+  connectionByReferenceSchema,
+  connectionStatusSchema,
+  deleteConnectionSchema,
+  deleteProviderAccountSchema,
+  enablebankingExchangeSchema,
+  enablebankingLinkSchema,
+  getBalanceSchema,
+  getProviderAccountsSchema,
+  getProviderTransactionsSchema,
+  gocardlessAgreementSchema,
+  gocardlessLinkSchema,
+  plaidExchangeSchema,
+  plaidLinkSchema,
+} from "@api/schemas/banking";
+import { createTRPCRouter, internalProcedure } from "@api/trpc/init";
+import {
+  EnableBankingApi,
+  GoCardLessApi,
+  getRates,
+  PlaidApi,
+  Provider,
+} from "@midday/banking";
+import { createLoggerWithContext } from "@midday/logger";
+import { TRPCError } from "@trpc/server";
+
+const logger = createLoggerWithContext("trpc:banking");
+
+export const bankingRouter = createTRPCRouter({
+  // --- Auth: Plaid ---
+
+  plaidLink: internalProcedure
+    .input(plaidLinkSchema)
+    .mutation(async ({ input }) => {
+      const api = new PlaidApi();
+
+      try {
+        const { data } = await api.linkTokenCreate({
+          userId: input.userId,
+          language: input.language,
+          accessToken: input.accessToken,
+        });
+        return { data };
+      } catch (error) {
+        logger.error("Failed to create Plaid link token", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create Plaid link token",
+        });
+      }
+    }),
+
+  plaidExchange: internalProcedure
+    .input(plaidExchangeSchema)
+    .mutation(async ({ input }) => {
+      const api = new PlaidApi();
+
+      try {
+        const data = await api.itemPublicTokenExchange({
+          publicToken: input.token,
+        });
+        return data;
+      } catch (error) {
+        logger.error("Failed to exchange Plaid token", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to exchange Plaid token",
+        });
+      }
+    }),
+
+  // --- Auth: GoCardless ---
+
+  gocardlessLink: internalProcedure
+    .input(gocardlessLinkSchema)
+    .mutation(async ({ input }) => {
+      const api = new GoCardLessApi();
+
+      try {
+        const data = await api.buildLink(input);
+        return { data };
+      } catch (error) {
+        logger.error("Failed to create GoCardless link", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create GoCardless link",
+        });
+      }
+    }),
+
+  gocardlessAgreement: internalProcedure
+    .input(gocardlessAgreementSchema)
+    .mutation(async ({ input }) => {
+      const api = new GoCardLessApi();
+
+      try {
+        const data = await api.createEndUserAgreement(input);
+        return { data };
+      } catch (error) {
+        logger.error("Failed to create GoCardless agreement", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create GoCardless agreement",
+        });
+      }
+    }),
+
+  // --- Auth: EnableBanking ---
+
+  enablebankingLink: internalProcedure
+    .input(enablebankingLinkSchema)
+    .mutation(async ({ input }) => {
+      const api = new EnableBankingApi();
+
+      try {
+        const data = await api.authenticate(input);
+        return { data: { url: data.url } };
+      } catch (error) {
+        logger.error("Failed to create EnableBanking link", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create EnableBanking link",
+        });
+      }
+    }),
+
+  enablebankingExchange: internalProcedure
+    .input(enablebankingExchangeSchema)
+    .mutation(async ({ input }) => {
+      const api = new EnableBankingApi();
+
+      try {
+        const data = await api.exchangeCode(input.code);
+        return {
+          data: {
+            session_id: data.session_id,
+            expires_at: data.expires_at,
+            accounts: data.accounts,
+          },
+        };
+      } catch (error) {
+        logger.error("Failed to exchange EnableBanking code", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to exchange EnableBanking code",
+        });
+      }
+    }),
+
+  // --- Connections ---
+
+  connectionStatus: internalProcedure
+    .input(connectionStatusSchema)
+    .query(async ({ input }) => {
+      const api = new Provider({ provider: input.provider });
+
+      try {
+        const data = await api.getConnectionStatus({
+          id: input.id,
+          accessToken: input.accessToken,
+        });
+        return { data };
+      } catch (error) {
+        logger.error("Failed to get connection status", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to get connection status",
+        });
+      }
+    }),
+
+  deleteConnection: internalProcedure
+    .input(deleteConnectionSchema)
+    .mutation(async ({ input }) => {
+      const api = new Provider({ provider: input.provider });
+
+      try {
+        await api.deleteConnection({
+          id: input.id,
+          accessToken: input.accessToken,
+        });
+        return { data: { success: true } };
+      } catch (error) {
+        logger.error("Failed to delete connection", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete connection",
+        });
+      }
+    }),
+
+  connectionByReference: internalProcedure
+    .input(connectionByReferenceSchema)
+    .query(async ({ input }) => {
+      const api = new GoCardLessApi();
+
+      try {
+        const data = await api.getRequisitionByReference(input.reference);
+        if (!data) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Connection not found",
+          });
+        }
+        return { data: { id: data.id, accounts: data.accounts } };
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        logger.error("Failed to get connection by reference", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to get connection by reference",
+        });
+      }
+    }),
+
+  gocardlessConnections: internalProcedure.query(async () => {
+    const api = new GoCardLessApi();
+
+    try {
+      const data = await api.getRequisitions();
+      return {
+        count: data.count,
+        next: data.next,
+        previous: data.previous,
+        results: data.results,
+      };
+    } catch (error) {
+      logger.error("Failed to get GoCardless connections", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to get GoCardless connections",
+      });
+    }
+  }),
+
+  // --- Accounts ---
+
+  getProviderAccounts: internalProcedure
+    .input(getProviderAccountsSchema)
+    .query(async ({ input }) => {
+      const api = new Provider({ provider: input.provider });
+
+      try {
+        const data = await api.getAccounts({
+          id: input.id,
+          accessToken: input.accessToken,
+          institutionId: input.institutionId,
+        });
+        return { data };
+      } catch (error) {
+        logger.error("Failed to get provider accounts", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to get provider accounts",
+        });
+      }
+    }),
+
+  deleteProviderAccount: internalProcedure
+    .input(deleteProviderAccountSchema)
+    .mutation(async ({ input }) => {
+      const api = new Provider({ provider: input.provider });
+
+      try {
+        await api.deleteAccounts({
+          accessToken: input.accessToken,
+          accountId: input.accountId,
+        });
+        return { success: true };
+      } catch (error) {
+        logger.error("Failed to delete provider account", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete provider account",
+        });
+      }
+    }),
+
+  getBalance: internalProcedure
+    .input(getBalanceSchema)
+    .query(async ({ input }) => {
+      const api = new Provider({ provider: input.provider });
+
+      try {
+        const data = await api.getAccountBalance({
+          accessToken: input.accessToken,
+          accountId: input.id,
+          accountType: input.accountType,
+        });
+        return { data };
+      } catch (error) {
+        logger.error("Failed to get account balance", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to get account balance",
+        });
+      }
+    }),
+
+  // --- Transactions ---
+
+  getProviderTransactions: internalProcedure
+    .input(getProviderTransactionsSchema)
+    .query(async ({ input }) => {
+      const api = new Provider({ provider: input.provider });
+
+      try {
+        const data = await api.getTransactions({
+          accountId: input.accountId,
+          accountType: input.accountType,
+          latest: input.latest,
+          accessToken: input.accessToken,
+        });
+        return { data };
+      } catch (error) {
+        logger.error("Failed to get provider transactions", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to get provider transactions",
+        });
+      }
+    }),
+
+  // --- Rates ---
+
+  rates: internalProcedure.query(async () => {
+    try {
+      const data = await getRates();
+      return { data };
+    } catch (error) {
+      logger.error("Failed to get exchange rates", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to get exchange rates",
+      });
+    }
+  }),
+});

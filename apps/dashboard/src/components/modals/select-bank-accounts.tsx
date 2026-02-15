@@ -1,19 +1,6 @@
 "use client";
 
-import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sendSupportAction } from "@/actions/send-support-action";
-import { useConnectParams } from "@/hooks/use-connect-params";
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
-
-// Extended account type with new balance fields (until engine types are regenerated)
-type AccountWithBalances = RouterOutputs["institutions"]["accounts"][number] & {
-  available_balance?: number | null;
-  credit_limit?: number | null;
-};
-
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -44,6 +31,11 @@ import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod/v3";
+import { sendSupportAction } from "@/actions/send-support-action";
+import { useConnectParams } from "@/hooks/use-connect-params";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { FormatAmount } from "../format-amount";
 import { LoadingTransactionsEvent } from "../loading-transactions-event";
 
@@ -207,8 +199,8 @@ export function SelectBankAccountsModal() {
 
   const isOpen = step === "account";
 
-  const { data, isLoading } = useQuery(
-    trpc.institutions.accounts.queryOptions(
+  const { data: accountsData, isLoading } = useQuery(
+    trpc.banking.getProviderAccounts.queryOptions(
       {
         id: ref ?? undefined,
         accessToken: token ?? undefined,
@@ -277,14 +269,13 @@ export function SelectBankAccountsModal() {
       enrollmentId: enrollment_id ?? undefined,
       // GoCardLess Requestion ID or Plaid Item ID
       referenceId: ref ?? undefined,
-      accounts: (data as AccountWithBalances[] | undefined)?.map((account) => ({
+      accounts: accountsData?.data?.map((account) => ({
         name: account.name,
         institutionId: account.institution.id,
         logoUrl: account.institution?.logo,
         accountId: account.id,
         accountReference: account.resource_id,
         bankName: account.institution.name,
-        // TODO: Remove once we have a fix and return currency from engine
         currency: account.currency ?? account.balance.currency,
         balance: account.balance.amount,
         enabled: true,
@@ -304,7 +295,7 @@ export function SelectBankAccountsModal() {
         creditLimit: account.credit_limit ?? null,
       })),
     });
-  }, [data, ref]);
+  }, [accountsData, ref]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     connectBankConnectionMutation.mutate(values);
@@ -335,7 +326,7 @@ export function SelectBankAccountsModal() {
                 >
                   {isLoading && <RowsSkeleton />}
 
-                  {data?.map((account) => {
+                  {accountsData?.data?.map((account) => {
                     // Get the last 4 digits of IBAN or account identifier for display
                     const accountIdentifier = account.iban?.slice(-4);
 

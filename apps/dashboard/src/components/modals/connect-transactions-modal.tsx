@@ -12,15 +12,14 @@ import {
 } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import { useDebounceValue, useScript } from "usehooks-ts";
-import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
-import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useTeamQuery } from "@/hooks/use-team";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { BankLogo } from "../bank-logo";
 import { ConnectBankProvider } from "../connect-bank-provider";
@@ -111,6 +110,7 @@ export function ConnectTransactionsModal() {
   const router = useRouter();
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
   const { data: team } = useTeamQuery();
+  const { data: user } = useUserQuery();
   const teamCountryCode = team?.countryCode || "";
 
   const {
@@ -121,6 +121,20 @@ export function ConnectTransactionsModal() {
   } = useConnectParams(teamCountryCode);
 
   const isOpen = step === "connect";
+
+  const createPlaidLink = useMutation(
+    trpc.banking.plaidLink.mutationOptions({
+      onSuccess: (result) => {
+        if (result.data.link_token) {
+          setPlaidToken(result.data.link_token);
+        }
+      },
+    }),
+  );
+
+  const exchangeToken = useMutation(
+    trpc.banking.plaidExchange.mutationOptions({}),
+  );
 
   // NOTE: Load SDKs here so it's not unmonted
   useScript("https://cdn.teller.io/connect/connect.js", {
@@ -134,13 +148,15 @@ export function ConnectTransactionsModal() {
     clientName: "Midday",
     product: ["transactions"],
     onSuccess: async (public_token, metadata) => {
-      const { access_token, item_id } = await exchangePublicToken(public_token);
+      const result = await exchangeToken.mutateAsync({
+        token: public_token,
+      });
 
       setParams({
         step: "account",
         provider: "plaid",
-        token: access_token,
-        ref: item_id,
+        token: result.data.access_token,
+        ref: result.data.item_id,
         institution_id: metadata.institution?.institution_id,
       });
       track({
@@ -184,19 +200,11 @@ export function ConnectTransactionsModal() {
   );
 
   useEffect(() => {
-    async function createLinkToken() {
-      const token = await createPlaidLinkTokenAction();
-
-      if (token) {
-        setPlaidToken(token);
-      }
-    }
-
     // NOTE: Only run where Plaid is supported
-    if ((isOpen && countryCode === "US") || (isOpen && countryCode === "CA")) {
-      createLinkToken();
+    if (isOpen && (countryCode === "US" || countryCode === "CA") && user?.id) {
+      createPlaidLink.mutate({ userId: user.id });
     }
-  }, [isOpen, countryCode]);
+  }, [isOpen, countryCode, user?.id]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOnClose}>
