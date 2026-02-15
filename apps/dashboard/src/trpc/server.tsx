@@ -109,8 +109,13 @@ export function batchPrefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
  * Get a tRPC client for server-side API routes
  * Use this when you need to call mutations from API routes (e.g., webhooks, callbacks)
  * For queries, use the `trpc` proxy with `queryOptions` instead
+ *
+ * @param options.forcePrimary - Force all reads to use the primary database,
+ *   bypassing replicas. Use this in auth callbacks and other flows where
+ *   read-after-write consistency is critical (e.g., reading a user that was
+ *   just created). This is more reliable than depending on the cookie alone.
  */
-export async function getTRPCClient() {
+export async function getTRPCClient(options?: { forcePrimary?: boolean }) {
   // Parallelize independent async calls
   const [supabase, cookieStore, headersList] = await Promise.all([
     createClient(),
@@ -124,6 +129,10 @@ export async function getTRPCClient() {
 
   const location = getLocationHeaders(headersList);
 
+  const shouldForcePrimary =
+    options?.forcePrimary ||
+    cookieStore.get(Cookies.ForcePrimary)?.value === "true";
+
   return createTRPCClient<AppRouter>({
     links: [
       httpBatchLink({
@@ -134,7 +143,7 @@ export async function getTRPCClient() {
           "x-user-timezone": location.timezone,
           "x-user-locale": location.locale,
           "x-user-country": location.country,
-          ...(cookieStore.get(Cookies.ForcePrimary)?.value === "true" && {
+          ...(shouldForcePrimary && {
             "x-force-primary": "true",
           }),
         },
