@@ -38,10 +38,11 @@ export async function GET(req: NextRequest) {
     } = await getSession();
 
     if (session) {
-      // Set cookie to force primary database reads for new users (10 seconds)
-      // This prevents replication lag issues when user record hasn't replicated yet
+      // Set cookie to force primary database reads for subsequent client-side
+      // requests after redirect. This prevents replication lag issues when the
+      // user record hasn't replicated to read replicas yet.
       cookieStore.set(Cookies.ForcePrimary, "true", {
-        expires: addSeconds(new Date(), 10),
+        expires: addSeconds(new Date(), 30),
         httpOnly: false, // Needs to be readable by client-side tRPC
         sameSite: "lax",
       });
@@ -58,7 +59,9 @@ export async function GET(req: NextRequest) {
         return NextResponse.redirect(`${origin}/teams`);
       }
 
-      const trpcClient = await getTRPCClient();
+      // Explicitly force primary reads for this query -- the user may have
+      // just been created and not yet replicated to read replicas.
+      const trpcClient = await getTRPCClient({ forcePrimary: true });
       const user = await trpcClient.user.me.query();
 
       if (!user?.fullName) {
