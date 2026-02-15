@@ -1,3 +1,4 @@
+import { bankingCache, CacheTTL } from "@midday/cache/banking-cache";
 import { formatISO, subDays } from "date-fns";
 import {
   Configuration,
@@ -15,7 +16,7 @@ import { PLAID_COUNTRIES } from "../../utils/countries";
 import { ProviderError } from "../../utils/error";
 import { logger } from "../../utils/logger";
 import { paginate } from "../../utils/paginate";
-import { withRetry } from "../../utils/retry";
+import { withRateLimitRetry, withRetry } from "../../utils/retry";
 import type {
   DisconnectAccountRequest,
   GetAccountBalanceRequest,
@@ -85,12 +86,14 @@ export class PlaidApi {
     accountId,
   }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse | undefined> {
     try {
-      const accounts = await this.#client.accountsGet({
-        access_token: accessToken,
-        options: {
-          account_ids: [accountId],
-        },
-      });
+      const accounts = await withRateLimitRetry(() =>
+        this.#client.accountsGet({
+          access_token: accessToken,
+          options: {
+            account_ids: [accountId],
+          },
+        }),
+      );
 
       const account = accounts.data.accounts.at(0);
       if (!account) return undefined;
@@ -114,9 +117,11 @@ export class PlaidApi {
     institutionId,
   }: GetAccountsRequest): Promise<GetAccountsResponse | undefined> {
     try {
-      const accounts = await this.#client.accountsGet({
-        access_token: accessToken,
-      });
+      const accounts = await withRateLimitRetry(() =>
+        this.#client.accountsGet({
+          access_token: accessToken,
+        }),
+      );
 
       const institution = await this.institutionsGetById(institutionId);
 
@@ -146,27 +151,31 @@ export class PlaidApi {
 
       if (latest) {
         // Get transactions from the last 5 days using /transactions/get
-        const { data } = await this.#client.transactionsGet({
-          access_token: accessToken,
-          start_date: formatISO(subDays(new Date(), 5), {
-            representation: "date",
+        const { data } = await withRateLimitRetry(() =>
+          this.#client.transactionsGet({
+            access_token: accessToken,
+            start_date: formatISO(subDays(new Date(), 5), {
+              representation: "date",
+            }),
+            end_date: formatISO(new Date(), {
+              representation: "date",
+            }),
           }),
-          end_date: formatISO(new Date(), {
-            representation: "date",
-          }),
-        });
+        );
 
         transactions = data.transactions;
       } else {
         // Get all transactions using /transactions/sync
-        let cursor;
+        let cursor: string | undefined;
         let hasMore = true;
 
         while (hasMore) {
-          const { data } = await this.#client.transactionsSync({
-            access_token: accessToken,
-            cursor,
-          });
+          const { data } = await withRateLimitRetry(() =>
+            this.#client.transactionsSync({
+              access_token: accessToken,
+              cursor,
+            }),
+          );
 
           transactions = transactions.concat(data.added);
           hasMore = data.has_more;
@@ -215,13 +224,18 @@ export class PlaidApi {
   }
 
   async institutionsGetById(institution_id: string) {
-    return this.#client.institutionsGetById({
-      institution_id,
-      country_codes: this.#countryCodes,
-      options: {
-        include_auth_metadata: true,
-      },
-    });
+    return bankingCache.getOrSet(
+      `plaid_institution_${institution_id}`,
+      CacheTTL.TWENTY_FOUR_HOURS,
+      () =>
+        this.#client.institutionsGetById({
+          institution_id,
+          country_codes: this.#countryCodes,
+          options: {
+            include_auth_metadata: true,
+          },
+        }),
+    );
   }
 
   async itemPublicTokenExchange({
@@ -245,26 +259,31 @@ export class PlaidApi {
       ? [params.countryCode as CountryCode]
       : this.#countryCodes;
 
-    return paginate({
-      delay: { milliseconds: 100, onDelay: (message) => logger(message) },
-      pageSize: 500,
-      fetchData: (offset, count) =>
-        withRetry(() =>
-          this.#client
-            .institutionsGet({
-              country_codes: countryCode,
-              count,
-              offset,
-              options: {
-                include_optional_metadata: true,
-                products: [Products.Transactions],
-              },
-            })
-            .then(({ data }) => {
-              return data.institutions;
-            }),
-        ),
-    });
+    return bankingCache.getOrSet(
+      `plaid_institutions_${params?.countryCode ?? "all"}`,
+      CacheTTL.TWENTY_FOUR_HOURS,
+      () =>
+        paginate({
+          delay: { milliseconds: 100, onDelay: (message) => logger(message) },
+          pageSize: 500,
+          fetchData: (offset, count) =>
+            withRetry(() =>
+              this.#client
+                .institutionsGet({
+                  country_codes: countryCode,
+                  count,
+                  offset,
+                  options: {
+                    include_optional_metadata: true,
+                    products: [Products.Transactions],
+                  },
+                })
+                .then(({ data }) => {
+                  return data.institutions;
+                }),
+            ),
+        }),
+    );
   }
 
   async getConnectionStatus({

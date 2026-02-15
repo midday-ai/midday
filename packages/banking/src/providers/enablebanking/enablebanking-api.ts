@@ -1,10 +1,12 @@
 import { Buffer } from "node:buffer";
+import { bankingCache, CacheTTL } from "@midday/cache/banking-cache";
 import { formatISO, subDays } from "date-fns";
 import * as jose from "jose";
 import xior, { type XiorInstance, type XiorRequestConfig } from "xior";
 import { env } from "../../env";
 import type { GetTransactionsRequest } from "../../types";
 import { ProviderError } from "../../utils/error";
+import { withRateLimitRetry } from "../../utils/retry";
 import { transformSessionData } from "./transform";
 import type {
   AuthenticateRequest,
@@ -26,6 +28,11 @@ export class EnableBankingApi {
 
   // Maximum allowed TTL is 24 hours (86400 seconds)
   #expiresIn = 20; // hours
+
+  // Cache JWT and xior client in memory to avoid RSA signing + client creation on every request
+  #cachedJwt: string | null = null;
+  #cachedJwtExpiresAt = 0;
+  #cachedApi: XiorInstance | null = null;
 
   constructor() {
     this.#applicationId = env.ENABLEBANKING_APPLICATION_ID;
@@ -87,10 +94,28 @@ export class EnableBankingApi {
     return `${jwtHeaders}.${jwtBody}.${jwtSignature}`;
   }
 
-  async #getApi(): Promise<XiorInstance> {
-    const jwt = await this.#generateJWT();
+  async #getJwt(): Promise<string> {
+    const now = Math.floor(Date.now() / 1000);
+    // Reuse cached JWT if it has at least 5 minutes of validity left
+    if (this.#cachedJwt && this.#cachedJwtExpiresAt > now + 300) {
+      return this.#cachedJwt;
+    }
 
-    return xior.create({
+    const jwt = await this.#generateJWT();
+    this.#cachedJwt = jwt;
+    this.#cachedJwtExpiresAt = now + this.#expiresIn * 60 * 60;
+    return jwt;
+  }
+
+  async #getApi(): Promise<XiorInstance> {
+    const jwt = await this.#getJwt();
+
+    // Reuse the xior instance if the JWT hasn't changed
+    if (this.#cachedApi && this.#cachedJwt === jwt) {
+      return this.#cachedApi;
+    }
+
+    this.#cachedApi = xior.create({
       baseURL: this.#baseUrl,
       timeout: 30_000,
       headers: {
@@ -98,6 +123,8 @@ export class EnableBankingApi {
         Authorization: `Bearer ${jwt}`,
       },
     });
+
+    return this.#cachedApi;
   }
 
   async #get<TResponse>(
@@ -105,23 +132,25 @@ export class EnableBankingApi {
     params?: Record<string, string>,
     config?: XiorRequestConfig,
   ): Promise<TResponse> {
-    const api = await this.#getApi();
+    return withRateLimitRetry(async () => {
+      const api = await this.#getApi();
 
-    return api
-      .get<TResponse>(path, {
-        params,
-        ...config,
-        headers: {
-          ...config?.headers,
-          "Psu-Ip-Address": Array.from(
-            { length: 4 },
-            () => ~~(Math.random() * 256),
-          ).join("."),
-          "Psu-User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        },
-      })
-      .then(({ data }) => data);
+      return api
+        .get<TResponse>(path, {
+          params,
+          ...config,
+          headers: {
+            ...config?.headers,
+            "Psu-Ip-Address": Array.from(
+              { length: 4 },
+              () => ~~(Math.random() * 256),
+            ).join("."),
+            "Psu-User-Agent":
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          },
+        })
+        .then(({ data }) => data);
+    });
   }
 
   async #post<TResponse>(
@@ -129,9 +158,11 @@ export class EnableBankingApi {
     body?: unknown,
     config?: XiorRequestConfig,
   ): Promise<TResponse> {
-    const api = await this.#getApi();
+    return withRateLimitRetry(async () => {
+      const api = await this.#getApi();
 
-    return api.post<TResponse>(path, body, config).then(({ data }) => data);
+      return api.post<TResponse>(path, body, config).then(({ data }) => data);
+    });
   }
 
   async authenticate(
@@ -181,7 +212,11 @@ export class EnableBankingApi {
   }
 
   async getSession(sessionId: string): Promise<GetSessionResponse> {
-    return this.#get<GetSessionResponse>(`/sessions/${sessionId}`);
+    return bankingCache.getOrSet(
+      `enablebanking_session_${sessionId}`,
+      CacheTTL.FIFTEEN_MINUTES,
+      () => this.#get<GetSessionResponse>(`/sessions/${sessionId}`),
+    );
   }
 
   async getHealthCheck(): Promise<boolean> {
@@ -194,16 +229,24 @@ export class EnableBankingApi {
   }
 
   async getInstitutions(): Promise<GetAspspsResponse["aspsps"]> {
-    const response = await this.#get<GetAspspsResponse>("/aspsps");
-
-    return response.aspsps;
+    return bankingCache.getOrSet(
+      "enablebanking_institutions",
+      CacheTTL.TWENTY_FOUR_HOURS,
+      async () => {
+        const response = await this.#get<GetAspspsResponse>("/aspsps");
+        return response.aspsps;
+      },
+    );
   }
 
   async getAccountDetails(
     accountId: string,
   ): Promise<GetAccountDetailsResponse> {
-    return this.#get<GetAccountDetailsResponse>(
-      `/accounts/${accountId}/details`,
+    return bankingCache.getOrSet(
+      `enablebanking_account_details_${accountId}`,
+      CacheTTL.THIRTY_MINUTES,
+      () =>
+        this.#get<GetAccountDetailsResponse>(`/accounts/${accountId}/details`),
     );
   }
 

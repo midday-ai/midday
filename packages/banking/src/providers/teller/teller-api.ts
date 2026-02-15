@@ -1,9 +1,11 @@
+import { bankingCache, CacheTTL } from "@midday/cache/banking-cache";
 import { env } from "../../env";
 import type {
   GetConnectionStatusRequest,
   GetConnectionStatusResponse,
 } from "../../types";
 import { ProviderError } from "../../utils/error";
+import { withRateLimitRetry } from "../../utils/retry";
 import type {
   AuthenticatedRequest,
   DisconnectAccountRequest,
@@ -101,7 +103,11 @@ export class TellerApi {
   }
 
   async getInstitutions(): Promise<GetInstitutionsResponse> {
-    return this.#get("/institutions");
+    return bankingCache.getOrSet(
+      "teller_institutions",
+      CacheTTL.TWENTY_FOUR_HOURS,
+      () => this.#get<GetInstitutionsResponse>("/institutions"),
+    );
   }
 
   /**
@@ -128,23 +134,14 @@ export class TellerApi {
     accessToken,
   }: GetConnectionStatusRequest): Promise<GetConnectionStatusResponse> {
     try {
+      // A successful /accounts call proves the access token is valid
       const accounts = await this.#get("/accounts", accessToken);
 
       if (!Array.isArray(accounts)) {
         return { status: "disconnected" };
       }
 
-      const results = await Promise.allSettled(
-        accounts.map((account) =>
-          this.#get(`/accounts/${account.id}`, accessToken),
-        ),
-      );
-
-      if (results.some((result) => result.status === "fulfilled")) {
-        return { status: "connected" };
-      }
-
-      return { status: "disconnected" };
+      return { status: "connected" };
     } catch (error) {
       const parsedError = isError(error);
 
@@ -199,30 +196,39 @@ export class TellerApi {
     token?: string,
     params?: Record<string, string | number | undefined>,
   ): Promise<TResponse> {
-    const url = new URL(`${this.#baseUrl}/${path}`);
+    return withRateLimitRetry(async () => {
+      const url = new URL(`${this.#baseUrl}/${path}`);
 
-    if (params) {
-      for (const [key, value] of Object.entries(params)) {
-        if (value) {
-          url.searchParams.append(key, value.toString());
+      if (params) {
+        for (const [key, value] of Object.entries(params)) {
+          if (value) {
+            url.searchParams.append(key, value.toString());
+          }
         }
       }
-    }
 
-    return this.#fetch(url.toString(), {
-      headers: {
-        Authorization: `Basic ${btoa(`${token}:`)}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const error = isError(data);
-
-        if (error) {
-          throw new ProviderError(error);
-        }
-
-        return data as TResponse;
+      const response = await this.#fetch(url.toString(), {
+        headers: {
+          Authorization: `Basic ${btoa(`${token}:`)}`,
+        },
       });
+
+      // Check for rate limit at HTTP level before parsing
+      if (response.status === 429) {
+        const err = new Error("Rate limited") as any;
+        err.status = 429;
+        err.headers = Object.fromEntries(response.headers.entries());
+        throw err;
+      }
+
+      const data = await response.json();
+      const error = isError(data);
+
+      if (error) {
+        throw new ProviderError(error);
+      }
+
+      return data as TResponse;
+    });
   }
 }

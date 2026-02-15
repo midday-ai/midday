@@ -27,8 +27,6 @@ import { TRPCError } from "@trpc/server";
 const logger = createLoggerWithContext("trpc:banking");
 
 export const bankingRouter = createTRPCRouter({
-  // --- Auth: Plaid ---
-
   plaidLink: internalProcedure
     .input(plaidLinkSchema)
     .mutation(async ({ input }) => {
@@ -58,10 +56,13 @@ export const bankingRouter = createTRPCRouter({
       const api = new PlaidApi();
 
       try {
-        const data = await api.itemPublicTokenExchange({
+        const { data } = await api.itemPublicTokenExchange({
           publicToken: input.token,
         });
-        return data;
+
+        return {
+          data,
+        };
       } catch (error) {
         logger.error("Failed to exchange Plaid token", {
           error: error instanceof Error ? error.message : String(error),
@@ -72,8 +73,6 @@ export const bankingRouter = createTRPCRouter({
         });
       }
     }),
-
-  // --- Auth: GoCardless ---
 
   gocardlessLink: internalProcedure
     .input(gocardlessLinkSchema)
@@ -112,8 +111,6 @@ export const bankingRouter = createTRPCRouter({
         });
       }
     }),
-
-  // --- Auth: EnableBanking ---
 
   enablebankingLink: internalProcedure
     .input(enablebankingLinkSchema)
@@ -158,8 +155,6 @@ export const bankingRouter = createTRPCRouter({
         });
       }
     }),
-
-  // --- Connections ---
 
   connectionStatus: internalProcedure
     .input(connectionStatusSchema)
@@ -253,8 +248,6 @@ export const bankingRouter = createTRPCRouter({
     }
   }),
 
-  // --- Accounts ---
-
   getProviderAccounts: internalProcedure
     .input(getProviderAccountsSchema)
     .query(async ({ input }) => {
@@ -323,8 +316,6 @@ export const bankingRouter = createTRPCRouter({
       }
     }),
 
-  // --- Transactions ---
-
   getProviderTransactions: internalProcedure
     .input(getProviderTransactionsSchema)
     .query(async ({ input }) => {
@@ -348,8 +339,6 @@ export const bankingRouter = createTRPCRouter({
         });
       }
     }),
-
-  // --- Rates ---
 
   rates: internalProcedure.query(async () => {
     try {
