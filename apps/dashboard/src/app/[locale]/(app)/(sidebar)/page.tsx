@@ -1,4 +1,5 @@
 import { Provider as ChatProvider } from "@ai-sdk-tools/store";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { ChatInterface } from "@/components/chat/chat-interface";
@@ -10,6 +11,8 @@ import {
   trpc,
 } from "@/trpc/server";
 import { geolocation } from "@/utils/geo";
+
+type WidgetPreferences = RouterOutputs["widgets"]["getWidgetPreferences"];
 
 export const metadata: Metadata = {
   title: "Overview | Midday",
@@ -32,10 +35,13 @@ export default async function Overview() {
   // still mount and the client-side useQuery will refetch automatically.
   const widgetPreferences = await queryClient
     .fetchQuery(trpc.widgets.getWidgetPreferences.queryOptions())
-    .catch(() => ({
-      primaryWidgets: [] as string[],
-      availableWidgets: [] as string[],
-    }));
+    .catch(
+      () =>
+        ({
+          primaryWidgets: [],
+          availableWidgets: [],
+        }) as WidgetPreferences,
+    );
 
   return (
     <HydrateClient>
