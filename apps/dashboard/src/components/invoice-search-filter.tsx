@@ -16,20 +16,8 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { formatISO } from "date-fns";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import type { InvoiceFilterSchema } from "@/app/api/ai/filters/invoices/schema";
-import {
-  invoiceFilterOutputSchema,
-  invoiceFilterSchema,
-} from "@/app/api/ai/filters/invoices/schema";
-import {
-  mapStringArrayToIds,
-  normalizeString,
-  useAIFilter,
-  validateEnumArray,
-} from "@/hooks/use-ai-filter";
 import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
@@ -63,58 +51,6 @@ export function InvoiceSearchFilter() {
     name: t(`invoice_status.${status}`),
   }));
 
-  const mapInvoiceFilters = useCallback(
-    (
-      object: InvoiceFilterSchema,
-      data?: { customersData?: { data?: Array<{ id: string; name: string }> } },
-    ) => {
-      const statuses = Array.isArray(object.statuses)
-        ? validateEnumArray(object.statuses, [
-            "draft",
-            "overdue",
-            "paid",
-            "unpaid",
-            "canceled",
-            "refunded",
-          ] as const)
-        : normalizeString(object.statuses)
-          ? validateEnumArray([object.statuses], [
-              "draft",
-              "overdue",
-              "paid",
-              "unpaid",
-              "canceled",
-              "refunded",
-            ] as const)
-          : null;
-
-      const customerIds = mapStringArrayToIds(
-        object.customers,
-        (name) =>
-          data?.customersData?.data?.find((customer) => customer.name === name)
-            ?.id ?? null,
-      );
-
-      return {
-        q: normalizeString(object.name),
-        statuses,
-        customers: customerIds,
-        start: normalizeString(object.start),
-        end: normalizeString(object.end),
-      };
-    },
-    [],
-  );
-
-  const { submit, isLoading } = useAIFilter({
-    api: "/api/ai/filters/invoices",
-    inputSchema: invoiceFilterSchema,
-    outputSchema: invoiceFilterOutputSchema,
-    mapper: mapInvoiceFilters,
-    onFilterApplied: setFilter,
-    data: { customersData },
-  });
-
   useHotkeys(
     "esc",
     () => {
@@ -144,23 +80,9 @@ export function InvoiceSearchFilter() {
     }
   };
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-
-    if (input.split(" ").length > 1) {
-      const context = `Invoice payment statuses: ${statusFilters.map((filter) => filter.name).join(", ")}
-         Customers: ${customersData?.data?.map((customer) => customer.name).join(", ")}
-      `;
-
-      submit({
-        input,
-        context,
-        currentDate: formatISO(new Date(), { representation: "date" }),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
-    } else {
-      setFilter({ q: input.length > 0 ? input : null });
-    }
+    setFilter({ q: input.length > 0 ? input : null });
   };
 
   const validFilters = Object.fromEntries(
@@ -184,7 +106,7 @@ export function InvoiceSearchFilter() {
           <Icons.Search className="absolute pointer-events-none left-3 top-[11px]" />
           <Input
             ref={inputRef}
-            placeholder="Search or filter"
+            placeholder="Search invoices..."
             className="pl-9 w-full sm:w-[350px] pr-8"
             value={input}
             onChange={handleSearch}
@@ -211,7 +133,6 @@ export function InvoiceSearchFilter() {
 
         <FilterList
           filters={validFilters}
-          loading={isLoading}
           onRemove={setFilter}
           statusFilters={statusFilters}
           customers={customersData?.data}

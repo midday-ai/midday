@@ -18,15 +18,9 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { formatISO, parseISO } from "date-fns";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import type { VaultFilterSchema } from "@/app/api/ai/filters/vault/schema";
-import {
-  vaultFilterOutputSchema,
-  vaultFilterSchema,
-} from "@/app/api/ai/filters/vault/schema";
 import { FilterList } from "@/components/filter-list";
-import { normalizeString, useAIFilter } from "@/hooks/use-ai-filter";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -46,23 +40,6 @@ export function VaultSearchFilter() {
   const { data: tagsData } = useQuery({
     ...trpc.documentTags.get.queryOptions(),
     enabled: shouldFetch || Boolean(filter.tags?.length),
-  });
-
-  const mapVaultFilters = useCallback((object: VaultFilterSchema) => {
-    return {
-      q: normalizeString(object.name),
-      tags: null,
-      start: normalizeString(object.start),
-      end: normalizeString(object.end),
-    };
-  }, []);
-
-  const { submit, isLoading } = useAIFilter({
-    api: "/api/ai/filters/vault",
-    inputSchema: vaultFilterSchema,
-    outputSchema: vaultFilterOutputSchema,
-    mapper: mapVaultFilters,
-    onFilterApplied: setFilter,
   });
 
   useHotkeys(
@@ -94,18 +71,9 @@ export function VaultSearchFilter() {
     }
   };
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-
-    if (input.split(" ").length > 1) {
-      submit({
-        input,
-        currentDate: formatISO(new Date(), { representation: "date" }),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
-    } else {
-      setFilter({ q: input.length > 0 ? input : null });
-    }
+    setFilter({ q: input.length > 0 ? input : null });
   };
 
   const validFilters = Object.fromEntries(
@@ -129,7 +97,7 @@ export function VaultSearchFilter() {
           <Icons.Search className="absolute pointer-events-none left-3 top-[11px]" />
           <Input
             ref={inputRef}
-            placeholder="Search or type filter"
+            placeholder="Search documents..."
             className="pl-9 w-full md:w-[350px] pr-8"
             value={input}
             onChange={handleSearch}
@@ -158,7 +126,6 @@ export function VaultSearchFilter() {
 
         <FilterList
           filters={validFilters}
-          loading={isLoading}
           onRemove={setFilter}
           tags={tagsData}
         />

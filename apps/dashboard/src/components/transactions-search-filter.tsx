@@ -15,22 +15,8 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { formatISO } from "date-fns";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import type { TransactionsFilterSchema } from "@/app/api/ai/filters/transactions/schema";
-import {
-  transactionFilterOutputSchema,
-  transactionsFilterSchema,
-} from "@/app/api/ai/filters/transactions/schema";
-import {
-  mapStringArrayToIds,
-  normalizeEnum,
-  normalizeString,
-  useAIFilter,
-  validateEnumArray,
-  validateNumberRange,
-} from "@/hooks/use-ai-filter";
 import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTRPC } from "@/trpc/client";
@@ -88,15 +74,6 @@ const defaultSearch = {
   manual: null,
   type: null,
 };
-
-const PLACEHOLDERS = [
-  "Software and taxes last month",
-  "Income last year",
-  "Software last Q4",
-  "From Google without receipt",
-  "Search or filter",
-  "Without receipts this month",
-];
 
 const statusFilters: FilterItem<StatusFilter>[] = [
   { id: "completed", name: "Completed" },
@@ -231,7 +208,6 @@ function updateArrayFilter(
 }
 
 export function TransactionsSearchFilter() {
-  const [placeholder, setPlaceholder] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -239,72 +215,6 @@ export function TransactionsSearchFilter() {
     useTransactionFilterParamsWithPersistence();
   const { tags, accounts, categories } = useFilterData(isOpen, isFocused);
   const [input, setInput] = useState(filter.q ?? "");
-
-  const mapTransactionFilters = useCallback(
-    (
-      object: TransactionsFilterSchema,
-      data?: {
-        categories?: Array<{ name: string; slug: string | null }>;
-        tags?: Array<{ id: string; name: string }>;
-      },
-    ) => {
-      const categorySlugs = mapStringArrayToIds(
-        object.categories,
-        (name) =>
-          data?.categories?.find((category) => category.name === name)?.slug ??
-          null,
-      );
-
-      const tagIds = mapStringArrayToIds(
-        object.tags,
-        (name) => data?.tags?.find((tag) => tag.name === name)?.id ?? null,
-      );
-
-      const recurring = validateEnumArray(object.recurring, [
-        "all",
-        "weekly",
-        "monthly",
-        "annually",
-      ] as const);
-
-      return {
-        q: normalizeString(object.name),
-        attachments: normalizeEnum(object.attachments, [
-          "exclude",
-          "include",
-        ] as const),
-        start: normalizeString(object.start),
-        end: normalizeString(object.end),
-        categories: categorySlugs,
-        tags: tagIds,
-        accounts: null,
-        assignees: null,
-        amount_range: validateNumberRange(object.amount_range),
-        amount: null,
-        recurring,
-        statuses: null,
-        manual: null,
-      };
-    },
-    [],
-  );
-
-  const { submit, isLoading } = useAIFilter({
-    api: "/api/ai/filters/transactions",
-    inputSchema: transactionsFilterSchema,
-    outputSchema: transactionFilterOutputSchema,
-    mapper: mapTransactionFilters,
-    onFilterApplied: setFilter,
-    data: { categories, tags },
-  });
-
-  useEffect(() => {
-    const randomPlaceholder =
-      PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)] ??
-      "Search or filter";
-
-    setPlaceholder(randomPlaceholder);
-  }, []);
 
   useHotkeys(
     "esc",
@@ -334,24 +244,9 @@ export function TransactionsSearchFilter() {
     }
   };
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-
-    if (input.split(" ").length > 1) {
-      const context = `
-        Categories: ${categories?.map((category) => category.name).join(", ")}
-        Tags: ${tags?.map((tag) => tag.name).join(", ")}
-      `;
-
-      submit({
-        input,
-        context,
-        currentDate: formatISO(new Date(), { representation: "date" }),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
-    } else {
-      setFilter({ q: input.length > 0 ? input : null });
-    }
+    setFilter({ q: input.length > 0 ? input : null });
   };
 
   const validFilters = Object.fromEntries(
@@ -412,7 +307,7 @@ export function TransactionsSearchFilter() {
           <Icons.Search className="absolute pointer-events-none left-3 top-[11px]" />
           <Input
             ref={inputRef}
-            placeholder={placeholder}
+            placeholder="Search transactions..."
             className="pl-9 w-full sm:w-[350px] pr-8"
             value={input}
             onChange={handleSearch}
@@ -441,7 +336,6 @@ export function TransactionsSearchFilter() {
 
         <FilterList
           filters={processFiltersForList()}
-          loading={isLoading}
           onRemove={setFilter}
           categories={categories}
           accounts={accounts}
