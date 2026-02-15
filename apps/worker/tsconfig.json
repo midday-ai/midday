@@ -22,6 +22,7 @@
     "paths": {
       "@worker/*": ["src/*"],
       "@api/*": ["../../apps/api/src/*"],
+      "@jobs/*": ["../../packages/jobs/src/*"],
       "@documents/*": ["../../packages/documents/src/*"],
       "@supabase/*": ["../../packages/supabase/src/*"]
     },

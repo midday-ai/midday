@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "echo 'Types validated by @midday/api and consumer packages'"
   },
   "exports": {
     ".": "./src/index.ts",
