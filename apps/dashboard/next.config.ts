@@ -90,15 +90,5 @@ export default isProduction
       sourcemaps: {
         deleteSourcemapsAfterUpload: true,
       },
-
-      // Webpack-specific settings (not supported with Turbopack)
-      webpack: {
-        // Tree-shake Sentry logger statements to reduce bundle size
-        treeshake: {
-          removeDebugLogging: true,
-        },
-        // Annotate React component names for clearer error boundaries in Sentry
-        reactComponentAnnotation: true,
-      },
     })
   : config;
