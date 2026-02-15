@@ -28,7 +28,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "remark-gfm": "^4.0.1",
-    "streamdown": "^2.2.0",
+    "streamdown": "1.2.0",
     "sugar-high": "^0.9.5"
   },
   "devDependencies": {
