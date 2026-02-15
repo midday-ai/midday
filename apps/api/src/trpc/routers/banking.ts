@@ -39,10 +39,13 @@ export const bankingRouter = createTRPCRouter({
       try {
         const { data } = await api.linkTokenCreate({
           userId: ctx.session.user.id,
-          language: input.language,
-          accessToken: input.accessToken,
+          language: input?.language,
+          accessToken: input?.accessToken,
         });
-        return { data };
+
+        return {
+          data,
+        };
       } catch (error) {
         logger.error("Failed to create Plaid link token", {
           error: error instanceof Error ? error.message : String(error),

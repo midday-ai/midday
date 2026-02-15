@@ -132,9 +132,11 @@ export function ReconnectProvider({
     switch (provider) {
       case "plaid": {
         if (!user?.id) return;
+
         createPlaidLink.mutate({
           accessToken: accessToken ?? undefined,
         });
+
         return;
       }
       case "gocardless": {

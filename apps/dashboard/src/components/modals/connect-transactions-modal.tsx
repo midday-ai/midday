@@ -19,7 +19,6 @@ import { usePlaidLink } from "react-plaid-link";
 import { useDebounceValue, useScript } from "usehooks-ts";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useTeamQuery } from "@/hooks/use-team";
-import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { BankLogo } from "../bank-logo";
 import { ConnectBankProvider } from "../connect-bank-provider";
@@ -110,7 +109,6 @@ export function ConnectTransactionsModal() {
   const router = useRouter();
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
   const { data: team } = useTeamQuery();
-  const { data: user } = useUserQuery();
   const teamCountryCode = team?.countryCode || "";
 
   const {
@@ -133,7 +131,7 @@ export function ConnectTransactionsModal() {
   );
 
   const exchangeToken = useMutation(
-    trpc.banking.plaidExchange.mutationOptions({}),
+    trpc.banking.plaidExchange.mutationOptions(),
   );
 
   // NOTE: Load SDKs here so it's not unmonted

@@ -16,10 +16,12 @@ export const accountTypeSchema = z.enum([
 ]);
 
 // Auth schemas
-export const plaidLinkSchema = z.object({
-  language: z.string().optional(),
-  accessToken: z.string().optional(),
-});
+export const plaidLinkSchema = z
+  .object({
+    language: z.string().optional(),
+    accessToken: z.string().optional(),
+  })
+  .optional();
 
 export const plaidExchangeSchema = z.object({
   token: z.string(),
