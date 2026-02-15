@@ -6,16 +6,27 @@ import { useEffect, useState } from "react";
 import { useReviewTransactions } from "@/hooks/use-review-transactions";
 import { useTransactionTab } from "@/hooks/use-transaction-tab";
 
+function ReviewCount() {
+  const { transactionIds } = useReviewTransactions();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || transactionIds.length === 0) {
+    return null;
+  }
+
+  return (
+    <span className="ml-1 text-xs text-[#878787]">
+      ({transactionIds.length})
+    </span>
+  );
+}
+
 export function TransactionTabs() {
   const { tab, setTab } = useTransactionTab();
-  const { transactionIds } = useReviewTransactions();
-  const reviewCount = transactionIds.length;
-
-  // Defer count to client-only to avoid hydration mismatch –
-  // the server and client query caches may disagree on the count
-  // during the first render.
-  const [clientCount, setClientCount] = useState(0);
-  useEffect(() => setClientCount(reviewCount), [reviewCount]);
 
   const handleValueChange = (value: string) => {
     if (value === "all" || value === "review") {
@@ -46,11 +57,7 @@ export function TransactionTabs() {
             )}
           >
             Review
-            {clientCount > 0 && (
-              <span className="ml-1 text-xs text-[#878787]">
-                ({clientCount})
-              </span>
-            )}
+            <ReviewCount />
           </TabsTrigger>
         </TabsList>
       </div>
