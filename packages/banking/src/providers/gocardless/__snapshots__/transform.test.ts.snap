@@ -1,0 +1,152 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`Transform expense transaction (depository) 1`] = `
+{
+  "amount": -38000,
+  "balance": null,
+  "category": null,
+  "counterparty_name": null,
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-23",
+  "description": null,
+  "id": "86b1bc36e6a6d2a5dee8ff7138920255",
+  "merchant_name": null,
+  "method": "transfer",
+  "name": "Lön 160434262327",
+  "status": "posted",
+}
+`;
+
+exports[`Transform income transaction (depository) 1`] = `
+{
+  "amount": 5000,
+  "balance": null,
+  "category": "income",
+  "counterparty_name": null,
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-23",
+  "description": null,
+  "id": "income-internal-123",
+  "merchant_name": null,
+  "method": "transfer",
+  "name": "Salary Deposit",
+  "status": "posted",
+}
+`;
+
+exports[`Transform credit card payment - should be credit-card-payment not income 1`] = `
+{
+  "amount": 500,
+  "balance": null,
+  "category": "credit-card-payment",
+  "counterparty_name": null,
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-23",
+  "description": null,
+  "id": "cc-payment-internal-123",
+  "merchant_name": null,
+  "method": "transfer",
+  "name": "Credit Card Payment",
+  "status": "posted",
+}
+`;
+
+exports[`Transform credit card refund - should be null (user categorizes) 1`] = `
+{
+  "amount": 75,
+  "balance": null,
+  "category": null,
+  "counterparty_name": "Some Merchant",
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-23",
+  "description": "Refund",
+  "id": "cc-refund-internal-123",
+  "merchant_name": null,
+  "method": "card_purchase",
+  "name": "Some Merchant",
+  "status": "posted",
+}
+`;
+
+exports[`Transform accounts 1`] = `
+{
+  "account_number": null,
+  "available_balance": null,
+  "balance": {
+    "amount": 1942682.86,
+    "available_balance": null,
+    "credit_limit": null,
+    "currency": "SEK",
+  },
+  "bic": "PLEODK00",
+  "credit_limit": null,
+  "currency": "SEK",
+  "enrollment_id": null,
+  "expires_at": "FIXED_DATE_FOR_TESTING",
+  "iban": "123",
+  "id": "b11e5627-cac8-41c9-a74a-2b88438fe07d",
+  "institution": {
+    "id": "PLEO_PLEODK00",
+    "logo": "https://cdn-engine.midday.ai/PLEO_PLEODK00.png",
+    "name": "Pleo",
+    "provider": "gocardless",
+  },
+  "name": "Pleo Account",
+  "resource_id": "3133",
+  "routing_number": null,
+  "sort_code": null,
+  "subtype": null,
+  "type": "depository",
+  "wire_routing_number": null,
+}
+`;
+
+exports[`Transform credit card account (CARD type) 1`] = `
+{
+  "account_number": null,
+  "available_balance": null,
+  "balance": {
+    "amount": 1500,
+    "available_balance": null,
+    "credit_limit": null,
+    "currency": "EUR",
+  },
+  "bic": "TESTBIC",
+  "credit_limit": null,
+  "currency": "EUR",
+  "enrollment_id": null,
+  "expires_at": "FIXED_DATE_FOR_TESTING",
+  "iban": "4444",
+  "id": "credit-card-account-123",
+  "institution": {
+    "id": "BANK_CREDIT",
+    "logo": "https://cdn-engine.midday.ai/BANK_CREDIT.png",
+    "name": "Test Bank",
+    "provider": "gocardless",
+  },
+  "name": "Credit Card",
+  "resource_id": "4444",
+  "routing_number": null,
+  "sort_code": null,
+  "subtype": null,
+  "type": "credit",
+  "wire_routing_number": null,
+}
+`;
+
+exports[`Transform account balance - depository (positive stays positive) 1`] = `
+{
+  "amount": 1942682.86,
+  "available_balance": null,
+  "credit_limit": null,
+  "currency": "SEK",
+}
+`;

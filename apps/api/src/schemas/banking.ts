@@ -76,17 +76,11 @@ export const getProviderAccountsSchema = z.object({
   id: z.string().optional(),
 });
 
-export const deleteProviderAccountSchema = z.object({
-  provider: providerSchema,
-  accountId: z.string().optional(),
-  accessToken: z.string().optional(),
-});
-
 export const getBalanceSchema = z.object({
   provider: providerSchema,
   accessToken: z.string().optional(),
   id: z.string(),
-  accountType: z.string().optional(),
+  accountType: accountTypeSchema.optional(),
 });
 
 // Transaction schemas

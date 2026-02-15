@@ -1,0 +1,195 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`Transform pending transaction 1`] = `
+{
+  "amount": -83.62,
+  "balance": null,
+  "category": null,
+  "counterparty_name": "Bank Of Many",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": "Bank Of Many",
+  "id": "txn_os41r5u90e29shubl2000",
+  "merchant_name": null,
+  "method": "other",
+  "name": "Online Check Deposit",
+  "status": "pending",
+}
+`;
+
+exports[`Transform credit card purchase transaction 1`] = `
+{
+  "amount": -29,
+  "balance": null,
+  "category": null,
+  "counterparty_name": "Bank Of Many",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": "Bank Of Many",
+  "id": "txn_os41r5u90e29shubl2000",
+  "merchant_name": null,
+  "method": "other",
+  "name": "Technology",
+  "status": "pending",
+}
+`;
+
+exports[`Transform credit card payment received - should be credit-card-payment not income 1`] = `
+{
+  "amount": 200,
+  "balance": 500,
+  "category": "credit-card-payment",
+  "counterparty_name": "Bank Payment",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": "Bank Payment",
+  "id": "txn_os41r5u90e29shubl3000",
+  "merchant_name": null,
+  "method": "payment",
+  "name": "Payment Thank You",
+  "status": "posted",
+}
+`;
+
+exports[`Transform credit card refund - should have no category 1`] = `
+{
+  "amount": 50,
+  "balance": 500,
+  "category": null,
+  "counterparty_name": "Amazon Refund",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": null,
+  "id": "txn_os41r5u90e29shubl4000",
+  "merchant_name": null,
+  "method": "card_purchase",
+  "name": "Amazon Refund",
+  "status": "posted",
+}
+`;
+
+exports[`Transform credit card cashback - should be income 1`] = `
+{
+  "amount": 25,
+  "balance": 500,
+  "category": "income",
+  "counterparty_name": "Rewards",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": "Rewards",
+  "id": "txn_os41r5u90e29shubl5000",
+  "merchant_name": null,
+  "method": "other",
+  "name": "Cash Back Rewards",
+  "status": "posted",
+}
+`;
+
+exports[`Transform card payment transaction 1`] = `
+{
+  "amount": -68.9,
+  "balance": 83431.46,
+  "category": null,
+  "counterparty_name": "Nordstrom",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-01",
+  "description": null,
+  "id": "txn_os41r5u90e29shubl2005",
+  "merchant_name": null,
+  "method": "card_purchase",
+  "name": "Nordstrom",
+  "status": "posted",
+}
+`;
+
+exports[`Transform income transaction 1`] = `
+{
+  "amount": 1000000,
+  "balance": 83296.4,
+  "category": "income",
+  "counterparty_name": "Exxon Mobil",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-03",
+  "description": null,
+  "id": "txn_os41r5u90e29shubl2002",
+  "merchant_name": null,
+  "method": "card_purchase",
+  "name": "Exxon Mobil",
+  "status": "posted",
+}
+`;
+
+exports[`Transform type transfer 1`] = `
+{
+  "amount": -37.99,
+  "balance": 85897.25,
+  "category": null,
+  "counterparty_name": "Yourself",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-01-27",
+  "description": "Yourself",
+  "id": "txn_os41r5ua0e29shubl2001",
+  "merchant_name": null,
+  "method": "transfer",
+  "name": "Recurring Transfer To Savings",
+  "status": "posted",
+}
+`;
+
+exports[`Transform accounts 1`] = `
+{
+  "account_number": null,
+  "available_balance": null,
+  "balance": {
+    "amount": 2011100,
+    "available_balance": null,
+    "credit_limit": null,
+    "currency": "USD",
+  },
+  "bic": null,
+  "credit_limit": null,
+  "currency": "USD",
+  "enrollment_id": "enr_os557c8pck2deoskak000",
+  "expires_at": null,
+  "iban": null,
+  "id": "acc_os557c2mge29shubl2000",
+  "institution": {
+    "id": "mercury",
+    "logo": "https://cdn-engine.midday.ai/mercury.jpg",
+    "name": "Mercury",
+    "provider": "teller",
+  },
+  "name": "Platinum Card",
+  "resource_id": "6587",
+  "routing_number": null,
+  "sort_code": null,
+  "subtype": "credit_card",
+  "type": "credit",
+  "wire_routing_number": null,
+}
+`;
+
+exports[`Transform account balance - depository 1`] = `
+{
+  "amount": 2011100,
+  "available_balance": null,
+  "credit_limit": null,
+  "currency": "USD",
+}
+`;

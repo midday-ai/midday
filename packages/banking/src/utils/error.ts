@@ -54,7 +54,9 @@ export class ProviderError extends Error {
 }
 
 export function createErrorResponse(error: unknown) {
-  logger.error("Provider error response", { error: error instanceof Error ? error.message : String(error) });
+  logger.error("Provider error response", {
+    error: error instanceof Error ? error.message : String(error),
+  });
 
   if (error instanceof ProviderError) {
     return {

@@ -2,7 +2,6 @@ import {
   connectionByReferenceSchema,
   connectionStatusSchema,
   deleteConnectionSchema,
-  deleteProviderAccountSchema,
   enablebankingExchangeSchema,
   enablebankingLinkSchema,
   getBalanceSchema,
@@ -226,28 +225,6 @@ export const bankingRouter = createTRPCRouter({
       }
     }),
 
-  gocardlessConnections: internalProcedure.query(async () => {
-    const api = new GoCardLessApi();
-
-    try {
-      const data = await api.getRequisitions();
-      return {
-        count: data.count,
-        next: data.next,
-        previous: data.previous,
-        results: data.results,
-      };
-    } catch (error) {
-      logger.error("Failed to get GoCardless connections", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to get GoCardless connections",
-      });
-    }
-  }),
-
   getProviderAccounts: internalProcedure
     .input(getProviderAccountsSchema)
     .query(async ({ input }) => {
@@ -259,7 +236,13 @@ export const bankingRouter = createTRPCRouter({
           accessToken: input.accessToken,
           institutionId: input.institutionId,
         });
-        return { data };
+
+        // Sort accounts by balance descending (highest first) for display
+        const sorted = [...data].sort(
+          (a, b) => b.balance.amount - a.balance.amount,
+        );
+
+        return { data: sorted };
       } catch (error) {
         logger.error("Failed to get provider accounts", {
           error: error instanceof Error ? error.message : String(error),
@@ -267,28 +250,6 @@ export const bankingRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to get provider accounts",
-        });
-      }
-    }),
-
-  deleteProviderAccount: internalProcedure
-    .input(deleteProviderAccountSchema)
-    .mutation(async ({ input }) => {
-      const api = new Provider({ provider: input.provider });
-
-      try {
-        await api.deleteAccounts({
-          accessToken: input.accessToken,
-          accountId: input.accountId,
-        });
-        return { success: true };
-      } catch (error) {
-        logger.error("Failed to delete provider account", {
-          error: error instanceof Error ? error.message : String(error),
-        });
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to delete provider account",
         });
       }
     }),

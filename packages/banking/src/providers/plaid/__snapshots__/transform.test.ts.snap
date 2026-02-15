@@ -1,0 +1,147 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`Transform pending transaction 1`] = `
+{
+  "amount": -5.4,
+  "balance": null,
+  "category": "travel",
+  "counterparty_name": "Uber",
+  "currency": "CAD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-24",
+  "description": "Uber",
+  "id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "merchant_name": "Uber",
+  "method": "other",
+  "name": "Uber 063015 SF**POOL**",
+  "status": "pending",
+}
+`;
+
+exports[`Transform income transaction 1`] = `
+{
+  "amount": -1500,
+  "balance": null,
+  "category": "travel",
+  "counterparty_name": "United Airlines",
+  "currency": "CAD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-22",
+  "description": null,
+  "id": "5QKmMdaKWgtzkvKEPmqriLZR1mV3kMF5X9EeX",
+  "merchant_name": "United Airlines",
+  "method": "other",
+  "name": "United Airlines",
+  "status": "posted",
+}
+`;
+
+exports[`Transform type transfer 1`] = `
+{
+  "amount": -31.53,
+  "balance": null,
+  "category": "travel",
+  "counterparty_name": "Uber",
+  "currency": "CAD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-24",
+  "description": "Uber",
+  "id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "merchant_name": "Uber",
+  "method": "transfer",
+  "name": "Uber 063015 SF**POOL**",
+  "status": "pending",
+}
+`;
+
+exports[`Transform accounts 1`] = `
+{
+  "account_number": null,
+  "available_balance": 56302.06,
+  "balance": {
+    "amount": 56302.06,
+    "available_balance": 56302.06,
+    "credit_limit": null,
+    "currency": "CAD",
+  },
+  "bic": null,
+  "credit_limit": null,
+  "currency": "CAD",
+  "enrollment_id": null,
+  "expires_at": null,
+  "iban": null,
+  "id": "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
+  "institution": {
+    "id": "ins_100546",
+    "logo": "https://cdn-engine.midday.ai/ins_100546.jpg",
+    "name": "American Funds Retirement Solutions",
+    "provider": "plaid",
+  },
+  "name": "Plaid Mortgage",
+  "resource_id": "8888",
+  "routing_number": null,
+  "sort_code": null,
+  "subtype": "mortgage",
+  "type": "loan",
+  "wire_routing_number": null,
+}
+`;
+
+exports[`Transform account balance - depository uses available 1`] = `
+{
+  "amount": 2000,
+  "available_balance": 2000,
+  "credit_limit": null,
+  "currency": "USD",
+}
+`;
+
+exports[`Transform account balance - credit uses current (amount owed) 1`] = `
+{
+  "amount": 1000,
+  "available_balance": 4000,
+  "credit_limit": 5000,
+  "currency": "USD",
+}
+`;
+
+exports[`Transform credit card payment - should be credit-card-payment not income 1`] = `
+{
+  "amount": 500,
+  "balance": null,
+  "category": "credit-card-payment",
+  "counterparty_name": null,
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-24",
+  "description": null,
+  "id": "payment123",
+  "merchant_name": null,
+  "method": "payment",
+  "name": "Credit Card Payment",
+  "status": "posted",
+}
+`;
+
+exports[`Transform credit card refund - should have no category 1`] = `
+{
+  "amount": 50,
+  "balance": null,
+  "category": null,
+  "counterparty_name": "Amazon",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-24",
+  "description": "Amazon",
+  "id": "refund123",
+  "merchant_name": "Amazon",
+  "method": "other",
+  "name": "Amazon Refund",
+  "status": "posted",
+}
+`;

@@ -264,7 +264,10 @@ export class PlaidApi {
       CacheTTL.TWENTY_FOUR_HOURS,
       () =>
         paginate({
-          delay: { milliseconds: 100, onDelay: (message) => logger.info(message) },
+          delay: {
+            milliseconds: 100,
+            onDelay: (message) => logger.info(message),
+          },
           pageSize: 500,
           fetchData: (offset, count) =>
             withRetry(() =>

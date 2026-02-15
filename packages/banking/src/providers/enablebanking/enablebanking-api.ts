@@ -81,7 +81,9 @@ export class EnableBankingApi {
 
       return jose.base64url.encode(new Uint8Array(signature));
     } catch (error) {
-      logger.error("EnableBanking JWT signing failed", { error: error instanceof Error ? error.message : String(error) });
+      logger.error("EnableBanking JWT signing failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -190,7 +192,9 @@ export class EnableBankingApi {
 
       return response;
     } catch (error) {
-      logger.error("EnableBanking authentication failed", { error: error instanceof Error ? error.message : String(error) });
+      logger.error("EnableBanking authentication failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -203,7 +207,9 @@ export class EnableBankingApi {
 
       return transformSessionData(response);
     } catch (error) {
-      logger.error("EnableBanking code exchange failed", { error: error instanceof Error ? error.message : String(error) });
+      logger.error("EnableBanking code exchange failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new ProviderError({
         message: "Failed to exchange code",
         // @ts-expect-error
@@ -282,7 +288,9 @@ export class EnableBankingApi {
 
       return accountDetails;
     } catch (error) {
-      logger.error("EnableBanking getAccounts failed", { error: error instanceof Error ? error.message : String(error) });
+      logger.error("EnableBanking getAccounts failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -464,7 +472,10 @@ export class EnableBankingApi {
       }
     } catch (error) {
       // Fallback: If longest strategy fails, use default with 1-year range
-      logger.warn("EnableBanking longest strategy failed, using default fallback", { error: error instanceof Error ? error.message : String(error) });
+      logger.warn(
+        "EnableBanking longest strategy failed, using default fallback",
+        { error: error instanceof Error ? error.message : String(error) },
+      );
 
       // Reset transactions array to avoid mixing data from failed attempt
       allTransactions = [];
