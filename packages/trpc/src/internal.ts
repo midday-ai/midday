@@ -12,6 +12,14 @@ export function createInternalClient() {
     process.env.NEXT_PUBLIC_API_URL ||
     "http://localhost:3003";
 
+  const internalApiKey = process.env.INTERNAL_API_KEY;
+
+  if (!internalApiKey) {
+    throw new Error(
+      "INTERNAL_API_KEY environment variable is required for internal tRPC client",
+    );
+  }
+
   return createTRPCClient<AppRouter>({
     links: [
       httpBatchLink({
@@ -19,7 +27,7 @@ export function createInternalClient() {
         transformer: superjson,
         headers() {
           return {
-            "x-internal-key": process.env.INTERNAL_API_KEY || "",
+            "x-internal-key": internalApiKey,
           };
         },
       }),

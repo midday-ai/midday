@@ -53,23 +53,26 @@ export class SyncInstitutionsProcessor extends BaseProcessor<SyncInstitutionsPay
 
     this.logger.info(`Fetched ${institutions.length} institutions total`);
 
-    // 2. Upsert into DB
-    const upserted = await upsertInstitutions(db, institutions);
+    // 2. Upsert and mark removed in a transaction to prevent inconsistent state
+    const result = await db.transaction(async (tx) => {
+      const upserted = await upsertInstitutions(tx, institutions);
 
-    this.logger.info(`Upserted ${upserted} institutions`);
+      this.logger.info(`Upserted ${upserted} institutions`);
 
-    // 3. Mark removed institutions
-    const fetchedIds = new Set(institutions.map((i) => i.id));
-    const activeIds = await getActiveInstitutionIds(db);
-    const removedIds = activeIds.filter((id) => !fetchedIds.has(id));
-    const removed = await markInstitutionsRemoved(db, removedIds);
+      const fetchedIds = new Set(institutions.map((i) => i.id));
+      const activeIds = await getActiveInstitutionIds(tx);
+      const removedIds = activeIds.filter((id) => !fetchedIds.has(id));
+      const removed = await markInstitutionsRemoved(tx, removedIds);
 
-    if (removed > 0) {
-      this.logger.info(`Marked ${removed} institutions as removed`);
-    }
+      if (removed > 0) {
+        this.logger.info(`Marked ${removed} institutions as removed`);
+      }
 
-    this.logger.info("Institution sync completed", { upserted, removed });
+      return { upserted, removed };
+    });
 
-    return { upserted, removed };
+    this.logger.info("Institution sync completed", result);
+
+    return result;
   }
 }

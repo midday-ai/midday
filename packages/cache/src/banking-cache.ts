@@ -29,7 +29,7 @@ export const bankingCache = {
     const cached = await cache.get<T>(key);
     if (cached !== undefined) return cached;
     const result = await fn();
-    cache.set(key, result, ttl);
+    await cache.set(key, result, ttl);
     return result;
   },
 };

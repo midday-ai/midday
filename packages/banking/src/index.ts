@@ -16,19 +16,18 @@ import type {
 import { logger } from "./utils/logger";
 
 export class Provider {
-  #name?: string;
+  #name: string;
 
   #provider:
     | PlaidProvider
     | TellerProvider
     | GoCardLessProvider
-    | EnableBankingProvider
-    | null = null;
+    | EnableBankingProvider;
 
-  constructor(params?: ProviderParams) {
-    this.#name = params?.provider;
+  constructor(params: ProviderParams) {
+    this.#name = params.provider;
 
-    switch (params?.provider) {
+    switch (params.provider) {
       case "gocardless":
         this.#provider = new GoCardLessProvider();
         break;
@@ -41,7 +40,10 @@ export class Provider {
       case "enablebanking":
         this.#provider = new EnableBankingProvider();
         break;
-      default:
+      default: {
+        const exhaustiveCheck: never = params.provider;
+        throw new Error(`Unknown banking provider: ${exhaustiveCheck}`);
+      }
     }
   }
 
@@ -78,8 +80,9 @@ export class Provider {
           healthy: isEnableBankingHealthy,
         },
       };
-    } catch {
-      throw Error("Something went wrong");
+    } catch (error) {
+      logger.error("Health check failed", { error });
+      throw error;
     }
   }
 
@@ -89,25 +92,13 @@ export class Provider {
       accountId: params.accountId,
     });
 
-    const data = await this.#provider?.getTransactions(params);
-
-    if (data) {
-      return data;
-    }
-
-    return [];
+    return this.#provider.getTransactions(params);
   }
 
   async getAccounts(params: GetAccountsRequest) {
     logger.info("getAccounts", { provider: this.#name });
 
-    const data = await this.#provider?.getAccounts(params);
-
-    if (data) {
-      return data;
-    }
-
-    return [];
+    return this.#provider.getAccounts(params);
   }
 
   async getAccountBalance(params: GetAccountBalanceRequest) {
@@ -116,49 +107,31 @@ export class Provider {
       accountId: params.accountId,
     });
 
-    const data = await this.#provider?.getAccountBalance(params);
-
-    if (data) {
-      return data;
-    }
-
-    return null;
+    return this.#provider.getAccountBalance(params);
   }
 
   async getInstitutions(params: GetInstitutionsRequest) {
     logger.info("getInstitutions", { provider: this.#name });
 
-    const data = await this.#provider?.getInstitutions(params);
-
-    if (data) {
-      return data;
-    }
-
-    return [];
+    return this.#provider.getInstitutions(params);
   }
 
   async deleteAccounts(params: DeleteAccountsRequest) {
     logger.info("deleteAccounts", { provider: this.#name });
 
-    return this.#provider?.deleteAccounts(params);
+    return this.#provider.deleteAccounts(params);
   }
 
   async getConnectionStatus(params: GetConnectionStatusRequest) {
     logger.info("getConnectionStatus", { provider: this.#name });
 
-    const data = await this.#provider?.getConnectionStatus(params);
-
-    if (data) {
-      return data;
-    }
-
-    return { status: "connected" as const };
+    return this.#provider.getConnectionStatus(params);
   }
 
   async deleteConnection(params: DeleteConnectionRequest) {
     logger.info("deleteConnection", { provider: this.#name });
 
-    return this.#provider?.deleteConnection(params);
+    return this.#provider.deleteConnection(params);
   }
 }
 
