@@ -64,6 +64,10 @@ const config = {
 // Only apply Sentry configuration in production
 const isProduction = process.env.NODE_ENV === "production";
 
+// Resolve the release tag: prefer SENTRY_RELEASE, fall back to the Railway git SHA
+const sentryRelease =
+  process.env.SENTRY_RELEASE || process.env.RAILWAY_GIT_COMMIT_SHA;
+
 export default isProduction
   ? withSentryConfig(config, {
       org: process.env.SENTRY_ORG,
@@ -77,12 +81,9 @@ export default isProduction
       // Upload a larger set of source maps for prettier stack traces (includes app router chunks)
       widenClientFileUpload: true,
 
-      // Tree-shake Sentry logger statements to reduce bundle size
-      disableLogger: true,
-
       // Tie uploaded source maps to the deploy's git SHA so Debug IDs match at runtime
       release: {
-        name: process.env.SENTRY_RELEASE,
+        name: sentryRelease,
       },
 
       // Delete source maps after upload so they aren't publicly accessible
@@ -90,9 +91,16 @@ export default isProduction
         deleteSourcemapsAfterUpload: true,
       },
 
-      // Annotate React component names for clearer error boundaries in Sentry
-      reactComponentAnnotation: {
-        enabled: true,
+      // Webpack-specific settings (not supported with Turbopack)
+      webpack: {
+        // Tree-shake Sentry logger statements to reduce bundle size
+        treeshake: {
+          removeDebugLogging: true,
+        },
+        // Annotate React component names for clearer error boundaries in Sentry
+        reactComponentAnnotation: {
+          enabled: true,
+        },
       },
     })
   : config;

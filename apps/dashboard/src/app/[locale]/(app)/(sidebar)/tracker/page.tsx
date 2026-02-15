@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { cookies } from "next/headers";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
+import { ErrorFallback } from "@/components/error-fallback";
 import { OpenTrackerSheet } from "@/components/open-tracker-sheet";
 import { ScrollableContent } from "@/components/scrollable-content";
 import { DataTable } from "@/components/tables/tracker";
@@ -47,9 +49,11 @@ export default async function Page(props: Props) {
         </div>
       </div>
 
-      <Suspense fallback={<Loading />}>
-        <DataTable />
-      </Suspense>
+      <ErrorBoundary errorComponent={ErrorFallback}>
+        <Suspense fallback={<Loading />}>
+          <DataTable />
+        </Suspense>
+      </ErrorBoundary>
     </ScrollableContent>
   );
 }

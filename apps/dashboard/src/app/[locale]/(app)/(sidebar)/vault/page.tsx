@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
+import { ErrorFallback } from "@/components/error-fallback";
 import { ScrollableContent } from "@/components/scrollable-content";
 import { VaultHeader } from "@/components/vault/vault-header";
 import { VaultSkeleton } from "@/components/vault/vault-skeleton";
@@ -35,9 +37,11 @@ export default async function Page(props: Props) {
     <ScrollableContent>
       <VaultHeader />
 
-      <Suspense fallback={<VaultSkeleton />}>
-        <VaultView initialSettings={initialSettings} />
-      </Suspense>
+      <ErrorBoundary errorComponent={ErrorFallback}>
+        <Suspense fallback={<VaultSkeleton />}>
+          <VaultView initialSettings={initialSettings} />
+        </Suspense>
+      </ErrorBoundary>
     </ScrollableContent>
   );
 }

@@ -17,6 +17,9 @@ RUN turbo prune @midday/dashboard --docker
 FROM base AS installer
 WORKDIR /app
 
+# Install CA certificates so Sentry CLI can verify SSL during source map upload
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+
 # Copy package.json files from pruned workspace
 COPY --from=builder /app/out/json/ .
 COPY bunfig.toml .
@@ -55,6 +58,7 @@ ENV NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=$NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
 
 # Release tracking (Railway provides the git SHA automatically)
 ARG RAILWAY_GIT_COMMIT_SHA
+ENV RAILWAY_GIT_COMMIT_SHA=$RAILWAY_GIT_COMMIT_SHA
 ENV SENTRY_RELEASE=$RAILWAY_GIT_COMMIT_SHA
 ENV CI=true
 

@@ -27,9 +27,12 @@ export default async function Layout({
     trpc.search.global.queryOptions({ searchTerm: "" }),
   ]);
 
-  // NOTE: Right now we want to fetch the user and hydrate the client
-  // Next steps would be to prefetch and suspense
-  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
+  // Fetch the user – .catch → redirect so a transient API failure
+  // (timeout, 5xx, expired session, etc.) doesn't crash the entire
+  // layout and blank the page.
+  const user = await queryClient
+    .fetchQuery(trpc.user.me.queryOptions())
+    .catch(() => redirect("/login"));
 
   if (!user) {
     redirect("/login");
