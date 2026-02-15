@@ -16,14 +16,13 @@
     "@hono/node-server": "^1.19.9",
     "@midday/accounting": "workspace:*",
     "@midday/app-store": "workspace:*",
-    "@midday/customers": "workspace:*",
     "@midday/banking": "workspace:*",
+    "@midday/customers": "workspace:*",
     "@midday/db": "workspace:*",
     "@midday/documents": "workspace:*",
     "@midday/email": "workspace:*",
     "@midday/health": "workspace:*",
     "@midday/import": "workspace:*",
-    "@midday/trpc": "workspace:*",
     "@midday/insights": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/job-client": "workspace:*",
@@ -32,6 +31,7 @@
     "@midday/logger": "workspace:*",
     "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
+    "@midday/trpc": "workspace:*",
     "@midday/utils": "workspace:*",
     "@sentry/bun": "catalog:",
     "@types/archiver": "^7.0.0",
@@ -51,6 +51,6 @@
     "@types/bun": "latest",
     "@types/heic-convert": "1.2.3",
     "@types/papaparse": "^5.5.2",
-    "@types/react": "^19.2.14"
+    "@types/react": "^19.2.13"
   }
 }

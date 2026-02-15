@@ -35,7 +35,7 @@ export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload
       return Object.entries(rate.rates).map(([target, value]) => ({
         base: rate.source,
         target: target,
-        rate: value as number,
+        rate: value,
         updatedAt: rate.date,
       }));
     });

@@ -9,18 +9,16 @@ async function getCurrency(currency: string) {
   return response.json();
 }
 
-function transformKeysToUppercase(obj: Record<string, number>) {
+function transformKeysToUppercase(
+  obj: Record<string, number>,
+): Record<string, number> {
   const entries = Object.entries(obj);
 
   const upperCaseEntries = entries
-    .map(([key, value]) => {
-      return [key.toUpperCase(), value];
-    })
-    .filter(([key]) => uniqueCurrencies.includes(key as string));
+    .map(([key, value]) => [key.toUpperCase(), value] as [string, number])
+    .filter(([key]) => uniqueCurrencies.includes(key));
 
-  const transformedObject = Object.fromEntries(upperCaseEntries);
-
-  return transformedObject;
+  return Object.fromEntries(upperCaseEntries) as Record<string, number>;
 }
 
 export async function getRates() {

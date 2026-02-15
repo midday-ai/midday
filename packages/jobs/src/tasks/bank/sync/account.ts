@@ -114,7 +114,7 @@ export const syncAccount = schemaTask({
           accountType: classification,
           accessToken,
           // If the transactions are being synced manually, we want to get all transactions
-          latest: manualSync ? "false" : "true",
+          latest: !manualSync,
         });
 
       // Reset error details and retries if we successfully got the transactions

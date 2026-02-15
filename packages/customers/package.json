@@ -17,7 +17,7 @@
     "@ai-sdk/google": "^3.0.10",
     "@exalabs/ai-sdk": "^1.0.5",
     "@midday/logger": "workspace:*",
-    "ai": "^6.0.41",
+    "ai": "^6.0.86",
     "exa-js": "^2.0.12",
     "zod": "catalog:"
   },

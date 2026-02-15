@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^25.2.3",
-    "@types/react": "^19.2.14"
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.13"
   }
 }
