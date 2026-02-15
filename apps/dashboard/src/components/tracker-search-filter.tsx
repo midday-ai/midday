@@ -18,18 +18,8 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { formatISO, parseISO } from "date-fns";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import type { TrackerFilterSchema } from "@/app/api/ai/filters/tracker/schema";
-import {
-  trackerFilterOutputSchema,
-  trackerFilterSchema,
-} from "@/app/api/ai/filters/tracker/schema";
-import {
-  mapStringArrayToIds,
-  normalizeString,
-  useAIFilter,
-} from "@/hooks/use-ai-filter";
 import { useTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -67,53 +57,6 @@ export function TrackerSearchFilter() {
     enabled: shouldFetch || Boolean(filter.tags?.length),
   });
 
-  const mapTrackerFilters = useCallback(
-    (
-      object: TrackerFilterSchema,
-      data?: {
-        customersData?: { data?: Array<{ id: string; name: string }> };
-        tagsData?: Array<{ id: string; name: string }>;
-      },
-    ) => {
-      const tagIds = mapStringArrayToIds(
-        object.tags,
-        (name) => data?.tagsData?.find((tag) => tag.name === name)?.id ?? null,
-      );
-
-      const customerIds = mapStringArrayToIds(
-        object.customers,
-        (name) =>
-          data?.customersData?.data?.find((customer) => customer.name === name)
-            ?.id ?? null,
-      );
-
-      const status =
-        typeof object.status === "string" &&
-        (object.status === "in_progress" || object.status === "completed")
-          ? object.status
-          : null;
-
-      return {
-        q: normalizeString(object.name),
-        status,
-        tags: tagIds,
-        customers: customerIds,
-        start: normalizeString(object.start),
-        end: normalizeString(object.end),
-      };
-    },
-    [],
-  );
-
-  const { submit, isLoading } = useAIFilter({
-    api: "/api/ai/filters/tracker",
-    inputSchema: trackerFilterSchema,
-    outputSchema: trackerFilterOutputSchema,
-    mapper: mapTrackerFilters,
-    onFilterApplied: setFilter,
-    data: { customersData, tagsData },
-  });
-
   useHotkeys(
     "esc",
     () => {
@@ -143,24 +86,9 @@ export function TrackerSearchFilter() {
     }
   };
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-
-    if (input.split(" ").length > 1) {
-      const context = `
-        Customers: ${customersData?.data?.map((customer) => customer.name).join(", ")}
-        Tags: ${tagsData?.map((tag) => tag.name).join(", ")}
-      `;
-
-      submit({
-        input,
-        context,
-        currentDate: formatISO(new Date(), { representation: "date" }),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
-    } else {
-      setFilter({ q: input.length > 0 ? input : null });
-    }
+    setFilter({ q: input.length > 0 ? input : null });
   };
 
   const validFilters = Object.fromEntries(
@@ -181,7 +109,6 @@ export function TrackerSearchFilter() {
       <div className="flex space-x-4 items-center">
         <FilterList
           filters={validFilters}
-          loading={isLoading}
           onRemove={setFilter}
           members={members}
           customers={customersData?.data}
@@ -199,7 +126,7 @@ export function TrackerSearchFilter() {
           <Icons.Search className="absolute pointer-events-none left-3 top-[11px]" />
           <Input
             ref={inputRef}
-            placeholder="Search or type filter"
+            placeholder="Search projects..."
             className="pl-9 w-full md:w-[350px] pr-8"
             value={input}
             onChange={handleSearch}
