@@ -55,7 +55,7 @@ ENV NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=$NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
 
 # Release tracking (Railway provides the git SHA automatically)
 ARG RAILWAY_GIT_COMMIT_SHA
-ENV NEXT_PUBLIC_SENTRY_RELEASE=$RAILWAY_GIT_COMMIT_SHA
+ENV SENTRY_RELEASE=$RAILWAY_GIT_COMMIT_SHA
 ENV CI=true
 
 # Build engine types (dependency) then dashboard only
@@ -70,6 +70,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+# Sentry release tracking — the plugin injects this into client bundles at build time,
+# but the server SDK also reads it at runtime via SENTRY_RELEASE.
+ARG RAILWAY_GIT_COMMIT_SHA
+ENV SENTRY_RELEASE=$RAILWAY_GIT_COMMIT_SHA
 
 RUN groupadd --system --gid 1001 nodejs && \
     useradd --system --uid 1001 --no-log-init -g nodejs nextjs

@@ -74,10 +74,25 @@ export default isProduction
       // Only print logs for uploading source maps in CI
       silent: !process.env.CI,
 
-      // Upload source maps for better stack traces
+      // Upload a larger set of source maps for prettier stack traces (includes app router chunks)
       widenClientFileUpload: true,
 
       // Tree-shake Sentry logger statements to reduce bundle size
       disableLogger: true,
+
+      // Tie uploaded source maps to the deploy's git SHA so Debug IDs match at runtime
+      release: {
+        name: process.env.SENTRY_RELEASE,
+      },
+
+      // Delete source maps after upload so they aren't publicly accessible
+      sourcemaps: {
+        deleteSourcemapsAfterUpload: true,
+      },
+
+      // Annotate React component names for clearer error boundaries in Sentry
+      reactComponentAnnotation: {
+        enabled: true,
+      },
     })
   : config;
