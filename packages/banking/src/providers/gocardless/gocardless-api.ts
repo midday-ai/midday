@@ -112,7 +112,7 @@ export class GoCardLessApi {
         ),
       ]);
     } catch (_error) {
-      logger("Error saving tokens");
+      logger.error("Error saving tokens");
     }
 
     return response.access;

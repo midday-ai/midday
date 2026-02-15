@@ -84,10 +84,10 @@ export class Provider {
   }
 
   async getTransactions(params: GetTransactionsRequest) {
-    logger(
-      "getTransactions:",
-      `provider: ${this.#name} id: ${params.accountId}`,
-    );
+    logger.info("getTransactions", {
+      provider: this.#name,
+      accountId: params.accountId,
+    });
 
     const data = await this.#provider?.getTransactions(params);
 
@@ -99,7 +99,7 @@ export class Provider {
   }
 
   async getAccounts(params: GetAccountsRequest) {
-    logger("getAccounts:", `provider: ${this.#name}`);
+    logger.info("getAccounts", { provider: this.#name });
 
     const data = await this.#provider?.getAccounts(params);
 
@@ -111,10 +111,10 @@ export class Provider {
   }
 
   async getAccountBalance(params: GetAccountBalanceRequest) {
-    logger(
-      "getAccountBalance:",
-      `provider: ${this.#name} id: ${params.accountId}`,
-    );
+    logger.info("getAccountBalance", {
+      provider: this.#name,
+      accountId: params.accountId,
+    });
 
     const data = await this.#provider?.getAccountBalance(params);
 
@@ -126,7 +126,7 @@ export class Provider {
   }
 
   async getInstitutions(params: GetInstitutionsRequest) {
-    logger("getInstitutions:", `provider: ${this.#name}`);
+    logger.info("getInstitutions", { provider: this.#name });
 
     const data = await this.#provider?.getInstitutions(params);
 
@@ -138,13 +138,13 @@ export class Provider {
   }
 
   async deleteAccounts(params: DeleteAccountsRequest) {
-    logger("delete:", `provider: ${this.#name}`);
+    logger.info("deleteAccounts", { provider: this.#name });
 
     return this.#provider?.deleteAccounts(params);
   }
 
   async getConnectionStatus(params: GetConnectionStatusRequest) {
-    logger("getConnectionStatus:", `provider: ${this.#name}`);
+    logger.info("getConnectionStatus", { provider: this.#name });
 
     const data = await this.#provider?.getConnectionStatus(params);
 
@@ -156,7 +156,7 @@ export class Provider {
   }
 
   async deleteConnection(params: DeleteConnectionRequest) {
-    logger("deleteConnection:", `provider: ${this.#name}`);
+    logger.info("deleteConnection", { provider: this.#name });
 
     return this.#provider?.deleteConnection(params);
   }
