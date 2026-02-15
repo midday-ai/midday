@@ -1,18 +1,10 @@
 import { Provider as ChatProvider } from "@ai-sdk-tools/store";
-import type { RouterOutputs } from "@api/trpc/routers/_app";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { ChatInterface } from "@/components/chat/chat-interface";
 import { Widgets } from "@/components/widgets";
-import {
-  batchPrefetch,
-  getQueryClient,
-  HydrateClient,
-  trpc,
-} from "@/trpc/server";
+import { getQueryClient, HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { geolocation } from "@/utils/geo";
-
-type WidgetPreferences = RouterOutputs["widgets"]["getWidgetPreferences"];
 
 export const metadata: Metadata = {
   title: "Overview | Midday",
@@ -24,24 +16,13 @@ export default async function Overview() {
 
   const queryClient = getQueryClient();
 
-  // Prefetch suggested actions (metrics are prefetched client-side to respect localStorage)
-  batchPrefetch([
+  // Fetch widget preferences so the dashboard renders with data immediately
+  const widgetPreferences = await queryClient.fetchQuery(
     trpc.widgets.getWidgetPreferences.queryOptions(),
-    trpc.suggestedActions.list.queryOptions({ limit: 6 }),
-  ]);
+  );
 
-  // Fetch widget preferences so the dashboard renders with data immediately.
-  // On failure, fall back to empty preferences – the Widgets component will
-  // still mount and the client-side useQuery will refetch automatically.
-  const widgetPreferences = await queryClient
-    .fetchQuery(trpc.widgets.getWidgetPreferences.queryOptions())
-    .catch(
-      () =>
-        ({
-          primaryWidgets: [],
-          availableWidgets: [],
-        }) as WidgetPreferences,
-    );
+  // Prefetch suggested actions (metrics are prefetched client-side to respect localStorage)
+  prefetch(trpc.suggestedActions.list.queryOptions({ limit: 6 }));
 
   return (
     <HydrateClient>

@@ -50,8 +50,14 @@ COPY --from=installer /app/apps/engine ./apps/engine
 COPY --from=installer /app/packages ./packages
 COPY --from=installer /app/package.json ./package.json
 
+# Carry the git SHA into the runtime container (stamped by CI before `railway up`)
+COPY --from=builder /app/.git-commit-sha /tmp/git-sha.txt
+COPY --from=builder /app/scripts/docker-entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 WORKDIR /app/apps/worker
 
 EXPOSE 8080
 
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["bun", "src/index.ts"]

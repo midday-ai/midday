@@ -29,15 +29,19 @@ export default async function Page(props: Props) {
   // Fetch inbox data and accounts in parallel.
   // Wrapped in catch so a transient failure doesn't blank the page.
   const [data, accounts] = await Promise.all([
-    queryClient.fetchInfiniteQuery(
-      trpc.inbox.get.infiniteQueryOptions({
-        order: params.order,
-        sort: params.sort,
-        ...filter,
-        tab: filter.tab ?? "all",
-      }),
-    ),
-    queryClient.fetchQuery(trpc.inboxAccounts.get.queryOptions()),
+    queryClient
+      .fetchInfiniteQuery(
+        trpc.inbox.get.infiniteQueryOptions({
+          order: params.order,
+          sort: params.sort,
+          ...filter,
+          tab: filter.tab ?? "all",
+        }),
+      )
+      .catch(() => null),
+    queryClient
+      .fetchQuery(trpc.inboxAccounts.get.queryOptions())
+      .catch(() => null),
   ]);
 
   const hasInboxItems = (data?.pages?.[0]?.data?.length ?? 0) > 0;

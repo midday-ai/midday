@@ -60,7 +60,7 @@
         "SENTRY_PROJECT",
         "SENTRY_RELEASE",
         "NEXT_PUBLIC_SENTRY_DSN",
-        "RAILWAY_GIT_COMMIT_SHA"
+        "GIT_COMMIT_SHA"
       ]
     },
     "start": {

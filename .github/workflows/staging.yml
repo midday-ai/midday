@@ -97,6 +97,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Stamp git SHA for Docker build
+        run: echo "${{ github.sha }}" > .git-commit-sha
+
       - name: Deploy to Railway
         run: npx @railway/cli up --service api --environment staging
         env:
@@ -119,6 +122,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Stamp git SHA for Docker build
+        run: echo "${{ github.sha }}" > .git-commit-sha
+
       - name: Deploy to Railway
         run: npx @railway/cli up --service dashboard --environment staging
         env:
@@ -140,6 +146,9 @@ jobs:
     concurrency: railway-worker-staging
     steps:
       - uses: actions/checkout@v4
+
+      - name: Stamp git SHA for Docker build
+        run: echo "${{ github.sha }}" > .git-commit-sha
 
       - name: Deploy to Railway
         run: npx @railway/cli up --service worker --environment staging

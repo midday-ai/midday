@@ -4,7 +4,7 @@ if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
 
-    release: process.env.RAILWAY_GIT_COMMIT_SHA,
+    release: process.env.GIT_COMMIT_SHA || process.env.RAILWAY_GIT_COMMIT_SHA,
 
     // Use Railway environment name so staging and production are separate in Sentry
     environment:
