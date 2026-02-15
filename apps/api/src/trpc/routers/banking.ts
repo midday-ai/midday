@@ -15,6 +15,7 @@ import {
 import {
   createTRPCRouter,
   internalProcedure,
+  protectedOrInternalProcedure,
   protectedProcedure,
 } from "@api/trpc/init";
 import {
@@ -229,7 +230,7 @@ export const bankingRouter = createTRPCRouter({
       }
     }),
 
-  getProviderAccounts: protectedProcedure
+  getProviderAccounts: protectedOrInternalProcedure
     .input(getProviderAccountsSchema)
     .query(async ({ input }) => {
       const api = new Provider({ provider: input.provider });

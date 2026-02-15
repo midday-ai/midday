@@ -119,3 +119,31 @@ export const internalProcedure = t.procedure
       ctx: opts.ctx,
     });
   });
+
+/**
+ * Procedure that accepts EITHER a valid user session OR a valid internal key.
+ * Use for endpoints called from both the dashboard (browser) and internal services
+ * (Trigger.dev jobs, BullMQ workers, etc.).
+ */
+export const protectedOrInternalProcedure = t.procedure
+  .use(withPrimaryDbMiddleware)
+  .use(async (opts) => {
+    const { isInternalRequest, session } = opts.ctx;
+
+    // Allow internal service-to-service calls
+    if (isInternalRequest) {
+      return opts.next({ ctx: opts.ctx });
+    }
+
+    // Otherwise require a valid user session
+    if (!session) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return opts.next({
+      ctx: {
+        ...opts.ctx,
+        session,
+      },
+    });
+  });
