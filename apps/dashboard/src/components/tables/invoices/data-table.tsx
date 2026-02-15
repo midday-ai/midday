@@ -1,7 +1,7 @@
 "use client";
 
 import { closestCenter, DndContext } from "@dnd-kit/core";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { Table, TableBody } from "@midday/ui/table";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useVirtualizer, type VirtualItem } from "@tanstack/react-virtual";
@@ -205,38 +205,27 @@ export function DataTable({ initialSettings }: Props) {
                   position: "relative",
                 }}
               >
-                {virtualItems.length > 0 ? (
-                  virtualItems.map((virtualRow: VirtualItem) => {
-                    const row = rows[virtualRow.index];
-                    if (!row) return null;
+                {virtualItems.map((virtualRow: VirtualItem) => {
+                  const row = rows[virtualRow.index];
+                  if (!row) return null;
 
-                    return (
-                      <VirtualRow
-                        key={row.id}
-                        row={row}
-                        virtualStart={virtualRow.start}
-                        rowHeight={57}
-                        getStickyStyle={getStickyStyle}
-                        getStickyClassName={getStickyClassName}
-                        nonClickableColumns={NON_CLICKABLE_COLUMNS}
-                        onCellClick={handleCellClick}
-                        columnSizing={columnSizing}
-                        columnOrder={columnOrder}
-                        columnVisibility={columnVisibility}
-                        isSelected={rowSelection[row.id] ?? false}
-                      />
-                    );
-                  })
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
-                      No results.
-                    </TableCell>
-                  </TableRow>
-                )}
+                  return (
+                    <VirtualRow
+                      key={row.id}
+                      row={row}
+                      virtualStart={virtualRow.start}
+                      rowHeight={57}
+                      getStickyStyle={getStickyStyle}
+                      getStickyClassName={getStickyClassName}
+                      nonClickableColumns={NON_CLICKABLE_COLUMNS}
+                      onCellClick={handleCellClick}
+                      columnSizing={columnSizing}
+                      columnOrder={columnOrder}
+                      columnVisibility={columnVisibility}
+                      isSelected={rowSelection[row.id] ?? false}
+                    />
+                  );
+                })}
               </TableBody>
             </Table>
           </DndContext>
