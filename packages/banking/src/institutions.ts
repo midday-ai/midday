@@ -2,13 +2,14 @@ import { createHash } from "node:crypto";
 import { EnableBankingApi } from "./providers/enablebanking/enablebanking-api";
 import { GoCardLessApi } from "./providers/gocardless/gocardless-api";
 import { PlaidApi } from "./providers/plaid/plaid-api";
+import type { Providers } from "./types";
 import { getFileExtension, getLogoURL } from "./utils/logo";
 
 export type InstitutionRecord = {
   id: string;
   name: string;
   logo: string | null;
-  provider: "gocardless" | "plaid" | "teller" | "enablebanking";
+  provider: Providers;
   countries: string[];
   availableHistory: number | null;
   maximumConsentValidity: number | null;
@@ -19,6 +20,7 @@ export type InstitutionRecord = {
 export type FetchInstitutionsResult = {
   institutions: InstitutionRecord[];
   errors: { provider: string; error: string }[];
+  succeededProviders: Providers[];
 };
 
 async function fetchEnableBankingInstitutions(): Promise<InstitutionRecord[]> {
@@ -101,12 +103,14 @@ export async function fetchAllInstitutions(): Promise<FetchInstitutionsResult> {
 
   const institutions: InstitutionRecord[] = [];
   const errors: { provider: string; error: string }[] = [];
-  const providers = ["enablebanking", "gocardless", "plaid"];
+  const succeededProviders: Providers[] = [];
+  const providers: Providers[] = ["enablebanking", "gocardless", "plaid"];
 
   for (let i = 0; i < results.length; i++) {
     const result = results[i]!;
     if (result.status === "fulfilled") {
       institutions.push(...result.value);
+      succeededProviders.push(providers[i]!);
     } else {
       errors.push({
         provider: providers[i]!,
@@ -115,5 +119,5 @@ export async function fetchAllInstitutions(): Promise<FetchInstitutionsResult> {
     }
   }
 
-  return { institutions, errors };
+  return { institutions, errors, succeededProviders };
 }

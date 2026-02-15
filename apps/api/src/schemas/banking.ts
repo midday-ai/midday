@@ -17,7 +17,6 @@ export const accountTypeSchema = z.enum([
 
 // Auth schemas
 export const plaidLinkSchema = z.object({
-  userId: z.string(),
   language: z.string().optional(),
   accessToken: z.string().optional(),
 });

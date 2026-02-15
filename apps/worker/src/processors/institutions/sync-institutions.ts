@@ -36,7 +36,8 @@ export class SyncInstitutionsProcessor extends BaseProcessor<SyncInstitutionsPay
     this.logger.info("Starting institution sync");
 
     // 1. Fetch from all providers
-    const { institutions, errors } = await fetchAllInstitutions();
+    const { institutions, errors, succeededProviders } =
+      await fetchAllInstitutions();
 
     for (const error of errors) {
       this.logger.error(`Failed to fetch ${error.provider} institutions`, {
@@ -51,16 +52,27 @@ export class SyncInstitutionsProcessor extends BaseProcessor<SyncInstitutionsPay
       return { upserted: 0, removed: 0 };
     }
 
-    this.logger.info(`Fetched ${institutions.length} institutions total`);
+    this.logger.info(
+      `Fetched ${institutions.length} institutions from ${succeededProviders.length} providers (${succeededProviders.join(", ")})`,
+    );
+
+    if (errors.length > 0) {
+      this.logger.warn(
+        `${errors.length} provider(s) failed; removal will only apply to succeeded providers`,
+      );
+    }
 
     // 2. Upsert and mark removed in a transaction to prevent inconsistent state
+    // Only mark institutions as removed for providers that successfully returned data.
+    // This prevents a transient outage of a single provider from incorrectly
+    // removing all of that provider's institutions.
     const result = await db.transaction(async (tx) => {
       const upserted = await upsertInstitutions(tx, institutions);
 
       this.logger.info(`Upserted ${upserted} institutions`);
 
       const fetchedIds = new Set(institutions.map((i) => i.id));
-      const activeIds = await getActiveInstitutionIds(tx);
+      const activeIds = await getActiveInstitutionIds(tx, succeededProviders);
       const removedIds = activeIds.filter((id) => !fetchedIds.has(id));
       const removed = await markInstitutionsRemoved(tx, removedIds);
 

@@ -133,7 +133,6 @@ export function ReconnectProvider({
       case "plaid": {
         if (!user?.id) return;
         createPlaidLink.mutate({
-          userId: user.id,
           accessToken: accessToken ?? undefined,
         });
         return;

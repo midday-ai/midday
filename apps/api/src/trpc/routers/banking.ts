@@ -12,7 +12,11 @@ import {
   plaidExchangeSchema,
   plaidLinkSchema,
 } from "@api/schemas/banking";
-import { createTRPCRouter, internalProcedure } from "@api/trpc/init";
+import {
+  createTRPCRouter,
+  internalProcedure,
+  protectedProcedure,
+} from "@api/trpc/init";
 import {
   EnableBankingApi,
   GoCardLessApi,
@@ -26,14 +30,14 @@ import { TRPCError } from "@trpc/server";
 const logger = createLoggerWithContext("trpc:banking");
 
 export const bankingRouter = createTRPCRouter({
-  plaidLink: internalProcedure
+  plaidLink: protectedProcedure
     .input(plaidLinkSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const api = new PlaidApi();
 
       try {
         const { data } = await api.linkTokenCreate({
-          userId: input.userId,
+          userId: ctx.session.user.id,
           language: input.language,
           accessToken: input.accessToken,
         });
@@ -49,7 +53,7 @@ export const bankingRouter = createTRPCRouter({
       }
     }),
 
-  plaidExchange: internalProcedure
+  plaidExchange: protectedProcedure
     .input(plaidExchangeSchema)
     .mutation(async ({ input }) => {
       const api = new PlaidApi();
@@ -73,7 +77,7 @@ export const bankingRouter = createTRPCRouter({
       }
     }),
 
-  gocardlessLink: internalProcedure
+  gocardlessLink: protectedProcedure
     .input(gocardlessLinkSchema)
     .mutation(async ({ input }) => {
       const api = new GoCardLessApi();
@@ -92,7 +96,7 @@ export const bankingRouter = createTRPCRouter({
       }
     }),
 
-  gocardlessAgreement: internalProcedure
+  gocardlessAgreement: protectedProcedure
     .input(gocardlessAgreementSchema)
     .mutation(async ({ input }) => {
       const api = new GoCardLessApi();
@@ -111,7 +115,7 @@ export const bankingRouter = createTRPCRouter({
       }
     }),
 
-  enablebankingLink: internalProcedure
+  enablebankingLink: protectedProcedure
     .input(enablebankingLinkSchema)
     .mutation(async ({ input }) => {
       const api = new EnableBankingApi();
@@ -130,7 +134,7 @@ export const bankingRouter = createTRPCRouter({
       }
     }),
 
-  enablebankingExchange: internalProcedure
+  enablebankingExchange: protectedProcedure
     .input(enablebankingExchangeSchema)
     .mutation(async ({ input }) => {
       const api = new EnableBankingApi();
@@ -225,7 +229,7 @@ export const bankingRouter = createTRPCRouter({
       }
     }),
 
-  getProviderAccounts: internalProcedure
+  getProviderAccounts: protectedProcedure
     .input(getProviderAccountsSchema)
     .query(async ({ input }) => {
       const api = new Provider({ provider: input.provider });

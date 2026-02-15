@@ -7,8 +7,8 @@ import {
   notInArray,
   sql,
 } from "drizzle-orm";
-import type { Database } from "../client";
-import { institutions } from "../schema";
+import type { Database, DatabaseOrTransaction } from "../client";
+import { bankProvidersEnum, institutions } from "../schema";
 
 const excludedInstitutions = [
   "ins_56", // Chase - Plaid
@@ -108,7 +108,7 @@ export type UpsertInstitutionData = {
 };
 
 export async function upsertInstitutions(
-  db: Database,
+  db: DatabaseOrTransaction,
   data: UpsertInstitutionData[],
   batchSize = 500,
 ): Promise<number> {
@@ -155,17 +155,28 @@ export async function upsertInstitutions(
   return total;
 }
 
-export async function getActiveInstitutionIds(db: Database): Promise<string[]> {
+type BankProvider = (typeof bankProvidersEnum.enumValues)[number];
+
+export async function getActiveInstitutionIds(
+  db: DatabaseOrTransaction,
+  providers?: BankProvider[],
+): Promise<string[]> {
+  const conditions = [eq(institutions.status, "active")];
+
+  if (providers && providers.length > 0) {
+    conditions.push(inArray(institutions.provider, providers));
+  }
+
   const results = await db
     .select({ id: institutions.id })
     .from(institutions)
-    .where(eq(institutions.status, "active"));
+    .where(and(...conditions));
 
   return results.map((r) => r.id);
 }
 
 export async function markInstitutionsRemoved(
-  db: Database,
+  db: DatabaseOrTransaction,
   ids: string[],
 ): Promise<number> {
   if (ids.length === 0) return 0;

@@ -201,10 +201,10 @@ export function ConnectTransactionsModal() {
 
   useEffect(() => {
     // NOTE: Only run where Plaid is supported
-    if (isOpen && (countryCode === "US" || countryCode === "CA") && user?.id) {
-      createPlaidLink.mutate({ userId: user.id });
+    if (isOpen && (countryCode === "US" || countryCode === "CA")) {
+      createPlaidLink.mutate();
     }
-  }, [isOpen, countryCode, user?.id]);
+  }, [isOpen, countryCode]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOnClose}>

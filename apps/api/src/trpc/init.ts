@@ -96,17 +96,17 @@ export const protectedProcedure = t.procedure
   });
 
 /**
- * Internal procedure for service-to-service calls.
- * Authenticates via x-internal-key header (INTERNAL_API_KEY) instead of user session.
+ * Internal procedure for service-to-service calls ONLY.
+ * Authenticates exclusively via x-internal-key header (INTERNAL_API_KEY).
  * Used by Trigger.dev jobs, BullMQ workers, and other internal services.
- * Allows either a valid user session OR a valid internal API key.
+ * Regular user sessions are NOT accepted — use protectedProcedure for browser-facing endpoints.
  */
 export const internalProcedure = t.procedure
   .use(withPrimaryDbMiddleware)
   .use(async (opts) => {
-    const { session, isInternalRequest } = opts.ctx;
+    const { isInternalRequest } = opts.ctx;
 
-    if (!session && !isInternalRequest) {
+    if (!isInternalRequest) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
