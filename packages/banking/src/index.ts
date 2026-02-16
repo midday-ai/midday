@@ -140,11 +140,11 @@ export type {
   InstitutionRecord,
 } from "./institutions";
 export { fetchAllInstitutions } from "./institutions";
-export { syncInstitutionLogos } from "./sync-logos";
 export { EnableBankingApi } from "./providers/enablebanking/enablebanking-api";
 export { GoCardLessApi } from "./providers/gocardless/gocardless-api";
 export { PlaidApi } from "./providers/plaid/plaid-api";
 export { TellerApi } from "./providers/teller/teller-api";
+export { syncInstitutionLogos } from "./sync-logos";
 // Re-export types, provider APIs, and institution sync
 export type * from "./types";
 export { createErrorResponse, ProviderError } from "./utils/error";

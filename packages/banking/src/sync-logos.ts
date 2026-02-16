@@ -43,12 +43,13 @@ function inferContentType(key: string): string {
 }
 
 /**
- * Download logo data from source. Handles both URLs and base64 data URIs.
+ * Download logo data from source.
+ * Handles URLs, data URIs, and raw base64 strings (Plaid returns raw base64).
  */
 async function downloadLogo(
   sourceUrl: string,
 ): Promise<{ buffer: Uint8Array; contentType: string } | null> {
-  // Handle base64 data URIs (Plaid may return these)
+  // Handle base64 data URIs
   if (sourceUrl.startsWith("data:")) {
     const match = sourceUrl.match(/^data:([^;]+);base64,(.+)$/);
     if (!match) return null;
@@ -58,13 +59,30 @@ async function downloadLogo(
     return { buffer, contentType };
   }
 
-  // Download from URL
-  const response = await fetch(sourceUrl);
-  if (!response.ok) return null;
+  // Handle raw base64 (Plaid returns base64-encoded PNGs without prefix)
+  if (sourceUrl.startsWith("iVBOR")) {
+    // PNG base64 header
+    const buffer = Buffer.from(sourceUrl, "base64");
+    return { buffer, contentType: "image/png" };
+  }
 
-  const buffer = new Uint8Array(await response.arrayBuffer());
-  const contentType = response.headers.get("content-type") || "image/jpeg";
-  return { buffer, contentType };
+  if (sourceUrl.startsWith("/9j/")) {
+    // JPEG base64 header
+    const buffer = Buffer.from(sourceUrl, "base64");
+    return { buffer, contentType: "image/jpeg" };
+  }
+
+  // Download from URL
+  if (sourceUrl.startsWith("http")) {
+    const response = await fetch(sourceUrl);
+    if (!response.ok) return null;
+
+    const buffer = new Uint8Array(await response.arrayBuffer());
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    return { buffer, contentType };
+  }
+
+  return null;
 }
 
 /**
@@ -81,10 +99,7 @@ export async function syncInstitutionLogos(
   const { concurrency = 10, delayMs = 200 } = options;
 
   // Deduplicate by logo CDN URL (e.g. EnableBanking personal/business share a logo)
-  const uniqueLogos = new Map<
-    string,
-    { key: string; sourceLogo: string }
-  >();
+  const uniqueLogos = new Map<string, { key: string; sourceLogo: string }>();
 
   for (const inst of institutions) {
     if (!inst.logo || !inst.sourceLogo) continue;

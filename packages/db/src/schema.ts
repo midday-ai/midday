@@ -1360,7 +1360,10 @@ export const institutions = pgTable(
   },
   (table) => [
     index("institutions_country_idx").using("gin", table.countries),
-    index("institutions_name_idx").on(table.name),
+    index("institutions_name_trgm_idx").using(
+      "gin",
+      sql`${table.name} gin_trgm_ops`,
+    ),
     index("institutions_status_idx").on(table.status),
   ],
 );

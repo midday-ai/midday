@@ -1,68 +1,71 @@
 /**
- * Quick test: fetch GoCardless institutions and sync 10 logos to R2.
+ * Full sync: fetch EnableBanking institutions, sync logos to R2, upsert to DB.
  *
  * Usage:
  *   cd packages/db/src/scripts
  *   bun run test-sync-logos.ts
  */
 
-import { S3Client } from "bun";
+import { createHash } from "node:crypto";
 import {
-  GoCardLessApi,
-  getFileExtension,
+  EnableBankingApi,
   getLogoURL,
+  type InstitutionRecord,
+  syncInstitutionLogos,
 } from "@midday/banking";
-
-const r2 = new S3Client({
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-  secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
-  bucket: process.env.R2_BUCKET_NAME!,
-});
+import { db } from "../client";
+import { upsertInstitutions } from "../queries/institutions";
 
 async function main() {
-  console.log("Fetching GoCardless institutions...");
+  console.log("Fetching EnableBanking institutions...");
 
-  const api = new GoCardLessApi();
+  const api = new EnableBankingApi();
   const data = await api.getInstitutions();
 
-  console.log(`Fetched ${data.length} GoCardless institutions.\n`);
+  console.log(`Fetched ${data.length} EnableBanking institutions.\n`);
 
-  const sample = data.slice(0, 10);
+  const institutions: InstitutionRecord[] = data.flatMap((institution) => {
+    const hashId = createHash("md5")
+      .update(`${institution.name}-${institution.country}`)
+      .digest("hex")
+      .slice(0, 12);
 
-  for (const inst of sample) {
-    const ext = getFileExtension(inst.logo);
-    const key = `${inst.id}.${ext}`;
+    const logo = getLogoURL(encodeURIComponent(institution.name), "png");
 
-    console.log(`${inst.name} (${key}):`);
+    return (institution.psu_types ?? []).map((psuType: string) => ({
+      id: psuType === "business" ? hashId : `${hashId}-personal`,
+      name: institution.name,
+      logo,
+      sourceLogo: institution.logo ?? null,
+      provider: "enablebanking" as const,
+      countries: [institution.country],
+      availableHistory: null,
+      maximumConsentValidity: institution.maximum_consent_validity ?? null,
+      popularity: 10000,
+      type: psuType,
+    }));
+  });
 
-    try {
-      const exists = await r2.exists(key);
-      console.log(`  R2 exists: ${exists}`);
+  console.log(`Mapped to ${institutions.length} institution records.\n`);
 
-      if (!exists) {
-        console.log(`  Downloading from: ${inst.logo}`);
-        const response = await fetch(inst.logo);
-        console.log(`  Download status: ${response.status}`);
+  // 1. Sync logos to R2
+  console.log("Syncing logos to R2...");
+  const logoResult = await syncInstitutionLogos(institutions, {
+    concurrency: 10,
+  });
+  console.log(
+    `Logos: ${logoResult.uploaded} uploaded, ${logoResult.skipped} skipped, ${logoResult.failed} failed.\n`,
+  );
 
-        if (response.ok) {
-          const buffer = new Uint8Array(await response.arrayBuffer());
-          const contentType = ext === "png" ? "image/png" : "image/jpeg";
-          console.log(`  Uploading ${buffer.length} bytes as ${contentType}...`);
-          await r2.write(key, buffer, { type: contentType });
-          console.log(`  Uploaded!`);
-        }
-      }
-    } catch (error) {
-      console.error(`  Error:`, error);
-    }
-    console.log();
-  }
+  // 2. Upsert to DB
+  console.log("Upserting to database...");
+  const upserted = await upsertInstitutions(db, institutions);
+  console.log(`Upserted ${upserted} institutions.\n`);
 
   console.log("Done!");
 }
 
 main().catch((error) => {
-  console.error("Test failed:", error);
+  console.error("Failed:", error);
   process.exit(1);
 });

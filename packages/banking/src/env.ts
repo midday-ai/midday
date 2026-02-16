@@ -13,10 +13,11 @@ export const env = createEnv({
     ENABLEBANKING_REDIRECT_URL: z.string().min(1),
     TELLER_CERT_BASE64: z.string().min(1),
     TELLER_KEY_BASE64: z.string().min(1),
-    R2_ACCOUNT_ID: z.string().min(1),
+    R2_ENDPOINT: z.string().url(),
     R2_ACCESS_KEY_ID: z.string().min(1),
     R2_SECRET_ACCESS_KEY: z.string().min(1),
     R2_BUCKET_NAME: z.string().min(1),
+    LOGO_DEV_TOKEN: z.string().min(1),
   },
   runtimeEnv: process.env,
 });

@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
+import { env } from "./env";
 import { EnableBankingApi } from "./providers/enablebanking/enablebanking-api";
 import { GoCardLessApi } from "./providers/gocardless/gocardless-api";
 import { PlaidApi } from "./providers/plaid/plaid-api";
-import { TellerApi } from "./providers/teller/teller-api";
 import type { Providers } from "./types";
 import { getFileExtension, getLogoURL } from "./utils/logo";
 
@@ -78,27 +78,68 @@ async function fetchGoCardLessInstitutions(): Promise<InstitutionRecord[]> {
   });
 }
 
+/**
+ * Extract domain from a URL for logo.dev fallback.
+ * e.g. "https://www.wellsfargo.com/" -> "wellsfargo.com"
+ */
+function extractDomain(url: string): string | null {
+  try {
+    const hostname = new URL(url).hostname;
+    return hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Build a logo.dev URL for a given domain.
+ * Used as fallback when Plaid doesn't return a logo.
+ */
+function getLogoDevURL(domain: string): string {
+  return `https://img.logo.dev/${domain}?token=${env.LOGO_DEV_TOKEN}&format=png&size=256&retina=true`;
+}
+
 async function fetchPlaidInstitutions(): Promise<InstitutionRecord[]> {
   const api = new PlaidApi();
   const data = await api.getInstitutions();
 
-  return data.map((institution) => ({
-    id: institution.institution_id,
-    name: institution.name,
-    logo: institution.logo ? getLogoURL(institution.institution_id) : null,
-    sourceLogo: institution.logo ?? null,
-    provider: "plaid" as const,
-    countries: institution.country_codes as string[],
-    availableHistory: null,
-    maximumConsentValidity: null,
-    popularity: 0,
-    type: null,
-  }));
+  return data.map((institution) => {
+    const hasLogo = !!institution.logo;
+    const domain = institution.url ? extractDomain(institution.url) : null;
+
+    let logo: string | null;
+    let sourceLogo: string | null;
+
+    if (hasLogo) {
+      logo = getLogoURL(institution.institution_id);
+      sourceLogo = institution.logo!;
+    } else if (domain) {
+      logo = getLogoURL(institution.institution_id);
+      sourceLogo = getLogoDevURL(domain);
+    } else {
+      logo = null;
+      sourceLogo = null;
+    }
+
+    return {
+      id: institution.institution_id,
+      name: institution.name,
+      logo,
+      sourceLogo,
+      provider: "plaid" as const,
+      countries: institution.country_codes as string[],
+      availableHistory: null,
+      maximumConsentValidity: null,
+      popularity: 0,
+      type: null,
+    };
+  });
 }
 
 async function fetchTellerInstitutions(): Promise<InstitutionRecord[]> {
-  const api = new TellerApi();
-  const data = await api.getInstitutions();
+  // Teller's /institutions endpoint is public and doesn't require mTLS
+  const response = await fetch("https://api.teller.io/institutions");
+  const data = (await response.json()) as { id: string; name: string }[];
 
   return data.map((institution) => ({
     id: institution.id,

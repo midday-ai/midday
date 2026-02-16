@@ -6,7 +6,7 @@ let _client: S3Client | null = null;
 function getR2Client(): S3Client {
   if (!_client) {
     _client = new S3Client({
-      endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      endpoint: env.R2_ENDPOINT,
       accessKeyId: env.R2_ACCESS_KEY_ID,
       secretAccessKey: env.R2_SECRET_ACCESS_KEY,
       bucket: env.R2_BUCKET_NAME,

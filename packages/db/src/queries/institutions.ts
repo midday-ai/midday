@@ -1,14 +1,6 @@
-import {
-  and,
-  arrayContains,
-  eq,
-  ilike,
-  inArray,
-  notInArray,
-  sql,
-} from "drizzle-orm";
+import { and, arrayContains, eq, inArray, notInArray, sql } from "drizzle-orm";
 import type { Database, DatabaseOrTransaction } from "../client";
-import { bankProvidersEnum, institutions } from "../schema";
+import { type bankProvidersEnum, institutions } from "../schema";
 
 const excludedInstitutions = [
   "ins_56", // Chase - Plaid
@@ -35,8 +27,15 @@ export async function getInstitutions(
     conditions.push(notInArray(institutions.id, excludedInstitutions));
   }
 
-  if (q && q !== "*") {
-    conditions.push(ilike(institutions.name, `%${q}%`));
+  const hasSearch = q && q !== "*";
+
+  if (hasSearch) {
+    conditions.push(
+      sql`(
+        ${institutions.name} ILIKE ${`%${q}%`}
+        OR word_similarity(${q}, ${institutions.name}) > 0.3
+      )`,
+    );
   }
 
   return db
@@ -52,7 +51,14 @@ export async function getInstitutions(
     })
     .from(institutions)
     .where(and(...conditions))
-    .orderBy(sql`${institutions.popularity} desc`)
+    .orderBy(
+      ...(hasSearch
+        ? [
+            sql`word_similarity(${q}, ${institutions.name}) DESC`,
+            sql`${institutions.popularity} DESC`,
+          ]
+        : [sql`${institutions.popularity} DESC`]),
+    )
     .limit(limit);
 }
 
