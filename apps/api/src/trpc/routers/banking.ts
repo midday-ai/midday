@@ -21,6 +21,7 @@ import {
 import {
   EnableBankingApi,
   GoCardLessApi,
+  getProviderErrorDetails,
   getRates,
   PlaidApi,
   Provider,
@@ -47,9 +48,10 @@ export const bankingRouter = createTRPCRouter({
           data,
         };
       } catch (error) {
-        logger.error("Failed to create Plaid link token", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to create Plaid link token",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create Plaid link token",
@@ -71,9 +73,10 @@ export const bankingRouter = createTRPCRouter({
           data,
         };
       } catch (error) {
-        logger.error("Failed to exchange Plaid token", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to exchange Plaid token",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to exchange Plaid token",
@@ -90,9 +93,10 @@ export const bankingRouter = createTRPCRouter({
         const data = await api.buildLink(input);
         return { data };
       } catch (error) {
-        logger.error("Failed to create GoCardless link", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to create GoCardless link",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create GoCardless link",
@@ -109,9 +113,10 @@ export const bankingRouter = createTRPCRouter({
         const data = await api.createEndUserAgreement(input);
         return { data };
       } catch (error) {
-        logger.error("Failed to create GoCardless agreement", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to create GoCardless agreement",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create GoCardless agreement",
@@ -128,9 +133,10 @@ export const bankingRouter = createTRPCRouter({
         const data = await api.authenticate(input);
         return { data: { url: data.url } };
       } catch (error) {
-        logger.error("Failed to create EnableBanking link", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to create EnableBanking link",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create EnableBanking link",
@@ -153,9 +159,10 @@ export const bankingRouter = createTRPCRouter({
           },
         };
       } catch (error) {
-        logger.error("Failed to exchange EnableBanking code", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to exchange EnableBanking code",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to exchange EnableBanking code",
@@ -175,9 +182,10 @@ export const bankingRouter = createTRPCRouter({
         });
         return { data };
       } catch (error) {
-        logger.error("Failed to get connection status", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to get connection status",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to get connection status",
@@ -197,9 +205,10 @@ export const bankingRouter = createTRPCRouter({
         });
         return { data: { success: true } };
       } catch (error) {
-        logger.error("Failed to delete connection", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to delete connection",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to delete connection",
@@ -223,9 +232,10 @@ export const bankingRouter = createTRPCRouter({
         return { data: { id: data.id, accounts: data.accounts } };
       } catch (error) {
         if (error instanceof TRPCError) throw error;
-        logger.error("Failed to get connection by reference", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to get connection by reference",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to get connection by reference",
@@ -252,9 +262,10 @@ export const bankingRouter = createTRPCRouter({
 
         return { data: sorted };
       } catch (error) {
-        logger.error("Failed to get provider accounts", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to get provider accounts",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to get provider accounts",
@@ -275,9 +286,10 @@ export const bankingRouter = createTRPCRouter({
         });
         return { data };
       } catch (error) {
-        logger.error("Failed to get account balance", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to get account balance",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to get account balance",
@@ -299,9 +311,10 @@ export const bankingRouter = createTRPCRouter({
         });
         return { data };
       } catch (error) {
-        logger.error("Failed to get provider transactions", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        logger.error(
+          "Failed to get provider transactions",
+          getProviderErrorDetails(error),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to get provider transactions",
@@ -314,9 +327,10 @@ export const bankingRouter = createTRPCRouter({
       const data = await getRates();
       return { data };
     } catch (error) {
-      logger.error("Failed to get exchange rates", {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.error(
+        "Failed to get exchange rates",
+        getProviderErrorDetails(error),
+      );
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to get exchange rates",

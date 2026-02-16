@@ -5,7 +5,7 @@ import * as jose from "jose";
 import xior, { type XiorInstance, type XiorRequestConfig } from "xior";
 import { env } from "../../env";
 import type { GetTransactionsRequest } from "../../types";
-import { ProviderError } from "../../utils/error";
+import { getProviderErrorDetails, ProviderError } from "../../utils/error";
 import { logger } from "../../utils/logger";
 import { withRateLimitRetry } from "../../utils/retry";
 import { transformSessionData } from "./transform";
@@ -81,9 +81,10 @@ export class EnableBankingApi {
 
       return jose.base64url.encode(new Uint8Array(signature));
     } catch (error) {
-      logger.error("EnableBanking JWT signing failed", {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.error(
+        "EnableBanking JWT signing failed",
+        getProviderErrorDetails(error),
+      );
       throw error;
     }
   }
@@ -192,9 +193,10 @@ export class EnableBankingApi {
 
       return response;
     } catch (error) {
-      logger.error("EnableBanking authentication failed", {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.error(
+        "EnableBanking authentication failed",
+        getProviderErrorDetails(error),
+      );
       throw error;
     }
   }
@@ -207,9 +209,10 @@ export class EnableBankingApi {
 
       return transformSessionData(response);
     } catch (error) {
-      logger.error("EnableBanking code exchange failed", {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.error(
+        "EnableBanking code exchange failed",
+        getProviderErrorDetails(error),
+      );
       throw new ProviderError({
         message: "Failed to exchange code",
         // @ts-expect-error
@@ -288,9 +291,10 @@ export class EnableBankingApi {
 
       return accountDetails;
     } catch (error) {
-      logger.error("EnableBanking getAccounts failed", {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.error(
+        "EnableBanking getAccounts failed",
+        getProviderErrorDetails(error),
+      );
       throw error;
     }
   }

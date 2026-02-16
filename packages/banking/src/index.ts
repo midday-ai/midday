@@ -147,6 +147,10 @@ export { TellerApi } from "./providers/teller/teller-api";
 export { syncInstitutionLogos } from "./sync-logos";
 // Re-export types, provider APIs, and institution sync
 export type * from "./types";
-export { createErrorResponse, ProviderError } from "./utils/error";
+export {
+  createErrorResponse,
+  getProviderErrorDetails,
+  ProviderError,
+} from "./utils/error";
 export { getFileExtension, getLogoURL } from "./utils/logo";
 export { getRates } from "./utils/rates";
