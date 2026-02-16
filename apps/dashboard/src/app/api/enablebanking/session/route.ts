@@ -57,18 +57,24 @@ export async function GET(request: NextRequest) {
     exchangeSessionId &&
     exchangeExpiresAt
   ) {
-    const connection = await trpc.bankConnections.reconnect.mutate({
-      referenceId: sessionId,
-      newReferenceId: exchangeSessionId,
-      expiresAt: exchangeExpiresAt,
-    });
+    try {
+      const connection = await trpc.bankConnections.reconnect.mutate({
+        referenceId: sessionId,
+        newReferenceId: exchangeSessionId,
+        expiresAt: exchangeExpiresAt,
+      });
 
-    return NextResponse.redirect(
-      new URL(
-        `/settings/accounts?id=${connection.id}&step=reconnect`,
-        redirectBase,
-      ),
-    );
+      return NextResponse.redirect(
+        new URL(
+          `/settings/accounts?id=${connection.id}&step=reconnect`,
+          redirectBase,
+        ),
+      );
+    } catch {
+      return NextResponse.redirect(
+        new URL("/?error=reconnect_failed", redirectBase),
+      );
+    }
   }
 
   return NextResponse.redirect(new URL("/", redirectBase));
