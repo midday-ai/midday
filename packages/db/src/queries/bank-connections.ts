@@ -210,6 +210,33 @@ export const createBankConnection = async (
   return bankConnection;
 };
 
+export type ReconnectBankConnectionParams = {
+  referenceId: string;
+  newReferenceId: string;
+  expiresAt: string;
+};
+
+export const reconnectBankConnection = async (
+  db: Database,
+  params: ReconnectBankConnectionParams,
+) => {
+  const { referenceId, newReferenceId, expiresAt } = params;
+
+  const [result] = await db
+    .update(bankConnections)
+    .set({
+      referenceId: newReferenceId,
+      expiresAt,
+      status: "connected",
+    })
+    .where(eq(bankConnections.referenceId, referenceId))
+    .returning({
+      id: bankConnections.id,
+    });
+
+  return result;
+};
+
 export type GetBankAccountDetailsParams = {
   accountId: string;
   teamId: string;

@@ -1,5 +1,4 @@
 import { getSession } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { getTRPCClient } from "@/trpc/server";
 import { getUrl } from "@/utils/environment";
@@ -9,7 +8,6 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const state = searchParams.get("state");
-  const supabase = await createClient();
 
   const {
     data: { session },
@@ -32,7 +30,7 @@ export async function GET(request: NextRequest) {
   const trpc = await getTRPCClient();
 
   let sessionData:
-    | { data?: { session_id?: string; expires_at?: string } }
+    | Awaited<ReturnType<typeof trpc.banking.enablebankingExchange.mutate>>
     | undefined;
 
   try {
@@ -42,38 +40,27 @@ export async function GET(request: NextRequest) {
   }
 
   if (method === "connect") {
-    if (sessionData?.data?.session_id) {
-      return NextResponse.redirect(
-        new URL(
-          `/?ref=${sessionData.data.session_id}&provider=enablebanking&step=account`,
-          redirectBase,
-        ),
-      );
-    }
+    return NextResponse.redirect(
+      new URL(
+        `/?ref=${sessionData.data.session_id}&provider=enablebanking&step=account`,
+        redirectBase,
+      ),
+    );
   }
 
   if (method === "reconnect" && sessionId) {
-    // Update the bank connection session
-    if (sessionData?.data?.session_id) {
-      const { data } = await supabase
-        .from("bank_connections")
-        .update({
-          expires_at: sessionData.data.expires_at,
-          reference_id: sessionData.data.session_id,
-          status: "connected",
-        })
-        .eq("reference_id", sessionId)
-        .select("id")
-        .single();
+    const connection = await trpc.bankConnections.reconnect.mutate({
+      referenceId: sessionId,
+      newReferenceId: sessionData.data.session_id,
+      expiresAt: sessionData.data.expires_at,
+    });
 
-      // Redirect to frontend which will trigger the reconnect job
-      return NextResponse.redirect(
-        new URL(
-          `/settings/accounts?id=${data?.id}&step=reconnect`,
-          redirectBase,
-        ),
-      );
-    }
+    return NextResponse.redirect(
+      new URL(
+        `/settings/accounts?id=${connection.id}&step=reconnect`,
+        redirectBase,
+      ),
+    );
   }
 
   return NextResponse.redirect(new URL("/", redirectBase));

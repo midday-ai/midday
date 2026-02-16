@@ -45,3 +45,9 @@ export const createBankConnectionSchema = z.object({
 });
 
 export const deleteBankConnectionSchema = z.object({ id: z.string() });
+
+export const reconnectBankConnectionSchema = z.object({
+  referenceId: z.string(),
+  newReferenceId: z.string(),
+  expiresAt: z.string(),
+});
