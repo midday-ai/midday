@@ -140,6 +140,7 @@ export type {
   InstitutionRecord,
 } from "./institutions";
 export { fetchAllInstitutions } from "./institutions";
+export { syncInstitutionLogos } from "./sync-logos";
 export { EnableBankingApi } from "./providers/enablebanking/enablebanking-api";
 export { GoCardLessApi } from "./providers/gocardless/gocardless-api";
 export { PlaidApi } from "./providers/plaid/plaid-api";

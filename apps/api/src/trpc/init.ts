@@ -99,7 +99,7 @@ export const protectedProcedure = t.procedure
 /**
  * Internal procedure for service-to-service calls ONLY.
  * Authenticates exclusively via x-internal-key header (INTERNAL_API_KEY).
- * Used by Trigger.dev jobs, BullMQ workers, and other internal services.
+ * Used by BullMQ workers, and other internal services.
  * Regular user sessions are NOT accepted — use protectedProcedure for browser-facing endpoints.
  */
 export const internalProcedure = t.procedure
@@ -119,7 +119,7 @@ export const internalProcedure = t.procedure
 /**
  * Procedure that accepts EITHER a valid user session OR a valid internal key.
  * Use for endpoints called from both the dashboard (browser) and internal services
- * (Trigger.dev jobs, BullMQ workers, etc.).
+ * (BullMQ workers, etc.).
  */
 export const protectedOrInternalProcedure = t.procedure
   .use(withPrimaryDbMiddleware)

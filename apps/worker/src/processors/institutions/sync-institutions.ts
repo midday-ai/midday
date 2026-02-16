@@ -1,4 +1,4 @@
-import { fetchAllInstitutions } from "@midday/banking";
+import { fetchAllInstitutions, syncInstitutionLogos } from "@midday/banking";
 import {
   getActiveInstitutionIds,
   markInstitutionsRemoved,
@@ -17,8 +17,9 @@ type SyncInstitutionsPayload = Record<string, never>;
  *
  * Runs daily to:
  * 1. Fetch latest institutions from all providers
- * 2. Upsert new/updated institutions (preserving popularity)
- * 3. Mark removed institutions as status: "removed"
+ * 2. Sync logos to R2 for new institutions only
+ * 3. Upsert new/updated institutions (preserving popularity)
+ * 4. Mark removed institutions as status: "removed"
  */
 export class SyncInstitutionsProcessor extends BaseProcessor<SyncInstitutionsPayload> {
   async process(
@@ -62,7 +63,31 @@ export class SyncInstitutionsProcessor extends BaseProcessor<SyncInstitutionsPay
       );
     }
 
-    // 2. Upsert and mark removed in a transaction to prevent inconsistent state
+    // 2. Sync logos to R2 for new institutions only
+    const existingIds = new Set(
+      await getActiveInstitutionIds(db, succeededProviders),
+    );
+    const newInstitutions = institutions.filter(
+      (inst) => !existingIds.has(inst.id),
+    );
+
+    if (newInstitutions.length > 0) {
+      this.logger.info(
+        `Syncing logos for ${newInstitutions.length} new institutions`,
+      );
+
+      const logoResult = await syncInstitutionLogos(newInstitutions, {
+        concurrency: 5,
+      });
+
+      this.logger.info("Logo sync completed", {
+        uploaded: logoResult.uploaded,
+        skipped: logoResult.skipped,
+        failed: logoResult.failed,
+      });
+    }
+
+    // 3. Upsert and mark removed in a transaction to prevent inconsistent state
     // Only mark institutions as removed for providers that successfully returned data.
     // This prevents a transient outage of a single provider from incorrectly
     // removing all of that provider's institutions.

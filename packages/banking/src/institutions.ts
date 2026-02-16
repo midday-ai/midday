@@ -2,13 +2,17 @@ import { createHash } from "node:crypto";
 import { EnableBankingApi } from "./providers/enablebanking/enablebanking-api";
 import { GoCardLessApi } from "./providers/gocardless/gocardless-api";
 import { PlaidApi } from "./providers/plaid/plaid-api";
+import { TellerApi } from "./providers/teller/teller-api";
 import type { Providers } from "./types";
 import { getFileExtension, getLogoURL } from "./utils/logo";
+
+const TELLER_CDN = "https://teller.io/images/banks";
 
 export type InstitutionRecord = {
   id: string;
   name: string;
   logo: string | null;
+  sourceLogo: string | null;
   provider: Providers;
   countries: string[];
   availableHistory: number | null;
@@ -39,6 +43,7 @@ async function fetchEnableBankingInstitutions(): Promise<InstitutionRecord[]> {
       id: psuType === "business" ? hashId : `${hashId}-personal`,
       name: institution.name,
       logo,
+      sourceLogo: institution.logo ?? null,
       provider: "enablebanking" as const,
       countries: [institution.country],
       availableHistory: null,
@@ -60,6 +65,7 @@ async function fetchGoCardLessInstitutions(): Promise<InstitutionRecord[]> {
       id: institution.id,
       name: institution.name,
       logo: getLogoURL(institution.id, ext),
+      sourceLogo: institution.logo ?? null,
       provider: "gocardless" as const,
       countries: institution.countries,
       availableHistory: institution.transaction_total_days
@@ -80,11 +86,30 @@ async function fetchPlaidInstitutions(): Promise<InstitutionRecord[]> {
     id: institution.institution_id,
     name: institution.name,
     logo: institution.logo ? getLogoURL(institution.institution_id) : null,
+    sourceLogo: institution.logo ?? null,
     provider: "plaid" as const,
     countries: institution.country_codes as string[],
     availableHistory: null,
     maximumConsentValidity: null,
     popularity: 0,
+    type: null,
+  }));
+}
+
+async function fetchTellerInstitutions(): Promise<InstitutionRecord[]> {
+  const api = new TellerApi();
+  const data = await api.getInstitutions();
+
+  return data.map((institution) => ({
+    id: institution.id,
+    name: institution.name,
+    logo: getLogoURL(institution.id),
+    sourceLogo: `${TELLER_CDN}/${institution.id}.jpg`,
+    provider: "teller" as const,
+    countries: ["US"],
+    availableHistory: null,
+    maximumConsentValidity: null,
+    popularity: 10,
     type: null,
   }));
 }
@@ -99,12 +124,18 @@ export async function fetchAllInstitutions(): Promise<FetchInstitutionsResult> {
     fetchEnableBankingInstitutions(),
     fetchGoCardLessInstitutions(),
     fetchPlaidInstitutions(),
+    fetchTellerInstitutions(),
   ]);
 
   const institutions: InstitutionRecord[] = [];
   const errors: { provider: string; error: string }[] = [];
   const succeededProviders: Providers[] = [];
-  const providers: Providers[] = ["enablebanking", "gocardless", "plaid"];
+  const providers: Providers[] = [
+    "enablebanking",
+    "gocardless",
+    "plaid",
+    "teller",
+  ];
 
   for (let i = 0; i < results.length; i++) {
     const result = results[i]!;
