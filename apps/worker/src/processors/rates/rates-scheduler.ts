@@ -8,7 +8,7 @@ import { BaseProcessor } from "../base";
 
 /**
  * Scheduled task that runs twice daily to update exchange rates
- * Fetches rates from the engine API and upserts them to the database
+ * Fetches rates from the banking API and upserts them to the database
  */
 export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload> {
   async process(_job: Job<RatesSchedulerPayload>): Promise<{
@@ -27,7 +27,7 @@ export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload
 
     this.logger.info("Starting rates scheduler");
 
-    // Fetch rates from engine API
+    // Fetch rates from banking API
     const { data: ratesData } = await trpc.banking.rates.query();
 
     // Transform rates data to match database schema

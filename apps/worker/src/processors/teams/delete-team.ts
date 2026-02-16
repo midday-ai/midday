@@ -7,7 +7,7 @@ import { BaseProcessor } from "../base";
  * Delete team processor
  *
  * Handles cleanup tasks when a team is deleted:
- * - Delete bank connections via engine client
+ * - Delete bank connections via banking API
  *
  * Note: Subscription cancellation is handled manually by the user via the
  * customer portal before team deletion. The UI prompts users to cancel

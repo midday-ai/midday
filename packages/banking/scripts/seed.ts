@@ -7,18 +7,11 @@
  * Usage:
  *   cd packages/db
  *   bun run src/scripts/seed-institutions.ts
- *
- * Required environment variables:
- *   DATABASE_PRIMARY_URL - PostgreSQL connection URL
- *   PLAID_CLIENT_ID, PLAID_SECRET, PLAID_ENVIRONMENT
- *   GOCARDLESS_SECRET_ID, GOCARDLESS_SECRET_KEY
- *   ENABLEBANKING_APPLICATION_ID, ENABLE_BANKING_KEY_CONTENT, ENABLEBANKING_REDIRECT_URL
- *   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME
  */
 
 import { fetchAllInstitutions, syncInstitutionLogos } from "@midday/banking";
-import { db } from "../client";
-import { upsertInstitutions } from "../queries/institutions";
+import { db } from "@midday/db/client";
+import { upsertInstitutions } from "@midday/db/queries";
 
 async function main() {
   // 1. Fetch institutions from all providers
