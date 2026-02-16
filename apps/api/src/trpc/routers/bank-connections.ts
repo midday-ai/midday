@@ -75,11 +75,12 @@ export const bankConnectionsRouter = createTRPCRouter({
 
   reconnect: protectedProcedure
     .input(reconnectBankConnectionSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
       const result = await reconnectBankConnection(db, {
         referenceId: input.referenceId,
         newReferenceId: input.newReferenceId,
         expiresAt: input.expiresAt,
+        teamId: teamId!,
       });
 
       if (!result) {

@@ -214,13 +214,14 @@ export type ReconnectBankConnectionParams = {
   referenceId: string;
   newReferenceId: string;
   expiresAt: string;
+  teamId: string;
 };
 
 export const reconnectBankConnection = async (
   db: Database,
   params: ReconnectBankConnectionParams,
 ) => {
-  const { referenceId, newReferenceId, expiresAt } = params;
+  const { referenceId, newReferenceId, expiresAt, teamId } = params;
 
   const [result] = await db
     .update(bankConnections)
@@ -229,7 +230,12 @@ export const reconnectBankConnection = async (
       expiresAt,
       status: "connected",
     })
-    .where(eq(bankConnections.referenceId, referenceId))
+    .where(
+      and(
+        eq(bankConnections.referenceId, referenceId),
+        eq(bankConnections.teamId, teamId),
+      ),
+    )
     .returning({
       id: bankConnections.id,
     });

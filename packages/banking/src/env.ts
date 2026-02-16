@@ -11,8 +11,8 @@ export const env = createEnv({
     ENABLEBANKING_APPLICATION_ID: z.string().min(1),
     ENABLE_BANKING_KEY_CONTENT: z.string().min(1),
     ENABLEBANKING_REDIRECT_URL: z.string().min(1),
-    TELLER_CERT_BASE64: z.string().optional(),
-    TELLER_KEY_BASE64: z.string().optional(),
+    TELLER_CERT_BASE64: z.string().min(1),
+    TELLER_KEY_BASE64: z.string().min(1),
   },
   runtimeEnv: process.env,
 });
