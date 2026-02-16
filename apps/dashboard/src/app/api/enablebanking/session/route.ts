@@ -39,20 +39,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/?error=invalid_code", redirectBase));
   }
 
-  if (method === "connect") {
+  const exchangeSessionId = sessionData.data.session_id;
+  const exchangeExpiresAt = sessionData.data.expires_at;
+
+  if (method === "connect" && exchangeSessionId) {
     return NextResponse.redirect(
       new URL(
-        `/?ref=${sessionData.data.session_id}&provider=enablebanking&step=account`,
+        `/?ref=${exchangeSessionId}&provider=enablebanking&step=account`,
         redirectBase,
       ),
     );
   }
 
-  if (method === "reconnect" && sessionId) {
+  if (
+    method === "reconnect" &&
+    sessionId &&
+    exchangeSessionId &&
+    exchangeExpiresAt
+  ) {
     const connection = await trpc.bankConnections.reconnect.mutate({
       referenceId: sessionId,
-      newReferenceId: sessionData.data.session_id,
-      expiresAt: sessionData.data.expires_at,
+      newReferenceId: exchangeSessionId,
+      expiresAt: exchangeExpiresAt,
     });
 
     return NextResponse.redirect(
