@@ -1,8 +1,8 @@
-import { timingSafeEqual } from "node:crypto";
 import { createClient } from "@api/services/supabase";
 import type { Session } from "@api/utils/auth";
 import { verifyAccessToken } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
+import { safeCompare } from "@api/utils/safe-compare";
 import type { Database } from "@midday/db/client";
 import { db } from "@midday/db/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -33,11 +33,7 @@ export const createTRPCContext = async (
   const isInternalRequest =
     !!internalKey &&
     !!process.env.INTERNAL_API_KEY &&
-    internalKey.length === process.env.INTERNAL_API_KEY.length &&
-    timingSafeEqual(
-      Buffer.from(internalKey),
-      Buffer.from(process.env.INTERNAL_API_KEY),
-    );
+    safeCompare(internalKey, process.env.INTERNAL_API_KEY);
 
   const session = await verifyAccessToken(accessToken);
   const supabase = await createClient(accessToken);

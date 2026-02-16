@@ -1,4 +1,4 @@
-import { timingSafeEqual } from "node:crypto";
+import { safeCompare } from "@api/utils/safe-compare";
 import { hash } from "@midday/encryption";
 
 export type OAuthApplication = {
@@ -19,5 +19,5 @@ export function validateClientCredentials(
   const storedSecret = application.clientSecret;
 
   // Use timing-safe comparison to prevent timing attacks
-  return timingSafeEqual(Buffer.from(storedSecret), Buffer.from(hashedSecret));
+  return safeCompare(storedSecret, hashedSecret);
 }
