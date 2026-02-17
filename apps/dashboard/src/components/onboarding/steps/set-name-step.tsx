@@ -10,7 +10,7 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod/v3";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { useUserMutation } from "@/hooks/use-user";
@@ -26,9 +26,15 @@ type Props = {
   userId: string;
   avatarUrl?: string | null;
   onComplete: () => void;
+  onLoadingChange?: (loading: boolean) => void;
 };
 
-export function SetNameStep({ userId, avatarUrl, onComplete }: Props) {
+export function SetNameStep({
+  userId,
+  avatarUrl,
+  onComplete,
+  onLoadingChange,
+}: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const isSubmittedRef = useRef(false);
   const updateUserMutation = useUserMutation();
@@ -38,6 +44,10 @@ export function SetNameStep({ userId, avatarUrl, onComplete }: Props) {
       fullName: "",
     },
   });
+
+  useEffect(() => {
+    onLoadingChange?.(isLoading);
+  }, [isLoading, onLoadingChange]);
 
   const isFormLocked = isLoading || isSubmittedRef.current;
 

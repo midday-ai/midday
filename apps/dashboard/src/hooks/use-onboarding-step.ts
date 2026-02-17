@@ -1,58 +1,81 @@
 "use client";
 
-import { parseAsInteger, useQueryState } from "nuqs";
+import { parseAsString, useQueryState } from "nuqs";
 import { useEffect } from "react";
 
-// Steps: 1 Profile, 2 CreateTeam, 3 ConnectBank, 4 ConnectInbox, 5 Reconciliation, 6 StartTrial
-const TOTAL_STEPS = 6;
+const STEP_KEYS = [
+  "set-name",
+  "create-team",
+  "connect-bank",
+  "connect-inbox",
+  "reconciliation",
+  "start-trial",
+] as const;
+
+export type OnboardingStepKey = (typeof STEP_KEYS)[number];
 
 type OnboardingStepOptions = {
   hasTeam: boolean;
   hasFullName: boolean;
 };
 
+function keyToIndex(key: string | null): number {
+  if (!key) return -1;
+  return STEP_KEYS.indexOf(key as OnboardingStepKey);
+}
+
 export function useOnboardingStep(opts: OnboardingStepOptions) {
-  const [step, setStep] = useQueryState(
+  const [stepKey, setStepKey] = useQueryState(
     "s",
-    parseAsInteger.withDefault(1).withOptions({ history: "push" }),
+    parseAsString.withOptions({ history: "push" }),
   );
 
-  // Determine the lowest step this user still needs:
-  //   !hasFullName → 1 (must complete profile)
-  //   hasFullName  → 2 (always allow creating a new team)
-  const minStep = !opts.hasFullName ? 1 : 2;
+  const minKey: OnboardingStepKey = !opts.hasFullName
+    ? "set-name"
+    : "create-team";
 
-  // Gate forward progress — can't skip past the step that's blocking:
-  //   profile incomplete  → locked to step 1
-  //   team not created    → locked to step 2
-  //   both done           → full access
-  const maxAllowedStep = !opts.hasFullName
-    ? 1
+  const maxKey: OnboardingStepKey = !opts.hasFullName
+    ? "set-name"
     : !opts.hasTeam
-      ? 2
-      : TOTAL_STEPS;
+      ? "create-team"
+      : "start-trial";
 
-  const safeStep = Math.max(minStep, Math.min(step, maxAllowedStep));
+  const minIndex = keyToIndex(minKey);
+  const maxIndex = keyToIndex(maxKey);
+  const requestedIndex = keyToIndex(stepKey);
+
+  const safeIndex =
+    requestedIndex === -1
+      ? minIndex
+      : Math.max(minIndex, Math.min(requestedIndex, maxIndex));
+
+  const safeKey = STEP_KEYS[safeIndex] as OnboardingStepKey;
 
   useEffect(() => {
-    if (step !== safeStep) {
-      setStep(safeStep);
+    if (stepKey !== safeKey) {
+      setStepKey(safeKey);
     }
-  }, [step, safeStep, setStep]);
+  }, [stepKey, safeKey, setStepKey]);
+
+  const step = safeIndex + 1;
 
   const nextStep = () => {
-    if (safeStep < TOTAL_STEPS) setStep(safeStep + 1);
+    if (safeIndex < STEP_KEYS.length - 1) {
+      setStepKey(STEP_KEYS[safeIndex + 1] as string);
+    }
   };
 
   const prevStep = () => {
-    if (safeStep > minStep) setStep(safeStep - 1);
+    if (safeIndex > minIndex) {
+      setStepKey(STEP_KEYS[safeIndex - 1] as string);
+    }
   };
 
   return {
-    step: safeStep,
-    setStep,
+    step,
+    stepKey: safeKey,
     nextStep,
     prevStep,
-    totalSteps: TOTAL_STEPS,
+    totalSteps: STEP_KEYS.length,
   };
 }

@@ -76,7 +76,7 @@ export function ConnectBankStep({
         <Suspense>
           <BankSearchContent
             enabled={true}
-            redirectPath="/onboarding?s=2"
+            redirectPath="/onboarding?s=connect-bank"
             listHeight="h-[calc(100vh-570px)] max-h-[calc(100vh-570px)]"
             defaultCountryCode={countryCode}
             fadeGradientClass="bg-gradient-to-t from-[#f7f7f7] dark:from-[#0c0c0c] to-transparent"

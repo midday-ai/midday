@@ -87,8 +87,8 @@ export function ConnectInboxStep({ onContinue }: Props) {
         transition={{ duration: 0.4, delay: 0.8 }}
         className="flex gap-2 !mt-6"
       >
-        <ConnectGmail redirectPath="/onboarding?s=4" />
-        <ConnectOutlook redirectPath="/onboarding?s=4" />
+        <ConnectGmail redirectPath="/onboarding?s=connect-inbox" />
+        <ConnectOutlook redirectPath="/onboarding?s=connect-inbox" />
       </motion.div>
     </div>
   );

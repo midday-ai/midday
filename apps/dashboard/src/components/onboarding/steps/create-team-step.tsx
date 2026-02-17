@@ -38,6 +38,7 @@ type Props = {
   defaultCountryCodePromise: Promise<string>;
   onComplete: () => void;
   onCountryChange?: (countryCode: string) => void;
+  onLoadingChange?: (loading: boolean) => void;
 };
 
 export function CreateTeamStep({
@@ -45,6 +46,7 @@ export function CreateTeamStep({
   defaultCountryCodePromise,
   onComplete,
   onCountryChange,
+  onLoadingChange,
 }: Props) {
   const currency = use(defaultCurrencyPromise);
   const countryCode = use(defaultCountryCodePromise);
@@ -93,6 +95,10 @@ export function CreateTeamStep({
       onCountryChange?.(selectedCountryCode);
     }
   }, [selectedCountryCode, form, onCountryChange]);
+
+  useEffect(() => {
+    onLoadingChange?.(isLoading);
+  }, [isLoading, onLoadingChange]);
 
   const isFormLocked = isLoading || isSubmittedRef.current;
 

@@ -5,6 +5,7 @@ import { BulkReconciliationAnimation } from "@midday/ui/animations/bulk-reconcil
 import { ReceiptAttachmentAnimation } from "@midday/ui/animations/receipt-attachment";
 import { WidgetsAnimation } from "@midday/ui/animations/widgets";
 import { Icons } from "@midday/ui/icons";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
@@ -146,6 +147,7 @@ export function OnboardingPage({
 }: Props) {
   const [hasTeam, setHasTeam] = useState(!!user.teamId);
   const [hasFullName, setHasFullName] = useState(!!user.fullName);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [bankSync, setBankSync] = useState<BankSyncState>(null);
   const [inboxSync, setInboxSync] = useState<InboxSyncState>(null);
   const [syncVisible, setSyncVisible] = useState(false);
@@ -158,7 +160,7 @@ export function OnboardingPage({
     countryCode: parseAsString,
   });
 
-  const { step, nextStep, prevStep, totalSteps } = useOnboardingStep({
+  const { step, stepKey, nextStep, prevStep, totalSteps } = useOnboardingStep({
     hasTeam,
     hasFullName,
   });
@@ -206,6 +208,10 @@ export function OnboardingPage({
     nextStep();
   }, [nextStep]);
 
+  const handleLoadingChange = useCallback((loading: boolean) => {
+    setIsSubmitting(loading);
+  }, []);
+
   const handleBankSyncStarted = useCallback(
     (data: { runId: string; accessToken: string }) => {
       setBankSync(data);
@@ -225,6 +231,7 @@ export function OnboardingPage({
             userId={user.id}
             avatarUrl={user.avatarUrl}
             onComplete={handleNameSet}
+            onLoadingChange={handleLoadingChange}
           />
         ),
         overlay: true,
@@ -240,6 +247,7 @@ export function OnboardingPage({
             defaultCountryCodePromise={defaultCountryCodePromise}
             onComplete={handleTeamCreated}
             onCountryChange={handleCountryChange}
+            onLoadingChange={handleLoadingChange}
           />
         ),
         overlay: true,
@@ -295,6 +303,7 @@ export function OnboardingPage({
       handleTeamCreated,
       handleNameSet,
       handleCountryChange,
+      handleLoadingChange,
       handleBankSyncStarted,
       nextStep,
     ],
@@ -366,7 +375,7 @@ export function OnboardingPage({
             >
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
-                  key={step}
+                  key={stepKey}
                   layout
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -387,13 +396,14 @@ export function OnboardingPage({
             <div className="mt-auto pt-8">
               {currentStep.navigation === "submit" ? (
                 <div className="flex justify-end">
-                  <button
+                  <SubmitButton
                     type="submit"
                     form={`${currentStep.key}-form`}
+                    isSubmitting={isSubmitting}
                     className="px-4 py-2 bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
                   >
                     Continue
-                  </button>
+                  </SubmitButton>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">

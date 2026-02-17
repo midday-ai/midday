@@ -20,10 +20,18 @@ export function createInternalClient() {
     );
   }
 
+  const trpcUrl = `${apiUrl}/trpc`;
+
+  if (!process.env.API_INTERNAL_URL && !process.env.NEXT_PUBLIC_API_URL) {
+    console.warn(
+      `[trpc-internal] Neither API_INTERNAL_URL nor NEXT_PUBLIC_API_URL is set, falling back to ${trpcUrl}`,
+    );
+  }
+
   return createTRPCClient<AppRouter>({
     links: [
       httpBatchLink({
-        url: `${apiUrl}/trpc`,
+        url: trpcUrl,
         transformer: superjson,
         headers() {
           return {

@@ -36,7 +36,7 @@ export const syncConnection = schemaTask({
           | "gocardless"
           | "plaid"
           | "teller"
-          | "enablebanking", // Pluggy not supported yet
+          | "enablebanking",
         accessToken: data.access_token ?? undefined,
       });
 
@@ -155,7 +155,19 @@ export const syncConnection = schemaTask({
           .eq("id", connectionId);
       }
     } catch (error) {
-      logger.error("Failed to sync connection", { error });
+      const errorDetails: Record<string, unknown> = {
+        connectionId,
+        message: error instanceof Error ? error.message : String(error),
+        name: error instanceof Error ? error.name : undefined,
+      };
+
+      if (error instanceof Error && "cause" in error && error.cause) {
+        const cause = error.cause as Error;
+        errorDetails.cause = cause.message ?? String(cause);
+        errorDetails.causeCode = (cause as NodeJS.ErrnoException).code;
+      }
+
+      logger.error("Failed to sync connection", errorDetails);
 
       throw error;
     }
