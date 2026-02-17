@@ -81,7 +81,7 @@ function useSyncLabels({
   }, [isActive]);
 
   return {
-    label: labels[index] ?? labels[0],
+    label: labels[index] ?? labels[0] ?? "",
     isDone: index === labels.length - 1,
   };
 }
