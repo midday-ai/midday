@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { SubmitButton } from "@midday/ui/submit-button";
+
 import { getDefaultFiscalYearStartMonth } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -138,7 +138,7 @@ export function CreateTeamStep({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="text-sm text-[#878787] leading-relaxed"
+        className="text-sm text-muted-foreground leading-relaxed"
       >
         Add company details so amounts, currency, tax, and reporting periods
         line up correctly across insights, invoices and exports.
@@ -150,14 +150,14 @@ export function CreateTeamStep({
         transition={{ duration: 0.35, delay: 0.3 }}
       >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form id="create-team-form" onSubmit={form.handleSubmit(onSubmit)}>
             {showFullName && (
               <FormField
                 control={form.control}
                 name="fullName"
                 render={({ field }) => (
                   <FormItem className="mt-4 w-full">
-                    <FormLabel className="text-xs text-[#878787] font-normal">
+                    <FormLabel className="text-xs text-primary font-normal">
                       Full name
                     </FormLabel>
                     <FormControl>
@@ -165,7 +165,7 @@ export function CreateTeamStep({
                         autoFocus
                         placeholder="John Doe"
                         autoComplete="name"
-                        className="bg-[#1A1A1A] border-[#2C2C2C] text-white placeholder:text-[#555]"
+                        className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                         {...field}
                       />
                     </FormControl>
@@ -180,7 +180,7 @@ export function CreateTeamStep({
               name="name"
               render={({ field }) => (
                 <FormItem className="mt-4 w-full">
-                  <FormLabel className="text-xs text-[#878787] font-normal">
+                  <FormLabel className="text-xs text-primary font-normal">
                     Company name
                   </FormLabel>
                   <FormControl>
@@ -191,7 +191,7 @@ export function CreateTeamStep({
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
-                      className="bg-[#1A1A1A] border-[#2C2C2C] text-white placeholder:text-[#555]"
+                      className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                       {...field}
                     />
                   </FormControl>
@@ -205,12 +205,13 @@ export function CreateTeamStep({
               name="countryCode"
               render={({ field }) => (
                 <FormItem className="mt-4 w-full">
-                  <FormLabel className="text-xs text-[#878787] font-normal">
+                  <FormLabel className="text-xs text-primary font-normal">
                     Country
                   </FormLabel>
                   <FormControl className="w-full">
                     <CountrySelector
                       defaultValue={field.value ?? ""}
+                      className="bg-secondary border-border text-foreground"
                       onSelect={(code) => {
                         field.onChange(code);
                         form.setValue("countryCode", code);
@@ -226,15 +227,21 @@ export function CreateTeamStep({
               control={form.control}
               name="baseCurrency"
               render={({ field }) => (
-                <FormItem className="mt-4 border-b border-[#2C2C2C] pb-4">
-                  <FormLabel className="text-xs text-[#878787] font-normal">
+                <FormItem className="mt-4">
+                  <FormLabel className="text-xs text-primary font-normal">
                     Base currency
                   </FormLabel>
                   <FormControl>
-                    <SelectCurrency currencies={uniqueCurrencies} {...field} />
+                    <SelectCurrency
+                      currencies={uniqueCurrencies}
+                      triggerClassName="bg-secondary border-border text-foreground"
+                      {...field}
+                    />
                   </FormControl>
-                  <FormDescription className="text-[#555]">
-                    Default currency for your company. You can change it later.
+                  <FormDescription className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
+                    If you have multiple accounts in different currencies, this
+                    will be the default currency for your company. You can
+                    change it later.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -245,29 +252,24 @@ export function CreateTeamStep({
               control={form.control}
               name="fiscalYearStartMonth"
               render={({ field }) => (
-                <FormItem className="mt-4 border-b border-[#2C2C2C] pb-4">
-                  <FormLabel className="text-xs text-[#878787] font-normal">
+                <FormItem className="mt-4">
+                  <FormLabel className="text-xs text-primary font-normal">
                     Fiscal year starts
                   </FormLabel>
                   <FormControl>
-                    <SelectFiscalMonth {...field} />
+                    <SelectFiscalMonth
+                      triggerClassName="bg-secondary border-border text-foreground"
+                      {...field}
+                    />
                   </FormControl>
-                  <FormDescription className="text-[#555]">
-                    When does your company's fiscal year begin? You can change
-                    it later.
+                  <FormDescription className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
+                    When does your company's fiscal year begin? This determines
+                    default date ranges for reports. You can change it later.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <SubmitButton
-              className="mt-6 w-full bg-white text-[#121212] hover:bg-white/90 border-white"
-              type="submit"
-              isSubmitting={isFormLocked}
-            >
-              Continue
-            </SubmitButton>
           </form>
         </Form>
       </motion.div>

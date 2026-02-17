@@ -38,6 +38,7 @@ type Props<T> = {
   onCreate?: (value: string) => void;
   headless?: boolean;
   className?: string;
+  triggerClassName?: string;
   modal?: boolean;
 };
 
@@ -56,6 +57,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
   disabled,
   onCreate,
   className,
+  triggerClassName,
   modal = true,
 }: Props<T>) {
   const [open, setOpen] = React.useState(false);
@@ -155,7 +157,10 @@ export function ComboboxDropdown<T extends ComboboxItem>({
         <Button
           variant="outline"
           aria-expanded={open}
-          className="w-full justify-between relative font-normal"
+          className={cn(
+            "w-full justify-between relative font-normal",
+            triggerClassName,
+          )}
         >
           <span className="truncate text-ellipsis pr-3">
             {selectedItem ? (

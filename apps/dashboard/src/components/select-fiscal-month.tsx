@@ -5,6 +5,7 @@ type Props = {
   value?: number | null;
   onChange: (value: number | null) => void;
   className?: string;
+  triggerClassName?: string;
   headless?: boolean;
 };
 
@@ -28,6 +29,7 @@ export function SelectFiscalMonth({
   value,
   onChange,
   className,
+  triggerClassName,
   headless,
 }: Props) {
   const selectedItem = fiscalMonthOptions.find(
@@ -42,6 +44,7 @@ export function SelectFiscalMonth({
       searchPlaceholder="Search months"
       items={fiscalMonthOptions}
       className={className}
+      triggerClassName={triggerClassName}
       onSelect={(item) => {
         onChange(item.value);
       }}

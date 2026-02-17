@@ -62,7 +62,7 @@ export function ConnectBankStep({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="text-sm text-[#878787] leading-relaxed"
+        className="text-sm text-muted-foreground leading-relaxed"
       >
         Connect your bank account to automatically sync transactions and keep
         your finances up to date.
@@ -77,9 +77,9 @@ export function ConnectBankStep({
           <BankSearchContent
             enabled={true}
             redirectPath="/onboarding?s=2"
-            listHeight="min-h-[355px] max-h-[calc(100vh-420px)]"
+            listHeight="h-[calc(100vh-570px)] max-h-[calc(100vh-570px)]"
             defaultCountryCode={countryCode}
-            fadeGradientClass="bg-gradient-to-t from-[#121212] to-transparent dark:from-[#0c0c0c]"
+            fadeGradientClass="bg-gradient-to-t from-[#f7f7f7] dark:from-[#0c0c0c] to-transparent"
           />
         </Suspense>
       </motion.div>

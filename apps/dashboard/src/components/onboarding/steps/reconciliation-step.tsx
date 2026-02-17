@@ -22,7 +22,7 @@ export function ReconciliationStep({ onContinue }: Props) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="text-sm text-[#878787] leading-relaxed"
+        className="text-sm text-muted-foreground leading-relaxed"
       >
         Export matched transactions and receipts to your accountant or
         accounting system in one click, saving time every month.
@@ -47,7 +47,7 @@ export function ReconciliationStep({ onContinue }: Props) {
             transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
             className="flex items-start gap-3"
           >
-            <div className="relative w-4 h-4 flex items-center justify-center shrink-0 mt-0.5 border border-[#2C2C2C] bg-[#1A1A1A]">
+            <div className="relative w-4 h-4 flex items-center justify-center shrink-0 mt-0.5 border border-border bg-secondary">
               <svg
                 width="10"
                 height="10"
@@ -57,14 +57,14 @@ export function ReconciliationStep({ onContinue }: Props) {
               >
                 <path
                   d="M2 5L4.5 7.5L8 3"
-                  stroke="white"
+                  stroke="currentColor"
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
             </div>
-            <span className="text-sm text-[#878787] leading-relaxed">
+            <span className="text-sm text-muted-foreground leading-relaxed">
               {feature}
             </span>
           </motion.li>

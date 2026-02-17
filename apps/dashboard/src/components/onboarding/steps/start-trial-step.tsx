@@ -18,7 +18,7 @@ export function StartTrialStep() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="text-sm text-[#878787] leading-relaxed"
+        className="text-sm text-muted-foreground leading-relaxed"
       >
         You're all set! Start your free trial and explore everything Midday has
         to offer.

@@ -29,7 +29,7 @@ type StepConfig = {
   animation: ReactNode;
   content: ReactNode;
   overlay?: boolean;
-  navigation: "none" | "skip" | "next" | "finish";
+  navigation: "none" | "submit" | "skip" | "next" | "finish";
   canGoBack?: boolean;
 };
 
@@ -66,13 +66,22 @@ function DashboardImageAnimation() {
 
 function GradientOverlay() {
   return (
-    <div
-      className="absolute inset-0 pointer-events-none z-[15]"
-      style={{
-        background:
-          "linear-gradient(to right, transparent 0%, transparent 50%, rgba(8, 8, 8, 0.2) 70%, rgba(8, 8, 8, 0.5) 85%, rgba(8, 8, 8, 0.8) 100%)",
-      }}
-    />
+    <>
+      <div
+        className="absolute inset-0 pointer-events-none z-[15] dark:hidden"
+        style={{
+          background:
+            "linear-gradient(to right, transparent 0%, transparent 50%, rgba(247, 247, 247, 0.2) 70%, rgba(247, 247, 247, 0.5) 85%, rgba(247, 247, 247, 0.8) 100%)",
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none z-[15] hidden dark:block"
+        style={{
+          background:
+            "linear-gradient(to right, transparent 0%, transparent 50%, rgba(8, 8, 8, 0.2) 70%, rgba(8, 8, 8, 0.5) 85%, rgba(8, 8, 8, 0.8) 100%)",
+        }}
+      />
+    </>
   );
 }
 
@@ -100,7 +109,7 @@ function ProgressBar({
       <motion.div
         layoutId="progress-bar-container"
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="w-32 h-1.5 bg-[#2C2C2C] border border-[#2C2C2C] overflow-hidden"
+        className="w-32 h-1 bg-border overflow-hidden"
       >
         <motion.div
           layoutId="progress-bar-fill"
@@ -109,7 +118,7 @@ function ProgressBar({
             width: `${(currentStep / totalSteps) * 100}%`,
           }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="h-full bg-white"
+          className="h-full bg-primary"
         />
       </motion.div>
     </div>
@@ -118,6 +127,7 @@ function ProgressBar({
 
 const NAV_LABELS: Record<StepConfig["navigation"], string | null> = {
   none: null,
+  submit: null,
   skip: "Skip",
   next: "Next",
   finish: null,
@@ -202,7 +212,7 @@ export function OnboardingPage({
           />
         ),
         overlay: true,
-        navigation: "none",
+        navigation: "submit",
       },
       {
         key: "connect-bank",
@@ -259,14 +269,9 @@ export function OnboardingPage({
     <div className="h-screen overflow-hidden flex relative">
       <nav className="fixed top-0 left-0 right-0 z-50 w-full pointer-events-none">
         <div className="relative py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center">
-          <Link
-            href="/"
-            className="flex items-center gap-2 hover:opacity-80 active:opacity-80 transition-opacity duration-200 pointer-events-auto"
-          >
-            <div className="w-6 h-6">
-              <Icons.LogoSmall className="w-full h-full text-foreground" />
-            </div>
-          </Link>
+          <div className="w-6 h-6">
+            <Icons.LogoSmall className="w-full h-full text-foreground" />
+          </div>
         </div>
       </nav>
 
@@ -289,9 +294,9 @@ export function OnboardingPage({
       </div>
 
       {/* Right Side - Onboarding content */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center p-8 lg:p-12 pt-20 bg-[#121212] dark:bg-[#0c0c0c] text-white">
+      <div className="w-full lg:w-1/2 flex flex-col items-center p-8 lg:p-12 pt-10 bg-[#f7f7f7] dark:bg-[#0c0c0c] text-foreground">
         <div className="w-full max-w-md flex flex-col h-full relative">
-          <div className="relative h-8 mb-4">
+          <div className="relative h-6 mb-2">
             <div className="absolute inset-0 flex items-center justify-center z-10">
               <OnboardingSyncStatus
                 bankSync={bankSync}
@@ -331,39 +336,53 @@ export function OnboardingPage({
 
           {/* Navigation Buttons - Bottom */}
           {currentStep.navigation !== "none" && (
-            <div className="flex items-center justify-between mt-auto pt-8">
-              <div>
-                {currentStep.canGoBack && (
+            <div className="mt-auto pt-8">
+              {currentStep.navigation === "submit" ? (
+                <div className="flex justify-end">
                   <button
-                    type="button"
-                    onClick={prevStep}
-                    className="px-4 py-2 bg-[#1A1A1A] border border-[#2C2C2C] text-white text-sm hover:bg-[#2C2C2C] transition-colors"
+                    type="submit"
+                    form="create-team-form"
+                    className="px-4 py-2 bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
                   >
-                    Previous
+                    Continue
                   </button>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div>
+                    {currentStep.canGoBack && (
+                      <button
+                        type="button"
+                        onClick={prevStep}
+                        className="px-4 py-2 bg-secondary border border-border text-foreground text-sm hover:bg-accent transition-colors"
+                      >
+                        Previous
+                      </button>
+                    )}
+                  </div>
 
-              <div>
-                {navLabel && (
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    className="px-4 py-2 bg-[#1A1A1A] border border-[#2C2C2C] text-white text-sm hover:bg-[#2C2C2C] transition-colors"
-                  >
-                    {navLabel}
-                  </button>
-                )}
-                {currentStep.navigation === "finish" && (
-                  <Link
-                    href="/"
-                    prefetch
-                    className="px-4 py-2 bg-white text-[#121212] font-medium text-sm hover:bg-white/90 transition-colors border border-white"
-                  >
-                    Get started
-                  </Link>
-                )}
-              </div>
+                  <div>
+                    {navLabel && (
+                      <button
+                        type="button"
+                        onClick={nextStep}
+                        className="px-4 py-2 bg-secondary border border-border text-foreground text-sm hover:bg-accent transition-colors"
+                      >
+                        {navLabel}
+                      </button>
+                    )}
+                    {currentStep.navigation === "finish" && (
+                      <Link
+                        href="/"
+                        prefetch
+                        className="px-4 py-2 bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors border border-primary"
+                      >
+                        Get started
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
