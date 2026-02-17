@@ -93,7 +93,7 @@ export function SetNameStep({ userId, avatarUrl, onComplete }: Props) {
         transition={{ duration: 0.35, delay: 0.3 }}
       >
         <Form {...form}>
-          <form id="create-team-form" onSubmit={form.handleSubmit(onSubmit)}>
+          <form id="set-name-form" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="fullName"

@@ -389,7 +389,7 @@ export function OnboardingPage({
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    form="create-team-form"
+                    form={`${currentStep.key}-form`}
                     className="px-4 py-2 bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
                   >
                     Continue
