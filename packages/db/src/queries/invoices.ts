@@ -836,6 +836,12 @@ export async function draftInvoice(
         token: useToken,
         templateId,
         ...restInput,
+        // Revert overdue to unpaid when due date is moved to the future
+        status: sql`CASE
+          WHEN ${invoices.status} = 'overdue' AND ${restInput.dueDate}::timestamp >= now()
+          THEN 'unpaid'
+          ELSE ${invoices.status}
+        END`,
         currency: template.currency?.toUpperCase(),
         template: camelcaseKeys(restTemplate, { deep: true }),
         paymentDetails: paymentDetails,
