@@ -1,67 +1,59 @@
 import { createLoggerWithContext } from "@midday/logger";
+import { createClient, type RedisClientType } from "redis";
 
 const logger = createLoggerWithContext("redis");
 
-let sharedRedisClient: any = null;
-let RedisClientClass: any = null;
-
-// Dynamically load Bun's RedisClient to avoid crashing in non-Bun runtimes (e.g. trigger.dev on Node)
-try {
-  ({ RedisClient: RedisClientClass } = require("bun"));
-} catch {
-  // Not running in Bun — cache will be unavailable
-}
-
-/**
- * Resolve the Redis URL.
- *
- * All regions share a single Upstash Redis instance via REDIS_URL.
- */
-function resolveRedisUrl(): string | undefined {
-  return process.env.REDIS_URL;
-}
+let sharedRedisClient: RedisClientType | null = null;
 
 /**
  * Get or create a shared Redis client instance.
- * Returns null in non-Bun runtimes where RedisClient is unavailable.
+ * Uses the `redis` (node-redis) package which works on both Bun and Node runtimes.
+ * Reuses the same connection for both cache and memory providers.
  */
-export function getSharedRedisClient(): any {
+export function getSharedRedisClient(): RedisClientType {
   if (sharedRedisClient) {
     return sharedRedisClient;
   }
 
-  if (!RedisClientClass) {
-    return null;
-  }
-
-  const redisUrl = resolveRedisUrl();
+  const redisUrl = process.env.REDIS_URL;
 
   if (!redisUrl) {
-    throw new Error(
-      "Redis URL not found. Set per-region REDIS_CACHE_* env vars or REDIS_URL.",
-    );
+    throw new Error("REDIS_URL environment variable is required");
   }
 
   const isProduction =
     process.env.NODE_ENV === "production" ||
     process.env.RAILWAY_ENVIRONMENT === "production";
 
-  sharedRedisClient = new RedisClientClass(redisUrl, {
-    connectionTimeout: isProduction ? 10000 : 5000,
-    autoReconnect: true,
-    maxRetries: 10,
-    enableOfflineQueue: true,
-    enableAutoPipelining: true,
+  sharedRedisClient = createClient({
+    url: redisUrl,
+    pingInterval: 60_000,
+    socket: {
+      family: 4,
+      connectTimeout: isProduction ? 10_000 : 5_000,
+      keepAlive: true,
+      noDelay: true,
+      reconnectStrategy: (retries) => {
+        const delay = Math.min(100 * 2 ** retries, 3_000);
+        logger.info(`Reconnecting in ${delay}ms (attempt ${retries + 1})`);
+        return delay;
+      },
+    },
   });
 
-  sharedRedisClient.onclose = (err: Error) => {
-    if (err) {
-      logger.error("Connection closed", { error: err.message });
-    }
-  };
+  sharedRedisClient.on("error", (err) => {
+    logger.error("Client error", { error: err.message });
+  });
 
-  // Connect eagerly so the client is ready for first use
-  sharedRedisClient.connect().catch((err: Error) => {
+  sharedRedisClient.on("reconnecting", () => {
+    logger.info("Reconnecting...");
+  });
+
+  sharedRedisClient.on("ready", () => {
+    logger.info("Connection established");
+  });
+
+  sharedRedisClient.connect().catch((err) => {
     logger.error("Initial connection error", { error: err.message });
   });
 

@@ -59,11 +59,7 @@ export class RedisCache {
       const ttl = ttlSeconds ?? this.defaultTTL;
 
       if (ttl > 0) {
-        await this.redis.send("SETEX", [
-          redisKey,
-          ttl.toString(),
-          serializedValue,
-        ]);
+        await this.redis.setEx(redisKey, ttl, serializedValue);
       } else {
         await this.redis.set(redisKey, serializedValue);
       }
@@ -88,7 +84,7 @@ export class RedisCache {
 
   async healthCheck(): Promise<void> {
     try {
-      await this.redis.send("PING", []);
+      await this.redis.ping();
     } catch (error) {
       throw new Error(`Redis health check failed: ${error}`);
     }

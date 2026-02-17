@@ -4,7 +4,7 @@ import { openai } from "@ai-sdk/openai";
 import { Agent, type AgentConfig } from "@ai-sdk-tools/agents";
 import { RedisProvider } from "@ai-sdk-tools/memory/redis";
 import type { ChatUserContext } from "@midday/cache/chat-cache";
-import { createIORedisAdapter } from "@midday/cache/ioredis-adapter";
+import { getSharedRedisClient } from "@midday/cache/shared-redis";
 
 const memoryTemplate = readFileSync(
   join(process.cwd(), "src/ai/agents/config/memory-template.md"),
@@ -128,7 +128,7 @@ export function buildAppContext(
   };
 }
 
-export const memoryProvider = new RedisProvider(createIORedisAdapter());
+export const memoryProvider = new RedisProvider(getSharedRedisClient());
 
 export const createAgent = (config: AgentConfig<AppContext>) => {
   return new Agent({
