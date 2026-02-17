@@ -47,15 +47,16 @@ export async function GET(req: NextRequest) {
         sameSite: "lax",
       });
 
-      const analytics = await setupAnalytics();
-
-      await analytics.track({
-        event: LogEvents.SignIn.name,
-        channel: LogEvents.SignIn.channel,
-      });
-
       // If user is redirected from an invite, redirect to teams page to accept/decline the invite
       if (returnTo?.startsWith("teams/invite/")) {
+        const analytics = await setupAnalytics();
+        analytics.track({
+          event: LogEvents.SignIn.name,
+          channel: LogEvents.SignIn.channel,
+          provider: provider ?? "unknown",
+          destination: "teams",
+        });
+
         return NextResponse.redirect(`${origin}/teams`);
       }
 
@@ -64,7 +65,16 @@ export async function GET(req: NextRequest) {
       const trpcClient = await getTRPCClient({ forcePrimary: true });
       const user = await trpcClient.user.me.query();
 
-      if (!user?.fullName || !user.teamId) {
+      const isOnboarding = !user?.fullName || !user.teamId;
+      const analytics = await setupAnalytics();
+      analytics.track({
+        event: LogEvents.SignIn.name,
+        channel: LogEvents.SignIn.channel,
+        provider: provider ?? "unknown",
+        destination: isOnboarding ? "onboarding" : "dashboard",
+      });
+
+      if (isOnboarding) {
         return NextResponse.redirect(`${origin}/onboarding`);
       }
     }

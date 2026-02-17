@@ -80,6 +80,19 @@ export function ConnectBankStep({
             listHeight="h-[calc(100vh-570px)] max-h-[calc(100vh-570px)]"
             defaultCountryCode={countryCode}
             fadeGradientClass="bg-gradient-to-t from-[#f7f7f7] dark:from-[#0c0c0c] to-transparent"
+            emptyState={({ query }) => (
+              <div className="flex flex-col items-center justify-center py-16 border-b border-border">
+                <p className="font-medium mb-3">No banks found</p>
+                <p className="text-sm text-center text-muted-foreground leading-relaxed max-w-[280px]">
+                  {query
+                    ? "Try a different search term."
+                    : "We don't support banks in this region yet. We're adding new banks regularly."}
+                </p>
+                <p className="text-xs text-center text-muted-foreground mt-4">
+                  You can also import transactions via CSV from settings.
+                </p>
+              </div>
+            )}
           />
         </Suspense>
       </motion.div>

@@ -4,7 +4,7 @@ export const Cookies = {
   TableSettings: "table-settings",
   InboxFilter: "inbox-filter-v2",
   InboxOrder: "inbox-order",
-  HideConnectFlow: "hide-connect-flow",
+
   LastProject: "last-project",
   WeeklyCalendar: "weekly-calendar",
   ForcePrimary: "midday-force-primary",

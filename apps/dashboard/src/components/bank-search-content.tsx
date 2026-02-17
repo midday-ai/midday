@@ -120,6 +120,9 @@ type BankSearchContentProps = {
   listHeight?: string;
   defaultCountryCode?: string;
   fadeGradientClass?: string;
+  emptyState?:
+    | React.ReactNode
+    | ((context: { query: string; countryCode: string }) => React.ReactNode);
 };
 
 export function BankSearchContent({
@@ -129,6 +132,7 @@ export function BankSearchContent({
   listHeight = "h-[430px]",
   fadeGradientClass,
   defaultCountryCode,
+  emptyState,
 }: BankSearchContentProps) {
   const trpc = useTRPC();
   const router = useRouter();
@@ -278,32 +282,38 @@ export function BankSearchContent({
             );
           })}
 
-          {!isLoading && data?.length === 0 && (
-            <div className="flex flex-col items-center justify-center min-h-[350px]">
-              <p className="font-medium mb-2">No banks found</p>
-              <p className="text-sm text-center text-[#878787]">
-                We couldn't find a bank matching your criteria.
-                <br /> Let us know, or start with manual import.
-              </p>
+          {!isLoading &&
+            data?.length === 0 &&
+            (typeof emptyState === "function" ? (
+              emptyState({ query: debouncedQuery, countryCode })
+            ) : emptyState ? (
+              emptyState
+            ) : (
+              <div className="flex flex-col items-center justify-center min-h-[350px]">
+                <p className="font-medium mb-2">No banks found</p>
+                <p className="text-sm text-center text-[#878787]">
+                  We couldn't find a bank matching your criteria.
+                  <br /> Let us know, or start with manual import.
+                </p>
 
-              <div className="mt-4 flex space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setParams({ step: "import" })}
-                >
-                  Import
-                </Button>
+                <div className="mt-4 flex space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setParams({ step: "import" })}
+                  >
+                    Import
+                  </Button>
 
-                <Button
-                  onClick={() => {
-                    router.push("/account/support");
-                  }}
-                >
-                  Contact us
-                </Button>
+                  <Button
+                    onClick={() => {
+                      router.push("/account/support");
+                    }}
+                  >
+                    Contact us
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
         </div>
         {fadeGradientClass && (
           <div

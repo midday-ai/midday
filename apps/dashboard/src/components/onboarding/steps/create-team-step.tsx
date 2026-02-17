@@ -1,5 +1,7 @@
 "use client";
 
+import { track } from "@midday/events/client";
+import { LogEvents } from "@midday/events/events";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import {
   Form,
@@ -11,7 +13,6 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-
 import { getDefaultFiscalYearStartMonth } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -64,6 +65,12 @@ export function CreateTeamStep({
   const createTeamMutation = useMutation(
     trpc.team.create.mutationOptions({
       onSuccess: async () => {
+        track({
+          event: LogEvents.OnboardingTeamCreated.name,
+          channel: LogEvents.OnboardingTeamCreated.channel,
+          countryCode: form.getValues("countryCode"),
+          currency: form.getValues("baseCurrency"),
+        });
         await queryClient.invalidateQueries();
         onComplete();
       },

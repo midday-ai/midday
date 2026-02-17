@@ -50,7 +50,7 @@ export function CountrySelector({ defaultValue, onSelect, className }: Props) {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[var(--radix-popover-trigger-width)] p-0 z-[60]"
+        className="w-[var(--radix-popover-trigger-width)] min-w-[225px] p-0 z-[60]"
         align="start"
         portal={true}
       >

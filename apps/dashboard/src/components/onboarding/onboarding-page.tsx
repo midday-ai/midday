@@ -1,5 +1,6 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
 import { BulkReconciliationAnimation } from "@midday/ui/animations/bulk-reconciliation";
 import { ReceiptAttachmentAnimation } from "@midday/ui/animations/receipt-attachment";
 import { WidgetsAnimation } from "@midday/ui/animations/widgets";
@@ -10,14 +11,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { parseAsString, useQueryStates } from "nuqs";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { use, useCallback, useEffect, useMemo, useState } from "react";
 import { useOnboardingStep } from "@/hooks/use-onboarding-step";
+import { useOnboardingTracking } from "@/hooks/use-onboarding-tracking";
 import { useTRPC } from "@/trpc/client";
 import {
   type BankSyncState,
   type InboxSyncState,
   OnboardingSyncStatus,
 } from "./onboarding-sync-status";
+import { OnboardingUserMenu } from "./onboarding-user-menu";
 import { ConnectBankStep } from "./steps/connect-bank-step";
 import { ConnectInboxStep } from "./steps/connect-inbox-step";
 import { CreateTeamStep } from "./steps/create-team-step";
@@ -31,6 +34,7 @@ type StepConfig = {
   overlay?: boolean;
   navigation: "none" | "submit" | "skip" | "next" | "finish";
   canGoBack?: boolean;
+  trackEvent?: { name: string; channel: string };
 };
 
 function DashboardImageAnimation() {
@@ -156,6 +160,8 @@ export function OnboardingPage({
     hasTeam,
   });
 
+  const { trackNavigation, trackEvent } = useOnboardingTracking(step);
+
   useEffect(() => {
     if (
       connectionParams.connected === "true" &&
@@ -163,9 +169,12 @@ export function OnboardingPage({
       !inboxSync
     ) {
       setInboxSync({ provider: connectionParams.provider });
+      trackEvent(LogEvents.OnboardingInboxConnected, {
+        provider: connectionParams.provider,
+      });
       setConnectionParams({ connected: null, provider: null });
     }
-  }, [connectionParams, inboxSync, setConnectionParams]);
+  }, [connectionParams, inboxSync, setConnectionParams, trackEvent]);
 
   useEffect(() => {
     if (connectionParams.debug_sync === "true") {
@@ -175,15 +184,22 @@ export function OnboardingPage({
     }
   }, [connectionParams.debug_sync, setConnectionParams]);
 
-  const handleCountryChange = useCallback((countryCode: string) => {
-    setConnectionParams({ countryCode });
-    queryClient.prefetchQuery(
-      trpc.institutions.get.queryOptions({
-        q: "",
-        countryCode,
-      }),
-    );
-  }, []);
+  const defaultCountryCode = use(defaultCountryCodePromise);
+
+  const handleCountryChange = useCallback(
+    (countryCode: string) => {
+      setConnectionParams({
+        countryCode: countryCode === defaultCountryCode ? null : countryCode,
+      });
+      queryClient.prefetchQuery(
+        trpc.institutions.get.queryOptions({
+          q: "",
+          countryCode,
+        }),
+      );
+    },
+    [defaultCountryCode, setConnectionParams, queryClient, trpc],
+  );
 
   const handleTeamCreated = useCallback(() => {
     setHasTeam(true);
@@ -193,8 +209,9 @@ export function OnboardingPage({
   const handleBankSyncStarted = useCallback(
     (data: { runId: string; accessToken: string }) => {
       setBankSync(data);
+      trackEvent(LogEvents.OnboardingBankConnected);
     },
-    [],
+    [trackEvent],
   );
 
   const steps: StepConfig[] = useMemo(
@@ -225,6 +242,7 @@ export function OnboardingPage({
           />
         ),
         navigation: "skip",
+        trackEvent: LogEvents.OnboardingBankSkipped,
       },
       {
         key: "connect-inbox",
@@ -232,6 +250,7 @@ export function OnboardingPage({
         content: <ConnectInboxStep onContinue={nextStep} />,
         navigation: "skip",
         canGoBack: true,
+        trackEvent: LogEvents.OnboardingInboxSkipped,
       },
       {
         key: "reconciliation",
@@ -239,6 +258,7 @@ export function OnboardingPage({
         content: <ReconciliationStep onContinue={nextStep} />,
         navigation: "next",
         canGoBack: true,
+        trackEvent: LogEvents.OnboardingStepCompleted,
       },
       {
         key: "start-trial",
@@ -265,12 +285,20 @@ export function OnboardingPage({
 
   const navLabel = NAV_LABELS[currentStep.navigation];
 
+  const handleNavigation = () => {
+    trackNavigation(currentStep);
+    nextStep();
+  };
+
   return (
     <div className="h-screen overflow-hidden flex relative">
       <nav className="fixed top-0 left-0 right-0 z-50 w-full pointer-events-none">
-        <div className="relative py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center">
+        <div className="relative py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center justify-between">
           <div className="w-6 h-6">
             <Icons.LogoSmall className="w-full h-full text-foreground" />
+          </div>
+          <div className="pointer-events-auto">
+            <OnboardingUserMenu />
           </div>
         </div>
       </nav>
@@ -365,7 +393,7 @@ export function OnboardingPage({
                     {navLabel && (
                       <button
                         type="button"
-                        onClick={nextStep}
+                        onClick={handleNavigation}
                         className="px-4 py-2 bg-secondary border border-border text-foreground text-sm hover:bg-accent transition-colors"
                       >
                         {navLabel}
@@ -375,6 +403,9 @@ export function OnboardingPage({
                       <Link
                         href="/"
                         prefetch
+                        onClick={() =>
+                          trackEvent(LogEvents.OnboardingCompleted)
+                        }
                         className="px-4 py-2 bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors border border-primary"
                       >
                         Get started
