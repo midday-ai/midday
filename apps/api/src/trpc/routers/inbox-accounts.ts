@@ -36,6 +36,7 @@ export const inboxAccountsRouter = createTRPCRouter({
           teamId,
           provider: input.provider,
           source: "inbox",
+          redirectPath: input.redirectPath,
         });
 
         const connector = new InboxConnector(input.provider, db);

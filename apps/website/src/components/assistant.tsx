@@ -1,9 +1,10 @@
 "use client";
 
+import { AssistantQuestionAnimation } from "@midday/ui/animations/assistant-question";
+import { DashboardAnimation } from "@midday/ui/animations/dashboard";
 import Image from "next/image";
+import { useTheme } from "next-themes";
 import { HeroImage } from "./hero-image";
-import { AssistantQuestionAnimation } from "./homepage/assistant-question-animation";
-import { DashboardAnimation } from "./homepage/dashboard-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
 import { PreAccountingSection } from "./sections/pre-accounting-section";
@@ -12,6 +13,9 @@ import { TestimonialsSection } from "./sections/testimonials-section";
 import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Assistant() {
+  const { resolvedTheme } = useTheme();
+  const isLightMode = resolvedTheme !== "dark";
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -189,7 +193,10 @@ export function Assistant() {
               <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background">
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
-                    <AssistantQuestionAnimation onComplete={undefined} />
+                    <AssistantQuestionAnimation
+                      onComplete={undefined}
+                      isLightMode={isLightMode}
+                    />
                   </div>
                 </div>
               </div>

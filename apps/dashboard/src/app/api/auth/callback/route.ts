@@ -64,12 +64,8 @@ export async function GET(req: NextRequest) {
       const trpcClient = await getTRPCClient({ forcePrimary: true });
       const user = await trpcClient.user.me.query();
 
-      if (!user?.fullName) {
-        return NextResponse.redirect(`${origin}/setup`);
-      }
-
-      if (!user.teamId) {
-        return NextResponse.redirect(`${origin}/teams`);
+      if (!user?.fullName || !user.teamId) {
+        return NextResponse.redirect(`${origin}/onboarding`);
       }
     }
   }

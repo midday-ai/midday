@@ -1,10 +1,10 @@
 "use client";
 
+import { InboxMatchAnimation } from "@midday/ui/animations/inbox-match";
+import { ReceiptAttachmentAnimation } from "@midday/ui/animations/receipt-attachment";
 import Image from "next/image";
 import Link from "next/link";
 import { HeroImage } from "./hero-image";
-import { InboxMatchAnimation } from "./homepage/inbox-match-animation";
-import { ReceiptAttachmentAnimation } from "./homepage/receipt-attachment-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
 import { PreAccountingSection } from "./sections/pre-accounting-section";

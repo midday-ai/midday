@@ -1,10 +1,9 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { MaterialIcon } from "./icon-mapping";
+import { useEffect, useRef, useState } from "react";
+import { MdCheck, MdSearch } from "react-icons/md";
 
 interface Transaction {
   id: string;
@@ -152,9 +151,12 @@ const initialTransactions: Omit<Transaction, "status" | "checked">[] = [
 
 export function BulkReconciliationAnimation({
   onComplete,
+  shouldPlay = true,
 }: {
   onComplete?: () => void;
+  shouldPlay?: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [transactions, setTransactions] = useState<Transaction[]>(
     initialTransactions.map((t) => ({
       ...t,
@@ -174,46 +176,30 @@ export function BulkReconciliationAnimation({
     (t) => t.status === "in_review",
   ).length;
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
-
   useEffect(() => {
     if (!shouldPlay) return;
 
-    // Show table immediately (no fade in)
     setShowTable(true);
 
-    // Show dragdrop image and animate it
     const dragdropTimer = setTimeout(() => {
       setShowDragdrop(true);
-      // Animate dragdrop moving over the table
       setTimeout(() => {
         setDragdropPosition({ x: 0, y: 100 });
       }, 100);
-      // Start dropping animation
       setTimeout(() => {
         setIsDropping(true);
         setDragdropPosition({ x: 0, y: 150 });
       }, 800);
-      // Hide dragdrop after drop
       setTimeout(() => {
         setShowDragdrop(false);
       }, 1200);
     }, 1000);
 
-    // Start reconciling transactions one by one after dragdrop is done (after 1200ms + 1000ms = 2200ms)
-    // Change to "in_review", then check some of them
     const reconcileTimers: NodeJS.Timeout[] = [];
-    const checkedIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]; // First 12 transactions get checked
+    const checkedIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
-    // Calculate when all "in review" animations will be done
-    const allInReviewDoneTime = 2200 + 200; // After dragdrop completes + small delay
+    const allInReviewDoneTime = 2200 + 200;
 
-    // Change first 12 transactions to "in_review" at the same time
     const reviewTimer = setTimeout(() => {
       setTransactions((prev) =>
         prev.map((t, idx) =>
@@ -223,10 +209,8 @@ export function BulkReconciliationAnimation({
     }, 2200 + 200);
     reconcileTimers.push(reviewTimer);
 
-    // Check transactions randomly after all "in review" animations are done
-    const shuffledIndices = [...checkedIndices].sort(() => Math.random() - 0.5); // Randomize order
+    const shuffledIndices = [...checkedIndices].sort(() => Math.random() - 0.5);
     shuffledIndices.forEach((index, checkOrder) => {
-      // Random delay between 0-300ms for each checkmark, starting after all "in review" is done
       const randomDelay = Math.random() * 300;
       const checkTimer = setTimeout(
         () => {
@@ -239,16 +223,14 @@ export function BulkReconciliationAnimation({
           });
         },
         allInReviewDoneTime + 200 + randomDelay + checkOrder * 50,
-      ); // Base delay + random + slight stagger
+      );
       reconcileTimers.push(checkTimer);
     });
 
-    // Show action bar after all 12 items are checked
-    // Calculate max time: allInReviewDoneTime + 200 + 300 (max random) + 11 * 50 (last check order)
     const maxCheckTime = allInReviewDoneTime + 200 + 300 + 11 * 50;
     const actionBarTimer = setTimeout(() => {
       setShowActionBar(true);
-    }, maxCheckTime + 100); // After the last item is checked, plus a small delay
+    }, maxCheckTime + 100);
     reconcileTimers.push(actionBarTimer);
 
     let _done: NodeJS.Timeout | undefined;
@@ -287,9 +269,8 @@ export function BulkReconciliationAnimation({
         </div>
       </div>
 
-      {/* Search and Tabs Row - Full width, no padding */}
+      {/* Search and Tabs Row */}
       <div className="flex items-center justify-between gap-2 w-full mb-0.5 relative z-10">
-        {/* Search Field - Smaller on left */}
         <div className="relative flex-1 max-w-[200px] md:max-w-[240px]">
           <input
             type="text"
@@ -297,15 +278,10 @@ export function BulkReconciliationAnimation({
             className="w-full bg-background border border-border px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-[11px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border/50 rounded-none pr-6 md:pr-7"
           />
           <div className="absolute right-1.5 md:right-2 top-0 bottom-0 flex items-center pointer-events-none">
-            <MaterialIcon
-              name="search"
-              className="text-muted-foreground"
-              size={12}
-            />
+            <MdSearch className="text-muted-foreground" size={12} />
           </div>
         </div>
 
-        {/* Tabs - Right side, same style as time tracking */}
         <div className="relative flex items-stretch bg-muted flex-shrink-0">
           <div className="flex items-stretch">
             <button
@@ -346,7 +322,7 @@ export function BulkReconciliationAnimation({
         </div>
       </div>
 
-      {/* Dragdrop Image - Animated */}
+      {/* Dragdrop Image */}
       {showDragdrop && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -424,8 +400,7 @@ export function BulkReconciliationAnimation({
                               transition={{ duration: 0.2 }}
                               className="w-3 h-3 bg-primary flex items-center justify-center"
                             >
-                              <MaterialIcon
-                                name="check"
+                              <MdCheck
                                 className="text-primary-foreground"
                                 size={10}
                               />
@@ -469,7 +444,7 @@ export function BulkReconciliationAnimation({
             </table>
           </div>
 
-          {/* Action Bar - Floating above table */}
+          {/* Action Bar */}
           {showActionBar && selectedCount > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}

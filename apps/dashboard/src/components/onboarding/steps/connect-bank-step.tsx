@@ -1,0 +1,88 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Suspense, use } from "react";
+import { BankSearchContent } from "@/components/bank-search-content";
+import { SelectBankAccountsContent } from "@/components/select-bank-accounts-content";
+import { useConnectParams } from "@/hooks/use-connect-params";
+
+type Props = {
+  onContinue: () => void;
+  defaultCountryCodePromise: Promise<string>;
+  onSyncStarted?: (data: { runId: string; accessToken: string }) => void;
+};
+
+export function ConnectBankStep({
+  onContinue,
+  defaultCountryCodePromise,
+  onSyncStarted,
+}: Props) {
+  const countryCode = use(defaultCountryCodePromise);
+  const { step: connectStep, setParams } = useConnectParams();
+
+  const isSelectingAccounts = connectStep === "account";
+
+  const handleComplete = () => {
+    setParams(null);
+    onContinue();
+  };
+
+  const handleClose = () => {
+    setParams(null);
+  };
+
+  if (isSelectingAccounts) {
+    return (
+      <div>
+        <Suspense>
+          <SelectBankAccountsContent
+            enabled={true}
+            onClose={handleClose}
+            onComplete={handleComplete}
+            onSyncStarted={onSyncStarted}
+            stickySubmit={false}
+          />
+        </Suspense>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <motion.h1
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="text-lg lg:text-xl font-serif"
+      >
+        Connect your bank
+      </motion.h1>
+
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="text-sm text-[#878787] leading-relaxed"
+      >
+        Connect your bank account to automatically sync transactions and keep
+        your finances up to date.
+      </motion.p>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35, delay: 0.3 }}
+      >
+        <Suspense>
+          <BankSearchContent
+            enabled={true}
+            redirectPath="/onboarding?s=2"
+            listHeight="min-h-[355px] max-h-[calc(100vh-420px)]"
+            defaultCountryCode={countryCode}
+            fadeGradientClass="bg-gradient-to-t from-[#121212] to-transparent dark:from-[#0c0c0c]"
+          />
+        </Suspense>
+      </motion.div>
+    </div>
+  );
+}

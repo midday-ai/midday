@@ -94,12 +94,21 @@ app.openapi(
     const parsedState = decryptOAuthState(state);
     const source = parsedState?.source;
 
+    const redirectPath = parsedState?.redirectPath;
+
     // Handle OAuth errors (user denied access, etc.)
     if (error || !code) {
       const errorCode = mapOAuthError(error);
       logger.info("Gmail OAuth error or cancelled", { error, errorCode });
       return c.redirect(
-        buildErrorRedirect(dashboardUrl, errorCode, "gmail", source, "/inbox"),
+        buildErrorRedirect(
+          dashboardUrl,
+          errorCode,
+          "gmail",
+          source,
+          "/inbox",
+          redirectPath,
+        ),
         302,
       );
     }
@@ -127,6 +136,7 @@ app.openapi(
             "gmail",
             parsedState.source,
             "/inbox",
+            redirectPath,
           ),
           302,
         );
@@ -144,6 +154,7 @@ app.openapi(
           "gmail",
           parsedState.source,
           "/inbox",
+          redirectPath,
         ),
         302,
       );
@@ -160,6 +171,7 @@ app.openapi(
           "gmail",
           parsedState.source,
           "/inbox",
+          redirectPath,
         ),
         302,
       );

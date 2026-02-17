@@ -1,25 +1,46 @@
 "use client";
 
 import { Icons } from "@midday/ui/icons";
-import { motion } from "motion/react";
-import { useTheme } from "next-themes";
+import { motion } from "framer-motion";
 import type { ReactElement } from "react";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { type IconMap, MaterialIcon } from "./icon-mapping";
+import { useEffect, useRef, useState } from "react";
+import type { IconType } from "react-icons";
+import { MdOutlineReceipt, MdOutlineTrendingUp } from "react-icons/md";
 
-export function AssistantQuestionAnimation({
+const dynamicIconMap: Record<string, IconType> = {
+  trending_up: MdOutlineTrendingUp,
+  receipt: MdOutlineReceipt,
+};
+
+function DynamicIcon({
+  name,
+  className,
+  size,
+}: {
+  name: string;
+  className?: string;
+  size?: number;
+}) {
+  const Icon = dynamicIconMap[name];
+  return Icon ? <Icon className={className} size={size} /> : null;
+}
+
+export function AIAssistantAnimation({
   onComplete,
+  shouldPlay = true,
+  isLightMode = false,
 }: {
   onComplete?: () => void;
+  shouldPlay?: boolean;
+  isLightMode?: boolean;
 }) {
-  const { resolvedTheme } = useTheme();
-  const _isLightMode = resolvedTheme !== "dark";
+  const containerRef = useRef<HTMLDivElement>(null);
   const [showUserMessage, setShowUserMessage] = useState(false);
   const [displayedSegments, setDisplayedSegments] = useState<
     Array<{
       id: number;
       text: string;
+      textMobile?: string;
       isComplete: boolean;
       showCards?: boolean;
     }>
@@ -34,55 +55,57 @@ export function AssistantQuestionAnimation({
 
   const cards = [
     {
-      icon: "account_balance_wallet",
-      title: "Cash Balance",
-      value: "$24,500",
-      change: "+$3,200",
-      changeType: "positive" as const,
-      subtitle: "this month",
-    },
-    {
       icon: "trending_up",
-      title: "Runway",
-      value: "8.5 months",
-      change: "+1.2 months",
+      title: "Revenue",
+      value: "$4,200",
+      change: "+12%",
       changeType: "positive" as const,
-      subtitle: "vs last month",
+      subtitle: "vs last week",
     },
     {
-      icon: "receipt",
-      title: "Outstanding",
-      value: "$8,400",
-      change: "3 invoices",
-      changeType: "neutral" as const,
-      subtitle: "awaiting payment",
+      icon: "trending_down",
+      title: "Expenses",
+      value: "$1,800",
+      change: "-8%",
+      changeType: "positive" as const,
+      subtitle: "vs last week",
+    },
+    {
+      icon: "account_balance_wallet",
+      title: "Net Profit",
+      value: "$2,400",
+      change: "+28%",
+      changeType: "positive" as const,
+      subtitle: "vs last week",
     },
     {
       icon: "savings",
-      title: "Monthly Burn",
-      value: "$2,900",
-      change: "-$400",
+      title: "Cash Flow",
+      value: "+$1,200",
+      change: "+15%",
       changeType: "positive" as const,
-      subtitle: "vs last month",
+      subtitle: "this week",
     },
   ];
 
   const responseSegments = [
     {
       id: 1,
-      text: "# Cash Flow Analysis — October 2025\n\n## Current Status\n\nYour cash position is strong with $24,500 in the bank. Your runway has improved to 8.5 months, giving you solid financial stability. Monthly burn rate decreased by $400 compared to last month.",
+      text: "# Weekly Summary — September 8-14, 2025\n\n## Key Highlights\n\nHere's a quick snapshot of your most important metrics this week. Revenue is trending up while expenses are well-controlled, resulting in strong profitability and healthy cash flow.",
       toolCall: {
-        text: "Analyzing cash flow data",
-        icon: "account_balance_wallet",
+        text: "Analyzing financial data",
+        icon: "trending_up",
         duration: 2000,
       },
       showCards: true,
     },
     {
       id: 2,
-      text: "## Recommendations\n\nYou have $8,400 in outstanding invoices (3 invoices). Consider following up on payments older than 30 days to improve cash collection. Your reduced burn rate suggests good cost control—maintain this discipline to extend your runway further.",
+      text: "## Business Activity\n\nBusiness activity included 8 invoices sent (3 more than last week), 47 hours tracked across projects, $2,800 in forecasted revenue from tracked hours, 23 receipts automatically matched to transactions, and 4 bank transactions categorized automatically.\n\nKeep monitoring cash flow trends to maintain this positive momentum.",
+      textMobile:
+        "## Business Activity\n\nBusiness activity included 8 invoices sent (3 more than last week), 47 hours tracked across projects, $2,800 in forecasted revenue from tracked hours, 23 receipts automatically matched to transactions, and 4 bank transactions categorized automatically.",
       toolCall: {
-        text: "Reviewing payment status",
+        text: "Processing business metrics",
         icon: "receipt",
         duration: 1600,
       },
@@ -130,13 +153,6 @@ export function AssistantQuestionAnimation({
     return elements;
   };
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
-
   useEffect(() => {
     if (!shouldPlay) return;
 
@@ -166,6 +182,7 @@ export function AssistantQuestionAnimation({
               {
                 id: segment.id,
                 text: currentText,
+                textMobile: segment.textMobile,
                 isComplete: false,
                 showCards: segment.showCards,
               },
@@ -178,6 +195,7 @@ export function AssistantQuestionAnimation({
               {
                 id: segment.id,
                 text: segment.text,
+                textMobile: segment.textMobile,
                 isComplete: true,
                 showCards: segment.showCards,
               },
@@ -249,7 +267,7 @@ export function AssistantQuestionAnimation({
               }`}
             >
               <p className="text-[11px] md:text-[12px] text-right text-foreground">
-                How's my cash flow looking?
+                Show me weekly summary
               </p>
             </div>
           </div>
@@ -259,7 +277,7 @@ export function AssistantQuestionAnimation({
               <div className="flex justify-start">
                 <div className="flex flex-col max-w-full w-full">
                   <div className="text-[12px] leading-[16px]  animate-shimmer text-foreground">
-                    Analyzing cash flow and runway
+                    Processing invoices and time data
                   </div>
                 </div>
               </div>
@@ -273,7 +291,12 @@ export function AssistantQuestionAnimation({
                 <div className="flex justify-start">
                   <div className="flex flex-col max-w-full w-full">
                     <div className="prose prose-sm max-w-none">
-                      {renderMarkdown(segment.text)}
+                      <div className="hidden md:block">
+                        {renderMarkdown(segment.text)}
+                      </div>
+                      <div className="md:hidden">
+                        {renderMarkdown(segment.textMobile || segment.text)}
+                      </div>
                     </div>
                     {!segment.isComplete && (
                       <div className="flex items-center gap-0.5 mt-2 md:mt-3">
@@ -336,8 +359,8 @@ export function AssistantQuestionAnimation({
                   activeToolCall && (
                     <div className="flex justify-start mt-3 md:mt-4 animate-fade-in">
                       <div className="px-2 py-1 flex items-center gap-2 h-6 w-fit bg-secondary border border-border">
-                        <MaterialIcon
-                          name={activeToolCall.icon as keyof typeof IconMap}
+                        <DynamicIcon
+                          name={activeToolCall.icon}
                           className="text-muted-foreground"
                           size={12}
                         />

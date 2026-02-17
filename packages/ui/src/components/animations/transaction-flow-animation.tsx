@@ -1,9 +1,34 @@
 "use client";
 
-import { motion } from "motion/react";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { MaterialIcon } from "./icon-mapping";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import type { IconType } from "react-icons";
+import {
+  MdOutlineAccountBalance,
+  MdOutlineAccountBalanceWallet,
+  MdOutlineCreditCard,
+  MdOutlineSavings,
+} from "react-icons/md";
+
+const dynamicIconMap: Record<string, IconType> = {
+  account_balance: MdOutlineAccountBalance,
+  credit_card: MdOutlineCreditCard,
+  account_balance_wallet: MdOutlineAccountBalanceWallet,
+  savings: MdOutlineSavings,
+};
+
+function DynamicIcon({
+  name,
+  className,
+  size,
+}: {
+  name: string;
+  className?: string;
+  size?: number;
+}) {
+  const Icon = dynamicIconMap[name];
+  return Icon ? <Icon className={className} size={size} /> : null;
+}
 
 interface AccountNode {
   id: number;
@@ -26,9 +51,12 @@ interface Transaction {
 
 export function TransactionFlowAnimation({
   onComplete,
+  shouldPlay = true,
 }: {
   onComplete?: () => void;
+  shouldPlay?: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [showAccounts, setShowAccounts] = useState(false);
   const [showArrows, setShowArrows] = useState(false);
   const [showTransactions, setShowTransactions] = useState(false);
@@ -43,13 +71,11 @@ export function TransactionFlowAnimation({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Account nodes positioned horizontally at the top, centered
-  // Use responsive spacing that adapts via viewBox scaling
   const topY = isMobile ? 60 : 80;
   const nodeSpacing = 90;
   const viewBoxWidth = 500;
-  const totalNodesWidth = nodeSpacing * 3; // Distance from first to last node center
-  const startX = (viewBoxWidth - totalNodesWidth) / 2; // Center the group
+  const totalNodesWidth = nodeSpacing * 3;
+  const startX = (viewBoxWidth - totalNodesWidth) / 2;
 
   const accountNodes: AccountNode[] = [
     {
@@ -86,7 +112,6 @@ export function TransactionFlowAnimation({
     },
   ];
 
-  // Format amount helper
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat("sv-SE", {
       minimumFractionDigits: 2,
@@ -94,7 +119,6 @@ export function TransactionFlowAnimation({
     }).format(Math.abs(amount));
   };
 
-  // Unified transaction list in the center
   const transactions: Transaction[] = [
     {
       id: 1,
@@ -233,10 +257,6 @@ export function TransactionFlowAnimation({
     },
   ];
 
-  // Straight line paths from top accounts down to transaction list
-  // Lines go straight down from each account node to the table
-  // The SVG viewBox is 500x180 on mobile (taller viewBox with smaller container makes lines extend further)
-  // Lines end at the bottom of the viewBox to connect to table
   const transactionListTopY = isMobile ? 180 : 200;
   const viewBoxHeight = isMobile ? 180 : 200;
 
@@ -263,18 +283,9 @@ export function TransactionFlowAnimation({
     },
   ] as const;
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
-
-  // Start animation only when shouldPlay is true
   useEffect(() => {
     if (!shouldPlay) return;
 
-    // Sequence: accounts -> arrows -> transactions
     const accountsTimer = setTimeout(() => setShowAccounts(true), 0);
     const arrowsTimer = setTimeout(() => setShowArrows(true), 500);
     const transactionsTimer = setTimeout(() => setShowTransactions(true), 900);
@@ -315,7 +326,6 @@ export function TransactionFlowAnimation({
             preserveAspectRatio="xMidYMin meet"
             style={{ display: "block" }}
           >
-            {/* Account nodes horizontally at the top */}
             {accountNodes.map((node, _index) => (
               <g key={node.id}>
                 <rect
@@ -329,7 +339,6 @@ export function TransactionFlowAnimation({
                   strokeWidth={1}
                   opacity={showAccounts ? 1 : 0}
                 />
-                {/* Account icon inside the container */}
                 <foreignObject
                   x={node.x - 18}
                   y={node.y - 18}
@@ -355,20 +364,10 @@ export function TransactionFlowAnimation({
                         opacity: showAccounts ? 1 : 0,
                       }}
                     >
-                      <MaterialIcon
-                        name={
-                          node.icon as
-                            | "account_balance"
-                            | "account_balance_wallet"
-                            | "credit_card"
-                            | "savings"
-                        }
-                        size={18}
-                      />
+                      <DynamicIcon name={node.icon} size={18} />
                     </div>
                   </div>
                 </foreignObject>
-                {/* Account label - hidden on mobile to save space */}
                 <text
                   x={node.x}
                   y={node.y - 25}
@@ -383,13 +382,11 @@ export function TransactionFlowAnimation({
               </g>
             ))}
 
-            {/* Straight dashed lines flowing down to transaction list */}
             {arrowPaths.map((arrow, index) => {
               const pathId = `arrow-${arrow.id}`;
-              // Create a straight line path
               const pathD = `M ${arrow.from.x} ${arrow.from.y} L ${arrow.to.x} ${arrow.to.y}`;
-              const dashLength = 4; // Length of dash
-              const gapLength = 3; // Length of gap
+              const dashLength = 4;
+              const gapLength = 3;
               const totalDashLength = dashLength + gapLength;
 
               return (
@@ -406,10 +403,7 @@ export function TransactionFlowAnimation({
                     strokeDashoffset: showArrows ? [0, -totalDashLength] : 0,
                   }}
                   transition={{
-                    opacity: {
-                      duration: 0.3,
-                      delay: index * 0.15,
-                    },
+                    opacity: { duration: 0.3, delay: index * 0.15 },
                     strokeDashoffset: {
                       duration: 2,
                       repeat: Number.POSITIVE_INFINITY,
@@ -423,7 +417,7 @@ export function TransactionFlowAnimation({
           </svg>
         </div>
 
-        {/* Transaction list full width below - Midday table style */}
+        {/* Transaction list */}
         <div className="flex-1 min-h-0 overflow-hidden border border-border bg-background">
           <table
             className="w-full border-collapse"
@@ -461,12 +455,9 @@ export function TransactionFlowAnimation({
                   }}
                   className="h-[28px] md:h-[32px] border-b border-border bg-background hover:bg-secondary transition-colors"
                 >
-                  {/* Date */}
                   <td className="w-[60px] md:w-[70px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-muted-foreground border-r border-border">
                     {transaction.date}
                   </td>
-
-                  {/* Description */}
                   <td
                     className={`w-[140px] md:w-[160px] px-1.5 md:px-2 text-[10px] md:text-[11px] border-r border-border ${
                       transaction.amount > 0
@@ -478,8 +469,6 @@ export function TransactionFlowAnimation({
                       {transaction.description}
                     </div>
                   </td>
-
-                  {/* Amount */}
                   <td
                     className={`w-[90px] md:w-[100px] px-1.5 md:px-2 text-[10px] md:text-[11px] border-r border-border ${
                       transaction.amount > 0
@@ -490,8 +479,6 @@ export function TransactionFlowAnimation({
                     {transaction.amount > 0 ? "+" : "-"}
                     {formatAmount(transaction.amount)} kr
                   </td>
-
-                  {/* Category */}
                   <td className="w-[110px] md:w-[120px] px-1.5 md:px-2">
                     <div className="flex items-center gap-1 md:gap-1.5">
                       <div

@@ -8,9 +8,10 @@ import { BankConnectButton } from "./bank-connect-button";
 type Props = {
   id: string;
   onSelect: (id: string) => void;
+  connectRef?: React.MutableRefObject<(() => void) | null>;
 };
 
-export function TellerConnect({ id, onSelect }: Props) {
+export function TellerConnect({ id, onSelect, connectRef }: Props) {
   const [institution, setInstitution] = useState<string | undefined>();
   const { setParams } = useConnectParams();
   const { theme } = useTheme();
@@ -65,6 +66,7 @@ export function TellerConnect({ id, onSelect }: Props) {
 
   return (
     <BankConnectButton
+      connectRef={connectRef}
       onClick={() => {
         onSelect(id);
         setInstitution(id);

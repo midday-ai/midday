@@ -1,0 +1,374 @@
+"use client";
+
+import { BulkReconciliationAnimation } from "@midday/ui/animations/bulk-reconciliation";
+import { ReceiptAttachmentAnimation } from "@midday/ui/animations/receipt-attachment";
+import { WidgetsAnimation } from "@midday/ui/animations/widgets";
+import { Icons } from "@midday/ui/icons";
+import { useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { parseAsString, useQueryStates } from "nuqs";
+import type { ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useOnboardingStep } from "@/hooks/use-onboarding-step";
+import { useTRPC } from "@/trpc/client";
+import {
+  type BankSyncState,
+  type InboxSyncState,
+  OnboardingSyncStatus,
+} from "./onboarding-sync-status";
+import { ConnectBankStep } from "./steps/connect-bank-step";
+import { ConnectInboxStep } from "./steps/connect-inbox-step";
+import { CreateTeamStep } from "./steps/create-team-step";
+import { ReconciliationStep } from "./steps/reconciliation-step";
+import { StartTrialStep } from "./steps/start-trial-step";
+
+type StepConfig = {
+  key: string;
+  animation: ReactNode;
+  content: ReactNode;
+  overlay?: boolean;
+  navigation: "none" | "skip" | "next" | "finish";
+  canGoBack?: boolean;
+};
+
+function DashboardImageAnimation() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="flex items-center justify-center overflow-visible"
+      style={{ width: "100%", height: "100%", transformOrigin: "center" }}
+    >
+      <Image
+        src="https://cdn.midday.ai/web/dashboard-light.svg"
+        alt="Dashboard illustration"
+        width={2400}
+        height={1800}
+        className="h-auto transform -rotate-[2deg] dark:hidden"
+        style={{ width: "140%", minWidth: "1400px" }}
+        priority
+      />
+      <Image
+        src="https://cdn.midday.ai/web/dashboard-dark.svg"
+        alt="Dashboard illustration"
+        width={2400}
+        height={1800}
+        className="h-auto transform -rotate-[2deg] hidden dark:block"
+        style={{ width: "140%", minWidth: "1400px" }}
+        priority
+      />
+    </motion.div>
+  );
+}
+
+function GradientOverlay() {
+  return (
+    <div
+      className="absolute inset-0 pointer-events-none z-[15]"
+      style={{
+        background:
+          "linear-gradient(to right, transparent 0%, transparent 50%, rgba(8, 8, 8, 0.2) 70%, rgba(8, 8, 8, 0.5) 85%, rgba(8, 8, 8, 0.8) 100%)",
+      }}
+    />
+  );
+}
+
+type Props = {
+  defaultCurrencyPromise: Promise<string>;
+  defaultCountryCodePromise: Promise<string>;
+  user: {
+    id: string;
+    fullName: string | null;
+    teamId: string | null;
+  };
+};
+
+function ProgressBar({
+  currentStep,
+  totalSteps,
+}: {
+  currentStep: number;
+  totalSteps: number;
+}) {
+  if (currentStep >= totalSteps) return null;
+
+  return (
+    <div className="flex justify-center">
+      <motion.div
+        layoutId="progress-bar-container"
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="w-32 h-1.5 bg-[#2C2C2C] border border-[#2C2C2C] overflow-hidden"
+      >
+        <motion.div
+          layoutId="progress-bar-fill"
+          initial={{ width: 0 }}
+          animate={{
+            width: `${(currentStep / totalSteps) * 100}%`,
+          }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="h-full bg-white"
+        />
+      </motion.div>
+    </div>
+  );
+}
+
+const NAV_LABELS: Record<StepConfig["navigation"], string | null> = {
+  none: null,
+  skip: "Skip",
+  next: "Next",
+  finish: null,
+};
+
+export function OnboardingPage({
+  defaultCurrencyPromise,
+  defaultCountryCodePromise,
+  user,
+}: Props) {
+  const [hasTeam, setHasTeam] = useState(!!user.teamId);
+  const [bankSync, setBankSync] = useState<BankSyncState>(null);
+  const [inboxSync, setInboxSync] = useState<InboxSyncState>(null);
+  const [syncVisible, setSyncVisible] = useState(false);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const [connectionParams, setConnectionParams] = useQueryStates({
+    connected: parseAsString,
+    provider: parseAsString,
+    debug_sync: parseAsString,
+  });
+
+  const { step, nextStep, prevStep, totalSteps } = useOnboardingStep({
+    hasTeam,
+  });
+
+  useEffect(() => {
+    if (
+      connectionParams.connected === "true" &&
+      connectionParams.provider &&
+      !inboxSync
+    ) {
+      setInboxSync({ provider: connectionParams.provider });
+      setConnectionParams({ connected: null, provider: null });
+    }
+  }, [connectionParams, inboxSync, setConnectionParams]);
+
+  useEffect(() => {
+    if (connectionParams.debug_sync === "true") {
+      setBankSync({ runId: "debug", accessToken: "debug" });
+      setInboxSync({ provider: "gmail" });
+      setConnectionParams({ debug_sync: null });
+    }
+  }, [connectionParams.debug_sync, setConnectionParams]);
+
+  const handleCountryChange = useCallback(
+    (countryCode: string) => {
+      queryClient.prefetchQuery(
+        trpc.institutions.get.queryOptions({
+          q: "",
+          countryCode,
+        }),
+      );
+    },
+    [queryClient, trpc],
+  );
+
+  const handleTeamCreated = useCallback(() => {
+    setHasTeam(true);
+    nextStep();
+  }, [nextStep]);
+
+  const handleBankSyncStarted = useCallback(
+    (data: { runId: string; accessToken: string }) => {
+      setBankSync(data);
+    },
+    [],
+  );
+
+  const steps: StepConfig[] = useMemo(
+    () => [
+      {
+        key: "create-team",
+        animation: <DashboardImageAnimation />,
+        content: (
+          <CreateTeamStep
+            defaultCurrencyPromise={defaultCurrencyPromise}
+            defaultCountryCodePromise={defaultCountryCodePromise}
+            showFullName={!user.fullName}
+            onComplete={handleTeamCreated}
+            onCountryChange={handleCountryChange}
+          />
+        ),
+        overlay: true,
+        navigation: "none",
+      },
+      {
+        key: "connect-bank",
+        animation: <WidgetsAnimation />,
+        content: (
+          <ConnectBankStep
+            onContinue={nextStep}
+            defaultCountryCodePromise={defaultCountryCodePromise}
+            onSyncStarted={handleBankSyncStarted}
+          />
+        ),
+        navigation: "skip",
+      },
+      {
+        key: "connect-inbox",
+        animation: <ReceiptAttachmentAnimation />,
+        content: <ConnectInboxStep onContinue={nextStep} />,
+        navigation: "skip",
+        canGoBack: true,
+      },
+      {
+        key: "reconciliation",
+        animation: <BulkReconciliationAnimation />,
+        content: <ReconciliationStep onContinue={nextStep} />,
+        navigation: "next",
+        canGoBack: true,
+      },
+      {
+        key: "start-trial",
+        animation: <DashboardImageAnimation />,
+        content: <StartTrialStep />,
+        overlay: true,
+        navigation: "finish",
+        canGoBack: true,
+      },
+    ],
+    [
+      defaultCurrencyPromise,
+      defaultCountryCodePromise,
+      user.fullName,
+      handleTeamCreated,
+      handleCountryChange,
+      handleBankSyncStarted,
+      nextStep,
+    ],
+  );
+
+  const currentStep = steps[step - 1];
+  if (!currentStep) return null;
+
+  const navLabel = NAV_LABELS[currentStep.navigation];
+
+  return (
+    <div className="h-screen overflow-hidden flex relative">
+      <nav className="fixed top-0 left-0 right-0 z-50 w-full pointer-events-none">
+        <div className="relative py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center">
+          <Link
+            href="/"
+            className="flex items-center gap-2 hover:opacity-80 active:opacity-80 transition-opacity duration-200 pointer-events-auto"
+          >
+            <div className="w-6 h-6">
+              <Icons.LogoSmall className="w-full h-full text-foreground" />
+            </div>
+          </Link>
+        </div>
+      </nav>
+
+      {/* Left Side - Animation */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background dark:bg-[#080808] items-center justify-center p-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep.key}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+            className="w-full h-full max-w-[500px] max-h-[700px]"
+          >
+            {currentStep.animation}
+          </motion.div>
+        </AnimatePresence>
+
+        {currentStep.overlay && <GradientOverlay />}
+      </div>
+
+      {/* Right Side - Onboarding content */}
+      <div className="w-full lg:w-1/2 flex flex-col items-center p-8 lg:p-12 pt-20 bg-[#121212] dark:bg-[#0c0c0c] text-white">
+        <div className="w-full max-w-md flex flex-col h-full relative">
+          <div className="relative h-8 mb-4">
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <OnboardingSyncStatus
+                bankSync={bankSync}
+                inboxSync={inboxSync}
+                onVisibilityChange={setSyncVisible}
+              />
+            </div>
+            {!syncVisible && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <ProgressBar currentStep={step} totalSteps={totalSteps} />
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 flex flex-col justify-center pt-20 min-h-0">
+            <motion.div
+              layout
+              transition={{ layout: { duration: 0.3, ease: "easeInOut" } }}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={step}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    opacity: { duration: 0.2 },
+                    layout: { duration: 0.3, ease: "easeInOut" },
+                  }}
+                >
+                  {currentStep.content}
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          </div>
+
+          {/* Navigation Buttons - Bottom */}
+          {currentStep.navigation !== "none" && (
+            <div className="flex items-center justify-between mt-auto pt-8">
+              <div>
+                {currentStep.canGoBack && (
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    className="px-4 py-2 bg-[#1A1A1A] border border-[#2C2C2C] text-white text-sm hover:bg-[#2C2C2C] transition-colors"
+                  >
+                    Previous
+                  </button>
+                )}
+              </div>
+
+              <div>
+                {navLabel && (
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="px-4 py-2 bg-[#1A1A1A] border border-[#2C2C2C] text-white text-sm hover:bg-[#2C2C2C] transition-colors"
+                  >
+                    {navLabel}
+                  </button>
+                )}
+                {currentStep.navigation === "finish" && (
+                  <Link
+                    href="/"
+                    prefetch
+                    className="px-4 py-2 bg-white text-[#121212] font-medium text-sm hover:bg-white/90 transition-colors border border-white"
+                  >
+                    Get started
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

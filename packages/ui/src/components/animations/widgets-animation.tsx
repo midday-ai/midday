@@ -1,9 +1,34 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { type IconMap, MaterialIcon } from "./icon-mapping";
+import type { IconType } from "react-icons";
+import {
+  MdOutlineAccountBalance,
+  MdOutlineDescription,
+  MdOutlineTimer,
+  MdOutlineTrendingUp,
+} from "react-icons/md";
+
+const dynamicIconMap: Record<string, IconType> = {
+  timer: MdOutlineTimer,
+  account_balance: MdOutlineAccountBalance,
+  trending_up: MdOutlineTrendingUp,
+  description: MdOutlineDescription,
+};
+
+function DynamicIcon({
+  name,
+  className,
+  size,
+}: {
+  name: string;
+  className?: string;
+  size?: number;
+}) {
+  const Icon = dynamicIconMap[name];
+  return Icon ? <Icon className={className} size={size} /> : null;
+}
 
 interface Widget {
   id: string;
@@ -72,7 +97,14 @@ const widgets: Widget[] = [
   },
 ];
 
-export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
+export function WidgetsAnimation({
+  onComplete,
+  shouldPlay = true,
+}: {
+  onComplete?: () => void;
+  shouldPlay?: boolean;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [showWidgets, setShowWidgets] = useState(false);
   const [isWiggling, setIsWiggling] = useState(false);
   const [cardOrder, setCardOrder] = useState<string[]>(
@@ -87,7 +119,6 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
     timeoutRefs.current = [];
   };
 
-  // Simple shuffle function to rearrange cards
   const shuffleArray = <T,>(array: T[]): T[] => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -99,13 +130,6 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
     return shuffled;
   };
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
-
   useEffect(() => {
     if (!shouldPlay) return;
 
@@ -116,17 +140,14 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
     const timer = setTimeout(() => setShowWidgets(true), 0);
     timeoutRefs.current.push(timer);
 
-    // Start wiggling after cards appear
     const wiggleTimer = setTimeout(() => {
       setIsWiggling(true);
     }, 800);
     timeoutRefs.current.push(wiggleTimer);
 
-    // Shuffle cards while wiggling
     const shuffleTimer = setTimeout(() => {
       setCardOrder(shuffleArray(initialOrder));
 
-      // Stop wiggling after shuffle completes
       const stopTimer = setTimeout(() => {
         setIsWiggling(false);
       }, 600);
@@ -148,15 +169,13 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
   }, [shouldPlay, onComplete]);
 
   const renderBarChart = () => {
-    // Vertical bar chart for Profit & Loss - pairs of bars
-    // Each pair: [dark gray height, white height]
     const barPairs = [
-      [16, 29], // Medium dark, tall white
-      [36, 29], // Tall dark, tall white
-      [16, 29], // Medium dark, tall white
-      [36, 10], // Tall dark, short white
-      [16, 29], // Medium dark, tall white
-      [16, 10], // Medium dark, short white
+      [16, 29],
+      [36, 29],
+      [16, 29],
+      [36, 10],
+      [16, 29],
+      [16, 10],
     ];
 
     return (
@@ -166,7 +185,6 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
             key={`bar-pair-${pair[0]}-${pair[1]}-${pairIdx}`}
             className="flex gap-1.5 md:gap-2 items-end justify-center flex-1"
           >
-            {/* Dark gray bar */}
             <motion.div
               className="bg-muted-foreground w-1.5 md:w-2"
               style={{ height: `${pair[0]}px` }}
@@ -174,7 +192,6 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
               animate={{ height: showWidgets ? `${pair[0]}px` : 0 }}
               transition={{ duration: 0.3, delay: pairIdx * 0.05 }}
             />
-            {/* White bar */}
             <motion.div
               className="bg-foreground w-1.5 md:w-2"
               style={{ height: `${pair[1]}px` }}
@@ -189,7 +206,6 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
   };
 
   const renderLineChart = () => {
-    // Line chart for Forecast
     return (
       <div className="h-[60px] md:h-[80px] w-full mt-2 md:mt-3 relative">
         <svg
@@ -230,11 +246,9 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
             transition={{ duration: 0.3, delay: idx * 0.1 }}
             className="flex items-center gap-2 md:gap-3"
           >
-            {/* Label on the left */}
             <span className="text-[10px] md:text-[12px] text-foreground whitespace-nowrap shrink-0">
               {expense.name}
             </span>
-            {/* Bar in the middle */}
             <div className="flex-1 h-1.5 md:h-2 bg-muted/20 relative overflow-hidden min-w-0">
               <motion.div
                 className={`h-full ${
@@ -249,7 +263,6 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
                 transition={{ duration: 0.4, delay: idx * 0.1 + 0.2 }}
               />
             </div>
-            {/* Value on the right */}
             <span className="text-[10px] md:text-[12px] text-foreground whitespace-nowrap shrink-0">
               {expense.value}
             </span>
@@ -264,7 +277,7 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
       ref={containerRef}
       className="w-full h-full flex flex-col relative bg-background p-2 md:p-3"
     >
-      {/* Widget Grid - 3 rows, 2 columns */}
+      {/* Widget Grid */}
       <div className="flex-1 grid grid-cols-2 gap-4 md:gap-5 relative auto-rows-fr">
         {cardOrder.map((widgetId, _displayIdx) => {
           const widget = widgets.find((w) => w.id === widgetId)!;
@@ -303,8 +316,8 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
             >
               {/* Title with icon */}
               <div className="flex items-center gap-1 md:gap-1.5 mb-1 md:mb-2">
-                <MaterialIcon
-                  name={widget.icon as keyof typeof IconMap}
+                <DynamicIcon
+                  name={widget.icon}
                   className="text-muted-foreground w-[10px] h-[10px] md:w-[14px] md:h-[14px]"
                   size={14}
                 />
@@ -335,7 +348,6 @@ export function WidgetsAnimation({ onComplete }: { onComplete?: () => void }) {
                     {widget.content
                       .split(/(\d+|\d+ [\d,]+ kr)/)
                       .map((part, idx) => {
-                        // Highlight numbers
                         if (
                           part.match(/^\d+/) ||
                           part.match(/^\d+ [\d,]+ kr/)

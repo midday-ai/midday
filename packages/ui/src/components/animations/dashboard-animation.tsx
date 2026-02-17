@@ -1,14 +1,16 @@
 "use client";
 
-import { motion } from "motion/react";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 export function DashboardAnimation({
   onComplete,
+  shouldPlay = true,
 }: {
   onComplete?: () => void;
+  shouldPlay?: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [showWidgets, setShowWidgets] = useState(false);
   const [showChart, setShowChart] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
@@ -17,21 +19,11 @@ export function DashboardAnimation({
     0, 0, 0, 0, 0,
   ]);
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-      // Animation will start via useEffect below
-    },
-    { threshold: 0.5 },
-  );
-
-  // Start animation only when shouldPlay is true
   useEffect(() => {
     if (!shouldPlay) return;
 
     const timer = setTimeout(() => setShowWidgets(true), 0);
 
-    // Call onComplete after animation duration
     const doneTimer = onComplete
       ? setTimeout(() => {
           onComplete();
@@ -44,7 +36,6 @@ export function DashboardAnimation({
     };
   }, [shouldPlay, onComplete]);
 
-  // Sequential reveal
   useEffect(() => {
     if (showWidgets) {
       const chartTimer = setTimeout(() => setShowChart(true), 0);
@@ -58,7 +49,6 @@ export function DashboardAnimation({
     }
   }, [showWidgets]);
 
-  // Category data
   const categoryData = [
     { name: "Marketing", value: 2100, color: "hsl(var(--foreground))" },
     {
@@ -89,12 +79,10 @@ export function DashboardAnimation({
 
   const total = categoryData.reduce((sum, item) => sum + item.value, 0);
 
-  // Animate chart progress - sequential, one segment after another (faster)
   useEffect(() => {
     if (showChart) {
       setSegmentProgress([0, 0, 0, 0, 0]);
-      // Animate each segment sequentially - fast
-      const segmentDuration = 0.18; // Fast duration (180ms per segment)
+      const segmentDuration = 0.18;
       const timeouts: NodeJS.Timeout[] = [];
       categoryData.forEach((_, index) => {
         const timeout = setTimeout(
@@ -116,7 +104,6 @@ export function DashboardAnimation({
     setSegmentProgress([0, 0, 0, 0, 0]);
   }, [showChart]);
 
-  // Render pie chart as SVG
   const renderPieChart = () => {
     const size = 200;
     const centerX = size / 2;
@@ -124,7 +111,7 @@ export function DashboardAnimation({
     const innerRadius = 60;
     const outerRadius = 90;
 
-    let currentAngle = -90; // Start from top
+    let currentAngle = -90;
 
     return (
       <div className="w-full h-full flex items-center justify-center relative">
@@ -139,37 +126,31 @@ export function DashboardAnimation({
             const angle = (percentage / 100) * 360;
             const startAngle = currentAngle;
 
-            // Use individual segment progress for sequential animation
             const progress = segmentProgress[index] || 0;
             const animatedAngle = angle * progress;
             const endAngle = currentAngle + animatedAngle;
 
-            // Convert angles to radians
             const startAngleRad = (startAngle * Math.PI) / 180;
             const endAngleRad = (endAngle * Math.PI) / 180;
 
-            // Calculate start and end points for outer arc
             const x1 = centerX + outerRadius * Math.cos(startAngleRad);
             const y1 = centerY + outerRadius * Math.sin(startAngleRad);
             const x2 = centerX + outerRadius * Math.cos(endAngleRad);
             const y2 = centerY + outerRadius * Math.sin(endAngleRad);
 
-            // Calculate start and end points for inner arc
             const x3 = centerX + innerRadius * Math.cos(endAngleRad);
             const y3 = centerY + innerRadius * Math.sin(endAngleRad);
             const x4 = centerX + innerRadius * Math.cos(startAngleRad);
             const y4 = centerY + innerRadius * Math.sin(startAngleRad);
 
-            // Large arc flag (1 if angle > 180, 0 otherwise)
             const largeArcFlag = animatedAngle > 180 ? 1 : 0;
 
-            // Create path for segment
             const pathData = [
-              `M ${x1} ${y1}`, // Move to outer start point
-              `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${x2} ${y2}`, // Outer arc
-              `L ${x3} ${y3}`, // Line to inner end point
-              `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${x4} ${y4}`, // Inner arc
-              "Z", // Close path
+              `M ${x1} ${y1}`,
+              `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+              `L ${x3} ${y3}`,
+              `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${x4} ${y4}`,
+              "Z",
             ].join(" ");
 
             currentAngle += angle;
@@ -194,7 +175,6 @@ export function DashboardAnimation({
             );
           })}
         </svg>
-        {/* Center text */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
             <div className="text-[18px] md:text-[24px] font-normal font-serif text-foreground">
@@ -223,7 +203,6 @@ export function DashboardAnimation({
 
       <div className="flex-1 p-2 md:p-3 overflow-hidden">
         <div className="flex flex-col gap-4 pt-2">
-          {/* Chart Section */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: showChart ? 1 : 0, y: showChart ? 0 : 12 }}
@@ -259,7 +238,6 @@ export function DashboardAnimation({
             </div>
           </motion.div>
 
-          {/* Metrics Grid */}
           {showMetrics && (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
@@ -314,7 +292,6 @@ export function DashboardAnimation({
             </motion.div>
           )}
 
-          {/* Summary Section */}
           {showSummary && (
             <motion.div
               initial={{ opacity: 0, y: 12 }}

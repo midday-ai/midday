@@ -1,24 +1,22 @@
 "use client";
 
-import { motion } from "motion/react";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { MaterialIcon } from "./icon-mapping";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { MdOutlineFilterList, MdSearch } from "react-icons/md";
 
-export function FileGridAnimation({ onComplete }: { onComplete?: () => void }) {
-  const { resolvedTheme } = useTheme();
-  const _isLightMode = resolvedTheme !== "dark";
+export function FileGridAnimation({
+  onComplete,
+  shouldPlay = true,
+  isLightMode = false,
+}: {
+  onComplete?: () => void;
+  shouldPlay?: boolean;
+  isLightMode?: boolean;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [firstCardLoaded, setFirstCardLoaded] = useState(false);
   const [showCards, setShowCards] = useState(false);
-
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
 
   useEffect(() => {
     if (!shouldPlay) return;
@@ -116,8 +114,7 @@ export function FileGridAnimation({ onComplete }: { onComplete?: () => void }) {
               type="button"
               className="w-6 h-6 flex items-center justify-center hover:bg-muted transition-colors"
             >
-              <MaterialIcon
-                name="filter_list"
+              <MdOutlineFilterList
                 className="text-sm text-muted-foreground"
                 size={16}
               />
@@ -133,8 +130,7 @@ export function FileGridAnimation({ onComplete }: { onComplete?: () => void }) {
               placeholder="Search files..."
               className="w-full bg-background border border-border px-2 md:px-3 py-1.5 md:py-2 text-[11px] md:text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border/50 rounded-none pr-7 md:pr-8"
             />
-            <MaterialIcon
-              name="search"
+            <MdSearch
               className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
               size={14}
             />

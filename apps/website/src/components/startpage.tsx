@@ -8,23 +8,25 @@ import { useEffect, useRef, useState } from "react";
 
 // Dynamic imports for animations (5,500+ lines - loaded after hero)
 const AIAssistantAnimation = dynamic(() =>
-  import("./homepage/ai-assistant-animation").then(
+  import("@midday/ui/animations/ai-assistant").then(
     (m) => m.AIAssistantAnimation,
   ),
 );
 const DashboardAnimation = dynamic(() =>
-  import("./homepage/dashboard-animation").then((m) => m.DashboardAnimation),
+  import("@midday/ui/animations/dashboard").then((m) => m.DashboardAnimation),
 );
 const InboxMatchAnimation = dynamic(() =>
-  import("./homepage/inbox-match-animation").then((m) => m.InboxMatchAnimation),
+  import("@midday/ui/animations/inbox-match").then(
+    (m) => m.InboxMatchAnimation,
+  ),
 );
 const InvoicePaymentAnimation = dynamic(() =>
-  import("./homepage/invoice-payment-animation").then(
+  import("@midday/ui/animations/invoice-payment").then(
     (m) => m.InvoicePaymentAnimation,
   ),
 );
 const TransactionFlowAnimation = dynamic(() =>
-  import("./homepage/transaction-flow-animation").then(
+  import("@midday/ui/animations/transaction-flow").then(
     (m) => m.TransactionFlowAnimation,
   ),
 );

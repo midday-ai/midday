@@ -17,14 +17,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/", origin));
   }
 
-  const [type, method, sessionId] = state?.split(":") ?? [];
+  const stateParts = state?.split(":") ?? [];
+  const [type, method] = stateParts;
+  // The third segment is either a sessionId (for reconnect) or an encoded redirectPath (for connect)
+  const thirdSegment = stateParts[2];
 
   const isDesktop = type === "desktop";
   const scheme = process.env.NEXT_PUBLIC_DESKTOP_SCHEME || "midday";
   const redirectBase = isDesktop ? `${scheme}://` : origin;
 
   if (!code) {
-    return NextResponse.redirect(new URL("/?error=missing_code", redirectBase));
+    // User cancelled auth — redirect back to the original page (e.g. onboarding)
+    const cancelRedirectPath =
+      method === "connect" && thirdSegment
+        ? decodeURIComponent(thirdSegment)
+        : "/";
+    return NextResponse.redirect(new URL(cancelRedirectPath, redirectBase));
   }
 
   const trpc = await getTRPCClient();
@@ -43,13 +51,19 @@ export async function GET(request: NextRequest) {
   const exchangeExpiresAt = sessionData.data.expires_at;
 
   if (method === "connect" && exchangeSessionId) {
+    const customRedirectPath = thirdSegment
+      ? decodeURIComponent(thirdSegment)
+      : "/";
+    const separator = customRedirectPath.includes("?") ? "&" : "?";
     return NextResponse.redirect(
       new URL(
-        `/?ref=${exchangeSessionId}&provider=enablebanking&step=account`,
+        `${customRedirectPath}${separator}ref=${exchangeSessionId}&provider=enablebanking&step=account`,
         redirectBase,
       ),
     );
   }
+
+  const sessionId = thirdSegment;
 
   if (
     method === "reconnect" &&

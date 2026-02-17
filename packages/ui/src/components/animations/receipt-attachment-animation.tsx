@@ -1,33 +1,28 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { MaterialIcon } from "./icon-mapping";
+import { useEffect, useRef, useState } from "react";
+import { MdCheck, MdDeleteOutline, MdOutlineMoreVert } from "react-icons/md";
 
-export function ReceiptAttachmentAnimation() {
+export function ReceiptAttachmentAnimation({
+  shouldPlay = true,
+}: {
+  shouldPlay?: boolean;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [showReceipt, setShowReceipt] = useState(false);
   const [showLogo, setShowLogo] = useState(false);
   const [showBar, setShowBar] = useState(false);
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
-
   useEffect(() => {
     if (!shouldPlay) return;
 
-    // Show receipt immediately
     const receiptTimer = setTimeout(() => {
       setShowReceipt(true);
       setShowLogo(true);
     }, 0);
 
-    // Show bar after receipt is shown
     const barTimer = setTimeout(() => {
       setShowBar(true);
     }, 1500);
@@ -56,11 +51,7 @@ export function ReceiptAttachmentAnimation() {
             {/* Header */}
             <div className="flex items-center justify-between px-2 md:px-3 py-1.5 md:py-2 border-b border-border">
               <div className="flex items-center gap-1.5">
-                <MaterialIcon
-                  name="delete"
-                  className="text-muted-foreground"
-                  size={14}
-                />
+                <MdDeleteOutline className="text-muted-foreground" size={14} />
               </div>
               <div className="flex items-center gap-2">
                 <Image
@@ -70,8 +61,7 @@ export function ReceiptAttachmentAnimation() {
                   height={14}
                   className="object-contain w-3 h-3 md:w-3.5 md:h-3.5"
                 />
-                <MaterialIcon
-                  name="more_vert"
+                <MdOutlineMoreVert
                   className="text-muted-foreground"
                   size={14}
                 />
@@ -249,11 +239,7 @@ export function ReceiptAttachmentAnimation() {
                 <span className="font-sans text-[10px] md:text-[11px]">
                   Confirm
                 </span>
-                <MaterialIcon
-                  name="check"
-                  className="text-primary-foreground"
-                  size={14}
-                />
+                <MdCheck className="text-primary-foreground" size={14} />
               </button>
             </div>
           </motion.div>

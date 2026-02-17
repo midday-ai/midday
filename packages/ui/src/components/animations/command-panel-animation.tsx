@@ -1,16 +1,28 @@
 "use client";
 
 import { Icons } from "@midday/ui/icons";
-import { motion } from "motion/react";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { MaterialIcon } from "./icon-mapping";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import {
+  MdOutlineArrowDownward,
+  MdOutlineArrowOutward,
+  MdOutlineArrowUpward,
+  MdOutlineDescription,
+  MdOutlineListAlt,
+  MdOutlinePictureAsPdf,
+  MdOutlineReceipt,
+  MdOutlineSubdirectoryArrowLeft,
+  MdSearch,
+} from "react-icons/md";
 
 export function CommandPanelAnimation({
   onComplete,
+  shouldPlay = true,
 }: {
   onComplete?: () => void;
+  shouldPlay?: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [_searchQuery, _setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [showTransaction, setShowTransaction] = useState(false);
@@ -77,17 +89,9 @@ export function CommandPanelAnimation({
     },
   ];
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
-
   useEffect(() => {
     if (!shouldPlay) return;
 
-    // Start typing the search query
     let charIndex = 0;
     const typingInterval = setInterval(() => {
       if (charIndex < transactionSearch.length) {
@@ -95,7 +99,6 @@ export function CommandPanelAnimation({
         charIndex++;
       } else {
         clearInterval(typingInterval);
-        // After typing completes, show results with staggered timing
         setTimeout(() => {
           setShowResults(true);
           setTimeout(() => {
@@ -143,8 +146,7 @@ export function CommandPanelAnimation({
               placeholder="Type a command or search..."
               className="w-full bg-background px-2 md:px-3 py-1 md:py-1.5 text-[11px] md:text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none rounded-none pr-7 md:pr-8"
             />
-            <MaterialIcon
-              name="search"
+            <MdSearch
               className="absolute right-2 md:right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
               size={14}
             />
@@ -172,8 +174,7 @@ export function CommandPanelAnimation({
                     transition={{ duration: 0.3, delay: 0.08, ease: "easeOut" }}
                     className="flex items-center gap-2 md:gap-3 pr-2 md:pr-3 py-1 md:py-1.5 cursor-pointer hover:bg-muted transition-colors"
                   >
-                    <MaterialIcon
-                      name="list_alt"
+                    <MdOutlineListAlt
                       className="text-muted-foreground flex-shrink-0"
                       size={16}
                     />
@@ -210,8 +211,7 @@ export function CommandPanelAnimation({
                         }}
                         className="flex items-center gap-2 md:gap-3 pr-2 md:pr-3 py-1 md:py-1.5 cursor-pointer hover:bg-muted transition-colors"
                       >
-                        <MaterialIcon
-                          name="docs"
+                        <MdOutlineDescription
                           className="text-muted-foreground flex-shrink-0"
                           size={16}
                         />
@@ -250,8 +250,7 @@ export function CommandPanelAnimation({
                         }}
                         className="flex items-center gap-2 md:gap-3 pr-2 md:pr-3 py-1 md:py-1.5 cursor-pointer hover:bg-muted transition-colors"
                       >
-                        <MaterialIcon
-                          name="receipt"
+                        <MdOutlineReceipt
                           className="text-muted-foreground flex-shrink-0"
                           size={16}
                         />
@@ -290,8 +289,7 @@ export function CommandPanelAnimation({
                         }}
                         className="flex items-center gap-2 md:gap-3 pr-2 md:pr-3 py-1 md:py-1.5 cursor-pointer hover:bg-muted transition-colors"
                       >
-                        <MaterialIcon
-                          name="pdf"
+                        <MdOutlinePictureAsPdf
                           className="text-muted-foreground flex-shrink-0"
                           size={16}
                         />
@@ -310,8 +308,7 @@ export function CommandPanelAnimation({
                     className="flex items-center gap-1 pr-2 md:pr-3 py-1 md:py-1.5 mt-2 text-[11px] md:text-[12px] text-muted-foreground hover:text-foreground cursor-pointer hover:bg-muted transition-colors"
                   >
                     <span>View vault</span>
-                    <MaterialIcon
-                      name="arrow_outward"
+                    <MdOutlineArrowOutward
                       className="text-muted-foreground"
                       size={12}
                     />
@@ -337,8 +334,7 @@ export function CommandPanelAnimation({
               type="button"
               className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
             >
-              <MaterialIcon
-                name="arrow_upward"
+              <MdOutlineArrowUpward
                 className="text-muted-foreground"
                 size={12}
               />
@@ -347,8 +343,7 @@ export function CommandPanelAnimation({
               type="button"
               className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
             >
-              <MaterialIcon
-                name="arrow_downward"
+              <MdOutlineArrowDownward
                 className="text-muted-foreground"
                 size={12}
               />
@@ -357,8 +352,7 @@ export function CommandPanelAnimation({
               type="button"
               className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
             >
-              <MaterialIcon
-                name="subdirectory_arrow_left"
+              <MdOutlineSubdirectoryArrowLeft
                 className="text-muted-foreground"
                 size={12}
               />

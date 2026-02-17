@@ -1,15 +1,17 @@
 "use client";
 
-import { motion } from "motion/react";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { MaterialIcon } from "./icon-mapping";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { MdOutlineOpenInNew } from "react-icons/md";
 
 export function InvoicePromptAnimation({
   onComplete,
+  shouldPlay = true,
 }: {
   onComplete?: () => void;
+  shouldPlay?: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [showUserMessage, setShowUserMessage] = useState(false);
   const [showInvoice, setShowInvoice] = useState(false);
   const [visibleSections, setVisibleSections] = useState<number[]>([]);
@@ -25,13 +27,6 @@ export function InvoicePromptAnimation({
   const subtotal = developmentQty * developmentRate + designQty * designRate;
   const tax = subtotal * 0.1;
   const total = subtotal + tax;
-
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
 
   useEffect(() => {
     if (!shouldPlay) return;
@@ -272,7 +267,7 @@ export function InvoicePromptAnimation({
               type="button"
               className="flex items-center gap-1 text-[11px] md:text-[12px] leading-[15px] md:leading-[16px] text-muted-foreground hover:text-foreground"
             >
-              <MaterialIcon name="open_in_new" className="" size={11} />
+              <MdOutlineOpenInNew size={11} />
               <span>Preview invoice</span>
             </button>
           </div>

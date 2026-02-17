@@ -1,10 +1,13 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { MaterialIcon } from "./icon-mapping";
+import { useEffect, useRef, useState } from "react";
+import {
+  MdOutlineExpandLess,
+  MdOutlineExpandMore,
+  MdOutlineMoreVert,
+} from "react-icons/md";
 
 interface Invoice {
   id: string;
@@ -68,9 +71,12 @@ const initialInvoices: Invoice[] = [
 
 export function CustomerStatementAnimation({
   onComplete,
+  shouldPlay = true,
 }: {
   onComplete?: () => void;
+  shouldPlay?: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [showHeader, setShowHeader] = useState(false);
   const [showLogo, setShowLogo] = useState(false);
   const [showGeneral, setShowGeneral] = useState(false);
@@ -79,13 +85,6 @@ export function CustomerStatementAnimation({
   const [showCards, setShowCards] = useState(false);
   const [showTable, setShowTable] = useState(false);
   const [invoices, _setInvoices] = useState<Invoice[]>(initialInvoices);
-
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
 
   useEffect(() => {
     if (!shouldPlay) return;
@@ -139,7 +138,6 @@ export function CustomerStatementAnimation({
         className="pt-2 md:pt-3 pb-2 md:pb-3 border-b border-border flex items-center justify-between px-2 md:px-3"
       >
         <div className="flex items-center gap-2 md:gap-3">
-          {/* Logo - Supabase */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: showLogo ? 1 : 0 }}
@@ -158,8 +156,7 @@ export function CustomerStatementAnimation({
             Supabase
           </h2>
         </div>
-        <MaterialIcon
-          name="more_vert"
+        <MdOutlineMoreVert
           className="text-sm text-muted-foreground"
           size={16}
         />
@@ -176,8 +173,7 @@ export function CustomerStatementAnimation({
           <h3 className="text-[11px] md:text-[12px] text-foreground">
             General
           </h3>
-          <MaterialIcon
-            name="expand_less"
+          <MdOutlineExpandLess
             className="text-sm text-muted-foreground"
             size={16}
           />
@@ -210,8 +206,7 @@ export function CustomerStatementAnimation({
           <h3 className="text-[11px] md:text-[12px] text-foreground">
             Details
           </h3>
-          <MaterialIcon
-            name="expand_more"
+          <MdOutlineExpandMore
             className="text-sm text-muted-foreground"
             size={16}
           />
@@ -229,8 +224,7 @@ export function CustomerStatementAnimation({
           <h3 className="text-[11px] md:text-[12px] text-foreground">
             Statement
           </h3>
-          <MaterialIcon
-            name="more_vert"
+          <MdOutlineMoreVert
             className="text-sm text-muted-foreground"
             size={16}
           />

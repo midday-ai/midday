@@ -1,8 +1,8 @@
 "use client";
 
+import { InvoicePromptAnimation } from "@midday/ui/animations/invoice-prompt";
 import Image from "next/image";
 import { HeroImage } from "./hero-image";
-import { InvoicePromptAnimation } from "./homepage/invoice-prompt-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
 import { PreAccountingSection } from "./sections/pre-accounting-section";

@@ -1,29 +1,28 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { MaterialIcon } from "./icon-mapping";
+import { useEffect, useRef, useState } from "react";
+import {
+  MdOutlineExpandLess,
+  MdOutlineExpandMore,
+  MdOutlineMoreVert,
+} from "react-icons/md";
 
 export function CompanyEnrichmentAnimation({
   onComplete,
+  shouldPlay = true,
 }: {
   onComplete?: () => void;
+  shouldPlay?: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [showHeader, setShowHeader] = useState(false);
   const [showLogo, setShowLogo] = useState(false);
   const [showTags, setShowTags] = useState(false);
   const [showGeneral, setShowGeneral] = useState(false);
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
 
   useEffect(() => {
     if (!shouldPlay) return;
@@ -66,7 +65,6 @@ export function CompanyEnrichmentAnimation({
         className="pt-2 md:pt-3 pb-2 md:pb-3 border-b border-border flex items-center justify-between px-2 md:px-3"
       >
         <div className="flex items-center gap-2 md:gap-3">
-          {/* Logo - Supabase */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: showLogo ? 1 : 0 }}
@@ -85,8 +83,7 @@ export function CompanyEnrichmentAnimation({
             Supabase
           </h2>
         </div>
-        <MaterialIcon
-          name="more_vert"
+        <MdOutlineMoreVert
           className="text-sm text-muted-foreground"
           size={16}
         />
@@ -116,7 +113,7 @@ export function CompanyEnrichmentAnimation({
         </motion.div>
       )}
 
-      {/* Tags - Rectangular, not rounded */}
+      {/* Tags */}
       {showTags && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -170,8 +167,7 @@ export function CompanyEnrichmentAnimation({
           <h3 className="text-[11px] md:text-[12px] text-foreground">
             General
           </h3>
-          <MaterialIcon
-            name="expand_less"
+          <MdOutlineExpandLess
             className="text-sm text-muted-foreground"
             size={16}
           />
@@ -213,7 +209,7 @@ export function CompanyEnrichmentAnimation({
         )}
       </motion.div>
 
-      {/* Company Profile Section - Content in Two Columns */}
+      {/* Company Profile Section */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: showCompanyProfile ? 1 : 0 }}
@@ -224,8 +220,7 @@ export function CompanyEnrichmentAnimation({
           <h3 className="text-[11px] md:text-[12px] text-foreground">
             Company Profile
           </h3>
-          <MaterialIcon
-            name="expand_less"
+          <MdOutlineExpandLess
             className="text-sm text-muted-foreground"
             size={16}
           />
@@ -338,8 +333,7 @@ export function CompanyEnrichmentAnimation({
           <h3 className="text-[11px] md:text-[12px] text-foreground">
             Details
           </h3>
-          <MaterialIcon
-            name="expand_more"
+          <MdOutlineExpandMore
             className="text-sm text-muted-foreground"
             size={16}
           />

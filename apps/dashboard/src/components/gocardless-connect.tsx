@@ -12,9 +12,17 @@ type Props = {
   id: string;
   availableHistory: number;
   onSelect: () => void;
+  redirectPath?: string;
+  connectRef?: React.MutableRefObject<(() => void) | null>;
 };
 
-export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
+export function GoCardLessConnect({
+  onSelect,
+  id,
+  availableHistory,
+  redirectPath,
+  connectRef,
+}: Props) {
   const { toast } = useToast();
   const trpc = useTRPC();
 
@@ -30,7 +38,7 @@ export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
     onSelect();
 
     const redirectBase = isDesktopApp() ? getDesktopSchemeUrl() : getUrl();
-    const redirectTo = new URL(redirectBase);
+    const redirectTo = new URL(redirectPath ?? "/", redirectBase);
     redirectTo.searchParams.append("step", "account");
     redirectTo.searchParams.append("provider", "gocardless");
 
@@ -56,5 +64,5 @@ export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
     }
   };
 
-  return <BankConnectButton onClick={handleOnSelect} />;
+  return <BankConnectButton onClick={handleOnSelect} connectRef={connectRef} />;
 }

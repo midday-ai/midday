@@ -21,9 +21,9 @@ export default async function Teams() {
 
   const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
-  // If no teams and no invites, redirect to create team
+  // If no teams and no invites, redirect to onboarding
   if (!teams?.length && !invites?.length) {
-    redirect("/teams/create");
+    redirect("/onboarding");
   }
 
   return (
@@ -76,7 +76,7 @@ export default async function Teams() {
             <span className="absolute left-1/2 -translate-x-1/2 text-sm text-[#878787] bg-background -top-3 px-4">
               Or
             </span>
-            <Link href="/teams/create" className="w-full">
+            <Link href="/onboarding" className="w-full">
               <Button className="w-full mt-2" variant="outline">
                 Create team
               </Button>

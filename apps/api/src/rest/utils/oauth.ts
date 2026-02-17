@@ -72,18 +72,19 @@ export function buildSuccessRedirect(
   provider: string,
   source?: string,
   fallbackPath = "/settings/apps",
+  redirectPath?: string,
 ): string {
   // For apps flow (popup), redirect to oauth-callback
   if (source === "apps") {
     return `${dashboardUrl}/oauth-callback?status=success`;
   }
 
-  // For direct navigation flow, redirect to fallback path with success params
-  const params = new URLSearchParams({
-    connected: "true",
-    provider,
-  });
-  return `${dashboardUrl}${fallbackPath}?${params.toString()}`;
+  // Use custom redirect path if provided (e.g. from onboarding)
+  const targetPath = redirectPath || fallbackPath;
+
+  // For direct navigation flow, redirect to target path with success params
+  const separator = targetPath.includes("?") ? "&" : "?";
+  return `${dashboardUrl}${targetPath}${separator}connected=true&provider=${provider}`;
 }
 
 /**
@@ -95,6 +96,7 @@ export function buildErrorRedirect(
   provider: string,
   source?: string,
   fallbackPath = "/settings/apps",
+  redirectPath?: string,
 ): string {
   // For apps flow (popup), redirect to oauth-callback to show error
   if (source === "apps") {
@@ -105,11 +107,10 @@ export function buildErrorRedirect(
     return `${dashboardUrl}/oauth-callback?${params.toString()}`;
   }
 
-  // For direct navigation flow, redirect to fallback path with error params
-  const params = new URLSearchParams({
-    connected: "false",
-    error: errorCode,
-    provider,
-  });
-  return `${dashboardUrl}${fallbackPath}?${params.toString()}`;
+  // Use custom redirect path if provided (e.g. from onboarding)
+  const targetPath = redirectPath || fallbackPath;
+
+  // For direct navigation flow, redirect to target path with error params
+  const separator = targetPath.includes("?") ? "&" : "?";
+  return `${dashboardUrl}${targetPath}${separator}connected=false&error=${errorCode}&provider=${provider}`;
 }

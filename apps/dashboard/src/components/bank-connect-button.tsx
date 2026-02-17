@@ -1,15 +1,17 @@
-import { Button } from "@midday/ui/button";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Spinner } from "@midday/ui/spinner";
+import type { MutableRefObject } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   onClick: () => void;
+  connectRef?: MutableRefObject<(() => void) | null>;
 };
 
-export function BankConnectButton({ onClick }: Props) {
+export function BankConnectButton({ onClick, connectRef }: Props) {
   const [isLoading, setLoading] = useState(false);
 
   const handleOnClick = () => {
+    if (isLoading) return;
     setLoading(true);
     onClick();
 
@@ -18,16 +20,15 @@ export function BankConnectButton({ onClick }: Props) {
     }, 3000);
   };
 
+  useEffect(() => {
+    if (connectRef) {
+      connectRef.current = handleOnClick;
+    }
+  });
+
   return (
-    <Button
-      variant="outline"
-      data-event="Bank Selected"
-      data-icon="🏦"
-      data-channel="bank"
-      disabled={isLoading}
-      onClick={handleOnClick}
-    >
-      {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
-    </Button>
+    <span className="text-xs text-[#878787] group-hover:text-primary shrink-0 transition-colors duration-200">
+      {isLoading ? <Spinner size={14} /> : "Connect"}
+    </span>
   );
 }

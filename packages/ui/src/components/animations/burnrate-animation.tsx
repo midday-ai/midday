@@ -1,8 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -22,7 +21,14 @@ function useIsMobile() {
   return { isMobile, isTablet };
 }
 
-export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
+export function BurnrateAnimation({
+  onComplete,
+  shouldPlay = true,
+}: {
+  onComplete?: () => void;
+  shouldPlay?: boolean;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const { isMobile, isTablet } = useIsMobile();
   const [showGraph, setShowGraph] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
@@ -31,14 +37,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
   const [areaOpacity, setAreaOpacity] = useState(0);
   const [showAverageLine, setShowAverageLine] = useState(false);
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
-
-  // Start animation only when shouldPlay is true
   useEffect(() => {
     if (!shouldPlay) return;
 
@@ -56,13 +54,10 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
     };
   }, [shouldPlay, onComplete]);
 
-  // Sequential reveal
   useEffect(() => {
     if (showGraph) {
-      // Show graph immediately without animation
       setPathLength(1);
       setAreaOpacity(1);
-      // Animate average line
       setTimeout(() => {
         setShowAverageLine(true);
       }, 0);
@@ -76,7 +71,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
     }
   }, [showGraph]);
 
-  // Burn rate data points (Oct to Apr) - values in thousands with moderate variation and one big dip
   const dataPoints = [
     { month: "Oct", value: 5.0 },
     { month: "Nov", value: 6.2 },
@@ -90,7 +84,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
   const maxValue = 15;
   const averageValue = 6;
   const graphWidth = 500;
-  // Graph height matches container height to fill it properly
   const graphHeight = isMobile ? 180 : isTablet ? 240 : 280;
   const paddingLeft = 30;
   const paddingRight = 30;
@@ -99,7 +92,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
   const chartWidth = graphWidth - paddingLeft - paddingRight;
   const chartHeight = graphHeight - paddingTop - paddingBottom;
 
-  // Convert data points to SVG coordinates
   const points = dataPoints.map((point, idx) => {
     const divisor = dataPoints.length > 1 ? dataPoints.length - 1 : 1;
     const x = paddingLeft + (idx / divisor) * chartWidth;
@@ -107,23 +99,18 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
     return { x, y, month: point.month, value: point.value };
   });
 
-  // Create path for line with sharp, angular curves
   const pathData = points.reduce((path, p, idx) => {
     if (idx === 0) {
       return `M ${p.x} ${p.y}`;
     }
     const prevPoint = points[idx - 1];
-    // Check if this is the big dip (Dec - index 2) or transitions to/from it
-    const isDipPoint = idx === 2; // Dec is index 2
-    const isBeforeDip = idx === 1; // Nov is before dip
-    const isAfterDip = idx === 3; // Jan is after dip
+    const isDipPoint = idx === 2;
+    const isBeforeDip = idx === 1;
+    const isAfterDip = idx === 3;
 
-    // Use straight lines for dip transitions, curves for others
     if (isDipPoint || isBeforeDip || isAfterDip) {
-      // Sharp corner - straight line for dip area
       return `${path} L ${p.x} ${p.y}`;
     }
-    // Sharp angular curve using quadratic bezier
     if (!prevPoint) {
       return path;
     }
@@ -135,7 +122,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
     return `${path} Q ${controlX} ${controlY}, ${p.x} ${p.y}`;
   }, "");
 
-  // Create area path (line + bottom)
   const lastPoint = points[points.length - 1];
   const firstPoint = points[0];
   const areaPath =
@@ -146,7 +132,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
   const averageY =
     paddingTop + chartHeight - (averageValue / maxValue) * chartHeight;
 
-  // Grid lines
   const gridLines = [0, 3, 6, 9, 12, 15].map((value) => {
     const y = paddingTop + chartHeight - (value / maxValue) * chartHeight;
     return { y, value };
@@ -207,7 +192,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
                 preserveAspectRatio="none"
                 className="overflow-visible"
               >
-                {/* Pattern definition for striped area */}
                 <defs>
                   <pattern
                     id="burnRatePattern"
@@ -227,7 +211,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
                   </pattern>
                 </defs>
 
-                {/* Background grid - Horizontal lines */}
                 {gridLines.map((grid) => (
                   <line
                     key={`grid-h-${grid.value}`}
@@ -242,7 +225,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
                   />
                 ))}
 
-                {/* Background grid - Vertical lines */}
                 {points.map((point) => (
                   <line
                     key={`grid-v-${point.month}`}
@@ -257,7 +239,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
                   />
                 ))}
 
-                {/* Average line (dashed) */}
                 <motion.line
                   x1={paddingLeft}
                   y1={averageY}
@@ -271,7 +252,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
                   transition={{ duration: 0.3, delay: 0.8 }}
                 />
 
-                {/* Area under line with striped pattern */}
                 {areaPath && (
                   <motion.path
                     d={areaPath}
@@ -282,7 +262,6 @@ export function BurnrateAnimation({ onComplete }: { onComplete?: () => void }) {
                   />
                 )}
 
-                {/* Line with sharp angular curves */}
                 <path
                   d={pathData}
                   fill="none"

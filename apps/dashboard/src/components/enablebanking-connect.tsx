@@ -1,7 +1,6 @@
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
-import { useTeamQuery } from "@/hooks/use-team";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { BankConnectButton } from "./bank-connect-button";
 
@@ -11,6 +10,8 @@ type Props = {
   maximumConsentValidity: number;
   country: string;
   type?: "personal" | "business";
+  redirectPath?: string;
+  connectRef?: React.MutableRefObject<(() => void) | null>;
 };
 
 export function EnableBankingConnect({
@@ -19,28 +20,40 @@ export function EnableBankingConnect({
   maximumConsentValidity,
   country,
   type,
+  redirectPath,
+  connectRef,
 }: Props) {
   const { toast } = useToast();
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
+  const { data: team } = useQuery(trpc.team.current.queryOptions());
 
   const createLink = useMutation(
     trpc.banking.enablebankingLink.mutationOptions({}),
   );
 
   const handleOnSelect = async () => {
+    if (!team?.id) {
+      return;
+    }
+
     onSelect();
 
     try {
+      const desktopOrWeb = isDesktopApp() ? "desktop" : "web";
+      const stateParts = [desktopOrWeb, "connect"];
+      if (redirectPath) {
+        stateParts.push(encodeURIComponent(redirectPath));
+      }
+
       const linkData = await createLink.mutateAsync({
         institutionId: id,
-        country: country || team?.countryCode || "",
+        country: country || team.countryCode || "",
         type: type ?? "business",
-        teamId: team?.id ?? "",
+        teamId: team.id,
         validUntil: new Date(Date.now() + maximumConsentValidity * 1000)
           .toISOString()
           .replace(/\.\d+Z$/, ".000000+00:00"),
-        state: isDesktopApp() ? "desktop:connect" : "web:connect",
+        state: stateParts.join(":"),
       });
 
       window.location.href = linkData.data.url;
@@ -53,5 +66,5 @@ export function EnableBankingConnect({
     }
   };
 
-  return <BankConnectButton onClick={handleOnSelect} />;
+  return <BankConnectButton onClick={handleOnSelect} connectRef={connectRef} />;
 }

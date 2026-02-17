@@ -1,16 +1,45 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { MaterialIcon } from "./icon-mapping";
+import { useEffect, useRef, useState } from "react";
+import type { IconType } from "react-icons";
+import {
+  MdOutlineFilterList,
+  MdOutlineLink,
+  MdOutlinePictureAsPdf,
+  MdOutlineReceipt,
+  MdOutlineReceiptLong,
+  MdSearch,
+} from "react-icons/md";
+
+const dynamicIconMap: Record<string, IconType> = {
+  pdf: MdOutlinePictureAsPdf,
+  receipt: MdOutlineReceipt,
+  receipt_long: MdOutlineReceiptLong,
+};
+
+function DynamicIcon({
+  name,
+  className,
+  size,
+}: {
+  name: string;
+  className?: string;
+  size?: number;
+}) {
+  const Icon = dynamicIconMap[name];
+  return Icon ? <Icon className={className} size={size} /> : null;
+}
 
 export function InboxMatchAnimation({
   onComplete,
+  shouldPlay = true,
 }: {
   onComplete?: () => void;
+  shouldPlay?: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [showIncoming, setShowIncoming] = useState(false);
   const [showSuggestBar, setShowSuggestBar] = useState(false);
   const [showItems, setShowItems] = useState(false);
@@ -65,13 +94,6 @@ export function InboxMatchAnimation({
     date: "Sep 10",
   };
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
-
   useEffect(() => {
     if (!shouldPlay) return;
 
@@ -103,8 +125,7 @@ export function InboxMatchAnimation({
               type="button"
               className="w-6 h-6 flex items-center justify-center hover:bg-muted transition-colors"
             >
-              <MaterialIcon
-                name="filter_list"
+              <MdOutlineFilterList
                 className="text-sm text-muted-foreground"
                 size={16}
               />
@@ -117,8 +138,7 @@ export function InboxMatchAnimation({
             placeholder="Search inbox..."
             className="w-full bg-background border border-border px-2 md:px-3 py-1.5 md:py-2 text-[11px] md:text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border/50 rounded-none pr-7 md:pr-8"
           />
-          <MaterialIcon
-            name="search"
+          <MdSearch
             className="absolute right-2 md:right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground"
             size={14}
           />
@@ -140,8 +160,8 @@ export function InboxMatchAnimation({
             >
               <div className="flex items-start gap-1.5 md:gap-2">
                 <span className="inline-flex w-5 h-5 md:w-6 md:h-6 items-center justify-center bg-secondary border border-border flex-shrink-0">
-                  <MaterialIcon
-                    name={item.icon as "receipt" | "receipt_long" | "pdf"}
+                  <DynamicIcon
+                    name={item.icon}
                     className="text-sm text-muted-foreground"
                     size={14}
                   />
@@ -225,8 +245,7 @@ export function InboxMatchAnimation({
       >
         <div className="w-full bg-secondary border border-border px-2 md:px-3 py-2 md:py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
-            <MaterialIcon
-              name="link"
+            <MdOutlineLink
               className="text-sm text-muted-foreground flex-shrink-0"
               size={14}
             />

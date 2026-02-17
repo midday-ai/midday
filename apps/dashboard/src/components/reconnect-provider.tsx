@@ -140,8 +140,12 @@ export function ReconnectProvider({
         return;
       }
       case "gocardless": {
+        if (!team?.id) {
+          return;
+        }
+
         setIsLoading(true);
-        const reference = `${team?.id}:${nanoid()}`;
+        const reference = `${team.id}:${nanoid()}`;
         const link = new URL(`${getUrl()}/api/gocardless/reconnect`);
         link.searchParams.append("id", id);
 
@@ -174,6 +178,15 @@ export function ReconnectProvider({
         return;
       }
       case "enablebanking": {
+        if (!team?.id) {
+          toast({
+            duration: 2500,
+            variant: "error",
+            title: "Team not loaded. Please try again.",
+          });
+          return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -194,8 +207,8 @@ export function ReconnectProvider({
 
           const linkData = await createEnableBankingLink.mutateAsync({
             institutionId: institution.name,
-            country: institution.country ?? team?.countryCode ?? "",
-            teamId: team?.id ?? "",
+            country: institution.country ?? team.countryCode ?? "",
+            teamId: team.id,
             type: (institution.type as "business" | "personal") ?? "business",
             validUntil,
             state: isDesktopApp()

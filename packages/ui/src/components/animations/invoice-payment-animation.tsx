@@ -1,8 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 interface Invoice {
   id: string;
@@ -139,9 +138,12 @@ const initialInvoices: Omit<Invoice, "status">[] = [
 
 export function InvoicePaymentAnimation({
   onComplete,
+  shouldPlay = true,
 }: {
   onComplete?: () => void;
+  shouldPlay?: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [showCards, setShowCards] = useState(false);
   const [showTable, setShowTable] = useState(false);
   const [invoices, setInvoices] = useState<Invoice[]>(
@@ -157,29 +159,18 @@ export function InvoicePaymentAnimation({
   const [overdueCount, setOverdueCount] = useState(12);
   const [paidCount, setPaidCount] = useState(10);
 
-  // Payment score bars: 10 bars total, 8 filled (white), 2 unfilled (gray)
   const paymentScoreBars = Array.from({ length: 10 }, (_, i) => ({
     id: i,
-    filled: i < 8, // First 8 bars are filled
+    filled: i < 8,
   }));
-
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
-    () => {
-      // Callback triggered when element becomes visible
-    },
-    { threshold: 0.5 },
-  );
 
   useEffect(() => {
     if (!shouldPlay) return;
 
-    // Show cards first
     const cardsTimer = setTimeout(() => setShowCards(true), 0);
 
-    // Show payment score bar
     const scoreTimer = setTimeout(() => {
       setShowPaymentScore(true);
-      // Animate bars appearing one by one
       paymentScoreBars.forEach((_, index) => {
         setTimeout(
           () => {
@@ -190,14 +181,10 @@ export function InvoicePaymentAnimation({
       });
     }, 700);
 
-    // Show table
     const tableTimer = setTimeout(() => setShowTable(true), 500);
 
-    // Start flipping status tags one by one
-    // Some invoices become overdue (yellow), scheduled (blue), or paid (green)
     const flipTimers: NodeJS.Timeout[] = [];
     const invoiceCount = initialInvoices.length;
-    // Make 2 invoices overdue (indices 2 and 7), 1 scheduled (index 1), 1 recurring (index 4), rest paid
     const overdueIndices = [2, 7];
     const scheduledIndices = [1];
     const recurringIndices = [4];
@@ -228,7 +215,6 @@ export function InvoicePaymentAnimation({
             ),
           );
 
-          // Update counts and amounts
           if (isOverdue) {
             setOverdueCount((prev) => prev + 1);
           } else if (!isScheduled && !isRecurring) {
@@ -238,7 +224,6 @@ export function InvoicePaymentAnimation({
             );
           }
 
-          // Update paid count and amount when all invoices are processed
           if (index === invoiceCount - 1) {
             setPaidCount((prev) => prev + paidCount);
             setPaidAmount((prev) => {

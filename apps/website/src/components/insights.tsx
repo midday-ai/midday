@@ -1,10 +1,11 @@
 "use client";
 
+import { AIAssistantAnimation } from "@midday/ui/animations/ai-assistant";
+import { BurnrateAnimation } from "@midday/ui/animations/burnrate";
+import { WidgetsAnimation } from "@midday/ui/animations/widgets";
 import Image from "next/image";
+import { useTheme } from "next-themes";
 import { HeroImage } from "./hero-image";
-import { AIAssistantAnimation } from "./homepage/ai-assistant-animation";
-import { BurnrateAnimation } from "./homepage/burnrate-animation";
-import { WidgetsAnimation } from "./homepage/widgets-animation";
 import { AudioSummarySection } from "./sections/audio-summary-section";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
@@ -14,6 +15,9 @@ import { TestimonialsSection } from "./sections/testimonials-section";
 import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Insights() {
+  const { resolvedTheme } = useTheme();
+  const isLightMode = resolvedTheme !== "dark";
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -250,7 +254,10 @@ export function Insights() {
               <div className="flex items-center justify-center p-6 lg:p-8 border border-border overflow-hidden relative bg-background lg:order-1">
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
-                    <AIAssistantAnimation onComplete={undefined} />
+                    <AIAssistantAnimation
+                      onComplete={undefined}
+                      isLightMode={isLightMode}
+                    />
                   </div>
                 </div>
               </div>
