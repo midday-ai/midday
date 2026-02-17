@@ -126,11 +126,11 @@ export const bankingRouter = createTRPCRouter({
 
   enablebankingLink: protectedProcedure
     .input(enablebankingLinkSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx: { teamId } }) => {
       const api = new EnableBankingApi();
 
       try {
-        const data = await api.authenticate(input);
+        const data = await api.authenticate({ ...input, teamId: teamId! });
         return { data: { url: data.url } };
       } catch (error) {
         logger.error(

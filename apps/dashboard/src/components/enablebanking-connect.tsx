@@ -49,7 +49,6 @@ export function EnableBankingConnect({
         institutionId: id,
         country: country || team.countryCode || "",
         type: type ?? "business",
-        teamId: team.id,
         validUntil: new Date(Date.now() + maximumConsentValidity * 1000)
           .toISOString()
           .replace(/\.\d+Z$/, ".000000+00:00"),

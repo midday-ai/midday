@@ -204,7 +204,6 @@ export function ReconnectProvider({
           const linkData = await createEnableBankingLink.mutateAsync({
             institutionId: institution.name,
             country: institution.country ?? team.countryCode ?? "",
-            teamId: team.id,
             type: (institution.type as "business" | "personal") ?? "business",
             validUntil,
             state: isDesktopApp()

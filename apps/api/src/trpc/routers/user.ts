@@ -6,9 +6,12 @@ import {
   deleteUser,
   getUserById,
   getUserInvites,
+  switchUserTeam,
   updateUser,
 } from "@midday/db/queries";
 import { generateFileKey } from "@midday/encryption";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx: { db, session } }) => {
@@ -35,6 +38,22 @@ export const userRouter = createTRPCRouter({
         id: session.user.id,
         ...input,
       });
+    }),
+
+  switchTeam: protectedProcedure
+    .input(z.object({ teamId: z.string().uuid() }))
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      try {
+        return await switchUserTeam(db, {
+          userId: session.user.id,
+          teamId: input.teamId,
+        });
+      } catch {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You are not a member of this team",
+        });
+      }
     }),
 
   delete: protectedProcedure.mutation(

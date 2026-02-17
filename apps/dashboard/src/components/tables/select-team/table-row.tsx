@@ -19,7 +19,7 @@ export function TableRow({ row }: Props) {
   const trpc = useTRPC();
 
   const changeTeamMutation = useMutation(
-    trpc.user.update.mutationOptions({
+    trpc.user.switchTeam.mutationOptions({
       onMutate: () => {
         setIsLoading(true);
       },

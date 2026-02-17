@@ -155,7 +155,6 @@ export function OnboardingPage({
   const [connectionParams, setConnectionParams] = useQueryStates({
     connected: parseAsString,
     provider: parseAsString,
-    debug_sync: parseAsString,
     countryCode: parseAsString,
   });
 
@@ -179,14 +178,6 @@ export function OnboardingPage({
       setConnectionParams({ connected: null, provider: null });
     }
   }, [connectionParams, inboxSync, setConnectionParams, trackEvent]);
-
-  useEffect(() => {
-    if (connectionParams.debug_sync === "true") {
-      setBankSync({ runId: "debug", accessToken: "debug" });
-      setInboxSync({ provider: "gmail" });
-      setConnectionParams({ debug_sync: null });
-    }
-  }, [connectionParams.debug_sync, setConnectionParams]);
 
   const defaultCountryCode = use(defaultCountryCodePromise);
 

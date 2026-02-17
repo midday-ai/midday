@@ -2,6 +2,7 @@ import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
+import { sanitizeRedirectPath } from "@midday/utils/sanitize-redirect";
 import { addSeconds, addYears } from "date-fns";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
@@ -81,7 +82,8 @@ export async function GET(req: NextRequest) {
   }
 
   if (returnTo) {
-    return NextResponse.redirect(`${origin}/${returnTo}`);
+    const safePath = sanitizeRedirectPath(returnTo);
+    return NextResponse.redirect(`${origin}${safePath}`);
   }
 
   return NextResponse.redirect(origin);

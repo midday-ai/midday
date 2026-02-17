@@ -79,7 +79,7 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
       const router = useRouter();
 
       const viewTeamMutation = useMutation(
-        trpc.user.update.mutationOptions({
+        trpc.user.switchTeam.mutationOptions({
           onSuccess: () => {
             queryClient.invalidateQueries();
           },
@@ -87,7 +87,7 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
       );
 
       const manageTeamMutation = useMutation(
-        trpc.user.update.mutationOptions({
+        trpc.user.switchTeam.mutationOptions({
           onSuccess: () => {
             queryClient.invalidateQueries();
           },

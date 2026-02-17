@@ -18,10 +18,9 @@ export function useOnboardingStep(opts: OnboardingStepOptions) {
   );
 
   // Determine the lowest step this user still needs:
-  //   !hasFullName          → 1 (must complete profile)
-  //   hasFullName && !hasTeam → 2 (must create team)
-  //   hasFullName && hasTeam  → 3 (both done, start at connect bank)
-  const minStep = !opts.hasFullName ? 1 : !opts.hasTeam ? 2 : 3;
+  //   !hasFullName → 1 (must complete profile)
+  //   hasFullName  → 2 (always allow creating a new team)
+  const minStep = !opts.hasFullName ? 1 : 2;
 
   // Gate forward progress — can't skip past the step that's blocking:
   //   profile incomplete  → locked to step 1

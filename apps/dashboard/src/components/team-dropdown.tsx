@@ -51,7 +51,7 @@ export function TeamDropdown({ isExpanded = false }: Props) {
   const [isChangingTeam, setIsChangingTeam] = useState(false);
 
   const changeTeamMutation = useMutation(
-    trpc.user.update.mutationOptions({
+    trpc.user.switchTeam.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries();
         setIsChangingTeam(false);
