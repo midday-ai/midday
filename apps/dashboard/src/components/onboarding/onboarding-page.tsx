@@ -312,6 +312,14 @@ export function OnboardingPage({
   );
 
   const currentStep = steps[step - 1];
+
+  // Prefetch the dashboard route as soon as the user reaches the final step
+  useEffect(() => {
+    if (currentStep?.navigation === "finish") {
+      router.prefetch("/");
+    }
+  }, [currentStep?.navigation, router]);
+
   if (!currentStep) return null;
 
   const navLabel = NAV_LABELS[currentStep.navigation];
@@ -437,9 +445,8 @@ export function OnboardingPage({
                         onClick={async () => {
                           setIsFinishing(true);
                           trackEvent(LogEvents.OnboardingCompleted);
-                          router.prefetch("/");
-                          await new Promise((r) => setTimeout(r, 5000));
                           router.push("/");
+                          await new Promise((r) => setTimeout(r, 5000));
                         }}
                         className="px-4 py-2 bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors border border-primary"
                       >
