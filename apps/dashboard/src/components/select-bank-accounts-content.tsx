@@ -36,12 +36,21 @@ function RowsSkeleton() {
   return (
     <div className="space-y-6">
       {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index.toString()} className="flex items-center space-x-4">
-          <Skeleton className="h-9 w-9 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-3.5 w-[250px] rounded-none" />
-            <Skeleton className="h-2.5 w-[200px] rounded-none" />
+        <div key={index.toString()} className="flex justify-between">
+          <div className="flex items-center space-x-4 mr-8 flex-1 min-w-0">
+            <Skeleton className="size-[34px] rounded-full shrink-0" />
+            <div className="flex flex-col flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-3.5 w-[120px] rounded-none" />
+                <Skeleton className="h-3 w-[50px] rounded-none" />
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <Skeleton className="h-3 w-[80px] rounded-none" />
+                <Skeleton className="h-3.5 w-[70px] rounded-none" />
+              </div>
+            </div>
           </div>
+          <Skeleton className="h-5 w-9 rounded-full shrink-0 self-center" />
         </div>
       ))}
     </div>
@@ -171,6 +180,8 @@ type SelectBankAccountsContentProps = {
   onComplete?: () => void;
   onSyncStarted?: (data: { runId: string; accessToken: string }) => void;
   stickySubmit?: boolean;
+  accountsListClassName?: string;
+  fadeGradientClass?: string;
 };
 
 export function SelectBankAccountsContent({
@@ -179,6 +190,8 @@ export function SelectBankAccountsContent({
   onComplete,
   onSyncStarted,
   stickySubmit = true,
+  accountsListClassName,
+  fadeGradientClass,
 }: SelectBankAccountsContentProps) {
   const { toast } = useToast();
   const trpc = useTRPC();
@@ -327,89 +340,97 @@ export function SelectBankAccountsContent({
         </div>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 overflow-auto scrollbar-hide"
-          >
-            {isLoading && <RowsSkeleton />}
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="relative">
+              <div
+                className={`space-y-6 overflow-auto scrollbar-hide ${accountsListClassName ?? ""}`}
+              >
+                {isLoading && <RowsSkeleton />}
 
-            {accountsData?.data?.map((account) => {
-              const accountIdentifier = account.iban?.slice(-4);
+                {accountsData?.data?.map((account) => {
+                  const accountIdentifier = account.iban?.slice(-4);
 
-              return (
-                <FormField
-                  key={account.id}
-                  control={form.control}
-                  name="accounts"
-                  render={({ field }) => {
-                    return (
-                      <FormItem
-                        key={account.id}
-                        className="flex justify-between"
-                      >
-                        <FormLabel className="flex items-center space-x-4 w-full mr-8">
-                          <Avatar className="size-[34px]">
-                            <AvatarFallback className="text-[11px]">
-                              {getInitials(account.name)}
-                            </AvatarFallback>
-                          </Avatar>
+                  return (
+                    <FormField
+                      key={account.id}
+                      control={form.control}
+                      name="accounts"
+                      render={({ field }) => {
+                        return (
+                          <FormItem
+                            key={account.id}
+                            className="flex justify-between"
+                          >
+                            <FormLabel className="flex items-center space-x-4 w-full mr-8">
+                              <Avatar className="size-[34px]">
+                                <AvatarFallback className="text-[11px]">
+                                  {getInitials(account.name)}
+                                </AvatarFallback>
+                              </Avatar>
 
-                          <div className="flex flex-col flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <p className="font-medium leading-none text-sm truncate">
-                                {account.name}
-                              </p>
-                              {accountIdentifier && (
-                                <span className="text-xs text-[#878787] font-normal shrink-0">
-                                  ····{accountIdentifier}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center justify-between mt-1">
-                              <span className="text-xs text-[#878787] font-normal">
-                                {t(`account_type.${account.type}`)}
-                              </span>
-                              <span className="text-sm font-medium">
-                                <FormatAmount
-                                  amount={account.balance.amount}
-                                  currency={account.balance.currency}
+                              <div className="flex flex-col flex-1 min-w-0">
+                                <div className="flex items-center justify-between">
+                                  <p className="font-medium leading-none text-sm truncate">
+                                    {account.name}
+                                  </p>
+                                  {accountIdentifier && (
+                                    <span className="text-xs text-[#878787] font-normal shrink-0">
+                                      ····{accountIdentifier}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between mt-1">
+                                  <span className="text-xs text-[#878787] font-normal">
+                                    {t(`account_type.${account.type}`)}
+                                  </span>
+                                  <span className="text-sm font-medium">
+                                    <FormatAmount
+                                      amount={account.balance.amount}
+                                      currency={account.balance.currency}
+                                    />
+                                  </span>
+                                </div>
+                              </div>
+                            </FormLabel>
+
+                            <div>
+                              <FormControl>
+                                <Switch
+                                  checked={
+                                    field.value?.find(
+                                      (value) => value.accountId === account.id,
+                                    )?.enabled
+                                  }
+                                  onCheckedChange={(checked) => {
+                                    return field.onChange(
+                                      field.value.map((value) => {
+                                        if (value.accountId === account.id) {
+                                          return {
+                                            ...value,
+                                            enabled: checked,
+                                          };
+                                        }
+
+                                        return value;
+                                      }),
+                                    );
+                                  }}
                                 />
-                              </span>
+                              </FormControl>
                             </div>
-                          </div>
-                        </FormLabel>
-
-                        <div>
-                          <FormControl>
-                            <Switch
-                              checked={
-                                field.value?.find(
-                                  (value) => value.accountId === account.id,
-                                )?.enabled
-                              }
-                              onCheckedChange={(checked) => {
-                                return field.onChange(
-                                  field.value.map((value) => {
-                                    if (value.accountId === account.id) {
-                                      return {
-                                        ...value,
-                                        enabled: checked,
-                                      };
-                                    }
-
-                                    return value;
-                                  }),
-                                );
-                              }}
-                            />
-                          </FormControl>
-                        </div>
-                      </FormItem>
-                    );
-                  }}
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              {fadeGradientClass && (
+                <div
+                  className={`pointer-events-none absolute bottom-0 left-0 right-0 h-16 ${fadeGradientClass}`}
                 />
-              );
-            })}
+              )}
+            </div>
 
             <div
               className={

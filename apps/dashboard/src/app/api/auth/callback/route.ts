@@ -82,7 +82,10 @@ export async function GET(req: NextRequest) {
   }
 
   if (returnTo) {
-    const safePath = sanitizeRedirectPath(returnTo);
+    // The middleware strips the leading "/" (e.g. "settings/accounts"),
+    // but sanitizeRedirectPath requires a root-relative path starting with "/".
+    const normalized = returnTo.startsWith("/") ? returnTo : `/${returnTo}`;
+    const safePath = sanitizeRedirectPath(normalized);
     return NextResponse.redirect(`${origin}${safePath}`);
   }
 

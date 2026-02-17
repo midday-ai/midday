@@ -23,6 +23,8 @@ const BANK_LABELS = [
   "Bank connected",
 ] as const;
 
+const BANK_FAILED_LABEL = "Bank sync failed";
+
 const INBOX_LABELS = [
   "Connecting inbox...",
   "Importing receipts...",
@@ -132,7 +134,11 @@ function SyncPill({
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
             >
-              <Icons.AlertCircle className="size-3 text-destructive" />
+              <Icons.AlertCircle
+                width={12}
+                height={12}
+                className="text-destructive"
+              />
             </motion.div>
           ) : (
             <motion.div
@@ -221,11 +227,14 @@ export function OnboardingSyncStatus({
   }, []);
 
   useEffect(() => {
-    if (bankDone && bankActive) {
-      const timer = setTimeout(() => handleDismiss("bank"), 2000);
+    if ((bankDone || bankFailed) && bankActive) {
+      const timer = setTimeout(
+        () => handleDismiss("bank"),
+        bankFailed ? 5000 : 2000,
+      );
       return () => clearTimeout(timer);
     }
-  }, [bankDone, bankActive, handleDismiss]);
+  }, [bankDone, bankFailed, bankActive, handleDismiss]);
 
   useEffect(() => {
     if (inboxDone && inboxActive) {
@@ -234,7 +243,7 @@ export function OnboardingSyncStatus({
     }
   }, [inboxDone, inboxActive, handleDismiss]);
 
-  const showBank = bankActive && !bankFailed;
+  const showBank = bankActive;
   const showInbox = inboxActive;
   const isVisible = showBank || showInbox;
 
@@ -252,7 +261,7 @@ export function OnboardingSyncStatus({
   if (showBank) {
     items.push({
       key: "bank",
-      label: bankLabel,
+      label: bankFailed ? BANK_FAILED_LABEL : bankLabel,
       isDone: bankDone,
       isFailed: bankFailed,
     });

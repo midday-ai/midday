@@ -41,6 +41,8 @@ export function ConnectBankStep({
             onComplete={handleComplete}
             onSyncStarted={onSyncStarted}
             stickySubmit={false}
+            accountsListClassName="min-h-[180px]"
+            fadeGradientClass="bg-gradient-to-t from-[#f7f7f7] dark:from-[#0c0c0c] to-transparent"
           />
         </Suspense>
       </div>
