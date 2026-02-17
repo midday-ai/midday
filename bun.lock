@@ -329,6 +329,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@midday/logger": "workspace:*",
+        "redis": "5.10.0",
       },
     },
     "packages/categories": {
