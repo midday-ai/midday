@@ -9,7 +9,7 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 import type { ReactNode } from "react";
 import { use, useCallback, useEffect, useMemo, useState } from "react";
@@ -145,9 +145,11 @@ export function OnboardingPage({
   defaultCountryCodePromise,
   user,
 }: Props) {
+  const router = useRouter();
   const [hasTeam, setHasTeam] = useState(!!user.teamId);
   const [hasFullName, setHasFullName] = useState(!!user.fullName);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
   const [bankSync, setBankSync] = useState<BankSyncState>(null);
   const [inboxSync, setInboxSync] = useState<InboxSyncState>(null);
   const [syncVisible, setSyncVisible] = useState(false);
@@ -430,16 +432,19 @@ export function OnboardingPage({
                       </button>
                     )}
                     {currentStep.navigation === "finish" && (
-                      <Link
-                        href="/"
-                        prefetch
-                        onClick={() =>
-                          trackEvent(LogEvents.OnboardingCompleted)
-                        }
+                      <SubmitButton
+                        isSubmitting={isFinishing}
+                        onClick={async () => {
+                          setIsFinishing(true);
+                          trackEvent(LogEvents.OnboardingCompleted);
+                          router.prefetch("/");
+                          await new Promise((r) => setTimeout(r, 5000));
+                          router.push("/");
+                        }}
                         className="px-4 py-2 bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors border border-primary"
                       >
                         Get started
-                      </Link>
+                      </SubmitButton>
                     )}
                   </div>
                 </div>
