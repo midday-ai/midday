@@ -1,7 +1,36 @@
 import { createLoggerWithContext } from "@midday/logger";
-import { getSharedRedisClient } from "./shared-redis";
+import { getSharedRedisClient, isRedisConnected } from "./shared-redis";
 
 const logger = createLoggerWithContext("redis-cache");
+
+// Maximum time (ms) to wait for any single Redis operation.
+// If the command hasn't resolved by then, we abandon it and
+// return the safe fallback (undefined for reads, void for writes).
+const OPERATION_TIMEOUT_MS = 3_000;
+
+/**
+ * Race a promise against a timeout. Rejects with a descriptive error
+ * if the operation takes longer than `ms` milliseconds.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`Redis operation timed out after ${ms}ms`)),
+      ms,
+    );
+
+    promise.then(
+      (val) => {
+        clearTimeout(timer);
+        resolve(val);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
+}
 
 export class RedisCache {
   private prefix: string;
@@ -40,8 +69,16 @@ export class RedisCache {
   }
 
   async get<T>(key: string): Promise<T | undefined> {
+    // Skip Redis entirely when disconnected — go straight to DB fallback
+    if (!isRedisConnected()) {
+      return undefined;
+    }
+
     try {
-      const value = await this.redis.get(this.getKey(key));
+      const value = await withTimeout<string | null>(
+        this.redis.get(this.getKey(key)),
+        OPERATION_TIMEOUT_MS,
+      );
       return this.parseValue<T>(value);
     } catch (error) {
       logger.error(`Get error for ${this.prefix} cache`, {
@@ -53,19 +90,25 @@ export class RedisCache {
   }
 
   async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
+    if (!isRedisConnected()) {
+      return;
+    }
+
     try {
       const serializedValue = this.stringifyValue(value);
       const redisKey = this.getKey(key);
       const ttl = ttlSeconds ?? this.defaultTTL;
 
       if (ttl > 0) {
-        await this.redis.send("SETEX", [
-          redisKey,
-          ttl.toString(),
-          serializedValue,
-        ]);
+        await withTimeout(
+          this.redis.send("SETEX", [redisKey, ttl.toString(), serializedValue]),
+          OPERATION_TIMEOUT_MS,
+        );
       } else {
-        await this.redis.set(redisKey, serializedValue);
+        await withTimeout(
+          this.redis.set(redisKey, serializedValue),
+          OPERATION_TIMEOUT_MS,
+        );
       }
     } catch (error) {
       logger.error(`Set error for ${this.prefix} cache`, {
@@ -76,8 +119,12 @@ export class RedisCache {
   }
 
   async delete(key: string): Promise<void> {
+    if (!isRedisConnected()) {
+      return;
+    }
+
     try {
-      await this.redis.del(this.getKey(key));
+      await withTimeout(this.redis.del(this.getKey(key)), OPERATION_TIMEOUT_MS);
     } catch (error) {
       logger.error(`Delete error for ${this.prefix} cache`, {
         key,
@@ -88,7 +135,7 @@ export class RedisCache {
 
   async healthCheck(): Promise<void> {
     try {
-      await this.redis.send("PING", []);
+      await withTimeout(this.redis.send("PING", []), OPERATION_TIMEOUT_MS);
     } catch (error) {
       throw new Error(`Redis health check failed: ${error}`);
     }
