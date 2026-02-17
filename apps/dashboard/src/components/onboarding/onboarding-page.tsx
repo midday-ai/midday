@@ -139,6 +139,7 @@ export function OnboardingPage({
     connected: parseAsString,
     provider: parseAsString,
     debug_sync: parseAsString,
+    countryCode: parseAsString,
   });
 
   const { step, nextStep, prevStep, totalSteps } = useOnboardingStep({
@@ -164,17 +165,15 @@ export function OnboardingPage({
     }
   }, [connectionParams.debug_sync, setConnectionParams]);
 
-  const handleCountryChange = useCallback(
-    (countryCode: string) => {
-      queryClient.prefetchQuery(
-        trpc.institutions.get.queryOptions({
-          q: "",
-          countryCode,
-        }),
-      );
-    },
-    [queryClient, trpc],
-  );
+  const handleCountryChange = useCallback((countryCode: string) => {
+    setConnectionParams({ countryCode });
+    queryClient.prefetchQuery(
+      trpc.institutions.get.queryOptions({
+        q: "",
+        countryCode,
+      }),
+    );
+  }, []);
 
   const handleTeamCreated = useCallback(() => {
     setHasTeam(true);
