@@ -111,7 +111,9 @@ export function getSharedRedisClient(): any {
 
 /**
  * Check whether the shared Redis client is currently connected.
- * Useful for callers that want to skip Redis entirely when it's down.
+ * Note: Do NOT use this as a precondition guard in cache operations —
+ * the flag is `false` before the first client is created, so gating
+ * on it would prevent the lazy client from ever being instantiated.
  */
 export function isRedisConnected(): boolean {
   return clientIsConnected;

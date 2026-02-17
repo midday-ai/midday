@@ -1,5 +1,5 @@
 import { createLoggerWithContext } from "@midday/logger";
-import { getSharedRedisClient, isRedisConnected } from "./shared-redis";
+import { getSharedRedisClient } from "./shared-redis";
 
 const logger = createLoggerWithContext("redis-cache");
 
@@ -69,14 +69,14 @@ export class RedisCache {
   }
 
   async get<T>(key: string): Promise<T | undefined> {
-    // Skip Redis entirely when disconnected — go straight to DB fallback
-    if (!isRedisConnected()) {
+    const client = this.redis;
+    if (!client) {
       return undefined;
     }
 
     try {
       const value = await withTimeout<string | null>(
-        this.redis.get(this.getKey(key)),
+        client.get(this.getKey(key)),
         OPERATION_TIMEOUT_MS,
       );
       return this.parseValue<T>(value);
@@ -90,7 +90,8 @@ export class RedisCache {
   }
 
   async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
-    if (!isRedisConnected()) {
+    const client = this.redis;
+    if (!client) {
       return;
     }
 
@@ -101,12 +102,12 @@ export class RedisCache {
 
       if (ttl > 0) {
         await withTimeout(
-          this.redis.send("SETEX", [redisKey, ttl.toString(), serializedValue]),
+          client.send("SETEX", [redisKey, ttl.toString(), serializedValue]),
           OPERATION_TIMEOUT_MS,
         );
       } else {
         await withTimeout(
-          this.redis.set(redisKey, serializedValue),
+          client.set(redisKey, serializedValue),
           OPERATION_TIMEOUT_MS,
         );
       }
@@ -119,12 +120,13 @@ export class RedisCache {
   }
 
   async delete(key: string): Promise<void> {
-    if (!isRedisConnected()) {
+    const client = this.redis;
+    if (!client) {
       return;
     }
 
     try {
-      await withTimeout(this.redis.del(this.getKey(key)), OPERATION_TIMEOUT_MS);
+      await withTimeout(client.del(this.getKey(key)), OPERATION_TIMEOUT_MS);
     } catch (error) {
       logger.error(`Delete error for ${this.prefix} cache`, {
         key,
