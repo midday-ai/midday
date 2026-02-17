@@ -30,6 +30,7 @@ export default async function Page() {
         user={{
           id: user.id,
           fullName: user.fullName,
+          avatarUrl: user.avatarUrl ?? null,
           teamId: user.teamId,
         }}
       />

@@ -2,6 +2,7 @@
  * Shared OAuth utilities for app integrations
  */
 import type { OAuthErrorCode } from "@midday/app-store/oauth-errors";
+import { sanitizeRedirectPath } from "@midday/utils/sanitize-redirect";
 
 export type { OAuthErrorCode };
 
@@ -79,8 +80,10 @@ export function buildSuccessRedirect(
     return `${dashboardUrl}/oauth-callback?status=success`;
   }
 
-  // Use custom redirect path if provided (e.g. from onboarding)
-  const targetPath = redirectPath || fallbackPath;
+  // Use custom redirect path if provided (e.g. from onboarding), sanitized to prevent open redirects
+  const targetPath = redirectPath
+    ? sanitizeRedirectPath(redirectPath, fallbackPath)
+    : fallbackPath;
 
   // For direct navigation flow, redirect to target path with success params
   const separator = targetPath.includes("?") ? "&" : "?";
@@ -107,8 +110,10 @@ export function buildErrorRedirect(
     return `${dashboardUrl}/oauth-callback?${params.toString()}`;
   }
 
-  // Use custom redirect path if provided (e.g. from onboarding)
-  const targetPath = redirectPath || fallbackPath;
+  // Use custom redirect path if provided (e.g. from onboarding), sanitized to prevent open redirects
+  const targetPath = redirectPath
+    ? sanitizeRedirectPath(redirectPath, fallbackPath)
+    : fallbackPath;
 
   // For direct navigation flow, redirect to target path with error params
   const separator = targetPath.includes("?") ? "&" : "?";

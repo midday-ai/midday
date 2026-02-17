@@ -16,7 +16,6 @@ import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import { useScript } from "usehooks-ts";
 import { useTeamQuery } from "@/hooks/use-team";
-import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 
@@ -57,7 +56,6 @@ export function ReconnectProvider({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { data: team } = useTeamQuery();
-  const { data: user } = useUserQuery();
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -131,8 +129,6 @@ export function ReconnectProvider({
   const handleOnClick = async () => {
     switch (provider) {
       case "plaid": {
-        if (!user?.id) return;
-
         createPlaidLink.mutate({
           accessToken: accessToken ?? undefined,
         });

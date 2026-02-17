@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "format": "biome format --write .",
+    "lint:fix": "biome format --write .",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
@@ -17,6 +17,7 @@
     ".": "./src/index.ts",
     "./envs": "./src/envs.ts",
     "./format": "./src/format.ts",
+    "./sanitize-redirect": "./src/sanitize-redirect.ts",
     "./tax": "./src/tax.ts"
   }
 }

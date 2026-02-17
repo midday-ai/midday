@@ -115,7 +115,6 @@ function SearchResult({
 
 type BankSearchContentProps = {
   enabled: boolean;
-  onClose?: () => void;
   redirectPath?: string;
   listHeight?: string;
   defaultCountryCode?: string;
@@ -127,7 +126,6 @@ type BankSearchContentProps = {
 
 export function BankSearchContent({
   enabled,
-  onClose,
   redirectPath,
   listHeight = "h-[430px]",
   fadeGradientClass,

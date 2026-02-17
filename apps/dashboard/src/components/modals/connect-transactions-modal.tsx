@@ -49,7 +49,6 @@ export function ConnectTransactionsModal() {
             <div className="pt-4">
               <BankSearchContent
                 enabled={isOpen}
-                onClose={handleOnClose}
                 defaultCountryCode={team?.countryCode ?? ""}
               />
             </div>

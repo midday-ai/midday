@@ -21,16 +21,10 @@ import { z } from "zod/v3";
 import { CountrySelector } from "@/components/country-selector";
 import { SelectCurrency } from "@/components/select-currency";
 import { SelectFiscalMonth } from "@/components/select-fiscal-month";
-import { useUserMutation } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 
 const formSchema = z.object({
-  fullName: z
-    .string()
-    .min(2, "Name must be at least 2 characters.")
-    .max(32)
-    .optional(),
   name: z.string().min(2, "Company name must be at least 2 characters."),
   countryCode: z.string(),
   baseCurrency: z.string(),
@@ -42,7 +36,6 @@ type FormValues = z.infer<typeof formSchema>;
 type Props = {
   defaultCurrencyPromise: Promise<string>;
   defaultCountryCodePromise: Promise<string>;
-  showFullName: boolean;
   onComplete: () => void;
   onCountryChange?: (countryCode: string) => void;
 };
@@ -50,7 +43,6 @@ type Props = {
 export function CreateTeamStep({
   defaultCurrencyPromise,
   defaultCountryCodePromise,
-  showFullName,
   onComplete,
   onCountryChange,
 }: Props) {
@@ -60,7 +52,6 @@ export function CreateTeamStep({
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const isSubmittedRef = useRef(false);
-  const updateUserMutation = useUserMutation();
 
   const createTeamMutation = useMutation(
     trpc.team.create.mutationOptions({
@@ -83,7 +74,6 @@ export function CreateTeamStep({
 
   const form = useZodForm(formSchema, {
     defaultValues: {
-      fullName: "",
       name: "",
       baseCurrency: currency,
       countryCode: countryCode ?? "",
@@ -113,10 +103,6 @@ export function CreateTeamStep({
     isSubmittedRef.current = true;
 
     try {
-      if (showFullName && values.fullName) {
-        await updateUserMutation.mutateAsync({ fullName: values.fullName });
-      }
-
       createTeamMutation.mutate({
         name: values.name,
         baseCurrency: values.baseCurrency,
@@ -158,30 +144,6 @@ export function CreateTeamStep({
       >
         <Form {...form}>
           <form id="create-team-form" onSubmit={form.handleSubmit(onSubmit)}>
-            {showFullName && (
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem className="mt-4 w-full">
-                    <FormLabel className="text-xs text-primary font-normal">
-                      Full name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        autoFocus
-                        placeholder="John Doe"
-                        autoComplete="name"
-                        className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
             <FormField
               control={form.control}
               name="name"
@@ -192,7 +154,7 @@ export function CreateTeamStep({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      autoFocus={!showFullName}
+                      autoFocus
                       placeholder="Ex: Acme Marketing or Acme Co"
                       autoComplete="off"
                       autoCapitalize="none"

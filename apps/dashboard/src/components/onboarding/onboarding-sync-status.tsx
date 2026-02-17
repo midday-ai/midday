@@ -200,10 +200,19 @@ export function OnboardingSyncStatus({
 
   const inboxActive = !!inboxSync && !dismissed.inbox;
 
+  const [inboxCompleted, setInboxCompleted] = useState(false);
+
+  useEffect(() => {
+    if (inboxActive && !inboxCompleted) {
+      const timer = setTimeout(() => setInboxCompleted(true), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [inboxActive, inboxCompleted]);
+
   const { label: inboxLabel, isDone: inboxDone } = useSyncLabels({
     labels: INBOX_LABELS,
     isActive: inboxActive,
-    isCompleted: false,
+    isCompleted: inboxCompleted,
     isFailed: false,
   });
 

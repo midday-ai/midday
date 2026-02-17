@@ -25,6 +25,7 @@ import { ConnectBankStep } from "./steps/connect-bank-step";
 import { ConnectInboxStep } from "./steps/connect-inbox-step";
 import { CreateTeamStep } from "./steps/create-team-step";
 import { ReconciliationStep } from "./steps/reconciliation-step";
+import { SetNameStep } from "./steps/set-name-step";
 import { StartTrialStep } from "./steps/start-trial-step";
 
 type StepConfig = {
@@ -95,6 +96,7 @@ type Props = {
   user: {
     id: string;
     fullName: string | null;
+    avatarUrl: string | null;
     teamId: string | null;
   };
 };
@@ -143,6 +145,7 @@ export function OnboardingPage({
   user,
 }: Props) {
   const [hasTeam, setHasTeam] = useState(!!user.teamId);
+  const [hasFullName, setHasFullName] = useState(!!user.fullName);
   const [bankSync, setBankSync] = useState<BankSyncState>(null);
   const [inboxSync, setInboxSync] = useState<InboxSyncState>(null);
   const [syncVisible, setSyncVisible] = useState(false);
@@ -158,6 +161,7 @@ export function OnboardingPage({
 
   const { step, nextStep, prevStep, totalSteps } = useOnboardingStep({
     hasTeam,
+    hasFullName,
   });
 
   const { trackNavigation, trackEvent } = useOnboardingTracking(step);
@@ -206,6 +210,11 @@ export function OnboardingPage({
     nextStep();
   }, [nextStep]);
 
+  const handleNameSet = useCallback(() => {
+    setHasFullName(true);
+    nextStep();
+  }, [nextStep]);
+
   const handleBankSyncStarted = useCallback(
     (data: { runId: string; accessToken: string }) => {
       setBankSync(data);
@@ -216,6 +225,21 @@ export function OnboardingPage({
 
   const steps: StepConfig[] = useMemo(
     () => [
+      // Step 1 — Profile (name + avatar). Skipped via minStep when hasFullName.
+      {
+        key: "set-name",
+        animation: <DashboardImageAnimation />,
+        content: (
+          <SetNameStep
+            userId={user.id}
+            avatarUrl={user.avatarUrl}
+            onComplete={handleNameSet}
+          />
+        ),
+        overlay: true,
+        navigation: "submit" as const,
+      },
+      // Step 2 — Business details / create team. Skipped via minStep when hasTeam.
       {
         key: "create-team",
         animation: <DashboardImageAnimation />,
@@ -223,14 +247,14 @@ export function OnboardingPage({
           <CreateTeamStep
             defaultCurrencyPromise={defaultCurrencyPromise}
             defaultCountryCodePromise={defaultCountryCodePromise}
-            showFullName={!user.fullName}
             onComplete={handleTeamCreated}
             onCountryChange={handleCountryChange}
           />
         ),
         overlay: true,
-        navigation: "submit",
+        navigation: "submit" as const,
       },
+      // Step 3
       {
         key: "connect-bank",
         animation: <WidgetsAnimation />,
@@ -244,6 +268,7 @@ export function OnboardingPage({
         navigation: "skip",
         trackEvent: LogEvents.OnboardingBankSkipped,
       },
+      // Step 4
       {
         key: "connect-inbox",
         animation: <ReceiptAttachmentAnimation />,
@@ -252,6 +277,7 @@ export function OnboardingPage({
         canGoBack: true,
         trackEvent: LogEvents.OnboardingInboxSkipped,
       },
+      // Step 5
       {
         key: "reconciliation",
         animation: <BulkReconciliationAnimation />,
@@ -260,6 +286,7 @@ export function OnboardingPage({
         canGoBack: true,
         trackEvent: LogEvents.OnboardingStepCompleted,
       },
+      // Step 6
       {
         key: "start-trial",
         animation: <DashboardImageAnimation />,
@@ -270,10 +297,12 @@ export function OnboardingPage({
       },
     ],
     [
+      user.id,
+      user.avatarUrl,
       defaultCurrencyPromise,
       defaultCountryCodePromise,
-      user.fullName,
       handleTeamCreated,
+      handleNameSet,
       handleCountryChange,
       handleBankSyncStarted,
       nextStep,
