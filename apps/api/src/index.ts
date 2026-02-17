@@ -3,6 +3,7 @@ import "./instrument";
 
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { closeDb } from "@midday/db/client";
 import {
   buildDependenciesResponse,
   buildReadinessResponse,
@@ -157,6 +158,45 @@ app.onError((err, c) => {
   });
   return c.json({ error: "Internal Server Error" }, 500);
 });
+
+/**
+ * Graceful shutdown handlers
+ * Close database connections cleanly on process termination (e.g. Railway deploys)
+ */
+const shutdown = async (signal: string) => {
+  logger.info(`Received ${signal}, starting graceful shutdown...`);
+
+  const SHUTDOWN_TIMEOUT = 12_000; // 12s — fits within Railway's 15s draining window
+
+  const shutdownPromise = (async () => {
+    try {
+      logger.info("Closing database connections...");
+      await closeDb();
+
+      logger.info("Flushing Sentry events...");
+      await Sentry.close(2000);
+
+      logger.info("Graceful shutdown complete");
+    } catch (error) {
+      logger.error("Error during shutdown", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })();
+
+  const timeoutPromise = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      logger.warn("Shutdown timeout reached, forcing exit");
+      resolve();
+    }, SHUTDOWN_TIMEOUT);
+  });
+
+  await Promise.race([shutdownPromise, timeoutPromise]);
+  process.exit(0);
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
 
 /**
  * Unhandled exception and rejection handlers
