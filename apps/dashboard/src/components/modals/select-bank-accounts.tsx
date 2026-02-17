@@ -24,6 +24,7 @@ export function SelectBankAccountsModal() {
             enabled={isOpen}
             onClose={onClose}
             stickySubmit={true}
+            accountsListClassName="min-h-[280px]"
           />
         </div>
       </DialogContent>

@@ -36,7 +36,7 @@ export function ConnectBankStep({
       <div>
         <Suspense>
           <SelectBankAccountsContent
-            enabled={true}
+            enabled 
             onClose={handleClose}
             onComplete={handleComplete}
             onSyncStarted={onSyncStarted}

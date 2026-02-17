@@ -2,11 +2,7 @@
 
 import { motion } from "framer-motion";
 
-type Props = {
-  onContinue: () => void;
-};
-
-export function ReconciliationStep({ onContinue }: Props) {
+export function ReconciliationStep() {
   return (
     <div className="space-y-4">
       <motion.h1

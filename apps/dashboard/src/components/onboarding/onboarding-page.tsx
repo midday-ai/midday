@@ -273,7 +273,7 @@ export function OnboardingPage({
       {
         key: "connect-inbox",
         animation: <ReceiptAttachmentAnimation />,
-        content: <ConnectInboxStep onContinue={nextStep} />,
+        content: <ConnectInboxStep />,
         navigation: "skip",
         canGoBack: true,
         trackEvent: LogEvents.OnboardingInboxSkipped,
@@ -282,7 +282,7 @@ export function OnboardingPage({
       {
         key: "reconciliation",
         animation: <BulkReconciliationAnimation />,
-        content: <ReconciliationStep onContinue={nextStep} />,
+        content: <ReconciliationStep />,
         navigation: "next",
         canGoBack: true,
         trackEvent: LogEvents.OnboardingStepCompleted,

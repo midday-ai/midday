@@ -4,11 +4,7 @@ import { motion } from "framer-motion";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
 import { ConnectOutlook } from "@/components/inbox/connect-outlook";
 
-type Props = {
-  onContinue: () => void;
-};
-
-export function ConnectInboxStep({ onContinue }: Props) {
+export function ConnectInboxStep() {
   return (
     <div className="space-y-4">
       <motion.h1

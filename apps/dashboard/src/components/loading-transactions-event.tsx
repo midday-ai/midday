@@ -54,7 +54,49 @@ export function LoadingTransactionsEvent({
         setParams(null);
       }, 1000);
     }
+
+    if (status === "FAILED") {
+      setStep(-1);
+    }
   }, [status]);
+
+  if (step === -1) {
+    return (
+      <div className="w-full">
+        <h2 className="text-lg font-semibold leading-none tracking-tight mb-2">
+          Something went wrong
+        </h2>
+
+        <p className="text-sm text-[#878787] mb-8">
+          We couldn't set up your account. This can happen if the bank
+          connection timed out or there was a temporary issue. Please try again.
+        </p>
+
+        <div className="w-full mt-12">
+          <Button
+            className="w-full"
+            onClick={() => {
+              setRunId(undefined);
+              setStep(1);
+              setActiveTab("select-accounts");
+            }}
+          >
+            Try again
+          </Button>
+
+          <div className="flex justify-center mt-4">
+            <button
+              type="button"
+              className="text-xs text-[#878787]"
+              onClick={() => setActiveTab("support")}
+            >
+              Need support
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
