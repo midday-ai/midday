@@ -230,7 +230,7 @@ export function SelectBankAccountsContent({
           | "enablebanking",
       },
       {
-        enabled,
+        enabled: enabled && !!provider,
         retry: false,
       },
     ),
@@ -266,6 +266,12 @@ export function SelectBankAccountsContent({
 
   useEffect(() => {
     if (error || isError) {
+      toast({
+        duration: 5000,
+        variant: "error",
+        title: "Could not connect your bank. Please try again.",
+      });
+
       setParams({
         step: null,
         error: null,

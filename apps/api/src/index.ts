@@ -64,7 +64,7 @@ app.use(
   trpcServer({
     router: appRouter,
     createContext: createTRPCContext,
-    onError: ({ error, path }) => {
+    onError: ({ error, path, input }) => {
       logger.error(`[tRPC] ${path}`, {
         message: error.message,
         code: error.code,
@@ -76,6 +76,10 @@ app.use(
       if (error.code === "INTERNAL_SERVER_ERROR") {
         Sentry.captureException(error, {
           tags: { source: "trpc", path: path ?? "unknown" },
+          extra: {
+            input:
+              typeof input === "object" ? JSON.stringify(input) : undefined,
+          },
         });
       }
     },
