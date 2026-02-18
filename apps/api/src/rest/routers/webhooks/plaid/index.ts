@@ -10,6 +10,7 @@ import type { SyncConnectionPayload } from "@midday/jobs/schema";
 import { logger } from "@midday/logger";
 import { tasks } from "@trigger.dev/sdk";
 import { isAfter, subDays } from "date-fns";
+import { getConnInfo } from "hono/bun";
 import { HTTPException } from "hono/http-exception";
 
 const app = new OpenAPIHono<Context>();
@@ -84,12 +85,32 @@ app.openapi(
     },
   }),
   async (c) => {
-    const clientIp = c.get("clientIp") ?? "";
+    const forwardedFor = c.req.header("x-forwarded-for");
 
-    if (!ALLOWED_IPS.includes(clientIp)) {
-      throw new HTTPException(403, {
-        message: "Unauthorized IP address",
-      });
+    if (forwardedFor) {
+      const ips = forwardedFor
+        .split(",")
+        .map((ip) => ip.trim())
+        .filter(Boolean);
+
+      if (ips.length === 0 || !ips.every((ip) => ALLOWED_IPS.includes(ip))) {
+        throw new HTTPException(403, {
+          message: "Unauthorized IP address",
+        });
+      }
+    } else {
+      let connectingIp = "";
+      try {
+        connectingIp = getConnInfo(c).remote.address ?? "";
+      } catch {
+        // no connection info available
+      }
+
+      if (!ALLOWED_IPS.includes(connectingIp)) {
+        throw new HTTPException(403, {
+          message: "Unauthorized IP address",
+        });
+      }
     }
 
     const body = await c.req.json();
