@@ -12,9 +12,22 @@ export class RedisCache {
     this.defaultTTL = defaultTTL;
   }
 
-  // Get client lazily - allows picking up reconnected clients
   private get redis() {
     return getSharedRedisClient();
+  }
+
+  /**
+   * Fail-fast guard: when the client is mid-reconnect, skip the operation
+   * instead of queuing commands against a dead socket (which is what causes
+   * the "slow after inactivity" hang). The app keeps working with a cache
+   * miss while node-redis reconnects in the background.
+   */
+  private get isReady(): boolean {
+    try {
+      return this.redis.isReady;
+    } catch {
+      return false;
+    }
   }
 
   private parseValue<T>(value: string | null): T | undefined {
@@ -23,7 +36,6 @@ export class RedisCache {
     try {
       return JSON.parse(value) as T;
     } catch {
-      // If parsing fails, return the raw string (for backwards compatibility)
       return value as unknown as T;
     }
   }
@@ -40,6 +52,13 @@ export class RedisCache {
   }
 
   async get<T>(key: string): Promise<T | undefined> {
+    if (!this.isReady) {
+      logger.warn(`Client not ready, skipping get for ${this.prefix}`, {
+        key,
+      });
+      return undefined;
+    }
+
     try {
       const value = await this.redis.get(this.getKey(key));
       return this.parseValue<T>(value);
@@ -53,6 +72,13 @@ export class RedisCache {
   }
 
   async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
+    if (!this.isReady) {
+      logger.warn(`Client not ready, skipping set for ${this.prefix}`, {
+        key,
+      });
+      return;
+    }
+
     try {
       const serializedValue = this.stringifyValue(value);
       const redisKey = this.getKey(key);
@@ -72,6 +98,13 @@ export class RedisCache {
   }
 
   async delete(key: string): Promise<void> {
+    if (!this.isReady) {
+      logger.warn(`Client not ready, skipping delete for ${this.prefix}`, {
+        key,
+      });
+      return;
+    }
+
     try {
       await this.redis.del(this.getKey(key));
     } catch (error) {
