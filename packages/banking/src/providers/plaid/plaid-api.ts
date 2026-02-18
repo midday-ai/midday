@@ -58,10 +58,10 @@ export class PlaidApi {
 
   #generateWebhookUrl(environment: "sandbox" | "production") {
     if (environment === "sandbox") {
-      return "https://staging.app.midday.ai/api/webhook/plaid";
+      return "https://staging.api.midday.ai/webhook/plaid";
     }
 
-    return "https://app.midday.ai/api/webhook/plaid";
+    return "https://api.midday.ai/webhook/plaid";
   }
 
   async getHealthCheck() {
@@ -309,8 +309,10 @@ export class PlaidApi {
         }
       }
 
-      // If we get here, the account is not disconnected
-      // But it could be a connection issue between Plaid and the institution
+      logger.error("Plaid connection status check failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+
       return { status: "connected" };
     }
   }

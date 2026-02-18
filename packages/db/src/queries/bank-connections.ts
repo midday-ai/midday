@@ -290,6 +290,63 @@ export const getBankAccountDetails = async (
   };
 };
 
+export const getBankConnectionByEnrollmentId = async (
+  db: Database,
+  params: { enrollmentId: string },
+) => {
+  return db.query.bankConnections.findFirst({
+    where: eq(bankConnections.enrollmentId, params.enrollmentId),
+    columns: {
+      id: true,
+      createdAt: true,
+    },
+    with: {
+      team: {
+        columns: {
+          id: true,
+          plan: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+};
+
+export const getBankConnectionByReferenceId = async (
+  db: Database,
+  params: { referenceId: string },
+) => {
+  return db.query.bankConnections.findFirst({
+    where: eq(bankConnections.referenceId, params.referenceId),
+    columns: {
+      id: true,
+      createdAt: true,
+    },
+    with: {
+      team: {
+        columns: {
+          id: true,
+          plan: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+};
+
+export const updateBankConnectionStatus = async (
+  db: Database,
+  params: { id: string; status: "connected" | "disconnected" | "unknown" },
+) => {
+  const [result] = await db
+    .update(bankConnections)
+    .set({ status: params.status })
+    .where(eq(bankConnections.id, params.id))
+    .returning({ id: bankConnections.id });
+
+  return result;
+};
+
 export type GetBankAccountsWithPaymentInfoParams = {
   teamId: string;
 };
