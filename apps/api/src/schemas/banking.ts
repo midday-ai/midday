@@ -53,7 +53,7 @@ export const enablebankingExchangeSchema = z.object({
 
 // Connection schemas
 export const connectionStatusSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().nullish(),
   provider: providerSchema,
   accessToken: z.string().optional(),
 });
