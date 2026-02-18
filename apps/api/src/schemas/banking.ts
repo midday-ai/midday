@@ -41,10 +41,7 @@ export const gocardlessAgreementSchema = z.object({
 
 export const enablebankingLinkSchema = z.object({
   institutionId: z.string(),
-  country: z.string(),
-  validUntil: z.string(),
   state: z.string(),
-  type: z.enum(["personal", "business"]),
 });
 
 export const enablebankingExchangeSchema = z.object({

@@ -338,7 +338,7 @@ export type GetTransactionsResponse = {
 
 export type AuthenticateRequest = {
   country: string;
-  institutionId: string;
+  institutionName: string;
   teamId: string;
   validUntil: string;
   state: string;

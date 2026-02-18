@@ -1,41 +1,30 @@
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { BankConnectButton } from "./bank-connect-button";
 
 type Props = {
-  id: string;
+  institutionId: string;
   onSelect: () => void;
-  maximumConsentValidity: number;
-  country: string;
-  type?: "personal" | "business";
   redirectPath?: string;
   connectRef?: React.MutableRefObject<(() => void) | null>;
 };
 
 export function EnableBankingConnect({
   onSelect,
-  id,
-  maximumConsentValidity,
-  country,
-  type,
+  institutionId,
   redirectPath,
   connectRef,
 }: Props) {
   const { toast } = useToast();
   const trpc = useTRPC();
-  const { data: team } = useQuery(trpc.team.current.queryOptions());
 
   const createLink = useMutation(
     trpc.banking.enablebankingLink.mutationOptions({}),
   );
 
   const handleOnSelect = async () => {
-    if (!team?.id) {
-      return;
-    }
-
     onSelect();
 
     try {
@@ -46,12 +35,7 @@ export function EnableBankingConnect({
       }
 
       const linkData = await createLink.mutateAsync({
-        institutionId: id,
-        country: country || team.countryCode || "",
-        type: type ?? "business",
-        validUntil: new Date(Date.now() + maximumConsentValidity * 1000)
-          .toISOString()
-          .replace(/\.\d+Z$/, ".000000+00:00"),
+        institutionId,
         state: stateParts.join(":"),
       });
 

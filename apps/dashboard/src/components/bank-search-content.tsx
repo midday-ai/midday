@@ -66,6 +66,7 @@ type SearchResultProps = {
   openPlaid: () => void;
   type?: "personal" | "business";
   redirectPath?: string;
+  country?: string;
 };
 
 function SearchResult({
@@ -78,6 +79,7 @@ function SearchResult({
   maximumConsentValidity,
   type,
   redirectPath,
+  country,
 }: SearchResultProps) {
   const connectRef = useRef<(() => void) | null>(null);
 
@@ -203,6 +205,7 @@ export function BankSearchContent({
       {
         q: debouncedQuery,
         countryCode,
+        excludeProviders: ["gocardless"],
       },
       {
         enabled,
@@ -271,6 +274,7 @@ export function BankSearchContent({
                     : 0
                 }
                 type={institution?.type ?? undefined}
+                country={institution?.country ?? undefined}
                 openPlaid={() => {
                   setParams({ step: null });
                   openPlaid();

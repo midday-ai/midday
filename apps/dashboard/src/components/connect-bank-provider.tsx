@@ -30,7 +30,7 @@ export function ConnectBankProvider({
   redirectPath,
   connectRef,
 }: Props) {
-  const { setParams, countryCode } = useConnectParams();
+  const { setParams } = useConnectParams();
   const trpc = useTRPC();
   const updateUsageMutation = useMutation(
     trpc.institutions.updateUsage.mutationOptions(),
@@ -72,10 +72,7 @@ export function ConnectBankProvider({
     case "enablebanking": {
       return (
         <EnableBankingConnect
-          id={name}
-          country={countryCode}
-          maximumConsentValidity={maximumConsentValidity}
-          type={type}
+          institutionId={id}
           onSelect={() => {
             updateUsage();
           }}
