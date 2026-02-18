@@ -55,7 +55,7 @@ export const onboardTeam = schemaTask({
       return;
     }
 
-    await wait.for({ days: 11 });
+    await wait.for({ days: 13 });
 
     if (await shouldSendEmail(user.team_id)) {
       await resend.emails.send({
@@ -70,7 +70,7 @@ export const onboardTeam = schemaTask({
       });
     }
 
-    await wait.for({ days: 15 });
+    await wait.for({ days: 1 });
 
     if (await shouldSendEmail(user.team_id)) {
       await resend.emails.send({
