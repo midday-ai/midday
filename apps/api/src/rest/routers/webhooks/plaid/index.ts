@@ -1,5 +1,6 @@
 import type { Context } from "@api/rest/types";
 import { isTeamEligibleForSync } from "@api/utils/check-team-eligibility";
+import { validatePlaidWebhook } from "@api/utils/plaid";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   deleteTransactionsByInternalIds,
@@ -10,18 +11,9 @@ import type { SyncConnectionPayload } from "@midday/jobs/schema";
 import { logger } from "@midday/logger";
 import { tasks } from "@trigger.dev/sdk";
 import { isAfter, subDays } from "date-fns";
-import { getConnInfo } from "hono/bun";
 import { HTTPException } from "hono/http-exception";
 
 const app = new OpenAPIHono<Context>();
-
-// https://plaid.com/docs/api/webhooks/#configuring-webhooks
-const ALLOWED_IPS = [
-  "52.21.26.131",
-  "52.21.47.157",
-  "52.41.247.19",
-  "52.88.82.239",
-];
 
 const errorSchema = z
   .object({
@@ -65,7 +57,7 @@ app.openapi(
     summary: "Plaid webhook handler",
     operationId: "plaidWebhook",
     description:
-      "Handles Plaid webhook events for transaction updates and item status changes. Validates source IP against Plaid's allowlist.",
+      "Handles Plaid webhook events for transaction updates and item status changes. Verifies the Plaid-Verification JWT signature.",
     tags: ["Webhooks"],
     responses: {
       200: {
@@ -79,41 +71,26 @@ app.openapi(
       400: {
         description: "Invalid webhook payload",
       },
-      403: {
-        description: "Unauthorized IP address",
+      401: {
+        description: "Invalid webhook signature",
       },
     },
   }),
   async (c) => {
-    const forwardedFor = c.req.header("x-forwarded-for");
+    const rawBody = await c.req.text();
 
-    if (forwardedFor) {
-      const ips = forwardedFor
-        .split(",")
-        .map((ip) => ip.trim())
-        .filter(Boolean);
+    const isValid = await validatePlaidWebhook({
+      body: rawBody,
+      verificationHeader: c.req.header("plaid-verification") ?? null,
+    });
 
-      if (ips.length === 0 || !ips.every((ip) => ALLOWED_IPS.includes(ip))) {
-        throw new HTTPException(403, {
-          message: "Unauthorized IP address",
-        });
-      }
-    } else {
-      let connectingIp = "";
-      try {
-        connectingIp = getConnInfo(c).remote.address ?? "";
-      } catch {
-        // no connection info available
-      }
-
-      if (!ALLOWED_IPS.includes(connectingIp)) {
-        throw new HTTPException(403, {
-          message: "Unauthorized IP address",
-        });
-      }
+    if (!isValid) {
+      throw new HTTPException(401, {
+        message: "Invalid webhook signature",
+      });
     }
 
-    const body = await c.req.json();
+    const body = JSON.parse(rawBody);
 
     const result = webhookSchema.safeParse(body);
 
