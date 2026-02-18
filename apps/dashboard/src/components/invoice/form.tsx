@@ -23,7 +23,6 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useInvoiceEditorStore } from "@/store/invoice-editor";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
-
 import { SavingBar } from "../saving-bar";
 import { CustomerDetails } from "./customer-details";
 import { EditBlock } from "./edit-block";

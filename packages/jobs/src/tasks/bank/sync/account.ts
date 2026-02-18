@@ -1,7 +1,7 @@
 import { parseAPIError } from "@jobs/utils/parse-error";
 import { getClassification } from "@jobs/utils/transform";
-import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
+import { trpc } from "@midday/trpc";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { upsertTransactions } from "../transactions/upsert";
@@ -45,27 +45,19 @@ export const syncAccount = schemaTask({
 
     // Get the balance
     try {
-      const balanceResponse = await client.accounts.balance.$get({
-        query: {
-          provider,
-          id: accountId,
-          accessToken,
-          accountType,
-        },
+      const balanceResult = await trpc.banking.getBalance.query({
+        provider,
+        id: accountId,
+        accessToken,
+        accountType,
       });
 
-      if (!balanceResponse.ok) {
-        throw new Error("Failed to get balance");
-      }
-
-      const { data: balanceData } = (await balanceResponse.json()) as {
-        data: {
-          amount: number;
-          currency: string;
-          available_balance?: number | null;
-          credit_limit?: number | null;
-        } | null;
-      };
+      const balanceData = balanceResult.data as {
+        amount: number;
+        currency: string;
+        available_balance?: number | null;
+        credit_limit?: number | null;
+      } | null;
 
       const balance = balanceData?.amount ?? null;
 
@@ -115,20 +107,15 @@ export const syncAccount = schemaTask({
 
     // Get the transactions
     try {
-      const transactionsResponse = await client.transactions.$get({
-        query: {
+      const transactionsResult =
+        await trpc.banking.getProviderTransactions.query({
           provider,
           accountId,
           accountType: classification,
           accessToken,
           // If the transactions are being synced manually, we want to get all transactions
-          latest: manualSync ? "false" : "true",
-        },
-      });
-
-      if (!transactionsResponse.ok) {
-        throw new Error("Failed to get transactions");
-      }
+          latest: !manualSync,
+        });
 
       // Reset error details and retries if we successfully got the transactions
       await supabase
@@ -139,7 +126,7 @@ export const syncAccount = schemaTask({
         })
         .eq("id", id);
 
-      const { data: transactionsData } = await transactionsResponse.json();
+      const transactionsData = transactionsResult.data;
 
       if (!transactionsData) {
         logger.info(`No transactions to upsert for account ${accountId}`);

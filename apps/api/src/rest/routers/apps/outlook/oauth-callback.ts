@@ -94,6 +94,8 @@ app.openapi(
     const parsedState = decryptOAuthState(state);
     const source = parsedState?.source;
 
+    const redirectPath = parsedState?.redirectPath;
+
     // Handle OAuth errors (user denied access, etc.)
     if (error || !code) {
       const errorCode = mapOAuthError(error);
@@ -105,6 +107,7 @@ app.openapi(
           "outlook",
           source,
           "/inbox",
+          redirectPath,
         ),
         302,
       );
@@ -133,6 +136,7 @@ app.openapi(
             "outlook",
             parsedState.source,
             "/inbox",
+            redirectPath,
           ),
           302,
         );
@@ -150,6 +154,7 @@ app.openapi(
           "outlook",
           parsedState.source,
           "/inbox",
+          redirectPath,
         ),
         302,
       );
@@ -166,6 +171,7 @@ app.openapi(
           "outlook",
           parsedState.source,
           "/inbox",
+          redirectPath,
         ),
         302,
       );

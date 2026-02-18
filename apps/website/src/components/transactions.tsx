@@ -1,10 +1,10 @@
 "use client";
 
+import { BulkReconciliationAnimation } from "@midday/ui/animations/bulk-reconciliation";
+import { TransactionFlowAnimation } from "@midday/ui/animations/transaction-flow";
 import Image from "next/image";
 import Link from "next/link";
 import { HeroImage } from "./hero-image";
-import { BulkReconciliationAnimation } from "./homepage/bulk-reconciliation-animation";
-import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
 import { PreAccountingSection } from "./sections/pre-accounting-section";

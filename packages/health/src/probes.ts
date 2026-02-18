@@ -7,6 +7,7 @@
  * - Fast timeout
  */
 
+import { Provider } from "@midday/banking";
 import { checkHealth as checkCacheHealth } from "@midday/cache/health";
 import { checkHealth as checkDbHealth } from "@midday/db/utils/health";
 import type { Dependency } from "./registry";
@@ -96,22 +97,78 @@ export function redisQueueProbe(): Dependency {
 // Tier 2 — Important services
 // ---------------------------------------------------------------------------
 
-/** Engine service: GET /health (reachable if response received, even if sub-services are degraded) */
-export function engineProbe(): Dependency {
+/** Plaid health check via @midday/banking */
+export function plaidProbe(): Dependency {
   return {
-    name: "engine",
+    name: "plaid",
     tier: 2,
     cacheTtlMs: 60_000,
     timeoutMs: 5_000,
     probe: async () => {
-      const url = process.env.ENGINE_API_URL;
-      if (!url) return false;
-      const res = await fetch(`${url}/health`, {
-        signal: AbortSignal.timeout(5_000),
-      });
-      // Engine returns 400 when a sub-provider is down but the service itself
-      // is reachable and processing requests — treat that as healthy.
-      return res.status < 500;
+      try {
+        const provider = new Provider({ provider: "plaid" });
+        return await provider.getHealthCheck().then((h) => h.plaid.healthy);
+      } catch {
+        return false;
+      }
+    },
+  };
+}
+
+/** GoCardless health check via @midday/banking */
+export function gocardlessProbe(): Dependency {
+  return {
+    name: "gocardless",
+    tier: 2,
+    cacheTtlMs: 60_000,
+    timeoutMs: 5_000,
+    probe: async () => {
+      try {
+        const provider = new Provider({ provider: "gocardless" });
+        return await provider
+          .getHealthCheck()
+          .then((h) => h.gocardless.healthy);
+      } catch {
+        return false;
+      }
+    },
+  };
+}
+
+/** EnableBanking health check via @midday/banking */
+export function enableBankingProbe(): Dependency {
+  return {
+    name: "enablebanking",
+    tier: 2,
+    cacheTtlMs: 60_000,
+    timeoutMs: 5_000,
+    probe: async () => {
+      try {
+        const provider = new Provider({ provider: "enablebanking" });
+        return await provider
+          .getHealthCheck()
+          .then((h) => h.enablebanking.healthy);
+      } catch {
+        return false;
+      }
+    },
+  };
+}
+
+/** Teller health check via @midday/banking */
+export function tellerProbe(): Dependency {
+  return {
+    name: "teller",
+    tier: 2,
+    cacheTtlMs: 60_000,
+    timeoutMs: 5_000,
+    probe: async () => {
+      try {
+        const provider = new Provider({ provider: "teller" });
+        return await provider.getHealthCheck().then((h) => h.teller.healthy);
+      } catch {
+        return false;
+      }
     },
   };
 }
@@ -377,7 +434,10 @@ export function apiDependencies(): Dependency[] {
     redisQueueProbe(),
     supabaseProbe(),
     // Tier 2 — Important
-    engineProbe(),
+    plaidProbe(),
+    gocardlessProbe(),
+    enableBankingProbe(),
+    tellerProbe(),
     stripeProbe(),
     polarProbe(),
     resendProbe(),
@@ -403,7 +463,10 @@ export function workerDependencies(): Dependency[] {
     redisQueueProbe(),
     supabaseProbe(),
     // Tier 2 — Important
-    engineProbe(),
+    plaidProbe(),
+    gocardlessProbe(),
+    enableBankingProbe(),
+    tellerProbe(),
     resendProbe(),
     openaiProbe(),
     // Tier 4 — Optional

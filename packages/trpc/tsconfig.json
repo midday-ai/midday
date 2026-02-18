@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@api/*": ["../../apps/api/src/*"],
+      "@jobs/*": ["../../packages/jobs/src/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

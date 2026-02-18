@@ -30,7 +30,6 @@ jobs:
       api: ${{ steps.affected.outputs.api }}
       dashboard: ${{ steps.affected.outputs.dashboard }}
       worker: ${{ steps.affected.outputs.worker }}
-      engine: ${{ steps.affected.outputs.engine }}
       website: ${{ steps.affected.outputs.website }}
       email: ${{ steps.affected.outputs.email }}
       jobs: ${{ steps.affected.outputs.jobs }}
@@ -49,7 +48,6 @@ jobs:
           echo "api=$(echo "$AFFECTED" | grep -q '@midday/api' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "dashboard=$(echo "$AFFECTED" | grep -q '@midday/dashboard' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "worker=$(echo "$AFFECTED" | grep -q '@midday/worker' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "engine=$(echo "$AFFECTED" | grep -q '@midday/engine' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "website=$(echo "$AFFECTED" | grep -q '@midday/website' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "email=$(echo "$AFFECTED" | grep -q '@midday/email' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "jobs=$(echo "$AFFECTED" | grep -q '@midday/jobs' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
@@ -75,7 +73,7 @@ jobs:
         run: bunx turbo lint --affected
 
       - name: Build required type dependencies
-        run: bunx turbo build --filter=workbench --filter=@midday/engine
+        run: bunx turbo build --filter=workbench
 
       - name: Typecheck
         run: bunx turbo typecheck --affected
@@ -156,32 +154,6 @@ jobs:
         run: npx @railway/cli up --service worker
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
-  # ---------------------------------------------------------------------------
-  # Deploy Engine to Cloudflare
-  # ---------------------------------------------------------------------------
-  deploy-engine:
-    name: Deploy Engine
-    needs: [detect-changes, validate]
-    if: >-
-      always() &&
-      needs.validate.result == 'success' &&
-      needs.detect-changes.outputs.engine == 'true'
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/setup
-
-      - name: Deploy to Cloudflare
-        uses: cloudflare/wrangler-action@v3
-        with:
-          packageManager: bun
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          workingDirectory: "apps/engine"
-          wranglerVersion: "4.33.2"
-          command: deploy --minify src/index.ts --env production
 
   # ---------------------------------------------------------------------------
   # Deploy Website to Vercel

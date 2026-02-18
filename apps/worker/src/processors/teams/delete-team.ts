@@ -1,4 +1,4 @@
-import { client } from "@midday/engine-client";
+import { trpc } from "@midday/trpc";
 import type { Job } from "bullmq";
 import type { DeleteTeamPayload } from "../../schemas/teams";
 import { BaseProcessor } from "../base";
@@ -7,7 +7,7 @@ import { BaseProcessor } from "../base";
  * Delete team processor
  *
  * Handles cleanup tasks when a team is deleted:
- * - Delete bank connections via engine client
+ * - Delete bank connections via banking API
  *
  * Note: Subscription cancellation is handled manually by the user via the
  * customer portal before team deletion. The UI prompts users to cancel
@@ -65,16 +65,14 @@ export class DeleteTeamProcessor extends BaseProcessor<DeleteTeamPayload> {
       }
 
       try {
-        await client.connections.delete.$delete({
-          json: {
-            id: connection.referenceId,
-            provider: connection.provider as
-              | "gocardless"
-              | "teller"
-              | "plaid"
-              | "enablebanking",
-            accessToken: connection.accessToken ?? undefined,
-          },
+        await trpc.banking.deleteConnection.mutate({
+          id: connection.referenceId,
+          provider: connection.provider as
+            | "gocardless"
+            | "teller"
+            | "plaid"
+            | "enablebanking",
+          accessToken: connection.accessToken ?? undefined,
         });
         return true;
       } catch (error) {

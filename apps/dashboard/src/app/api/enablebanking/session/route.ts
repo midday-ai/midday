@@ -1,7 +1,7 @@
-import { client } from "@midday/engine-client";
 import { getSession } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
+import { sanitizeRedirectPath } from "@midday/utils/sanitize-redirect";
 import { type NextRequest, NextResponse } from "next/server";
+import { getTRPCClient } from "@/trpc/server";
 import { getUrl } from "@/utils/environment";
 
 export async function GET(request: NextRequest) {
@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const state = searchParams.get("state");
-  const supabase = await createClient();
 
   const {
     data: { session },
@@ -19,61 +18,76 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/", origin));
   }
 
-  const [type, method, sessionId] = state?.split(":") ?? [];
+  const stateParts = state?.split(":") ?? [];
+  const [type, method] = stateParts;
+  // The third segment is either a sessionId (for reconnect) or an encoded redirectPath (for connect)
+  const thirdSegment = stateParts[2];
 
   const isDesktop = type === "desktop";
   const scheme = process.env.NEXT_PUBLIC_DESKTOP_SCHEME || "midday";
   const redirectBase = isDesktop ? `${scheme}://` : origin;
 
   if (!code) {
-    return NextResponse.redirect(new URL("/?error=missing_code", redirectBase));
+    // User cancelled auth — redirect back to the original page (e.g. onboarding)
+    const cancelRedirectPath =
+      method === "connect" && thirdSegment
+        ? sanitizeRedirectPath(thirdSegment)
+        : "/";
+    return NextResponse.redirect(new URL(cancelRedirectPath, redirectBase));
   }
 
-  const sessionResponse = await client.auth.enablebanking.exchange.$get({
-    query: {
-      code,
-    },
-  });
+  const trpc = await getTRPCClient();
 
-  if (sessionResponse.status !== 200) {
+  let sessionData:
+    | Awaited<ReturnType<typeof trpc.banking.enablebankingExchange.mutate>>
+    | undefined;
+
+  try {
+    sessionData = await trpc.banking.enablebankingExchange.mutate({ code });
+  } catch {
     return NextResponse.redirect(new URL("/?error=invalid_code", redirectBase));
   }
 
-  if (method === "connect") {
-    const { data: sessionData } = await sessionResponse.json();
+  const exchangeSessionId = sessionData.data.session_id;
+  const exchangeExpiresAt = sessionData.data.expires_at;
 
-    if (sessionData?.session_id) {
+  if (method === "connect" && exchangeSessionId) {
+    const customRedirectPath = thirdSegment
+      ? sanitizeRedirectPath(thirdSegment)
+      : "/";
+    const separator = customRedirectPath.includes("?") ? "&" : "?";
+    return NextResponse.redirect(
+      new URL(
+        `${customRedirectPath}${separator}ref=${exchangeSessionId}&provider=enablebanking&step=account`,
+        redirectBase,
+      ),
+    );
+  }
+
+  const sessionId = thirdSegment;
+
+  if (
+    method === "reconnect" &&
+    sessionId &&
+    exchangeSessionId &&
+    exchangeExpiresAt
+  ) {
+    try {
+      const connection = await trpc.bankConnections.reconnect.mutate({
+        referenceId: sessionId,
+        newReferenceId: exchangeSessionId,
+        expiresAt: exchangeExpiresAt,
+      });
+
       return NextResponse.redirect(
         new URL(
-          `/?ref=${sessionData.session_id}&provider=enablebanking&step=account`,
+          `/settings/accounts?id=${connection.id}&step=reconnect`,
           redirectBase,
         ),
       );
-    }
-  }
-
-  if (method === "reconnect" && sessionId) {
-    const { data: sessionData } = await sessionResponse.json();
-
-    // Update the bank connection session
-    if (sessionData?.session_id) {
-      const { data } = await supabase
-        .from("bank_connections")
-        .update({
-          expires_at: sessionData.expires_at,
-          reference_id: sessionData.session_id,
-          status: "connected",
-        })
-        .eq("reference_id", sessionId)
-        .select("id")
-        .single();
-
-      // Redirect to frontend which will trigger the reconnect job
+    } catch {
       return NextResponse.redirect(
-        new URL(
-          `/settings/accounts?id=${data?.id}&step=reconnect`,
-          redirectBase,
-        ),
+        new URL("/?error=reconnect_failed", redirectBase),
       );
     }
   }

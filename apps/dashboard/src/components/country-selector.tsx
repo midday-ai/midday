@@ -17,9 +17,10 @@ import { useEffect } from "react";
 type Props = {
   defaultValue: string;
   onSelect: (countryCode: string, countryName: string) => void;
+  className?: string;
 };
 
-export function CountrySelector({ defaultValue, onSelect }: Props) {
+export function CountrySelector({ defaultValue, onSelect, className }: Props) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(defaultValue);
 
@@ -39,14 +40,17 @@ export function CountrySelector({ defaultValue, onSelect }: Props) {
         <Button
           variant="outline"
           aria-expanded={open}
-          className="w-full justify-between font-normal truncate"
+          className={cn(
+            "w-full justify-between font-normal truncate",
+            className,
+          )}
         >
           {value ? selected?.name : "Select country"}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[225px] p-0 z-[60]"
+        className="w-[var(--radix-popover-trigger-width)] min-w-[225px] p-0 z-[60]"
         align="start"
         portal={true}
       >

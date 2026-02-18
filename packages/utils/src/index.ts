@@ -17,6 +17,7 @@ export {
   ensureFileExtension,
   getExtensionFromMimeType,
 } from "./mime-to-extension";
+export { sanitizeRedirectPath } from "./sanitize-redirect";
 export {
   getDefaultTaxType,
   getTaxTypeForCountry,

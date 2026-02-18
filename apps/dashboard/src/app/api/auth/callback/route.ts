@@ -2,6 +2,7 @@ import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
+import { sanitizeRedirectPath } from "@midday/utils/sanitize-redirect";
 import { addSeconds, addYears } from "date-fns";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
@@ -47,15 +48,16 @@ export async function GET(req: NextRequest) {
         sameSite: "lax",
       });
 
-      const analytics = await setupAnalytics();
-
-      await analytics.track({
-        event: LogEvents.SignIn.name,
-        channel: LogEvents.SignIn.channel,
-      });
-
       // If user is redirected from an invite, redirect to teams page to accept/decline the invite
       if (returnTo?.startsWith("teams/invite/")) {
+        const analytics = await setupAnalytics();
+        analytics.track({
+          event: LogEvents.SignIn.name,
+          channel: LogEvents.SignIn.channel,
+          provider: provider ?? "unknown",
+          destination: "teams",
+        });
+
         return NextResponse.redirect(`${origin}/teams`);
       }
 
@@ -64,18 +66,27 @@ export async function GET(req: NextRequest) {
       const trpcClient = await getTRPCClient({ forcePrimary: true });
       const user = await trpcClient.user.me.query();
 
-      if (!user?.fullName) {
-        return NextResponse.redirect(`${origin}/setup`);
-      }
+      const isOnboarding = !user?.fullName || !user.teamId;
+      const analytics = await setupAnalytics();
+      analytics.track({
+        event: LogEvents.SignIn.name,
+        channel: LogEvents.SignIn.channel,
+        provider: provider ?? "unknown",
+        destination: isOnboarding ? "onboarding" : "dashboard",
+      });
 
-      if (!user.teamId) {
-        return NextResponse.redirect(`${origin}/teams`);
+      if (isOnboarding) {
+        return NextResponse.redirect(`${origin}/onboarding`);
       }
     }
   }
 
   if (returnTo) {
-    return NextResponse.redirect(`${origin}/${returnTo}`);
+    // The middleware strips the leading "/" (e.g. "settings/accounts"),
+    // but sanitizeRedirectPath requires a root-relative path starting with "/".
+    const normalized = returnTo.startsWith("/") ? returnTo : `/${returnTo}`;
+    const safePath = sanitizeRedirectPath(normalized);
+    return NextResponse.redirect(`${origin}${safePath}`);
   }
 
   return NextResponse.redirect(origin);

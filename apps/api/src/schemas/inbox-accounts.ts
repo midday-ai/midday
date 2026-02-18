@@ -2,6 +2,7 @@ import { z } from "@hono/zod-openapi";
 
 export const connectInboxAccountSchema = z.object({
   provider: z.enum(["gmail", "outlook"]),
+  redirectPath: z.string().optional(),
 });
 
 export const exchangeCodeForAccountSchema = z.object({

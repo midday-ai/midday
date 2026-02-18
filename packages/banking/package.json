@@ -1,0 +1,35 @@
+{
+  "name": "@midday/banking",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "bun test",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./account": "./src/utils/account.ts",
+    "./rates": "./src/utils/rates.ts",
+    "./gocardless/utils": "./src/providers/gocardless/utils.ts"
+  },
+  "dependencies": {
+    "@midday/cache": "workspace:*",
+    "@midday/location": "workspace:*",
+    "@midday/logger": "workspace:*",
+    "@t3-oss/env-core": "^0.13.10",
+    "axios": "^1.9.0",
+    "change-case": "catalog:",
+    "date-fns": "catalog:",
+    "jose": "catalog:",
+    "plaid": "^41.1.0",
+    "xior": "^0.8.3",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

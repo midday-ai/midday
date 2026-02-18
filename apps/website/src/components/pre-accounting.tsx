@@ -1,15 +1,15 @@
 "use client";
 
+import { BulkReconciliationAnimation } from "@midday/ui/animations/bulk-reconciliation";
+import { DashboardAnimation } from "@midday/ui/animations/dashboard";
+import { InboxMatchAnimation } from "@midday/ui/animations/inbox-match";
+import { TransactionFlowAnimation } from "@midday/ui/animations/transaction-flow";
 import { Button } from "@midday/ui/button";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { BulkReconciliationAnimation } from "./homepage/bulk-reconciliation-animation";
-import { DashboardAnimation } from "./homepage/dashboard-animation";
 import { MaterialIcon } from "./homepage/icon-mapping";
-import { InboxMatchAnimation } from "./homepage/inbox-match-animation";
-import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { PricingSection } from "./sections/pricing-section";
 

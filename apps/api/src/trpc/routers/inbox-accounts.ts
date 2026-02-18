@@ -6,7 +6,11 @@ import {
   syncInboxAccountSchema,
 } from "@api/schemas/inbox-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
+import {
+  deleteInboxAccount,
+  getInboxAccountById,
+  getInboxAccounts,
+} from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { encryptOAuthState } from "@midday/inbox/utils";
 import { createLoggerWithContext } from "@midday/logger";
@@ -36,6 +40,7 @@ export const inboxAccountsRouter = createTRPCRouter({
           teamId,
           provider: input.provider,
           source: "inbox",
+          redirectPath: input.redirectPath,
         });
 
         const connector = new InboxConnector(input.provider, db);
@@ -91,7 +96,20 @@ export const inboxAccountsRouter = createTRPCRouter({
 
   sync: protectedProcedure
     .input(syncInboxAccountSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      // Verify the inbox account belongs to the caller's team
+      const account = await getInboxAccountById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      if (!account) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Inbox account not found",
+        });
+      }
+
       const event = await tasks.trigger("sync-inbox-account", {
         id: input.id,
         manualSync: input.manualSync || false,

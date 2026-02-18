@@ -21,7 +21,6 @@
     "baseUrl": ".",
     "paths": {
       "@api/*": ["src/*"],
-      "@engine/*": ["../engine/src/*"],
       "@jobs/*": ["../../packages/jobs/src/*"],
       "@db/*": ["../../packages/db/src/*"],
       "@midday/job-client": ["../../packages/job-client/src/index.ts"]

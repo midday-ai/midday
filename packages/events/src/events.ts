@@ -131,4 +131,40 @@ export const LogEvents = {
     name: "Delete Connection",
     channel: "bank",
   },
+  OnboardingStarted: {
+    name: "Onboarding Started",
+    channel: "onboarding",
+  },
+  OnboardingStepViewed: {
+    name: "Onboarding Step Viewed",
+    channel: "onboarding",
+  },
+  OnboardingTeamCreated: {
+    name: "Onboarding Team Created",
+    channel: "onboarding",
+  },
+  OnboardingBankConnected: {
+    name: "Onboarding Bank Connected",
+    channel: "onboarding",
+  },
+  OnboardingBankSkipped: {
+    name: "Onboarding Bank Skipped",
+    channel: "onboarding",
+  },
+  OnboardingInboxConnected: {
+    name: "Onboarding Inbox Connected",
+    channel: "onboarding",
+  },
+  OnboardingInboxSkipped: {
+    name: "Onboarding Inbox Skipped",
+    channel: "onboarding",
+  },
+  OnboardingStepCompleted: {
+    name: "Onboarding Step Completed",
+    channel: "onboarding",
+  },
+  OnboardingCompleted: {
+    name: "Onboarding Completed",
+    channel: "onboarding",
+  },
 };

@@ -4,6 +4,7 @@ type Props = {
   value?: string;
   headless?: boolean;
   className?: string;
+  triggerClassName?: string;
   currencies: string[];
   onChange: (value: string) => void;
 };
@@ -14,6 +15,7 @@ export function SelectCurrency({
   onChange,
   headless,
   className,
+  triggerClassName,
 }: Props) {
   const data = currencies?.map((currency) => ({
     id: currency.toLowerCase(),
@@ -29,6 +31,7 @@ export function SelectCurrency({
       searchPlaceholder="Search currencies"
       items={data}
       className={className}
+      triggerClassName={triggerClassName}
       onSelect={(item) => {
         onChange(item.value);
       }}

@@ -28,7 +28,7 @@ const teamsQueueOptions: QueueOptions = {
 
 /**
  * Worker options for teams queue
- * Lower concurrency - involves external API calls (Polar, engine)
+ * Lower concurrency - involves external API calls (Polar, banking providers)
  * Longer lock duration for cleanup operations
  */
 const teamsWorkerOptions: WorkerOptions = {

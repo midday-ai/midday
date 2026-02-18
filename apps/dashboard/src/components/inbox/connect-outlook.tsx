@@ -6,7 +6,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTRPC } from "@/trpc/client";
 
-export function ConnectOutlook() {
+type Props = {
+  redirectPath?: string;
+};
+
+export function ConnectOutlook({ redirectPath }: Props) {
   const trpc = useTRPC();
   const router = useRouter();
 
@@ -22,9 +26,11 @@ export function ConnectOutlook() {
 
   return (
     <SubmitButton
-      className="px-6 py-4 w-full font-medium h-[40px]"
+      className="px-4 font-medium h-[40px]"
       variant="outline"
-      onClick={() => connectMutation.mutate({ provider: "outlook" })}
+      onClick={() =>
+        connectMutation.mutate({ provider: "outlook", redirectPath })
+      }
       isSubmitting={connectMutation.isPending}
     >
       <div className="flex items-center space-x-2">

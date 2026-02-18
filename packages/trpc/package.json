@@ -1,0 +1,24 @@
+{
+  "name": "@midday/trpc",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "echo 'Types validated by @midday/api and consumer packages'"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./internal": "./src/internal.ts"
+  },
+  "dependencies": {
+    "@trpc/client": "^11.10.0",
+    "@trpc/server": "^11.10.0",
+    "superjson": "^2.2.6"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

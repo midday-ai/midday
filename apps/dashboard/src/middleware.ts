@@ -57,7 +57,7 @@ export async function middleware(request: NextRequest) {
 
   // If authenticated, proceed with other checks
   if (session) {
-    if (newUrl.pathname !== "/teams/create" && newUrl.pathname !== "/teams") {
+    if (newUrl.pathname !== "/onboarding" && newUrl.pathname !== "/teams") {
       // Check if the URL contains an invite code
       const inviteCodeMatch = newUrl.pathname.startsWith("/teams/invite/");
 

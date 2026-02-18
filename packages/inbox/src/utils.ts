@@ -9,6 +9,7 @@ export interface OAuthStatePayload {
   teamId: string;
   provider: "gmail" | "outlook";
   source: "inbox" | "apps";
+  redirectPath?: string;
 }
 
 /**

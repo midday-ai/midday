@@ -16,8 +16,8 @@ export function TeamInvite({ invite }: Props) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const updateUserMutation = useMutation(
-    trpc.user.update.mutationOptions({
+  const switchTeamMutation = useMutation(
+    trpc.user.switchTeam.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries();
         router.push("/");
@@ -32,8 +32,8 @@ export function TeamInvite({ invite }: Props) {
           return;
         }
 
-        // Update the user's teamId
-        updateUserMutation.mutate({
+        // Switch to the newly joined team
+        switchTeamMutation.mutate({
           teamId: data.teamId,
         });
       },

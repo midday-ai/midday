@@ -1,5 +1,5 @@
-import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
-import { eq, inArray, sql } from "drizzle-orm";
+import { teamCache } from "@midday/cache/team-cache";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { teams, users, usersOnTeam } from "../schema";
 
@@ -21,6 +21,7 @@ export const getUserById = async (db: Database, id: string) => {
         id: teams.id,
         name: teams.name,
         logoUrl: teams.logoUrl,
+        email: teams.email,
         plan: teams.plan,
         inboxId: teams.inboxId,
         createdAt: teams.createdAt,
@@ -39,7 +40,6 @@ export const getUserById = async (db: Database, id: string) => {
 export type UpdateUserParams = {
   id: string;
   fullName?: string | null;
-  teamId?: string | null;
   email?: string | null;
   avatarUrl?: string | null;
   locale?: string | null;
@@ -71,11 +71,52 @@ export const updateUser = async (db: Database, data: UpdateUserParams) => {
       teamId: users.teamId,
     });
 
-  // If teamId was updated, invalidate the team permissions cache
-  if (updateData.teamId !== undefined) {
-    const cacheKey = `user:${id}:team`;
-    await teamPermissionsCache.delete(cacheKey);
+  return result;
+};
+
+/**
+ * Switch a user's active team. Validates membership in usersOnTeam
+ * to prevent unauthorized team access.
+ */
+export const switchUserTeam = async (
+  db: Database,
+  params: { userId: string; teamId: string },
+) => {
+  const { userId, teamId } = params;
+
+  // Get the user's current teamId so we can invalidate its cache entry
+  const currentUser = await db.query.users.findFirst({
+    columns: { teamId: true },
+    where: eq(users.id, userId),
+  });
+
+  // Verify the user is a member of the target team
+  const [membership] = await db
+    .select({ id: usersOnTeam.id })
+    .from(usersOnTeam)
+    .where(and(eq(usersOnTeam.userId, userId), eq(usersOnTeam.teamId, teamId)))
+    .limit(1);
+
+  if (!membership) {
+    throw new Error("User is not a member of the target team");
   }
+
+  const [result] = await db
+    .update(users)
+    .set({ teamId })
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      teamId: users.teamId,
+    });
+
+  // Invalidate the team access cache for both old and new team
+  await Promise.all([
+    currentUser?.teamId
+      ? teamCache.delete(`user:${userId}:team:${currentUser.teamId}`)
+      : Promise.resolve(),
+    teamCache.delete(`user:${userId}:team:${teamId}`),
+  ]);
 
   return result;
 };

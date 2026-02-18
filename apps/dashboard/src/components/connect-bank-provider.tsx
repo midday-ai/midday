@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import type { MutableRefObject } from "react";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useTRPC } from "@/trpc/client";
 import { BankConnectButton } from "./bank-connect-button";
@@ -14,6 +15,8 @@ type Props = {
   maximumConsentValidity: number;
   openPlaid: () => void;
   type?: "personal" | "business";
+  redirectPath?: string;
+  connectRef?: MutableRefObject<(() => void) | null>;
 };
 
 export function ConnectBankProvider({
@@ -24,6 +27,8 @@ export function ConnectBankProvider({
   availableHistory,
   maximumConsentValidity,
   type,
+  redirectPath,
+  connectRef,
 }: Props) {
   const { setParams, countryCode } = useConnectParams();
   const trpc = useTRPC();
@@ -40,6 +45,7 @@ export function ConnectBankProvider({
       return (
         <TellerConnect
           id={id}
+          connectRef={connectRef}
           onSelect={() => {
             // NOTE: Wait for Teller sdk to be configured
             setTimeout(() => {
@@ -58,6 +64,8 @@ export function ConnectBankProvider({
           onSelect={() => {
             updateUsage();
           }}
+          redirectPath={redirectPath}
+          connectRef={connectRef}
         />
       );
     }
@@ -71,12 +79,15 @@ export function ConnectBankProvider({
           onSelect={() => {
             updateUsage();
           }}
+          redirectPath={redirectPath}
+          connectRef={connectRef}
         />
       );
     }
     case "plaid":
       return (
         <BankConnectButton
+          connectRef={connectRef}
           onClick={() => {
             updateUsage();
             openPlaid();

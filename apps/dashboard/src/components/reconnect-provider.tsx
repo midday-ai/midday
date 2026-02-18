@@ -9,14 +9,14 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { nanoid } from "nanoid";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import { useScript } from "usehooks-ts";
-import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
-import { reconnectEnableBankingLinkAction } from "@/actions/institutions/reconnect-enablebanking-link";
-import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 
 /**
@@ -53,46 +53,32 @@ export function ReconnectProvider({
 }: Props) {
   const { toast } = useToast();
   const { theme } = useTheme();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const { data: team } = useTeamQuery();
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const reconnectGoCardLessLink = useAction(reconnectGoCardLessLinkAction, {
-    onExecute: () => {
-      setIsLoading(true);
-    },
-    onError: () => {
-      setIsLoading(false);
-
-      toast({
-        duration: 2500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-    onSuccess: () => {
-      setIsLoading(false);
-    },
-  });
-
-  const reconnectEnableBankingLink = useAction(
-    reconnectEnableBankingLinkAction,
-    {
-      onExecute: () => {
-        setIsLoading(true);
+  const createPlaidLink = useMutation(
+    trpc.banking.plaidLink.mutationOptions({
+      onSuccess: (result) => {
+        if (result.data.link_token) {
+          setPlaidToken(result.data.link_token);
+        }
       },
-      onError: () => {
-        setIsLoading(false);
+    }),
+  );
 
-        toast({
-          duration: 2500,
-          variant: "error",
-          title: "Something went wrong please try again.",
-        });
-      },
-      onSuccess: () => {
-        setIsLoading(false);
-      },
-    },
+  const createGocardlessAgreement = useMutation(
+    trpc.banking.gocardlessAgreement.mutationOptions({}),
+  );
+
+  const createGocardlessLink = useMutation(
+    trpc.banking.gocardlessLink.mutationOptions({}),
+  );
+
+  const createEnableBankingLink = useMutation(
+    trpc.banking.enablebankingLink.mutationOptions({}),
   );
 
   useScript("https://cdn.teller.io/connect/connect.js", {
@@ -143,35 +129,98 @@ export function ReconnectProvider({
   const handleOnClick = async () => {
     switch (provider) {
       case "plaid": {
-        const token = await createPlaidLinkTokenAction(
-          accessToken ?? undefined,
-        );
-
-        if (token) {
-          setPlaidToken(token);
-        }
+        createPlaidLink.mutate({
+          accessToken: accessToken ?? undefined,
+        });
 
         return;
       }
       case "gocardless": {
-        // GoCardless redirects to API route, which then redirects to frontend
-        // The useReconnect hook detects URL params and triggers the job
-        return reconnectGoCardLessLink.execute({
-          id,
-          institutionId,
-          availableHistory: 60,
-          redirectTo: `${getUrl()}/api/gocardless/reconnect`,
-          isDesktop: isDesktopApp(),
-        });
+        if (!team?.id) {
+          return;
+        }
+
+        setIsLoading(true);
+        const reference = `${team.id}:${nanoid()}`;
+        const link = new URL(`${getUrl()}/api/gocardless/reconnect`);
+        link.searchParams.append("id", id);
+
+        if (isDesktopApp()) {
+          link.searchParams.append("desktop", "true");
+        }
+
+        try {
+          const agreementData = await createGocardlessAgreement.mutateAsync({
+            institutionId,
+            transactionTotalDays: 60,
+          });
+
+          const linkData = await createGocardlessLink.mutateAsync({
+            agreement: agreementData.data.id,
+            institutionId,
+            redirect: link.toString(),
+            reference,
+          });
+
+          window.location.href = linkData.data.link;
+        } catch {
+          setIsLoading(false);
+          toast({
+            duration: 2500,
+            variant: "error",
+            title: "Something went wrong please try again.",
+          });
+        }
+        return;
       }
       case "enablebanking": {
-        // EnableBanking redirects to API route, which then redirects to frontend
-        // The useReconnect hook detects URL params and triggers the job
-        return reconnectEnableBankingLink.execute({
-          institutionId,
-          isDesktop: isDesktopApp(),
-          sessionId: referenceId!,
-        });
+        if (!team?.id) {
+          toast({
+            duration: 2500,
+            variant: "error",
+            title: "Team not loaded. Please try again.",
+          });
+          return;
+        }
+
+        setIsLoading(true);
+
+        try {
+          const institution = await queryClient.fetchQuery(
+            trpc.institutions.getById.queryOptions({ id: institutionId }),
+          );
+
+          const maxConsentSeconds =
+            typeof institution.maximumConsentValidity === "string"
+              ? Number.parseInt(institution.maximumConsentValidity, 10)
+              : typeof institution.maximumConsentValidity === "number"
+                ? institution.maximumConsentValidity
+                : 0;
+
+          const validUntil = new Date(Date.now() + maxConsentSeconds * 1000)
+            .toISOString()
+            .replace(/\.\d+Z$/, ".000000+00:00");
+
+          const linkData = await createEnableBankingLink.mutateAsync({
+            institutionId: institution.name,
+            country: institution.country ?? team.countryCode ?? "",
+            type: (institution.type as "business" | "personal") ?? "business",
+            validUntil,
+            state: isDesktopApp()
+              ? `desktop:reconnect:${referenceId}`
+              : `web:reconnect:${referenceId}`,
+          });
+
+          window.location.href = linkData.data.url;
+        } catch {
+          setIsLoading(false);
+          toast({
+            duration: 2500,
+            variant: "error",
+            title: "Something went wrong please try again.",
+          });
+        }
+        return;
       }
       case "teller":
         return openTeller();

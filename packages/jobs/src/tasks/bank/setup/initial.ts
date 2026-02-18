@@ -28,10 +28,14 @@ export const initialBankSetup = schemaTask({
     });
 
     // Run initial sync for transactions and balance for the connection
-    await syncConnection.triggerAndWait({
-      connectionId,
-      manualSync: true,
-    });
+    // .unwrap() throws SubtaskUnwrapError if the child task fails,
+    // ensuring this parent task also fails and the UI shows the error state
+    await syncConnection
+      .triggerAndWait({
+        connectionId,
+        manualSync: true,
+      })
+      .unwrap();
 
     // And run once more to ensure all transactions are fetched on the providers side
     // GoCardLess, Teller and Plaid can take up to 3 minutes to fetch all transactions

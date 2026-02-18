@@ -38,12 +38,8 @@ export default async function Layout({
     redirect("/login");
   }
 
-  if (!user.fullName) {
-    redirect("/setup");
-  }
-
-  if (!user.teamId) {
-    redirect("/teams");
+  if (!user.fullName || !user.teamId) {
+    redirect("/onboarding");
   }
 
   return (

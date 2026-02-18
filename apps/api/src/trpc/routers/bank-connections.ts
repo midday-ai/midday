@@ -2,12 +2,14 @@ import {
   createBankConnectionSchema,
   deleteBankConnectionSchema,
   getBankConnectionsSchema,
+  reconnectBankConnectionSchema,
 } from "@api/schemas/bank-connections";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   createBankConnection,
   deleteBankConnection,
   getBankConnections,
+  reconnectBankConnection,
 } from "@midday/db/queries";
 import type {
   DeleteConnectionPayload,
@@ -69,5 +71,25 @@ export const bankConnectionsRouter = createTRPCRouter({
       } satisfies DeleteConnectionPayload);
 
       return data;
+    }),
+
+  reconnect: protectedProcedure
+    .input(reconnectBankConnectionSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      const result = await reconnectBankConnection(db, {
+        referenceId: input.referenceId,
+        newReferenceId: input.newReferenceId,
+        expiresAt: input.expiresAt,
+        teamId: teamId!,
+      });
+
+      if (!result) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bank connection not found",
+        });
+      }
+
+      return result;
     }),
 });

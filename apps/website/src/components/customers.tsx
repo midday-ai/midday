@@ -1,9 +1,9 @@
 "use client";
 
+import { CompanyEnrichmentAnimation } from "@midday/ui/animations/company-enrichment";
+import { CustomerStatementAnimation } from "@midday/ui/animations/customer-statement";
 import Image from "next/image";
 import { HeroImage } from "./hero-image";
-import { CompanyEnrichmentAnimation } from "./homepage/company-enrichment-animation";
-import { CustomerStatementAnimation } from "./homepage/customer-statement-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
 import { PreAccountingSection } from "./sections/pre-accounting-section";

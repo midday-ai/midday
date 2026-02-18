@@ -1,75 +1,119 @@
-import {
-  getAccountsSchema,
-  getInstitutionsSchema,
-  updateUsageSchema,
-} from "@api/schemas/institutions";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { client } from "@midday/engine-client";
+import {
+  getInstitutionById,
+  getInstitutions,
+  updateInstitutionUsage,
+} from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 const logger = createLoggerWithContext("trpc:institutions");
+
+const getInstitutionsSchema = z.object({
+  q: z.string().optional(),
+  countryCode: z.string(),
+  limit: z.number().optional().default(50),
+});
+
+const getInstitutionByIdSchema = z.object({
+  id: z.string(),
+});
+
+const updateUsageSchema = z.object({ id: z.string() });
 
 export const institutionsRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getInstitutionsSchema)
-    .query(async ({ input }) => {
-      const institutionsResponse = await client.institutions.$get({
-        query: input,
-      });
-
-      if (!institutionsResponse.ok) {
-        throw new Error("Failed to get institutions");
-      }
-
-      const { data } = await institutionsResponse.json();
-
-      return data.map((institution) => ({
-        ...institution,
-        availableHistory: institution.available_history,
-        maximumConsentValidity: institution.maximum_consent_validity,
-        type: institution.type,
-        provider: institution.provider!,
-      }));
-    }),
-
-  accounts: protectedProcedure
-    .input(getAccountsSchema)
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx: { db } }) => {
       try {
-        const accountsResponse = await client.accounts.$get({
-          query: input,
+        const results = await getInstitutions(db, {
+          countryCode: input.countryCode,
+          q: input.q,
+          limit: input.limit,
         });
 
-        if (!accountsResponse.ok) {
-          throw new Error("Failed to get accounts");
-        }
-
-        const { data } = await accountsResponse.json();
-
-        return data.sort((a, b) => b.balance.amount - a.balance.amount);
+        return results.map((institution) => ({
+          id: institution.id,
+          name: institution.name,
+          logo: institution.logo ?? null,
+          popularity: institution.popularity,
+          availableHistory: institution.availableHistory ?? null,
+          maximumConsentValidity: institution.maximumConsentValidity ?? null,
+          provider: institution.provider,
+          type: (institution.type as "personal" | "business" | null) ?? null,
+        }));
       } catch (error) {
-        logger.error("Failed to get accounts", {
+        logger.error("Failed to get institutions", {
           error: error instanceof Error ? error.message : String(error),
         });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get accounts",
+          message: "Failed to get institutions",
         });
       }
     }),
 
-  updateUsage: protectedProcedure
-    .input(updateUsageSchema)
-    .mutation(async ({ input }) => {
-      const usageResponse = await client.institutions[":id"].usage.$put({
-        param: input,
-      });
+  getById: protectedProcedure
+    .input(getInstitutionByIdSchema)
+    .query(async ({ input, ctx: { db } }) => {
+      const result = await getInstitutionById(db, { id: input.id });
 
-      if (!usageResponse.ok) {
-        throw new Error("Failed to update institution usage");
+      if (!result) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Institution not found",
+        });
       }
 
-      return usageResponse.json();
+      return {
+        id: result.id,
+        name: result.name,
+        logo: result.logo ?? null,
+        provider: result.provider,
+        availableHistory: result.availableHistory ?? null,
+        maximumConsentValidity: result.maximumConsentValidity ?? null,
+        popularity: result.popularity,
+        type: (result.type as "personal" | "business" | null) ?? null,
+        country: result.countries?.[0] ?? undefined,
+      };
+    }),
+
+  updateUsage: protectedProcedure
+    .input(updateUsageSchema)
+    .mutation(async ({ input, ctx: { db } }) => {
+      try {
+        const result = await updateInstitutionUsage(db, { id: input.id });
+
+        if (!result) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Institution not found",
+          });
+        }
+
+        return {
+          data: {
+            id: result.id,
+            name: result.name,
+            logo: result.logo ?? null,
+            availableHistory: result.availableHistory ?? null,
+            maximumConsentValidity: result.maximumConsentValidity ?? null,
+            popularity: result.popularity,
+            provider: result.provider,
+            type: result.type ?? null,
+            country: result.countries?.[0] ?? undefined,
+          },
+        };
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        logger.error("Failed to update institution usage", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update institution usage",
+        });
+      }
     }),
 });

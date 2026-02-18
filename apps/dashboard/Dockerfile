@@ -68,7 +68,6 @@ ENV NODE_ENV=production
 RUN GIT_COMMIT_SHA=$(cat /tmp/git-sha.txt 2>/dev/null || echo ""); \
     export GIT_COMMIT_SHA; \
     export SENTRY_RELEASE="$GIT_COMMIT_SHA"; \
-    bunx turbo run build --filter=@midday/engine --only && \
     bunx turbo run build --filter=@midday/dashboard --only
 
 # Runner stage - clean bun image, no turbo

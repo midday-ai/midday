@@ -6,7 +6,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTRPC } from "@/trpc/client";
 
-export function ConnectGmail() {
+type Props = {
+  redirectPath?: string;
+};
+
+export function ConnectGmail({ redirectPath }: Props) {
   const trpc = useTRPC();
   const router = useRouter();
 
@@ -22,9 +26,11 @@ export function ConnectGmail() {
 
   return (
     <SubmitButton
-      className="px-6 py-4 w-full font-medium h-[40px]"
+      className="px-4 font-medium h-[40px]"
       variant="outline"
-      onClick={() => connectMutation.mutate({ provider: "gmail" })}
+      onClick={() =>
+        connectMutation.mutate({ provider: "gmail", redirectPath })
+      }
       isSubmitting={connectMutation.isPending}
     >
       <div className="flex items-center space-x-2">

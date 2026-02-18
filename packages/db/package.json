@@ -34,10 +34,10 @@
   "dependencies": {
     "@date-fns/tz": "catalog:",
     "@date-fns/utc": "^2.1.1",
+    "@midday/banking": "workspace:*",
     "@midday/cache": "workspace:*",
     "@midday/categories": "workspace:*",
     "@midday/encryption": "workspace:*",
-    "@midday/engine": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/logger": "workspace:*",
     "@midday/utils": "workspace:*",

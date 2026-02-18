@@ -10,6 +10,7 @@ import { documentProcessors } from "./documents";
 import { embeddingsProcessors } from "./embeddings";
 import { inboxProcessors } from "./inbox";
 import { insightsProcessors } from "./insights";
+import { institutionsProcessors } from "./institutions";
 import { invoiceProcessors } from "./invoices";
 import { notificationProcessors } from "./notifications";
 import { ratesProcessors } from "./rates";
@@ -47,6 +48,11 @@ for (const [jobName, processor] of Object.entries(documentProcessors)) {
 
 // Register rates processors
 for (const [jobName, processor] of Object.entries(ratesProcessors)) {
+  processors.set(jobName, processor);
+}
+
+// Register institutions processors
+for (const [jobName, processor] of Object.entries(institutionsProcessors)) {
   processors.set(jobName, processor);
 }
 

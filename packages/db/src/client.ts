@@ -61,11 +61,12 @@ if (!isDevelopment) {
 }
 
 // Only create ONE replica pool for the current region, fall back to primary
-const replicaDb = replicaUrl
-  ? drizzle(new Pool({ connectionString: replicaUrl, ...connectionConfig }), {
-      schema,
-      casing: "snake_case",
-    })
+const replicaPool = replicaUrl
+  ? new Pool({ connectionString: replicaUrl, ...connectionConfig })
+  : null;
+
+const replicaDb = replicaPool
+  ? drizzle(replicaPool, { schema, casing: "snake_case" })
   : primaryDb;
 
 export const db = withReplicas(
@@ -93,4 +94,12 @@ export type DatabaseOrTransaction = Database | TransactionClient;
 export type DatabaseWithPrimary = Database & {
   $primary?: Database;
   usePrimaryOnly?: () => Database;
+};
+
+/**
+ * Close all database pools gracefully.
+ * Call during process shutdown to release connections cleanly.
+ */
+export const closeDb = async (): Promise<void> => {
+  await Promise.all([primaryPool.end(), replicaPool?.end()]);
 };
