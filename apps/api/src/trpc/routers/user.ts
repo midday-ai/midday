@@ -57,22 +57,20 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  delete: protectedProcedure.mutation(
-    async ({ ctx: { db, session } }) => {
-      const supabaseAdmin = await createAdminClient();
+  delete: protectedProcedure.mutation(async ({ ctx: { db, session } }) => {
+    const supabaseAdmin = await createAdminClient();
 
-      const [data] = await Promise.all([
-        deleteUser(db, session.user.id),
-        supabaseAdmin.auth.admin.deleteUser(session.user.id),
-        resend.contacts.remove({
-          email: session.user.email!,
-          audienceId: process.env.RESEND_AUDIENCE_ID!,
-        }),
-      ]);
+    const [data] = await Promise.all([
+      deleteUser(db, session.user.id),
+      supabaseAdmin.auth.admin.deleteUser(session.user.id),
+      resend.contacts.remove({
+        email: session.user.email!,
+        audienceId: process.env.RESEND_AUDIENCE_ID!,
+      }),
+    ]);
 
-      return data;
-    },
-  ),
+    return data;
+  }),
 
   invites: protectedProcedure.query(async ({ ctx: { db, session } }) => {
     if (!session.user.email) {
