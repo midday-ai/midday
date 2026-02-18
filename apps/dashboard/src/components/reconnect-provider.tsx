@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -54,7 +54,6 @@ export function ReconnectProvider({
   const { toast } = useToast();
   const { theme } = useTheme();
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { data: team } = useTeamQuery();
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
@@ -174,38 +173,11 @@ export function ReconnectProvider({
         return;
       }
       case "enablebanking": {
-        if (!team?.id) {
-          toast({
-            duration: 2500,
-            variant: "error",
-            title: "Team not loaded. Please try again.",
-          });
-          return;
-        }
-
         setIsLoading(true);
 
         try {
-          const institution = await queryClient.fetchQuery(
-            trpc.institutions.getById.queryOptions({ id: institutionId }),
-          );
-
-          const maxConsentSeconds =
-            typeof institution.maximumConsentValidity === "string"
-              ? Number.parseInt(institution.maximumConsentValidity, 10)
-              : typeof institution.maximumConsentValidity === "number"
-                ? institution.maximumConsentValidity
-                : 0;
-
-          const validUntil = new Date(Date.now() + maxConsentSeconds * 1000)
-            .toISOString()
-            .replace(/\.\d+Z$/, ".000000+00:00");
-
           const linkData = await createEnableBankingLink.mutateAsync({
-            institutionId: institution.name,
-            country: institution.country ?? team.countryCode ?? "",
-            type: (institution.type as "business" | "personal") ?? "business",
-            validUntil,
+            institutionId,
             state: isDesktopApp()
               ? `desktop:reconnect:${referenceId}`
               : `web:reconnect:${referenceId}`,
