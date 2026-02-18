@@ -343,7 +343,7 @@ export function OnboardingPage({
       </nav>
 
       {/* Left Side - Animation */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background dark:bg-[#080808] items-center justify-center p-8">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#f7f7f7] dark:bg-[#080808] items-center justify-center p-8 m-2">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep.key}
@@ -361,7 +361,7 @@ export function OnboardingPage({
       </div>
 
       {/* Right Side - Onboarding content */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center p-8 lg:p-12 pt-10 bg-[#f7f7f7] dark:bg-[#0c0c0c] text-foreground">
+      <div className="w-full lg:w-1/2 flex flex-col items-center p-8 lg:p-12 pt-10 dark:bg-[#0c0c0c] text-foreground">
         <div className="w-full max-w-md flex flex-col h-full relative">
           <div className="relative h-6 mb-2">
             <div className="absolute inset-0 flex items-center justify-center z-10">

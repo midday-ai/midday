@@ -31,7 +31,7 @@ export const syncConnection = schemaTask({
       }
 
       const connectionResult = await trpc.banking.connectionStatus.query({
-        id: data.reference_id!,
+        id: data.reference_id ?? undefined,
         provider: data.provider as
           | "gocardless"
           | "plaid"

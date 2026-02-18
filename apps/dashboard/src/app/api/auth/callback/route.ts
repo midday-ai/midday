@@ -68,6 +68,7 @@ export async function GET(req: NextRequest) {
 
       const isOnboarding = !user?.fullName || !user.teamId;
       const analytics = await setupAnalytics();
+
       analytics.track({
         event: LogEvents.SignIn.name,
         channel: LogEvents.SignIn.channel,

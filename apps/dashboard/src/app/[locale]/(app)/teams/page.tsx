@@ -44,7 +44,7 @@ export default async function Teams() {
         <div className="relative z-20 m-auto flex w-full max-w-[480px] flex-col">
           <div>
             <div className="text-center">
-              <h1 className="text-lg mb-2 font-serif">
+              <h1 className="text-lg lg:text-xl mb-2 font-serif">
                 Welcome, {user?.fullName?.split(" ").at(0)}
               </h1>
               {invites?.length > 0 ? (

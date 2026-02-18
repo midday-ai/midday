@@ -27,13 +27,21 @@ export function getSharedRedisClient(): RedisClientType {
 
   sharedRedisClient = createClient({
     url: redisUrl,
-    pingInterval: 60_000,
+    // Upstash / Railway intermediaries silently kill idle TLS connections.
+    // A 10 s ping shrinks the window where commands queue on a dead socket
+    // from ~60 s down to ~10 s, which is the main fix for the "slow after
+    // inactivity" symptom.
+    pingInterval: 10_000,
     socket: {
       family: 4,
       connectTimeout: isProduction ? 10_000 : 5_000,
       keepAlive: true,
       noDelay: true,
       reconnectStrategy: (retries) => {
+        if (retries > 20) {
+          logger.error("Max reconnection attempts reached");
+          return new Error("Max reconnection attempts reached");
+        }
         const delay = Math.min(100 * 2 ** retries, 3_000);
         logger.info(`Reconnecting in ${delay}ms (attempt ${retries + 1})`);
         return delay;
@@ -51,6 +59,11 @@ export function getSharedRedisClient(): RedisClientType {
 
   sharedRedisClient.on("ready", () => {
     logger.info("Connection established");
+  });
+
+  sharedRedisClient.on("end", () => {
+    logger.info("Connection closed, clearing singleton for future reconnect");
+    sharedRedisClient = null;
   });
 
   sharedRedisClient.connect().catch((err) => {
