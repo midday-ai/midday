@@ -1,7 +1,6 @@
 import { onboardTeamSchema } from "@jobs/schema";
 import { shouldSendEmail } from "@jobs/utils/check-team-plan";
 import { resend } from "@jobs/utils/resend";
-import { GetStartedEmail } from "@midday/email/emails/get-started";
 import { TrialEndedEmail } from "@midday/email/emails/trial-ended";
 import { TrialExpiringEmail } from "@midday/email/emails/trial-expiring";
 import { WelcomeEmail } from "@midday/email/emails/welcome";
@@ -54,21 +53,6 @@ export const onboardTeam = schemaTask({
     if (!user.team_id) {
       logger.info("User has no team, skipping onboarding");
       return;
-    }
-
-    await wait.for({ days: 3 });
-
-    if (await shouldSendEmail(user.team_id)) {
-      await resend.emails.send({
-        from: "Pontus from Midday <pontus@midday.ai>",
-        to: user.email,
-        subject: "Get the most out of Midday",
-        html: await render(
-          GetStartedEmail({
-            fullName: user.full_name,
-          }),
-        ),
-      });
     }
 
     await wait.for({ days: 11 });
