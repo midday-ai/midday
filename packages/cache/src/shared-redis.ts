@@ -4,7 +4,6 @@ import { createClient, type RedisClientType } from "redis";
 const logger = createLoggerWithContext("redis");
 
 let sharedRedisClient: RedisClientType | null = null;
-let connectPromise: Promise<void> | null = null;
 
 /**
  * Get or create a shared Redis client instance.
@@ -66,38 +65,9 @@ export function getSharedRedisClient(): RedisClientType {
     logger.info("Connection closed");
   });
 
-  connectPromise = sharedRedisClient
-    .connect()
-    .then(() => {
-      connectPromise = null;
-    })
-    .catch((err) => {
-      connectPromise = null;
-      logger.error("Initial connection error", { error: err.message });
-    });
+  sharedRedisClient.connect().catch((err) => {
+    logger.error("Initial connection error", { error: err.message });
+  });
 
   return sharedRedisClient;
-}
-
-/**
- * Wait for the shared client to finish its initial connection.
- * Returns `true` if the client is ready, `false` on timeout.
- */
-export async function waitForRedisReady(timeoutMs = 2_000): Promise<boolean> {
-  const client = getSharedRedisClient();
-
-  if (client.isReady) return true;
-  if (!connectPromise) return false;
-
-  try {
-    await Promise.race([
-      connectPromise,
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("timeout")), timeoutMs),
-      ),
-    ]);
-    return client.isReady;
-  } catch {
-    return false;
-  }
 }
