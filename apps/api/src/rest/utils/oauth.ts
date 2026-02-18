@@ -86,8 +86,9 @@ export function buildSuccessRedirect(
     : fallbackPath;
 
   // For direct navigation flow, redirect to target path with success params
+  const params = new URLSearchParams({ connected: "true", provider });
   const separator = targetPath.includes("?") ? "&" : "?";
-  return `${dashboardUrl}${targetPath}${separator}connected=true&provider=${provider}`;
+  return `${dashboardUrl}${targetPath}${separator}${params.toString()}`;
 }
 
 /**
@@ -116,6 +117,11 @@ export function buildErrorRedirect(
     : fallbackPath;
 
   // For direct navigation flow, redirect to target path with error params
+  const params = new URLSearchParams({
+    connected: "false",
+    error: errorCode,
+    provider,
+  });
   const separator = targetPath.includes("?") ? "&" : "?";
-  return `${dashboardUrl}${targetPath}${separator}connected=false&error=${errorCode}&provider=${provider}`;
+  return `${dashboardUrl}${targetPath}${separator}${params.toString()}`;
 }
