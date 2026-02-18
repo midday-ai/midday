@@ -5,6 +5,7 @@ import type {
   GetConnectionStatusResponse,
 } from "../../types";
 import { ProviderError } from "../../utils/error";
+import { logger } from "../../utils/logger";
 import { withRateLimitRetry } from "../../utils/retry";
 import type {
   AuthenticatedRequest,
@@ -134,27 +135,37 @@ export class TellerApi {
     accessToken,
   }: GetConnectionStatusRequest): Promise<GetConnectionStatusResponse> {
     try {
-      // A successful /accounts call proves the access token is valid
-      const accounts = await this.#get("/accounts", accessToken);
+      const accounts = await this.#get<{ id: string }[]>(
+        "/accounts",
+        accessToken,
+      );
 
-      if (!Array.isArray(accounts)) {
+      if (!Array.isArray(accounts) || accounts.length === 0) {
         return { status: "disconnected" };
       }
 
+      // Teller returns accounts even for inactive enrollments, so probe
+      // a single account's transactions to verify the enrollment is healthy.
+      await this.#get(
+        `/accounts/${accounts[0]!.id}/transactions`,
+        accessToken,
+        {
+          count: 1,
+        },
+      );
+
       return { status: "connected" };
     } catch (error) {
-      const parsedError = isError(error);
-
-      if (parsedError) {
-        const providerError = new ProviderError(parsedError);
-
-        if (providerError.code === "disconnected") {
-          return { status: "disconnected" };
-        }
+      if (error instanceof ProviderError && error.code === "disconnected") {
+        return { status: "disconnected" };
       }
-    }
 
-    return { status: "connected" };
+      logger.error("Teller connection status check failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      return { status: "connected" };
+    }
   }
 
   async deleteAccounts({

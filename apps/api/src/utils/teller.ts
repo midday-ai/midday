@@ -19,18 +19,16 @@ export const validateTellerSignature = (params: {
     return false;
   }
 
-  // Ensure the text is used as a raw string
   const signedMessage = `${timestamp}.${params.text}`;
   const calculatedSignature = crypto
     .createHmac("sha256", process.env.TELLER_SIGNING_SECRET!)
     .update(signedMessage)
     .digest("hex");
 
-  // Compare calculated signature with provided signatures
   return signatures.includes(calculatedSignature);
 };
 
-export const parseTellerSignatureHeader = (
+const parseTellerSignatureHeader = (
   header: string,
 ): { timestamp: string; signatures: string[] } => {
   const parts = header.split(",");

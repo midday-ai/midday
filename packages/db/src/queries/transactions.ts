@@ -958,6 +958,25 @@ export async function deleteTransactions(
     });
 }
 
+export async function deleteTransactionsByInternalIds(
+  db: Database,
+  params: { teamId: string; internalIds: string[] },
+) {
+  if (params.internalIds.length === 0) return [];
+
+  const fullIds = params.internalIds.map((id) => `${params.teamId}_${id}`);
+
+  return db
+    .delete(transactions)
+    .where(
+      and(
+        inArray(transactions.internalId, fullIds),
+        eq(transactions.teamId, params.teamId),
+      ),
+    )
+    .returning({ id: transactions.id });
+}
+
 type GetSimilarTransactionsParams = {
   name: string;
   teamId: string;
