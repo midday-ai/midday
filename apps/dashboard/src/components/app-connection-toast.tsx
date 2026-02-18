@@ -1,5 +1,7 @@
 "use client";
 
+import { track } from "@midday/events/client";
+import { LogEvents } from "@midday/events/events";
 import { useToast } from "@midday/ui/use-toast";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
@@ -9,6 +11,8 @@ import {
   getErrorDescription,
   getErrorTitle,
 } from "@/utils/app-oauth-errors";
+
+const INBOX_PROVIDERS = new Set(["gmail", "outlook"]);
 
 /**
  * Component that watches URL search params for OAuth connection status
@@ -52,6 +56,14 @@ export function AppConnectionToast() {
       }, 100);
     } else if (connected === "true" && provider) {
       hasShownToast.current = true;
+
+      if (INBOX_PROVIDERS.has(provider)) {
+        track({
+          event: LogEvents.InboxConnected.name,
+          channel: LogEvents.InboxConnected.channel,
+          provider,
+        });
+      }
 
       const providerName = formatProviderName(provider);
 

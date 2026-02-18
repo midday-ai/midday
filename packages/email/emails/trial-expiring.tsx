@@ -22,7 +22,7 @@ interface Props {
 
 export const TrialExpiringEmail = ({ fullName = "" }: Props) => {
   const firstName = fullName ? fullName.split(" ").at(0) : "";
-  const text = `${firstName ? `Hi ${firstName}, ` : ""}Just a quick reminder—your Midday trial ends in 3 days. We hope you've had a great experience so far.`;
+  const text = `${firstName ? `Hi ${firstName}, ` : ""}Just a quick reminder—your Midday trial ends tomorrow. We hope you've had a great experience so far.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -60,7 +60,7 @@ export const TrialExpiringEmail = ({ fullName = "" }: Props) => {
             className={themeClasses.text}
             style={{ color: lightStyles.text.color }}
           >
-            Just a quick reminder—your Midday trial ends in 3 days. We hope
+            Just a quick reminder—your Midday trial ends tomorrow. We hope
             you've had a great experience so far.
           </Text>
           <Text

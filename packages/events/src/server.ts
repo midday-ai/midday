@@ -1,5 +1,4 @@
 import { OpenPanel, type TrackProperties } from "@openpanel/nextjs";
-import { waitUntil } from "@vercel/functions";
 
 export const setupAnalytics = async () => {
   const client = new OpenPanel({
@@ -16,7 +15,7 @@ export const setupAnalytics = async () => {
 
       const { event, ...rest } = options;
 
-      waitUntil(client.track(event, rest));
+      client.track(event, rest).catch(() => {});
     },
   };
 };

@@ -107,6 +107,10 @@ export const LogEvents = {
     name: "GoCardLess Link Created",
     channel: "gocardless",
   },
+  InboxConnected: {
+    name: "Inbox Connected",
+    channel: "inbox",
+  },
   InboxUpload: {
     name: "Inbox Upload",
     channel: "inbox",
