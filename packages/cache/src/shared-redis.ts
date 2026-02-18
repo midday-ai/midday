@@ -62,7 +62,8 @@ export function getSharedRedisClient(): RedisClientType {
   });
 
   sharedRedisClient.on("end", () => {
-    logger.info("Connection closed");
+    logger.info("Connection closed, clearing singleton for future reconnect");
+    sharedRedisClient = null;
   });
 
   sharedRedisClient.connect().catch((err) => {
