@@ -3,6 +3,7 @@ import "./instrument";
 
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { closeSharedRedisClient } from "@midday/cache/shared-redis";
 import { closeDb } from "@midday/db/client";
 import {
   buildDependenciesResponse,
@@ -176,6 +177,9 @@ const shutdown = async (signal: string) => {
     try {
       logger.info("Closing database connections...");
       await closeDb();
+
+      logger.info("Closing Redis connection...");
+      closeSharedRedisClient();
 
       logger.info("Flushing Sentry events...");
       await Sentry.close(2000);
