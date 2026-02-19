@@ -39,6 +39,7 @@ type Props<T> = {
   headless?: boolean;
   className?: string;
   triggerClassName?: string;
+  listClassName?: string;
   modal?: boolean;
 };
 
@@ -58,6 +59,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
   onCreate,
   className,
   triggerClassName,
+  listClassName,
   modal = true,
 }: Props<T>) {
   const [open, setOpen] = React.useState(false);
@@ -84,7 +86,9 @@ export function ComboboxDropdown<T extends ComboboxItem>({
       />
 
       <CommandGroup>
-        <CommandList className="max-h-[225px] overflow-auto">
+        <CommandList
+          className={cn("max-h-[225px] overflow-auto", listClassName)}
+        >
           {filteredItems.map((item) => {
             const isChecked = selectedItem?.id === item.id;
 
