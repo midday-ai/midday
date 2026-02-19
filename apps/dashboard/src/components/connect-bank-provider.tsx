@@ -13,6 +13,7 @@ type Props = {
   availableHistory: number;
   openPlaid: () => void;
   redirectPath?: string;
+  countryCode?: string;
   connectRef?: MutableRefObject<(() => void) | null>;
 };
 
@@ -22,6 +23,7 @@ export function ConnectBankProvider({
   openPlaid,
   availableHistory,
   redirectPath,
+  countryCode,
   connectRef,
 }: Props) {
   const { setParams } = useConnectParams();
@@ -67,6 +69,7 @@ export function ConnectBankProvider({
       return (
         <EnableBankingConnect
           institutionId={id}
+          countryCode={countryCode}
           onSelect={() => {
             updateUsage();
           }}

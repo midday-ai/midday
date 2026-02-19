@@ -65,6 +65,7 @@ type SearchResultProps = {
   openPlaid: () => void;
   type?: "personal" | "business";
   redirectPath?: string;
+  countryCode?: string;
 };
 
 function SearchResult({
@@ -76,6 +77,7 @@ function SearchResult({
   openPlaid,
   type,
   redirectPath,
+  countryCode,
 }: SearchResultProps) {
   const connectRef = useRef<(() => void) | null>(null);
 
@@ -102,6 +104,7 @@ function SearchResult({
         openPlaid={openPlaid}
         availableHistory={availableHistory}
         redirectPath={redirectPath}
+        countryCode={countryCode}
         connectRef={connectRef}
       />
     </div>
@@ -267,6 +270,7 @@ export function BankSearchContent({
                   openPlaid();
                 }}
                 redirectPath={redirectPath}
+                countryCode={countryCode}
               />
             );
           })}

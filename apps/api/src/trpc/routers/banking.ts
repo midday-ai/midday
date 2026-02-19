@@ -132,14 +132,18 @@ export const bankingRouter = createTRPCRouter({
         id: input.institutionId,
       });
 
-      if (!institution || institution.provider !== "enablebanking") {
+      if (!institution) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Institution not found",
         });
       }
 
-      const country = institution.countries?.[0];
+      const country =
+        input.countryCode && institution.countries?.includes(input.countryCode)
+          ? input.countryCode
+          : institution.countries?.[0];
+
       if (!country) {
         throw new TRPCError({
           code: "BAD_REQUEST",

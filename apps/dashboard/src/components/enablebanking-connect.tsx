@@ -6,6 +6,7 @@ import { BankConnectButton } from "./bank-connect-button";
 
 type Props = {
   institutionId: string;
+  countryCode?: string;
   onSelect: () => void;
   redirectPath?: string;
   connectRef?: React.MutableRefObject<(() => void) | null>;
@@ -14,6 +15,7 @@ type Props = {
 export function EnableBankingConnect({
   onSelect,
   institutionId,
+  countryCode,
   redirectPath,
   connectRef,
 }: Props) {
@@ -36,6 +38,7 @@ export function EnableBankingConnect({
 
       const linkData = await createLink.mutateAsync({
         institutionId,
+        countryCode,
         state: stateParts.join(":"),
       });
 
