@@ -19,7 +19,10 @@ function resolveRedisUrl(): string {
       return url;
     }
   }
-  if (process.env.REDIS_URL) return process.env.REDIS_URL;
+  if (process.env.REDIS_URL) {
+    logger.info("Using default REDIS_URL (no region match)");
+    return process.env.REDIS_URL;
+  }
   throw new Error(
     "No Redis URL configured. Set REDIS_URL or region-specific REDIS_URL_EU / REDIS_URL_US_EAST / REDIS_URL_US_WEST",
   );
@@ -68,6 +71,8 @@ function createClient(): RedisClient {
     if (!disconnectedAt) disconnectedAt = Date.now();
     if (err) {
       logger.warn(`Connection closed: ${err.message}`);
+    } else {
+      logger.warn("Connection closed (no error)");
     }
   };
 
@@ -118,6 +123,7 @@ export function getSharedRedisClient(): RedisClient {
  */
 export function closeSharedRedisClient(): void {
   if (sharedClient) {
+    logger.info("Closing shared Redis client (graceful shutdown)");
     sharedClient.close();
     sharedClient = null;
     disconnectedAt = null;
