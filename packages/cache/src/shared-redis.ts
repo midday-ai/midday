@@ -10,7 +10,7 @@ const REGION_URL_MAP: Record<string, string> = {
 };
 
 function resolveRedisUrl(): string {
-  const region = process.env.RAILWAY_REGION;
+  const region = process.env.RAILWAY_REPLICA_REGION;
   if (region) {
     const envVar = REGION_URL_MAP[region];
     const url = envVar ? process.env[envVar] : undefined;
@@ -89,7 +89,7 @@ function createClient(): RedisClient {
 
 /**
  * Get or create a shared Bun RedisClient singleton.
- * Automatically selects the correct regional Redis URL based on RAILWAY_REGION.
+ * Automatically selects the correct regional Redis URL based on RAILWAY_REPLICA_REGION.
  *
  * Self-healing: if the client has been disconnected for longer than
  * MAX_DISCONNECT_MS (auto-reconnect exhausted), it is destroyed and a
