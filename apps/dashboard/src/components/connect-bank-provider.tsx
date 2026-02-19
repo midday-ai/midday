@@ -9,24 +9,18 @@ import { TellerConnect } from "./teller-connect";
 
 type Props = {
   id: string;
-  name: string;
   provider: string;
   availableHistory: number;
-  maximumConsentValidity: number;
   openPlaid: () => void;
-  type?: "personal" | "business";
   redirectPath?: string;
   connectRef?: MutableRefObject<(() => void) | null>;
 };
 
 export function ConnectBankProvider({
   id,
-  name,
   provider,
   openPlaid,
   availableHistory,
-  maximumConsentValidity,
-  type,
   redirectPath,
   connectRef,
 }: Props) {

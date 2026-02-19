@@ -62,11 +62,9 @@ type SearchResultProps = {
   logo: string | null;
   provider: string;
   availableHistory: number;
-  maximumConsentValidity: number;
   openPlaid: () => void;
   type?: "personal" | "business";
   redirectPath?: string;
-  country?: string;
 };
 
 function SearchResult({
@@ -76,10 +74,8 @@ function SearchResult({
   provider,
   availableHistory,
   openPlaid,
-  maximumConsentValidity,
   type,
   redirectPath,
-  country,
 }: SearchResultProps) {
   const connectRef = useRef<(() => void) | null>(null);
 
@@ -102,12 +98,9 @@ function SearchResult({
 
       <ConnectBankProvider
         id={id}
-        name={name}
         provider={provider}
         openPlaid={openPlaid}
-        maximumConsentValidity={maximumConsentValidity}
         availableHistory={availableHistory}
-        type={type}
         redirectPath={redirectPath}
         connectRef={connectRef}
       />
@@ -268,13 +261,7 @@ export function BankSearchContent({
                     ? +institution.availableHistory
                     : 0
                 }
-                maximumConsentValidity={
-                  institution.maximumConsentValidity
-                    ? +institution.maximumConsentValidity
-                    : 0
-                }
                 type={institution?.type ?? undefined}
-                country={institution?.country ?? undefined}
                 openPlaid={() => {
                   setParams({ step: null });
                   openPlaid();
