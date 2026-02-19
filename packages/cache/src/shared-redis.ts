@@ -52,6 +52,7 @@ function createClient(): RedisClient {
   });
 
   client.onconnect = () => {
+    if (sharedClient !== client) return;
     disconnectedAt = null;
     logger.info("Connection established");
   };
@@ -60,7 +61,10 @@ function createClient(): RedisClient {
   // Don't clear the singleton here — let auto-reconnect work. We only track
   // the timestamp so getSharedRedisClient() can destroy a permanently-dead
   // client after MAX_DISCONNECT_MS.
+  //
+  // Guard: ignore callbacks from a replaced client whose close() fired late.
   client.onclose = (err) => {
+    if (sharedClient !== client) return;
     if (!disconnectedAt) disconnectedAt = Date.now();
     if (err) {
       logger.warn(`Connection closed: ${err.message}`);

@@ -412,6 +412,10 @@ export async function deleteTeam(db: Database, params: DeleteTeamParams) {
       id: teams.id,
     });
 
+  if (!result) {
+    return null;
+  }
+
   return {
     ...result,
     memberUserIds: teamMembers
