@@ -1,6 +1,3 @@
-import { chatCache } from "@midday/cache/chat-cache";
-import { teamCache } from "@midday/cache/team-cache";
-import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
 import {
   CATEGORIES,
   getTaxRateForCategory,
@@ -328,12 +325,6 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
     }
   });
 
-  // If team switching was enabled, invalidate the team permissions cache
-  if (params.switchTeam) {
-    const cacheKey = `user:${params.userId}:team`;
-    await teamPermissionsCache.delete(cacheKey);
-  }
-
   return teamId;
 };
 
@@ -393,10 +384,6 @@ export async function leaveTeam(db: Database, params: LeaveTeamParams) {
     )
     .returning();
 
-  // Invalidate the team permissions cache since teamId was set to null
-  const cacheKey = `user:${params.userId}:team`;
-  await teamPermissionsCache.delete(cacheKey);
-
   return deleted;
 }
 
@@ -425,28 +412,12 @@ export async function deleteTeam(db: Database, params: DeleteTeamParams) {
       id: teams.id,
     });
 
-  // Invalidate caches for all team members after successful deletion
-  // This prevents stale cache data when users create new teams after deleting their only team
-  // Cache invalidation errors are non-fatal - log but don't throw
-  try {
-    await Promise.all([
-      chatCache.invalidateTeamContext(params.teamId),
-      ...teamMembers.map(async (member) => {
-        if (member.userId) {
-          await Promise.all([
-            teamPermissionsCache.delete(`user:${member.userId}:team`),
-            teamCache.delete(`user:${member.userId}:team:${params.teamId}`),
-            chatCache.invalidateUserContext(member.userId, params.teamId),
-          ]);
-        }
-      }),
-    ]);
-  } catch (error) {
-    // Log but don't fail - team deletion succeeded, cache will expire naturally
-    console.error("Failed to invalidate caches after team deletion:", error);
-  }
-
-  return result;
+  return {
+    ...result,
+    memberUserIds: teamMembers
+      .map((m) => m.userId)
+      .filter((id): id is string => id !== null),
+  };
 }
 
 type DeleteTeamMemberParams = {

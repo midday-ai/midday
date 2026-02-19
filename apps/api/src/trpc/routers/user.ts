@@ -3,6 +3,7 @@ import { resend } from "@api/services/resend";
 import { createAdminClient } from "@api/services/supabase";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { withRetryOnPrimary } from "@api/utils/db-retry";
+import { teamCache } from "@midday/cache/team-cache";
 import {
   deleteUser,
   getUserById,
@@ -45,10 +46,21 @@ export const userRouter = createTRPCRouter({
     .input(z.object({ teamId: z.string().uuid() }))
     .mutation(async ({ ctx: { db, session }, input }) => {
       try {
-        return await switchUserTeam(db, {
+        const result = await switchUserTeam(db, {
           userId: session.user.id,
           teamId: input.teamId,
         });
+
+        await Promise.all([
+          result.previousTeamId
+            ? teamCache.delete(
+                `user:${session.user.id}:team:${result.previousTeamId}`,
+              )
+            : Promise.resolve(),
+          teamCache.delete(`user:${session.user.id}:team:${input.teamId}`),
+        ]);
+
+        return result;
       } catch {
         throw new TRPCError({
           code: "FORBIDDEN",

@@ -67,6 +67,14 @@ function createClient(): RedisClient {
     }
   };
 
+  // Bun connects lazily (first command triggers connection). With
+  // enableOfflineQueue: false the first command would fail because
+  // there's no connection yet. Kick it off eagerly so `connected`
+  // is true by the time the first request arrives.
+  client.connect().catch((err) => {
+    logger.error(`Initial connection failed: ${err.message}`);
+  });
+
   return client;
 }
 

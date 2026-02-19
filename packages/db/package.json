@@ -35,7 +35,6 @@
     "@date-fns/tz": "catalog:",
     "@date-fns/utc": "^2.1.1",
     "@midday/banking": "workspace:*",
-    "@midday/cache": "workspace:*",
     "@midday/categories": "workspace:*",
     "@midday/encryption": "workspace:*",
     "@midday/invoice": "workspace:*",

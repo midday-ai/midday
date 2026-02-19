@@ -1,4 +1,3 @@
-import { chatCache } from "@midday/cache/chat-cache";
 import { decrypt, encrypt } from "@midday/encryption";
 import { and, eq } from "drizzle-orm";
 import type { Database } from "../client";
@@ -203,9 +202,6 @@ export const createBankConnection = async (
       creditLimit: account.creditLimit,
     })),
   );
-
-  // Invalidate team context cache to refresh hasBankAccounts flag
-  await chatCache.invalidateTeamContext(teamId);
 
   return bankConnection;
 };

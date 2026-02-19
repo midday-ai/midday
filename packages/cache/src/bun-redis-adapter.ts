@@ -6,9 +6,9 @@
  * client, then calls PascalCase methods like setEx, rPush, hSet, etc.
  * This adapter maps those to Bun's `send()`.
  *
- * IMPORTANT: every method calls getSharedRedisClient() fresh so it always
- * uses the current singleton. If the old client died and was recreated,
- * the adapter picks up the new one automatically.
+ * Every method calls getSharedRedisClient() fresh so it always uses the
+ * current singleton. If the old client died and was recreated, the adapter
+ * picks up the new one automatically.
  */
 import { getSharedRedisClient } from "./shared-redis";
 
