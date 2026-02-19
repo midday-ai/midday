@@ -13,14 +13,23 @@ function resolveRedisUrl(): string {
   const region = process.env.RAILWAY_REGION;
   if (region) {
     const envVar = REGION_URL_MAP[region];
-    const url = envVar ? process.env[envVar] : undefined;
-    if (url) {
+    if (!envVar) {
+      logger.warn(
+        `RAILWAY_REGION="${region}" has no mapping in REGION_URL_MAP, falling back to REDIS_URL`,
+      );
+    } else if (!process.env[envVar]) {
+      logger.warn(
+        `Region ${region} mapped to ${envVar} but env var is not set, falling back to REDIS_URL`,
+      );
+    } else {
       logger.info(`Using regional Redis: ${envVar} (${region})`);
-      return url;
+      return process.env[envVar]!;
     }
+  } else {
+    logger.info("RAILWAY_REGION not set, using REDIS_URL");
   }
+
   if (process.env.REDIS_URL) {
-    logger.info("Using default REDIS_URL (no region match)");
     return process.env.REDIS_URL;
   }
   throw new Error(
