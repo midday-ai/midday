@@ -13,12 +13,12 @@ export function AddAccountButton({ onClick }: { onClick?: () => void }) {
 
   return (
     <Button
-      data-event="Add account"
+      data-event="Add connection"
       data-icon="🏦"
       data-channel="bank"
       onClick={handleClick}
     >
-      Add account
+      Add connection
     </Button>
   );
 }

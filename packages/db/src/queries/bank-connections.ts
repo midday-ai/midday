@@ -206,6 +206,78 @@ export const createBankConnection = async (
   return bankConnection;
 };
 
+export type AddProviderAccountsParams = {
+  connectionId: string;
+  teamId: string;
+  userId: string;
+  accounts: {
+    accountId: string;
+    name: string;
+    currency: string;
+    type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
+    accountReference?: string | null;
+    balance?: number;
+    iban?: string | null;
+    subtype?: string | null;
+    bic?: string | null;
+    routingNumber?: string | null;
+    wireRoutingNumber?: string | null;
+    accountNumber?: string | null;
+    sortCode?: string | null;
+    availableBalance?: number | null;
+    creditLimit?: number | null;
+  }[];
+};
+
+export const addProviderAccounts = async (
+  db: Database,
+  params: AddProviderAccountsParams,
+) => {
+  const { connectionId, teamId, userId, accounts } = params;
+
+  if (accounts.length === 0) return [];
+
+  const connection = await db.query.bankConnections.findFirst({
+    where: and(
+      eq(bankConnections.id, connectionId),
+      eq(bankConnections.teamId, teamId),
+    ),
+    columns: { id: true },
+  });
+
+  if (!connection) return [];
+
+  return db
+    .insert(bankAccounts)
+    .values(
+      accounts.map((account) => ({
+        accountId: account.accountId,
+        bankConnectionId: connectionId,
+        teamId,
+        createdBy: userId,
+        name: account.name,
+        currency: account.currency,
+        enabled: true,
+        type: account.type,
+        accountReference: account.accountReference,
+        balance: account.balance ?? 0,
+        manual: false,
+        subtype: account.subtype,
+        bic: account.bic,
+        routingNumber: account.routingNumber,
+        wireRoutingNumber: account.wireRoutingNumber,
+        sortCode: account.sortCode,
+        iban: account.iban ? encrypt(account.iban) : null,
+        accountNumber: account.accountNumber
+          ? encrypt(account.accountNumber)
+          : null,
+        availableBalance: account.availableBalance,
+        creditLimit: account.creditLimit,
+      })),
+    )
+    .returning();
+};
+
 export type ReconnectBankConnectionParams = {
   referenceId: string;
   newReferenceId: string;

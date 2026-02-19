@@ -206,7 +206,7 @@ export function BankAccount({ data, provider }: Props) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <AlertDialogTrigger className="w-full text-left">
-                    Remove
+                    Delete
                   </AlertDialogTrigger>
                 </DropdownMenuItem>
               </DropdownMenuContent>
