@@ -3,8 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@midday/logger": "workspace:*",
-    "redis": "5.10.0"
+    "@midday/logger": "workspace:*"
   },
   "scripts": {
     "lint": "biome check .",
@@ -24,6 +23,7 @@
     "./chat-feedback-cache": "./src/chat-feedback-cache.ts",
     "./suggested-actions-cache": "./src/suggested-actions-cache.ts",
     "./widget-preferences-cache": "./src/widget-preferences-cache.ts",
-    "./banking-cache": "./src/banking-cache.ts"
+    "./banking-cache": "./src/banking-cache.ts",
+    "./bun-redis-adapter": "./src/bun-redis-adapter.ts"
   }
 }

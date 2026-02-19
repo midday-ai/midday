@@ -3,6 +3,26 @@ import { getSharedRedisClient } from "./shared-redis";
 
 const logger = createLoggerWithContext("redis-cache");
 
+// Every Redis command is raced against this timeout.
+// If the socket is half-open (appears connected but server is gone),
+// this prevents the API request from hanging forever.
+const COMMAND_TIMEOUT_MS = 3_000;
+
+function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(
+        () =>
+          reject(
+            new Error(`Redis ${label} timed out after ${COMMAND_TIMEOUT_MS}ms`),
+          ),
+        COMMAND_TIMEOUT_MS,
+      ),
+    ),
+  ]);
+}
+
 export class RedisCache {
   private prefix: string;
   private defaultTTL: number;
@@ -16,15 +36,9 @@ export class RedisCache {
     return getSharedRedisClient();
   }
 
-  /**
-   * Fail-fast guard: when the client is mid-reconnect, skip the operation
-   * instead of queuing commands against a dead socket (which is what causes
-   * the "slow after inactivity" hang). The app keeps working with a cache
-   * miss while node-redis reconnects in the background.
-   */
-  private get isReady(): boolean {
+  private get isConnected(): boolean {
     try {
-      return this.redis.isReady;
+      return this.redis.connected;
     } catch {
       return false;
     }
@@ -52,32 +66,21 @@ export class RedisCache {
   }
 
   async get<T>(key: string): Promise<T | undefined> {
-    if (!this.isReady) {
-      logger.warn(`Client not ready, skipping get for ${this.prefix}`, {
-        key,
-      });
-      return undefined;
-    }
+    if (!this.isConnected) return undefined;
 
     try {
-      const value = await this.redis.get(this.getKey(key));
+      const value = await withTimeout(this.redis.get(this.getKey(key)), "GET");
       return this.parseValue<T>(value);
     } catch (error) {
-      logger.error(`Get error for ${this.prefix} cache`, {
-        key,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.error(
+        `Get error for ${this.prefix}: ${error instanceof Error ? error.message : error}`,
+      );
       return undefined;
     }
   }
 
   async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
-    if (!this.isReady) {
-      logger.warn(`Client not ready, skipping set for ${this.prefix}`, {
-        key,
-      });
-      return;
-    }
+    if (!this.isConnected) return;
 
     try {
       const serializedValue = this.stringifyValue(value);
@@ -85,41 +88,33 @@ export class RedisCache {
       const ttl = ttlSeconds ?? this.defaultTTL;
 
       if (ttl > 0) {
-        await this.redis.setEx(redisKey, ttl, serializedValue);
+        await withTimeout(
+          this.redis.send("SETEX", [redisKey, String(ttl), serializedValue]),
+          "SETEX",
+        );
       } else {
-        await this.redis.set(redisKey, serializedValue);
+        await withTimeout(this.redis.set(redisKey, serializedValue), "SET");
       }
     } catch (error) {
-      logger.error(`Set error for ${this.prefix} cache`, {
-        key,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.error(
+        `Set error for ${this.prefix}: ${error instanceof Error ? error.message : error}`,
+      );
     }
   }
 
   async delete(key: string): Promise<void> {
-    if (!this.isReady) {
-      logger.warn(`Client not ready, skipping delete for ${this.prefix}`, {
-        key,
-      });
-      return;
-    }
+    if (!this.isConnected) return;
 
     try {
-      await this.redis.del(this.getKey(key));
+      await withTimeout(this.redis.del(this.getKey(key)), "DEL");
     } catch (error) {
-      logger.error(`Delete error for ${this.prefix} cache`, {
-        key,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.error(
+        `Delete error for ${this.prefix}: ${error instanceof Error ? error.message : error}`,
+      );
     }
   }
 
   async healthCheck(): Promise<void> {
-    try {
-      await this.redis.ping();
-    } catch (error) {
-      throw new Error(`Redis health check failed: ${error}`);
-    }
+    await withTimeout(this.redis.send("PING", []), "PING");
   }
 }

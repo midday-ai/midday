@@ -13,6 +13,9 @@ import {
 } from "@api/schemas/team";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import type { InviteTeamMembersPayload } from "@jobs/schema";
+import { chatCache } from "@midday/cache/chat-cache";
+import { teamCache } from "@midday/cache/team-cache";
+import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
 import {
   acceptTeamInvite,
   createTeam,
@@ -68,11 +71,17 @@ export const teamRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createTeamSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
-      return createTeam(db, {
+      const teamId = await createTeam(db, {
         ...input,
         userId: session.user.id,
         email: session.user.email!,
       });
+
+      if (input.switchTeam) {
+        await teamPermissionsCache.delete(`user:${session.user.id}:team`);
+      }
+
+      return teamId;
     }),
 
   leave: protectedProcedure
@@ -92,10 +101,14 @@ export const teamRouter = createTRPCRouter({
         throw Error("Action not allowed");
       }
 
-      return leaveTeam(db, {
+      const result = await leaveTeam(db, {
         userId: session.user.id,
         teamId: input.teamId,
       });
+
+      await teamPermissionsCache.delete(`user:${session.user.id}:team`);
+
+      return result;
     }),
 
   acceptInvite: protectedProcedure
@@ -161,8 +174,6 @@ export const teamRouter = createTRPCRouter({
         "teams",
       );
 
-      // Delete the team from database after cleanup job is enqueued
-      // Note: deleteTeam handles cache invalidation for all team members internally
       const data = await deleteTeam(db, {
         teamId: input.teamId,
         userId: session.user.id,
@@ -173,6 +184,21 @@ export const teamRouter = createTRPCRouter({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to delete team",
         });
+      }
+
+      try {
+        await Promise.all([
+          chatCache.invalidateTeamContext(input.teamId),
+          ...data.memberUserIds.map((userId) =>
+            Promise.all([
+              teamPermissionsCache.delete(`user:${userId}:team`),
+              teamCache.delete(`user:${userId}:team:${input.teamId}`),
+              chatCache.invalidateUserContext(userId, input.teamId),
+            ]),
+          ),
+        ]);
+      } catch {
+        // Non-fatal — team deletion succeeded, cache will expire naturally
       }
     }),
 

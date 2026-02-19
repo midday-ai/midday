@@ -9,28 +9,24 @@ import { TellerConnect } from "./teller-connect";
 
 type Props = {
   id: string;
-  name: string;
   provider: string;
   availableHistory: number;
-  maximumConsentValidity: number;
   openPlaid: () => void;
-  type?: "personal" | "business";
   redirectPath?: string;
+  countryCode?: string;
   connectRef?: MutableRefObject<(() => void) | null>;
 };
 
 export function ConnectBankProvider({
   id,
-  name,
   provider,
   openPlaid,
   availableHistory,
-  maximumConsentValidity,
-  type,
   redirectPath,
+  countryCode,
   connectRef,
 }: Props) {
-  const { setParams, countryCode } = useConnectParams();
+  const { setParams } = useConnectParams();
   const trpc = useTRPC();
   const updateUsageMutation = useMutation(
     trpc.institutions.updateUsage.mutationOptions(),
@@ -72,10 +68,8 @@ export function ConnectBankProvider({
     case "enablebanking": {
       return (
         <EnableBankingConnect
-          id={name}
-          country={countryCode}
-          maximumConsentValidity={maximumConsentValidity}
-          type={type}
+          institutionId={id}
+          countryCode={countryCode}
           onSelect={() => {
             updateUsage();
           }}

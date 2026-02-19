@@ -42,7 +42,7 @@ export function ConnectBankStep({
             onSyncStarted={onSyncStarted}
             stickySubmit={false}
             accountsListClassName="min-h-[180px]"
-            fadeGradientClass="bg-gradient-to-t from-[#f7f7f7] dark:from-[#0c0c0c] to-transparent"
+            fadeGradientClass="bg-gradient-to-t from-white dark:from-[#0c0c0c] to-transparent"
           />
         </Suspense>
       </div>
@@ -81,7 +81,7 @@ export function ConnectBankStep({
             redirectPath="/onboarding?s=connect-bank"
             listHeight="h-[calc(100vh-570px)] max-h-[calc(100vh-570px)]"
             defaultCountryCode={countryCode}
-            fadeGradientClass="bg-gradient-to-t from-[#f7f7f7] dark:from-[#0c0c0c] to-transparent"
+            fadeGradientClass="bg-gradient-to-t from-white dark:from-[#0c0c0c] to-transparent"
             emptyState={({ query }) => (
               <div className="flex flex-col items-center justify-center py-16 border-b border-border">
                 <p className="font-medium mb-3">No banks found</p>

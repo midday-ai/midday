@@ -172,7 +172,8 @@ export class EnableBankingApi {
   async authenticate(
     params: AuthenticateRequest,
   ): Promise<AuthenticateResponse> {
-    const { country, institutionId, teamId, validUntil, state, type } = params;
+    const { country, institutionName, teamId, validUntil, state, type } =
+      params;
 
     try {
       const response = await this.#post<AuthenticateResponse>("/auth", {
@@ -182,7 +183,7 @@ export class EnableBankingApi {
           valid_until: validUntil,
         },
         aspsp: {
-          name: institutionId,
+          name: institutionName,
           country,
         },
         psu_type: type,

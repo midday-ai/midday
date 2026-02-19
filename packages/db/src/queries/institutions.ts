@@ -6,17 +6,20 @@ const excludedInstitutions = [
   "ins_56", // Chase - Plaid
 ];
 
+type BankProvider = (typeof bankProvidersEnum.enumValues)[number];
+
 export type GetInstitutionsParams = {
   countryCode: string;
   q?: string;
   limit?: number;
+  excludeProviders?: BankProvider[];
 };
 
 export async function getInstitutions(
   db: Database,
   params: GetInstitutionsParams,
 ) {
-  const { countryCode, q, limit = 50 } = params;
+  const { countryCode, q, limit = 50, excludeProviders } = params;
 
   const conditions = [
     eq(institutions.status, "active"),
@@ -25,6 +28,10 @@ export async function getInstitutions(
 
   if (excludedInstitutions.length > 0) {
     conditions.push(notInArray(institutions.id, excludedInstitutions));
+  }
+
+  if (excludeProviders && excludeProviders.length > 0) {
+    conditions.push(notInArray(institutions.provider, excludeProviders));
   }
 
   const hasSearch = q && q !== "*";
@@ -48,6 +55,7 @@ export async function getInstitutions(
       maximumConsentValidity: institutions.maximumConsentValidity,
       provider: institutions.provider,
       type: institutions.type,
+      countries: institutions.countries,
     })
     .from(institutions)
     .where(and(...conditions))
@@ -160,8 +168,6 @@ export async function upsertInstitutions(
 
   return total;
 }
-
-type BankProvider = (typeof bankProvidersEnum.enumValues)[number];
 
 export async function getActiveInstitutionIds(
   db: DatabaseOrTransaction,

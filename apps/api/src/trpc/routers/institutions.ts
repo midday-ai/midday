@@ -14,6 +14,9 @@ const getInstitutionsSchema = z.object({
   q: z.string().optional(),
   countryCode: z.string(),
   limit: z.number().optional().default(50),
+  excludeProviders: z
+    .array(z.enum(["gocardless", "plaid", "teller", "enablebanking"]))
+    .optional(),
 });
 
 const getInstitutionByIdSchema = z.object({
@@ -31,6 +34,7 @@ export const institutionsRouter = createTRPCRouter({
           countryCode: input.countryCode,
           q: input.q,
           limit: input.limit,
+          excludeProviders: input.excludeProviders,
         });
 
         return results.map((institution) => ({
@@ -42,6 +46,7 @@ export const institutionsRouter = createTRPCRouter({
           maximumConsentValidity: institution.maximumConsentValidity ?? null,
           provider: institution.provider,
           type: (institution.type as "personal" | "business" | null) ?? null,
+          country: institution.countries?.[0] ?? null,
         }));
       } catch (error) {
         logger.error("Failed to get institutions", {

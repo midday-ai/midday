@@ -5,6 +5,7 @@ import {
   reconnectBankConnectionSchema,
 } from "@api/schemas/bank-connections";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { chatCache } from "@midday/cache/chat-cache";
 import {
   createBankConnection,
   deleteBankConnection,
@@ -42,6 +43,12 @@ export const bankConnectionsRouter = createTRPCRouter({
           code: "INTERNAL_SERVER_ERROR",
           message: "Bank connection not found",
         });
+      }
+
+      try {
+        await chatCache.invalidateTeamContext(teamId!);
+      } catch {
+        // Non-fatal — cache will expire naturally
       }
 
       const event = await tasks.trigger("initial-bank-setup", {

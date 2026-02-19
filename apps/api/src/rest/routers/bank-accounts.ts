@@ -10,6 +10,7 @@ import {
 } from "@api/schemas/bank-accounts";
 import { validateResponse } from "@api/utils/validate-response";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { chatCache } from "@midday/cache/chat-cache";
 import {
   createBankAccount,
   deleteBankAccount,
@@ -146,6 +147,12 @@ app.openapi(
       userId: session.user.id,
     });
 
+    try {
+      await chatCache.invalidateTeamContext(teamId);
+    } catch {
+      // Non-fatal — cache will expire naturally
+    }
+
     return c.json(validateResponse(result, bankAccountResponseSchema));
   },
 );
@@ -230,6 +237,12 @@ app.openapi(
       id,
       teamId,
     });
+
+    try {
+      await chatCache.invalidateTeamContext(teamId);
+    } catch {
+      // Non-fatal — cache will expire naturally
+    }
 
     return c.json(validateResponse(result, bankAccountResponseSchema));
   },

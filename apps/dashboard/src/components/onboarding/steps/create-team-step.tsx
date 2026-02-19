@@ -234,6 +234,8 @@ export function CreateTeamStep({
                   <FormControl>
                     <SelectFiscalMonth
                       triggerClassName="bg-secondary border-border text-foreground"
+                      popoverProps={{ side: "bottom", avoidCollisions: false }}
+                      listClassName="max-h-[150px]"
                       {...field}
                     />
                   </FormControl>

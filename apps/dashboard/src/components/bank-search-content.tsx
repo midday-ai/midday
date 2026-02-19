@@ -62,10 +62,10 @@ type SearchResultProps = {
   logo: string | null;
   provider: string;
   availableHistory: number;
-  maximumConsentValidity: number;
   openPlaid: () => void;
   type?: "personal" | "business";
   redirectPath?: string;
+  countryCode?: string;
 };
 
 function SearchResult({
@@ -75,9 +75,9 @@ function SearchResult({
   provider,
   availableHistory,
   openPlaid,
-  maximumConsentValidity,
   type,
   redirectPath,
+  countryCode,
 }: SearchResultProps) {
   const connectRef = useRef<(() => void) | null>(null);
 
@@ -100,13 +100,11 @@ function SearchResult({
 
       <ConnectBankProvider
         id={id}
-        name={name}
         provider={provider}
         openPlaid={openPlaid}
-        maximumConsentValidity={maximumConsentValidity}
         availableHistory={availableHistory}
-        type={type}
         redirectPath={redirectPath}
+        countryCode={countryCode}
         connectRef={connectRef}
       />
     </div>
@@ -203,6 +201,7 @@ export function BankSearchContent({
       {
         q: debouncedQuery,
         countryCode,
+        excludeProviders: ["gocardless"],
       },
       {
         enabled,
@@ -265,17 +264,13 @@ export function BankSearchContent({
                     ? +institution.availableHistory
                     : 0
                 }
-                maximumConsentValidity={
-                  institution.maximumConsentValidity
-                    ? +institution.maximumConsentValidity
-                    : 0
-                }
                 type={institution?.type ?? undefined}
                 openPlaid={() => {
                   setParams({ step: null });
                   openPlaid();
                 }}
                 redirectPath={redirectPath}
+                countryCode={countryCode}
               />
             );
           })}

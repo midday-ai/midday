@@ -2,7 +2,6 @@ import {
   CASH_ACCOUNT_TYPES,
   CREDIT_ACCOUNT_TYPE,
 } from "@midday/banking/account";
-import { chatCache } from "@midday/cache/chat-cache";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import type { Database } from "../client";
@@ -32,9 +31,6 @@ export async function createBankAccount(
     })
     .returning();
 
-  // Invalidate team context cache to refresh hasBankAccounts flag
-  await chatCache.invalidateTeamContext(params.teamId);
-
   return result;
 }
 
@@ -53,9 +49,6 @@ export async function deleteBankAccount(
     .delete(bankAccounts)
     .where(and(eq(bankAccounts.id, id), eq(bankAccounts.teamId, teamId)))
     .returning();
-
-  // Invalidate team context cache to refresh hasBankAccounts flag
-  await chatCache.invalidateTeamContext(teamId);
 
   return result;
 }

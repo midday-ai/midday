@@ -77,7 +77,7 @@ function GradientOverlay() {
         className="absolute inset-0 pointer-events-none z-[15] dark:hidden"
         style={{
           background:
-            "linear-gradient(to right, transparent 0%, transparent 50%, rgba(247, 247, 247, 0.2) 70%, rgba(247, 247, 247, 0.5) 85%, rgba(247, 247, 247, 0.8) 100%)",
+            "linear-gradient(to right, transparent 0%, transparent 50%, rgba(255, 255, 255, 0.2) 70%, rgba(255, 255, 255, 0.5) 85%, rgba(255, 255, 255, 0.8) 100%)",
         }}
       />
       <div

@@ -26,6 +26,7 @@ import {
   PlaidApi,
   Provider,
 } from "@midday/banking";
+import { getInstitutionById } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
 import { TRPCError } from "@trpc/server";
 
@@ -126,17 +127,56 @@ export const bankingRouter = createTRPCRouter({
 
   enablebankingLink: protectedProcedure
     .input(enablebankingLinkSchema)
-    .mutation(async ({ input, ctx: { teamId } }) => {
+    .mutation(async ({ input, ctx: { teamId, db } }) => {
+      const institution = await getInstitutionById(db, {
+        id: input.institutionId,
+      });
+
+      if (!institution) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Institution not found",
+        });
+      }
+
+      const country =
+        input.countryCode && institution.countries?.includes(input.countryCode)
+          ? input.countryCode
+          : institution.countries?.[0];
+
+      if (!country) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Institution has no country",
+        });
+      }
+
+      const validUntil = new Date(
+        Date.now() + (institution.maximumConsentValidity ?? 90 * 86400) * 1000,
+      )
+        .toISOString()
+        .replace(/\.\d+Z$/, ".000000+00:00");
+
       const api = new EnableBankingApi();
 
       try {
-        const data = await api.authenticate({ ...input, teamId: teamId! });
+        const data = await api.authenticate({
+          institutionName: institution.name,
+          country,
+          type: (institution.type as "personal" | "business") ?? "business",
+          teamId: teamId!,
+          validUntil,
+          state: input.state,
+        });
         return { data: { url: data.url } };
       } catch (error) {
-        logger.error(
-          "Failed to create EnableBanking link",
-          getProviderErrorDetails(error),
-        );
+        logger.error("Failed to create EnableBanking link", {
+          ...getProviderErrorDetails(error),
+          institutionId: input.institutionId,
+          institutionName: institution.name,
+          country,
+          type: institution.type,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create EnableBanking link",

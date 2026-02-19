@@ -1,4 +1,3 @@
-import { teamCache } from "@midday/cache/team-cache";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { teams, users, usersOnTeam } from "../schema";
@@ -110,15 +109,7 @@ export const switchUserTeam = async (
       teamId: users.teamId,
     });
 
-  // Invalidate the team access cache for both old and new team
-  await Promise.all([
-    currentUser?.teamId
-      ? teamCache.delete(`user:${userId}:team:${currentUser.teamId}`)
-      : Promise.resolve(),
-    teamCache.delete(`user:${userId}:team:${teamId}`),
-  ]);
-
-  return result;
+  return { ...result, previousTeamId: currentUser?.teamId ?? null };
 };
 
 export const getUserTeamId = async (db: Database, userId: string) => {

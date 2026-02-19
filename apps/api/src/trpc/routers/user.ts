@@ -3,6 +3,7 @@ import { resend } from "@api/services/resend";
 import { createAdminClient } from "@api/services/supabase";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { withRetryOnPrimary } from "@api/utils/db-retry";
+import { teamCache } from "@midday/cache/team-cache";
 import {
   deleteUser,
   getUserById,
@@ -44,8 +45,10 @@ export const userRouter = createTRPCRouter({
   switchTeam: protectedProcedure
     .input(z.object({ teamId: z.string().uuid() }))
     .mutation(async ({ ctx: { db, session }, input }) => {
+      let result: Awaited<ReturnType<typeof switchUserTeam>>;
+
       try {
-        return await switchUserTeam(db, {
+        result = await switchUserTeam(db, {
           userId: session.user.id,
           teamId: input.teamId,
         });
@@ -55,6 +58,21 @@ export const userRouter = createTRPCRouter({
           message: "You are not a member of this team",
         });
       }
+
+      try {
+        await Promise.all([
+          result.previousTeamId
+            ? teamCache.delete(
+                `user:${session.user.id}:team:${result.previousTeamId}`,
+              )
+            : Promise.resolve(),
+          teamCache.delete(`user:${session.user.id}:team:${input.teamId}`),
+        ]);
+      } catch {
+        // Non-fatal — cache will expire naturally
+      }
+
+      return result;
     }),
 
   delete: protectedProcedure.mutation(async ({ ctx: { db, session } }) => {
