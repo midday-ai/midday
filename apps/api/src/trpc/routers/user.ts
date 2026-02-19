@@ -45,12 +45,21 @@ export const userRouter = createTRPCRouter({
   switchTeam: protectedProcedure
     .input(z.object({ teamId: z.string().uuid() }))
     .mutation(async ({ ctx: { db, session }, input }) => {
+      let result: Awaited<ReturnType<typeof switchUserTeam>>;
+
       try {
-        const result = await switchUserTeam(db, {
+        result = await switchUserTeam(db, {
           userId: session.user.id,
           teamId: input.teamId,
         });
+      } catch {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You are not a member of this team",
+        });
+      }
 
+      try {
         await Promise.all([
           result.previousTeamId
             ? teamCache.delete(
@@ -59,14 +68,11 @@ export const userRouter = createTRPCRouter({
             : Promise.resolve(),
           teamCache.delete(`user:${session.user.id}:team:${input.teamId}`),
         ]);
-
-        return result;
       } catch {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You are not a member of this team",
-        });
+        // Non-fatal — cache will expire naturally
       }
+
+      return result;
     }),
 
   delete: protectedProcedure.mutation(async ({ ctx: { db, session } }) => {

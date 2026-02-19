@@ -45,7 +45,11 @@ export const bankConnectionsRouter = createTRPCRouter({
         });
       }
 
-      await chatCache.invalidateTeamContext(teamId!);
+      try {
+        await chatCache.invalidateTeamContext(teamId!);
+      } catch {
+        // Non-fatal — cache will expire naturally
+      }
 
       const event = await tasks.trigger("initial-bank-setup", {
         connectionId: data.id,
