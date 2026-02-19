@@ -71,7 +71,11 @@ export const bankAccountsRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      await chatCache.invalidateTeamContext(teamId!);
+      try {
+        await chatCache.invalidateTeamContext(teamId!);
+      } catch {
+        // Non-fatal — cache will expire naturally
+      }
 
       return result;
     }),
@@ -96,7 +100,11 @@ export const bankAccountsRouter = createTRPCRouter({
         manual: input.manual,
       });
 
-      await chatCache.invalidateTeamContext(teamId!);
+      try {
+        await chatCache.invalidateTeamContext(teamId!);
+      } catch {
+        // Non-fatal — cache will expire naturally
+      }
 
       return result;
     }),

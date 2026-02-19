@@ -147,7 +147,11 @@ app.openapi(
       userId: session.user.id,
     });
 
-    await chatCache.invalidateTeamContext(teamId);
+    try {
+      await chatCache.invalidateTeamContext(teamId);
+    } catch {
+      // Non-fatal — cache will expire naturally
+    }
 
     return c.json(validateResponse(result, bankAccountResponseSchema));
   },
@@ -234,7 +238,11 @@ app.openapi(
       teamId,
     });
 
-    await chatCache.invalidateTeamContext(teamId);
+    try {
+      await chatCache.invalidateTeamContext(teamId);
+    } catch {
+      // Non-fatal — cache will expire naturally
+    }
 
     return c.json(validateResponse(result, bankAccountResponseSchema));
   },
