@@ -360,6 +360,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   // Memoize the meta object to prevent table re-renders
   const tableMeta = useMemo(
     () => ({
+      dateFormat: user?.dateFormat,
       setOpen,
       copyUrl,
       updateTransaction,
@@ -372,6 +373,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
       exportingTransactionIds,
     }),
     [
+      user?.dateFormat,
       setOpen,
       copyUrl,
       updateTransaction,

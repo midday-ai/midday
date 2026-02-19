@@ -55,15 +55,8 @@ const SelectCell = memo(
 SelectCell.displayName = "SelectCell";
 
 const DateCell = memo(
-  ({
-    date,
-    format,
-    noSort,
-  }: {
-    date: string;
-    format?: string | null;
-    noSort?: boolean;
-  }) => formatDate(date, format, noSort),
+  ({ date, format }: { date: string; format?: string | null }) =>
+    formatDate(date, format),
 );
 
 DateCell.displayName = "DateCell";
@@ -343,7 +336,6 @@ export const columns: ColumnDef<Transaction>[] = [
       <DateCell
         date={row.original.date}
         format={table.options.meta?.dateFormat}
-        noSort={!table.options.meta?.hasSorting}
       />
     ),
   },

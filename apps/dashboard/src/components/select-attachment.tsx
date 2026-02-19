@@ -92,7 +92,7 @@ export function SelectAttachment({
           // For inbox items: date is most important for matching, then description if available
           const parts: string[] = [];
           if (item.date) {
-            parts.push(formatDate(item.date, user?.dateFormat, true));
+            parts.push(formatDate(item.date, user?.dateFormat));
           }
           // Add description if available and not too long (truncate if needed)
           if (item.description && item.description.length > 0) {

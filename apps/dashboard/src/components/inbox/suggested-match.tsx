@@ -138,7 +138,6 @@ export function SuggestedMatch() {
                 formatDate(
                   suggestion.suggestedTransaction.date,
                   user?.dateFormat,
-                  true,
                 )}
             </span>
           </div>
