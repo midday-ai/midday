@@ -63,15 +63,10 @@ type Props = {
 };
 
 function isExistingAccount(
-  providerAccount: { name: string; type: string; currency: string },
+  providerAccountId: string,
   existing: ExistingAccount[],
 ): boolean {
-  return existing.some(
-    (e) =>
-      e.name?.toLowerCase() === providerAccount.name.toLowerCase() &&
-      e.type === providerAccount.type &&
-      e.currency === providerAccount.currency,
-  );
+  return existing.some((e) => e.accountId === providerAccountId);
 }
 
 export function AddBankAccountsModal({
@@ -111,7 +106,7 @@ export function AddBankAccountsModal({
 
   const newAccounts = useMemo(() => {
     const accounts = providerData?.data ?? [];
-    return accounts.filter((a) => !isExistingAccount(a, existingAccounts));
+    return accounts.filter((a) => !isExistingAccount(a.id, existingAccounts));
   }, [providerData, existingAccounts]);
 
   const initializedRef = useRef(false);

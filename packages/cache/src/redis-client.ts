@@ -3,10 +3,10 @@ import { getSharedRedisClient } from "./shared-redis";
 
 const logger = createLoggerWithContext("redis-cache");
 
-// Every Redis command is raced against this timeout.
-// If the socket is half-open (appears connected but server is gone),
-// this prevents the API request from hanging forever.
-const COMMAND_TIMEOUT_MS = 3_000;
+const COMMAND_TIMEOUT_MS = 1_500;
+
+// Commands faster than this are not logged individually.
+const SLOW_COMMAND_MS = 50;
 
 function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
   return Promise.race([
@@ -66,22 +66,45 @@ export class RedisCache {
   }
 
   async get<T>(key: string): Promise<T | undefined> {
-    if (!this.isConnected) return undefined;
+    if (!this.isConnected) {
+      logger.warn("GET skipped: not connected", { prefix: this.prefix, key });
+      return undefined;
+    }
 
+    const start = performance.now();
     try {
       const value = await withTimeout(this.redis.get(this.getKey(key)), "GET");
+      const elapsed = performance.now() - start;
+
+      if (elapsed > SLOW_COMMAND_MS) {
+        logger.warn("Slow GET", {
+          prefix: this.prefix,
+          key,
+          latencyMs: Math.round(elapsed),
+          hit: value !== null,
+        });
+      }
+
       return this.parseValue<T>(value);
     } catch (error) {
-      logger.error(
-        `Get error for ${this.prefix}: ${error instanceof Error ? error.message : error}`,
-      );
+      const elapsed = performance.now() - start;
+      logger.error("GET failed", {
+        prefix: this.prefix,
+        key,
+        latencyMs: Math.round(elapsed),
+        error: error instanceof Error ? error.message : String(error),
+      });
       return undefined;
     }
   }
 
   async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
-    if (!this.isConnected) return;
+    if (!this.isConnected) {
+      logger.warn("SET skipped: not connected", { prefix: this.prefix, key });
+      return;
+    }
 
+    const start = performance.now();
     try {
       const serializedValue = this.stringifyValue(value);
       const redisKey = this.getKey(key);
@@ -95,26 +118,69 @@ export class RedisCache {
       } else {
         await withTimeout(this.redis.set(redisKey, serializedValue), "SET");
       }
+
+      const elapsed = performance.now() - start;
+      if (elapsed > SLOW_COMMAND_MS) {
+        logger.warn("Slow SET", {
+          prefix: this.prefix,
+          key,
+          latencyMs: Math.round(elapsed),
+          ttl,
+        });
+      }
     } catch (error) {
-      logger.error(
-        `Set error for ${this.prefix}: ${error instanceof Error ? error.message : error}`,
-      );
+      const elapsed = performance.now() - start;
+      logger.error("SET failed", {
+        prefix: this.prefix,
+        key,
+        latencyMs: Math.round(elapsed),
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
   async delete(key: string): Promise<void> {
-    if (!this.isConnected) return;
+    if (!this.isConnected) {
+      logger.warn("DEL skipped: not connected", { prefix: this.prefix, key });
+      return;
+    }
 
+    const start = performance.now();
     try {
       await withTimeout(this.redis.del(this.getKey(key)), "DEL");
+
+      const elapsed = performance.now() - start;
+      if (elapsed > SLOW_COMMAND_MS) {
+        logger.warn("Slow DEL", {
+          prefix: this.prefix,
+          key,
+          latencyMs: Math.round(elapsed),
+        });
+      }
     } catch (error) {
-      logger.error(
-        `Delete error for ${this.prefix}: ${error instanceof Error ? error.message : error}`,
-      );
+      const elapsed = performance.now() - start;
+      logger.error("DEL failed", {
+        prefix: this.prefix,
+        key,
+        latencyMs: Math.round(elapsed),
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
   async healthCheck(): Promise<void> {
-    await withTimeout(this.redis.send("PING", []), "PING");
+    const start = performance.now();
+    try {
+      await withTimeout(this.redis.send("PING", []), "PING");
+      const elapsed = performance.now() - start;
+      logger.info("Health check OK", { latencyMs: Math.round(elapsed) });
+    } catch (error) {
+      const elapsed = performance.now() - start;
+      logger.error("Health check failed", {
+        latencyMs: Math.round(elapsed),
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 }

@@ -33,6 +33,7 @@ export const getBankConnections = async (
       bankAccounts: {
         columns: {
           id: true,
+          accountId: true,
           name: true,
           enabled: true,
           manual: true,
