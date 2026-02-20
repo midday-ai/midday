@@ -4,7 +4,6 @@ import copilotMcpApp from "./copilot-mcp/config";
 import cursorMcpApp from "./cursor-mcp/config";
 import deelApp from "./deel/config";
 import dropboxApp from "./dropbox/config";
-import eInvoiceApp from "./e-invoice/config";
 import fortnoxApp from "./fortnox/config-client";
 import gmailApp from "./gmail/config-client";
 import googleDriveApp from "./google-drive/config";
@@ -13,6 +12,7 @@ import middayDesktopApp from "./midday-desktop/config";
 import n8nMcpApp from "./n8n-mcp/config";
 import opencodeMcpApp from "./opencode-mcp/config";
 import outlookApp from "./outlook/config-client";
+import peppolApp from "./peppol/config";
 import perplexityMcpApp from "./perplexity-mcp/config";
 import polarApp from "./polar/config";
 import quickBooksApp from "./quick-books/config-client";
@@ -35,6 +35,7 @@ export const apps = [
   fortnoxApp,
   whatsappApp,
   stripePaymentsApp,
+  peppolApp,
   middayDesktopApp,
   raycastApp,
   googleDriveApp,
@@ -42,7 +43,6 @@ export const apps = [
   stripeApp,
   polarApp,
   deelApp,
-  eInvoiceApp,
   cursorMcpApp,
   claudeMcpApp,
   perplexityMcpApp,

@@ -1,6 +1,7 @@
 "use client";
 
 import { TZDate } from "@date-fns/tz";
+import { friendlyFaultMessage } from "@midday/e-invoice/constants";
 import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import {
   Accordion,
@@ -40,6 +41,9 @@ export function InvoiceDetails() {
   const { data, isLoading } = useQuery({
     ...trpc.invoice.getById.queryOptions({ id: invoiceId! }),
     enabled: isOpen,
+    refetchInterval: (query) => {
+      return query.state.data?.eInvoiceStatus === "processing" ? 5000 : false;
+    },
   });
 
   // Fetch upcoming invoices for recurring series
@@ -227,6 +231,26 @@ export function InvoiceDetails() {
             <div className="flex justify-between items-center">
               <span className="text-sm text-[#606060]">Sent to</span>
               <span className="text-sm">{sentTo}</span>
+            </div>
+          )}
+
+          {data.eInvoiceStatus && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">E-invoice</span>
+              <span className="text-sm">
+                {data.eInvoiceStatus === "sent" && "Delivered via Peppol"}
+                {data.eInvoiceStatus === "processing" && (
+                  <span className="text-[#606060]">Processing</span>
+                )}
+                {data.eInvoiceStatus === "error" && (
+                  <span
+                    className="text-destructive"
+                    title={data.eInvoiceFaults?.[0]?.message ?? undefined}
+                  >
+                    {friendlyFaultMessage(data.eInvoiceFaults?.[0])}
+                  </span>
+                )}
+              </span>
             </div>
           )}
 

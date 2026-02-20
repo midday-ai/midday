@@ -142,6 +142,48 @@ export const allNotificationTypes: NotificationType[] = [
     category: "insights",
     order: 1,
   },
+  {
+    type: "e_invoice_registration_processing",
+    channels: ["in_app", "email"],
+    showInSettings: false,
+    category: "e_invoicing",
+    order: 1,
+  },
+  {
+    type: "e_invoice_registration_complete",
+    channels: ["in_app", "email"],
+    showInSettings: false,
+    category: "e_invoicing",
+    order: 2,
+  },
+  {
+    type: "e_invoice_registration_error",
+    channels: ["in_app", "email"],
+    showInSettings: false,
+    category: "e_invoicing",
+    order: 3,
+  },
+  {
+    type: "e_invoice_sent",
+    channels: ["in_app"],
+    showInSettings: false,
+    category: "e_invoicing",
+    order: 4,
+  },
+  {
+    type: "e_invoice_error",
+    channels: ["in_app"],
+    showInSettings: false,
+    category: "e_invoicing",
+    order: 5,
+  },
+  {
+    type: "e_invoice_received",
+    channels: ["in_app"],
+    showInSettings: false,
+    category: "e_invoicing",
+    order: 6,
+  },
 ];
 
 // Get all notification types (including hidden ones)

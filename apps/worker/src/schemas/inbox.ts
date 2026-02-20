@@ -77,6 +77,13 @@ export const whatsappUploadSchema = z.object({
 
 export type WhatsAppUploadPayload = z.infer<typeof whatsappUploadSchema>;
 
+export const peppolIncomingSchema = z.object({
+  siloEntryId: z.string(),
+  key: z.string().optional(),
+});
+
+export type PeppolIncomingPayload = z.infer<typeof peppolIncomingSchema>;
+
 // Provider schemas
 export const inboxProviderInitialSetupSchema = z.object({
   inboxAccountId: z.string().uuid(),

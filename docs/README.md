@@ -9,6 +9,7 @@ This directory contains technical documentation for the Midday.
 - **[invoice-recurring.md](./invoice-recurring.md)** - Technical documentation of the recurring invoice system including architecture, state machine, generation flow, and key design decisions.
 - **[document-processing.md](./document-processing.md)** - Technical documentation of the document processing pipeline including AI classification, graceful degradation, retry functionality, and error handling.
 - **[database-connection-pooling.md](./database-connection-pooling.md)** - Database connection pooling setup with Supabase Supavisor (transaction mode), multi-region read replica mapping across Railway, pool configuration, and prepared statement constraints.
+- **[e-invoicing.md](./e-invoicing.md)** - Technical documentation of the e-invoicing feature including Peppol registration, GOBL transformation, Invopop integration, webhook handling, and key design decisions.
 
 ## About
 

@@ -714,6 +714,105 @@ const handleInboxCrossCurrencyMatched: NotificationDescriptionHandler = (
   return t("notifications.inbox_cross_currency_matched.title");
 };
 
+const handleEInvoiceSent: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  t,
+) => {
+  const invoiceNumber = metadata?.invoiceNumber;
+  const customerName = metadata?.customerName;
+  if (invoiceNumber && customerName) {
+    return t("notifications.e_invoice_sent.with_customer", {
+      invoiceNumber,
+      customerName,
+    });
+  }
+  if (invoiceNumber) {
+    return t("notifications.e_invoice_sent.without_customer", {
+      invoiceNumber,
+    });
+  }
+  return t("notifications.e_invoice_sent.title");
+};
+
+const handleEInvoiceError: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  t,
+) => {
+  const invoiceNumber = metadata?.invoiceNumber;
+  const customerName = metadata?.customerName;
+  if (invoiceNumber && customerName) {
+    return t("notifications.e_invoice_error.with_customer", {
+      invoiceNumber,
+      customerName,
+    });
+  }
+  if (invoiceNumber) {
+    return t("notifications.e_invoice_error.without_customer", {
+      invoiceNumber,
+    });
+  }
+  return t("notifications.e_invoice_error.title");
+};
+
+const handleEInvoiceRegistrationProcessing: NotificationDescriptionHandler = (
+  _metadata,
+  _user,
+  t,
+) => {
+  return t("notifications.e_invoice_registration_processing.title");
+};
+
+const handleEInvoiceRegistrationComplete: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  t,
+) => {
+  const peppolId = metadata?.peppolId;
+  if (peppolId) {
+    return t("notifications.e_invoice_registration_complete.with_peppol_id", {
+      peppolId,
+    });
+  }
+  return t("notifications.e_invoice_registration_complete.title");
+};
+
+const handleEInvoiceRegistrationError: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  t,
+) => {
+  const errorMessage = metadata?.errorMessage;
+  if (errorMessage) {
+    return t("notifications.e_invoice_registration_error.with_message", {
+      errorMessage,
+    });
+  }
+  return t("notifications.e_invoice_registration_error.title");
+};
+
+const handleEInvoiceReceived: NotificationDescriptionHandler = (
+  metadata,
+  _user,
+  t,
+) => {
+  const supplierName = metadata?.supplierName;
+  const invoiceNumber = metadata?.invoiceNumber;
+  if (supplierName && invoiceNumber) {
+    return t("notifications.e_invoice_received.with_supplier", {
+      supplierName,
+      invoiceNumber,
+    });
+  }
+  if (supplierName) {
+    return t("notifications.e_invoice_received.without_number", {
+      supplierName,
+    });
+  }
+  return t("notifications.e_invoice_received.title");
+};
+
 const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   transactions_created: handleTransactionsCreated,
   inbox_new: handleInboxNew,
@@ -733,6 +832,12 @@ const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   recurring_series_completed: handleRecurringSeriesCompleted,
   recurring_series_paused: handleRecurringSeriesPaused,
   recurring_invoice_upcoming: handleRecurringInvoiceUpcoming,
+  e_invoice_sent: handleEInvoiceSent,
+  e_invoice_error: handleEInvoiceError,
+  e_invoice_registration_processing: handleEInvoiceRegistrationProcessing,
+  e_invoice_registration_complete: handleEInvoiceRegistrationComplete,
+  e_invoice_registration_error: handleEInvoiceRegistrationError,
+  e_invoice_received: handleEInvoiceReceived,
 };
 
 export function getNotificationDescription(

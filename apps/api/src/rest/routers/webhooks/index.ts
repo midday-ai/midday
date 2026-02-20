@@ -2,6 +2,7 @@ import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { inboxWebhookRouter } from "./inbox";
+import { invopopWebhookRouter } from "./invopop";
 import { plaidWebhookRouter } from "./plaid";
 import { polarWebhookRouter } from "./polar";
 import { stripeWebhookRouter } from "./stripe";
@@ -20,5 +21,6 @@ app.route("/polar", polarWebhookRouter);
 app.route("/stripe", stripeWebhookRouter);
 app.route("/teller", tellerWebhookRouter);
 app.route("/whatsapp", whatsappWebhookRouter);
+app.route("/invopop", invopopWebhookRouter);
 
 export { app as webhookRouter };

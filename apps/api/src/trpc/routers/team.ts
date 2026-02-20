@@ -26,6 +26,7 @@ import {
   deleteTeamMember,
   getAvailablePlans,
   getBankConnections,
+  getEInvoiceRegistration,
   getInboxAccounts,
   getInvitesByEmail,
   getTeamById,
@@ -35,12 +36,16 @@ import {
   getTeamsByUserId,
   hasTeamAccess,
   leaveTeam,
+  updateEInvoiceRegistration,
   updateTeamById,
   updateTeamMember,
+  upsertEInvoiceRegistration,
 } from "@midday/db/queries";
+import { E_INVOICE_PROVIDER_PEPPOL } from "@midday/e-invoice/constants";
 import { triggerJob } from "@midday/job-client";
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 export const teamRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -393,6 +398,128 @@ export const teamRouter = createTRPCRouter({
           provider: a.provider,
         })),
       };
+    },
+  ),
+
+  // E-Invoice registration
+  eInvoiceRegistration: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      if (!teamId) return null;
+
+      return getEInvoiceRegistration(db, {
+        teamId,
+        provider: E_INVOICE_PROVIDER_PEPPOL,
+      });
+    },
+  ),
+
+  registerForEInvoice: protectedProcedure.mutation(
+    async ({ ctx: { db, teamId } }) => {
+      if (!teamId) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      const team = await getTeamById(db, teamId);
+      if (
+        !team?.addressLine1 ||
+        !team?.city ||
+        !team?.zip ||
+        !team?.vatNumber ||
+        !team?.countryCode ||
+        !team?.email
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Complete company address, city, postal code, email, and VAT number are required",
+        });
+      }
+
+      // Validate formats using Zod for consistency with the rest of the codebase
+      const formatValidation = z
+        .object({
+          email: z
+            .string()
+            .email("Company email must be a valid email address"),
+          countryCode: z
+            .string()
+            .length(2, "Country code must be a 2-letter ISO code")
+            .regex(/^[A-Z]{2}$/i, "Country code must be a 2-letter ISO code"),
+          vatNumber: z.string().trim().min(1, "VAT number cannot be empty"),
+        })
+        .safeParse({
+          email: team.email,
+          countryCode: team.countryCode,
+          vatNumber: team.vatNumber,
+        });
+
+      if (!formatValidation.success) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: formatValidation.error.issues[0]?.message ?? "Invalid input",
+        });
+      }
+
+      // Check if already registered or processing (guard before upsert)
+      const existing = await getEInvoiceRegistration(db, {
+        teamId,
+        provider: E_INVOICE_PROVIDER_PEPPOL,
+      });
+
+      if (existing?.status === "registered") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Already registered for e-invoicing",
+        });
+      }
+
+      if (existing?.status === "processing") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Registration is already in progress",
+        });
+      }
+
+      // Atomic upsert — the unique constraint on (team_id, provider) prevents
+      // duplicate rows even if concurrent requests pass the guard above.
+      const registration = await upsertEInvoiceRegistration(db, {
+        teamId,
+        provider: E_INVOICE_PROVIDER_PEPPOL,
+        status: "pending",
+        faults: null,
+      });
+
+      if (!registration) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create registration record",
+        });
+      }
+
+      const registrationId = registration.id;
+
+      // Trigger the registration worker job — roll back status on failure
+      try {
+        await triggerJob("register-supplier", { teamId }, "invoices");
+      } catch (err) {
+        await updateEInvoiceRegistration(db, {
+          id: registrationId,
+          status: "error",
+          faults: [
+            {
+              message: "Failed to start registration. Please try again later.",
+            },
+          ],
+        });
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to start registration job",
+          cause: err,
+        });
+      }
+
+      return { status: "pending" };
     },
   ),
 });

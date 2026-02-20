@@ -91,6 +91,16 @@ const appExtensions: Record<
       "Keyboard-first workflow",
     ],
   },
+  peppol: {
+    slug: "peppol",
+    features: [
+      "Send compliant e-invoices via Peppol",
+      "Receive incoming invoices to inbox",
+      "Automatic data extraction from GOBL",
+      "AI-powered transaction matching",
+    ],
+    installUrl: "/settings/company#e-invoicing",
+  },
   "stripe-payments": {
     slug: "stripe-payments",
     features: [
@@ -153,15 +163,6 @@ const appExtensions: Record<
       "Payroll integration",
       "Compliance tracking",
       "Global workforce support",
-    ],
-  },
-  "e-invoice": {
-    slug: "e-invoice",
-    features: [
-      "Peppol network support",
-      "European compliance",
-      "Send & receive e-invoices",
-      "Automated processing",
     ],
   },
   "cursor-mcp": {
@@ -301,6 +302,7 @@ export const categories = [
   { id: "storage", name: "Storage" },
   { id: "apps", name: "Apps" },
   { id: "ai-automation", name: "AI & Automation" },
+  { id: "e-invoicing", name: "E-Invoicing" },
 ];
 
 export function getAppBySlug(slug: string): WebsiteApp | undefined {

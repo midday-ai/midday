@@ -100,3 +100,13 @@ export const invoiceUpcomingNotificationSchema = z.object({});
 export type InvoiceUpcomingNotificationPayload = z.infer<
   typeof invoiceUpcomingNotificationSchema
 >;
+
+/**
+ * Submit e-invoice job schema
+ * Handles submitting an invoice to Invopop for e-invoicing compliance
+ */
+export const submitEInvoiceSchema = z.object({
+  invoiceId: z.string().uuid(),
+});
+
+export type SubmitEInvoicePayload = z.infer<typeof submitEInvoiceSchema>;

@@ -220,6 +220,34 @@ export default {
       single_with_customer:
         "An invoice for {customerName} is scheduled for tomorrow",
     },
+    e_invoice_sent: {
+      title: "E-invoice delivered via Peppol",
+      with_customer:
+        "Invoice {invoiceNumber} delivered via Peppol to {customerName}",
+      without_customer: "Invoice {invoiceNumber} delivered via Peppol",
+    },
+    e_invoice_error: {
+      title: "E-invoice delivery failed",
+      with_customer:
+        "E-invoice delivery failed for {invoiceNumber} to {customerName}",
+      without_customer: "E-invoice delivery failed for {invoiceNumber}",
+    },
+    e_invoice_received: {
+      title: "E-invoice received via Peppol",
+      with_supplier: "E-invoice {invoiceNumber} received from {supplierName}",
+      without_number: "E-invoice received from {supplierName}",
+    },
+    e_invoice_registration_processing: {
+      title: "E-invoicing setup is being verified",
+    },
+    e_invoice_registration_complete: {
+      title: "E-invoicing is now active",
+      with_peppol_id: "E-invoicing is now active (Peppol ID: {peppolId})",
+    },
+    e_invoice_registration_error: {
+      title: "E-invoicing setup needs attention",
+      with_message: "E-invoicing setup failed: {errorMessage}",
+    },
     inbox_new: {
       name: "New Inbox Items",
       description: "Get notified when new items arrive in your inbox",

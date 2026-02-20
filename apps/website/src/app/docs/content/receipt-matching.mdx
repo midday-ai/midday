@@ -9,7 +9,7 @@ Midday's inbox captures receipts and invoices, then uses AI to match them to you
 
 ## How it works
 
-1. A receipt arrives in your inbox (via email forward, connected email, or upload)
+1. A receipt arrives in your inbox (via email forward, connected email, Peppol e-invoice, or upload)
 2. AI extracts the merchant, amount, and date
 3. The system searches your transactions for matches
 4. When confident, it attaches the receipt automatically
@@ -132,6 +132,17 @@ Share receipts directly from Slack:
 Great for teams where receipts come through Slack.
 
 [Set up Slack →](/docs/connect-slack)
+
+### Peppol e-invoices
+
+If you're registered for e-invoicing, incoming Peppol invoices appear in your inbox automatically:
+
+- E-invoices arrive with all data pre-extracted (supplier, amount, dates, invoice number)
+- No OCR or manual entry needed — the structured data is authoritative
+- They go through the same matching pipeline as other inbox items
+- Look for the Peppol icon to identify e-invoice items
+
+[Set up e-invoicing →](/docs/e-invoicing-setup)
 
 ### Manual upload
 

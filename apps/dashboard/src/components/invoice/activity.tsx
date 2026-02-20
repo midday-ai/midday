@@ -1,9 +1,17 @@
 "use client";
 
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { friendlyFaultMessage } from "@midday/e-invoice/constants";
 import { cn } from "@midday/ui/cn";
 import { format } from "date-fns";
 import { useUserQuery } from "@/hooks/use-user";
+
+function getFaultLabel(
+  fault?: { code?: string; message?: string } | null,
+): string {
+  const message = friendlyFaultMessage(fault);
+  return `E-invoice failed: ${message}`;
+}
 
 type ActivityItemProps = {
   label: string;
@@ -88,6 +96,30 @@ export function InvoiceActivity({ data }: Props) {
           label="Scheduled"
           date={data?.scheduledAt}
           completed={!!data?.sentAt}
+          timeFormat={user?.timeFormat}
+        />
+      )}
+      {data?.eInvoiceStatus === "processing" && (
+        <ActivityItem
+          label="E-invoice processing"
+          date={data?.updatedAt}
+          completed={false}
+          timeFormat={user?.timeFormat}
+        />
+      )}
+      {data?.eInvoiceStatus === "sent" && (
+        <ActivityItem
+          label="Delivered via Peppol"
+          date={data?.updatedAt}
+          completed
+          timeFormat={user?.timeFormat}
+        />
+      )}
+      {data?.eInvoiceStatus === "error" && (
+        <ActivityItem
+          label={getFaultLabel(data?.eInvoiceFaults?.[0])}
+          date={data?.updatedAt}
+          completed
           timeFormat={user?.timeFormat}
         />
       )}

@@ -73,9 +73,9 @@ export function Inbox() {
                 Receipts and invoices are matched automatically to transactions.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
-                Receipts and invoices are pulled in from email, uploads, and
-                payments, then matched to transactions so reconciliation doesn't
-                require manual work.
+                Receipts and invoices are pulled in from email, uploads,
+                payments, and the Peppol e-invoice network, then matched to
+                transactions so reconciliation doesn't require manual work.
               </p>
             </div>
 
@@ -112,9 +112,9 @@ export function Inbox() {
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Receipts and invoices are pulled in from email, uploads, and
-                payments, then matched to transactions so reconciliation doesn't
-                require manual work.
+                Receipts and invoices are pulled in from email, uploads,
+                payments, and the Peppol e-invoice network, then matched to
+                transactions so reconciliation doesn't require manual work.
               </p>
             </div>
 
@@ -153,7 +153,8 @@ export function Inbox() {
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     Upload receipts and invoices manually, connect existing
-                    folders, or pull them in from connected email accounts.
+                    folders, pull them in from connected email accounts, or
+                    receive e-invoices directly via the Peppol network.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
@@ -234,6 +235,21 @@ export function Inbox() {
                       />
                       <span className="font-sans text-sm text-foreground">
                         Slack
+                      </span>
+                    </Link>
+                    <Link
+                      href="/integrations/peppol"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                    >
+                      <Image
+                        src="/images/peppol.svg"
+                        alt="Peppol"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        Peppol
                       </span>
                     </Link>
                   </div>

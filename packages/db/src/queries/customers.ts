@@ -78,6 +78,8 @@ export const getCustomerById = async (
       // Portal fields
       portalEnabled: customers.portalEnabled,
       portalId: customers.portalId,
+      // E-invoice fields
+      peppolId: customers.peppolId,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`
@@ -192,6 +194,8 @@ export const getCustomers = async (
       // Portal fields
       portalEnabled: customers.portalEnabled,
       portalId: customers.portalId,
+      // E-invoice fields
+      peppolId: customers.peppolId,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       // Financial metrics
@@ -341,6 +345,7 @@ export type UpsertCustomerParams = {
   contact?: string | null;
   vatNumber?: string | null;
   countryCode?: string | null;
+  peppolId?: string | null;
   tags?: { id: string; name: string }[] | null;
 };
 
@@ -381,6 +386,7 @@ export const upsertCustomer = async (
         contact: rest.contact,
         vatNumber: rest.vatNumber,
         countryCode: rest.countryCode,
+        peppolId: rest.peppolId,
       },
     })
     .returning();

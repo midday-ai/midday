@@ -36,6 +36,12 @@ export const createActivitySchema = z.object({
     "recurring_series_paused",
     "recurring_invoice_upcoming",
     "insight_ready",
+    "e_invoice_registration_processing",
+    "e_invoice_registration_complete",
+    "e_invoice_registration_error",
+    "e_invoice_sent",
+    "e_invoice_error",
+    "e_invoice_received",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
@@ -371,6 +377,66 @@ export type TransactionsAssignedInput = z.infer<
 >;
 export type InsightReadyInput = z.infer<typeof insightReadySchema>;
 
+export const eInvoiceRegistrationProcessingSchema = z.object({
+  users: z.array(userSchema),
+  teamId: z.string().uuid(),
+  registrationUrl: z.string().url().optional(),
+});
+
+export const eInvoiceRegistrationCompleteSchema = z.object({
+  users: z.array(userSchema),
+  teamId: z.string().uuid(),
+  peppolId: z.string().optional(),
+});
+
+export const eInvoiceRegistrationErrorSchema = z.object({
+  users: z.array(userSchema),
+  teamId: z.string().uuid(),
+  errorMessage: z.string().optional(),
+});
+
+export type EInvoiceRegistrationProcessingInput = z.infer<
+  typeof eInvoiceRegistrationProcessingSchema
+>;
+export type EInvoiceRegistrationCompleteInput = z.infer<
+  typeof eInvoiceRegistrationCompleteSchema
+>;
+export type EInvoiceRegistrationErrorInput = z.infer<
+  typeof eInvoiceRegistrationErrorSchema
+>;
+
+// E-invoice delivery schemas
+export const eInvoiceSentSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string().optional(),
+  customerName: z.string().optional(),
+});
+
+export const eInvoiceDeliveryErrorSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string().optional(),
+  customerName: z.string().optional(),
+  errorMessage: z.string().optional(),
+});
+
+export type EInvoiceSentInput = z.infer<typeof eInvoiceSentSchema>;
+export type EInvoiceDeliveryErrorInput = z.infer<
+  typeof eInvoiceDeliveryErrorSchema
+>;
+
+// E-invoice received (incoming Peppol documents)
+export const eInvoiceReceivedSchema = z.object({
+  users: z.array(userSchema),
+  supplierName: z.string().optional(),
+  invoiceNumber: z.string().optional(),
+  amount: z.number().optional(),
+  currency: z.string().optional(),
+});
+
+export type EInvoiceReceivedInput = z.infer<typeof eInvoiceReceivedSchema>;
+
 // Notification types map - all available notification types with their data structures
 export type NotificationTypes = {
   transactions_created: TransactionsCreatedInput;
@@ -396,4 +462,10 @@ export type NotificationTypes = {
   recurring_series_paused: RecurringSeriesPausedInput;
   recurring_invoice_upcoming: RecurringInvoiceUpcomingInput;
   insight_ready: InsightReadyInput;
+  e_invoice_registration_processing: EInvoiceRegistrationProcessingInput;
+  e_invoice_registration_complete: EInvoiceRegistrationCompleteInput;
+  e_invoice_registration_error: EInvoiceRegistrationErrorInput;
+  e_invoice_sent: EInvoiceSentInput;
+  e_invoice_error: EInvoiceDeliveryErrorInput;
+  e_invoice_received: EInvoiceReceivedInput;
 };

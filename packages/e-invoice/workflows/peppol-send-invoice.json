@@ -1,0 +1,75 @@
+{
+  "name": "Peppol send invoice",
+  "description": "Send Peppol BIS invoice through Peppol network",
+  "schema": "bill/invoice",
+  "steps": [
+    {
+      "id": "33e23480-10ab-11f0-a09e-7b63571a4ae2",
+      "name": "Set State",
+      "provider": "silo.state",
+      "summary": "Set state to `processing`{.state .processing}",
+      "config": {
+        "state": "processing"
+      }
+    },
+    {
+      "id": "fb06b190-10aa-11f0-a09e-7b63571a4ae2",
+      "name": "Sign Envelope",
+      "provider": "silo.close"
+    },
+    {
+      "id": "fc5aa8d0-10aa-11f0-a09e-7b63571a4ae2",
+      "name": "Generate UBL Document",
+      "provider": "ubl.generate",
+      "config": {
+        "doc_type": "bis-invoice-v3",
+        "private": false
+      }
+    },
+    {
+      "id": "075442a0-10ab-11f0-a09e-7b63571a4ae2",
+      "name": "Send Peppol Document",
+      "provider": "peppol.send"
+    },
+    {
+      "id": "3037a310-10ab-11f0-a09e-7b63571a4ae2",
+      "name": "Set State",
+      "provider": "silo.state",
+      "summary": "Set state to `sent`{.state .sent}",
+      "config": {
+        "state": "sent"
+      }
+    },
+    {
+      "id": "67492340-0823-11f1-a6fd-11cb10981972",
+      "name": "Send Webhook",
+      "provider": "webhook",
+      "config": {
+        "bearer_token": "INVOPOP_WEBHOOK_SECRET",
+        "callback_url": "https://<YOUR_API_HOST>/webhooks/invopop",
+        "event": "success"
+      }
+    }
+  ],
+  "rescue": [
+    {
+      "id": "39513240-10ab-11f0-a09e-7b63571a4ae2",
+      "name": "Set State",
+      "provider": "silo.state",
+      "summary": "Set state to `error`{.state .error}",
+      "config": {
+        "state": "error"
+      }
+    },
+    {
+      "id": "82a49de0-0823-11f1-a6fd-11cb10981972",
+      "name": "Send Webhook",
+      "provider": "webhook",
+      "config": {
+        "bearer_token": "INVOPOP_WEBHOOK_SECRET",
+        "callback_url": "https://<YOUR_API_HOST>/webhooks/invopop",
+        "event": "failed"
+      }
+    }
+  ]
+}

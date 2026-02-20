@@ -216,6 +216,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       bottomBlock: invoices.bottomBlock,
       scheduledAt: invoices.scheduledAt,
       scheduledJobId: invoices.scheduledJobId,
+      eInvoiceStatus: invoices.eInvoiceStatus,
       customer: {
         id: customers.id,
         name: customers.name,
@@ -383,6 +384,11 @@ export async function getInvoiceById(
         name: invoiceTemplates.name,
         isDefault: invoiceTemplates.isDefault,
       },
+      // E-invoice fields
+      eInvoiceStatus: invoices.eInvoiceStatus,
+      eInvoiceSiloEntryId: invoices.eInvoiceSiloEntryId,
+      eInvoiceJobId: invoices.eInvoiceJobId,
+      eInvoiceFaults: invoices.eInvoiceFaults,
       // Recurring invoice data
       invoiceRecurringId: invoices.invoiceRecurringId,
       recurringSequence: invoices.recurringSequence,
@@ -476,11 +482,6 @@ export async function getInvoiceByPaymentIntentId(
 type PaymentStatusResult = {
   score: number;
   paymentStatus: string;
-};
-
-type DbPaymentStatusResult = {
-  score: number;
-  payment_status: string;
 };
 
 export async function getPaymentStatus(
@@ -1118,6 +1119,11 @@ export type UpdateInvoiceParams = {
   fileSize?: number | null;
   invoiceRecurringId?: string | null;
   recurringSequence?: number | null;
+  // E-invoice tracking fields
+  eInvoiceStatus?: string | null;
+  eInvoiceSiloEntryId?: string | null;
+  eInvoiceJobId?: string | null;
+  eInvoiceFaults?: { message: string; [key: string]: unknown }[] | null;
   teamId: string;
   userId?: string;
 };

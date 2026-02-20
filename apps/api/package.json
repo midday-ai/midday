@@ -31,6 +31,7 @@
     "@midday/categories": "workspace:*",
     "@midday/db": "workspace:*",
     "@midday/documents": "workspace:*",
+    "@midday/e-invoice": "workspace:*",
     "@midday/encryption": "workspace:*",
     "@midday/events": "workspace:*",
     "@midday/health": "workspace:*",

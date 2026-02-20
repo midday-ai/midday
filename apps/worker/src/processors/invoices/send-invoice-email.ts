@@ -1,4 +1,5 @@
-import { getInvoiceById, updateInvoice } from "@midday/db/queries";
+import { getInvoiceById, getTeamById, updateInvoice } from "@midday/db/queries";
+import { triggerJob } from "@midday/job-client";
 import { Notifications } from "@midday/notifications";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
@@ -151,5 +152,22 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
       invoiceId,
       customerEmail,
     });
+
+    // Trigger e-invoice submission if platform is configured and team has complete data
+    try {
+      if (process.env.INVOPOP_API_KEY && process.env.INVOPOP_WORKFLOW_ID) {
+        const team = await getTeamById(db, invoice.teamId);
+        if (team?.addressLine1 && team?.vatNumber && team?.countryCode) {
+          await triggerJob("submit-e-invoice", { invoiceId }, "invoices");
+          this.logger.info("E-invoice submission triggered", { invoiceId });
+        }
+      }
+    } catch (error) {
+      // Don't fail the email send if e-invoice triggering fails
+      this.logger.error("Failed to trigger e-invoice submission", {
+        invoiceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 }

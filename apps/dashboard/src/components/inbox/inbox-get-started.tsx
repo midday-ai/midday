@@ -13,6 +13,7 @@ import { revalidateInbox } from "@/actions/revalidate-action";
 import { AppConnectionToast } from "@/components/app-connection-toast";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
 import { ConnectOutlook } from "@/components/inbox/connect-outlook";
+import { ConnectPeppol } from "@/components/inbox/connect-peppol";
 import { ConnectSlack } from "@/components/inbox/connect-slack";
 import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
 import { useInboxParams } from "@/hooks/use-inbox-params";
@@ -83,9 +84,9 @@ export function InboxGetStarted() {
             <div className="pb-4 text-center">
               <h2 className="font-medium text-lg">Connect Your Inbox</h2>
               <p className="pb-6 text-sm text-[#878787]">
-                Connect your email or messaging apps to automatically import
-                receipts and invoices. We'll extract the data and match it to
-                your transactions.
+                Connect your email, messaging apps, or Peppol e-invoicing to
+                automatically import receipts and invoices. We'll extract the
+                data and match it to your transactions.
               </p>
             </div>
 
@@ -106,6 +107,7 @@ export function InboxGetStarted() {
                     <div className="flex flex-col space-y-4">
                       <ConnectSlack />
                       <ConnectWhatsApp />
+                      <ConnectPeppol />
                       {user?.team?.inboxId && (
                         <CopyInput value={getInboxEmail(user.team.inboxId)} />
                       )}

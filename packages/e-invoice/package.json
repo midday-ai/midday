@@ -1,0 +1,23 @@
+{
+  "name": "@midday/e-invoice",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "bun test --exit src",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./client": "./src/client.ts",
+    "./gobl": "./src/gobl.ts",
+    "./parsers": "./src/parsers.ts",
+    "./registration": "./src/registration.ts",
+    "./types": "./src/types.ts",
+    "./constants": "./src/constants.ts",
+    "./incoming": "./src/incoming.ts"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  }
+}
