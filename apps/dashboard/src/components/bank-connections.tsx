@@ -1,6 +1,7 @@
 "use client";
 
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -10,12 +11,15 @@ import {
 } from "@midday/ui/tooltip";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import { useReconnect } from "@/hooks/use-reconnect";
 import { useTRPC } from "@/trpc/client";
 import { connectionStatus } from "@/utils/connection-status";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
 import { DeleteConnection } from "./delete-connection";
+import { AddBankAccountsModal } from "./modals/add-bank-accounts-modal";
 import { ReconnectProvider } from "./reconnect-provider";
 import { SyncTransactions } from "./sync-transactions";
 
@@ -125,6 +129,7 @@ function ConnectionState({
 
 export function BankConnection({ connection }: { connection: BankConnection }) {
   const { show } = connectionStatus(connection);
+  const [isAddAccountsOpen, setAddAccountsOpen] = useState(false);
 
   // All reconnect/sync logic is encapsulated in the useReconnect hook
   const { isSyncing, triggerReconnect, triggerManualSync } = useReconnect({
@@ -140,6 +145,8 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
       triggerManualSync();
     }
   };
+
+  const isConnected = connection.status === "connected" && !show;
 
   return (
     <div className="py-4">
@@ -191,6 +198,30 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
                 onComplete={handleComplete}
                 referenceId={connection.referenceId}
               />
+
+              {isConnected && (
+                <TooltipProvider delayDuration={70}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="rounded-full w-7 h-7 flex items-center"
+                        onClick={() => setAddAccountsOpen(true)}
+                      >
+                        <Plus size={16} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      className="px-3 py-1.5 text-xs"
+                      sideOffset={10}
+                    >
+                      Add accounts
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+
               <SyncTransactions
                 disabled={isSyncing}
                 onClick={triggerManualSync}
@@ -212,6 +243,25 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
           );
         })}
       </div>
+
+      <AddBankAccountsModal
+        connectionId={connection.id}
+        provider={
+          connection.provider as
+            | "gocardless"
+            | "plaid"
+            | "teller"
+            | "enablebanking"
+        }
+        accessToken={connection.accessToken}
+        referenceId={connection.referenceId}
+        enrollmentId={connection.enrollmentId}
+        institutionId={connection.institutionId}
+        existingAccounts={connection.bankAccounts}
+        isOpen={isAddAccountsOpen}
+        onOpenChange={setAddAccountsOpen}
+        onAccountsAdded={triggerManualSync}
+      />
     </div>
   );
 }

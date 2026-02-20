@@ -1,4 +1,5 @@
 import {
+  addProviderAccountsSchema,
   createBankConnectionSchema,
   deleteBankConnectionSchema,
   getBankConnectionsSchema,
@@ -7,6 +8,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { chatCache } from "@midday/cache/chat-cache";
 import {
+  addProviderAccounts,
   createBankConnection,
   deleteBankConnection,
   getBankConnections,
@@ -78,6 +80,25 @@ export const bankConnectionsRouter = createTRPCRouter({
       } satisfies DeleteConnectionPayload);
 
       return data;
+    }),
+
+  addAccounts: protectedProcedure
+    .input(addProviderAccountsSchema)
+    .mutation(async ({ input, ctx: { db, teamId, session } }) => {
+      const result = await addProviderAccounts(db, {
+        connectionId: input.connectionId,
+        teamId: teamId!,
+        userId: session.user.id,
+        accounts: input.accounts,
+      });
+
+      try {
+        await chatCache.invalidateTeamContext(teamId!);
+      } catch {
+        // Non-fatal
+      }
+
+      return result;
     }),
 
   reconnect: protectedProcedure
