@@ -10,7 +10,11 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
 import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";
-import { withTeamPermission } from "./middleware/team-permission";
+import {
+  resolveTeamPermission,
+  type TeamResolution,
+  withTeamPermission,
+} from "./middleware/team-permission";
 
 type TRPCContext = {
   session: Session | null;
@@ -20,6 +24,7 @@ type TRPCContext = {
   teamId?: string;
   forcePrimary?: boolean;
   isInternalRequest?: boolean;
+  resolveTeam: () => Promise<TeamResolution>;
 };
 
 export const createTRPCContext = async (
@@ -44,6 +49,17 @@ export const createTRPCContext = async (
   // Check if client wants to force primary database reads (for replication lag handling)
   const forcePrimary = c.req.header("x-force-primary") === "true";
 
+  // Lazy team resolver — computed once on first access, shared across
+  // all procedures in a batched tRPC request (context is per HTTP request).
+  let teamPromise: Promise<TeamResolution> | null = null;
+  const resolveTeam = () => {
+    if (!teamPromise) {
+      teamPromise = resolveTeamPermission(session, db);
+    }
+
+    return teamPromise;
+  };
+
   return {
     session,
     supabase,
@@ -51,6 +67,7 @@ export const createTRPCContext = async (
     geo,
     forcePrimary,
     isInternalRequest,
+    resolveTeam,
   };
 };
 

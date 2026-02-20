@@ -5,7 +5,6 @@ const logger = createLoggerWithContext("redis-cache");
 
 const COMMAND_TIMEOUT_MS = 1_500;
 
-// Commands faster than this are not logged individually.
 const SLOW_COMMAND_MS = 50;
 
 function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
@@ -26,6 +25,7 @@ function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
 export class RedisCache {
   private prefix: string;
   private defaultTTL: number;
+  private inflight = new Map<string, Promise<unknown>>();
 
   constructor(prefix: string, defaultTTL: number = 30 * 60) {
     this.prefix = prefix;
@@ -71,9 +71,30 @@ export class RedisCache {
       return undefined;
     }
 
+    const fullKey = this.getKey(key);
+
+    const existing = this.inflight.get(fullKey);
+    if (existing) {
+      return existing as Promise<T | undefined>;
+    }
+
+    const promise = this.executeGet<T>(key, fullKey);
+    this.inflight.set(fullKey, promise);
+
+    try {
+      return await promise;
+    } finally {
+      this.inflight.delete(fullKey);
+    }
+  }
+
+  private async executeGet<T>(
+    key: string,
+    fullKey: string,
+  ): Promise<T | undefined> {
     const start = performance.now();
     try {
-      const value = await withTimeout(this.redis.get(this.getKey(key)), "GET");
+      const value = await withTimeout(this.redis.get(fullKey), "GET");
       const elapsed = performance.now() - start;
 
       if (elapsed > SLOW_COMMAND_MS) {
