@@ -1,5 +1,5 @@
 import { decrypt, encrypt } from "@midday/encryption";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { Database } from "../client";
 import { bankAccounts, bankConnections } from "../schema";
 
@@ -248,10 +248,26 @@ export const addProviderAccounts = async (
 
   if (!connection) return [];
 
+  const existing = await db.query.bankAccounts.findMany({
+    where: and(
+      eq(bankAccounts.bankConnectionId, connectionId),
+      inArray(
+        bankAccounts.accountId,
+        accounts.map((a) => a.accountId),
+      ),
+    ),
+    columns: { accountId: true },
+  });
+
+  const existingIds = new Set(existing.map((e) => e.accountId));
+  const newAccounts = accounts.filter((a) => !existingIds.has(a.accountId));
+
+  if (newAccounts.length === 0) return [];
+
   return db
     .insert(bankAccounts)
     .values(
-      accounts.map((account) => ({
+      newAccounts.map((account) => ({
         accountId: account.accountId,
         bankConnectionId: connectionId,
         teamId,

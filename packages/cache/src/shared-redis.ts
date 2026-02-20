@@ -23,6 +23,7 @@ function resolveRedisUrl(): string {
     logger.info("Using default REDIS_URL (no region match)");
     return process.env.REDIS_URL;
   }
+
   throw new Error(
     "No Redis URL configured. Set REDIS_URL or region-specific REDIS_URL_EU / REDIS_URL_US_EAST / REDIS_URL_US_WEST",
   );
@@ -35,6 +36,7 @@ let connectedAt: number | null = null;
 let connectStartedAt: number | null = null;
 let reconnectCount = 0;
 let keepaliveTimer: ReturnType<typeof setInterval> | null = null;
+let initialConnectPromise: Promise<void> | null = null;
 
 const isProduction =
   process.env.NODE_ENV === "production" ||
@@ -160,7 +162,7 @@ function createClient(): RedisClient {
     });
   };
 
-  client.connect().catch((err) => {
+  initialConnectPromise = client.connect().catch((err) => {
     logger.error("Initial connection failed", {
       error: err.message,
       connectMs: connectStartedAt
@@ -210,6 +212,21 @@ export function getSharedRedisClient(): RedisClient {
   logger.info("Creating new Redis client");
   sharedClient = createClient();
   return sharedClient;
+}
+
+/**
+ * Wait for the initial Redis connection (up to `timeoutMs`).
+ * Returns `true` if connected, `false` if timed out or no client exists.
+ */
+export function waitForRedisReady(timeoutMs = 2_000): Promise<boolean> {
+  if (sharedClient?.connected) return Promise.resolve(true);
+  if (!initialConnectPromise) return Promise.resolve(false);
+  return Promise.race([
+    initialConnectPromise.then(() => sharedClient?.connected ?? false),
+    new Promise<boolean>((resolve) =>
+      setTimeout(() => resolve(false), timeoutMs),
+    ),
+  ]);
 }
 
 /**

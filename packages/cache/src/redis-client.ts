@@ -1,5 +1,5 @@
 import { createLoggerWithContext } from "@midday/logger";
-import { getSharedRedisClient } from "./shared-redis";
+import { getSharedRedisClient, waitForRedisReady } from "./shared-redis";
 
 const logger = createLoggerWithContext("redis-cache");
 
@@ -66,7 +66,7 @@ export class RedisCache {
   }
 
   async get<T>(key: string): Promise<T | undefined> {
-    if (!this.isConnected) {
+    if (!this.isConnected && !(await waitForRedisReady())) {
       logger.warn("GET skipped: not connected", { prefix: this.prefix, key });
       return undefined;
     }
@@ -99,7 +99,7 @@ export class RedisCache {
   }
 
   async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
-    if (!this.isConnected) {
+    if (!this.isConnected && !(await waitForRedisReady())) {
       logger.warn("SET skipped: not connected", { prefix: this.prefix, key });
       return;
     }
@@ -140,7 +140,7 @@ export class RedisCache {
   }
 
   async delete(key: string): Promise<void> {
-    if (!this.isConnected) {
+    if (!this.isConnected && !(await waitForRedisReady())) {
       logger.warn("DEL skipped: not connected", { prefix: this.prefix, key });
       return;
     }
