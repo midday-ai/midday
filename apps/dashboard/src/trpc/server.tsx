@@ -13,6 +13,7 @@ import { cookies, headers } from "next/headers";
 import { cache } from "react";
 import superjson from "superjson";
 import { Cookies } from "@/utils/constants";
+import { fetchWithRetry } from "@/utils/fetch-with-retry";
 import { makeQueryClient } from "./query-client";
 
 // IMPORTANT: Create a stable getter for the query client that
@@ -31,6 +32,7 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
       httpBatchLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
+        fetch: fetchWithRetry,
         async headers() {
           const [supabase, cookieStore, headersList] = await Promise.all([
             createClient(),
@@ -138,6 +140,7 @@ export async function getTRPCClient(options?: { forcePrimary?: boolean }) {
       httpBatchLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
+        fetch: fetchWithRetry,
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
           "x-user-timezone": location.timezone,

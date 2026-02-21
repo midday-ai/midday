@@ -58,7 +58,7 @@ export class PlaidApi {
 
   #generateWebhookUrl(environment: "sandbox" | "production") {
     if (environment === "sandbox") {
-      return "https://staging.api.midday.ai/webhook/plaid";
+      return "https://api-staging.midday.ai/webhook/plaid";
     }
 
     return "https://api.midday.ai/webhook/plaid";
