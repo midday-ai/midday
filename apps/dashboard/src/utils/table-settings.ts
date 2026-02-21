@@ -34,7 +34,7 @@ export const TABLE_SETTINGS_COOKIE = "table-settings";
  * Default hidden columns for each table
  */
 export const defaultHiddenColumns: Record<TableId, string[]> = {
-  transactions: ["assigned", "tags", "method", "counterparty", "taxAmount"],
+  transactions: ["assigned", "tags", "method", "counterparty", "taxAmount", "baseAmount"],
   customers: ["tags", "website", "financeEmail", "language"],
   invoices: [
     "sentAt",

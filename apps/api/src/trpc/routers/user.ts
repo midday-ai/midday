@@ -61,12 +61,8 @@ export const userRouter = createTRPCRouter({
 
       try {
         await Promise.all([
-          result.previousTeamId
-            ? teamCache.delete(
-                `user:${session.user.id}:team:${result.previousTeamId}`,
-              )
-            : Promise.resolve(),
-          teamCache.delete(`user:${session.user.id}:team:${input.teamId}`),
+          teamCache.invalidateForUser(session.user.id, result.previousTeamId),
+          teamCache.invalidateForUser(session.user.id, input.teamId),
         ]);
       } catch {
         // Non-fatal — cache will expire naturally

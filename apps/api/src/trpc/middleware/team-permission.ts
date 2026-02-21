@@ -4,17 +4,19 @@ import { teamCache } from "@midday/cache/team-cache";
 import type { Database } from "@midday/db/client";
 import { TRPCError } from "@trpc/server";
 
-export type TeamResolution = {
+type TeamResolution = {
   teamId: string | null;
 };
 
-/**
- * Resolves the current user's team and verifies access.
- * Designed to be called once per HTTP request via a lazy promise on the
- * tRPC context, so batched procedures share a single DB query + cache hit.
- */
-export async function resolveTeamPermission(
-  session: Session | null,
+// Deduplicates the DB query + Redis check across all procedures in a batched
+// tRPC request. tRPC creates one context object per HTTP request and passes
+// the same reference to every procedure, so using it as a WeakMap key means
+// the resolution runs once per batch. Entries are garbage-collected when the
+// context goes out of scope (after the request completes).
+const resolveCache = new WeakMap<object, Promise<TeamResolution>>();
+
+async function resolveTeamPermission(
+  session: Session | undefined | null,
   db: Database,
 ): Promise<TeamResolution> {
   const userId = session?.user?.id;
@@ -76,17 +78,10 @@ export async function resolveTeamPermission(
   return { teamId };
 }
 
-/**
- * tRPC middleware that enforces team permission.
- * Delegates to the shared lazy resolver on the context so the expensive
- * DB query + Redis check only executes once per HTTP request, even when
- * multiple procedures are batched together.
- */
 export const withTeamPermission = async <TReturn>(opts: {
   ctx: {
     session?: Session | null;
     db: Database;
-    resolveTeam: () => Promise<TeamResolution>;
   };
   next: (opts: {
     ctx: {
@@ -98,7 +93,13 @@ export const withTeamPermission = async <TReturn>(opts: {
 }) => {
   const { ctx, next } = opts;
 
-  const { teamId } = await ctx.resolveTeam();
+  let resolution = resolveCache.get(ctx);
+  if (!resolution) {
+    resolution = resolveTeamPermission(ctx.session, ctx.db);
+    resolveCache.set(ctx, resolution);
+  }
+
+  const { teamId } = await resolution;
 
   return next({
     ctx: {

@@ -15,7 +15,6 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import type { InviteTeamMembersPayload } from "@jobs/schema";
 import { chatCache } from "@midday/cache/chat-cache";
 import { teamCache } from "@midday/cache/team-cache";
-import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
 import {
   acceptTeamInvite,
   createTeam,
@@ -78,7 +77,11 @@ export const teamRouter = createTRPCRouter({
       });
 
       if (input.switchTeam) {
-        await teamPermissionsCache.delete(`user:${session.user.id}:team`);
+        try {
+          await teamCache.invalidateForUser(session.user.id);
+        } catch {
+          // Non-fatal — cache will expire naturally
+        }
       }
 
       return teamId;
@@ -106,7 +109,11 @@ export const teamRouter = createTRPCRouter({
         teamId: input.teamId,
       });
 
-      await teamPermissionsCache.delete(`user:${session.user.id}:team`);
+      try {
+        await teamCache.invalidateForUser(session.user.id, input.teamId);
+      } catch {
+        // Non-fatal — cache will expire naturally
+      }
 
       return result;
     }),
@@ -191,8 +198,7 @@ export const teamRouter = createTRPCRouter({
           chatCache.invalidateTeamContext(input.teamId),
           ...data.memberUserIds.map((userId) =>
             Promise.all([
-              teamPermissionsCache.delete(`user:${userId}:team`),
-              teamCache.delete(`user:${userId}:team:${input.teamId}`),
+              teamCache.invalidateForUser(userId, input.teamId),
               chatCache.invalidateUserContext(userId, input.teamId),
             ]),
           ),
@@ -238,10 +244,18 @@ export const teamRouter = createTRPCRouter({
         }
       }
 
-      return deleteTeamMember(db, {
+      const result = await deleteTeamMember(db, {
         teamId: input.teamId,
         userId: input.userId,
       });
+
+      try {
+        await teamCache.invalidateForUser(input.userId, input.teamId);
+      } catch {
+        // Non-fatal — cache will expire naturally
+      }
+
+      return result;
     }),
 
   updateMember: protectedProcedure
