@@ -395,7 +395,7 @@ export const columns: ColumnDef<Transaction>[] = [
     },
     cell: ({ row }) => {
       const { baseAmount, baseCurrency, currency } = row.original;
-      if (!baseAmount || !baseCurrency || baseCurrency === currency) {
+      if (baseAmount == null || !baseCurrency || baseCurrency === currency) {
         return <span className="text-muted-foreground">-</span>;
       }
       return <AmountCell amount={baseAmount} currency={baseCurrency} />;
