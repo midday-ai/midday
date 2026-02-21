@@ -4,17 +4,19 @@ import { teamCache } from "@midday/cache/team-cache";
 import type { Database } from "@midday/db/client";
 import { TRPCError } from "@trpc/server";
 
-export type TeamResolution = {
+type TeamResolution = {
   teamId: string | null;
 };
 
-/**
- * Resolves the current user's team and verifies access.
- * Designed to be called once per HTTP request via a lazy promise on the
- * tRPC context, so batched procedures share a single DB query + cache hit.
- */
-export async function resolveTeamPermission(
-  session: Session | null,
+// Deduplicates the expensive DB query + Redis check across all procedures in
+// a batched tRPC request. tRPC creates one context object per HTTP request and
+// passes the same reference to every procedure, so using it as a WeakMap key
+// means the resolution runs once per batch. Entries are garbage-collected when
+// the context goes out of scope (after the request completes).
+const resolveCache = new WeakMap<object, Promise<TeamResolution>>();
+
+async function resolveTeamPermission(
+  session: Session | undefined | null,
   db: Database,
 ): Promise<TeamResolution> {
   const userId = session?.user?.id;
@@ -24,6 +26,12 @@ export async function resolveTeamPermission(
       code: "UNAUTHORIZED",
       message: "No permission to access this team",
     });
+  }
+
+  // Fast path: if the full resolution is cached by userId, skip the DB query entirely.
+  const cached = await teamCache.get<TeamResolution>(`resolve:${userId}`);
+  if (cached) {
+    return cached;
   }
 
   const result = await withRetryOnPrimary(
@@ -54,16 +62,9 @@ export async function resolveTeamPermission(
   const teamId = result.teamId;
 
   if (teamId !== null) {
-    const cacheKey = `user:${userId}:team:${teamId}`;
-    let hasAccess = await teamCache.get(cacheKey);
-
-    if (hasAccess === undefined) {
-      hasAccess = result.usersOnTeams.some(
-        (membership) => membership.teamId === teamId,
-      );
-
-      await teamCache.set(cacheKey, hasAccess);
-    }
+    const hasAccess = result.usersOnTeams.some(
+      (membership) => membership.teamId === teamId,
+    );
 
     if (!hasAccess) {
       throw new TRPCError({
@@ -73,20 +74,19 @@ export async function resolveTeamPermission(
     }
   }
 
-  return { teamId };
+  const resolution: TeamResolution = { teamId };
+
+  // Cache the full resolution keyed by userId so subsequent requests skip the DB.
+  // Uses the same 30-minute TTL as the team cache.
+  await teamCache.set(`resolve:${userId}`, resolution);
+
+  return resolution;
 }
 
-/**
- * tRPC middleware that enforces team permission.
- * Delegates to the shared lazy resolver on the context so the expensive
- * DB query + Redis check only executes once per HTTP request, even when
- * multiple procedures are batched together.
- */
 export const withTeamPermission = async <TReturn>(opts: {
   ctx: {
     session?: Session | null;
     db: Database;
-    resolveTeam: () => Promise<TeamResolution>;
   };
   next: (opts: {
     ctx: {
@@ -98,7 +98,13 @@ export const withTeamPermission = async <TReturn>(opts: {
 }) => {
   const { ctx, next } = opts;
 
-  const { teamId } = await ctx.resolveTeam();
+  let resolution = resolveCache.get(ctx);
+  if (!resolution) {
+    resolution = resolveTeamPermission(ctx.session, ctx.db);
+    resolveCache.set(ctx, resolution);
+  }
+
+  const { teamId } = await resolution;
 
   return next({
     ctx: {
