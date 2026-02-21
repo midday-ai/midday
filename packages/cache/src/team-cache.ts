@@ -1,25 +1,24 @@
 import { RedisCache } from "./redis-client";
 import { teamPermissionsCache } from "./team-permissions-cache";
 
-// Redis-based cache for team permission data, shared across all server instances
+// Redis-based cache to check if a user has access to a team, shared across all server instances
 const cache = new RedisCache("team", 30 * 60); // 30 minutes TTL
 
 export const teamCache = {
-  get: <T = boolean>(key: string): Promise<T | undefined> => cache.get<T>(key),
-  set: (key: string, value: unknown): Promise<void> => cache.set(key, value),
+  get: (key: string): Promise<boolean | undefined> => cache.get<boolean>(key),
+  set: (key: string, value: boolean): Promise<void> => cache.set(key, value),
   delete: (key: string): Promise<void> => cache.delete(key),
 
   /**
    * Invalidate all team-related cache entries for a user.
    * Call this whenever team membership or active team changes.
-   * Clears: resolve cache, per-team access cache, and REST permissions cache.
+   * Clears: per-team access cache and REST permissions cache.
    */
   invalidateForUser: (
     userId: string,
     teamId?: string | null,
   ): Promise<void> => {
     const deletes: Promise<void>[] = [
-      cache.delete(`resolve:${userId}`),
       teamPermissionsCache.delete(`user:${userId}:team`),
     ];
 

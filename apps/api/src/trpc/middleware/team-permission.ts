@@ -8,11 +8,11 @@ type TeamResolution = {
   teamId: string | null;
 };
 
-// Deduplicates the expensive DB query + Redis check across all procedures in
-// a batched tRPC request. tRPC creates one context object per HTTP request and
-// passes the same reference to every procedure, so using it as a WeakMap key
-// means the resolution runs once per batch. Entries are garbage-collected when
-// the context goes out of scope (after the request completes).
+// Deduplicates the DB query + Redis check across all procedures in a batched
+// tRPC request. tRPC creates one context object per HTTP request and passes
+// the same reference to every procedure, so using it as a WeakMap key means
+// the resolution runs once per batch. Entries are garbage-collected when the
+// context goes out of scope (after the request completes).
 const resolveCache = new WeakMap<object, Promise<TeamResolution>>();
 
 async function resolveTeamPermission(
@@ -26,12 +26,6 @@ async function resolveTeamPermission(
       code: "UNAUTHORIZED",
       message: "No permission to access this team",
     });
-  }
-
-  // Fast path: if the full resolution is cached by userId, skip the DB query entirely.
-  const cached = await teamCache.get<TeamResolution>(`resolve:${userId}`);
-  if (cached) {
-    return cached;
   }
 
   const result = await withRetryOnPrimary(
@@ -62,9 +56,16 @@ async function resolveTeamPermission(
   const teamId = result.teamId;
 
   if (teamId !== null) {
-    const hasAccess = result.usersOnTeams.some(
-      (membership) => membership.teamId === teamId,
-    );
+    const cacheKey = `user:${userId}:team:${teamId}`;
+    let hasAccess = await teamCache.get(cacheKey);
+
+    if (hasAccess === undefined) {
+      hasAccess = result.usersOnTeams.some(
+        (membership) => membership.teamId === teamId,
+      );
+
+      await teamCache.set(cacheKey, hasAccess);
+    }
 
     if (!hasAccess) {
       throw new TRPCError({
@@ -74,13 +75,7 @@ async function resolveTeamPermission(
     }
   }
 
-  const resolution: TeamResolution = { teamId };
-
-  // Cache the full resolution keyed by userId so subsequent requests skip the DB.
-  // Uses the same 30-minute TTL as the team cache.
-  await teamCache.set(`resolve:${userId}`, resolution);
-
-  return resolution;
+  return { teamId };
 }
 
 export const withTeamPermission = async <TReturn>(opts: {

@@ -382,6 +382,26 @@ export const columns: ColumnDef<Transaction>[] = [
     ),
   },
   {
+    accessorKey: "baseAmount",
+    header: "Base Amount",
+    size: 170,
+    minSize: 100,
+    maxSize: 400,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Base Amount",
+      className: "w-[170px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      const { baseAmount, baseCurrency, currency } = row.original;
+      if (baseAmount == null || !baseCurrency || baseCurrency === currency) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+      return <AmountCell amount={baseAmount} currency={baseCurrency} />;
+    },
+  },
+  {
     accessorKey: "taxAmount",
     header: "Tax Amount",
     size: 170,
