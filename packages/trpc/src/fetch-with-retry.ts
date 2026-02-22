@@ -5,7 +5,7 @@ const RETRYABLE_CODES = new Set([
   "UND_ERR_SOCKET",
 ]);
 
-const RETRYABLE_NAMES = new Set(["AbortError", "TimeoutError"]);
+const RETRYABLE_NAMES = new Set(["TimeoutError"]);
 
 const MAX_RETRIES = 3;
 const TIMEOUT_MS = 5_000;
