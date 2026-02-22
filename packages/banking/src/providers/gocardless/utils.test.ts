@@ -2,7 +2,17 @@ import { expect, test } from "bun:test";
 import type { AccountBalance } from "./types";
 import { getMaxHistoricalDays, selectPrimaryBalance } from "./utils";
 
-test("Should return 90 days", () => {
+test("getMaxHistoricalDays - returns 90 when separateContinuousHistoryConsent flag is true", () => {
+  expect(
+    getMaxHistoricalDays({
+      institutionId: "SOME_BANK",
+      transactionTotalDays: 720,
+      separateContinuousHistoryConsent: true,
+    }),
+  ).toEqual(90);
+});
+
+test("getMaxHistoricalDays - returns 90 for hardcoded restricted institution", () => {
   expect(
     getMaxHistoricalDays({
       institutionId: "SWEDBANK_SWEDSESS",
@@ -11,7 +21,17 @@ test("Should return 90 days", () => {
   ).toEqual(90);
 });
 
-test("Should return 720 days", () => {
+test("getMaxHistoricalDays - returns transactionTotalDays when flag is false and not restricted", () => {
+  expect(
+    getMaxHistoricalDays({
+      institutionId: "NOT_RESTRICTED",
+      transactionTotalDays: 720,
+      separateContinuousHistoryConsent: false,
+    }),
+  ).toEqual(720);
+});
+
+test("getMaxHistoricalDays - returns transactionTotalDays when flag is undefined and not restricted", () => {
   expect(
     getMaxHistoricalDays({
       institutionId: "NOT_RESTRICTED",

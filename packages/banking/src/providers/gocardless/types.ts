@@ -36,6 +36,7 @@ export type Institution = {
   transaction_total_days: string;
   logo: string;
   countries: string[];
+  separate_continuous_history_consent?: boolean;
 };
 
 export type GetRefreshTokenResponse = {

@@ -67,9 +67,9 @@ The maximum history is determined per-institution via the end user agreement:
 
 1. The `/institutions/` endpoint returns `transaction_total_days` for each bank
 2. `createEndUserAgreement()` requests `max_historical_days` set to that value
-3. Some banks are hardcoded to lower limits in `getMaxHistoricalDays()` because they
-   break with extended history (e.g., BRED, Swedbank → 90 days; COOP Estonia → 180 days).
-   See `gocardless/utils.ts` for the full restricted list.
+3. Some banks only provide extended history once and require separate consent for
+   continuous access. `getMaxHistoricalDays()` checks the GoCardless
+   `separate_continuous_history_consent` flag and a hardcoded fallback list, capping to 90 days.
 4. Initial sync fetches ALL available transactions (no `date_from` filter)
 5. Daily sync fetches last 5 days only (`date_from` = 5 days ago)
 6. No fallback strategy is needed — the bank controls what it returns based on the
@@ -283,16 +283,17 @@ stores the correct expiry.
 
 ### GoCardless: Institution-specific history restrictions
 
-Some banks cannot handle extended transaction history requests and will fail or return errors.
-These are hardcoded in `getMaxHistoricalDays()` (`gocardless/utils.ts`):
+Some banks only provide extended (>90 day) transaction history once and require separate
+consent for continuous access. `getMaxHistoricalDays()` uses two signals to detect these:
 
-- **90-day restricted**: BRED, Swedbank, LHV, Bankinter, CaixaBank, BBVA, multiple Italian
-  banks (Banca Sella, Hype, illimity, etc.), and others
-- **180-day restricted**: COOP Estonia
+1. **API flag**: GoCardless exposes `separate_continuous_history_consent` on the
+   `/institutions/` endpoint. When `true`, history is capped to 90 days.
+2. **Hardcoded fallback**: A small Set of known restricted institution IDs (BRED, Swedbank,
+   BBVA, etc.) catches banks where the flag may not yet be populated.
 
-The restricted lists are maintained manually based on GoCardless support documentation.
-When a bank is not in a restricted list, the full `transaction_total_days` from the
-institutions endpoint is used (up to 730 days for some banks).
+When neither signal matches, the full `transaction_total_days` from the institution is used.
+
+See: https://bankaccountdata.zendesk.com/hc/en-gb/articles/11529718632476
 
 ### GoCardless / EnableBanking: Primary balance selection for multi-currency accounts
 

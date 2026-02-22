@@ -227,10 +227,16 @@ export class GoCardLessApi {
     institutionId,
     transactionTotalDays,
   }: PostEndUserAgreementRequest): Promise<PostCreateAgreementResponse> {
-    const token = await this.#getAccessToken();
+    const [token, institution] = await Promise.all([
+      this.#getAccessToken(),
+      this.getInstitution(institutionId),
+    ]);
+
     const maxHistoricalDays = getMaxHistoricalDays({
       institutionId,
       transactionTotalDays,
+      separateContinuousHistoryConsent:
+        institution.separate_continuous_history_consent,
     });
 
     const createAgreement = (accessDays: number) =>
@@ -247,8 +253,15 @@ export class GoCardLessApi {
 
     try {
       return await createAgreement(180);
-    } catch {
-      return await createAgreement(90);
+    } catch (error) {
+      const parsed = parseProviderError(error);
+      const isClientError = parsed !== false && (parsed.statusCode ?? 0) < 500;
+
+      if (isClientError) {
+        return await createAgreement(90);
+      }
+
+      throw error;
     }
   }
 
