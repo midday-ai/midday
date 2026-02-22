@@ -115,6 +115,39 @@ test("selectPrimaryBalance - uses absolute value for negative balances (credit)"
   expect(result).toEqual({ amount: "-5000.00", currency: "EUR" });
 });
 
+test("selectPrimaryBalance - preferredCurrency narrows to matching currency", () => {
+  const result = selectPrimaryBalance(
+    [
+      mkBalance("interimBooked", "9000.00", "DKK"),
+      mkBalance("interimBooked", "5000.00", "EUR"),
+    ],
+    "EUR",
+  );
+  expect(result).toEqual({ amount: "5000.00", currency: "EUR" });
+});
+
+test("selectPrimaryBalance - preferredCurrency falls back to all when no match", () => {
+  const result = selectPrimaryBalance(
+    [
+      mkBalance("interimBooked", "9000.00", "DKK"),
+      mkBalance("interimAvailable", "5000.00", "DKK"),
+    ],
+    "EUR",
+  );
+  expect(result).toEqual({ amount: "9000.00", currency: "DKK" });
+});
+
+test("selectPrimaryBalance - preferredCurrency ignores XXX hint", () => {
+  const result = selectPrimaryBalance(
+    [
+      mkBalance("interimBooked", "100.00", "DKK"),
+      mkBalance("interimBooked", "9000.00", "EUR"),
+    ],
+    "XXX",
+  );
+  expect(result).toEqual({ amount: "9000.00", currency: "EUR" });
+});
+
 test("selectPrimaryBalance - empty array returns undefined", () => {
   expect(selectPrimaryBalance([])).toBeUndefined();
 });

@@ -1,3 +1,4 @@
+import { isValidCurrency } from "../../utils/currency";
 import type { GetBalancesResponse } from "./types";
 
 type Balance = GetBalancesResponse["balances"][0];
@@ -12,10 +13,14 @@ type Balance = GetBalancesResponse["balances"][0];
  *   4. expected / XPCD
  *   5. any remaining balance
  *
- * Within each tier, the entry with the highest absolute amount wins
- * (handles multi-currency accounts).
+ * When `preferredCurrency` is provided, balances matching that currency are
+ * tried first within each tier. This prevents multi-currency accounts from
+ * picking the wrong currency based on raw amount comparison.
  */
-export function selectPrimaryBalance(balances: Balance[]): Balance | undefined {
+export function selectPrimaryBalance(
+  balances: Balance[],
+  preferredCurrency?: string,
+): Balance | undefined {
   if (!balances.length) return undefined;
 
   const tiers: ((b: Balance) => boolean)[] = [
@@ -34,11 +39,24 @@ export function selectPrimaryBalance(balances: Balance[]): Balance | undefined {
           return curAbs > maxAbs ? current : max;
         });
 
+  const hasCurrencyHint =
+    preferredCurrency && isValidCurrency(preferredCurrency);
+  const currencyMatch = hasCurrencyHint
+    ? balances.filter(
+        (b) =>
+          b.balance_amount.currency.toUpperCase() ===
+          preferredCurrency.toUpperCase(),
+      )
+    : [];
+
   for (const match of tiers) {
-    const tier = balances.filter(match);
-    const winner = pickHighest(tier);
+    if (currencyMatch.length) {
+      const winner = pickHighest(currencyMatch.filter(match));
+      if (winner) return winner;
+    }
+    const winner = pickHighest(balances.filter(match));
     if (winner) return winner;
   }
 
-  return balances[0];
+  return currencyMatch[0] ?? balances[0];
 }

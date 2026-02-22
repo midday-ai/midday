@@ -313,7 +313,10 @@ export class GoCardLessApi {
           ]);
 
           return {
-            balance: balanceResult.primaryBalance,
+            balance: selectPrimaryBalance(
+              balanceResult.balances,
+              details.account.currency,
+            ),
             balances: balanceResult.balances,
             institution,
             ...details,

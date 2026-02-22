@@ -275,7 +275,10 @@ export class EnableBankingApi {
             this.#get<GetBalancesResponse>(`/accounts/${id}/balances`),
           ]);
 
-          const balance = selectPrimaryBalance(balanceResponse.balances);
+          const balance = selectPrimaryBalance(
+            balanceResponse.balances,
+            details.currency,
+          );
 
           return {
             ...details,
@@ -307,7 +310,10 @@ export class EnableBankingApi {
       this.getAccountDetails(accountId).catch(() => null),
     ]);
 
-    const primaryBalance = selectPrimaryBalance(balanceResponse.balances);
+    const primaryBalance = selectPrimaryBalance(
+      balanceResponse.balances,
+      accountDetails?.currency,
+    );
 
     return {
       balance: primaryBalance!,

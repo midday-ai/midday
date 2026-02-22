@@ -1,3 +1,4 @@
+import { isValidCurrency } from "../../utils/currency";
 import type { AccountBalance } from "./types";
 
 /**
@@ -10,11 +11,13 @@ import type { AccountBalance } from "./types";
  *   4. expected
  *   5. any remaining balance
  *
- * Within each tier, the entry with the highest absolute amount wins
- * (handles multi-currency accounts, e.g. EUR 9,242.93 over DKK 9.76).
+ * When `preferredCurrency` is provided, balances matching that currency are
+ * tried first within each tier. This prevents multi-currency accounts from
+ * picking the wrong currency based on raw amount comparison.
  */
 export function selectPrimaryBalance(
   balances: AccountBalance[] | undefined,
+  preferredCurrency?: string,
 ): AccountBalance["balanceAmount"] | undefined {
   if (!balances?.length) return undefined;
 
@@ -34,13 +37,26 @@ export function selectPrimaryBalance(
           return curAbs > maxAbs ? current : max;
         });
 
+  const hasCurrencyHint =
+    preferredCurrency && isValidCurrency(preferredCurrency);
+  const currencyMatch = hasCurrencyHint
+    ? balances.filter(
+        (b) =>
+          b.balanceAmount.currency.toUpperCase() ===
+          preferredCurrency.toUpperCase(),
+      )
+    : [];
+
   for (const match of tiers) {
-    const tier = balances.filter(match);
-    const winner = pickHighest(tier);
+    if (currencyMatch.length) {
+      const winner = pickHighest(currencyMatch.filter(match));
+      if (winner) return winner.balanceAmount;
+    }
+    const winner = pickHighest(balances.filter(match));
     if (winner) return winner.balanceAmount;
   }
 
-  return balances[0]?.balanceAmount;
+  return (currencyMatch[0] ?? balances[0])?.balanceAmount;
 }
 
 export function isError(error: unknown) {

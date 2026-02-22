@@ -139,6 +139,39 @@ test("selectPrimaryBalance - falls back to XPCD when no booked types", () => {
   });
 });
 
+test("selectPrimaryBalance - preferredCurrency narrows to matching currency", () => {
+  const result = selectPrimaryBalance(
+    [mkBalance("ITBD", "9000.00", "DKK"), mkBalance("ITBD", "5000.00", "EUR")],
+    "EUR",
+  );
+  expect(result?.balance_amount).toEqual({
+    amount: "5000.00",
+    currency: "EUR",
+  });
+});
+
+test("selectPrimaryBalance - preferredCurrency falls back to all when no match", () => {
+  const result = selectPrimaryBalance(
+    [mkBalance("ITBD", "9000.00", "DKK"), mkBalance("ITAV", "5000.00", "DKK")],
+    "EUR",
+  );
+  expect(result?.balance_amount).toEqual({
+    amount: "9000.00",
+    currency: "DKK",
+  });
+});
+
+test("selectPrimaryBalance - preferredCurrency ignores XXX hint", () => {
+  const result = selectPrimaryBalance(
+    [mkBalance("ITBD", "100.00", "DKK"), mkBalance("ITBD", "9000.00", "EUR")],
+    "XXX",
+  );
+  expect(result?.balance_amount).toEqual({
+    amount: "9000.00",
+    currency: "EUR",
+  });
+});
+
 test("selectPrimaryBalance - empty array returns undefined", () => {
   expect(selectPrimaryBalance([])).toBeUndefined();
 });

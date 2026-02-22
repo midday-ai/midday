@@ -303,9 +303,13 @@ the balance to use as the account's displayed balance using a **booked-first** s
    3. `interimAvailable` / `ITAV` — current available (may include credit limits)
    4. `expected` / `XPCD`
    5. First balance in the array (fallback)
-2. **Within each tier**, pick the entry with the highest absolute amount. For multi-currency
-   accounts this correctly selects the dominant currency (e.g., EUR 9,242.93 over DKK 9.76).
-   Absolute value is used so credit accounts with negative balances are handled correctly.
+2. **Currency hint**: When the account-level currency is known (e.g., `account.currency`),
+   balances matching that currency are tried first within each tier. This prevents multi-currency
+   accounts from picking the wrong currency based on raw amount comparison alone. If the hint
+   is `"XXX"` or no balances match, the hint is ignored and all balances are considered.
+3. **Within each tier**, pick the entry with the highest absolute amount (fallback for when
+   no currency hint is available or multiple balances share the same currency). Absolute value
+   is used so credit accounts with negative balances are handled correctly.
 
 The `available_balance` field is populated separately by scanning the full balances array
 for an "available" type entry (`interimAvailable`, `ITAV`, `closingAvailable`, `CLAV`,
