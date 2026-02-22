@@ -68,7 +68,11 @@ export function findMatchingAccount(
     !!c && c.toUpperCase() !== "XXX";
 
   const byCurrencyAndType = available.filter((db) => {
-    if (hasRealCurrency(db.currency) && db.currency !== apiAccount.currency)
+    if (
+      hasRealCurrency(db.currency) &&
+      hasRealCurrency(apiAccount.currency) &&
+      db.currency !== apiAccount.currency
+    )
       return false;
     if (db.type && db.type !== apiAccount.type) return false;
     return true;
