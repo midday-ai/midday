@@ -36,18 +36,17 @@ function isRetryable(err: any): boolean {
  *    instead of blocking the caller, and the retry with exponential backoff
  *    gives the mesh time to converge.
  */
-interface FetchResponse {
-  json(): Promise<unknown>;
-}
-
 export async function fetchWithRetry(
   input: string | URL | Request,
   init?: RequestInit,
-): Promise<FetchResponse> {
+): Promise<Response> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const signal = init?.signal ?? AbortSignal.timeout(TIMEOUT_MS);
+      const timeout = AbortSignal.timeout(TIMEOUT_MS);
+      const signal = init?.signal
+        ? AbortSignal.any([init.signal, timeout])
+        : timeout;
       const headers = new Headers(init?.headers);
       headers.set("Connection", "close");
 
