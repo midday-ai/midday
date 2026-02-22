@@ -99,6 +99,7 @@
         "@midday/location": "workspace:*",
         "@midday/plans": "workspace:*",
         "@midday/supabase": "workspace:*",
+        "@midday/trpc": "workspace:*",
         "@midday/ui": "workspace:*",
         "@midday/utils": "workspace:*",
         "@number-flow/react": "^0.5.11",
