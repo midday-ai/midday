@@ -42,7 +42,7 @@ import {
 } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 import { STICKY_COLUMNS } from "@/utils/table-configs";
-import type { TableSettings } from "@/utils/table-settings";
+import { getColumnIds, type TableSettings } from "@/utils/table-settings";
 import { BulkEditBar } from "./bulk-edit-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
@@ -58,6 +58,8 @@ const NON_CLICKABLE_COLUMNS = new Set([
   "assigned",
   "tags",
 ]);
+
+const COLUMN_IDS = getColumnIds(columns);
 
 type Props = {
   initialSettings?: Partial<TableSettings>;
@@ -98,6 +100,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   } = useTableSettings({
     tableId: "transactions",
     initialSettings,
+    columnIds: COLUMN_IDS,
   });
 
   // Use the current tab from URL, falling back to initial value

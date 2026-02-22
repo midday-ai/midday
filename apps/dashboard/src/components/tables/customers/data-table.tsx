@@ -27,13 +27,15 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useCustomersStore } from "@/store/customers";
 import { useTRPC } from "@/trpc/client";
 import { STICKY_COLUMNS, SUMMARY_GRID_HEIGHTS } from "@/utils/table-configs";
-import type { TableSettings } from "@/utils/table-settings";
+import { getColumnIds, type TableSettings } from "@/utils/table-settings";
 import { columns } from "./columns";
 import { EmptyState, NoResults } from "./empty-states";
 import { DataTableHeader } from "./table-header";
 
 // Stable reference for non-clickable columns (avoids recreation on each render)
 const NON_CLICKABLE_COLUMNS = new Set(["actions"]);
+
+const COLUMN_IDS = getColumnIds(columns);
 
 type Props = {
   initialSettings?: Partial<TableSettings>;
@@ -64,6 +66,7 @@ export function DataTable({ initialSettings }: Props) {
   } = useTableSettings({
     tableId: "customers",
     initialSettings,
+    columnIds: COLUMN_IDS,
   });
 
   const infiniteQueryOptions = trpc.customers.get.infiniteQueryOptions(
