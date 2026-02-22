@@ -11,7 +11,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./internal": "./src/internal.ts"
+    "./internal": "./src/internal.ts",
+    "./fetch-with-retry": "./src/fetch-with-retry.ts"
   },
   "dependencies": {
     "@trpc/client": "^11.10.0",

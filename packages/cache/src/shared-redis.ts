@@ -42,9 +42,9 @@ const isProduction =
   process.env.NODE_ENV === "production" ||
   process.env.RAILWAY_ENVIRONMENT === "production";
 
-const MAX_DISCONNECT_MS = 60_000;
+const MAX_DISCONNECT_MS = 15_000;
 
-const KEEPALIVE_INTERVAL_MS = 15_000;
+const KEEPALIVE_INTERVAL_MS = 5_000;
 const KEEPALIVE_TIMEOUT_MS = 2_000;
 
 function startKeepalive(client: RedisClient): void {

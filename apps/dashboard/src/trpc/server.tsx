@@ -3,6 +3,7 @@ import "server-only";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { getLocationHeaders } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
+import { fetchWithRetry } from "@midday/trpc/fetch-with-retry";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import {
@@ -13,7 +14,6 @@ import { cookies, headers } from "next/headers";
 import { cache } from "react";
 import superjson from "superjson";
 import { Cookies } from "@/utils/constants";
-import { fetchWithRetry } from "@/utils/fetch-with-retry";
 import { makeQueryClient } from "./query-client";
 
 // IMPORTANT: Create a stable getter for the query client that

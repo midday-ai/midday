@@ -31,7 +31,7 @@ function getConnectionOptions() {
     // BullMQ required settings
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
-    // Network settings
+    // Network settings — Railway private networking is IPv4 only
     family: 4,
     keepAlive: 30000,
     lazyConnect: false,
