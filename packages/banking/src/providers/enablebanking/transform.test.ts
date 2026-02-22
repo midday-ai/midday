@@ -386,28 +386,44 @@ test("Transform account balance - closingBooked does NOT return available_balanc
   });
 });
 
+const xxxTestAccountBase = {
+  all_account_ids: [],
+  account_servicer: {
+    bic_fi: "TESTBIC",
+    clearing_system_member_id: { clearing_system_id: "TEST", member_id: 1 },
+    name: "Test Bank",
+  },
+  name: "Test Account",
+  details: "Test",
+  usage: "PRIV",
+  cash_account_type: "CACC",
+  product: "Current Account",
+  currency: "XXX",
+  psu_status: "Authorized",
+  postal_address: {
+    address_type: "",
+    department: "",
+    sub_department: "",
+    street_name: "",
+    building_number: "",
+    post_code: "",
+    town_name: "",
+    country_sub_division: "",
+    country: "DE",
+    address_line: [],
+  },
+  identification_hashes: [],
+  institution: { name: "Test Bank", country: "DE" },
+  legal_age: true,
+  valid_until: "2024-06-06",
+};
+
 test("Transform account - XXX currency resolved from balance", () => {
   const result = transformAccount({
+    ...xxxTestAccountBase,
     account_id: { iban: "DE89370400440532013000" },
-    all_account_ids: [],
-    account_servicer: {
-      bic_fi: "TESTBIC",
-      clearing_system_member_id: null,
-      name: "Test Bank",
-    },
-    name: "Test Account",
-    details: "Test",
-    usage: "PRIV",
-    cash_account_type: "CACC",
-    product: "Current Account",
-    currency: "XXX",
-    psu_status: "Authorized",
-    credit_limit: null,
-    postal_address: null,
     uid: "xxx-test-uid",
     identification_hash: "xxx-hash",
-    identification_hashes: [],
-    institution: { name: "Test Bank", country: "DE" },
     balance: {
       name: "",
       balance_amount: { currency: "EUR", amount: "5000.00" },
@@ -416,8 +432,6 @@ test("Transform account - XXX currency resolved from balance", () => {
       reference_date: "2024-03-06",
       last_committed_transaction: "1234567890",
     },
-    legal_age: true,
-    valid_until: "2024-06-06",
   });
 
   expect(result.currency).toBe("EUR");
@@ -426,26 +440,10 @@ test("Transform account - XXX currency resolved from balance", () => {
 
 test("Transform account - XXX preserved when balance also XXX", () => {
   const result = transformAccount({
+    ...xxxTestAccountBase,
     account_id: { iban: "DE89370400440532013001" },
-    all_account_ids: [],
-    account_servicer: {
-      bic_fi: "TESTBIC",
-      clearing_system_member_id: null,
-      name: "Test Bank",
-    },
-    name: "Test Account",
-    details: "Test",
-    usage: "PRIV",
-    cash_account_type: "CACC",
-    product: "Current Account",
-    currency: "XXX",
-    psu_status: "Authorized",
-    credit_limit: null,
-    postal_address: null,
     uid: "xxx-test-uid-2",
     identification_hash: "xxx-hash-2",
-    identification_hashes: [],
-    institution: { name: "Test Bank", country: "DE" },
     balance: {
       name: "",
       balance_amount: { currency: "XXX", amount: "3000.00" },
@@ -454,8 +452,6 @@ test("Transform account - XXX preserved when balance also XXX", () => {
       reference_date: "2024-03-06",
       last_committed_transaction: "1234567890",
     },
-    legal_age: true,
-    valid_until: "2024-06-06",
   });
 
   expect(result.currency).toBe("XXX");
