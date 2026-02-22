@@ -7,6 +7,7 @@ import type {
   Transaction,
 } from "../../types";
 import type { AccountType } from "../../utils/account";
+import { isValidCurrency } from "../../utils/currency";
 import { getLogoURL } from "../../utils/logo";
 import type {
   GetAccountDetailsResponse,
@@ -88,9 +89,6 @@ const getAvailableBalance = (
   }
   return null;
 };
-
-const isValidCurrency = (code?: string): boolean =>
-  !!code && code.toUpperCase() !== "XXX";
 
 export const transformAccount = (
   account: GetAccountDetailsResponse,

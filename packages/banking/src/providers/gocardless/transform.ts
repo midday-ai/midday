@@ -7,6 +7,7 @@ import type {
   GetAccountBalanceResponse,
 } from "../../types";
 import type { AccountType } from "../../utils/account";
+import { isValidCurrency } from "../../utils/currency";
 import { getFileExtension, getLogoURL } from "../../utils/logo";
 import type {
   GetRequisitionResponse,
@@ -215,14 +216,11 @@ const transformAccountName = (account: TransformAccountName) => {
   return "No name";
 };
 
-const isValidCurrency = (code?: string): boolean =>
-  !!code && code.toUpperCase() !== "XXX";
-
 const resolveCurrency = (...candidates: (string | undefined)[]): string => {
   for (const c of candidates) {
     if (c && isValidCurrency(c)) return c.toUpperCase();
   }
-  return candidates[0]?.toUpperCase() ?? "XXX";
+  return candidates[0]?.toUpperCase() || "XXX";
 };
 
 const getAvailableBalance = (
