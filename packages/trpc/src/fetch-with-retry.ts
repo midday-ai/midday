@@ -21,7 +21,7 @@ function isRetryable(err: any): boolean {
 }
 
 /**
- * Fetch wrapper for server-side tRPC calls over Railway private networking.
+ * Fetch wrapper for service-to-service calls over Railway private networking.
  *
  * Solves two known Railway issues during API redeployments:
  *
@@ -33,13 +33,17 @@ function isRetryable(err: any): boolean {
  *
  * 2. Hanging requests — Even with fresh connections, DNS propagation on
  *    Railway's Wireguard mesh can lag. The 5s timeout ensures we fail fast
- *    instead of blocking SSR, and the retry with exponential backoff gives
- *    the mesh time to converge.
+ *    instead of blocking the caller, and the retry with exponential backoff
+ *    gives the mesh time to converge.
  */
+interface FetchResponse {
+  json(): Promise<unknown>;
+}
+
 export async function fetchWithRetry(
-  input: RequestInfo | URL,
+  input: string | URL | Request,
   init?: RequestInit,
-): Promise<Response> {
+): Promise<FetchResponse> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
