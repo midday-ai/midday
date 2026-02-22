@@ -5,6 +5,7 @@
  *
  * Usage:
  *   bun run packages/banking/scripts/debug.ts connection   <bank_connection_id>
+ *   bun run packages/banking/scripts/debug.ts reconnect    <bank_connection_id>
  *   bun run packages/banking/scripts/debug.ts accounts     <bank_account_id>
  *   bun run packages/banking/scripts/debug.ts balance      <bank_account_id>
  *   bun run packages/banking/scripts/debug.ts transactions <bank_account_id> [--limit N]
@@ -18,6 +19,12 @@ import {
   bankConnections,
   transactions as transactionsTable,
 } from "@midday/db/schema";
+import { setLogLevel } from "@midday/logger";
+import {
+  type ApiAccount,
+  type DbAccount,
+  findMatchingAccount,
+} from "@midday/supabase/account-matching";
 import { and, desc, eq } from "drizzle-orm";
 import { Provider } from "../src/index";
 import { EnableBankingApi } from "../src/providers/enablebanking/enablebanking-api";
@@ -32,6 +39,8 @@ import {
   transformAccountBalance as gcTransformAccountBalance,
   transformTransaction as gcTransformTransaction,
 } from "../src/providers/gocardless/transform";
+import type { Account } from "../src/types";
+import type { AccountType } from "../src/utils/account";
 
 // ── Formatting helpers ──────────────────────────────────────────────────────
 
@@ -628,6 +637,430 @@ async function debugTransactions(bankAccountId: string, limit: number) {
   }
 }
 
+// ── Subcommand: reconnect (dry-run) ─────────────────────────────────────────
+
+function toApiAccount(a: Account): ApiAccount {
+  return {
+    id: a.id,
+    resource_id: a.resource_id,
+    iban: a.iban,
+    type: a.type,
+    currency: a.currency,
+    name: a.name,
+  };
+}
+
+function toDbAccount(a: {
+  id: string;
+  accountId: string;
+  accountReference: string | null;
+  iban: string | null;
+  type: string | null;
+  currency: string | null;
+  name: string | null;
+}): DbAccount {
+  return {
+    id: a.id,
+    account_reference: a.accountReference,
+    iban: a.iban,
+    type: a.type,
+    currency: a.currency,
+    name: a.name,
+  };
+}
+
+function detectMatchTier(apiAccount: ApiAccount, dbAccount: DbAccount): string {
+  if (
+    apiAccount.resource_id &&
+    dbAccount.account_reference === apiAccount.resource_id
+  ) {
+    return `resource_id (${apiAccount.resource_id})`;
+  }
+  if (apiAccount.iban && dbAccount.iban === apiAccount.iban) {
+    return `iban (${apiAccount.iban})`;
+  }
+  return `fuzzy (${[dbAccount.currency, dbAccount.type, dbAccount.name].filter(Boolean).join(", ")})`;
+}
+
+async function debugReconnect(bankConnectionId: string) {
+  const { connection, accounts } = await loadConnection(bankConnectionId);
+  const provider = connection.provider;
+
+  header("STORED (DB)");
+  console.log(
+    `  Connection: ${BOLD}${connection.id}${RESET} (${connection.provider})`,
+  );
+  console.log(`  Accounts:   ${accounts.length}`);
+
+  // Fetch provider accounts
+  let apiAccounts: ApiAccount[];
+
+  try {
+    if (provider === "gocardless") {
+      const api = new GoCardLessApi();
+      const raw = await api.getAccounts({ id: connection.referenceId! });
+      if (!raw?.length) {
+        fail("Provider returned no accounts");
+        return;
+      }
+      const transformed = raw.map((r) => gcTransformAccount(r));
+      apiAccounts = transformed.map(toApiAccount);
+    } else if (provider === "enablebanking") {
+      const api = new EnableBankingApi();
+      const raw = await api.getAccounts({ id: connection.accessToken! });
+      if (!raw?.length) {
+        fail("Provider returned no accounts");
+        return;
+      }
+      const transformed = raw.map((r) => ebTransformAccount(r));
+      apiAccounts = transformed.map(toApiAccount);
+    } else {
+      const providerInstance = new Provider({ provider });
+      const raw = await providerInstance.getAccounts({
+        id: connection.referenceId ?? connection.enrollmentId ?? "",
+        accessToken: connection.accessToken ?? undefined,
+        institutionId: connection.institutionId,
+      });
+      apiAccounts = raw.map(toApiAccount);
+    }
+  } catch (error) {
+    fail(
+      `Provider error: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return;
+  }
+
+  console.log(`  Provider:   ${apiAccounts.length} accounts returned`);
+
+  // Run matching
+  const dbAccounts = accounts.map(toDbAccount);
+  const matchedDbIds = new Set<string>();
+  const matchedApiIds = new Set<string>();
+
+  type MatchEntry = {
+    db: (typeof accounts)[0];
+    api: ApiAccount;
+    tier: string;
+  };
+  const matched: MatchEntry[] = [];
+
+  for (const api of apiAccounts) {
+    const match = findMatchingAccount(api, dbAccounts, matchedDbIds);
+    if (match) {
+      matchedDbIds.add(match.id);
+      matchedApiIds.add(api.id);
+      const dbRow = accounts.find((a) => a.id === match.id)!;
+      matched.push({ db: dbRow, api, tier: detectMatchTier(api, match) });
+    }
+  }
+
+  const staleDbAccounts = accounts.filter((a) => !matchedDbIds.has(a.id));
+  const newApiAccounts = apiAccounts.filter((a) => !matchedApiIds.has(a.id));
+
+  header("RECONNECT DRY-RUN");
+
+  for (const { db: dbRow, api, tier } of matched) {
+    const changed = dbRow.accountId !== api.id;
+    const arrow = changed
+      ? `${dbRow.accountId}  →  ${BOLD}${api.id}${RESET}`
+      : `${dbRow.accountId} ${DIM}(unchanged)${RESET}`;
+    ok(`${BOLD}${dbRow.name}${RESET} (${dbRow.currency})`);
+    console.log(`    db=${dbRow.id}  account_id=${arrow}`);
+    console.log(`    ${DIM}matched by: ${tier}${RESET}`);
+    console.log();
+  }
+
+  for (const dbRow of staleDbAccounts) {
+    fail(
+      `${BOLD}${dbRow.name}${RESET} (${dbRow.currency})  ${RED}← BROKEN${RESET}`,
+    );
+    console.log(`    db=${dbRow.id}  account_id=${dbRow.accountId}`);
+    console.log(
+      `    ${DIM}account_reference=${dbRow.accountReference ?? "null"}  iban=${dbRow.iban ?? "null"}  type=${dbRow.type ?? "null"}${RESET}`,
+    );
+    console.log(
+      `    ${DIM}no matching provider account (resource_id, iban, currency+name all failed)${RESET}`,
+    );
+    console.log();
+  }
+
+  for (const api of newApiAccounts) {
+    warn(`${api.id} ${BOLD}${api.name}${RESET} (${api.currency})`);
+    console.log(
+      `    ${DIM}resource_id=${api.resource_id ?? "null"}  iban=${api.iban ?? "null"}  type=${api.type}${RESET}`,
+    );
+    console.log(`    ${DIM}provider account not linked to any DB row${RESET}`);
+    console.log();
+  }
+
+  header("SUMMARY");
+  console.log(
+    `  Matched: ${matched.length}    Stale: ${staleDbAccounts.length}    New: ${newApiAccounts.length}`,
+  );
+
+  // ── Suggested manual fixes ──────────────────────────────────────────────
+  if (staleDbAccounts.length > 0 && newApiAccounts.length > 0) {
+    header("SUGGESTED MANUAL FIXES");
+
+    for (const dbRow of staleDbAccounts) {
+      for (const api of newApiAccounts) {
+        const signals: { label: string; pass: boolean; detail: string }[] = [];
+
+        // 1. Count check — strongest when 1:1
+        if (staleDbAccounts.length === 1 && newApiAccounts.length === 1) {
+          signals.push({
+            label: "1:1 orphan",
+            pass: true,
+            detail:
+              "exactly one stale DB row and one unlinked provider account",
+          });
+        }
+
+        // 2. Type match
+        const typeOk = !dbRow.type || dbRow.type === api.type;
+        signals.push({
+          label: "type",
+          pass: typeOk,
+          detail: typeOk
+            ? `both ${api.type}`
+            : `db=${dbRow.type} vs provider=${api.type}`,
+        });
+
+        // 3. Currency compatibility (XXX = unknown, not a conflict)
+        const dbCcy = dbRow.currency?.toUpperCase();
+        const apiCcy = api.currency.toUpperCase();
+        const ccyUnknown = !dbCcy || dbCcy === "XXX";
+        const ccyMatch = ccyUnknown || dbCcy === apiCcy;
+        signals.push({
+          label: "currency",
+          pass: ccyMatch,
+          detail: ccyUnknown
+            ? `db=${dbCcy ?? "null"} (unknown) — provider=${apiCcy} — not a conflict`
+            : ccyMatch
+              ? `both ${apiCcy}`
+              : `db=${dbCcy} vs provider=${apiCcy} — CONFLICT`,
+        });
+
+        // 4. IBAN check
+        if (dbRow.iban && api.iban) {
+          const ibanOk = dbRow.iban === api.iban;
+          signals.push({
+            label: "iban",
+            pass: ibanOk,
+            detail: ibanOk
+              ? `match (${api.iban})`
+              : `db=${dbRow.iban} vs provider=${api.iban} — CONFLICT`,
+          });
+        }
+
+        // 5. Name similarity
+        const dbName = (dbRow.name ?? "").toLowerCase();
+        const apiName = api.name.toLowerCase();
+        const nameExact = dbName === apiName;
+        const namePartial =
+          !nameExact &&
+          (dbName.includes(apiName) ||
+            apiName.includes(dbName) ||
+            dbName
+              .split(/\s+/)
+              .some((w) => w.length > 2 && apiName.includes(w)));
+        signals.push({
+          label: "name",
+          pass: nameExact,
+          detail: nameExact
+            ? `exact match "${api.name}"`
+            : namePartial
+              ? `partial overlap: db="${dbRow.name}" vs provider="${api.name}"`
+              : `different: db="${dbRow.name}" vs provider="${api.name}"`,
+        });
+
+        // 6. Transaction overlap — the strongest signal
+        let txOverlap = 0;
+        let txChecked = 0;
+        let dateRangeNote = "";
+        try {
+          const dbTxs = await db
+            .select({
+              internalId: transactionsTable.internalId,
+              amount: transactionsTable.amount,
+              date: transactionsTable.date,
+              currency: transactionsTable.currency,
+            })
+            .from(transactionsTable)
+            .where(
+              and(
+                eq(transactionsTable.bankAccountId, dbRow.id),
+                eq(transactionsTable.teamId, dbRow.teamId),
+              ),
+            )
+            .orderBy(desc(transactionsTable.date))
+            .limit(50);
+
+          if (dbTxs.length > 0) {
+            const providerTxIds: Set<string> = new Set();
+            const providerTxFingerprints: Set<string> = new Set();
+            const providerDates: string[] = [];
+            const acctType = api.type as AccountType;
+
+            if (provider === "gocardless") {
+              const gcApi = new GoCardLessApi();
+              const rawTxs = await gcApi.getTransactions({
+                accountId: api.id,
+                latest: false,
+              });
+              for (const raw of rawTxs ?? []) {
+                const t = gcTransformTransaction({
+                  transaction: raw,
+                  accountType: acctType,
+                });
+                providerTxIds.add(t.id);
+                providerTxFingerprints.add(`${t.date}|${t.amount}`);
+                providerDates.push(t.date);
+              }
+            } else if (provider === "enablebanking") {
+              const ebApi = new EnableBankingApi();
+              const raw = await ebApi.getTransactions({
+                accountId: api.id,
+                accountType: acctType,
+                latest: false,
+              });
+              for (const rawTx of raw.transactions) {
+                const t = ebTransformTransaction({
+                  transaction: rawTx,
+                  accountType: acctType,
+                });
+                providerTxIds.add(t.id);
+                providerTxFingerprints.add(`${t.date}|${t.amount}`);
+                providerDates.push(t.date);
+              }
+            } else {
+              const providerInstance = new Provider({ provider });
+              const txs = await providerInstance.getTransactions({
+                accountId: api.id,
+                accessToken: connection.accessToken ?? undefined,
+                accountType: acctType,
+                latest: false,
+              });
+              for (const t of txs) {
+                providerTxIds.add(t.id);
+                providerTxFingerprints.add(`${t.date}|${t.amount}`);
+                providerDates.push(t.date);
+              }
+            }
+
+            txChecked = dbTxs.length;
+            for (const dbTx of dbTxs) {
+              const byId =
+                dbTx.internalId && providerTxIds.has(dbTx.internalId);
+              const byFingerprint = providerTxFingerprints.has(
+                `${dbTx.date}|${Number(dbTx.amount)}`,
+              );
+              if (byId || byFingerprint) txOverlap++;
+            }
+
+            // Check if date ranges overlap
+            const dbDates = dbTxs.map((t) => t.date).sort();
+            const pDates = providerDates.sort();
+            const dbMin = dbDates[0];
+            const dbMax = dbDates[dbDates.length - 1];
+            const pMin = pDates[0];
+            const pMax = pDates[pDates.length - 1];
+
+            if (dbMax && pMin && dbMax < pMin) {
+              dateRangeNote = ` — date ranges don't overlap! db=${dbMin}..${dbMax}, provider=${pMin}..${pMax}`;
+            } else if (dbMin && pMax && pMax < dbMin) {
+              dateRangeNote = ` — date ranges don't overlap! db=${dbMin}..${dbMax}, provider=${pMin}..${pMax}`;
+            } else if (dbMin && pMin) {
+              dateRangeNote = ` — db=${dbMin}..${dbMax}, provider=${pMin}..${pMax}`;
+            }
+          }
+        } catch {
+          // Transaction fetch failed — skip this signal
+        }
+
+        if (txChecked > 0) {
+          const pct = Math.round((txOverlap / txChecked) * 100);
+          const noOverlappingRange = dateRangeNote.includes("don't overlap");
+          signals.push({
+            label: "tx overlap",
+            pass: pct >= 30 || noOverlappingRange,
+            detail: `${txOverlap}/${txChecked} (${pct}%)${dateRangeNote}`,
+          });
+        }
+
+        // Print pair assessment
+        console.log(
+          `  ${BOLD}${dbRow.name}${RESET} (${dbRow.currency})  ↔  ${BOLD}${api.name}${RESET} (${api.currency})`,
+        );
+        console.log();
+
+        const passing = signals.filter((s) => s.pass).length;
+        for (const s of signals) {
+          const icon = s.pass ? `${GREEN}✓${RESET}` : `${RED}✗${RESET}`;
+          console.log(`    ${icon} ${s.label}: ${s.detail}`);
+        }
+
+        // Confidence verdict
+        const hardConflicts = signals.filter(
+          (s) => !s.pass && ["currency", "type", "iban"].includes(s.label),
+        );
+        const txSignal = signals.find((s) => s.label === "tx overlap");
+        const txRangesDisjoint =
+          txSignal?.detail.includes("don't overlap") ?? false;
+        const txConfirmed = txSignal?.pass === true && !txRangesDisjoint;
+        const txRefuted = txSignal && !txSignal.pass && !txRangesDisjoint;
+
+        let confidence: string;
+        if (hardConflicts.length > 0) {
+          confidence = `${RED}LOW — hard conflict on ${hardConflicts.map((c) => c.label).join(", ")}${RESET}`;
+        } else if (txConfirmed && passing >= signals.length - 1) {
+          confidence = `${GREEN}HIGH — transaction data confirms match${RESET}`;
+        } else if (txRefuted) {
+          confidence = `${YELLOW}MEDIUM — overlapping date range but 0% tx match, verify manually${RESET}`;
+        } else if (
+          staleDbAccounts.length === 1 &&
+          newApiAccounts.length === 1 &&
+          hardConflicts.length === 0
+        ) {
+          confidence = `${GREEN}HIGH — 1:1 with no conflicts${RESET}`;
+        } else if (passing >= Math.ceil(signals.length / 2)) {
+          confidence = `${YELLOW}MEDIUM — ${passing}/${signals.length} checks pass, review carefully${RESET}`;
+        } else {
+          confidence = `${RED}LOW — most checks failed${RESET}`;
+        }
+
+        console.log();
+        console.log(`    Confidence: ${confidence}`);
+
+        // SQL — mirrors what matchAndUpdateAccountIds does on reconnect
+        const setClauses = [`account_id = '${api.id}'`];
+        if (api.resource_id) {
+          setClauses.push(`account_reference = '${api.resource_id}'`);
+        }
+        if (api.iban) {
+          setClauses.push(`iban = '${api.iban}'`);
+        }
+        if (
+          dbRow.currency?.toUpperCase() !== api.currency.toUpperCase() ||
+          dbRow.currency === "XXX"
+        ) {
+          setClauses.push(`currency = '${api.currency}'`);
+        }
+        if (dbRow.name !== api.name) {
+          setClauses.push(`name = '${api.name.replace(/'/g, "''")}'`);
+        }
+
+        console.log();
+        console.log(`    ${DIM}SQL:${RESET}`);
+        console.log(
+          `    ${DIM}UPDATE bank_accounts SET ${setClauses.join(", ")} WHERE id = '${dbRow.id}';${RESET}`,
+        );
+        console.log();
+      }
+    }
+  }
+}
+
 // ── Diff helpers ────────────────────────────────────────────────────────────
 
 function diffField(label: string, stored: unknown, provider: unknown) {
@@ -659,12 +1092,15 @@ function diffNumeric(
 const USAGE = `
 Usage:
   bun run packages/banking/scripts/debug.ts connection   <bank_connection_id>
+  bun run packages/banking/scripts/debug.ts reconnect    <bank_connection_id>
   bun run packages/banking/scripts/debug.ts accounts     <bank_account_id>
   bun run packages/banking/scripts/debug.ts balance      <bank_account_id>
   bun run packages/banking/scripts/debug.ts transactions <bank_account_id> [--limit N]
 `;
 
 async function main() {
+  setLogLevel("error");
+
   const args = process.argv.slice(2);
   const command = args[0];
   const bankAccountId = args[1];
@@ -681,6 +1117,9 @@ async function main() {
   switch (command) {
     case "connection":
       await debugConnection(bankAccountId);
+      break;
+    case "reconnect":
+      await debugReconnect(bankAccountId);
       break;
     case "accounts":
       await debugAccounts(bankAccountId);

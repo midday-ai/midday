@@ -30,7 +30,7 @@ describe("findMatchingAccount", () => {
 
   // ── Tier 1: IBAN matching ──────────────────────────────────────────────
 
-  test("matches by IBAN (highest priority)", () => {
+  test("matches by IBAN when no resource_id", () => {
     const dbAccounts = [
       createDbAccount({
         iban: "DE89370400440532013000",
