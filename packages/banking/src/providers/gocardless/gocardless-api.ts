@@ -8,6 +8,7 @@ import { ProviderError } from "../../utils/error";
 import { logger } from "../../utils/logger";
 import { withRateLimitRetry } from "../../utils/retry";
 import type {
+  AccountBalance,
   DeleteRequistionResponse,
   GetAccessTokenResponse,
   GetAccountBalanceResponse,
@@ -28,9 +29,8 @@ import type {
   PostRequisitionsResponse,
 } from "./types";
 import {
-  getAccessValidForDays,
   getMaxHistoricalDays,
-  isError,
+  parseProviderError,
   selectPrimaryBalance,
 } from "./utils";
 
@@ -125,29 +125,23 @@ export class GoCardLessApi {
 
   async getAccountBalance(
     accountId: string,
-  ): Promise<
-    GetAccountBalanceResponse["balances"][0]["balanceAmount"] | undefined
-  > {
+  ): Promise<AccountBalance["balanceAmount"] | undefined> {
     const result = await this.getAccountBalances(accountId);
-    return result?.primaryBalance;
+    return result?.primaryBalance?.balanceAmount;
   }
 
   async getAccountBalances(
     accountId: string,
     preResolvedToken?: string,
   ): Promise<{
-    primaryBalance:
-      | GetAccountBalanceResponse["balances"][0]["balanceAmount"]
-      | undefined;
+    primaryBalance: AccountBalance | undefined;
     balances: GetAccountBalanceResponse["balances"] | undefined;
   }> {
     const cacheKey = `${this.#accountBalanceCacheKey}_${accountId}`;
     const cached = await bankingCache.get(cacheKey);
     if (cached) {
       return cached as {
-        primaryBalance:
-          | GetAccountBalanceResponse["balances"][0]["balanceAmount"]
-          | undefined;
+        primaryBalance: AccountBalance | undefined;
         balances: GetAccountBalanceResponse["balances"] | undefined;
       };
     }
@@ -169,7 +163,7 @@ export class GoCardLessApi {
 
       return result;
     } catch (error) {
-      const parsedError = isError(error);
+      const parsedError = parseProviderError(error);
 
       if (parsedError) {
         throw new ProviderError(parsedError);
@@ -239,16 +233,36 @@ export class GoCardLessApi {
       transactionTotalDays,
     });
 
-    return this.#post<PostCreateAgreementResponse>(
-      "/api/v2/agreements/enduser/",
-      token,
-      {
-        institution_id: institutionId,
-        access_scope: ["balances", "details", "transactions"],
-        access_valid_for_days: getAccessValidForDays({ institutionId }),
-        max_historical_days: maxHistoricalDays,
-      },
-    );
+    const createAgreement = (accessDays: number) =>
+      this.#post<PostCreateAgreementResponse>(
+        "/api/v2/agreements/enduser/",
+        token,
+        {
+          institution_id: institutionId,
+          access_scope: ["balances", "details", "transactions"],
+          access_valid_for_days: accessDays,
+          max_historical_days: maxHistoricalDays,
+        },
+      );
+
+    try {
+      return await createAgreement(180);
+    } catch {
+      return await createAgreement(90);
+    }
+  }
+
+  async getEndUserAgreement(id: string): Promise<PostCreateAgreementResponse> {
+    const cacheKey = `gocardless_agreement_${id}`;
+
+    return bankingCache.getOrSet(cacheKey, CacheTTL.ONE_HOUR, async () => {
+      const token = await this.#getAccessToken();
+
+      return this.#get<PostCreateAgreementResponse>(
+        `/api/v2/agreements/enduser/${id}/`,
+        token,
+      );
+    });
   }
 
   async getAccountDetails(
@@ -302,8 +316,11 @@ export class GoCardLessApi {
         return undefined;
       }
 
-      // Fetch institution once — all accounts in a requisition share the same institution
-      const institution = await this.getInstitution(response.institution_id);
+      // Fetch institution and agreement in parallel — shared across all accounts in this requisition
+      const [institution, agreement] = await Promise.all([
+        this.getInstitution(response.institution_id),
+        this.getEndUserAgreement(response.agreement),
+      ]);
 
       return Promise.all(
         response.accounts.map(async (acountId: string) => {
@@ -316,15 +333,16 @@ export class GoCardLessApi {
             balance: selectPrimaryBalance(
               balanceResult.balances,
               details.account.currency,
-            ),
+            )?.balanceAmount,
             balances: balanceResult.balances,
             institution,
+            accessValidForDays: agreement.access_valid_for_days,
             ...details,
           };
         }),
       );
     } catch (error) {
-      const parsedError = isError(error);
+      const parsedError = parseProviderError(error);
 
       if (parsedError) {
         throw new ProviderError(parsedError);
@@ -355,7 +373,7 @@ export class GoCardLessApi {
 
       return response?.transactions?.booked;
     } catch (error) {
-      const parsedError = isError(error);
+      const parsedError = parseProviderError(error);
 
       if (parsedError) {
         throw new ProviderError(parsedError);
@@ -388,7 +406,7 @@ export class GoCardLessApi {
 
       return response;
     } catch (error) {
-      const parsedError = isError(error);
+      const parsedError = parseProviderError(error);
 
       if (parsedError) {
         throw new ProviderError(parsedError);

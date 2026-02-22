@@ -184,25 +184,7 @@ export const transformBalance = ({
   const amount =
     accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
 
-  const isAvailableType = (type?: string) =>
-    type?.toLowerCase().includes("available") ||
-    type === "ITAV" ||
-    type === "CLAV" ||
-    type === "OPAV";
-
-  // Find available balance: check full balances array first, fall back to primary
-  const availableEntry = balances?.find((b) => isAvailableType(b.balance_type));
-  const rawAvailable = availableEntry
-    ? +availableEntry.balance_amount.amount
-    : isAvailableType(balance.balance_type)
-      ? rawAmount
-      : null;
-  const availableBalance =
-    rawAvailable !== null && accountType === "credit" && rawAvailable < 0
-      ? Math.abs(rawAvailable)
-      : rawAvailable;
-
-  // Resolve currency: prefer primary balance, fall back to other balances in the array
+  // Resolve currency first — needed to filter available balance by currency
   const candidates = [
     balance.balance_amount.currency,
     ...(balances?.map((b) => b.balance_amount.currency) ?? []),
@@ -210,6 +192,23 @@ export const transformBalance = ({
   const currency =
     candidates.find((c) => isValidCurrency(c)) ??
     balance.balance_amount.currency;
+
+  // Find available balance: prefer same currency, then any available entry
+  const availableEntry =
+    balances?.find(
+      (b) =>
+        isAvailableBalanceType(b.balance_type) &&
+        b.balance_amount.currency.toUpperCase() === currency.toUpperCase(),
+    ) ?? balances?.find((b) => isAvailableBalanceType(b.balance_type));
+  const rawAvailable = availableEntry
+    ? +availableEntry.balance_amount.amount
+    : isAvailableBalanceType(balance.balance_type)
+      ? rawAmount
+      : null;
+  const availableBalance =
+    rawAvailable !== null && accountType === "credit" && rawAvailable < 0
+      ? Math.abs(rawAvailable)
+      : rawAvailable;
 
   return {
     amount,

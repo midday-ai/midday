@@ -19,7 +19,6 @@ import type {
   TransformAccountName,
   TransformInstitution,
 } from "./types";
-import { getAccessValidForDays } from "./utils";
 
 const getAccountType = (cashAccountType?: string): AccountType => {
   switch (cashAccountType) {
@@ -37,7 +36,7 @@ type MapTransactionCategory = {
   accountType: AccountType;
 };
 
-export const mapTransactionCategory = ({
+export const transformTransactionCategory = ({
   transaction,
   accountType,
 }: MapTransactionCategory) => {
@@ -57,7 +56,7 @@ export const mapTransactionCategory = ({
   return null;
 };
 
-export const mapTransactionMethod = (type?: string) => {
+export const transformTransactionMethod = (type?: string) => {
   switch (type) {
     case "Payment":
     case "Bankgiro payment":
@@ -155,7 +154,7 @@ export const transformTransaction = ({
   transaction,
   accountType,
 }: TransformTransactionPayload): BaseTransaction => {
-  const method = mapTransactionMethod(
+  const method = transformTransactionMethod(
     transaction?.proprietaryBankTransactionCode,
   );
 
@@ -189,7 +188,7 @@ export const transformTransaction = ({
     method,
     amount: +transaction.transactionAmount.amount,
     currency: transaction.transactionAmount.currency,
-    category: mapTransactionCategory({ transaction, accountType }),
+    category: transformTransactionCategory({ transaction, accountType }),
     currency_rate: currencyExchange?.rate || null,
     currency_source: currencyExchange?.currency?.toUpperCase() || null,
     balance,
@@ -216,26 +215,30 @@ const transformAccountName = (account: TransformAccountName) => {
   return "No name";
 };
 
-const resolveCurrency = (...candidates: (string | undefined)[]): string => {
-  for (const c of candidates) {
-    if (c && isValidCurrency(c)) return c.toUpperCase();
-  }
-  return candidates[0]?.toUpperCase() || "XXX";
-};
+const resolveCurrency = (...candidates: (string | undefined)[]): string =>
+  candidates.find((c) => c && isValidCurrency(c))?.toUpperCase() || "XXX";
 
 const getAvailableBalance = (
   balances?: TransformAccount["balances"],
+  preferredCurrency?: string,
 ): number | null => {
   if (!balances?.length) return null;
 
-  const interimAvailable = balances.find(
-    (b) => b.balanceType === "interimAvailable",
-  );
+  const matchesCurrency = (b: { balanceAmount: { currency: string } }) =>
+    !preferredCurrency ||
+    b.balanceAmount.currency.toUpperCase() === preferredCurrency.toUpperCase();
+
+  const interimAvailable =
+    balances.find(
+      (b) => b.balanceType === "interimAvailable" && matchesCurrency(b),
+    ) ?? balances.find((b) => b.balanceType === "interimAvailable");
   if (interimAvailable) {
     return +interimAvailable.balanceAmount.amount;
   }
 
-  const expected = balances.find((b) => b.balanceType === "expected");
+  const expected =
+    balances.find((b) => b.balanceType === "expected" && matchesCurrency(b)) ??
+    balances.find((b) => b.balanceType === "expected");
   if (expected) {
     return +expected.balanceAmount.amount;
   }
@@ -249,6 +252,7 @@ export const transformAccount = ({
   balance,
   balances,
   institution,
+  accessValidForDays,
 }: TransformAccount): BaseAccount => {
   const accountType = getAccountType(account.cashAccountType);
   const balanceCurrencies = balances?.map((b) => b.balanceAmount.currency);
@@ -272,10 +276,7 @@ export const transformAccount = ({
     balance: transformAccountBalance({ balance, balances, accountType }),
     institution: transformInstitution(institution),
     resource_id: account.resourceId,
-    expires_at: addDays(
-      new Date(),
-      getAccessValidForDays({ institutionId: institution.id }),
-    ).toISOString(),
+    expires_at: addDays(new Date(), accessValidForDays ?? 180).toISOString(),
     iban: account.iban || null,
     subtype: null,
     bic: institution.bic || null,
@@ -283,7 +284,7 @@ export const transformAccount = ({
     wire_routing_number: null,
     account_number: null,
     sort_code: null,
-    available_balance: getAvailableBalance(balances),
+    available_balance: getAvailableBalance(balances, currency),
     credit_limit: null,
   };
 };
@@ -305,11 +306,15 @@ export const transformAccountBalance = ({
     accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
 
   const balanceCurrencies = balances?.map((b) => b.balanceAmount.currency);
+  const currency = resolveCurrency(
+    balance?.currency,
+    ...(balanceCurrencies ?? []),
+  );
 
   return {
-    currency: resolveCurrency(balance?.currency, ...(balanceCurrencies ?? [])),
+    currency,
     amount,
-    available_balance: getAvailableBalance(balances),
+    available_balance: getAvailableBalance(balances, currency),
     credit_limit: null,
   };
 };

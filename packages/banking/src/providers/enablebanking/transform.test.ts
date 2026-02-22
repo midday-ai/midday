@@ -539,6 +539,45 @@ test("Transform balance - ITAV primary returns available_balance directly", () =
   });
 });
 
+test("Transform balance - multi-currency available_balance matches primary currency", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "9436.86" },
+        balance_type: "ITBD",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      balances: [
+        {
+          name: "",
+          balance_amount: { currency: "DKK", amount: "9.76" },
+          balance_type: "ITAV",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+        {
+          name: "",
+          balance_amount: { currency: "EUR", amount: "9200.00" },
+          balance_type: "ITAV",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+      ],
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 9436.86,
+    currency: "EUR",
+    available_balance: 9200,
+    credit_limit: null,
+  });
+});
+
 test("Transform balance - XXX currency resolved from balances array", () => {
   expect(
     transformBalance({

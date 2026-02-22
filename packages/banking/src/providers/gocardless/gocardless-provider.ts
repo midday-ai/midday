@@ -68,7 +68,7 @@ export class GoCardLessProvider implements Provider {
       await this.#api.getAccountBalances(accountId);
 
     return transformAccountBalance({
-      balance: primaryBalance,
+      balance: primaryBalance?.balanceAmount,
       balances,
       accountType,
     });

@@ -18,10 +18,17 @@ export async function GET(req: NextRequest) {
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
   const referenceId = requestUrl.searchParams.get("reference_id") ?? undefined;
+  const accessValidForDays = Number(
+    requestUrl.searchParams.get("access_valid_for_days"),
+  );
   const isDesktop = requestUrl.searchParams.get("desktop");
 
   if (id) {
-    await updateBankConnection(supabase, { id, referenceId });
+    await updateBankConnection(supabase, {
+      id,
+      referenceId,
+      accessValidForDays: accessValidForDays || 180,
+    });
   }
 
   if (isDesktop === "true") {

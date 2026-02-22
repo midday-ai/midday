@@ -1,10 +1,6 @@
 import { expect, test } from "bun:test";
 import type { AccountBalance } from "./types";
-import {
-  getAccessValidForDays,
-  getMaxHistoricalDays,
-  selectPrimaryBalance,
-} from "./utils";
+import { getMaxHistoricalDays, selectPrimaryBalance } from "./utils";
 
 test("Should return 90 days", () => {
   expect(
@@ -24,22 +20,6 @@ test("Should return 720 days", () => {
   ).toEqual(720);
 });
 
-test("Should return 90 days", () => {
-  expect(
-    getAccessValidForDays({
-      institutionId: "CUMBERLAND_CMBSGB2A",
-    }),
-  ).toEqual(90);
-});
-
-test("Should return 720 days", () => {
-  expect(
-    getAccessValidForDays({
-      institutionId: "NOT_RESTRICTED",
-    }),
-  ).toEqual(180);
-});
-
 const mkBalance = (
   type: AccountBalance["balanceType"],
   amount: string,
@@ -54,7 +34,7 @@ test("selectPrimaryBalance - single interimAvailable", () => {
   const result = selectPrimaryBalance([
     mkBalance("interimAvailable", "5000.00", "EUR"),
   ]);
-  expect(result).toEqual({ amount: "5000.00", currency: "EUR" });
+  expect(result?.balanceAmount).toEqual({ amount: "5000.00", currency: "EUR" });
 });
 
 test("selectPrimaryBalance - prefers interimAvailable over expected", () => {
@@ -62,7 +42,7 @@ test("selectPrimaryBalance - prefers interimAvailable over expected", () => {
     mkBalance("expected", "9999.00", "EUR"),
     mkBalance("interimAvailable", "5000.00", "EUR"),
   ]);
-  expect(result).toEqual({ amount: "5000.00", currency: "EUR" });
+  expect(result?.balanceAmount).toEqual({ amount: "5000.00", currency: "EUR" });
 });
 
 test("selectPrimaryBalance - prefers closingBooked over expected", () => {
@@ -70,7 +50,7 @@ test("selectPrimaryBalance - prefers closingBooked over expected", () => {
     mkBalance("closingBooked", "1000.00", "EUR"),
     mkBalance("expected", "2000.00", "EUR"),
   ]);
-  expect(result).toEqual({ amount: "1000.00", currency: "EUR" });
+  expect(result?.balanceAmount).toEqual({ amount: "1000.00", currency: "EUR" });
 });
 
 test("selectPrimaryBalance - prefers interimBooked over closingBooked", () => {
@@ -78,7 +58,7 @@ test("selectPrimaryBalance - prefers interimBooked over closingBooked", () => {
     mkBalance("closingBooked", "9000.00", "EUR"),
     mkBalance("interimBooked", "5000.00", "EUR"),
   ]);
-  expect(result).toEqual({ amount: "5000.00", currency: "EUR" });
+  expect(result?.balanceAmount).toEqual({ amount: "5000.00", currency: "EUR" });
 });
 
 test("selectPrimaryBalance - prefers closingBooked over interimAvailable", () => {
@@ -86,7 +66,7 @@ test("selectPrimaryBalance - prefers closingBooked over interimAvailable", () =>
     mkBalance("interimAvailable", "8000.00", "EUR"),
     mkBalance("closingBooked", "7500.00", "EUR"),
   ]);
-  expect(result).toEqual({ amount: "7500.00", currency: "EUR" });
+  expect(result?.balanceAmount).toEqual({ amount: "7500.00", currency: "EUR" });
 });
 
 test("selectPrimaryBalance - multi-currency picks highest amount among preferred types", () => {
@@ -96,7 +76,7 @@ test("selectPrimaryBalance - multi-currency picks highest amount among preferred
     mkBalance("interimAvailable", "9242.93", "EUR"),
     mkBalance("interimBooked", "9436.86", "EUR"),
   ]);
-  expect(result).toEqual({ amount: "9436.86", currency: "EUR" });
+  expect(result?.balanceAmount).toEqual({ amount: "9436.86", currency: "EUR" });
 });
 
 test("selectPrimaryBalance - multi-currency with only interimAvailable", () => {
@@ -104,7 +84,7 @@ test("selectPrimaryBalance - multi-currency with only interimAvailable", () => {
     mkBalance("interimAvailable", "50.00", "DKK"),
     mkBalance("interimAvailable", "8000.00", "EUR"),
   ]);
-  expect(result).toEqual({ amount: "8000.00", currency: "EUR" });
+  expect(result?.balanceAmount).toEqual({ amount: "8000.00", currency: "EUR" });
 });
 
 test("selectPrimaryBalance - uses absolute value for negative balances (credit)", () => {
@@ -112,7 +92,10 @@ test("selectPrimaryBalance - uses absolute value for negative balances (credit)"
     mkBalance("interimAvailable", "100.00", "DKK"),
     mkBalance("interimBooked", "-5000.00", "EUR"),
   ]);
-  expect(result).toEqual({ amount: "-5000.00", currency: "EUR" });
+  expect(result?.balanceAmount).toEqual({
+    amount: "-5000.00",
+    currency: "EUR",
+  });
 });
 
 test("selectPrimaryBalance - preferredCurrency narrows to matching currency", () => {
@@ -123,7 +106,7 @@ test("selectPrimaryBalance - preferredCurrency narrows to matching currency", ()
     ],
     "EUR",
   );
-  expect(result).toEqual({ amount: "5000.00", currency: "EUR" });
+  expect(result?.balanceAmount).toEqual({ amount: "5000.00", currency: "EUR" });
 });
 
 test("selectPrimaryBalance - preferredCurrency falls back to all when no match", () => {
@@ -134,7 +117,7 @@ test("selectPrimaryBalance - preferredCurrency falls back to all when no match",
     ],
     "EUR",
   );
-  expect(result).toEqual({ amount: "9000.00", currency: "DKK" });
+  expect(result?.balanceAmount).toEqual({ amount: "9000.00", currency: "DKK" });
 });
 
 test("selectPrimaryBalance - preferredCurrency ignores XXX hint", () => {
@@ -145,7 +128,7 @@ test("selectPrimaryBalance - preferredCurrency ignores XXX hint", () => {
     ],
     "XXX",
   );
-  expect(result).toEqual({ amount: "9000.00", currency: "EUR" });
+  expect(result?.balanceAmount).toEqual({ amount: "9000.00", currency: "EUR" });
 });
 
 test("selectPrimaryBalance - empty array returns undefined", () => {

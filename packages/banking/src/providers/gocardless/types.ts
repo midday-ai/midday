@@ -171,6 +171,7 @@ export type GetAccountsResponse = {
   balances?: AccountBalance[];
   institution: Institution;
   resourceId?: string;
+  accessValidForDays?: number;
 }[];
 
 export type GetTransactionsRequest = {

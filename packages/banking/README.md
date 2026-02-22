@@ -56,8 +56,10 @@ All four providers implement a common interface:
 - **Account identifier**: GoCardless account UUID
 - **Transaction history**: Institution-dependent, reported via `transaction_total_days` field
   in the institutions list (e.g., 540 days for ABN AMRO, 730 for Revolut)
-- **Access duration**: Configurable via `access_valid_for_days` in the end user agreement.
-  Most banks: 180 days. Some UK banks restricted to 90 days (see `getAccessValidForDays()`)
+- **Access duration**: `createEndUserAgreement()` tries 180 days first (EEA standard
+  under Article 10a RTS). If the bank rejects it, automatically falls back to 90 days.
+  UK banks are limited to 90 days by FCA regulation. The actual `access_valid_for_days`
+  accepted by the bank is read from the agreement response and used for `expires_at`.
 
 **Transaction history strategy:**
 
@@ -266,12 +268,18 @@ Some banks limit to 4 API calls per day per account per endpoint. Our caching st
 ensures account details, balances, and institution data are fetched once during account
 selection and reused during the initial sync, staying within even the strictest limits.
 
-### GoCardless: Requisition expiry
+### GoCardless: Requisition expiry and EUA fallback
 
 Requisitions can have status `"EX"` (expired) or `"RJ"` (rejected). The connection status
-check detects both and marks the connection as disconnected. Consent duration is set via
-`access_valid_for_days` — 180 days for most banks, 90 for restricted UK banks (see
-`getAccessValidForDays()` in `gocardless/utils.ts`).
+check detects both and marks the connection as disconnected.
+
+`createEndUserAgreement()` uses a **try-180, fall-back-to-90** strategy for
+`access_valid_for_days`. Per the EC Article 10a RTS (effective July 2023), EEA banks
+should accept 180 days, but compliance varies. If a bank rejects 180 days, the method
+automatically retries with 90. The actual value the bank accepted is read from the
+agreement response and threaded through to `transformAccount` for an accurate `expires_at`.
+On reconnect, the value is passed via the redirect URL so `updateBankConnection` also
+stores the correct expiry.
 
 ### GoCardless: Institution-specific history restrictions
 

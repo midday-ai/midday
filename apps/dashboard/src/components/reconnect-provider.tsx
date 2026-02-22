@@ -154,6 +154,11 @@ export function ReconnectProvider({
             transactionTotalDays: 60,
           });
 
+          link.searchParams.append(
+            "access_valid_for_days",
+            String(agreementData.data.access_valid_for_days),
+          );
+
           const linkData = await createGocardlessLink.mutateAsync({
             agreement: agreementData.data.id,
             institutionId,
