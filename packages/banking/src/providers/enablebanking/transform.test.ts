@@ -479,6 +479,66 @@ test("Transform account balance - credit with negative balance and available typ
   });
 });
 
+test("Transform balance - available_balance from balances array when primary is booked", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "SEK", amount: "273048.86" },
+        balance_type: "ITBD",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      balances: [
+        {
+          name: "",
+          balance_amount: { currency: "SEK", amount: "273048.86" },
+          balance_type: "ITBD",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+        {
+          name: "",
+          balance_amount: { currency: "SEK", amount: "270206.25" },
+          balance_type: "ITAV",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+      ],
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 273048.86,
+    currency: "SEK",
+    available_balance: 270206.25,
+    credit_limit: null,
+  });
+});
+
+test("Transform balance - ITAV primary returns available_balance directly", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "SEK", amount: "90737.96" },
+        balance_type: "ITAV",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 90737.96,
+    currency: "SEK",
+    available_balance: 90737.96,
+    credit_limit: null,
+  });
+});
+
 test("Transform balance - XXX currency resolved from balances array", () => {
   expect(
     transformBalance({

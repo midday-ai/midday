@@ -27,7 +27,12 @@ import type {
   PostRequisitionsRequest,
   PostRequisitionsResponse,
 } from "./types";
-import { getAccessValidForDays, getMaxHistoricalDays, isError } from "./utils";
+import {
+  getAccessValidForDays,
+  getMaxHistoricalDays,
+  isError,
+  selectPrimaryBalance,
+} from "./utils";
 
 export class GoCardLessApi {
   #baseUrl = "https://bankaccountdata.gocardless.com";
@@ -155,20 +160,8 @@ export class GoCardLessApi {
         token,
       );
 
-      const foundInterimAvailable = balances?.find(
-        (account) =>
-          account.balanceType === "interimAvailable" ||
-          account.balanceType === "interimBooked",
-      );
-
-      const foundExpectedAvailable = balances?.find(
-        (account) => account.balanceType === "expected",
-      );
-
       const result = {
-        primaryBalance:
-          foundInterimAvailable?.balanceAmount ||
-          foundExpectedAvailable?.balanceAmount,
+        primaryBalance: selectPrimaryBalance(balances),
         balances,
       };
 

@@ -1,3 +1,48 @@
+import type { AccountBalance } from "./types";
+
+/**
+ * Select the primary balance from a list of balances.
+ *
+ * Priority (booked-first for accounting accuracy):
+ *   1. interimBooked  – current intraday settled balance
+ *   2. closingBooked  – end-of-day settled balance
+ *   3. interimAvailable – current available (may include credit limits)
+ *   4. expected
+ *   5. any remaining balance
+ *
+ * Within each tier, the entry with the highest absolute amount wins
+ * (handles multi-currency accounts, e.g. EUR 9,242.93 over DKK 9.76).
+ */
+export function selectPrimaryBalance(
+  balances: AccountBalance[] | undefined,
+): AccountBalance["balanceAmount"] | undefined {
+  if (!balances?.length) return undefined;
+
+  const tiers: ((b: AccountBalance) => boolean)[] = [
+    (b) => b.balanceType === "interimBooked",
+    (b) => b.balanceType === "closingBooked",
+    (b) => b.balanceType === "interimAvailable",
+    (b) => b.balanceType === "expected",
+  ];
+
+  const pickHighest = (items: AccountBalance[]): AccountBalance | undefined =>
+    items.length === 0
+      ? undefined
+      : items.reduce((max, current) => {
+          const curAbs = Math.abs(+current.balanceAmount.amount);
+          const maxAbs = Math.abs(+max.balanceAmount.amount);
+          return curAbs > maxAbs ? current : max;
+        });
+
+  for (const match of tiers) {
+    const tier = balances.filter(match);
+    const winner = pickHighest(tier);
+    if (winner) return winner.balanceAmount;
+  }
+
+  return balances[0]?.balanceAmount;
+}
+
 export function isError(error: unknown) {
   if (!error) return false;
 

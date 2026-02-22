@@ -286,6 +286,31 @@ The restricted lists are maintained manually based on GoCardless support documen
 When a bank is not in a restricted list, the full `transaction_total_days` from the
 institutions endpoint is used (up to 730 days for some banks).
 
+### GoCardless / EnableBanking: Primary balance selection for multi-currency accounts
+
+PSD2 banks return an array of balances from the `/balances` endpoint, each with its own
+`balanceType` and `currency`. For single-currency accounts this array typically has one or
+two entries. For multi-currency accounts (common with Nordic/European banks), it can have
+entries in multiple currencies — e.g., both DKK and EUR.
+
+The `selectPrimaryBalance` utility (`gocardless/utils.ts`, `enablebanking/utils.ts`) picks
+the balance to use as the account's displayed balance using a **booked-first** strategy
+(settled amounts are more appropriate for accounting):
+
+1. **Priority by balance type** (first match wins):
+   1. `interimBooked` / `ITBD` — current intraday settled balance (best: current + settled)
+   2. `closingBooked` / `CLBD` — end-of-day settled balance (settled but may be stale)
+   3. `interimAvailable` / `ITAV` — current available (may include credit limits)
+   4. `expected` / `XPCD`
+   5. First balance in the array (fallback)
+2. **Within each tier**, pick the entry with the highest absolute amount. For multi-currency
+   accounts this correctly selects the dominant currency (e.g., EUR 9,242.93 over DKK 9.76).
+   Absolute value is used so credit accounts with negative balances are handled correctly.
+
+The `available_balance` field is populated separately by scanning the full balances array
+for an "available" type entry (`interimAvailable`, `ITAV`, `closingAvailable`, `CLAV`,
+`OPAV`), regardless of which balance was selected as primary.
+
 ### GoCardless / EnableBanking: ISO 4217 "XXX" currency code
 
 Some PSD2 banks return `"XXX"` (ISO 4217 for "no currency") as the account-level currency

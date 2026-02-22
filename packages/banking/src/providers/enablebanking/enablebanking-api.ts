@@ -20,6 +20,7 @@ import type {
   GetSessionResponse,
   GetTransactionsResponse,
 } from "./types";
+import { selectPrimaryBalance } from "./utils";
 
 export class EnableBankingApi {
   #baseUrl = "https://api.enablebanking.com";
@@ -274,12 +275,7 @@ export class EnableBankingApi {
             this.#get<GetBalancesResponse>(`/accounts/${id}/balances`),
           ]);
 
-          // Find balance with highest amount
-          const balance = balanceResponse.balances.reduce((max, current) => {
-            const currentAmount = +current.balance_amount.amount;
-            const maxAmount = +(max?.balance_amount.amount ?? 0);
-            return currentAmount > maxAmount ? current : max;
-          }, balanceResponse.balances[0]!);
+          const balance = selectPrimaryBalance(balanceResponse.balances);
 
           return {
             ...details,
@@ -311,15 +307,10 @@ export class EnableBankingApi {
       this.getAccountDetails(accountId).catch(() => null),
     ]);
 
-    // Find balance with highest amount
-    const highestBalance = balanceResponse.balances.reduce((max, current) => {
-      const currentAmount = +current.balance_amount.amount;
-      const maxAmount = +(max?.balance_amount.amount ?? 0);
-      return currentAmount > maxAmount ? current : max;
-    }, balanceResponse.balances[0]!);
+    const primaryBalance = selectPrimaryBalance(balanceResponse.balances);
 
     return {
-      balance: highestBalance!,
+      balance: primaryBalance!,
       balances: balanceResponse.balances,
       creditLimit: accountDetails?.credit_limit,
     };

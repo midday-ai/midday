@@ -79,12 +79,17 @@ function getAccountType(cashAccountType?: string): AccountType {
  * Only "available" types represent available funds. The "interim" prefix indicates
  * intraday snapshot, NOT available balance.
  */
+const isAvailableBalanceType = (type?: string): boolean =>
+  !!type &&
+  (type.toLowerCase().includes("available") ||
+    type === "ITAV" ||
+    type === "CLAV" ||
+    type === "OPAV");
+
 const getAvailableBalance = (
   balance: GetAccountDetailsResponse["balance"],
 ): number | null => {
-  // Only match balance types containing "available" (e.g., interimAvailable, closingAvailable)
-  // Do NOT match "interim" alone as interimBooked is a booked balance, not available
-  if (balance?.balance_type?.toLowerCase().includes("available")) {
+  if (isAvailableBalanceType(balance?.balance_type)) {
     return +balance.balance_amount.amount;
   }
   return null;
@@ -179,16 +184,23 @@ export const transformBalance = ({
   const amount =
     accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
 
-  // Check if balance_type indicates available balance
-  // Only match "available" types (e.g., interimAvailable, closingAvailable)
-  // Apply same normalization as amount for credit accounts
-  const availableBalance = balance.balance_type
-    ?.toLowerCase()
-    .includes("available")
-    ? accountType === "credit" && rawAmount < 0
-      ? Math.abs(rawAmount)
-      : rawAmount
-    : null;
+  const isAvailableType = (type?: string) =>
+    type?.toLowerCase().includes("available") ||
+    type === "ITAV" ||
+    type === "CLAV" ||
+    type === "OPAV";
+
+  // Find available balance: check full balances array first, fall back to primary
+  const availableEntry = balances?.find((b) => isAvailableType(b.balance_type));
+  const rawAvailable = availableEntry
+    ? +availableEntry.balance_amount.amount
+    : isAvailableType(balance.balance_type)
+      ? rawAmount
+      : null;
+  const availableBalance =
+    rawAvailable !== null && accountType === "credit" && rawAvailable < 0
+      ? Math.abs(rawAvailable)
+      : rawAvailable;
 
   // Resolve currency: prefer primary balance, fall back to other balances in the array
   const candidates = [
