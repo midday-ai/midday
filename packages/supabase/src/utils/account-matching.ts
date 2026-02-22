@@ -1,6 +1,7 @@
 export type DbAccount = {
   id: string;
   account_reference: string | null;
+  iban: string | null;
   type: string | null;
   currency: string | null;
   name: string | null;
@@ -9,6 +10,7 @@ export type DbAccount = {
 export type ApiAccount = {
   id: string;
   resource_id: string | null;
+  iban: string | null;
   type: string;
   currency: string;
   name: string;
@@ -21,43 +23,66 @@ export type MatchingResult = {
 };
 
 /**
- * Finds the best matching DB account for an API account.
- * Returns null if no match is found.
+ * Finds the best matching DB account for an API account using a tiered strategy:
  *
- * The matching algorithm:
- * 1. Filter by resource_id (account_reference) - must match exactly
- * 2. Filter by type if available on both sides
- * 3. Filter by currency if available on both sides
- * 4. If multiple candidates remain, prefer exact name match
- * 5. Each DB account can only be matched once (tracked via matchedDbIds)
+ * 1. resource_id / account_reference — the identifier we already track
+ * 2. IBAN — stable bank-side identifier (fallback for old accounts missing account_reference)
+ * 3. Fuzzy — currency + type, preferring name match (for accounts like PayPal
+ *    that lack both resource_id and IBAN)
  *
- * This prevents the issue where accounts with the same last_four digits
- * would all get updated to the same account_id.
+ * Each DB account can only be matched once (tracked via matchedDbIds).
  */
 export function findMatchingAccount(
   apiAccount: ApiAccount,
   existingAccounts: DbAccount[],
   matchedDbIds: Set<string>,
 ): DbAccount | null {
-  if (!apiAccount.resource_id) {
-    return null;
+  const available = existingAccounts.filter((a) => !matchedDbIds.has(a.id));
+
+  // Tier 1: resource_id / account_reference match
+  if (apiAccount.resource_id) {
+    const byRef = available.filter(
+      (db) =>
+        db.account_reference && db.account_reference === apiAccount.resource_id,
+    );
+    if (byRef.length === 1) return byRef[0]!;
+    if (byRef.length > 1) {
+      return pickBestCandidate(byRef, apiAccount);
+    }
   }
 
-  // Find candidates that match on resource_id and haven't been matched yet
-  const candidates = existingAccounts.filter((dbAccount) => {
-    if (matchedDbIds.has(dbAccount.id)) return false;
-    if (dbAccount.account_reference !== apiAccount.resource_id) return false;
-    if (dbAccount.type && dbAccount.type !== apiAccount.type) return false;
-    if (dbAccount.currency && dbAccount.currency !== apiAccount.currency)
-      return false;
+  // Tier 2: IBAN match (for old accounts that predate account_reference storage)
+  if (apiAccount.iban) {
+    const byIban = available.filter(
+      (db) => db.iban && db.iban === apiAccount.iban,
+    );
+    if (byIban.length === 1) return byIban[0]!;
+    if (byIban.length > 1) {
+      return pickBestCandidate(byIban, apiAccount);
+    }
+  }
+
+  // Tier 3: fuzzy — currency + type, prefer name match
+  const byCurrencyAndType = available.filter((db) => {
+    if (db.currency && db.currency !== apiAccount.currency) return false;
+    if (db.type && db.type !== apiAccount.type) return false;
     return true;
   });
 
-  // If multiple candidates, prefer exact name match
-  const match = candidates.find(
+  if (byCurrencyAndType.length === 1) return byCurrencyAndType[0]!;
+  if (byCurrencyAndType.length > 1) {
+    return pickBestCandidate(byCurrencyAndType, apiAccount);
+  }
+
+  return null;
+}
+
+function pickBestCandidate(
+  candidates: DbAccount[],
+  apiAccount: ApiAccount,
+): DbAccount {
+  const nameMatch = candidates.find(
     (c) => c.name?.toLowerCase() === apiAccount.name?.toLowerCase(),
   );
-
-  // Otherwise take the first candidate
-  return match ?? candidates[0] ?? null;
+  return nameMatch ?? candidates[0]!;
 }

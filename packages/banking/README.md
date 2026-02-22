@@ -369,10 +369,27 @@ Balance is derived from `running_balance` in the first 50 transactions. If no tr
 have a `running_balance` (rare — new accounts or uncommon institutions), balance defaults
 to 0. A fallback to the paid `/balances` endpoint could be added if needed.
 
-### Plaid: Account ID stability
+### Reconnect: Account ID remapping
 
-Plaid preserves account IDs across reconnects via "update mode". No account remapping is
-needed, unlike GoCardless/Teller/EnableBanking which require matching algorithms.
+When a user reconnects a GoCardless, Teller, or EnableBanking connection, the provider
+issues new account identifiers. The `reconnect-connection` job
+(`packages/jobs/src/tasks/reconnect/connection.ts`) handles this by:
+
+1. Fetching fresh accounts from the provider API
+2. Matching them to existing DB accounts via `findMatchingAccount`
+3. Updating `account_id`, `account_reference`, and `iban` on matched rows
+
+The matching algorithm (`packages/supabase/src/utils/account-matching.ts`) uses a
+**tiered strategy**:
+
+1. **resource_id / account_reference** — the identifier we already track, most direct match
+2. **IBAN** — stable bank-side identifier (fallback for old accounts missing `account_reference`)
+3. **Fuzzy** — currency + type, preferring name match (catches accounts like PayPal
+   that lack both resource_id and IBAN)
+
+Each DB account can only be matched once to prevent duplicate assignments.
+
+Plaid preserves account IDs across reconnects via "update mode", so no remapping is needed.
 
 ### Redis cache unavailability
 

@@ -18,7 +18,7 @@ export const reconnectConnection = schemaTask({
     // Fetch existing bank accounts for this connection
     const { data: existingAccounts } = await supabase
       .from("bank_accounts")
-      .select("id, account_reference, type, currency, name")
+      .select("id, account_reference, iban, type, currency, name")
       .eq("bank_connection_id", connectionId)
       .eq("team_id", teamId);
 
