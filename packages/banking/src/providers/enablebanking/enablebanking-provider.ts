@@ -52,6 +52,7 @@ export class EnableBankingProvider implements Provider {
 
     return transformBalance({
       balance: response.balance,
+      balances: response.balances,
       creditLimit: response.creditLimit,
       accountType: params.accountType,
     });

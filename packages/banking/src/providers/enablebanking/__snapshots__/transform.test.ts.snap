@@ -60,7 +60,7 @@ exports[`Transform credit card payment - should be credit-card-payment 1`] = `
 exports[`Transform account 1`] = `
 {
   "account_number": null,
-  "available_balance": null,
+  "available_balance": 90737.96,
   "balance": {
     "amount": 90737.96,
     "currency": "SEK",
@@ -91,7 +91,7 @@ exports[`Transform account 1`] = `
 exports[`Transform account balance - depository 1`] = `
 {
   "amount": 90737.96,
-  "available_balance": null,
+  "available_balance": 90737.96,
   "credit_limit": null,
   "currency": "SEK",
 }

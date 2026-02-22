@@ -386,9 +386,79 @@ test("Transform account balance - closingBooked does NOT return available_balanc
   });
 });
 
+const xxxTestAccountBase = {
+  all_account_ids: [],
+  account_servicer: {
+    bic_fi: "TESTBIC",
+    clearing_system_member_id: { clearing_system_id: "TEST", member_id: 1 },
+    name: "Test Bank",
+  },
+  name: "Test Account",
+  details: "Test",
+  usage: "PRIV",
+  cash_account_type: "CACC",
+  product: "Current Account",
+  currency: "XXX",
+  psu_status: "Authorized",
+  postal_address: {
+    address_type: "",
+    department: "",
+    sub_department: "",
+    street_name: "",
+    building_number: "",
+    post_code: "",
+    town_name: "",
+    country_sub_division: "",
+    country: "DE",
+    address_line: [],
+  },
+  identification_hashes: [],
+  institution: { name: "Test Bank", country: "DE" },
+  legal_age: true,
+  valid_until: "2024-06-06",
+};
+
+test("Transform account - XXX currency resolved from balance", () => {
+  const result = transformAccount({
+    ...xxxTestAccountBase,
+    account_id: { iban: "DE89370400440532013000" },
+    uid: "xxx-test-uid",
+    identification_hash: "xxx-hash",
+    balance: {
+      name: "",
+      balance_amount: { currency: "EUR", amount: "5000.00" },
+      balance_type: "interimAvailable",
+      last_change_date_time: "2024-03-06",
+      reference_date: "2024-03-06",
+      last_committed_transaction: "1234567890",
+    },
+  });
+
+  expect(result.currency).toBe("EUR");
+  expect(result.balance.currency).toBe("EUR");
+});
+
+test("Transform account - XXX preserved when balance also XXX", () => {
+  const result = transformAccount({
+    ...xxxTestAccountBase,
+    account_id: { iban: "DE89370400440532013001" },
+    uid: "xxx-test-uid-2",
+    identification_hash: "xxx-hash-2",
+    balance: {
+      name: "",
+      balance_amount: { currency: "XXX", amount: "3000.00" },
+      balance_type: "interimBooked",
+      last_change_date_time: "2024-03-06",
+      reference_date: "2024-03-06",
+      last_committed_transaction: "1234567890",
+    },
+  });
+
+  expect(result.currency).toBe("XXX");
+  expect(result.balance.currency).toBe("XXX");
+});
+
 test("Transform account balance - credit with negative balance and available type normalizes both amount and available_balance", () => {
-  // This test verifies that both amount and available_balance are normalized consistently
-  // for credit accounts with negative raw balances and an "available" balance type
   expect(
     transformBalance({
       balance: {
@@ -402,9 +472,176 @@ test("Transform account balance - credit with negative balance and available typ
       accountType: "credit",
     }),
   ).toEqual({
-    amount: 1500, // Normalized to positive
+    amount: 1500,
     currency: "EUR",
-    available_balance: 1500, // Also normalized to positive (not -1500)
+    available_balance: 1500,
+    credit_limit: null,
+  });
+});
+
+test("Transform balance - available_balance from balances array when primary is booked", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "SEK", amount: "273048.86" },
+        balance_type: "ITBD",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      balances: [
+        {
+          name: "",
+          balance_amount: { currency: "SEK", amount: "273048.86" },
+          balance_type: "ITBD",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+        {
+          name: "",
+          balance_amount: { currency: "SEK", amount: "270206.25" },
+          balance_type: "ITAV",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+      ],
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 273048.86,
+    currency: "SEK",
+    available_balance: 270206.25,
+    credit_limit: null,
+  });
+});
+
+test("Transform balance - ITAV primary returns available_balance directly", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "SEK", amount: "90737.96" },
+        balance_type: "ITAV",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 90737.96,
+    currency: "SEK",
+    available_balance: 90737.96,
+    credit_limit: null,
+  });
+});
+
+test("Transform balance - multi-currency available_balance matches primary currency", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "9436.86" },
+        balance_type: "ITBD",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      balances: [
+        {
+          name: "",
+          balance_amount: { currency: "DKK", amount: "9.76" },
+          balance_type: "ITAV",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+        {
+          name: "",
+          balance_amount: { currency: "EUR", amount: "9200.00" },
+          balance_type: "ITAV",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+      ],
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 9436.86,
+    currency: "EUR",
+    available_balance: 9200,
+    credit_limit: null,
+  });
+});
+
+test("Transform balance - XXX currency resolved from balances array", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "XXX", amount: "1000.00" },
+        balance_type: "interimBooked",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      balances: [
+        {
+          name: "",
+          balance_amount: { currency: "XXX", amount: "1000.00" },
+          balance_type: "interimBooked",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+        {
+          name: "",
+          balance_amount: { currency: "EUR", amount: "1000.00" },
+          balance_type: "closingBooked",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+      ],
+    }),
+  ).toEqual({
+    amount: 1000,
+    currency: "EUR",
+    available_balance: null,
+    credit_limit: null,
+  });
+});
+
+test("Transform balance - XXX preserved when all balances are XXX", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "XXX", amount: "500.00" },
+        balance_type: "interimBooked",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      balances: [
+        {
+          name: "",
+          balance_amount: { currency: "XXX", amount: "500.00" },
+          balance_type: "interimBooked",
+          last_change_date_time: "2024-03-06",
+          reference_date: "2024-03-06",
+          last_committed_transaction: "1234567890",
+        },
+      ],
+    }),
+  ).toEqual({
+    amount: 500,
+    currency: "XXX",
+    available_balance: null,
     credit_limit: null,
   });
 });

@@ -33,14 +33,6 @@ export async function matchAndUpdateAccountIds({
   const results: MatchingResult = { matched: 0, unmatched: 0, errors: 0 };
 
   for (const apiAccount of apiAccounts) {
-    if (!apiAccount.resource_id) {
-      logger.debug("Skipping API account without resource_id", {
-        accountId: apiAccount.id,
-        provider,
-      });
-      continue;
-    }
-
     const match = findMatchingAccount(
       apiAccount,
       existingAccounts,
@@ -49,9 +41,20 @@ export async function matchAndUpdateAccountIds({
 
     if (match) {
       matchedDbIds.add(match.id);
+
+      const updates: Record<string, string | null> = {
+        account_id: apiAccount.id,
+      };
+      if (apiAccount.resource_id) {
+        updates.account_reference = apiAccount.resource_id;
+      }
+      if (apiAccount.iban) {
+        updates.iban = apiAccount.iban;
+      }
+
       const { error } = await supabase
         .from("bank_accounts")
-        .update({ account_id: apiAccount.id })
+        .update(updates)
         .eq("id", match.id);
 
       if (error) {
@@ -67,6 +70,7 @@ export async function matchAndUpdateAccountIds({
     } else {
       logger.warn(`No matching DB account found for ${provider} account`, {
         resource_id: apiAccount.resource_id,
+        iban: apiAccount.iban,
         type: apiAccount.type,
         currency: apiAccount.currency,
         name: apiAccount.name,

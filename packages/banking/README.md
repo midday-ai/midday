@@ -56,8 +56,10 @@ All four providers implement a common interface:
 - **Account identifier**: GoCardless account UUID
 - **Transaction history**: Institution-dependent, reported via `transaction_total_days` field
   in the institutions list (e.g., 540 days for ABN AMRO, 730 for Revolut)
-- **Access duration**: Configurable via `access_valid_for_days` in the end user agreement.
-  Most banks: 180 days. Some UK banks restricted to 90 days (see `getAccessValidForDays()`)
+- **Access duration**: `createEndUserAgreement()` tries 180 days first (EEA standard
+  under Article 10a RTS). If the bank rejects it, automatically falls back to 90 days.
+  UK banks are limited to 90 days by FCA regulation. The actual `access_valid_for_days`
+  accepted by the bank is read from the agreement response and used for `expires_at`.
 
 **Transaction history strategy:**
 
@@ -65,9 +67,9 @@ The maximum history is determined per-institution via the end user agreement:
 
 1. The `/institutions/` endpoint returns `transaction_total_days` for each bank
 2. `createEndUserAgreement()` requests `max_historical_days` set to that value
-3. Some banks are hardcoded to lower limits in `getMaxHistoricalDays()` because they
-   break with extended history (e.g., BRED, Swedbank → 90 days; COOP Estonia → 180 days).
-   See `gocardless/utils.ts` for the full restricted list.
+3. Some banks only provide extended history once and require separate consent for
+   continuous access. `getMaxHistoricalDays()` checks the GoCardless
+   `separate_continuous_history_consent` flag and a hardcoded fallback list, capping to 90 days.
 4. Initial sync fetches ALL available transactions (no `date_from` filter)
 5. Daily sync fetches last 5 days only (`date_from` = 5 days ago)
 6. No fallback strategy is needed — the bank controls what it returns based on the
@@ -266,25 +268,81 @@ Some banks limit to 4 API calls per day per account per endpoint. Our caching st
 ensures account details, balances, and institution data are fetched once during account
 selection and reused during the initial sync, staying within even the strictest limits.
 
-### GoCardless: Requisition expiry
+### GoCardless: Requisition expiry and EUA fallback
 
 Requisitions can have status `"EX"` (expired) or `"RJ"` (rejected). The connection status
-check detects both and marks the connection as disconnected. Consent duration is set via
-`access_valid_for_days` — 180 days for most banks, 90 for restricted UK banks (see
-`getAccessValidForDays()` in `gocardless/utils.ts`).
+check detects both and marks the connection as disconnected.
+
+`createEndUserAgreement()` uses a **try-180, fall-back-to-90** strategy for
+`access_valid_for_days`. Per the EC Article 10a RTS (effective July 2023), EEA banks
+should accept 180 days, but compliance varies. If a bank rejects 180 days, the method
+automatically retries with 90. The actual value the bank accepted is read from the
+agreement response and threaded through to `transformAccount` for an accurate `expires_at`.
+On reconnect, the value is passed via the redirect URL so `updateBankConnection` also
+stores the correct expiry.
 
 ### GoCardless: Institution-specific history restrictions
 
-Some banks cannot handle extended transaction history requests and will fail or return errors.
-These are hardcoded in `getMaxHistoricalDays()` (`gocardless/utils.ts`):
+Some banks only provide extended (>90 day) transaction history once and require separate
+consent for continuous access. `getMaxHistoricalDays()` uses two signals to detect these:
 
-- **90-day restricted**: BRED, Swedbank, LHV, Bankinter, CaixaBank, BBVA, multiple Italian
-  banks (Banca Sella, Hype, illimity, etc.), and others
-- **180-day restricted**: COOP Estonia
+1. **API flag**: GoCardless exposes `separate_continuous_history_consent` on the
+   `/institutions/` endpoint. When `true`, history is capped to 90 days.
+2. **Hardcoded fallback**: A small Set of known restricted institution IDs (BRED, Swedbank,
+   BBVA, etc.) catches banks where the flag may not yet be populated.
 
-The restricted lists are maintained manually based on GoCardless support documentation.
-When a bank is not in a restricted list, the full `transaction_total_days` from the
-institutions endpoint is used (up to 730 days for some banks).
+When neither signal matches, the full `transaction_total_days` from the institution is used.
+
+See: https://bankaccountdata.zendesk.com/hc/en-gb/articles/11529718632476
+
+### GoCardless / EnableBanking: Primary balance selection for multi-currency accounts
+
+PSD2 banks return an array of balances from the `/balances` endpoint, each with its own
+`balanceType` and `currency`. For single-currency accounts this array typically has one or
+two entries. For multi-currency accounts (common with Nordic/European banks), it can have
+entries in multiple currencies — e.g., both DKK and EUR.
+
+The `selectPrimaryBalance` utility (`gocardless/utils.ts`, `enablebanking/utils.ts`) picks
+the balance to use as the account's displayed balance using a **booked-first** strategy
+(settled amounts are more appropriate for accounting):
+
+1. **Priority by balance type** (first match wins):
+   1. `interimBooked` / `ITBD` — current intraday settled balance (best: current + settled)
+   2. `closingBooked` / `CLBD` — end-of-day settled balance (settled but may be stale)
+   3. `interimAvailable` / `ITAV` — current available (may include credit limits)
+   4. `expected` / `XPCD`
+   5. First balance in the array (fallback)
+2. **Currency hint**: When the account-level currency is known (e.g., `account.currency`),
+   balances matching that currency are tried first within each tier. This prevents multi-currency
+   accounts from picking the wrong currency based on raw amount comparison alone. If the hint
+   is `"XXX"` or no balances match, the hint is ignored and all balances are considered.
+3. **Within each tier**, pick the entry with the highest absolute amount (fallback for when
+   no currency hint is available or multiple balances share the same currency). Absolute value
+   is used so credit accounts with negative balances are handled correctly.
+
+The `available_balance` field is populated separately by scanning the full balances array
+for an "available" type entry (`interimAvailable`, `ITAV`, `closingAvailable`, `CLAV`,
+`OPAV`), regardless of which balance was selected as primary.
+
+### GoCardless / EnableBanking: ISO 4217 "XXX" currency code
+
+Some PSD2 banks return `"XXX"` (ISO 4217 for "no currency") as the account-level currency
+in the account details endpoint, while individual transactions correctly report the real
+currency (e.g., `EUR`). This affects both GoCardless and EnableBanking since they connect
+to the same underlying European banks.
+
+The system handles this at three levels:
+
+1. **Transform layer** (`gocardless/transform.ts`, `enablebanking/transform.ts`): When
+   `account.currency` is `"XXX"`, falls back to the balance currency, then to currencies
+   from the balances array. If all sources are `"XXX"`, the raw value is preserved (no
+   hardcoded fallback — these could be GBP, SEK, DKK, etc.).
+2. **Sync self-heal** (`sync/account.ts`): During daily sync, if the stored currency is
+   `"XXX"`, the job updates it from the balance response currency. If the balance is also
+   `"XXX"`, it derives the currency from the first transaction with a valid currency code.
+3. **Dashboard display** (`apps/dashboard/src/utils/format.ts`): `formatAmount` detects
+   `"XXX"` and formats the value as a plain decimal number (e.g., `5,000.00`) without a
+   currency symbol, avoiding misleading display.
 
 ### Plaid: Transactions during pagination
 
@@ -311,10 +369,27 @@ Balance is derived from `running_balance` in the first 50 transactions. If no tr
 have a `running_balance` (rare — new accounts or uncommon institutions), balance defaults
 to 0. A fallback to the paid `/balances` endpoint could be added if needed.
 
-### Plaid: Account ID stability
+### Reconnect: Account ID remapping
 
-Plaid preserves account IDs across reconnects via "update mode". No account remapping is
-needed, unlike GoCardless/Teller/EnableBanking which require matching algorithms.
+When a user reconnects a GoCardless, Teller, or EnableBanking connection, the provider
+issues new account identifiers. The `reconnect-connection` job
+(`packages/jobs/src/tasks/reconnect/connection.ts`) handles this by:
+
+1. Fetching fresh accounts from the provider API
+2. Matching them to existing DB accounts via `findMatchingAccount`
+3. Updating `account_id`, `account_reference`, and `iban` on matched rows
+
+The matching algorithm (`packages/supabase/src/utils/account-matching.ts`) uses a
+**tiered strategy**:
+
+1. **resource_id / account_reference** — the identifier we already track, most direct match
+2. **IBAN** — stable bank-side identifier (fallback for old accounts missing `account_reference`)
+3. **Fuzzy** — currency + type, preferring name match (catches accounts like PayPal
+   that lack both resource_id and IBAN)
+
+Each DB account can only be matched once to prevent duplicate assignments.
+
+Plaid preserves account IDs across reconnects via "update mode", so no remapping is needed.
 
 ### Redis cache unavailability
 
