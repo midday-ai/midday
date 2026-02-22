@@ -13,6 +13,11 @@ export async function revalidateAfterTeamChange() {
   redirect("/");
 }
 
+export async function redirectAfterAccountDeletion() {
+  revalidatePath("/", "layout");
+  redirect("/");
+}
+
 export async function revalidateInbox() {
   revalidatePath("/inbox");
 }

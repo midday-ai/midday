@@ -24,20 +24,19 @@ import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { redirectAfterAccountDeletion } from "@/actions/revalidate-action";
 import { useTRPC } from "@/trpc/client";
 
 export function DeleteAccount() {
   const supabase = createClient();
   const trpc = useTRPC();
-  const router = useRouter();
 
   const deleteUserMutation = useMutation(
     trpc.user.delete.mutationOptions({
       onSuccess: async () => {
         await supabase.auth.signOut();
-        router.push("/");
+        await redirectAfterAccountDeletion();
       },
     }),
   );
