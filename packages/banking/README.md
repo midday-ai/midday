@@ -286,6 +286,26 @@ The restricted lists are maintained manually based on GoCardless support documen
 When a bank is not in a restricted list, the full `transaction_total_days` from the
 institutions endpoint is used (up to 730 days for some banks).
 
+### GoCardless / EnableBanking: ISO 4217 "XXX" currency code
+
+Some PSD2 banks return `"XXX"` (ISO 4217 for "no currency") as the account-level currency
+in the account details endpoint, while individual transactions correctly report the real
+currency (e.g., `EUR`). This affects both GoCardless and EnableBanking since they connect
+to the same underlying European banks.
+
+The system handles this at three levels:
+
+1. **Transform layer** (`gocardless/transform.ts`, `enablebanking/transform.ts`): When
+   `account.currency` is `"XXX"`, falls back to the balance currency, then to currencies
+   from the balances array. If all sources are `"XXX"`, the raw value is preserved (no
+   hardcoded fallback — these could be GBP, SEK, DKK, etc.).
+2. **Sync self-heal** (`sync/account.ts`): During daily sync, if the stored currency is
+   `"XXX"`, the job updates it from the balance response currency. If the balance is also
+   `"XXX"`, it derives the currency from the first transaction with a valid currency code.
+3. **Dashboard display** (`apps/dashboard/src/utils/format.ts`): `formatAmount` detects
+   `"XXX"` and formats the value as a plain decimal number (e.g., `5,000.00`) without a
+   currency symbol, avoiding misleading display.
+
 ### Plaid: Transactions during pagination
 
 Plaid's `/transactions/sync` can return `TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION`

@@ -61,7 +61,7 @@ export const syncConnection = schemaTask({
         const query = supabase
           .from("bank_accounts")
           .select(
-            "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status)",
+            "id, team_id, account_id, type, currency, bank_connection:bank_connection_id(id, provider, access_token, status)",
           )
           .eq("bank_connection_id", connectionId)
           .eq("enabled", true)
@@ -88,6 +88,7 @@ export const syncConnection = schemaTask({
           connectionId: account.bank_connection?.id,
           teamId: account.team_id,
           accountType: account.type ?? "depository",
+          currency: account.currency ?? undefined,
           manualSync,
         }));
 

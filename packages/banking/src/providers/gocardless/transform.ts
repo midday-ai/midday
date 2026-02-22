@@ -215,6 +215,16 @@ const transformAccountName = (account: TransformAccountName) => {
   return "No name";
 };
 
+const isValidCurrency = (code?: string): boolean =>
+  !!code && code.toUpperCase() !== "XXX";
+
+const resolveCurrency = (...candidates: (string | undefined)[]): string => {
+  for (const c of candidates) {
+    if (c && isValidCurrency(c)) return c.toUpperCase();
+  }
+  return candidates[0]?.toUpperCase() ?? "XXX";
+};
+
 const getAvailableBalance = (
   balances?: TransformAccount["balances"],
 ): number | null => {
@@ -243,6 +253,12 @@ export const transformAccount = ({
   institution,
 }: TransformAccount): BaseAccount => {
   const accountType = getAccountType(account.cashAccountType);
+  const balanceCurrencies = balances?.map((b) => b.balanceAmount.currency);
+  const currency = resolveCurrency(
+    account.currency,
+    balance?.currency,
+    ...(balanceCurrencies ?? []),
+  );
 
   return {
     id,
@@ -251,11 +267,11 @@ export const transformAccount = ({
       name: account.name,
       product: account.product,
       institution: institution,
-      currency: account.currency.toUpperCase(),
+      currency,
     }),
-    currency: account.currency.toUpperCase(),
+    currency,
     enrollment_id: null,
-    balance: transformAccountBalance({ balance, accountType }),
+    balance: transformAccountBalance({ balance, balances, accountType }),
     institution: transformInstitution(institution),
     resource_id: account.resourceId,
     expires_at: addDays(
@@ -290,8 +306,10 @@ export const transformAccountBalance = ({
   const amount =
     accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
 
+  const balanceCurrencies = balances?.map((b) => b.balanceAmount.currency);
+
   return {
-    currency: balance?.currency.toUpperCase() || "EUR",
+    currency: resolveCurrency(balance?.currency, ...(balanceCurrencies ?? [])),
     amount,
     available_balance: getAvailableBalance(balances),
     credit_limit: null,

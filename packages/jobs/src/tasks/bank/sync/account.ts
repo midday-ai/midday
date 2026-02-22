@@ -22,6 +22,7 @@ export const syncAccount = schemaTask({
     errorRetries: z.number().optional(),
     provider: z.enum(["gocardless", "plaid", "teller", "enablebanking"]),
     manualSync: z.boolean().optional(),
+    currency: z.string().optional(),
     accountType: z.enum([
       "credit",
       "other_asset",
@@ -38,10 +39,26 @@ export const syncAccount = schemaTask({
     accessToken,
     errorRetries,
     provider,
+    currency: storedCurrency,
     manualSync,
   }) => {
     const supabase = createClient();
     const classification = getClassification(accountType);
+
+    // Only heal currency when we know for certain it's "XXX".
+    // If the caller didn't pass the currency, query the DB so we don't guess.
+    let currentCurrency = storedCurrency;
+    if (!currentCurrency) {
+      const { data: accountData } = await supabase
+        .from("bank_accounts")
+        .select("currency")
+        .eq("id", id)
+        .single();
+      currentCurrency = accountData?.currency ?? undefined;
+    }
+
+    const needsCurrencyHeal = currentCurrency?.toUpperCase() === "XXX";
+    let currencyHealed = false;
 
     // Get the balance
     try {
@@ -61,19 +78,31 @@ export const syncAccount = schemaTask({
 
       const balance = balanceData?.amount ?? null;
 
+      const balanceCurrencyValid =
+        balanceData?.currency && balanceData.currency.toUpperCase() !== "XXX";
+
       // Update balance (including zero/negative for overdrafts) and reset errors
       // Only skip update if balance is null (provider didn't return a balance)
       if (balance !== null) {
-        await supabase
-          .from("bank_accounts")
-          .update({
-            balance,
-            available_balance: balanceData?.available_balance ?? null,
-            credit_limit: balanceData?.credit_limit ?? null,
-            error_details: null,
-            error_retries: null,
-          })
-          .eq("id", id);
+        const updatePayload: Record<string, unknown> = {
+          balance,
+          available_balance: balanceData?.available_balance ?? null,
+          credit_limit: balanceData?.credit_limit ?? null,
+          error_details: null,
+          error_retries: null,
+        };
+
+        if (needsCurrencyHeal && balanceCurrencyValid) {
+          updatePayload.currency = balanceData.currency;
+          currencyHealed = true;
+          logger.info("Healing account currency from balance", {
+            accountId,
+            from: currentCurrency,
+            to: balanceData.currency,
+          });
+        }
+
+        await supabase.from("bank_accounts").update(updatePayload).eq("id", id);
       } else {
         // Reset error details and retries even if balance is null
         await supabase
@@ -139,8 +168,32 @@ export const syncAccount = schemaTask({
         merchant_name: tx.merchant_name ?? null,
       }));
 
+      // If currency still needs healing and balance didn't provide one,
+      // derive from the first transaction with a valid currency
+      if (
+        needsCurrencyHeal &&
+        !currencyHealed &&
+        mappedTransactions.length > 0
+      ) {
+        const txCurrency = mappedTransactions.find(
+          (tx: any) => tx.currency && tx.currency.toUpperCase() !== "XXX",
+        )?.currency;
+
+        if (txCurrency) {
+          await supabase
+            .from("bank_accounts")
+            .update({ currency: txCurrency })
+            .eq("id", id);
+
+          logger.info("Healing account currency from transaction", {
+            accountId,
+            from: currentCurrency,
+            to: txCurrency,
+          });
+        }
+      }
+
       // Upsert transactions in batches of 500
-      // This is to avoid memory issues with the DB
       for (let i = 0; i < mappedTransactions.length; i += BATCH_SIZE) {
         const transactionBatch = mappedTransactions.slice(i, i + BATCH_SIZE);
         await upsertTransactions.triggerAndWait({

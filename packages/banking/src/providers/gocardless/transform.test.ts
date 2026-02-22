@@ -262,7 +262,7 @@ test("Transform account balance - handles undefined balance gracefully", () => {
       accountType: "depository",
     }),
   ).toEqual({
-    currency: "EUR",
+    currency: "XXX",
     amount: 0,
     available_balance: null,
     credit_limit: null,
@@ -467,4 +467,156 @@ test("Transform account - handles empty balances array", () => {
 
   expect(result.available_balance).toBeNull();
   expect(result.credit_limit).toBeNull();
+});
+
+test("Transform account - XXX currency resolved from balance", () => {
+  const result = transformAccount({
+    id: "gc_xxx_balance",
+    created: "2024-02-23T13:29:47.314568Z",
+    last_accessed: "2024-03-06T16:34:16.782598Z",
+    iban: "DE89370400440532013002",
+    institution_id: "BANK_XXX",
+    status: "READY",
+    owner_name: "Test User",
+    account: {
+      currency: "XXX",
+      iban: "DE89370400440532013002",
+      ownerName: "Test User",
+      name: "Main Account",
+      product: "Current Account",
+      cashAccountType: "CACC",
+      resourceId: "resource_xxx",
+    },
+    balance: {
+      currency: "EUR",
+      amount: "5000.00",
+    },
+    balances: [
+      {
+        balanceType: "interimAvailable",
+        balanceAmount: { amount: "5000.00", currency: "EUR" },
+        creditLimitIncluded: false,
+      },
+    ],
+    institution: {
+      id: "BANK_XXX",
+      name: "Test Bank",
+      bic: "TESTBIC",
+      transaction_total_days: "90",
+      countries: ["DE"],
+      logo: "https://example.com/logo.png",
+    },
+  });
+
+  expect(result.currency).toBe("EUR");
+  expect(result.balance.currency).toBe("EUR");
+});
+
+test("Transform account - XXX currency resolved from balances array when balance also XXX", () => {
+  const result = transformAccount({
+    id: "gc_xxx_balances_arr",
+    created: "2024-02-23T13:29:47.314568Z",
+    last_accessed: "2024-03-06T16:34:16.782598Z",
+    iban: "DE89370400440532013003",
+    institution_id: "BANK_XXX2",
+    status: "READY",
+    owner_name: "Test User",
+    account: {
+      currency: "XXX",
+      iban: "DE89370400440532013003",
+      ownerName: "Test User",
+      name: "Main Account",
+      product: "Current Account",
+      cashAccountType: "CACC",
+      resourceId: "resource_xxx2",
+    },
+    balance: {
+      currency: "XXX",
+      amount: "3000.00",
+    },
+    balances: [
+      {
+        balanceType: "interimBooked",
+        balanceAmount: { amount: "3000.00", currency: "EUR" },
+        creditLimitIncluded: false,
+      },
+    ],
+    institution: {
+      id: "BANK_XXX2",
+      name: "Test Bank",
+      bic: "TESTBIC",
+      transaction_total_days: "90",
+      countries: ["DE"],
+      logo: "https://example.com/logo.png",
+    },
+  });
+
+  expect(result.currency).toBe("EUR");
+  expect(result.balance.currency).toBe("EUR");
+});
+
+test("Transform account - XXX preserved when all sources are XXX", () => {
+  const result = transformAccount({
+    id: "gc_all_xxx",
+    created: "2024-02-23T13:29:47.314568Z",
+    last_accessed: "2024-03-06T16:34:16.782598Z",
+    iban: "DE89370400440532013004",
+    institution_id: "BANK_ALL_XXX",
+    status: "READY",
+    owner_name: "Test User",
+    account: {
+      currency: "XXX",
+      iban: "DE89370400440532013004",
+      ownerName: "Test User",
+      name: "Main Account",
+      product: "Current Account",
+      cashAccountType: "CACC",
+      resourceId: "resource_all_xxx",
+    },
+    balance: {
+      currency: "XXX",
+      amount: "1000.00",
+    },
+    balances: [
+      {
+        balanceType: "interimBooked",
+        balanceAmount: { amount: "1000.00", currency: "XXX" },
+        creditLimitIncluded: false,
+      },
+    ],
+    institution: {
+      id: "BANK_ALL_XXX",
+      name: "Test Bank",
+      bic: "TESTBIC",
+      transaction_total_days: "90",
+      countries: ["DE"],
+      logo: "https://example.com/logo.png",
+    },
+  });
+
+  expect(result.currency).toBe("XXX");
+});
+
+test("Transform account balance - XXX resolved from balances array", () => {
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "XXX",
+        amount: "1000.00",
+      },
+      balances: [
+        {
+          balanceType: "interimAvailable",
+          balanceAmount: { amount: "1000.00", currency: "EUR" },
+          creditLimitIncluded: false,
+        },
+      ],
+      accountType: "depository",
+    }),
+  ).toEqual({
+    currency: "EUR",
+    amount: 1000,
+    available_balance: 1000,
+    credit_limit: null,
+  });
 });

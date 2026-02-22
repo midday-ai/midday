@@ -89,21 +89,28 @@ const getAvailableBalance = (
   return null;
 };
 
+const isValidCurrency = (code?: string): boolean =>
+  !!code && code.toUpperCase() !== "XXX";
+
 export const transformAccount = (
   account: GetAccountDetailsResponse,
 ): Account => {
   const accountType = getAccountType(account.cash_account_type);
   const rawAmount = +account.balance.balance_amount.amount;
 
-  // Normalize credit card balances to positive (amount owed) for consistency
-  // Enable Banking typically returns positive values, but this ensures consistency
   const amount =
     accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+
+  const currency = isValidCurrency(account.currency)
+    ? account.currency
+    : isValidCurrency(account.balance.balance_amount.currency)
+      ? account.balance.balance_amount.currency
+      : account.currency;
 
   return {
     id: account.uid,
     name: getAccountName(account),
-    currency: account.currency,
+    currency,
     type: accountType,
     institution: {
       id: hashInstitutionId(
@@ -116,7 +123,7 @@ export const transformAccount = (
     },
     balance: {
       amount,
-      currency: account.currency,
+      currency,
     },
     enrollment_id: null,
     resource_id: account.identification_hash,
@@ -151,6 +158,7 @@ export const transformSessionData = (session: GetExchangeCodeResponse) => {
 
 type TransformBalanceParams = {
   balance: GetBalancesResponse["balances"][0];
+  balances?: GetBalancesResponse["balances"];
   creditLimit?: { currency: string; amount: string } | null;
   accountType?: string;
 };
@@ -163,6 +171,7 @@ type TransformBalanceParams = {
  */
 export const transformBalance = ({
   balance,
+  balances,
   creditLimit,
   accountType,
 }: TransformBalanceParams): GetAccountBalanceResponse => {
@@ -183,9 +192,18 @@ export const transformBalance = ({
       : rawAmount
     : null;
 
+  // Resolve currency: prefer primary balance, fall back to other balances in the array
+  const candidates = [
+    balance.balance_amount.currency,
+    ...(balances?.map((b) => b.balance_amount.currency) ?? []),
+  ];
+  const currency =
+    candidates.find((c) => isValidCurrency(c)) ??
+    balance.balance_amount.currency;
+
   return {
     amount,
-    currency: balance.balance_amount.currency,
+    currency,
     available_balance: availableBalance,
     credit_limit: creditLimit?.amount ? +creditLimit.amount : null,
   };

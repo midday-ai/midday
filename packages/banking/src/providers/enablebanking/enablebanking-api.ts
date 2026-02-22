@@ -302,6 +302,7 @@ export class EnableBankingApi {
 
   async getAccountBalance(accountId: string): Promise<{
     balance: GetBalancesResponse["balances"][0];
+    balances: GetBalancesResponse["balances"];
     creditLimit?: { currency: string; amount: string } | null;
   }> {
     // Fetch both balance and account details (for credit_limit)
@@ -319,6 +320,7 @@ export class EnableBankingApi {
 
     return {
       balance: highestBalance!,
+      balances: balanceResponse.balances,
       creditLimit: accountDetails?.credit_limit,
     };
   }
