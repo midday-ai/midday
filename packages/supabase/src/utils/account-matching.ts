@@ -63,8 +63,13 @@ export function findMatchingAccount(
   }
 
   // Tier 3: fuzzy — currency + type, prefer name match
+  // "XXX" (ISO 4217 "no currency") is treated as unknown — don't reject on it
+  const hasRealCurrency = (c: string | null) =>
+    !!c && c.toUpperCase() !== "XXX";
+
   const byCurrencyAndType = available.filter((db) => {
-    if (db.currency && db.currency !== apiAccount.currency) return false;
+    if (hasRealCurrency(db.currency) && db.currency !== apiAccount.currency)
+      return false;
     if (db.type && db.type !== apiAccount.type) return false;
     return true;
   });
