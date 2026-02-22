@@ -306,6 +306,7 @@ function getHeaderLabel(columnId: string): string {
     date: "Date",
     description: "Description",
     amount: "Amount",
+    baseAmount: "Base Amount",
     taxAmount: "Tax Amount",
     category: "Category",
     counterparty: "From / To",

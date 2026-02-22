@@ -21,7 +21,7 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useInvoiceStore } from "@/store/invoice";
 import { useTRPC } from "@/trpc/client";
 import { STICKY_COLUMNS, SUMMARY_GRID_HEIGHTS } from "@/utils/table-configs";
-import type { TableSettings } from "@/utils/table-settings";
+import { getColumnIds, type TableSettings } from "@/utils/table-settings";
 import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { EmptyState, NoResults } from "./empty-states";
@@ -29,6 +29,8 @@ import { DataTableHeader } from "./table-header";
 
 // Stable reference for non-clickable columns (avoids recreation on each render)
 const NON_CLICKABLE_COLUMNS = new Set(["select", "actions"]);
+
+const COLUMN_IDS = getColumnIds(columns);
 
 type Props = {
   initialSettings?: Partial<TableSettings>;
@@ -58,6 +60,7 @@ export function DataTable({ initialSettings }: Props) {
   } = useTableSettings({
     tableId: "invoices",
     initialSettings,
+    columnIds: COLUMN_IDS,
   });
 
   const infiniteQueryOptions = trpc.invoice.get.infiniteQueryOptions(

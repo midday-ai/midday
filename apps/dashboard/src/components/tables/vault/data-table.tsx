@@ -29,13 +29,15 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useDocumentsStore } from "@/store/vault";
 import { useTRPC } from "@/trpc/client";
 import { STICKY_COLUMNS } from "@/utils/table-configs";
-import type { TableSettings } from "@/utils/table-settings";
+import { getColumnIds, type TableSettings } from "@/utils/table-settings";
 import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
 
 // Stable reference for non-clickable columns (avoids recreation on each render)
 const NON_CLICKABLE_COLUMNS = new Set(["select", "tags", "actions"]);
+
+const COLUMN_IDS = getColumnIds(columns);
 
 type Props = {
   initialSettings?: Partial<TableSettings>;
@@ -65,6 +67,7 @@ export function DataTable({ initialSettings }: Props) {
   } = useTableSettings({
     tableId: "vault",
     initialSettings,
+    columnIds: COLUMN_IDS,
   });
 
   // Use the reusable table scroll hook
