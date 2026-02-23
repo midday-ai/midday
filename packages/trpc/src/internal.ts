@@ -34,6 +34,8 @@ export function createInternalClient() {
       httpBatchLink({
         url: trpcUrl,
         transformer: superjson,
+        // @ts-expect-error -- native Response.body (ReadableStream<any>) is not structurally
+        // compatible with tRPC's ResponseEsque (ReadableStream<Uint8Array>) due to getReader() generics
         fetch: fetchWithRetry,
         headers() {
           return {
