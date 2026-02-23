@@ -3,6 +3,7 @@ import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
 import type { SyncAccountsSchedulerPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
+import { isProduction } from "../../utils/env";
 import { BaseProcessor } from "../base";
 
 const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
@@ -18,6 +19,13 @@ export class SyncAccountsSchedulerProcessor extends BaseProcessor<SyncAccountsSc
     eligibleAccounts: number;
     dispatched: number;
   }> {
+    if (!isProduction()) {
+      this.logger.info(
+        "Skipping inbox sync scheduler in non-production environment",
+      );
+      return { eligibleAccounts: 0, dispatched: 0 };
+    }
+
     const db = getDb();
 
     this.logger.info("Starting centralized inbox sync scheduler", {
