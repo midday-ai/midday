@@ -163,16 +163,8 @@ export async function downloadBatchResults(
   const client = getMistralClient();
   const fileContent = await client.files.download({ fileId: outputFileId });
 
-  let text: string;
-  if (fileContent instanceof Blob) {
-    text = await fileContent.text();
-  } else if (typeof fileContent === "string") {
-    text = fileContent;
-  } else if (Buffer.isBuffer(fileContent)) {
-    text = fileContent.toString("utf-8");
-  } else {
-    text = String(fileContent);
-  }
+  // SDK returns ReadableStream<Uint8Array>
+  const text = await new Response(fileContent).text();
 
   const lines = text.trim().split("\n").filter(Boolean);
   const results: BatchExtractionResult[] = [];
@@ -236,16 +228,8 @@ export async function downloadBatchErrors(
   const client = getMistralClient();
   const fileContent = await client.files.download({ fileId: errorFileId });
 
-  let text: string;
-  if (fileContent instanceof Blob) {
-    text = await fileContent.text();
-  } else if (typeof fileContent === "string") {
-    text = fileContent;
-  } else if (Buffer.isBuffer(fileContent)) {
-    text = fileContent.toString("utf-8");
-  } else {
-    text = String(fileContent);
-  }
+  // SDK returns ReadableStream<Uint8Array>
+  const text = await new Response(fileContent).text();
 
   const lines = text.trim().split("\n").filter(Boolean);
   const results: BatchExtractionResult[] = [];

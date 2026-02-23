@@ -35,6 +35,7 @@ import { ConnectOutlook } from "./connect-outlook";
 import { DeleteInboxAccount } from "./delete-inbox-account";
 import { InboxAccountsListSkeleton } from "./inbox-connected-accounts-skeleton";
 import { SyncInboxAccount } from "./sync-inbox-account";
+import { SyncPeriodDialog } from "./sync-period-dialog";
 
 type InboxAccount = NonNullable<RouterOutputs["inboxAccounts"]["get"]>[number];
 
@@ -150,10 +151,14 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
     }
   }, [status]);
 
-  const handleManualSync = () => {
+  const [syncDialogOpen, setSyncDialogOpen] = useState(false);
+
+  const handleSyncWithDate = (syncStartDate: string) => {
+    setSyncDialogOpen(false);
     syncInboxAccountMutation.mutate({
       id: account.id,
       manualSync: true,
+      syncStartDate,
     });
   };
 
@@ -209,12 +214,14 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
           </div>
           <span className="text-muted-foreground text-xs">
             {isSyncing ? (
-              "Syncing..."
-            ) : (
+              "Importing..."
+            ) : account.lastAccessed ? (
               <>
                 Last accessed{" "}
                 {formatDistanceToNow(new Date(account.lastAccessed))} ago
               </>
+            ) : (
+              "Not yet imported"
             )}
           </span>
         </div>
@@ -237,11 +244,18 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
         ) : (
           <SyncInboxAccount
             disabled={isSyncing || syncInboxAccountMutation.isPending}
-            onClick={handleManualSync}
+            onClick={() => setSyncDialogOpen(true)}
           />
         )}
         <DeleteInboxAccount accountId={account.id} />
       </div>
+
+      <SyncPeriodDialog
+        open={syncDialogOpen}
+        onOpenChange={setSyncDialogOpen}
+        onSync={handleSyncWithDate}
+        isSyncing={isSyncing}
+      />
     </div>
   );
 }

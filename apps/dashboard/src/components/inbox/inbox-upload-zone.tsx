@@ -20,6 +20,7 @@ type ProcessAttachmentInput = {
   filePath: string[];
   mimetype: string;
   size: number;
+  inboxId?: string;
 };
 
 type Props = {
@@ -129,10 +130,11 @@ export function UploadZone({ children, onUploadComplete }: Props) {
       // Trigger the upload jobs
       processAttachmentsMutation.mutate(
         results.map(
-          (result): ProcessAttachmentInput => ({
+          (result, idx): ProcessAttachmentInput => ({
             filePath: [...path, result.filename],
             mimetype: result.file.type,
             size: result.file.size,
+            inboxId: inboxItems[idx]?.id,
           }),
         ),
       );
