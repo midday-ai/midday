@@ -90,7 +90,6 @@
     "server-only": "^0.0.1",
     "sharp": "catalog:",
     "tippy.js": "^6.3.7",
-    "torph": "^0.0.5",
     "tus-js-client": "4.3.1",
     "use-places-autocomplete": "^4.0.1",
     "usehooks-ts": "^3.1.1",
