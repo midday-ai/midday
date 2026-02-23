@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { skipToken, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useTRPC } from "@/trpc/client";
 
@@ -26,14 +26,11 @@ export function useSyncStatus({ jobId: initialJobId }: UseSyncStatusProps) {
   const settled = useRef(false);
 
   const { data } = useQuery(
-    trpc.jobs.getStatus.queryOptions(
-      { jobId: jobId! },
-      {
-        enabled: !!jobId && !settled.current,
-        refetchInterval: POLL_INTERVAL_MS,
-        refetchIntervalInBackground: false,
-      },
-    ),
+    trpc.jobs.getStatus.queryOptions(jobId ? { jobId } : skipToken, {
+      enabled: !settled.current,
+      refetchInterval: POLL_INTERVAL_MS,
+      refetchIntervalInBackground: false,
+    }),
   );
 
   useEffect(() => {

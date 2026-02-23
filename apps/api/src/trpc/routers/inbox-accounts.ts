@@ -2,7 +2,6 @@ import {
   connectInboxAccountSchema,
   deleteInboxAccountSchema,
   exchangeCodeForAccountSchema,
-  // initialSetupInboxAccountSchema,
   syncInboxAccountSchema,
 } from "@api/schemas/inbox-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
@@ -35,7 +34,6 @@ export const inboxAccountsRouter = createTRPCRouter({
       }
 
       try {
-        // Encrypt state to prevent tampering with teamId
         const state = encryptOAuthState({
           teamId,
           provider: input.provider,
@@ -93,7 +91,6 @@ export const inboxAccountsRouter = createTRPCRouter({
   sync: protectedProcedure
     .input(syncInboxAccountSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
-      // Verify the inbox account belongs to the caller's team
       const account = await getInboxAccountById(db, {
         id: input.id,
         teamId: teamId!,
@@ -119,18 +116,4 @@ export const inboxAccountsRouter = createTRPCRouter({
 
       return { id: job.id };
     }),
-
-  // initialSetup: protectedProcedure
-  //   .input(initialSetupInboxAccountSchema)
-  //   .mutation(async ({ input }) => {
-  //     const job = await triggerJob(
-  //       "initial-setup",
-  //       {
-  //         inboxAccountId: input.inboxAccountId,
-  //       },
-  //       "inbox-provider",
-  //     );
-
-  //     return { id: job.id };
-  //   }),
 });

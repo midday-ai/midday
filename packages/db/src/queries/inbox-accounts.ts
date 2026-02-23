@@ -153,7 +153,7 @@ export async function upsertInboxAccount(
  * Eligible = pro/starter (always) or trial (within 14 days of creation).
  */
 export async function getEligibleInboxAccounts(db: Database) {
-  const fourteenDaysAgo = subDays(new Date(), 14);
+  const fourteenDaysAgo = subDays(new Date(), 14).toISOString();
 
   return db
     .select({
