@@ -3,7 +3,6 @@ import "server-only";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { getLocationHeaders } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
-import { fetchWithRetry } from "@midday/trpc/fetch-with-retry";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import {
@@ -32,7 +31,6 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
       httpBatchLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
-        fetch: fetchWithRetry,
         async headers() {
           const [supabase, cookieStore, headersList] = await Promise.all([
             createClient(),
@@ -140,7 +138,6 @@ export async function getTRPCClient(options?: { forcePrimary?: boolean }) {
       httpBatchLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
-        fetch: fetchWithRetry,
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
           "x-user-timezone": location.timezone,

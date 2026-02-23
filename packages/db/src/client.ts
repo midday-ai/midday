@@ -10,13 +10,15 @@ import * as schema from "./schema";
 const logger = createLoggerWithContext("db");
 
 const isDevelopment = process.env.NODE_ENV === "development";
+const isProduction = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
 
 const connectionConfig = {
-  max: isDevelopment ? 8 : 12,
+  max: isDevelopment ? 8 : isProduction ? 12 : 6,
+  min: isDevelopment ? 0 : isProduction ? 2 : 1,
   idleTimeoutMillis: isDevelopment ? 5000 : 60000,
   connectionTimeoutMillis: 5000,
   maxUses: isDevelopment ? 100 : 0,
-  allowExitOnIdle: true,
+  allowExitOnIdle: isDevelopment,
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
 };
 
@@ -44,23 +46,32 @@ const replicaUrlForRegion: Record<string, string | undefined> = {
 };
 
 const currentRegion = process.env.RAILWAY_REPLICA_REGION;
-const replicaUrl = currentRegion
+const rawReplicaUrl = currentRegion
   ? replicaUrlForRegion[currentRegion]
   : undefined;
+
+// Don't create a separate replica pool if it points to the same DB as primary
+const replicaUrl =
+  rawReplicaUrl && rawReplicaUrl !== process.env.DATABASE_PRIMARY_URL
+    ? rawReplicaUrl
+    : undefined;
 
 if (!isDevelopment) {
   if (!currentRegion) {
     logger.warn(
       "RAILWAY_REPLICA_REGION not set — all reads will use the primary database",
     );
-  } else if (!replicaUrl) {
+  } else if (!rawReplicaUrl) {
     logger.warn(
       `RAILWAY_REPLICA_REGION="${currentRegion}" but no matching DATABASE_*_URL found — falling back to primary`,
+    );
+  } else if (!replicaUrl) {
+    logger.info(
+      `Region "${currentRegion}" replica URL matches primary — sharing pool`,
     );
   }
 }
 
-// Only create ONE replica pool for the current region, fall back to primary
 const replicaPool = replicaUrl
   ? new Pool({ connectionString: replicaUrl, ...connectionConfig })
   : null;
