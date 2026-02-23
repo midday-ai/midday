@@ -16,8 +16,5 @@ export const syncInboxAccountSchema = z.object({
   id: z.string(),
   manualSync: z.boolean().optional(),
   syncStartDate: z.string().optional(),
-});
-
-export const initialSetupInboxAccountSchema = z.object({
-  inboxAccountId: z.string().uuid(),
+  maxResults: z.number().optional(),
 });

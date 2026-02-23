@@ -6,6 +6,7 @@ import { TextMorph } from "@midday/ui/text-morph";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useInitialConnectionStatus } from "@/hooks/use-initial-connection-status";
+import { useSyncStatus } from "@/hooks/use-sync-status";
 
 export type BankSyncState = {
   runId: string;
@@ -14,6 +15,7 @@ export type BankSyncState = {
 
 export type InboxSyncState = {
   provider: string;
+  syncJobId?: string;
 } | null;
 
 const BANK_LABELS = [
@@ -30,6 +32,8 @@ const INBOX_LABELS = [
   "Importing receipts...",
   "Inbox connected",
 ] as const;
+
+const INBOX_FAILED_LABEL = "Inbox sync failed";
 
 function useSyncLabels({
   labels,
@@ -206,20 +210,18 @@ export function OnboardingSyncStatus({
 
   const inboxActive = !!inboxSync && !dismissed.inbox;
 
-  const [inboxCompleted, setInboxCompleted] = useState(false);
+  const { status: inboxStatus } = useSyncStatus({
+    jobId: inboxSync?.syncJobId,
+  });
 
-  useEffect(() => {
-    if (inboxActive && !inboxCompleted) {
-      const timer = setTimeout(() => setInboxCompleted(true), 6000);
-      return () => clearTimeout(timer);
-    }
-  }, [inboxActive, inboxCompleted]);
+  const inboxCompleted = inboxStatus === "COMPLETED";
+  const inboxFailed = inboxStatus === "FAILED";
 
   const { label: inboxLabel, isDone: inboxDone } = useSyncLabels({
     labels: INBOX_LABELS,
     isActive: inboxActive,
     isCompleted: inboxCompleted,
-    isFailed: false,
+    isFailed: inboxFailed,
   });
 
   const handleDismiss = useCallback((type: "bank" | "inbox") => {
@@ -237,11 +239,14 @@ export function OnboardingSyncStatus({
   }, [bankDone, bankFailed, bankActive, handleDismiss]);
 
   useEffect(() => {
-    if (inboxDone && inboxActive) {
-      const timer = setTimeout(() => handleDismiss("inbox"), 2000);
+    if ((inboxDone || inboxFailed) && inboxActive) {
+      const timer = setTimeout(
+        () => handleDismiss("inbox"),
+        inboxFailed ? 5000 : 2000,
+      );
       return () => clearTimeout(timer);
     }
-  }, [inboxDone, inboxActive, handleDismiss]);
+  }, [inboxDone, inboxFailed, inboxActive, handleDismiss]);
 
   const showBank = bankActive;
   const showInbox = inboxActive;
@@ -269,9 +274,9 @@ export function OnboardingSyncStatus({
   if (showInbox) {
     items.push({
       key: "inbox",
-      label: inboxLabel,
+      label: inboxFailed ? INBOX_FAILED_LABEL : inboxLabel,
       isDone: inboxDone,
-      isFailed: false,
+      isFailed: inboxFailed,
     });
   }
 

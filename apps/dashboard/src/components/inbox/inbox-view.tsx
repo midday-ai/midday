@@ -2,6 +2,7 @@
 
 import { ScrollArea } from "@midday/ui/scroll-area";
 import {
+  useQuery,
   useQueryClient,
   useSuspenseInfiniteQuery,
 } from "@tanstack/react-query";
@@ -26,6 +27,7 @@ import { InboxItem } from "./inbox-item";
 export function InboxView() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { data: accounts } = useQuery(trpc.inboxAccounts.get.queryOptions());
   const { ref, inView } = useInView();
   const { data: user } = useUserQuery();
   const { params, setParams } = useInboxParams();
@@ -302,7 +304,7 @@ export function InboxView() {
   const isAllTab = !filter.tab || filter.tab === "all";
 
   if (isAllTab && !tableData?.length && !hasFilter) {
-    return <InboxConnectedEmpty />;
+    return <InboxConnectedEmpty accountId={accounts?.[0]?.id} />;
   }
 
   if (!isAllTab && !tableData?.length && !hasFilter) {

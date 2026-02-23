@@ -60,8 +60,12 @@ export default async function Page(props: Props) {
 
   const hasSyncedAccounts = accounts?.some((a) => a.lastAccessed !== null);
   const unsyncedAccount = accounts?.find((a) => a.lastAccessed === null);
+  const syncJobId =
+    typeof searchParams.syncJobId === "string"
+      ? searchParams.syncJobId
+      : undefined;
 
-  // Account connected but never synced -> show period picker for initial import
+  // Account connected but never synced -> track the sync job started by OAuth callback
   if (
     isAllTab &&
     hasConnectedAccounts &&
@@ -73,7 +77,10 @@ export default async function Page(props: Props) {
     return (
       <HydrateClient>
         <Inbox>
-          <InboxInitialSync accountId={unsyncedAccount.id} />
+          <InboxInitialSync
+            accountId={unsyncedAccount.id}
+            syncJobId={syncJobId}
+          />
         </Inbox>
       </HydrateClient>
     );
@@ -90,7 +97,7 @@ export default async function Page(props: Props) {
   ) {
     return (
       <Inbox>
-        <InboxConnectedEmpty />
+        <InboxConnectedEmpty accountId={accounts?.[0]?.id} />
       </Inbox>
     );
   }

@@ -1,118 +1,72 @@
 "use client";
 
-import { useToast } from "@midday/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { useSyncStatus } from "@/hooks/use-sync-status";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
+import { ToastAction } from "@midday/ui/toast";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useSyncToast } from "@/hooks/use-sync-toast";
 import { useTRPC } from "@/trpc/client";
-import { InboxSelectPeriod } from "./inbox-empty";
+import { SyncPeriodDialog } from "./sync-period-dialog";
+
+const SYNC_TOAST_ID = "inbox-initial-sync";
 
 interface InboxInitialSyncProps {
   accountId: string;
+  syncJobId?: string;
 }
 
-export function InboxInitialSync({ accountId }: InboxInitialSyncProps) {
+export function InboxInitialSync({
+  accountId,
+  syncJobId,
+}: InboxInitialSyncProps) {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
-  const { toast, dismiss } = useToast();
-  const [jobId, setJobId] = useState<string | undefined>();
-  const [isSyncing, setSyncing] = useState(false);
+  const router = useRouter();
+  const [syncDialogOpen, setSyncDialogOpen] = useState(false);
 
-  const { status, setStatus, result, syncMetadata } = useSyncStatus({
-    jobId,
+  const {
+    isSyncing,
+    syncComplete,
+    attachmentCount,
+    startTracking,
+    handleMutationError,
+  } = useSyncToast({
+    toastId: SYNC_TOAST_ID,
+    initialJobId: syncJobId,
+    labels: {
+      syncing: "Importing...",
+      defaultProgress:
+        "Looking through your emails for receipts and invoices...",
+      completed: "Import complete",
+      failed: "Import failed, please try again.",
+    },
+    completedDuration: 8000,
+    completedAction: (
+      <ToastAction
+        altText="Import more"
+        onClick={() => setSyncDialogOpen(true)}
+      >
+        Import more
+      </ToastAction>
+    ),
   });
 
   const syncMutation = useMutation(
     trpc.inboxAccounts.sync.mutationOptions({
-      onMutate: () => setSyncing(true),
       onSuccess: (data) => {
         if (data) {
-          setJobId(data.id);
+          startTracking(data.id);
         }
       },
       onError: () => {
-        setSyncing(false);
-        setJobId(undefined);
-        setStatus("FAILED");
-        toast({
-          duration: 3500,
-          variant: "error",
-          title: "Something went wrong, please try again.",
-        });
+        handleMutationError();
       },
     }),
   );
 
-  useEffect(() => {
-    if (isSyncing) {
-      const discoveredCount = syncMetadata?.discoveredCount;
-      const uploadedCount = syncMetadata?.uploadedCount;
-      const metadataStatus = syncMetadata?.status;
-
-      let description =
-        "Looking through your emails for receipts and invoices...";
-
-      if (metadataStatus === "extracting" && uploadedCount) {
-        description = `Found ${uploadedCount} ${uploadedCount === 1 ? "receipt" : "receipts"}, reading the details...`;
-      } else if (discoveredCount && !metadataStatus) {
-        description = `Found ${discoveredCount} ${discoveredCount === 1 ? "email" : "emails"} with attachments...`;
-      }
-
-      toast({
-        title: "Importing...",
-        description,
-        duration: Number.POSITIVE_INFINITY,
-        variant: "spinner",
-      });
-    }
-  }, [
-    isSyncing,
-    syncMetadata?.status,
-    syncMetadata?.uploadedCount,
-    syncMetadata?.discoveredCount,
-  ]);
-
-  useEffect(() => {
-    if (status === "COMPLETED") {
-      dismiss();
-      setJobId(undefined);
-      setSyncing(false);
-
-      const attachmentCount = Number(result?.attachmentsProcessed) || 0;
-      const description =
-        attachmentCount > 0
-          ? `Found ${attachmentCount} ${attachmentCount === 1 ? "receipt" : "receipts"}.`
-          : "No receipts or invoices found for this period.";
-
-      toast({
-        title: "Import complete",
-        description,
-        variant: "success",
-        duration: 3500,
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.inboxAccounts.get.queryKey(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: trpc.inbox.get.queryKey(),
-      });
-    }
-  }, [status]);
-
-  useEffect(() => {
-    if (status === "FAILED") {
-      setSyncing(false);
-      setJobId(undefined);
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Import failed, please try again.",
-      });
-    }
-  }, [status]);
-
-  const handleSync = (syncStartDate: string) => {
+  const handleSyncWithDate = (syncStartDate: string) => {
+    setSyncDialogOpen(false);
     syncMutation.mutate({
       id: accountId,
       manualSync: true,
@@ -120,5 +74,96 @@ export function InboxInitialSync({ accountId }: InboxInitialSyncProps) {
     });
   };
 
-  return <InboxSelectPeriod onSync={handleSync} isSyncing={isSyncing} />;
+  if (syncComplete) {
+    return (
+      <div className="h-[calc(100vh-300px)] flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <Icons.Inbox2 className="mb-4" />
+          <div className="text-center mb-6 space-y-2">
+            <h2 className="font-medium text-lg">
+              {attachmentCount > 0
+                ? `${attachmentCount} ${attachmentCount === 1 ? "receipt" : "receipts"} imported`
+                : "No receipts found"}
+            </h2>
+            <p className="text-[#606060] text-sm">
+              We'll keep checking for new receipts automatically.
+            </p>
+          </div>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => setSyncDialogOpen(true)}>
+              Import more
+            </Button>
+            {attachmentCount > 0 && (
+              <Button onClick={() => router.refresh()}>View inbox</Button>
+            )}
+          </div>
+
+          <SyncPeriodDialog
+            open={syncDialogOpen}
+            onOpenChange={setSyncDialogOpen}
+            onSync={handleSyncWithDate}
+            isSyncing={syncMutation.isPending}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isSyncing && !syncComplete) {
+    return (
+      <div className="h-[calc(100vh-300px)] flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <Icons.Inbox2 className="mb-4" />
+          <div className="text-center mb-6 space-y-2">
+            <h2 className="font-medium text-lg">Your inbox is connected</h2>
+            <p className="text-[#606060] text-sm">
+              Import your recent receipts and invoices
+              <br />
+              to get started.
+            </p>
+          </div>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => setSyncDialogOpen(true)}>
+              Choose period
+            </Button>
+            <Button
+              onClick={() =>
+                syncMutation.mutate({
+                  id: accountId,
+                  manualSync: false,
+                  maxResults: 30,
+                })
+              }
+              disabled={syncMutation.isPending}
+            >
+              Import recent
+            </Button>
+          </div>
+
+          <SyncPeriodDialog
+            open={syncDialogOpen}
+            onOpenChange={setSyncDialogOpen}
+            onSync={handleSyncWithDate}
+            isSyncing={syncMutation.isPending}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-[calc(100vh-300px)] flex items-center justify-center">
+      <div className="flex flex-col items-center">
+        <Icons.Inbox2 className="mb-4" />
+        <div className="text-center mb-6 space-y-2">
+          <h2 className="font-medium text-lg">Setting up your inbox</h2>
+          <p className="text-[#606060] text-sm">
+            Looking for receipts and invoices
+            <br />
+            in your recent emails...
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }

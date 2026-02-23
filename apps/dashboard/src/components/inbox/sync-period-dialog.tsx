@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import { formatISO } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SyncPeriodPicker } from "./sync-period-picker";
 
 interface SyncPeriodDialogProps {
@@ -27,6 +27,12 @@ export function SyncPeriodDialog({
   isSyncing,
 }: SyncPeriodDialogProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+
+  useEffect(() => {
+    if (open) {
+      setSelectedDate(undefined);
+    }
+  }, [open]);
 
   const handleSync = () => {
     if (selectedDate) {
