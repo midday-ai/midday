@@ -110,7 +110,7 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
       setSyncing(false);
 
       // Show success toast with attachment count
-      const attachmentCount = result?.attachmentsProcessed || 0;
+      const attachmentCount = Number(result?.attachmentsProcessed) || 0;
       const description =
         attachmentCount > 0
           ? `Found ${attachmentCount} new ${attachmentCount === 1 ? "attachment" : "attachments"}.`

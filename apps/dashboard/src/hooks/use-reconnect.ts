@@ -2,12 +2,12 @@
 
 import { useToast } from "@midday/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
 import { reconnectConnectionAction } from "@/actions/transactions/reconnect-connection-action";
-import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useTRPC } from "@/trpc/client";
 
 type Provider = "gocardless" | "plaid" | "teller" | "enablebanking";
@@ -26,14 +26,8 @@ type UseReconnectReturn = {
 
 /**
  * Hook that encapsulates all reconnect and sync logic for bank connections.
- *
- * Handles:
- * - URL param detection for OAuth providers (GoCardless, EnableBanking)
- * - Direct trigger for embedded SDK providers (Teller)
- * - Job status tracking via useSyncStatus
- * - Toast notifications (syncing, success, error)
- * - Query invalidation on completion
- * - URL param cleanup after triggering
+ * Uses Trigger.dev useRealtimeRun for status tracking since bank connection
+ * syncs still run through Trigger.dev (not BullMQ).
  */
 export function useReconnect({
   connectionId,
@@ -46,8 +40,23 @@ export function useReconnect({
   const [runId, setRunId] = useState<string | undefined>();
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
+  const [status, setStatus] = useState<
+    "FAILED" | "SYNCING" | "COMPLETED" | null
+  >(null);
 
-  const { status, setStatus } = useSyncStatus({ runId, accessToken });
+  const { run, error } = useRealtimeRun(runId, {
+    enabled: !!runId && !!accessToken,
+    accessToken,
+  });
+
+  useEffect(() => {
+    if (error || run?.status === "FAILED") {
+      setStatus("FAILED");
+    }
+    if (run?.status === "COMPLETED") {
+      setStatus("COMPLETED");
+    }
+  }, [error, run]);
 
   const [params, setParams] = useQueryStates({
     step: parseAsString,
