@@ -1,4 +1,5 @@
 import {
+  getTeamById,
   type UpdateInboxWithProcessedDataParams,
   updateInbox,
   updateInboxWithProcessedData,
@@ -91,11 +92,14 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       };
     }
 
+    const teamData = await getTeamById(db, teamId);
+
     this.logger.info("Starting batch extraction", {
       jobId: job.id,
       teamId,
       inboxAccountId,
       itemCount: items.length,
+      companyName: teamData?.name,
     });
 
     // Stream downloads per chunk: download, encode, submit, release memory
@@ -138,7 +142,11 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
           const buffer = await data.arrayBuffer();
           const base64 = Buffer.from(buffer).toString("base64");
 
-          chunkItems.push({ id: item.id, pdfBase64: base64 });
+          chunkItems.push({
+            id: item.id,
+            pdfBase64: base64,
+            companyName: teamData?.name,
+          });
         } catch (error) {
           this.logger.warn("Failed to download file, skipping", {
             filePath,
