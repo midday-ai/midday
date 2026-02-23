@@ -169,6 +169,7 @@ export const inboxRouter = createTRPCRouter({
       const batchCandidates = input.filter(
         (item) => item.inboxId && item.mimetype === "application/pdf",
       );
+
       const realTimeItems =
         batchCandidates.length >= BATCH_THRESHOLD
           ? input.filter(
@@ -183,7 +184,6 @@ export const inboxRouter = createTRPCRouter({
           "batch-extract-inbox",
           {
             teamId: teamId!,
-            inboxAccountId: "",
             items: batchCandidates.map((item) => ({
               id: item.inboxId!,
               filePath: item.filePath,
@@ -192,6 +192,7 @@ export const inboxRouter = createTRPCRouter({
           },
           "inbox",
         );
+
         jobResults.push({ id: batchResult.id });
       }
 
@@ -214,6 +215,7 @@ export const inboxRouter = createTRPCRouter({
             ),
           ),
         );
+
         jobResults.push(...realTimeResults.map((r) => ({ id: r.id })));
       }
 
