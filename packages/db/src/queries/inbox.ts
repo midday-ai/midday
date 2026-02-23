@@ -1643,7 +1643,7 @@ export type GetStuckInboxItemsParams = {
 };
 
 /**
- * Find inbox items stuck in "processing" or "new" status for longer than threshold
+ * Find inbox items stuck in "processing", "new", or "analyzing" status for longer than threshold
  * Useful for cleanup jobs to recover stuck items
  */
 export async function getStuckInboxItems(
@@ -1667,7 +1667,11 @@ export async function getStuckInboxItems(
       and(
         eq(inbox.teamId, teamId),
         ne(inbox.status, "deleted"),
-        or(eq(inbox.status, "processing"), eq(inbox.status, "new")),
+        or(
+          eq(inbox.status, "processing"),
+          eq(inbox.status, "new"),
+          eq(inbox.status, "analyzing"),
+        ),
         lt(inbox.createdAt, thresholdDate),
       ),
     )

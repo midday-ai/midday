@@ -41,6 +41,10 @@ export const embedInbox = schemaTask({
         inboxId,
         teamId,
       });
+      await db
+        .update(inbox)
+        .set({ status: "pending" })
+        .where(eq(inbox.id, inboxId));
       return;
     }
 
@@ -107,6 +111,11 @@ export const embedInbox = schemaTask({
         teamId,
         embeddingDimensions: embedding.length,
       });
+
+      await db
+        .update(inbox)
+        .set({ status: "pending" })
+        .where(eq(inbox.id, inboxId));
     } catch (error) {
       logger.error("Failed to create inbox embedding", {
         inboxId,
