@@ -87,9 +87,10 @@ export type InboxProviderInitialSetupPayload = z.infer<
 >;
 
 export const inboxProviderSyncAccountSchema = z.object({
-  id: z.string().uuid(), // Inbox account ID
+  id: z.string().uuid(),
   manualSync: z.boolean().optional(),
-  teamId: z.string().uuid().optional(), // Included for manual syncs so getJobStatus can authorize
+  teamId: z.string().uuid().optional(),
+  syncStartDate: z.string().optional(),
 });
 
 export type InboxProviderSyncAccountPayload = z.infer<

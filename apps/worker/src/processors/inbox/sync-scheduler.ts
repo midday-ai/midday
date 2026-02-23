@@ -14,7 +14,7 @@ import {
 } from "@midday/inbox/errors";
 import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
-import { ensureFileExtension, getFiscalYearDates } from "@midday/utils";
+import { ensureFileExtension } from "@midday/utils";
 import type { Job } from "bullmq";
 import type { InboxProviderSyncAccountPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
@@ -58,18 +58,9 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
     });
 
     try {
-      const isFullSync = manualSync || !accountRow.lastAccessed;
-
-      let syncStartDate: Date | undefined;
-      if (isFullSync) {
-        const { from: fiscalYearStart } = getFiscalYearDates(
-          accountRow.fiscalYearStartMonth,
-        );
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        syncStartDate =
-          fiscalYearStart < threeMonthsAgo ? fiscalYearStart : threeMonthsAgo;
-      }
+      const syncStartDate = job.data.syncStartDate
+        ? new Date(job.data.syncStartDate)
+        : undefined;
 
       const attachments = await connector.getAttachments({
         id: inboxAccountId,
@@ -282,13 +273,13 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
 
       if (uploadedAttachments.length > 0) {
         const useBatchExtraction =
-          isFullSync || uploadedAttachments.length > BATCH_THRESHOLD;
+          !!syncStartDate || uploadedAttachments.length > BATCH_THRESHOLD;
 
         if (useBatchExtraction) {
           this.logger.info("Routing to batch extraction path", {
             accountId: inboxAccountId,
             attachmentCount: uploadedAttachments.length,
-            reason: isFullSync ? "full_sync" : "above_threshold",
+            reason: syncStartDate ? "user_initiated" : "above_threshold",
           });
 
           await triggerJob(

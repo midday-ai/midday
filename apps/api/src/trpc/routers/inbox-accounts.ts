@@ -109,6 +109,7 @@ export const inboxAccountsRouter = createTRPCRouter({
           id: input.id,
           manualSync: input.manualSync || false,
           teamId: teamId!,
+          syncStartDate: input.syncStartDate,
         },
         "inbox-provider",
         { priority: 1 },
