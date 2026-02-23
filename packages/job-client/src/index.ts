@@ -21,7 +21,7 @@ export interface TriggerJobOptions {
   /** Job priority - lower number = higher priority. Used to let manual syncs jump ahead of background work. */
   priority?: number;
   /** Override per-job removal policy after completion. Set a short age (seconds) for dedup keys that should expire quickly. */
-  removeOnComplete?: boolean | number | { age?: number; count?: number };
+  removeOnComplete?: boolean | number | { age: number; count?: number };
 }
 
 /**

@@ -13,6 +13,8 @@ export const taxTypeSchema = z.enum([
 
 export const documentTypeSchema = z.enum(["invoice", "receipt", "other"]);
 
+export type InvoiceData = z.infer<typeof invoiceSchema>;
+
 export const invoiceSchema = z.object({
   document_type: documentTypeSchema.describe(
     "Classify this document type FIRST before extracting data:\n" +

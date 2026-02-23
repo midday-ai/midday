@@ -2,7 +2,7 @@ import { Mistral } from "@mistralai/mistralai";
 import { z } from "zod/v4";
 import { invoiceConfig } from "../config/extraction-config";
 import type { PromptComponents } from "../prompts/factory";
-import { invoiceSchema } from "../schema";
+import { type InvoiceData, invoiceSchema } from "../schema";
 
 const OCR_MODEL = "mistral-ocr-latest";
 
@@ -52,7 +52,7 @@ export interface BatchExtractionItem {
 export interface BatchExtractionResult {
   id: string;
   success: boolean;
-  data?: Record<string, unknown>;
+  data?: Partial<InvoiceData>;
   error?: string;
 }
 

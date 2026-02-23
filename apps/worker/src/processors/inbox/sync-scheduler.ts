@@ -24,6 +24,10 @@ import { BaseProcessor } from "../base";
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
 const UPLOAD_CONCURRENCY = 10;
 
+function releaseBuffer(obj: { data: unknown }) {
+  delete (obj as Record<string, unknown>).data;
+}
+
 /**
  * Syncs attachments from a connected inbox account (Gmail/Outlook).
  * Triggered by manual sync or the centralized sync-accounts-scheduler.
@@ -195,7 +199,7 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       // Release file buffers on skipped attachments to free memory before uploads
       for (const att of attachments) {
         if (!filteredAttachments.includes(att)) {
-          (att as { data: Buffer | null }).data = null;
+          releaseBuffer(att);
         }
       }
 
@@ -220,8 +224,7 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
                   { contentType: item.mimeType, upsert: true },
                 );
 
-              // Release the file buffer so GC can reclaim memory
-              (item as { data: Buffer | null }).data = null;
+              releaseBuffer(item);
 
               if (!uploadData) return null;
 
