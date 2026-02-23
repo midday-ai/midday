@@ -7,7 +7,7 @@ const RETRYABLE_CODES = new Set([
 
 const RETRYABLE_NAMES = new Set(["TimeoutError"]);
 
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 1;
 const TIMEOUT_MS = 5_000;
 
 function isRetryable(err: any): boolean {

@@ -3,7 +3,6 @@ import "server-only";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { getLocationHeaders } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
-import { fetchWithRetry } from "@midday/trpc/fetch-with-retry";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import {
@@ -20,10 +19,9 @@ import { makeQueryClient } from "./query-client";
 //            will return the same client during the same request.
 export const getQueryClient = cache(makeQueryClient);
 
-// Server-side: prefer Railway private networking (skips DNS + TLS + Cloudflare)
-// Falls back to public URL for local dev / non-Railway environments
-const API_BASE_URL =
-  process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL;
+// Always use the public API URL (via Cloudflare) — testing whether Railway's
+// internal Wireguard mesh is the source of intermittent hangs.
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const trpc = createTRPCOptionsProxy<AppRouter>({
   queryClient: getQueryClient,
@@ -32,7 +30,6 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
       httpBatchLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
-        fetch: fetchWithRetry,
         async headers() {
           const [supabase, cookieStore, headersList] = await Promise.all([
             createClient(),
@@ -140,7 +137,6 @@ export async function getTRPCClient(options?: { forcePrimary?: boolean }) {
       httpBatchLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
-        fetch: fetchWithRetry,
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
           "x-user-timezone": location.timezone,
