@@ -21,7 +21,9 @@ export function useSyncStatus({ jobId: initialJobId }: UseSyncStatusProps) {
   const [status, setStatus] = useState<
     "FAILED" | "SYNCING" | "COMPLETED" | null
   >(null);
-  const [result, setResult] = useState<Record<string, unknown> | undefined>();
+  const [result, setResult] = useState<
+    { attachmentsProcessed?: number } | undefined
+  >();
   const [syncMetadata, setSyncMetadata] = useState<SyncMetadata | undefined>();
   const settled = useRef(false);
 
@@ -51,14 +53,32 @@ export function useSyncStatus({ jobId: initialJobId }: UseSyncStatusProps) {
       typeof data.progress === "object" &&
       !Array.isArray(data.progress)
     ) {
-      setSyncMetadata(data.progress as unknown as SyncMetadata);
+      const p = data.progress;
+      setSyncMetadata({
+        discoveredCount:
+          typeof p.discoveredCount === "number" ? p.discoveredCount : undefined,
+        uploadedCount:
+          typeof p.uploadedCount === "number" ? p.uploadedCount : undefined,
+        processedCount:
+          typeof p.processedCount === "number" ? p.processedCount : undefined,
+        status:
+          typeof p.status === "string"
+            ? (p.status as SyncMetadata["status"])
+            : undefined,
+      });
     }
 
     if (data.status === "completed") {
       settled.current = true;
       setStatus("COMPLETED");
       if (data.result && typeof data.result === "object") {
-        setResult(data.result as Record<string, unknown>);
+        const r = data.result as Record<string, unknown>;
+        setResult({
+          attachmentsProcessed:
+            typeof r.attachmentsProcessed === "number"
+              ? r.attachmentsProcessed
+              : undefined,
+        });
       }
     } else if (data.status === "failed") {
       settled.current = true;

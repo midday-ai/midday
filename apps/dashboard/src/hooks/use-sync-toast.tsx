@@ -4,7 +4,6 @@ import { useToast } from "@midday/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TextMorph } from "torph/react";
 import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useTRPC } from "@/trpc/client";
 
@@ -82,7 +81,7 @@ export function useSyncToast({
 
     toast({
       id: toastId,
-      title: <TextMorph as="span">{labels.syncing}</TextMorph>,
+      title: labels.syncing,
       description,
       duration: Number.POSITIVE_INFINITY,
       variant: "spinner",
@@ -110,7 +109,7 @@ export function useSyncToast({
 
       toast({
         id: toastId,
-        title: <TextMorph as="span">{labels.completed}</TextMorph>,
+        title: labels.completed,
         description,
         variant: "success",
         duration: completedDuration,
@@ -141,7 +140,7 @@ export function useSyncToast({
         id: toastId,
         duration: 3500,
         variant: "error",
-        title: <TextMorph as="span">{labels.failed}</TextMorph>,
+        title: labels.failed,
       });
 
       onFailedRef.current?.();
@@ -164,7 +163,7 @@ export function useSyncToast({
       id: toastId,
       duration: 3500,
       variant: "error",
-      title: <TextMorph as="span">{labels.mutationError}</TextMorph>,
+      title: labels.mutationError,
     });
   }, [toastId, labels.mutationError, toast, setStatus]);
 

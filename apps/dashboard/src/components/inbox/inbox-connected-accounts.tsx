@@ -137,7 +137,7 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
             variant="outline"
             onClick={() =>
               connectMutation.mutate({
-                provider: account.provider as "gmail" | "outlook",
+                provider: account.provider,
               })
             }
             className="text-xs"

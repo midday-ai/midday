@@ -1,4 +1,8 @@
-import { updateInbox, updateInboxWithProcessedData } from "@midday/db/queries";
+import {
+  type UpdateInboxWithProcessedDataParams,
+  updateInbox,
+  updateInboxWithProcessedData,
+} from "@midday/db/queries";
 import {
   type BatchExtractionItem,
   type BatchExtractionResult,
@@ -407,16 +411,12 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       inboxId: string;
       item: BatchExtractInboxPayload["items"][number];
     }> = [];
-    const dbUpdates: Array<{
-      id: string;
-      data: Record<string, unknown>;
-    }> = [];
+    const dbUpdates: UpdateInboxWithProcessedDataParams[] = [];
 
-    // First pass: prepare all DB updates and collect embeddable IDs
     for (const result of results) {
       if (result.success && result.data) {
         const data = result.data;
-        const docType = data.document_type as string | undefined;
+        const docType = data.document_type;
 
         const type =
           docType === "invoice"
@@ -429,25 +429,17 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
 
         dbUpdates.push({
           id: result.id,
-          data: {
-            amount: data.total_amount as number | undefined,
-            currency: data.currency as string | undefined,
-            displayName:
-              (data.vendor_name as string) ||
-              (data.store_name as string) ||
-              undefined,
-            website: data.website as string | undefined,
-            date:
-              (data.invoice_date as string) ||
-              (data.date as string) ||
-              undefined,
-            taxAmount: data.tax_amount as number | undefined,
-            taxRate: data.tax_rate as number | undefined,
-            taxType: data.tax_type as string | undefined,
-            type,
-            invoiceNumber: data.invoice_number as string | undefined,
-            status: docType === "other" ? "other" : "analyzing",
-          },
+          amount: data.total_amount ?? undefined,
+          currency: data.currency ?? undefined,
+          displayName: data.vendor_name || data.store_name || undefined,
+          website: data.website ?? undefined,
+          date: data.invoice_date || data.date || undefined,
+          taxAmount: data.tax_amount ?? undefined,
+          taxRate: data.tax_rate ?? undefined,
+          taxType: data.tax_type ?? undefined,
+          type,
+          invoiceNumber: data.invoice_number ?? undefined,
+          status: docType === "other" ? "other" : "analyzing",
         });
 
         if (docType !== "other") {
@@ -472,14 +464,7 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
     for (let i = 0; i < dbUpdates.length; i += DB_BATCH_SIZE) {
       const batch = dbUpdates.slice(i, i + DB_BATCH_SIZE);
       const settled = await Promise.allSettled(
-        batch.map((update) =>
-          updateInboxWithProcessedData(db, {
-            id: update.id,
-            ...(update.data as Parameters<
-              typeof updateInboxWithProcessedData
-            >[1]),
-          }),
-        ),
+        batch.map((update) => updateInboxWithProcessedData(db, update)),
       );
       for (const result of settled) {
         if (result.status === "rejected") {
