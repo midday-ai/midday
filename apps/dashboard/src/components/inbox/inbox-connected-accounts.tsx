@@ -18,16 +18,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useToast } from "@midday/ui/use-toast";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
-import { useSyncStatus } from "@/hooks/use-sync-status";
+import { Suspense, useState } from "react";
+import { useSyncToast } from "@/hooks/use-sync-toast";
 import { useTRPC } from "@/trpc/client";
 import { ConnectEmailModal } from "./connect-email-modal";
 import { ConnectGmail } from "./connect-gmail";
@@ -41,117 +36,25 @@ type InboxAccount = NonNullable<RouterOutputs["inboxAccounts"]["get"]>[number];
 
 function InboxAccountItem({ account }: { account: InboxAccount }) {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
-  const [jobId, setJobId] = useState<string | undefined>();
-  const [isSyncing, setSyncing] = useState(false);
-  const { toast, dismiss } = useToast();
   const router = useRouter();
+  const [syncDialogOpen, setSyncDialogOpen] = useState(false);
 
-  const { status, setStatus, result, syncMetadata } = useSyncStatus({
-    jobId,
+  const { isSyncing, startTracking, handleMutationError } = useSyncToast({
+    toastId: `sync-${account.id}`,
   });
 
   const syncInboxAccountMutation = useMutation(
     trpc.inboxAccounts.sync.mutationOptions({
-      onMutate: () => {
-        setSyncing(true);
-      },
       onSuccess: (data) => {
         if (data) {
-          setJobId(data.id);
+          startTracking(data.id);
         }
       },
       onError: () => {
-        setSyncing(false);
-        setJobId(undefined);
-        setStatus("FAILED");
-
-        toast({
-          duration: 3500,
-          variant: "error",
-          title: "Something went wrong please try again.",
-        });
+        handleMutationError();
       },
     }),
   );
-
-  useEffect(() => {
-    if (isSyncing) {
-      const discoveredCount = syncMetadata?.discoveredCount;
-      const uploadedCount = syncMetadata?.uploadedCount;
-      const metadataStatus = syncMetadata?.status;
-
-      let description =
-        "We're scanning for PDF attachments and receipts, please wait.";
-
-      if (metadataStatus === "extracting" && uploadedCount) {
-        description = `Found ${uploadedCount} ${uploadedCount === 1 ? "attachment" : "attachments"}, extracting data...`;
-      } else if (discoveredCount && !metadataStatus) {
-        description = `Discovered ${discoveredCount} ${discoveredCount === 1 ? "email" : "emails"} with attachments...`;
-      }
-
-      toast({
-        title: "Syncing...",
-        description,
-        duration: Number.POSITIVE_INFINITY,
-        variant: "spinner",
-      });
-    }
-  }, [
-    isSyncing,
-    syncMetadata?.status,
-    syncMetadata?.uploadedCount,
-    syncMetadata?.discoveredCount,
-  ]);
-
-  useEffect(() => {
-    if (status === "COMPLETED") {
-      dismiss();
-      setJobId(undefined);
-      setSyncing(false);
-
-      // Show success toast with attachment count
-      const attachmentCount = Number(result?.attachmentsProcessed) || 0;
-      const description =
-        attachmentCount > 0
-          ? `Found ${attachmentCount} new ${attachmentCount === 1 ? "attachment" : "attachments"}.`
-          : "No new attachments found.";
-
-      toast({
-        title: "Sync completed successfully",
-        description,
-        variant: "success",
-        duration: 3500,
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.inboxAccounts.get.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.inbox.get.queryKey(),
-      });
-    }
-  }, [status]);
-
-  useEffect(() => {
-    if (status === "FAILED") {
-      setSyncing(false);
-      setJobId(undefined);
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.inboxAccounts.get.queryKey(),
-      });
-
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Inbox sync failed, please try again.",
-      });
-    }
-  }, [status]);
-
-  const [syncDialogOpen, setSyncDialogOpen] = useState(false);
 
   const handleSyncWithDate = (syncStartDate: string) => {
     setSyncDialogOpen(false);

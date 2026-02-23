@@ -1,8 +1,8 @@
 import { triggerJob } from "@midday/job-client";
 import type {
+  BatchEmbedInboxPayload,
   BatchProcessMatchingPayload,
   EmbedInboxPayload,
-  InboxProviderInitialSetupPayload,
   InboxProviderSyncAccountPayload,
   ProcessAttachmentPayload,
   SlackUploadPayload,
@@ -28,16 +28,14 @@ export async function enqueueEmbedInbox(payload: EmbedInboxPayload) {
   return triggerJob("embed-inbox", payload, "embeddings");
 }
 
+export async function enqueueBatchEmbedInbox(payload: BatchEmbedInboxPayload) {
+  return triggerJob("batch-embed-inbox", payload, "inbox");
+}
+
 export async function enqueueBatchProcessMatching(
   payload: BatchProcessMatchingPayload,
 ) {
   return triggerJob("batch-process-matching", payload, "inbox");
-}
-
-export async function enqueueInitialSetup(
-  payload: InboxProviderInitialSetupPayload,
-) {
-  return triggerJob("initial-setup", payload, "inbox-provider");
 }
 
 export async function enqueueSyncScheduler(

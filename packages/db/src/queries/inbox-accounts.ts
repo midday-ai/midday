@@ -66,7 +66,6 @@ export async function deleteInboxAccount(
     )
     .returning({
       id: inboxAccounts.id,
-      scheduleId: inboxAccounts.scheduleId,
     });
 
   return deleted;
@@ -188,10 +187,8 @@ export async function getInboxAccountInfo(
       provider: inboxAccounts.provider,
       teamId: inboxAccounts.teamId,
       lastAccessed: inboxAccounts.lastAccessed,
-      fiscalYearStartMonth: teams.fiscalYearStartMonth,
     })
     .from(inboxAccounts)
-    .innerJoin(teams, eq(inboxAccounts.teamId, teams.id))
     .where(eq(inboxAccounts.id, params.id))
     .limit(1);
 

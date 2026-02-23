@@ -359,14 +359,11 @@ export class GmailProvider implements OAuthProviderInterface {
     // Proactively refresh token if expired or expiring soon
     await this.#ensureValidAccessToken();
 
-    const {
-      maxResults = 50,
-      lastAccessed,
-      fullSync = false,
-      syncStartDate,
-    } = options;
+    const { lastAccessed, fullSync = false, syncStartDate } = options;
 
     const DISCOVERY_MAX = 500;
+    const explicitMaxResults = options.maxResults;
+    const defaultMaxResults = 50;
 
     // Build date filter based on sync type and lastAccessed
     let dateFilter = "";
@@ -390,7 +387,11 @@ export class GmailProvider implements OAuthProviderInterface {
     }
 
     const isFullSync = fullSync || !lastAccessed;
-    const maxMessages = isFullSync ? DISCOVERY_MAX : maxResults;
+    const maxMessages = explicitMaxResults
+      ? explicitMaxResults
+      : isFullSync
+        ? DISCOVERY_MAX
+        : defaultMaxResults;
 
     try {
       const query = `-from:me has:attachment filename:pdf ${dateFilter}`;

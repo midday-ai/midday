@@ -9,25 +9,21 @@ import {
   getBatchJobStatus,
   submitBatchExtraction,
 } from "@midday/documents/batch";
-import { triggerJob, triggerJobAndWait } from "@midday/job-client";
+import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
+import {
+  type BatchExtractInboxPayload,
+  batchExtractInboxSchema,
+} from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
-
-interface BatchExtractInboxPayload {
-  items: Array<{
-    id: string;
-    filePath: string[];
-    teamId: string;
-  }>;
-  teamId: string;
-  inboxAccountId: string;
-}
 
 const BATCH_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 const POLL_INTERVALS = [5000, 10000, 20000, 30000];
 const CHUNK_SIZE = 50;
+const MAX_ITEMS_PER_JOB = 500;
+const DB_BATCH_SIZE = 100;
 
 function getPollInterval(attempt: number): number {
   if (attempt < POLL_INTERVALS.length) {
@@ -46,15 +42,50 @@ function isTerminalStatus(status: BatchJobStatus): boolean {
 }
 
 export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxPayload> {
+  protected getPayloadSchema() {
+    return batchExtractInboxSchema;
+  }
+
   async process(job: Job<BatchExtractInboxPayload>): Promise<{
     totalItems: number;
     succeeded: number;
     failed: number;
     batchJobIds: string[];
+    splitIntoJobs?: number;
   }> {
     const { items, teamId, inboxAccountId } = job.data;
     const supabase = createClient();
     const db = getDb();
+
+    // Split large payloads into separate jobs to limit blast radius
+    if (items.length > MAX_ITEMS_PER_JOB) {
+      const childJobIds: string[] = [];
+
+      for (let i = 0; i < items.length; i += MAX_ITEMS_PER_JOB) {
+        const chunk = items.slice(i, i + MAX_ITEMS_PER_JOB);
+        const result = await triggerJob(
+          "batch-extract-inbox",
+          { items: chunk, teamId, inboxAccountId },
+          "inbox-provider",
+        );
+        childJobIds.push(result.id);
+      }
+
+      this.logger.info("Split large batch into child jobs", {
+        jobId: job.id,
+        totalItems: items.length,
+        childJobs: childJobIds.length,
+        childJobIds,
+      });
+
+      return {
+        totalItems: items.length,
+        succeeded: 0,
+        failed: 0,
+        batchJobIds: [],
+        splitIntoJobs: childJobIds.length,
+      };
+    }
 
     this.logger.info("Starting batch extraction", {
       jobId: job.id,
@@ -63,49 +94,87 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       itemCount: items.length,
     });
 
-    const batchItems: BatchExtractionItem[] = [];
+    // Stream downloads per chunk: download, encode, submit, release memory
+    const batchJobIds: string[] = [];
+    const submittedItemIds: string[] = [];
+    const itemChunks: Array<typeof items> = [];
 
-    for (const item of items) {
-      if (!item.id) {
-        this.logger.warn("Skipping batch item with missing id", {
-          filePath: item.filePath,
-          teamId: item.teamId,
-        });
-        continue;
-      }
+    for (let i = 0; i < items.length; i += CHUNK_SIZE) {
+      itemChunks.push(items.slice(i, i + CHUNK_SIZE));
+    }
 
-      const filePath = item.filePath.join("/");
+    for (let chunkIdx = 0; chunkIdx < itemChunks.length; chunkIdx++) {
+      const chunk = itemChunks[chunkIdx]!;
+      const chunkItems: BatchExtractionItem[] = [];
 
-      try {
-        const { data } = await supabase.storage
-          .from("vault")
-          .download(filePath);
-
-        if (!data) {
-          this.logger.warn("File not found in storage, skipping", {
-            filePath,
-            inboxItemId: item.id,
+      for (const item of chunk) {
+        if (!item.id) {
+          this.logger.warn("Skipping batch item with missing id", {
+            filePath: item.filePath,
+            teamId: item.teamId,
           });
           continue;
         }
 
-        const buffer = await data.arrayBuffer();
-        const base64 = Buffer.from(buffer).toString("base64");
+        const filePath = item.filePath.join("/");
 
-        batchItems.push({
-          id: item.id,
-          pdfBase64: base64,
-        });
-      } catch (error) {
-        this.logger.warn("Failed to download file, skipping", {
-          filePath,
-          inboxItemId: item.id,
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
+        try {
+          const { data } = await supabase.storage
+            .from("vault")
+            .download(filePath);
+
+          if (!data) {
+            this.logger.warn("File not found in storage, skipping", {
+              filePath,
+              inboxItemId: item.id,
+            });
+            continue;
+          }
+
+          const buffer = await data.arrayBuffer();
+          const base64 = Buffer.from(buffer).toString("base64");
+
+          chunkItems.push({ id: item.id, pdfBase64: base64 });
+        } catch (error) {
+          this.logger.warn("Failed to download file, skipping", {
+            filePath,
+            inboxItemId: item.id,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
       }
+
+      if (chunkItems.length === 0) {
+        this.logger.warn("No valid items in chunk, skipping", {
+          jobId: job.id,
+          chunkIndex: chunkIdx,
+        });
+        continue;
+      }
+
+      const batchJobId = await submitBatchExtraction(chunkItems);
+      batchJobIds.push(batchJobId);
+      submittedItemIds.push(...chunkItems.map((item) => item.id));
+
+      this.logger.info("Batch chunk submitted", {
+        jobId: job.id,
+        batchJobId,
+        chunkIndex: chunkIdx,
+        chunkSize: chunkItems.length,
+      });
+
+      await job.updateProgress({
+        status: "submitting",
+        chunksSubmitted: chunkIdx + 1,
+        totalChunks: itemChunks.length,
+        itemsSubmitted: submittedItemIds.length,
+        totalItems: items.length,
+      });
+
+      // chunkItems goes out of scope here, allowing GC to reclaim the base64 data
     }
 
-    if (batchItems.length === 0) {
+    if (batchJobIds.length === 0) {
       this.logger.warn("No valid items to process", {
         jobId: job.id,
         teamId,
@@ -118,46 +187,38 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       };
     }
 
-    // Split into chunks to avoid large JSONL uploads
-    const chunks: BatchExtractionItem[][] = [];
-    for (let i = 0; i < batchItems.length; i += CHUNK_SIZE) {
-      chunks.push(batchItems.slice(i, i + CHUNK_SIZE));
+    for (let i = 0; i < submittedItemIds.length; i += DB_BATCH_SIZE) {
+      const batch = submittedItemIds.slice(i, i + DB_BATCH_SIZE);
+      const settled = await Promise.allSettled(
+        batch.map((id) =>
+          updateInbox(db, { id, teamId, status: "processing" }),
+        ),
+      );
+      for (const result of settled) {
+        if (result.status === "rejected") {
+          this.logger.warn("Failed to update inbox item to processing", {
+            jobId: job.id,
+            error:
+              result.reason instanceof Error
+                ? result.reason.message
+                : "Unknown error",
+          });
+        }
+      }
     }
 
-    this.logger.info("Submitting batch chunks to Mistral", {
-      jobId: job.id,
-      totalItems: batchItems.length,
-      chunkCount: chunks.length,
-      chunkSize: CHUNK_SIZE,
+    await job.updateProgress({
+      status: "polling",
+      chunksSubmitted: batchJobIds.length,
+      totalChunks: itemChunks.length,
+      itemsSubmitted: submittedItemIds.length,
+      totalItems: items.length,
     });
-
-    const batchJobIds = await Promise.all(
-      chunks.map(async (chunk, idx) => {
-        const batchJobId = await submitBatchExtraction(chunk);
-        this.logger.info("Batch chunk submitted", {
-          jobId: job.id,
-          batchJobId,
-          chunkIndex: idx,
-          chunkSize: chunk.length,
-        });
-        return batchJobId;
-      }),
-    );
-
-    await Promise.all(
-      batchItems.map((item) =>
-        updateInbox(db, {
-          id: item.id,
-          teamId,
-          status: "processing",
-        }),
-      ),
-    );
 
     const allResults = await this.pollBatchJobs(job, batchJobIds);
 
     const processedIds = new Set(allResults.map((r) => r.id));
-    const { succeeded, failed } = await this.processResults(
+    const { succeeded, failed, embeddableIds } = await this.processResults(
       allResults,
       items,
       teamId,
@@ -165,12 +226,35 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       db,
     );
 
+    // Trigger batch embedding for all successful non-"other" items
+    if (embeddableIds.length > 0) {
+      try {
+        await triggerJob(
+          "batch-embed-inbox",
+          {
+            items: embeddableIds.map((id) => ({ inboxId: id, teamId })),
+            teamId,
+          },
+          "inbox",
+        );
+
+        this.logger.info("Triggered batch embedding", {
+          jobId: job.id,
+          embeddableCount: embeddableIds.length,
+        });
+      } catch (error) {
+        this.logger.error("Failed to trigger batch embedding", {
+          jobId: job.id,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
+
     // Fallback: items that were submitted but got no result
+    const submittedIdSet = new Set(submittedItemIds);
     const unprocessedItems = items.filter(
       (item) =>
-        item.id &&
-        batchItems.some((b) => b.id === item.id) &&
-        !processedIds.has(item.id),
+        item.id && submittedIdSet.has(item.id) && !processedIds.has(item.id),
     );
 
     if (unprocessedItems.length > 0) {
@@ -179,27 +263,34 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
         count: unprocessedItems.length,
       });
 
-      for (const item of unprocessedItems) {
-        try {
-          await triggerJob(
+      await Promise.allSettled(
+        unprocessedItems.map((item) =>
+          triggerJob(
             "process-attachment",
             {
               filePath: item.filePath,
               teamId: item.teamId,
-              size: 0,
-              mimetype: "application/pdf",
+              size: item.size ?? 0,
+              mimetype: item.mimetype ?? "application/pdf",
               inboxAccountId,
             },
             "inbox",
-          );
-        } catch (error) {
-          this.logger.error("Failed to queue fallback extraction", {
-            inboxItemId: item.id,
-            error: error instanceof Error ? error.message : "Unknown error",
-          });
-        }
-      }
+          ).catch((error) => {
+            this.logger.error("Failed to queue fallback extraction", {
+              inboxItemId: item.id,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
+          }),
+        ),
+      );
     }
+
+    await job.updateProgress({
+      status: "complete",
+      succeeded,
+      failed: failed + unprocessedItems.length,
+      totalItems: items.length,
+    });
 
     return {
       totalItems: items.length,
@@ -275,7 +366,6 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       }
     }
 
-    // Cancel any still-running jobs on timeout
     for (const batchJobId of pending) {
       this.logger.warn("Batch chunk timed out, cancelling", {
         jobId: job.id,
@@ -300,7 +390,8 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
   }
 
   /**
-   * Process extraction results: update DB, trigger embeddings, queue fallbacks.
+   * Process extraction results: batch update DB, collect embeddable IDs, queue fallbacks.
+   * Returns succeeded/failed counts and IDs that need embedding.
    */
   private async processResults(
     results: BatchExtractionResult[],
@@ -308,18 +399,37 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
     teamId: string,
     inboxAccountId: string,
     db: ReturnType<typeof getDb>,
-  ): Promise<{ succeeded: number; failed: number }> {
+  ): Promise<{ succeeded: number; failed: number; embeddableIds: string[] }> {
     let succeeded = 0;
     let failed = 0;
+    const embeddableIds: string[] = [];
+    const fallbackItems: Array<{
+      inboxId: string;
+      item: BatchExtractInboxPayload["items"][number];
+    }> = [];
+    const dbUpdates: Array<{
+      id: string;
+      data: Record<string, unknown>;
+    }> = [];
 
+    // First pass: prepare all DB updates and collect embeddable IDs
     for (const result of results) {
       if (result.success && result.data) {
-        try {
-          const data = result.data;
-          const docType = data.document_type as string | undefined;
+        const data = result.data;
+        const docType = data.document_type as string | undefined;
 
-          await updateInboxWithProcessedData(db, {
-            id: result.id,
+        const type =
+          docType === "invoice"
+            ? "invoice"
+            : docType === "receipt"
+              ? "expense"
+              : docType === "other"
+                ? "other"
+                : null;
+
+        dbUpdates.push({
+          id: result.id,
+          data: {
             amount: data.total_amount as number | undefined,
             currency: data.currency as string | undefined,
             displayName:
@@ -334,57 +444,17 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
             taxAmount: data.tax_amount as number | undefined,
             taxRate: data.tax_rate as number | undefined,
             taxType: data.tax_type as string | undefined,
-            type:
-              docType === "invoice"
-                ? "invoice"
-                : docType === "receipt"
-                  ? "expense"
-                  : docType === "other"
-                    ? "other"
-                    : null,
+            type,
             invoiceNumber: data.invoice_number as string | undefined,
-            status: "analyzing",
-          });
+            status: docType === "other" ? "other" : "analyzing",
+          },
+        });
 
-          if (docType !== "other") {
-            try {
-              await triggerJobAndWait(
-                "embed-inbox",
-                { inboxId: result.id, teamId },
-                "embeddings",
-                { timeout: 60000 },
-              );
-            } catch (embedError) {
-              this.logger.warn("Embedding failed for batch item", {
-                inboxId: result.id,
-                error:
-                  embedError instanceof Error
-                    ? embedError.message
-                    : "Unknown error",
-              });
-              await updateInboxWithProcessedData(db, {
-                id: result.id,
-                status: "pending",
-              });
-            }
-          } else {
-            await updateInboxWithProcessedData(db, {
-              id: result.id,
-              status: "other",
-            });
-          }
-
-          succeeded++;
-        } catch (updateError) {
-          this.logger.error("Failed to update inbox item from batch", {
-            inboxId: result.id,
-            error:
-              updateError instanceof Error
-                ? updateError.message
-                : "Unknown error",
-          });
-          failed++;
+        if (docType !== "other") {
+          embeddableIds.push(result.id);
         }
+
+        succeeded++;
       } else {
         this.logger.warn("Batch item extraction failed, queuing fallback", {
           inboxId: result.id,
@@ -393,32 +463,60 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
 
         const originalItem = items.find((i) => i.id === result.id);
         if (originalItem) {
-          try {
-            await triggerJob(
-              "process-attachment",
-              {
-                filePath: originalItem.filePath,
-                teamId: originalItem.teamId,
-                size: 0,
-                mimetype: "application/pdf",
-                inboxAccountId,
-              },
-              "inbox",
-            );
-          } catch (fallbackError) {
-            this.logger.error("Failed to queue fallback extraction", {
-              inboxId: result.id,
-              error:
-                fallbackError instanceof Error
-                  ? fallbackError.message
-                  : "Unknown error",
-            });
-          }
+          fallbackItems.push({ inboxId: result.id, item: originalItem });
         }
         failed++;
       }
     }
 
-    return { succeeded, failed };
+    for (let i = 0; i < dbUpdates.length; i += DB_BATCH_SIZE) {
+      const batch = dbUpdates.slice(i, i + DB_BATCH_SIZE);
+      const settled = await Promise.allSettled(
+        batch.map((update) =>
+          updateInboxWithProcessedData(db, {
+            id: update.id,
+            ...(update.data as Parameters<
+              typeof updateInboxWithProcessedData
+            >[1]),
+          }),
+        ),
+      );
+      for (const result of settled) {
+        if (result.status === "rejected") {
+          this.logger.warn("Failed to update inbox item with processed data", {
+            jobId: job.id,
+            error:
+              result.reason instanceof Error
+                ? result.reason.message
+                : "Unknown error",
+          });
+        }
+      }
+    }
+
+    if (fallbackItems.length > 0) {
+      await Promise.allSettled(
+        fallbackItems.map(({ inboxId, item }) =>
+          triggerJob(
+            "process-attachment",
+            {
+              filePath: item.filePath,
+              teamId: item.teamId,
+              size: item.size ?? 0,
+              mimetype: item.mimetype ?? "application/pdf",
+              inboxAccountId,
+            },
+            "inbox",
+          ).catch((error) => {
+            this.logger.error("Failed to queue fallback extraction", {
+              inboxId,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
+          }),
+        ),
+      );
+    }
+
+    return { succeeded, failed, embeddableIds };
   }
 }

@@ -60,6 +60,8 @@ export class SyncAccountsSchedulerProcessor extends BaseProcessor<SyncAccountsSc
           {
             priority: BACKGROUND_PRIORITY,
             delay,
+            jobId: `sync-${account.id}`,
+            removeOnComplete: { age: 60 },
           },
         );
         dispatched++;

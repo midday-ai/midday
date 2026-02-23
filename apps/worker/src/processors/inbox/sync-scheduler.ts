@@ -22,7 +22,7 @@ import { processBatch } from "../../utils/process-batch";
 import { BaseProcessor } from "../base";
 
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
-const BATCH_SIZE = 5;
+const UPLOAD_CONCURRENCY = 10;
 
 /**
  * Syncs attachments from a connected inbox account (Gmail/Outlook).
@@ -68,6 +68,7 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         lastAccessed: accountRow.lastAccessed,
         fullSync: manualSync,
         syncStartDate,
+        maxResults: job.data.maxResults,
       });
 
       this.logger.info("Fetched attachments from provider", {
@@ -191,27 +192,39 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         },
       });
 
+      // Release file buffers on skipped attachments to free memory before uploads
+      for (const att of attachments) {
+        if (!filteredAttachments.includes(att)) {
+          (att as { data: Buffer | null }).data = null;
+        }
+      }
+
       const BATCH_THRESHOLD = 20;
 
       const uploadedAttachments = await processBatch(
         filteredAttachments,
-        BATCH_SIZE,
+        UPLOAD_CONCURRENCY,
         async (batch) => {
-          const results = [];
-          for (const item of batch) {
-            const safeFilename = ensureFileExtension(
-              item.filename,
-              item.mimeType,
-            );
+          const settled = await Promise.allSettled(
+            batch.map(async (item) => {
+              const safeFilename = ensureFileExtension(
+                item.filename,
+                item.mimeType,
+              );
 
-            const { data: uploadData } = await supabase.storage
-              .from("vault")
-              .upload(`${accountRow.teamId}/inbox/${safeFilename}`, item.data, {
-                contentType: item.mimeType,
-                upsert: true,
-              });
+              const { data: uploadData } = await supabase.storage
+                .from("vault")
+                .upload(
+                  `${accountRow.teamId}/inbox/${safeFilename}`,
+                  item.data,
+                  { contentType: item.mimeType, upsert: true },
+                );
 
-            if (uploadData) {
+              // Release the file buffer so GC can reclaim memory
+              (item as { data: Buffer | null }).data = null;
+
+              if (!uploadData) return null;
+
               const filePath = uploadData.path.split("/");
 
               const inboxItem = await createInbox(db, {
@@ -237,10 +250,10 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
                     accountId: inboxAccountId,
                   },
                 );
-                continue;
+                return null;
               }
 
-              results.push({
+              return {
                 filePath,
                 size: item.size,
                 mimetype: item.mimeType,
@@ -250,6 +263,21 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
                 teamId: accountRow.teamId,
                 inboxAccountId: inboxAccountId,
                 inboxItemId: inboxItem.id,
+              };
+            }),
+          );
+
+          const results = [];
+          for (const result of settled) {
+            if (result.status === "fulfilled" && result.value) {
+              results.push(result.value);
+            } else if (result.status === "rejected") {
+              this.logger.warn("Upload failed for attachment in batch", {
+                accountId: inboxAccountId,
+                error:
+                  result.reason instanceof Error
+                    ? result.reason.message
+                    : "Unknown error",
               });
             }
           }
@@ -273,13 +301,21 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
 
       if (uploadedAttachments.length > 0) {
         const useBatchExtraction =
-          !!syncStartDate || uploadedAttachments.length > BATCH_THRESHOLD;
+          !manualSync ||
+          !!syncStartDate ||
+          uploadedAttachments.length > BATCH_THRESHOLD;
 
         if (useBatchExtraction) {
+          const reason = !manualSync
+            ? "background_sync"
+            : syncStartDate
+              ? "user_initiated"
+              : "above_threshold";
+
           this.logger.info("Routing to batch extraction path", {
             accountId: inboxAccountId,
             attachmentCount: uploadedAttachments.length,
-            reason: syncStartDate ? "user_initiated" : "above_threshold",
+            reason,
           });
 
           await triggerJob(
@@ -289,6 +325,8 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
                 id: a.inboxItemId,
                 filePath: a.filePath,
                 teamId: a.teamId,
+                mimetype: a.mimetype,
+                size: a.size,
               })),
               teamId: accountRow.teamId,
               inboxAccountId: inboxAccountId,

@@ -487,14 +487,11 @@ export class OutlookProvider implements OAuthProviderInterface {
       throw new Error("Graph client not initialized. Set tokens first.");
     }
 
-    const {
-      maxResults = 50,
-      lastAccessed,
-      fullSync = false,
-      syncStartDate,
-    } = options;
+    const { lastAccessed, fullSync = false, syncStartDate } = options;
 
     const DISCOVERY_MAX = 500;
+    const explicitMaxResults = options.maxResults;
+    const defaultMaxResults = 50;
 
     // Get the current user's email to exclude self-sent messages
     const userInfo = await this.getUserInfo();
@@ -518,7 +515,11 @@ export class OutlookProvider implements OAuthProviderInterface {
     }
 
     const isFullSync = fullSync || !lastAccessed;
-    const maxMessages = isFullSync ? DISCOVERY_MAX : maxResults;
+    const maxMessages = explicitMaxResults
+      ? explicitMaxResults
+      : isFullSync
+        ? DISCOVERY_MAX
+        : defaultMaxResults;
 
     try {
       // Query for messages with attachments

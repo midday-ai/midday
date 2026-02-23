@@ -98,7 +98,7 @@ const inboxProviderWorkerOptions: WorkerOptions = {
 
 /**
  * Inbox provider queue configuration
- * Jobs: initial-setup, sync-scheduler, sync-accounts-scheduler, batch-extract-inbox
+ * Jobs: sync-scheduler, sync-accounts-scheduler, batch-extract-inbox
  */
 export const inboxProviderQueueConfig: QueueConfig = {
   name: "inbox-provider",

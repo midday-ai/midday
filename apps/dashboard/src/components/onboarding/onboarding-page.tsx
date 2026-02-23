@@ -160,6 +160,7 @@ export function OnboardingPage({
     connected: parseAsString,
     provider: parseAsString,
     countryCode: parseAsString,
+    syncJobId: parseAsString,
   });
 
   const { step, stepKey, nextStep, prevStep, totalSteps } = useOnboardingStep({
@@ -175,11 +176,18 @@ export function OnboardingPage({
       connectionParams.provider &&
       !inboxSync
     ) {
-      setInboxSync({ provider: connectionParams.provider });
+      setInboxSync({
+        provider: connectionParams.provider,
+        syncJobId: connectionParams.syncJobId ?? undefined,
+      });
       trackEvent(LogEvents.OnboardingInboxConnected, {
         provider: connectionParams.provider,
       });
-      setConnectionParams({ connected: null, provider: null });
+      setConnectionParams({
+        connected: null,
+        provider: null,
+        syncJobId: null,
+      });
     }
   }, [connectionParams, inboxSync, setConnectionParams, trackEvent]);
 

@@ -110,9 +110,14 @@ export const inboxAccountsRouter = createTRPCRouter({
           manualSync: input.manualSync || false,
           teamId: teamId!,
           syncStartDate: input.syncStartDate,
+          maxResults: input.maxResults,
         },
         "inbox-provider",
-        { priority: 1 },
+        {
+          priority: 1,
+          jobId: `sync-${input.id}`,
+          removeOnComplete: { age: 60 },
+        },
       );
 
       return { id: job.id };
