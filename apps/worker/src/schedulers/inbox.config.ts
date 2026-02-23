@@ -1,8 +1,4 @@
-import type {
-  DynamicSchedulerTemplate,
-  StaticSchedulerConfig,
-} from "../types/scheduler-config";
-import { generateQuarterDailyCronTag } from "../utils/generate-cron-tag";
+import type { StaticSchedulerConfig } from "../types/scheduler-config";
 
 /**
  * Static scheduler configurations for inbox
@@ -19,24 +15,12 @@ export const inboxStaticSchedulers: StaticSchedulerConfig[] = [
       tz: "UTC",
     },
   },
-];
-
-/**
- * Dynamic scheduler templates for inbox
- * These are registered per-account when accounts are connected
- */
-export const inboxDynamicSchedulerTemplates: DynamicSchedulerTemplate[] = [
   {
-    template: "inbox-sync-scheduler",
+    name: "inbox-sync-accounts",
     queue: "inbox-provider",
-    cronGenerator: (accountId: string) =>
-      generateQuarterDailyCronTag(accountId),
-    jobName: "sync-scheduler",
-    payloadGenerator: (accountId: string) => ({
-      id: accountId,
-      manualSync: false,
-    }),
-    jobKey: (accountId: string) => `inbox-sync-${accountId}`,
+    cron: "0 */6 * * *", // Every 6 hours
+    jobName: "sync-accounts-scheduler",
+    payload: {},
     options: {
       tz: "UTC",
     },

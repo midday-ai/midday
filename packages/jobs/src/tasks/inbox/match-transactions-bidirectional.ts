@@ -11,6 +11,13 @@ import {
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
+const BATCH_SIZE = 10;
+
+/**
+ * Temporary bridge: kept alive for the Trigger.dev embed-transaction chain
+ * until bank transaction tasks are also migrated to the worker.
+ * The worker has its own equivalent at apps/worker/src/processors/inbox/match-transactions-bidirectional.ts
+ */
 export const matchTransactionsBidirectional = schemaTask({
   id: "match-transactions-bidirectional",
   schema: z.object({
@@ -18,7 +25,9 @@ export const matchTransactionsBidirectional = schemaTask({
     newTransactionIds: z.array(z.string().uuid()),
   }),
   maxDuration: 120,
-  queue: { concurrencyLimit: 5 },
+  queue: {
+    concurrencyLimit: 5,
+  },
   run: async ({ teamId, newTransactionIds }) => {
     const db = getDb();
 
@@ -27,11 +36,11 @@ export const matchTransactionsBidirectional = schemaTask({
       newTransactionCount: newTransactionIds.length,
     });
 
-    // PHASE 1: Forward matching - Find inbox items for new transactions
-    const forwardMatches = new Map<string, string>();
     let forwardMatchCount = 0;
     let forwardSuggestionCount = 0;
+    const forwardMatchedInboxIds = new Set<string>();
 
+    // PHASE 1: Forward matching - Find inbox items for new transactions
     for (const transactionId of newTransactionIds) {
       try {
         const inboxMatch = await findInboxMatches(db, {
@@ -40,8 +49,7 @@ export const matchTransactionsBidirectional = schemaTask({
         });
 
         if (inboxMatch) {
-          forwardMatches.set(transactionId, inboxMatch.inboxId);
-
+          forwardMatchedInboxIds.add(inboxMatch.inboxId);
           const shouldAutoMatch = inboxMatch.matchType === "auto_matched";
 
           if (shouldAutoMatch) {
@@ -50,15 +58,7 @@ export const matchTransactionsBidirectional = schemaTask({
               teamId,
               transactionId,
             });
-
             forwardMatchCount++;
-
-            logger.info("Auto-matched transaction to inbox", {
-              teamId,
-              transactionId,
-              inboxId: inboxMatch.inboxId,
-              confidence: inboxMatch.confidenceScore,
-            });
 
             const transaction = await getTransactionById(db, {
               id: transactionId,
@@ -91,13 +91,6 @@ export const matchTransactionsBidirectional = schemaTask({
             }
           } else {
             forwardSuggestionCount++;
-
-            logger.info("Created forward match suggestion", {
-              teamId,
-              transactionId,
-              inboxId: inboxMatch.inboxId,
-              confidence: inboxMatch.confidenceScore,
-            });
           }
         }
       } catch (error) {
@@ -115,23 +108,14 @@ export const matchTransactionsBidirectional = schemaTask({
       limit: 50,
     });
 
-    const matchedInboxIds = new Set(forwardMatches.values());
     const unmatchedInboxItems = pendingInboxItems.filter(
-      (item) => !matchedInboxIds.has(item.id),
+      (item) => !forwardMatchedInboxIds.has(item.id),
     );
-
-    logger.info("Processing reverse matching for unmatched inbox items", {
-      teamId,
-      totalPendingItems: pendingInboxItems.length,
-      alreadyMatchedInPhase1: matchedInboxIds.size,
-      toProcessInPhase2: unmatchedInboxItems.length,
-    });
 
     let reverseMatchCount = 0;
     let reverseSuggestionCount = 0;
     let noMatchCount = 0;
 
-    const BATCH_SIZE = 10;
     for (let i = 0; i < unmatchedInboxItems.length; i += BATCH_SIZE) {
       const batch = unmatchedInboxItems.slice(i, i + BATCH_SIZE);
 
@@ -155,24 +139,10 @@ export const matchTransactionsBidirectional = schemaTask({
             switch (result.action) {
               case "auto_matched":
                 reverseMatchCount++;
-                logger.info("Auto-matched inbox item to transaction", {
-                  teamId,
-                  inboxId: inboxItem.id,
-                  transactionId: result.suggestion?.transactionId,
-                  confidence: result.suggestion?.confidenceScore,
-                });
                 break;
-
               case "suggestion_created":
                 reverseSuggestionCount++;
-                logger.info("Created reverse match suggestion", {
-                  teamId,
-                  inboxId: inboxItem.id,
-                  transactionId: result.suggestion?.transactionId,
-                  confidence: result.suggestion?.confidenceScore,
-                });
                 break;
-
               case "no_match_yet":
                 noMatchCount++;
                 break;
@@ -188,34 +158,13 @@ export const matchTransactionsBidirectional = schemaTask({
       );
     }
 
-    const totalProcessed =
-      newTransactionIds.length + unmatchedInboxItems.length;
-    const totalMatched = forwardMatchCount + reverseMatchCount;
-    const totalSuggestions = forwardSuggestionCount + reverseSuggestionCount;
-
     logger.info("Completed bidirectional transaction matching", {
       teamId,
-      summary: {
-        newTransactions: newTransactionIds.length,
-        pendingInboxItems: unmatchedInboxItems.length,
-        totalProcessed,
-        forwardMatches: forwardMatchCount,
-        reverseMatches: reverseMatchCount,
-        totalAutoMatches: totalMatched,
-        forwardSuggestions: forwardSuggestionCount,
-        reverseSuggestions: reverseSuggestionCount,
-        totalSuggestions,
-        noMatches: noMatchCount,
-      },
-    });
-
-    return {
-      processed: totalProcessed,
-      autoMatched: totalMatched,
-      suggestions: totalSuggestions,
-      noMatches: noMatchCount,
       forwardMatches: forwardMatchCount,
+      forwardSuggestions: forwardSuggestionCount,
       reverseMatches: reverseMatchCount,
-    };
+      reverseSuggestions: reverseSuggestionCount,
+      noMatches: noMatchCount,
+    });
   },
 });

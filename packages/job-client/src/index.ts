@@ -18,6 +18,8 @@ export interface TriggerJobOptions {
   delay?: number;
   /** Custom job ID for deduplication - BullMQ will reject duplicates with the same jobId */
   jobId?: string;
+  /** Job priority - lower number = higher priority. Used to let manual syncs jump ahead of background work. */
+  priority?: number;
 }
 
 /**
@@ -41,6 +43,7 @@ export async function triggerJob(
     const job = await queue.add(jobName, payload, {
       delay: options?.delay,
       jobId: options?.jobId,
+      priority: options?.priority,
     });
 
     if (!job?.id) {
@@ -56,6 +59,7 @@ export async function triggerJob(
       jobId: compositeId,
       queueName,
       customJobId: options?.jobId,
+      priority: options?.priority,
       duration: `${enqueueDuration}ms`,
     });
 
@@ -315,8 +319,16 @@ export async function getJobStatus(
 
   return {
     status,
+<<<<<<< HEAD
     progress,
     progressStep,
+=======
+    progress:
+      typeof progress === "number" ||
+      (typeof progress === "object" && progress !== null)
+        ? (progress as number | Record<string, unknown>)
+        : undefined,
+>>>>>>> 86c62dca5 (wip)
     result: returnValue,
     error: failedReason,
   };

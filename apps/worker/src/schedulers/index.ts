@@ -2,10 +2,7 @@ import type {
   DynamicSchedulerTemplate,
   StaticSchedulerConfig,
 } from "../types/scheduler-config";
-import {
-  inboxDynamicSchedulerTemplates,
-  inboxStaticSchedulers,
-} from "./inbox.config";
+import { inboxStaticSchedulers } from "./inbox.config";
 import { insightsStaticSchedulers } from "./insights.config";
 import { institutionsStaticSchedulers } from "./institutions.config";
 import { invoicesStaticSchedulers } from "./invoices.config";
@@ -25,9 +22,6 @@ export const staticSchedulerConfigs: StaticSchedulerConfig[] = [
 
 /**
  * All dynamic scheduler templates
- * Add new dynamic scheduler templates here
- * Note: Accounting auto-sync has been removed in favor of manual export only
+ * Currently empty -- inbox syncs moved to centralized static scheduler
  */
-export const dynamicSchedulerTemplates: DynamicSchedulerTemplate[] = [
-  ...inboxDynamicSchedulerTemplates,
-];
+export const dynamicSchedulerTemplates: DynamicSchedulerTemplate[] = [];

@@ -1,4 +1,5 @@
 import {
+  createInbox,
   getExistingInboxAttachmentsByReferenceIds,
   getInboxAccountInfo,
   getInboxBlocklist,
@@ -13,7 +14,7 @@ import {
 } from "@midday/inbox/errors";
 import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
-import { ensureFileExtension } from "@midday/utils";
+import { ensureFileExtension, getFiscalYearDates } from "@midday/utils";
 import type { Job } from "bullmq";
 import type { InboxProviderSyncAccountPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
@@ -58,20 +59,36 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
     });
 
     try {
-      const maxResults = 50;
+      const isFullSync = manualSync || !accountRow.lastAccessed;
+
+      let syncStartDate: Date | undefined;
+      if (isFullSync) {
+        const { from: fiscalYearStart } = getFiscalYearDates(
+          accountRow.fiscalYearStartMonth,
+        );
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        syncStartDate =
+          fiscalYearStart < threeMonthsAgo ? fiscalYearStart : threeMonthsAgo;
+      }
 
       const attachments = await connector.getAttachments({
         id: inboxAccountId,
         teamId: accountRow.teamId,
-        maxResults,
         lastAccessed: accountRow.lastAccessed,
         fullSync: manualSync,
+        syncStartDate,
       });
 
       this.logger.info("Fetched attachments from provider", {
         accountId: inboxAccountId,
         totalFound: attachments.length,
         provider: accountRow.provider,
+      });
+
+      await job.updateProgress({
+        discoveredCount: attachments.length,
+        status: "discovering",
       });
 
       // Filter out attachments that are already processed
@@ -192,13 +209,14 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         },
       });
 
+      const BATCH_THRESHOLD = 20;
+
       const uploadedAttachments = await processBatch(
         filteredAttachments,
         BATCH_SIZE,
         async (batch) => {
           const results = [];
           for (const item of batch) {
-            // Ensure filename has proper extension as final safety check
             const safeFilename = ensureFileExtension(
               item.filename,
               item.mimeType,
@@ -212,8 +230,25 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
               });
 
             if (uploadData) {
+              const filePath = uploadData.path.split("/");
+
+              // Create inbox item immediately so it appears in the UI via realtime
+              const inboxItem = await createInbox(db, {
+                displayName: item.filename,
+                teamId: accountRow.teamId,
+                filePath,
+                fileName: safeFilename,
+                contentType: item.mimeType,
+                size: item.size,
+                referenceId: item.referenceId,
+                website: item.website,
+                senderEmail: item.senderEmail,
+                inboxAccountId: inboxAccountId,
+                status: "new",
+              });
+
               results.push({
-                filePath: uploadData.path.split("/"),
+                filePath,
                 size: item.size,
                 mimetype: item.mimeType,
                 website: item.website,
@@ -221,6 +256,7 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
                 referenceId: item.referenceId,
                 teamId: accountRow.teamId,
                 inboxAccountId: inboxAccountId,
+                inboxItemId: inboxItem?.id,
               });
             }
           }
@@ -236,20 +272,49 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         uploaded: uploadedAttachments.length,
       });
 
+      await job.updateProgress({
+        discoveredCount: attachments.length,
+        uploadedCount: uploadedAttachments.length,
+        status: "extracting",
+      });
+
       if (uploadedAttachments.length > 0) {
-        this.logger.info("Triggering document processing", {
-          accountId: inboxAccountId,
-          attachmentCount: uploadedAttachments.length,
-        });
+        const useBatchExtraction =
+          isFullSync || uploadedAttachments.length > BATCH_THRESHOLD;
 
-        // Trigger process-attachment jobs for each uploaded attachment
-        await Promise.all(
-          uploadedAttachments.map((attachment) =>
-            triggerJob("process-attachment", attachment, "inbox"),
-          ),
-        );
+        if (useBatchExtraction) {
+          this.logger.info("Routing to batch extraction path", {
+            accountId: inboxAccountId,
+            attachmentCount: uploadedAttachments.length,
+            reason: isFullSync ? "full_sync" : "above_threshold",
+          });
 
-        // Send notification for new inbox items
+          await triggerJob(
+            "batch-extract-inbox",
+            {
+              items: uploadedAttachments.map((a) => ({
+                id: a.inboxItemId,
+                filePath: a.filePath,
+                teamId: a.teamId,
+              })),
+              teamId: accountRow.teamId,
+              inboxAccountId: inboxAccountId,
+            },
+            "inbox-provider",
+          );
+        } else {
+          this.logger.info("Routing to real-time extraction path", {
+            accountId: inboxAccountId,
+            attachmentCount: uploadedAttachments.length,
+          });
+
+          await Promise.all(
+            uploadedAttachments.map((attachment) =>
+              triggerJob("process-attachment", attachment, "inbox"),
+            ),
+          );
+        }
+
         try {
           await triggerJob(
             "notification",
@@ -264,7 +329,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
             "notifications",
           );
         } catch (error) {
-          // Don't fail the entire process if notification fails
           this.logger.warn("Failed to trigger inbox_new notification", {
             accountId: inboxAccountId,
             teamId: accountRow.teamId,
@@ -276,6 +340,7 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           accountId: inboxAccountId,
           teamId: accountRow.teamId,
           totalCount: uploadedAttachments.length,
+          extractionPath: useBatchExtraction ? "batch" : "realtime",
         });
       }
 
@@ -285,6 +350,12 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         lastAccessed: new Date().toISOString(),
         status: "connected",
         errorMessage: null,
+      });
+
+      await job.updateProgress({
+        discoveredCount: attachments.length,
+        uploadedCount: uploadedAttachments.length,
+        status: "complete",
       });
 
       this.logger.info("Inbox sync completed", {

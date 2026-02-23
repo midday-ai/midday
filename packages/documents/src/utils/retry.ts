@@ -1,6 +1,23 @@
 /**
- * Retry wrapper for calls with exponential backoff
- * Only retries on timeout/network errors, not on other errors
+ * Check if an error is a rate limit error (429, quota exceeded, etc.)
+ */
+export function isRateLimitError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("rate limit") ||
+    message.includes("rate_limit") ||
+    message.includes("too many requests") ||
+    message.includes("quota") ||
+    message.includes("429") ||
+    message.includes("resource_exhausted")
+  );
+}
+
+/**
+ * Retry wrapper for calls with exponential backoff.
+ * Retries on timeout, network, and rate limit errors.
  */
 export async function retryCall<T>(
   operation: () => Promise<T>,
@@ -11,12 +28,10 @@ export async function retryCall<T>(
     try {
       return await operation();
     } catch (error) {
-      // Don't retry on the last attempt
       if (attempt === maxRetries) {
         throw error;
       }
 
-      // Only retry on timeout/network errors, not on other AI errors
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       const errorName = error instanceof Error ? error.name : "";
@@ -30,13 +45,13 @@ export async function retryCall<T>(
         errorMessage.includes("goaway") ||
         errorName === "AbortError" ||
         errorName === "TimeoutError" ||
-        (error instanceof DOMException && error.code === 23);
+        (error instanceof DOMException && error.code === 23) ||
+        isRateLimitError(error);
 
       if (!isRetryableError) {
         throw error;
       }
 
-      // Exponential backoff with jitter
       const delay = baseDelay * 2 ** attempt + Math.random() * 1000;
       console.log(
         `AI call failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${Math.round(delay)}ms:`,

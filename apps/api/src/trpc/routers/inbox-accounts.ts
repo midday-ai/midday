@@ -13,8 +13,8 @@ import {
 } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { encryptOAuthState } from "@midday/inbox/utils";
+import { triggerJob } from "@midday/job-client";
 import { createLoggerWithContext } from "@midday/logger";
-import { schedules, tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 const logger = createLoggerWithContext("trpc:inbox-accounts");
@@ -87,10 +87,6 @@ export const inboxAccountsRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      if (data?.scheduleId) {
-        await schedules.del(data.scheduleId);
-      }
-
       return data;
     }),
 
@@ -110,12 +106,18 @@ export const inboxAccountsRouter = createTRPCRouter({
         });
       }
 
-      const event = await tasks.trigger("sync-inbox-account", {
-        id: input.id,
-        manualSync: input.manualSync || false,
-      });
+      const job = await triggerJob(
+        "sync-scheduler",
+        {
+          id: input.id,
+          manualSync: input.manualSync || false,
+          teamId: teamId!,
+        },
+        "inbox-provider",
+        { priority: 1 },
+      );
 
-      return event;
+      return { id: job.id };
     }),
 
   // initialSetup: protectedProcedure

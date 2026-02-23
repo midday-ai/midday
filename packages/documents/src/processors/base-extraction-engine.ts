@@ -11,7 +11,7 @@ import type { PromptComponents } from "../prompts/factory";
 import { createFieldSpecificPrompt } from "../prompts/field-specific";
 import type { DocumentFormat } from "../utils/format-detection";
 import { extractTextFromPdf } from "../utils/pdf-text-extract";
-import { retryCall } from "../utils/retry";
+import { isRateLimitError, retryCall } from "../utils/retry";
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
@@ -20,23 +20,6 @@ const google = createGoogleGenerativeAI({
 const mistral = createMistral({
   apiKey: process.env.MISTRAL_API_KEY!,
 });
-
-/**
- * Check if an error is a rate limit error
- */
-function isRateLimitError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
-
-  const message = error.message.toLowerCase();
-  return (
-    message.includes("rate limit") ||
-    message.includes("rate_limit") ||
-    message.includes("too many requests") ||
-    message.includes("quota") ||
-    message.includes("429") ||
-    message.includes("resource_exhausted")
-  );
-}
 
 export interface ExtractionResult<T> {
   data: T;
@@ -174,14 +157,26 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
-        const isRateLimit = isRateLimitError(error);
-        this.logger.warn(`${name} model extraction failed`, {
-          provider: modelConfig.provider,
-          model: modelConfig.model,
-          isRateLimit,
-          error: lastError.message,
-        });
-        // Continue to next model on rate limit or any error
+        if (isRateLimitError(error)) {
+          this.logger.warn(
+            `${name} model hit rate limit after retries exhausted, not cascading`,
+            {
+              provider: modelConfig.provider,
+              model: modelConfig.model,
+              error: lastError.message,
+            },
+          );
+          throw lastError;
+        }
+
+        this.logger.warn(
+          `${name} model extraction failed, cascading to next model`,
+          {
+            provider: modelConfig.provider,
+            model: modelConfig.model,
+            error: lastError.message,
+          },
+        );
       }
     }
 

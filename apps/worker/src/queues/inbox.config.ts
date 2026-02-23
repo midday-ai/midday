@@ -81,11 +81,19 @@ const inboxProviderQueueOptions: QueueOptions = {
 
 /**
  * Worker options for inbox provider queue
- * Concurrency: 10
+ * Concurrency: 5 (each sync job hits external Gmail/Outlook APIs)
+ * Rate limiter: 5 jobs per minute to avoid hitting provider rate limits
+ * Lock/stalled intervals support batch extraction jobs (up to 35 min)
  */
 const inboxProviderWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
-  concurrency: 10,
+  concurrency: 5,
+  lockDuration: 1800000, // 30 minutes -- batch extraction can poll for up to 30 min
+  stalledInterval: 2100000, // 35 minutes -- longer than lockDuration to avoid false stalls
+  limiter: {
+    max: 5,
+    duration: 60000, // Max 5 jobs per minute
+  },
 };
 
 /**
