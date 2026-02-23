@@ -12,11 +12,6 @@ const I18nMiddleware = createI18nMiddleware({
 });
 
 export async function middleware(request: NextRequest) {
-  // Server action requests carry their own auth
-  if (request.headers.get("Next-Action")) {
-    return I18nMiddleware(request);
-  }
-
   const response = await updateSession(request, I18nMiddleware(request));
   const supabase = await createClient();
   const nextUrl = request.nextUrl;
