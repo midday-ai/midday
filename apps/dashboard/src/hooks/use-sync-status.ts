@@ -1,48 +1,84 @@
-import { useRealtimeRun } from "@trigger.dev/react-hooks";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { useTRPC } from "@/trpc/client";
 
 type UseSyncStatusProps = {
-  runId?: string;
-  accessToken?: string;
+  jobId?: string;
 };
 
-export function useSyncStatus({
-  runId: initialRunId,
-  accessToken: initialAccessToken,
-}: UseSyncStatusProps) {
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    initialAccessToken,
-  );
-  const [runId, setRunId] = useState<string | undefined>(initialRunId);
+export type SyncMetadata = {
+  discoveredCount?: number;
+  uploadedCount?: number;
+  processedCount?: number;
+  status?: "discovering" | "extracting" | "complete";
+};
+
+const POLL_INTERVAL_MS = 2000;
+
+export function useSyncStatus({ jobId: initialJobId }: UseSyncStatusProps) {
+  const trpc = useTRPC();
+  const [jobId, setJobId] = useState<string | undefined>(initialJobId);
   const [status, setStatus] = useState<
     "FAILED" | "SYNCING" | "COMPLETED" | null
   >(null);
-  const { run, error } = useRealtimeRun(runId, {
-    enabled: !!runId && !!accessToken,
-    accessToken,
-  });
+  const [result, setResult] = useState<Record<string, unknown> | undefined>();
+  const [syncMetadata, setSyncMetadata] = useState<SyncMetadata | undefined>();
+  const settled = useRef(false);
+
+  const { data } = useQuery(
+    trpc.jobs.getStatus.queryOptions(
+      { jobId: jobId! },
+      {
+        enabled: !!jobId && !settled.current,
+        refetchInterval: POLL_INTERVAL_MS,
+        refetchIntervalInBackground: false,
+      },
+    ),
+  );
 
   useEffect(() => {
-    if (initialRunId && initialAccessToken) {
-      setAccessToken(initialAccessToken);
-      setRunId(initialRunId);
+    if (initialJobId) {
+      settled.current = false;
+      setJobId(initialJobId);
+      setStatus("SYNCING");
+      setSyncMetadata(undefined);
+      setResult(undefined);
+    }
+  }, [initialJobId]);
+
+  useEffect(() => {
+    if (!data || settled.current) return;
+
+    if (
+      data.progress &&
+      typeof data.progress === "object" &&
+      !Array.isArray(data.progress)
+    ) {
+      setSyncMetadata(data.progress as unknown as SyncMetadata);
+    }
+
+    if (data.status === "completed") {
+      settled.current = true;
+      setStatus("COMPLETED");
+      if (data.result && typeof data.result === "object") {
+        setResult(data.result as Record<string, unknown>);
+      }
+    } else if (data.status === "failed") {
+      settled.current = true;
+      setStatus("FAILED");
+    } else if (
+      data.status === "active" ||
+      data.status === "waiting" ||
+      data.status === "delayed"
+    ) {
       setStatus("SYNCING");
     }
-  }, [initialRunId, initialAccessToken]);
-
-  useEffect(() => {
-    if (error || run?.status === "FAILED") {
-      setStatus("FAILED");
-    }
-
-    if (run?.status === "COMPLETED") {
-      setStatus("COMPLETED");
-    }
-  }, [error, run]);
+  }, [data]);
 
   return {
     status,
     setStatus,
-    result: run?.output,
+    result,
+    syncMetadata,
   };
 }

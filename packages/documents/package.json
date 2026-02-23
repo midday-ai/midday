@@ -8,7 +8,8 @@
     "./loader": "./src/loaders/loader.ts",
     "./classifier": "./src/classifier/classifier.ts",
     "./embed": "./src/embed/embed.ts",
-    "./utils": "./src/utils.ts"
+    "./utils": "./src/utils.ts",
+    "./batch": "./src/batch/mistral-batch.ts"
   },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
@@ -24,6 +25,7 @@
     "@langchain/community": "1.0.3",
     "@langchain/core": "1.0.5",
     "@midday/utils": "workspace:*",
+    "@mistralai/mistralai": "^1.14.0",
     "ai": "catalog:",
     "canvas": "^3.2.0",
     "langchain": "^1.0.5",

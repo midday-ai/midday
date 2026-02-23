@@ -41,13 +41,14 @@ type InboxAccount = NonNullable<RouterOutputs["inboxAccounts"]["get"]>[number];
 function InboxAccountItem({ account }: { account: InboxAccount }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const [runId, setRunId] = useState<string | undefined>();
-  const [accessToken, setAccessToken] = useState<string | undefined>();
+  const [jobId, setJobId] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
   const router = useRouter();
 
-  const { status, setStatus, result } = useSyncStatus({ runId, accessToken });
+  const { status, setStatus, result, syncMetadata } = useSyncStatus({
+    jobId,
+  });
 
   const syncInboxAccountMutation = useMutation(
     trpc.inboxAccounts.sync.mutationOptions({
@@ -56,13 +57,12 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
       },
       onSuccess: (data) => {
         if (data) {
-          setRunId(data.id);
-          setAccessToken(data.publicAccessToken);
+          setJobId(data.id);
         }
       },
       onError: () => {
         setSyncing(false);
-        setRunId(undefined);
+        setJobId(undefined);
         setStatus("FAILED");
 
         toast({
@@ -76,20 +76,37 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
 
   useEffect(() => {
     if (isSyncing) {
+      const discoveredCount = syncMetadata?.discoveredCount;
+      const uploadedCount = syncMetadata?.uploadedCount;
+      const metadataStatus = syncMetadata?.status;
+
+      let description =
+        "We're scanning for PDF attachments and receipts, please wait.";
+
+      if (metadataStatus === "extracting" && uploadedCount) {
+        description = `Found ${uploadedCount} ${uploadedCount === 1 ? "attachment" : "attachments"}, extracting data...`;
+      } else if (discoveredCount && !metadataStatus) {
+        description = `Discovered ${discoveredCount} ${discoveredCount === 1 ? "email" : "emails"} with attachments...`;
+      }
+
       toast({
         title: "Syncing...",
-        description:
-          "We're scanning for PDF attachments and receipts, please wait.",
+        description,
         duration: Number.POSITIVE_INFINITY,
         variant: "spinner",
       });
     }
-  }, [isSyncing]);
+  }, [
+    isSyncing,
+    syncMetadata?.status,
+    syncMetadata?.uploadedCount,
+    syncMetadata?.discoveredCount,
+  ]);
 
   useEffect(() => {
     if (status === "COMPLETED") {
       dismiss();
-      setRunId(undefined);
+      setJobId(undefined);
       setSyncing(false);
 
       // Show success toast with attachment count
@@ -119,7 +136,7 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
   useEffect(() => {
     if (status === "FAILED") {
       setSyncing(false);
-      setRunId(undefined);
+      setJobId(undefined);
 
       queryClient.invalidateQueries({
         queryKey: trpc.inboxAccounts.get.queryKey(),

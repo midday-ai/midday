@@ -1,6 +1,7 @@
-import { and, eq } from "drizzle-orm";
+import { subDays } from "date-fns";
+import { and, eq, gte, inArray, or } from "drizzle-orm";
 import type { Database } from "../client";
-import { inboxAccounts } from "../schema";
+import { inboxAccounts, teams } from "../schema";
 
 export async function getInboxAccounts(db: Database, teamId: string) {
   return db
@@ -147,6 +148,32 @@ export async function upsertInboxAccount(
   return result;
 }
 
+/**
+ * Get all inbox accounts that are connected and belong to eligible teams.
+ * Eligible = pro/starter (always) or trial (within 14 days of creation).
+ */
+export async function getEligibleInboxAccounts(db: Database) {
+  const fourteenDaysAgo = subDays(new Date(), 14);
+
+  return db
+    .select({
+      id: inboxAccounts.id,
+      provider: inboxAccounts.provider,
+      teamId: inboxAccounts.teamId,
+    })
+    .from(inboxAccounts)
+    .innerJoin(teams, eq(inboxAccounts.teamId, teams.id))
+    .where(
+      and(
+        eq(inboxAccounts.status, "connected"),
+        or(
+          inArray(teams.plan, ["pro", "starter"]),
+          and(eq(teams.plan, "trial"), gte(teams.createdAt, fourteenDaysAgo)),
+        ),
+      ),
+    );
+}
+
 type GetInboxAccountInfoParams = {
   id: string;
 };
@@ -161,8 +188,10 @@ export async function getInboxAccountInfo(
       provider: inboxAccounts.provider,
       teamId: inboxAccounts.teamId,
       lastAccessed: inboxAccounts.lastAccessed,
+      fiscalYearStartMonth: teams.fiscalYearStartMonth,
     })
     .from(inboxAccounts)
+    .innerJoin(teams, eq(inboxAccounts.teamId, teams.id))
     .where(eq(inboxAccounts.id, params.id))
     .limit(1);
 

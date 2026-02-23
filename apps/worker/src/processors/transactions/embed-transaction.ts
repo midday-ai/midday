@@ -70,6 +70,13 @@ export class EmbedTransactionProcessor extends BaseProcessor<EmbedTransactionPay
         teamId,
         requestedCount: transactionIds.length,
       });
+
+      await triggerJob(
+        "match-transactions-bidirectional",
+        { teamId, newTransactionIds: transactionIds },
+        "inbox",
+      );
+
       return;
     }
 
@@ -138,6 +145,17 @@ export class EmbedTransactionProcessor extends BaseProcessor<EmbedTransactionPay
 
     this.logger.info("All transaction embeddings created", {
       totalCount: transactionsToEmbed.length,
+      teamId,
+    });
+
+    await triggerJob(
+      "match-transactions-bidirectional",
+      { teamId, newTransactionIds: transactionIds },
+      "inbox",
+    );
+
+    this.logger.info("Triggered bidirectional transaction matching", {
+      transactionCount: transactionIds.length,
       teamId,
     });
   }

@@ -359,38 +359,52 @@ export class GmailProvider implements OAuthProviderInterface {
     // Proactively refresh token if expired or expiring soon
     await this.#ensureValidAccessToken();
 
-    const { maxResults = 50, lastAccessed, fullSync = false } = options;
+    const {
+      maxResults = 50,
+      lastAccessed,
+      fullSync = false,
+      syncStartDate,
+    } = options;
+
+    const DISCOVERY_MAX = 500;
 
     // Build date filter based on sync type and lastAccessed
     let dateFilter = "";
     if (fullSync || !lastAccessed) {
-      // For full syncs (initial or manual) or accounts without lastAccessed, fetch last 30 days to capture recent business documents
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const formattedDate = thirtyDaysAgo.toISOString().split("T")[0];
-      dateFilter = `after:${formattedDate}`;
+      if (syncStartDate) {
+        const formattedDate = syncStartDate.toISOString().split("T")[0];
+        dateFilter = `after:${formattedDate}`;
+      } else {
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        const formattedDate = threeMonthsAgo.toISOString().split("T")[0];
+        dateFilter = `after:${formattedDate}`;
+      }
     } else {
       // For subsequent syncs, sync from last access date
       // Subtract 1 day to make it inclusive since Gmail's "after:" is exclusive
       const lastAccessDate = new Date(lastAccessed);
       lastAccessDate.setDate(lastAccessDate.getDate() - 1);
-      const formattedDate = lastAccessDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+      const formattedDate = lastAccessDate.toISOString().split("T")[0];
       dateFilter = `after:${formattedDate}`;
     }
+
+    const isFullSync = fullSync || !lastAccessed;
+    const maxMessages = isFullSync ? DISCOVERY_MAX : maxResults;
 
     try {
       const query = `-from:me has:attachment filename:pdf ${dateFilter}`;
 
-      // Fetch messages with pagination to handle high-volume days
+      // Fetch messages with pagination
       const allMessages: gmail_v1.Schema$Message[] = [];
       let nextPageToken: string | undefined;
-      const maxPagesToFetch = 3; // Limit to prevent infinite loops
+      const maxPagesToFetch = isFullSync ? 100 : 3;
       let pagesFetched = 0;
 
       do {
         const listResponse = await this.#gmail.users.messages.list({
           userId: "me",
-          maxResults: Math.min(maxResults, 50), // Gmail API max per request
+          maxResults: Math.min(maxMessages, 50), // Gmail API max per request
           q: query,
           pageToken: nextPageToken,
         });
@@ -405,12 +419,11 @@ export class GmailProvider implements OAuthProviderInterface {
         // Stop if we have enough messages or hit our page limit
       } while (
         nextPageToken &&
-        allMessages.length < maxResults &&
+        allMessages.length < maxMessages &&
         pagesFetched < maxPagesToFetch
       );
 
-      // Limit to maxResults to respect our system limits
-      const messages = allMessages.slice(0, maxResults);
+      const messages = allMessages.slice(0, maxMessages);
 
       if (!messages || messages.length === 0) {
         console.log(
