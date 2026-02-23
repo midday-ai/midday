@@ -1,8 +1,4 @@
-import {
-  calculateInboxSuggestions,
-  hasSuggestion,
-  updateInboxStatus,
-} from "@midday/db/queries";
+import { calculateInboxSuggestions, hasSuggestion } from "@midday/db/queries";
 import type { Job } from "bullmq";
 import {
   type BatchProcessMatchingPayload,
@@ -104,22 +100,6 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
               errorCategory: classified.category,
               retryable: classified.retryable,
             });
-
-            // Safety net: reset status to "pending" so items don't stay stuck in "analyzing"
-            try {
-              await updateInboxStatus(db, { id: inboxId, status: "pending" });
-            } catch (statusError) {
-              this.logger.error(
-                "Failed to reset inbox status after matching error",
-                {
-                  inboxId,
-                  error:
-                    statusError instanceof Error
-                      ? statusError.message
-                      : "Unknown error",
-                },
-              );
-            }
 
             throw error;
           }

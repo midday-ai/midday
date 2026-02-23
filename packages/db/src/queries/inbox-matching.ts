@@ -48,64 +48,26 @@ export async function calculateInboxSuggestions(
     status: "analyzing",
   });
 
-  try {
-    // Find the best match using our matching algorithm
-    const bestMatch = await findMatches(db, { teamId, inboxId });
+  // Find the best match using our matching algorithm
+  const bestMatch = await findMatches(db, { teamId, inboxId });
 
-    if (!bestMatch) {
-      // Update inbox status to pending - we'll keep looking when new transactions arrive
-      // The no_match status is only set by the scheduler after 90 days
-      await updateInbox(db, {
-        id: inboxId,
-        teamId,
-        status: "pending",
-      });
+  if (!bestMatch) {
+    // Update inbox status to pending - we'll keep looking when new transactions arrive
+    // The no_match status is only set by the scheduler after 90 days
+    await updateInbox(db, {
+      id: inboxId,
+      teamId,
+      status: "pending",
+    });
 
-      return { action: "no_match_yet" };
-    }
+    return { action: "no_match_yet" };
+  }
 
-    // Check if this should be auto-matched (very strict criteria)
-    const shouldAutoMatch = bestMatch.matchType === "auto_matched";
+  // Check if this should be auto-matched (very strict criteria)
+  const shouldAutoMatch = bestMatch.matchType === "auto_matched";
 
-    if (shouldAutoMatch) {
-      // Store the auto-match record for tracking
-      await createMatchSuggestion(db, {
-        teamId,
-        inboxId,
-        transactionId: bestMatch.transactionId,
-        confidenceScore: bestMatch.confidenceScore,
-        amountScore: bestMatch.amountScore,
-        currencyScore: bestMatch.currencyScore,
-        dateScore: bestMatch.dateScore,
-        embeddingScore: bestMatch.embeddingScore,
-        matchType: "auto_matched",
-        status: "confirmed", // Already confirmed by system
-        matchDetails: {
-          autoMatched: true,
-          calculatedAt: new Date().toISOString(),
-          criteria: {
-            confidence: bestMatch.confidenceScore,
-            amount: bestMatch.amountScore,
-            currency: bestMatch.currencyScore,
-            date: bestMatch.dateScore,
-          },
-        },
-      });
-
-      // Perform the actual match
-      await matchTransaction(db, {
-        id: inboxId,
-        transactionId: bestMatch.transactionId,
-        teamId,
-      });
-
-      return {
-        action: "auto_matched",
-        suggestion: bestMatch,
-      };
-    }
-
-    // Create suggestion and update inbox status to 'suggested_match'
+  if (shouldAutoMatch) {
+    // Store the auto-match record for tracking
     await createMatchSuggestion(db, {
       teamId,
       inboxId,
@@ -115,40 +77,67 @@ export async function calculateInboxSuggestions(
       currencyScore: bestMatch.currencyScore,
       dateScore: bestMatch.dateScore,
       embeddingScore: bestMatch.embeddingScore,
-      matchType: bestMatch.matchType,
-      status: "pending",
+      matchType: "auto_matched",
+      status: "confirmed", // Already confirmed by system
       matchDetails: {
+        autoMatched: true,
         calculatedAt: new Date().toISOString(),
-        scores: {
+        criteria: {
+          confidence: bestMatch.confidenceScore,
           amount: bestMatch.amountScore,
           currency: bestMatch.currencyScore,
           date: bestMatch.dateScore,
-          embedding: bestMatch.embeddingScore,
         },
       },
     });
 
-    // Update inbox status to indicate suggestion is available
-    await updateInbox(db, {
+    // Perform the actual match
+    await matchTransaction(db, {
       id: inboxId,
+      transactionId: bestMatch.transactionId,
       teamId,
-      status: "suggested_match",
     });
 
     return {
-      action: "suggestion_created",
+      action: "auto_matched",
       suggestion: bestMatch,
     };
-  } catch (error) {
-    // Reset status to "pending" so the item doesn't get stuck in "analyzing"
-    await updateInbox(db, {
-      id: inboxId,
-      teamId,
-      status: "pending",
-    });
-
-    throw error;
   }
+
+  // Create suggestion and update inbox status to 'suggested_match'
+  await createMatchSuggestion(db, {
+    teamId,
+    inboxId,
+    transactionId: bestMatch.transactionId,
+    confidenceScore: bestMatch.confidenceScore,
+    amountScore: bestMatch.amountScore,
+    currencyScore: bestMatch.currencyScore,
+    dateScore: bestMatch.dateScore,
+    embeddingScore: bestMatch.embeddingScore,
+    matchType: bestMatch.matchType,
+    status: "pending",
+    matchDetails: {
+      calculatedAt: new Date().toISOString(),
+      scores: {
+        amount: bestMatch.amountScore,
+        currency: bestMatch.currencyScore,
+        date: bestMatch.dateScore,
+        embedding: bestMatch.embeddingScore,
+      },
+    },
+  });
+
+  // Update inbox status to indicate suggestion is available
+  await updateInbox(db, {
+    id: inboxId,
+    teamId,
+    status: "suggested_match",
+  });
+
+  return {
+    action: "suggestion_created",
+    suggestion: bestMatch,
+  };
 }
 
 // Confirm a suggested match
