@@ -23,18 +23,10 @@ function isRetryable(err: any): boolean {
 /**
  * Fetch wrapper for service-to-service calls over Railway private networking.
  *
- * Solves two known Railway issues during API redeployments:
- *
- * 1. Stale TCP connections — Bun's HTTP client pools keep-alive connections.
- *    When the API redeploys with a new internal IP, pooled connections point
- *    at dead containers and hang indefinitely. `Connection: close` forces a
- *    fresh TCP connection (and DNS resolution) per request, similar to how
- *    Caddy handles this (Railway's recommended approach).
- *
- * 2. Hanging requests — Even with fresh connections, DNS propagation on
- *    Railway's Wireguard mesh can lag. The 5s timeout ensures we fail fast
- *    instead of blocking the caller, and the retry with exponential backoff
- *    gives the mesh time to converge.
+ * During API redeployments, DNS propagation on Railway's Wireguard mesh can
+ * lag and pooled keep-alive connections may point at dead containers. The 5s
+ * timeout ensures we fail fast instead of hanging, and the retry with
+ * exponential backoff gives the mesh time to converge.
  */
 export async function fetchWithRetry(
   input: string | URL | Request,
@@ -47,10 +39,8 @@ export async function fetchWithRetry(
       const signal = init?.signal
         ? AbortSignal.any([init.signal, timeout])
         : timeout;
-      const headers = new Headers(init?.headers);
-      headers.set("Connection", "close");
 
-      return await fetch(input, { ...init, signal, headers });
+      return await fetch(input, { ...init, signal });
     } catch (err: any) {
       lastError = err;
       if (!isRetryable(err) || attempt === MAX_RETRIES) throw err;
