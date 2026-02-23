@@ -3,13 +3,30 @@ import { RedisClient } from "bun";
 
 const logger = createLoggerWithContext("redis");
 
+const REGION_URL_MAP: Record<string, string> = {
+  "europe-west4-drams3a": "REDIS_URL_EU",
+  "us-east4-eqdc4a": "REDIS_URL_US_EAST",
+  "us-west2": "REDIS_URL_US_WEST",
+};
+
 function resolveRedisUrl(): string {
+  const region = process.env.RAILWAY_REPLICA_REGION;
+  if (region) {
+    const envVar = REGION_URL_MAP[region];
+    const url = envVar ? process.env[envVar] : undefined;
+    if (url) {
+      logger.info(`Using regional Redis: ${envVar} (${region})`);
+      return url;
+    }
+  }
   if (process.env.REDIS_URL) {
-    logger.info("Using REDIS_URL (Upstash multi-region)");
+    logger.info("Using default REDIS_URL (no region match)");
     return process.env.REDIS_URL;
   }
 
-  throw new Error("No Redis URL configured. Set REDIS_URL.");
+  throw new Error(
+    "No Redis URL configured. Set REDIS_URL or region-specific REDIS_URL_EU / REDIS_URL_US_EAST / REDIS_URL_US_WEST",
+  );
 }
 
 let sharedClient: RedisClient | null = null;
