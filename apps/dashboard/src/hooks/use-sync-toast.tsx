@@ -1,8 +1,8 @@
 "use client";
 
+import type { ToastActionElement } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useTRPC } from "@/trpc/client";
@@ -28,7 +28,7 @@ interface UseSyncToastOptions {
   toastId: string;
   initialJobId?: string;
   labels?: Partial<SyncToastLabels>;
-  completedAction?: ReactNode;
+  completedAction?: ToastActionElement;
   completedDuration?: number;
   onCompleted?: (attachmentCount: number) => void;
   onFailed?: () => void;
@@ -113,7 +113,7 @@ export function useSyncToast({
         description,
         variant: "success",
         duration: completedDuration,
-        ...(completedAction ? { action: completedAction } : {}),
+        action: completedAction,
       });
 
       queryClient.invalidateQueries({
