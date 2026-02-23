@@ -77,7 +77,6 @@ export async function submitBatchExtraction(
     return JSON.stringify({
       custom_id: item.id,
       body: {
-        model: OCR_MODEL,
         document: {
           type: "document_url",
           document_url: `data:application/pdf;base64,${item.pdfBase64}`,
@@ -91,6 +90,7 @@ export async function submitBatchExtraction(
           },
         },
         document_annotation_prompt: prompt,
+        pages: [0, 1, 2, 3, 4, 5, 6, 7],
         include_image_base64: false,
       },
     });
@@ -111,6 +111,7 @@ export async function submitBatchExtraction(
     model: OCR_MODEL,
     endpoint: "/v1/ocr",
     metadata: { type: "inbox-extraction" },
+    timeoutHours: 1,
   });
 
   return job.id;
@@ -131,6 +132,7 @@ export interface BatchJobInfo {
   succeededRequests: number;
   failedRequests: number;
   outputFileId?: string | null;
+  errorFileId?: string | null;
 }
 
 /**
@@ -146,6 +148,7 @@ export async function getBatchJobStatus(jobId: string): Promise<BatchJobInfo> {
     succeededRequests: job.succeededRequests ?? 0,
     failedRequests: job.failedRequests ?? 0,
     outputFileId: job.outputFile,
+    errorFileId: job.errorFile,
   };
 }
 
@@ -217,6 +220,49 @@ export async function downloadBatchResults(
       }
     } catch (parseError) {
       console.error("Failed to parse batch result line:", parseError);
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Download and parse the error file from a batch job.
+ * Returns IDs of requests that failed on Mistral's side so we can fall back.
+ */
+export async function downloadBatchErrors(
+  errorFileId: string,
+): Promise<BatchExtractionResult[]> {
+  const client = getMistralClient();
+  const fileContent = await client.files.download({ fileId: errorFileId });
+
+  let text: string;
+  if (fileContent instanceof Blob) {
+    text = await fileContent.text();
+  } else if (typeof fileContent === "string") {
+    text = fileContent;
+  } else if (Buffer.isBuffer(fileContent)) {
+    text = fileContent.toString("utf-8");
+  } else {
+    text = String(fileContent);
+  }
+
+  const lines = text.trim().split("\n").filter(Boolean);
+  const results: BatchExtractionResult[] = [];
+
+  for (const line of lines) {
+    try {
+      const entry = JSON.parse(line);
+      results.push({
+        id: entry.custom_id,
+        success: false,
+        error:
+          entry.error?.message ||
+          entry.response?.body?.error?.message ||
+          `Status ${entry.response?.status_code || "unknown"}`,
+      });
+    } catch {
+      // skip unparseable lines
     }
   }
 

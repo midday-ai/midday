@@ -381,10 +381,11 @@ pending → confirmed/declined/expired/unmatched
 - **Entry Job**: `upsert-transactions`
 - **Flow**: Transaction → Embedding → Match against inbox
 
-### 2. Gmail Account Sync
-- **Trigger**: Gmail API sync for attachments
-- **Entry Job**: `sync-inbox-account` → `process-attachment`
-- **Flow**: Attachment → Process → Embed → Match against transactions
+### 2. Email Account Sync (Gmail/Outlook)
+- **Trigger**: Periodic sync or manual sync from dashboard
+- **Entry Job**: `sync-scheduler` → `batch-extract-inbox` or `process-attachment`
+- **Flow**: Attachment → Upload → Extract → Embed → Match against transactions
+- **See**: [inbox-sync.md](./inbox-sync.md) for full sync pipeline details
 
 ### 3. Email Webhook
 - **Trigger**: Email forwarded to team inbox

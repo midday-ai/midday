@@ -9,9 +9,6 @@ import { SyncAccountsSchedulerProcessor } from "./sync-accounts-scheduler";
 import { SyncSchedulerProcessor } from "./sync-scheduler";
 import { WhatsAppUploadProcessor } from "./whatsapp-upload";
 
-/**
- * Export all inbox processors (for type imports)
- */
 export { BatchExtractInboxProcessor } from "./batch-extract-inbox";
 export { BatchProcessMatchingProcessor } from "./batch-process-matching";
 export { InitialSetupProcessor } from "./initial-setup";
@@ -23,10 +20,6 @@ export { SyncAccountsSchedulerProcessor } from "./sync-accounts-scheduler";
 export { SyncSchedulerProcessor } from "./sync-scheduler";
 export { WhatsAppUploadProcessor } from "./whatsapp-upload";
 
-/**
- * Inbox processor registry
- * Maps job names to processor instances
- */
 export const inboxProcessors = {
   "batch-extract-inbox": new BatchExtractInboxProcessor(),
   "batch-process-matching": new BatchProcessMatchingProcessor(),

@@ -82,7 +82,11 @@ const inboxProviderQueueOptions: QueueOptions = {
 /**
  * Worker options for inbox provider queue
  * Concurrency: 5 (each sync job hits external Gmail/Outlook APIs)
- * Rate limiter: 5 jobs per minute to avoid hitting provider rate limits
+ * No global rate limiter -- BullMQ limiters are priority-blind, so a global
+ * limiter would let background scheduler traffic block user-initiated manual
+ * syncs even when they have higher priority. Concurrency alone is sufficient
+ * to cap external API pressure; priority ordering ensures manual syncs are
+ * picked up ahead of background work as soon as a slot opens.
  * Lock/stalled intervals support batch extraction jobs (up to 35 min)
  */
 const inboxProviderWorkerOptions: WorkerOptions = {
@@ -90,16 +94,11 @@ const inboxProviderWorkerOptions: WorkerOptions = {
   concurrency: 5,
   lockDuration: 1800000, // 30 minutes -- batch extraction can poll for up to 30 min
   stalledInterval: 2100000, // 35 minutes -- longer than lockDuration to avoid false stalls
-  limiter: {
-    max: 5,
-    duration: 60000, // Max 5 jobs per minute
-  },
 };
 
 /**
  * Inbox provider queue configuration
- * Gmail provider sync jobs
- * Jobs: initial-setup, scheduler, sync-account
+ * Jobs: initial-setup, sync-scheduler, sync-accounts-scheduler, batch-extract-inbox
  */
 export const inboxProviderQueueConfig: QueueConfig = {
   name: "inbox-provider",

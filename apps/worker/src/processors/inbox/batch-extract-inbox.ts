@@ -3,6 +3,7 @@ import {
   type BatchExtractionItem,
   type BatchJobStatus,
   cancelBatchJob,
+  downloadBatchErrors,
   downloadBatchResults,
   getBatchJobStatus,
   submitBatchExtraction,
@@ -51,11 +52,16 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       itemCount: items.length,
     });
 
-    // Step 1: Download PDFs from storage and build batch request
     const batchItems: BatchExtractionItem[] = [];
 
     for (const item of items) {
-      if (!item.id) continue;
+      if (!item.id) {
+        this.logger.warn("Skipping batch item with missing id", {
+          filePath: item.filePath,
+          teamId: item.teamId,
+        });
+        continue;
+      }
 
       const filePath = item.filePath.join("/");
 
@@ -106,7 +112,6 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       batchItemCount: batchItems.length,
     });
 
-    // Step 2: Submit to Mistral Batch API
     const batchJobId = await submitBatchExtraction(batchItems);
 
     this.logger.info("Batch job submitted", {
@@ -115,7 +120,6 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       itemCount: batchItems.length,
     });
 
-    // Mark all items as processing
     await Promise.all(
       batchItems.map((item) =>
         updateInbox(db, {
@@ -126,7 +130,6 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       ),
     );
 
-    // Step 3: Poll for completion
     const startTime = Date.now();
     let pollAttempt = 0;
     let finalStatus: BatchJobStatus = "QUEUED";
@@ -155,11 +158,22 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
         status.status === "TIMEOUT_EXCEEDED" ||
         status.status === "CANCELLED"
       ) {
-        // Download and process results if output file exists
-        if (status.outputFileId) {
-          const results = await downloadBatchResults(status.outputFileId);
+        const results = status.outputFileId
+          ? await downloadBatchResults(status.outputFileId)
+          : [];
 
-          this.logger.info("Batch results downloaded", {
+        if (status.errorFileId) {
+          const errorResults = await downloadBatchErrors(status.errorFileId);
+          const outputIds = new Set(results.map((r) => r.id));
+          for (const err of errorResults) {
+            if (!outputIds.has(err.id)) {
+              results.push(err);
+            }
+          }
+        }
+
+        if (results.length > 0) {
+          this.logger.info("Batch results collected", {
             jobId: job.id,
             batchJobId,
             resultCount: results.length,
@@ -168,7 +182,6 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
           let succeeded = 0;
           let failed = 0;
 
-          // Step 4: Process each result
           for (const result of results) {
             if (result.success && result.data) {
               try {
@@ -203,7 +216,6 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
                   status: "analyzing",
                 });
 
-                // Trigger embedding + matching for this item
                 if (docType !== "other") {
                   try {
                     await triggerJobAndWait(
@@ -252,7 +264,6 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
                 },
               );
 
-              // Fallback: queue real-time extraction via existing pipeline
               const originalItem = items.find((i) => i.id === result.id);
               if (originalItem) {
                 try {
@@ -289,7 +300,6 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
           };
         }
 
-        // Batch failed without output
         this.logger.error("Batch job completed without output file", {
           jobId: job.id,
           batchJobId,
@@ -299,7 +309,6 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       }
     }
 
-    // Timeout or failure: cancel the batch and fall back to real-time
     if (finalStatus === "QUEUED" || finalStatus === "RUNNING") {
       this.logger.warn("Batch job timed out, cancelling and falling back", {
         jobId: job.id,
@@ -320,14 +329,19 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       }
     }
 
-    // Fall back to real-time extraction for all items
     this.logger.info("Falling back to real-time extraction for all items", {
       jobId: job.id,
       itemCount: items.length,
     });
 
     for (const item of items) {
-      if (!item.id) continue;
+      if (!item.id) {
+        this.logger.warn("Skipping fallback for item with missing id", {
+          filePath: item.filePath,
+          teamId: item.teamId,
+        });
+        continue;
+      }
       try {
         await triggerJob(
           "process-attachment",

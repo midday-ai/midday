@@ -25,8 +25,8 @@ const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
 const BATCH_SIZE = 5;
 
 /**
- * Sync scheduler processor - triggered by dynamic scheduler for each inbox account
- * Receives inbox account ID and syncs attachments from the provider
+ * Syncs attachments from a connected inbox account (Gmail/Outlook).
+ * Triggered by manual sync or the centralized sync-accounts-scheduler.
  */
 export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccountPayload> {
   async process(job: Job<InboxProviderSyncAccountPayload>): Promise<{
@@ -42,7 +42,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       throw new Error("inboxAccountId is required");
     }
 
-    // Get the account info to access provider and teamId
     const accountRow = await getInboxAccountInfo(db, { id: inboxAccountId });
 
     if (!accountRow) {
@@ -91,7 +90,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         status: "discovering",
       });
 
-      // Filter out attachments that are already processed
       const referenceIds = attachments.map(
         (attachment) => attachment.referenceId,
       );
@@ -122,7 +120,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         })),
       };
 
-      // Get blocklist entries for the team
       const blocklistEntries = await getInboxBlocklist(db, {
         teamId: accountRow.teamId,
       });
@@ -130,13 +127,11 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       const { blockedDomains, blockedEmails } =
         separateBlocklistEntries(blocklistEntries);
 
-      // Track filtering statistics
       let skippedAlreadyProcessed = 0;
       let skippedTooLarge = 0;
       let skippedBlockedDomain = 0;
       let skippedBlockedEmail = 0;
 
-      // Create a Set for O(1) lookup
       const existingReferenceIdSet = new Set(
         existingAttachments.data?.map((e) => e.reference_id) ?? [],
       );
@@ -152,7 +147,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       });
 
       const filteredAttachments = attachments.filter((attachment) => {
-        // Skip if already exists in database
         const exists = existingReferenceIdSet.has(attachment.referenceId);
         if (exists) {
           skippedAlreadyProcessed++;
@@ -163,7 +157,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           return false;
         }
 
-        // Skip if attachment is too large
         if (attachment.size > MAX_ATTACHMENT_SIZE) {
           skippedTooLarge++;
           this.logger.warn("Attachment exceeds size limit", {
@@ -175,7 +168,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           return false;
         }
 
-        // Skip if domain is blocked
         if (attachment.website) {
           const domain = attachment.website.toLowerCase();
           if (blockedDomains.includes(domain)) {
@@ -184,7 +176,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           }
         }
 
-        // Skip if sender email is blocked
         if (attachment.senderEmail) {
           const email = attachment.senderEmail.toLowerCase();
           if (blockedEmails.includes(email)) {
@@ -232,7 +223,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
             if (uploadData) {
               const filePath = uploadData.path.split("/");
 
-              // Create inbox item immediately so it appears in the UI via realtime
               const inboxItem = await createInbox(db, {
                 displayName: item.filename,
                 teamId: accountRow.teamId,
@@ -247,6 +237,18 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
                 status: "new",
               });
 
+              if (!inboxItem?.id) {
+                this.logger.warn(
+                  "Failed to create inbox item, skipping attachment",
+                  {
+                    referenceId: item.referenceId,
+                    filename: item.filename,
+                    accountId: inboxAccountId,
+                  },
+                );
+                continue;
+              }
+
               results.push({
                 filePath,
                 size: item.size,
@@ -256,7 +258,7 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
                 referenceId: item.referenceId,
                 teamId: accountRow.teamId,
                 inboxAccountId: inboxAccountId,
-                inboxItemId: inboxItem?.id,
+                inboxItemId: inboxItem.id,
               });
             }
           }
@@ -344,7 +346,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         });
       }
 
-      // Update account with successful sync - mark as connected and clear errors
       await updateInboxAccount(db, {
         id: inboxAccountId,
         lastAccessed: new Date().toISOString(),
@@ -369,7 +370,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         syncedAt: new Date().toISOString(),
       };
     } catch (error) {
-      // Handle structured InboxAuthError
       if (isInboxAuthError(error)) {
         assertInboxAuthError(error);
 
@@ -382,7 +382,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         });
 
         if (error.requiresReauth) {
-          // Mark as disconnected - user needs to re-authenticate
           await updateInboxAccount(db, {
             id: inboxAccountId,
             status: "disconnected",
@@ -398,7 +397,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
             },
           );
         } else {
-          // Transient auth error - don't change status, let retry handle it
           this.logger.warn("Transient auth error - will retry", {
             accountId: inboxAccountId,
             errorCode: error.code,
@@ -409,7 +407,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         throw error;
       }
 
-      // Handle structured InboxSyncError
       if (error instanceof InboxSyncError) {
         this.logger.warn("Inbox sync failed - sync error", {
           accountId: inboxAccountId,
@@ -419,11 +416,9 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           provider: error.provider,
         });
 
-        // Sync errors are typically transient - don't change connection status
         throw error;
       }
 
-      // Handle unknown errors (fallback)
       const errorMessage =
         error instanceof Error ? error.message : "Unknown sync error";
 
@@ -433,7 +428,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         provider: accountRow.provider,
       });
 
-      // For unknown errors, don't change connection status
       throw error;
     }
   }
