@@ -401,7 +401,7 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
     results: BatchExtractionResult[],
     items: BatchExtractInboxPayload["items"],
     teamId: string,
-    inboxAccountId: string,
+    inboxAccountId: string | undefined,
     db: ReturnType<typeof getDb>,
   ): Promise<{ succeeded: number; failed: number; embeddableIds: string[] }> {
     let succeeded = 0;
@@ -431,9 +431,9 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
           id: result.id,
           amount: data.total_amount ?? undefined,
           currency: data.currency ?? undefined,
-          displayName: data.vendor_name || data.store_name || undefined,
+          displayName: data.vendor_name || undefined,
           website: data.website ?? undefined,
-          date: data.invoice_date || data.date || undefined,
+          date: data.invoice_date || undefined,
           taxAmount: data.tax_amount ?? undefined,
           taxRate: data.tax_rate ?? undefined,
           taxType: data.tax_type ?? undefined,
@@ -469,7 +469,6 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       for (const result of settled) {
         if (result.status === "rejected") {
           this.logger.warn("Failed to update inbox item with processed data", {
-            jobId: job.id,
             error:
               result.reason instanceof Error
                 ? result.reason.message

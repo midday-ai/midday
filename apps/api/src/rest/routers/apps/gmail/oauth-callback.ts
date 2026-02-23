@@ -142,15 +142,16 @@ app.openapi(
         );
       }
 
-      const redirectUrl = buildSuccessRedirect(
-        dashboardUrl,
-        "gmail",
-        parsedState.source,
-        "/inbox",
-        redirectPath,
+      const finalUrl = new URL(
+        buildSuccessRedirect(
+          dashboardUrl,
+          "gmail",
+          parsedState.source,
+          "/inbox",
+          redirectPath,
+        ),
       );
 
-      let syncJobSuffix = "";
       try {
         const syncJob = await triggerJob(
           "sync-scheduler",
@@ -161,7 +162,7 @@ app.openapi(
             removeOnComplete: { age: 60 },
           },
         );
-        syncJobSuffix = `&syncJobId=${syncJob.id}`;
+        finalUrl.searchParams.set("syncJobId", syncJob.id);
       } catch (syncError) {
         logger.warn("Failed to trigger initial sync job after Gmail OAuth", {
           accountId: account.id,
@@ -170,7 +171,7 @@ app.openapi(
         });
       }
 
-      return c.redirect(`${redirectUrl}${syncJobSuffix}`, 302);
+      return c.redirect(finalUrl.toString(), 302);
     } catch (err) {
       logger.error("Gmail OAuth callback error", {
         error: err instanceof Error ? err.message : String(err),

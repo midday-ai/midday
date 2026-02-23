@@ -100,7 +100,7 @@ export const batchExtractInboxSchema = z.object({
     }),
   ),
   teamId: z.string().uuid(),
-  inboxAccountId: z.string().uuid(),
+  inboxAccountId: z.string().uuid().optional(),
 });
 
 export type BatchExtractInboxPayload = z.infer<typeof batchExtractInboxSchema>;
