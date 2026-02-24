@@ -29,6 +29,7 @@ import type {
   PostRequisitionsResponse,
 } from "./types";
 import {
+  getErrorStatusCode,
   getMaxHistoricalDays,
   parseProviderError,
   selectPrimaryBalance,
@@ -254,10 +255,9 @@ export class GoCardLessApi {
     try {
       return await createAgreement(180);
     } catch (error) {
-      const parsed = parseProviderError(error);
-      const isClientError = parsed !== false && (parsed.statusCode ?? 0) < 500;
+      const status = getErrorStatusCode(error);
 
-      if (isClientError) {
+      if (status != null && status >= 400 && status < 500) {
         return await createAgreement(90);
       }
 

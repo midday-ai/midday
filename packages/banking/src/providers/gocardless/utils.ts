@@ -29,6 +29,13 @@ export function selectPrimaryBalance(
   );
 }
 
+export function getErrorStatusCode(error: unknown): number | undefined {
+  const response = (
+    error as { response?: { status?: number; data?: { status_code?: number } } }
+  )?.response;
+  return response?.status ?? response?.data?.status_code;
+}
+
 export function parseProviderError(
   error: unknown,
 ): { code: string; message: string; statusCode?: number } | false {
