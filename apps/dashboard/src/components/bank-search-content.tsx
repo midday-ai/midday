@@ -201,7 +201,6 @@ export function BankSearchContent({
       {
         q: debouncedQuery,
         countryCode,
-        excludeProviders: ["gocardless"],
       },
       {
         enabled,

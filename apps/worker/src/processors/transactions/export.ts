@@ -58,6 +58,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
     const {
       teamId,
       userId,
+      userEmail,
       locale,
       transactionIds,
       dateFormat,
@@ -267,6 +268,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
               {
                 type: "transactions_exported",
                 teamId,
+                userEmail,
                 transactionCount: rows.length,
                 downloadLink,
                 accountantEmail: settings.sendEmail

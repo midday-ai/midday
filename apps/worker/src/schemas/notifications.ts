@@ -160,6 +160,7 @@ export const recurringSeriesPausedNotificationSchema = z.object({
 export const transactionsExportedNotificationSchema = z.object({
   ...baseFields,
   type: z.literal("transactions_exported"),
+  userEmail: z.string().email(),
   transactionCount: z.number(),
   downloadLink: z.string(),
   accountantEmail: z.string().optional(),

@@ -81,6 +81,7 @@ export const transactionsCreatedSchema = z.object({
 
 export const transactionsExportedSchema = z.object({
   users: z.array(userSchema),
+  userEmail: z.string().email(),
   transactionCount: z.number(),
   locale: z.string().optional(),
   dateFormat: z.string().optional(),

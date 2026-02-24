@@ -112,6 +112,7 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
           "transactions_exported",
           payload.teamId,
           {
+            userEmail: payload.userEmail,
             transactionCount: payload.transactionCount,
             downloadLink: payload.downloadLink,
             accountantEmail: payload.accountantEmail,
