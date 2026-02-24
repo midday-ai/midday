@@ -906,6 +906,36 @@ export async function getInvoiceSummary(
     };
   }
 
+  // Collect unique foreign currencies that need conversion
+  const foreignCurrencies = [
+    ...new Set(
+      invoiceData
+        .map((inv) => inv.currency || baseCurrency)
+        .filter((c) => c !== baseCurrency),
+    ),
+  ];
+
+  // Batch-fetch all needed exchange rates in a single query
+  const rateMap = new Map<string, number>();
+  if (foreignCurrencies.length > 0) {
+    const rates = await db
+      .select({
+        base: exchangeRates.base,
+        rate: exchangeRates.rate,
+      })
+      .from(exchangeRates)
+      .where(
+        and(
+          inArray(exchangeRates.base, foreignCurrencies),
+          eq(exchangeRates.target, baseCurrency),
+        ),
+      );
+
+    for (const r of rates) {
+      if (r.rate) rateMap.set(r.base, Number(r.rate));
+    }
+  }
+
   // Convert all amounts to base currency and track currency breakdown
   let totalAmount = 0;
   const currencyBreakdown = new Map<
@@ -930,20 +960,10 @@ export async function getInvoiceSummary(
         convertedAmount: existing.convertedAmount + amount,
       });
     } else {
-      // Get exchange rate for this currency to base currency
-      const [exchangeRate] = await db
-        .select({ rate: exchangeRates.rate })
-        .from(exchangeRates)
-        .where(
-          and(
-            eq(exchangeRates.base, currency),
-            eq(exchangeRates.target, baseCurrency),
-          ),
-        )
-        .limit(1);
+      const rate = rateMap.get(currency);
 
-      if (exchangeRate?.rate) {
-        const convertedAmount = amount * Number(exchangeRate.rate);
+      if (rate) {
+        const convertedAmount = amount * rate;
         totalAmount += convertedAmount;
 
         const existing = currencyBreakdown.get(currency) || {
@@ -958,7 +978,6 @@ export async function getInvoiceSummary(
         });
       }
       // Skip invoices with missing exchange rates to avoid mixing currencies
-      // This prevents silently producing incorrect totals
     }
   }
 
