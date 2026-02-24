@@ -24,7 +24,7 @@
     "@elevenlabs/elevenlabs-js": "^2.30.0",
     "@midday/db": "workspace:*",
     "@midday/logger": "workspace:*",
-    "@supabase/supabase-js": "^2.87.0",
+    "@supabase/supabase-js": "^2.97.0",
     "ai": "catalog:",
     "date-fns": "catalog:",
     "jose": "catalog:",
