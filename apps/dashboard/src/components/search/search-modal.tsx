@@ -1,10 +1,15 @@
 "use client";
 
 import { Dialog, DialogContent } from "@midday/ui/dialog";
+import dynamic from "next/dynamic";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useSearchStore } from "@/store/search";
-import { Search } from "./search";
 import { SearchFooter } from "./search-footer";
+
+const Search = dynamic(
+  () => import("./search").then((mod) => mod.Search),
+  { ssr: false },
+);
 
 export function SearchModal() {
   const { isOpen, setOpen } = useSearchStore();
@@ -19,8 +24,12 @@ export function SearchModal() {
         className="overflow-hidden p-0 max-w-full w-full md:max-w-[740px] h-[535px] m-0 select-text bg-transparent border-none"
         hideClose
       >
-        <Search />
-        <SearchFooter />
+        {isOpen && (
+          <>
+            <Search />
+            <SearchFooter />
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
