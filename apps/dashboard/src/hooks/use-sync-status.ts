@@ -42,6 +42,9 @@ export function useSyncStatus({ jobId: initialJobId }: UseSyncStatusProps) {
       setStatus("SYNCING");
       setSyncMetadata(undefined);
       setResult(undefined);
+    } else {
+      settled.current = true;
+      setJobId(undefined);
     }
   }, [initialJobId]);
 
