@@ -28,7 +28,7 @@ const connectionConfig = {
 
 const drizzleLogger = DEBUG_PERF ? createDrizzleLogger() : undefined;
 
-// Primary pool — DATABASE_PRIMARY_URL should point to the Supabase pooler
+// Primary pool — DATABASE_PRIMARY_URL points to Supabase (direct or pooler)
 const primaryPool = new Pool({
   connectionString: process.env.DATABASE_PRIMARY_URL!,
   ...connectionConfig,
