@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import {
+  calculateBaseTaxAmount,
   calculateTaxAmountFromGross,
   calculateTaxRateFromGross,
   getTaxTypeLabel,
@@ -29,6 +30,8 @@ type TaxAmountProps = {
   taxRate?: number | null;
   taxAmount?: number | null;
   taxType?: string | null;
+  baseAmount?: number | null;
+  baseCurrency?: string | null;
 };
 
 export function TaxAmount({
@@ -38,6 +41,8 @@ export function TaxAmount({
   taxRate,
   taxAmount,
   taxType,
+  baseAmount,
+  baseCurrency,
 }: TaxAmountProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -262,18 +267,39 @@ export function TaxAmount({
         </Select>
       </div>
       {taxAmount !== null && taxAmount !== undefined && taxAmount > 0 && (
-        <p className="text-xs text-muted-foreground mt-2">
-          {getTaxLabel()}:{" "}
-          <FormatAmount
-            amount={taxAmount}
-            currency={currency}
-            maximumFractionDigits={2}
-          />
-          {taxRate !== null &&
-            taxRate !== undefined &&
-            taxRate > 0 &&
-            ` (${taxRate}%)`}
-        </p>
+        <div className="mt-2 space-y-0.5">
+          <p className="text-xs text-muted-foreground">
+            {getTaxLabel()}:{" "}
+            <FormatAmount
+              amount={taxAmount}
+              currency={currency}
+              maximumFractionDigits={2}
+            />
+            {taxRate !== null &&
+              taxRate !== undefined &&
+              taxRate > 0 &&
+              ` (${taxRate}%)`}
+          </p>
+          {(() => {
+            const baseTax = calculateBaseTaxAmount({
+              amount,
+              taxAmount,
+              taxRate,
+              baseAmount,
+              baseCurrency,
+              currency,
+            });
+            return baseTax != null && baseCurrency ? (
+              <p className="text-xs text-muted-foreground">
+                <FormatAmount
+                  amount={baseTax}
+                  currency={baseCurrency}
+                  maximumFractionDigits={2}
+                />
+              </p>
+            ) : null;
+          })()}
+        </div>
       )}
     </div>
   );

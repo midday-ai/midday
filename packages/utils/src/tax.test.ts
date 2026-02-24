@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  calculateBaseTaxAmount,
   calculateTaxAmount,
   calculateTaxAmountFromGross,
   calculateTaxRateFromGross,
@@ -448,6 +449,195 @@ describe("Tax Utilities", () => {
 
       // Gross calculation: 100 × (25/125) = 20
       expect(result.taxAmount).toBe(20);
+    });
+  });
+
+  describe("calculateBaseTaxAmount", () => {
+    test("should return null when baseCurrency matches currency", () => {
+      expect(
+        calculateBaseTaxAmount({
+          amount: -100,
+          taxAmount: 20,
+          taxRate: 25,
+          baseAmount: -100,
+          baseCurrency: "USD",
+          currency: "USD",
+        }),
+      ).toBe(null);
+    });
+
+    test("should return null when baseAmount is null", () => {
+      expect(
+        calculateBaseTaxAmount({
+          amount: -100,
+          taxAmount: 20,
+          taxRate: 25,
+          baseAmount: null,
+          baseCurrency: "EUR",
+          currency: "USD",
+        }),
+      ).toBe(null);
+    });
+
+    test("should return null when baseCurrency is null", () => {
+      expect(
+        calculateBaseTaxAmount({
+          amount: -100,
+          taxAmount: 20,
+          taxRate: 25,
+          baseAmount: -85,
+          baseCurrency: null,
+          currency: "USD",
+        }),
+      ).toBe(null);
+    });
+
+    test("should return null when taxAmount is null", () => {
+      expect(
+        calculateBaseTaxAmount({
+          amount: -100,
+          taxAmount: null,
+          taxRate: 25,
+          baseAmount: -85,
+          baseCurrency: "EUR",
+          currency: "USD",
+        }),
+      ).toBe(null);
+    });
+
+    test("should return null when amount is zero", () => {
+      expect(
+        calculateBaseTaxAmount({
+          amount: 0,
+          taxAmount: 20,
+          taxRate: null,
+          baseAmount: 0,
+          baseCurrency: "EUR",
+          currency: "USD",
+        }),
+      ).toBe(null);
+    });
+
+    test("should calculate from taxRate for positive income", () => {
+      // 1000 USD income, baseAmount 850 EUR, 20% tax
+      // baseTax = 850 × (20 / 120) = 141.67
+      expect(
+        calculateBaseTaxAmount({
+          amount: 1000,
+          taxAmount: 166.67,
+          taxRate: 20,
+          baseAmount: 850,
+          baseCurrency: "EUR",
+          currency: "USD",
+        }),
+      ).toBe(141.67);
+    });
+
+    test("should calculate from taxRate for negative expense", () => {
+      // -1000 USD expense, baseAmount -850 EUR, 20% tax
+      // baseTax = Math.abs(-850 × (20 / 120)) = 141.67
+      expect(
+        calculateBaseTaxAmount({
+          amount: -1000,
+          taxAmount: 166.67,
+          taxRate: 20,
+          baseAmount: -850,
+          baseCurrency: "EUR",
+          currency: "USD",
+        }),
+      ).toBe(141.67);
+    });
+
+    test("should calculate from exchange ratio when no taxRate", () => {
+      // -100 USD expense, baseAmount -85 EUR, taxAmount 20 (fixed)
+      // baseTax = 20 × Math.abs(-85 / -100) = 20 × 0.85 = 17
+      expect(
+        calculateBaseTaxAmount({
+          amount: -100,
+          taxAmount: 20,
+          taxRate: null,
+          baseAmount: -85,
+          baseCurrency: "EUR",
+          currency: "USD",
+        }),
+      ).toBe(17);
+    });
+
+    test("should calculate from exchange ratio for income", () => {
+      // 200 USD income, baseAmount 170 EUR, taxAmount 30 (fixed)
+      // baseTax = 30 × Math.abs(170 / 200) = 30 × 0.85 = 25.5
+      expect(
+        calculateBaseTaxAmount({
+          amount: 200,
+          taxAmount: 30,
+          taxRate: null,
+          baseAmount: 170,
+          baseCurrency: "EUR",
+          currency: "USD",
+        }),
+      ).toBe(25.5);
+    });
+
+    test("should always return positive values", () => {
+      const result = calculateBaseTaxAmount({
+        amount: -500,
+        taxAmount: 50,
+        taxRate: 25,
+        baseAmount: -425,
+        baseCurrency: "SEK",
+        currency: "USD",
+      });
+      expect(result).toBeGreaterThan(0);
+    });
+
+    test("should round to 2 decimal places", () => {
+      // 333.33 USD, baseAmount 283.33 EUR, 19% tax
+      // baseTax = 283.33 × (19 / 119) = 45.2437... → 45.24
+      const result = calculateBaseTaxAmount({
+        amount: 333.33,
+        taxAmount: 53.22,
+        taxRate: 19,
+        baseAmount: 283.33,
+        baseCurrency: "EUR",
+        currency: "USD",
+      });
+      expect(result).toBe(45.24);
+      expect(result!.toString().split(".")[1]?.length ?? 0).toBeLessThanOrEqual(
+        2,
+      );
+    });
+
+    test("should be consistent with calculateTaxAmountFromGross", () => {
+      // If exchange rate is 1:1 but different currencies (edge case),
+      // calculateBaseTaxAmount with taxRate should give same result as calculateTaxAmountFromGross
+      const grossBase = 100;
+      const rate = 25;
+      const expected = calculateTaxAmountFromGross(grossBase, rate);
+
+      const result = calculateBaseTaxAmount({
+        amount: 100,
+        taxAmount: 20,
+        taxRate: rate,
+        baseAmount: grossBase,
+        baseCurrency: "EUR",
+        currency: "USD",
+      });
+
+      expect(result).toBe(expected);
+    });
+
+    test("should handle SEK to EUR real-world scenario", () => {
+      // Transaction: -25,026.67 SEK (expense), base: -2,278.79 EUR, 20% tax
+      // baseTax = Math.abs(-2278.79 × (20 / 120)) = 379.8
+      const result = calculateBaseTaxAmount({
+        amount: -25026.67,
+        taxAmount: 4171.11,
+        taxRate: 20,
+        baseAmount: -2278.79,
+        baseCurrency: "EUR",
+        currency: "SEK",
+      });
+      expect(result).toBe(379.8);
     });
   });
 

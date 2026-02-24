@@ -16,6 +16,7 @@ import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { formatDate } from "@midday/utils/format";
+import { calculateBaseTaxAmount } from "@midday/utils/tax";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useCallback } from "react";
 import { FormatAmount } from "@/components/format-amount";
@@ -411,17 +412,14 @@ export const columns: ColumnDef<Transaction>[] = [
         return <span className="text-muted-foreground">-</span>;
       }
 
-      const showBase =
-        baseAmount != null &&
-        baseCurrency &&
-        baseCurrency !== currency &&
-        amount;
-
-      const baseTax = showBase
-        ? taxRate
-          ? (baseAmount * taxRate) / (100 + taxRate)
-          : taxAmount * (baseAmount / amount)
-        : null;
+      const baseTax = calculateBaseTaxAmount({
+        amount,
+        taxAmount,
+        taxRate,
+        baseAmount,
+        baseCurrency,
+        currency,
+      });
 
       return (
         <div className="flex flex-col">

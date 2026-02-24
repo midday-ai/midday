@@ -280,17 +280,29 @@ export function TransactionDetails() {
               {isLoading ? (
                 <Skeleton className="w-[50%] h-[30px] rounded-md mb-2" />
               ) : (
-                <span
-                  className={cn(
-                    "text-4xl select-text font-serif",
-                    data?.amount > 0 && "text-[#00C969]",
-                  )}
-                >
-                  <FormatAmount
-                    amount={data?.amount}
-                    currency={data?.currency}
-                  />
-                </span>
+                <>
+                  <span
+                    className={cn(
+                      "text-4xl select-text font-serif",
+                      data?.amount > 0 && "text-[#00C969]",
+                    )}
+                  >
+                    <FormatAmount
+                      amount={data?.amount}
+                      currency={data?.currency}
+                    />
+                  </span>
+                  {data?.baseAmount != null &&
+                    data?.baseCurrency &&
+                    data.baseCurrency !== data.currency && (
+                      <span className="text-[#606060] text-sm select-text">
+                        <FormatAmount
+                          amount={data.baseAmount}
+                          currency={data.baseCurrency}
+                        />
+                      </span>
+                    )}
+                </>
               )}
               <div className="h-3">
                 {data?.taxAmount && data.taxAmount > 0 ? (
@@ -448,6 +460,8 @@ export function TransactionDetails() {
               taxRate={data?.taxRate}
               taxAmount={data?.taxAmount}
               taxType={data?.taxType}
+              baseAmount={data?.baseAmount}
+              baseCurrency={data?.baseCurrency}
             />
 
             <div className="flex flex-row items-center justify-between">

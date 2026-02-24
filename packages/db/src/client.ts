@@ -16,7 +16,7 @@ const DEBUG_PERF = process.env.DEBUG_PERF === "true";
 
 const connectionConfig = {
   max: isDevelopment ? 8 : isProduction ? 12 : 6,
-  min: isDevelopment ? 0 : isProduction ? 8 : 1,
+  min: isDevelopment ? 0 : isProduction ? 8 : 2,
   idleTimeoutMillis: isDevelopment ? 5000 : 30000,
   connectionTimeoutMillis: 5000,
   maxUses: isDevelopment ? 100 : 0,
