@@ -1,5 +1,6 @@
 import { createLoggerWithContext } from "@midday/logger";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
+import type { Logger as DrizzleLogger } from "drizzle-orm/logger";
 import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { PgTransaction } from "drizzle-orm/pg-core";
@@ -8,9 +9,11 @@ import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
 const logger = createLoggerWithContext("db");
+const perfLogger = createLoggerWithContext("perf:db");
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const isProduction = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
+const DEBUG_PERF = process.env.DEBUG_PERF === "true";
 
 const connectionConfig = {
   max: isDevelopment ? 8 : isProduction ? 12 : 6,
@@ -24,11 +27,53 @@ const connectionConfig = {
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
 };
 
+const SLOW_QUERY_MS = 100;
+
+function instrumentPool(pool: Pool, label: string): void {
+  const origQuery = pool.query.bind(pool);
+
+  (pool as any).query = (...args: any[]) => {
+    const start = performance.now();
+    const result = origQuery(...args);
+    if (result && typeof result.then === "function") {
+      result.then(
+        () => {
+          const ms = performance.now() - start;
+          if (ms > SLOW_QUERY_MS) {
+            const sql =
+              typeof args[0] === "string" ? args[0] : args[0]?.text;
+            perfLogger.warn("slow query", {
+              durationMs: +ms.toFixed(2),
+              sql: sql ? sql.slice(0, 500) : undefined,
+              pool: label,
+            });
+          }
+        },
+        () => {},
+      );
+    }
+    return result;
+  };
+}
+
+const drizzleLogger: DrizzleLogger | undefined = DEBUG_PERF
+  ? {
+      logQuery(query: string, params: unknown[]) {
+        perfLogger.info("query", {
+          sql: query.length > 500 ? `${query.slice(0, 500)}…` : query,
+          paramCount: params.length,
+        });
+      },
+    }
+  : undefined;
+
 // Primary pool — DATABASE_PRIMARY_URL should point to the Supabase pooler
 const primaryPool = new Pool({
   connectionString: process.env.DATABASE_PRIMARY_URL!,
   ...connectionConfig,
 });
+
+if (DEBUG_PERF) instrumentPool(primaryPool, "primary");
 
 primaryPool.on("error", (err) => {
   logger.error("Primary pool: idle client error", { error: err.message });
@@ -37,6 +82,7 @@ primaryPool.on("error", (err) => {
 export const primaryDb = drizzle(primaryPool, {
   schema,
   casing: "snake_case",
+  logger: drizzleLogger,
 });
 
 /**
@@ -82,12 +128,14 @@ const replicaPool = replicaUrl
   ? new Pool({ connectionString: replicaUrl, ...connectionConfig })
   : null;
 
+if (DEBUG_PERF && replicaPool) instrumentPool(replicaPool, "replica");
+
 replicaPool?.on("error", (err) => {
   logger.error("Replica pool: idle client error", { error: err.message });
 });
 
 const replicaDb = replicaPool
-  ? drizzle(replicaPool, { schema, casing: "snake_case" })
+  ? drizzle(replicaPool, { schema, casing: "snake_case", logger: drizzleLogger })
   : primaryDb;
 
 export const db = withReplicas(
@@ -116,6 +164,23 @@ export type DatabaseWithPrimary = Database & {
   $primary?: Database;
   usePrimaryOnly?: () => Database;
 };
+
+export function getPoolStats() {
+  return {
+    primary: {
+      total: primaryPool.totalCount,
+      idle: primaryPool.idleCount,
+      waiting: primaryPool.waitingCount,
+    },
+    replica: replicaPool
+      ? {
+          total: replicaPool.totalCount,
+          idle: replicaPool.idleCount,
+          waiting: replicaPool.waitingCount,
+        }
+      : null,
+  };
+}
 
 /**
  * Close all database pools gracefully.
