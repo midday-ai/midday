@@ -1271,24 +1271,29 @@ export async function matchTransaction(
     throw new Error("Transaction is already matched to another inbox item");
   }
 
-  // Insert transaction attachments for all related items
+  // Insert transaction attachments for all related items in one batch
   const attachmentIds = new Map<string, string>();
 
-  for (const item of relatedItems) {
-    const [attachmentData] = await db
+  if (relatedItems.length > 0) {
+    const inserted = await db
       .insert(transactionAttachments)
-      .values({
-        type: item.contentType ?? "",
-        path: item.filePath ?? [],
-        transactionId,
-        size: item.size ?? 0,
-        name: item.fileName ?? "",
-        teamId,
-      })
+      .values(
+        relatedItems.map((item) => ({
+          type: item.contentType ?? "",
+          path: item.filePath ?? [],
+          transactionId,
+          size: item.size ?? 0,
+          name: item.fileName ?? "",
+          teamId,
+        })),
+      )
       .returning({ id: transactionAttachments.id });
 
-    if (attachmentData) {
-      attachmentIds.set(item.id, attachmentData.id);
+    // PostgreSQL INSERT ... VALUES ... RETURNING preserves insertion order,
+    // so we can safely match by position. A path-based map would break when
+    // multiple inbox items share the same filePath (or filePath is empty).
+    for (let i = 0; i < inserted.length; i++) {
+      attachmentIds.set(relatedItems[i]!.id, inserted[i]!.id);
     }
   }
 
@@ -1324,18 +1329,21 @@ export async function matchTransaction(
   }
 
   // Update all related inbox items with attachment and transaction IDs
-  for (const item of relatedItems) {
-    const attachmentId = attachmentIds.get(item.id);
-    if (attachmentId) {
-      await db
+  const inboxUpdates = relatedItems
+    .filter((item) => attachmentIds.has(item.id))
+    .map((item) =>
+      db
         .update(inbox)
         .set({
-          attachmentId,
+          attachmentId: attachmentIds.get(item.id)!,
           transactionId: transactionId,
           status: "done",
         })
-        .where(and(eq(inbox.id, item.id), eq(inbox.teamId, teamId)));
-    }
+        .where(and(eq(inbox.id, item.id), eq(inbox.teamId, teamId))),
+    );
+
+  if (inboxUpdates.length > 0) {
+    await Promise.all(inboxUpdates);
   }
 
   // Return updated inbox with transaction data
@@ -1423,52 +1431,55 @@ export async function unmatchTransaction(
 
   // LEARNING FEEDBACK: Find the original match suggestions to mark as incorrect for all related items
   if (transactionId) {
-    for (const item of relatedItems) {
-      if (item.transactionId) {
-        // Look for the match suggestion that led to this pairing
-        const [originalSuggestion] = await db
-          .select({
-            id: transactionMatchSuggestions.id,
-            status: transactionMatchSuggestions.status,
-            matchType: transactionMatchSuggestions.matchType,
-            confidenceScore: transactionMatchSuggestions.confidenceScore,
-          })
-          .from(transactionMatchSuggestions)
-          .where(
-            and(
-              eq(transactionMatchSuggestions.inboxId, item.id),
-              eq(transactionMatchSuggestions.transactionId, transactionId),
-              eq(transactionMatchSuggestions.teamId, teamId),
-              eq(transactionMatchSuggestions.status, "confirmed"),
-            ),
-          )
-          .orderBy(desc(transactionMatchSuggestions.createdAt))
-          .limit(1);
+    const itemsWithTransactions = relatedItems.filter(
+      (item) => item.transactionId,
+    );
 
-        // Mark the suggestion as "unmatched" to provide negative feedback for learning
-        if (originalSuggestion) {
-          await db
-            .update(transactionMatchSuggestions)
-            .set({
-              status: "unmatched", // New status for post-match removal
-              userActionAt: new Date().toISOString(),
-              userId: userId || null,
+    if (itemsWithTransactions.length > 0) {
+      await Promise.all(
+        itemsWithTransactions.map(async (item) => {
+          const [originalSuggestion] = await db
+            .select({
+              id: transactionMatchSuggestions.id,
+              status: transactionMatchSuggestions.status,
+              matchType: transactionMatchSuggestions.matchType,
+              confidenceScore: transactionMatchSuggestions.confidenceScore,
             })
-            .where(eq(transactionMatchSuggestions.id, originalSuggestion.id));
+            .from(transactionMatchSuggestions)
+            .where(
+              and(
+                eq(transactionMatchSuggestions.inboxId, item.id),
+                eq(transactionMatchSuggestions.transactionId, transactionId),
+                eq(transactionMatchSuggestions.teamId, teamId),
+                eq(transactionMatchSuggestions.status, "confirmed"),
+              ),
+            )
+            .orderBy(desc(transactionMatchSuggestions.createdAt))
+            .limit(1);
 
-          // Log for debugging/monitoring
-          logger.info("UNMATCH LEARNING FEEDBACK", {
-            teamId,
-            inboxId: item.id,
-            transactionId,
-            originalMatchType: originalSuggestion.matchType,
-            originalConfidence: Number(originalSuggestion.confidenceScore),
-            originalStatus: originalSuggestion.status,
-            message:
-              "User unmatched a previously confirmed/auto-matched pair - negative feedback for learning",
-          });
-        }
-      }
+          if (originalSuggestion) {
+            await db
+              .update(transactionMatchSuggestions)
+              .set({
+                status: "unmatched",
+                userActionAt: new Date().toISOString(),
+                userId: userId || null,
+              })
+              .where(eq(transactionMatchSuggestions.id, originalSuggestion.id));
+
+            logger.info("UNMATCH LEARNING FEEDBACK", {
+              teamId,
+              inboxId: item.id,
+              transactionId,
+              originalMatchType: originalSuggestion.matchType,
+              originalConfidence: Number(originalSuggestion.confidenceScore),
+              originalStatus: originalSuggestion.status,
+              message:
+                "User unmatched a previously confirmed/auto-matched pair - negative feedback for learning",
+            });
+          }
+        }),
+      );
     }
   }
 
