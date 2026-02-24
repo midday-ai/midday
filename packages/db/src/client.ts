@@ -15,11 +15,11 @@ const isProduction = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
 const DEBUG_PERF = process.env.DEBUG_PERF === "true";
 
 const connectionConfig = {
-  max: isDevelopment ? 8 : isProduction ? 12 : 3,
-  min: isDevelopment ? 0 : isProduction ? 8 : 0,
+  max: isDevelopment ? 8 : isProduction ? 12 : 6,
+  min: isDevelopment ? 0 : isProduction ? 8 : 1,
   idleTimeoutMillis: isDevelopment ? 5000 : isProduction ? 30000 : 10000,
   connectionTimeoutMillis: 5000,
-  maxUses: isDevelopment ? 100 : 0,
+  maxUses: isDevelopment ? 100 : 7500,
   allowExitOnIdle: !isProduction,
   keepAlive: true,
   keepAliveInitialDelayMillis: 10_000,
