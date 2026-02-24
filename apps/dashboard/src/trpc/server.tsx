@@ -6,7 +6,7 @@ import { createClient } from "@midday/supabase/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import {
   createTRPCClient,
-  httpBatchStreamLink,
+  httpLink,
   loggerLink,
 } from "@trpc/client";
 import {
@@ -46,7 +46,7 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
   queryClient: getQueryClient,
   client: createTRPCClient({
     links: [
-      httpBatchStreamLink({
+      httpLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
         fetch: fetchWithTimeout,
@@ -154,7 +154,7 @@ export async function getTRPCClient(options?: { forcePrimary?: boolean }) {
 
   return createTRPCClient<AppRouter>({
     links: [
-      httpBatchStreamLink({
+      httpLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
         headers: {
