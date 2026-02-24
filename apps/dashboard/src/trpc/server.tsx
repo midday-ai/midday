@@ -30,13 +30,12 @@ function fetchWithTimeout(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), SSR_FETCH_TIMEOUT_MS);
+  const timeoutSignal = AbortSignal.timeout(SSR_FETCH_TIMEOUT_MS);
+  const signal = init?.signal
+    ? AbortSignal.any([init.signal, timeoutSignal])
+    : timeoutSignal;
 
-  return fetch(input, {
-    ...init,
-    signal: controller.signal,
-  }).finally(() => clearTimeout(timeout));
+  return fetch(input, { ...init, signal });
 }
 
 export const trpc = createTRPCOptionsProxy<AppRouter>({
