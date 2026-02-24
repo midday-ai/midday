@@ -1962,7 +1962,8 @@ export async function upsertTransactions(
   db: Database,
   params: UpsertTransactionsParams,
 ): Promise<Array<{ id: string }>> {
-  const { transactions: transactionsData, teamId } = params;
+  // Exclude teamId from the params
+  const { transactions: transactionsData, teamId: _teamId } = params;
 
   const upserted = await db
     .insert(transactions)

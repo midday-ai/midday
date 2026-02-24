@@ -24,6 +24,20 @@ export const getQueryClient = cache(makeQueryClient);
 const API_BASE_URL =
   process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL;
 
+const SSR_FETCH_TIMEOUT_MS = 8_000;
+
+function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<Response> {
+  const timeoutSignal = AbortSignal.timeout(SSR_FETCH_TIMEOUT_MS);
+  const signal = init?.signal
+    ? AbortSignal.any([init.signal, timeoutSignal])
+    : timeoutSignal;
+
+  return fetch(input, { ...init, signal });
+}
+
 export const trpc = createTRPCOptionsProxy<AppRouter>({
   queryClient: getQueryClient,
   client: createTRPCClient({
@@ -31,6 +45,7 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
       httpBatchLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
+        fetch: fetchWithTimeout,
         async headers() {
           const [supabase, cookieStore, headersList] = await Promise.all([
             createClient(),

@@ -4,6 +4,7 @@ import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import { Pool } from "pg";
+import { createDrizzleLogger, instrumentPool } from "./instrument";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
@@ -11,16 +12,21 @@ const logger = createLoggerWithContext("db");
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const isProduction = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
+const DEBUG_PERF = process.env.DEBUG_PERF === "true";
 
 const connectionConfig = {
   max: isDevelopment ? 8 : isProduction ? 12 : 6,
-  min: isDevelopment ? 0 : isProduction ? 2 : 1,
-  idleTimeoutMillis: isDevelopment ? 5000 : 60000,
+  min: isDevelopment ? 0 : 1,
+  idleTimeoutMillis: isDevelopment ? 5000 : 30000,
   connectionTimeoutMillis: 5000,
   maxUses: isDevelopment ? 100 : 0,
   allowExitOnIdle: isDevelopment,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10_000,
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
 };
+
+const drizzleLogger = DEBUG_PERF ? createDrizzleLogger() : undefined;
 
 // Primary pool — DATABASE_PRIMARY_URL should point to the Supabase pooler
 const primaryPool = new Pool({
@@ -28,9 +34,16 @@ const primaryPool = new Pool({
   ...connectionConfig,
 });
 
+if (DEBUG_PERF) instrumentPool(primaryPool, "primary");
+
+primaryPool.on("error", (err) => {
+  logger.error("Primary pool: idle client error", { error: err.message });
+});
+
 export const primaryDb = drizzle(primaryPool, {
   schema,
   casing: "snake_case",
+  logger: drizzleLogger,
 });
 
 /**
@@ -76,8 +89,18 @@ const replicaPool = replicaUrl
   ? new Pool({ connectionString: replicaUrl, ...connectionConfig })
   : null;
 
+if (DEBUG_PERF && replicaPool) instrumentPool(replicaPool, "replica");
+
+replicaPool?.on("error", (err) => {
+  logger.error("Replica pool: idle client error", { error: err.message });
+});
+
 const replicaDb = replicaPool
-  ? drizzle(replicaPool, { schema, casing: "snake_case" })
+  ? drizzle(replicaPool, {
+      schema,
+      casing: "snake_case",
+      logger: drizzleLogger,
+    })
   : primaryDb;
 
 export const db = withReplicas(
@@ -106,6 +129,23 @@ export type DatabaseWithPrimary = Database & {
   $primary?: Database;
   usePrimaryOnly?: () => Database;
 };
+
+export function getPoolStats() {
+  return {
+    primary: {
+      total: primaryPool.totalCount,
+      idle: primaryPool.idleCount,
+      waiting: primaryPool.waitingCount,
+    },
+    replica: replicaPool
+      ? {
+          total: replicaPool.totalCount,
+          idle: replicaPool.idleCount,
+          waiting: replicaPool.waitingCount,
+        }
+      : null,
+  };
+}
 
 /**
  * Close all database pools gracefully.

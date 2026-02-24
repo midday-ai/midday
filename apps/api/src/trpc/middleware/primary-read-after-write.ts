@@ -1,11 +1,11 @@
 import type { Session } from "@api/utils/auth";
 import { replicationCache } from "@midday/cache/replication-cache";
 import type { Database, DatabaseWithPrimary } from "@midday/db/client";
+import { createLoggerWithContext } from "@midday/logger";
 
-// Database middleware that handles replication lag based on mutation operations
-// For mutations: always use primary DB
-// For queries: use primary DB if the team recently performed a mutation
-// Also checks x-force-primary header to force primary reads for new users
+const DEBUG_PERF = process.env.DEBUG_PERF === "true";
+const perfLogger = createLoggerWithContext("perf:trpc");
+
 export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
   ctx: {
     session?: Session | null;
@@ -27,54 +27,70 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
   const teamId = ctx.teamId;
   const forcePrimary = ctx.forcePrimary;
 
-  // If x-force-primary header is set, force primary DB reads (for new users)
-  // For queries, we can return early. For mutations, we still need to update the cache.
   if (forcePrimary && type !== "mutation") {
     const dbWithPrimary = ctx.db as DatabaseWithPrimary;
     if (dbWithPrimary.usePrimaryOnly) {
       ctx.db = dbWithPrimary.usePrimaryOnly();
     }
-    const result = await next({ ctx });
-    return result;
+    return next({ ctx });
   }
 
-  if (teamId) {
-    // For mutations, always use primary DB and update the team's timestamp
-    if (type === "mutation") {
-      await replicationCache.set(teamId);
+  let routedToPrimary = false;
+  let routeReason = "";
 
-      // Use primary-only mode to maintain interface consistency
+  if (teamId) {
+    if (type === "mutation") {
+      const cacheStart = DEBUG_PERF ? performance.now() : 0;
+      await replicationCache.set(teamId);
+      if (DEBUG_PERF) {
+        perfLogger.info("replicationCache.set", {
+          cacheMs: +(performance.now() - cacheStart).toFixed(2),
+          teamId,
+        });
+      }
+
       const dbWithPrimary = ctx.db as DatabaseWithPrimary;
       if (dbWithPrimary.usePrimaryOnly) {
         ctx.db = dbWithPrimary.usePrimaryOnly();
       }
-      // If usePrimaryOnly doesn't exist, we're already using the primary DB
-    }
-    // For queries, check if the team recently performed a mutation
-    else {
+      routedToPrimary = true;
+      routeReason = "mutation";
+    } else {
+      const cacheStart = DEBUG_PERF ? performance.now() : 0;
       const timestamp = await replicationCache.get(teamId);
-      const now = Date.now();
+      if (DEBUG_PERF) {
+        perfLogger.info("replicationCache.get", {
+          cacheMs: +(performance.now() - cacheStart).toFixed(2),
+          teamId,
+          hasTimestamp: timestamp !== undefined,
+        });
+      }
 
-      // If the timestamp exists and hasn't expired, use primary DB
-      if (timestamp && now < timestamp) {
-        // Use primary-only mode to maintain interface consistency
+      if (timestamp && Date.now() < timestamp) {
         const dbWithPrimary = ctx.db as DatabaseWithPrimary;
         if (dbWithPrimary.usePrimaryOnly) {
           ctx.db = dbWithPrimary.usePrimaryOnly();
         }
-        // If usePrimaryOnly doesn't exist, we're already using the primary DB
+        routedToPrimary = true;
+        routeReason = "recent-mutation";
       }
     }
   } else {
-    // When no team ID is present, always use primary DB
     const dbWithPrimary = ctx.db as DatabaseWithPrimary;
     if (dbWithPrimary.usePrimaryOnly) {
       ctx.db = dbWithPrimary.usePrimaryOnly();
     }
-    // If usePrimaryOnly doesn't exist, we're already using the primary DB
+    routedToPrimary = true;
+    routeReason = "no-team";
   }
 
-  const result = await next({ ctx });
+  if (DEBUG_PERF && routedToPrimary) {
+    perfLogger.info("replicationRoute", {
+      teamId,
+      type,
+      reason: routeReason,
+    });
+  }
 
-  return result;
+  return next({ ctx });
 };

@@ -4,14 +4,14 @@ import "./instrument";
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { closeSharedRedisClient } from "@midday/cache/shared-redis";
-import { closeDb } from "@midday/db/client";
+import { closeDb, getPoolStats } from "@midday/db/client";
 import {
   buildDependenciesResponse,
   buildReadinessResponse,
   checkDependencies,
 } from "@midday/health/checker";
 import { apiDependencies } from "@midday/health/probes";
-import { logger } from "@midday/logger";
+import { createLoggerWithContext, logger } from "@midday/logger";
 import { Scalar } from "@scalar/hono-api-reference";
 import * as Sentry from "@sentry/bun";
 import { cors } from "hono/cors";
@@ -59,6 +59,24 @@ app.use(
     maxAge: 86400,
   }),
 );
+
+if (process.env.DEBUG_PERF === "true") {
+  const perfLogger = createLoggerWithContext("perf:trpc");
+
+  app.use("/trpc/*", async (c, next) => {
+    const start = performance.now();
+    await next();
+    const elapsed = performance.now() - start;
+    const procedures = c.req.path.replace("/trpc/", "").split(",");
+    perfLogger.info("request", {
+      totalMs: +elapsed.toFixed(2),
+      procedureCount: procedures.length,
+      procedures,
+      status: c.res.status,
+      pool: getPoolStats(),
+    });
+  });
+}
 
 app.use(
   "/trpc/*",
