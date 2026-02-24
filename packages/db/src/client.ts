@@ -1,15 +1,14 @@
 import { createLoggerWithContext } from "@midday/logger";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
-import type { Logger as DrizzleLogger } from "drizzle-orm/logger";
 import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import { Pool } from "pg";
+import { createDrizzleLogger, instrumentPool } from "./instrument";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
 const logger = createLoggerWithContext("db");
-const perfLogger = createLoggerWithContext("perf:db");
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const isProduction = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
@@ -27,49 +26,7 @@ const connectionConfig = {
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
 };
 
-const SLOW_QUERY_MS = 100;
-
-function instrumentPool(pool: Pool, label: string): void {
-  const origQuery = pool.query.bind(pool);
-
-  (pool as unknown as Record<string, unknown>).query = (
-    ...args: unknown[]
-  ): unknown => {
-    const start = performance.now();
-    const result = (origQuery as (...a: unknown[]) => unknown)(...args);
-    if (result && typeof (result as any).then === "function") {
-      (result as Promise<unknown>).then(
-        () => {
-          const ms = performance.now() - start;
-          if (ms > SLOW_QUERY_MS) {
-            const sql =
-              typeof args[0] === "string"
-                ? args[0]
-                : (args[0] as { text?: string } | undefined)?.text;
-            perfLogger.warn("slow query", {
-              durationMs: +ms.toFixed(2),
-              sql: sql ? sql.slice(0, 500) : undefined,
-              pool: label,
-            });
-          }
-        },
-        () => {},
-      );
-    }
-    return result;
-  };
-}
-
-const drizzleLogger: DrizzleLogger | undefined = DEBUG_PERF
-  ? {
-      logQuery(query: string, params: unknown[]) {
-        perfLogger.info("query", {
-          sql: query.length > 500 ? `${query.slice(0, 500)}…` : query,
-          paramCount: params.length,
-        });
-      },
-    }
-  : undefined;
+const drizzleLogger = DEBUG_PERF ? createDrizzleLogger() : undefined;
 
 // Primary pool — DATABASE_PRIMARY_URL should point to the Supabase pooler
 const primaryPool = new Pool({

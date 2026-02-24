@@ -45,6 +45,7 @@ import {
   transactionCategories,
   transactions,
 } from "../schema";
+import { dedupeByDb } from "../utils/dedupe";
 import { getCashBalance } from "./bank-accounts";
 import { getExchangeRatesBatch } from "./exhange-rates";
 import { getRecurringInvoiceProjection } from "./invoice-recurring";
@@ -103,9 +104,7 @@ async function getCogsCategorySlugs(
           )!,
         ),
       );
-    slugs = children
-      .map((c) => c.slug)
-      .filter((s): s is string => s !== null);
+    slugs = children.map((c) => c.slug).filter((s): s is string => s !== null);
   }
 
   cogsSlugsCache.set(teamId, { slugs, timestamp: Date.now() });
@@ -155,22 +154,11 @@ interface ReportsResultItem {
   currency: string;
 }
 
-const profitInflight = new Map<string, Promise<ReportsResultItem[]>>();
-
-export function getProfit(
-  db: Database,
-  params: GetReportsParams,
-): Promise<ReportsResultItem[]> {
-  const key = `${params.teamId}:${params.from}:${params.to}:${params.currency ?? ""}:${params.revenueType ?? "net"}:${params.exactDates ?? false}`;
-  const existing = profitInflight.get(key);
-  if (existing) return existing;
-
-  const promise = getProfitImpl(db, params).finally(() => {
-    profitInflight.delete(key);
-  });
-  profitInflight.set(key, promise);
-  return promise;
-}
+export const getProfit = dedupeByDb<GetReportsParams, ReportsResultItem[]>(
+  (p) =>
+    `${p.teamId}:${p.from}:${p.to}:${p.currency ?? ""}:${p.revenueType ?? "net"}:${p.exactDates ?? false}`,
+  getProfitImpl,
+);
 
 async function getProfitImpl(db: Database, params: GetReportsParams) {
   const {
@@ -194,8 +182,8 @@ async function getProfitImpl(db: Database, params: GetReportsParams) {
   const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
 
   // Parallel step 1: all three are independent (COGS slugs are TTL-cached)
-  const [targetCurrency, netRevenueData, cogsCategorySlugs] =
-    await Promise.all([
+  const [targetCurrency, netRevenueData, cogsCategorySlugs] = await Promise.all(
+    [
       getTargetCurrency(db, teamId, inputCurrency),
       getRevenue(db, {
         teamId,
@@ -206,7 +194,8 @@ async function getProfitImpl(db: Database, params: GetReportsParams) {
         revenueType: "net",
       }),
       getCogsCategorySlugs(db, teamId),
-    ]);
+    ],
+  );
 
   // Build expense conditions (needs targetCurrency from step 1)
   const expenseConditions = [
@@ -358,22 +347,11 @@ async function getProfitImpl(db: Database, params: GetReportsParams) {
   return results;
 }
 
-const revenueInflight = new Map<string, Promise<ReportsResultItem[]>>();
-
-export function getRevenue(
-  db: Database,
-  params: GetReportsParams,
-): Promise<ReportsResultItem[]> {
-  const key = `${params.teamId}:${params.from}:${params.to}:${params.currency ?? ""}:${params.revenueType ?? "gross"}:${params.exactDates ?? false}`;
-  const existing = revenueInflight.get(key);
-  if (existing) return existing;
-
-  const promise = getRevenueImpl(db, params).finally(() => {
-    revenueInflight.delete(key);
-  });
-  revenueInflight.set(key, promise);
-  return promise;
-}
+export const getRevenue = dedupeByDb<GetReportsParams, ReportsResultItem[]>(
+  (p) =>
+    `${p.teamId}:${p.from}:${p.to}:${p.currency ?? ""}:${p.revenueType ?? "gross"}:${p.exactDates ?? false}`,
+  getRevenueImpl,
+);
 
 async function getRevenueImpl(db: Database, params: GetReportsParams) {
   const {
