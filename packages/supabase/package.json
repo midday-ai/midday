@@ -5,19 +5,19 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "format": "biome format --write .",
+    "lint:fix": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "db:generate": "supabase gen types --lang=typescript --project-id $PROJECT_ID --schema public > src/types/db.ts"
   },
   "dependencies": {
     "@midday/banking": "workspace:*",
-    "@supabase/postgrest-js": "^2.87.0",
+    "@supabase/postgrest-js": "^2.97.0",
     "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.87.0",
+    "@supabase/supabase-js": "^2.97.0",
     "date-fns": "catalog:",
     "react": "catalog:",
     "server-only": "^0.0.1",
-    "supabase": "^2.65.6"
+    "supabase": "^2.76.14"
   },
   "devDependencies": {
     "typescript": "catalog:"

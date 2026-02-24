@@ -103,27 +103,46 @@ export async function updateTransactionEnrichments(
   }
 
   try {
+    // Deduplicate by transactionId — later entries override earlier ones so
+    // the result matches sequential semantics if callers ever pass duplicates.
+    const deduped = new Map<string, EnrichmentUpdateData>();
     for (const update of updates) {
-      const updateData: {
-        merchantName?: string;
-        categorySlug?: string;
-        enrichmentCompleted: boolean;
-      } = {
-        enrichmentCompleted: true,
-      };
+      const existing = deduped.get(update.transactionId);
+      deduped.set(
+        update.transactionId,
+        existing ? { ...existing, ...update.data } : { ...update.data },
+      );
+    }
 
-      // Only include fields that have values
-      if (update.data.merchantName) {
-        updateData.merchantName = update.data.merchantName;
-      }
-      if (update.data.categorySlug) {
-        updateData.categorySlug = update.data.categorySlug;
-      }
+    const uniqueUpdates = Array.from(deduped.entries());
 
-      await db
-        .update(transactions)
-        .set(updateData)
-        .where(eq(transactions.id, update.transactionId));
+    const CHUNK_SIZE = 50;
+    for (let i = 0; i < uniqueUpdates.length; i += CHUNK_SIZE) {
+      const chunk = uniqueUpdates.slice(i, i + CHUNK_SIZE);
+
+      await Promise.all(
+        chunk.map(([transactionId, data]) => {
+          const updateData: {
+            merchantName?: string;
+            categorySlug?: string;
+            enrichmentCompleted: boolean;
+          } = {
+            enrichmentCompleted: true,
+          };
+
+          if (data.merchantName) {
+            updateData.merchantName = data.merchantName;
+          }
+          if (data.categorySlug) {
+            updateData.categorySlug = data.categorySlug;
+          }
+
+          return db
+            .update(transactions)
+            .set(updateData)
+            .where(eq(transactions.id, transactionId));
+        }),
+      );
     }
   } catch (error) {
     throw new Error(

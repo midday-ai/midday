@@ -2,7 +2,11 @@ import { getTransactionsByIds } from "@midday/db/queries";
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
 import { ensureFileExtension } from "@midday/utils";
-import { getTaxTypeLabel, resolveTaxValues } from "@midday/utils/tax";
+import {
+  calculateBaseTaxAmount,
+  getTaxTypeLabel,
+  resolveTaxValues,
+} from "@midday/utils/tax";
 import type { Job } from "bullmq";
 import { format, parseISO } from "date-fns";
 import type { ProcessExportPayload } from "../../schemas/transactions";
@@ -112,6 +116,20 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
         const formattedTaxType = getTaxTypeLabel(taxType ?? "");
         const formattedTaxRate = taxRate != null ? `${taxRate}%` : "";
 
+        const hasBaseCurrency =
+          transaction.base_amount != null &&
+          transaction.base_currency &&
+          transaction.base_currency !== transaction.currency;
+
+        const baseTaxAmount = calculateBaseTaxAmount({
+          amount: transaction.amount,
+          taxAmount,
+          taxRate,
+          baseAmount: transaction.base_amount,
+          baseCurrency: transaction.base_currency,
+          currency: transaction.currency,
+        });
+
         return [
           transaction.id,
           format(parseISO(transaction.date), dateFormat ?? "LLL dd, y"),
@@ -123,12 +141,20 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
             style: "currency",
             currency: transaction.currency,
           }).format(transaction.amount),
+          hasBaseCurrency ? transaction.base_amount : "",
+          hasBaseCurrency ? transaction.base_currency : "",
           formattedTaxType,
           formattedTaxRate,
           Intl.NumberFormat(locale, {
             style: "currency",
             currency: transaction.currency,
           }).format(taxAmount ?? 0),
+          baseTaxAmount != null
+            ? Intl.NumberFormat(locale, {
+                style: "currency",
+                currency: transaction.base_currency!,
+              }).format(baseTaxAmount)
+            : "",
           transaction?.counterparty_name ?? "",
           transaction?.category?.name ?? "",
           transaction?.category?.description ?? "",

@@ -185,6 +185,43 @@ export function calculateTaxAmountFromGross(
 }
 
 /**
+ * Calculate the base currency tax amount from existing transaction data.
+ * Uses taxRate when available (more precise), otherwise derives the exchange
+ * rate from baseAmount/amount and applies it to taxAmount.
+ *
+ * @returns The tax amount in base currency (always positive), or null if conversion is not applicable
+ */
+export function calculateBaseTaxAmount(params: {
+  amount: number;
+  taxAmount: number | null | undefined;
+  taxRate: number | null | undefined;
+  baseAmount: number | null | undefined;
+  baseCurrency: string | null | undefined;
+  currency: string;
+}): number | null {
+  const { amount, taxAmount, taxRate, baseAmount, baseCurrency, currency } =
+    params;
+
+  if (
+    baseAmount == null ||
+    !baseCurrency ||
+    baseCurrency === currency ||
+    taxAmount == null ||
+    amount === 0
+  ) {
+    return null;
+  }
+
+  if (taxRate != null) {
+    return Math.abs(
+      Math.round(baseAmount * (taxRate / (100 + taxRate)) * 100) / 100,
+    );
+  }
+
+  return Math.abs(Math.round(taxAmount * (baseAmount / amount) * 100) / 100);
+}
+
+/**
  * Calculate tax rate percentage from a gross amount (amount including tax) and tax amount
  * Uses reverse calculation: Rate = (Tax × 100) / (Gross - Tax)
  * All transactions are gross amounts, so this is the standard calculation.

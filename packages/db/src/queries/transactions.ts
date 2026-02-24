@@ -732,6 +732,8 @@ export async function getTransactionById(
       taxRate: transactions.taxRate,
       taxType: transactions.taxType,
       taxAmount: transactions.taxAmount,
+      baseAmount: transactions.baseAmount,
+      baseCurrency: transactions.baseCurrency,
       enrichmentCompleted: transactions.enrichmentCompleted,
       isFulfilled:
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, params.teamId)})) OR ${transactions.status} = 'completed'`.as(
@@ -1604,6 +1606,8 @@ export async function getTransactionsByIds(
       tax_type: transactions.taxType,
       tax_rate: transactions.taxRate,
       tax_amount: transactions.taxAmount,
+      base_amount: transactions.baseAmount,
+      base_currency: transactions.baseCurrency,
       status: transactions.status,
       attachments: sql<
         Array<{

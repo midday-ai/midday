@@ -113,7 +113,8 @@ export const syncInboxAccount = schemaTask({
         // Skip if already exists in database
         if (
           existingAttachments.data?.some(
-            (existing) => existing.reference_id === attachment.referenceId,
+            (existing: { reference_id: string | null }) =>
+              existing.reference_id === attachment.referenceId,
           )
         ) {
           skippedAlreadyProcessed++;

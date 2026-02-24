@@ -108,6 +108,7 @@ export const updateTeamByIdSchema = z.object({
       includeCSV: z.boolean(),
       includeXLSX: z.boolean(),
       sendEmail: z.boolean(),
+      sendCopyToMe: z.boolean().optional(),
       accountantEmail: z.string().optional(),
     })
     .optional()

@@ -42,6 +42,7 @@ export const defaultHiddenColumns: Record<TableId, string[]> = {
     "counterparty",
     "taxAmount",
     "baseAmount",
+    "baseTaxAmount",
   ],
   customers: ["tags", "website", "financeEmail", "language"],
   invoices: [

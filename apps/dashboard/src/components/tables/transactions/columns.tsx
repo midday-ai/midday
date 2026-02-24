@@ -16,6 +16,7 @@ import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { formatDate } from "@midday/utils/format";
+import { calculateBaseTaxAmount } from "@midday/utils/tax";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useCallback } from "react";
 import { FormatAmount } from "@/components/format-amount";
@@ -382,6 +383,34 @@ export const columns: ColumnDef<Transaction>[] = [
     ),
   },
   {
+    accessorKey: "taxAmount",
+    header: "Tax Amount",
+    size: 170,
+    minSize: 100,
+    maxSize: 400,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-24" },
+      headerLabel: "Tax Amount",
+      className: "w-[170px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      const { taxAmount, currency } = row.original;
+
+      if (taxAmount == null) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
+      return (
+        <FormatAmount
+          amount={taxAmount}
+          currency={currency}
+          maximumFractionDigits={2}
+        />
+      );
+    },
+  },
+  {
     accessorKey: "baseAmount",
     header: "Base Amount",
     size: 170,
@@ -395,31 +424,88 @@ export const columns: ColumnDef<Transaction>[] = [
     },
     cell: ({ row }) => {
       const { baseAmount, baseCurrency, currency } = row.original;
+
       if (baseAmount == null || !baseCurrency || baseCurrency === currency) {
         return <span className="text-muted-foreground">-</span>;
       }
-      return <AmountCell amount={baseAmount} currency={baseCurrency} />;
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className={cn("text-sm", baseAmount > 0 && "text-[#00C969]")}>
+              <FormatAmount amount={baseAmount} currency={baseCurrency} />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent
+            className="px-3 py-1.5 text-xs max-w-[280px]"
+            side="top"
+            sideOffset={5}
+          >
+            Approximate amount converted to your base currency.
+          </TooltipContent>
+        </Tooltip>
+      );
     },
   },
   {
-    accessorKey: "taxAmount",
-    header: "Tax Amount",
+    accessorKey: "baseTaxAmount",
+    header: "Base Tax Amount",
     size: 170,
     minSize: 100,
     maxSize: 400,
     enableResizing: true,
     meta: {
-      skeleton: { type: "text", width: "w-24" },
-      headerLabel: "Tax Amount",
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Base Tax Amount",
       className: "w-[170px] min-w-[100px]",
     },
-    cell: ({ row }) => (
-      <FormatAmount
-        amount={row.original.taxAmount ?? 0}
-        currency={row.original.currency}
-        maximumFractionDigits={2}
-      />
-    ),
+    cell: ({ row }) => {
+      const { taxAmount, taxRate, amount, baseAmount, baseCurrency, currency } =
+        row.original;
+
+      if (
+        baseAmount == null ||
+        !baseCurrency ||
+        baseCurrency === currency ||
+        taxAmount == null
+      ) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
+      const baseTax = calculateBaseTaxAmount({
+        amount,
+        taxAmount,
+        taxRate,
+        baseAmount,
+        baseCurrency,
+        currency,
+      });
+
+      if (baseTax == null) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span>
+              <FormatAmount
+                amount={baseTax}
+                currency={baseCurrency}
+                maximumFractionDigits={2}
+              />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent
+            className="px-3 py-1.5 text-xs max-w-[280px]"
+            side="top"
+            sideOffset={5}
+          >
+            Approximate tax amount converted to your base currency.
+          </TooltipContent>
+        </Tooltip>
+      );
+    },
   },
   {
     accessorKey: "category",

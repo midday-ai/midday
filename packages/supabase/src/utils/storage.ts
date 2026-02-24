@@ -1,6 +1,10 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-
 export const EMPTY_FOLDER_PLACEHOLDER_FILE_NAME = ".emptyFolderPlaceholder";
+
+type StorageClient = {
+  storage: {
+    from(bucket: string): any;
+  };
+};
 
 type UploadParams = {
   file: File;
@@ -9,7 +13,7 @@ type UploadParams = {
 };
 
 export async function upload(
-  client: SupabaseClient,
+  client: StorageClient,
   { file, path, bucket }: UploadParams,
 ) {
   const storage = client.storage.from(bucket);
@@ -32,7 +36,7 @@ type RemoveParams = {
 };
 
 export async function remove(
-  client: SupabaseClient,
+  client: StorageClient,
   { bucket, path }: RemoveParams,
 ) {
   return client.storage
@@ -46,7 +50,7 @@ type DownloadParams = {
 };
 
 export async function download(
-  client: SupabaseClient,
+  client: StorageClient,
   { bucket, path }: DownloadParams,
 ) {
   return client.storage.from(bucket).download(path);
@@ -62,7 +66,7 @@ type SignedUrlParams = {
 };
 
 export async function signedUrl(
-  client: SupabaseClient,
+  client: StorageClient,
   { bucket, path, expireIn, options }: SignedUrlParams,
 ) {
   return client.storage.from(bucket).createSignedUrl(path, expireIn, options);

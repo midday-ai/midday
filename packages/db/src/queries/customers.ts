@@ -7,13 +7,13 @@ import type { Database } from "../client";
 import {
   customers,
   customerTags,
-  exchangeRates,
   invoices,
   tags,
   teams,
   trackerProjects,
 } from "../schema";
 import { createActivity } from "./activities";
+import { getExchangeRatesBatch } from "./exhange-rates";
 
 type GetCustomerByIdParams = {
   id: string;
@@ -586,27 +586,16 @@ export async function getCustomerInvoiceSummary(
     ),
   ];
 
-  // Fetch all exchange rates
   const exchangeRateMap = new Map<string, number>();
   if (currenciesToConvert.length > 0) {
-    const exchangeRatesData = await db
-      .select({
-        base: exchangeRates.base,
-        rate: exchangeRates.rate,
-      })
-      .from(exchangeRates)
-      .where(
-        and(
-          inArray(exchangeRates.base, currenciesToConvert),
-          eq(exchangeRates.target, baseCurrency),
-        ),
-      );
-
-    // Build a map for O(1) lookup
-    for (const rateData of exchangeRatesData) {
-      if (rateData.base && rateData.rate) {
-        exchangeRateMap.set(rateData.base, Number(rateData.rate));
-      }
+    const pairs = currenciesToConvert.map((c) => ({
+      base: c,
+      target: baseCurrency,
+    }));
+    const batchRates = await getExchangeRatesBatch(db, { pairs });
+    for (const [key, rate] of batchRates) {
+      const base = key.split(":")[0];
+      if (base) exchangeRateMap.set(base, rate);
     }
   }
 

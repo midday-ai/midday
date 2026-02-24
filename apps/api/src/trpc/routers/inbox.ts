@@ -110,37 +110,39 @@ export const inboxRouter = createTRPCRouter({
       });
 
       // Delete files from storage and embeddings
-      for (const result of results) {
-        // Delete file from storage if filePath exists
-        if (result?.filePath && result.filePath.length > 0) {
+      await Promise.all(
+        results
+          .filter((result) => result?.filePath && result.filePath.length > 0)
+          .map(async (result) => {
+            try {
+              await remove(supabase, {
+                bucket: "vault",
+                path: result.filePath!,
+              });
+            } catch (error) {
+              logger.error("Failed to delete file from storage", {
+                inboxId: result.id,
+                error: error instanceof Error ? error.message : String(error),
+              });
+            }
+          }),
+      );
+
+      await Promise.all(
+        results.map(async (result) => {
           try {
-            await remove(supabase, {
-              bucket: "vault",
-              path: result.filePath,
+            await deleteInboxEmbedding(db, {
+              inboxId: result.id,
+              teamId: teamId!,
             });
           } catch (error) {
-            // Log error but don't fail the deletion if file doesn't exist in storage
-            logger.error("Failed to delete file from storage", {
+            logger.error("Failed to delete embedding", {
               inboxId: result.id,
               error: error instanceof Error ? error.message : String(error),
             });
           }
-        }
-
-        // Delete embedding
-        try {
-          await deleteInboxEmbedding(db, {
-            inboxId: result.id,
-            teamId: teamId!,
-          });
-        } catch (error) {
-          // Log error but continue with other items
-          logger.error("Failed to delete embedding", {
-            inboxId: result.id,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
+        }),
+      );
 
       return results;
     }),

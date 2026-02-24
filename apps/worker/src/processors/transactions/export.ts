@@ -5,6 +5,7 @@ import {
   markTransactionsAsExported,
   updateDocumentByPath,
 } from "@midday/db/queries";
+import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import { signedUrl } from "@midday/supabase/storage";
 import { getAppUrl } from "@midday/utils/envs";
@@ -26,9 +27,12 @@ const columns = [
   { label: "Amount", key: "amount" },
   { label: "Currency", key: "currency" },
   { label: "Formatted amount", key: "formattedAmount" },
+  { label: "Base amount", key: "baseAmount" },
+  { label: "Base currency", key: "baseCurrency" },
   { label: "Tax type", key: "taxType" },
   { label: "Tax rate", key: "taxRate" },
   { label: "Tax amount", key: "taxAmount" },
+  { label: "Base tax amount", key: "baseTaxAmount" },
   { label: "From / To", key: "counterpartyName" },
   { label: "Category", key: "category" },
   { label: "Category description", key: "categoryDescription" },
@@ -54,6 +58,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
     const {
       teamId,
       userId,
+      userEmail,
       locale,
       transactionIds,
       dateFormat,
@@ -71,6 +76,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
       includeCSV: exportSettings?.includeCSV ?? true,
       includeXLSX: exportSettings?.includeXLSX ?? true,
       sendEmail: exportSettings?.sendEmail ?? false,
+      sendCopyToMe: exportSettings?.sendCopyToMe ?? false,
       accountantEmail: exportSettings?.accountantEmail,
     };
 
@@ -231,7 +237,6 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
     // Mark transactions as exported so they disappear from review tab
     await markTransactionsAsExported(db, transactionIds);
 
-    // Create short link if email is enabled
     if (settings.sendEmail && settings.accountantEmail) {
       const expireIn = 7 * 24 * 60 * 60;
       const { data: signedUrlData } = await signedUrl(supabase, {
@@ -253,9 +258,29 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
         });
 
         if (shortLink) {
-          this.logger.debug("Short link created for export", {
-            downloadLink: `${getAppUrl()}/s/${shortLink.shortId}`,
-          });
+          const downloadLink = `${getAppUrl()}/s/${shortLink.shortId}`;
+
+          this.logger.debug("Short link created for export", { downloadLink });
+
+          try {
+            await triggerJob(
+              "notification",
+              {
+                type: "transactions_exported",
+                teamId,
+                userEmail,
+                transactionCount: rows.length,
+                downloadLink,
+                accountantEmail: settings.accountantEmail,
+                sendCopyToMe: userEmail ? settings.sendCopyToMe : false,
+              },
+              "notifications",
+            );
+          } catch (error) {
+            this.logger.warn("Failed to trigger export notification", {
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
+          }
         }
       }
     }

@@ -12,5 +12,12 @@
     "drainingSeconds": 15,
     "region": "europe-west4-drams3a",
     "numReplicas": 3
+  },
+  "environments": {
+    "staging": {
+      "deploy": {
+        "numReplicas": 1
+      }
+    }
   }
 }

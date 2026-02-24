@@ -18,15 +18,15 @@ export const transactionsExported: NotificationHandler = {
     },
   }),
 
-  createEmail: (data, user, team) => ({
+  createEmail: (data, _user, team) => ({
     template: "transactions-exported",
     emailType: "customer" as const,
-    replyTo: user.email,
+    replyTo: data.userEmail,
     to: data.accountantEmail ? [data.accountantEmail] : [],
-    subject: `Transaction Export from ${team.name}`,
+    bcc: data.sendCopyToMe && data.userEmail ? [data.userEmail] : undefined,
+    subject: `${team.name} shared an export`,
     from: `${team.name} <middaybot@midday.ai>`,
     data: {
-      accountantEmail: data.accountantEmail,
       teamName: team.name,
       transactionCount: data.transactionCount,
       downloadLink: data.downloadLink,

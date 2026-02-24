@@ -7,6 +7,7 @@ import { z } from "zod";
 export const exportTransactionsSchema = z.object({
   teamId: z.string().uuid(),
   userId: z.string().uuid(),
+  userEmail: z.string().email().optional(),
   locale: z.string(),
   dateFormat: z.string().nullable().optional(),
   transactionIds: z.array(z.string().uuid()),
@@ -16,6 +17,7 @@ export const exportTransactionsSchema = z.object({
       includeCSV: z.boolean(),
       includeXLSX: z.boolean(),
       sendEmail: z.boolean(),
+      sendCopyToMe: z.boolean().optional(),
       accountantEmail: z.string().optional(),
     })
     .optional(),

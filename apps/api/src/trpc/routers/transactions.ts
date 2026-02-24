@@ -139,6 +139,7 @@ export const transactionsRouter = createTRPCRouter({
         {
           teamId,
           userId: session.user.id,
+          userEmail: session.user.email ?? undefined,
           locale: input.locale,
           transactionIds: input.transactionIds,
           dateFormat: input.dateFormat,

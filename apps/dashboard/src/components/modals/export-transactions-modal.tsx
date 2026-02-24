@@ -45,6 +45,7 @@ const exportSettingsSchema = z
     includeCSV: z.boolean(),
     includeXLSX: z.boolean(),
     sendEmail: z.boolean(),
+    sendCopyToMe: z.boolean().optional().default(false),
     accountantEmail: z.string().optional(),
   })
   .refine(
@@ -66,6 +67,15 @@ const exportSettingsSchema = z
   .refine((data) => data.includeCSV || data.includeXLSX, {
     message: "Please select at least one export format",
   });
+
+const exportSettingsDefaults = {
+  csvDelimiter: ",",
+  includeCSV: true,
+  includeXLSX: true,
+  sendEmail: false,
+  sendCopyToMe: false,
+  accountantEmail: "",
+};
 
 interface ExportTransactionsModalProps {
   isOpen: boolean;
@@ -127,26 +137,24 @@ export function ExportTransactionsModal({
     trpc.transactions.getReviewCount,
   ]);
 
-  // Load saved settings from team
-  const savedSettings = (team?.exportSettings as z.infer<
-    typeof exportSettingsSchema
-  >) || {
-    csvDelimiter: ",",
-    includeCSV: true,
-    includeXLSX: true,
-    sendEmail: false,
-    accountantEmail: "",
-  };
+  const savedSettings = team?.exportSettings
+    ? {
+        ...exportSettingsDefaults,
+        ...(team.exportSettings as z.infer<typeof exportSettingsSchema>),
+      }
+    : exportSettingsDefaults;
 
   const form = useZodForm(exportSettingsSchema, {
     defaultValues: savedSettings,
     mode: "onChange",
   });
 
-  // Update form when team data changes
   useEffect(() => {
     if (team?.exportSettings) {
-      form.reset(team.exportSettings as z.infer<typeof exportSettingsSchema>);
+      form.reset({
+        ...exportSettingsDefaults,
+        ...(team.exportSettings as z.infer<typeof exportSettingsSchema>),
+      });
     }
   }, [team?.exportSettings, form]);
 
@@ -185,6 +193,7 @@ export function ExportTransactionsModal({
   };
 
   const isExporting =
+    form.formState.isSubmitting ||
     exportMutation.isPending ||
     jobStatus === "active" ||
     jobStatus === "waiting";
@@ -377,6 +386,28 @@ export function ExportTransactionsModal({
                     )}
                   />
                 )}
+
+                <div className={sendEmail ? undefined : "hidden"}>
+                  <FormField
+                    control={form.control}
+                    name="sendCopyToMe"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="text-sm font-normal">
+                            Send a copy to me
+                          </FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               <Separator />
@@ -399,7 +430,7 @@ export function ExportTransactionsModal({
                     transactionIds.length === 0
                   }
                 >
-                  {exportMutation.isPending ? (
+                  {isExporting ? (
                     <div className="flex items-center space-x-2">
                       <Spinner className="size-4" />
                       <span>Exporting...</span>
