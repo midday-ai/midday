@@ -59,7 +59,58 @@ const teamCurrencyCache = new Map<
   string,
   { currency: string | null; timestamp: number }
 >();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 5 * 60 * 1000;
+
+const cogsSlugsCache = new Map<
+  string,
+  { slugs: string[]; timestamp: number }
+>();
+
+async function getCogsCategorySlugs(
+  db: Database,
+  teamId: string,
+): Promise<string[]> {
+  const cached = cogsSlugsCache.get(teamId);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.slugs;
+  }
+
+  const cogsParent = await db
+    .select({ id: transactionCategories.id })
+    .from(transactionCategories)
+    .where(
+      and(
+        eq(transactionCategories.teamId, teamId),
+        eq(transactionCategories.slug, "cost-of-goods-sold"),
+        isNull(transactionCategories.parentId),
+      ),
+    )
+    .limit(1);
+
+  let slugs: string[] = [];
+  const parentId = cogsParent[0]?.id;
+  if (parentId) {
+    const children = await db
+      .select({ slug: transactionCategories.slug })
+      .from(transactionCategories)
+      .where(
+        and(
+          eq(transactionCategories.teamId, teamId),
+          eq(transactionCategories.parentId, parentId),
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+        ),
+      );
+    slugs = children
+      .map((c) => c.slug)
+      .filter((s): s is string => s !== null);
+  }
+
+  cogsSlugsCache.set(teamId, { slugs, timestamp: Date.now() });
+  return slugs;
+}
 
 async function getTargetCurrency(
   db: Database,
@@ -104,8 +155,24 @@ interface ReportsResultItem {
   currency: string;
 }
 
-// Helper function for profit calculation
-export async function getProfit(db: Database, params: GetReportsParams) {
+const profitInflight = new Map<string, Promise<ReportsResultItem[]>>();
+
+export function getProfit(
+  db: Database,
+  params: GetReportsParams,
+): Promise<ReportsResultItem[]> {
+  const key = `${params.teamId}:${params.from}:${params.to}:${params.currency ?? ""}:${params.revenueType ?? "net"}:${params.exactDates ?? false}`;
+  const existing = profitInflight.get(key);
+  if (existing) return existing;
+
+  const promise = getProfitImpl(db, params).finally(() => {
+    profitInflight.delete(key);
+  });
+  profitInflight.set(key, promise);
+  return promise;
+}
+
+async function getProfitImpl(db: Database, params: GetReportsParams) {
   const {
     teamId,
     from,
@@ -126,8 +193,8 @@ export async function getProfit(db: Database, params: GetReportsParams) {
 
   const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
 
-  // Parallel step 1: targetCurrency, revenue, and COGS parent lookup are independent
-  const [targetCurrency, netRevenueData, cogsParentCategory] =
+  // Parallel step 1: all three are independent (COGS slugs are TTL-cached)
+  const [targetCurrency, netRevenueData, cogsCategorySlugs] =
     await Promise.all([
       getTargetCurrency(db, teamId, inputCurrency),
       getRevenue(db, {
@@ -138,41 +205,8 @@ export async function getProfit(db: Database, params: GetReportsParams) {
         currency: inputCurrency,
         revenueType: "net",
       }),
-      db
-        .select({ id: transactionCategories.id })
-        .from(transactionCategories)
-        .where(
-          and(
-            eq(transactionCategories.teamId, teamId),
-            eq(transactionCategories.slug, "cost-of-goods-sold"),
-            isNull(transactionCategories.parentId),
-          ),
-        )
-        .limit(1),
+      getCogsCategorySlugs(db, teamId),
     ]);
-
-  // Sequential step 2: COGS children depend on the parent ID
-  const cogsParentId = cogsParentCategory[0]?.id;
-  let cogsCategorySlugs: string[] = [];
-  if (cogsParentId) {
-    const cogsCategories = await db
-      .select({ slug: transactionCategories.slug })
-      .from(transactionCategories)
-      .where(
-        and(
-          eq(transactionCategories.teamId, teamId),
-          eq(transactionCategories.parentId, cogsParentId),
-          or(
-            isNull(transactionCategories.excluded),
-            eq(transactionCategories.excluded, false),
-          )!,
-        ),
-      );
-
-    cogsCategorySlugs = cogsCategories
-      .map((cat) => cat.slug)
-      .filter((slug): slug is string => slug !== null);
-  }
 
   // Build expense conditions (needs targetCurrency from step 1)
   const expenseConditions = [
@@ -1206,27 +1240,25 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
     inArray(bankAccounts.type, [...CASH_ACCOUNT_TYPES]),
   ];
 
-  const balanceResult = await db
-    .select({
-      totalBalance: sql<number>`SUM(CASE
-        WHEN ${bankAccounts.currency} = ${targetCurrency} THEN COALESCE(${bankAccounts.balance}, 0)
-        ELSE COALESCE(${bankAccounts.baseBalance}, 0)
-      END)`,
-    })
-    .from(bankAccounts)
-    .where(and(...balanceConditions));
+  const [balanceResult, burnRateData] = await Promise.all([
+    db
+      .select({
+        totalBalance: sql<number>`SUM(CASE
+          WHEN ${bankAccounts.currency} = ${targetCurrency} THEN COALESCE(${bankAccounts.balance}, 0)
+          ELSE COALESCE(${bankAccounts.baseBalance}, 0)
+        END)`,
+      })
+      .from(bankAccounts)
+      .where(and(...balanceConditions)),
+    getBurnRate(db, {
+      teamId,
+      from: burnRateFrom,
+      to: burnRateTo,
+      currency: inputCurrency,
+    }),
+  ]);
 
   const totalBalance = balanceResult[0]?.totalBalance || 0;
-
-  // Step 3: Get burn rate data over the fixed 6-month window
-  const burnRateData = await getBurnRate(db, {
-    teamId,
-    from: burnRateFrom,
-    to: burnRateTo,
-    currency: inputCurrency,
-  });
-
-  // Step 4: Calculate average burn rate
   if (burnRateData.length === 0) {
     return 0;
   }
@@ -1539,14 +1571,10 @@ export async function getGrowthRate(db: Database, params: GetGrowthRateParams) {
       break;
   }
 
-  // Get target currency
-  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
-
-  // Use appropriate data function based on type
   const dataFunction = type === "profit" ? getProfit : getRevenue;
 
-  // Get current and previous period data in parallel
-  const [currentData, previousData] = await Promise.all([
+  const [targetCurrency, currentData, previousData] = await Promise.all([
+    getTargetCurrency(db, teamId, inputCurrency),
     dataFunction(db, {
       teamId,
       from,
