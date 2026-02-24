@@ -4,11 +4,7 @@ import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { getLocationHeaders } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import {
-  createTRPCClient,
-  httpLink,
-  loggerLink,
-} from "@trpc/client";
+import { createTRPCClient, httpLink, loggerLink } from "@trpc/client";
 import {
   createTRPCOptionsProxy,
   type TRPCQueryOptions,
