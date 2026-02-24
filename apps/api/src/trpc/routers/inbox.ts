@@ -190,7 +190,7 @@ export const inboxRouter = createTRPCRouter({
               teamId: teamId!,
             })),
           },
-          "inbox",
+          "inbox-provider",
         );
 
         jobResults.push({ id: batchResult.id });
