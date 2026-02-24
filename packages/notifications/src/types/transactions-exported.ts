@@ -24,7 +24,7 @@ export const transactionsExported: NotificationHandler = {
     replyTo: user.email,
     to: data.accountantEmail ? [data.accountantEmail] : [],
     bcc: data.sendCopyToMe && user.email ? [user.email] : undefined,
-    subject: `Transaction Export from ${team.name}`,
+    subject: `${team.name} shared an export`,
     from: `${team.name} <middaybot@midday.ai>`,
     data: {
       teamName: team.name,

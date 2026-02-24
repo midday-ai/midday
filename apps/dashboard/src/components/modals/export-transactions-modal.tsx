@@ -128,10 +128,8 @@ export function ExportTransactionsModal({
     trpc.transactions.getReviewCount,
   ]);
 
-  // Load saved settings from team
-  const savedSettings = (team?.exportSettings as z.infer<
-    typeof exportSettingsSchema
-  >) || {
+  // Load saved settings from team, merging with defaults for new fields
+  const defaults = {
     csvDelimiter: ",",
     includeCSV: true,
     includeXLSX: true,
@@ -140,15 +138,21 @@ export function ExportTransactionsModal({
     accountantEmail: "",
   };
 
+  const savedSettings = team?.exportSettings
+    ? { ...defaults, ...(team.exportSettings as Record<string, unknown>) }
+    : defaults;
+
   const form = useZodForm(exportSettingsSchema, {
     defaultValues: savedSettings,
     mode: "onChange",
   });
 
-  // Update form when team data changes
   useEffect(() => {
     if (team?.exportSettings) {
-      form.reset(team.exportSettings as z.infer<typeof exportSettingsSchema>);
+      form.reset({
+        ...defaults,
+        ...(team.exportSettings as Record<string, unknown>),
+      });
     }
   }, [team?.exportSettings, form]);
 
@@ -187,6 +191,7 @@ export function ExportTransactionsModal({
   };
 
   const isExporting =
+    form.formState.isSubmitting ||
     exportMutation.isPending ||
     jobStatus === "active" ||
     jobStatus === "waiting";
@@ -363,49 +368,49 @@ export function ExportTransactionsModal({
                 />
 
                 {sendEmail && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="accountantEmail"
-                      render={({ field }) => (
-                        <FormItem>
+                  <FormField
+                    control={form.control}
+                    name="accountantEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="accountant@example.com"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                <div className={sendEmail ? undefined : "hidden"}>
+                  <FormField
+                    control={form.control}
+                    name="sendCopyToMe"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-normal">
+                              Send a copy to me
+                            </FormLabel>
+                            <p className="text-xs text-[#878787]">
+                              Receive the export in your inbox
+                            </p>
+                          </div>
                           <FormControl>
-                            <Input
-                              type="email"
-                              placeholder="accountant@example.com"
-                              {...field}
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
                             />
                           </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="sendCopyToMe"
-                      render={({ field }) => (
-                        <FormItem>
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-sm font-normal">
-                                Send a copy to me
-                              </FormLabel>
-                              <p className="text-xs text-[#878787]">
-                                Receive the export in your inbox
-                              </p>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               <Separator />
@@ -428,7 +433,7 @@ export function ExportTransactionsModal({
                     transactionIds.length === 0
                   }
                 >
-                  {exportMutation.isPending ? (
+                  {isExporting ? (
                     <div className="flex items-center space-x-2">
                       <Spinner className="size-4" />
                       <span>Exporting...</span>

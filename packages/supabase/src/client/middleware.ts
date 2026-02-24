@@ -14,6 +14,9 @@ export async function updateSession(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      auth: {
+        suppressGetSessionWarning: true,
+      },
       cookies: {
         get(name: string) {
           return request.cookies.get(name)?.value;

@@ -25,12 +25,12 @@ export const TransactionsExportedEmail = ({
   transactionCount = 100,
   downloadLink = "https://app.midday.ai/s/abc123",
 }: Props) => {
-  const text = `Transaction Export from ${teamName}`;
+  const preview = `${transactionCount} transaction${transactionCount !== 1 ? "s" : ""} ready to download`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
   return (
-    <EmailThemeProvider preview={<Preview>{text}</Preview>}>
+    <EmailThemeProvider preview={<Preview>{preview}</Preview>}>
       <Body
         className={`my-auto mx-auto font-sans ${themeClasses.body}`}
         style={lightStyles.body}
@@ -48,22 +48,16 @@ export const TransactionsExportedEmail = ({
             className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
-            Transaction Export from {teamName}
+            Export
           </Heading>
 
           <br />
 
-          <span
-            className={`font-medium ${themeClasses.text}`}
-            style={{ color: lightStyles.text.color }}
-          >
-            Hi,
-          </span>
           <Text
             className={themeClasses.text}
             style={{ color: lightStyles.text.color }}
           >
-            {teamName} has shared a transaction export with you containing{" "}
+            {teamName} has shared an export with you containing{" "}
             {transactionCount} transaction{transactionCount !== 1 ? "s" : ""}.
             Click the button below to download the file.
           </Text>
