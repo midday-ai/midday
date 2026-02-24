@@ -382,7 +382,7 @@ export const columns: ColumnDef<Transaction>[] = [
       return (
         <div className="flex flex-col">
           <AmountCell amount={amount} currency={currency} />
-          {showBase && (
+          {showBase && baseCurrency && (
             <span className="text-xs text-muted-foreground">
               <FormatAmount amount={baseAmount} currency={baseCurrency} />
             </span>
@@ -430,7 +430,7 @@ export const columns: ColumnDef<Transaction>[] = [
             currency={currency}
             maximumFractionDigits={2}
           />
-          {baseTax != null && (
+          {baseTax != null && baseCurrency && (
             <span className="text-xs text-muted-foreground">
               <FormatAmount
                 amount={baseTax}
