@@ -7,7 +7,7 @@ import { z } from "zod";
 export const exportTransactionsSchema = z.object({
   teamId: z.string().uuid(),
   userId: z.string().uuid(),
-  userEmail: z.string().email(),
+  userEmail: z.string().email().optional(),
   locale: z.string(),
   dateFormat: z.string().nullable().optional(),
   transactionIds: z.array(z.string().uuid()),

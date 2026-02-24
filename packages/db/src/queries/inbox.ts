@@ -1287,11 +1287,22 @@ export async function matchTransaction(
           teamId,
         })),
       )
-      .returning({ id: transactionAttachments.id });
+      .returning({
+        id: transactionAttachments.id,
+        path: transactionAttachments.path,
+      });
 
-    for (let i = 0; i < relatedItems.length; i++) {
-      if (inserted[i]) {
-        attachmentIds.set(relatedItems[i]!.id, inserted[i]!.id);
+    // Match returned rows back to inbox items by path (unique per file)
+    // rather than by positional index, since RETURNING order is not guaranteed.
+    const pathToInboxId = new Map<string, string>();
+    for (const item of relatedItems) {
+      pathToInboxId.set(JSON.stringify(item.filePath ?? []), item.id);
+    }
+
+    for (const row of inserted) {
+      const inboxId = pathToInboxId.get(JSON.stringify(row.path ?? []));
+      if (inboxId) {
+        attachmentIds.set(inboxId, row.id);
       }
     }
   }
