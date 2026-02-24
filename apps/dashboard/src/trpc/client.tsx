@@ -4,7 +4,7 @@ import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { createClient } from "@midday/supabase/client";
 import type { QueryClient } from "@tanstack/react-query";
 import { isServer, QueryClientProvider } from "@tanstack/react-query";
-import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
+import { createTRPCClient, httpLink, loggerLink } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import { useState } from "react";
 import superjson from "superjson";
@@ -48,7 +48,7 @@ export function TRPCReactProvider(
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
       links: [
-        httpBatchLink({
+        httpLink({
           url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
           transformer: superjson,
           async headers() {

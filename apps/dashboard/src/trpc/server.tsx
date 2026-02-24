@@ -4,7 +4,7 @@ import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { getLocationHeaders } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
+import { createTRPCClient, httpLink, loggerLink } from "@trpc/client";
 import {
   createTRPCOptionsProxy,
   type TRPCQueryOptions,
@@ -42,7 +42,7 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
   queryClient: getQueryClient,
   client: createTRPCClient({
     links: [
-      httpBatchLink({
+      httpLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
         fetch: fetchWithTimeout,
@@ -150,7 +150,7 @@ export async function getTRPCClient(options?: { forcePrimary?: boolean }) {
 
   return createTRPCClient<AppRouter>({
     links: [
-      httpBatchLink({
+      httpLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
         headers: {
