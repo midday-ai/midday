@@ -20,7 +20,6 @@ const workerPool = new Pool({
 const workerDb = drizzle(workerPool, {
   schema,
   casing: "snake_case",
-  prepare: false,
 });
 
 /**

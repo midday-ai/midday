@@ -3,19 +3,9 @@
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-
-// Only prefetch high-traffic routes to reduce unnecessary network requests on load
-const prefetchRoutes = new Set([
-  "/transactions",
-  "/inbox",
-  "/invoices",
-  "/tracker",
-  "/vault",
-  "/apps",
-]);
 
 const icons = {
   "/": () => <Icons.Overview size={20} />,
@@ -182,6 +172,7 @@ const Item = ({
 }: ItemProps) => {
   const Icon = icons[item.path as keyof typeof icons];
   const pathname = usePathname();
+  const router = useRouter();
   const hasChildren = item.children && item.children.length > 0;
 
   // Children should be visible when: expanded sidebar AND this item is expanded
@@ -193,11 +184,16 @@ const Item = ({
     onToggle(item.path);
   };
 
+  const handlePrefetch = useCallback(() => {
+    router.prefetch(item.path);
+  }, [router, item.path]);
+
   return (
     <div className="group">
       <Link
         href={item.path}
-        prefetch={prefetchRoutes.has(item.path)}
+        prefetch={false}
+        onMouseEnter={handlePrefetch}
         onClick={() => onSelect?.()}
         className="group"
       >
@@ -283,8 +279,18 @@ type Props = {
   isExpanded?: boolean;
 };
 
+const deferredPrefetchRoutes = [
+  "/transactions",
+  "/inbox",
+  "/invoices",
+  "/tracker",
+  "/vault",
+  "/apps",
+];
+
 export function MainMenu({ onSelect, isExpanded = false }: Props) {
   const pathname = usePathname();
+  const router = useRouter();
   const { isChatPage } = useChatInterface();
   const part = pathname?.split("/")[1];
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
@@ -293,6 +299,19 @@ export function MainMenu({ onSelect, isExpanded = false }: Props) {
   useEffect(() => {
     setExpandedItem(null);
   }, [isExpanded]);
+
+  // Prefetch high-traffic routes after initial load settles
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      for (const route of deferredPrefetchRoutes) {
+        if (route !== `/${part}`) {
+          router.prefetch(route);
+        }
+      }
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, [router, part]);
 
   return (
     <div className="mt-6 w-full">
