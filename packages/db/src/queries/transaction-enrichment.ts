@@ -103,27 +103,33 @@ export async function updateTransactionEnrichments(
   }
 
   try {
-    for (const update of updates) {
-      const updateData: {
-        merchantName?: string;
-        categorySlug?: string;
-        enrichmentCompleted: boolean;
-      } = {
-        enrichmentCompleted: true,
-      };
+    const CHUNK_SIZE = 50;
+    for (let i = 0; i < updates.length; i += CHUNK_SIZE) {
+      const chunk = updates.slice(i, i + CHUNK_SIZE);
 
-      // Only include fields that have values
-      if (update.data.merchantName) {
-        updateData.merchantName = update.data.merchantName;
-      }
-      if (update.data.categorySlug) {
-        updateData.categorySlug = update.data.categorySlug;
-      }
+      await Promise.all(
+        chunk.map((update) => {
+          const updateData: {
+            merchantName?: string;
+            categorySlug?: string;
+            enrichmentCompleted: boolean;
+          } = {
+            enrichmentCompleted: true,
+          };
 
-      await db
-        .update(transactions)
-        .set(updateData)
-        .where(eq(transactions.id, update.transactionId));
+          if (update.data.merchantName) {
+            updateData.merchantName = update.data.merchantName;
+          }
+          if (update.data.categorySlug) {
+            updateData.categorySlug = update.data.categorySlug;
+          }
+
+          return db
+            .update(transactions)
+            .set(updateData)
+            .where(eq(transactions.id, update.transactionId));
+        }),
+      );
     }
   } catch (error) {
     throw new Error(

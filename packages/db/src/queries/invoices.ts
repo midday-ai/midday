@@ -932,7 +932,7 @@ export async function getInvoiceSummary(
       );
 
     for (const r of rates) {
-      if (r.rate) rateMap.set(r.base, Number(r.rate));
+      if (r.rate && r.base) rateMap.set(r.base, Number(r.rate));
     }
   }
 

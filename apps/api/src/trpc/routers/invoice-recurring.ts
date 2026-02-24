@@ -534,37 +534,37 @@ export const invoiceRecurringRouter = createTRPCRouter({
 
         // Collect job IDs to remove AFTER transaction commits
         const jobIdsToRemove: string[] = [];
-
-        // First, update all invoices within the transaction
         for (const invoice of scheduledInvoices) {
-          // Collect job ID for removal after transaction
           if (invoice.scheduledJobId) {
             const { jobId: rawJobId } = decodeJobId(invoice.scheduledJobId);
             jobIdsToRemove.push(rawJobId);
           }
-
-          // Revert the invoice to draft
-          await updateInvoice(tx, {
-            id: invoice.id,
-            teamId,
-            status: "draft",
-            scheduledAt: null,
-            scheduledJobId: null,
-          });
         }
+
+        // Revert all scheduled invoices to draft in parallel
+        await Promise.all(
+          scheduledInvoices.map((invoice) =>
+            updateInvoice(tx, {
+              id: invoice.id,
+              teamId,
+              status: "draft",
+              scheduledAt: null,
+              scheduledJobId: null,
+            }),
+          ),
+        );
 
         return { recurring, jobIdsToRemove };
       });
 
       // Remove BullMQ jobs AFTER the transaction has committed successfully
-      // This ensures we don't remove jobs if the database update fails
       const queue = getQueue("invoices");
-      for (const jobId of result.jobIdsToRemove) {
-        const job = await queue.getJob(jobId);
-        if (job) {
-          await job.remove();
-        }
-      }
+      await Promise.all(
+        result.jobIdsToRemove.map(async (jobId) => {
+          const job = await queue.getJob(jobId);
+          if (job) await job.remove();
+        }),
+      );
 
       return { id: result.recurring.id };
     }),
@@ -607,37 +607,37 @@ export const invoiceRecurringRouter = createTRPCRouter({
 
         // Collect job IDs to remove AFTER transaction commits
         const jobIdsToRemove: string[] = [];
-
-        // First, update all invoices within the transaction
         for (const invoice of scheduledInvoices) {
-          // Collect job ID for removal after transaction
           if (invoice.scheduledJobId) {
             const { jobId: rawJobId } = decodeJobId(invoice.scheduledJobId);
             jobIdsToRemove.push(rawJobId);
           }
-
-          // Revert the invoice to draft
-          await updateInvoice(tx, {
-            id: invoice.id,
-            teamId,
-            status: "draft",
-            scheduledAt: null,
-            scheduledJobId: null,
-          });
         }
+
+        // Revert all scheduled invoices to draft in parallel
+        await Promise.all(
+          scheduledInvoices.map((invoice) =>
+            updateInvoice(tx, {
+              id: invoice.id,
+              teamId,
+              status: "draft",
+              scheduledAt: null,
+              scheduledJobId: null,
+            }),
+          ),
+        );
 
         return { recurring, jobIdsToRemove };
       });
 
       // Remove BullMQ jobs AFTER the transaction has committed successfully
-      // This ensures we don't remove jobs if the database update fails
       const queue = getQueue("invoices");
-      for (const jobId of result.jobIdsToRemove) {
-        const job = await queue.getJob(jobId);
-        if (job) {
-          await job.remove();
-        }
-      }
+      await Promise.all(
+        result.jobIdsToRemove.map(async (jobId) => {
+          const job = await queue.getJob(jobId);
+          if (job) await job.remove();
+        }),
+      );
 
       return result.recurring;
     }),
