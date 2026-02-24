@@ -1,7 +1,12 @@
-import { exchangeRateCache } from "@midday/cache/exchange-rate-cache";
 import { eq, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { exchangeRates } from "../schema";
+
+const RATE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
+const rateCache = new Map<
+  string,
+  { rates: Record<string, number>; ts: number }
+>();
 
 export type ExchangeRateData = {
   base: string;
@@ -63,16 +68,14 @@ export type GetExchangeRateParams = {
   target: string;
 };
 
-/**
- * Loads all rates targeting a given currency, caches the full set in one Redis key.
- * Returns the lookup map so callers can reuse it across multiple conversions.
- */
 async function getRatesForTarget(
   db: Database,
   target: string,
 ): Promise<Record<string, number>> {
-  const cached = await exchangeRateCache.getRatesForTarget(target);
-  if (cached) return cached;
+  const cached = rateCache.get(target);
+  if (cached && Date.now() - cached.ts < RATE_TTL_MS) {
+    return cached.rates;
+  }
 
   const rows = await db
     .select({
@@ -89,7 +92,7 @@ async function getRatesForTarget(
     }
   }
 
-  await exchangeRateCache.setRatesForTarget(target, rates);
+  rateCache.set(target, { rates, ts: Date.now() });
   return rates;
 }
 
