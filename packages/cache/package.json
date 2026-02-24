@@ -24,7 +24,6 @@
     "./suggested-actions-cache": "./src/suggested-actions-cache.ts",
     "./widget-preferences-cache": "./src/widget-preferences-cache.ts",
     "./banking-cache": "./src/banking-cache.ts",
-    "./exchange-rate-cache": "./src/exchange-rate-cache.ts",
     "./bun-redis-adapter": "./src/bun-redis-adapter.ts"
   }
 }

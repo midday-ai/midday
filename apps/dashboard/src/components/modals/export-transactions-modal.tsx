@@ -45,7 +45,7 @@ const exportSettingsSchema = z
     includeCSV: z.boolean(),
     includeXLSX: z.boolean(),
     sendEmail: z.boolean(),
-    sendCopyToMe: z.boolean(),
+    sendCopyToMe: z.boolean().optional().default(false),
     accountantEmail: z.string().optional(),
   })
   .refine(
@@ -67,6 +67,15 @@ const exportSettingsSchema = z
   .refine((data) => data.includeCSV || data.includeXLSX, {
     message: "Please select at least one export format",
   });
+
+const exportSettingsDefaults = {
+  csvDelimiter: ",",
+  includeCSV: true,
+  includeXLSX: true,
+  sendEmail: false,
+  sendCopyToMe: false,
+  accountantEmail: "",
+};
 
 interface ExportTransactionsModalProps {
   isOpen: boolean;
@@ -128,19 +137,12 @@ export function ExportTransactionsModal({
     trpc.transactions.getReviewCount,
   ]);
 
-  // Load saved settings from team, merging with defaults for new fields
-  const defaults = {
-    csvDelimiter: ",",
-    includeCSV: true,
-    includeXLSX: true,
-    sendEmail: false,
-    sendCopyToMe: false,
-    accountantEmail: "",
-  };
-
   const savedSettings = team?.exportSettings
-    ? { ...defaults, ...(team.exportSettings as Record<string, unknown>) }
-    : defaults;
+    ? {
+        ...exportSettingsDefaults,
+        ...(team.exportSettings as z.infer<typeof exportSettingsSchema>),
+      }
+    : exportSettingsDefaults;
 
   const form = useZodForm(exportSettingsSchema, {
     defaultValues: savedSettings,
@@ -150,8 +152,8 @@ export function ExportTransactionsModal({
   useEffect(() => {
     if (team?.exportSettings) {
       form.reset({
-        ...defaults,
-        ...(team.exportSettings as Record<string, unknown>),
+        ...exportSettingsDefaults,
+        ...(team.exportSettings as z.infer<typeof exportSettingsSchema>),
       });
     }
   }, [team?.exportSettings, form]);
