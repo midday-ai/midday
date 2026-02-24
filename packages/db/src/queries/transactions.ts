@@ -1604,6 +1604,8 @@ export async function getTransactionsByIds(
       tax_type: transactions.taxType,
       tax_rate: transactions.taxRate,
       tax_amount: transactions.taxAmount,
+      base_amount: transactions.baseAmount,
+      base_currency: transactions.baseCurrency,
       status: transactions.status,
       attachments: sql<
         Array<{

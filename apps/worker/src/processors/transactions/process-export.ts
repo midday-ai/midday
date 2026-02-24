@@ -112,6 +112,18 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
         const formattedTaxType = getTaxTypeLabel(taxType ?? "");
         const formattedTaxRate = taxRate != null ? `${taxRate}%` : "";
 
+        const hasBaseCurrency =
+          transaction.base_amount != null &&
+          transaction.base_currency &&
+          transaction.base_currency !== transaction.currency;
+
+        const baseTaxAmount =
+          hasBaseCurrency && taxAmount != null && transaction.amount
+            ? taxRate != null
+              ? (transaction.base_amount! * taxRate) / (100 + taxRate)
+              : taxAmount * (transaction.base_amount! / transaction.amount)
+            : null;
+
         return [
           transaction.id,
           format(parseISO(transaction.date), dateFormat ?? "LLL dd, y"),
@@ -123,12 +135,20 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
             style: "currency",
             currency: transaction.currency,
           }).format(transaction.amount),
+          hasBaseCurrency ? transaction.base_amount : "",
+          hasBaseCurrency ? transaction.base_currency : "",
           formattedTaxType,
           formattedTaxRate,
           Intl.NumberFormat(locale, {
             style: "currency",
             currency: transaction.currency,
           }).format(taxAmount ?? 0),
+          baseTaxAmount != null
+            ? Intl.NumberFormat(locale, {
+                style: "currency",
+                currency: transaction.base_currency!,
+              }).format(baseTaxAmount)
+            : "",
           transaction?.counterparty_name ?? "",
           transaction?.category?.name ?? "",
           transaction?.category?.description ?? "",

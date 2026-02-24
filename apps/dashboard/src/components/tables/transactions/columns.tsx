@@ -374,31 +374,21 @@ export const columns: ColumnDef<Transaction>[] = [
       headerLabel: "Amount",
       className: "w-[170px] min-w-[100px]",
     },
-    cell: ({ row }) => (
-      <AmountCell
-        amount={row.original.amount}
-        currency={row.original.currency}
-      />
-    ),
-  },
-  {
-    accessorKey: "baseAmount",
-    header: "Base Amount",
-    size: 170,
-    minSize: 100,
-    maxSize: 400,
-    enableResizing: true,
-    meta: {
-      skeleton: { type: "text", width: "w-20" },
-      headerLabel: "Base Amount",
-      className: "w-[170px] min-w-[100px]",
-    },
     cell: ({ row }) => {
-      const { baseAmount, baseCurrency, currency } = row.original;
-      if (baseAmount == null || !baseCurrency || baseCurrency === currency) {
-        return <span className="text-muted-foreground">-</span>;
-      }
-      return <AmountCell amount={baseAmount} currency={baseCurrency} />;
+      const { amount, currency, baseAmount, baseCurrency } = row.original;
+      const showBase =
+        baseAmount != null && baseCurrency && baseCurrency !== currency;
+
+      return (
+        <div className="flex flex-col">
+          <AmountCell amount={amount} currency={currency} />
+          {showBase && (
+            <span className="text-xs text-muted-foreground">
+              <FormatAmount amount={baseAmount} currency={baseCurrency} />
+            </span>
+          )}
+        </div>
+      );
     },
   },
   {
@@ -413,13 +403,45 @@ export const columns: ColumnDef<Transaction>[] = [
       headerLabel: "Tax Amount",
       className: "w-[170px] min-w-[100px]",
     },
-    cell: ({ row }) => (
-      <FormatAmount
-        amount={row.original.taxAmount ?? 0}
-        currency={row.original.currency}
-        maximumFractionDigits={2}
-      />
-    ),
+    cell: ({ row }) => {
+      const { taxAmount, taxRate, amount, baseAmount, baseCurrency, currency } =
+        row.original;
+
+      if (!taxAmount) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
+      const showBase =
+        baseAmount != null &&
+        baseCurrency &&
+        baseCurrency !== currency &&
+        amount;
+
+      const baseTax = showBase
+        ? taxRate
+          ? (baseAmount * taxRate) / (100 + taxRate)
+          : taxAmount * (baseAmount / amount)
+        : null;
+
+      return (
+        <div className="flex flex-col">
+          <FormatAmount
+            amount={taxAmount}
+            currency={currency}
+            maximumFractionDigits={2}
+          />
+          {baseTax != null && (
+            <span className="text-xs text-muted-foreground">
+              <FormatAmount
+                amount={baseTax}
+                currency={baseCurrency}
+                maximumFractionDigits={2}
+              />
+            </span>
+          )}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "category",
