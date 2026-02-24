@@ -392,14 +392,9 @@ export function ExportTransactionsModal({
                     render={({ field }) => (
                       <FormItem>
                         <div className="flex items-center justify-between">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-sm font-normal">
-                              Send a copy to me
-                            </FormLabel>
-                            <p className="text-xs text-[#878787]">
-                              Receive the export in your inbox
-                            </p>
-                          </div>
+                          <FormLabel className="text-sm font-normal">
+                            Send a copy to me
+                          </FormLabel>
                           <FormControl>
                             <Switch
                               checked={field.value}
