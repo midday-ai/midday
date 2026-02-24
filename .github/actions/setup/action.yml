@@ -9,18 +9,18 @@ runs:
       with:
         bun-version: v1.3.9
 
-    - name: Cache dependencies
-      id: cache
-      uses: actions/cache@v4
+    - name: Mount bun global cache
+      uses: useblacksmith/stickydisk@v1
       with:
-        path: |
-          node_modules
-          **/node_modules
-        key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-bun-
+        key: ${{ github.repository }}-bun-cache
+        path: ~/.bun/install/cache
+
+    - name: Mount node_modules
+      uses: useblacksmith/stickydisk@v1
+      with:
+        key: ${{ github.repository }}-node-modules
+        path: node_modules
 
     - name: Install dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
       run: bun install
