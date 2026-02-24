@@ -111,6 +111,7 @@ export type UpdateBaseCurrencyPayload = z.infer<
 export const exportTransactionsSchema = z.object({
   teamId: z.string().uuid(),
   userId: z.string().uuid(),
+  userEmail: z.string().email(),
   locale: z.string(),
   dateFormat: z.string().nullable().optional(),
   transactionIds: z.array(z.string().uuid()),
