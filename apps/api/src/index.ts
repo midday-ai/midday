@@ -42,6 +42,7 @@ app.use(
       "Content-Type",
       "User-Agent",
       "accept-language",
+      "trpc-accept",
       "x-trpc-source",
       "x-user-locale",
       "x-user-timezone",
