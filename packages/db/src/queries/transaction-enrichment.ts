@@ -103,12 +103,25 @@ export async function updateTransactionEnrichments(
   }
 
   try {
+    // Deduplicate by transactionId — later entries override earlier ones so
+    // the result matches sequential semantics if callers ever pass duplicates.
+    const deduped = new Map<string, EnrichmentUpdateData>();
+    for (const update of updates) {
+      const existing = deduped.get(update.transactionId);
+      deduped.set(
+        update.transactionId,
+        existing ? { ...existing, ...update.data } : { ...update.data },
+      );
+    }
+
+    const uniqueUpdates = Array.from(deduped.entries());
+
     const CHUNK_SIZE = 50;
-    for (let i = 0; i < updates.length; i += CHUNK_SIZE) {
-      const chunk = updates.slice(i, i + CHUNK_SIZE);
+    for (let i = 0; i < uniqueUpdates.length; i += CHUNK_SIZE) {
+      const chunk = uniqueUpdates.slice(i, i + CHUNK_SIZE);
 
       await Promise.all(
-        chunk.map((update) => {
+        chunk.map(([transactionId, data]) => {
           const updateData: {
             merchantName?: string;
             categorySlug?: string;
@@ -117,17 +130,17 @@ export async function updateTransactionEnrichments(
             enrichmentCompleted: true,
           };
 
-          if (update.data.merchantName) {
-            updateData.merchantName = update.data.merchantName;
+          if (data.merchantName) {
+            updateData.merchantName = data.merchantName;
           }
-          if (update.data.categorySlug) {
-            updateData.categorySlug = update.data.categorySlug;
+          if (data.categorySlug) {
+            updateData.categorySlug = data.categorySlug;
           }
 
           return db
             .update(transactions)
             .set(updateData)
-            .where(eq(transactions.id, update.transactionId));
+            .where(eq(transactions.id, transactionId));
         }),
       );
     }

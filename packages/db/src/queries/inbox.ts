@@ -1287,23 +1287,13 @@ export async function matchTransaction(
           teamId,
         })),
       )
-      .returning({
-        id: transactionAttachments.id,
-        path: transactionAttachments.path,
-      });
+      .returning({ id: transactionAttachments.id });
 
-    // Match returned rows back to inbox items by path (unique per file)
-    // rather than by positional index, since RETURNING order is not guaranteed.
-    const pathToInboxId = new Map<string, string>();
-    for (const item of relatedItems) {
-      pathToInboxId.set(JSON.stringify(item.filePath ?? []), item.id);
-    }
-
-    for (const row of inserted) {
-      const inboxId = pathToInboxId.get(JSON.stringify(row.path ?? []));
-      if (inboxId) {
-        attachmentIds.set(inboxId, row.id);
-      }
+    // PostgreSQL INSERT ... VALUES ... RETURNING preserves insertion order,
+    // so we can safely match by position. A path-based map would break when
+    // multiple inbox items share the same filePath (or filePath is empty).
+    for (let i = 0; i < inserted.length; i++) {
+      attachmentIds.set(relatedItems[i]!.id, inserted[i]!.id);
     }
   }
 
