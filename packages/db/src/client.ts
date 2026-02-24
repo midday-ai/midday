@@ -32,15 +32,20 @@ const SLOW_QUERY_MS = 100;
 function instrumentPool(pool: Pool, label: string): void {
   const origQuery = pool.query.bind(pool);
 
-  (pool as any).query = (...args: any[]) => {
+  (pool as unknown as Record<string, unknown>).query = (
+    ...args: unknown[]
+  ): unknown => {
     const start = performance.now();
-    const result = origQuery(...args);
-    if (result && typeof result.then === "function") {
-      result.then(
+    const result = (origQuery as (...a: unknown[]) => unknown)(...args);
+    if (result && typeof (result as any).then === "function") {
+      (result as Promise<unknown>).then(
         () => {
           const ms = performance.now() - start;
           if (ms > SLOW_QUERY_MS) {
-            const sql = typeof args[0] === "string" ? args[0] : args[0]?.text;
+            const sql =
+              typeof args[0] === "string"
+                ? args[0]
+                : (args[0] as { text?: string } | undefined)?.text;
             perfLogger.warn("slow query", {
               durationMs: +ms.toFixed(2),
               sql: sql ? sql.slice(0, 500) : undefined,
