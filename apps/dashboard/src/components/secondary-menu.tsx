@@ -2,8 +2,7 @@
 
 import { cn } from "@midday/ui/cn";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 type Item = {
   path: string;
@@ -16,26 +15,6 @@ type Props = {
 
 export function SecondaryMenu({ items }: Props) {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const handlePrefetch = useCallback(
-    (path: string) => {
-      router.prefetch(path);
-    },
-    [router],
-  );
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      for (const item of items) {
-        if (item.path !== pathname) {
-          router.prefetch(item.path);
-        }
-      }
-    }, 2000);
-
-    return () => clearTimeout(timeout);
-  }, [router, items, pathname]);
 
   return (
     <nav className="py-4">
@@ -44,8 +23,7 @@ export function SecondaryMenu({ items }: Props) {
           <Link
             key={item.path}
             href={item.path}
-            prefetch={false}
-            onMouseEnter={() => handlePrefetch(item.path)}
+            prefetch
             className={cn(
               "text-[#606060]",
               pathname === item.path &&
