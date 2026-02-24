@@ -541,18 +541,15 @@ export const invoiceRecurringRouter = createTRPCRouter({
           }
         }
 
-        // Revert all scheduled invoices to draft in parallel
-        await Promise.all(
-          scheduledInvoices.map((invoice) =>
-            updateInvoice(tx, {
-              id: invoice.id,
-              teamId,
-              status: "draft",
-              scheduledAt: null,
-              scheduledJobId: null,
-            }),
-          ),
-        );
+        for (const invoice of scheduledInvoices) {
+          await updateInvoice(tx, {
+            id: invoice.id,
+            teamId,
+            status: "draft",
+            scheduledAt: null,
+            scheduledJobId: null,
+          });
+        }
 
         return { recurring, jobIdsToRemove };
       });
@@ -614,18 +611,15 @@ export const invoiceRecurringRouter = createTRPCRouter({
           }
         }
 
-        // Revert all scheduled invoices to draft in parallel
-        await Promise.all(
-          scheduledInvoices.map((invoice) =>
-            updateInvoice(tx, {
-              id: invoice.id,
-              teamId,
-              status: "draft",
-              scheduledAt: null,
-              scheduledJobId: null,
-            }),
-          ),
-        );
+        for (const invoice of scheduledInvoices) {
+          await updateInvoice(tx, {
+            id: invoice.id,
+            teamId,
+            status: "draft",
+            scheduledAt: null,
+            scheduledJobId: null,
+          });
+        }
 
         return { recurring, jobIdsToRemove };
       });

@@ -4098,7 +4098,7 @@ export async function getBalanceSheet(
 
   // Convert invoices using batch-fetched rates
   for (const invoice of invoicesNeedingConversion) {
-    const key = `${invoice.currency}-${currency}`;
+    const key = `${invoice.currency}:${currency}`;
     const rate = exchangeRateMap.get(key);
     if (rate) {
       const convertedAmount = invoice.amount * rate;
@@ -4110,7 +4110,7 @@ export async function getBalanceSheet(
 
   // Convert bills using batch-fetched rates
   for (const bill of billsNeedingConversion) {
-    const key = `${bill.currency}-${currency}`;
+    const key = `${bill.currency}:${currency}`;
     const rate = exchangeRateMap.get(key);
     if (rate) {
       const convertedAmount = bill.amount * rate;
@@ -4122,7 +4122,7 @@ export async function getBalanceSheet(
 
   // Convert accounts using batch-fetched rates
   for (const account of accountsNeedingConversion) {
-    const key = `${account.currency}-${currency}`;
+    const key = `${account.currency}:${currency}`;
     const rate = exchangeRateMap.get(key);
     if (rate) {
       const convertedBalance = account.balance * rate;

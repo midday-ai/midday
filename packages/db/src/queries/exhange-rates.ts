@@ -1,4 +1,5 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { exchangeRateCache } from "@midday/cache/exchange-rate-cache";
+import { eq, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { exchangeRates } from "../schema";
 
@@ -62,21 +63,47 @@ export type GetExchangeRateParams = {
   target: string;
 };
 
+/**
+ * Loads all rates targeting a given currency, caches the full set in one Redis key.
+ * Returns the lookup map so callers can reuse it across multiple conversions.
+ */
+async function getRatesForTarget(
+  db: Database,
+  target: string,
+): Promise<Record<string, number>> {
+  const cached = await exchangeRateCache.getRatesForTarget(target);
+  if (cached) return cached;
+
+  const rows = await db
+    .select({
+      base: exchangeRates.base,
+      rate: exchangeRates.rate,
+    })
+    .from(exchangeRates)
+    .where(eq(exchangeRates.target, target));
+
+  const rates: Record<string, number> = {};
+  for (const row of rows) {
+    if (row.base && row.rate) {
+      rates[row.base] = Number(row.rate);
+    }
+  }
+
+  await exchangeRateCache.setRatesForTarget(target, rates);
+  return rates;
+}
+
 export async function getExchangeRate(
   db: Database,
   params: GetExchangeRateParams,
 ) {
   const { base, target } = params;
 
-  const [result] = await db
-    .select({
-      rate: exchangeRates.rate,
-    })
-    .from(exchangeRates)
-    .where(and(eq(exchangeRates.base, base), eq(exchangeRates.target, target)))
-    .limit(1);
+  if (base === target) return { rate: 1 };
 
-  return result;
+  const rates = await getRatesForTarget(db, target);
+  const rate = rates[base];
+  return rate !== undefined ? { rate } : undefined;
 }
 
 export type GetExchangeRatesBatchParams = {
@@ -93,39 +120,25 @@ export async function getExchangeRatesBatch(
     return new Map<string, number>();
   }
 
-  // Extract unique base and target currencies
-  const baseCurrencies = [...new Set(pairs.map((p) => p.base))];
-  const targetCurrencies = [...new Set(pairs.map((p) => p.target))];
+  // Group by target currency (almost always a single target)
+  const byTarget = new Map<string, string[]>();
+  for (const { base, target } of pairs) {
+    const list = byTarget.get(target) ?? [];
+    list.push(base);
+    byTarget.set(target, list);
+  }
 
-  // Fetch all exchange rates in one query
-  // Filter to only the exact pairs we need
-  const results = await db
-    .select({
-      base: exchangeRates.base,
-      target: exchangeRates.target,
-      rate: exchangeRates.rate,
-    })
-    .from(exchangeRates)
-    .where(
-      and(
-        inArray(exchangeRates.base, baseCurrencies),
-        inArray(exchangeRates.target, targetCurrencies),
-      ),
-    );
+  const result = new Map<string, number>();
 
-  // Filter results to only include exact pairs we requested
-  const pairSet = new Set(pairs.map((p) => `${p.base}-${p.target}`));
-
-  // Build a map for O(1) lookup, only including requested pairs
-  const rateMap = new Map<string, number>();
-  for (const result of results) {
-    if (result.base && result.target && result.rate) {
-      const key = `${result.base}-${result.target}`;
-      if (pairSet.has(key)) {
-        rateMap.set(key, Number(result.rate));
+  for (const [target, bases] of byTarget) {
+    const rates = await getRatesForTarget(db, target);
+    for (const base of bases) {
+      const rate = rates[base];
+      if (rate !== undefined) {
+        result.set(`${base}:${target}`, rate);
       }
     }
   }
 
-  return rateMap;
+  return result;
 }

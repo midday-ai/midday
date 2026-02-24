@@ -32,7 +32,6 @@ import type { Database, DatabaseOrTransaction } from "../client";
 import {
   type activityTypeEnum,
   customers,
-  exchangeRates,
   invoiceRecurring,
   invoiceStatusEnum,
   invoices,
@@ -43,6 +42,7 @@ import {
   users,
 } from "../schema";
 import { logActivity } from "../utils/log-activity";
+import { getExchangeRatesBatch } from "./exhange-rates";
 
 export type Template = {
   id?: string; // Reference to invoice_templates table
@@ -875,12 +875,10 @@ export async function getInvoiceSummary(
 
   const whereConditions: SQL[] = [eq(invoices.teamId, teamId)];
 
-  // Handle multiple statuses
   if (statuses && statuses.length > 0) {
     whereConditions.push(inArray(invoices.status, statuses));
   }
 
-  // Get team's base currency
   const [team] = await db
     .select({ baseCurrency: teams.baseCurrency })
     .from(teams)
@@ -889,16 +887,18 @@ export async function getInvoiceSummary(
 
   const baseCurrency = team?.baseCurrency || "USD";
 
-  // Get all invoices with their amounts and currencies
-  const invoiceData = await db
+  // Aggregate in SQL — returns one row per currency instead of one row per invoice
+  const currencyTotals = await db
     .select({
-      amount: invoices.amount,
       currency: invoices.currency,
+      totalAmount: sql<string>`COALESCE(SUM(${invoices.amount}), 0)`,
+      invoiceCount: count(),
     })
     .from(invoices)
-    .where(and(...whereConditions));
+    .where(and(...whereConditions))
+    .groupBy(invoices.currency);
 
-  if (invoiceData.length === 0) {
+  if (currencyTotals.length === 0) {
     return {
       totalAmount: 0,
       invoiceCount: 0,
@@ -906,103 +906,70 @@ export async function getInvoiceSummary(
     };
   }
 
-  // Collect unique foreign currencies that need conversion
-  const foreignCurrencies = [
-    ...new Set(
-      invoiceData
-        .map((inv) => inv.currency || baseCurrency)
-        .filter((c) => c !== baseCurrency),
-    ),
-  ];
+  const foreignCurrencies = currencyTotals
+    .map((row) => row.currency || baseCurrency)
+    .filter((c) => c !== baseCurrency);
 
-  // Batch-fetch all needed exchange rates in a single query
   const rateMap = new Map<string, number>();
   if (foreignCurrencies.length > 0) {
-    const rates = await db
-      .select({
-        base: exchangeRates.base,
-        rate: exchangeRates.rate,
-      })
-      .from(exchangeRates)
-      .where(
-        and(
-          inArray(exchangeRates.base, foreignCurrencies),
-          eq(exchangeRates.target, baseCurrency),
-        ),
-      );
-
-    for (const r of rates) {
-      if (r.rate && r.base) rateMap.set(r.base, Number(r.rate));
+    const pairs = foreignCurrencies.map((c) => ({
+      base: c,
+      target: baseCurrency,
+    }));
+    const batchRates = await getExchangeRatesBatch(db, { pairs });
+    for (const [key, rate] of batchRates) {
+      const base = key.split(":")[0];
+      if (base) rateMap.set(base, rate);
     }
   }
 
-  // Convert all amounts to base currency and track currency breakdown
   let totalAmount = 0;
-  const currencyBreakdown = new Map<
-    string,
-    { amount: number; count: number; convertedAmount: number }
-  >();
+  let invoiceCount = 0;
+  const breakdown: Array<{
+    currency: string;
+    originalAmount: number;
+    convertedAmount: number;
+    count: number;
+  }> = [];
 
-  for (const invoice of invoiceData) {
-    const amount = Number(invoice.amount) || 0;
-    const currency = invoice.currency || baseCurrency;
+  for (const row of currencyTotals) {
+    const currency = row.currency || baseCurrency;
+    const amount = Number(row.totalAmount) || 0;
+    const rowCount = Number(row.invoiceCount) || 0;
 
     if (currency === baseCurrency) {
       totalAmount += amount;
-      const existing = currencyBreakdown.get(currency) || {
-        amount: 0,
-        count: 0,
-        convertedAmount: 0,
-      };
-      currencyBreakdown.set(currency, {
-        amount: existing.amount + amount,
-        count: existing.count + 1,
-        convertedAmount: existing.convertedAmount + amount,
+      breakdown.push({
+        currency,
+        originalAmount: Math.round(amount * 100) / 100,
+        convertedAmount: Math.round(amount * 100) / 100,
+        count: rowCount,
       });
+      invoiceCount += rowCount;
     } else {
       const rate = rateMap.get(currency);
-
       if (rate) {
         const convertedAmount = amount * rate;
         totalAmount += convertedAmount;
-
-        const existing = currencyBreakdown.get(currency) || {
-          amount: 0,
-          count: 0,
-          convertedAmount: 0,
-        };
-        currencyBreakdown.set(currency, {
-          amount: existing.amount + amount,
-          count: existing.count + 1,
-          convertedAmount: existing.convertedAmount + convertedAmount,
+        breakdown.push({
+          currency,
+          originalAmount: Math.round(amount * 100) / 100,
+          convertedAmount: Math.round(convertedAmount * 100) / 100,
+          count: rowCount,
         });
+        invoiceCount += rowCount;
       }
-      // Skip invoices with missing exchange rates to avoid mixing currencies
+      // Skip currencies with missing exchange rates to avoid mixing currencies
     }
   }
 
-  // Convert breakdown to array and sort by amount (descending)
-  const breakdown = Array.from(currencyBreakdown.entries())
-    .map(([currency, data]) => ({
-      currency,
-      originalAmount: Math.round(data.amount * 100) / 100,
-      convertedAmount: Math.round(data.convertedAmount * 100) / 100,
-      count: data.count,
-    }))
-    .sort((a, b) => b.originalAmount - a.originalAmount);
-
-  // Count only invoices that were successfully included in the calculation
-  // (i.e., invoices with valid exchange rates or in base currency)
-  const invoiceCount = Array.from(currencyBreakdown.values()).reduce(
-    (sum, data) => sum + data.count,
-    0,
-  );
+  breakdown.sort((a, b) => b.originalAmount - a.originalAmount);
 
   return {
-    totalAmount: Math.round(totalAmount * 100) / 100, // Round to 2 decimal places
+    totalAmount: Math.round(totalAmount * 100) / 100,
     invoiceCount,
     currency: baseCurrency,
-    breakdown: breakdown.length > 1 ? breakdown : undefined, // Only include if multiple currencies
+    breakdown: breakdown.length > 1 ? breakdown : undefined,
   };
 }
 
