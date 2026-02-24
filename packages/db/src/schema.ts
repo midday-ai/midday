@@ -1013,6 +1013,21 @@ export const invoices = pgTable(
       .on(table.invoiceRecurringId, table.recurringSequence)
       .where(sql`invoice_recurring_id IS NOT NULL`),
     unique("invoices_scheduled_job_id_key").on(table.scheduledJobId),
+    // Invoice page query indexes
+    index("invoices_team_due_date_idx")
+      .on(table.teamId, table.dueDate)
+      .where(sql`due_date IS NOT NULL`),
+    index("invoices_team_status_due_date_idx").on(
+      table.teamId,
+      table.status,
+      table.dueDate,
+    ),
+    index("invoices_team_customer_id_idx")
+      .on(table.teamId, table.customerId)
+      .where(sql`customer_id IS NOT NULL`),
+    index("invoices_customer_id_idx")
+      .on(table.customerId)
+      .where(sql`customer_id IS NOT NULL`),
     pgPolicy("Invoices can be handled by a member of the team", {
       as: "permissive",
       for: "all",
