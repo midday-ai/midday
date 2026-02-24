@@ -14,11 +14,13 @@ const isProduction = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
 
 const connectionConfig = {
   max: isDevelopment ? 8 : isProduction ? 12 : 6,
-  min: isDevelopment ? 0 : isProduction ? 2 : 1,
-  idleTimeoutMillis: isDevelopment ? 5000 : 60000,
+  min: isDevelopment ? 0 : 1,
+  idleTimeoutMillis: isDevelopment ? 5000 : 30000,
   connectionTimeoutMillis: 5000,
   maxUses: isDevelopment ? 100 : 0,
   allowExitOnIdle: isDevelopment,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10_000,
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
 };
 
@@ -26,6 +28,10 @@ const connectionConfig = {
 const primaryPool = new Pool({
   connectionString: process.env.DATABASE_PRIMARY_URL!,
   ...connectionConfig,
+});
+
+primaryPool.on("error", (err) => {
+  logger.error("Primary pool: idle client error", { error: err.message });
 });
 
 export const primaryDb = drizzle(primaryPool, {
@@ -75,6 +81,10 @@ if (!isDevelopment) {
 const replicaPool = replicaUrl
   ? new Pool({ connectionString: replicaUrl, ...connectionConfig })
   : null;
+
+replicaPool?.on("error", (err) => {
+  logger.error("Replica pool: idle client error", { error: err.message });
+});
 
 const replicaDb = replicaPool
   ? drizzle(replicaPool, { schema, casing: "snake_case" })

@@ -1,11 +1,16 @@
 import { type CookieOptions, createServerClient } from "@supabase/ssr";
+import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import type { NextRequest, NextResponse } from "next/server";
 
 export async function updateSession(
   request: NextRequest,
   response: NextResponse,
-) {
-  createServerClient(
+): Promise<{
+  response: NextResponse;
+  session: Session | null;
+  supabase: SupabaseClient;
+}> {
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -25,5 +30,17 @@ export async function updateSession(
     },
   );
 
-  return response;
+  // getSession() checks the JWT expiry locally and only makes a network call
+  // to Supabase when the token actually needs refreshing. For valid tokens
+  // this is a local decode — zero network overhead.
+  //
+  // This client's cookie handlers write to both request.cookies (so downstream
+  // server components see the fresh token) and response.cookies (so the
+  // browser receives updated cookies). Previously this function never called
+  // any auth method, so expired tokens were never refreshed → 401s during SSR.
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  return { response, session, supabase };
 }
