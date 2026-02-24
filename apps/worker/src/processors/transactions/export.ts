@@ -271,9 +271,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
                 userEmail,
                 transactionCount: rows.length,
                 downloadLink,
-                accountantEmail: settings.sendEmail
-                  ? settings.accountantEmail
-                  : undefined,
+                accountantEmail: settings.accountantEmail,
                 sendCopyToMe: userEmail ? settings.sendCopyToMe : false,
               },
               "notifications",
