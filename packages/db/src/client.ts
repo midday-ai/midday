@@ -40,8 +40,7 @@ function instrumentPool(pool: Pool, label: string): void {
         () => {
           const ms = performance.now() - start;
           if (ms > SLOW_QUERY_MS) {
-            const sql =
-              typeof args[0] === "string" ? args[0] : args[0]?.text;
+            const sql = typeof args[0] === "string" ? args[0] : args[0]?.text;
             perfLogger.warn("slow query", {
               durationMs: +ms.toFixed(2),
               sql: sql ? sql.slice(0, 500) : undefined,
@@ -135,7 +134,11 @@ replicaPool?.on("error", (err) => {
 });
 
 const replicaDb = replicaPool
-  ? drizzle(replicaPool, { schema, casing: "snake_case", logger: drizzleLogger })
+  ? drizzle(replicaPool, {
+      schema,
+      casing: "snake_case",
+      logger: drizzleLogger,
+    })
   : primaryDb;
 
 export const db = withReplicas(
