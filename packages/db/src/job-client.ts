@@ -26,6 +26,7 @@ export const createJobDb = () => {
   const db = drizzle(jobPool, {
     schema,
     casing: "snake_case",
+    prepare: false,
   });
 
   return {

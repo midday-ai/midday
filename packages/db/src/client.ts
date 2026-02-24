@@ -44,6 +44,7 @@ export const primaryDb = drizzle(primaryPool, {
   schema,
   casing: "snake_case",
   logger: drizzleLogger,
+  prepare: false,
 });
 
 /**
@@ -100,6 +101,7 @@ const replicaDb = replicaPool
       schema,
       casing: "snake_case",
       logger: drizzleLogger,
+      prepare: false,
     })
   : primaryDb;
 
