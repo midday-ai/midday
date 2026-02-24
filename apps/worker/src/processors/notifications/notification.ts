@@ -105,6 +105,30 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
       }
 
       // ========================================
+      // Transaction Export Notifications
+      // ========================================
+      case "transactions_exported": {
+        await notifications.create(
+          "transactions_exported",
+          payload.teamId,
+          {
+            transactionCount: payload.transactionCount,
+            downloadLink: payload.downloadLink,
+            accountantEmail: payload.accountantEmail,
+            sendCopyToMe: payload.sendCopyToMe,
+          },
+          { sendEmail: true },
+        );
+
+        this.logger.info("Transactions exported notification sent", {
+          teamId: payload.teamId,
+          transactionCount: payload.transactionCount,
+          sendCopyToMe: payload.sendCopyToMe,
+        });
+        break;
+      }
+
+      // ========================================
       // Document Notifications
       // ========================================
       case "document_uploaded": {

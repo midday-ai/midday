@@ -154,6 +154,19 @@ export const recurringSeriesPausedNotificationSchema = z.object({
 });
 
 // ============================================
+// Transaction Export Notifications
+// ============================================
+
+export const transactionsExportedNotificationSchema = z.object({
+  ...baseFields,
+  type: z.literal("transactions_exported"),
+  transactionCount: z.number(),
+  downloadLink: z.string(),
+  accountantEmail: z.string().optional(),
+  sendCopyToMe: z.boolean().optional(),
+});
+
+// ============================================
 // Discriminated Union of All Notification Types
 // ============================================
 
@@ -165,6 +178,8 @@ export const notificationPayloadSchema = z.discriminatedUnion("type", [
   // Documents
   documentUploadedNotificationSchema,
   documentProcessedNotificationSchema,
+  // Transactions
+  transactionsExportedNotificationSchema,
   // Invoices
   invoicePaidNotificationSchema,
   invoiceOverdueNotificationSchema,
@@ -220,4 +235,7 @@ export type RecurringSeriesCompletedNotification = z.infer<
 >;
 export type RecurringSeriesPausedNotification = z.infer<
   typeof recurringSeriesPausedNotificationSchema
+>;
+export type TransactionsExportedNotification = z.infer<
+  typeof transactionsExportedNotificationSchema
 >;

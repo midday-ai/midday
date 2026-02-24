@@ -82,11 +82,12 @@ export const transactionsCreatedSchema = z.object({
 export const transactionsExportedSchema = z.object({
   users: z.array(userSchema),
   transactionCount: z.number(),
-  locale: z.string(),
-  dateFormat: z.string(),
+  locale: z.string().optional(),
+  dateFormat: z.string().optional(),
   downloadLink: z.string().optional(),
   accountantEmail: z.string().optional(),
   sendEmail: z.boolean().optional(),
+  sendCopyToMe: z.boolean().optional(),
 });
 
 export const documentUploadedSchema = z.object({

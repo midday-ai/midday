@@ -375,22 +375,12 @@ export const columns: ColumnDef<Transaction>[] = [
       headerLabel: "Amount",
       className: "w-[170px] min-w-[100px]",
     },
-    cell: ({ row }) => {
-      const { amount, currency, baseAmount, baseCurrency } = row.original;
-      const showBase =
-        baseAmount != null && baseCurrency && baseCurrency !== currency;
-
-      return (
-        <div className="flex flex-col">
-          <AmountCell amount={amount} currency={currency} />
-          {showBase && baseCurrency && (
-            <span className="text-xs text-muted-foreground">
-              <FormatAmount amount={baseAmount} currency={baseCurrency} />
-            </span>
-          )}
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <AmountCell
+        amount={row.original.amount}
+        currency={row.original.currency}
+      />
+    ),
   },
   {
     accessorKey: "taxAmount",
@@ -405,10 +395,80 @@ export const columns: ColumnDef<Transaction>[] = [
       className: "w-[170px] min-w-[100px]",
     },
     cell: ({ row }) => {
+      const { taxAmount, currency } = row.original;
+
+      if (taxAmount == null) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
+      return (
+        <FormatAmount
+          amount={taxAmount}
+          currency={currency}
+          maximumFractionDigits={2}
+        />
+      );
+    },
+  },
+  {
+    accessorKey: "baseAmount",
+    header: "Base Amount",
+    size: 170,
+    minSize: 100,
+    maxSize: 400,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Base Amount",
+      className: "w-[170px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      const { baseAmount, baseCurrency, currency } = row.original;
+
+      if (baseAmount == null || !baseCurrency || baseCurrency === currency) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className={cn("text-sm", baseAmount > 0 && "text-[#00C969]")}>
+              <FormatAmount amount={baseAmount} currency={baseCurrency} />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent
+            className="px-3 py-1.5 text-xs max-w-[280px]"
+            side="top"
+            sideOffset={5}
+          >
+            Approximate amount converted to your base currency.
+          </TooltipContent>
+        </Tooltip>
+      );
+    },
+  },
+  {
+    accessorKey: "baseTaxAmount",
+    header: "Base Tax Amount",
+    size: 170,
+    minSize: 100,
+    maxSize: 400,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Base Tax Amount",
+      className: "w-[170px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
       const { taxAmount, taxRate, amount, baseAmount, baseCurrency, currency } =
         row.original;
 
-      if (!taxAmount) {
+      if (
+        baseAmount == null ||
+        !baseCurrency ||
+        baseCurrency === currency ||
+        taxAmount == null
+      ) {
         return <span className="text-muted-foreground">-</span>;
       }
 
@@ -421,23 +481,29 @@ export const columns: ColumnDef<Transaction>[] = [
         currency,
       });
 
+      if (baseTax == null) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
       return (
-        <div className="flex flex-col">
-          <FormatAmount
-            amount={taxAmount}
-            currency={currency}
-            maximumFractionDigits={2}
-          />
-          {baseTax != null && baseCurrency && (
-            <span className="text-xs text-muted-foreground">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span>
               <FormatAmount
                 amount={baseTax}
                 currency={baseCurrency}
                 maximumFractionDigits={2}
               />
             </span>
-          )}
-        </div>
+          </TooltipTrigger>
+          <TooltipContent
+            className="px-3 py-1.5 text-xs max-w-[280px]"
+            side="top"
+            sideOffset={5}
+          >
+            Approximate tax amount converted to your base currency.
+          </TooltipContent>
+        </Tooltip>
       );
     },
   },
