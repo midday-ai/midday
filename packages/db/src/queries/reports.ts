@@ -124,83 +124,35 @@ export async function getProfit(db: Database, params: GetReportsParams) {
     ? new UTCDate(parseISO(to))
     : endOfMonth(new UTCDate(parseISO(to)));
 
-  // Step 1: Get the target currency (cached)
-  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
-
-  // Step 2: Generate month series for complete results
   const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
 
-  // Step 3: Get Net Revenue for each month (always use net revenue for profit calculation)
-  const netRevenueData = await getRevenue(db, {
-    teamId,
-    exactDates,
-    from,
-    to,
-    currency: inputCurrency,
-    revenueType: "net", // Always use net revenue for profit calculations
-  });
+  // Parallel step 1: targetCurrency, revenue, and COGS parent lookup are independent
+  const [targetCurrency, netRevenueData, cogsParentCategory] =
+    await Promise.all([
+      getTargetCurrency(db, teamId, inputCurrency),
+      getRevenue(db, {
+        teamId,
+        exactDates,
+        from,
+        to,
+        currency: inputCurrency,
+        revenueType: "net",
+      }),
+      db
+        .select({ id: transactionCategories.id })
+        .from(transactionCategories)
+        .where(
+          and(
+            eq(transactionCategories.teamId, teamId),
+            eq(transactionCategories.slug, "cost-of-goods-sold"),
+            isNull(transactionCategories.parentId),
+          ),
+        )
+        .limit(1),
+    ]);
 
-  // Step 4: Build the main query conditions for expenses
-  // Note: When no inputCurrency is provided, we use baseAmount directly in WHERE clause.
-  // This is intentional - transactions without baseAmount set are excluded as they haven't
-  // been converted to the team's base currency yet. When inputCurrency is provided,
-  // we handle NULL baseAmount gracefully by using the original amount field.
-  const expenseConditions = [
-    eq(transactions.teamId, teamId),
-    eq(transactions.internal, false),
-    ne(transactions.status, "excluded"),
-    gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
-    lte(transactions.date, format(toDate, "yyyy-MM-dd")),
-  ];
-
-  // Amount condition: handle NULL baseAmount gracefully when inputCurrency is provided
-  if (inputCurrency && targetCurrency) {
-    // When inputCurrency is provided, use CASE to handle NULL baseAmount
-    // If baseCurrency matches targetCurrency and baseAmount is not NULL, use baseAmount
-    // Otherwise, use the original amount field
-    expenseConditions.push(
-      sql`(CASE 
-        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-        ELSE ${transactions.amount}
-      END < 0)`,
-    );
-  } else {
-    // When no inputCurrency, exclude transactions without baseAmount
-    expenseConditions.push(lt(transactions.baseAmount, 0));
-  }
-
-  // Add currency conditions
-  // When inputCurrency is provided, we want to show transactions in that currency
-  // This includes transactions where either:
-  // 1. The original currency matches, OR
-  // 2. The baseCurrency matches (for converted transactions)
-  if (inputCurrency && targetCurrency) {
-    expenseConditions.push(
-      or(
-        eq(transactions.currency, targetCurrency),
-        eq(transactions.baseCurrency, targetCurrency),
-      )!,
-    );
-  } else if (targetCurrency) {
-    expenseConditions.push(eq(transactions.baseCurrency, targetCurrency));
-  }
-
-  // Step 5: First, get the COGS parent category ID
-  const cogsParentCategory = await db
-    .select({ id: transactionCategories.id })
-    .from(transactionCategories)
-    .where(
-      and(
-        eq(transactionCategories.teamId, teamId),
-        eq(transactionCategories.slug, "cost-of-goods-sold"),
-        isNull(transactionCategories.parentId), // Parent category has no parent
-      ),
-    )
-    .limit(1);
-
+  // Sequential step 2: COGS children depend on the parent ID
   const cogsParentId = cogsParentCategory[0]?.id;
-
-  // Step 6: Get all COGS category slugs (child categories under "cost-of-goods-sold")
   let cogsCategorySlugs: string[] = [];
   if (cogsParentId) {
     const cogsCategories = await db
@@ -222,7 +174,38 @@ export async function getProfit(db: Database, params: GetReportsParams) {
       .filter((slug): slug is string => slug !== null);
   }
 
-  // Step 7: Get COGS expenses (categories under "cost-of-goods-sold" parent)
+  // Build expense conditions (needs targetCurrency from step 1)
+  const expenseConditions = [
+    eq(transactions.teamId, teamId),
+    eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
+    gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
+    lte(transactions.date, format(toDate, "yyyy-MM-dd")),
+  ];
+
+  if (inputCurrency && targetCurrency) {
+    expenseConditions.push(
+      sql`(CASE 
+        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
+        ELSE ${transactions.amount}
+      END < 0)`,
+    );
+  } else {
+    expenseConditions.push(lt(transactions.baseAmount, 0));
+  }
+
+  if (inputCurrency && targetCurrency) {
+    expenseConditions.push(
+      or(
+        eq(transactions.currency, targetCurrency),
+        eq(transactions.baseCurrency, targetCurrency),
+      )!,
+    );
+  } else if (targetCurrency) {
+    expenseConditions.push(eq(transactions.baseCurrency, targetCurrency));
+  }
+
+  // Build COGS and operating expense conditions
   const cogsConditions = [...expenseConditions];
   if (cogsCategorySlugs.length > 0) {
     cogsConditions.push(
@@ -230,86 +213,78 @@ export async function getProfit(db: Database, params: GetReportsParams) {
       inArray(transactions.categorySlug, cogsCategorySlugs),
     );
   } else {
-    // No COGS categories found, so no COGS expenses
-    cogsConditions.push(sql`1 = 0`); // Always false
+    cogsConditions.push(sql`1 = 0`);
   }
 
-  const cogsData = await db
-    .select({
-      month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      value: sql<number>`COALESCE(SUM(ABS(${
-        inputCurrency && targetCurrency
-          ? sql`CASE
-              WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-              ELSE ${transactions.amount}
-            END`
-          : sql`COALESCE(${transactions.baseAmount}, 0)`
-      })), 0)`,
-    })
-    .from(transactions)
-    .leftJoin(
-      transactionCategories,
-      and(
-        eq(transactionCategories.slug, transactions.categorySlug),
-        eq(transactionCategories.teamId, teamId),
-      ),
-    )
-    .where(
-      and(
-        ...cogsConditions,
-        or(
-          isNull(transactionCategories.excluded),
-          eq(transactionCategories.excluded, false),
-        )!,
-      ),
-    )
-    .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
-    .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
-
-  // Step 8: Get Operating Expenses (all expenses EXCEPT COGS)
-  // This includes expenses from non-COGS categories and uncategorized expenses
   const operatingExpensesConditions = [...expenseConditions];
   if (cogsCategorySlugs.length > 0) {
-    // Exclude COGS categories
     operatingExpensesConditions.push(
       or(
-        isNull(transactions.categorySlug), // Uncategorized expenses are operating expenses
-        not(inArray(transactions.categorySlug, cogsCategorySlugs)), // Not a COGS category
+        isNull(transactions.categorySlug),
+        not(inArray(transactions.categorySlug, cogsCategorySlugs)),
       )!,
     );
   }
 
-  const operatingExpensesData = await db
-    .select({
-      month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      value: sql<number>`COALESCE(SUM(ABS(${
-        inputCurrency && targetCurrency
-          ? sql`CASE
-              WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-              ELSE ${transactions.amount}
-            END`
-          : sql`COALESCE(${transactions.baseAmount}, 0)`
-      })), 0)`,
-    })
-    .from(transactions)
-    .leftJoin(
-      transactionCategories,
-      and(
-        eq(transactionCategories.slug, transactions.categorySlug),
-        eq(transactionCategories.teamId, teamId),
-      ),
-    )
-    .where(
-      and(
-        ...operatingExpensesConditions,
-        or(
-          isNull(transactionCategories.excluded),
-          eq(transactionCategories.excluded, false),
-        )!,
-      ),
-    )
-    .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
-    .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
+  const amountExpr =
+    inputCurrency && targetCurrency
+      ? sql`CASE
+            WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
+            ELSE ${transactions.amount}
+          END`
+      : sql`COALESCE(${transactions.baseAmount}, 0)`;
+
+  // Parallel step 3: COGS and operating expenses are independent
+  const [cogsData, operatingExpensesData] = await Promise.all([
+    db
+      .select({
+        month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
+        value: sql<number>`COALESCE(SUM(ABS(${amountExpr})), 0)`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          ...cogsConditions,
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+        ),
+      )
+      .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
+      .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`),
+    db
+      .select({
+        month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
+        value: sql<number>`COALESCE(SUM(ABS(${amountExpr})), 0)`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          ...operatingExpensesConditions,
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+        ),
+      )
+      .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
+      .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`),
+  ]);
 
   // Step 9: Create maps for quick lookup
   const netRevenueMap = new Map(
@@ -349,8 +324,24 @@ export async function getProfit(db: Database, params: GetReportsParams) {
   return results;
 }
 
-// Helper function for revenue calculation
-export async function getRevenue(db: Database, params: GetReportsParams) {
+const revenueInflight = new Map<string, Promise<ReportsResultItem[]>>();
+
+export function getRevenue(
+  db: Database,
+  params: GetReportsParams,
+): Promise<ReportsResultItem[]> {
+  const key = `${params.teamId}:${params.from}:${params.to}:${params.currency ?? ""}:${params.revenueType ?? "gross"}:${params.exactDates ?? false}`;
+  const existing = revenueInflight.get(key);
+  if (existing) return existing;
+
+  const promise = getRevenueImpl(db, params).finally(() => {
+    revenueInflight.delete(key);
+  });
+  revenueInflight.set(key, promise);
+  return promise;
+}
+
+async function getRevenueImpl(db: Database, params: GetReportsParams) {
   const {
     teamId,
     from,

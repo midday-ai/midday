@@ -474,6 +474,14 @@ export const transactions = pgTable(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
     ),
+    index("idx_transactions_reports")
+      .using(
+        "btree",
+        table.teamId.asc().nullsLast().op("uuid_ops"),
+        table.date.asc().nullsLast().op("date_ops"),
+        table.categorySlug.asc().nullsLast().op("text_ops"),
+      )
+      .where(sql`internal = false AND status != 'excluded'`),
     foreignKey({
       columns: [table.assignedId],
       foreignColumns: [users.id],
