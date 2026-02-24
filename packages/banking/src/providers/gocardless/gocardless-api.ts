@@ -42,7 +42,6 @@ export class GoCardLessApi {
   #refreshTokenCacheKey = "gocardless_refresh_token";
   #institutionsCacheKey = "gocardless_institutions";
   #institutionCacheKey = "gocardless_institution";
-  #requisitionCacheKey = "gocardless_requisition";
   #accountDetailsCacheKey = "gocardless_account_details";
   #accountBalanceCacheKey = "gocardless_account_balance";
 
@@ -401,23 +400,13 @@ export class GoCardLessApi {
   }
 
   async getRequestion(id: string): Promise<GetRequisitionResponse | undefined> {
-    const cacheKey = `${this.#requisitionCacheKey}_${id}`;
-    const cached = await bankingCache.get(cacheKey);
-    if (cached) {
-      return cached as GetRequisitionResponse;
-    }
-
     try {
       const token = await this.#getAccessToken();
 
-      const response = await this.#get<GetRequisitionResponse>(
+      return await this.#get<GetRequisitionResponse>(
         `/api/v2/requisitions/${id}/`,
         token,
       );
-
-      bankingCache.set(cacheKey, response, CacheTTL.FIFTEEN_MINUTES);
-
-      return response;
     } catch (error) {
       const parsedError = parseProviderError(error);
 
