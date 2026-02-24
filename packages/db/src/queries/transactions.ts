@@ -117,8 +117,8 @@ export async function getTransactions(
 
   // Search query filter (name, description, or amount)
   if (q) {
-    const numericQ = Number.parseFloat(q);
-    if (!Number.isNaN(numericQ)) {
+    const numericQ = Number(q);
+    if (!Number.isNaN(numericQ) && q.trim() !== "") {
       whereConditions.push(sql`${transactions.amount} = ${numericQ}`);
     } else {
       const searchQuery = buildSearchQuery(q);

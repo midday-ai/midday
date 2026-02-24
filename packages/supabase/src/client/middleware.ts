@@ -36,11 +36,14 @@ export async function updateSession(
   //
   // This client's cookie handlers write to both request.cookies (so downstream
   // server components see the fresh token) and response.cookies (so the
-  // browser receives updated cookies). Previously this function never called
-  // any auth method, so expired tokens were never refreshed → 401s during SSR.
+  // browser receives updated cookies).
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  return { response, session, supabase };
+  return {
+    response,
+    session,
+    supabase,
+  };
 }
