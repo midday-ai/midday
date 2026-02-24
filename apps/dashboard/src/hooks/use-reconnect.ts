@@ -134,6 +134,10 @@ export function useReconnect({
       });
 
       queryClient.invalidateQueries({
+        queryKey: trpc.team.connectionStatus.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
         queryKey: trpc.transactions.get.queryKey(),
       });
 
