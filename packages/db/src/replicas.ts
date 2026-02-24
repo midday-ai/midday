@@ -46,54 +46,65 @@ export const withReplicas = <
       return (result as any).rows as TRow[];
     };
 
-    const transactionOnReplica = getDbForRead().transaction;
+    const replicaDb = getDbForRead();
+    const transactionOnReplica = replicaDb.transaction.bind(replicaDb);
 
     const usePrimaryOnly = (): ReplicatedDatabase<Q> => createDatabase(true);
 
+    // Bind a method to its owning database so `this.session` resolves
+    // to the correct pool. Without binding, the spread of `...primary`
+    // copies `session` as an own property, and JS method-call semantics
+    // set `this` to the proxy object — routing every query to primary.
+    const bind = (db: Q, method: any): any =>
+      typeof method === "function" ? method.bind(db) : method;
+
     return {
       ...primary,
-      // Override methods to route to appropriate database
       get select() {
-        return getDbForRead().select;
+        const db = getDbForRead();
+        return bind(db, db.select);
       },
       get selectDistinct() {
-        return getDbForRead().selectDistinct;
+        const db = getDbForRead();
+        return bind(db, db.selectDistinct);
       },
       get selectDistinctOn() {
-        return getDbForRead().selectDistinctOn;
+        const db = getDbForRead();
+        return bind(db, db.selectDistinctOn);
       },
       get $count() {
-        return getDbForRead().$count;
+        const db = getDbForRead();
+        return bind(db, db.$count);
       },
       get with() {
-        return getDbForRead().with;
+        const db = getDbForRead();
+        return bind(db, db.with);
       },
       get $with() {
-        return getDbForRead().$with;
+        const db = getDbForRead();
+        return bind(db, db.$with);
       },
       get query() {
         return getDbForRead().query;
       },
-      // Write operations always go to primary
       get update() {
-        return primary.update;
+        return bind(primary, primary.update);
       },
       get insert() {
-        return primary.insert;
+        return bind(primary, primary.insert);
       },
       get delete() {
-        return primary.delete;
+        return bind(primary, primary.delete);
       },
       get execute() {
-        return primary.execute;
+        return bind(primary, primary.execute);
       },
       get transaction() {
-        return primary.transaction;
+        return bind(primary, primary.transaction);
       },
       get refreshMaterializedView() {
-        return primary.refreshMaterializedView;
+        return bind(primary, primary.refreshMaterializedView);
       },
-      // Replica-specific methods
       executeOnReplica,
       transactionOnReplica,
       $primary: primary,
