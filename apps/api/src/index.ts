@@ -80,15 +80,6 @@ if (process.env.DEBUG_PERF === "true") {
   });
 }
 
-// Prevent Cloudflare from buffering tRPC streaming responses
-app.use("/trpc/*", async (c, next) => {
-  await next();
-  if (c.req.header("trpc-accept") === "application/jsonl") {
-    c.res.headers.set("Cache-Control", "no-transform");
-    c.res.headers.set("X-Accel-Buffering", "no");
-  }
-});
-
 app.use(
   "/trpc/*",
   trpcServer({
