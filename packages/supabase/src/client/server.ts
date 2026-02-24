@@ -17,14 +17,16 @@ export async function createClient(options?: CreateClientOptions) {
 
   const auth = admin
     ? {
-        suppressGetSessionWarning: true,
         persistSession: false,
         autoRefreshToken: false,
         detectSessionInUrl: false,
       }
-    : {
-        suppressGetSessionWarning: true,
-      };
+    : {};
+
+  if (auth) {
+    // @ts-expect-error - suppressGetSessionWarning is protected
+    auth.suppressGetSessionWarning = true;
+  }
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

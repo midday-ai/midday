@@ -1,15 +1,10 @@
 import { type CookieOptions, createServerClient } from "@supabase/ssr";
-import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import type { NextRequest, NextResponse } from "next/server";
 
 export async function updateSession(
   request: NextRequest,
   response: NextResponse,
-): Promise<{
-  response: NextResponse;
-  session: Session | null;
-  supabase: SupabaseClient;
-}> {
+) {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -29,6 +24,11 @@ export async function updateSession(
       },
     },
   );
+
+  if (supabase.auth) {
+    // @ts-expect-error - suppressGetSessionWarning is protected
+    supabase.auth.suppressGetSessionWarning = true;
+  }
 
   // getSession() checks the JWT expiry locally and only makes a network call
   // to Supabase when the token actually needs refreshing. For valid tokens
