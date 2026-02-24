@@ -224,11 +224,7 @@ export class EnableBankingApi {
   }
 
   async getSession(sessionId: string): Promise<GetSessionResponse> {
-    return bankingCache.getOrSet(
-      `enablebanking_session_${sessionId}`,
-      CacheTTL.FIFTEEN_MINUTES,
-      () => this.#get<GetSessionResponse>(`/sessions/${sessionId}`),
-    );
+    return this.#get<GetSessionResponse>(`/sessions/${sessionId}`);
   }
 
   async getHealthCheck(): Promise<boolean> {

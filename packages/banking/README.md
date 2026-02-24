@@ -81,8 +81,10 @@ The maximum history is determined per-institution via the end user agreement:
 - `getAccounts()` pre-resolves the access token once and passes it to all sub-methods
   to avoid repeated Redis lookups (~8 → 1 per call)
 - Institution is fetched once per requisition (all accounts share the same institution)
-- Account details, balances, requisitions, and institutions are cached in Redis
+- Account details, balances, and institutions are cached in Redis
   to bridge the gap between account selection and initial sync
+- Requisitions are **not** cached — they hold connection status that must be fresh
+  on every sync to avoid stale state after reconnect
 
 ### Plaid (US/CA)
 
@@ -138,7 +140,9 @@ The maximum history is determined per-institution via the end user agreement:
 
 - JWT is cached in memory (~20 hours) to avoid RSA signing on every request
 - xior client instance is reused as long as JWT hasn't changed
-- Session, account details, and institution list are cached in Redis
+- Account details and institution list are cached in Redis
+- Sessions are **not** cached — they hold connection status that must be fresh
+  on every sync to avoid stale state after reconnect
 - Requires `Psu-Ip-Address` and `Psu-User-Agent` headers on GET requests
 - Transaction deduplication is handled at the database layer (upsert with `internal_id`)
 
@@ -155,7 +159,6 @@ Redis (Upstash) with the `"banking"` key prefix.
 |------|-----|-----------|
 | GoCardless access token | Dynamic (expires - 1h) | OAuth token lifecycle |
 | GoCardless refresh token | Dynamic (expires - 1h) | OAuth token lifecycle |
-| Requisition / Session | 15 minutes | Bridges account selection → sync |
 | Account details | 30 minutes | Static within a flow, rarely changes |
 | Account balance | 30 minutes | DB is source of truth; prevents redundant API calls |
 | Individual institution | 24 hours | Institution data is static |
@@ -180,6 +183,8 @@ return bankingCache.getOrSet(key, CacheTTL.THIRTY_MINUTES, () => fetchFromApi())
 
 ### What is NOT cached
 
+- **Requisitions / Sessions**: Hold connection status that must be live on every sync;
+  caching caused stale "disconnected" state to persist after reconnect
 - **Transactions**: Must be fresh every sync (the whole point of syncing)
 - **Mutations**: Link creation, token exchange, agreements — one-time operations
 - **Delete operations**: Side effects, cannot be cached

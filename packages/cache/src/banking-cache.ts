@@ -2,7 +2,6 @@ import { RedisCache } from "./redis-client";
 
 // Shared TTL constants for banking provider caching
 export const CacheTTL = {
-  FIFTEEN_MINUTES: 900,
   THIRTY_MINUTES: 1800,
   ONE_HOUR: 3600,
   TWENTY_FOUR_HOURS: 86400,
