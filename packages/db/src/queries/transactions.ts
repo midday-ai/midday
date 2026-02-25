@@ -2022,11 +2022,8 @@ export type BulkUpdateTransactionsBaseCurrencyParams = {
 
 /**
  * Bulk update transactions with base currency/amount
- * Uses unnest with only 4 params - avoids prepared statement issues with
- * Supavisor/PgBouncer transaction mode (which can fail on large param counts).
- *
- * Multi-tenant safety: WHERE clause requires BOTH teamId AND id match.
- * Only rows for the given team are updated; other teams' data is never touched.
+ * Uses per-row updates in a transaction — avoids array serialization issues
+ * with postgres.js + Drizzle (unnest expands arrays into many params).
  */
 export async function bulkUpdateTransactionsBaseCurrency(
   db: Database,
@@ -2038,30 +2035,34 @@ export async function bulkUpdateTransactionsBaseCurrency(
     throw new Error("bulkUpdateTransactionsBaseCurrency: teamId is required");
   }
 
-  const BATCH_LIMIT = 500;
+  if (transactionsData.length === 0) return;
 
-  for (let i = 0; i < transactionsData.length; i += BATCH_LIMIT) {
-    const batch = transactionsData.slice(i, i + BATCH_LIMIT);
-    if (batch.length === 0) continue;
+  const BATCH_SIZE = 100;
+  const CONCURRENCY = 10;
 
-    const ids = batch.map((tx) => tx.id);
-    const baseAmounts = batch.map((tx) => tx.baseAmount);
-    const baseCurrencies = batch.map((tx) => tx.baseCurrency);
-
-    await db.execute(sql`
-      UPDATE transactions AS t
-      SET
-        base_amount = v.base_amount,
-        base_currency = v.base_currency
-      FROM (
-        SELECT * FROM unnest(
-          ${ids}::uuid[],
-          ${baseAmounts}::numeric[],
-          ${baseCurrencies}::text[]
-        ) AS v(id, base_amount, base_currency)
-      ) AS v
-      WHERE t.id = v.id AND t.team_id = ${teamId}
-    `);
+  for (let i = 0; i < transactionsData.length; i += BATCH_SIZE) {
+    const batch = transactionsData.slice(i, i + BATCH_SIZE);
+    await db.transaction(async (tx) => {
+      for (let j = 0; j < batch.length; j += CONCURRENCY) {
+        const chunk = batch.slice(j, j + CONCURRENCY);
+        await Promise.all(
+          chunk.map((item) =>
+            tx
+              .update(transactions)
+              .set({
+                baseAmount: item.baseAmount,
+                baseCurrency: item.baseCurrency,
+              })
+              .where(
+                and(
+                  eq(transactions.id, item.id),
+                  eq(transactions.teamId, teamId),
+                ),
+              ),
+          ),
+        );
+      }
+    });
   }
 }
 

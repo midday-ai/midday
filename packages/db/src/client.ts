@@ -1,10 +1,10 @@
 import { createLoggerWithContext } from "@midday/logger";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
+import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
 import type { PgTransaction } from "drizzle-orm/pg-core";
-import type { PostgresJsQueryResultHKT } from "drizzle-orm/postgres-js";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import { createDrizzleLogger } from "./instrument";
+import { Pool } from "pg";
+import { createDrizzleLogger, instrumentPool } from "./instrument";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
@@ -16,20 +16,31 @@ const DEBUG_PERF = process.env.DEBUG_PERF === "true";
 
 const connectionConfig = {
   max: isDevelopment ? 8 : isProduction ? 40 : 6,
-  idle_timeout: isDevelopment ? 5 : isProduction ? 30 : 10,
-  connect_timeout: 5,
+  min: isDevelopment ? 0 : isProduction ? 8 : 1,
+  idleTimeoutMillis: isDevelopment ? 5000 : isProduction ? 30000 : 10000,
+  connectionTimeoutMillis: 5000,
+  maxUses: isDevelopment ? 100 : 7500,
+  allowExitOnIdle: !isProduction,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10_000,
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
-  prepare: false, // Required for Supabase transaction-mode pooler
 };
 
 const drizzleLogger = DEBUG_PERF ? createDrizzleLogger() : undefined;
 
-// Primary — DATABASE_PRIMARY_URL
-const primaryClient = postgres(process.env.DATABASE_PRIMARY_URL!, {
+// Primary pool — DATABASE_PRIMARY_URL
+const primaryPool = new Pool({
+  connectionString: process.env.DATABASE_PRIMARY_URL!,
   ...connectionConfig,
 });
 
-export const primaryDb = drizzle(primaryClient, {
+if (DEBUG_PERF) instrumentPool(primaryPool, "primary");
+
+primaryPool.on("error", (err) => {
+  logger.error("Primary pool: idle client error", { error: err.message });
+});
+
+export const primaryDb = drizzle(primaryPool, {
   schema,
   casing: "snake_case",
   logger: drizzleLogger,
@@ -70,12 +81,18 @@ if (!isDevelopment) {
   }
 }
 
-const replicaClient = replicaUrl
-  ? postgres(replicaUrl, { ...connectionConfig })
+const replicaPool = replicaUrl
+  ? new Pool({ connectionString: replicaUrl, ...connectionConfig })
   : null;
 
-const replicaDb = replicaClient
-  ? drizzle(replicaClient, {
+if (DEBUG_PERF && replicaPool) instrumentPool(replicaPool, "replica");
+
+replicaPool?.on("error", (err) => {
+  logger.error("Replica pool: idle client error", { error: err.message });
+});
+
+const replicaDb = replicaPool
+  ? drizzle(replicaPool, {
       schema,
       casing: "snake_case",
       logger: drizzleLogger,
@@ -95,7 +112,7 @@ export const connectDb = async () => {
 export type Database = Awaited<ReturnType<typeof connectDb>>;
 
 export type TransactionClient = PgTransaction<
-  PostgresJsQueryResultHKT,
+  NodePgQueryResultHKT,
   typeof schema,
   ExtractTablesWithRelations<typeof schema>
 >;
@@ -108,33 +125,26 @@ export type DatabaseWithPrimary = Database & {
   usePrimaryOnly?: () => Database;
 };
 
-/**
- * Pool stats — postgres.js does not expose pool stats like pg.
- * Returns placeholder for compatibility with health/DEBUG_PERF logging.
- */
 export function getPoolStats() {
   return {
     primary: {
-      total: 0,
-      idle: 0,
-      waiting: 0,
+      total: primaryPool.totalCount,
+      idle: primaryPool.idleCount,
+      waiting: primaryPool.waitingCount,
     },
-    replica: replicaClient
+    replica: replicaPool
       ? {
-          total: 0,
-          idle: 0,
-          waiting: 0,
+          total: replicaPool.totalCount,
+          idle: replicaPool.idleCount,
+          waiting: replicaPool.waitingCount,
         }
       : null,
   };
 }
 
 /**
- * Close all database connections gracefully
+ * Close all database pools gracefully
  */
 export const closeDb = async (): Promise<void> => {
-  await Promise.all([
-    primaryClient.end(),
-    replicaClient ? replicaClient.end() : Promise.resolve(),
-  ]);
+  await Promise.all([primaryPool.end(), replicaPool?.end()]);
 };

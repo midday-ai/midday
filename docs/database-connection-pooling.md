@@ -58,7 +58,7 @@ Each API instance creates up to 2 pools (primary + 1 regional replica), so the m
 
 ## Prepared Statements
 
-Transaction mode does **not** support prepared statements. We use **postgres.js** with `prepare: false` for all database clients (API, worker, job). This uses the simple query protocol instead of Parse/Bind/Execute, which is compatible with Supavisor transaction mode.
+We use **pg** (node-postgres) for all database clients. Transaction mode (port 6543) does **not** support prepared statements — use **session pooler** (port 5432) or **direct connection** for pg compatibility.
 
 See [Supabase: Disabling prepared statements](https://github.com/orgs/supabase/discussions/28239).
 

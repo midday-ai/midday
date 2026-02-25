@@ -1,26 +1,23 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import type { Database } from "./client";
 import * as schema from "./schema";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
 /**
- * Worker database client using postgres.js with prepare: false.
- * Required for Supabase Dedicated Pooler in transaction mode (port 6543),
- * which does NOT support prepared statements.
- *
- * @see https://supabase.com/docs/guides/troubleshooting/disabling-prepared-statements
+ * Worker database client with connection pool optimized for BullMQ concurrent jobs
  */
-const workerClient = postgres(process.env.DATABASE_PRIMARY_POOLER_URL!, {
+const workerPool = new Pool({
+  connectionString: process.env.DATABASE_PRIMARY_POOLER_URL!,
   max: 100, // Sized for total worker concurrency (120 jobs) with buffer
-  idle_timeout: isDevelopment ? 5 : 60,
-  connect_timeout: 15,
-  ssl: isDevelopment ? false : { rejectUnauthorized: false },
-  prepare: false,
+  idleTimeoutMillis: isDevelopment ? 5000 : 60000,
+  connectionTimeoutMillis: 15000,
+  maxUses: 0,
+  allowExitOnIdle: true,
 });
 
-const workerDb = drizzle(workerClient, {
+const workerDb = drizzle(workerPool, {
   schema,
   casing: "snake_case",
 });
@@ -29,12 +26,12 @@ const workerDb = drizzle(workerClient, {
  * Get the shared worker database instance
  */
 export const getWorkerDb = (): Database => {
-  return workerDb as unknown as Database;
+  return workerDb as Database;
 };
 
 /**
  * Cleanup function to close database connections gracefully
  */
 export const closeWorkerDb = async (): Promise<void> => {
-  await workerClient.end();
+  await workerPool.end();
 };
