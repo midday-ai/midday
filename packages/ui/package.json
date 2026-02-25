@@ -23,6 +23,7 @@
     "./chart": "./src/components/chart.tsx",
     "./currency-input": "./src/components/currency-input.tsx",
     "./submit-button": "./src/components/submit-button.tsx",
+    "./submit-button-morph": "./src/components/submit-button-morph.tsx",
     "./avatar": "./src/components/avatar.tsx",
     "./button": "./src/components/button.tsx",
     "./calendar": "./src/components/calendar.tsx",

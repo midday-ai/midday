@@ -70,12 +70,18 @@ export const importTransactionsSchema = z.object({
   currency: z.string(),
   teamId: z.string(),
   table: z.array(z.record(z.string(), z.string())).optional(),
-  mappings: z.object({
-    amount: z.string(),
-    date: z.string(),
-    description: z.string(),
-    balance: z.string().optional(),
-  }),
+  mappings: z
+    .object({
+      amount: z.string(),
+      date: z.string(),
+      description: z.string().optional(),
+      counterparty: z.string().optional(),
+      balance: z.string().optional(),
+    })
+    .refine((mappings) => !!mappings.description || !!mappings.counterparty, {
+      message: "Either description or counterparty mapping is required",
+      path: ["description"],
+    }),
 });
 
 export type ImportTransactionsPayload = z.infer<

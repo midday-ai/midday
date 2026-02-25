@@ -1968,40 +1968,15 @@ export async function upsertTransactions(
 ): Promise<Array<{ id: string }>> {
   // Exclude teamId from the params
   const { transactions: transactionsData, teamId: _teamId } = params;
+  if (transactionsData.length === 0) {
+    return [];
+  }
 
   const upserted = await db
     .insert(transactions)
     .values(transactionsData)
-    .onConflictDoUpdate({
+    .onConflictDoNothing({
       target: [transactions.internalId],
-      set: {
-        // Update all fields except id and createdAt
-        name: sql`excluded.name`,
-        amount: sql`excluded.amount`,
-        currency: sql`excluded.currency`,
-        date: sql`excluded.date`,
-        description: sql`excluded.description`,
-        method: sql`excluded.method`,
-        status: sql`excluded.status`,
-        balance: sql`excluded.balance`,
-        note: sql`excluded.note`,
-        categorySlug: sql`excluded.category_slug`,
-        counterpartyName: sql`excluded.counterparty_name`,
-        merchantName: sql`excluded.merchant_name`,
-        bankAccountId: sql`excluded.bank_account_id`,
-        assignedId: sql`excluded.assigned_id`,
-        internal: sql`excluded.internal`,
-        notified: sql`excluded.notified`,
-        manual: sql`excluded.manual`,
-        baseAmount: sql`excluded.base_amount`,
-        baseCurrency: sql`excluded.base_currency`,
-        taxAmount: sql`excluded.tax_amount`,
-        taxRate: sql`excluded.tax_rate`,
-        taxType: sql`excluded.tax_type`,
-        recurring: sql`excluded.recurring`,
-        frequency: sql`excluded.frequency`,
-        enrichmentCompleted: sql`excluded.enrichment_completed`,
-      },
     })
     .returning({
       id: transactions.id,

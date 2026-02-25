@@ -9,7 +9,11 @@ export const mappableFields = {
   },
   description: {
     label: "Description",
-    required: true,
+    required: false,
+  },
+  counterparty: {
+    label: "From / To",
+    required: false,
   },
   amount: {
     label: "Amount",
@@ -21,17 +25,23 @@ export const mappableFields = {
   },
 } as const;
 
-export const importSchema = z.object({
-  file: z.custom<File>(),
-  currency: z.string(),
-  bank_account_id: z.string(),
-  amount: z.string(),
-  balance: z.string().optional(),
-  date: z.string(),
-  description: z.string(),
-  inverted: z.boolean(),
-  table: z.array(z.record(z.string(), z.string())).optional(),
-});
+export const importSchema = z
+  .object({
+    file: z.custom<File>(),
+    currency: z.string(),
+    bank_account_id: z.string(),
+    amount: z.string(),
+    balance: z.string().optional(),
+    date: z.string(),
+    description: z.string().optional(),
+    counterparty: z.string().optional(),
+    inverted: z.boolean(),
+    table: z.array(z.record(z.string(), z.string())).optional(),
+  })
+  .refine((data) => !!data.description || !!data.counterparty, {
+    message: "Either Description or From / To is required",
+    path: ["description"],
+  });
 
 export type ImportCsvFormData = {
   file: File;
@@ -40,7 +50,8 @@ export type ImportCsvFormData = {
   amount: string;
   balance?: string;
   date: string;
-  description: string;
+  description?: string;
+  counterparty?: string;
   inverted: boolean;
   table?: Record<string, string>[];
 };

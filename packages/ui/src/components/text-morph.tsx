@@ -26,9 +26,9 @@ export function TextMorph({
   transition,
 }: TextMorphProps) {
   const defaultVariants: Variants = {
-    initial: { opacity: 0, y: 4, filter: "blur(4px)" },
+    initial: { opacity: 0, y: -6, filter: "blur(2px)" },
     animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-    exit: { opacity: 0, y: -4, filter: "blur(4px)" },
+    exit: { opacity: 0, y: 6, filter: "blur(2px)" },
   };
 
   const defaultTransition: Transition = {

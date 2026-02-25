@@ -3,6 +3,7 @@ import type { Transaction } from "./types";
 
 export const createTransactionSchema = z.object({
   name: z.string(),
+  counterparty_name: z.string().nullable().optional(),
   currency: z.string(),
   bank_account_id: z.string(),
   team_id: z.string(),
