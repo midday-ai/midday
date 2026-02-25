@@ -14,7 +14,13 @@ export interface CanvasPdfOptions {
 export async function generateCanvasPdf(
   options: CanvasPdfOptions = {},
 ): Promise<void> {
-  const { quality = 1.0, scale = 4, padding = 10, theme } = options;
+  const {
+    filename = "canvas-report.pdf",
+    quality = 1.0,
+    scale = 4,
+    padding = 10,
+    theme,
+  } = options;
 
   // Resolve theme: if "system" or undefined, check system preference
   const resolvedTheme =

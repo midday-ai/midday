@@ -44,7 +44,10 @@ export function DeleteApiKeyModal() {
 
           <SubmitButton
             className="w-full mt-4"
-            onClick={() => deleteApiKeyMutation.mutate({ id: data!.id })}
+            onClick={() => {
+              if (!data?.id) return;
+              deleteApiKeyMutation.mutate({ id: data.id });
+            }}
             isSubmitting={deleteApiKeyMutation.isPending}
           >
             Delete
