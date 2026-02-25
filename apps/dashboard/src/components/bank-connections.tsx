@@ -185,7 +185,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
                 onComplete={handleComplete}
                 referenceId={connection.referenceId}
               />
-              <DeleteConnection connectionId={connection.id} />
+              <DeleteConnection connection={connection} />
             </>
           ) : (
             <>
@@ -226,7 +226,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
                 disabled={isSyncing}
                 onClick={triggerManualSync}
               />
-              <DeleteConnection connectionId={connection.id} />
+              <DeleteConnection connection={connection} />
             </>
           )}
         </div>

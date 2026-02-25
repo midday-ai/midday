@@ -2011,6 +2011,36 @@ export async function getTransactionsByAccountId(
     );
 }
 
+export type GetTransactionCountByBankAccountIdParams = {
+  bankAccountId: string;
+  teamId: string;
+};
+
+/**
+ * Get transaction count for a bank account
+ * Used by delete bank account dialog to show impact
+ */
+export async function getTransactionCountByBankAccountId(
+  db: Database,
+  params: GetTransactionCountByBankAccountIdParams,
+): Promise<number> {
+  const { bankAccountId, teamId } = params;
+
+  const [result] = await db
+    .select({
+      count: sql<number>`COUNT(*)::int`.as("count"),
+    })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.bankAccountId, bankAccountId),
+        eq(transactions.teamId, teamId),
+      ),
+    );
+
+  return result?.count ?? 0;
+}
+
 export type BulkUpdateTransactionsBaseCurrencyParams = {
   transactions: Array<{
     id: string;

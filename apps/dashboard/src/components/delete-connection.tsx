@@ -1,5 +1,6 @@
 "use client";
 
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,15 +23,19 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTRPC } from "@/trpc/client";
 
+type BankConnection = NonNullable<
+  RouterOutputs["bankConnections"]["get"]
+>[number];
+
 type Props = {
-  connectionId: string;
+  connection: BankConnection;
 };
 
-export function DeleteConnection({ connectionId }: Props) {
+export function DeleteConnection({ connection }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [value, setValue] = useState("");
@@ -49,8 +54,17 @@ export function DeleteConnection({ connectionId }: Props) {
     }),
   );
 
+  const accounts = connection.bankAccounts ?? [];
+  const provider = connection.provider;
+
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) setValue("");
+      }}
+    >
       <TooltipProvider delayDuration={70}>
         <Tooltip>
           <AlertDialogTrigger asChild>
@@ -74,17 +88,44 @@ export function DeleteConnection({ connectionId }: Props) {
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Connection</AlertDialogTitle>
-          <AlertDialogDescription>
-            You are about to delete a bank connection. If you proceed, all
-            transactions associated with this connection and all bank accounts
-            will also be deleted.
+          <AlertDialogTitle>Delete connection</AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-3">
+              <p>
+                This will permanently remove the connection and all its accounts
+                and transaction history. This cannot be undone.
+              </p>
+              <div className="my-6 px-3 py-3 bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/30">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm space-y-2">
+                    <p className="font-medium text-amber-700 dark:text-amber-300">
+                      {accounts.length > 0
+                        ? "These accounts will be removed:"
+                        : "No accounts in this connection."}
+                    </p>
+                    {accounts.length > 0 && (
+                      <ul className="list-disc list-inside text-amber-700 dark:text-amber-300 space-y-0.5">
+                        {accounts.map((account) => (
+                          <li key={account.id}>{account.name || "Unknown"}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <p className="text-amber-700 dark:text-amber-300">
+                      {provider
+                        ? "Reconnecting later may not restore full history."
+                        : "Connection data is stored only in Midday and cannot be recovered."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="flex flex-col gap-2 mt-2">
           <Label htmlFor="confirm-delete">
-            Type <span className="font-medium">DELETE</span> to confirm.
+            Type <span className="font-medium">DELETE</span> to confirm
           </Label>
           <Input
             id="confirm-delete"
@@ -98,7 +139,7 @@ export function DeleteConnection({ connectionId }: Props) {
           <AlertDialogAction
             disabled={value !== "DELETE" || deleteConnectionMutation.isPending}
             onClick={() =>
-              deleteConnectionMutation.mutate({ id: connectionId })
+              deleteConnectionMutation.mutate({ id: connection.id })
             }
           >
             {deleteConnectionMutation.isPending ? (

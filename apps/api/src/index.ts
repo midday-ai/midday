@@ -5,7 +5,6 @@ import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { closeSharedRedisClient } from "@midday/cache/shared-redis";
 import { closeDb, getPoolStats } from "@midday/db/client";
-import { checkHealth as checkDbHealth } from "@midday/db/utils/health";
 import {
   buildDependenciesResponse,
   buildReadinessResponse,
@@ -110,10 +109,7 @@ app.use(
 app.get("/favicon.ico", (c) => c.body(null, 204));
 app.get("/robots.txt", (c) => c.body(null, 204));
 
-app.get("/health", async (c) => {
-  await checkDbHealth();
-  return c.json({ status: "ok" }, 200);
-});
+app.get("/health", (c) => c.json({ status: "ok" }, 200));
 
 app.get("/health/ready", async (c) => {
   const results = await checkDependencies(apiDependencies(), 1);

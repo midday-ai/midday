@@ -3,6 +3,7 @@ import {
   deleteBankAccountSchema,
   getBankAccountDetailsSchema,
   getBankAccountsSchema,
+  getTransactionCountSchema,
   updateBankAccountSchema,
 } from "@api/schemas/bank-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
@@ -15,6 +16,7 @@ import {
   getBankAccountsBalances,
   getBankAccountsCurrencies,
   getBankAccountsWithPaymentInfo,
+  getTransactionCountByBankAccountId,
   updateBankAccount,
 } from "@midday/db/queries";
 
@@ -27,6 +29,16 @@ export const bankAccountsRouter = createTRPCRouter({
         enabled: input?.enabled,
         manual: input?.manual,
       });
+    }),
+
+  getTransactionCount: protectedProcedure
+    .input(getTransactionCountSchema)
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      const count = await getTransactionCountByBankAccountId(db, {
+        bankAccountId: input.id,
+        teamId: teamId!,
+      });
+      return { count };
     }),
 
   /**

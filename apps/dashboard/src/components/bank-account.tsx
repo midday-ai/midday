@@ -10,7 +10,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -27,7 +26,13 @@ import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Eye, EyeOff, Loader2, MoreHorizontal } from "lucide-react";
+import {
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  Loader2,
+  MoreHorizontal,
+} from "lucide-react";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useI18n } from "@/locales/client";
@@ -90,6 +95,7 @@ export function BankAccount({ data, provider }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [deleteValue, setDeleteValue] = useState("");
+  const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [isEditOpen, setEditOpen] = useState(false);
   const [showSensitive, setShowSensitive] = useState(false);
   const t = useI18n();
@@ -131,6 +137,16 @@ export function BankAccount({ data, provider }: Props) {
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
+  const { data: transactionCountData, isFetching: isFetchingTransactionCount } =
+    useQuery({
+      ...trpc.bankAccounts.getTransactionCount.queryOptions({ id }),
+      enabled: isDeleteOpen,
+    });
+
+  const transactionCount = transactionCountData?.count ?? 0;
+  const isLoadingTransactionCount =
+    isFetchingTransactionCount && transactionCountData === undefined;
+
   const deleteAccountMutation = useMutation(
     trpc.bankAccounts.delete.mutationOptions({
       onSuccess: () => {
@@ -141,6 +157,7 @@ export function BankAccount({ data, provider }: Props) {
           queryKey: trpc.bankConnections.get.queryKey(),
         });
         setDeleteValue("");
+        setDeleteOpen(false);
       },
     }),
   );
@@ -178,7 +195,13 @@ export function BankAccount({ data, provider }: Props) {
         </div>
 
         <div className="flex items-center gap-2">
-          <AlertDialog>
+          <AlertDialog
+            open={isDeleteOpen}
+            onOpenChange={(open) => {
+              setDeleteOpen(open);
+              if (!open) setDeleteValue("");
+            }}
+          >
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -203,27 +226,47 @@ export function BankAccount({ data, provider }: Props) {
                   Backfill
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <AlertDialogTrigger className="w-full text-left">
-                    Delete
-                  </AlertDialogTrigger>
+                <DropdownMenuItem onClick={() => setDeleteOpen(true)}>
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete Account</AlertDialogTitle>
-                <AlertDialogDescription>
-                  You are about to delete a bank account. If you proceed, all
-                  transactions associated with this account will also be
-                  deleted.
+                <AlertDialogTitle>Delete account</AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div className="space-y-3">
+                    <p>
+                      This will permanently remove the account and its history.
+                      This cannot be undone.
+                    </p>
+                    <div className="my-6 px-3 py-3 bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/30">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm space-y-1">
+                          <p className="font-medium text-amber-700 dark:text-amber-300">
+                            {isLoadingTransactionCount
+                              ? "Checking transaction history…"
+                              : transactionCount > 0
+                                ? `History includes ${transactionCount} transaction${transactionCount !== 1 ? "s" : ""}—all will be deleted.`
+                                : "No history in this account."}
+                          </p>
+                          <p className="text-amber-700 dark:text-amber-300">
+                            {provider
+                              ? "Reconnecting later may not restore full history."
+                              : "Manual account data is stored only in Midday and cannot be recovered."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </AlertDialogDescription>
               </AlertDialogHeader>
 
               <div className="flex flex-col gap-2 mt-2">
                 <Label htmlFor="confirm-delete">
-                  Type <span className="font-medium">DELETE</span> to confirm.
+                  Type <span className="font-medium">DELETE</span> to confirm
                 </Label>
                 <Input
                   id="confirm-delete"
