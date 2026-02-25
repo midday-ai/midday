@@ -174,7 +174,7 @@ export function BankAccount({ data, provider }: Props) {
           <p className="font-medium text-sm">{name}</p>
           <span className="text-xs text-[#878787] capitalize">
             {/* @ts-expect-error */}
-            {t(`account_type.${type}`)}
+            {type ? t(`account_type.${type}`) : t("account_type.depository")}
           </span>
         </div>
 
@@ -263,7 +263,7 @@ export function BankAccount({ data, provider }: Props) {
 
       {/* Balance Section */}
       <div className="flex flex-col gap-1">
-        {balance !== null && balance !== undefined && currency ? (
+        {balance != null && Number.isFinite(balance) && currency ? (
           <>
             <div className="flex items-baseline gap-2">
               {isCreditAccount && (

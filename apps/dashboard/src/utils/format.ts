@@ -40,6 +40,7 @@ export function formatAmount({
     return;
   }
 
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
   const safeLocale = locale ?? undefined;
 
   const formatDecimal = () =>
@@ -47,7 +48,7 @@ export function formatAmount({
       style: "decimal",
       minimumFractionDigits: minimumFractionDigits ?? 2,
       maximumFractionDigits: maximumFractionDigits ?? 2,
-    }).format(amount);
+    }).format(safeAmount);
 
   if (currency.toUpperCase() === "XXX") {
     return formatDecimal();
@@ -61,7 +62,7 @@ export function formatAmount({
       currency: normalizedCurrency,
       minimumFractionDigits,
       maximumFractionDigits,
-    }).format(amount);
+    }).format(safeAmount);
   } catch {
     return formatDecimal();
   }

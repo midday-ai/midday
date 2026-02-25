@@ -28,6 +28,7 @@ export async function createBankAccount(
       createdBy: params.userId,
       manual: params.manual,
       accountId: nanoid(),
+      type: "depository",
     })
     .returning();
 

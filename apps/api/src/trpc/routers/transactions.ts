@@ -18,6 +18,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   createTransaction,
   deleteTransactions,
+  getBankAccountById,
   getSimilarTransactions,
   getTransactionById,
   getTransactions,
@@ -177,17 +178,29 @@ export const transactionsRouter = createTRPCRouter({
         throw new Error("Team not found");
       }
 
-      // Update currency for account
-      const balance = input.currentBalance
-        ? formatAmountValue({ amount: input.currentBalance })
-        : null;
-
-      await updateBankAccount(db, {
+      // Only update balance/currency for manual accounts (backfill into connected accounts keeps bank-synced balance)
+      const account = await getBankAccountById(db, {
         id: input.bankAccountId,
         teamId,
-        currency: input.currency,
-        balance: balance ?? undefined,
       });
+
+      if (account?.manual) {
+        const parsedBalance = input.currentBalance
+          ? formatAmountValue({ amount: input.currentBalance })
+          : null;
+
+        const balance =
+          parsedBalance !== null && Number.isFinite(parsedBalance)
+            ? parsedBalance
+            : null;
+
+        await updateBankAccount(db, {
+          id: input.bankAccountId,
+          teamId,
+          currency: input.currency,
+          balance: balance ?? undefined,
+        });
+      }
 
       return triggerJob(
         "import-transactions",

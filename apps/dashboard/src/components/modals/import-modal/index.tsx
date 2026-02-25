@@ -25,6 +25,7 @@ import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 import { ImportCsvContext, importSchema } from "./context";
 import { FieldMapping } from "./field-mapping";
+import { getBalanceFromLatestDate } from "./field-mapping.utils";
 import { SelectFile } from "./select-file";
 
 const pages = ["select-file", "confirm-import"] as const;
@@ -391,11 +392,20 @@ export function ImportModal() {
                         file,
                       });
 
+                      const currentBalance =
+                        firstRows && data.date && data.balance
+                          ? getBalanceFromLatestDate(
+                              firstRows,
+                              data.date,
+                              data.balance,
+                            )
+                          : undefined;
+
                       importTransactions.mutate({
                         filePath: path,
                         currency: data.currency,
                         bankAccountId: data.bank_account_id,
-                        currentBalance: data.balance,
+                        currentBalance,
                         inverted: data.inverted,
                         mappings: {
                           amount: data.amount,
