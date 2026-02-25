@@ -851,7 +851,12 @@ export class QuickBooksProvider extends BaseAccountingProvider {
    * Always creates new transactions - user can re-export to create updated versions
    */
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
-    const { transactions, targetAccountId, tenantId, jobId } = params;
+    const {
+      transactions,
+      targetAccountId,
+      tenantId: _tenantId,
+      jobId,
+    } = params;
 
     // Sort by date ascending for consistent ordering
     // This ensures transactions appear in chronological order in QuickBooks

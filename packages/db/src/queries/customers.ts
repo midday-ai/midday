@@ -656,7 +656,7 @@ export type ToggleCustomerPortalParams = {
 
 /**
  * Toggle customer portal access.
- * Generates a portal_id (nanoid(8)) on first enable.
+ * Generates a portal_id (nanoid(21)) on first enable.
  */
 export async function toggleCustomerPortal(
   db: Database,
@@ -680,7 +680,9 @@ export async function toggleCustomerPortal(
 
   // Generate portal_id if enabling and doesn't exist yet
   const portalId =
-    enabled && !currentCustomer.portalId ? nanoid(8) : currentCustomer.portalId;
+    enabled && !currentCustomer.portalId
+      ? nanoid(21)
+      : currentCustomer.portalId;
 
   // Update the customer
   const [result] = await db

@@ -444,7 +444,6 @@ function MorphingDialogImage({
   const { uniqueId } = useMorphingDialog();
 
   return (
-    // biome-ignore lint/performance/noImgElement: motion.img required for layout animations
     <motion.img
       src={src}
       alt={alt}

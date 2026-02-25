@@ -29,8 +29,9 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
 
   if (forcePrimary && type !== "mutation") {
     const dbWithPrimary = ctx.db as DatabaseWithPrimary;
-    if (dbWithPrimary.usePrimaryOnly) {
-      ctx.db = dbWithPrimary.usePrimaryOnly();
+    const primaryOnly = dbWithPrimary.usePrimaryOnly;
+    if (primaryOnly) {
+      ctx.db = primaryOnly();
     }
     return next({ ctx });
   }
@@ -50,8 +51,9 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
       }
 
       const dbWithPrimary = ctx.db as DatabaseWithPrimary;
-      if (dbWithPrimary.usePrimaryOnly) {
-        ctx.db = dbWithPrimary.usePrimaryOnly();
+      const primaryOnly = dbWithPrimary.usePrimaryOnly;
+      if (primaryOnly) {
+        ctx.db = primaryOnly();
       }
       routedToPrimary = true;
       routeReason = "mutation";
@@ -68,8 +70,9 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
 
       if (timestamp && Date.now() < timestamp) {
         const dbWithPrimary = ctx.db as DatabaseWithPrimary;
-        if (dbWithPrimary.usePrimaryOnly) {
-          ctx.db = dbWithPrimary.usePrimaryOnly();
+        const primaryOnly = dbWithPrimary.usePrimaryOnly;
+        if (primaryOnly) {
+          ctx.db = primaryOnly();
         }
         routedToPrimary = true;
         routeReason = "recent-mutation";
@@ -77,8 +80,9 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
     }
   } else {
     const dbWithPrimary = ctx.db as DatabaseWithPrimary;
-    if (dbWithPrimary.usePrimaryOnly) {
-      ctx.db = dbWithPrimary.usePrimaryOnly();
+    const primaryOnly = dbWithPrimary.usePrimaryOnly;
+    if (primaryOnly) {
+      ctx.db = primaryOnly();
     }
     routedToPrimary = true;
     routeReason = "no-team";

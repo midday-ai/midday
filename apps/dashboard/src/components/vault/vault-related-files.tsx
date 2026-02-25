@@ -21,7 +21,7 @@ export function VaultRelatedFiles() {
     trpc.documents.getRelatedDocuments.queryOptions(
       {
         pageSize: 12,
-        id: params?.documentId!,
+        id: params?.documentId ?? "",
       },
       {
         enabled: !!params?.documentId,

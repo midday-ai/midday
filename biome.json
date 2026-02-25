@@ -52,7 +52,7 @@
         "noDangerouslySetInnerHtml": "off"
       },
       "performance": {
-        "noImgElement": "warn"
+        "noImgElement": "off"
       }
     }
   },

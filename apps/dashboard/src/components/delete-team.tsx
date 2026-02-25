@@ -133,10 +133,11 @@ export function DeleteTeam() {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                onClick={() =>
-                  deleteTeamMutation.mutate({ teamId: user?.teamId! })
-                }
-                disabled={value !== "DELETE"}
+                onClick={() => {
+                  if (!user?.teamId) return;
+                  deleteTeamMutation.mutate({ teamId: user.teamId });
+                }}
+                disabled={value !== "DELETE" || !user?.teamId}
               >
                 {deleteTeamMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

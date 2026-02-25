@@ -121,9 +121,17 @@ export const teamRouter = createTRPCRouter({
   acceptInvite: protectedProcedure
     .input(acceptTeamInviteSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
+      if (!session.user.email) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email is required to accept an invite",
+        });
+      }
+
       return acceptTeamInvite(db, {
         id: input.id,
         userId: session.user.id,
+        userEmail: session.user.email,
       });
     }),
 
@@ -310,6 +318,14 @@ export const teamRouter = createTRPCRouter({
   invite: protectedProcedure
     .input(inviteTeamMembersSchema)
     .mutation(async ({ ctx: { db, session, teamId, geo }, input }) => {
+      const invitedByEmail = session.user.email;
+      if (!invitedByEmail) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email is required to invite team members",
+        });
+      }
+
       const ip = geo.ip ?? "127.0.0.1";
 
       const data = await createTeamInvites(db, {
@@ -323,14 +339,22 @@ export const teamRouter = createTRPCRouter({
       const results = data?.results ?? [];
       const skippedInvites = data?.skippedInvites ?? [];
 
-      const invites = results.map((invite) => ({
-        email: invite?.email!,
-        invitedBy: session.user.id!,
-        invitedByName: session.user.full_name!,
-        invitedByEmail: session.user.email!,
-        teamName: invite?.team?.name!,
-        inviteCode: invite?.code!,
-      }));
+      const invites: InviteTeamMembersPayload["invites"] = results.flatMap(
+        (invite) => {
+          if (!invite?.email) {
+            return [];
+          }
+
+          return [
+            {
+              email: invite.email,
+              invitedByName: session.user.full_name ?? "",
+              invitedByEmail,
+              teamName: invite.team?.name ?? "",
+            },
+          ];
+        },
+      );
 
       // Only trigger email sending if there are valid invites
       if (invites.length > 0) {

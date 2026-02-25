@@ -85,7 +85,7 @@ export function ExportStatus() {
   const { play: playSuccessSound } = useSuccessSound();
   const [toastId, setToastId] = useState<string | null>(null);
   const { exportData, setExportData } = useExportStore();
-  const { status, progress, result, isLoading, queryError } = useJobStatus({
+  const { status, progress, result, queryError } = useJobStatus({
     jobId: exportData?.runId,
     enabled: !!exportData?.runId,
   });

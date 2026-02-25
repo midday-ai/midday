@@ -52,11 +52,9 @@ export function MetricsFilter() {
   const {
     period,
     revenueType,
-    currency,
     effectiveCurrency,
     from,
     to,
-    fiscalYearStartMonth,
     updatePeriod,
     updateRevenueType,
     updateCurrency,

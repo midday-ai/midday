@@ -48,7 +48,7 @@ type CreateShortLinkData = {
 };
 
 export async function createShortLink(db: Database, data: CreateShortLinkData) {
-  const shortId = nanoid(8);
+  const shortId = nanoid(21);
 
   const [result] = await db
     .insert(shortLinks)

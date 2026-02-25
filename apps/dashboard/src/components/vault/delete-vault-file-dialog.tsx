@@ -33,7 +33,7 @@ export function DeleteVaultFileDialog({
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Check if document has transaction attachments
-  const { data: attachmentData, isLoading: isCheckingAttachments } = useQuery(
+  const { data: attachmentData } = useQuery(
     trpc.documents.checkAttachments.queryOptions(
       { id },
       {

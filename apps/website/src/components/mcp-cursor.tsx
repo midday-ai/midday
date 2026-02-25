@@ -139,14 +139,12 @@ export function MCPCursor() {
             {/* Install Button */}
             <div className="space-y-4 mb-12">
               <a href={cursorDeepLink} className="inline-block">
-                {/* biome-ignore lint/performance/noImgElement: External deeplink badge images cannot use next/image */}
                 <img
                   src="https://cursor.com/deeplink/mcp-install-dark.png"
                   alt="Add Midday MCP server to Cursor"
                   height={32}
                   className="h-8 dark:hidden"
                 />
-                {/* biome-ignore lint/performance/noImgElement: External deeplink badge images cannot use next/image */}
                 <img
                   src="https://cursor.com/deeplink/mcp-install-light.png"
                   alt="Add Midday MCP server to Cursor"

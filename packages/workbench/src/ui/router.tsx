@@ -112,7 +112,7 @@ export function createSort(field: string, direction: "asc" | "desc"): string {
 function RootLayout() {
   const { data: config, isLoading: loading } = useConfig();
   // Use fast queue names for sidebar (no counts, instant)
-  const { data: queueNames = [] } = useQueueNames();
+  useQueueNames();
   // Lazy load full queue info for paused state (loads in background)
   const { data: queuesData = [] } = useQueues();
   const navigate = useNavigate();

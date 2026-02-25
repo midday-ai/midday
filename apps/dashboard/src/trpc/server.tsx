@@ -1,19 +1,20 @@
 import "server-only";
 
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
-import { getLocationHeaders } from "@midday/location";
-import { createClient } from "@midday/supabase/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { createTRPCClient, httpLink, loggerLink } from "@trpc/client";
 import {
   createTRPCOptionsProxy,
   type TRPCQueryOptions,
 } from "@trpc/tanstack-react-query";
-import { cookies, headers } from "next/headers";
 import { cache } from "react";
 import superjson from "superjson";
-import { Cookies } from "@/utils/constants";
 import { makeQueryClient } from "./query-client";
+import {
+  buildTRPCRequestHeaders,
+  getForcePrimaryFromCookies,
+  getServerRequestContext,
+} from "./request-context";
 
 // IMPORTANT: Create a stable getter for the query client that
 //            will return the same client during the same request.
@@ -47,32 +48,19 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
         transformer: superjson,
         fetch: fetchWithTimeout,
         async headers() {
-          const [supabase, cookieStore, headersList] = await Promise.all([
-            createClient(),
-            cookies(),
-            headers(),
-          ]);
-
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-
-          const location = getLocationHeaders(headersList);
-
-          const result: Record<string, string> = {
-            Authorization: `Bearer ${session?.access_token}`,
-            "x-user-timezone": location.timezone,
-            "x-user-locale": location.locale,
-            "x-user-country": location.country,
-          };
+          const requestContext = await getServerRequestContext();
 
           // Pass force-primary cookie as header to API for replication lag handling
-          const forcePrimary = cookieStore.get(Cookies.ForcePrimary);
-          if (forcePrimary?.value === "true") {
-            result["x-force-primary"] = "true";
-          }
+          const forcePrimary = getForcePrimaryFromCookies(
+            requestContext.cookieStore,
+          );
 
-          return result;
+          return buildTRPCRequestHeaders({
+            session: requestContext.session,
+            forcePrimary,
+            location: requestContext.location,
+            traceHeaders: requestContext.traceHeaders,
+          });
         },
       }),
       loggerLink({
@@ -100,9 +88,13 @@ export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
   const queryClient = getQueryClient();
 
   if (queryOptions.queryKey[1]?.type === "infinite") {
-    void queryClient.prefetchInfiniteQuery(queryOptions as any);
+    void queryClient.prefetchInfiniteQuery(queryOptions as any).catch(() => {
+      // Avoid unhandled promise rejections from fire-and-forget prefetches.
+    });
   } else {
-    void queryClient.prefetchQuery(queryOptions);
+    void queryClient.prefetchQuery(queryOptions).catch(() => {
+      // Avoid unhandled promise rejections from fire-and-forget prefetches.
+    });
   }
 }
 
@@ -113,9 +105,13 @@ export function batchPrefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
 
   for (const queryOptions of queryOptionsArray) {
     if (queryOptions.queryKey[1]?.type === "infinite") {
-      void queryClient.prefetchInfiniteQuery(queryOptions as any);
+      void queryClient.prefetchInfiniteQuery(queryOptions as any).catch(() => {
+        // Avoid unhandled promise rejections from fire-and-forget prefetches.
+      });
     } else {
-      void queryClient.prefetchQuery(queryOptions);
+      void queryClient.prefetchQuery(queryOptions).catch(() => {
+        // Avoid unhandled promise rejections from fire-and-forget prefetches.
+      });
     }
   }
 }
@@ -131,37 +127,23 @@ export function batchPrefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
  *   just created). This is more reliable than depending on the cookie alone.
  */
 export async function getTRPCClient(options?: { forcePrimary?: boolean }) {
-  // Parallelize independent async calls
-  const [supabase, cookieStore, headersList] = await Promise.all([
-    createClient(),
-    cookies(),
-    headers(),
-  ]);
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const location = getLocationHeaders(headersList);
+  const requestContext = await getServerRequestContext();
 
   const shouldForcePrimary =
     options?.forcePrimary ||
-    cookieStore.get(Cookies.ForcePrimary)?.value === "true";
+    getForcePrimaryFromCookies(requestContext.cookieStore);
 
   return createTRPCClient<AppRouter>({
     links: [
       httpLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-          "x-user-timezone": location.timezone,
-          "x-user-locale": location.locale,
-          "x-user-country": location.country,
-          ...(shouldForcePrimary && {
-            "x-force-primary": "true",
-          }),
-        },
+        headers: buildTRPCRequestHeaders({
+          session: requestContext.session,
+          forcePrimary: shouldForcePrimary,
+          location: requestContext.location,
+          traceHeaders: requestContext.traceHeaders,
+        }),
       }),
     ],
   });

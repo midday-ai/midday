@@ -2,6 +2,7 @@ import { createClient } from "@api/services/supabase";
 import type { Session } from "@api/utils/auth";
 import { verifyAccessToken } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
+import { getRequestTrace } from "@api/utils/request-trace";
 import { safeCompare } from "@api/utils/safe-compare";
 import type { Database } from "@midday/db/client";
 import { db } from "@midday/db/client";
@@ -24,6 +25,8 @@ type TRPCContext = {
   teamId?: string;
   forcePrimary?: boolean;
   isInternalRequest?: boolean;
+  requestId: string;
+  cfRay?: string;
 };
 
 export const createTRPCContext = async (
@@ -34,6 +37,7 @@ export const createTRPCContext = async (
 
   const accessToken = c.req.header("Authorization")?.split(" ")[1];
   const internalKey = c.req.header("x-internal-key");
+  const { requestId, cfRay } = getRequestTrace(c.req);
 
   const isInternalRequest =
     !!internalKey &&
@@ -58,6 +62,8 @@ export const createTRPCContext = async (
       supabaseClientMs: +supaMs.toFixed(2),
       hasSession: !!session,
       forcePrimary,
+      requestId,
+      cfRay,
     });
   }
 
@@ -68,6 +74,8 @@ export const createTRPCContext = async (
     geo,
     forcePrimary,
     isInternalRequest,
+    requestId,
+    cfRay,
   };
 };
 
@@ -101,6 +109,7 @@ const withPrimaryDbMiddleware = t.middleware(async (opts) => {
 const withTeamPermissionMiddleware = t.middleware(async (opts) => {
   return withTeamPermission({
     ctx: opts.ctx,
+    procedurePath: opts.path,
     next: opts.next,
   });
 });

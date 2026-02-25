@@ -15,7 +15,7 @@ export async function generateCanvasPdf(
   options: CanvasPdfOptions = {},
 ): Promise<void> {
   const {
-    filename = "report.pdf",
+    filename = "canvas-report.pdf",
     quality = 1.0,
     scale = 4,
     padding = 10,
@@ -142,13 +142,7 @@ export async function generateCanvasPdf(
 export async function generateCanvasPdfBlob(
   options: CanvasPdfOptions = {},
 ): Promise<Blob> {
-  const {
-    filename = "report.pdf",
-    quality = 1.0,
-    scale = 4,
-    padding = 10,
-    theme,
-  } = options;
+  const { quality = 1.0, scale = 4, padding = 10, theme } = options;
 
   // Resolve theme: if "system" or undefined, check system preference
   const resolvedTheme =

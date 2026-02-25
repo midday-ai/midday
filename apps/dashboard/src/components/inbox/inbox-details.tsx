@@ -293,12 +293,14 @@ export function InboxDetails() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem
-                  onClick={() =>
+                  onClick={() => {
+                    if (!data?.id) return;
+
                     updateInboxMutation.mutate({
-                      id: data?.id!,
-                      status: data?.status === "done" ? "pending" : "done",
-                    })
-                  }
+                      id: data.id,
+                      status: data.status === "done" ? "pending" : "done",
+                    });
+                  }}
                 >
                   {data?.status === "done" ? (
                     <>
@@ -581,12 +583,14 @@ export function InboxDetails() {
         </div>
       )}
 
-      <DeleteInboxDialog
-        id={data?.id!}
-        filePath={data?.filePath ?? null}
-        isOpen={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-      />
+      {data?.id && (
+        <DeleteInboxDialog
+          id={data.id}
+          filePath={data.filePath ?? null}
+          isOpen={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+        />
+      )}
     </div>
   );
 }

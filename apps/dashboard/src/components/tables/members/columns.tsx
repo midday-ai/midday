@@ -135,7 +135,7 @@ export const columns: ColumnDef<TeamMember>[] = [
                 value={row.original.role ?? undefined}
                 onValueChange={(role) => {
                   updateMemberMutation.mutate({
-                    userId: row.original.user?.id!,
+                    userId: row.original.user!.id,
                     teamId: row.original.teamId!,
                     role: role as "owner" | "member",
                   });
@@ -189,7 +189,7 @@ export const columns: ColumnDef<TeamMember>[] = [
                             disabled={deleteMemberMutation.isPending}
                             onClick={() => {
                               deleteMemberMutation.mutate({
-                                userId: row.original.user?.id!,
+                                userId: row.original.user!.id,
                                 teamId: row.original.teamId!,
                               });
                             }}

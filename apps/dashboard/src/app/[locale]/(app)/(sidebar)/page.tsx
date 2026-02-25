@@ -1,6 +1,7 @@
 import { Provider as ChatProvider } from "@ai-sdk-tools/store";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { ChatInterface } from "@/components/chat/chat-interface";
 import { Widgets } from "@/components/widgets";
 import { getQueryClient, HydrateClient, prefetch, trpc } from "@/trpc/server";
@@ -17,9 +18,9 @@ export default async function Overview() {
   const queryClient = getQueryClient();
 
   // Fetch widget preferences so the dashboard renders with data immediately
-  const widgetPreferences = await queryClient.fetchQuery(
-    trpc.widgets.getWidgetPreferences.queryOptions(),
-  );
+  const widgetPreferences = await queryClient
+    .fetchQuery(trpc.widgets.getWidgetPreferences.queryOptions())
+    .catch(() => redirect("/login"));
 
   // Prefetch suggested actions (metrics are prefetched client-side to respect localStorage)
   prefetch(trpc.suggestedActions.list.queryOptions({ limit: 6 }));

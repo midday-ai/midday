@@ -40,7 +40,7 @@ export function DeleteInboxDialog({
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Check if inbox item has transaction attachments
-  const { data: attachmentData, isLoading: isCheckingAttachments } = useQuery(
+  const { data: attachmentData } = useQuery(
     trpc.inbox.checkAttachments.queryOptions(
       { id },
       {
