@@ -41,11 +41,11 @@
     "@midday/logger": "workspace:*",
     "@midday/utils": "workspace:*",
     "@sindresorhus/slugify": "catalog:",
-    "@types/pg": "^8.15.6",
+    "@types/pg": "^8.16.0",
     "camelcase-keys": "catalog:",
     "drizzle-orm": "^0.45.0",
     "nanoid": "catalog:",
-    "pg": "^8.16.3",
+    "pg": "^8.18.0",
     "snakecase-keys": "^9.0.2"
   },
   "devDependencies": {

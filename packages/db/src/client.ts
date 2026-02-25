@@ -28,7 +28,7 @@ const connectionConfig = {
 
 const drizzleLogger = DEBUG_PERF ? createDrizzleLogger() : undefined;
 
-// Primary pool — DATABASE_PRIMARY_URL points to Supabase (direct or pooler)
+// Primary pool — DATABASE_PRIMARY_URL
 const primaryPool = new Pool({
   connectionString: process.env.DATABASE_PRIMARY_URL!,
   ...connectionConfig,
@@ -47,10 +47,7 @@ export const primaryDb = drizzle(primaryPool, {
 });
 
 /**
- * Map Railway region → replica URL (only create the pool this instance needs).
- *
- * RAILWAY_REPLICA_REGION is a system-provided variable injected at runtime
- * by Railway for every deployment (see https://docs.railway.com/variables/reference).
+ * Map Railway region → replica URL
  */
 const replicaUrlForRegion: Record<string, string | undefined> = {
   "europe-west4-drams3a": process.env.DATABASE_FRA_URL,
@@ -63,7 +60,6 @@ const rawReplicaUrl = currentRegion
   ? replicaUrlForRegion[currentRegion]
   : undefined;
 
-// Don't create a separate replica pool if it points to the same DB as primary
 const replicaUrl =
   rawReplicaUrl && rawReplicaUrl !== process.env.DATABASE_PRIMARY_URL
     ? rawReplicaUrl
@@ -109,7 +105,6 @@ export const db = withReplicas(
   (replicas) => replicas[0]!,
 );
 
-// Keep connectDb for backward compatibility, but just return the singleton
 export const connectDb = async () => {
   return db;
 };
@@ -148,8 +143,7 @@ export function getPoolStats() {
 }
 
 /**
- * Close all database pools gracefully.
- * Call during process shutdown to release connections cleanly.
+ * Close all database pools gracefully
  */
 export const closeDb = async (): Promise<void> => {
   await Promise.all([primaryPool.end(), replicaPool?.end()]);

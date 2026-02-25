@@ -1,14 +1,10 @@
 "use client";
 
 import { Dialog, DialogContent } from "@midday/ui/dialog";
-import dynamic from "next/dynamic";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useSearchStore } from "@/store/search";
+import { Search } from "./search";
 import { SearchFooter } from "./search-footer";
-
-const Search = dynamic(() => import("./search").then((mod) => mod.Search), {
-  ssr: false,
-});
 
 export function SearchModal() {
   const { isOpen, setOpen } = useSearchStore();

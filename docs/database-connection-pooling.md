@@ -58,9 +58,9 @@ Each API instance creates up to 2 pools (primary + 1 regional replica), so the m
 
 ## Prepared Statements
 
-Transaction mode does **not** support named prepared statements. The `node-postgres` (`pg`) package with Drizzle ORM uses unnamed parameterized queries (extended query protocol without a `name` field), which are compatible with transaction mode. No special configuration is needed.
+We use **pg** (node-postgres) for all database clients. Transaction mode (port 6543) does **not** support prepared statements — use **session pooler** (port 5432) or **direct connection** for pg compatibility.
 
-**Do not** add named queries like `pool.query({ name: 'my-query', text: '...' })` — these will fail through the pooler.
+See [Supabase: Disabling prepared statements](https://github.com/orgs/supabase/discussions/28239).
 
 ## Environment Variables
 

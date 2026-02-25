@@ -11,9 +11,9 @@ const isDevelopment = process.env.NODE_ENV === "development";
 const workerPool = new Pool({
   connectionString: process.env.DATABASE_PRIMARY_POOLER_URL!,
   max: 100, // Sized for total worker concurrency (120 jobs) with buffer
-  idleTimeoutMillis: isDevelopment ? 5000 : 60000, // Match main client config
-  connectionTimeoutMillis: 15000, // Match main client config
-  maxUses: 0, // No limit on connection reuse for long-lived worker
+  idleTimeoutMillis: isDevelopment ? 5000 : 60000,
+  connectionTimeoutMillis: 15000,
+  maxUses: 0,
   allowExitOnIdle: true,
 });
 
@@ -24,7 +24,6 @@ const workerDb = drizzle(workerPool, {
 
 /**
  * Get the shared worker database instance
- * This is a singleton optimized for concurrent job processing
  */
 export const getWorkerDb = (): Database => {
   return workerDb as Database;
@@ -32,7 +31,6 @@ export const getWorkerDb = (): Database => {
 
 /**
  * Cleanup function to close database connections gracefully
- * Should be called on worker shutdown
  */
 export const closeWorkerDb = async (): Promise<void> => {
   await workerPool.end();

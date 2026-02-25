@@ -2022,35 +2022,47 @@ export type BulkUpdateTransactionsBaseCurrencyParams = {
 
 /**
  * Bulk update transactions with base currency/amount
- * Uses batch processing internally for large datasets
- * Uses direct UPDATE (not upsert) since transactions already exist
+ * Uses per-row updates in a transaction — avoids array serialization issues
+ * with postgres.js + Drizzle (unnest expands arrays into many params).
  */
 export async function bulkUpdateTransactionsBaseCurrency(
   db: Database,
   params: BulkUpdateTransactionsBaseCurrencyParams,
 ) {
   const { transactions: transactionsData, teamId } = params;
-  const BATCH_LIMIT = 500;
 
-  for (let i = 0; i < transactionsData.length; i += BATCH_LIMIT) {
-    const batch = transactionsData.slice(i, i + BATCH_LIMIT);
-    if (batch.length === 0) continue;
+  if (!teamId?.trim()) {
+    throw new Error("bulkUpdateTransactionsBaseCurrency: teamId is required");
+  }
 
-    const valuesClause = sql.join(
-      batch.map(
-        (tx) => sql`(${tx.id}::uuid, ${tx.baseAmount}, ${tx.baseCurrency})`,
-      ),
-      sql`, `,
-    );
+  if (transactionsData.length === 0) return;
 
-    await db.execute(sql`
-      UPDATE transactions AS t
-      SET
-        base_amount = v.base_amount,
-        base_currency = v.base_currency
-      FROM (VALUES ${valuesClause}) AS v(id, base_amount, base_currency)
-      WHERE t.id = v.id AND t.team_id = ${teamId}
-    `);
+  const BATCH_SIZE = 100;
+  const CONCURRENCY = 10;
+
+  for (let i = 0; i < transactionsData.length; i += BATCH_SIZE) {
+    const batch = transactionsData.slice(i, i + BATCH_SIZE);
+    await db.transaction(async (tx) => {
+      for (let j = 0; j < batch.length; j += CONCURRENCY) {
+        const chunk = batch.slice(j, j + CONCURRENCY);
+        await Promise.all(
+          chunk.map((item) =>
+            tx
+              .update(transactions)
+              .set({
+                baseAmount: item.baseAmount,
+                baseCurrency: item.baseCurrency,
+              })
+              .where(
+                and(
+                  eq(transactions.id, item.id),
+                  eq(transactions.teamId, teamId),
+                ),
+              ),
+          ),
+        );
+      }
+    });
   }
 }
 
