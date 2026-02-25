@@ -52,13 +52,19 @@ export function formatAmountValue({
   amount,
   inverted,
 }: {
-  amount: string;
+  amount?: string | null;
   inverted?: boolean;
 }) {
+  // Handle undefined/empty amount (e.g. missing CSV column or empty cell)
+  const trimmed = amount?.trim();
+  if (trimmed === undefined || trimmed === "") {
+    return NaN;
+  }
+
   let value: number;
 
   // Handle special minus sign (−) by replacing with standard minus (-)
-  const normalizedAmount = amount.replace(/−/g, "-");
+  const normalizedAmount = trimmed.replace(/−/g, "-");
 
   if (normalizedAmount.includes(",")) {
     // Remove thousands separators and replace the comma with a period.

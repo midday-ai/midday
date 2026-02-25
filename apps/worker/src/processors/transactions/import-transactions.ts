@@ -23,6 +23,7 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
   async process(job: Job<ImportTransactionsPayload>): Promise<{
     importedCount: number;
     skippedCount: number;
+    invalidCount: number;
   }> {
     const { teamId, filePath, bankAccountId, currency, mappings, inverted } =
       job.data;
@@ -60,6 +61,7 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
 
     const allTransactionIds: string[] = [];
     let totalAttempted = 0;
+    let totalInvalid = 0;
 
     let processedChunks = 0;
     await new Promise<void>((resolve, reject) => {
@@ -116,6 +118,7 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
           }
 
           totalAttempted += validTransactions.length;
+          totalInvalid += invalidTransactions.length;
 
           await this.updateProgress(
             job,
@@ -241,9 +244,10 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
     this.logger.info("Import transactions completed", {
       importedCount,
       skippedCount,
+      invalidCount: totalInvalid,
       teamId,
     });
 
-    return { importedCount, skippedCount };
+    return { importedCount, skippedCount, invalidCount: totalInvalid };
   }
 }

@@ -38,6 +38,13 @@ describe("formatAmountValue", () => {
     expect(formatAmountValue({ amount: "0" })).toBe(0);
     expect(formatAmountValue({ amount: "0", inverted: true })).toBe(-0);
   });
+
+  it("should return NaN for undefined or empty amount", () => {
+    expect(formatAmountValue({ amount: undefined })).toBe(NaN);
+    expect(formatAmountValue({ amount: null })).toBe(NaN);
+    expect(formatAmountValue({ amount: "" })).toBe(NaN);
+    expect(formatAmountValue({ amount: "   " })).toBe(NaN);
+  });
 });
 
 describe("formatDate", () => {

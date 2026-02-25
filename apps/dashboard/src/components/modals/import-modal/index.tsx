@@ -235,9 +235,26 @@ export function ImportModal() {
         queryKey: trpc.bankConnections.get.queryKey(),
       });
 
-      const skippedCount =
-        (result as { skippedCount?: number } | undefined)?.skippedCount ?? 0;
-      if (skippedCount > 0) {
+      const jobResult = result as
+        | {
+            skippedCount?: number;
+            invalidCount?: number;
+            importedCount?: number;
+          }
+        | undefined;
+      const skippedCount = jobResult?.skippedCount ?? 0;
+      const invalidCount = jobResult?.invalidCount ?? 0;
+
+      if (invalidCount > 0) {
+        toast({
+          duration: 5000,
+          variant: "info",
+          title: `${invalidCount} transaction${invalidCount === 1 ? "" : "s"} skipped due to invalid data (e.g. missing amount or date).`,
+        });
+      }
+      // Only show "already imported" when there are no invalid transactions,
+      // to avoid confusing users who had rows with missing/invalid data
+      if (skippedCount > 0 && invalidCount === 0) {
         toast({
           duration: 5000,
           variant: "info",

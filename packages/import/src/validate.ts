@@ -11,7 +11,9 @@ export const createTransactionSchema = z.object({
   status: z.enum(["posted", "pending"]),
   method: z.enum(["card", "bank", "other"]),
   date: z.string().date(),
-  amount: z.number(),
+  amount: z.number().refine((n) => !Number.isNaN(n), {
+    message: "Amount is required and must be a valid number",
+  }),
   manual: z.boolean(),
   category_slug: z.string().nullable(),
 });
