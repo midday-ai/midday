@@ -15,6 +15,7 @@ export type JobStatus =
 export interface JobStatusResponse {
   status: JobStatus;
   progress?: number;
+  progressStep?: string;
   result?: unknown;
   error?: string;
 }

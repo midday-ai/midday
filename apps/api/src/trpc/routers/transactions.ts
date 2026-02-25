@@ -1,7 +1,10 @@
+import { anthropic } from "@ai-sdk/anthropic";
 import {
   createTransactionSchema,
   deleteTransactionsSchema,
   exportTransactionsSchema,
+  generateCsvMappingResponseSchema,
+  generateCsvMappingSchema,
   getSimilarTransactionsSchema,
   getTransactionByIdSchema,
   getTransactionsSchema,
@@ -25,8 +28,26 @@ import {
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
-import { formatAmountValue } from "@midday/import";
+import {
+  buildCsvMappingPrompt,
+  compactSampleRows,
+  formatAmountValue,
+  selectPromptColumns,
+} from "@midday/import";
 import { triggerJob } from "@midday/job-client";
+import { generateObject } from "ai";
+
+const csvMappingInFlight = new Map<
+  string,
+  Promise<{
+    date?: string;
+    description?: string;
+    counterparty?: string;
+    amount?: string;
+    balance?: string;
+    currency?: string;
+  }>
+>();
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -195,5 +216,54 @@ export const transactionsRouter = createTRPCRouter({
       });
 
       return { success: true };
+    }),
+
+  generateCsvMapping: protectedProcedure
+    .input(generateCsvMappingSchema)
+    .mutation(async ({ input, ctx: { teamId } }) => {
+      const requestStartedAt = Date.now();
+      const promptColumns = selectPromptColumns(input.fieldColumns);
+      const sampleRows = compactSampleRows(input.firstRows, promptColumns);
+      const prompt = buildCsvMappingPrompt(promptColumns, sampleRows);
+      const requestKey = JSON.stringify({
+        teamId,
+        columns: promptColumns,
+        sampleRows,
+      });
+
+      const inFlight = csvMappingInFlight.get(requestKey);
+      if (inFlight) {
+        console.info("CSV mapping reusing in-flight request", {
+          mode: "object",
+          columnsCount: promptColumns.length,
+          sampleRowsCount: sampleRows.length,
+        });
+        return inFlight;
+      }
+
+      const mappingPromise = (async () => {
+        try {
+          const { object } = await generateObject({
+            model: anthropic("claude-3-haiku-20240307"),
+            schema: generateCsvMappingResponseSchema,
+            prompt,
+          });
+
+          return generateCsvMappingResponseSchema.parse(object);
+        } catch (error) {
+          console.error("Error generating CSV mapping:", {
+            mode: "object",
+            durationMs: Date.now() - requestStartedAt,
+            error,
+          });
+          throw error;
+        } finally {
+          csvMappingInFlight.delete(requestKey);
+        }
+      })();
+
+      csvMappingInFlight.set(requestKey, mappingPromise);
+
+      return mappingPromise;
     }),
 });

@@ -32,6 +32,7 @@ const toastVariants = cva(
         progress: "",
         spinner: "",
         ai: "",
+        info: "",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
       },

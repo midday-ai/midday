@@ -497,7 +497,7 @@ export const transactionsResponseSchema = z.object({
 
 export const deleteTransactionsSchema = z
   .array(z.string().uuid())
-  .max(100)
+  .max(1000)
   .min(1)
   .openapi({
     description: "List of transaction IDs to delete.",
@@ -905,12 +905,32 @@ export const importTransactionsSchema = z.object({
   currency: z.string(),
   currentBalance: z.string().optional(),
   inverted: z.boolean(),
-  mappings: z.object({
-    amount: z.string(),
-    date: z.string(),
-    description: z.string(),
-    balance: z.string().optional(),
-  }),
+  mappings: z
+    .object({
+      amount: z.string(),
+      date: z.string(),
+      description: z.string().optional(),
+      counterparty: z.string().optional(),
+      balance: z.string().optional(),
+    })
+    .refine((mappings) => !!mappings.description || !!mappings.counterparty, {
+      message: "Either description or counterparty mapping is required",
+      path: ["description"],
+    }),
+});
+
+export const generateCsvMappingSchema = z.object({
+  fieldColumns: z.array(z.string()).min(1),
+  firstRows: z.array(z.record(z.string(), z.string())).min(1),
+});
+
+export const generateCsvMappingResponseSchema = z.object({
+  date: z.string().optional(),
+  description: z.string().optional(),
+  counterparty: z.string().optional(),
+  amount: z.string().optional(),
+  balance: z.string().optional(),
+  currency: z.string().optional(),
 });
 
 export const moveToReviewSchema = z.object({

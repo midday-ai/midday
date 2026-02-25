@@ -266,9 +266,29 @@ export async function getJobStatus(
   }
 
   const state = await job.getState();
-  const progress = job.progress;
+  const rawProgress = job.progress;
   const returnValue = job.returnvalue;
   const failedReason = job.failedReason;
+
+  let progress: number | undefined;
+  let progressStep: string | undefined;
+
+  if (typeof rawProgress === "number") {
+    progress = rawProgress;
+  } else if (rawProgress && typeof rawProgress === "object") {
+    const progressObject = rawProgress as {
+      progress?: unknown;
+      step?: unknown;
+    };
+
+    if (typeof progressObject.progress === "number") {
+      progress = progressObject.progress;
+    }
+
+    if (typeof progressObject.step === "string") {
+      progressStep = progressObject.step;
+    }
+  }
 
   // Map BullMQ states to our status enum
   let status: JobStatus;
@@ -295,7 +315,8 @@ export async function getJobStatus(
 
   return {
     status,
-    progress: typeof progress === "number" ? progress : undefined,
+    progress,
+    progressStep,
     result: returnValue,
     error: failedReason,
   };

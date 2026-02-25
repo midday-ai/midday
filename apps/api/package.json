@@ -17,6 +17,7 @@
     "@ai-sdk-tools/artifacts": "^1.2.0",
     "@ai-sdk-tools/cache": "^1.2.0",
     "@ai-sdk-tools/memory": "^1.2.0",
+    "@ai-sdk/anthropic": "2.0.62",
     "@ai-sdk/openai": "catalog:",
     "@ai-sdk/react": "catalog:",
     "@date-fns/tz": "catalog:",

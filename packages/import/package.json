@@ -6,15 +6,14 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "format": "biome format --write .",
+    "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "test": "bun test --exit src"
   },
   "dependencies": {
     "change-case": "catalog:",
     "chrono-node": "^2.9.0",
-    "date-fns": "catalog:",
-    "uuid": "catalog:"
+    "date-fns": "catalog:"
   },
   "exports": {
     ".": "./src/index.ts",

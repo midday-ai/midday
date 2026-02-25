@@ -10,12 +10,12 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
-import { SubmitButton } from "@midday/ui/submit-button";
+import { SubmitButtonMorph } from "@midday/ui/submit-button-morph";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
 import { useJobStatus } from "@/hooks/use-job-status";
 import { useTeamQuery } from "@/hooks/use-team";
@@ -37,10 +37,16 @@ export function ImportModal() {
   const invalidateTransactionQueries = useInvalidateTransactionQueries();
   const [jobId, setJobId] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stepTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sequenceIndexRef = useRef(0);
   const [fileColumns, setFileColumns] = useState<string[] | null>(null);
   const [firstRows, setFirstRows] = useState<Record<string, string>[] | null>(
     null,
   );
+  const [visibleProgressStep, setVisibleProgressStep] = useState<
+    string | undefined
+  >();
 
   const { data: user } = useUserQuery();
 
@@ -60,9 +66,10 @@ export function ImportModal() {
 
   const isOpen = params.step === "import";
 
-  const { status } = useJobStatus({
+  const { status, progressStep, progress, result } = useJobStatus({
     jobId,
     enabled: !!jobId && isOpen,
+    refetchInterval: 300,
   });
 
   const importTransactions = useMutation(
@@ -109,20 +116,34 @@ export function ImportModal() {
 
   const file = watch("file");
 
-  const onclose = () => {
-    setIsImporting(false);
-    setFileColumns(null);
-    setFirstRows(null);
-    setPageNumber(0);
-    setJobId(undefined);
-    reset();
-
+  const requestClose = () => {
     setParams({
       step: null,
       accountId: null,
       type: null,
       hide: null,
     });
+  };
+
+  const resetModalState = () => {
+    setIsImporting(false);
+    setVisibleProgressStep(undefined);
+    sequenceIndexRef.current = 0;
+    if (stepTimeoutRef.current) {
+      clearTimeout(stepTimeoutRef.current);
+      stepTimeoutRef.current = null;
+    }
+    setFileColumns(null);
+    setFirstRows(null);
+    setPageNumber(0);
+    setJobId(undefined);
+    reset();
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      requestClose();
+    }
   };
 
   useEffect(() => {
@@ -150,11 +171,58 @@ export function ImportModal() {
     }
   }, [status, toast]);
 
+  // Predefined sequence - backend steps are too fast to poll, so we run these locally.
+  const EARLY_STEPS = [
+    "analyzing",
+    "transforming",
+    "validating",
+    "importing",
+  ] as const;
+  const STEP_DURATION_MS = 1000;
+
+  useEffect(() => {
+    if (!isImporting) return;
+
+    // Completed: show Done immediately and stop sequence.
+    if (status === "completed") {
+      if (stepTimeoutRef.current) {
+        clearTimeout(stepTimeoutRef.current);
+        stepTimeoutRef.current = null;
+      }
+      setVisibleProgressStep("completed");
+      return;
+    }
+
+    // Run early steps on a timer (analyzing -> transforming -> validating -> importing).
+    const advanceSequence = () => {
+      const idx = sequenceIndexRef.current;
+      if (idx < EARLY_STEPS.length) {
+        setVisibleProgressStep(EARLY_STEPS[idx]);
+        sequenceIndexRef.current = idx + 1;
+        stepTimeoutRef.current = setTimeout(advanceSequence, STEP_DURATION_MS);
+      } else {
+        stepTimeoutRef.current = null;
+      }
+    };
+
+    // First time: show first step and schedule next.
+    if (!visibleProgressStep) {
+      setVisibleProgressStep(EARLY_STEPS[0]);
+      sequenceIndexRef.current = 1;
+      stepTimeoutRef.current = setTimeout(advanceSequence, STEP_DURATION_MS);
+      return;
+    }
+
+    // After we've shown all early steps, follow backend for finalizing/enriching.
+    if (sequenceIndexRef.current >= EARLY_STEPS.length && progressStep) {
+      if (progressStep === "finalizing" || progressStep === "enriching") {
+        setVisibleProgressStep(progressStep);
+      }
+    }
+  }, [isImporting, status, progressStep, visibleProgressStep]);
+
   useEffect(() => {
     if (status === "completed") {
-      setIsImporting(false);
-      setJobId(undefined);
-
       // Invalidate all transaction-related queries (transactions, reports, widgets)
       invalidateTransactionQueries();
 
@@ -167,15 +235,38 @@ export function ImportModal() {
         queryKey: trpc.bankConnections.get.queryKey(),
       });
 
-      toast({
-        duration: 3500,
-        variant: "success",
-        title: "Transactions imported successfully.",
-      });
+      const skippedCount =
+        (result as { skippedCount?: number } | undefined)?.skippedCount ?? 0;
+      if (skippedCount > 0) {
+        toast({
+          duration: 5000,
+          variant: "info",
+          title: `${skippedCount} transaction${skippedCount === 1 ? "" : "s"} were already imported and skipped.`,
+        });
+      }
 
-      onclose();
+      closeTimeoutRef.current = setTimeout(() => {
+        requestClose();
+      }, 700);
     }
-  }, [status]);
+  }, [status, result, toast]);
+
+  useEffect(() => {
+    return () => {
+      if (stepTimeoutRef.current) {
+        clearTimeout(stepTimeoutRef.current);
+      }
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      resetModalState();
+    }
+  }, [isOpen]);
 
   // Go to second page if file looks good
   useEffect(() => {
@@ -184,8 +275,49 @@ export function ImportModal() {
     }
   }, [file, fileColumns, firstRows, pageNumber]);
 
+  const importStepLabels: Record<string, string> = {
+    analyzing: "Analyzing...",
+    transforming: "Mapping with AI...",
+    validating: "Checking...",
+    importing: "Importing...",
+    finalizing: "Finalizing...",
+    enriching: "Enriching...",
+    completed: "Done",
+  };
+
+  const getImportingLabel = () => {
+    if (typeof progress !== "number") {
+      return importStepLabels.importing;
+    }
+    if (progress < 58) {
+      return "Importing...";
+    }
+    if (progress < 66) {
+      return "Processing...";
+    }
+    if (progress < 73) {
+      return "Almost done...";
+    }
+    return "Wrapping up...";
+  };
+
+  const getStepLabel = (step?: string) => {
+    if (!step) {
+      return "Importing...";
+    }
+    return importStepLabels[step] ?? "Importing...";
+  };
+
+  const importButtonLabel = (
+    isImporting
+      ? visibleProgressStep === "importing"
+        ? getImportingLabel()
+        : getStepLabel(visibleProgressStep)
+      : "Confirm import"
+  ) as string;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onclose}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="overflow-visible">
         <div className="p-4 pb-0 max-h-[calc(100svh-10vw)] overflow-y-auto overflow-x-visible">
           <DialogHeader>
@@ -229,6 +361,10 @@ export function ImportModal() {
                   <form
                     className="flex flex-col gap-y-4"
                     onSubmit={handleSubmit(async (data) => {
+                      if (isImporting) {
+                        return;
+                      }
+
                       setIsImporting(true);
 
                       const filename = stripSpecialCharacters(data.file.name);
@@ -248,6 +384,7 @@ export function ImportModal() {
                           amount: data.amount,
                           date: data.date,
                           description: data.description,
+                          counterparty: data.counterparty,
                           balance: data.balance,
                         },
                       });
@@ -258,13 +395,13 @@ export function ImportModal() {
                       <>
                         <FieldMapping currencies={uniqueCurrencies} />
 
-                        <SubmitButton
+                        <SubmitButtonMorph
                           isSubmitting={isImporting}
+                          completed={visibleProgressStep === "completed"}
                           disabled={!isValid}
                           className="mt-4"
-                        >
-                          Confirm import
-                        </SubmitButton>
+                          children={importButtonLabel}
+                        />
 
                         <button
                           type="button"
