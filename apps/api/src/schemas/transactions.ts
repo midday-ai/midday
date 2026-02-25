@@ -913,17 +913,6 @@ export const importTransactionsSchema = z.object({
       counterparty: z.string().optional(),
       balance: z.string().optional(),
     })
-    .transform((mappings) => {
-      if (
-        mappings.description &&
-        mappings.counterparty &&
-        mappings.description === mappings.counterparty
-      ) {
-        const { description, ...rest } = mappings;
-        return rest;
-      }
-      return mappings;
-    })
     .refine((mappings) => !!mappings.description || !!mappings.counterparty, {
       message: "Either description or counterparty mapping is required",
       path: ["description"],
