@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
   isActiveRequest,
   shouldApplyMappedColumn,
-} from "./field-mapping.test-utils";
+} from "./field-mapping.utils";
 
 describe("isActiveRequest", () => {
   it("returns true when request id matches active request", () => {

@@ -319,14 +319,24 @@ export function TransactionAttachments({
         });
       }
     } else {
-      // Handle inbox item selection (existing logic)
+      // Handle inbox item selection
+      const filePath = normalizePath(file.data.filePath);
+      if (!filePath.length) {
+        toast({
+          variant: "error",
+          duration: 2500,
+          title: "Inbox item file not found",
+        });
+        return;
+      }
+
       const filename = stripSpecialCharacters(file.name);
 
       const item = {
         name: filename,
         size: file.data.size,
         type: file.data.contentType,
-        path: file.data.filePath,
+        path: filePath,
         transactionId: id,
       };
 

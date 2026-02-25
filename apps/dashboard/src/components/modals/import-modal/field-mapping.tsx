@@ -39,7 +39,7 @@ import { mappableFields, useCsvContext } from "./context";
 import {
   isActiveRequest,
   shouldApplyMappedColumn,
-} from "./field-mapping.test-utils";
+} from "./field-mapping.utils";
 
 export function FieldMapping({ currencies }: { currencies: string[] }) {
   const { fileColumns, firstRows, setValue, control, watch } = useCsvContext();
