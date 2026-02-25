@@ -8,7 +8,6 @@ import {
 } from "@api/schemas/bank-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { chatCache } from "@midday/cache/chat-cache";
-import { primaryDb } from "@midday/db/client";
 import {
   createBankAccount,
   deleteBankAccount,
@@ -34,9 +33,8 @@ export const bankAccountsRouter = createTRPCRouter({
 
   getTransactionCount: protectedProcedure
     .input(getTransactionCountSchema)
-    .query(async ({ input, ctx: { teamId } }) => {
-      // Use primary DB to avoid replica lag showing stale 0 count
-      const count = await getTransactionCountByBankAccountId(primaryDb, {
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      const count = await getTransactionCountByBankAccountId(db, {
         bankAccountId: input.id,
         teamId: teamId!,
       });
