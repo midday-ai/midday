@@ -220,30 +220,32 @@ export function MatchTransaction() {
         onSelect={handleSelect}
       />
 
-      <TooltipProvider delayDuration={100}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleIncludeAlreadyMatched}
-              className={cn(
-                "absolute right-3 top-1/2 transform -translate-y-1/2 z-10 h-6 w-6",
-                includeAlreadyMatched
-                  ? "text-foreground hover:text-foreground"
-                  : "text-muted-foreground hover:text-muted-foreground",
-              )}
-            >
-              <Icons.Filter className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="text-xs px-3 py-1.5">
-            {includeAlreadyMatched
-              ? "Hide already matched transactions"
-              : "Show already matched transactions"}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      {!isSearching && (
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleIncludeAlreadyMatched}
+                className={cn(
+                  "absolute right-3 top-1/2 transform -translate-y-1/2 z-10 h-6 w-6",
+                  includeAlreadyMatched
+                    ? "text-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-muted-foreground",
+                )}
+              >
+                <Icons.Filter className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-xs px-3 py-1.5">
+              {includeAlreadyMatched
+                ? "Hide already matched transactions"
+                : "Show already matched transactions"}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </motion.div>
   );
 }

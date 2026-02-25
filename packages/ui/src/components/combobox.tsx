@@ -138,7 +138,7 @@ export const Combobox = ({
         />
 
         {isLoading && (
-          <Spinner className="w-[16px] h-[16px] absolute right-2 text-dark-gray" />
+          <Spinner className="w-[16px] h-[16px] absolute right-3 text-dark-gray" />
         )}
 
         {!isLoading && selected && onRemove && (
