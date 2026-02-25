@@ -141,7 +141,9 @@ export function ImportModal() {
   };
 
   const handleOpenChange = (open: boolean) => {
-    requestClose();
+    if (!open) {
+      requestClose();
+    }
   };
 
   useEffect(() => {
