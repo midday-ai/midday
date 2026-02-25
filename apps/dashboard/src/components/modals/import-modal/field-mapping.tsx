@@ -312,6 +312,21 @@ function FieldRow({
 
   const firstRow = firstRows?.at(0);
 
+  // For description and counterparty: collect up to 5 unique values from rows
+  const isDescriptionOrCounterparty =
+    field === "description" || field === "counterparty";
+  const exampleValues: string[] =
+    value && firstRows && isDescriptionOrCounterparty
+      ? Array.from(
+          new Set(
+            firstRows
+              .slice(0, 5)
+              .map((row) => row[value as string]?.trim())
+              .filter((v): v is string => Boolean(v)),
+          ),
+        ).slice(0, 5)
+      : [];
+
   const description = value && firstRow ? firstRow[value as string] : undefined;
 
   // Check if date field has valid parseable date
@@ -428,7 +443,7 @@ function FieldRow({
         <div className="grow whitespace-nowrap text-sm font-normal text-muted-foreground justify-between flex">
           <span>{label}</span>
 
-          {description?.trim() && (
+          {(description?.trim() || exampleValues.length > 0) && (
             <TooltipProvider delayDuration={50}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -440,8 +455,19 @@ function FieldRow({
                     )}
                   </button>
                 </TooltipTrigger>
-                <TooltipContent className="p-2 text-xs">
-                  {getErrorMessage() ?? formatDescription(description)}
+                <TooltipContent className="max-w-[200px] p-2 text-xs">
+                  {getErrorMessage() ??
+                    (exampleValues.length > 0 ? (
+                      <span className="block whitespace-pre-line">
+                        {exampleValues
+                          .map((val) =>
+                            field === "description" ? capitalCase(val) : val,
+                          )
+                          .join("\n")}
+                      </span>
+                    ) : (
+                      formatDescription(description ?? "")
+                    ))}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
