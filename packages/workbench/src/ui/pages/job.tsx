@@ -676,7 +676,7 @@ function Timeline({ job }: TimelineProps) {
 
   // Generate time axis labels
   const timeLabels = React.useMemo(() => {
-    const { start, end, duration } = timeRange;
+    const { start, duration } = timeRange;
     const labels: { position: number; label: string }[] = [];
     const steps = 5;
 

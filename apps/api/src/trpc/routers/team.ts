@@ -332,12 +332,12 @@ export const teamRouter = createTRPCRouter({
       const skippedInvites = data?.skippedInvites ?? [];
 
       const invites = results.map((invite) => ({
-        email: invite?.email!,
-        invitedBy: session.user.id!,
+        email: invite.email,
+        invitedBy: session.user.id,
         invitedByName: session.user.full_name!,
         invitedByEmail: session.user.email!,
-        teamName: invite?.team?.name!,
-        inviteCode: invite?.code!,
+        teamName: invite.team?.name ?? "",
+        inviteCode: invite.code,
       }));
 
       // Only trigger email sending if there are valid invites

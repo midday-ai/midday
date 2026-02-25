@@ -68,7 +68,7 @@ export function EditInboxModal({ children }: Props) {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateInboxMutation.mutate({
-      id: data?.id!,
+      id: data!.id,
       displayName: values.displayName,
       amount: values.amount,
     });

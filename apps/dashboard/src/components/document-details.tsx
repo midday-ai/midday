@@ -79,7 +79,7 @@ export function DocumentDetails() {
           </p>
         )}
 
-        <DocumentTags tags={data?.documentTagAssignments} id={data?.id!} />
+        <DocumentTags tags={data?.documentTagAssignments} id={data!.id} />
 
         {fullView && <VaultRelatedFiles />}
       </div>

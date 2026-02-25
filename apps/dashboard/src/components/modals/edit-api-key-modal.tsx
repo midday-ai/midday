@@ -10,7 +10,7 @@ import { ApiKeyForm } from "@/components/forms/api-key-form";
 import { useTokenModalStore } from "@/store/token-modal";
 
 export function EditApiKeyModal() {
-  const { setData, data, type } = useTokenModalStore();
+  const { setData, type } = useTokenModalStore();
 
   return (
     <Dialog open={type === "edit"} onOpenChange={() => setData(undefined)}>

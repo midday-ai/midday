@@ -94,7 +94,7 @@ export function MetricsBreakdownSummaryCanvas() {
     };
   }
 
-  const { data, status } = artifactData;
+  const { data } = artifactData;
   const { data: user } = useUserQuery();
   const { setParams } = useTransactionParams();
   const stage = data?.stage;

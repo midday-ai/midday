@@ -112,6 +112,10 @@ export function ExpensesChart({
   onSelectionComplete,
   onSelectionStateChange,
 }: ExpensesChartProps) {
+  const tickFormatter = createYAxisTickFormatter(currency, locale);
+  const maxValues = data.map((d) => ({ maxValue: d.amount }));
+  const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
+
   if (chartType === "pie" && categoryData) {
     return (
       <div className={`w-full ${className}`}>
@@ -155,10 +159,6 @@ export function ExpensesChart({
       </div>
     );
   }
-
-  const tickFormatter = createYAxisTickFormatter(currency, locale);
-  const maxValues = data.map((d) => ({ maxValue: d.amount }));
-  const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
 
   const chartContent = (
     <div className={`w-full ${className}`}>

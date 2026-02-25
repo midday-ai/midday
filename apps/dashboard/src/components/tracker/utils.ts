@@ -3,6 +3,7 @@ import { addMonths, formatISO, subMonths } from "date-fns";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 
 export function handleMonthChange(direction: number, currentDate: TZDate) {
+  // biome-ignore lint/correctness/useHookAtTopLevel: Utility called only from React components.
   const { setParams } = useTrackerParams();
   const newDate =
     direction > 0 ? addMonths(currentDate, 1) : subMonths(currentDate, 1);

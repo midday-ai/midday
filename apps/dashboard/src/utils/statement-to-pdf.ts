@@ -14,13 +14,7 @@ export interface StatementPdfOptions {
 export async function generateStatementPdf(
   options: StatementPdfOptions = {},
 ): Promise<void> {
-  const {
-    filename = "statement.pdf",
-    quality = 1.0,
-    scale = 4,
-    padding = 10,
-    theme,
-  } = options;
+  const { quality = 1.0, scale = 4, padding = 10, theme } = options;
 
   // Resolve theme: if "system" or undefined, check system preference
   const resolvedTheme =
@@ -159,13 +153,7 @@ export async function generateStatementPdf(
 export async function generateStatementPdfBlob(
   options: StatementPdfOptions = {},
 ): Promise<Blob> {
-  const {
-    filename = "statement.pdf",
-    quality = 1.0,
-    scale = 4,
-    padding = 10,
-    theme,
-  } = options;
+  const { quality = 1.0, scale = 4, padding = 10, theme } = options;
 
   // Resolve theme: if "system" or undefined, check system preference
   const resolvedTheme =

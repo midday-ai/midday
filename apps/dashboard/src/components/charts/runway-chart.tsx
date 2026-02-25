@@ -106,9 +106,15 @@ export function RunwayChart({
   const tickFormatter = isMonthsMode
     ? createMonthsTickFormatter()
     : createYAxisTickFormatter(currency, locale);
+  const safeData = data ?? [];
+  const { marginLeft } = useChartMargin(
+    safeData,
+    isMonthsMode ? "runwayMonths" : "cashRemaining",
+    tickFormatter,
+  );
 
   // Guard against empty data
-  if (!data || data.length === 0) {
+  if (safeData.length === 0) {
     return (
       <div
         className={`w-full h-full flex items-center justify-center ${className}`}
@@ -119,13 +125,6 @@ export function RunwayChart({
       </div>
     );
   }
-
-  // Calculate margin using the actual data field
-  const { marginLeft } = useChartMargin(
-    data,
-    isMonthsMode ? "runwayMonths" : "cashRemaining",
-    tickFormatter,
-  );
 
   const chartContent = (
     <div className={`w-full ${className}`}>

@@ -15,7 +15,6 @@ export function CommandMenu() {
     filteredCommands,
     selectedCommandIndex,
     showCommands,
-    handleCommandSelect,
     resetCommandState,
     setInput,
     setShowCommands,

@@ -295,7 +295,7 @@ export function InboxDetails() {
                 <DropdownMenuItem
                   onClick={() =>
                     updateInboxMutation.mutate({
-                      id: data?.id!,
+                      id: data!.id,
                       status: data?.status === "done" ? "pending" : "done",
                     })
                   }
@@ -582,7 +582,7 @@ export function InboxDetails() {
       )}
 
       <DeleteInboxDialog
-        id={data?.id!}
+        id={data!.id}
         filePath={data?.filePath ?? null}
         isOpen={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}

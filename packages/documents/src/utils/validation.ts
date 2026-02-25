@@ -140,7 +140,7 @@ export function calculateQualityScore(result: InvoiceData): QualityScore {
   let score = 100;
 
   // Check critical fields
-  if (!result.total_amount || !isValidAmount(result.total_amount)) {
+  if (!result.total_amount) {
     missingCriticalFields.push("total_amount");
     score -= 30;
   } else if (!isValidAmount(result.total_amount)) {
@@ -148,7 +148,7 @@ export function calculateQualityScore(result: InvoiceData): QualityScore {
     score -= 15;
   }
 
-  if (!result.currency || !isValidCurrencyCode(result.currency)) {
+  if (!result.currency) {
     missingCriticalFields.push("currency");
     score -= 25;
   } else if (!isValidCurrencyCode(result.currency)) {
@@ -330,7 +330,7 @@ export function calculateReceiptQualityScore(
   let score = 100;
 
   // Check critical fields
-  if (!result.total_amount || !isValidAmount(result.total_amount)) {
+  if (!result.total_amount) {
     missingCriticalFields.push("total_amount");
     score -= 30;
   } else if (!isValidAmount(result.total_amount)) {
@@ -338,7 +338,7 @@ export function calculateReceiptQualityScore(
     score -= 15;
   }
 
-  if (!result.currency || !isValidCurrencyCode(result.currency)) {
+  if (!result.currency) {
     missingCriticalFields.push("currency");
     score -= 25;
   } else if (!isValidCurrencyCode(result.currency)) {

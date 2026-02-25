@@ -59,8 +59,9 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
 
       // Use primary-only mode to maintain interface consistency
       const dbWithPrimary = db as DatabaseWithPrimary;
-      if (dbWithPrimary.usePrimaryOnly) {
-        finalDb = dbWithPrimary.usePrimaryOnly();
+      const primaryOnly = dbWithPrimary.usePrimaryOnly;
+      if (primaryOnly) {
+        finalDb = primaryOnly();
       }
       // If usePrimaryOnly doesn't exist, we're already using the primary DB
     }
@@ -73,8 +74,9 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
       if (timestamp && now < timestamp) {
         // Use primary-only mode to maintain interface consistency
         const dbWithPrimary = db as DatabaseWithPrimary;
-        if (dbWithPrimary.usePrimaryOnly) {
-          finalDb = dbWithPrimary.usePrimaryOnly();
+        const primaryOnly = dbWithPrimary.usePrimaryOnly;
+        if (primaryOnly) {
+          finalDb = primaryOnly();
         }
       }
     }

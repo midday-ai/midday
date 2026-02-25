@@ -479,11 +479,6 @@ type PaymentStatusResult = {
   paymentStatus: string;
 };
 
-type DbPaymentStatusResult = {
-  score: number;
-  payment_status: string;
-};
-
 export async function getPaymentStatus(
   db: Database,
   teamId: string,

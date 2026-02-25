@@ -99,7 +99,7 @@ export function BankAccount({ data, provider }: Props) {
   const [isEditOpen, setEditOpen] = useState(false);
   const [showSensitive, setShowSensitive] = useState(false);
   const t = useI18n();
-  const { toast } = useToast();
+  useToast();
 
   const [_, setParams] = useQueryStates({
     step: parseAsString,
@@ -116,7 +116,6 @@ export function BankAccount({ data, provider }: Props) {
     name,
     balance,
     currency,
-    subtype,
     bic,
     routingNumber,
     wireRoutingNumber,

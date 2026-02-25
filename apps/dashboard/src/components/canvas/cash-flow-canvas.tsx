@@ -23,7 +23,7 @@ import { CashFlowChart } from "../charts";
 export function CashFlowCanvas() {
   const [version] = useQueryState("version", parseAsInteger.withDefault(0));
   const [artifact] = useArtifact(cashFlowArtifact, { version });
-  const { data, status } = artifact;
+  const { data } = artifact;
   const { data: user } = useUserQuery();
   const stage = data?.stage;
   const currency = data?.currency || "USD";
