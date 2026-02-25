@@ -1,16 +1,5 @@
 import { TZDate } from "@date-fns/tz";
-import { addMonths, formatISO, subMonths } from "date-fns";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
-
-export function handleMonthChange(direction: number, currentDate: TZDate) {
-  // biome-ignore lint/correctness/useHookAtTopLevel: Utility called only from React components.
-  const { setParams } = useTrackerParams();
-  const newDate =
-    direction > 0 ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
-  setParams({
-    date: formatISO(newDate, { representation: "date" }),
-  });
-}
+import { formatISO } from "date-fns";
 
 export function checkIsInRange(
   date: TZDate,
