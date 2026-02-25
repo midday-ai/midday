@@ -1,5 +1,6 @@
 import { logger } from "@midday/logger";
 import type { Context, MiddlewareHandler } from "hono";
+import { getRequestTrace } from "./request-trace";
 
 export const httpLogger = (): MiddlewareHandler => {
   return async (context: Context, next) => {
@@ -8,8 +9,12 @@ export const httpLogger = (): MiddlewareHandler => {
     const method = context.req.method;
     const url = context.req.url;
     const path = new URL(url).pathname;
+    const { requestId, cfRay } = getRequestTrace(context.req);
 
-    logger.info(`${method} ${path} - incoming request`);
+    logger.info(`${method} ${path} - incoming request`, {
+      requestId,
+      cfRay,
+    });
 
     await next();
 
@@ -18,6 +23,10 @@ export const httpLogger = (): MiddlewareHandler => {
 
     logger.info(
       `${method} ${path} ${statusCode} - completed in ${duration.toFixed(2)}ms`,
+      {
+        requestId,
+        cfRay,
+      },
     );
   };
 };

@@ -21,6 +21,7 @@ import type { Context } from "./rest/types";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
 import { httpLogger } from "./utils/logger";
+import { getRequestTrace } from "./utils/request-trace";
 
 const app = new OpenAPIHono<Context>();
 
@@ -41,7 +42,9 @@ app.use(
       "Content-Type",
       "User-Agent",
       "accept-language",
+      "cf-ray",
       "trpc-accept",
+      "x-request-id",
       "x-trpc-source",
       "x-user-locale",
       "x-user-timezone",
@@ -66,6 +69,7 @@ if (process.env.DEBUG_PERF === "true") {
 
   app.use("/trpc/*", async (c, next) => {
     const start = performance.now();
+    const { requestId, cfRay } = getRequestTrace(c.req);
     await next();
     const elapsed = performance.now() - start;
     const procedures = c.req.path.replace("/trpc/", "").split(",");
@@ -75,6 +79,8 @@ if (process.env.DEBUG_PERF === "true") {
       procedures,
       status: c.res.status,
       pool: getPoolStats(),
+      requestId,
+      cfRay,
     });
   });
 }
