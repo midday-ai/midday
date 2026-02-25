@@ -1,6 +1,7 @@
 "use client";
 
 import { ScrollArea } from "@midday/ui/scroll-area";
+import { useMediaQuery } from "@midday/ui/hooks";
 import {
   useQueryClient,
   useSuspenseInfiniteQuery,
@@ -31,6 +32,7 @@ export function InboxView() {
   const { data: user } = useUserQuery();
   const { params, setParams } = useInboxParams();
   const { params: filter, hasFilter } = useInboxFilterParams();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   const {
     lastClickedIndex,
     selectRange,
@@ -226,8 +228,8 @@ export function InboxView() {
         (item) => item.id === params.inboxId,
       );
 
-      // Auto-select first item if nothing selected or current selection isn't in the list
-      if (!params.inboxId || !currentInList) {
+      // Auto-select first item on desktop only (on mobile, drawer would open automatically)
+      if (isDesktop && (!params.inboxId || !currentInList)) {
         setParams({
           ...params,
           inboxId: tableData.at(0)?.id,
@@ -240,7 +242,7 @@ export function InboxView() {
         inboxId: null,
       });
     }
-  }, [tableData, params.inboxId, setParams]);
+  }, [tableData, params.inboxId, setParams, isDesktop]);
 
   // Clear lastClickedIndex when sort/filter/tab params change
   // since item positions in tableData will change

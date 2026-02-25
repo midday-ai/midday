@@ -55,7 +55,7 @@ function WidgetsContent() {
     <Tabs value={tab} onValueChange={setTab}>
       <div
         className={cn(
-          "flex flex-col mt-6",
+          "flex flex-col mt-4 md:mt-6",
           isHome && "widgets-container-spacing",
         )}
       >

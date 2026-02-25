@@ -1,6 +1,7 @@
 "use client";
 
 import { closestCenter, DndContext } from "@dnd-kit/core";
+import { useMediaQuery } from "@midday/ui/hooks";
 import { Table, TableBody } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
@@ -46,6 +47,7 @@ import { getColumnIds, type TableSettings } from "@/utils/table-settings";
 import { BulkEditBar } from "./bulk-edit-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
+import { MobileTransactionRow } from "./mobile-transaction-row";
 import { NoResults, NoTransactions, ReviewComplete } from "./empty-states";
 import { ExportBar } from "./export-bar";
 import { TransactionTableProvider } from "./transaction-table-context";
@@ -72,6 +74,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   const { data: user } = useUserQuery();
   const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
   const { tab } = useTransactionTab();
+  const isMobile = !useMediaQuery("(min-width: 1024px)");
   const {
     setRowSelection: setRowSelectionForTab,
     rowSelectionByTab,
@@ -477,7 +480,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 45, // Row height in pixels
+    estimateSize: () => (isMobile ? 72 : 45), // Taller rows on mobile list
     overscan: 10, // Number of rows to render outside visible area
   });
 
@@ -585,7 +588,12 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                     ).current = el;
                   }
                 }}
-                className="overflow-auto overscroll-none border-l border-r border-b border-border scrollbar-hide"
+                className={cn(
+                  "overscroll-none border-l border-r border-b border-border scrollbar-hide",
+                  isMobile
+                    ? "overflow-y-auto overflow-x-hidden"
+                    : "overflow-auto",
+                )}
                 style={{
                   height: "calc(100vh - 180px + var(--header-offset, 0px))",
                 }}
@@ -596,14 +604,11 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                   collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}
                 >
-                  <Table className="w-full min-w-full">
-                    <DataTableHeader table={table} tableScroll={tableScroll} />
-
-                    <TableBody
-                      className="border-l-0 border-r-0 block"
+                  {isMobile ? (
+                    <div
+                      className="relative w-full"
                       style={{
                         height: `${rowVirtualizer.getTotalSize()}px`,
-                        position: "relative",
                       }}
                     >
                       {virtualItems.map((virtualRow: VirtualItem) => {
@@ -611,27 +616,56 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                         if (!row) return null;
 
                         return (
-                          <VirtualRow
+                          <MobileTransactionRow
                             key={row.id}
-                            row={row}
+                            transaction={row.original}
                             virtualStart={virtualRow.start}
-                            rowHeight={45}
-                            getStickyStyle={getStickyStyle}
-                            getStickyClassName={getStickyClassName}
-                            nonClickableColumns={NON_CLICKABLE_COLUMNS}
-                            onCellClick={handleCellClick}
-                            columnSizing={columnSizing}
-                            columnOrder={columnOrder}
-                            columnVisibility={columnVisibility}
                             isSelected={rowSelection[row.id] ?? false}
-                            isExporting={exportingTransactionIds.includes(
-                              row.id,
-                            )}
                           />
                         );
                       })}
-                    </TableBody>
-                  </Table>
+                    </div>
+                  ) : (
+                    <Table className="w-full min-w-full">
+                      <DataTableHeader
+                        table={table}
+                        tableScroll={tableScroll}
+                      />
+
+                      <TableBody
+                        className="border-l-0 border-r-0 block"
+                        style={{
+                          height: `${rowVirtualizer.getTotalSize()}px`,
+                          position: "relative",
+                        }}
+                      >
+                        {virtualItems.map((virtualRow: VirtualItem) => {
+                          const row = rows[virtualRow.index];
+                          if (!row) return null;
+
+                          return (
+                            <VirtualRow
+                              key={row.id}
+                              row={row}
+                              virtualStart={virtualRow.start}
+                              rowHeight={45}
+                              getStickyStyle={getStickyStyle}
+                              getStickyClassName={getStickyClassName}
+                              nonClickableColumns={NON_CLICKABLE_COLUMNS}
+                              onCellClick={handleCellClick}
+                              columnSizing={columnSizing}
+                              columnOrder={columnOrder}
+                              columnVisibility={columnVisibility}
+                              isSelected={rowSelection[row.id] ?? false}
+                              isExporting={exportingTransactionIds.includes(
+                                row.id,
+                              )}
+                            />
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
                 </DndContext>
                 {/* Spacer ensures scrolling works when content barely overflows */}
                 <div

@@ -218,7 +218,7 @@ export function FilterList({
   };
 
   return (
-    <ul className="flex space-x-2">
+    <ul className="flex flex-wrap gap-2">
       {Object.entries(filters)
         .filter(([key, value]) => value !== null && key !== "end")
         .map(([key, value]) => {

@@ -52,27 +52,30 @@ export function WidgetsHeader() {
   }, [user?.timezone]);
 
   return (
-    <div className="flex justify-between items-end mb-6">
+    <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-end mb-6">
       <div>
-        <h1 className="text-[30px] font-serif leading-normal mb-1">
+        <h1 className="text-2xl md:text-[30px] font-serif leading-normal mb-1">
           <span>{greeting} </span>
           <span className="text-[#666666]">
             {user?.fullName?.split(" ")[0]},
           </span>
         </h1>
-        <p className="text-[#666666] text-[14px]">
+        <p className="text-[#666666] text-sm md:text-[14px]">
           {isCustomizing
             ? "drag and drop to arrange your perfect dashboard."
             : "here's a quick look at how things are going."}
         </p>
       </div>
 
-      <div className="flex items-center gap-2" data-no-close>
+      <div
+        className="flex flex-wrap items-center gap-2 min-w-0"
+        data-no-close
+      >
         <div className="hidden md:block">
           <Customize />
         </div>
         <MetricsFilter />
-        <div className="ml-2 relative flex items-stretch bg-[#f7f7f7] dark:bg-[#131313] w-fit">
+        <div className="relative flex items-stretch bg-[#f7f7f7] dark:bg-[#131313] w-fit shrink-0">
           <TabsList className="flex items-stretch h-auto p-0 bg-transparent">
             <TabsTrigger
               value="overview"

@@ -47,7 +47,7 @@ export function InboxSearch() {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <form
-        className="relative w-[280px]"
+        className="relative w-full min-w-0 md:w-[280px] flex-1"
         onSubmit={(e) => {
           e.preventDefault();
           setIsOpen(false);
@@ -81,7 +81,7 @@ export function InboxSearch() {
       </form>
 
       <DropdownMenuContent
-        className="w-[280px]"
+        className="w-[280px] max-w-[calc(100vw-2rem)]"
         align="end"
         sideOffset={19}
         alignOffset={-11}

@@ -275,8 +275,11 @@ const useSearchNavigation = () => {
     navigateToDocument: (params: { documentId: string }) => {
       return navigateWithParams(params, setDocumentParams);
     },
-    navigateToCustomer: (params: { customerId: string }) => {
-      return navigateWithParams(params, setCustomerParams);
+    navigateToCustomer: (params: { customerId: string; details?: boolean }) => {
+      return navigateWithParams(
+        { ...params, details: params.details ?? true },
+        setCustomerParams,
+      );
     },
     navigateToInvoice: (params: {
       invoiceId: string;

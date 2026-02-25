@@ -67,32 +67,36 @@ export default async function Transactions(props: Props) {
   return (
     <HydrateClient>
       <ScrollableContent>
-        <div className="flex justify-between items-center py-6">
-          <TransactionsSearchFilter />
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2">
-              <TransactionsColumnVisibility />
-              <AddTransactions />
+        <div className="overflow-x-hidden">
+          <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center py-4 md:py-6">
+            <TransactionsSearchFilter />
+            <div className="flex items-center justify-between gap-4 min-w-0">
+              <TransactionTabs />
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="hidden md:flex items-center gap-2">
+                  <TransactionsColumnVisibility />
+                </div>
+                <AddTransactions />
+              </div>
             </div>
-            <TransactionTabs />
           </div>
-        </div>
 
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense
-            fallback={
-              <Loading
-                columnVisibility={initialSettings.columns}
-                columnSizing={initialSettings.sizing}
-                columnOrder={initialSettings.order}
-              />
-            }
-          >
-            <TransactionsUploadZone>
-              <DataTable initialSettings={initialSettings} initialTab={tab} />
-            </TransactionsUploadZone>
-          </Suspense>
-        </ErrorBoundary>
+          <ErrorBoundary errorComponent={ErrorFallback}>
+            <Suspense
+              fallback={
+                <Loading
+                  columnVisibility={initialSettings.columns}
+                  columnSizing={initialSettings.sizing}
+                  columnOrder={initialSettings.order}
+                />
+              }
+            >
+              <TransactionsUploadZone>
+                <DataTable initialSettings={initialSettings} initialTab={tab} />
+              </TransactionsUploadZone>
+            </Suspense>
+          </ErrorBoundary>
+        </div>
       </ScrollableContent>
     </HydrateClient>
   );

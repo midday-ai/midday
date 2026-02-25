@@ -14,19 +14,22 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getWebsiteLogo } from "@/utils/logos";
 
-export function InboxSheetDetails() {
+type Props = {
+  /** When true, uses drawer layout (ensures overlay is visible) */
+  stickyFooter?: boolean;
+};
+
+export function InboxSheetDetails({ stickyFooter = false }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { params } = useInboxParams();
   const { data: user } = useUserQuery();
 
-  const isOpen = Boolean(params.inboxId && params.type === "details");
-
   const { data, isLoading } = useQuery({
     ...trpc.inbox.getById.queryOptions({
       id: params.inboxId!,
     }),
-    enabled: isOpen,
+    enabled: Boolean(params.inboxId),
     staleTime: 30 * 1000, // 30 seconds - prevents excessive refetches when reopening
     placeholderData: () => {
       const pages = queryClient
@@ -61,8 +64,31 @@ export function InboxSheetDetails() {
     data.status === "processing" || data.status === "analyzing";
   const logoUrl = getWebsiteLogo(data.website);
 
-  return (
-    <div className="flex flex-col flex-grow min-h-0 relative h-full w-full">
+  const previewArea = (
+    <div
+      className={
+        stickyFooter ? "flex-1 min-h-[200px] overflow-hidden relative" : "flex-1 mb-4 overflow-hidden relative"
+      }
+    >
+      {data?.filePath && (
+        <div className="h-full flex items-center justify-center">
+          <FileViewer
+            mimeType={data.contentType}
+            url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${data.filePath.join("/")}`}
+            maxWidth={565}
+          />
+        </div>
+      )}
+      {!stickyFooter && (
+        <div className="absolute bottom-4 left-4 right-4 z-10">
+          <InboxActions data={data} key={data.id} />
+        </div>
+      )}
+    </div>
+  );
+
+  const previewContent = (
+    <>
       {/* Document info header */}
       <div className="mb-4">
         <div className="flex items-start justify-between">
@@ -115,24 +141,30 @@ export function InboxSheetDetails() {
 
       <Separator className="mb-4" />
 
-      {/* Document preview */}
-      <div className="flex-1 mb-4 overflow-hidden relative">
-        {data?.filePath && (
-          <div className="h-full flex items-center justify-center">
-            <FileViewer
-              mimeType={data.contentType}
-              url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${data.filePath.join("/")}`}
-              maxWidth={565}
-            />
-          </div>
-        )}
-
-        <div className="absolute bottom-4 z-10 left-4 right-4">
-          <InboxActions data={data} key={data.id} />
-        </div>
-      </div>
+      {previewArea}
 
       <Separator className="mb-4" />
+    </>
+  );
+
+  if (stickyFooter) {
+    return (
+      <div className="flex flex-col min-h-0 flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {previewContent}
+          <div className="sticky bottom-0 left-0 right-0 z-20 p-2">
+            <div className="mx-auto max-w-[calc(100%-1rem)] rounded-lg p-3">
+              <InboxActions data={data} key={data.id} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col flex-grow min-h-0 relative h-full w-full">
+      {previewContent}
     </div>
   );
 }
