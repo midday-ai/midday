@@ -3,15 +3,17 @@
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Button } from "@midday/ui/button";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
+import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
 import { useJobStatus } from "@/hooks/use-job-status";
 import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 
 export function SelectCurrency() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { toast, update, dismiss } = useToast();
   const [isSyncing, setSyncing] = useState(false);
   const [jobId, setJobId] = useState<string | undefined>();
@@ -20,6 +22,7 @@ export function SelectCurrency() {
   const lastProgressRef = useRef<number | undefined>(undefined);
   const updateTeamMutation = useTeamMutation();
   const { data: team } = useTeamQuery();
+  const invalidateTransactionQueries = useInvalidateTransactionQueries();
 
   const updateBaseCurrencyMutation = useMutation(
     trpc.team.updateBaseCurrency.mutationOptions({
@@ -128,6 +131,10 @@ export function SelectCurrency() {
       lastProgressRef.current = undefined;
       setSyncing(false);
       setJobId(undefined);
+      invalidateTransactionQueries();
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankAccounts.get.queryKey(),
+      });
       toast({
         duration: 3500,
         variant: "success",
