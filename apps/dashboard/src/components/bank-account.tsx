@@ -173,7 +173,6 @@ export function BankAccount({ data, provider }: Props) {
         <div className="flex flex-col gap-1">
           <p className="font-medium text-sm">{name}</p>
           <span className="text-xs text-[#878787] capitalize">
-            {/* @ts-expect-error */}
             {type ? t(`account_type.${type}`) : t("account_type.depository")}
           </span>
         </div>
