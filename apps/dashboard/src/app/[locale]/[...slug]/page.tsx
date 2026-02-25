@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function NotFound() {
+export default function CatchAllPage() {
   redirect("/");
 }
