@@ -9,6 +9,7 @@ import {
   isNonRetryableError,
   NonRetryableError,
 } from "../utils/error-classification";
+import { extractErrorDetails } from "../utils/error-details";
 
 /**
  * Base processor class with error handling, retries, and logging
@@ -157,6 +158,7 @@ export abstract class BaseProcessor<TData = unknown> {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       const errorStack = error instanceof Error ? error.stack : undefined;
+      const errorDetails = extractErrorDetails(error);
       const classified = classifyError(error);
 
       // Check if this is a non-retryable error
@@ -180,6 +182,7 @@ export abstract class BaseProcessor<TData = unknown> {
         suggestedRetryDelay: getRetryDelay(error),
         suggestedMaxRetries: getMaxRetries(error),
         stack: errorStack,
+        errorDetails,
       });
 
       // Only send to Sentry on final attempt or non-retryable errors

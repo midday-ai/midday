@@ -1,7 +1,7 @@
 // Import Sentry instrumentation first, before any other modules
 import "./instrument";
 
-import { closeWorkerDb } from "@midday/db/worker-client";
+import { closeWorkerDb, getWorkerPoolStats } from "@midday/db/worker-client";
 import {
   buildReadinessResponse,
   checkDependencies,
@@ -15,6 +15,7 @@ import { workbench } from "workbench/hono";
 import { getProcessor } from "./processors/registry";
 import { getAllQueues, queueConfigs } from "./queues";
 import { registerStaticSchedulers } from "./schedulers/registry";
+import { extractErrorDetails } from "./utils/error-details";
 
 const logger = createLoggerWithContext("worker");
 
@@ -37,7 +38,10 @@ const workers = queueConfigs.map((config) => {
   // Always attach error handler to prevent unhandled errors
   // See: https://docs.bullmq.io/guide/going-to-production#log-errors
   worker.on("error", (err) => {
-    logger.error(`Worker error: ${config.name}`, { error: err.message });
+    logger.error(`Worker error: ${config.name}`, {
+      error: err.message,
+      errorDetails: extractErrorDetails(err),
+    });
     Sentry.captureException(err, {
       tags: { workerName: config.name, errorType: "worker_error" },
     });
@@ -51,6 +55,7 @@ const workers = queueConfigs.map((config) => {
       worker: config.name,
       jobId: job?.id,
       error: err.message,
+      errorDetails: extractErrorDetails(err),
     });
     Sentry.captureException(err, {
       tags: {
@@ -197,6 +202,19 @@ Bun.serve({
 logger.info(`Worker server running on port ${port}`);
 logger.info("Workers initialized and ready to process jobs");
 
+const poolStatsIntervalMs = Number.parseInt(
+  process.env.DB_POOL_STATS_INTERVAL_MS || "60000",
+  10,
+);
+const poolStatsInterval = setInterval(
+  () => {
+    logger.info("Worker DB pool stats", {
+      pool: getWorkerPoolStats(),
+    });
+  },
+  Number.isFinite(poolStatsIntervalMs) ? poolStatsIntervalMs : 60000,
+);
+
 /**
  * Graceful shutdown handlers
  * Close database connections and workers cleanly on process termination
@@ -208,6 +226,8 @@ const shutdown = async (signal: string) => {
 
   const shutdownPromise = (async () => {
     try {
+      clearInterval(poolStatsInterval);
+
       // Stop accepting new jobs
       logger.info("Stopping workers from accepting new jobs...");
       await Promise.all(workers.map((worker) => worker.close()));
@@ -252,7 +272,11 @@ process.on("SIGINT", () => shutdown("SIGINT"));
  * See: https://docs.bullmq.io/guide/going-to-production#unhandled-exceptions-and-rejections
  */
 process.on("uncaughtException", (err) => {
-  logger.error("Uncaught exception", { error: err.message, stack: err.stack });
+  logger.error("Uncaught exception", {
+    error: err.message,
+    stack: err.stack,
+    errorDetails: extractErrorDetails(err),
+  });
   Sentry.captureException(err, {
     tags: { errorType: "uncaught_exception" },
   });
@@ -263,6 +287,7 @@ process.on("unhandledRejection", (reason, promise) => {
   logger.error("Unhandled rejection", {
     reason: reason instanceof Error ? reason.message : String(reason),
     stack: reason instanceof Error ? reason.stack : undefined,
+    errorDetails: extractErrorDetails(reason),
   });
   Sentry.captureException(
     reason instanceof Error ? reason : new Error(String(reason)),
