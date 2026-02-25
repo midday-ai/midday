@@ -453,40 +453,6 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
       ),
     );
 
-  // Self-heal inconsistent states (fire-and-forget, don't block the response)
-  if (
-    primaryItem.status === "suggested_match" &&
-    !primaryItem.suggestion?.id &&
-    !primaryItem.transactionId
-  ) {
-    // Status is "suggested_match" but no pending suggestion exists — reset to "pending"
-    db.update(inbox)
-      .set({ status: "pending" })
-      .where(and(eq(inbox.id, primaryItem.id), eq(inbox.teamId, teamId)))
-      .then(() => {
-        logger.info(
-          "Self-healed inbox status from suggested_match to pending",
-          {
-            inboxId: primaryItem.id,
-          },
-        );
-      })
-      .catch(() => {});
-    primaryItem = { ...primaryItem, status: "pending" };
-  } else if (primaryItem.transactionId && primaryItem.status === "pending") {
-    // Transaction is matched but status is still "pending" — update to "done"
-    db.update(inbox)
-      .set({ status: "done" })
-      .where(and(eq(inbox.id, primaryItem.id), eq(inbox.teamId, teamId)))
-      .then(() => {
-        logger.info("Self-healed inbox status from pending to done", {
-          inboxId: primaryItem.id,
-        });
-      })
-      .catch(() => {});
-    primaryItem = { ...primaryItem, status: "done" };
-  }
-
   // If there's a suggestion, get the suggested transaction details
   if (primaryItem?.suggestion?.transactionId) {
     const [suggestedTransaction] = await db
