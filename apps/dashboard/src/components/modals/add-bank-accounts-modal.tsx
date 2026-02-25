@@ -239,12 +239,18 @@ export function AddBankAccountsModal({
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-xs text-[#878787]">
                         {/* @ts-ignore */}
-                        {t(`account_type.${account.type}`)}
+                        {account.type
+                          ? t(`account_type.${account.type}`)
+                          : t("account_type.depository")}
                       </span>
                       <span className="text-sm font-medium">
                         <FormatAmount
-                          amount={account.balance.amount}
-                          currency={account.balance.currency}
+                          amount={
+                            Number.isFinite(account.balance?.amount)
+                              ? account.balance.amount
+                              : 0
+                          }
+                          currency={account.balance?.currency ?? "USD"}
                         />
                       </span>
                     </div>

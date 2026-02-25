@@ -37,6 +37,7 @@ import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { mappableFields, useCsvContext } from "./context";
 import {
+  getBalanceFromLatestDate,
   isActiveRequest,
   shouldApplyMappedColumn,
 } from "./field-mapping.utils";
@@ -307,10 +308,25 @@ function FieldRow({
   // Use useWatch for better reactivity when values change
   const value = useWatch({ control, name: field });
   const inverted = useWatch({ control, name: "inverted" });
+  const dateColumn = useWatch({ control, name: "date" });
 
   const isLoading = isStreaming && !value;
 
   const firstRow = firstRows?.at(0);
+
+  // For balance: use value from row with latest date (current balance)
+  const balanceFromLatestDate =
+    field === "balance" && value && dateColumn && firstRows
+      ? getBalanceFromLatestDate(firstRows, dateColumn, value)
+      : undefined;
+
+  // For other fields, use first row; for balance use row with latest date
+  const description =
+    field === "balance" && balanceFromLatestDate
+      ? balanceFromLatestDate
+      : value && firstRow
+        ? firstRow[value as string]
+        : undefined;
 
   // For description and counterparty: collect up to 5 unique values from rows
   const isDescriptionOrCounterparty =
@@ -326,8 +342,6 @@ function FieldRow({
           ),
         ).slice(0, 5)
       : [];
-
-  const description = value && firstRow ? firstRow[value as string] : undefined;
 
   // Check if date field has valid parseable date
   const isDateInvalid =
@@ -363,8 +377,8 @@ function FieldRow({
     if (field === "balance") {
       const amount = formatAmountValue({ amount: description });
 
-      // Always invert the amount for balance
-      const balance = +(amount * -1);
+      // Balance is always displayed as positive (absolute value)
+      const balance = Math.abs(amount);
 
       if (currency) {
         return formatAmount({
