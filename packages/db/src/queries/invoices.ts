@@ -22,6 +22,7 @@ import {
   inArray,
   isNotNull,
   isNull,
+  lt,
   lte,
   or,
   sql,
@@ -1249,7 +1250,12 @@ export async function getInactiveClientsCount(
             ),
           ),
         )
-        .where(eq(customers.teamId, teamId))
+        .where(
+          and(
+            eq(customers.teamId, teamId),
+            lt(customers.createdAt, thirtyDaysAgo.toISOString()),
+          ),
+        )
         .groupBy(customers.id)
         .having(
           sql`COUNT(DISTINCT ${invoices.id}) = 0 AND COALESCE(SUM(${trackerEntries.duration}), 0) = 0`,

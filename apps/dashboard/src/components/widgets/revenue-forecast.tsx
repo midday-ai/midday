@@ -126,6 +126,7 @@ export function RevenueForecastWidget() {
                     stroke="hsl(var(--foreground))"
                     strokeWidth={2}
                     dot={false}
+                    activeDot={false}
                   />
                 </LineChart>
               </ResponsiveContainer>
