@@ -137,12 +137,15 @@ export function BankAccount({ data, provider }: Props) {
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
-  const { data: transactionCountData } = useQuery({
-    ...trpc.bankAccounts.getTransactionCount.queryOptions({ id }),
-    enabled: isDeleteOpen,
-  });
+  const { data: transactionCountData, isFetching: isFetchingTransactionCount } =
+    useQuery({
+      ...trpc.bankAccounts.getTransactionCount.queryOptions({ id }),
+      enabled: isDeleteOpen,
+    });
 
   const transactionCount = transactionCountData?.count ?? 0;
+  const isLoadingTransactionCount =
+    isFetchingTransactionCount && transactionCountData === undefined;
 
   const deleteAccountMutation = useMutation(
     trpc.bankAccounts.delete.mutationOptions({
@@ -244,9 +247,11 @@ export function BankAccount({ data, provider }: Props) {
                         <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                         <div className="text-sm space-y-1">
                           <p className="font-medium text-amber-700 dark:text-amber-300">
-                            {transactionCount > 0
-                              ? `History includes ${transactionCount} transaction${transactionCount !== 1 ? "s" : ""}—all will be deleted.`
-                              : "No history in this account."}
+                            {isLoadingTransactionCount
+                              ? "Checking transaction history…"
+                              : transactionCount > 0
+                                ? `History includes ${transactionCount} transaction${transactionCount !== 1 ? "s" : ""}—all will be deleted.`
+                                : "No history in this account."}
                           </p>
                           <p className="text-amber-700 dark:text-amber-300">
                             {provider
