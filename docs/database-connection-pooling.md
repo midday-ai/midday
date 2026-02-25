@@ -48,13 +48,13 @@ Defined in `packages/db/src/client.ts`:
 
 | Setting | Development | Production |
 |---------|-------------|------------|
-| `max` | 8 | 12 |
+| `max` | 8 | 40 |
 | `idleTimeoutMillis` | 5,000ms | 60,000ms |
 | `connectionTimeoutMillis` | 5,000ms | 5,000ms |
 | `maxUses` | 100 | 0 (unlimited) |
 | `ssl` | disabled | enabled (rejectUnauthorized: false) |
 
-Each API instance creates up to 2 pools (primary + 1 regional replica), so the maximum backend connections per instance is `12 × 2 = 24`. With Supavisor transaction mode, these are multiplexed into a much smaller number of actual Postgres backend connections.
+Each API instance creates up to 2 pools (primary + 1 regional replica), so the maximum client connections per instance is `40 × 2 = 80`. With Supavisor transaction mode, these are multiplexed into a much smaller number of actual Postgres backend connections. Pool sizes are tuned for PgBouncer's 600 client limit across API + worker instances.
 
 ## Prepared Statements
 
