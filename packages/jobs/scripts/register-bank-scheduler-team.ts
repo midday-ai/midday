@@ -60,7 +60,8 @@ function parseCliArgs(): CliOptions {
 }
 
 function getTeamId(opts: { teamId?: string }) {
-  const teamId = opts.teamId ?? process.env.BANK_SYNC_TEAM_ID ?? process.env.TEAM_ID;
+  const teamId =
+    opts.teamId ?? process.env.BANK_SYNC_TEAM_ID ?? process.env.TEAM_ID;
 
   if (!teamId) {
     throw new Error(
@@ -192,7 +193,9 @@ async function registerBankSchedulerForTeam(options: RegisterOptions = {}) {
 
   if (dryRun) {
     const cron = generateCronTag(teamId);
-    console.log("Dry run enabled. Scheduler does not exist and would be created.");
+    console.log(
+      "Dry run enabled. Scheduler does not exist and would be created.",
+    );
     console.log(`  Team: ${team.name ?? "Unnamed"} (${team.id})`);
     console.log(`  Plan: ${team.plan}`);
     console.log(`  Bank connections: ${team.bankConnections.length}`);
