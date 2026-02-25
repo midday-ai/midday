@@ -125,15 +125,15 @@ export function SuggestedMatch() {
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className="bg-white/95 dark:bg-black/95 p-4 space-y-4 border dark:border-[#2C2C2C] border-[#DCDAD2] shadow-sm"
     >
-      <div className="flex items-center justify-between gap-2 text-sm bg-muted/50">
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2 items-center">
+      <div className="flex items-start justify-between gap-2 text-sm bg-muted/50">
+        <div className="flex flex-col gap-2 min-w-0 flex-1">
+          <div className="flex gap-2 items-center min-w-0">
             <span className="truncate font-medium">
               {hasSuggestedTransaction(suggestion)
                 ? suggestion.suggestedTransaction.name
                 : "Transaction"}
             </span>
-            <span className="text-muted-foreground">
+            <span className="text-muted-foreground flex-shrink-0">
               {hasSuggestedTransaction(suggestion) &&
                 formatDate(
                   suggestion.suggestedTransaction.date,
@@ -148,18 +148,20 @@ export function SuggestedMatch() {
           </div>
         </div>
 
-        <FormatAmount
-          amount={
-            hasSuggestedTransaction(suggestion)
-              ? suggestion.suggestedTransaction.amount
-              : 0
-          }
-          currency={
-            hasSuggestedTransaction(suggestion)
-              ? suggestion.suggestedTransaction.currency
-              : "USD"
-          }
-        />
+        <div className="flex-shrink-0">
+          <FormatAmount
+            amount={
+              hasSuggestedTransaction(suggestion)
+                ? suggestion.suggestedTransaction.amount
+                : 0
+            }
+            currency={
+              hasSuggestedTransaction(suggestion)
+                ? suggestion.suggestedTransaction.currency
+                : "USD"
+            }
+          />
+        </div>
       </div>
 
       <div className="flex gap-2">

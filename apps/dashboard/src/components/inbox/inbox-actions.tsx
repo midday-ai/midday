@@ -10,20 +10,22 @@ type Props = {
 };
 
 export function InboxActions({ data }: Props) {
-  // Don't show matching actions for "other" documents (non-financial documents)
   const isOtherDocument = data?.status === "other" || data?.type === "other";
 
   if (isOtherDocument) {
     return null;
   }
 
+  const hasSuggestion =
+    data?.status === "suggested_match" &&
+    !data?.transactionId &&
+    !!data?.suggestion;
+
   return (
     <AnimatePresence>
-      {data?.status === "suggested_match" && !data?.transactionId && (
-        <SuggestedMatch key="suggested-match" />
-      )}
+      {hasSuggestion && <SuggestedMatch key="suggested-match" />}
 
-      {!data?.suggestion && <MatchTransaction key="match-transaction" />}
+      {!hasSuggestion && <MatchTransaction key="match-transaction" />}
     </AnimatePresence>
   );
 }

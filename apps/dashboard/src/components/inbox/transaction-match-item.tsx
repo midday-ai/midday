@@ -37,10 +37,10 @@ export function TransactionMatchItem({
     : "Already matched";
 
   return (
-    <div className="flex w-full items-center justify-between gap-2 text-sm">
-      <div className="flex gap-2 items-center">
-        <span className="truncate">{name}</span>
-        <span className="text-muted-foreground">
+    <div className="flex min-w-0 flex-1 items-center justify-between gap-2 text-sm">
+      <div className="flex gap-2 items-center min-w-0 flex-1">
+        <span className="truncate max-w-[70%]">{name}</span>
+        <span className="text-muted-foreground flex-shrink-0">
           {formatDate(date, dateFormat)}
         </span>
         {isAlreadyMatched && (
