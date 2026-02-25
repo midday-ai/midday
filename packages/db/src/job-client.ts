@@ -1,35 +1,33 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import type { Database } from "./client";
 import * as schema from "./schema";
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 /**
- * Creates a new job-optimized database instance with its own connection pool.
+ * Creates a new job-optimized database instance.
+ * Uses postgres.js with prepare: false for Supabase transaction-mode pooler compatibility.
  *
- * Each instance is designed for job workflows with:
  * - Single connection per job (max: 1) to avoid flooding Supabase pooler
- * - Quick idle timeout (10s) for efficient connection management
  * - Separate disconnect function for lifecycle management
  */
 export const createJobDb = () => {
-  const isDevelopment = process.env.NODE_ENV === "development";
-
-  const jobPool = new Pool({
-    connectionString: process.env.DATABASE_PRIMARY_POOLER_URL!,
-    max: 1, // Critical: only 1 connection per job to avoid flooding Supabase pooler
-    idleTimeoutMillis: isDevelopment ? 5000 : 60000, // Match main client config
-    connectionTimeoutMillis: 15000, // Match main client config
-    maxUses: 0, // No limit on connection reuse for jobs
-    allowExitOnIdle: true,
+  const jobClient = postgres(process.env.DATABASE_PRIMARY_POOLER_URL!, {
+    max: 1,
+    idle_timeout: isDevelopment ? 5 : 60,
+    connect_timeout: 15,
+    ssl: isDevelopment ? false : { rejectUnauthorized: false },
+    prepare: false,
   });
 
-  const db = drizzle(jobPool, {
+  const db = drizzle(jobClient, {
     schema,
     casing: "snake_case",
   });
 
   return {
-    db: db as Database,
-    disconnect: () => jobPool.end(),
+    db: db as unknown as Database,
+    disconnect: () => jobClient.end(),
   };
 };

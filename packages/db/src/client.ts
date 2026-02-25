@@ -1,10 +1,10 @@
 import { createLoggerWithContext } from "@midday/logger";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
-import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
-import { drizzle } from "drizzle-orm/node-postgres";
 import type { PgTransaction } from "drizzle-orm/pg-core";
-import { Pool } from "pg";
-import { createDrizzleLogger, instrumentPool } from "./instrument";
+import type { PostgresJsQueryResultHKT } from "drizzle-orm/postgres-js";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import { createDrizzleLogger } from "./instrument";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
@@ -16,41 +16,27 @@ const DEBUG_PERF = process.env.DEBUG_PERF === "true";
 
 const connectionConfig = {
   max: isDevelopment ? 8 : isProduction ? 40 : 6,
-  min: isDevelopment ? 0 : isProduction ? 8 : 1,
-  idleTimeoutMillis: isDevelopment ? 5000 : isProduction ? 30000 : 10000,
-  connectionTimeoutMillis: 5000,
-  maxUses: isDevelopment ? 100 : 7500,
-  allowExitOnIdle: !isProduction,
-  keepAlive: true,
-  keepAliveInitialDelayMillis: 10_000,
+  idle_timeout: isDevelopment ? 5 : isProduction ? 30 : 10,
+  connect_timeout: 5,
   ssl: isDevelopment ? false : { rejectUnauthorized: false },
+  prepare: false, // Required for Supabase transaction-mode pooler
 };
 
 const drizzleLogger = DEBUG_PERF ? createDrizzleLogger() : undefined;
 
-// Primary pool — DATABASE_PRIMARY_URL points to Supabase (direct or pooler)
-const primaryPool = new Pool({
-  connectionString: process.env.DATABASE_PRIMARY_URL!,
+// Primary — DATABASE_PRIMARY_URL
+const primaryClient = postgres(process.env.DATABASE_PRIMARY_URL!, {
   ...connectionConfig,
 });
 
-if (DEBUG_PERF) instrumentPool(primaryPool, "primary");
-
-primaryPool.on("error", (err) => {
-  logger.error("Primary pool: idle client error", { error: err.message });
-});
-
-export const primaryDb = drizzle(primaryPool, {
+export const primaryDb = drizzle(primaryClient, {
   schema,
   casing: "snake_case",
   logger: drizzleLogger,
 });
 
 /**
- * Map Railway region → replica URL (only create the pool this instance needs).
- *
- * RAILWAY_REPLICA_REGION is a system-provided variable injected at runtime
- * by Railway for every deployment (see https://docs.railway.com/variables/reference).
+ * Map Railway region → replica URL
  */
 const replicaUrlForRegion: Record<string, string | undefined> = {
   "europe-west4-drams3a": process.env.DATABASE_FRA_URL,
@@ -63,7 +49,6 @@ const rawReplicaUrl = currentRegion
   ? replicaUrlForRegion[currentRegion]
   : undefined;
 
-// Don't create a separate replica pool if it points to the same DB as primary
 const replicaUrl =
   rawReplicaUrl && rawReplicaUrl !== process.env.DATABASE_PRIMARY_URL
     ? rawReplicaUrl
@@ -85,18 +70,12 @@ if (!isDevelopment) {
   }
 }
 
-const replicaPool = replicaUrl
-  ? new Pool({ connectionString: replicaUrl, ...connectionConfig })
+const replicaClient = replicaUrl
+  ? postgres(replicaUrl, { ...connectionConfig })
   : null;
 
-if (DEBUG_PERF && replicaPool) instrumentPool(replicaPool, "replica");
-
-replicaPool?.on("error", (err) => {
-  logger.error("Replica pool: idle client error", { error: err.message });
-});
-
-const replicaDb = replicaPool
-  ? drizzle(replicaPool, {
+const replicaDb = replicaClient
+  ? drizzle(replicaClient, {
       schema,
       casing: "snake_case",
       logger: drizzleLogger,
@@ -109,7 +88,6 @@ export const db = withReplicas(
   (replicas) => replicas[0]!,
 );
 
-// Keep connectDb for backward compatibility, but just return the singleton
 export const connectDb = async () => {
   return db;
 };
@@ -117,7 +95,7 @@ export const connectDb = async () => {
 export type Database = Awaited<ReturnType<typeof connectDb>>;
 
 export type TransactionClient = PgTransaction<
-  NodePgQueryResultHKT,
+  PostgresJsQueryResultHKT,
   typeof schema,
   ExtractTablesWithRelations<typeof schema>
 >;
@@ -130,27 +108,33 @@ export type DatabaseWithPrimary = Database & {
   usePrimaryOnly?: () => Database;
 };
 
+/**
+ * Pool stats — postgres.js does not expose pool stats like pg.
+ * Returns placeholder for compatibility with health/DEBUG_PERF logging.
+ */
 export function getPoolStats() {
   return {
     primary: {
-      total: primaryPool.totalCount,
-      idle: primaryPool.idleCount,
-      waiting: primaryPool.waitingCount,
+      total: 0,
+      idle: 0,
+      waiting: 0,
     },
-    replica: replicaPool
+    replica: replicaClient
       ? {
-          total: replicaPool.totalCount,
-          idle: replicaPool.idleCount,
-          waiting: replicaPool.waitingCount,
+          total: 0,
+          idle: 0,
+          waiting: 0,
         }
       : null,
   };
 }
 
 /**
- * Close all database pools gracefully.
- * Call during process shutdown to release connections cleanly.
+ * Close all database connections gracefully
  */
 export const closeDb = async (): Promise<void> => {
-  await Promise.all([primaryPool.end(), replicaPool?.end()]);
+  await Promise.all([
+    primaryClient.end(),
+    replicaClient ? replicaClient.end() : Promise.resolve(),
+  ]);
 };

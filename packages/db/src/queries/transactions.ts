@@ -2022,33 +2022,44 @@ export type BulkUpdateTransactionsBaseCurrencyParams = {
 
 /**
  * Bulk update transactions with base currency/amount
- * Uses batch processing internally for large datasets
- * Uses direct UPDATE (not upsert) since transactions already exist
+ * Uses unnest with only 4 params - avoids prepared statement issues with
+ * Supavisor/PgBouncer transaction mode (which can fail on large param counts).
+ *
+ * Multi-tenant safety: WHERE clause requires BOTH teamId AND id match.
+ * Only rows for the given team are updated; other teams' data is never touched.
  */
 export async function bulkUpdateTransactionsBaseCurrency(
   db: Database,
   params: BulkUpdateTransactionsBaseCurrencyParams,
 ) {
   const { transactions: transactionsData, teamId } = params;
+
+  if (!teamId?.trim()) {
+    throw new Error("bulkUpdateTransactionsBaseCurrency: teamId is required");
+  }
+
   const BATCH_LIMIT = 500;
 
   for (let i = 0; i < transactionsData.length; i += BATCH_LIMIT) {
     const batch = transactionsData.slice(i, i + BATCH_LIMIT);
     if (batch.length === 0) continue;
 
-    const valuesClause = sql.join(
-      batch.map(
-        (tx) => sql`(${tx.id}::uuid, ${tx.baseAmount}, ${tx.baseCurrency})`,
-      ),
-      sql`, `,
-    );
+    const ids = batch.map((tx) => tx.id);
+    const baseAmounts = batch.map((tx) => tx.baseAmount);
+    const baseCurrencies = batch.map((tx) => tx.baseCurrency);
 
     await db.execute(sql`
       UPDATE transactions AS t
       SET
         base_amount = v.base_amount,
         base_currency = v.base_currency
-      FROM (VALUES ${valuesClause}) AS v(id, base_amount, base_currency)
+      FROM (
+        SELECT * FROM unnest(
+          ${ids}::uuid[],
+          ${baseAmounts}::numeric[],
+          ${baseCurrencies}::text[]
+        ) AS v(id, base_amount, base_currency)
+      ) AS v
       WHERE t.id = v.id AND t.team_id = ${teamId}
     `);
   }

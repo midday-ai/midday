@@ -104,6 +104,7 @@ export class UpdateAccountBaseCurrencyProcessor extends BaseProcessor<UpdateAcco
       currency,
       baseCurrency,
       transactionCount: formattedTransactions.length,
+      teamId,
     });
   }
 }
