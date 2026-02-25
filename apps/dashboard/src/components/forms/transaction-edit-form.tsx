@@ -522,10 +522,6 @@ export function TransactionEditForm({ transaction }: Props) {
               <TransactionAttachments
                 id={transaction.id}
                 data={transaction.attachments}
-                onUpload={(_files) => {
-                  // Note: Attachments are handled by TransactionAttachments component
-                  // The component manages its own state and updates the transaction
-                }}
               />
             </div>
           </AccordionContent>

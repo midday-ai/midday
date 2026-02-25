@@ -25,12 +25,23 @@ const normalizePath = (path: unknown): string[] => {
 type Props = {
   id: string;
   data?: NonNullable<RouterOutputs["transactions"]["getById"]>["attachments"];
-  onUpload?: (files: Attachment[]) => void;
+  onUploadAction?: (files: Attachment[]) => void;
+  onDeleteUploadAction?: (file: Attachment) => void;
+  persistToTransaction?: boolean;
+  onUploadingChangeAction?: (isUploading: boolean) => void;
 };
 
-export function TransactionAttachments({ id, data, onUpload }: Props) {
+export function TransactionAttachments({
+  id,
+  data,
+  onUploadAction,
+  onDeleteUploadAction,
+  persistToTransaction = true,
+  onUploadingChangeAction,
+}: Props) {
   const { toast } = useToast();
   const [files, setFiles] = useState<Attachment[]>([]);
+  const [pendingUploads, setPendingUploads] = useState(0);
   const { uploadFile } = useUpload();
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
@@ -106,7 +117,9 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
       pollingForTax &&
       pollingTransaction?.taxRate &&
       pollingTransaction?.taxRate > 0 &&
-      pollingTransaction?.taxType
+      pollingTransaction?.taxType &&
+      pollingTransaction?.taxAmount != null &&
+      pollingTransaction?.currency
     ) {
       toast({
         variant: "success",
@@ -114,8 +127,8 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         title: `${getTaxTypeLabel(pollingTransaction?.taxType)} extracted and applied`,
         description: `${pollingTransaction?.taxRate}% ${getTaxTypeLabel(pollingTransaction?.taxType)} (${formatAmount(
           {
-            amount: pollingTransaction?.taxAmount!,
-            currency: pollingTransaction?.currency!,
+            amount: pollingTransaction.taxAmount,
+            currency: pollingTransaction.currency,
             locale: user?.locale,
           },
         )}) was detected from the uploaded receipt and added to this transaction.`,
@@ -156,11 +169,24 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
   }, [pollingForTax]);
 
   const handleOnDelete = (id: string) => {
+    const deletedFile = files.find((file) => file?.id === id);
     setFiles((files) => files.filter((file) => file?.id !== id));
-    deleteattachmentMutation.mutate({ id });
+
+    if (deletedFile) {
+      onDeleteUploadAction?.(deletedFile);
+    }
+
+    if (persistToTransaction) {
+      deleteattachmentMutation.mutate({ id });
+    }
   };
 
   const onDrop = async (acceptedFiles: Array<Attachment>) => {
+    if (acceptedFiles.length === 0) {
+      return;
+    }
+
+    setPendingUploads((prev) => prev + acceptedFiles.length);
     setFiles((prev) => [
       ...prev,
       ...acceptedFiles.map((a) => ({
@@ -171,44 +197,50 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
       })),
     ]);
 
-    const uploadedFiles = await Promise.all(
-      acceptedFiles.map(async (acceptedFile) => {
-        const filename = stripSpecialCharacters(acceptedFile.name);
+    try {
+      const uploadedFiles = await Promise.all(
+        acceptedFiles.map(async (acceptedFile) => {
+          const filename = stripSpecialCharacters(acceptedFile.name);
 
-        const { path } = await uploadFile({
-          bucket: "vault",
-          path: [user?.teamId ?? "", "transactions", id, filename],
-          file: acceptedFile as File,
-        });
+          const { path } = await uploadFile({
+            bucket: "vault",
+            path: [user?.teamId ?? "", "transactions", id, filename],
+            file: acceptedFile as File,
+          });
 
-        return {
-          path: path,
-          name: filename,
-          size: acceptedFile.size,
-          type: acceptedFile.type,
-        };
-      }),
-    );
+          return {
+            path: path,
+            name: filename,
+            size: acceptedFile.size,
+            type: acceptedFile.type,
+          };
+        }),
+      );
 
-    onUpload?.(uploadedFiles);
+      onUploadAction?.(uploadedFiles);
 
-    createAttachmentsMutation.mutate(
-      uploadedFiles.map((file) => ({
-        name: file.name,
-        type: file.type,
-        path: file.path,
-        size: file.size,
-        transactionId: id,
-      })),
-    );
+      if (persistToTransaction) {
+        createAttachmentsMutation.mutate(
+          uploadedFiles.map((file) => ({
+            name: file.name,
+            type: file.type,
+            path: file.path,
+            size: file.size,
+            transactionId: id,
+          })),
+        );
 
-    processTransactionAttachmentMutation.mutate(
-      uploadedFiles.map((file) => ({
-        filePath: file.path,
-        mimetype: file.type,
-        transactionId: id,
-      })),
-    );
+        processTransactionAttachmentMutation.mutate(
+          uploadedFiles.map((file) => ({
+            filePath: file.path,
+            mimetype: file.type,
+            transactionId: id,
+          })),
+        );
+      }
+    } finally {
+      setPendingUploads((prev) => Math.max(0, prev - acceptedFiles.length));
+    }
   };
 
   // @ts-expect-error
@@ -264,7 +296,18 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         };
 
         setFiles((prev) => [attachmentItem, ...prev]);
-        createAttachmentsMutation.mutate([attachmentItem]);
+        onUploadAction?.([
+          {
+            name: attachmentItem.name,
+            size: attachmentItem.size,
+            type: attachmentItem.type,
+            path: attachmentItem.path,
+          },
+        ]);
+
+        if (persistToTransaction) {
+          createAttachmentsMutation.mutate([attachmentItem]);
+        }
       } catch (error) {
         console.error("Error handling invoice selection:", error);
         toast({
@@ -288,9 +331,24 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
       };
 
       setFiles((prev) => [item, ...prev]);
-      createAttachmentsMutation.mutate([item]);
+      onUploadAction?.([
+        {
+          name: item.name,
+          size: item.size,
+          type: item.type,
+          path: item.path,
+        },
+      ]);
+
+      if (persistToTransaction) {
+        createAttachmentsMutation.mutate([item]);
+      }
     }
   };
+
+  useEffect(() => {
+    onUploadingChangeAction?.(pendingUploads > 0);
+  }, [pendingUploads, onUploadingChangeAction]);
 
   useEffect(() => {
     if (data) {
@@ -380,7 +438,11 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
           <AttachmentItem
             key={`${file.name}-${idx}`}
             file={file}
-            onDelete={() => handleOnDelete(file?.id!)}
+            onDelete={() => {
+              if (file.id) {
+                handleOnDelete(file.id);
+              }
+            }}
           />
         ))}
       </ul>
