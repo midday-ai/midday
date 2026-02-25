@@ -121,9 +121,17 @@ export const teamRouter = createTRPCRouter({
   acceptInvite: protectedProcedure
     .input(acceptTeamInviteSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
+      if (!session.user.email) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email is required to accept an invite",
+        });
+      }
+
       return acceptTeamInvite(db, {
         id: input.id,
         userId: session.user.id,
+        userEmail: session.user.email,
       });
     }),
 

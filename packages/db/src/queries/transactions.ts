@@ -1830,6 +1830,98 @@ export type CreateTransactionParams = {
   attachments?: Attachment[];
 };
 
+type TeamBankAccountRef = {
+  teamId: string;
+  bankAccountId: string;
+};
+
+type TeamAssigneeRef = {
+  teamId: string;
+  assignedId?: string | null;
+};
+
+async function assertBankAccountsBelongToTeams(
+  db: Database,
+  accountRefs: TeamBankAccountRef[],
+) {
+  const uniqueRefs = Array.from(
+    new Map(
+      accountRefs.map((ref) => [`${ref.teamId}:${ref.bankAccountId}`, ref]),
+    ).values(),
+  );
+
+  const idsByTeam = new Map<string, Set<string>>();
+  for (const { teamId, bankAccountId } of uniqueRefs) {
+    const existing = idsByTeam.get(teamId);
+    if (existing) {
+      existing.add(bankAccountId);
+    } else {
+      idsByTeam.set(teamId, new Set([bankAccountId]));
+    }
+  }
+
+  for (const [teamId, accountIds] of idsByTeam) {
+    const ids = Array.from(accountIds);
+    if (ids.length === 0) {
+      continue;
+    }
+
+    const accounts = await db
+      .select({ id: bankAccounts.id })
+      .from(bankAccounts)
+      .where(
+        and(eq(bankAccounts.teamId, teamId), inArray(bankAccounts.id, ids)),
+      );
+
+    if (accounts.length !== ids.length) {
+      throw new Error("Bank account not found or access denied");
+    }
+  }
+}
+
+async function assertAssignedUsersBelongToTeams(
+  db: Database,
+  assigneeRefs: TeamAssigneeRef[],
+) {
+  const uniqueRefs = Array.from(
+    new Map(
+      assigneeRefs
+        .filter((ref) => Boolean(ref.assignedId))
+        .map((ref) => [`${ref.teamId}:${ref.assignedId}`, ref]),
+    ).values(),
+  );
+
+  const idsByTeam = new Map<string, Set<string>>();
+  for (const { teamId, assignedId } of uniqueRefs) {
+    if (!assignedId) {
+      continue;
+    }
+
+    const existing = idsByTeam.get(teamId);
+    if (existing) {
+      existing.add(assignedId);
+    } else {
+      idsByTeam.set(teamId, new Set([assignedId]));
+    }
+  }
+
+  for (const [teamId, userIds] of idsByTeam) {
+    const ids = Array.from(userIds);
+    if (ids.length === 0) {
+      continue;
+    }
+
+    const foundUsers = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(and(eq(users.teamId, teamId), inArray(users.id, ids)));
+
+    if (foundUsers.length !== ids.length) {
+      throw new Error("Assigned user not found or access denied");
+    }
+  }
+}
+
 export async function createTransaction(
   db: Database,
   params: CreateTransactionParams,
@@ -1842,6 +1934,9 @@ export async function createTransaction(
     assignedId,
     ...rest
   } = params;
+
+  await assertBankAccountsBelongToTeams(db, [{ teamId, bankAccountId }]);
+  await assertAssignedUsersBelongToTeams(db, [{ teamId, assignedId }]);
 
   const [result] = await db
     .insert(transactions)
@@ -1882,6 +1977,15 @@ export async function createTransactions(
   db: Database,
   params: CreateTransactionParams[],
 ) {
+  await assertBankAccountsBelongToTeams(
+    db,
+    params.map(({ teamId, bankAccountId }) => ({ teamId, bankAccountId })),
+  );
+  await assertAssignedUsersBelongToTeams(
+    db,
+    params.map(({ teamId, assignedId }) => ({ teamId, assignedId })),
+  );
+
   const transactionsToInsert = params.map(
     ({ attachments, teamId, ...rest }) => {
       return {

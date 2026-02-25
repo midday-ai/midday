@@ -36,6 +36,7 @@ import {
   selectPromptColumns,
 } from "@midday/import";
 import { triggerJob } from "@midday/job-client";
+import { TRPCError } from "@trpc/server";
 import { generateObject } from "ai";
 
 const csvMappingInFlight = new Map<
@@ -184,7 +185,14 @@ export const transactionsRouter = createTRPCRouter({
         teamId,
       });
 
-      if (account?.manual) {
+      if (!account) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Bank account not found",
+        });
+      }
+
+      if (account.manual) {
         const parsedBalance = input.currentBalance
           ? formatAmountValue({ amount: input.currentBalance })
           : null;

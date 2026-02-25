@@ -4363,7 +4363,7 @@ export type CreateReportParams = {
 
 export async function createReport(db: Database, params: CreateReportParams) {
   const { type, from, to, currency, teamId, createdBy, expireAt } = params;
-  const linkId = nanoid(8);
+  const linkId = nanoid(21);
 
   const [result] = await db
     .insert(reports)
