@@ -1,11 +1,12 @@
 import type { Database } from "@db/client";
 import {
   collectionAgencies,
+  collectionCases,
   collectionEscalationRules,
   collectionSlaConfigs,
   collectionStages,
 } from "@db/schema";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 
 // ============================================================================
 // Collection Stages
@@ -73,10 +74,81 @@ export const upsertCollectionStage = async (
   return result;
 };
 
-export const deleteCollectionStage = async (
+export const swapStagePositions = async (
+  db: Database,
+  params: {
+    teamId: string;
+    stageAId: string;
+    stageBId: string;
+  },
+) => {
+  return db.transaction(async (tx) => {
+    const [stageA] = await tx
+      .select({ id: collectionStages.id, position: collectionStages.position })
+      .from(collectionStages)
+      .where(
+        and(
+          eq(collectionStages.id, params.stageAId),
+          eq(collectionStages.teamId, params.teamId),
+        ),
+      );
+
+    const [stageB] = await tx
+      .select({ id: collectionStages.id, position: collectionStages.position })
+      .from(collectionStages)
+      .where(
+        and(
+          eq(collectionStages.id, params.stageBId),
+          eq(collectionStages.teamId, params.teamId),
+        ),
+      );
+
+    if (!stageA || !stageB) {
+      throw new Error("One or both stages not found");
+    }
+
+    await tx
+      .update(collectionStages)
+      .set({ position: stageB.position })
+      .where(eq(collectionStages.id, stageA.id));
+
+    await tx
+      .update(collectionStages)
+      .set({ position: stageA.position })
+      .where(eq(collectionStages.id, stageB.id));
+  });
+};
+
+export const getStageUsageCount = async (
   db: Database,
   params: { id: string; teamId: string },
 ) => {
+  const [result] = await db
+    .select({
+      count: sql<number>`cast(count(*) as int)`,
+    })
+    .from(collectionCases)
+    .where(
+      and(
+        eq(collectionCases.stageId, params.id),
+        eq(collectionCases.teamId, params.teamId),
+      ),
+    );
+  return result?.count ?? 0;
+};
+
+export const deleteCollectionStage = async (
+  db: Database,
+  params: { id: string; teamId: string; force?: boolean },
+) => {
+  // Check if any cases reference this stage
+  const usageCount = await getStageUsageCount(db, params);
+  if (usageCount > 0 && !params.force) {
+    throw new Error(
+      `Cannot delete stage: ${usageCount} case${usageCount !== 1 ? "s" : ""} still reference it. Reassign cases first or use force delete.`,
+    );
+  }
+
   const [result] = await db
     .delete(collectionStages)
     .where(

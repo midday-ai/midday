@@ -120,7 +120,7 @@ export class CollectionsSlaCheckProcessor extends BaseProcessor<CollectionsSlaCh
     metric: string,
     thresholdMinutes: number,
     caseRow: {
-      stageEnteredAt: string;
+      stageEnteredAt: string | null;
       enteredCollectionsAt: string;
       nextFollowUp: string | null;
     },
@@ -129,6 +129,7 @@ export class CollectionsSlaCheckProcessor extends BaseProcessor<CollectionsSlaCh
 
     switch (metric) {
       case "time_in_stage": {
+        if (!caseRow.stageEnteredAt) return false;
         const stageEntered = new Date(caseRow.stageEnteredAt).getTime();
         const minutesInStage = (now - stageEntered) / 60_000;
         return minutesInStage > thresholdMinutes;

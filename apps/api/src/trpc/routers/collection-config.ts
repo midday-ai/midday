@@ -1,5 +1,6 @@
 import {
   upsertCollectionStageSchema,
+  swapStagePositionsSchema,
   upsertCollectionAgencySchema,
   upsertEscalationRuleSchema,
   upsertSlaConfigSchema,
@@ -14,6 +15,7 @@ import {
   getCollectionStages,
   upsertCollectionStage,
   deleteCollectionStage,
+  swapStagePositions,
   seedDefaultStages,
   getCollectionAgencies,
   upsertCollectionAgency,
@@ -39,6 +41,16 @@ export const collectionConfigRouter = createTRPCRouter({
       return upsertCollectionStage(db, {
         ...input,
         teamId: teamId!,
+      });
+    }),
+
+  swapStagePositions: adminProcedure
+    .input(swapStagePositionsSchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return swapStagePositions(db, {
+        teamId: teamId!,
+        stageAId: input.stageAId,
+        stageBId: input.stageBId,
       });
     }),
 

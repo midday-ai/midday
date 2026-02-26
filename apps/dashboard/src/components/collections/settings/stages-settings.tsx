@@ -3,7 +3,6 @@
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Input } from "@midday/ui/input";
-import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -55,12 +54,28 @@ export function StagesSettings() {
     }),
   );
 
-  const deleteMutation = useMutation(
-    trpc.collectionConfig.deleteStage.mutationOptions({
+  const swapMutation = useMutation(
+    trpc.collectionConfig.swapStagePositions.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.collectionConfig.getStages.queryKey(),
         });
+      },
+    }),
+  );
+
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const deleteMutation = useMutation(
+    trpc.collectionConfig.deleteStage.mutationOptions({
+      onSuccess: () => {
+        setDeleteError(null);
+        queryClient.invalidateQueries({
+          queryKey: trpc.collectionConfig.getStages.queryKey(),
+        });
+      },
+      onError: (error) => {
+        setDeleteError(error.message);
       },
     }),
   );
@@ -126,6 +141,11 @@ export function StagesSettings() {
   }
 
   function handleDelete(id: string) {
+    const stage = stages?.find((s) => s.id === id);
+    const confirmed = window.confirm(
+      `Delete stage "${stage?.name ?? ""}"? This will fail if any cases are currently in this stage.`,
+    );
+    if (!confirmed) return;
     deleteMutation.mutate({ id });
   }
 
@@ -133,25 +153,7 @@ export function StagesSettings() {
     if (!stages || index === 0) return;
     const sorted = [...stages].sort((a, b) => a.position - b.position);
     const prev = sorted[index - 1]!;
-    // Swap positions
-    upsertMutation.mutate({
-      id: stage.id,
-      name: stage.name,
-      slug: stage.slug,
-      position: prev.position,
-      color: stage.color ?? undefined,
-      isDefault: stage.isDefault ?? undefined,
-      isTerminal: stage.isTerminal ?? undefined,
-    });
-    upsertMutation.mutate({
-      id: prev.id,
-      name: prev.name,
-      slug: prev.slug,
-      position: stage.position,
-      color: prev.color ?? undefined,
-      isDefault: prev.isDefault ?? undefined,
-      isTerminal: prev.isTerminal ?? undefined,
-    });
+    swapMutation.mutate({ stageAId: stage.id, stageBId: prev.id });
   }
 
   function handleMoveDown(stage: Stage, index: number) {
@@ -159,24 +161,7 @@ export function StagesSettings() {
     const sorted = [...stages].sort((a, b) => a.position - b.position);
     if (index === sorted.length - 1) return;
     const next = sorted[index + 1]!;
-    upsertMutation.mutate({
-      id: stage.id,
-      name: stage.name,
-      slug: stage.slug,
-      position: next.position,
-      color: stage.color ?? undefined,
-      isDefault: stage.isDefault ?? undefined,
-      isTerminal: stage.isTerminal ?? undefined,
-    });
-    upsertMutation.mutate({
-      id: next.id,
-      name: next.name,
-      slug: next.slug,
-      position: stage.position,
-      color: next.color ?? undefined,
-      isDefault: next.isDefault ?? undefined,
-      isTerminal: next.isTerminal ?? undefined,
-    });
+    swapMutation.mutate({ stageAId: stage.id, stageBId: next.id });
   }
 
   if (isLoading) {
@@ -218,7 +203,7 @@ export function StagesSettings() {
               <button
                 type="button"
                 onClick={() => handleMoveUp(stage, index)}
-                disabled={index === 0}
+                disabled={index === 0 || swapMutation.isPending}
                 className="text-[#878787] hover:text-primary disabled:opacity-30"
               >
                 <Icons.ChevronUp className="size-3.5" />
@@ -226,7 +211,7 @@ export function StagesSettings() {
               <button
                 type="button"
                 onClick={() => handleMoveDown(stage, index)}
-                disabled={index === sorted.length - 1}
+                disabled={index === sorted.length - 1 || swapMutation.isPending}
                 className="text-[#878787] hover:text-primary disabled:opacity-30"
               >
                 <Icons.ChevronDown className="size-3.5" />
@@ -410,6 +395,13 @@ export function StagesSettings() {
           </div>
         )}
       </div>
+
+      {/* Delete error */}
+      {deleteError && (
+        <div className="text-[12px] text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 px-3 py-2 rounded">
+          {deleteError}
+        </div>
+      )}
 
       {/* Validation hint */}
       {stages && stages.length > 0 && (

@@ -108,6 +108,11 @@ export const upsertCollectionStageSchema = z.object({
   isTerminal: z.boolean().optional(),
 });
 
+export const swapStagePositionsSchema = z.object({
+  stageAId: z.string().uuid(),
+  stageBId: z.string().uuid(),
+});
+
 export const deleteByIdSchema = z.object({
   id: z.string().uuid(),
 });
