@@ -43,6 +43,7 @@
     "@midday/location": "workspace:*",
     "@midday/logger": "workspace:*",
     "@midday/notifications": "workspace:*",
+    "@midday/underwriting": "workspace:*",
     "@midday/plans": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",

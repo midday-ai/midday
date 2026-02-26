@@ -28,6 +28,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { MerchantCollectionsSection } from "@/components/collections/merchant-collections-section";
 import { PaymentLedgerSheet } from "./payment-ledger-sheet";
+import { UnderwritingSummaryCard } from "./underwriting-summary-card";
 
 type Merchant = {
   id: string;
@@ -56,6 +57,18 @@ export function MerchantDetailContent({ merchantId, merchant }: Props) {
     trpc.merchants.getMcaDealStats.queryOptions({ merchantId }),
   );
 
+  const { data: team } = useQuery(trpc.team.current.queryOptions());
+
+  const { data: uwApplication } = useQuery(
+    trpc.underwritingApplications.getByMerchant.queryOptions({ merchantId }),
+  );
+
+  const underwritingEnabled = team?.underwritingEnabled ?? false;
+  const isApproved = uwApplication?.status === "approved";
+
+  // If underwriting is enabled and merchant is NOT approved, gate the New Deal button
+  const shouldGateNewDeal = underwritingEnabled && !isApproved;
+
   const dealIds = deals?.map((d) => d.id) ?? [];
   const { data: riskScores } = useQuery(
     trpc.risk.getScores.queryOptions({ dealIds }),
@@ -63,6 +76,7 @@ export function MerchantDetailContent({ merchantId, merchant }: Props) {
   const riskScoreMap = new Map(
     (riskScores ?? []).map((s) => [s.dealId, s]),
   );
+
 
   const collectionRate =
     stats && stats.totalPayback > 0
@@ -108,12 +122,21 @@ export function MerchantDetailContent({ merchantId, merchant }: Props) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href={`/merchants/${merchantId}/deals/new`}>
-              <Button variant="outline" size="sm">
-                <Icons.Add className="size-4 mr-1" />
-                New Deal
-              </Button>
-            </Link>
+            {shouldGateNewDeal ? (
+              <Link href={`/merchants/${merchantId}/underwriting/new`}>
+                <Button variant="outline" size="sm">
+                  <Icons.Add className="size-4 mr-1" />
+                  Underwrite First
+                </Button>
+              </Link>
+            ) : (
+              <Link href={`/merchants/${merchantId}/deals/new`}>
+                <Button variant="outline" size="sm">
+                  <Icons.Add className="size-4 mr-1" />
+                  New Deal
+                </Button>
+              </Link>
+            )}
             {merchant.portalEnabled && merchant.portalId && (
               <Link href={`/merchants/${merchantId}/portal-preview`}>
                 <Button variant="outline" size="sm">
@@ -156,6 +179,9 @@ export function MerchantDetailContent({ merchantId, merchant }: Props) {
           <div className="text-[18px] font-medium">{collectionRate}%</div>
         </div>
       </div>
+
+      {/* Underwriting Summary */}
+      <UnderwritingSummaryCard merchantId={merchantId} />
 
       {/* Deals Table */}
       <div>

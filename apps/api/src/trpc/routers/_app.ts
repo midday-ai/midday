@@ -40,6 +40,7 @@ import { widgetsRouter } from "./widgets";
 import { mcaDealsRouter } from "./mca-deals";
 import { merchantPortalRouter } from "./merchant-portal";
 import { underwritingRouter } from "./underwriting";
+import { underwritingApplicationsRouter } from "./underwriting-applications";
 import { brokersRouter } from "./brokers";
 import { syndicationRouter } from "./syndication";
 import { disclosuresRouter } from "./disclosures";
@@ -92,6 +93,7 @@ export const appRouter = createTRPCRouter({
   mcaDeals: mcaDealsRouter,
   merchantPortal: merchantPortalRouter,
   underwriting: underwritingRouter,
+  underwritingApplications: underwritingApplicationsRouter,
   brokers: brokersRouter,
   syndication: syndicationRouter,
   disclosures: disclosuresRouter,

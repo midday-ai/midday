@@ -1519,6 +1519,11 @@ export const teams = pgTable(
     stripePriceId: text("stripe_price_id"),
     // Branding customization for merchant portal
     branding: jsonb().$type<TeamBranding>().default({}),
+
+    // Underwriting feature flag
+    underwritingEnabled: boolean("underwriting_enabled")
+      .notNull()
+      .default(false),
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),
@@ -3664,6 +3669,9 @@ export const mcaDeals = pgTable(
     personalGuarantee: boolean("personal_guarantee").default(false),
     defaultTerms: text("default_terms"),
     curePeriodDays: integer("cure_period_days"),
+
+    // Underwriting link
+    underwritingApplicationId: uuid("underwriting_application_id"),
   },
   (table) => [
     index("mca_deals_merchant_id_idx").on(table.merchantId),
@@ -3671,6 +3679,7 @@ export const mcaDeals = pgTable(
     index("mca_deals_status_idx").on(table.status),
     index("mca_deals_deal_code_idx").on(table.dealCode),
     index("mca_deals_broker_id_idx").on(table.brokerId),
+    index("idx_mca_deals_uw_application_id").on(table.underwritingApplicationId),
     unique("mca_deals_team_deal_code_unique").on(table.teamId, table.dealCode),
     foreignKey({
       columns: [table.merchantId],
@@ -3682,6 +3691,11 @@ export const mcaDeals = pgTable(
       foreignColumns: [teams.id],
       name: "mca_deals_team_id_fkey",
     }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.underwritingApplicationId],
+      foreignColumns: [underwritingApplications.id],
+      name: "mca_deals_uw_application_id_fkey",
+    }).onDelete("set null"),
     pgPolicy("Team members can manage MCA deals", {
       as: "permissive",
       for: "all",
@@ -4504,6 +4518,10 @@ export const mcaDealsRelations = relations(mcaDeals, ({ one, many }) => ({
     fields: [mcaDeals.brokerId],
     references: [brokers.id],
   }),
+  underwritingApplication: one(underwritingApplications, {
+    fields: [mcaDeals.underwritingApplicationId],
+    references: [underwritingApplications.id],
+  }),
   payments: many(mcaPayments),
   payoffLetterRequests: many(payoffLetterRequests),
   brokerCommissions: many(brokerCommissions),
@@ -4814,6 +4832,398 @@ export const underwritingBuyBoxRelations = relations(
   ({ one }) => ({
     team: one(teams, {
       fields: [underwritingBuyBox.teamId],
+      references: [teams.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// Underwriting Enums
+// ============================================================================
+
+export const underwritingApplicationStatusEnum = pgEnum(
+  "underwriting_application_status",
+  [
+    "pending_documents",
+    "in_review",
+    "scoring",
+    "approved",
+    "declined",
+    "review_needed",
+  ],
+);
+
+export const underwritingDecisionEnum = pgEnum("underwriting_decision", [
+  "approved",
+  "declined",
+  "review_needed",
+]);
+
+export const underwritingDocProcessingStatusEnum = pgEnum(
+  "underwriting_doc_processing_status",
+  ["pending", "processing", "completed", "failed"],
+);
+
+export const underwritingRecommendationEnum = pgEnum(
+  "underwriting_recommendation",
+  ["approve", "decline", "review_needed"],
+);
+
+export const underwritingConfidenceEnum = pgEnum("underwriting_confidence", [
+  "high",
+  "medium",
+  "low",
+]);
+
+// ============================================================================
+// Underwriting Document Requirements
+// ============================================================================
+
+export const underwritingDocumentRequirements = pgTable(
+  "underwriting_document_requirements",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    teamId: uuid("team_id").notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    required: boolean("required").notNull().default(true),
+    appliesToStates: text("applies_to_states").array().default([]),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_uw_doc_requirements_team_id").on(table.teamId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "uw_doc_requirements_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can view underwriting_document_requirements", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can insert underwriting_document_requirements", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can update underwriting_document_requirements", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team owners can delete underwriting_document_requirements", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT team_id FROM public.users_on_team WHERE user_id = auth.uid() AND role = 'owner'))`,
+    }),
+  ],
+);
+
+export const underwritingDocumentRequirementsRelations = relations(
+  underwritingDocumentRequirements,
+  ({ one, many }) => ({
+    team: one(teams, {
+      fields: [underwritingDocumentRequirements.teamId],
+      references: [teams.id],
+    }),
+    documents: many(underwritingDocuments),
+  }),
+);
+
+// ============================================================================
+// Underwriting Applications
+// ============================================================================
+
+export const underwritingApplications = pgTable(
+  "underwriting_applications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    merchantId: uuid("merchant_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    status: underwritingApplicationStatusEnum("status")
+      .notNull()
+      .default("pending_documents"),
+
+    // Requested funding details
+    requestedAmountMin: numericCasted("requested_amount_min", {
+      precision: 12,
+      scale: 2,
+    }),
+    requestedAmountMax: numericCasted("requested_amount_max", {
+      precision: 12,
+      scale: 2,
+    }),
+    useOfFunds: text("use_of_funds"),
+    ficoRange: text("fico_range"),
+    timeInBusinessMonths: integer("time_in_business_months"),
+
+    // Broker / context
+    brokerNotes: text("broker_notes"),
+    priorMcaHistory: text("prior_mca_history"),
+
+    // Decision
+    decision: underwritingDecisionEnum("decision"),
+    decisionDate: timestamp("decision_date", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    decidedBy: uuid("decided_by"),
+    decisionNotes: text("decision_notes"),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_uw_applications_merchant_id").on(table.merchantId),
+    index("idx_uw_applications_team_id").on(table.teamId),
+    index("idx_uw_applications_status").on(table.status),
+    foreignKey({
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "uw_applications_merchant_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "uw_applications_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.decidedBy],
+      foreignColumns: [users.id],
+      name: "uw_applications_decided_by_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Team members can view underwriting_applications", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can insert underwriting_applications", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can update underwriting_applications", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team owners can delete underwriting_applications", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT team_id FROM public.users_on_team WHERE user_id = auth.uid() AND role = 'owner'))`,
+    }),
+  ],
+);
+
+export const underwritingApplicationsRelations = relations(
+  underwritingApplications,
+  ({ one, many }) => ({
+    merchant: one(merchants, {
+      fields: [underwritingApplications.merchantId],
+      references: [merchants.id],
+    }),
+    team: one(teams, {
+      fields: [underwritingApplications.teamId],
+      references: [teams.id],
+    }),
+    decidedByUser: one(users, {
+      fields: [underwritingApplications.decidedBy],
+      references: [users.id],
+    }),
+    documents: many(underwritingDocuments),
+    scores: many(underwritingScores),
+    deals: many(mcaDeals),
+  }),
+);
+
+// ============================================================================
+// Underwriting Documents
+// ============================================================================
+
+export const underwritingDocuments = pgTable(
+  "underwriting_documents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    applicationId: uuid("application_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    requirementId: uuid("requirement_id"),
+
+    // File info
+    filePath: text("file_path").notNull(),
+    fileName: text("file_name").notNull(),
+    fileSize: integer("file_size"),
+    documentType: text("document_type"),
+
+    // Processing
+    processingStatus: underwritingDocProcessingStatusEnum("processing_status")
+      .notNull()
+      .default("pending"),
+    extractionResults: jsonb("extraction_results"),
+
+    // Waiver
+    waived: boolean("waived").notNull().default(false),
+    waiveReason: text("waive_reason"),
+
+    // Timestamps
+    uploadedAt: timestamp("uploaded_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_uw_documents_application_id").on(table.applicationId),
+    index("idx_uw_documents_team_id").on(table.teamId),
+    index("idx_uw_documents_requirement_id").on(table.requirementId),
+    foreignKey({
+      columns: [table.applicationId],
+      foreignColumns: [underwritingApplications.id],
+      name: "uw_documents_application_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "uw_documents_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.requirementId],
+      foreignColumns: [underwritingDocumentRequirements.id],
+      name: "uw_documents_requirement_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Team members can view underwriting_documents", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can insert underwriting_documents", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can update underwriting_documents", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team owners can delete underwriting_documents", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT team_id FROM public.users_on_team WHERE user_id = auth.uid() AND role = 'owner'))`,
+    }),
+  ],
+);
+
+export const underwritingDocumentsRelations = relations(
+  underwritingDocuments,
+  ({ one }) => ({
+    application: one(underwritingApplications, {
+      fields: [underwritingDocuments.applicationId],
+      references: [underwritingApplications.id],
+    }),
+    team: one(teams, {
+      fields: [underwritingDocuments.teamId],
+      references: [teams.id],
+    }),
+    requirement: one(underwritingDocumentRequirements, {
+      fields: [underwritingDocuments.requirementId],
+      references: [underwritingDocumentRequirements.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// Underwriting Scores
+// ============================================================================
+
+export const underwritingScores = pgTable(
+  "underwriting_scores",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    applicationId: uuid("application_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // AI recommendation
+    recommendation: underwritingRecommendationEnum("recommendation"),
+    confidence: underwritingConfidenceEnum("confidence"),
+
+    // Detailed results
+    buyBoxResults: jsonb("buy_box_results"),
+    bankAnalysis: jsonb("bank_analysis"),
+    extractedMetrics: jsonb("extracted_metrics"),
+    riskFlags: jsonb("risk_flags"),
+    priorMcaFlags: jsonb("prior_mca_flags"),
+    aiNarrative: text("ai_narrative"),
+
+    // Timestamps
+    scoredAt: timestamp("scored_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_uw_scores_application_id").on(table.applicationId),
+    index("idx_uw_scores_team_id").on(table.teamId),
+    foreignKey({
+      columns: [table.applicationId],
+      foreignColumns: [underwritingApplications.id],
+      name: "uw_scores_application_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "uw_scores_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can view underwriting_scores", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can insert underwriting_scores", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can update underwriting_scores", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const underwritingScoresRelations = relations(
+  underwritingScores,
+  ({ one }) => ({
+    application: one(underwritingApplications, {
+      fields: [underwritingScores.applicationId],
+      references: [underwritingApplications.id],
+    }),
+    team: one(teams, {
+      fields: [underwritingScores.teamId],
       references: [teams.id],
     }),
   }),

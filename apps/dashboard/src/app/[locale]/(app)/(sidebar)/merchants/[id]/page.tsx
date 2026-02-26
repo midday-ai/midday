@@ -26,6 +26,9 @@ export default async function MerchantDetailPage(props: Props) {
   batchPrefetch([
     trpc.merchants.getMcaDeals.queryOptions({ merchantId: params.id }),
     trpc.merchants.getMcaDealStats.queryOptions({ merchantId: params.id }),
+    trpc.underwritingApplications.getByMerchant.queryOptions({
+      merchantId: params.id,
+    }),
   ]);
 
   return (
