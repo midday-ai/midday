@@ -26,7 +26,7 @@ const OAuthCallbackPage = async (props: Props) => {
 
   return (
     <>
-      <EventEmitter status={status} />
+      <EventEmitter status={status} error={errorCode} />
       <div className="h-screen flex flex-col items-center justify-center text-center px-8">
         {isError ? (
           <>

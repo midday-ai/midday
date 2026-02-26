@@ -6,17 +6,19 @@ import type { OAuthStatus } from "./schema";
 
 type Props = {
   status: OAuthStatus;
+  error?: string;
 };
 
-export const EventEmitter = ({ status }: Props) => {
+export const EventEmitter = ({ status, error }: Props) => {
   useEffect(() => {
     if (!status) {
       return;
     }
 
-    const message: OAuthMessage = {
-      type: status === "success" ? "app_oauth_completed" : "app_oauth_error",
-    };
+    const message: OAuthMessage =
+      status === "success"
+        ? { type: "app_oauth_completed" }
+        : { type: "app_oauth_error", error };
 
     let channel: BroadcastChannel | null = null;
 
@@ -48,7 +50,7 @@ export const EventEmitter = ({ status }: Props) => {
       clearTimeout(timeout);
       channel?.close();
     };
-  }, [status]);
+  }, [status, error]);
 
   return null;
 };

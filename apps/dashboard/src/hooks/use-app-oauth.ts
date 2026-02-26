@@ -1,5 +1,6 @@
 "use client";
 
+import type { OAuthErrorCode } from "@midday/app-store/oauth-errors";
 import { createClient } from "@midday/supabase/client";
 import { useEffect, useRef, useState } from "react";
 import { isOAuthMessage, OAUTH_CHANNEL_NAME } from "@/utils/oauth-message";
@@ -45,13 +46,16 @@ export function useAppOAuth({
       setIsLoading(false);
     };
 
-    const handleOAuthError = () => {
+    const handleOAuthError = (errorCode?: OAuthErrorCode) => {
       if (oauthCompleted) return;
       oauthCompleted = true;
       cleanup();
       // Don't close the popup immediately - let the user read the error message
       // displayed at /oauth-callback?status=error before closing it themselves
-      onError?.(new Error("OAuth connection failed"));
+      // Keep explicit user cancellation silent, but surface real callback failures.
+      if (errorCode !== "access_denied") {
+        onError?.(new Error("OAuth connection failed"));
+      }
       setIsLoading(false);
     };
 
@@ -71,7 +75,7 @@ export function useAppOAuth({
         if (e.data.type === "app_oauth_completed") {
           handleOAuthComplete();
         } else if (e.data.type === "app_oauth_error") {
-          handleOAuthError();
+          handleOAuthError(e.data.error);
         }
       }
     };
@@ -128,14 +132,13 @@ export function useAppOAuth({
       // Navigate the popup to the OAuth URL
       popup.location.href = url;
 
-      // Check if popup was closed manually
+      // Treat manual popup close as a user cancel, not an OAuth error toast.
       checkInterval = setInterval(() => {
         if (popup?.closed && !oauthCompleted) {
           clearInterval(checkInterval!);
           popupClosedTimeout = setTimeout(() => {
             if (!oauthCompleted) {
               cleanup();
-              onError?.(new Error("OAuth popup was closed without completing"));
               setIsLoading(false);
             }
           }, 1500);

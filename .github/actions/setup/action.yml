@@ -7,7 +7,7 @@ runs:
     - name: Setup Bun
       uses: oven-sh/setup-bun@v2
       with:
-        bun-version: v1.3.9
+        bun-version: v1.3.10
 
     - name: Mount bun global cache
       uses: useblacksmith/stickydisk@v1
