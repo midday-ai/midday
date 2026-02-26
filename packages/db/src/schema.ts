@@ -3646,6 +3646,11 @@ export const mcaDeals = pgTable(
       foreignColumns: [teams.id],
       name: "mca_deals_team_id_fkey",
     }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.underwritingApplicationId],
+      foreignColumns: [underwritingApplications.id],
+      name: "mca_deals_uw_application_id_fkey",
+    }).onDelete("set null"),
     pgPolicy("Team members can manage MCA deals", {
       as: "permissive",
       for: "all",
@@ -4482,9 +4487,9 @@ export const underwritingDocumentRequirements = pgTable(
     teamId: uuid("team_id").notNull(),
     name: text("name").notNull(),
     description: text("description"),
-    required: boolean("required").default(true),
+    required: boolean("required").notNull().default(true),
     appliesToStates: text("applies_to_states").array().default([]),
-    sortOrder: integer("sort_order").default(0),
+    sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .defaultNow()
       .notNull(),
@@ -4544,9 +4549,9 @@ export const underwritingApplications = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     merchantId: uuid("merchant_id").notNull(),
     teamId: uuid("team_id").notNull(),
-    status: underwritingApplicationStatusEnum("status").default(
-      "pending_documents",
-    ),
+    status: underwritingApplicationStatusEnum("status")
+      .notNull()
+      .default("pending_documents"),
 
     // Requested funding details
     requestedAmountMin: numericCasted("requested_amount_min", {
@@ -4668,14 +4673,13 @@ export const underwritingDocuments = pgTable(
     documentType: text("document_type"),
 
     // Processing
-    processingStatus:
-      underwritingDocProcessingStatusEnum("processing_status").default(
-        "pending",
-      ),
+    processingStatus: underwritingDocProcessingStatusEnum("processing_status")
+      .notNull()
+      .default("pending"),
     extractionResults: jsonb("extraction_results"),
 
     // Waiver
-    waived: boolean("waived").default(false),
+    waived: boolean("waived").notNull().default(false),
     waiveReason: text("waive_reason"),
 
     // Timestamps

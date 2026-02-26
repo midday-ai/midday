@@ -49,9 +49,9 @@ CREATE TABLE underwriting_document_requirements (
   team_id uuid NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
   name text NOT NULL,
   description text,
-  required boolean DEFAULT true,
+  required boolean NOT NULL DEFAULT true,
   applies_to_states text[] DEFAULT '{}',
-  sort_order integer DEFAULT 0,
+  sort_order integer NOT NULL DEFAULT 0,
   created_at timestamptz DEFAULT now() NOT NULL
 );
 
@@ -79,7 +79,7 @@ CREATE TABLE underwriting_applications (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   merchant_id uuid NOT NULL REFERENCES merchants(id) ON DELETE CASCADE,
   team_id uuid NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-  status underwriting_application_status DEFAULT 'pending_documents',
+  status underwriting_application_status NOT NULL DEFAULT 'pending_documents',
 
   -- Requested funding details
   requested_amount_min numeric(12,2),
@@ -138,11 +138,11 @@ CREATE TABLE underwriting_documents (
   document_type text,
 
   -- Processing
-  processing_status underwriting_doc_processing_status DEFAULT 'pending',
+  processing_status underwriting_doc_processing_status NOT NULL DEFAULT 'pending',
   extraction_results jsonb,
 
   -- Waiver
-  waived boolean DEFAULT false,
+  waived boolean NOT NULL DEFAULT false,
   waive_reason text,
 
   -- Timestamps
