@@ -20,7 +20,17 @@ const getTransactionsSchema = z.object({
   start: z.string().nullable().optional().describe("Start date (ISO 8601)"),
   end: z.string().nullable().optional().describe("End date (ISO 8601)"),
   statuses: z
-    .array(z.enum(["pending", "completed", "archived", "posted", "excluded"]))
+    .array(
+      z.enum([
+        "blank",
+        "receipt_match",
+        "in_review",
+        "export_error",
+        "exported",
+        "excluded",
+        "archived",
+      ]),
+    )
     .nullable()
     .optional()
     .describe("Status filter"),
