@@ -6,8 +6,6 @@ import { AnimatedNumber } from "../animated-number";
 import { FormatAmount } from "../format-amount";
 import { AmountInput } from "./amount-input";
 import { LabelInput } from "./label-input";
-import { TaxInput } from "./tax-input";
-import { VATInput } from "./vat-input";
 
 export function Summary() {
   const { control, setValue } = useFormContext();
@@ -30,34 +28,9 @@ export function Summary() {
     name: "template.locale",
   });
 
-  const includeTax = useWatch({
-    control,
-    name: "template.includeTax",
-  });
-
-  const taxRate = useWatch({
-    control,
-    name: "template.taxRate",
-  });
-
-  const vatRate = useWatch({
-    control,
-    name: "template.vatRate",
-  });
-
-  const includeVat = useWatch({
-    control,
-    name: "template.includeVat",
-  });
-
   const includeDiscount = useWatch({
     control,
     name: "template.includeDiscount",
-  });
-
-  const includeLineItemTax = useWatch({
-    control,
-    name: "template.includeLineItemTax",
   });
 
   const lineItems = useWatch({
@@ -70,50 +43,20 @@ export function Summary() {
     name: "discount",
   });
 
-  const {
-    subTotal,
-    total,
-    vat: totalVAT,
-    tax: totalTax,
-  } = calculateTotal({
+  const { subTotal, total } = calculateTotal({
     lineItems,
-    taxRate,
-    vatRate,
-    includeVat,
-    includeTax,
-    includeLineItemTax,
     discount: discount ?? 0,
   });
 
   const updateFormValues = useCallback(() => {
     setValue("amount", total, { shouldValidate: true });
-    setValue("vat", totalVAT, { shouldValidate: true });
-    setValue("tax", totalTax, { shouldValidate: true });
     setValue("subtotal", subTotal, { shouldValidate: true });
     setValue("discount", discount ?? 0, { shouldValidate: true });
-  }, [total, totalVAT, totalTax, subTotal, discount]);
+  }, [total, subTotal, discount]);
 
   useEffect(() => {
     updateFormValues();
   }, [updateFormValues]);
-
-  useEffect(() => {
-    if (!includeTax) {
-      setValue("template.taxRate", 0, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    }
-  }, [includeTax]);
-
-  useEffect(() => {
-    if (!includeVat) {
-      setValue("template.vatRate", 0, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    }
-  }, [includeVat]);
 
   useEffect(() => {
     if (!includeDiscount) {
@@ -159,77 +102,6 @@ export function Summary() {
         </div>
       )}
 
-      {includeVat && (
-        <div className="flex justify-between items-center py-1">
-          <div className="flex items-center gap-1">
-            <LabelInput
-              className="flex-shrink-0 min-w-5"
-              name="template.vatLabel"
-              onSave={(value) => {
-                updateTemplate({ vatLabel: value });
-              }}
-            />
-
-            <VATInput />
-          </div>
-
-          <span className="text-right text-[11px] text-[#878787]">
-            <FormatAmount
-              amount={totalVAT}
-              maximumFractionDigits={2}
-              currency={currency}
-              locale={locale}
-            />
-          </span>
-        </div>
-      )}
-
-      {includeTax && !includeLineItemTax && (
-        <div className="flex justify-between items-center py-1">
-          <div className="flex items-center gap-1">
-            <LabelInput
-              className="flex-shrink-0 min-w-5"
-              name="template.taxLabel"
-              onSave={(value) => {
-                updateTemplate({ taxLabel: value });
-              }}
-            />
-
-            <TaxInput />
-          </div>
-
-          <span className="text-right text-[11px] text-[#878787]">
-            <FormatAmount
-              amount={totalTax}
-              maximumFractionDigits={2}
-              currency={currency}
-              locale={locale}
-            />
-          </span>
-        </div>
-      )}
-
-      {includeLineItemTax && totalTax > 0 && (
-        <div className="flex justify-between items-center py-1">
-          <LabelInput
-            className="flex-shrink-0 min-w-5"
-            name="template.taxLabel"
-            onSave={(value) => {
-              updateTemplate({ taxLabel: value });
-            }}
-          />
-
-          <span className="text-right text-[11px] text-[#878787]">
-            <FormatAmount
-              amount={totalTax}
-              maximumFractionDigits={2}
-              currency={currency}
-              locale={locale}
-            />
-          </span>
-        </div>
-      )}
-
       <div className="flex justify-between items-center py-4 mt-2 border-t border-border">
         <LabelInput
           name="template.totalSummaryLabel"
@@ -241,11 +113,7 @@ export function Summary() {
           <AnimatedNumber
             value={total}
             currency={currency}
-            maximumFractionDigits={
-              includeTax || includeVat || includeLineItemTax
-                ? 2
-                : maximumFractionDigits
-            }
+            maximumFractionDigits={maximumFractionDigits}
           />
         </span>
       </div>
