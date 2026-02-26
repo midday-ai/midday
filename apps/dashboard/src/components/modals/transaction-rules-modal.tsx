@@ -183,6 +183,7 @@ export function TransactionRulesModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[520px] max-h-[80vh] overflow-auto">
+        <div className="p-4">
         <DialogHeader>
           <DialogTitle>
             {view === "list"
@@ -523,6 +524,7 @@ export function TransactionRulesModal({
             </div>
           </div>
         )}
+        </div>
       </DialogContent>
     </Dialog>
   );

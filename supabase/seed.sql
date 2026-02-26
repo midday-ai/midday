@@ -22,8 +22,8 @@ INSERT INTO auth.users (
   phone_change_token,
   reauthentication_token
 ) VALUES (
-  '00000000-0000-0000-0000-000000000001',
-  '00000000-0000-0000-0000-000000000000',
+  '00000000-0000-4000-a000-000000000001',
+  '00000000-0000-4000-a000-000000000000',
   'suph.tweel@gmail.com',
   crypt('admin123', gen_salt('bf')),
   NOW(),
@@ -47,11 +47,11 @@ INSERT INTO auth.identities (
   created_at,
   updated_at
 ) VALUES (
-  '00000000-0000-0000-0000-000000000001',
-  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-4000-a000-000000000001',
+  '00000000-0000-4000-a000-000000000001',
   'suph.tweel@gmail.com',
   'email',
-  '{"sub": "00000000-0000-0000-0000-000000000001", "email": "suph.tweel@gmail.com"}',
+  '{"sub": "00000000-0000-4000-a000-000000000001", "email": "suph.tweel@gmail.com"}',
   NOW(),
   NOW(),
   NOW()
@@ -60,7 +60,7 @@ INSERT INTO auth.identities (
 -- Create profile in public.users table
 INSERT INTO public.users (id, email, full_name, created_at)
 VALUES (
-  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-4000-a000-000000000001',
   'suph.tweel@gmail.com',
   'Suphi Tweel',
   NOW()
@@ -73,10 +73,10 @@ VALUES (
 
 DO $$
 DECLARE
-  v_team_id  uuid := 'a0000000-0000-0000-0000-000000000001';
-  v_bank_op  uuid := 'ba000000-0000-0000-0000-000000000001';
-  v_bank_res uuid := 'ba000000-0000-0000-0000-000000000002';
-  v_user_id  uuid := '00000000-0000-0000-0000-000000000001';
+  v_team_id  uuid := 'a0000000-0000-4000-a000-000000000001';
+  v_bank_op  uuid := 'ba000000-0000-4000-a000-000000000001';
+  v_bank_res uuid := 'ba000000-0000-4000-a000-000000000002';
+  v_user_id  uuid := '00000000-0000-4000-a000-000000000001';
 
   -- Customer IDs (looked up from existing data)
   v_c_sunrise     uuid;
@@ -102,34 +102,34 @@ DECLARE
   v_c_urgentcare  uuid;
 
   -- Deal IDs (deterministic for reproducible seeds)
-  v_d_sunrise     uuid := 'd0000000-0000-0000-0000-000000000001';
-  v_d_martinez    uuid := 'd0000000-0000-0000-0000-000000000002';
-  v_d_bella       uuid := 'd0000000-0000-0000-0000-000000000003';
-  v_d_tonys       uuid := 'd0000000-0000-0000-0000-000000000004';
-  v_d_quickprint  uuid := 'd0000000-0000-0000-0000-000000000005';
-  v_d_westside    uuid := 'd0000000-0000-0000-0000-000000000006';
-  v_d_greenthumb  uuid := 'd0000000-0000-0000-0000-000000000007';
-  v_d_fitness     uuid := 'd0000000-0000-0000-0000-000000000008';
-  v_d_luckydragon uuid := 'd0000000-0000-0000-0000-000000000009';
-  v_d_smith       uuid := 'd0000000-0000-0000-0000-000000000010';
+  v_d_sunrise     uuid := 'd0000000-0000-4000-a000-000000000001';
+  v_d_martinez    uuid := 'd0000000-0000-4000-a000-000000000002';
+  v_d_bella       uuid := 'd0000000-0000-4000-a000-000000000003';
+  v_d_tonys       uuid := 'd0000000-0000-4000-a000-000000000004';
+  v_d_quickprint  uuid := 'd0000000-0000-4000-a000-000000000005';
+  v_d_westside    uuid := 'd0000000-0000-4000-a000-000000000006';
+  v_d_greenthumb  uuid := 'd0000000-0000-4000-a000-000000000007';
+  v_d_fitness     uuid := 'd0000000-0000-4000-a000-000000000008';
+  v_d_luckydragon uuid := 'd0000000-0000-4000-a000-000000000009';
+  v_d_smith       uuid := 'd0000000-0000-4000-a000-000000000010';
   -- New deals (13 total: 10 single + 3 renewal second deals)
-  v_d_harbor         uuid := 'd0000000-0000-0000-0000-000000000011';
-  v_d_bluesky        uuid := 'd0000000-0000-0000-0000-000000000012';
-  v_d_crossfit       uuid := 'd0000000-0000-0000-0000-000000000013';
-  v_d_catering       uuid := 'd0000000-0000-0000-0000-000000000014';
-  v_d_nightowl       uuid := 'd0000000-0000-0000-0000-000000000015';
-  v_d_nailstudio     uuid := 'd0000000-0000-0000-0000-000000000016';
-  v_d_redrock        uuid := 'd0000000-0000-0000-0000-000000000017';
-  v_d_urgentcare     uuid := 'd0000000-0000-0000-0000-000000000018';
+  v_d_harbor         uuid := 'd0000000-0000-4000-a000-000000000011';
+  v_d_bluesky        uuid := 'd0000000-0000-4000-a000-000000000012';
+  v_d_crossfit       uuid := 'd0000000-0000-4000-a000-000000000013';
+  v_d_catering       uuid := 'd0000000-0000-4000-a000-000000000014';
+  v_d_nightowl       uuid := 'd0000000-0000-4000-a000-000000000015';
+  v_d_nailstudio     uuid := 'd0000000-0000-4000-a000-000000000016';
+  v_d_redrock        uuid := 'd0000000-0000-4000-a000-000000000017';
+  v_d_urgentcare     uuid := 'd0000000-0000-4000-a000-000000000018';
   -- Renewal chain deals (paid-off first deals + active second deals)
-  v_d_bookshelf_1    uuid := 'd0000000-0000-0000-0000-000000000019';
-  v_d_bookshelf_2    uuid := 'd0000000-0000-0000-0000-000000000020';
-  v_d_cardinal_1     uuid := 'd0000000-0000-0000-0000-000000000021';
-  v_d_cardinal_2     uuid := 'd0000000-0000-0000-0000-000000000022';
-  v_d_luckydragon_2  uuid := 'd0000000-0000-0000-0000-000000000023';
+  v_d_bookshelf_1    uuid := 'd0000000-0000-4000-a000-000000000019';
+  v_d_bookshelf_2    uuid := 'd0000000-0000-4000-a000-000000000020';
+  v_d_cardinal_1     uuid := 'd0000000-0000-4000-a000-000000000021';
+  v_d_cardinal_2     uuid := 'd0000000-0000-4000-a000-000000000022';
+  v_d_luckydragon_2  uuid := 'd0000000-0000-4000-a000-000000000023';
 
   -- Deal template
-  v_template_id uuid := 'd1000000-0000-0000-0000-000000000001';
+  v_template_id uuid := 'd1000000-0000-4000-a000-000000000001';
 
   -- Tag IDs
   v_tag_vip        uuid;
@@ -139,34 +139,34 @@ DECLARE
   v_tag_seasonal   uuid;
 
   -- Broker IDs (deterministic)
-  v_broker_pinnacle   uuid := 'b0000000-0000-0000-0000-000000000001';
-  v_broker_capital    uuid := 'b0000000-0000-0000-0000-000000000002';
-  v_broker_southwest  uuid := 'b0000000-0000-0000-0000-000000000003';
+  v_broker_pinnacle   uuid := 'b0000000-0000-4000-a000-000000000001';
+  v_broker_capital    uuid := 'b0000000-0000-4000-a000-000000000002';
+  v_broker_southwest  uuid := 'b0000000-0000-4000-a000-000000000003';
 
   -- Syndicator IDs (deterministic)
-  v_syndicator_atlas    uuid := 'c0000000-0000-0000-0000-000000000001';
-  v_syndicator_meridian uuid := 'c0000000-0000-0000-0000-000000000002';
-  v_syndicator_coastal  uuid := 'c0000000-0000-0000-0000-000000000003';
+  v_syndicator_atlas    uuid := 'c0000000-0000-4000-a000-000000000001';
+  v_syndicator_meridian uuid := 'c0000000-0000-4000-a000-000000000002';
+  v_syndicator_coastal  uuid := 'c0000000-0000-4000-a000-000000000003';
 
   -- Collection Stage IDs (deterministic)
-  v_cs_early       uuid := 'c5000000-0000-0000-0000-000000000001';
-  v_cs_promise     uuid := 'c5000000-0000-0000-0000-000000000002';
-  v_cs_plan        uuid := 'c5000000-0000-0000-0000-000000000003';
-  v_cs_escalated   uuid := 'c5000000-0000-0000-0000-000000000004';
-  v_cs_legal       uuid := 'c5000000-0000-0000-0000-000000000005';
-  v_cs_agency      uuid := 'c5000000-0000-0000-0000-000000000006';
-  v_cs_resolved    uuid := 'c5000000-0000-0000-0000-000000000007';
+  v_cs_early       uuid := 'c5000000-0000-4000-a000-000000000001';
+  v_cs_promise     uuid := 'c5000000-0000-4000-a000-000000000002';
+  v_cs_plan        uuid := 'c5000000-0000-4000-a000-000000000003';
+  v_cs_escalated   uuid := 'c5000000-0000-4000-a000-000000000004';
+  v_cs_legal       uuid := 'c5000000-0000-4000-a000-000000000005';
+  v_cs_agency      uuid := 'c5000000-0000-4000-a000-000000000006';
+  v_cs_resolved    uuid := 'c5000000-0000-4000-a000-000000000007';
 
   -- Collection Agency IDs (deterministic)
-  v_agency_premier uuid := 'ca000000-0000-0000-0000-000000000001';
-  v_agency_rapid   uuid := 'ca000000-0000-0000-0000-000000000002';
+  v_agency_premier uuid := 'ca000000-0000-4000-a000-000000000001';
+  v_agency_rapid   uuid := 'ca000000-0000-4000-a000-000000000002';
 
   -- Collection Case IDs (deterministic)
-  v_cc_tonys       uuid := 'cc000000-0000-0000-0000-000000000001';
-  v_cc_westside    uuid := 'cc000000-0000-0000-0000-000000000002';
-  v_cc_redrock     uuid := 'cc000000-0000-0000-0000-000000000003';
-  v_cc_catering    uuid := 'cc000000-0000-0000-0000-000000000004';
-  v_cc_nightowl    uuid := 'cc000000-0000-0000-0000-000000000005';
+  v_cc_tonys       uuid := 'cc000000-0000-4000-a000-000000000001';
+  v_cc_westside    uuid := 'cc000000-0000-4000-a000-000000000002';
+  v_cc_redrock     uuid := 'cc000000-0000-4000-a000-000000000003';
+  v_cc_catering    uuid := 'cc000000-0000-4000-a000-000000000004';
+  v_cc_nightowl    uuid := 'cc000000-0000-4000-a000-000000000005';
 
 BEGIN
 
@@ -209,19 +209,19 @@ BEGIN
 
   INSERT INTO public.bank_connections (id, team_id, institution_id, name, provider, status)
   VALUES
-    ('bc000000-0000-0000-0000-000000000001'::uuid, v_team_id, 'manual_local', 'Manual Accounts', 'plaid', 'connected')
+    ('bc000000-0000-4000-a000-000000000001'::uuid, v_team_id, 'manual_local', 'Manual Accounts', 'plaid', 'connected')
   ON CONFLICT (institution_id, team_id) DO NOTHING;
 
   INSERT INTO public.bank_accounts (id, team_id, created_by, name, currency, balance, type, manual, enabled, account_id, bank_connection_id)
   VALUES
     (v_bank_op, v_team_id, v_user_id, 'Abacus Capital Operating', 'USD', 847500.00, 'depository', false, true, 'acct_operating_001',
-     'bc000000-0000-0000-0000-000000000001'::uuid)
+     'bc000000-0000-4000-a000-000000000001'::uuid)
   ON CONFLICT (id) DO NOTHING;
 
   INSERT INTO public.bank_accounts (id, team_id, created_by, name, currency, balance, type, manual, enabled, account_id, bank_connection_id)
   VALUES
     (v_bank_res, v_team_id, v_user_id, 'Abacus Capital Reserve', 'USD', 250000.00, 'depository', false, true, 'acct_reserve_001',
-     'bc000000-0000-0000-0000-000000000001'::uuid)
+     'bc000000-0000-4000-a000-000000000001'::uuid)
   ON CONFLICT (id) DO NOTHING;
 
   -- ========================================================================
@@ -1611,7 +1611,7 @@ BEGIN
     originator_name, originator_routing, originator_account,
     status, submitted_at, completed_at
   ) VALUES (
-    'ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_user_id,
+    'ab000000-0000-4000-a000-000000000001'::uuid, v_team_id, v_user_id,
     'ACH-2026-0218-001', '2026-02-18', 'Daily MCA collections — Feb 18',
     1990.00, 5, v_bank_op,
     'Abacus Capital LLC', '021000021', '****4521',
@@ -1624,7 +1624,7 @@ BEGIN
     originator_name, originator_routing, originator_account,
     status, submitted_at
   ) VALUES (
-    'ab000000-0000-0000-0000-000000000002'::uuid, v_team_id, v_user_id,
+    'ab000000-0000-4000-a000-000000000002'::uuid, v_team_id, v_user_id,
     'ACH-2026-0224-001', '2026-02-24', 'Daily MCA collections — Feb 24',
     1770.00, 4, v_bank_op,
     'Abacus Capital LLC', '021000021', '****4521',
@@ -1637,7 +1637,7 @@ BEGIN
     originator_name, originator_routing, originator_account,
     status
   ) VALUES (
-    'ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_user_id,
+    'ab000000-0000-4000-a000-000000000003'::uuid, v_team_id, v_user_id,
     'ACH-2026-0226-001', CURRENT_DATE, 'Daily MCA collections — today',
     2065.00, 5, v_bank_op,
     'Abacus Capital LLC', '021000021', '****4521',
@@ -1648,30 +1648,30 @@ BEGIN
   -- Batch 1 (completed)
   INSERT INTO ach_batch_items (batch_id, team_id, deal_id, receiver_name, receiver_routing, receiver_account, amount, transaction_code, status)
   VALUES
-    ('ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_d_sunrise,    'Sunrise Diner LLC',        '021000021', '****4521', 485.00, '27', 'completed'),
-    ('ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_d_bella,      'Bella Salon & Spa Inc',    '026009593', '****6190', 275.00, '27', 'completed'),
-    ('ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_d_quickprint, 'Quick Print Solutions LLC', '031101266', '****8877', 425.00, '27', 'completed'),
-    ('ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_d_greenthumb, 'Green Thumb Landscaping',  '021000021', '****5612', 295.00, '27', 'completed'),
-    ('ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_d_fitness,    'Fitness First Gym LLC',    '091000019', '****9043', 510.00, '27', 'completed')
+    ('ab000000-0000-4000-a000-000000000001'::uuid, v_team_id, v_d_sunrise,    'Sunrise Diner LLC',        '021000021', '****4521', 485.00, '27', 'completed'),
+    ('ab000000-0000-4000-a000-000000000001'::uuid, v_team_id, v_d_bella,      'Bella Salon & Spa Inc',    '026009593', '****6190', 275.00, '27', 'completed'),
+    ('ab000000-0000-4000-a000-000000000001'::uuid, v_team_id, v_d_quickprint, 'Quick Print Solutions LLC', '031101266', '****8877', 425.00, '27', 'completed'),
+    ('ab000000-0000-4000-a000-000000000001'::uuid, v_team_id, v_d_greenthumb, 'Green Thumb Landscaping',  '021000021', '****5612', 295.00, '27', 'completed'),
+    ('ab000000-0000-4000-a000-000000000001'::uuid, v_team_id, v_d_fitness,    'Fitness First Gym LLC',    '091000019', '****9043', 510.00, '27', 'completed')
   ON CONFLICT DO NOTHING;
 
   -- Batch 2 (processing)
   INSERT INTO ach_batch_items (batch_id, team_id, deal_id, receiver_name, receiver_routing, receiver_account, amount, transaction_code, status)
   VALUES
-    ('ab000000-0000-0000-0000-000000000002'::uuid, v_team_id, v_d_sunrise,    'Sunrise Diner LLC',        '021000021', '****4521', 485.00, '27', 'pending'),
-    ('ab000000-0000-0000-0000-000000000002'::uuid, v_team_id, v_d_bella,      'Bella Salon & Spa Inc',    '026009593', '****6190', 275.00, '27', 'pending'),
-    ('ab000000-0000-0000-0000-000000000002'::uuid, v_team_id, v_d_quickprint, 'Quick Print Solutions LLC', '031101266', '****8877', 425.00, '27', 'pending'),
-    ('ab000000-0000-0000-0000-000000000002'::uuid, v_team_id, v_d_fitness,    'Fitness First Gym LLC',    '091000019', '****9043', 510.00, '27', 'pending')
+    ('ab000000-0000-4000-a000-000000000002'::uuid, v_team_id, v_d_sunrise,    'Sunrise Diner LLC',        '021000021', '****4521', 485.00, '27', 'pending'),
+    ('ab000000-0000-4000-a000-000000000002'::uuid, v_team_id, v_d_bella,      'Bella Salon & Spa Inc',    '026009593', '****6190', 275.00, '27', 'pending'),
+    ('ab000000-0000-4000-a000-000000000002'::uuid, v_team_id, v_d_quickprint, 'Quick Print Solutions LLC', '031101266', '****8877', 425.00, '27', 'pending'),
+    ('ab000000-0000-4000-a000-000000000002'::uuid, v_team_id, v_d_fitness,    'Fitness First Gym LLC',    '091000019', '****9043', 510.00, '27', 'pending')
   ON CONFLICT DO NOTHING;
 
   -- Batch 3 (draft — today)
   INSERT INTO ach_batch_items (batch_id, team_id, deal_id, receiver_name, receiver_routing, receiver_account, amount, transaction_code, status)
   VALUES
-    ('ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_d_sunrise,    'Sunrise Diner LLC',        '021000021', '****4521', 485.00, '27', 'pending'),
-    ('ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_d_bella,      'Bella Salon & Spa Inc',    '026009593', '****6190', 275.00, '27', 'pending'),
-    ('ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_d_tonys,      'Tony''s Pizzeria Inc',     '121000248', '****3344', 380.00, '27', 'pending'),
-    ('ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_d_quickprint, 'Quick Print Solutions LLC', '031101266', '****8877', 425.00, '27', 'pending'),
-    ('ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_d_fitness,    'Fitness First Gym LLC',    '091000019', '****9043', 510.00, '27', 'pending')
+    ('ab000000-0000-4000-a000-000000000003'::uuid, v_team_id, v_d_sunrise,    'Sunrise Diner LLC',        '021000021', '****4521', 485.00, '27', 'pending'),
+    ('ab000000-0000-4000-a000-000000000003'::uuid, v_team_id, v_d_bella,      'Bella Salon & Spa Inc',    '026009593', '****6190', 275.00, '27', 'pending'),
+    ('ab000000-0000-4000-a000-000000000003'::uuid, v_team_id, v_d_tonys,      'Tony''s Pizzeria Inc',     '121000248', '****3344', 380.00, '27', 'pending'),
+    ('ab000000-0000-4000-a000-000000000003'::uuid, v_team_id, v_d_quickprint, 'Quick Print Solutions LLC', '031101266', '****8877', 425.00, '27', 'pending'),
+    ('ab000000-0000-4000-a000-000000000003'::uuid, v_team_id, v_d_fitness,    'Fitness First Gym LLC',    '091000019', '****9043', 510.00, '27', 'pending')
   ON CONFLICT DO NOTHING;
 
   -- ========================================================================
@@ -1694,7 +1694,7 @@ BEGIN
   VALUES (gen_random_uuid(), v_team_id, 'Rock Solid LLC', 'rock@example.com', 'active')
   RETURNING id INTO v_risk_merchant_id;
 
-  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a1';
+  v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a1';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
   VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'ROCK-001', 50000, 1.35, 67500, 1125, 0, 67500, 'paid_off', now() - interval '90 days', 'daily');
 
@@ -1715,7 +1715,7 @@ BEGIN
   VALUES (gen_random_uuid(), v_team_id, 'Sprint Corp', 'sprint@example.com', 'active')
   RETURNING id INTO v_risk_merchant_id;
 
-  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a2';
+  v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a2';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
   VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'SPRINT-001', 40000, 1.40, 56000, 933, 20000, 36000, 'active', now() - interval '30 days', 'daily');
 
@@ -1736,7 +1736,7 @@ BEGIN
   VALUES (gen_random_uuid(), v_team_id, 'Stumble & Rise Inc', 'stumbler@example.com', 'active')
   RETURNING id INTO v_risk_merchant_id;
 
-  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a3';
+  v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a3';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
   VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'STMBL-001', 30000, 1.38, 41400, 690, 17250, 24150, 0, 'active', now() - interval '45 days', 'daily');
 
@@ -1771,7 +1771,7 @@ BEGIN
   VALUES (gen_random_uuid(), v_team_id, 'Drift Along Co', 'drifter@example.com', 'active')
   RETURNING id INTO v_risk_merchant_id;
 
-  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a4';
+  v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a4';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
   VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'DRIFT-001', 25000, 1.42, 35500, 591, 21300, 14200, 'active', now() - interval '40 days', 'daily');
 
@@ -1789,7 +1789,7 @@ BEGIN
   VALUES (gen_random_uuid(), v_team_id, 'Sliding Scale LLC', 'slider@example.com', 'active')
   RETURNING id INTO v_risk_merchant_id;
 
-  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a5';
+  v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a5';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
   VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'SLIDE-001', 35000, 1.36, 47600, 793, 31920, 15680, 0, 'late', now() - interval '60 days', 'daily');
 
@@ -1824,7 +1824,7 @@ BEGIN
   VALUES (gen_random_uuid(), v_team_id, 'Bounce House Inc', 'bouncer@example.com', 'active')
   RETURNING id INTO v_risk_merchant_id;
 
-  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a6';
+  v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a6';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
   VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'BNCE-001', 20000, 1.45, 29000, 483, 22000, 7000, 0, 'active', now() - interval '50 days', 'daily');
 
@@ -1847,7 +1847,7 @@ BEGIN
   VALUES (gen_random_uuid(), v_team_id, 'Comeback Kid LLC', 'comeback@example.com', 'active')
   RETURNING id INTO v_risk_merchant_id;
 
-  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a7';
+  v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a7';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
   VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'CMBK-001', 45000, 1.32, 59400, 990, 29700, 29700, 0, 'active', now() - interval '50 days', 'daily');
 
@@ -1878,7 +1878,7 @@ BEGIN
   RETURNING id INTO v_risk_merchant_id;
 
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
-  VALUES ('d0000000-0000-0000-0000-0000000000a8', v_team_id, v_risk_merchant_id, 'NEW-001', 30000, 1.35, 40500, 675, 40500, 0, 'active', now(), 'daily');
+  VALUES ('d0000000-0000-4000-a000-0000000000a8', v_team_id, v_risk_merchant_id, 'NEW-001', 30000, 1.35, 40500, 675, 40500, 0, 'active', now(), 'daily');
 
   -- Re-run dynamic balance + NSF calculation for risk merchants too
   UPDATE mca_deals d
