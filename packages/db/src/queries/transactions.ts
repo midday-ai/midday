@@ -1495,6 +1495,25 @@ export async function updateTransaction(
 ) {
   const { id, teamId, userId, ...dataToUpdate } = params;
 
+  // When dealCode is provided, resolve it to matchedDealId for the join-based read path
+  if ("dealCode" in dataToUpdate) {
+    const { dealCode, ...rest } = dataToUpdate;
+    let matchedDealId: string | null = null;
+
+    if (dealCode) {
+      const [deal] = await db
+        .select({ id: mcaDeals.id })
+        .from(mcaDeals)
+        .where(
+          and(eq(mcaDeals.dealCode, dealCode), eq(mcaDeals.teamId, teamId)),
+        );
+      matchedDealId = deal?.id ?? null;
+    }
+
+    Object.assign(dataToUpdate, { ...rest, matchedDealId });
+    delete (dataToUpdate as Record<string, unknown>).dealCode;
+  }
+
   const [result] = await db
     .update(transactions)
     .set(dataToUpdate)
