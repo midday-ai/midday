@@ -26,7 +26,7 @@ echo "=== Abacus Demo Seed: Starting ==="
 echo ""
 
 # Step 1: Base data (users, teams, bank accounts, merchants, deals, transactions, payments, invoices)
-echo "[1/5] Running seed-local.mjs (JS-based base seed)..."
+echo "[1/6] Running seed-local.mjs (JS-based base seed)..."
 node "$SCRIPT_DIR/seed-local.mjs"
 echo "  Done."
 echo ""
@@ -34,26 +34,32 @@ echo ""
 # Step 2: MCA features (underwriting, deal bank accounts, deal fees, disclosures,
 #          transaction rules, export templates, ACH batches, reconciliation sessions,
 #          merchant documents, messages, notifications, payoff requests, match audit log)
-echo "[2/5] Running seed-mca-features.sql..."
+echo "[2/6] Running seed-mca-features.sql..."
 $PSQL -f "$SCRIPT_DIR/seed-mca-features.sql"
 echo "  Done."
 echo ""
 
 # Step 3: Brokers, syndicators, broker commissions, syndication participants
-echo "[3/5] Running seed-brokers-syndicators-v2.sql..."
+echo "[3/6] Running seed-brokers-syndicators-v2.sql..."
 $PSQL -f "$SCRIPT_DIR/seed-brokers-syndicators-v2.sql"
 echo "  Done."
 echo ""
 
 # Step 4: Diverse MCA scenarios (NSF storm, early payoff, seasonal slowdown, etc.)
-echo "[4/5] Running seed-diverse-scenarios.sql..."
+echo "[4/6] Running seed-diverse-scenarios.sql..."
 $PSQL -f "$SCRIPT_DIR/seed-diverse-scenarios.sql"
 echo "  Done."
 echo ""
 
 # Step 5: Portal sessions/invites/access, config tables, vault docs, inbox, deal column backfills
-echo "[5/5] Running seed-portal-and-config.sql..."
+echo "[5/6] Running seed-portal-and-config.sql..."
 $PSQL -f "$SCRIPT_DIR/seed-portal-and-config.sql"
+echo "  Done."
+echo ""
+
+# Step 6: Risk scoring seed data (8 merchant archetypes with payment histories)
+echo "[6/6] Running seed-risk-data.sql..."
+$PSQL -f "$SCRIPT_DIR/seed-risk-data.sql"
 echo "  Done."
 echo ""
 

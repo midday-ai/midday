@@ -60,3 +60,6 @@ export * from "./collections";
 export * from "./collection-notes";
 export * from "./collection-config";
 export * from "./collection-notifications";
+export * from "./risk-config";
+export * from "./risk-scores";
+export * from "./risk-events";

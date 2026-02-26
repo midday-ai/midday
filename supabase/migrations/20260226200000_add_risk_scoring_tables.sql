@@ -1,0 +1,81 @@
+-- Risk Configuration (per-team settings)
+create table if not exists risk_config (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references teams(id) on delete cascade,
+  preset text not null default 'balanced',
+  weights jsonb not null default '{"consistency":0.25,"nsf":0.25,"velocity":0.15,"recovery":0.15,"progress":0.10,"amounts":0.10}',
+  decay_half_life_days integer not null default 30,
+  baseline_score integer not null default 50,
+  event_impacts jsonb,
+  band_thresholds jsonb not null default '{"low_max":33,"high_min":67}',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint risk_config_team_id_unique unique (team_id)
+);
+
+create index if not exists idx_risk_config_team_id on risk_config(team_id);
+
+-- Risk Scores (one per deal, upserted on each recalculation)
+create table if not exists risk_scores (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references teams(id) on delete cascade,
+  deal_id uuid not null references mca_deals(id) on delete cascade,
+  overall_score numeric(5,2) not null default 50,
+  previous_score numeric(5,2),
+  band text not null default 'medium',
+  sub_scores jsonb not null default '{}',
+  calculated_at timestamptz not null default now(),
+  triggering_payment_id uuid references mca_payments(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint risk_scores_deal_id_unique unique (deal_id)
+);
+
+create index if not exists idx_risk_scores_team_id on risk_scores(team_id);
+create index if not exists idx_risk_scores_deal_id on risk_scores(deal_id);
+create index if not exists idx_risk_scores_band on risk_scores(band);
+
+-- Risk Events (immutable log of events that influence the score)
+create table if not exists risk_events (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references teams(id) on delete cascade,
+  deal_id uuid not null references mca_deals(id) on delete cascade,
+  payment_id uuid references mca_payments(id) on delete set null,
+  event_type text not null,
+  event_date timestamptz not null default now(),
+  raw_impact numeric(5,2) not null default 0,
+  decayed_impact numeric(5,2),
+  metadata jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_risk_events_deal_id on risk_events(deal_id);
+create index if not exists idx_risk_events_team_id on risk_events(team_id);
+create index if not exists idx_risk_events_event_date on risk_events(event_date);
+
+-- RLS Policies
+alter table risk_config enable row level security;
+alter table risk_scores enable row level security;
+alter table risk_events enable row level security;
+
+create policy "Team members can manage risk config"
+  on risk_config for all to public
+  using (team_id in (select private.get_teams_for_authenticated_user()));
+
+create policy "Team members can manage risk scores"
+  on risk_scores for all to public
+  using (team_id in (select private.get_teams_for_authenticated_user()));
+
+create policy "Team members can manage risk events"
+  on risk_events for all to public
+  using (team_id in (select private.get_teams_for_authenticated_user()));
+
+-- Updated-at trigger for risk_config
+create trigger set_risk_config_updated_at
+  before update on risk_config
+  for each row execute function moddatetime(updated_at);
+
+-- Updated-at trigger for risk_scores
+create trigger set_risk_scores_updated_at
+  before update on risk_scores
+  for each row execute function moddatetime(updated_at);

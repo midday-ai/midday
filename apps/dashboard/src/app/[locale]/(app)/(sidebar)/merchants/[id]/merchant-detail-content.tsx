@@ -5,6 +5,8 @@ import {
   type DealStatus,
 } from "@/components/deal-status-badge";
 import { FormatAmount } from "@/components/format-amount";
+import { RiskBadge } from "@/components/risk-badge";
+import { RiskScoreCard } from "@/components/risk-score-card";
 import { useTRPC } from "@/trpc/client";
 import { getWebsiteLogo } from "@/utils/logos";
 import { TZDate } from "@date-fns/tz";
@@ -51,6 +53,14 @@ export function MerchantDetailContent({ merchantId, merchant }: Props) {
 
   const { data: stats } = useQuery(
     trpc.merchants.getMcaDealStats.queryOptions({ merchantId }),
+  );
+
+  const dealIds = deals?.map((d) => d.id) ?? [];
+  const { data: riskScores } = useQuery(
+    trpc.risk.getScores.queryOptions({ dealIds }),
+  );
+  const riskScoreMap = new Map(
+    (riskScores ?? []).map((s) => [s.dealId, s]),
   );
 
   const collectionRate =
@@ -184,6 +194,9 @@ export function MerchantDetailContent({ merchantId, merchant }: Props) {
                   <TableHead className="text-[12px] font-medium text-[#606060] text-center">
                     NSFs
                   </TableHead>
+                  <TableHead className="text-[12px] font-medium text-[#606060] text-center">
+                    Risk
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -256,6 +269,27 @@ export function MerchantDetailContent({ merchantId, merchant }: Props) {
                         <span className="text-[12px] text-[#878787]">0</span>
                       )}
                     </TableCell>
+                    <TableCell className="text-center">
+                      {riskScoreMap.get(deal.id) ? (
+                        <RiskBadge
+                          score={riskScoreMap.get(deal.id)!.overallScore}
+                          band={
+                            riskScoreMap.get(deal.id)!.band as
+                              | "low"
+                              | "medium"
+                              | "high"
+                          }
+                          previousScore={
+                            riskScoreMap.get(deal.id)!.previousScore
+                          }
+                          compact
+                        />
+                      ) : (
+                        <span className="text-[12px] text-[#878787]">
+                          &mdash;
+                        </span>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -271,6 +305,9 @@ export function MerchantDetailContent({ merchantId, merchant }: Props) {
           </div>
         )}
       </div>
+
+      {/* Risk Score for selected deal */}
+      {selectedDealId && <RiskScoreCard dealId={selectedDealId} />}
 
       {/* Payment Ledger Sheet */}
       <PaymentLedgerSheet

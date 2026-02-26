@@ -5882,3 +5882,199 @@ export type TeamBranding = {
   collectionsTeam?: CollectionsTeamMember[];
   documentSigners?: DocumentSignerConfig;
 };
+
+// ============================================================================
+// Risk Scoring
+// ============================================================================
+
+export const riskConfig = pgTable(
+  "risk_config",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    teamId: uuid("team_id").notNull(),
+    preset: text("preset").notNull().default("balanced"),
+    weights: jsonb("weights")
+      .notNull()
+      .default({
+        consistency: 0.25,
+        nsf: 0.25,
+        velocity: 0.15,
+        recovery: 0.15,
+        progress: 0.1,
+        amounts: 0.1,
+      }),
+    decayHalfLifeDays: integer("decay_half_life_days").notNull().default(30),
+    baselineScore: integer("baseline_score").notNull().default(50),
+    eventImpacts: jsonb("event_impacts"),
+    bandThresholds: jsonb("band_thresholds")
+      .notNull()
+      .default({ low_max: 33, high_min: 67 }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("risk_config_team_id_unique").on(table.teamId),
+    index("idx_risk_config_team_id").on(table.teamId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "risk_config_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage risk config", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const riskConfigRelations = relations(riskConfig, ({ one }) => ({
+  team: one(teams, {
+    fields: [riskConfig.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const riskScores = pgTable(
+  "risk_scores",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    teamId: uuid("team_id").notNull(),
+    dealId: uuid("deal_id").notNull(),
+    overallScore: numericCasted("overall_score", {
+      precision: 5,
+      scale: 2,
+    })
+      .notNull()
+      .default(50),
+    previousScore: numericCasted("previous_score", {
+      precision: 5,
+      scale: 2,
+    }),
+    band: text("band").notNull().default("medium"),
+    subScores: jsonb("sub_scores").notNull().default({}),
+    calculatedAt: timestamp("calculated_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+    triggeringPaymentId: uuid("triggering_payment_id"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("risk_scores_deal_id_unique").on(table.dealId),
+    index("idx_risk_scores_team_id").on(table.teamId),
+    index("idx_risk_scores_deal_id").on(table.dealId),
+    index("idx_risk_scores_band").on(table.band),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "risk_scores_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "risk_scores_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.triggeringPaymentId],
+      foreignColumns: [mcaPayments.id],
+      name: "risk_scores_triggering_payment_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Team members can manage risk scores", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const riskScoresRelations = relations(riskScores, ({ one }) => ({
+  team: one(teams, {
+    fields: [riskScores.teamId],
+    references: [teams.id],
+  }),
+  deal: one(mcaDeals, {
+    fields: [riskScores.dealId],
+    references: [mcaDeals.id],
+  }),
+  triggeringPayment: one(mcaPayments, {
+    fields: [riskScores.triggeringPaymentId],
+    references: [mcaPayments.id],
+  }),
+}));
+
+export const riskEvents = pgTable(
+  "risk_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    teamId: uuid("team_id").notNull(),
+    dealId: uuid("deal_id").notNull(),
+    paymentId: uuid("payment_id"),
+    eventType: text("event_type").notNull(),
+    eventDate: timestamp("event_date", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    rawImpact: numericCasted("raw_impact", { precision: 5, scale: 2 })
+      .notNull()
+      .default(0),
+    decayedImpact: numericCasted("decayed_impact", { precision: 5, scale: 2 }),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_risk_events_deal_id").on(table.dealId),
+    index("idx_risk_events_team_id").on(table.teamId),
+    index("idx_risk_events_event_date").on(table.eventDate),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "risk_events_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "risk_events_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.paymentId],
+      foreignColumns: [mcaPayments.id],
+      name: "risk_events_payment_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Team members can manage risk events", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const riskEventsRelations = relations(riskEvents, ({ one }) => ({
+  team: one(teams, {
+    fields: [riskEvents.teamId],
+    references: [teams.id],
+  }),
+  deal: one(mcaDeals, {
+    fields: [riskEvents.dealId],
+    references: [mcaDeals.id],
+  }),
+  payment: one(mcaPayments, {
+    fields: [riskEvents.paymentId],
+    references: [mcaPayments.id],
+  }),
+}));
