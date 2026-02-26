@@ -11,6 +11,7 @@ import { teamCache } from "@midday/cache/team-cache";
 import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
 import { CATEGORIES } from "@midday/categories";
 import { and, eq } from "drizzle-orm";
+import { seedDefaultStages } from "./collection-config";
 
 export const hasTeamAccess = async (
   db: Database,
@@ -298,6 +299,11 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
       console.log(`[${teamCreationId}] Creating system categories`);
       // @ts-expect-error - tx is a PgTransaction
       await createSystemCategoriesForTeam(tx, newTeam.id);
+
+      // Seed default collection stages for the new team (atomic)
+      console.log(`[${teamCreationId}] Seeding default collection stages`);
+      // @ts-expect-error - tx is a PgTransaction
+      await seedDefaultStages(tx, { teamId: newTeam.id });
 
       // Optionally switch user to the new team (atomic)
       if (params.switchTeam) {
