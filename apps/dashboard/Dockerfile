@@ -1,5 +1,5 @@
 # Base image with Bun
-FROM oven/bun:1.3.9 AS base
+FROM oven/bun:1.3.10 AS base
 
 # Install turbo CLI globally using Bun
 FROM base AS turbo-cli
@@ -71,7 +71,7 @@ RUN GIT_COMMIT_SHA=$(cat /tmp/git-sha.txt 2>/dev/null || echo ""); \
     bunx turbo run build --filter=@midday/dashboard --only
 
 # Runner stage - clean bun image, no turbo
-FROM oven/bun:1.3.9 AS runner
+FROM oven/bun:1.3.10 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
