@@ -33,6 +33,10 @@ type RuleFormData = {
   amountValueMax: string;
   setCategorySlug: string;
   setMerchantName: string;
+  setDealCode: string;
+  autoResolveDeal: boolean;
+  dateStart: string;
+  dateEnd: string;
 };
 
 const emptyForm: RuleFormData = {
@@ -44,6 +48,10 @@ const emptyForm: RuleFormData = {
   amountValueMax: "",
   setCategorySlug: "",
   setMerchantName: "",
+  setDealCode: "",
+  autoResolveDeal: false,
+  dateStart: "",
+  dateEnd: "",
 };
 
 type Props = {
@@ -139,6 +147,10 @@ export function TransactionRulesModal({
       amountValueMax: rule.amountValueMax?.toString() ?? "",
       setCategorySlug: rule.setCategorySlug ?? "",
       setMerchantName: rule.setMerchantName ?? "",
+      setDealCode: rule.setDealCode ?? "",
+      autoResolveDeal: rule.autoResolveDeal ?? false,
+      dateStart: rule.dateStart ?? "",
+      dateEnd: rule.dateEnd ?? "",
     });
     setView("edit");
   };
@@ -155,6 +167,10 @@ export function TransactionRulesModal({
         : null,
       setCategorySlug: form.setCategorySlug || null,
       setMerchantName: form.setMerchantName || null,
+      setDealCode: form.setDealCode || null,
+      autoResolveDeal: form.autoResolveDeal,
+      dateStart: form.dateStart || null,
+      dateEnd: form.dateEnd || null,
     };
 
     if (view === "edit" && editingId) {
@@ -375,6 +391,38 @@ export function TransactionRulesModal({
                     )}
                   </div>
                 </div>
+
+                <div>
+                  <Label className="mb-2 block text-xs text-muted-foreground">
+                    Date range (optional)
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="date"
+                      value={form.dateStart}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          dateStart: e.target.value,
+                        }))
+                      }
+                      placeholder="Start date"
+                      className="flex-1"
+                    />
+                    <Input
+                      type="date"
+                      value={form.dateEnd}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          dateEnd: e.target.value,
+                        }))
+                      }
+                      placeholder="End date"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -412,6 +460,39 @@ export function TransactionRulesModal({
                     }
                     placeholder="e.g., Amazon.com"
                   />
+                </div>
+
+                <div>
+                  <Label className="mb-2 block text-xs text-muted-foreground">
+                    Assign to deal
+                  </Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Auto-resolve from merchant</span>
+                      <Switch
+                        checked={form.autoResolveDeal}
+                        onCheckedChange={(checked) =>
+                          setForm((f) => ({
+                            ...f,
+                            autoResolveDeal: checked,
+                            setDealCode: checked ? "" : f.setDealCode,
+                          }))
+                        }
+                      />
+                    </div>
+                    {!form.autoResolveDeal && (
+                      <Input
+                        value={form.setDealCode}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            setDealCode: e.target.value,
+                          }))
+                        }
+                        placeholder="e.g., MCA-2025-001"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
