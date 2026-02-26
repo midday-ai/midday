@@ -10,7 +10,6 @@ import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useMemo, useState } from "react";
-import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RepaymentVelocityCardProps {
   from: string;
@@ -74,14 +73,6 @@ export function RepaymentVelocityCard({
           <h3 className="text-sm font-normal text-muted-foreground">
             Repayment Velocity
           </h3>
-          <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <ShareMetricButton
-              type="repayment_velocity"
-              from={from}
-              to={to}
-              currency={currency}
-            />
-          </div>
         </div>
         <span className="text-3xl font-normal mb-3">
           {heroKpi} <span className="text-lg text-muted-foreground">days</span>

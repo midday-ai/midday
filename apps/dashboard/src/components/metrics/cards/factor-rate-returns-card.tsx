@@ -11,7 +11,6 @@ import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useMemo, useState } from "react";
-import { ShareMetricButton } from "../components/share-metric-button";
 
 interface FactorRateReturnsCardProps {
   from: string;
@@ -75,14 +74,6 @@ export function FactorRateReturnsCard({
           <h3 className="text-sm font-normal text-muted-foreground">
             Factor Rate Returns
           </h3>
-          <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <ShareMetricButton
-              type="factor_rate_returns"
-              from={from}
-              to={to}
-              currency={currency}
-            />
-          </div>
         </div>
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber

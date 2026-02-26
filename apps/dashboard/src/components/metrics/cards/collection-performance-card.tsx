@@ -11,7 +11,6 @@ import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useMemo, useState } from "react";
-import { ShareMetricButton } from "../components/share-metric-button";
 
 interface CollectionPerformanceCardProps {
   from: string;
@@ -75,14 +74,6 @@ export function CollectionPerformanceCard({
           <h3 className="text-sm font-normal text-muted-foreground">
             Collection Performance
           </h3>
-          <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <ShareMetricButton
-              type="collection_performance"
-              from={from}
-              to={to}
-              currency={currency}
-            />
-          </div>
         </div>
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber
@@ -105,7 +96,7 @@ export function CollectionPerformanceCard({
             <div
               className="w-4 h-0.5"
               style={{
-                borderTop: "2px dashed hsl(var(--muted-foreground))",
+                borderTop: "2px solid #16a34a",
               }}
             />
             <span className="text-xs text-muted-foreground">Rate %</span>
