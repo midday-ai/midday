@@ -175,6 +175,29 @@ app.get(
 
 app.route("/", routers);
 
+const poolStatsIntervalMsRaw = process.env.DB_POOL_STATS_INTERVAL_MS;
+const parsedPoolStatsIntervalMs = Number.parseInt(
+  poolStatsIntervalMsRaw ?? "60000",
+  10,
+);
+const poolStatsIntervalMs = Number.isFinite(parsedPoolStatsIntervalMs)
+  ? parsedPoolStatsIntervalMs
+  : 60000;
+const poolStatsInterval =
+  poolStatsIntervalMs > 0
+    ? setInterval(() => {
+        logger.info("API DB pool stats", {
+          pool: getPoolStats(),
+        });
+      }, poolStatsIntervalMs)
+    : null;
+
+if (poolStatsIntervalMs <= 0) {
+  logger.info("API DB pool stats logging disabled", {
+    configuredIntervalMs: poolStatsIntervalMsRaw ?? "0",
+  });
+}
+
 // Global error handler — captures unhandled route errors to Sentry
 app.onError((err, c) => {
   Sentry.captureException(err, {
@@ -198,6 +221,10 @@ const shutdown = async (signal: string) => {
 
   const shutdownPromise = (async () => {
     try {
+      if (poolStatsInterval) {
+        clearInterval(poolStatsInterval);
+      }
+
       logger.info("Closing database connections...");
       await closeDb();
 

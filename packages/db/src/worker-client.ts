@@ -6,6 +6,7 @@ import * as schema from "./schema";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const logger = createLoggerWithContext("db:worker");
+const DB_POOL_EVENT_LOGGING = process.env.DB_POOL_EVENT_LOGGING === "true";
 
 const connectionString =
   process.env.DATABASE_PRIMARY_POOLER_URL ?? process.env.DATABASE_PRIMARY_URL;
@@ -31,12 +32,68 @@ const workerPool = new Pool({
   allowExitOnIdle: true,
 });
 
+function getPgErrorDetails(error: unknown) {
+  const details: Record<string, unknown> = {};
+
+  if (error && typeof error === "object") {
+    const err = error as Record<string, unknown>;
+    const fields = [
+      "name",
+      "message",
+      "code",
+      "errno",
+      "syscall",
+      "address",
+      "port",
+      "stack",
+    ];
+
+    for (const field of fields) {
+      if (err[field] !== undefined) {
+        details[field] = err[field];
+      }
+    }
+  } else {
+    details.message = String(error);
+  }
+
+  return details;
+}
+
+function getPoolStatsSnapshot() {
+  return {
+    total: workerPool.totalCount,
+    idle: workerPool.idleCount,
+    waiting: workerPool.waitingCount,
+  };
+}
+
 workerPool.on("error", (err) => {
   logger.error("Worker pool: idle client error", {
-    error: err.message,
-    code: (err as { code?: string }).code,
+    ...getPgErrorDetails(err),
+    stats: getPoolStatsSnapshot(),
   });
 });
+
+if (DB_POOL_EVENT_LOGGING) {
+  workerPool.on("connect", () => {
+    logger.info("Worker pool: client connected", {
+      stats: getPoolStatsSnapshot(),
+    });
+  });
+
+  workerPool.on("acquire", () => {
+    logger.info("Worker pool: client acquired", {
+      stats: getPoolStatsSnapshot(),
+    });
+  });
+
+  workerPool.on("remove", () => {
+    logger.info("Worker pool: client removed", {
+      stats: getPoolStatsSnapshot(),
+    });
+  });
+}
 
 const workerDb = drizzle(workerPool, {
   schema,
@@ -51,11 +108,7 @@ export const getWorkerDb = (): Database => {
 };
 
 export const getWorkerPoolStats = () => {
-  return {
-    total: workerPool.totalCount,
-    idle: workerPool.idleCount,
-    waiting: workerPool.waitingCount,
-  };
+  return getPoolStatsSnapshot();
 };
 
 /**

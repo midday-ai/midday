@@ -202,18 +202,28 @@ Bun.serve({
 logger.info(`Worker server running on port ${port}`);
 logger.info("Workers initialized and ready to process jobs");
 
-const poolStatsIntervalMs = Number.parseInt(
-  process.env.DB_POOL_STATS_INTERVAL_MS || "60000",
+const poolStatsIntervalMsRaw = process.env.DB_POOL_STATS_INTERVAL_MS;
+const parsedPoolStatsIntervalMs = Number.parseInt(
+  poolStatsIntervalMsRaw ?? "60000",
   10,
 );
-const poolStatsInterval = setInterval(
-  () => {
-    logger.info("Worker DB pool stats", {
-      pool: getWorkerPoolStats(),
-    });
-  },
-  Number.isFinite(poolStatsIntervalMs) ? poolStatsIntervalMs : 60000,
-);
+const poolStatsIntervalMs = Number.isFinite(parsedPoolStatsIntervalMs)
+  ? parsedPoolStatsIntervalMs
+  : 60000;
+const poolStatsInterval =
+  poolStatsIntervalMs > 0
+    ? setInterval(() => {
+        logger.info("Worker DB pool stats", {
+          pool: getWorkerPoolStats(),
+        });
+      }, poolStatsIntervalMs)
+    : null;
+
+if (poolStatsIntervalMs <= 0) {
+  logger.info("Worker DB pool stats logging disabled", {
+    configuredIntervalMs: poolStatsIntervalMsRaw ?? "0",
+  });
+}
 
 /**
  * Graceful shutdown handlers
@@ -226,7 +236,9 @@ const shutdown = async (signal: string) => {
 
   const shutdownPromise = (async () => {
     try {
-      clearInterval(poolStatsInterval);
+      if (poolStatsInterval) {
+        clearInterval(poolStatsInterval);
+      }
 
       // Stop accepting new jobs
       logger.info("Stopping workers from accepting new jobs...");
