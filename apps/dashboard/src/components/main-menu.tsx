@@ -21,6 +21,7 @@ const icons = {
   "/syndications": () => <Icons.Syndication size={20} />,
   "/underwriting": () => <Icons.Tax size={20} />,
   "/reconciliation": () => <Icons.Reconciliation size={20} />,
+  "/collections": () => <Icons.Collections size={20} />,
   "/settings": () => <Icons.Settings size={20} />,
   "/inbox": () => <Icons.Inbox2 size={20} />,
   "/broker/deals": () => <Icons.Invoice size={20} />,
@@ -118,6 +119,14 @@ const allItems: MenuItem[] = [
     ],
   },
   {
+    path: "/collections",
+    name: "Collections",
+    roles: INTERNAL,
+    children: [
+      { path: "/collections/settings", name: "Settings" },
+    ],
+  },
+  {
     path: "/settings",
     name: "Settings",
     roles: [...INTERNAL, "bookkeeper"],
@@ -143,6 +152,7 @@ const KNOWN_MENU_PATHS = [
   "/syndications",
   "/underwriting",
   "/reconciliation",
+  "/collections",
   "/settings",
   "/broker",
 ];
