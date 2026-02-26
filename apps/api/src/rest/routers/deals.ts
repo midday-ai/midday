@@ -359,7 +359,7 @@ app.openapi(
                 examples: [
                   "scheduledAt is required for scheduled delivery",
                   "scheduledAt must be in the future",
-                  "Deal number 'INV-001' is already used. Please provide a different deal number or omit it to auto-generate one.",
+                  "Deal number 'D-0001' is already used. Please provide a different deal number or omit it to auto-generate one.",
                 ],
               }),
             }),
@@ -387,7 +387,7 @@ app.openapi(
               message: z.string().openapi({
                 description: "Error message about the conflict",
                 example:
-                  "Deal number 'INV-2024-001' is already used. Please provide a different deal number or omit it to auto-generate one.",
+                  "Deal number 'D-0001' is already used. Please provide a different deal number or omit it to auto-generate one.",
               }),
             }),
           },

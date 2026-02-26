@@ -284,19 +284,19 @@ async function run() {
 
   // ── 9. Invoices ──
   const invoices = [
-    { num: 'INV-2024-001', status: 'paid', cust: 'Lucky Dragon Restaurant', amt: 75000, issued: monthsAgo(18), due: monthsAgo(17), item: 'MCA Funding - MCA-2024-002' },
-    { num: 'INV-2024-002', status: 'paid', cust: 'Martinez Auto Repair', amt: 50000, issued: monthsAgo(14), due: monthsAgo(13), item: 'MCA Funding - MCA-2024-001' },
-    { num: 'INV-2024-003', status: 'paid', cust: 'Smith Plumbing Services', amt: 50000, issued: monthsAgo(12), due: monthsAgo(11), item: 'MCA Funding - MCA-2024-003' },
-    { num: 'INV-2025-001', status: 'paid', cust: 'Sunrise Diner', amt: 65000, issued: monthsAgo(8), due: monthsAgo(7), item: 'MCA Funding - MCA-2025-001' },
-    { num: 'INV-2025-002', status: 'paid', cust: 'Westside Construction LLC', amt: 75000, issued: monthsAgo(7), due: monthsAgo(6), item: 'MCA Funding - MCA-2025-006' },
-    { num: 'INV-2025-003', status: 'paid', cust: "Tony's Pizzeria", amt: 60000, issued: monthsAgo(6), due: monthsAgo(5), item: 'MCA Funding - MCA-2025-004' },
-    { num: 'INV-2025-004', status: 'paid', cust: 'Bella Salon & Spa', amt: 45000, issued: monthsAgo(5), due: monthsAgo(4), item: 'MCA Funding - MCA-2025-003' },
-    { num: 'INV-2025-005', status: 'paid', cust: 'Quick Print Solutions', amt: 70000, issued: monthsAgo(4), due: monthsAgo(3), item: 'MCA Funding - MCA-2025-005' },
-    { num: 'INV-2026-001', status: 'unpaid', cust: 'Green Thumb Landscaping', amt: 40000, issued: daysAgo(14), due: daysAgo(-16), item: 'MCA Funding - MCA-2026-001' },
-    { num: 'INV-2026-002', status: 'unpaid', cust: 'Fitness First Gym', amt: 80000, issued: daysAgo(7), due: daysAgo(-23), item: 'MCA Funding - MCA-2026-002' },
-    { num: 'INV-2025-006', status: 'overdue', cust: 'Westside Construction LLC', amt: 2500, issued: monthsAgo(2), due: monthsAgo(1), item: 'Legal fees - Collections review' },
-    { num: 'INV-2026-003', status: 'draft', cust: 'Lucky Dragon Restaurant', amt: 100000, issued: new Date(), due: daysAgo(-30), item: 'MCA Renewal Offer - Up to $100,000' },
-    { num: 'INV-2026-004', status: 'draft', cust: 'Smith Plumbing Services', amt: 75000, issued: new Date(), due: daysAgo(-30), item: 'MCA Renewal Offer - Up to $75,000' },
+    { num: 'D-0001', status: 'paid', cust: 'Lucky Dragon Restaurant', amt: 75000, issued: monthsAgo(18), due: monthsAgo(17), item: 'MCA Funding - MCA-2024-002' },
+    { num: 'D-0002', status: 'paid', cust: 'Martinez Auto Repair', amt: 50000, issued: monthsAgo(14), due: monthsAgo(13), item: 'MCA Funding - MCA-2024-001' },
+    { num: 'D-0003', status: 'paid', cust: 'Smith Plumbing Services', amt: 50000, issued: monthsAgo(12), due: monthsAgo(11), item: 'MCA Funding - MCA-2024-003' },
+    { num: 'D-0004', status: 'paid', cust: 'Sunrise Diner', amt: 65000, issued: monthsAgo(8), due: monthsAgo(7), item: 'MCA Funding - MCA-2025-001' },
+    { num: 'D-0005', status: 'paid', cust: 'Westside Construction LLC', amt: 75000, issued: monthsAgo(7), due: monthsAgo(6), item: 'MCA Funding - MCA-2025-006' },
+    { num: 'D-0006', status: 'paid', cust: "Tony's Pizzeria", amt: 60000, issued: monthsAgo(6), due: monthsAgo(5), item: 'MCA Funding - MCA-2025-004' },
+    { num: 'D-0007', status: 'paid', cust: 'Bella Salon & Spa', amt: 45000, issued: monthsAgo(5), due: monthsAgo(4), item: 'MCA Funding - MCA-2025-003' },
+    { num: 'D-0008', status: 'paid', cust: 'Quick Print Solutions', amt: 70000, issued: monthsAgo(4), due: monthsAgo(3), item: 'MCA Funding - MCA-2025-005' },
+    { num: 'D-0009', status: 'unpaid', cust: 'Green Thumb Landscaping', amt: 40000, issued: daysAgo(14), due: daysAgo(-16), item: 'MCA Funding - MCA-2026-001' },
+    { num: 'D-0010', status: 'unpaid', cust: 'Fitness First Gym', amt: 80000, issued: daysAgo(7), due: daysAgo(-23), item: 'MCA Funding - MCA-2026-002' },
+    { num: 'D-0011', status: 'overdue', cust: 'Westside Construction LLC', amt: 2500, issued: monthsAgo(2), due: monthsAgo(1), item: 'Legal fees - Collections review' },
+    { num: 'D-0012', status: 'draft', cust: 'Lucky Dragon Restaurant', amt: 100000, issued: new Date(), due: daysAgo(-30), item: 'MCA Renewal Offer - Up to $100,000' },
+    { num: 'D-0013', status: 'draft', cust: 'Smith Plumbing Services', amt: 75000, issued: new Date(), due: daysAgo(-30), item: 'MCA Renewal Offer - Up to $75,000' },
   ];
   for (const inv of invoices) {
     await client.query(`

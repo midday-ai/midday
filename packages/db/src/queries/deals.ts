@@ -628,7 +628,7 @@ export async function searchDealNumber(
 
 /**
  * Generate the next deal number for a team.
- * Format: INV-XXXX (e.g., INV-0001, INV-0042)
+ * Format: D-XXXX (e.g., D-0001, D-0042)
  *
  * Logic:
  * 1. Find the highest numeric suffix from existing deal numbers
@@ -640,7 +640,7 @@ export async function getNextDealNumber(
   db: DatabaseOrTransaction,
   teamId: string,
 ): Promise<string> {
-  const PREFIX = "INV-";
+  const PREFIX = "D-";
   const PAD_LENGTH = 4;
 
   // Find the highest deal number with a numeric suffix for this team

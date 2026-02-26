@@ -1019,67 +1019,67 @@ BEGIN
     amount, subtotal, currency, merchant_name, line_items, token
   ) VALUES
     (gen_random_uuid(), v_team_id, v_c_luckydragon, v_user_id, v_template_id,
-     'INV-2024-001', 'paid', NOW() - INTERVAL '18 months', NOW() - INTERVAL '17 months',
+     'D-0001', 'paid', NOW() - INTERVAL '18 months', NOW() - INTERVAL '17 months',
      75000.00, 75000.00, 'USD', 'Lucky Dragon Restaurant',
      '[{"name": "MCA Funding - MCA-2024-002", "quantity": 1, "price": 75000}]'::jsonb, 'tok_inv_001'),
 
     (gen_random_uuid(), v_team_id, v_c_martinez, v_user_id, v_template_id,
-     'INV-2024-002', 'paid', NOW() - INTERVAL '14 months', NOW() - INTERVAL '13 months',
+     'D-0002', 'paid', NOW() - INTERVAL '14 months', NOW() - INTERVAL '13 months',
      50000.00, 50000.00, 'USD', 'Martinez Auto Repair',
      '[{"name": "MCA Funding - MCA-2024-001", "quantity": 1, "price": 50000}]'::jsonb, 'tok_inv_002'),
 
     (gen_random_uuid(), v_team_id, v_c_smith, v_user_id, v_template_id,
-     'INV-2024-003', 'paid', NOW() - INTERVAL '12 months', NOW() - INTERVAL '11 months',
+     'D-0003', 'paid', NOW() - INTERVAL '12 months', NOW() - INTERVAL '11 months',
      50000.00, 50000.00, 'USD', 'Smith Plumbing Services',
      '[{"name": "MCA Funding - MCA-2024-003", "quantity": 1, "price": 50000}]'::jsonb, 'tok_inv_003'),
 
     (gen_random_uuid(), v_team_id, v_c_sunrise, v_user_id, v_template_id,
-     'INV-2025-001', 'paid', NOW() - INTERVAL '8 months', NOW() - INTERVAL '7 months',
+     'D-0004', 'paid', NOW() - INTERVAL '8 months', NOW() - INTERVAL '7 months',
      65000.00, 65000.00, 'USD', 'Sunrise Diner',
      '[{"name": "MCA Funding - MCA-2025-001", "quantity": 1, "price": 65000}]'::jsonb, 'tok_inv_004'),
 
     (gen_random_uuid(), v_team_id, v_c_westside, v_user_id, v_template_id,
-     'INV-2025-002', 'paid', NOW() - INTERVAL '7 months', NOW() - INTERVAL '6 months',
+     'D-0005', 'paid', NOW() - INTERVAL '7 months', NOW() - INTERVAL '6 months',
      75000.00, 75000.00, 'USD', 'Westside Construction LLC',
      '[{"name": "MCA Funding - MCA-2025-006", "quantity": 1, "price": 75000}]'::jsonb, 'tok_inv_005'),
 
     (gen_random_uuid(), v_team_id, v_c_tonys, v_user_id, v_template_id,
-     'INV-2025-003', 'paid', NOW() - INTERVAL '6 months', NOW() - INTERVAL '5 months',
+     'D-0006', 'paid', NOW() - INTERVAL '6 months', NOW() - INTERVAL '5 months',
      60000.00, 60000.00, 'USD', 'Tony''s Pizzeria',
      '[{"name": "MCA Funding - MCA-2025-004", "quantity": 1, "price": 60000}]'::jsonb, 'tok_inv_006'),
 
     (gen_random_uuid(), v_team_id, v_c_bella, v_user_id, v_template_id,
-     'INV-2025-004', 'paid', NOW() - INTERVAL '5 months', NOW() - INTERVAL '4 months',
+     'D-0007', 'paid', NOW() - INTERVAL '5 months', NOW() - INTERVAL '4 months',
      45000.00, 45000.00, 'USD', 'Bella Salon & Spa',
      '[{"name": "MCA Funding - MCA-2025-003", "quantity": 1, "price": 45000}]'::jsonb, 'tok_inv_007'),
 
     (gen_random_uuid(), v_team_id, v_c_quickprint, v_user_id, v_template_id,
-     'INV-2025-005', 'paid', NOW() - INTERVAL '4 months', NOW() - INTERVAL '3 months',
+     'D-0008', 'paid', NOW() - INTERVAL '4 months', NOW() - INTERVAL '3 months',
      70000.00, 70000.00, 'USD', 'Quick Print Solutions',
      '[{"name": "MCA Funding - MCA-2025-005", "quantity": 1, "price": 70000}]'::jsonb, 'tok_inv_008'),
 
     (gen_random_uuid(), v_team_id, v_c_greenthumb, v_user_id, v_template_id,
-     'INV-2026-001', 'unpaid', NOW() - INTERVAL '14 days', NOW() + INTERVAL '16 days',
+     'D-0009', 'unpaid', NOW() - INTERVAL '14 days', NOW() + INTERVAL '16 days',
      40000.00, 40000.00, 'USD', 'Green Thumb Landscaping',
      '[{"name": "MCA Funding - MCA-2026-001", "quantity": 1, "price": 40000}]'::jsonb, 'tok_inv_009'),
 
     (gen_random_uuid(), v_team_id, v_c_fitness, v_user_id, v_template_id,
-     'INV-2026-002', 'unpaid', NOW() - INTERVAL '7 days', NOW() + INTERVAL '23 days',
+     'D-0010', 'unpaid', NOW() - INTERVAL '7 days', NOW() + INTERVAL '23 days',
      80000.00, 80000.00, 'USD', 'Fitness First Gym',
      '[{"name": "MCA Funding - MCA-2026-002", "quantity": 1, "price": 80000}]'::jsonb, 'tok_inv_010'),
 
     (gen_random_uuid(), v_team_id, v_c_westside, v_user_id, v_template_id,
-     'INV-2025-006', 'overdue', NOW() - INTERVAL '2 months', NOW() - INTERVAL '1 month',
+     'D-0011', 'overdue', NOW() - INTERVAL '2 months', NOW() - INTERVAL '1 month',
      2500.00, 2500.00, 'USD', 'Westside Construction LLC',
      '[{"name": "Legal fees - Collections review", "quantity": 1, "price": 2500}]'::jsonb, 'tok_inv_011'),
 
     (gen_random_uuid(), v_team_id, v_c_luckydragon, v_user_id, v_template_id,
-     'INV-2026-003', 'paid', NOW() - INTERVAL '3 months', NOW() - INTERVAL '2 months',
+     'D-0012', 'paid', NOW() - INTERVAL '3 months', NOW() - INTERVAL '2 months',
      100000.00, 100000.00, 'USD', 'Lucky Dragon Restaurant',
      '[{"name": "MCA Renewal Funding - MCA-2026-003", "quantity": 1, "price": 100000}]'::jsonb, 'tok_inv_012'),
 
     (gen_random_uuid(), v_team_id, v_c_smith, v_user_id, v_template_id,
-     'INV-2026-004', 'draft', NOW(), NOW() + INTERVAL '30 days',
+     'D-0013', 'draft', NOW(), NOW() + INTERVAL '30 days',
      75000.00, 75000.00, 'USD', 'Smith Plumbing Services',
      '[{"name": "MCA Renewal Offer - Up to $75,000", "quantity": 1, "price": 75000}]'::jsonb, 'tok_inv_013');
 

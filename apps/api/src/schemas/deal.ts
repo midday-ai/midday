@@ -223,7 +223,7 @@ const baseDraftDealSchema = z.object({
   dealNumber: z.string().optional().openapi({
     description:
       "Deal number as shown on the deal (auto-generated if not provided)",
-    example: "INV-2024-001",
+    example: "D-0001",
   }),
   logoUrl: z.string().optional().nullable().openapi({
     description: "URL of the logo to display on the deal",
@@ -378,7 +378,7 @@ export const draftDealSchemaWithOpenApi = draftDealSchema.openapi({
     noteDetails: "Thank you for your business.",
     dueDate: "2024-06-30T23:59:59.000Z",
     issueDate: "2024-06-01T00:00:00.000Z",
-    dealNumber: "INV-2024-001",
+    dealNumber: "D-0001",
     logoUrl: "https://example.com/logo.png",
     vat: 150.0,
     tax: 50.0,
@@ -801,7 +801,7 @@ export const createDealRequestSchema = z
     dealNumber: z.string().optional().openapi({
       description:
         "Deal number as shown on the deal (auto-generated if not provided)",
-      example: "INV-2024-001",
+      example: "D-0001",
     }),
     logoUrl: z.string().optional().nullable().openapi({
       description: "URL of the logo to display on the deal",
@@ -1004,7 +1004,7 @@ export const createDealRequestSchema = z
       },
       dueDate: "2024-07-15T23:59:59.000Z",
       issueDate: "2024-06-15T00:00:00.000Z",
-      dealNumber: "INV-2024-001",
+      dealNumber: "D-0001",
       logoUrl: "https://example.com/logo.png",
       vat: undefined,
       tax: 85.0,
@@ -1234,7 +1234,7 @@ export const dealResponseSchema = z
     dealNumber: z.string().optional().openapi({
       description:
         "Deal number as shown on the deal (auto-generated if not provided)",
-      example: "INV-2024-001",
+      example: "D-0001",
     }),
     amount: z.number().openapi({
       description: "Total amount of the deal",

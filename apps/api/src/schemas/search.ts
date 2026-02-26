@@ -52,7 +52,7 @@ export const searchResponseSchema = z
         description:
           "Additional data for the search result, structure depends on the type.",
         example: {
-          invoiceNumber: "INV-2024-001",
+          dealNumber: "D-0001",
           merchantName: "Acme Corporation",
           amount: 1500.75,
         },
@@ -68,7 +68,7 @@ export const searchResponseSchema = z
         relevance: 0.92,
         created_at: "2024-06-01T00:00:00.000Z",
         data: {
-          invoiceNumber: "INV-2024-001",
+          dealNumber: "D-0001",
           merchantName: "Acme Corporation",
           amount: 1500.75,
         },

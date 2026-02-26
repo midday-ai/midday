@@ -530,25 +530,25 @@ async function main() {
 
   const invoiceRows = [
     // PAID: Historical fundings
-    { num: 'INV-2024-001', status: 'paid', customer: 'Lucky Dragon Restaurant', amount: 75000, issued: monthsAgo(18), due: monthsAgo(17), item: 'MCA Funding - MCA-2024-002' },
-    { num: 'INV-2024-002', status: 'paid', customer: 'Martinez Auto Repair', amount: 50000, issued: monthsAgo(14), due: monthsAgo(13), item: 'MCA Funding - MCA-2024-001' },
-    { num: 'INV-2024-003', status: 'paid', customer: 'Smith Plumbing Services', amount: 50000, issued: monthsAgo(12), due: monthsAgo(11), item: 'MCA Funding - MCA-2024-003' },
-    { num: 'INV-2025-001', status: 'paid', customer: 'Sunrise Diner', amount: 65000, issued: monthsAgo(8), due: monthsAgo(7), item: 'MCA Funding - MCA-2025-001' },
-    { num: 'INV-2025-002', status: 'paid', customer: 'Westside Construction LLC', amount: 75000, issued: monthsAgo(7), due: monthsAgo(6), item: 'MCA Funding - MCA-2025-006' },
-    { num: 'INV-2025-003', status: 'paid', customer: "Tony's Pizzeria", amount: 60000, issued: monthsAgo(6), due: monthsAgo(5), item: 'MCA Funding - MCA-2025-004' },
-    { num: 'INV-2025-004', status: 'paid', customer: 'Bella Salon & Spa', amount: 45000, issued: monthsAgo(5), due: monthsAgo(4), item: 'MCA Funding - MCA-2025-003' },
-    { num: 'INV-2025-005', status: 'paid', customer: 'Quick Print Solutions', amount: 70000, issued: monthsAgo(4), due: monthsAgo(3), item: 'MCA Funding - MCA-2025-005' },
+    { num: 'D-0001', status: 'paid', customer: 'Lucky Dragon Restaurant', amount: 75000, issued: monthsAgo(18), due: monthsAgo(17), item: 'MCA Funding - MCA-2024-002' },
+    { num: 'D-0002', status: 'paid', customer: 'Martinez Auto Repair', amount: 50000, issued: monthsAgo(14), due: monthsAgo(13), item: 'MCA Funding - MCA-2024-001' },
+    { num: 'D-0003', status: 'paid', customer: 'Smith Plumbing Services', amount: 50000, issued: monthsAgo(12), due: monthsAgo(11), item: 'MCA Funding - MCA-2024-003' },
+    { num: 'D-0004', status: 'paid', customer: 'Sunrise Diner', amount: 65000, issued: monthsAgo(8), due: monthsAgo(7), item: 'MCA Funding - MCA-2025-001' },
+    { num: 'D-0005', status: 'paid', customer: 'Westside Construction LLC', amount: 75000, issued: monthsAgo(7), due: monthsAgo(6), item: 'MCA Funding - MCA-2025-006' },
+    { num: 'D-0006', status: 'paid', customer: "Tony's Pizzeria", amount: 60000, issued: monthsAgo(6), due: monthsAgo(5), item: 'MCA Funding - MCA-2025-004' },
+    { num: 'D-0007', status: 'paid', customer: 'Bella Salon & Spa', amount: 45000, issued: monthsAgo(5), due: monthsAgo(4), item: 'MCA Funding - MCA-2025-003' },
+    { num: 'D-0008', status: 'paid', customer: 'Quick Print Solutions', amount: 70000, issued: monthsAgo(4), due: monthsAgo(3), item: 'MCA Funding - MCA-2025-005' },
 
     // UNPAID: Recent fundings
-    { num: 'INV-2026-001', status: 'unpaid', customer: 'Green Thumb Landscaping', amount: 40000, issued: daysAgo(14), due: addDays(new Date(), 16), item: 'MCA Funding - MCA-2026-001' },
-    { num: 'INV-2026-002', status: 'unpaid', customer: 'Fitness First Gym', amount: 80000, issued: daysAgo(7), due: addDays(new Date(), 23), item: 'MCA Funding - MCA-2026-002' },
+    { num: 'D-0009', status: 'unpaid', customer: 'Green Thumb Landscaping', amount: 40000, issued: daysAgo(14), due: addDays(new Date(), 16), item: 'MCA Funding - MCA-2026-001' },
+    { num: 'D-0010', status: 'unpaid', customer: 'Fitness First Gym', amount: 80000, issued: daysAgo(7), due: addDays(new Date(), 23), item: 'MCA Funding - MCA-2026-002' },
 
     // OVERDUE
-    { num: 'INV-2025-006', status: 'overdue', customer: 'Westside Construction LLC', amount: 2500, issued: monthsAgo(2), due: monthsAgo(1), item: 'Legal fees - Collections review' },
+    { num: 'D-0011', status: 'overdue', customer: 'Westside Construction LLC', amount: 2500, issued: monthsAgo(2), due: monthsAgo(1), item: 'Legal fees - Collections review' },
 
     // DRAFT: Renewal offers
-    { num: 'INV-2026-003', status: 'draft', customer: 'Lucky Dragon Restaurant', amount: 100000, issued: new Date(), due: addDays(new Date(), 30), item: 'MCA Renewal Offer - Up to $100,000' },
-    { num: 'INV-2026-004', status: 'draft', customer: 'Smith Plumbing Services', amount: 75000, issued: new Date(), due: addDays(new Date(), 30), item: 'MCA Renewal Offer - Up to $75,000' },
+    { num: 'D-0012', status: 'draft', customer: 'Lucky Dragon Restaurant', amount: 100000, issued: new Date(), due: addDays(new Date(), 30), item: 'MCA Renewal Offer - Up to $100,000' },
+    { num: 'D-0013', status: 'draft', customer: 'Smith Plumbing Services', amount: 75000, issued: new Date(), due: addDays(new Date(), 30), item: 'MCA Renewal Offer - Up to $75,000' },
   ].map(inv => ({
     id: uuid(),
     team_id: TEAM_ID,
