@@ -13,7 +13,7 @@ import { flexRender } from "@tanstack/react-table";
 import type React from "react";
 import type { CSSProperties } from "react";
 import { memo } from "react";
-import type { TableColumnMeta } from "./types";
+import { ACTIONS_FULL_WIDTH_CELL_CLASS, type TableColumnMeta } from "./types";
 
 interface VirtualRowProps<TData> {
   row: Row<TData>;
@@ -42,6 +42,13 @@ function VirtualRowInner<TData>({
   const cells = row.getVisibleCells();
   const lastCellId = cells[cells.length - 1]?.column.id ?? "";
 
+  // Check if there are any non-sticky columns visible before actions
+  const hasNonStickyBeforeActions = cells.some((cell) => {
+    if (cell.column.id === "actions") return false;
+    const meta = cell.column.columnDef.meta as TableColumnMeta | undefined;
+    return !(meta?.sticky ?? false);
+  });
+
   return (
     <TableRow
       data-index={row.index}
@@ -64,17 +71,19 @@ function VirtualRowInner<TData>({
         const isActions = columnId === "actions";
         const isLastBeforeActions =
           cellIndex === cells.length - 2 && lastCellId === "actions";
+        const actionsFullWidth = isActions && !hasNonStickyBeforeActions;
+        const shouldFlex =
+          (isLastBeforeActions && !isSticky) || actionsFullWidth;
 
-        // Build style: dynamic width + sticky positioning
         const cellStyle: CSSProperties = {
-          width: cell.column.getSize(),
-          ...getStickyStyle(columnId),
-          // Apply flex-1 to last non-sticky column before actions
-          ...(isLastBeforeActions && !isSticky && { flex: 1 }),
+          width: actionsFullWidth ? undefined : cell.column.getSize(),
+          ...(!actionsFullWidth && getStickyStyle(columnId)),
+          ...(shouldFlex && { flex: 1 }),
         };
 
-        // Build className from meta with proper sticky handling
-        const cellClassName = getStickyClassName(columnId, meta?.className);
+        const cellClassName = actionsFullWidth
+          ? ACTIONS_FULL_WIDTH_CELL_CLASS
+          : getStickyClassName(columnId, meta?.className);
 
         return (
           <TableCell

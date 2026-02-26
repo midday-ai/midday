@@ -41,7 +41,7 @@ export function TransactionMatchItem({
       <div className="flex gap-2 items-center">
         <span className="truncate">{name}</span>
         <span className="text-muted-foreground">
-          {formatDate(date, dateFormat, true)}
+          {formatDate(date, dateFormat)}
         </span>
         {isAlreadyMatched && (
           <TooltipProvider delayDuration={100}>
