@@ -4309,6 +4309,14 @@ export const transactionRules = pgTable(
     setExcluded: boolean("set_excluded"),
     setAssignedId: uuid("set_assigned_id"),
 
+    // Deal assignment actions
+    setDealCode: text("set_deal_code"),
+    autoResolveDeal: boolean("auto_resolve_deal").notNull().default(false),
+
+    // Date range criteria
+    dateStart: date("date_start"),
+    dateEnd: date("date_end"),
+
     // Timestamps
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .defaultNow()
