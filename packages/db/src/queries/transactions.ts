@@ -4,6 +4,8 @@ import {
   bankAccounts,
   bankConnections,
   inbox,
+  mcaDeals,
+  merchants,
   tags,
   transactionAttachments,
   transactionCategories,
@@ -131,41 +133,22 @@ export async function getTransactions(
     }
   }
 
-  // Status filtering - simplified logic using direct EXISTS subqueries
-  if (statuses?.includes("uncompleted") || attachments === "exclude") {
-    // Transaction is NOT fulfilled (no attachments AND status is not completed) AND status is not excluded
-    whereConditions.push(
-      sql`NOT (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed') AND ${transactions.status} != 'excluded'`,
-    );
-  } else if (statuses?.includes("completed") || attachments === "include") {
-    // Transaction is fulfilled (has attachments OR status is completed)
-    whereConditions.push(
-      sql`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
-    );
-  } else if (statuses?.includes("excluded")) {
+  // Status filtering
+  if (statuses?.includes("excluded")) {
     whereConditions.push(eq(transactions.status, "excluded"));
-  } else if (statuses?.includes("archived")) {
-    whereConditions.push(eq(transactions.status, "archived"));
-  } else if (statuses?.includes("exported")) {
-    // Show all exported transactions: manually marked OR synced to accounting provider
+  } else if (statuses && statuses.length > 0) {
     whereConditions.push(
-      sql`(
-        ${transactions.status} = 'exported' OR EXISTS (
-          SELECT 1 FROM ${accountingSyncRecords}
-          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
-          AND ${accountingSyncRecords.teamId} = ${teamId}
-          AND ${accountingSyncRecords.status} = 'synced'
-        )
-      )`,
+      inArray(transactions.status, statuses as string[]),
     );
   } else {
-    // Default: pending, posted, completed, or exported (exclude archived/excluded)
+    // Default: show all except excluded
     whereConditions.push(
       inArray(transactions.status, [
         "pending",
         "posted",
-        "completed",
-        "exported",
+        "failed",
+        "refund",
+        "funding",
       ]),
     );
   }
@@ -422,6 +405,16 @@ export async function getTransactions(
       taxAmount: transactions.taxAmount,
       enrichmentCompleted: transactions.enrichmentCompleted,
       transactionType: transactions.transactionType,
+      // MCA reconciliation fields
+      matchStatus: transactions.matchStatus,
+      matchConfidence: transactions.matchConfidence,
+      matchedDealId: transactions.matchedDealId,
+      matchedPaymentId: transactions.matchedPaymentId,
+      discrepancyType: transactions.discrepancyType,
+      paymentStatus: transactions.paymentStatus,
+      reconciliationNote: transactions.reconciliationNote,
+      dealCode: mcaDeals.dealCode,
+      dealMerchantName: merchants.name,
       isFulfilled:
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`.as(
           "isFulfilled",
@@ -551,6 +544,14 @@ export async function getTransactions(
         eq(transactionAttachments.teamId, teamId),
       ),
     )
+    .leftJoin(
+      mcaDeals,
+      eq(mcaDeals.id, transactions.matchedDealId),
+    )
+    .leftJoin(
+      merchants,
+      eq(merchants.id, mcaDeals.merchantId),
+    )
     .where(and(...finalWhereConditions))
     .groupBy(
       transactions.id,
@@ -584,6 +585,16 @@ export async function getTransactions(
       bankConnections.id,
       bankConnections.name,
       bankConnections.logoUrl,
+      // MCA reconciliation fields
+      transactions.matchStatus,
+      transactions.matchConfidence,
+      transactions.matchedDealId,
+      transactions.matchedPaymentId,
+      transactions.discrepancyType,
+      transactions.paymentStatus,
+      transactions.reconciliationNote,
+      mcaDeals.dealCode,
+      merchants.name,
     );
 
   let query = queryBuilder.$dynamic();
@@ -718,6 +729,16 @@ export async function getTransactionById(
       taxAmount: transactions.taxAmount,
       enrichmentCompleted: transactions.enrichmentCompleted,
       transactionType: transactions.transactionType,
+      // MCA reconciliation fields
+      matchStatus: transactions.matchStatus,
+      matchConfidence: transactions.matchConfidence,
+      matchedDealId: transactions.matchedDealId,
+      matchedPaymentId: transactions.matchedPaymentId,
+      discrepancyType: transactions.discrepancyType,
+      paymentStatus: transactions.paymentStatus,
+      reconciliationNote: transactions.reconciliationNote,
+      dealCode: mcaDeals.dealCode,
+      dealMerchantName: merchants.name,
       isFulfilled:
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, params.teamId)})) OR ${transactions.status} = 'completed'`.as(
           "isFulfilled",
@@ -823,6 +844,14 @@ export async function getTransactionById(
       ),
     )
     .leftJoin(
+      mcaDeals,
+      eq(mcaDeals.id, transactions.matchedDealId),
+    )
+    .leftJoin(
+      merchants,
+      eq(merchants.id, mcaDeals.merchantId),
+    )
+    .leftJoin(
       // Get any pending suggestion
       transactionMatchSuggestions,
       and(
@@ -867,6 +896,16 @@ export async function getTransactionById(
       transactions.description,
       transactions.createdAt,
       transactions.transactionType,
+      // MCA reconciliation fields
+      transactions.matchStatus,
+      transactions.matchConfidence,
+      transactions.matchedDealId,
+      transactions.matchedPaymentId,
+      transactions.discrepancyType,
+      transactions.paymentStatus,
+      transactions.reconciliationNote,
+      mcaDeals.dealCode,
+      merchants.name,
       transactionMatchSuggestions.id,
       transactionMatchSuggestions.inboxId,
       transactionMatchSuggestions.confidenceScore,
@@ -1475,11 +1514,11 @@ type UpdateTransactionData = {
   categorySlug?: string | null;
   status?:
     | "pending"
-    | "archived"
-    | "completed"
     | "posted"
+    | "failed"
+    | "refund"
+    | "funding"
     | "excluded"
-    | "exported"
     | null;
   internal?: boolean;
   note?: string | null;
@@ -1669,11 +1708,11 @@ type UpdateTransactionsData = {
   categorySlug?: string | null;
   status?:
     | "pending"
-    | "archived"
-    | "completed"
     | "posted"
+    | "failed"
+    | "refund"
+    | "funding"
     | "excluded"
-    | "exported"
     | null;
   internal?: boolean;
   note?: string | null;
@@ -1882,7 +1921,7 @@ export type UpsertTransactionData = {
   teamId: string;
   bankAccountId: string | null;
   internalId: string;
-  status: "pending" | "completed" | "archived" | "posted" | "excluded";
+  status: "pending" | "posted" | "failed" | "refund" | "funding" | "excluded";
   manual: boolean;
   categorySlug?: string | null;
   description?: string | null;
@@ -2044,9 +2083,10 @@ export async function bulkUpdateTransactionsBaseCurrency(
           internalId: tx.internalId ?? "",
           status: (tx.status ?? "posted") as
             | "pending"
-            | "completed"
-            | "archived"
             | "posted"
+            | "failed"
+            | "refund"
+            | "funding"
             | "excluded",
           manual: tx.manual ?? false,
           categorySlug: tx.categorySlug,
@@ -2139,30 +2179,13 @@ export async function getTransactionsReadyForExportCount(
 }
 
 /**
- * Mark transactions as exported (for file exports)
- * This removes them from the review tab
- */
-export async function markTransactionsAsExported(
-  db: Database,
-  transactionIds: string[],
-): Promise<void> {
-  if (transactionIds.length === 0) return;
-
-  await db
-    .update(transactions)
-    .set({ status: "exported" })
-    .where(inArray(transactions.id, transactionIds));
-}
-
-/**
- * Move a transaction back to review by resetting its export status
- * This handles both file exports (status = 'exported') and accounting exports (sync records)
+ * Move a transaction back to review by resetting its excluded status
  */
 export async function moveTransactionToReview(
   db: Database,
   params: { transactionId: string; teamId: string },
 ): Promise<void> {
-  // Reset status if it's 'exported' (file export)
+  // Reset status if it's 'excluded'
   await db
     .update(transactions)
     .set({ status: "posted" })
@@ -2170,7 +2193,7 @@ export async function moveTransactionToReview(
       and(
         eq(transactions.id, params.transactionId),
         eq(transactions.teamId, params.teamId),
-        eq(transactions.status, "exported"),
+        eq(transactions.status, "excluded"),
       ),
     );
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
-import { InlineAssignUser } from "@/components/inline-assign-user";
 import { InlineSelectTags } from "@/components/inline-select-tags";
 import { TransactionTypeBadge } from "@/components/transaction-type-badge";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
@@ -17,7 +16,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
@@ -126,6 +129,27 @@ const AmountCell = memo(
 
 AmountCell.displayName = "AmountCell";
 
+const DealCell = memo(
+  ({ dealCode }: { dealCode: string | null }) => {
+    if (!dealCode) {
+      return (
+        <span className="text-xs text-muted-foreground/60 flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+          Unassigned
+        </span>
+      );
+    }
+
+    return (
+      <span className="text-sm font-mono text-foreground">
+        {dealCode}
+      </span>
+    );
+  },
+);
+
+DealCell.displayName = "DealCell";
+
 const TagsCell = memo(
   ({ tags }: { tags?: { id: string; name: string | null }[] }) => (
     <div className="relative w-full">
@@ -147,64 +171,65 @@ const TagsCell = memo(
 
 TagsCell.displayName = "TagsCell";
 
+const DISCREPANCY_TYPES = [
+  { value: "partial_payment", label: "Partial payment" },
+  { value: "overpayment", label: "Overpayment" },
+  { value: "duplicate", label: "Duplicate" },
+  { value: "unrecognized", label: "Unrecognized" },
+  { value: "bank_fee", label: "Bank fee" },
+  { value: "split_payment", label: "Split payment" },
+] as const;
+
 const ActionsCell = memo(
   ({
     transaction,
     onViewDetails,
     onCopyUrl,
-    onUpdateTransaction,
     onDeleteTransaction,
     onEditTransaction,
-    onMoveToReview,
+    // MCA matching actions
+    onMatchToDeal,
+    onConfirmMatch,
+    onRejectMatch,
+    onUnmatch,
+    // MCA flagging actions
+    onMarkNsf,
+    onClearNsf,
+    onFlagForReview,
+    onResolveFlag,
+    // MCA workflow actions
+    onRecordCollection,
+    onCreateDeal,
+    onEscalateToCollections,
+    onExclude,
   }: {
     transaction: Transaction;
     onViewDetails?: (id: string) => void;
     onCopyUrl?: (id: string) => void;
-    onUpdateTransaction?: (data: {
-      id: string;
-      status?: string;
-      categorySlug?: string | null;
-      assignedId?: string | null;
-    }) => void;
     onDeleteTransaction?: (id: string) => void;
     onEditTransaction?: (id: string) => void;
-    onMoveToReview?: (id: string) => void;
+    onMatchToDeal?: (transaction: Transaction) => void;
+    onConfirmMatch?: (id: string) => void;
+    onRejectMatch?: (id: string) => void;
+    onUnmatch?: (id: string) => void;
+    onMarkNsf?: (transaction: Transaction) => void;
+    onClearNsf?: (id: string) => void;
+    onFlagForReview?: (transaction: Transaction, discrepancyType: string) => void;
+    onResolveFlag?: (transaction: Transaction) => void;
+    onRecordCollection?: (transaction: Transaction) => void;
+    onCreateDeal?: (transaction: Transaction) => void;
+    onEscalateToCollections?: (transaction: Transaction) => void;
+    onExclude?: (id: string) => void;
   }) => {
-    const handleViewDetails = useCallback(() => {
-      onViewDetails?.(transaction.id);
-    }, [transaction.id, onViewDetails]);
-
-    const handleEditTransaction = useCallback(() => {
-      onEditTransaction?.(transaction.id);
-    }, [transaction.id, onEditTransaction]);
-
-    const handleCopyUrl = useCallback(() => {
-      onCopyUrl?.(transaction.id);
-    }, [transaction.id, onCopyUrl]);
-
-    const handleUpdateToPosted = useCallback(() => {
-      onUpdateTransaction?.({ id: transaction.id, status: "posted" });
-    }, [transaction.id, onUpdateTransaction]);
-
-    const handleUpdateToCompleted = useCallback(() => {
-      onUpdateTransaction?.({ id: transaction.id, status: "completed" });
-    }, [transaction.id, onUpdateTransaction]);
-
-    const handleUpdateToExcluded = useCallback(() => {
-      onUpdateTransaction?.({ id: transaction.id, status: "excluded" });
-    }, [transaction.id, onUpdateTransaction]);
-
-    const handleUpdateToExported = useCallback(() => {
-      onUpdateTransaction?.({ id: transaction.id, status: "exported" });
-    }, [transaction.id, onUpdateTransaction]);
-
-    const handleDeleteTransaction = useCallback(() => {
-      onDeleteTransaction?.(transaction.id);
-    }, [transaction.id, onDeleteTransaction]);
-
-    const handleMoveToReview = useCallback(() => {
-      onMoveToReview?.(transaction.id);
-    }, [transaction.id, onMoveToReview]);
+    const matchStatus = transaction.matchStatus;
+    const isUnmatched = !matchStatus || matchStatus === "unmatched";
+    const isSuggested = matchStatus === "suggested" || matchStatus === "auto_matched";
+    const isMatched = matchStatus === "manual_matched" || matchStatus === "auto_matched";
+    const isFlagged = matchStatus === "flagged";
+    const isExcluded = matchStatus === "excluded";
+    const isNsf = transaction.discrepancyType === "nsf";
+    const hasDeal = !!transaction.matchedDealId;
+    const isLikelyFunding = !hasDeal && transaction.amount > 0;
 
     return (
       <div className="flex justify-center w-full">
@@ -215,66 +240,142 @@ const ActionsCell = memo(
               <Icons.MoreHoriz className="text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleViewDetails}>
+          <DropdownMenuContent align="end" className="w-52">
+            {/* Core actions */}
+            <DropdownMenuItem onClick={() => onViewDetails?.(transaction.id)}>
               View details
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleViewDetails}>
+            <DropdownMenuItem onClick={() => onViewDetails?.(transaction.id)}>
               <Icons.AI size={14} className="mr-2" />
               Explain with AI
             </DropdownMenuItem>
-            {transaction.manual && (
-              <DropdownMenuItem onClick={handleEditTransaction}>
-                Edit transaction
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onClick={handleCopyUrl}>
+            <DropdownMenuItem onClick={() => onCopyUrl?.(transaction.id)}>
               Share URL
             </DropdownMenuItem>
+
+            {/* Matching section */}
             <DropdownMenuSeparator />
-            {!transaction.manual && transaction.status === "excluded" && (
-              <DropdownMenuItem onClick={handleUpdateToPosted}>
-                Include
+            <DropdownMenuLabel className="text-[11px] text-muted-foreground">
+              Matching
+            </DropdownMenuLabel>
+
+            {isUnmatched && (
+              <DropdownMenuItem onClick={() => onMatchToDeal?.(transaction)}>
+                Match to deal
               </DropdownMenuItem>
             )}
 
-            {!transaction.isFulfilled && (
-              <DropdownMenuItem onClick={handleUpdateToCompleted}>
-                Mark as completed
+            {isSuggested && (
+              <>
+                <DropdownMenuItem onClick={() => onConfirmMatch?.(transaction.id)}>
+                  Confirm match
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onRejectMatch?.(transaction.id)}>
+                  Reject match
+                </DropdownMenuItem>
+              </>
+            )}
+
+            {isMatched && !isSuggested && (
+              <DropdownMenuItem onClick={() => onUnmatch?.(transaction.id)}>
+                Unmatch
               </DropdownMenuItem>
             )}
 
-            {transaction.isFulfilled && transaction.status === "completed" && (
-              <DropdownMenuItem onClick={handleUpdateToPosted}>
-                Mark as uncompleted
+            {/* Flagging section */}
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-[11px] text-muted-foreground">
+              Flagging
+            </DropdownMenuLabel>
+
+            {!isNsf && !isExcluded && (
+              <DropdownMenuItem onClick={() => onMarkNsf?.(transaction)}>
+                Mark as NSF
               </DropdownMenuItem>
             )}
 
-            {!transaction.isExported && transaction.status !== "exported" && (
-              <DropdownMenuItem onClick={handleUpdateToExported}>
-                Mark as exported
+            {isNsf && (
+              <DropdownMenuItem onClick={() => onClearNsf?.(transaction.id)}>
+                Clear NSF flag
               </DropdownMenuItem>
             )}
 
-            {(transaction.isExported || transaction.status === "exported") && (
-              <DropdownMenuItem onClick={handleMoveToReview}>
-                Move to review
+            {!isFlagged && (
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Flag for review</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {DISCREPANCY_TYPES.map((type) => (
+                    <DropdownMenuItem
+                      key={type.value}
+                      onClick={() => onFlagForReview?.(transaction, type.value)}
+                    >
+                      {type.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            )}
+
+            {isFlagged && (
+              <DropdownMenuItem onClick={() => onResolveFlag?.(transaction)}>
+                Resolve flag
               </DropdownMenuItem>
             )}
 
-            {!transaction.manual && transaction.status !== "excluded" && (
-              <DropdownMenuItem onClick={handleUpdateToExcluded}>
-                Exclude
-              </DropdownMenuItem>
+            {/* Workflow section */}
+            {(hasDeal || isLikelyFunding) && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-[11px] text-muted-foreground">
+                  Workflow
+                </DropdownMenuLabel>
+
+                {hasDeal && (
+                  <DropdownMenuItem onClick={() => onRecordCollection?.(transaction)}>
+                    Record collection
+                  </DropdownMenuItem>
+                )}
+
+                {isLikelyFunding && (
+                  <DropdownMenuItem onClick={() => onCreateDeal?.(transaction)}>
+                    Create deal
+                  </DropdownMenuItem>
+                )}
+
+                {hasDeal && (
+                  <DropdownMenuItem onClick={() => onEscalateToCollections?.(transaction)}>
+                    Escalate to collections
+                  </DropdownMenuItem>
+                )}
+              </>
             )}
 
-            {transaction.manual && (
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={handleDeleteTransaction}
-              >
-                Delete
-              </DropdownMenuItem>
+            {/* Danger zone */}
+            {(transaction.manual || !isExcluded) && (
+              <>
+                <DropdownMenuSeparator />
+
+                {transaction.manual && (
+                  <DropdownMenuItem onClick={() => onEditTransaction?.(transaction.id)}>
+                    Edit transaction
+                  </DropdownMenuItem>
+                )}
+
+                {!isExcluded && (
+                  <DropdownMenuItem onClick={() => onExclude?.(transaction.id)}>
+                    Exclude from reconciliation
+                  </DropdownMenuItem>
+                )}
+
+                {transaction.manual && (
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={() => onDeleteTransaction?.(transaction.id)}
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                )}
+              </>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -431,6 +532,20 @@ export const columns: ColumnDef<Transaction>[] = [
     ),
   },
   {
+    accessorKey: "dealCode",
+    header: "Deal",
+    size: 160,
+    minSize: 120,
+    maxSize: 300,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Deal",
+      className: "w-[160px] min-w-[120px]",
+    },
+    cell: ({ row }) => <DealCell dealCode={row.original.dealCode ?? null} />,
+  },
+  {
     accessorKey: "counterparty",
     header: "From / To",
     size: 200,
@@ -522,34 +637,6 @@ export const columns: ColumnDef<Transaction>[] = [
     ),
   },
   {
-    accessorKey: "assigned",
-    header: "Assigned",
-    size: 220,
-    minSize: 150,
-    maxSize: 400,
-    enableResizing: true,
-    meta: {
-      skeleton: { type: "avatar-text", width: "w-24" },
-      headerLabel: "Assigned",
-      className: "w-[220px] min-w-[150px]",
-    },
-    cell: ({ row, table }) => {
-      const meta = table.options.meta;
-
-      return (
-        <InlineAssignUser
-          selectedId={row.original.assigned?.id ?? undefined}
-          onSelect={(user) => {
-            meta?.updateTransaction?.({
-              id: row.original.id,
-              assignedId: user.id,
-            });
-          }}
-        />
-      );
-    },
-  },
-  {
     accessorKey: "status",
     header: "Status",
     size: 160,
@@ -612,10 +699,23 @@ export const columns: ColumnDef<Transaction>[] = [
           transaction={row.original}
           onViewDetails={meta?.setOpen}
           onCopyUrl={meta?.copyUrl}
-          onUpdateTransaction={meta?.updateTransaction}
           onDeleteTransaction={meta?.onDeleteTransaction}
           onEditTransaction={meta?.editTransaction}
-          onMoveToReview={meta?.moveToReview}
+          // MCA matching actions
+          onMatchToDeal={meta?.onMatchToDeal}
+          onConfirmMatch={meta?.onConfirmMatch}
+          onRejectMatch={meta?.onRejectMatch}
+          onUnmatch={meta?.onUnmatch}
+          // MCA flagging actions
+          onMarkNsf={meta?.onMarkNsf}
+          onClearNsf={meta?.onClearNsf}
+          onFlagForReview={meta?.onFlagForReview}
+          onResolveFlag={meta?.onResolveFlag}
+          // MCA workflow actions
+          onRecordCollection={meta?.onRecordCollection}
+          onCreateDeal={meta?.onCreateDeal}
+          onEscalateToCollections={meta?.onEscalateToCollections}
+          onExclude={meta?.onExclude}
         />
       );
     },
