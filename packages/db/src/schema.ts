@@ -2373,6 +2373,7 @@ export const usersOnTeam = pgTable(
     role: teamRolesEnum(),
     entityId: uuid("entity_id"),
     entityType: text("entity_type"),
+    hasCollectionsPermission: boolean("has_collections_permission").default(false),
     createdAt: timestamp("created_at", {
       withTimezone: true,
       mode: "string",
@@ -3534,6 +3535,48 @@ export const mcaDealStatusEnum = pgEnum("mca_deal_status", [
   "in_collections",
 ]);
 
+export const collectionPriorityEnum = pgEnum("collection_priority", [
+  "low",
+  "medium",
+  "high",
+  "critical",
+]);
+
+export const collectionOutcomeEnum = pgEnum("collection_outcome", [
+  "paid_in_full",
+  "settled",
+  "payment_plan",
+  "defaulted",
+  "written_off",
+  "sent_to_agency",
+]);
+
+export const collectionContactMethodEnum = pgEnum("collection_contact_method", [
+  "phone",
+  "email",
+  "text",
+  "in_person",
+  "other",
+]);
+
+export const collectionNotificationTypeEnum = pgEnum("collection_notification_type", [
+  "follow_up_due",
+  "sla_breach",
+  "escalation",
+  "assignment",
+]);
+
+export const collectionEscalationTriggerEnum = pgEnum("collection_escalation_trigger", [
+  "time_based",
+  "event_based",
+]);
+
+export const collectionSlaMetricEnum = pgEnum("collection_sla_metric", [
+  "time_in_stage",
+  "response_time",
+  "resolution_time",
+]);
+
 export const mcaPaymentTypeEnum = pgEnum("mca_payment_type", [
   "ach",
   "wire",
@@ -3644,6 +3687,286 @@ export const mcaDeals = pgTable(
       for: "all",
       to: ["public"],
       using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+// ============================================================================
+// Collections Module
+// ============================================================================
+
+export const collectionStages = pgTable(
+  "collection_stages",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    name: text().notNull(),
+    slug: text().notNull(),
+    position: integer().notNull(),
+    color: text().default("#6B7280"),
+    isDefault: boolean("is_default").default(false),
+    isTerminal: boolean("is_terminal").default(false),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("collection_stages_team_id_idx").on(table.teamId),
+    unique("collection_stages_team_slug_unique").on(table.teamId, table.slug),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "collection_stages_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage collection stages", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const collectionAgencies = pgTable(
+  "collection_agencies",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    name: text().notNull(),
+    contactName: text("contact_name"),
+    contactEmail: text("contact_email"),
+    contactPhone: text("contact_phone"),
+    notes: text(),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("collection_agencies_team_id_idx").on(table.teamId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "collection_agencies_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage collection agencies", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const collectionCases = pgTable(
+  "collection_cases",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    dealId: uuid("deal_id").notNull(),
+    stageId: uuid("stage_id").notNull(),
+    assignedTo: uuid("assigned_to"),
+    priority: collectionPriorityEnum().default("medium"),
+    outcome: collectionOutcomeEnum(),
+    agencyId: uuid("agency_id"),
+    nextFollowUp: timestamp("next_follow_up", { withTimezone: true, mode: "string" }),
+    stageEnteredAt: timestamp("stage_entered_at", { withTimezone: true, mode: "string" })
+      .defaultNow(),
+    enteredCollectionsAt: timestamp("entered_collections_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: "string" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow(),
+  },
+  (table) => [
+    index("collection_cases_team_id_idx").on(table.teamId),
+    index("collection_cases_deal_id_idx").on(table.dealId),
+    index("collection_cases_stage_id_idx").on(table.stageId),
+    index("collection_cases_assigned_to_idx").on(table.assignedTo),
+    unique("collection_cases_deal_id_unique").on(table.dealId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "collection_cases_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "collection_cases_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.stageId],
+      foreignColumns: [collectionStages.id],
+      name: "collection_cases_stage_id_fkey",
+    }),
+    foreignKey({
+      columns: [table.assignedTo],
+      foreignColumns: [users.id],
+      name: "collection_cases_assigned_to_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.agencyId],
+      foreignColumns: [collectionAgencies.id],
+      name: "collection_cases_agency_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Team members can manage collection cases", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const collectionNotes = pgTable(
+  "collection_notes",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    caseId: uuid("case_id").notNull(),
+    authorId: uuid("author_id").notNull(),
+    contactName: text("contact_name"),
+    contactMethod: collectionContactMethodEnum("contact_method"),
+    followUpDate: timestamp("follow_up_date", { withTimezone: true, mode: "string" }),
+    summary: text().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("collection_notes_case_id_idx").on(table.caseId),
+    foreignKey({
+      columns: [table.caseId],
+      foreignColumns: [collectionCases.id],
+      name: "collection_notes_case_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.authorId],
+      foreignColumns: [users.id],
+      name: "collection_notes_author_id_fkey",
+    }),
+    pgPolicy("Team members can manage collection notes", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(case_id IN ( SELECT cc.id FROM collection_cases cc WHERE cc.team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)))`,
+    }),
+  ],
+);
+
+export const collectionEscalationRules = pgTable(
+  "collection_escalation_rules",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    triggerType: collectionEscalationTriggerEnum("trigger_type").notNull(),
+    fromStageId: uuid("from_stage_id").notNull(),
+    toStageId: uuid("to_stage_id").notNull(),
+    condition: jsonb().notNull(),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("collection_escalation_rules_team_id_idx").on(table.teamId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "collection_escalation_rules_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.fromStageId],
+      foreignColumns: [collectionStages.id],
+      name: "collection_escalation_rules_from_stage_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.toStageId],
+      foreignColumns: [collectionStages.id],
+      name: "collection_escalation_rules_to_stage_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage escalation rules", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const collectionSlaConfigs = pgTable(
+  "collection_sla_configs",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    stageId: uuid("stage_id"),
+    metric: collectionSlaMetricEnum().notNull(),
+    thresholdMinutes: integer("threshold_minutes").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("collection_sla_configs_team_id_idx").on(table.teamId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "collection_sla_configs_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.stageId],
+      foreignColumns: [collectionStages.id],
+      name: "collection_sla_configs_stage_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage SLA configs", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const collectionNotifications = pgTable(
+  "collection_notifications",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    caseId: uuid("case_id").notNull(),
+    type: collectionNotificationTypeEnum().notNull(),
+    message: text().notNull(),
+    readAt: timestamp("read_at", { withTimezone: true, mode: "string" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("collection_notifications_user_id_idx").on(table.userId),
+    index("collection_notifications_case_id_idx").on(table.caseId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "collection_notifications_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "collection_notifications_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.caseId],
+      foreignColumns: [collectionCases.id],
+      name: "collection_notifications_case_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Users can view their own notifications", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(user_id = auth.uid())`,
     }),
   ],
 );
@@ -4186,6 +4509,10 @@ export const mcaDealsRelations = relations(mcaDeals, ({ one, many }) => ({
   brokerCommissions: many(brokerCommissions),
   syndicationParticipants: many(syndicationParticipants),
   dealBankAccounts: many(dealBankAccounts),
+  collectionCase: one(collectionCases, {
+    fields: [mcaDeals.id],
+    references: [collectionCases.dealId],
+  }),
 }));
 
 export const mcaPaymentsRelations = relations(mcaPayments, ({ one }) => ({
@@ -4197,6 +4524,76 @@ export const mcaPaymentsRelations = relations(mcaPayments, ({ one }) => ({
     fields: [mcaPayments.teamId],
     references: [teams.id],
   }),
+}));
+
+// ============================================================================
+// Collections Relations
+// ============================================================================
+
+export const collectionStagesRelations = relations(collectionStages, ({ one }) => ({
+  team: one(teams, {
+    fields: [collectionStages.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const collectionAgenciesRelations = relations(collectionAgencies, ({ one }) => ({
+  team: one(teams, {
+    fields: [collectionAgencies.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const collectionCasesRelations = relations(collectionCases, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [collectionCases.teamId],
+    references: [teams.id],
+  }),
+  deal: one(mcaDeals, {
+    fields: [collectionCases.dealId],
+    references: [mcaDeals.id],
+  }),
+  stage: one(collectionStages, {
+    fields: [collectionCases.stageId],
+    references: [collectionStages.id],
+  }),
+  assignedUser: one(users, {
+    fields: [collectionCases.assignedTo],
+    references: [users.id],
+  }),
+  agency: one(collectionAgencies, {
+    fields: [collectionCases.agencyId],
+    references: [collectionAgencies.id],
+  }),
+  notes: many(collectionNotes),
+}));
+
+export const collectionNotesRelations = relations(collectionNotes, ({ one }) => ({
+  case: one(collectionCases, {
+    fields: [collectionNotes.caseId],
+    references: [collectionCases.id],
+  }),
+  author: one(users, {
+    fields: [collectionNotes.authorId],
+    references: [users.id],
+  }),
+}));
+
+export const collectionEscalationRulesRelations = relations(collectionEscalationRules, ({ one }) => ({
+  team: one(teams, { fields: [collectionEscalationRules.teamId], references: [teams.id] }),
+  fromStage: one(collectionStages, { fields: [collectionEscalationRules.fromStageId], references: [collectionStages.id], relationName: "fromStage" }),
+  toStage: one(collectionStages, { fields: [collectionEscalationRules.toStageId], references: [collectionStages.id], relationName: "toStage" }),
+}));
+
+export const collectionSlaConfigsRelations = relations(collectionSlaConfigs, ({ one }) => ({
+  team: one(teams, { fields: [collectionSlaConfigs.teamId], references: [teams.id] }),
+  stage: one(collectionStages, { fields: [collectionSlaConfigs.stageId], references: [collectionStages.id] }),
+}));
+
+export const collectionNotificationsRelations = relations(collectionNotifications, ({ one }) => ({
+  team: one(teams, { fields: [collectionNotifications.teamId], references: [teams.id] }),
+  user: one(users, { fields: [collectionNotifications.userId], references: [users.id] }),
+  case: one(collectionCases, { fields: [collectionNotifications.caseId], references: [collectionCases.id] }),
 }));
 
 export const merchantPortalSessionsRelations = relations(

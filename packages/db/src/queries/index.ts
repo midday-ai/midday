@@ -56,3 +56,7 @@ export * from "./disclosures";
 export * from "./reconciliation";
 export * from "./ach-batches";
 export * from "./export-templates";
+export * from "./collections";
+export * from "./collection-notes";
+export * from "./collection-config";
+export * from "./collection-notifications";
