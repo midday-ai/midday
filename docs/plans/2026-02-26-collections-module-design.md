@@ -2,7 +2,7 @@
 
 ## Overview
 
-A full collections workflow module for managing at-risk MCA deals. Deals flagged as `late`, `defaulted`, or `in_collections` surface automatically as candidates. Collectors can self-assign cases, track outreach with hybrid structured+free-text notes, manage follow-ups with in-app notifications, and move cases through configurable workflow stages. The system includes auto-escalation rules (time and event-based), SLA tracking, and per-team configuration.
+A full collections workflow module for managing at-risk MCA deals. Deals flagged as `late`, `defaulted`, or `in_collections` surface automatically as candidates. Collectors can self-assign cases, track outreach with hybrid structured+free-text notes, manage follow-ups with in-app notifications, and move cases through configurable workflow stages. The system includes auto-escalation rules (time and event-based), SLA tracking, per-team configuration, external collections agency management, and merchant-level collections visibility.
 
 ## Data Model
 
@@ -34,7 +34,8 @@ One case per deal in collections.
 | stageId | uuid | FK → collection_stages |
 | assignedTo | uuid | FK → users (nullable) |
 | priority | enum | low, medium, high, critical |
-| outcome | enum | nullable — paid_in_full, settled, written_off, payment_plan |
+| outcome | enum | nullable — paid_in_full, settled, written_off, payment_plan, defaulted, sent_to_agency |
+| agencyId | uuid | FK → collection_agencies (nullable — set when outcome is sent_to_agency) |
 | nextFollowUp | timestamp | Next follow-up date |
 | enteredCollectionsAt | timestamp | When case was created |
 | resolvedAt | timestamp | nullable |
@@ -53,6 +54,21 @@ Hybrid structured + free-text activity log.
 | contactMethod | enum | phone, email, text, in_person, other (nullable) |
 | followUpDate | timestamp | When to follow up (nullable) |
 | summary | text | Free-text notes |
+| createdAt | timestamp | |
+
+#### `collection_agencies`
+External collections agencies configurable per team.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | PK |
+| teamId | uuid | FK → teams |
+| name | text | Agency name |
+| contactName | text | Primary contact person (nullable) |
+| contactEmail | text | Contact email (nullable) |
+| contactPhone | text | Contact phone (nullable) |
+| notes | text | Any notes about this agency (nullable) |
+| isActive | boolean | Whether this agency is available for selection |
 | createdAt | timestamp | |
 
 #### `collection_escalation_rules`
@@ -98,6 +114,7 @@ In-app notification system.
 ### Modifications to Existing Tables
 
 - **team_members**: Add `hasCollectionsPermission` boolean (default false)
+- **Merchant detail page**: Add a "Collections" section showing the merchant's at-risk deal history, active cases, past outcomes, and any agencies deals were sent to
 
 ## Navigation
 
@@ -136,7 +153,7 @@ Columns: Deal Code, Merchant, Balance, Stage, Assigned To, Priority, Next Follow
 ## Detail Page (`/collections/[id]`)
 
 ### Header
-Back link, deal code + merchant name, stage badge with dropdown, assign button, priority selector, resolution button.
+Back link, deal code + merchant name, stage badge with dropdown, assign button, priority selector, resolution button (with outcome options including "Send to Agency" which prompts for agency selection).
 
 ### Left Column (60%)
 - Activity timeline (notes, stage changes, system events)
@@ -144,7 +161,7 @@ Back link, deal code + merchant name, stage badge with dropdown, assign button, 
 
 ### Right Column (40%)
 - Deal Summary Card (funded amount, payback, balance, total paid, factor rate, funded date)
-- Merchant Info Card (name, contact, link to merchant detail)
+- Merchant Info Card (name, contact, link to merchant detail, collections history badge)
 - Syndication Info Card (syndicator positions if any)
 - Payment History (recent payments with status)
 - SLA Indicators (time in stage, response time, resolution time with breach warnings)
@@ -215,7 +232,7 @@ Syndicate users with `hasCollectionsPermission` see only cases for deals they ha
 
 ## Settings UI
 
-Both `/settings/collections` and `/collections/settings` render the same config. Three tabs:
+Both `/settings/collections` and `/collections/settings` render the same config. Four tabs:
 
 **Stages**: Drag-to-reorder list, color picker, name, default/terminal toggles, add/delete.
 
@@ -223,8 +240,28 @@ Both `/settings/collections` and `/collections/settings` render the same config.
 
 **SLA Thresholds**: Per-stage thresholds (metric, threshold in hours/days). Global resolution time threshold.
 
+**Agencies**: List of external collections agencies. Add/edit/deactivate. Fields: name, contact name, email, phone, notes. Active toggle.
+
 ## Resolution Outcomes
 - Paid in Full
 - Settled (partial payment agreement)
-- Written Off
 - Payment Plan Arranged
+- Defaulted (officially written off as default)
+- Written Off (loss accepted)
+- Sent to Agency (handed off to external collections agency — records which agency)
+
+## External Collections Agencies
+
+Teams can configure multiple external collections agencies in settings. When resolving a case with "Sent to Agency" outcome:
+1. User selects from the team's configured agencies
+2. The `agencyId` is recorded on the case
+3. The case moves to a terminal stage and is closed
+4. This is a hand-off — no further tracking in the system
+
+## Merchant-Level Collections Visibility
+
+The merchant detail page (`/merchants/[id]`) gets a new "Collections" section showing:
+- Count of active collections cases for this merchant's deals
+- History of past collections cases with outcomes
+- Agencies deals were sent to (if any)
+- Overall collections risk indicator (e.g., "2 of 5 deals in collections")
