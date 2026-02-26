@@ -450,6 +450,23 @@ export const getRevenueForecastSchema = z
   })
   .openapi("GetRevenueForecastSchema");
 
+export const getMcaReportSchema = z
+  .object({
+    from: z.string().openapi({
+      description: "Start date (ISO 8601 format)",
+      example: "2025-01-01",
+    }),
+    to: z.string().openapi({
+      description: "End date (ISO 8601 format)",
+      example: "2025-12-31",
+    }),
+    currency: z.string().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+  })
+  .openapi("GetMcaReportSchema");
+
 export const reportTypeSchema = z.enum([
   "profit",
   "revenue",
@@ -459,6 +476,13 @@ export const reportTypeSchema = z.enum([
   "revenue_forecast",
   "runway",
   "category_expenses",
+  "collection_performance",
+  "funding_activity",
+  "portfolio_composition",
+  "factor_rate_returns",
+  "rtr_aging",
+  "nsf_default_trends",
+  "repayment_velocity",
 ]);
 
 export const createReportSchema = z

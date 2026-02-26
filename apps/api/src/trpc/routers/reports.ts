@@ -3,6 +3,7 @@ import {
   getBurnRateSchema,
   getChartDataByLinkIdSchema,
   getExpensesSchema,
+  getMcaReportSchema,
   getProfitSchema,
   getReportByLinkIdSchema,
   getRevenueForecastSchema,
@@ -11,6 +12,15 @@ import {
   getSpendingSchema,
   getTaxSummarySchema,
 } from "@api/schemas/reports";
+import {
+  mockCollectionPerformance,
+  mockFundingActivity,
+  mockPortfolioComposition,
+  mockFactorRateReturns,
+  mockRtrAging,
+  mockNsfDefaultTrends,
+  mockRepaymentVelocity,
+} from "@api/trpc/mocks/mca-metrics-mock";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -131,6 +141,48 @@ export const reportsRouter = createTRPCRouter({
         currency: input.currency,
         revenueType: input.revenueType,
       });
+    }),
+
+  collectionPerformance: protectedProcedure
+    .input(getMcaReportSchema)
+    .query(async ({ input }) => {
+      return mockCollectionPerformance(input.from, input.to);
+    }),
+
+  fundingActivity: protectedProcedure
+    .input(getMcaReportSchema)
+    .query(async ({ input }) => {
+      return mockFundingActivity(input.from, input.to);
+    }),
+
+  portfolioComposition: protectedProcedure
+    .input(getMcaReportSchema)
+    .query(async ({ input }) => {
+      return mockPortfolioComposition(input.from, input.to);
+    }),
+
+  factorRateReturns: protectedProcedure
+    .input(getMcaReportSchema)
+    .query(async ({ input }) => {
+      return mockFactorRateReturns(input.from, input.to);
+    }),
+
+  rtrAging: protectedProcedure
+    .input(getMcaReportSchema)
+    .query(async ({ input }) => {
+      return mockRtrAging(input.from, input.to);
+    }),
+
+  nsfDefaultTrends: protectedProcedure
+    .input(getMcaReportSchema)
+    .query(async ({ input }) => {
+      return mockNsfDefaultTrends(input.from, input.to);
+    }),
+
+  repaymentVelocity: protectedProcedure
+    .input(getMcaReportSchema)
+    .query(async ({ input }) => {
+      return mockRepaymentVelocity(input.from, input.to);
     }),
 
   create: protectedProcedure
