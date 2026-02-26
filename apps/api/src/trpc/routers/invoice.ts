@@ -81,9 +81,16 @@ export const invoiceRouter = createTRPCRouter({
   getInvoiceByToken: publicProcedure
     .input(getInvoiceByTokenSchema)
     .query(async ({ input, ctx: { db } }) => {
-      const { id } = (await verify(decodeURIComponent(input.token))) as {
-        id: string;
-      };
+      let id: string | undefined;
+
+      try {
+        const payload = (await verify(decodeURIComponent(input.token))) as {
+          id?: string;
+        };
+        id = payload.id;
+      } catch {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
 
       if (!id) {
         throw new TRPCError({ code: "NOT_FOUND" });
