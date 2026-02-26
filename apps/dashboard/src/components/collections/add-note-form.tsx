@@ -57,7 +57,7 @@ export function AddNoteForm({ caseId }: Props) {
       addNoteMutation.mutate({
         caseId,
         contactName: contactName || undefined,
-        contactMethod: contactMethod || undefined,
+        contactMethod: (contactMethod || undefined) as "phone" | "email" | "text" | "in_person" | "other" | undefined,
         followUpDate: followUpDate?.toISOString(),
         summary: summary.trim(),
       });

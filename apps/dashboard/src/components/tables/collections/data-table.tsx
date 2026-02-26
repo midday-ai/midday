@@ -23,7 +23,6 @@ import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
-  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
@@ -46,8 +45,6 @@ export function DataTable({ initialSettings }: Props) {
   const parentRef = useRef<HTMLDivElement>(null);
   const { setColumns } = useCollectionsStore();
 
-  const deferredSearch = useDeferredValue(filter.q);
-
   useScrollHeader(parentRef, {
     extraOffset: SUMMARY_GRID_HEIGHTS.collections,
   });
@@ -69,12 +66,11 @@ export function DataTable({ initialSettings }: Props) {
 
   const infiniteQueryOptions = trpc.collections.get.infiniteQueryOptions(
     {
-      status,
+      status: status as "active" | "resolved",
       stageId: filter.stage,
       assignedTo: filter.assignedTo,
-      priority: filter.priority,
+      priority: filter.priority as "low" | "medium" | "high" | "critical" | null,
       sort: params.sort,
-      q: deferredSearch,
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,
@@ -152,9 +148,10 @@ export function DataTable({ initialSettings }: Props) {
     threshold: 50,
   });
 
+  // Realtime subscription — cast table name since Supabase types may not include collection_cases yet
   useRealtime({
     channelName: "realtime_collection_cases",
-    table: "collection_cases",
+    table: "collection_cases" as any,
     filter: user?.teamId ? `team_id=eq.${user.teamId}` : undefined,
     onEvent: (payload) => {
       if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {

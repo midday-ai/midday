@@ -200,7 +200,7 @@ export function CaseDetailHeader({ data }: Props) {
                   <div
                     className={cn(
                       "px-2 py-0.5 rounded-full text-[11px] font-medium",
-                      priorityStyles[data.priority] || priorityStyles.low,
+                      priorityStyles[data.priority ?? "low"] || priorityStyles.low,
                     )}
                   >
                     {data.priority}
