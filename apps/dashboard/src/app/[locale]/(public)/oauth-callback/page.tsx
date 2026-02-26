@@ -1,3 +1,4 @@
+import { isOAuthErrorCode } from "@midday/app-store/oauth-errors";
 import { notFound } from "next/navigation";
 import type { SearchParams } from "nuqs";
 import {
@@ -22,7 +23,8 @@ const OAuthCallbackPage = async (props: Props) => {
 
   const { status, error } = parsedSearchParams.data;
   const isError = status === "error";
-  const errorCode = error as AppOAuthErrorCode | undefined;
+  const errorCode: AppOAuthErrorCode | undefined =
+    typeof error === "string" && isOAuthErrorCode(error) ? error : undefined;
 
   return (
     <>

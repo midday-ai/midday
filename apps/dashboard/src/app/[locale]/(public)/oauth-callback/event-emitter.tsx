@@ -1,12 +1,13 @@
 "use client";
 
+import type { OAuthErrorCode } from "@midday/app-store/oauth-errors";
 import { useEffect } from "react";
 import { OAUTH_CHANNEL_NAME, type OAuthMessage } from "@/utils/oauth-message";
 import type { OAuthStatus } from "./schema";
 
 type Props = {
   status: OAuthStatus;
-  error?: string;
+  error?: OAuthErrorCode;
 };
 
 export const EventEmitter = ({ status, error }: Props) => {

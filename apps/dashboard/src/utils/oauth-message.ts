@@ -1,4 +1,7 @@
-import type { OAuthErrorCode } from "@midday/app-store/oauth-errors";
+import {
+  OAUTH_ERROR_CODES,
+  type OAuthErrorCode,
+} from "@midday/app-store/oauth-errors";
 
 export const OAUTH_CHANNEL_NAME = "midday_oauth_complete";
 
@@ -36,12 +39,5 @@ export function isOAuthMessage(data: unknown): data is OAuthMessage {
     return false;
   }
 
-  return (
-    data.error === "access_denied" ||
-    data.error === "missing_license" ||
-    data.error === "missing_permissions" ||
-    data.error === "invalid_state" ||
-    data.error === "token_exchange_failed" ||
-    data.error === "unknown_error"
-  );
+  return OAUTH_ERROR_CODES.includes(data.error as OAuthErrorCode);
 }
