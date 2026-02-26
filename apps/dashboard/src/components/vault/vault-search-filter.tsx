@@ -200,6 +200,7 @@ export function VaultSearchFilter() {
                 {tagsData?.map((tag) => (
                   <DropdownMenuCheckboxItem
                     key={tag.id}
+                    onSelect={(e) => e.preventDefault()}
                     onCheckedChange={() => {
                       setFilter({
                         tags: filter?.tags?.includes(tag.id)

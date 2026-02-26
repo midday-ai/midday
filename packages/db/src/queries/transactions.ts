@@ -131,43 +131,114 @@ export async function getTransactions(
     }
   }
 
-  // Status filtering - simplified logic using direct EXISTS subqueries
-  if (statuses?.includes("uncompleted") || attachments === "exclude") {
-    // Transaction is NOT fulfilled (no attachments AND status is not completed) AND status is not excluded
-    whereConditions.push(
-      sql`NOT (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed') AND ${transactions.status} != 'excluded'`,
-    );
-  } else if (statuses?.includes("completed") || attachments === "include") {
-    // Transaction is fulfilled (has attachments OR status is completed)
-    whereConditions.push(
-      sql`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
-    );
-  } else if (statuses?.includes("excluded")) {
-    whereConditions.push(eq(transactions.status, "excluded"));
-  } else if (statuses?.includes("archived")) {
-    whereConditions.push(eq(transactions.status, "archived"));
-  } else if (statuses?.includes("exported")) {
-    // Show all exported transactions: manually marked OR synced to accounting provider
-    whereConditions.push(
-      sql`(
-        ${transactions.status} = 'exported' OR EXISTS (
-          SELECT 1 FROM ${accountingSyncRecords}
-          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
-          AND ${accountingSyncRecords.teamId} = ${teamId}
-          AND ${accountingSyncRecords.status} = 'synced'
-        )
-      )`,
-    );
+  const isFulfilledCondition = sql`(
+    EXISTS (
+      SELECT 1
+      FROM ${transactionAttachments}
+      WHERE ${eq(transactionAttachments.transactionId, transactions.id)}
+      AND ${eq(transactionAttachments.teamId, teamId)}
+    ) OR ${transactions.status} = 'completed'
+  )`;
+
+  const isExportedCondition = sql`(
+    ${transactions.status} = 'exported' OR EXISTS (
+      SELECT 1
+      FROM ${accountingSyncRecords}
+      WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+      AND ${accountingSyncRecords.teamId} = ${teamId}
+      AND ${accountingSyncRecords.status} = 'synced'
+    )
+  )`;
+
+  const hasExportErrorCondition = sql`EXISTS (
+    SELECT 1
+    FROM ${accountingSyncRecords}
+    WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+    AND ${accountingSyncRecords.teamId} = ${teamId}
+    AND ${accountingSyncRecords.status} IN ('failed', 'partial')
+  )`;
+
+  const hasPendingSuggestionCondition = sql`EXISTS (
+    SELECT 1
+    FROM ${transactionMatchSuggestions}
+    WHERE ${transactionMatchSuggestions.transactionId} = ${transactions.id}
+    AND ${transactionMatchSuggestions.teamId} = ${teamId}
+  )`;
+
+  const isActiveWorkflowCondition = sql`${transactions.status} NOT IN ('excluded', 'archived')`;
+
+  if (attachments === "exclude") {
+    whereConditions.push(sql`NOT (${isFulfilledCondition})`);
+  } else if (attachments === "include") {
+    whereConditions.push(isFulfilledCondition);
+  }
+
+  // UI status filters map to computed states. DB status remains unchanged.
+  if (statuses && statuses.length > 0) {
+    const statusConditions: SQL[] = [];
+
+    if (statuses.includes("blank")) {
+      statusConditions.push(
+        sql`(
+          ${isActiveWorkflowCondition}
+          AND NOT (${isFulfilledCondition})
+          AND NOT (${hasPendingSuggestionCondition})
+          AND NOT (${isExportedCondition})
+          AND NOT (${hasExportErrorCondition})
+        )`,
+      );
+    }
+
+    if (statuses.includes("receipt_match")) {
+      statusConditions.push(
+        sql`(
+          ${isActiveWorkflowCondition}
+          AND ${hasPendingSuggestionCondition}
+          AND NOT (${isFulfilledCondition})
+          AND NOT (${isExportedCondition})
+        )`,
+      );
+    }
+
+    if (statuses.includes("in_review")) {
+      statusConditions.push(
+        sql`(
+          ${isActiveWorkflowCondition}
+          AND ${isFulfilledCondition}
+          AND NOT (${isExportedCondition})
+          AND NOT (${hasExportErrorCondition})
+        )`,
+      );
+    }
+
+    if (statuses.includes("export_error")) {
+      statusConditions.push(
+        sql`(
+          ${isActiveWorkflowCondition}
+          AND ${hasExportErrorCondition}
+          AND NOT (${isExportedCondition})
+        )`,
+      );
+    }
+
+    if (statuses.includes("exported")) {
+      statusConditions.push(isExportedCondition);
+    }
+
+    if (statuses.includes("excluded")) {
+      statusConditions.push(eq(transactions.status, "excluded"));
+    }
+
+    if (statuses.includes("archived")) {
+      statusConditions.push(eq(transactions.status, "archived"));
+    }
+
+    if (statusConditions.length > 0) {
+      whereConditions.push(or(...statusConditions));
+    }
   } else {
-    // Default: pending, posted, completed, or exported (exclude archived/excluded)
-    whereConditions.push(
-      inArray(transactions.status, [
-        "pending",
-        "posted",
-        "completed",
-        "exported",
-      ]),
-    );
+    // Default All tab behavior: hide excluded/archived unless explicitly filtered.
+    whereConditions.push(isActiveWorkflowCondition);
   }
 
   // Categories filter with child category expansion

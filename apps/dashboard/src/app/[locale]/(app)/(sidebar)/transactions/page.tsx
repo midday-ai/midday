@@ -43,8 +43,7 @@ export default async function Transactions(props: Props) {
   };
 
   const reviewTabFilter = {
-    ...filter,
-    amountRange: filter.amount_range ?? null,
+    // Review is a strict queue and does not apply user filters.
     sort,
     fulfilled: true,
     exported: false,

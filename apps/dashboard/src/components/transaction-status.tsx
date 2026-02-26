@@ -7,9 +7,6 @@ import {
 } from "@midday/ui/tooltip";
 import { format } from "date-fns";
 
-/**
- * User-friendly error messages for each error code
- */
 const ERROR_MESSAGES: Record<string, string> = {
   FINANCIAL_YEAR_MISSING:
     "Financial year not set up in your accounting software",
@@ -29,9 +26,6 @@ const ERROR_MESSAGES: Record<string, string> = {
   UNKNOWN: "An unexpected error occurred",
 };
 
-/**
- * Provider display names
- */
 const PROVIDER_NAMES: Record<string, string> = {
   xero: "Xero",
   quickbooks: "QuickBooks",
@@ -64,6 +58,7 @@ function formatExportDate(dateStr?: string | null): string {
 }
 
 type Props = {
+  rawStatus?: string | null;
   isFulfilled: boolean;
   isExported: boolean;
   hasExportError?: boolean;
@@ -74,6 +69,7 @@ type Props = {
 };
 
 export function TransactionStatus({
+  rawStatus,
   isFulfilled,
   isExported,
   hasExportError,
@@ -82,16 +78,21 @@ export function TransactionStatus({
   exportedAt,
   hasPendingSuggestion,
 }: Props) {
-  // Priority: Export error > In review > Receipt match > Exported
+  if (rawStatus === "archived") {
+    return <span className="cursor-default text-[#878787]">Archived</span>;
+  }
 
-  // Show "Export error" in red if export failed or partially failed
+  if (rawStatus === "excluded") {
+    return <span className="cursor-default text-[#878787]">Excluded</span>;
+  }
+
   if (hasExportError && !isExported) {
     return (
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
             <span style={{ color: "#f44336" }} className="cursor-default">
-              Export error
+              Export failed
             </span>
           </TooltipTrigger>
           <TooltipContent sideOffset={10} className="text-xs">
@@ -107,13 +108,10 @@ export function TransactionStatus({
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="cursor-default">In review</span>
+            <span className="cursor-default">Ready to export</span>
           </TooltipTrigger>
           <TooltipContent sideOffset={10} className="text-xs">
-            <p>
-              Receipt attached and categorized —<br />
-              ready to export
-            </p>
+            <p>Receipt attached. Ready for export.</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -126,14 +124,11 @@ export function TransactionStatus({
         <Tooltip>
           <TooltipTrigger asChild>
             <span style={{ color: "#ff9800" }} className="cursor-default">
-              Receipt match
+              Receipt found
             </span>
           </TooltipTrigger>
           <TooltipContent sideOffset={10} className="text-xs">
-            <p>
-              We found a possible match — confirm <br />
-              or dismiss it
-            </p>
+            <p>We found a possible receipt. Confirm or dismiss it.</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -168,5 +163,5 @@ export function TransactionStatus({
     );
   }
 
-  return null;
+  return <span className="cursor-default text-[#878787]">No receipt</span>;
 }

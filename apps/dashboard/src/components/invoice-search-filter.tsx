@@ -183,6 +183,7 @@ export function InvoiceSearchFilter() {
                 {customersData?.data?.map((customer) => (
                   <DropdownMenuCheckboxItem
                     key={customer.id}
+                    onSelect={(e) => e.preventDefault()}
                     onCheckedChange={() => {
                       setFilter({
                         customers: filter?.customers?.includes(customer.id)
@@ -220,6 +221,7 @@ export function InvoiceSearchFilter() {
                 {statusFilters?.map((status) => (
                   <DropdownMenuCheckboxItem
                     key={status.id}
+                    onSelect={(e) => e.preventDefault()}
                     onCheckedChange={() => {
                       setFilter({
                         statuses: filter?.statuses?.includes(status.id)
@@ -250,6 +252,7 @@ export function InvoiceSearchFilter() {
               >
                 <DropdownMenuCheckboxItem
                   checked={filter?.recurring === true}
+                  onSelect={(e) => e.preventDefault()}
                   onCheckedChange={(checked) => {
                     setFilter({
                       recurring: checked ? true : null,
@@ -260,6 +263,7 @@ export function InvoiceSearchFilter() {
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
                   checked={filter?.recurring === false}
+                  onSelect={(e) => e.preventDefault()}
                   onCheckedChange={(checked) => {
                     setFilter({
                       recurring: checked ? false : null,

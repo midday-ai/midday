@@ -128,8 +128,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Array of transaction statuses to filter by. Available statuses: 'pending', 'completed', 'archived', 'posted', 'excluded'",
-      example: ["pending", "completed"],
+        "Array of transaction list status filters. Supported UI filters: 'blank', 'receipt_match', 'in_review', 'export_error', 'exported', 'excluded', 'archived'",
+      example: ["in_review", "export_error"],
       param: {
         in: "query",
       },

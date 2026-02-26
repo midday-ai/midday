@@ -117,13 +117,11 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   );
 
   // Build query filters based on active tab
-  // Review tab: show fulfilled transactions (has attachments OR completed) that are not yet exported
+  // Review tab: strict export queue (ignore user filters)
   const queryFilter = useMemo(() => {
     if (isReviewTab) {
       return {
-        ...filter,
-        amountRange: filter.amount_range ?? null,
-        q: deferredSearch,
+        // Keep sort only; all filter state is ignored in Review.
         sort: params.sort,
         // Fulfilled = has attachments OR status=completed
         fulfilled: true,

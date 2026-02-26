@@ -224,6 +224,7 @@ export function TrackerSearchFilter() {
                   <DropdownMenuCheckboxItem
                     key={id}
                     checked={filter?.status === id}
+                    onSelect={(e) => e.preventDefault()}
                     onCheckedChange={() => {
                       setFilter({
                         status: id as "completed" | "in_progress" | null,
@@ -253,6 +254,7 @@ export function TrackerSearchFilter() {
                 {customersData?.data?.map((customer) => (
                   <DropdownMenuCheckboxItem
                     key={customer.id}
+                    onSelect={(e) => e.preventDefault()}
                     onCheckedChange={() => {
                       setFilter({
                         customers: filter?.customers?.includes(customer.id)
@@ -290,6 +292,7 @@ export function TrackerSearchFilter() {
                 {tagsData?.map((tag) => (
                   <DropdownMenuCheckboxItem
                     key={tag.id}
+                    onSelect={(e) => e.preventDefault()}
                     onCheckedChange={() => {
                       setFilter({
                         tags: filter?.tags?.includes(tag.id)

@@ -162,6 +162,10 @@ const ActionsCell = memo(
     onEditTransaction?: (id: string) => void;
     onMoveToReview?: (id: string) => void;
   }) => {
+    const isArchived = transaction.status === "archived";
+    const isExcluded = transaction.status === "excluded";
+    const isWorkflowActive = !isArchived && !isExcluded;
+
     const handleViewDetails = useCallback(() => {
       onViewDetails?.(transaction.id);
     }, [transaction.id, onViewDetails]);
@@ -213,40 +217,46 @@ const ActionsCell = memo(
             </DropdownMenuItem>
             {transaction.manual && (
               <DropdownMenuItem onClick={handleEditTransaction}>
-                Edit transaction
+                Edit
               </DropdownMenuItem>
             )}
             <DropdownMenuItem onClick={handleCopyUrl}>
-              Share URL
+              Copy link
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {isWorkflowActive && !transaction.isFulfilled && (
+              <DropdownMenuItem onClick={handleUpdateToCompleted}>
+                Mark ready
+              </DropdownMenuItem>
+            )}
+
+            {isWorkflowActive &&
+              transaction.isFulfilled &&
+              transaction.status === "completed" && (
+                <DropdownMenuItem onClick={handleUpdateToPosted}>
+                  Unmark ready
+                </DropdownMenuItem>
+              )}
+
+            {isWorkflowActive &&
+              !transaction.isExported &&
+              transaction.status !== "exported" && (
+                <DropdownMenuItem onClick={handleUpdateToExported}>
+                  Mark exported
+                </DropdownMenuItem>
+              )}
+
+            {isWorkflowActive &&
+              (transaction.isExported || transaction.status === "exported") && (
+                <DropdownMenuItem onClick={handleMoveToReview}>
+                  Unmark exported
+                </DropdownMenuItem>
+              )}
+
             <DropdownMenuSeparator />
             {!transaction.manual && transaction.status === "excluded" && (
               <DropdownMenuItem onClick={handleUpdateToPosted}>
                 Include
-              </DropdownMenuItem>
-            )}
-
-            {!transaction.isFulfilled && (
-              <DropdownMenuItem onClick={handleUpdateToCompleted}>
-                Mark as completed
-              </DropdownMenuItem>
-            )}
-
-            {transaction.isFulfilled && transaction.status === "completed" && (
-              <DropdownMenuItem onClick={handleUpdateToPosted}>
-                Mark as uncompleted
-              </DropdownMenuItem>
-            )}
-
-            {!transaction.isExported && transaction.status !== "exported" && (
-              <DropdownMenuItem onClick={handleUpdateToExported}>
-                Mark as exported
-              </DropdownMenuItem>
-            )}
-
-            {(transaction.isExported || transaction.status === "exported") && (
-              <DropdownMenuItem onClick={handleMoveToReview}>
-                Move to review
               </DropdownMenuItem>
             )}
 
@@ -691,6 +701,7 @@ export const columns: ColumnDef<Transaction>[] = [
 
       return (
         <TransactionStatus
+          rawStatus={row.original.status}
           isFulfilled={
             row.original.status === "completed" || row.original.isFulfilled
           }
