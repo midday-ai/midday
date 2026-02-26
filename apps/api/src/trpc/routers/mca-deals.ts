@@ -14,6 +14,7 @@ import {
 import { createMcaPayment } from "@db/queries/mca-payments";
 import { createDealBankAccount } from "@db/queries/deal-bank-accounts";
 import { getBrokerById, upsertCommission } from "@db/queries";
+import { calculateRiskScore } from "@api/services/risk-engine";
 import { z } from "zod";
 
 const createDealSchema = z.object({
@@ -110,8 +111,8 @@ export const mcaDealsRouter = createTRPCRouter({
           }
 
           if (type === "flat" && amount === undefined) {
-            amount = broker?.commissionAmount
-              ? Number(broker.commissionAmount)
+            amount = broker?.flatFee
+              ? Number(broker.flatFee)
               : 0;
           }
         }
@@ -224,8 +225,8 @@ export const mcaDealsRouter = createTRPCRouter({
           }
 
           if (type === "flat" && amount === undefined) {
-            amount = broker?.commissionAmount
-              ? Number(broker.commissionAmount)
+            amount = broker?.flatFee
+              ? Number(broker.flatFee)
               : 0;
           }
         }
@@ -340,6 +341,9 @@ export const mcaDealsRouter = createTRPCRouter({
         currentBalance: balanceAfter,
         totalPaid: (deal.totalPaid ?? 0) + input.amount,
       });
+
+      // Recalculate risk score for this deal
+      await calculateRiskScore(db, input.dealId, teamId!, payment.id);
 
       return payment;
     }),
