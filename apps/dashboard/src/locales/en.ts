@@ -5,7 +5,7 @@ export default {
     card_atm: "Card ATM",
     transfer: "Transfer",
     other: "Other",
-    ach: "Ach",
+    ach: "ACH",
     deposit: "Deposit",
     wire: "Wire",
     fee: "Fee",

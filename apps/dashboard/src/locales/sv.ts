@@ -5,7 +5,7 @@ export default {
     card_atm: "Kort bankomat",
     transfer: "Överföring",
     other: "Annan",
-    ach: "Ach",
+    ach: "ACH",
     deposit: "Deposition",
     wire: "Wire",
     fee: "Avgift",
