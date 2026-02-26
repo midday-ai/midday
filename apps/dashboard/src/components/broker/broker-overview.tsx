@@ -1,60 +1,47 @@
 "use client";
 
 import { useTRPC } from "@/trpc/client";
-import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
-
-type StatCardProps = {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-};
-
-function StatCard({ title, value, subtitle }: StatCardProps) {
-  return (
-    <div className="border border-border rounded-lg p-4">
-      <p className="text-xs text-[#878787] font-normal">{title}</p>
-      <p className="text-2xl font-mono font-semibold mt-1">{value}</p>
-      {subtitle && (
-        <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-      )}
-    </div>
-  );
-}
-
-function DealStatusBadge({ status }: { status: string }) {
-  function getStatusStyles(s: string): string {
-    switch (s) {
-      case "active":
-        return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
-      case "paid_off":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400";
-      case "defaulted":
-        return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  }
-
-  return (
-    <span className={cn("text-xs px-2 py-0.5 rounded-full", getStatusStyles(status))}>
-      {status.replace("_", " ")}
-    </span>
-  );
-}
-
-function formatCurrency(value: string | number | null | undefined): string {
-  return `$${Number(value ?? 0).toLocaleString()}`;
-}
+import { DealStatusBadge, StatCard, formatCurrency } from "./shared";
 
 export function BrokerOverview() {
   const trpc = useTRPC();
 
-  const { data: profile } = useQuery(trpc.brokers.getMyProfile.queryOptions());
-  const { data: stats } = useQuery(
+  const { data: profile, isLoading: profileLoading } = useQuery(
+    trpc.brokers.getMyProfile.queryOptions(),
+  );
+  const { data: stats, isLoading: statsLoading } = useQuery(
     trpc.brokers.getMyDealStats.queryOptions(),
   );
-  const { data: deals } = useQuery(trpc.brokers.getMyDeals.queryOptions());
+  const { data: deals, isLoading: dealsLoading } = useQuery(
+    trpc.brokers.getMyDeals.queryOptions(),
+  );
+
+  const isLoading = profileLoading || statsLoading || dealsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="border border-border rounded-lg p-4 animate-pulse"
+            >
+              <div className="h-3 w-20 bg-muted rounded" />
+              <div className="h-7 w-16 bg-muted rounded mt-2" />
+            </div>
+          ))}
+        </div>
+        <div>
+          <div className="h-4 w-24 bg-muted rounded mb-3" />
+          <div className="border border-border rounded-lg p-8 animate-pulse">
+            <div className="h-4 w-48 bg-muted rounded mx-auto" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const totalCommissions = profile?.totalCommissionsEarned ?? 0;
   const pendingCommissions = profile?.pendingCommissions ?? 0;

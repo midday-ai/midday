@@ -1,50 +1,8 @@
 "use client";
 
 import { useTRPC } from "@/trpc/client";
-import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
-
-type CommissionStatProps = {
-  title: string;
-  value: string;
-  className?: string;
-};
-
-function CommissionStat({ title, value, className }: CommissionStatProps) {
-  return (
-    <div className="border border-border rounded-lg p-4">
-      <p className="text-xs text-[#878787] font-normal">{title}</p>
-      <p className={cn("text-xl font-mono font-semibold mt-1", className)}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function CommissionStatusBadge({ status }: { status: string }) {
-  function getStatusStyles(s: string): string {
-    switch (s) {
-      case "paid":
-        return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
-      case "pending":
-        return "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400";
-      case "cancelled":
-        return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  }
-
-  return (
-    <span className={cn("text-xs px-2 py-0.5 rounded-full", getStatusStyles(status))}>
-      {status}
-    </span>
-  );
-}
-
-function formatCurrency(value: number): string {
-  return `$${value.toLocaleString()}`;
-}
+import { CommissionStatusBadge, StatCard, formatCurrency } from "./shared";
 
 export function BrokerCommissionsPage() {
   const trpc = useTRPC();
@@ -71,16 +29,16 @@ export function BrokerCommissionsPage() {
       <h2 className="text-lg font-medium">My Commissions</h2>
 
       <div className="grid grid-cols-3 gap-4">
-        <CommissionStat
+        <StatCard
           title="Total Earned"
           value={formatCurrency(totalEarned)}
         />
-        <CommissionStat
+        <StatCard
           title="Pending"
           value={formatCurrency(totalPending)}
           className="text-amber-600"
         />
-        <CommissionStat
+        <StatCard
           title="Paid"
           value={formatCurrency(totalPaid)}
           className="text-green-600"

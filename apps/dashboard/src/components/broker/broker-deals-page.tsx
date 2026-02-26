@@ -1,39 +1,12 @@
 "use client";
 
 import { useTRPC } from "@/trpc/client";
-import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
-
-function DealStatusBadge({ status }: { status: string }) {
-  function getStatusStyles(s: string): string {
-    switch (s) {
-      case "active":
-        return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
-      case "paid_off":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400";
-      case "defaulted":
-        return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  }
-
-  return (
-    <span className={cn("text-xs px-2 py-0.5 rounded-full", getStatusStyles(status))}>
-      {status.replace("_", " ")}
-    </span>
-  );
-}
-
-function formatCurrency(value: string | number | null | undefined): string {
-  return `$${Number(value ?? 0).toLocaleString()}`;
-}
-
-function CommissionStatusLabel({ status }: { status: string }) {
-  const color = status === "paid" ? "text-green-600" : "text-amber-600";
-
-  return <span className={cn("ml-1 text-[10px]", color)}>({status})</span>;
-}
+import {
+  CommissionStatusLabel,
+  DealStatusBadge,
+  formatCurrency,
+} from "./shared";
 
 export function BrokerDealsPage() {
   const trpc = useTRPC();

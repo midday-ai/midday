@@ -141,7 +141,13 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      if (value !== "broker") {
+                        form.setValue(`invites.${index}.entityId`, undefined);
+                        form.setValue(`invites.${index}.entityType`, undefined);
+                      }
+                    }}
                     defaultValue={field.value}
                   >
                     <FormControl>

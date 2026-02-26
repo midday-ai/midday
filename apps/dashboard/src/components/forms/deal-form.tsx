@@ -91,7 +91,7 @@ export function DealForm() {
   );
 
   const createDealMutation = useMutation(
-    trpc.deals.create.mutationOptions({
+    trpc.mcaDeals.create.mutationOptions({
       onSuccess: async (result) => {
         // Create fees for the newly created deal
         const validFees = feeRows.filter(
@@ -112,10 +112,10 @@ export function DealForm() {
         }
 
         queryClient.invalidateQueries({
-          queryKey: trpc.deals.list.queryKey(),
+          queryKey: trpc.mcaDeals.list.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.deals.stats.queryKey(),
+          queryKey: trpc.mcaDeals.stats.queryKey(),
         });
         queryClient.invalidateQueries({
           queryKey: trpc.merchants.getMcaDeals.queryKey(),
@@ -216,6 +216,13 @@ export function DealForm() {
                   </FormLabel>
                   <Select
                     onValueChange={(value) => {
+                      if (value === "none") {
+                        field.onChange(undefined);
+                        form.setValue("commissionType", "percentage");
+                        form.setValue("commissionPercentage", undefined);
+                        form.setValue("commissionAmount", undefined);
+                        return;
+                      }
                       field.onChange(value);
                       const broker = brokers?.data?.find(
                         (b) => b.id === value,
@@ -238,7 +245,7 @@ export function DealForm() {
                         }
                       }
                     }}
-                    defaultValue={field.value}
+                    value={field.value ?? "none"}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -246,6 +253,7 @@ export function DealForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="none">No broker</SelectItem>
                       {brokers?.data?.map((broker) => (
                         <SelectItem key={broker.id} value={broker.id}>
                           {broker.name}
