@@ -1,5 +1,5 @@
 import type { Database } from "@db/client";
-import { transactionRules, transactions, transactionTags } from "@db/schema";
+import { transactionRules, transactions, transactionTags, merchants, mcaDeals } from "@db/schema";
 import { and, asc, eq, ilike, sql } from "drizzle-orm";
 
 export type GetRulesParams = {
@@ -33,6 +33,10 @@ export type CreateRuleParams = {
   addTagIds?: string[];
   setExcluded?: boolean | null;
   setAssignedId?: string | null;
+  setDealCode?: string | null;
+  autoResolveDeal?: boolean;
+  dateStart?: string | null;
+  dateEnd?: string | null;
 };
 
 export const createTransactionRule = async (
@@ -57,6 +61,10 @@ export const createTransactionRule = async (
       addTagIds: params.addTagIds,
       setExcluded: params.setExcluded,
       setAssignedId: params.setAssignedId,
+      setDealCode: params.setDealCode,
+      autoResolveDeal: params.autoResolveDeal ?? false,
+      dateStart: params.dateStart,
+      dateEnd: params.dateEnd,
     })
     .returning();
 
@@ -80,6 +88,10 @@ export type UpdateRuleParams = {
   addTagIds?: string[];
   setExcluded?: boolean | null;
   setAssignedId?: string | null;
+  setDealCode?: string | null;
+  autoResolveDeal?: boolean;
+  dateStart?: string | null;
+  dateEnd?: string | null;
 };
 
 export const updateTransactionRule = async (
@@ -154,6 +166,7 @@ export const applyTransactionRules = async (
       merchantName: transactions.merchantName,
       amount: transactions.amount,
       bankAccountId: transactions.bankAccountId,
+      date: transactions.date,
     })
     .from(transactions)
     .where(
@@ -183,6 +196,49 @@ export const applyTransactionRules = async (
       }
       if (rule.setAssignedId) {
         updates.assignedId = rule.setAssignedId;
+      }
+
+      if (rule.setDealCode) {
+        updates.dealCode = rule.setDealCode;
+        updates.matchStatus = "auto_matched";
+        updates.matchRule = rule.name;
+        updates.matchedAt = new Date().toISOString();
+      }
+
+      if (rule.autoResolveDeal && (txn.merchantName ?? txn.name)) {
+        const merchantTarget = (txn.merchantName ?? txn.name).toLowerCase();
+        const [merchant] = await db
+          .select({ id: merchants.id })
+          .from(merchants)
+          .where(
+            and(
+              eq(merchants.teamId, teamId),
+              sql`LOWER(${merchants.name}) = ${merchantTarget}`,
+            ),
+          )
+          .limit(1);
+
+        if (merchant) {
+          const [deal] = await db
+            .select({ id: mcaDeals.id, dealCode: mcaDeals.dealCode })
+            .from(mcaDeals)
+            .where(
+              and(
+                eq(mcaDeals.merchantId, merchant.id),
+                eq(mcaDeals.teamId, teamId),
+                eq(mcaDeals.status, "active"),
+              ),
+            )
+            .limit(1);
+
+          if (deal) {
+            updates.dealCode = deal.dealCode;
+            updates.matchedDealId = deal.id;
+            updates.matchStatus = "auto_matched";
+            updates.matchRule = rule.name;
+            updates.matchedAt = new Date().toISOString();
+          }
+        }
       }
 
       if (Object.keys(updates).length > 0) {
@@ -216,6 +272,7 @@ function matchesRule(
     merchantName: string | null;
     amount: number;
     bankAccountId: string | null;
+    date: string;
   },
   rule: typeof transactionRules.$inferSelect,
 ): boolean {
@@ -266,6 +323,14 @@ function matchesRule(
 
   // Check account
   if (rule.accountId && txn.bankAccountId !== rule.accountId) {
+    return false;
+  }
+
+  // Check date range
+  if (rule.dateStart && txn.date < rule.dateStart) {
+    return false;
+  }
+  if (rule.dateEnd && txn.date > rule.dateEnd) {
     return false;
   }
 
