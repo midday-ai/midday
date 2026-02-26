@@ -16,46 +16,13 @@ import Link from "next/link";
 import { BankAnalysisTable } from "./bank-analysis-table";
 import { BuyBoxChecklist } from "./buy-box-checklist";
 import { RiskFlags } from "./risk-flags";
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const STATUS_BADGE_STYLES: Record<string, string> = {
-  approved: "bg-green-100 text-green-800 border-green-200",
-  declined: "bg-red-100 text-red-800 border-red-200",
-  review_needed: "bg-amber-50 text-amber-700 border-amber-200",
-  in_review: "bg-amber-50 text-amber-700 border-amber-200",
-  scoring: "bg-amber-50 text-amber-700 border-amber-200",
-  pending_documents: "bg-gray-100 text-gray-600 border-gray-200",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  approved: "Approved",
-  declined: "Declined",
-  review_needed: "Review Needed",
-  in_review: "In Review",
-  scoring: "Scoring",
-  pending_documents: "Pending Documents",
-};
-
-const RECOMMENDATION_STYLES: Record<string, string> = {
-  approve: "bg-green-100 text-green-800 border-green-200",
-  decline: "bg-red-100 text-red-800 border-red-200",
-  review_needed: "bg-amber-50 text-amber-700 border-amber-200",
-};
-
-const RECOMMENDATION_LABELS: Record<string, string> = {
-  approve: "Approve",
-  decline: "Decline",
-  review_needed: "Review Needed",
-};
-
-const CONFIDENCE_LABELS: Record<string, string> = {
-  high: "High",
-  medium: "Medium",
-  low: "Low",
-};
+import {
+  STATUS_BADGE_STYLES,
+  STATUS_LABELS,
+  RECOMMENDATION_STYLES,
+  RECOMMENDATION_LABELS,
+  CONFIDENCE_LABELS,
+} from "../constants";
 
 const DOC_STATUS_STYLES: Record<string, string> = {
   pending: "bg-gray-100 text-gray-600 border-gray-200",
@@ -134,14 +101,21 @@ export function UnderwritingDetail({
       }>
     | null;
 
-  const buyBoxResults = score?.buyBoxResults as
-    | Array<{
-        name: string;
-        passed: boolean;
-        actualValue: string | number;
-        requiredValue: string | number;
-      }>
+  // buyBoxResults is stored as { criteria: [...], passCount, totalCount, allPassed }
+  const buyBoxData = score?.buyBoxResults as
+    | {
+        criteria: Array<{
+          name: string;
+          passed: boolean;
+          actualValue: string | number;
+          requiredValue: string | number;
+        }>;
+        passCount: number;
+        totalCount: number;
+        allPassed: boolean;
+      }
     | null;
+  const buyBoxCriteria = buyBoxData?.criteria ?? null;
 
   const riskFlags = score?.riskFlags as
     | Array<{
@@ -345,8 +319,8 @@ export function UnderwritingDetail({
       {/* ================================================================= */}
       {/* F. Buy Box Checklist */}
       {/* ================================================================= */}
-      {score && Array.isArray(buyBoxResults) && buyBoxResults.length > 0 && (
-        <BuyBoxChecklist results={buyBoxResults} />
+      {score && buyBoxCriteria && buyBoxCriteria.length > 0 && (
+        <BuyBoxChecklist results={buyBoxCriteria} />
       )}
 
       {/* ================================================================= */}

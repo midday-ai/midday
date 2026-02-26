@@ -13,6 +13,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.0",
     "@ai-sdk/google": "^3.0.4",
+    "@supabase/supabase-js": "^2.87.0",
     "ai": "^6.0.13",
     "zod": "^4.3.5"
   },

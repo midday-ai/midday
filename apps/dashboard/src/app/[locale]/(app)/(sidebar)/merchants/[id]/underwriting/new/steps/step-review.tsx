@@ -8,8 +8,14 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useUnderwritingWizard } from "../wizard-context";
+import {
+  RECOMMENDATION_STYLES,
+  RECOMMENDATION_LABELS,
+  CONFIDENCE_LABELS,
+} from "../../constants";
 
 type Props = {
   merchantId: string;
@@ -33,28 +39,11 @@ function formatCurrency(n?: number | null) {
   return `$${n.toLocaleString(undefined, { minimumFractionDigits: 0 })}`;
 }
 
-const RECOMMENDATION_COLORS: Record<string, string> = {
-  approve: "bg-green-100 text-green-800 border-green-200",
-  decline: "bg-red-100 text-red-800 border-red-200",
-  review_needed: "bg-amber-50 text-amber-700 border-amber-200",
-};
-
-const RECOMMENDATION_LABELS: Record<string, string> = {
-  approve: "Approve",
-  decline: "Decline",
-  review_needed: "Review Needed",
-};
-
-const CONFIDENCE_LABELS: Record<string, string> = {
-  high: "High",
-  medium: "Medium",
-  low: "Low",
-};
-
 export function StepReview({ merchantId }: Props) {
   const { state, prevStep, reset } = useUnderwritingWizard();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const applicationId = state.applicationId;
 
   const [decision, setDecision] = useState<
@@ -103,6 +92,21 @@ export function StepReview({ merchantId }: Props) {
     }),
   );
 
+  const scoringMutation = useMutation(
+    trpc.underwritingApplications.runScoring.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey:
+            trpc.underwritingApplications.getScore.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey:
+            trpc.underwritingApplications.getById.queryKey(),
+        });
+      },
+    }),
+  );
+
   const handleDecision = (d: "approved" | "declined" | "review_needed") => {
     if (!applicationId) return;
 
@@ -132,9 +136,52 @@ export function StepReview({ merchantId }: Props) {
   }
 
   const profile = state.profile;
-  const buyBoxResults = score?.buyBoxResults as Record<string, unknown>[] | null;
-  const bankAnalysis = score?.bankAnalysis as Record<string, unknown> | null;
-  const riskFlags = score?.riskFlags as string[] | null;
+
+  // buyBoxResults is stored as { criteria: [...], passCount, totalCount, allPassed }
+  const buyBoxData = score?.buyBoxResults as
+    | {
+        criteria: Array<{
+          name: string;
+          passed: boolean;
+          actualValue: string | number;
+          requiredValue: string | number;
+        }>;
+        passCount: number;
+        totalCount: number;
+        allPassed: boolean;
+      }
+    | null;
+  const buyBoxCriteria = buyBoxData?.criteria ?? null;
+
+  // bankAnalysis is an array of monthly data
+  const bankAnalysis = score?.bankAnalysis as
+    | Array<{
+        month: string;
+        deposits: number;
+        payBurden: number;
+        holdbackPct: number;
+      }>
+    | null;
+
+  // extractedMetrics is a summary object
+  const extractedMetrics = score?.extractedMetrics as
+    | {
+        avgDailyBalance: number;
+        monthlyAvgRevenue: number;
+        nsfCount: number;
+        depositConsistency: number;
+        revenueVolatility: number;
+      }
+    | null;
+
+  // riskFlags is an array of { flag, severity, description }
+  const riskFlags = score?.riskFlags as
+    | Array<{
+        flag: string;
+        severity: "high" | "medium" | "low";
+        description: string;
+      }>
+    | null;
 
   return (
     <div className="space-y-6">
@@ -226,15 +273,32 @@ export function StepReview({ merchantId }: Props) {
           <h3 className="text-sm font-medium">Scorecard</h3>
 
           {!score ? (
-            <div className="border border-border p-6 text-center">
+            <div className="border border-border p-6 text-center space-y-3">
               <Icons.Time className="size-8 text-[#878787] mx-auto mb-2" />
               <p className="text-sm text-[#878787]">
                 Scoring not yet available.
               </p>
-              <p className="text-xs text-[#878787] mt-1">
-                The AI scoring engine will analyze this application after
-                documents are processed.
+              <p className="text-xs text-[#878787]">
+                Run the AI scoring engine to analyze this application.
               </p>
+              {scoringMutation.isError && (
+                <p className="text-xs text-red-600">
+                  {scoringMutation.error?.message || "Scoring failed. Please try again."}
+                </p>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={scoringMutation.isPending}
+                onClick={() => {
+                  if (applicationId) {
+                    scoringMutation.mutate({ applicationId });
+                  }
+                }}
+              >
+                {scoringMutation.isPending ? "Scoring..." : "Run AI Scoring"}
+              </Button>
             </div>
           ) : (
             <div className="space-y-4">
@@ -247,7 +311,7 @@ export function StepReview({ merchantId }: Props) {
                   {score.recommendation && (
                     <Badge
                       className={
-                        RECOMMENDATION_COLORS[score.recommendation] ||
+                        RECOMMENDATION_STYLES[score.recommendation] ||
                         "bg-gray-100 text-gray-800"
                       }
                     >
@@ -264,13 +328,13 @@ export function StepReview({ merchantId }: Props) {
               </div>
 
               {/* Buy Box Results */}
-              {buyBoxResults && buyBoxResults.length > 0 && (
+              {buyBoxCriteria && buyBoxCriteria.length > 0 && (
                 <div className="border border-border p-4">
                   <h4 className="text-xs text-[#878787] font-medium mb-2">
                     Buy Box Criteria
                   </h4>
                   <div className="space-y-1">
-                    {buyBoxResults.map((item, i) => (
+                    {buyBoxCriteria.map((item, i) => (
                       <div
                         key={i}
                         className="flex items-center gap-2 text-sm"
@@ -280,7 +344,7 @@ export function StepReview({ merchantId }: Props) {
                         ) : (
                           <Icons.Close className="size-3.5 text-red-600" />
                         )}
-                        <span>{String(item.name || item.criterion || "")}</span>
+                        <span>{item.name}</span>
                       </div>
                     ))}
                   </div>
@@ -288,40 +352,47 @@ export function StepReview({ merchantId }: Props) {
               )}
 
               {/* Bank Analysis Summary */}
-              {bankAnalysis && (
+              {bankAnalysis && bankAnalysis.length > 0 && (
                 <div className="border border-border p-4">
                   <h4 className="text-xs text-[#878787] font-medium mb-2">
                     Bank Analysis
                   </h4>
                   <div className="divide-y divide-border">
-                    {bankAnalysis.averageDailyBalance != null && (
-                      <ReviewRow
-                        label="Avg Daily Balance"
-                        value={formatCurrency(
-                          Number(bankAnalysis.averageDailyBalance),
-                        )}
-                      />
-                    )}
-                    {bankAnalysis.monthlyRevenue != null && (
-                      <ReviewRow
-                        label="Monthly Revenue"
-                        value={formatCurrency(
-                          Number(bankAnalysis.monthlyRevenue),
-                        )}
-                      />
-                    )}
-                    {bankAnalysis.nsfCount != null && (
-                      <ReviewRow
-                        label="NSF Count"
-                        value={Number(bankAnalysis.nsfCount)}
-                      />
-                    )}
-                    {bankAnalysis.negativeDays != null && (
-                      <ReviewRow
-                        label="Negative Days"
-                        value={Number(bankAnalysis.negativeDays)}
-                      />
-                    )}
+                    {bankAnalysis.map((month, i) => (
+                      <div key={i} className="py-1.5 grid grid-cols-4 gap-2 text-xs">
+                        <span className="font-medium">{month.month}</span>
+                        <span className="font-mono text-right">{formatCurrency(month.deposits)}</span>
+                        <span className="font-mono text-right">{formatCurrency(month.payBurden)}</span>
+                        <span className="font-mono text-right">{month.holdbackPct.toFixed(1)}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Extracted Metrics */}
+              {extractedMetrics && (
+                <div className="border border-border p-4">
+                  <h4 className="text-xs text-[#878787] font-medium mb-2">
+                    Key Metrics
+                  </h4>
+                  <div className="divide-y divide-border">
+                    <ReviewRow
+                      label="Avg Daily Balance"
+                      value={formatCurrency(extractedMetrics.avgDailyBalance)}
+                    />
+                    <ReviewRow
+                      label="Monthly Avg Revenue"
+                      value={formatCurrency(extractedMetrics.monthlyAvgRevenue)}
+                    />
+                    <ReviewRow
+                      label="NSF Count"
+                      value={extractedMetrics.nsfCount}
+                    />
+                    <ReviewRow
+                      label="Deposit Consistency"
+                      value={`${(extractedMetrics.depositConsistency * 100).toFixed(0)}%`}
+                    />
                   </div>
                 </div>
               )}
@@ -336,10 +407,16 @@ export function StepReview({ merchantId }: Props) {
                     {riskFlags.map((flag, i) => (
                       <div
                         key={i}
-                        className="flex items-center gap-2 text-sm text-amber-700"
+                        className={`flex items-center gap-2 text-sm ${
+                          flag.severity === "high"
+                            ? "text-red-700"
+                            : flag.severity === "medium"
+                              ? "text-amber-700"
+                              : "text-gray-600"
+                        }`}
                       >
                         <Icons.Error className="size-3.5" />
-                        <span>{flag}</span>
+                        <span>{flag.flag}: {flag.description}</span>
                       </div>
                     ))}
                   </div>
@@ -439,7 +516,7 @@ export function StepReview({ merchantId }: Props) {
                 variant="outline"
                 onClick={() => {
                   reset();
-                  window.location.href = `/merchants/${merchantId}`;
+                  router.push(`/merchants/${merchantId}`);
                 }}
               >
                 Back to Merchant

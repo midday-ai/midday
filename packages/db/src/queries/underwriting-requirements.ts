@@ -115,6 +115,20 @@ export const seedDefaultDocRequirements = async (
   db: Database,
   params: SeedDefaultDocRequirementsParams,
 ) => {
+  // Check if any requirements already exist for this team
+  const existing = await db
+    .select({ id: underwritingDocumentRequirements.id })
+    .from(underwritingDocumentRequirements)
+    .where(eq(underwritingDocumentRequirements.teamId, params.teamId))
+    .limit(1);
+
+  if (existing.length > 0) {
+    // Delete existing before re-seeding to avoid duplicates
+    await db
+      .delete(underwritingDocumentRequirements)
+      .where(eq(underwritingDocumentRequirements.teamId, params.teamId));
+  }
+
   const defaults = [
     {
       teamId: params.teamId,
