@@ -30,7 +30,7 @@ import {
   toggleBrokerPortal,
   upsertBroker,
 } from "@midday/db/queries";
-import { brokerCommissions } from "@midday/db/schema";
+import { brokerCommissions, usersOnTeam } from "@midday/db/schema";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 
@@ -160,6 +160,94 @@ export const brokersRouter = createTRPCRouter({
 
       return result;
     }),
+
+  // Self-service procedures (broker uses their own session)
+  getMyProfile: protectedProcedure.query(
+    async ({ ctx: { db, teamId, session } }) => {
+      const membership = await db.query.usersOnTeam.findFirst({
+        where: and(
+          eq(usersOnTeam.userId, session.user.id),
+          eq(usersOnTeam.teamId, teamId!),
+        ),
+        columns: { entityId: true, entityType: true },
+      });
+
+      if (!membership?.entityId || membership.entityType !== "broker") {
+        return null;
+      }
+
+      return getBrokerById(db, { id: membership.entityId, teamId: teamId! });
+    },
+  ),
+
+  getMyDeals: protectedProcedure.query(
+    async ({ ctx: { db, teamId, session } }) => {
+      const membership = await db.query.usersOnTeam.findFirst({
+        where: and(
+          eq(usersOnTeam.userId, session.user.id),
+          eq(usersOnTeam.teamId, teamId!),
+        ),
+        columns: { entityId: true, entityType: true },
+      });
+
+      if (!membership?.entityId || membership.entityType !== "broker") {
+        return [];
+      }
+
+      return getBrokerDeals(db, {
+        brokerId: membership.entityId,
+        teamId: teamId!,
+      });
+    },
+  ),
+
+  getMyDealStats: protectedProcedure.query(
+    async ({ ctx: { db, teamId, session } }) => {
+      const membership = await db.query.usersOnTeam.findFirst({
+        where: and(
+          eq(usersOnTeam.userId, session.user.id),
+          eq(usersOnTeam.teamId, teamId!),
+        ),
+        columns: { entityId: true, entityType: true },
+      });
+
+      if (!membership?.entityId || membership.entityType !== "broker") {
+        return {
+          totalDeals: 0,
+          activeDeals: 0,
+          totalFunded: 0,
+          totalBalance: 0,
+          totalPaid: 0,
+        };
+      }
+
+      return getBrokerDealStats(db, {
+        brokerId: membership.entityId,
+        teamId: teamId!,
+      });
+    },
+  ),
+
+  getMyCommissions: protectedProcedure.query(
+    async ({ ctx: { db, teamId, session } }) => {
+      const membership = await db.query.usersOnTeam.findFirst({
+        where: and(
+          eq(usersOnTeam.userId, session.user.id),
+          eq(usersOnTeam.teamId, teamId!),
+        ),
+        columns: { entityId: true, entityType: true },
+      });
+
+      if (!membership?.entityId || membership.entityType !== "broker") {
+        return [];
+      }
+
+      return getCommissionsByBroker(db, {
+        brokerId: membership.entityId,
+        teamId: teamId!,
+      });
+    },
+  ),
 
   // Public procedures (for broker portal)
   getByPortalId: publicProcedure
