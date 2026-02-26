@@ -20,8 +20,6 @@ import {
   type UploadAttachmentParams,
 } from "../types";
 import {
-  appendTaxInfoToDescription,
-  buildPrivateNote,
   ensureFileExtension,
   sleep,
   streamToBuffer,
@@ -1146,16 +1144,11 @@ export class FortnoxProvider extends BaseAccountingProvider {
       const baseDescription =
         tx.description || tx.counterpartyName || "Transaction";
 
-      // Append tax info to VoucherRow description (use compact format for Fortnox)
       // Fortnox description field has ~200 char limit
-      const rowDescription = appendTaxInfoToDescription(
-        tx.description || "",
-        tx,
-        { compact: true, maxLength: 200 },
-      );
+      const rowDescription = (tx.description || "").substring(0, 200);
 
-      // Build comments with tax info and user notes (visible in Fortnox UI comment box)
-      const voucherComments = buildPrivateNote(tx);
+      // User notes visible in Fortnox UI comment box
+      const voucherComments = tx.note || "";
 
       // Note: ReferenceNumber, Year, and ApprovalState are read-only in Fortnox API
       // Vouchers are created as posted/finalized entries (standard for accounting integrations)

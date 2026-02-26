@@ -10,7 +10,6 @@ import {
   getRevenueSchema,
   getRunwaySchema,
   getSpendingSchema,
-  getTaxSummarySchema,
 } from "@api/schemas/reports";
 import {
   mockCollectionPerformance,
@@ -41,7 +40,6 @@ import {
   getRevenueForecast,
   getRunway,
   getSpending,
-  getTaxSummary,
 } from "@midday/db/queries";
 import { TRPCError } from "@trpc/server";
 
@@ -113,20 +111,6 @@ export const reportsRouter = createTRPCRouter({
         from: input.from,
         to: input.to,
         currency: input.currency,
-      });
-    }),
-
-  taxSummary: protectedProcedure
-    .input(getTaxSummarySchema)
-    .query(async ({ ctx: { db, teamId }, input }) => {
-      return getTaxSummary(db, {
-        teamId: teamId!,
-        from: input.from,
-        to: input.to,
-        currency: input.currency,
-        type: input.type,
-        categorySlug: input.categorySlug,
-        taxType: input.taxType,
       });
     }),
 

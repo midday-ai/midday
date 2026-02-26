@@ -7,7 +7,7 @@ import type {
 /**
  * Table identifiers for all supported tables
  */
-export type TableId = "transactions" | "merchants" | "invoices" | "vault";
+export type TableId = "transactions" | "merchants" | "deals" | "vault" | "collections";
 
 /**
  * Settings for a single table
@@ -34,9 +34,9 @@ export const TABLE_SETTINGS_COOKIE = "table-settings";
  * Default hidden columns for each table
  */
 export const defaultHiddenColumns: Record<TableId, string[]> = {
-  transactions: ["assigned", "tags", "method", "counterparty", "taxAmount"],
+  transactions: ["assigned", "tags", "method", "counterparty"],
   merchants: ["tags", "website", "financeEmail", "language"],
-  invoices: [
+  deals: [
     "sentAt",
     "exclVat",
     "exclTax",
@@ -47,6 +47,7 @@ export const defaultHiddenColumns: Record<TableId, string[]> = {
     "internalNote",
   ],
   vault: [], // No hidden columns by default
+  collections: [],
 };
 
 /**

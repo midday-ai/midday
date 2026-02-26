@@ -203,7 +203,7 @@ export class PlaidApi {
     return this.#client.linkTokenCreate({
       client_id: this.#clientId,
       secret: this.#clientSecret,
-      client_name: "Midday",
+      client_name: "Abacus",
       products: [Products.Transactions],
       language,
       access_token: accessToken,
@@ -242,6 +242,49 @@ export class PlaidApi {
     await this.#client.itemRemove({
       access_token: accessToken,
     });
+  }
+
+  async institutionsSearch({
+    query,
+    countryCode,
+    limit = 50,
+  }: {
+    query: string;
+    countryCode: CountryCode;
+    limit?: number;
+  }) {
+    const { data } = await this.#client.institutionsSearch({
+      query,
+      country_codes: [countryCode],
+      products: [Products.Transactions],
+      options: {
+        include_optional_metadata: true,
+      },
+    });
+
+    return data.institutions.slice(0, limit);
+  }
+
+  async institutionsList({
+    countryCode,
+    count = 50,
+    offset = 0,
+  }: {
+    countryCode: CountryCode;
+    count?: number;
+    offset?: number;
+  }) {
+    const { data } = await this.#client.institutionsGet({
+      country_codes: [countryCode],
+      count,
+      offset,
+      options: {
+        include_optional_metadata: true,
+        products: [Products.Transactions],
+      },
+    });
+
+    return data.institutions;
   }
 
   async getInstitutions(params?: GetInstitutionsRequest) {

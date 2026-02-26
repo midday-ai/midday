@@ -168,21 +168,6 @@ const COMMAND_SUGGESTIONS = [
     toolParams: { showCanvas: true },
     keywords: ["analyze", "merchant", "payment", "patterns", "invoices"],
   },
-  // Tax Summary
-  {
-    command: "/show",
-    title: "Show tax summary",
-    toolName: "getTaxSummary",
-    toolParams: { showCanvas: true },
-    keywords: ["show", "tax", "summary", "deductions", "year"],
-  },
-  {
-    command: "/show",
-    title: "Show tax breakdown by category",
-    toolName: "getTaxSummary",
-    toolParams: { showCanvas: true },
-    keywords: ["show", "tax", "breakdown", "category", "deductions"],
-  },
   // Business Health Score
   {
     command: "/show",

@@ -407,9 +407,8 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
     conditions.push(eq(transactions.baseCurrency, targetCurrency));
   }
 
-  // Step 3: Execute the aggregated query with gross/net calculation
-  // Note: We use LEFT JOIN to get taxRate from categories, but we don't filter by excluded
-  // since revenue categories should always be included
+  // Step 3: Execute the aggregated query
+  // Note: We use LEFT JOIN on categories to check the excluded flag
   const tc = transactionCategories;
 
   // When inputCurrency is provided, we filter to include transactions where either
@@ -417,44 +416,19 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
   // - If baseCurrency matches targetCurrency, use baseAmount (converted amount)
   // - Otherwise, use amount (original currency amount)
   // When inputCurrency is not provided, always use baseAmount
+  // Note: In MCA, gross and net are equivalent (no tax deduction)
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
       value:
-        revenueType === "net"
-          ? inputCurrency && targetCurrency
-            ? sql<number>`COALESCE(SUM(
-                -- Use baseAmount when baseCurrency matches target AND baseAmount is not NULL, otherwise use amount
-                -- ROUND to 2 decimal places for financial precision
-                CASE 
-                  WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN
-                    ROUND(${transactions.baseAmount} - (
-                      ${transactions.baseAmount} * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
-                      (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
-                    ), 2)
-                  ELSE
-                    ROUND(${transactions.amount} - (
-                      ${transactions.amount} * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
-                      (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
-                    ), 2)
-                END
-              ), 0)`
-            : sql<number>`COALESCE(SUM(
-                -- ROUND to 2 decimal places for financial precision
-                ROUND(COALESCE(${transactions.baseAmount}, 0) - (
-                  COALESCE(${transactions.baseAmount}, 0) * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
-                  (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
-                ), 2)
-              ), 0)`
-          : inputCurrency && targetCurrency
-            ? sql<number>`COALESCE(SUM(
-                -- Use baseAmount when baseCurrency matches target AND baseAmount is not NULL, otherwise use amount
-                CASE 
-                  WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                  ELSE ${transactions.amount}
-                END
-              ), 0)`
-            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+        inputCurrency && targetCurrency
+          ? sql<number>`COALESCE(SUM(
+              CASE
+                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
+                ELSE ${transactions.amount}
+              END
+            ), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
     })
     .from(transactions)
     .leftJoin(

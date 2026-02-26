@@ -14,7 +14,7 @@ import {
 } from "@midday/ui/select";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useFieldArray } from "react-hook-form";
 import { z } from "zod/v3";
@@ -24,6 +24,8 @@ const formSchema = z.object({
     z.object({
       email: z.string().email(),
       role: z.enum(["owner", "admin", "member", "broker", "syndicate", "merchant"]),
+      entityId: z.string().uuid().optional(),
+      entityType: z.string().optional(),
     }),
   ),
 });
@@ -37,6 +39,10 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  const { data: brokers } = useQuery(
+    trpc.brokers.get.queryOptions({ pageSize: 100 }),
+  );
 
   const inviteMutation = useMutation(
     trpc.team.invite.mutationOptions({
@@ -75,13 +81,24 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
         {
           email: "",
           role: "member",
+          entityId: undefined,
+          entityType: undefined,
         },
       ],
     },
   });
 
   const onSubmit = form.handleSubmit((data) => {
-    inviteMutation.mutate(data.invites.filter((invite) => invite.email !== ""));
+    inviteMutation.mutate(
+      data.invites
+        .filter((invite) => invite.email !== "")
+        .map((invite) => ({
+          email: invite.email,
+          role: invite.role,
+          entityId: invite.entityId,
+          entityType: invite.entityType,
+        })),
+    );
   });
 
   const { fields, append } = useFieldArray({
@@ -124,7 +141,13 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      if (value !== "broker") {
+                        form.setValue(`invites.${index}.entityId`, undefined);
+                        form.setValue(`invites.${index}.entityType`, undefined);
+                      }
+                    }}
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -143,6 +166,37 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
                 </FormItem>
               )}
             />
+
+            {form.watch(`invites.${index}.role`) === "broker" && (
+              <FormField
+                control={form.control}
+                name={`invites.${index}.entityId`}
+                render={({ field }) => (
+                  <FormItem>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        form.setValue(`invites.${index}.entityType`, "broker");
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="min-w-[140px]">
+                          <SelectValue placeholder="Link broker" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {brokers?.data?.map((broker) => (
+                          <SelectItem key={broker.id} value={broker.id}>
+                            {broker.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
         ))}
 
@@ -150,7 +204,7 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
           variant="outline"
           type="button"
           className="mt-4 border-none bg-[#F2F1EF] text-[11px] dark:bg-[#1D1D1D]"
-          onClick={() => append({ email: "", role: "member" })}
+          onClick={() => append({ email: "", role: "member", entityId: undefined, entityType: undefined })}
         >
           Add more
         </Button>

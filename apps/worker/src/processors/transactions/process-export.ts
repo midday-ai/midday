@@ -2,7 +2,6 @@ import { getTransactionsByIds } from "@midday/db/queries";
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
 import { ensureFileExtension } from "@midday/utils";
-import { getTaxTypeLabel, resolveTaxValues } from "@midday/utils/tax";
 import type { Job } from "bullmq";
 import { format, parseISO } from "date-fns";
 import type { ProcessExportPayload } from "../../schemas/transactions";
@@ -100,18 +99,6 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
     const rows = transactionsData
       ?.sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime())
       .map((transaction) => {
-        const { taxAmount, taxRate, taxType } = resolveTaxValues({
-          transactionAmount: transaction.amount,
-          transactionTaxAmount: transaction.tax_amount,
-          transactionTaxRate: transaction.tax_rate,
-          transactionTaxType: transaction.tax_type,
-          categoryTaxRate: transaction.category?.tax_rate,
-          categoryTaxType: transaction.category?.tax_type,
-        });
-
-        const formattedTaxType = getTaxTypeLabel(taxType ?? "");
-        const formattedTaxRate = taxRate != null ? `${taxRate}%` : "";
-
         return [
           transaction.id,
           format(parseISO(transaction.date), dateFormat ?? "LLL dd, y"),
@@ -123,16 +110,10 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
             style: "currency",
             currency: transaction.currency,
           }).format(transaction.amount),
-          formattedTaxType,
-          formattedTaxRate,
-          Intl.NumberFormat(locale, {
-            style: "currency",
-            currency: transaction.currency,
-          }).format(taxAmount ?? 0),
           transaction?.counterparty_name ?? "",
           transaction?.category?.name ?? "",
           transaction?.category?.description ?? "",
-          transaction?.category?.tax_reporting_code ?? "",
+
           transaction?.status === "posted"
             ? "Posted"
             : transaction?.status ?? "Pending",

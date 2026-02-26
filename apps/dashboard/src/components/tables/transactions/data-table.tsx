@@ -40,15 +40,23 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounceCallback } from "usehooks-ts";
+import { EscalateDialog } from "@/components/reconciliation/escalate-dialog";
+import { MarkNsfDialog } from "@/components/reconciliation/mark-nsf-dialog";
+import { MatchToDealDialog } from "@/components/reconciliation/match-to-deal-dialog";
+import { RecordCollectionDialog } from "@/components/reconciliation/record-collection-dialog";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { BulkEditBar } from "./bulk-edit-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
 import { NoResults, NoTransactions, ReviewComplete } from "./empty-states";
 import { ExportBar } from "./export-bar";
 import { TransactionTableProvider } from "./transaction-table-context";
+
+type Transaction = RouterOutputs["transactions"]["get"]["data"][number];
 
 // Stable reference for non-clickable columns (avoids recreation on each render)
 const NON_CLICKABLE_COLUMNS = new Set([
@@ -246,6 +254,104 @@ export function DataTable({ initialSettings, initialTab }: Props) {
     return tableData.map((row) => row?.id);
   }, [tableData]);
 
+  // MCA dialog state
+  const [matchDialogTx, setMatchDialogTx] = useState<Transaction | null>(null);
+  const [nsfDialogTx, setNsfDialogTx] = useState<Transaction | null>(null);
+  const [collectionDialogTx, setCollectionDialogTx] = useState<Transaction | null>(null);
+  const [escalateDialogTx, setEscalateDialogTx] = useState<Transaction | null>(null);
+
+  // MCA mutations
+  const invalidateTransactions = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: trpc.transactions.get.infiniteQueryKey(),
+    });
+  }, [queryClient, trpc]);
+
+  const manualMatchMutation = useMutation(
+    trpc.reconciliation.manualMatch.mutationOptions({
+      onSuccess: () => {
+        invalidateTransactions();
+        setMatchDialogTx(null);
+        toast({ title: "Transaction matched to deal", variant: "success" });
+      },
+    }),
+  );
+
+  const confirmMatchMutation = useMutation(
+    trpc.reconciliation.confirmMatch.mutationOptions({
+      onSuccess: () => {
+        invalidateTransactions();
+        toast({ title: "Match confirmed", variant: "success" });
+      },
+    }),
+  );
+
+  const rejectMatchMutation = useMutation(
+    trpc.reconciliation.rejectMatch.mutationOptions({
+      onSuccess: () => {
+        invalidateTransactions();
+        toast({ title: "Match rejected", variant: "success" });
+      },
+    }),
+  );
+
+  const markNsfMutation = useMutation(
+    trpc.reconciliation.markNsf.mutationOptions({
+      onSuccess: () => {
+        invalidateTransactions();
+        setNsfDialogTx(null);
+        toast({ title: "Transaction marked as NSF", variant: "success" });
+      },
+    }),
+  );
+
+  const clearNsfMutation = useMutation(
+    trpc.reconciliation.clearNsf.mutationOptions({
+      onSuccess: () => {
+        invalidateTransactions();
+        toast({ title: "NSF flag cleared", variant: "success" });
+      },
+    }),
+  );
+
+  const flagDiscrepancyMutation = useMutation(
+    trpc.reconciliation.flagDiscrepancy.mutationOptions({
+      onSuccess: () => {
+        invalidateTransactions();
+        toast({ title: "Transaction flagged for review", variant: "success" });
+      },
+    }),
+  );
+
+  const resolveDiscrepancyMutation = useMutation(
+    trpc.reconciliation.resolveDiscrepancy.mutationOptions({
+      onSuccess: () => {
+        invalidateTransactions();
+        toast({ title: "Flag resolved", variant: "success" });
+      },
+    }),
+  );
+
+  const recordPaymentMutation = useMutation(
+    trpc.deals.recordPayment.mutationOptions({
+      onSuccess: () => {
+        invalidateTransactions();
+        setCollectionDialogTx(null);
+        toast({ title: "Collection recorded", variant: "success" });
+      },
+    }),
+  );
+
+  const updateDealStatusMutation = useMutation(
+    trpc.deals.updateStatus.mutationOptions({
+      onSuccess: () => {
+        invalidateTransactions();
+        setEscalateDialogTx(null);
+        toast({ title: "Deal escalated", variant: "success" });
+      },
+    }),
+  );
+
   // Handle shift-click range selection
   // Note: This function will be updated after table creation to use table.getRowModel().rows
   const handleShiftClickRangeRef = useRef<
@@ -357,6 +463,62 @@ export function DataTable({ initialSettings, initialTab }: Props) {
     [],
   );
 
+  // MCA action callbacks
+  const onMatchToDeal = useCallback((tx: Transaction) => setMatchDialogTx(tx), []);
+  const onConfirmMatch = useCallback(
+    (id: string) => confirmMatchMutation.mutate({ transactionId: id }),
+    [confirmMatchMutation],
+  );
+  const onRejectMatch = useCallback(
+    (id: string) => rejectMatchMutation.mutate({ transactionId: id }),
+    [rejectMatchMutation],
+  );
+  const onUnmatch = useCallback(
+    (id: string) => rejectMatchMutation.mutate({ transactionId: id }),
+    [rejectMatchMutation],
+  );
+  const onMarkNsf = useCallback((tx: Transaction) => setNsfDialogTx(tx), []);
+  const onClearNsf = useCallback(
+    (id: string) => clearNsfMutation.mutate({ transactionId: id }),
+    [clearNsfMutation],
+  );
+  const onFlagForReview = useCallback(
+    (tx: Transaction, discrepancyType: string) => {
+      flagDiscrepancyMutation.mutate({
+        transactionId: tx.id,
+        discrepancyType,
+      });
+    },
+    [flagDiscrepancyMutation],
+  );
+  const onResolveFlag = useCallback(
+    (tx: Transaction) => {
+      resolveDiscrepancyMutation.mutate({
+        transactionId: tx.id,
+        resolution: "excluded",
+      });
+    },
+    [resolveDiscrepancyMutation],
+  );
+  const onRecordCollection = useCallback((tx: Transaction) => setCollectionDialogTx(tx), []);
+  const onCreateDeal = useCallback(
+    (tx: Transaction) => {
+      // TODO: Open deal creation sheet with pre-filled data
+      toast({ title: "Deal creation from transaction coming soon", variant: "success" });
+    },
+    [],
+  );
+  const onEscalateToCollections = useCallback((tx: Transaction) => setEscalateDialogTx(tx), []);
+  const onExclude = useCallback(
+    (id: string) => {
+      resolveDiscrepancyMutation.mutate({
+        transactionId: id,
+        resolution: "excluded",
+      });
+    },
+    [resolveDiscrepancyMutation],
+  );
+
   // Memoize the meta object to prevent table re-renders
   const tableMeta = useMemo(
     () => ({
@@ -370,6 +532,19 @@ export function DataTable({ initialSettings, initialTab }: Props) {
       lastClickedIndex,
       setLastClickedIndex,
       exportingTransactionIds,
+      // MCA actions
+      onMatchToDeal,
+      onConfirmMatch,
+      onRejectMatch,
+      onUnmatch,
+      onMarkNsf,
+      onClearNsf,
+      onFlagForReview,
+      onResolveFlag,
+      onRecordCollection,
+      onCreateDeal,
+      onEscalateToCollections,
+      onExclude,
     }),
     [
       setOpen,
@@ -382,6 +557,18 @@ export function DataTable({ initialSettings, initialTab }: Props) {
       lastClickedIndex,
       setLastClickedIndex,
       exportingTransactionIds,
+      onMatchToDeal,
+      onConfirmMatch,
+      onRejectMatch,
+      onUnmatch,
+      onMarkNsf,
+      onClearNsf,
+      onFlagForReview,
+      onResolveFlag,
+      onRecordCollection,
+      onCreateDeal,
+      onEscalateToCollections,
+      onExclude,
     ],
   );
 
@@ -640,6 +827,68 @@ export function DataTable({ initialSettings, initialTab }: Props) {
 
         <ExportBar />
         <BulkEditBar />
+
+        {/* MCA action dialogs */}
+        <MatchToDealDialog
+          transaction={matchDialogTx}
+          open={!!matchDialogTx}
+          onOpenChange={(open) => !open && setMatchDialogTx(null)}
+          onConfirm={(dealId, note) => {
+            if (!matchDialogTx) return;
+            manualMatchMutation.mutate({
+              transactionId: matchDialogTx.id,
+              dealId,
+              note,
+            });
+          }}
+          isPending={manualMatchMutation.isPending}
+        />
+
+        <MarkNsfDialog
+          transaction={nsfDialogTx}
+          open={!!nsfDialogTx}
+          onOpenChange={(open) => !open && setNsfDialogTx(null)}
+          onConfirm={({ nsfFee, note }) => {
+            if (!nsfDialogTx) return;
+            markNsfMutation.mutate({
+              transactionId: nsfDialogTx.id,
+              nsfFee,
+              note,
+            });
+          }}
+          isPending={markNsfMutation.isPending}
+        />
+
+        <RecordCollectionDialog
+          transaction={collectionDialogTx}
+          open={!!collectionDialogTx}
+          onOpenChange={(open) => !open && setCollectionDialogTx(null)}
+          onConfirm={({ amount, paymentDate, paymentType, note }) => {
+            if (!collectionDialogTx?.matchedDealId) return;
+            recordPaymentMutation.mutate({
+              dealId: collectionDialogTx.matchedDealId,
+              amount,
+              paymentDate,
+              paymentType: paymentType as "ach" | "wire" | "check" | "manual" | "other",
+              note,
+            });
+          }}
+          isPending={recordPaymentMutation.isPending}
+        />
+
+        <EscalateDialog
+          transaction={escalateDialogTx}
+          open={!!escalateDialogTx}
+          onOpenChange={(open) => !open && setEscalateDialogTx(null)}
+          onConfirm={({ status }) => {
+            if (!escalateDialogTx?.matchedDealId) return;
+            updateDealStatusMutation.mutate({
+              dealId: escalateDialogTx.matchedDealId,
+              status: status as "active" | "paid_off" | "defaulted" | "paused" | "late" | "in_collections",
+            });
+          }}
+          isPending={updateDealStatusMutation.isPending}
+        />
       </div>
     </TransactionTableProvider>
   );

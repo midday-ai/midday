@@ -1,16 +1,13 @@
-import { updateTransaction } from "@midday/db/queries";
-import { DocumentClient } from "@midday/documents";
 import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import type { ProcessTransactionAttachmentPayload } from "../../schemas/transactions";
-import { getDb } from "../../utils/db";
 import { convertHeicToJpeg } from "../../utils/image-processing";
 import { BaseProcessor } from "../base";
 
 /**
  * Process transaction attachments (receipts/invoices)
- * Extracts tax information and updates the transaction
+ * Converts HEIC images and triggers document classification
  */
 export class ProcessTransactionAttachmentProcessor extends BaseProcessor<ProcessTransactionAttachmentPayload> {
   async process(job: Job<ProcessTransactionAttachmentPayload>): Promise<void> {
@@ -54,58 +51,6 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
       if (!uploadedData) {
         throw new Error("Failed to upload converted image");
       }
-    }
-
-    const filename = filePath.at(-1);
-
-    // Use 10 minutes expiration to ensure URL doesn't expire during processing
-    // (document processing can take up to 120s, plus buffer for retries)
-    const { data: signedUrlData } = await supabase.storage
-      .from("vault")
-      .createSignedUrl(filePath.join("/"), 600);
-
-    if (!signedUrlData) {
-      throw new Error("File not found");
-    }
-
-    const document = new DocumentClient();
-
-    this.logger.info("Extracting tax information from document", {
-      transactionId,
-      filename,
-      mimetype,
-    });
-
-    const result = await document.getInvoiceOrReceipt({
-      documentUrl: signedUrlData.signedUrl,
-      mimetype,
-    });
-
-    // Update the transaction with the tax information
-    if (result.tax_rate && result.tax_type) {
-      this.logger.info("Updating transaction with tax information", {
-        transactionId,
-        taxRate: result.tax_rate,
-        taxType: result.tax_type,
-      });
-
-      const db = getDb();
-      await updateTransaction(db, {
-        id: transactionId,
-        teamId,
-        taxRate: result.tax_rate ?? undefined,
-        taxType: result.tax_type ?? undefined,
-      });
-
-      this.logger.info("Transaction updated with tax information", {
-        transactionId,
-        taxRate: result.tax_rate,
-        taxType: result.tax_type,
-      });
-    } else {
-      this.logger.info("No tax information found in document", {
-        transactionId,
-      });
     }
 
     // NOTE: Process documents and images for classification

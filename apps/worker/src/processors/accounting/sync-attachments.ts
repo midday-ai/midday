@@ -65,10 +65,6 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
       existingSyncedAttachmentMapping,
       syncRecordId,
       providerEntityType,
-      // Tax info for history note (Xero only)
-      taxAmount,
-      taxRate,
-      taxType,
       note,
       addHistoryNote,
     } = job.data;
@@ -320,9 +316,6 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
         await provider.addTransactionHistoryNote?.({
           tenantId: orgId,
           transactionId: providerTransactionId,
-          taxAmount,
-          taxRate,
-          taxType,
           note,
         });
         this.logger.debug("Added history note to Xero transaction", {

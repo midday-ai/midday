@@ -194,9 +194,6 @@ export async function getInbox(db: Database, params: GetInboxParams) {
       senderEmail: inbox.senderEmail,
       description: inbox.description,
       inboxAccountId: inbox.inboxAccountId,
-      taxAmount: inbox.taxAmount,
-      taxRate: inbox.taxRate,
-      taxType: inbox.taxType,
       relatedCount: sql<number>`(
         SELECT COUNT(*)::int
         FROM ${inbox} AS related
@@ -295,9 +292,6 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
       description: inbox.description,
       inboxAccountId: inbox.inboxAccountId,
       groupedInboxId: inbox.groupedInboxId,
-      taxAmount: inbox.taxAmount,
-      taxRate: inbox.taxRate,
-      taxType: inbox.taxType,
       meta: inbox.meta,
       inboxAccount: {
         id: inboxAccounts.id,
@@ -360,9 +354,6 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
         description: inbox.description,
         inboxAccountId: inbox.inboxAccountId,
         groupedInboxId: inbox.groupedInboxId,
-        taxAmount: inbox.taxAmount,
-        taxRate: inbox.taxRate,
-        taxType: inbox.taxType,
         meta: inbox.meta,
         inboxAccount: {
           id: inboxAccounts.id,
@@ -550,27 +541,6 @@ export async function deleteInbox(db: Database, params: DeleteInboxParams) {
         ),
       );
 
-    // Check if this transaction still has other attachments before resetting tax info
-    const remainingAttachments = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(transactionAttachments)
-      .where(
-        and(
-          eq(transactionAttachments.transactionId, result.transactionId),
-          eq(transactionAttachments.teamId, teamId),
-        ),
-      );
-
-    // Only reset tax rate and type if no more attachments exist for this transaction
-    if (remainingAttachments[0]?.count === 0) {
-      await db
-        .update(transactions)
-        .set({
-          taxRate: null,
-          taxType: null,
-        })
-        .where(eq(transactions.id, result.transactionId));
-    }
   }
 
   // Delete any match suggestions for this inbox item
@@ -655,28 +625,6 @@ export async function deleteInboxMany(
               eq(transactionAttachments.teamId, teamId),
             ),
           );
-
-        // Check if this transaction still has other attachments before resetting tax info
-        const remainingAttachments = await db
-          .select({ count: sql<number>`count(*)` })
-          .from(transactionAttachments)
-          .where(
-            and(
-              eq(transactionAttachments.transactionId, item.transactionId),
-              eq(transactionAttachments.teamId, teamId),
-            ),
-          );
-
-        // Only reset tax rate and type if no more attachments exist for this transaction
-        if (remainingAttachments[0]?.count === 0) {
-          await db
-            .update(transactions)
-            .set({
-              taxRate: null,
-              taxType: null,
-            })
-            .where(eq(transactions.id, item.transactionId));
-        }
       }
 
       // Delete any match suggestions for this inbox item
@@ -806,9 +754,6 @@ export async function getInboxSearch(
           website: inbox.website,
           baseAmount: inbox.baseAmount,
           baseCurrency: inbox.baseCurrency,
-          taxAmount: inbox.taxAmount,
-          taxRate: inbox.taxRate,
-          taxType: inbox.taxType,
         })
         .from(inbox)
         .where(and(...whereConditions))
@@ -894,9 +839,6 @@ export async function getInboxSearch(
             baseCurrency: inbox.baseCurrency,
             status: inbox.status,
             website: inbox.website,
-            taxAmount: inbox.taxAmount,
-            taxRate: inbox.taxRate,
-            taxType: inbox.taxType,
             embeddingScore:
               sql<number>`(${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})`.as(
                 "embedding_score",
@@ -1021,9 +963,6 @@ export async function getInboxSearch(
         website: inbox.website,
         baseAmount: inbox.baseAmount,
         baseCurrency: inbox.baseCurrency,
-        taxAmount: inbox.taxAmount,
-        taxRate: inbox.taxRate,
-        taxType: inbox.taxType,
       })
       .from(inbox)
       .where(and(...whereConditions))
@@ -1078,28 +1017,6 @@ export async function updateInbox(db: Database, params: UpdateInboxParams) {
             eq(transactionAttachments.teamId, teamId),
           ),
         );
-
-      // Check if this transaction still has other attachments before resetting tax info
-      const remainingAttachments = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(transactionAttachments)
-        .where(
-          and(
-            eq(transactionAttachments.transactionId, result.transactionId),
-            eq(transactionAttachments.teamId, teamId),
-          ),
-        );
-
-      // Only reset tax rate and type if no more attachments exist for this transaction
-      if (remainingAttachments[0]?.count === 0) {
-        await db
-          .update(transactions)
-          .set({
-            taxRate: null,
-            taxType: null,
-          })
-          .where(eq(transactions.id, result.transactionId));
-      }
     }
 
     // Delete any match suggestions for this inbox item
@@ -1171,9 +1088,6 @@ export async function matchTransaction(
       filePath: inbox.filePath,
       size: inbox.size,
       fileName: inbox.fileName,
-      taxAmount: inbox.taxAmount,
-      taxRate: inbox.taxRate,
-      taxType: inbox.taxType,
       transactionId: inbox.transactionId, // Check if already matched
       status: inbox.status,
       groupedInboxId: inbox.groupedInboxId,
@@ -1200,9 +1114,6 @@ export async function matchTransaction(
       filePath: inbox.filePath,
       size: inbox.size,
       fileName: inbox.fileName,
-      taxAmount: inbox.taxAmount,
-      taxRate: inbox.taxRate,
-      taxType: inbox.taxType,
       transactionId: inbox.transactionId,
       status: inbox.status,
     })
@@ -1262,37 +1173,6 @@ export async function matchTransaction(
     if (attachmentData) {
       attachmentIds.set(item.id, attachmentData.id);
     }
-  }
-
-  // Update transaction with tax data from OCR (use primary item's tax data)
-  // Transfer taxAmount if available (from OCR extraction)
-  // Transfer taxRate and taxType if available
-  const primaryItem =
-    relatedItems.find((item) => item.id === primaryItemId) || result;
-  const taxUpdates: {
-    taxAmount?: number | null;
-    taxRate?: number | null;
-    taxType?: string | null;
-  } = {};
-
-  if (primaryItem.taxAmount !== null && primaryItem.taxAmount !== undefined) {
-    taxUpdates.taxAmount = primaryItem.taxAmount;
-  }
-
-  if (
-    primaryItem.taxRate !== null &&
-    primaryItem.taxRate !== undefined &&
-    primaryItem.taxType
-  ) {
-    taxUpdates.taxRate = primaryItem.taxRate;
-    taxUpdates.taxType = primaryItem.taxType;
-  }
-
-  if (Object.keys(taxUpdates).length > 0) {
-    await db
-      .update(transactions)
-      .set(taxUpdates)
-      .where(eq(transactions.id, transactionId));
   }
 
   // Update all related inbox items with attachment and transaction IDs
@@ -1476,30 +1356,6 @@ export async function unmatchTransaction(
           eq(transactionAttachments.teamId, teamId),
         ),
       );
-  }
-
-  // Check if this transaction still has other attachments before resetting tax info
-  if (transactionId) {
-    const remainingAttachments = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(transactionAttachments)
-      .where(
-        and(
-          eq(transactionAttachments.transactionId, transactionId),
-          eq(transactionAttachments.teamId, teamId),
-        ),
-      );
-
-    // Only reset tax rate and type if no more attachments exist for this transaction
-    if (remainingAttachments[0]?.count === 0) {
-      await db
-        .update(transactions)
-        .set({
-          taxRate: null,
-          taxType: null,
-        })
-        .where(eq(transactions.id, transactionId));
-    }
   }
 
   // Return updated inbox with transaction data
@@ -1885,9 +1741,6 @@ export type UpdateInboxWithProcessedDataParams = {
   displayName?: string;
   website?: string;
   date?: string;
-  taxAmount?: number;
-  taxRate?: number;
-  taxType?: string;
   type?: "invoice" | "expense" | null;
   invoiceNumber?: string;
   status?:
@@ -1926,9 +1779,6 @@ export async function updateInboxWithProcessedData(
       description: inbox.description,
       referenceId: inbox.referenceId,
       size: inbox.size,
-      taxAmount: inbox.taxAmount,
-      taxRate: inbox.taxRate,
-      taxType: inbox.taxType,
       type: inbox.type,
       invoiceNumber: inbox.invoiceNumber,
     });

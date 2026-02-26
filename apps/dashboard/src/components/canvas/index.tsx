@@ -18,8 +18,6 @@ import { RevenueCanvas } from "./revenue-canvas";
 import { RunwayCanvas } from "./runway-canvas";
 import { SpendingCanvas } from "./spending-canvas";
 import { StressTestCanvas } from "./stress-test-canvas";
-import { TaxSummaryCanvas } from "./tax-summary-canvas";
-
 export function Canvas() {
   const [selectedType, setSelectedType] = useQueryState(
     "artifact-type",
@@ -65,8 +63,6 @@ export function Canvas() {
         return <SpendingCanvas />;
       case "forecast-canvas":
         return <ForecastCanvas />;
-      case "tax-summary-canvas":
-        return <TaxSummaryCanvas />;
       case "stress-test-canvas":
         return <StressTestCanvas />;
       case "invoice-payment-canvas":

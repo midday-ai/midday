@@ -40,7 +40,6 @@ export const WIDGET_TYPES = [
   // Admin & documents
   "inbox",
   "vault",
-  "tax-summary",
 ] as const;
 
 export type WidgetType = (typeof WIDGET_TYPES)[number];

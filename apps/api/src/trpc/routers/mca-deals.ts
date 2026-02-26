@@ -9,10 +9,78 @@ import {
   getMcaDealById,
   getMcaDealStats,
   getMcaDealStatusBreakdown,
+  updateMcaDeal,
 } from "@db/queries/mca-deals";
+import { createMcaPayment } from "@db/queries/mca-payments";
 import { createDealBankAccount } from "@db/queries/deal-bank-accounts";
 import { getBrokerById, upsertCommission } from "@db/queries";
+import { calculateRiskScore } from "@api/services/risk-engine";
+import type { Database } from "@db/client";
 import { z } from "zod";
+
+async function createBrokerCommission(
+  db: Database,
+  params: {
+    dealId: string;
+    brokerId: string;
+    teamId: string;
+    fundingAmount: number;
+    commissionType?: "percentage" | "flat";
+    commissionPercentage?: number;
+    commissionAmount?: number;
+  },
+) {
+  let type = params.commissionType;
+  let pct = params.commissionPercentage;
+  let amount = params.commissionAmount;
+
+  // Fall back to broker defaults if not overridden
+  if (type === undefined || (pct === undefined && amount === undefined)) {
+    const broker = await getBrokerById(db, {
+      id: params.brokerId,
+      teamId: params.teamId,
+    });
+
+    if (type === undefined) {
+      type =
+        (broker?.commissionType as "percentage" | "flat") ?? "percentage";
+    }
+
+    if (type === "percentage" && pct === undefined) {
+      pct = broker?.commissionPercentage
+        ? Number(broker.commissionPercentage)
+        : 0;
+    }
+
+    if (type === "flat" && amount === undefined) {
+      amount = broker?.flatFee
+        ? Number(broker.flatFee)
+        : 0;
+    }
+  }
+
+  // Calculate amount from percentage or vice versa
+  if (type === "percentage") {
+    pct = pct ?? 0;
+    amount = +(params.fundingAmount * (pct / 100)).toFixed(2);
+  } else {
+    amount = amount ?? 0;
+    pct =
+      params.fundingAmount > 0
+        ? +((amount / params.fundingAmount) * 100).toFixed(2)
+        : 0;
+  }
+
+  await upsertCommission(db, {
+    dealId: params.dealId,
+    brokerId: params.brokerId,
+    teamId: params.teamId,
+    commissionType: type ?? "percentage",
+    commissionPercentage: pct,
+    commissionAmount: amount,
+    status: "pending",
+  });
+}
 
 const createDealSchema = z.object({
   merchantId: z.string().uuid(),
@@ -28,7 +96,9 @@ const createDealSchema = z.object({
   expectedPayoffDate: z.string().optional(),
   externalId: z.string().optional(),
   brokerId: z.string().uuid().optional(),
+  commissionType: z.enum(["percentage", "flat"]).optional(),
   commissionPercentage: z.number().min(0).max(100).optional(),
+  commissionAmount: z.number().min(0).optional(),
 });
 
 const bankAccountSchema = z.discriminatedUnion("mode", [
@@ -83,26 +153,14 @@ export const mcaDealsRouter = createTRPCRouter({
 
       // Auto-create broker commission if a broker is assigned
       if (deal && input.brokerId) {
-        let pct = input.commissionPercentage;
-
-        // Fall back to broker's default commission percentage
-        if (pct === undefined) {
-          const broker = await getBrokerById(db, {
-            id: input.brokerId,
-            teamId: teamId!,
-          });
-          pct = broker?.commissionPercentage ?? 0;
-        }
-
-        const amount = +(input.fundingAmount * (pct / 100)).toFixed(2);
-
-        await upsertCommission(db, {
+        await createBrokerCommission(db, {
           dealId: deal.id,
           brokerId: input.brokerId,
           teamId: teamId!,
-          commissionPercentage: pct,
-          commissionAmount: amount,
-          status: "pending",
+          fundingAmount: input.fundingAmount,
+          commissionType: input.commissionType,
+          commissionPercentage: input.commissionPercentage,
+          commissionAmount: input.commissionAmount,
         });
       }
 
@@ -168,25 +226,14 @@ export const mcaDealsRouter = createTRPCRouter({
 
       // Auto-create broker commission if a broker is assigned
       if (dealInput.brokerId) {
-        let pct = dealInput.commissionPercentage;
-
-        if (pct === undefined) {
-          const broker = await getBrokerById(db, {
-            id: dealInput.brokerId,
-            teamId: teamId!,
-          });
-          pct = broker?.commissionPercentage ?? 0;
-        }
-
-        const amount = +(dealInput.fundingAmount * (pct / 100)).toFixed(2);
-
-        await upsertCommission(db, {
+        await createBrokerCommission(db, {
           dealId: deal.id,
           brokerId: dealInput.brokerId,
           teamId: teamId!,
-          commissionPercentage: pct,
-          commissionAmount: amount,
-          status: "pending",
+          fundingAmount: dealInput.fundingAmount,
+          commissionType: dealInput.commissionType,
+          commissionPercentage: dealInput.commissionPercentage,
+          commissionAmount: dealInput.commissionAmount,
         });
       }
 
@@ -239,4 +286,66 @@ export const mcaDealsRouter = createTRPCRouter({
       });
     },
   ),
+
+  recordPayment: memberProcedure
+    .input(
+      z.object({
+        dealId: z.string().uuid(),
+        amount: z.number().positive(),
+        paymentDate: z.string(),
+        paymentType: z.enum(["ach", "wire", "check", "manual", "other"]).default("ach"),
+        note: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const deal = await getMcaDealById(db, { id: input.dealId, teamId: teamId! });
+      if (!deal) {
+        throw new Error("Deal not found");
+      }
+
+      const balanceBefore = deal.currentBalance ?? 0;
+      const balanceAfter = balanceBefore - input.amount;
+
+      const payment = await createMcaPayment(db, {
+        teamId: teamId!,
+        dealId: input.dealId,
+        amount: input.amount,
+        paymentDate: input.paymentDate,
+        paymentType: input.paymentType,
+        status: "completed",
+        description: input.note,
+        balanceBefore,
+        balanceAfter,
+      });
+
+      await updateMcaDeal(db, {
+        id: input.dealId,
+        teamId: teamId!,
+        currentBalance: balanceAfter,
+        totalPaid: (deal.totalPaid ?? 0) + input.amount,
+      });
+
+      // Recalculate risk score for this deal
+      if (payment) {
+        await calculateRiskScore(db, input.dealId, teamId!, payment.id);
+      }
+
+      return payment;
+    }),
+
+  updateStatus: memberProcedure
+    .input(
+      z.object({
+        dealId: z.string().uuid(),
+        status: z.enum(["active", "paid_off", "defaulted", "paused", "late", "in_collections"]),
+        note: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return updateMcaDeal(db, {
+        id: input.dealId,
+        teamId: teamId!,
+        status: input.status,
+      });
+    }),
 });

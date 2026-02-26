@@ -1,4 +1,5 @@
 import { AccountsList } from "@/components/accounts-list";
+import { AddAccountButton } from "@/components/add-account-button";
 import { ScrollableContent } from "@/components/scrollable-content";
 import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
@@ -20,6 +21,7 @@ export default async function AccountsPage() {
         <div className="py-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-lg font-medium">Accounts</h1>
+            <AddAccountButton />
           </div>
           <Suspense fallback={<AccountsListSkeleton />}>
             <AccountsList />

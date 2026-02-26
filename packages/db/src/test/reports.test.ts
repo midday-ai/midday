@@ -11,7 +11,6 @@ import {
   getRecurringExpenses,
   getRevenue,
   getSpending,
-  getTaxSummary,
 } from "../queries/reports";
 import {
   inbox,
@@ -38,8 +37,6 @@ type MockTransaction = {
   categorySlug: string | null;
   status: "pending" | "posted" | "failed" | "refund" | "funding" | "excluded";
   internal: boolean;
-  taxRate: number | null;
-  taxAmount: number | null;
   recurring: boolean | null;
   frequency: "weekly" | "monthly" | "annually" | "irregular" | null;
   method: string;
@@ -57,8 +54,6 @@ type MockCategory = {
   teamId: string;
   slug: string | null;
   name: string | null;
-  taxRate: number | null;
-  taxType: string | null;
   excluded: boolean | null;
   parentId: string | null;
   color: string | null;
@@ -214,17 +209,6 @@ function createMockDatabase(mockData: {
     return tx.amount;
   };
 
-  // Calculate net amount (with tax)
-  const getNetAmount = (
-    tx: MockTransaction,
-    targetCurrency: string | null,
-    category?: MockCategory,
-  ): number => {
-    const amount = getAmount(tx, targetCurrency);
-    const taxRate = tx.taxRate ?? category?.taxRate ?? 0;
-    return amount - (amount * taxRate) / (100 + taxRate);
-  };
-
   // Helper to check if query is for categories table
   const isCategoryQuery = (table: any) => {
     return (
@@ -295,7 +279,6 @@ function createMockDatabase(mockData: {
                   ...(fields.name && { name: cat.name }),
                   ...(fields.slug && { slug: cat.slug }),
                   ...(fields.color && { color: cat.color }),
-                  ...(fields.taxRate && { taxRate: cat.taxRate }),
                   ...(fields.excluded && { excluded: cat.excluded }),
                 }));
 
@@ -504,21 +487,8 @@ function createMockDatabase(mockData: {
                               }
 
                               const month = `${tx.date.substring(0, 7)}-01`;
-                              let value = 0;
-
-                              // Check if net revenue (simplified check)
-                              const isNet = fields.value
-                                .toString()
-                                .includes("taxRate");
-                              if (isNet) {
-                                value = getNetAmount(
-                                  tx,
-                                  targetCurrency,
-                                  tx.category,
-                                );
-                              } else {
-                                value = getAmount(tx, targetCurrency);
-                              }
+                              // Net = gross for MCA businesses (no tax deduction)
+                              const value = getAmount(tx, targetCurrency);
 
                               const current = grouped.get(month) || 0;
                               grouped.set(month, current + value);
@@ -756,8 +726,8 @@ function createMockDatabase(mockData: {
       },
     },
     executeOnReplica: async (query: any) => {
-      // Mock raw SQL execution for tax summary queries
-      // Return empty array - tax summary will process it
+      // Mock raw SQL execution for summary queries
+      // Return empty array - summary will process it
       return Promise.resolve([]);
     },
   } as any;
@@ -779,8 +749,6 @@ const createTestTransactions = (): MockTransaction[] => [
     categorySlug: "revenue",
     status: "posted",
     internal: false,
-    taxRate: 20,
-    taxAmount: null,
     recurring: false,
     frequency: null,
     method: "card_purchase",
@@ -798,8 +766,6 @@ const createTestTransactions = (): MockTransaction[] => [
     categorySlug: "revenue",
     status: "posted",
     internal: false,
-    taxRate: 20,
-    taxAmount: null,
     recurring: false,
     frequency: null,
     method: "card_purchase",
@@ -817,8 +783,6 @@ const createTestTransactions = (): MockTransaction[] => [
     categorySlug: "revenue",
     status: "posted",
     internal: false,
-    taxRate: null,
-    taxAmount: null,
     recurring: false,
     frequency: null,
     method: "card_purchase",
@@ -836,8 +800,6 @@ const createTestTransactions = (): MockTransaction[] => [
     categorySlug: "office-supplies",
     status: "posted",
     internal: false,
-    taxRate: 20,
-    taxAmount: null,
     recurring: false,
     frequency: null,
     method: "card_purchase",
@@ -855,8 +817,6 @@ const createTestTransactions = (): MockTransaction[] => [
     categorySlug: "travel",
     status: "posted",
     internal: false,
-    taxRate: null,
-    taxAmount: null,
     recurring: false,
     frequency: null,
     method: "card_purchase",
@@ -874,8 +834,6 @@ const createTestTransactions = (): MockTransaction[] => [
     categorySlug: "cost-of-goods-sold",
     status: "posted",
     internal: false,
-    taxRate: null,
-    taxAmount: null,
     recurring: false,
     frequency: null,
     method: "card_purchase",
@@ -893,8 +851,6 @@ const createTestTransactions = (): MockTransaction[] => [
     categorySlug: "software",
     status: "posted",
     internal: false,
-    taxRate: null,
-    taxAmount: null,
     recurring: true,
     frequency: "monthly",
     method: "card_purchase",
@@ -913,8 +869,6 @@ const createTestTransactions = (): MockTransaction[] => [
     categorySlug: "credit-card-payment", // EXCLUDED category
     status: "posted",
     internal: false,
-    taxRate: null,
-    taxAmount: null,
     recurring: false,
     frequency: null,
     method: "transfer",
@@ -932,8 +886,6 @@ const createTestTransactions = (): MockTransaction[] => [
     categorySlug: "internal-transfer", // EXCLUDED category
     status: "posted",
     internal: false,
-    taxRate: null,
-    taxAmount: null,
     recurring: false,
     frequency: null,
     method: "transfer",
@@ -955,8 +907,6 @@ const createTestCategories = (): MockCategory[] => [
     teamId: "team-1",
     slug: "revenue",
     name: "Revenue",
-    taxRate: null,
-    taxType: null,
     excluded: false,
     parentId: null,
     color: "#22c55e",
@@ -966,8 +916,6 @@ const createTestCategories = (): MockCategory[] => [
     teamId: "team-1",
     slug: "office-supplies",
     name: "Office Supplies",
-    taxRate: 20,
-    taxType: "vat",
     excluded: false,
     parentId: null,
     color: "#3b82f6",
@@ -977,8 +925,6 @@ const createTestCategories = (): MockCategory[] => [
     teamId: "team-1",
     slug: "cost-of-goods-sold",
     name: "Cost of Goods Sold",
-    taxRate: null,
-    taxType: null,
     excluded: false,
     parentId: null,
     color: "#ef4444",
@@ -988,8 +934,6 @@ const createTestCategories = (): MockCategory[] => [
     teamId: "team-1",
     slug: "travel",
     name: "Travel",
-    taxRate: null,
-    taxType: null,
     excluded: false,
     parentId: null,
     color: "#f59e0b",
@@ -999,8 +943,6 @@ const createTestCategories = (): MockCategory[] => [
     teamId: "team-1",
     slug: "software",
     name: "Software",
-    taxRate: null,
-    taxType: null,
     excluded: false,
     parentId: null,
     color: "#8b5cf6",
@@ -1011,8 +953,6 @@ const createTestCategories = (): MockCategory[] => [
     teamId: "team-1",
     slug: "credit-card-payment",
     name: "Credit Card Payment",
-    taxRate: null,
-    taxType: null,
     excluded: true, // EXCLUDED from reports
     parentId: null,
     color: "#6b7280",
@@ -1022,8 +962,6 @@ const createTestCategories = (): MockCategory[] => [
     teamId: "team-1",
     slug: "internal-transfer",
     name: "Internal Transfer",
-    taxRate: null,
-    taxType: null,
     excluded: true, // EXCLUDED from reports
     parentId: null,
     color: "#6b7280",
@@ -1098,7 +1036,7 @@ describe("Report Calculations", () => {
       expect(result).toBeArray();
     });
 
-    test("should calculate net revenue with tax", async () => {
+    test("should calculate net revenue (same as gross for MCA)", async () => {
       const result = await getRevenue(mockDb, {
         teamId: "team-1",
         from: "2024-08-01",
@@ -1111,11 +1049,8 @@ describe("Report Calculations", () => {
       const augustData = result.find((r) => r.date.startsWith("2024-08"));
       if (augustData) {
         const netValue = Number.parseFloat(augustData.value);
-        // Net should be less than gross due to tax
-        // With 20% tax: 1000 * (100/120) = 833.33 per transaction
-        // 2 transactions = ~1666.66, but allow margin for calculation differences
+        // Net = gross for MCA businesses (no tax deduction)
         expect(netValue).toBeGreaterThan(0);
-        expect(netValue).toBeLessThan(3500); // Allow larger margin for mock calculation differences
       }
     });
 
@@ -1260,23 +1195,6 @@ describe("Report Calculations", () => {
       const netCashFlow =
         result.summary.totalIncome - result.summary.totalExpenses;
       expect(result.summary.netCashFlow).toBe(netCashFlow);
-    });
-  });
-
-  describe("getTaxSummary", () => {
-    test("should calculate tax amounts correctly", async () => {
-      const result = await getTaxSummary(mockDb, {
-        teamId: "team-1",
-        type: "collected",
-        from: "2024-08-01",
-        to: "2024-08-31",
-        currency: "GBP",
-      });
-
-      // Tax summary returns an object with summary, meta, and result array
-      expect(result).toBeDefined();
-      expect(result.summary).toBeDefined();
-      expect(result.result).toBeArray();
     });
   });
 
@@ -1626,8 +1544,6 @@ describe("Category Exclusion Logic", () => {
       categorySlug: "software",
       status: "posted" as const,
       internal: false,
-      taxRate: null,
-      taxAmount: null,
       recurring: false,
       frequency: null as const,
       method: "card_purchase",
@@ -1646,8 +1562,6 @@ describe("Category Exclusion Logic", () => {
       categorySlug: "credit-card-payment",
       status: "posted" as const,
       internal: false,
-      taxRate: null,
-      taxAmount: null,
       recurring: false,
       frequency: null as const,
       method: "transfer",
@@ -1666,8 +1580,6 @@ describe("Category Exclusion Logic", () => {
       categorySlug: "internal-transfer",
       status: "posted" as const,
       internal: false,
-      taxRate: null,
-      taxAmount: null,
       recurring: false,
       frequency: null as const,
       method: "transfer",
@@ -1686,8 +1598,6 @@ describe("Category Exclusion Logic", () => {
       categorySlug: "office-supplies",
       status: "posted" as const,
       internal: false,
-      taxRate: null,
-      taxAmount: null,
       recurring: false,
       frequency: null as const,
       method: "card_purchase",
@@ -1701,8 +1611,6 @@ describe("Category Exclusion Logic", () => {
       teamId: "team-1",
       slug: "software",
       name: "Software",
-      taxRate: null,
-      taxType: null,
       excluded: false,
       parentId: null,
       color: "#8b5cf6",
@@ -1712,8 +1620,6 @@ describe("Category Exclusion Logic", () => {
       teamId: "team-1",
       slug: "office-supplies",
       name: "Office Supplies",
-      taxRate: null,
-      taxType: null,
       excluded: false,
       parentId: null,
       color: "#3b82f6",
@@ -1723,8 +1629,6 @@ describe("Category Exclusion Logic", () => {
       teamId: "team-1",
       slug: "credit-card-payment",
       name: "Credit Card Payment",
-      taxRate: null,
-      taxType: null,
       excluded: true, // EXCLUDED
       parentId: null,
       color: "#6b7280",
@@ -1734,8 +1638,6 @@ describe("Category Exclusion Logic", () => {
       teamId: "team-1",
       slug: "internal-transfer",
       name: "Internal Transfer",
-      taxRate: null,
-      taxType: null,
       excluded: true, // EXCLUDED
       parentId: null,
       color: "#6b7280",

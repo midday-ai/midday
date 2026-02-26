@@ -1,10 +1,14 @@
 import {
+  createSyndicatorTransactionSchema,
   deleteSyndicatorSchema,
   getParticipantsByDealSchema,
+  getPortalTransactionsSchema,
+  getSyndicatorBalanceSchema,
   getSyndicatorByIdSchema,
   getSyndicatorByPortalIdSchema,
   getSyndicatorDealStatsSchema,
   getSyndicatorDealsSchema,
+  getSyndicatorTransactionsSchema,
   getSyndicatorsSchema,
   removeParticipantSchema,
   toggleSyndicatorPortalSchema,
@@ -18,11 +22,16 @@ import {
   publicProcedure,
 } from "@api/trpc/init";
 import {
+  createSyndicatorTransaction,
   deleteSyndicator,
+  getCapitalSummary,
+  getPortalTransactions,
+  getSyndicatorBalance,
   getSyndicatorById,
   getSyndicatorByPortalId,
   getSyndicatorDealStats,
   getSyndicatorDeals,
+  getSyndicatorTransactions,
   getSyndicators,
   toggleSyndicatorPortal,
   upsertSyndicator,
@@ -163,6 +172,42 @@ export const syndicationRouter = createTRPCRouter({
       });
     }),
 
+  // ---- Syndicator Transactions (Capital Activity) ----
+
+  getTransactions: protectedProcedure
+    .input(getSyndicatorTransactionsSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getSyndicatorTransactions(db, {
+        ...input,
+        teamId: teamId!,
+      });
+    }),
+
+  getBalance: protectedProcedure
+    .input(getSyndicatorBalanceSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getSyndicatorBalance(db, {
+        syndicatorId: input.syndicatorId,
+        teamId: teamId!,
+      });
+    }),
+
+  getCapitalSummary: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      return getCapitalSummary(db, { teamId: teamId! });
+    },
+  ),
+
+  createTransaction: memberProcedure
+    .input(createSyndicatorTransactionSchema)
+    .mutation(async ({ ctx: { db, teamId, userId }, input }) => {
+      return createSyndicatorTransaction(db, {
+        ...input,
+        teamId: teamId!,
+        createdBy: userId,
+      });
+    }),
+
   // Public procedures (for syndicator portal)
   getByPortalId: publicProcedure
     .input(getSyndicatorByPortalIdSchema)
@@ -187,6 +232,48 @@ export const syndicationRouter = createTRPCRouter({
       }
 
       return getSyndicatorDeals(db, {
+        syndicatorId: syndicator.id,
+        teamId: syndicator.teamId,
+      });
+    }),
+
+  getPortalTransactions: publicProcedure
+    .input(getPortalTransactionsSchema)
+    .query(async ({ ctx: { db }, input }) => {
+      const syndicator = await getSyndicatorByPortalId(db, {
+        portalId: input.portalId,
+      });
+
+      if (!syndicator) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Syndicator portal not found",
+        });
+      }
+
+      return getPortalTransactions(db, {
+        syndicatorId: syndicator.id,
+        teamId: syndicator.teamId,
+        cursor: input.cursor,
+        pageSize: input.pageSize,
+      });
+    }),
+
+  getPortalBalance: publicProcedure
+    .input(getSyndicatorByPortalIdSchema)
+    .query(async ({ ctx: { db }, input }) => {
+      const syndicator = await getSyndicatorByPortalId(db, {
+        portalId: input.portalId,
+      });
+
+      if (!syndicator) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Syndicator portal not found",
+        });
+      }
+
+      return getSyndicatorBalance(db, {
         syndicatorId: syndicator.id,
         teamId: syndicator.teamId,
       });

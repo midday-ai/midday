@@ -21,6 +21,7 @@ type UpsertCommissionParams = {
   dealId: string;
   brokerId: string;
   teamId: string;
+  commissionType?: "percentage" | "flat";
   commissionPercentage: number;
   commissionAmount: number;
   status?: "pending" | "paid" | "cancelled";
@@ -115,6 +116,7 @@ export async function upsertCommission(
     .onConflictDoUpdate({
       target: [brokerCommissions.dealId, brokerCommissions.brokerId],
       set: {
+        commissionType: rest.commissionType,
         commissionPercentage: rest.commissionPercentage,
         commissionAmount: rest.commissionAmount,
         status: rest.status,

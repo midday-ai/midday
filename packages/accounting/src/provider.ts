@@ -130,9 +130,6 @@ export interface AccountingProvider {
   addTransactionHistoryNote?(params: {
     tenantId: string;
     transactionId: string;
-    taxAmount?: number;
-    taxRate?: number;
-    taxType?: string;
     note?: string;
   }): Promise<void>;
 }

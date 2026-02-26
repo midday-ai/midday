@@ -194,11 +194,6 @@ function renderHeaderContent<TData>(
     );
   }
 
-  // Tax Amount - not sortable
-  if (columnId === "taxAmount") {
-    return <span className="truncate">Tax Amount</span>;
-  }
-
   // Description column - special case with horizontal pagination
   if (columnId === "description") {
     return (
@@ -285,7 +280,6 @@ function getHeaderLabel(columnId: string): string {
     date: "Date",
     description: "Description",
     amount: "Amount",
-    taxAmount: "Tax Amount",
     category: "Category",
     counterparty: "From / To",
     tags: "Tags",

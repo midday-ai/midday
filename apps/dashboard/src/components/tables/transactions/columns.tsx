@@ -496,26 +496,6 @@ export const columns: ColumnDef<Transaction>[] = [
     ),
   },
   {
-    accessorKey: "taxAmount",
-    header: "Tax Amount",
-    size: 170,
-    minSize: 100,
-    maxSize: 400,
-    enableResizing: true,
-    meta: {
-      skeleton: { type: "text", width: "w-24" },
-      headerLabel: "Tax Amount",
-      className: "w-[170px] min-w-[100px]",
-    },
-    cell: ({ row }) => (
-      <FormatAmount
-        amount={row.original.taxAmount ?? 0}
-        currency={row.original.currency}
-        maximumFractionDigits={2}
-      />
-    ),
-  },
-  {
     accessorKey: "transactionType",
     header: "Type",
     size: 140,

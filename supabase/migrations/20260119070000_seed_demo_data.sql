@@ -114,14 +114,82 @@ VALUES
   ('a0000000-0000-0000-0000-000000000001',
    'Lucky Dragon Restaurant', 'chen@luckydragon.com', '(555) 901-2345', 'Wei Chen',
    'Restaurant', '1888 Asian District', 'Dallas', 'TX', '75207', 'US', 'active',
-   '✅ PAID OFF: $75,000 deal completed. Excellent history - pre-approved for renewal up to $100k',
+   '✅ RENEWAL: Paid off $75K deal (MCA-2024-002). Now on 2nd deal $100K (MCA-2026-003). Top client.',
    'luckydragonrestaurant.com', NOW() - INTERVAL '18 months', 'tok_luckydragon_001'),
 
   ('a0000000-0000-0000-0000-000000000001',
    'Smith Plumbing Services', 'john@smithplumbing.com', '(555) 012-3456', 'John Smith',
    'Home Services', '456 Trade Circle', 'San Antonio', 'TX', '78210', 'US', 'active',
    '✅ PAID OFF: $50,000 deal completed early! Interested in equipment financing next',
-   'smithplumbingservices.com', NOW() - INTERVAL '12 months', 'tok_smithplumbing_001')
+   'smithplumbingservices.com', NOW() - INTERVAL '12 months', 'tok_smithplumbing_001'),
+
+  -- ======== NEW MERCHANTS (11-20) — Expanded portfolio ========
+
+  -- HEALTHY (diverse geographies)
+  ('a0000000-0000-0000-0000-000000000001',
+   'Harbor Freight Logistics', 'rick@harborfreightlog.com', '(305) 555-1100', 'Rick Morales',
+   'Transportation', '8900 NW 33rd Street', 'Miami', 'FL', '33172', 'US', 'active',
+   'Regional freight company, 8 years in business. Steady contract revenue. Factor: 1.38, Daily ACH $570',
+   'harborfreightlogistics.com', NOW() - INTERVAL '3 months', 'tok_harbor_001'),
+
+  ('a0000000-0000-0000-0000-000000000001',
+   'Golden Gate Nail Studio', 'linda@goldengatenails.com', '(408) 555-1200', 'Linda Tran',
+   'Beauty & Personal Care', '1520 Saratoga Ave', 'San Jose', 'CA', '95129', 'US', 'active',
+   'Popular nail salon, strong walk-in traffic. Factor: 1.39, Daily ACH $245',
+   'goldengatenailstudio.com', NOW() - INTERVAL '3 months', 'tok_nailstudio_001'),
+
+  -- VIP / LARGE DEALS
+  ('a0000000-0000-0000-0000-000000000001',
+   'BlueSky Dental Group', 'amy@blueskydental.com', '(480) 555-1300', 'Dr. Amy Fong',
+   'Healthcare', '4200 E Camelback Rd', 'Phoenix', 'AZ', '85018', 'US', 'active',
+   'Multi-location dental practice. Very reliable cash flow. Factor: 1.32, Daily ACH $720. VIP client.',
+   'blueskydental.com', NOW() - INTERVAL '6 months', 'tok_bluesky_001'),
+
+  ('a0000000-0000-0000-0000-000000000001',
+   'Lakeside Urgent Care', 'priya@lakesideuc.com', '(312) 555-1400', 'Dr. Priya Shah',
+   'Healthcare', '900 N Michigan Ave', 'Chicago', 'IL', '60611', 'US', 'active',
+   'New deal — largest in portfolio at $150K. Insurance-backed revenue. Factor: 1.30, Daily ACH $870. VIP.',
+   'lakesideurgentcare.com', NOW() - INTERVAL '21 days', 'tok_urgentcare_001'),
+
+  -- NEAR PAYOFF
+  ('a0000000-0000-0000-0000-000000000001',
+   'Peak Performance CrossFit', 'jake@peakcrossfit.com', '(720) 555-1500', 'Jake Torres',
+   'Health & Fitness', '2800 Blake St', 'Denver', 'CO', '80205', 'US', 'active',
+   'About to pay off! Only ~$280 remaining. Renewal candidate. Factor: 1.36, Daily ACH $345',
+   'peakperformancecrossfit.com', NOW() - INTERVAL '10 months', 'tok_crossfit_001'),
+
+  -- AT-RISK / LATE
+  ('a0000000-0000-0000-0000-000000000001',
+   'Coastal Catering Co.', 'nina@coastalcatering.com', '(813) 555-1600', 'Nina Patel',
+   'Food Services', '3100 W Kennedy Blvd', 'Tampa', 'FL', '33609', 'US', 'active',
+   '⚠️ 2 NSFs in past month. Seasonal drop in events. Factor: 1.41, Daily ACH $325. Watching closely.',
+   'coastalcatering.com', NOW() - INTERVAL '5 months', 'tok_catering_001'),
+
+  ('a0000000-0000-0000-0000-000000000001',
+   'NightOwl Printing', 'derek@nightowlprint.com', '(404) 555-1700', 'Derek Simmons',
+   'Business Services', '550 Peachtree St NE', 'Atlanta', 'GA', '30308', 'US', 'active',
+   '⚠️ 3 NSFs, payments stalled for 3 weeks. Claims equipment breakdown. Factor: 1.44, Daily ACH $310. On payment plan.',
+   'nightowlprinting.com', NOW() - INTERVAL '5 months', 'tok_nightowl_001'),
+
+  -- DEFAULTED
+  ('a0000000-0000-0000-0000-000000000001',
+   'Redrock Excavation LLC', 'troy@redrockexcavation.com', '(702) 555-1800', 'Troy Hendrix',
+   'Construction', '7700 S Las Vegas Blvd', 'Las Vegas', 'NV', '89123', 'US', 'inactive',
+   '🔴 DEFAULTED: 6 NSFs, payments stopped 8 months ago. $56K balance outstanding. In collections. Direct deal (no broker).',
+   'redrockexcavation.com', NOW() - INTERVAL '20 months', 'tok_redrock_001'),
+
+  -- RENEWAL CHAIN MERCHANTS
+  ('a0000000-0000-0000-0000-000000000001',
+   'The Bookshelf Cafe', 'emma@bookshelfcafe.com', '(503) 555-1900', 'Emma Walsh',
+   'Retail', '820 NW 23rd Ave', 'Portland', 'OR', '97210', 'US', 'active',
+   '✅ RENEWAL: Paid off $35K deal (MCA-2024-004). Now on 2nd deal $55K (MCA-2025-007). Great client.',
+   'thebookshelfcafe.com', NOW() - INTERVAL '24 months', 'tok_bookshelf_001'),
+
+  ('a0000000-0000-0000-0000-000000000001',
+   'Cardinal Electric Co.', 'marcus@cardinalelectric.com', '(704) 555-2000', 'Marcus Webb',
+   'Home Services', '1200 S Tryon St', 'Charlotte', 'NC', '28203', 'US', 'active',
+   '✅ RENEWAL: Paid off $60K deal (MCA-2024-005). Now on 2nd deal $85K (MCA-2025-008). Near payoff — only $8.8K left!',
+   'cardinalelectric.com', NOW() - INTERVAL '22 months', 'tok_cardinal_001')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -129,16 +197,23 @@ ON CONFLICT DO NOTHING;
 -- ============================================================================
 --
 -- Demo Data Summary:
--- - 10 merchants across different industries and risk profiles
+-- - 20 merchants across different industries, risk profiles, and geographies
 -- - 1 bank account with $847,592.45 balance
 -- - 5 transaction categories for MCA operations
 --
--- Merchant Categories:
--- - 3 Healthy (Sunrise Diner, Martinez Auto, Bella Salon)
+-- Merchant Categories (20 total):
+-- - 3 Healthy TX (Sunrise Diner, Martinez Auto, Bella Salon)
+-- - 2 Healthy national (Harbor Freight FL, Golden Gate Nail CA)
 -- - 2 At-Risk (Tony's Pizzeria, Quick Print)
--- - 1 High-Risk (Westside Construction)
+-- - 3 Late/High-Risk (Westside Construction, Coastal Catering, NightOwl Printing)
+-- - 1 Defaulted (Redrock Excavation)
 -- - 2 New (Green Thumb, Fitness First)
--- - 2 Completed/Paid Off (Lucky Dragon, Smith Plumbing)
+-- - 2 VIP/Large (BlueSky Dental, Lakeside Urgent Care)
+-- - 1 Near Payoff (Peak Performance CrossFit)
+-- - 2 Paid Off (Martinez Auto, Smith Plumbing)
+-- - 3 Renewal Chains (Lucky Dragon 2 deals, Bookshelf Cafe 2 deals, Cardinal Electric 2 deals)
+--
+-- Total deals: 23 (20 merchants, 3 have 2 deals each)
 --
 -- Payment transactions are generated dynamically via the app or separate seed script
 -- See: supabase/seed.sql for transaction seeding

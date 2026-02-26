@@ -45,9 +45,6 @@ test("transformTransaction should correctly transform transaction data", () => {
     amount_text: null,
     calculated_vat: null,
     enrichment_completed: false,
-    tax_amount: null,
-    tax_rate: null,
-    tax_type: null,
   };
 
   const teamId = "team123";
@@ -121,9 +118,6 @@ test("transformTransaction should handle null values correctly", () => {
     amount_text: null,
     calculated_vat: null,
     enrichment_completed: false,
-    tax_amount: null,
-    tax_rate: null,
-    tax_type: null,
   };
 
   const teamId = "team456";

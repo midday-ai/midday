@@ -23,14 +23,6 @@ export interface ChildCategory extends BaseCategory {
 // Category hierarchy type
 export type CategoryHierarchy = ParentCategory[];
 
-// Tax rate configuration
-export interface TaxRateConfig {
-  countryCode: string;
-  taxType: "vat" | "gst" | "sales_tax" | "income_tax" | "none" | null;
-  defaultRate: number;
-  categoryRates?: Record<string, number>; // category slug -> tax rate
-}
-
 // Zod schemas for validation
 export const baseCategorySchema = z.object({
   slug: z.string(),
@@ -50,10 +42,3 @@ export const parentCategorySchema = baseCategorySchema.extend({
 });
 
 export const categoryHierarchySchema = z.array(parentCategorySchema);
-
-export const taxRateConfigSchema = z.object({
-  countryCode: z.string(),
-  taxType: z.enum(["vat", "gst", "sales_tax", "income_tax", "none"]),
-  defaultRate: z.number(),
-  categoryRates: z.record(z.string(), z.number()).optional(),
-});

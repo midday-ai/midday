@@ -10,11 +10,12 @@ export const STICKY_COLUMNS: Record<TableId, StickyColumnConfig[]> = {
     { id: "date", width: 110 },
     { id: "description", width: 320 },
   ],
-  invoices: [
+  deals: [
     { id: "select", width: 50 },
-    { id: "invoiceNumber", width: 180 },
+    { id: "dealNumber", width: 180 },
   ],
   merchants: [{ id: "name", width: 280 }],
+  collections: [{ id: "merchant", width: 240 }],
   vault: [
     { id: "select", width: 50 },
     { id: "title", width: 250 },
@@ -38,8 +39,8 @@ export const SORT_FIELD_MAPS: Record<TableId, Record<string, string>> = {
     assigned: "assigned",
     status: "attachment",
   },
-  invoices: {
-    invoiceNumber: "invoice_number",
+  deals: {
+    dealNumber: "deal_number",
     status: "status",
     dueDate: "due_date",
     merchant: "merchant",
@@ -58,6 +59,14 @@ export const SORT_FIELD_MAPS: Record<TableId, Record<string, string>> = {
     tags: "tags",
   },
   vault: {}, // Vault doesn't have sorting
+  collections: {
+    merchant: "merchant_name",
+    balance: "current_balance",
+    stage: "stage_position",
+    priority: "priority",
+    nextFollowUp: "next_follow_up",
+    daysInStage: "days_in_stage",
+  },
 };
 
 /**
@@ -65,8 +74,9 @@ export const SORT_FIELD_MAPS: Record<TableId, Record<string, string>> = {
  */
 export const NON_REORDERABLE_COLUMNS: Record<TableId, Set<string>> = {
   transactions: new Set(["select", "date", "description", "actions"]),
-  invoices: new Set(["select", "invoiceNumber", "actions"]),
+  deals: new Set(["select", "dealNumber", "actions"]),
   merchants: new Set(["name", "actions"]),
+  collections: new Set(["merchant", "actions"]),
   vault: new Set(["select", "title", "actions"]),
 };
 
@@ -75,8 +85,9 @@ export const NON_REORDERABLE_COLUMNS: Record<TableId, Set<string>> = {
  */
 export const ROW_HEIGHTS: Record<TableId, number> = {
   transactions: 45,
-  invoices: 57,
+  deals: 57,
   merchants: 45,
+  collections: 45,
   vault: 45,
 };
 
@@ -84,8 +95,9 @@ export const ROW_HEIGHTS: Record<TableId, number> = {
  * Summary grid heights for tables with summary sections
  */
 export const SUMMARY_GRID_HEIGHTS: Partial<Record<TableId, number>> = {
-  invoices: 180,
+  deals: 180,
   merchants: 180,
+  collections: 120,
 };
 
 /**
@@ -99,13 +111,13 @@ export const TABLE_CONFIGS: Record<TableId, TableConfig> = {
     nonReorderableColumns: NON_REORDERABLE_COLUMNS.transactions,
     rowHeight: ROW_HEIGHTS.transactions,
   },
-  invoices: {
-    tableId: "invoices",
-    stickyColumns: STICKY_COLUMNS.invoices,
-    sortFieldMap: SORT_FIELD_MAPS.invoices,
-    nonReorderableColumns: NON_REORDERABLE_COLUMNS.invoices,
-    rowHeight: ROW_HEIGHTS.invoices,
-    summaryGridHeight: SUMMARY_GRID_HEIGHTS.invoices,
+  deals: {
+    tableId: "deals",
+    stickyColumns: STICKY_COLUMNS.deals,
+    sortFieldMap: SORT_FIELD_MAPS.deals,
+    nonReorderableColumns: NON_REORDERABLE_COLUMNS.deals,
+    rowHeight: ROW_HEIGHTS.deals,
+    summaryGridHeight: SUMMARY_GRID_HEIGHTS.deals,
   },
   merchants: {
     tableId: "merchants",
@@ -114,6 +126,14 @@ export const TABLE_CONFIGS: Record<TableId, TableConfig> = {
     nonReorderableColumns: NON_REORDERABLE_COLUMNS.merchants,
     rowHeight: ROW_HEIGHTS.merchants,
     summaryGridHeight: SUMMARY_GRID_HEIGHTS.merchants,
+  },
+  collections: {
+    tableId: "collections",
+    stickyColumns: STICKY_COLUMNS.collections,
+    sortFieldMap: SORT_FIELD_MAPS.collections,
+    nonReorderableColumns: NON_REORDERABLE_COLUMNS.collections,
+    rowHeight: ROW_HEIGHTS.collections,
+    summaryGridHeight: SUMMARY_GRID_HEIGHTS.collections,
   },
   vault: {
     tableId: "vault",

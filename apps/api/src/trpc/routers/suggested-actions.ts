@@ -137,13 +137,6 @@ const SUGGESTED_ACTIONS_CONFIG = [
       showCanvas: true,
     },
   },
-  {
-    id: "get-tax-summary",
-    toolName: "getTaxSummary",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
 ] as const;
 
 export const suggestedActionsRouter = createTRPCRouter({

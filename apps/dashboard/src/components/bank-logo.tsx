@@ -8,6 +8,18 @@ type Props = {
   size?: number;
 };
 
+function BankFallback({ alt, size }: { alt: string; size: number }) {
+  const initial = alt?.charAt(0)?.toUpperCase() || "B";
+  return (
+    <div
+      className="flex items-center justify-center rounded-full bg-muted text-muted-foreground font-medium"
+      style={{ width: size, height: size, fontSize: size * 0.4 }}
+    >
+      {initial}
+    </div>
+  );
+}
+
 export function BankLogo({ src, alt, size = 34 }: Props) {
   const [hasError, setHasError] = useState(false);
   const showingFallback = !src || hasError;
@@ -24,19 +36,9 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
           className="object-contain bg-white"
           onError={() => setHasError(true)}
         />
-      ) : (
-        <AvatarImage
-          src="https://cdn-engine.midday.ai/default.jpg"
-          alt={alt}
-          className="object-contain"
-        />
-      )}
+      ) : null}
       <AvatarFallback>
-        <AvatarImage
-          src="https://cdn-engine.midday.ai/default.jpg"
-          alt={alt}
-          className="object-contain"
-        />
+        <BankFallback alt={alt} size={size} />
       </AvatarFallback>
     </Avatar>
   );

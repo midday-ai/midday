@@ -18,8 +18,6 @@ import { getProfitAnalysisTool } from "@api/ai/tools/get-profit-analysis";
 import { getRevenueSummaryTool } from "@api/ai/tools/get-revenue-summary";
 import { getRunwayTool } from "@api/ai/tools/get-runway";
 import { getSpendingTool } from "@api/ai/tools/get-spending";
-import { getTaxSummaryTool } from "@api/ai/tools/get-tax-summary";
-
 export const reportsAgent = createAgent({
   name: "reports",
   model: openai("gpt-4o-mini"),
@@ -62,7 +60,6 @@ When getMetricsBreakdown is called with showCanvas: true, respond with plain tex
 - Profit → getProfitAnalysis (showCanvas: true if "show" mentioned)
 - Expenses → getExpenses (showCanvas: true if "show" mentioned)
 - Runway → getRunway (showCanvas: true if "show" mentioned)
-- Tax summary → getTaxSummary (showCanvas: true if "show" mentioned)
 </Tool selection>
 
 <Multi-period requests>
@@ -87,7 +84,6 @@ Split by calendar periods (years/quarters/months) and call tool multiple times w
     getSpending: getSpendingTool,
     getBalanceSheet: getBalanceSheetTool,
     getExpenses: getExpensesTool,
-    getTaxSummary: getTaxSummaryTool,
     getBurnRate: getBurnRateTool,
     getInvoicePaymentAnalysis: getInvoicePaymentAnalysisTool,
     getForecast: getForecastTool,

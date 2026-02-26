@@ -28,7 +28,6 @@ import {
   type UploadAttachmentParams,
 } from "../types";
 import {
-  buildPrivateNote,
   ensureFileExtension,
   generateAttachmentIdempotencyKey,
   generateTransactionIdempotencyKey,
@@ -850,31 +849,21 @@ export class XeroProvider extends BaseAccountingProvider {
   async addTransactionHistoryNote(params: {
     tenantId: string;
     transactionId: string;
-    taxAmount?: number;
-    taxRate?: number;
-    taxType?: string;
     note?: string;
   }): Promise<void> {
-    const { tenantId, transactionId, taxAmount, taxRate, taxType, note } =
-      params;
+    const { tenantId, transactionId, note } = params;
 
     await this.ensureClientReady();
-
-    // Build note content
-    const noteContent = buildPrivateNote(
-      { taxAmount, taxRate, taxType, note },
-      { maxLength: 4000 },
-    );
 
     // Build parts for the history note
     const parts: string[] = ["Synced from Midday"];
 
-    if (noteContent) {
-      parts.push(noteContent);
+    if (note) {
+      parts.push(`Note: ${note}`);
     }
 
     // Only add history if there's meaningful content beyond "Synced from Midday"
-    if (parts.length === 1 && !noteContent) {
+    if (parts.length === 1 && !note) {
       return;
     }
 

@@ -3,7 +3,6 @@ export { BurnRateChart } from "./burn-rate-chart";
 export { RevenueChart } from "./revenue-chart";
 export { RevenueTrendChart } from "./revenue-trend-chart";
 export { RevenueForecastChart } from "./revenue-forecast-chart";
-export { TaxTrendChart } from "./tax-trend-chart";
 export { ProfitChart } from "./profit-chart";
 export { ExpensesChart } from "./expenses-chart";
 export { CategoryExpenseDonutChart } from "./category-expense-donut-chart";

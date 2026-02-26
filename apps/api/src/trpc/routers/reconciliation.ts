@@ -17,6 +17,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@api/trpc/init";
+import { checkEventBasedEscalation } from "@api/utils/collection-escalation";
 import {
   getPaymentFeed,
   getReconciliationStats,
@@ -30,8 +31,12 @@ import {
   bulkConfirmMatches,
   startReconciliationSession,
   completeReconciliationSession,
+  updateMcaDeal,
 } from "@midday/db/queries";
+import { mcaDeals } from "@midday/db/schema";
+import { eq, and, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 const RECONCILIATION_ROLES = ["owner", "admin", "member", "bookkeeper"];
 
@@ -183,5 +188,69 @@ export const reconciliationRouter = createTRPCRouter({
         triggered: true,
         transactionCount: input.transactionIds.length,
       };
+    }),
+
+  markNsf: protectedProcedure
+    .input(
+      z.object({
+        transactionId: z.string().uuid(),
+        nsfFee: z.number().optional(),
+        note: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      ensureReconciliationAccess(ctx.role);
+
+      // Flag the transaction as NSF
+      const result = await flagDiscrepancy(ctx.db, {
+        transactionId: input.transactionId,
+        teamId: ctx.teamId!,
+        userId: ctx.session.user.id,
+        discrepancyType: "nsf",
+        note: input.note,
+      });
+
+      // If the transaction is matched to a deal, increment the deal's NSF count
+      if (result?.matchedDealId) {
+        await ctx.db
+          .update(mcaDeals)
+          .set({
+            nsfCount: sql`COALESCE(${mcaDeals.nsfCount}, 0) + 1`,
+          })
+          .where(
+            and(
+              eq(mcaDeals.id, result.matchedDealId),
+              eq(mcaDeals.teamId, ctx.teamId!),
+            ),
+          );
+
+        // Check event-based collection escalation rules
+        await checkEventBasedEscalation(ctx.db, {
+          dealId: result.matchedDealId,
+          teamId: ctx.teamId!,
+          eventType: "nsf_returned",
+        });
+      }
+
+      return result;
+    }),
+
+  clearNsf: protectedProcedure
+    .input(
+      z.object({
+        transactionId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      ensureReconciliationAccess(ctx.role);
+
+      // Resolve the NSF flag by setting to unmatched
+      return resolveDiscrepancy(ctx.db, {
+        transactionId: input.transactionId,
+        teamId: ctx.teamId!,
+        userId: ctx.session.user.id,
+        resolution: "excluded",
+        note: "NSF flag cleared",
+      });
     }),
 });

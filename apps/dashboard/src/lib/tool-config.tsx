@@ -102,16 +102,6 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: CreditCard,
     description: "Analyzing spending patterns",
   },
-  taxSummary: {
-    name: "Tax Summary",
-    icon: FileText,
-    description: "Generating tax summary",
-  },
-  getTaxSummary: {
-    name: "Tax Summary",
-    icon: FileText,
-    description: "Generating tax summary",
-  },
   getBalanceSheet: {
     name: "Balance Sheet",
     icon: FileSpreadsheet,

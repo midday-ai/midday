@@ -45,6 +45,8 @@ export async function acceptTeamInvite(
       id: true,
       role: true,
       teamId: true,
+      entityId: true,
+      entityType: true,
     },
   });
 
@@ -56,6 +58,8 @@ export async function acceptTeamInvite(
     userId: params.userId,
     role: inviteData.role,
     teamId: inviteData.teamId!,
+    entityId: inviteData.entityId,
+    entityType: inviteData.entityType,
   });
 
   // Delete the invite
@@ -161,6 +165,8 @@ type CreateTeamInvitesParams = {
     email: string;
     role: "owner" | "admin" | "member" | "broker" | "syndicate" | "merchant";
     invitedBy: string;
+    entityId?: string | null;
+    entityType?: string | null;
   }[];
 };
 
@@ -169,6 +175,8 @@ type InviteValidationResult = {
     email: string;
     role: "owner" | "admin" | "member" | "broker" | "syndicate" | "merchant";
     invitedBy: string;
+    entityId?: string | null;
+    entityType?: string | null;
   }[];
   skippedInvites: {
     email: string;
@@ -186,6 +194,8 @@ async function validateInvites(
     email: string;
     role: "owner" | "admin" | "member" | "broker" | "syndicate" | "merchant";
     invitedBy: string;
+    entityId?: string | null;
+    entityType?: string | null;
   }[],
 ): Promise<InviteValidationResult> {
   // Remove duplicates from input
@@ -297,6 +307,8 @@ export async function createTeamInvites(
           role: invite.role,
           invitedBy: invite.invitedBy,
           teamId: teamId,
+          entityId: invite.entityId,
+          entityType: invite.entityType,
         })
         .onConflictDoNothing({
           target: [userInvites.teamId, userInvites.email],

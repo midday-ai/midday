@@ -16,7 +16,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { getTaxTypeLabel } from "@midday/utils/tax";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -209,23 +208,6 @@ export const columns: ColumnDef<any>[] = [
         </div>
       );
     },
-  },
-  {
-    header: "Tax Type",
-    accessorKey: "taxType",
-    cell: ({ row }) =>
-      row.getValue("taxType") ? getTaxTypeLabel(row.getValue("taxType")) : "-",
-  },
-  {
-    header: "Tax Rate",
-    accessorKey: "taxRate",
-    cell: ({ row }) =>
-      row.getValue("taxRate") ? `${row.getValue("taxRate")}%` : "-",
-  },
-  {
-    header: () => <span className="whitespace-nowrap">Report Code</span>,
-    accessorKey: "taxReportingCode",
-    cell: ({ row }) => row.getValue("taxReportingCode") || "-",
   },
   {
     id: "actions",

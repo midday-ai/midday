@@ -96,9 +96,6 @@ export const searchRouter = createTRPCRouter({
           website: item.website ?? null,
           baseAmount: item.baseAmount ?? null,
           baseCurrency: item.baseCurrency ?? null,
-          taxAmount: item.taxAmount ?? null,
-          taxRate: item.taxRate ?? null,
-          taxType: item.taxType ?? null,
           createdAt: item.createdAt,
         })) ?? [];
 

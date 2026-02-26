@@ -1,5 +1,4 @@
 import { CATEGORIES } from "./categories";
-import { getTaxRateForCategory } from "./tax-rates";
 import type { ChildCategory, ParentCategory } from "./types";
 
 // Get all categories flattened into a single array
@@ -43,23 +42,6 @@ export function getParentCategory(childSlug: string): ParentCategory | null {
     }
   }
   return null;
-}
-
-// Get category with tax rate for a specific country
-export function getCategoryWithTaxRate(
-  categorySlug: string,
-  countryCode: string,
-): ((ChildCategory | ParentCategory) & { taxRate: number }) | null {
-  const category = getCategoryBySlug(categorySlug);
-
-  if (!category) return null;
-
-  const taxRate = getTaxRateForCategory(countryCode, categorySlug);
-
-  return {
-    ...category,
-    taxRate,
-  };
 }
 
 // Export the main categories for easy access
