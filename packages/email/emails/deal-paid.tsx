@@ -16,22 +16,15 @@ import {
 } from "../components/theme";
 
 interface Props {
-  count: number;
-  teamName?: string;
+  dealNumber: string;
   link: string;
 }
 
-export const UpcomingInvoicesEmail = ({
-  count = 3,
-  teamName = "Your Team",
-  link = "https://app.abacuslabs.co/invoices",
+export const DealPaidEmail = ({
+  dealNumber = "DEAL-0001",
+  link = "https://app.abacuslabs.co/deals?dealId=40b25275-258c-48e0-9678-57324cd770a6&type=details",
 }: Props) => {
-  // Link to invoices filtered to show only recurring invoices
-  const viewLink = `${link}?recurring=true`;
-  const text =
-    count === 1
-      ? "You have 1 invoice scheduled for tomorrow"
-      : `You have ${count} invoices scheduled for tomorrow`;
+  const text = `Deal ${dealNumber} has been paid`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -54,17 +47,7 @@ export const UpcomingInvoicesEmail = ({
             className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
-            {count === 1 ? (
-              <>
-                You have 1 invoice <br />
-                scheduled for tomorrow
-              </>
-            ) : (
-              <>
-                You have {count} invoices <br />
-                scheduled for tomorrow
-              </>
-            )}
+            Deal {dealNumber} <br /> has been Paid
           </Heading>
 
           <br />
@@ -73,19 +56,16 @@ export const UpcomingInvoicesEmail = ({
             className={themeClasses.text}
             style={{ color: lightStyles.text.color }}
           >
-            {count === 1
-              ? "A recurring invoice is scheduled to be generated and sent tomorrow."
-              : `${count} recurring invoices are scheduled to be generated and sent tomorrow.`}
+            Great news! We found a matching transaction for this deal in your
+            account and have marked it accordingly.
             <br />
             <br />
-            You can review the recurring series settings or pause any series if
-            needed before the invoices are sent.
-            <br />
-            <br />
+            The deal has been linked to the transaction in your records.
+            Please take a moment to check that everything looks right.
           </Text>
 
           <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href={viewLink}>View invoices</Button>
+            <Button href={link}>View deal details</Button>
           </Section>
 
           <br />
@@ -97,4 +77,4 @@ export const UpcomingInvoicesEmail = ({
   );
 };
 
-export default UpcomingInvoicesEmail;
+export default DealPaidEmail;

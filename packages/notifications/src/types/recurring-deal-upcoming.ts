@@ -22,9 +22,9 @@ export const recurringDealUpcoming: NotificationHandler = {
     const { t } = getI18n({ locale: user?.locale ?? "en" });
 
     return {
-      template: "upcoming-invoices",
+      template: "upcoming-deals",
       emailType: "owners",
-      subject: t("invoice.upcoming.subject", {
+      subject: t("deal.upcoming.subject", {
         count: data.count,
       }),
       data: {

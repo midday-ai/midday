@@ -6,7 +6,6 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import {
   Button,
@@ -16,17 +15,19 @@ import {
 } from "../components/theme";
 
 interface Props {
-  merchantName: string;
-  invoiceNumber: string;
+  companyName: string;
+  teamName: string;
+  dealNumber: string;
   link: string;
 }
 
-export const InvoiceOverdueEmail = ({
-  merchantName = "Merchant",
-  invoiceNumber = "INV-0001",
-  link = "https://app.abacuslabs.co/invoices?invoiceId=40b25275-258c-48e0-9678-57324cd770a6&type=details",
+export const DealReminderEmail = ({
+  companyName = "Customer",
+  teamName = "Abacus",
+  dealNumber = "DEAL-0001",
+  link = "https://app.abacuslabs.co/i/1234567890",
 }: Props) => {
-  const text = `Invoice ${invoiceNumber} is now overdue`;
+  const text = `Reminder: Payment for ${dealNumber}`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -49,42 +50,37 @@ export const InvoiceOverdueEmail = ({
             className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
-            Invoice {invoiceNumber} <br />
-            is now overdue
+            Payment Reminder: Deal {dealNumber} <br />
+            from {teamName}
           </Heading>
 
           <br />
 
+          <span
+            className={`font-medium ${themeClasses.text}`}
+            style={{ color: lightStyles.text.color }}
+          >
+            Hi {companyName},
+          </span>
           <Text
             className={themeClasses.text}
             style={{ color: lightStyles.text.color }}
           >
-            Invoice <span className="font-medium">{invoiceNumber}</span> to{" "}
-            <span className="font-medium">{merchantName}</span> is now overdue.
-            We've checked your account but haven't found a matching transaction.
-            <br />
-            <br />
-            Please review the invoice details page to verify if payment has been
-            made through another method.
-            <br />
-            <br />
-            If needed, you can send a payment reminder to your merchant or
-            update the invoice status manually if it has already been paid.
-            <br />
-            <br />
+            This is a friendly reminder about your pending deal. We kindly
+            ask you to review and process the payment at your earliest
+            convenience. If you have any questions or need clarification, please
+            don't hesitate to reply to this email.
           </Text>
 
           <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href={link}>View invoice details</Button>
+            <Button href={link}>View deal</Button>
           </Section>
 
           <br />
-
-          <Footer />
         </Container>
       </Body>
     </EmailThemeProvider>
   );
 };
 
-export default InvoiceOverdueEmail;
+export default DealReminderEmail;

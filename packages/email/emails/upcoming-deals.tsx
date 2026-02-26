@@ -6,6 +6,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import {
   Button,
@@ -15,19 +16,22 @@ import {
 } from "../components/theme";
 
 interface Props {
-  companyName: string;
-  teamName: string;
-  invoiceNumber: string;
+  count: number;
+  teamName?: string;
   link: string;
 }
 
-export const InvoiceReminderEmail = ({
-  companyName = "Customer",
-  teamName = "Abacus",
-  invoiceNumber = "INV-0001",
-  link = "https://app.abacuslabs.co/i/1234567890",
+export const UpcomingDealsEmail = ({
+  count = 3,
+  teamName = "Your Team",
+  link = "https://app.abacuslabs.co/deals",
 }: Props) => {
-  const text = `Reminder: Payment for ${invoiceNumber}`;
+  // Link to deals filtered to show only recurring deals
+  const viewLink = `${link}?recurring=true`;
+  const text =
+    count === 1
+      ? "You have 1 deal scheduled for tomorrow"
+      : `You have ${count} deals scheduled for tomorrow`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -50,37 +54,47 @@ export const InvoiceReminderEmail = ({
             className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
-            Payment Reminder: Invoice {invoiceNumber} <br />
-            from {teamName}
+            {count === 1 ? (
+              <>
+                You have 1 deal <br />
+                scheduled for tomorrow
+              </>
+            ) : (
+              <>
+                You have {count} deals <br />
+                scheduled for tomorrow
+              </>
+            )}
           </Heading>
 
           <br />
 
-          <span
-            className={`font-medium ${themeClasses.text}`}
-            style={{ color: lightStyles.text.color }}
-          >
-            Hi {companyName},
-          </span>
           <Text
             className={themeClasses.text}
             style={{ color: lightStyles.text.color }}
           >
-            This is a friendly reminder about your pending invoice. We kindly
-            ask you to review and process the payment at your earliest
-            convenience. If you have any questions or need clarification, please
-            don't hesitate to reply to this email.
+            {count === 1
+              ? "A recurring deal is scheduled to be generated and sent tomorrow."
+              : `${count} recurring deals are scheduled to be generated and sent tomorrow.`}
+            <br />
+            <br />
+            You can review the recurring series settings or pause any series if
+            needed before the deals are sent.
+            <br />
+            <br />
           </Text>
 
           <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href={link}>View invoice</Button>
+            <Button href={viewLink}>View deals</Button>
           </Section>
 
           <br />
+
+          <Footer />
         </Container>
       </Body>
     </EmailThemeProvider>
   );
 };
 
-export default InvoiceReminderEmail;
+export default UpcomingDealsEmail;

@@ -3,9 +3,9 @@ import {
   enrichMerchantSchema,
   getMerchantByIdSchema,
   getMerchantByPortalIdSchema,
-  getMerchantInvoiceSummarySchema,
+  getMerchantDealSummarySchema,
   getMerchantsSchema,
-  getPortalInvoicesSchema,
+  getPortalDealsSchema,
   toggleMerchantPortalSchema,
   upsertMerchantSchema,
 } from "@api/schemas/merchants";
@@ -20,8 +20,8 @@ import {
   deleteMerchant,
   getMerchantById,
   getMerchantByPortalId,
-  getMerchantInvoiceSummary,
-  getMerchantPortalInvoices,
+  getMerchantDealSummary,
+  getMerchantPortalDeals,
   getMerchants,
   getMcaDealStats,
   getMcaDealsByMerchant,
@@ -105,10 +105,10 @@ export const merchantsRouter = createTRPCRouter({
       return merchant;
     }),
 
-  getInvoiceSummary: protectedProcedure
-    .input(getMerchantInvoiceSummarySchema)
+  getDealSummary: protectedProcedure
+    .input(getMerchantDealSummarySchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      return getMerchantInvoiceSummary(db, {
+      return getMerchantDealSummary(db, {
         merchantId: input.id,
         teamId: teamId!,
       });
@@ -223,8 +223,8 @@ export const merchantsRouter = createTRPCRouter({
         return null;
       }
 
-      // Get invoice summary
-      const summary = await getMerchantInvoiceSummary(db, {
+      // Get deal summary
+      const summary = await getMerchantDealSummary(db, {
         merchantId: merchant.id,
         teamId: merchant.teamId,
       });
@@ -235,8 +235,8 @@ export const merchantsRouter = createTRPCRouter({
       };
     }),
 
-  getPortalInvoices: publicProcedure
-    .input(getPortalInvoicesSchema)
+  getPortalDeals: publicProcedure
+    .input(getPortalDealsSchema)
     .query(async ({ ctx: { db }, input }) => {
       const merchant = await getMerchantByPortalId(db, {
         portalId: input.portalId,
@@ -246,7 +246,7 @@ export const merchantsRouter = createTRPCRouter({
         return { data: [], meta: { cursor: null } };
       }
 
-      const result = await getMerchantPortalInvoices(db, {
+      const result = await getMerchantPortalDeals(db, {
         merchantId: merchant.id,
         teamId: merchant.teamId,
         cursor: input.cursor,

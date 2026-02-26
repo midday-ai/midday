@@ -28,7 +28,7 @@ import {
 import {
   getUnreadNotifications,
   getNotificationCount,
-  markNotificationRead,
+  markCollectionNotificationRead,
   markAllNotificationsRead,
 } from "@db/queries/collection-notifications";
 import { seedDefaultStages } from "@db/queries/collection-config";
@@ -189,7 +189,7 @@ export const collectionsRouter = createTRPCRouter({
   markNotificationRead: protectedProcedure
     .input(markNotificationReadSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
-      return markNotificationRead(db, {
+      return markCollectionNotificationRead(db, {
         id: input.id,
         userId: session.user.id,
       });

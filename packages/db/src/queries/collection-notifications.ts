@@ -88,7 +88,7 @@ type MarkNotificationReadParams = {
   userId: string;
 };
 
-export const markNotificationRead = async (
+export const markCollectionNotificationRead = async (
   db: Database,
   params: MarkNotificationReadParams,
 ) => {

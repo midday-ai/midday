@@ -25,9 +25,9 @@ export const dealPaid: NotificationHandler = {
     const { t } = getI18n({ locale: user?.locale ?? "en" });
 
     return {
-      template: "invoice-paid",
+      template: "deal-paid",
       emailType: "owners",
-      subject: t("invoice.paid.subject", {
+      subject: t("deal.paid.subject", {
         dealNumber: data.dealNumber,
       }),
       user,

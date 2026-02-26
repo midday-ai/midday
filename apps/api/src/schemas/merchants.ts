@@ -137,33 +137,33 @@ export const merchantResponseSchema = z.object({
     description: "Primary contact person's name at the merchant organization",
     example: "John Smith",
   }),
-  invoiceCount: z.number().openapi({
-    description: "Total number of invoices created for this merchant",
+  dealCount: z.number().openapi({
+    description: "Total number of deals created for this merchant",
     example: 12,
   }),
   projectCount: z.number().openapi({
     description: "Total number of projects associated with this merchant",
     example: 3,
   }),
-  // Financial metrics (calculated from invoices, only returned in list queries)
+  // Financial metrics (calculated from deals, only returned in list queries)
   totalRevenue: z.number().optional().openapi({
     description:
-      "Total revenue from paid invoices for this merchant (in invoice currency). Only returned in list queries.",
+      "Total revenue from paid deals for this merchant (in deal currency). Only returned in list queries.",
     example: 15000.5,
   }),
   outstandingAmount: z.number().optional().openapi({
     description:
-      "Total outstanding amount from unpaid/overdue invoices (in invoice currency). Only returned in list queries.",
+      "Total outstanding amount from unpaid/overdue deals (in deal currency). Only returned in list queries.",
     example: 2500.0,
   }),
-  lastInvoiceDate: z.string().nullable().optional().openapi({
+  lastDealDate: z.string().nullable().optional().openapi({
     description:
-      "Date of the most recent invoice in ISO 8601 format. Only returned in list queries.",
+      "Date of the most recent deal in ISO 8601 format. Only returned in list queries.",
     example: "2024-04-15",
   }),
-  invoiceCurrency: z.string().nullable().optional().openapi({
+  dealCurrency: z.string().nullable().optional().openapi({
     description:
-      "Primary currency used in invoices for this merchant. Only returned in list queries.",
+      "Primary currency used in deals for this merchant. Only returned in list queries.",
     example: "USD",
   }),
   tags: z
@@ -316,7 +316,7 @@ export const getMerchantByIdSchema = z.object({
   }),
 });
 
-export const getMerchantInvoiceSummarySchema = z.object({
+export const getMerchantDealSummarySchema = z.object({
   id: z.string().openapi({
     description: "Unique identifier of the merchant",
     example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
@@ -327,21 +327,21 @@ export const getMerchantInvoiceSummarySchema = z.object({
   }),
 });
 
-export const merchantInvoiceSummaryResponseSchema = z.object({
+export const merchantDealSummaryResponseSchema = z.object({
   totalAmount: z.number().openapi({
-    description: "Total amount of all invoices",
+    description: "Total amount of all deals",
     example: 10021.5,
   }),
   paidAmount: z.number().openapi({
-    description: "Total amount of paid invoices",
+    description: "Total amount of paid deals",
     example: 5320.5,
   }),
   outstandingAmount: z.number().openapi({
-    description: "Total amount of unpaid and overdue invoices",
+    description: "Total amount of unpaid and overdue deals",
     example: 4701.0,
   }),
-  invoiceCount: z.number().openapi({
-    description: "Total number of invoices",
+  dealCount: z.number().openapi({
+    description: "Total number of deals",
     example: 5,
   }),
   currency: z.string().openapi({
@@ -496,7 +496,7 @@ export const getMerchantByPortalIdSchema = z.object({
   }),
 });
 
-export const getPortalInvoicesSchema = z.object({
+export const getPortalDealsSchema = z.object({
   portalId: z.string().openapi({
     description: "Short ID for the merchant portal URL",
     example: "X7kM9nPq",
@@ -506,7 +506,7 @@ export const getPortalInvoicesSchema = z.object({
     example: "10",
   }),
   pageSize: z.number().min(1).max(50).optional().openapi({
-    description: "Number of invoices to return per page",
+    description: "Number of deals to return per page",
     example: 10,
   }),
 });

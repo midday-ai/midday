@@ -25,10 +25,10 @@ export const dealSent: NotificationHandler = {
     const { t } = getI18n({ locale: user?.locale ?? "en" });
 
     return {
-      template: "invoice",
+      template: "deal",
       emailType: "merchant",
       to: [data.merchantEmail],
-      subject: t("invoice.sent.subject", {
+      subject: t("deal.sent.subject", {
         teamName: team.name,
       }),
       from: `${team.name} <middaybot@midday.ai>`,

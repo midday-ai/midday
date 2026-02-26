@@ -23,9 +23,9 @@ export const dealOverdue: NotificationHandler = {
     const { t } = getI18n({ locale: user?.locale ?? "en" });
 
     return {
-      template: "invoice-overdue",
+      template: "deal-overdue",
       emailType: "owners",
-      subject: t("invoice.overdue.subject", {
+      subject: t("deal.overdue.subject", {
         dealNumber: data.dealNumber,
       }),
       user,

@@ -118,9 +118,9 @@ export const attachmentSearchResultSchema = z
       createdAt: z.string(),
     }),
     z.object({
-      type: z.literal("invoice"),
+      type: z.literal("deal"),
       id: z.string(),
-      invoiceNumber: z.string().nullable(),
+      dealNumber: z.string().nullable(),
       merchantName: z.string().nullable(),
       amount: z.number().nullable(),
       currency: z.string().nullable(),
@@ -132,5 +132,5 @@ export const attachmentSearchResultSchema = z
     }),
   ])
   .openapi({
-    description: "Unified attachment search result (inbox item or invoice).",
+    description: "Unified attachment search result (inbox item or deal).",
   });
