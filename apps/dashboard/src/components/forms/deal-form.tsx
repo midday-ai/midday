@@ -32,7 +32,7 @@ import { z } from "zod/v3";
 
 const formSchema = z.object({
   merchantId: z.string().uuid("Select a merchant"),
-  dealCode: z.string().min(1, "Deal code is required"),
+  dealCode: z.string().optional(),
   fundingAmount: z.coerce.number().positive("Must be positive"),
   factorRate: z.coerce.number().positive("Must be positive"),
   paybackAmount: z.coerce.number().positive("Must be positive"),
@@ -389,7 +389,7 @@ export function DealForm() {
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="MCA-001"
+                      placeholder="Auto-generated (D-0001)"
                       autoComplete="off"
                     />
                   </FormControl>

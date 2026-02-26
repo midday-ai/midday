@@ -136,3 +136,31 @@ export const getPortalTransactionsSchema = z.object({
   cursor: z.string().optional(),
   pageSize: z.coerce.number().min(1).max(100).optional(),
 });
+
+// ============================================================================
+// Team-Wide Syndicator Transaction Schemas (for Transactions page tab)
+// ============================================================================
+
+export const getTeamSyndicatorTransactionsSchema = z.object({
+  cursor: z.string().optional(),
+  pageSize: z.coerce.number().min(1).max(100).optional(),
+  transactionType: z
+    .enum([
+      "contribution",
+      "withdrawal",
+      "profit_distribution",
+      "refund",
+      "fee",
+      "chargeback",
+      "transfer",
+      "deal_allocation",
+    ])
+    .nullable()
+    .optional(),
+  syndicatorId: z.string().uuid().nullable().optional(),
+  dealId: z.string().uuid().nullable().optional(),
+  status: z.string().nullable().optional(),
+  dateFrom: z.string().nullable().optional(),
+  dateTo: z.string().nullable().optional(),
+  q: z.string().nullable().optional(),
+});

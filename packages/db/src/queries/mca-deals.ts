@@ -228,13 +228,50 @@ export const getMcaDealsByMerchant = async (
 };
 
 // ============================================================================
+// MCA Deal Code Generation
+// ============================================================================
+
+const DEAL_CODE_PREFIX = "D-";
+const DEAL_CODE_PAD_LENGTH = 4;
+
+export async function getNextMcaDealCode(
+  db: Database,
+  teamId: string,
+): Promise<string> {
+  const maxResult = await db
+    .select({ dealCode: mcaDeals.dealCode })
+    .from(mcaDeals)
+    .where(
+      and(
+        eq(mcaDeals.teamId, teamId),
+        sql`${mcaDeals.dealCode} ~ '[0-9]+$'`,
+      ),
+    )
+    .orderBy(
+      sql`CAST(SUBSTRING(${mcaDeals.dealCode} FROM '[0-9]+$') AS INTEGER) DESC`,
+    )
+    .limit(1);
+
+  let nextNumber: number;
+
+  if (maxResult.length > 0 && maxResult[0]?.dealCode) {
+    const match = maxResult[0].dealCode.match(/(\d+)$/);
+    nextNumber = match?.[1] ? Number.parseInt(match[1], 10) + 1 : 1;
+  } else {
+    nextNumber = 1;
+  }
+
+  return `${DEAL_CODE_PREFIX}${nextNumber.toString().padStart(DEAL_CODE_PAD_LENGTH, "0")}`;
+}
+
+// ============================================================================
 // MCA Deal Mutations
 // ============================================================================
 
 export type CreateMcaDealParams = {
   teamId: string;
   merchantId: string;
-  dealCode: string;
+  dealCode?: string;
   fundingAmount: number;
   factorRate: number;
   paybackAmount: number;
@@ -263,12 +300,15 @@ export const createMcaDeal = async (
   db: Database,
   params: CreateMcaDealParams,
 ) => {
+  const dealCode =
+    params.dealCode || (await getNextMcaDealCode(db, params.teamId));
+
   const [result] = await db
     .insert(mcaDeals)
     .values({
       teamId: params.teamId,
       merchantId: params.merchantId,
-      dealCode: params.dealCode,
+      dealCode,
       fundingAmount: params.fundingAmount,
       factorRate: params.factorRate,
       paybackAmount: params.paybackAmount,

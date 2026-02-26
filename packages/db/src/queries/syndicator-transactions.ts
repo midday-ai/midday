@@ -4,7 +4,7 @@ import {
   syndicatorTransactions,
   syndicators,
 } from "@db/schema";
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, lte, or, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 
 // ============================================================================
@@ -75,6 +75,19 @@ type GetPortalTransactionsParams = {
   teamId: string;
   cursor?: string | null;
   pageSize?: number;
+};
+
+type GetTeamSyndicatorTransactionsParams = {
+  teamId: string;
+  cursor?: string | null;
+  pageSize?: number;
+  transactionType?: SyndicatorTransactionType | null;
+  syndicatorId?: string | null;
+  dealId?: string | null;
+  status?: string | null;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+  q?: string | null;
 };
 
 // Direction: which transaction types increase vs decrease the syndicator's balance
@@ -420,4 +433,120 @@ export async function getPortalTransactions(
     },
     data,
   };
+}
+
+/**
+ * Team-wide paginated syndicator transactions with search and filters.
+ * Used by the "Syndication" tab on the main Transactions page.
+ */
+export async function getTeamSyndicatorTransactions(
+  db: Database,
+  params: GetTeamSyndicatorTransactionsParams,
+) {
+  const {
+    teamId,
+    cursor,
+    pageSize = 25,
+    transactionType,
+    syndicatorId,
+    dealId,
+    status,
+    dateFrom,
+    dateTo,
+    q,
+  } = params;
+
+  const conditions: SQL[] = [
+    eq(syndicatorTransactions.teamId, teamId),
+  ];
+
+  if (transactionType) {
+    conditions.push(
+      eq(syndicatorTransactions.transactionType, transactionType),
+    );
+  }
+  if (syndicatorId) {
+    conditions.push(eq(syndicatorTransactions.syndicatorId, syndicatorId));
+  }
+  if (dealId) {
+    conditions.push(eq(syndicatorTransactions.dealId, dealId));
+  }
+  if (status) {
+    conditions.push(eq(syndicatorTransactions.status, status));
+  }
+  if (dateFrom) {
+    conditions.push(gte(syndicatorTransactions.date, dateFrom));
+  }
+  if (dateTo) {
+    conditions.push(lte(syndicatorTransactions.date, dateTo));
+  }
+  if (q) {
+    const pattern = `%${q}%`;
+    conditions.push(
+      or(
+        ilike(syndicatorTransactions.description, pattern),
+        ilike(syndicators.name, pattern),
+        ilike(syndicators.companyName, pattern),
+        ilike(mcaDeals.dealCode, pattern),
+      )!,
+    );
+  }
+
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  const data = await db
+    .select({
+      id: syndicatorTransactions.id,
+      createdAt: syndicatorTransactions.createdAt,
+      date: syndicatorTransactions.date,
+      syndicatorId: syndicatorTransactions.syndicatorId,
+      syndicatorName: syndicators.name,
+      syndicatorCompanyName: syndicators.companyName,
+      transactionType: syndicatorTransactions.transactionType,
+      method: syndicatorTransactions.method,
+      amount: syndicatorTransactions.amount,
+      currency: syndicatorTransactions.currency,
+      description: syndicatorTransactions.description,
+      dealId: syndicatorTransactions.dealId,
+      status: syndicatorTransactions.status,
+      balanceAfter: syndicatorTransactions.balanceAfter,
+      reference: syndicatorTransactions.reference,
+      dealCode: mcaDeals.dealCode,
+    })
+    .from(syndicatorTransactions)
+    .innerJoin(syndicators, eq(syndicators.id, syndicatorTransactions.syndicatorId))
+    .leftJoin(mcaDeals, eq(mcaDeals.id, syndicatorTransactions.dealId))
+    .where(and(...conditions))
+    .orderBy(desc(syndicatorTransactions.date), desc(syndicatorTransactions.createdAt))
+    .limit(pageSize)
+    .offset(offset);
+
+  const nextCursor =
+    data.length === pageSize ? (offset + pageSize).toString() : undefined;
+
+  return {
+    meta: {
+      cursor: nextCursor ?? null,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data.length === pageSize,
+    },
+    data,
+  };
+}
+
+/**
+ * Count of all syndicator transactions for a team (used for tab badge).
+ */
+export async function getTeamSyndicatorTransactionCount(
+  db: Database,
+  params: { teamId: string },
+) {
+  const [result] = await db
+    .select({
+      count: sql<number>`cast(count(*) as int)`,
+    })
+    .from(syndicatorTransactions)
+    .where(eq(syndicatorTransactions.teamId, params.teamId));
+
+  return { count: result?.count ?? 0 };
 }

@@ -38,16 +38,16 @@ UPDATE public.transactions
 SET transaction_type = 'debit',
     payment_status = 'completed',
     deal_code = CASE
-      WHEN internal_id LIKE 'demo_mca_sunrise_%'    THEN 'MCA-2025-001'
-      WHEN internal_id LIKE 'demo_mca_bella_%'       THEN 'MCA-2025-003'
-      WHEN internal_id LIKE 'demo_mca_tonys_%'       THEN 'MCA-2025-004'
-      WHEN internal_id LIKE 'demo_mca_quickprint_%'  THEN 'MCA-2025-005'
-      WHEN internal_id LIKE 'demo_mca_westside_%'    THEN 'MCA-2025-006'
-      WHEN internal_id LIKE 'demo_mca_greenthumb_%'  THEN 'MCA-2026-001'
-      WHEN internal_id LIKE 'demo_mca_fitness_%'     THEN 'MCA-2026-002'
-      WHEN internal_id LIKE 'demo_mca_martinez_%'    THEN 'MCA-2024-001'
-      WHEN internal_id LIKE 'demo_mca_luckydragon_%' THEN 'MCA-2024-002'
-      WHEN internal_id LIKE 'demo_mca_smith_%'       THEN 'MCA-2024-003'
+      WHEN internal_id LIKE 'demo_mca_sunrise_%'    THEN 'D-0001'
+      WHEN internal_id LIKE 'demo_mca_bella_%'       THEN 'D-0002'
+      WHEN internal_id LIKE 'demo_mca_tonys_%'       THEN 'D-0003'
+      WHEN internal_id LIKE 'demo_mca_quickprint_%'  THEN 'D-0004'
+      WHEN internal_id LIKE 'demo_mca_westside_%'    THEN 'D-0005'
+      WHEN internal_id LIKE 'demo_mca_greenthumb_%'  THEN 'D-0006'
+      WHEN internal_id LIKE 'demo_mca_fitness_%'     THEN 'D-0007'
+      WHEN internal_id LIKE 'demo_mca_martinez_%'    THEN 'D-0008'
+      WHEN internal_id LIKE 'demo_mca_luckydragon_%' THEN 'D-0009'
+      WHEN internal_id LIKE 'demo_mca_smith_%'       THEN 'D-0010'
     END
 WHERE category_slug = 'mca-payments';
 
@@ -56,9 +56,9 @@ UPDATE public.transactions
 SET transaction_type = 'debit',
     payment_status = 'failed',
     deal_code = CASE
-      WHEN internal_id LIKE 'demo_nsf_tonys_%'      THEN 'MCA-2025-004'
-      WHEN internal_id LIKE 'demo_nsf_quickprint_%'  THEN 'MCA-2025-005'
-      WHEN internal_id LIKE 'demo_nsf_westside_%'    THEN 'MCA-2025-006'
+      WHEN internal_id LIKE 'demo_nsf_tonys_%'      THEN 'D-0003'
+      WHEN internal_id LIKE 'demo_nsf_quickprint_%'  THEN 'D-0004'
+      WHEN internal_id LIKE 'demo_nsf_westside_%'    THEN 'D-0005'
     END
 WHERE category_slug = 'nsf-returns';
 
@@ -67,15 +67,15 @@ UPDATE public.transactions
 SET transaction_type = 'credit',
     payment_status = 'completed',
     deal_code = CASE
-      WHEN internal_id = 'demo_fund_sunrise'     THEN 'MCA-2025-001'
-      WHEN internal_id = 'demo_fund_bella'        THEN 'MCA-2025-003'
-      WHEN internal_id = 'demo_fund_tonys'        THEN 'MCA-2025-004'
-      WHEN internal_id = 'demo_fund_quickprint'   THEN 'MCA-2025-005'
-      WHEN internal_id = 'demo_fund_westside'     THEN 'MCA-2025-006'
-      WHEN internal_id = 'demo_fund_greenthumb'   THEN 'MCA-2026-001'
-      WHEN internal_id = 'demo_fund_fitness'      THEN 'MCA-2026-002'
-      WHEN internal_id = 'demo_fund_martinez'     THEN 'MCA-2024-001'
-      WHEN internal_id = 'demo_fund_luckydragon'  THEN 'MCA-2024-002'
-      WHEN internal_id = 'demo_fund_smith'        THEN 'MCA-2024-003'
+      WHEN internal_id = 'demo_fund_sunrise'     THEN 'D-0001'
+      WHEN internal_id = 'demo_fund_bella'        THEN 'D-0002'
+      WHEN internal_id = 'demo_fund_tonys'        THEN 'D-0003'
+      WHEN internal_id = 'demo_fund_quickprint'   THEN 'D-0004'
+      WHEN internal_id = 'demo_fund_westside'     THEN 'D-0005'
+      WHEN internal_id = 'demo_fund_greenthumb'   THEN 'D-0006'
+      WHEN internal_id = 'demo_fund_fitness'      THEN 'D-0007'
+      WHEN internal_id = 'demo_fund_martinez'     THEN 'D-0008'
+      WHEN internal_id = 'demo_fund_luckydragon'  THEN 'D-0009'
+      WHEN internal_id = 'demo_fund_smith'        THEN 'D-0010'
     END
 WHERE category_slug = 'funding-disbursements';

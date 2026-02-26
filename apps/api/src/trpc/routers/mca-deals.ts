@@ -84,7 +84,7 @@ async function createBrokerCommission(
 
 const createDealSchema = z.object({
   merchantId: z.string().uuid(),
-  dealCode: z.string().min(1, "Deal code is required"),
+  dealCode: z.string().min(1).optional(),
   fundingAmount: z.number().positive("Funding amount must be positive"),
   factorRate: z.number().positive("Factor rate must be positive"),
   paybackAmount: z.number().positive("Payback amount must be positive"),

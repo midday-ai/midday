@@ -1,11 +1,12 @@
 import type { Column, RowSelectionState, Updater } from "@tanstack/react-table";
 import { create } from "zustand";
 
-export type TransactionTab = "all" | "review";
+export type TransactionTab = "all" | "review" | "syndication";
 
 interface RowSelectionByTab {
   all: Record<string, boolean>;
   review: Record<string, boolean>;
+  syndication: Record<string, boolean>;
 }
 
 interface TransactionsState {
@@ -33,6 +34,7 @@ export const useTransactionsStore = create<TransactionsState>()((set, get) => ({
   rowSelectionByTab: {
     all: {},
     review: {},
+    syndication: {},
   },
   lastClickedIndex: null,
   setCanDelete: (canDelete) => set({ canDelete }),

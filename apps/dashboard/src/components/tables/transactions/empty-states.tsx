@@ -44,6 +44,20 @@ export function NoTransactions() {
   );
 }
 
+export function NoSyndicationTransactions() {
+  return (
+    <div className="absolute w-full h-[calc(100vh-300px)] top-0 left-0 flex items-center justify-center z-20">
+      <div className="text-center max-w-sm mx-auto flex flex-col items-center justify-center">
+        <h2 className="text-xl font-medium mb-2">No syndication activity</h2>
+        <p className="text-sm text-[#878787]">
+          Capital activity will appear here when syndicators contribute funds,
+          receive distributions, or have deal allocations.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function ReviewComplete() {
   return (
     <div className="absolute w-full h-[calc(100vh-300px)] top-0 left-0 flex items-center justify-center z-20">

@@ -1,14 +1,16 @@
 import { useQueryState } from "nuqs";
 import { createLoader, parseAsStringLiteral } from "nuqs/server";
 
+const TAB_VALUES = ["all", "review", "syndication"] as const;
+
 export const transactionTabSchema = {
-  tab: parseAsStringLiteral(["all", "review"] as const).withDefault("all"),
+  tab: parseAsStringLiteral(TAB_VALUES).withDefault("all"),
 };
 
 export function useTransactionTab() {
   const [tab, setTab] = useQueryState(
     "tab",
-    parseAsStringLiteral(["all", "review"] as const).withDefault("all"),
+    parseAsStringLiteral(TAB_VALUES).withDefault("all"),
   );
 
   return { tab, setTab };

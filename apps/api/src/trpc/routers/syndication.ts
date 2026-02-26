@@ -10,6 +10,7 @@ import {
   getSyndicatorDealsSchema,
   getSyndicatorTransactionsSchema,
   getSyndicatorsSchema,
+  getTeamSyndicatorTransactionsSchema,
   removeParticipantSchema,
   toggleSyndicatorPortalSchema,
   upsertParticipantSchema,
@@ -33,6 +34,8 @@ import {
   getSyndicatorDeals,
   getSyndicatorTransactions,
   getSyndicators,
+  getTeamSyndicatorTransactionCount,
+  getTeamSyndicatorTransactions,
   toggleSyndicatorPortal,
   upsertSyndicator,
   getParticipantsByDeal,
@@ -195,6 +198,21 @@ export const syndicationRouter = createTRPCRouter({
   getCapitalSummary: protectedProcedure.query(
     async ({ ctx: { db, teamId } }) => {
       return getCapitalSummary(db, { teamId: teamId! });
+    },
+  ),
+
+  getTeamTransactions: protectedProcedure
+    .input(getTeamSyndicatorTransactionsSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getTeamSyndicatorTransactions(db, {
+        ...input,
+        teamId: teamId!,
+      });
+    }),
+
+  getTeamTransactionCount: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      return getTeamSyndicatorTransactionCount(db, { teamId: teamId! });
     },
   ),
 

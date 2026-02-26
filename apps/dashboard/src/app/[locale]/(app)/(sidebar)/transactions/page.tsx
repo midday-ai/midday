@@ -1,11 +1,4 @@
-import { AddTransactions } from "@/components/add-transactions";
 import { ScrollableContent } from "@/components/scrollable-content";
-import { DataTable } from "@/components/tables/transactions/data-table";
-import { Loading } from "@/components/tables/transactions/loading";
-import { TransactionRulesButton } from "@/components/transaction-rules-button";
-import { TransactionTabs } from "@/components/transaction-tabs";
-import { TransactionsColumnVisibility } from "@/components/transactions-column-visibility";
-import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
 import { TransactionsUploadZone } from "@/components/transactions-upload-zone";
 import { loadSortParams } from "@/hooks/use-sort-params";
 import { loadTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
@@ -14,7 +7,7 @@ import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
 import { getInitialTableSettings } from "@/utils/columns";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
-import { Suspense } from "react";
+import { TransactionsPageContent } from "./transactions-page-content";
 
 export const metadata: Metadata = {
   title: "Transactions | abacus",
@@ -56,6 +49,12 @@ export default async function Transactions(props: Props) {
     trpc.transactions.get.infiniteQueryOptions(allTabFilter),
     trpc.transactions.get.infiniteQueryOptions(reviewTabFilter),
     trpc.transactions.getReviewCount.queryOptions(),
+    // Syndication tab data
+    trpc.syndication.getTeamTransactions.infiniteQueryOptions(
+      {},
+      { getNextPageParam: ({ meta }) => meta?.cursor },
+    ),
+    trpc.syndication.getTeamTransactionCount.queryOptions(),
     // Shared data used by table rows (assign user, tags)
     trpc.team.members.queryOptions(),
     trpc.tags.get.queryOptions(),
@@ -67,29 +66,10 @@ export default async function Transactions(props: Props) {
     <HydrateClient>
       <ScrollableContent>
         <TransactionsUploadZone>
-          <div className="flex justify-between items-center py-6">
-            <TransactionsSearchFilter />
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex items-center gap-2">
-                <TransactionRulesButton />
-                <TransactionsColumnVisibility />
-                <AddTransactions />
-              </div>
-              <TransactionTabs />
-            </div>
-          </div>
-
-          <Suspense
-            fallback={
-              <Loading
-                columnVisibility={initialSettings.columns}
-                columnSizing={initialSettings.sizing}
-                columnOrder={initialSettings.order}
-              />
-            }
-          >
-            <DataTable initialSettings={initialSettings} initialTab={tab} />
-          </Suspense>
+          <TransactionsPageContent
+            initialSettings={initialSettings}
+            initialTab={tab}
+          />
         </TransactionsUploadZone>
       </ScrollableContent>
     </HydrateClient>
