@@ -1298,6 +1298,8 @@ export const userInvites = pgTable(
     role: teamRolesEnum(),
     code: text().default("nanoid(24)"),
     invitedBy: uuid("invited_by"),
+    entityId: uuid("entity_id"),
+    entityType: text("entity_type"),
   },
   (table) => [
     index("user_invites_team_id_idx").using(

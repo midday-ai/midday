@@ -288,6 +288,16 @@ export const inviteTeamMembersSchema = z
           "Role to assign to the invited member",
         example: "member",
       }),
+      entityId: z.string().uuid().optional().openapi({
+        description:
+          "UUID of the entity (e.g., broker) to link the invited user to",
+        example: "123e4567-e89b-12d3-a456-426614174000",
+      }),
+      entityType: z.string().optional().openapi({
+        description:
+          "Type of entity to link (e.g., 'broker', 'syndicate', 'merchant')",
+        example: "broker",
+      }),
     }),
   )
   .openapi({
