@@ -1,3 +1,4 @@
+import { BrokerHomeGuard } from "@/components/broker/broker-home-guard";
 import { ChatInterface } from "@/components/chat/chat-interface";
 import { Widgets } from "@/components/widgets";
 import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
@@ -49,23 +50,25 @@ export default async function Overview(props: Props) {
 
   return (
     <HydrateClient>
-      <ChatProvider initialMessages={chat ?? []} key={currentChatId || "home"}>
-        <Widgets initialPreferences={widgetPreferences} />
+      <BrokerHomeGuard>
+        <ChatProvider initialMessages={chat ?? []} key={currentChatId || "home"}>
+          <Widgets initialPreferences={widgetPreferences} />
 
-        <ChatInterface geo={geo} />
+          <ChatInterface geo={geo} />
 
-        {process.env.NODE_ENV === "development" && (
-          <AIDevtools
-            config={{
-              streamCapture: {
-                enabled: true,
-                endpoint: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
-                autoConnect: true,
-              },
-            }}
-          />
-        )}
-      </ChatProvider>
+          {process.env.NODE_ENV === "development" && (
+            <AIDevtools
+              config={{
+                streamCapture: {
+                  enabled: true,
+                  endpoint: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
+                  autoConnect: true,
+                },
+              }}
+            />
+          )}
+        </ChatProvider>
+      </BrokerHomeGuard>
     </HydrateClient>
   );
 }
