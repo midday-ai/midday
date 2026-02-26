@@ -10,7 +10,6 @@ import {
 } from "@midday/accounting";
 import type { Database } from "@midday/db/client";
 import { getAppByAppId } from "@midday/db/queries";
-import { resolveTaxValues } from "@midday/utils/tax";
 import {
   ensureValidToken,
   getProviderCredentials,
@@ -41,16 +40,6 @@ export interface TransactionForMapping {
   categorySlug: string | null;
   categoryReportingCode: string | null;
   counterpartyName: string | null;
-  /** Tax amount from OCR or manual entry */
-  taxAmount: number | null;
-  /** Tax rate percentage (e.g., 25 for 25%) */
-  taxRate: number | null;
-  /** Tax type (e.g., "VAT", "moms", "GST") */
-  taxType: string | null;
-  /** Category's tax rate (fallback if transaction doesn't have one) */
-  categoryTaxRate: number | null;
-  /** Category's tax type (fallback if transaction doesn't have one) */
-  categoryTaxType: string | null;
   /** User's personal notes about the transaction */
   note: string | null;
   attachments: Array<{
@@ -184,19 +173,6 @@ export abstract class AccountingProcessorBase<
     transactions: TransactionForMapping[],
   ): MappedTransaction[] {
     return transactions.map((tx) => {
-      // Resolve tax values using priority:
-      // 1. Transaction taxAmount (if set)
-      // 2. Calculate from transaction taxRate
-      // 3. Calculate from category taxRate/taxType
-      const { taxAmount, taxRate, taxType } = resolveTaxValues({
-        transactionAmount: tx.amount,
-        transactionTaxAmount: tx.taxAmount,
-        transactionTaxRate: tx.taxRate,
-        transactionTaxType: tx.taxType,
-        categoryTaxRate: tx.categoryTaxRate,
-        categoryTaxType: tx.categoryTaxType,
-      });
-
       return {
         id: tx.id,
         date: tx.date,
@@ -207,10 +183,6 @@ export abstract class AccountingProcessorBase<
         counterpartyName: tx.name ?? undefined,
         category: tx.categorySlug ?? undefined,
         categoryReportingCode: tx.categoryReportingCode ?? undefined,
-        // Resolved tax values (from transaction or category)
-        taxAmount: taxAmount ?? undefined,
-        taxRate: taxRate ?? undefined,
-        taxType: taxType ?? undefined,
         // User notes
         note: tx.note ?? undefined,
         attachments:

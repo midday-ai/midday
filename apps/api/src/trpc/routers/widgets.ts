@@ -18,7 +18,6 @@ import {
   getRecurringExpensesSchema,
   getRevenueSummarySchema,
   getRunwaySchema,
-  getTaxSummarySchema,
   getVaultActivitySchema,
   updateWidgetPreferencesSchema,
 } from "@api/schemas/widgets";
@@ -43,7 +42,6 @@ import {
   getRunway,
   getSpending,
   getSpendingForPeriod,
-  getTaxSummary,
   getTopRevenueMerchant,
 } from "@midday/db/queries";
 
@@ -374,36 +372,6 @@ export const widgetsRouter = createTRPCRouter({
 
       return {
         result: recurringExpenses,
-      };
-    }),
-
-  getTaxSummary: protectedProcedure
-    .input(getTaxSummarySchema)
-    .query(async ({ ctx: { db, teamId }, input }) => {
-      // Get both paid and collected taxes
-      const [paidTaxes, collectedTaxes] = await Promise.all([
-        getTaxSummary(db, {
-          teamId: teamId!,
-          type: "paid",
-          from: input.from,
-          to: input.to,
-          currency: input.currency,
-        }),
-        getTaxSummary(db, {
-          teamId: teamId!,
-          type: "collected",
-          from: input.from,
-          to: input.to,
-          currency: input.currency,
-        }),
-      ]);
-
-      return {
-        result: {
-          paid: paidTaxes.summary,
-          collected: collectedTaxes.summary,
-          currency: paidTaxes.summary.currency || input.currency || "USD",
-        },
       };
     }),
 

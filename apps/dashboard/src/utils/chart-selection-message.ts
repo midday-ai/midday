@@ -18,7 +18,6 @@ const chartTypeMap: Record<string, string> = {
   "growth-rate": "growth rate",
   "business-health-score": "business health score",
   "invoice-payment": "invoice payments",
-  "tax-trend": "tax trends",
   "stress-test": "cash flow stress test",
 };
 

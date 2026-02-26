@@ -89,6 +89,17 @@ DECLARE
   v_c_fitness     uuid;
   v_c_luckydragon uuid;
   v_c_smith       uuid;
+  -- New merchants (11-20)
+  v_c_harbor      uuid;
+  v_c_bluesky     uuid;
+  v_c_crossfit    uuid;
+  v_c_catering    uuid;
+  v_c_nightowl    uuid;
+  v_c_nailstudio  uuid;
+  v_c_redrock     uuid;
+  v_c_bookshelf   uuid;
+  v_c_cardinal    uuid;
+  v_c_urgentcare  uuid;
 
   -- Deal IDs (generated fresh)
   v_d_sunrise     uuid := gen_random_uuid();
@@ -101,6 +112,21 @@ DECLARE
   v_d_fitness     uuid := gen_random_uuid();
   v_d_luckydragon uuid := gen_random_uuid();
   v_d_smith       uuid := gen_random_uuid();
+  -- New deals (13 total: 10 single + 3 renewal second deals)
+  v_d_harbor         uuid := gen_random_uuid();
+  v_d_bluesky        uuid := gen_random_uuid();
+  v_d_crossfit       uuid := gen_random_uuid();
+  v_d_catering       uuid := gen_random_uuid();
+  v_d_nightowl       uuid := gen_random_uuid();
+  v_d_nailstudio     uuid := gen_random_uuid();
+  v_d_redrock        uuid := gen_random_uuid();
+  v_d_urgentcare     uuid := gen_random_uuid();
+  -- Renewal chain deals (paid-off first deals + active second deals)
+  v_d_bookshelf_1    uuid := gen_random_uuid();
+  v_d_bookshelf_2    uuid := gen_random_uuid();
+  v_d_cardinal_1     uuid := gen_random_uuid();
+  v_d_cardinal_2     uuid := gen_random_uuid();
+  v_d_luckydragon_2  uuid := gen_random_uuid();
 
   -- Invoice template
   v_template_id uuid := gen_random_uuid();
@@ -192,6 +218,17 @@ BEGIN
   SELECT id INTO v_c_fitness     FROM public.merchants WHERE name = 'Fitness First Gym'           AND team_id = v_team_id;
   SELECT id INTO v_c_luckydragon FROM public.merchants WHERE name = 'Lucky Dragon Restaurant'     AND team_id = v_team_id;
   SELECT id INTO v_c_smith       FROM public.merchants WHERE name = 'Smith Plumbing Services'     AND team_id = v_team_id;
+  -- New merchants (11-20)
+  SELECT id INTO v_c_harbor      FROM public.merchants WHERE name = 'Harbor Freight Logistics'    AND team_id = v_team_id;
+  SELECT id INTO v_c_bluesky     FROM public.merchants WHERE name = 'BlueSky Dental Group'        AND team_id = v_team_id;
+  SELECT id INTO v_c_crossfit    FROM public.merchants WHERE name = 'Peak Performance CrossFit'   AND team_id = v_team_id;
+  SELECT id INTO v_c_catering    FROM public.merchants WHERE name = 'Coastal Catering Co.'        AND team_id = v_team_id;
+  SELECT id INTO v_c_nightowl    FROM public.merchants WHERE name = 'NightOwl Printing'           AND team_id = v_team_id;
+  SELECT id INTO v_c_nailstudio  FROM public.merchants WHERE name = 'Golden Gate Nail Studio'     AND team_id = v_team_id;
+  SELECT id INTO v_c_redrock     FROM public.merchants WHERE name = 'Redrock Excavation LLC'      AND team_id = v_team_id;
+  SELECT id INTO v_c_bookshelf   FROM public.merchants WHERE name = 'The Bookshelf Cafe'          AND team_id = v_team_id;
+  SELECT id INTO v_c_cardinal    FROM public.merchants WHERE name = 'Cardinal Electric Co.'       AND team_id = v_team_id;
+  SELECT id INTO v_c_urgentcare  FROM public.merchants WHERE name = 'Lakeside Urgent Care'        AND team_id = v_team_id;
 
   IF v_c_sunrise IS NULL THEN
     RAISE NOTICE 'Customers not found. Run the previous seed migration first.';
@@ -228,7 +265,21 @@ BEGIN
     (gen_random_uuid(), v_c_tonys,       v_team_id, v_tag_highrisk),
     (gen_random_uuid(), v_c_tonys,       v_team_id, v_tag_seasonal),
     (gen_random_uuid(), v_c_greenthumb,  v_team_id, v_tag_newclient),
-    (gen_random_uuid(), v_c_fitness,     v_team_id, v_tag_newclient)
+    (gen_random_uuid(), v_c_fitness,     v_team_id, v_tag_newclient),
+    -- New merchants (11-20)
+    (gen_random_uuid(), v_c_bluesky,     v_team_id, v_tag_vip),
+    (gen_random_uuid(), v_c_bluesky,     v_team_id, v_tag_renewal),
+    (gen_random_uuid(), v_c_urgentcare,  v_team_id, v_tag_vip),
+    (gen_random_uuid(), v_c_urgentcare,  v_team_id, v_tag_newclient),
+    (gen_random_uuid(), v_c_crossfit,    v_team_id, v_tag_renewal),
+    (gen_random_uuid(), v_c_catering,    v_team_id, v_tag_seasonal),
+    (gen_random_uuid(), v_c_catering,    v_team_id, v_tag_highrisk),
+    (gen_random_uuid(), v_c_nightowl,    v_team_id, v_tag_highrisk),
+    (gen_random_uuid(), v_c_harbor,      v_team_id, v_tag_newclient),
+    (gen_random_uuid(), v_c_nailstudio,  v_team_id, v_tag_newclient),
+    (gen_random_uuid(), v_c_redrock,     v_team_id, v_tag_highrisk),
+    (gen_random_uuid(), v_c_bookshelf,   v_team_id, v_tag_renewal),
+    (gen_random_uuid(), v_c_cardinal,    v_team_id, v_tag_renewal)
   ON CONFLICT (merchant_id, tag_id) DO NOTHING;
 
   -- ========================================================================
@@ -289,7 +340,87 @@ BEGIN
     (v_d_smith, v_team_id, v_c_smith, 'MCA-2024-003',
      50000.00, 1.3300, 66500.00, 350.00, 'daily',
      'paid_off', NOW() - INTERVAL '12 months', (NOW() - INTERVAL '3 months')::date,
-     0.00, 66500.00, 0)
+     0.00, 66500.00, 0),
+
+    -- ======== NEW DEALS (11-20 + renewal chains) ========
+
+    -- Renewal chain: Bookshelf Cafe Deal 1 (paid off)
+    (v_d_bookshelf_1, v_team_id, v_c_bookshelf, 'MCA-2024-004',
+     35000.00, 1.3800, 48300.00, 215.00, 'daily',
+     'paid_off', NOW() - INTERVAL '24 months', (NOW() - INTERVAL '15 months')::date,
+     0.00, 48300.00, 0),
+
+    -- Renewal chain: Cardinal Electric Deal 1 (paid off)
+    (v_d_cardinal_1, v_team_id, v_c_cardinal, 'MCA-2024-005',
+     60000.00, 1.4000, 84000.00, 370.00, 'daily',
+     'paid_off', NOW() - INTERVAL '22 months', (NOW() - INTERVAL '12 months')::date,
+     0.00, 84000.00, 0),
+
+    -- Redrock Excavation (defaulted)
+    (v_d_redrock, v_team_id, v_c_redrock, 'MCA-2024-006',
+     80000.00, 1.4800, 118400.00, 480.00, 'daily',
+     'defaulted', NOW() - INTERVAL '20 months', (NOW() - INTERVAL '8 months')::date,
+     56000.00, 62400.00, 6),
+
+    -- Renewal chain: Bookshelf Cafe Deal 2 (active renewal)
+    (v_d_bookshelf_2, v_team_id, v_c_bookshelf, 'MCA-2025-007',
+     55000.00, 1.3600, 74800.00, 330.00, 'daily',
+     'active', NOW() - INTERVAL '6 months', (NOW() + INTERVAL '3 months')::date,
+     31900.00, 42900.00, 0),
+
+    -- Renewal chain: Cardinal Electric Deal 2 (active, near payoff)
+    (v_d_cardinal_2, v_team_id, v_c_cardinal, 'MCA-2025-008',
+     85000.00, 1.3800, 117300.00, 500.00, 'daily',
+     'active', NOW() - INTERVAL '10 months', (NOW() + INTERVAL '18 days')::date,
+     8800.00, 108500.00, 0),
+
+    -- Harbor Freight Logistics (active, healthy)
+    (v_d_harbor, v_team_id, v_c_harbor, 'MCA-2025-009',
+     90000.00, 1.3800, 124200.00, 570.00, 'daily',
+     'active', NOW() - INTERVAL '3 months', (NOW() + INTERVAL '7 months')::date,
+     87150.00, 37050.00, 0),
+
+    -- BlueSky Dental Group (active, VIP)
+    (v_d_bluesky, v_team_id, v_c_bluesky, 'MCA-2025-010',
+     120000.00, 1.3200, 158400.00, 720.00, 'daily',
+     'active', NOW() - INTERVAL '6 months', (NOW() + INTERVAL '4 months')::date,
+     64800.00, 93600.00, 0),
+
+    -- Peak Performance CrossFit (active, near payoff — only $280 left!)
+    (v_d_crossfit, v_team_id, v_c_crossfit, 'MCA-2025-011',
+     55000.00, 1.3600, 74800.00, 345.00, 'daily',
+     'active', NOW() - INTERVAL '10 months', (NOW() + INTERVAL '1 day')::date,
+     280.00, 74520.00, 0),
+
+    -- Coastal Catering Co. (late, 2 NSFs)
+    (v_d_catering, v_team_id, v_c_catering, 'MCA-2025-012',
+     50000.00, 1.4100, 70500.00, 325.00, 'daily',
+     'late', NOW() - INTERVAL '5 months', (NOW() + INTERVAL '4 months')::date,
+     38000.00, 32500.00, 2),
+
+    -- NightOwl Printing (late, 3 NSFs)
+    (v_d_nightowl, v_team_id, v_c_nightowl, 'MCA-2025-013',
+     45000.00, 1.4400, 64800.00, 310.00, 'daily',
+     'late', NOW() - INTERVAL '5 months', (NOW() + INTERVAL '5 months')::date,
+     40000.00, 24800.00, 3),
+
+    -- Golden Gate Nail Studio (active, healthy)
+    (v_d_nailstudio, v_team_id, v_c_nailstudio, 'MCA-2025-014',
+     30000.00, 1.3900, 41700.00, 245.00, 'daily',
+     'active', NOW() - INTERVAL '3 months', (NOW() + INTERVAL '4 months')::date,
+     25775.00, 15925.00, 0),
+
+    -- Renewal chain: Lucky Dragon Deal 2 (active renewal)
+    (v_d_luckydragon_2, v_team_id, v_c_luckydragon, 'MCA-2026-003',
+     100000.00, 1.3300, 133000.00, 610.00, 'daily',
+     'active', NOW() - INTERVAL '3 months', (NOW() + INTERVAL '6 months')::date,
+     96710.00, 36290.00, 0),
+
+    -- Lakeside Urgent Care (active, new, largest deal in portfolio)
+    (v_d_urgentcare, v_team_id, v_c_urgentcare, 'MCA-2026-004',
+     150000.00, 1.3000, 195000.00, 870.00, 'daily',
+     'active', NOW() - INTERVAL '21 days', (NOW() + INTERVAL '10 months')::date,
+     181950.00, 13050.00, 0)
   ON CONFLICT (team_id, deal_code) DO NOTHING;
 
   -- ========================================================================
@@ -323,7 +454,23 @@ BEGIN
       ('Lucky Dragon Restaurant',450.00, (NOW() - INTERVAL '18 months')::date,(NOW() - INTERVAL '7 months')::date,   'luckydragon'),
       ('Smith Plumbing Services',350.00, (NOW() - INTERVAL '12 months')::date,(NOW() - INTERVAL '3 months')::date,   'smith'),
       ('Green Thumb Landscaping',295.00, (NOW() - INTERVAL '14 days')::date,  CURRENT_DATE,                          'greenthumb'),
-      ('Fitness First Gym',     510.00, (NOW() - INTERVAL '7 days')::date,    CURRENT_DATE,                          'fitness')
+      ('Fitness First Gym',     510.00, (NOW() - INTERVAL '7 days')::date,    CURRENT_DATE,                          'fitness'),
+      -- New merchants (11-20)
+      ('Harbor Freight Logistics',  570.00, (NOW() - INTERVAL '3 months')::date,   CURRENT_DATE,                          'harbor'),
+      ('BlueSky Dental Group',      720.00, (NOW() - INTERVAL '6 months')::date,   CURRENT_DATE,                          'bluesky'),
+      ('Peak Performance CrossFit', 345.00, (NOW() - INTERVAL '10 months')::date,  CURRENT_DATE,                          'crossfit'),
+      ('Coastal Catering Co.',      325.00, (NOW() - INTERVAL '5 months')::date,   (NOW() - INTERVAL '14 days')::date,    'catering'),
+      ('NightOwl Printing',         310.00, (NOW() - INTERVAL '5 months')::date,   (NOW() - INTERVAL '21 days')::date,    'nightowl'),
+      ('Golden Gate Nail Studio',   245.00, (NOW() - INTERVAL '3 months')::date,   CURRENT_DATE,                          'nailstudio'),
+      ('Redrock Excavation LLC',    480.00, (NOW() - INTERVAL '20 months')::date,  (NOW() - INTERVAL '8 months')::date,   'redrock'),
+      ('Lakeside Urgent Care',      870.00, (NOW() - INTERVAL '21 days')::date,    CURRENT_DATE,                          'urgentcare'),
+      -- Renewal chain: paid-off first deals
+      ('The Bookshelf Cafe',        215.00, (NOW() - INTERVAL '24 months')::date,  (NOW() - INTERVAL '15 months')::date,  'bookshelf1'),
+      ('Cardinal Electric Co.',     370.00, (NOW() - INTERVAL '22 months')::date,  (NOW() - INTERVAL '12 months')::date,  'cardinal1'),
+      -- Renewal chain: active second deals
+      ('The Bookshelf Cafe',        330.00, (NOW() - INTERVAL '6 months')::date,   CURRENT_DATE,                          'bookshelf2'),
+      ('Cardinal Electric Co.',     500.00, (NOW() - INTERVAL '10 months')::date,  CURRENT_DATE,                          'cardinal2'),
+      ('Lucky Dragon Restaurant',   610.00, (NOW() - INTERVAL '3 months')::date,   CURRENT_DATE,                          'luckydragon2')
   ) AS mp(customer_name, daily_amount, start_date, end_date, code)
   CROSS JOIN LATERAL generate_series(mp.start_date, mp.end_date, '1 day'::interval) d
   WHERE EXTRACT(DOW FROM d) NOT IN (0, 6)
@@ -390,7 +537,54 @@ BEGIN
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '5 days')::date,
      'Westside Construction - NSF Return', 'Returned ACH - insufficient funds',
-     -1890.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_westside_4')
+     -1890.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_westside_4'),
+    -- Coastal Catering (2 NSFs)
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '30 days')::date,
+     'Coastal Catering Co. - NSF Return', 'Returned ACH - insufficient funds',
+     -325.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_catering_1'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '16 days')::date,
+     'Coastal Catering Co. - NSF Return', 'Returned ACH - insufficient funds',
+     -325.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_catering_2'),
+    -- NightOwl Printing (3 NSFs)
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '50 days')::date,
+     'NightOwl Printing - NSF Return', 'Returned ACH - insufficient funds',
+     -310.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_nightowl_1'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '35 days')::date,
+     'NightOwl Printing - NSF Return', 'Returned ACH - insufficient funds',
+     -310.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_nightowl_2'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '23 days')::date,
+     'NightOwl Printing - NSF Return', 'Returned ACH - insufficient funds',
+     -310.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_nightowl_3'),
+    -- Redrock Excavation (6 NSFs spread across months 2-8 before default)
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '18 months')::date,
+     'Redrock Excavation LLC - NSF Return', 'Returned ACH - insufficient funds',
+     -480.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_redrock_1'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '17 months')::date,
+     'Redrock Excavation LLC - NSF Return', 'Returned ACH - insufficient funds',
+     -480.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_redrock_2'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '16 months')::date,
+     'Redrock Excavation LLC - NSF Return', 'Returned ACH - insufficient funds',
+     -480.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_redrock_3'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '14 months')::date,
+     'Redrock Excavation LLC - NSF Return', 'Returned ACH - insufficient funds',
+     -480.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_redrock_4'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '12 months')::date,
+     'Redrock Excavation LLC - NSF Return', 'Returned ACH - insufficient funds',
+     -480.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_redrock_5'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '10 months')::date,
+     'Redrock Excavation LLC - NSF Return', 'Returned ACH - insufficient funds',
+     -480.00, 'USD', 'nsf-returns', 'posted', 'ach', 'demo_nsf_redrock_6')
   ON CONFLICT (internal_id) DO NOTHING;
 
   -- ========================================================================
@@ -440,7 +634,60 @@ BEGIN
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '7 days')::date,
      'Funding - Fitness First Gym', 'MCA funding disbursement MCA-2026-002',
-     -80000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_fitness')
+     -80000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_fitness'),
+    -- New merchants + renewal chain deals
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '24 months')::date,
+     'Funding - The Bookshelf Cafe', 'MCA funding disbursement MCA-2024-004',
+     -35000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_bookshelf1'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '22 months')::date,
+     'Funding - Cardinal Electric Co.', 'MCA funding disbursement MCA-2024-005',
+     -60000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_cardinal1'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '20 months')::date,
+     'Funding - Redrock Excavation LLC', 'MCA funding disbursement MCA-2024-006',
+     -80000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_redrock'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '10 months')::date,
+     'Funding - Cardinal Electric Co.', 'MCA funding disbursement MCA-2025-008 (renewal)',
+     -85000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_cardinal2'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '10 months')::date,
+     'Funding - Peak Performance CrossFit', 'MCA funding disbursement MCA-2025-011',
+     -55000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_crossfit'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '6 months')::date,
+     'Funding - BlueSky Dental Group', 'MCA funding disbursement MCA-2025-010',
+     -120000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_bluesky'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '6 months')::date,
+     'Funding - The Bookshelf Cafe', 'MCA funding disbursement MCA-2025-007 (renewal)',
+     -55000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_bookshelf2'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '5 months')::date,
+     'Funding - Coastal Catering Co.', 'MCA funding disbursement MCA-2025-012',
+     -50000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_catering'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '5 months')::date,
+     'Funding - NightOwl Printing', 'MCA funding disbursement MCA-2025-013',
+     -45000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_nightowl'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '3 months')::date,
+     'Funding - Harbor Freight Logistics', 'MCA funding disbursement MCA-2025-009',
+     -90000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_harbor'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '3 months')::date,
+     'Funding - Golden Gate Nail Studio', 'MCA funding disbursement MCA-2025-014',
+     -30000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_nailstudio'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '3 months')::date,
+     'Funding - Lucky Dragon Restaurant', 'MCA funding disbursement MCA-2026-003 (renewal)',
+     -100000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_luckydragon2'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '21 days')::date,
+     'Funding - Lakeside Urgent Care', 'MCA funding disbursement MCA-2026-004',
+     -150000.00, 'USD', 'funding-disbursements', 'posted', 'wire', 'demo_fund_urgentcare')
   ON CONFLICT (internal_id) DO NOTHING;
 
   -- ========================================================================
@@ -490,7 +737,56 @@ BEGIN
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '7 days')::date,
      'ISO Commission - Pinnacle Funding Group', 'Commission on Fitness First deal (11%)',
-     -8800.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_fitness')
+     -8800.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_fitness'),
+    -- New deals commissions (Redrock has no broker — direct deal)
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '24 months')::date,
+     'ISO Commission - Southwest Funding Partners', 'Commission on Bookshelf Cafe deal (10%)',
+     -3500.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_bookshelf1'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '22 months')::date,
+     'ISO Commission - Capital Brokers LLC', 'Commission on Cardinal Electric deal (10%)',
+     -6000.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_cardinal1'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '10 months')::date,
+     'ISO Commission - Capital Brokers LLC', 'Commission on Cardinal Electric renewal (11%)',
+     -9350.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_cardinal2'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '10 months')::date,
+     'ISO Commission - Southwest Funding Partners', 'Commission on CrossFit deal (11%)',
+     -6050.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_crossfit'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '6 months')::date,
+     'ISO Commission - Pinnacle Funding Group', 'Commission on BlueSky Dental deal (10%)',
+     -12000.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_bluesky'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '6 months')::date,
+     'ISO Commission - Southwest Funding Partners', 'Commission on Bookshelf Cafe renewal (11%)',
+     -6050.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_bookshelf2'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '5 months')::date,
+     'ISO Commission - Southwest Funding Partners', 'Commission on Coastal Catering deal (11%)',
+     -5500.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_catering'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '5 months')::date,
+     'ISO Commission - Capital Brokers LLC', 'Commission on NightOwl Printing deal (11%)',
+     -4950.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_nightowl'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '3 months')::date,
+     'ISO Commission - Capital Brokers LLC', 'Commission on Harbor Freight deal (11%)',
+     -9900.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_harbor'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '3 months')::date,
+     'ISO Commission - Pinnacle Funding Group', 'Commission on Golden Gate Nail deal (10%)',
+     -3000.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_nailstudio'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '3 months')::date,
+     'ISO Commission - Pinnacle Funding Group', 'Commission on Lucky Dragon renewal (10%)',
+     -10000.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_luckydragon2'),
+    (gen_random_uuid(), v_team_id, v_bank_op,
+     (NOW() - INTERVAL '21 days')::date,
+     'ISO Commission - Pinnacle Funding Group', 'Commission on Lakeside Urgent Care deal (10%)',
+     -15000.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_urgentcare')
   ON CONFLICT (internal_id) DO NOTHING;
 
   -- ========================================================================
@@ -561,7 +857,22 @@ BEGIN
       (v_d_luckydragon, 450.00, (NOW() - INTERVAL '18 months')::date, (NOW() - INTERVAL '7 months')::date),
       (v_d_smith,       350.00, (NOW() - INTERVAL '12 months')::date, (NOW() - INTERVAL '3 months')::date),
       (v_d_greenthumb,  295.00, (NOW() - INTERVAL '14 days')::date,   CURRENT_DATE),
-      (v_d_fitness,     510.00, (NOW() - INTERVAL '7 days')::date,    CURRENT_DATE)
+      (v_d_fitness,     510.00, (NOW() - INTERVAL '7 days')::date,    CURRENT_DATE),
+      -- New deals
+      (v_d_harbor,       570.00, (NOW() - INTERVAL '3 months')::date,   CURRENT_DATE),
+      (v_d_bluesky,      720.00, (NOW() - INTERVAL '6 months')::date,   CURRENT_DATE),
+      (v_d_crossfit,     345.00, (NOW() - INTERVAL '10 months')::date,  CURRENT_DATE),
+      (v_d_catering,     325.00, (NOW() - INTERVAL '5 months')::date,   (NOW() - INTERVAL '14 days')::date),
+      (v_d_nightowl,     310.00, (NOW() - INTERVAL '5 months')::date,   (NOW() - INTERVAL '21 days')::date),
+      (v_d_nailstudio,   245.00, (NOW() - INTERVAL '3 months')::date,   CURRENT_DATE),
+      (v_d_redrock,      480.00, (NOW() - INTERVAL '20 months')::date,  (NOW() - INTERVAL '8 months')::date),
+      (v_d_urgentcare,   870.00, (NOW() - INTERVAL '21 days')::date,    CURRENT_DATE),
+      -- Renewal chain deals
+      (v_d_bookshelf_1,  215.00, (NOW() - INTERVAL '24 months')::date,  (NOW() - INTERVAL '15 months')::date),
+      (v_d_cardinal_1,   370.00, (NOW() - INTERVAL '22 months')::date,  (NOW() - INTERVAL '12 months')::date),
+      (v_d_bookshelf_2,  330.00, (NOW() - INTERVAL '6 months')::date,   CURRENT_DATE),
+      (v_d_cardinal_2,   500.00, (NOW() - INTERVAL '10 months')::date,  CURRENT_DATE),
+      (v_d_luckydragon_2, 610.00, (NOW() - INTERVAL '3 months')::date,  CURRENT_DATE)
   ) AS mp(deal_id, daily_amount, start_date, end_date)
   CROSS JOIN LATERAL generate_series(mp.start_date, mp.end_date, '1 day'::interval) d
   WHERE EXTRACT(DOW FROM d) NOT IN (0, 6);
@@ -597,23 +908,37 @@ BEGIN
     (gen_random_uuid(), v_d_westside,  v_team_id, 1890.00, (NOW() - INTERVAL '40 days')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '40 days', 35.00),
     (gen_random_uuid(), v_d_westside,  v_team_id, 1890.00, (NOW() - INTERVAL '33 days')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '33 days', 35.00),
     (gen_random_uuid(), v_d_westside,  v_team_id, 1890.00, (NOW() - INTERVAL '19 days')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '19 days', 35.00),
-    (gen_random_uuid(), v_d_westside,  v_team_id, 1890.00, (NOW() - INTERVAL '5 days')::date,  'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '5 days',  35.00);
+    (gen_random_uuid(), v_d_westside,  v_team_id, 1890.00, (NOW() - INTERVAL '5 days')::date,  'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '5 days',  35.00),
+    -- Coastal Catering NSFs
+    (gen_random_uuid(), v_d_catering,  v_team_id, 325.00,  (NOW() - INTERVAL '30 days')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '30 days', 35.00),
+    (gen_random_uuid(), v_d_catering,  v_team_id, 325.00,  (NOW() - INTERVAL '16 days')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '16 days', 35.00),
+    -- NightOwl Printing NSFs
+    (gen_random_uuid(), v_d_nightowl,  v_team_id, 310.00,  (NOW() - INTERVAL '50 days')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '50 days', 35.00),
+    (gen_random_uuid(), v_d_nightowl,  v_team_id, 310.00,  (NOW() - INTERVAL '35 days')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '35 days', 35.00),
+    (gen_random_uuid(), v_d_nightowl,  v_team_id, 310.00,  (NOW() - INTERVAL '23 days')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '23 days', 35.00),
+    -- Redrock Excavation NSFs (spread across months before default)
+    (gen_random_uuid(), v_d_redrock,   v_team_id, 480.00,  (NOW() - INTERVAL '18 months')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '18 months', 35.00),
+    (gen_random_uuid(), v_d_redrock,   v_team_id, 480.00,  (NOW() - INTERVAL '17 months')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '17 months', 35.00),
+    (gen_random_uuid(), v_d_redrock,   v_team_id, 480.00,  (NOW() - INTERVAL '16 months')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '16 months', 35.00),
+    (gen_random_uuid(), v_d_redrock,   v_team_id, 480.00,  (NOW() - INTERVAL '14 months')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '14 months', 35.00),
+    (gen_random_uuid(), v_d_redrock,   v_team_id, 480.00,  (NOW() - INTERVAL '12 months')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '12 months', 35.00),
+    (gen_random_uuid(), v_d_redrock,   v_team_id, 480.00,  (NOW() - INTERVAL '10 months')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '10 months', 35.00);
 
   -- ========================================================================
-  -- 12. INVOICE TEMPLATE
+  -- 12. DEAL TEMPLATE (formerly invoice_templates)
   -- ========================================================================
 
-  INSERT INTO public.invoice_templates (id, team_id, name, is_default, currency, size)
+  INSERT INTO public.deal_templates (id, team_id, name, is_default, currency, size)
   VALUES (v_template_id, v_team_id, 'Default', true, 'USD', 'letter')
   ON CONFLICT DO NOTHING;
 
   -- ========================================================================
-  -- 13. INVOICES
+  -- 13. DEALS (formerly invoices)
   -- ========================================================================
 
-  INSERT INTO public.invoices (
+  INSERT INTO public.deals (
     id, team_id, merchant_id, user_id, template_id,
-    invoice_number, status, issue_date, due_date,
+    deal_number, status, issue_date, due_date,
     amount, subtotal, currency, merchant_name, line_items, token
   ) VALUES
     (gen_random_uuid(), v_team_id, v_c_luckydragon, v_user_id, v_template_id,
@@ -672,9 +997,9 @@ BEGIN
      '[{"name": "Legal fees - Collections review", "quantity": 1, "price": 2500}]'::jsonb, 'tok_inv_011'),
 
     (gen_random_uuid(), v_team_id, v_c_luckydragon, v_user_id, v_template_id,
-     'INV-2026-003', 'draft', NOW(), NOW() + INTERVAL '30 days',
+     'INV-2026-003', 'paid', NOW() - INTERVAL '3 months', NOW() - INTERVAL '2 months',
      100000.00, 100000.00, 'USD', 'Lucky Dragon Restaurant',
-     '[{"name": "MCA Renewal Offer - Up to $100,000", "quantity": 1, "price": 100000}]'::jsonb, 'tok_inv_012'),
+     '[{"name": "MCA Renewal Funding - MCA-2026-003", "quantity": 1, "price": 100000}]'::jsonb, 'tok_inv_012'),
 
     (gen_random_uuid(), v_team_id, v_c_smith, v_user_id, v_template_id,
      'INV-2026-004', 'draft', NOW(), NOW() + INTERVAL '30 days',
@@ -701,6 +1026,21 @@ BEGIN
         WHEN internal_id LIKE 'demo_mca_martinez_%'    THEN 'MCA-2024-001'
         WHEN internal_id LIKE 'demo_mca_luckydragon_%' THEN 'MCA-2024-002'
         WHEN internal_id LIKE 'demo_mca_smith_%'       THEN 'MCA-2024-003'
+        -- New deals
+        WHEN internal_id LIKE 'demo_mca_harbor_%'      THEN 'MCA-2025-009'
+        WHEN internal_id LIKE 'demo_mca_bluesky_%'     THEN 'MCA-2025-010'
+        WHEN internal_id LIKE 'demo_mca_crossfit_%'    THEN 'MCA-2025-011'
+        WHEN internal_id LIKE 'demo_mca_catering_%'    THEN 'MCA-2025-012'
+        WHEN internal_id LIKE 'demo_mca_nightowl_%'    THEN 'MCA-2025-013'
+        WHEN internal_id LIKE 'demo_mca_nailstudio_%'  THEN 'MCA-2025-014'
+        WHEN internal_id LIKE 'demo_mca_redrock_%'     THEN 'MCA-2024-006'
+        WHEN internal_id LIKE 'demo_mca_urgentcare_%'  THEN 'MCA-2026-004'
+        -- Renewal chain deals
+        WHEN internal_id LIKE 'demo_mca_bookshelf1_%'  THEN 'MCA-2024-004'
+        WHEN internal_id LIKE 'demo_mca_bookshelf2_%'  THEN 'MCA-2025-007'
+        WHEN internal_id LIKE 'demo_mca_cardinal1_%'   THEN 'MCA-2024-005'
+        WHEN internal_id LIKE 'demo_mca_cardinal2_%'   THEN 'MCA-2025-008'
+        WHEN internal_id LIKE 'demo_mca_luckydragon2_%' THEN 'MCA-2026-003'
       END
   WHERE category_slug = 'mca-payments'
     AND team_id = v_team_id;
@@ -713,6 +1053,9 @@ BEGIN
         WHEN internal_id LIKE 'demo_nsf_tonys_%'      THEN 'MCA-2025-004'
         WHEN internal_id LIKE 'demo_nsf_quickprint_%'  THEN 'MCA-2025-005'
         WHEN internal_id LIKE 'demo_nsf_westside_%'    THEN 'MCA-2025-006'
+        WHEN internal_id LIKE 'demo_nsf_catering_%'    THEN 'MCA-2025-012'
+        WHEN internal_id LIKE 'demo_nsf_nightowl_%'    THEN 'MCA-2025-013'
+        WHEN internal_id LIKE 'demo_nsf_redrock_%'     THEN 'MCA-2024-006'
       END
   WHERE category_slug = 'nsf-returns'
     AND team_id = v_team_id;
@@ -732,6 +1075,19 @@ BEGIN
         WHEN internal_id = 'demo_fund_martinez'     THEN 'MCA-2024-001'
         WHEN internal_id = 'demo_fund_luckydragon'  THEN 'MCA-2024-002'
         WHEN internal_id = 'demo_fund_smith'        THEN 'MCA-2024-003'
+        WHEN internal_id = 'demo_fund_bookshelf1'   THEN 'MCA-2024-004'
+        WHEN internal_id = 'demo_fund_cardinal1'    THEN 'MCA-2024-005'
+        WHEN internal_id = 'demo_fund_redrock'      THEN 'MCA-2024-006'
+        WHEN internal_id = 'demo_fund_bookshelf2'   THEN 'MCA-2025-007'
+        WHEN internal_id = 'demo_fund_cardinal2'    THEN 'MCA-2025-008'
+        WHEN internal_id = 'demo_fund_harbor'       THEN 'MCA-2025-009'
+        WHEN internal_id = 'demo_fund_bluesky'      THEN 'MCA-2025-010'
+        WHEN internal_id = 'demo_fund_crossfit'     THEN 'MCA-2025-011'
+        WHEN internal_id = 'demo_fund_catering'     THEN 'MCA-2025-012'
+        WHEN internal_id = 'demo_fund_nightowl'     THEN 'MCA-2025-013'
+        WHEN internal_id = 'demo_fund_nailstudio'   THEN 'MCA-2025-014'
+        WHEN internal_id = 'demo_fund_luckydragon2' THEN 'MCA-2026-003'
+        WHEN internal_id = 'demo_fund_urgentcare'   THEN 'MCA-2026-004'
       END
   WHERE category_slug = 'funding-disbursements'
     AND team_id = v_team_id;
@@ -751,6 +1107,18 @@ BEGIN
         WHEN internal_id = 'demo_iso_quickprint'   THEN 'MCA-2025-005'
         WHEN internal_id = 'demo_iso_greenthumb'   THEN 'MCA-2026-001'
         WHEN internal_id = 'demo_iso_fitness'      THEN 'MCA-2026-002'
+        WHEN internal_id = 'demo_iso_bookshelf1'   THEN 'MCA-2024-004'
+        WHEN internal_id = 'demo_iso_cardinal1'    THEN 'MCA-2024-005'
+        WHEN internal_id = 'demo_iso_bookshelf2'   THEN 'MCA-2025-007'
+        WHEN internal_id = 'demo_iso_cardinal2'    THEN 'MCA-2025-008'
+        WHEN internal_id = 'demo_iso_harbor'       THEN 'MCA-2025-009'
+        WHEN internal_id = 'demo_iso_bluesky'      THEN 'MCA-2025-010'
+        WHEN internal_id = 'demo_iso_crossfit'     THEN 'MCA-2025-011'
+        WHEN internal_id = 'demo_iso_catering'     THEN 'MCA-2025-012'
+        WHEN internal_id = 'demo_iso_nightowl'     THEN 'MCA-2025-013'
+        WHEN internal_id = 'demo_iso_nailstudio'   THEN 'MCA-2025-014'
+        WHEN internal_id = 'demo_iso_luckydragon2' THEN 'MCA-2026-003'
+        WHEN internal_id = 'demo_iso_urgentcare'   THEN 'MCA-2026-004'
       END
   WHERE category_slug = 'iso-commissions'
     AND team_id = v_team_id;
@@ -795,16 +1163,20 @@ BEGIN
 
   -- Assign brokers to deals
   UPDATE public.mca_deals SET broker_id = v_broker_pinnacle
-  WHERE id IN (v_d_luckydragon, v_d_sunrise, v_d_bella, v_d_fitness)
+  WHERE id IN (v_d_luckydragon, v_d_sunrise, v_d_bella, v_d_fitness,
+               v_d_luckydragon_2, v_d_bluesky, v_d_nailstudio, v_d_urgentcare)
     AND team_id = v_team_id;
 
   UPDATE public.mca_deals SET broker_id = v_broker_capital
-  WHERE id IN (v_d_martinez, v_d_westside, v_d_quickprint)
+  WHERE id IN (v_d_martinez, v_d_westside, v_d_quickprint,
+               v_d_harbor, v_d_nightowl, v_d_cardinal_1, v_d_cardinal_2)
     AND team_id = v_team_id;
 
   UPDATE public.mca_deals SET broker_id = v_broker_southwest
-  WHERE id IN (v_d_smith, v_d_tonys, v_d_greenthumb)
+  WHERE id IN (v_d_smith, v_d_tonys, v_d_greenthumb,
+               v_d_bookshelf_1, v_d_bookshelf_2, v_d_crossfit, v_d_catering)
     AND team_id = v_team_id;
+  -- Note: v_d_redrock has no broker (direct deal)
 
   -- Commission records
   INSERT INTO public.broker_commissions (
@@ -835,7 +1207,38 @@ BEGIN
     (gen_random_uuid(), v_d_tonys, v_broker_southwest, v_team_id,
      11.00, 6600.00, 'paid', NOW() - INTERVAL '6 months'),
     (gen_random_uuid(), v_d_greenthumb, v_broker_southwest, v_team_id,
-     11.00, 4400.00, 'pending', NULL)
+     11.00, 4400.00, 'pending', NULL),
+
+    -- New deal commissions
+    -- Pinnacle deals
+    (gen_random_uuid(), v_d_luckydragon_2, v_broker_pinnacle, v_team_id,
+     10.00, 10000.00, 'paid', NOW() - INTERVAL '3 months'),
+    (gen_random_uuid(), v_d_bluesky, v_broker_pinnacle, v_team_id,
+     10.00, 12000.00, 'paid', NOW() - INTERVAL '6 months'),
+    (gen_random_uuid(), v_d_nailstudio, v_broker_pinnacle, v_team_id,
+     10.00, 3000.00, 'paid', NOW() - INTERVAL '3 months'),
+    (gen_random_uuid(), v_d_urgentcare, v_broker_pinnacle, v_team_id,
+     10.00, 15000.00, 'pending', NULL),
+
+    -- Capital deals
+    (gen_random_uuid(), v_d_harbor, v_broker_capital, v_team_id,
+     11.00, 9900.00, 'paid', NOW() - INTERVAL '3 months'),
+    (gen_random_uuid(), v_d_nightowl, v_broker_capital, v_team_id,
+     11.00, 4950.00, 'paid', NOW() - INTERVAL '5 months'),
+    (gen_random_uuid(), v_d_cardinal_1, v_broker_capital, v_team_id,
+     10.00, 6000.00, 'paid', NOW() - INTERVAL '22 months'),
+    (gen_random_uuid(), v_d_cardinal_2, v_broker_capital, v_team_id,
+     11.00, 9350.00, 'paid', NOW() - INTERVAL '10 months'),
+
+    -- Southwest deals
+    (gen_random_uuid(), v_d_bookshelf_1, v_broker_southwest, v_team_id,
+     10.00, 3500.00, 'paid', NOW() - INTERVAL '24 months'),
+    (gen_random_uuid(), v_d_bookshelf_2, v_broker_southwest, v_team_id,
+     11.00, 6050.00, 'paid', NOW() - INTERVAL '6 months'),
+    (gen_random_uuid(), v_d_crossfit, v_broker_southwest, v_team_id,
+     11.00, 6050.00, 'paid', NOW() - INTERVAL '10 months'),
+    (gen_random_uuid(), v_d_catering, v_broker_southwest, v_team_id,
+     11.00, 5500.00, 'paid', NOW() - INTERVAL '5 months')
   ON CONFLICT ON CONSTRAINT broker_commissions_deal_broker_unique DO NOTHING;
 
   -- ========================================================================
@@ -909,7 +1312,26 @@ BEGIN
     (gen_random_uuid(), v_d_luckydragon, v_syndicator_meridian, v_team_id,
      30000.00, 0.4000, 'active', NULL),
     (gen_random_uuid(), v_d_luckydragon, v_syndicator_coastal, v_team_id,
-     15000.00, 0.2000, 'active', NULL)
+     15000.00, 0.2000, 'active', NULL),
+
+    -- New deal syndications
+    -- Lakeside Urgent Care ($150K): Atlas 40% + Meridian 20% = 60% syndicated (largest deal)
+    (gen_random_uuid(), v_d_urgentcare, v_syndicator_atlas, v_team_id,
+     60000.00, 0.4000, 'active', 'Largest deal in portfolio'),
+    (gen_random_uuid(), v_d_urgentcare, v_syndicator_meridian, v_team_id,
+     30000.00, 0.2000, 'active', NULL),
+
+    -- Cardinal Electric D2 ($85K): Atlas 35% = 35% syndicated (near payoff)
+    (gen_random_uuid(), v_d_cardinal_2, v_syndicator_atlas, v_team_id,
+     29750.00, 0.3500, 'active', 'Near payoff — strong return'),
+
+    -- BlueSky Dental ($120K): Meridian 30% = 30% syndicated
+    (gen_random_uuid(), v_d_bluesky, v_syndicator_meridian, v_team_id,
+     36000.00, 0.3000, 'active', 'Healthcare vertical'),
+
+    -- Lucky Dragon D2 ($100K): Meridian 35% = 35% syndicated (renewal)
+    (gen_random_uuid(), v_d_luckydragon_2, v_syndicator_meridian, v_team_id,
+     35000.00, 0.3500, 'active', 'Renewal deal — returning client')
   ON CONFLICT ON CONSTRAINT syndication_participants_deal_syndicator_unique DO NOTHING;
 
   RAISE NOTICE 'Demo data seeded successfully!';

@@ -49,7 +49,6 @@ import { RecurringExpensesWidget } from "./recurring-expenses";
 import { RevenueForecastWidget } from "./revenue-forecast";
 import { RevenueSummaryWidget } from "./revenue-summary";
 import { RunwayWidget } from "./runway";
-import { TaxSummaryWidget } from "./tax-summary";
 import { TopMerchantWidget } from "./top-merchant";
 import { VaultWidget } from "./vault";
 import { WidgetErrorFallback } from "./widget-error-fallback";
@@ -136,7 +135,6 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "monthly-spending": MonthlySpendingWidget,
   "invoice-payment-score": InvoicePaymentScoreWidget,
   "recurring-expenses": RecurringExpensesWidget,
-  "tax-summary": TaxSummaryWidget,
   "category-expenses": CategoryExpensesWidget,
   "overdue-invoices-alert": OverdueInvoicesAlertWidget,
   "merchant-lifetime-value": MerchantLifetimeValueWidget,

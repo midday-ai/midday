@@ -460,15 +460,6 @@ export function TransactionDetails() {
               </div>
             </div>
 
-            <TaxAmount
-              transactionId={data?.id}
-              amount={data?.amount}
-              currency={data?.currency}
-              taxRate={data?.taxRate}
-              taxAmount={data?.taxAmount}
-              taxType={data?.taxType}
-            />
-
             <div className="flex flex-row items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="mb-2 block font-medium text-md">

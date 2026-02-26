@@ -4,10 +4,10 @@ import {
   type activityTypeEnum,
   merchants,
   exchangeRates,
-  invoiceRecurring,
-  invoiceStatusEnum,
-  invoiceTemplates,
-  invoices,
+  dealRecurring,
+  dealStatusEnum,
+  dealTemplates,
+  deals,
   teams,
   users,
 } from "@db/schema";
@@ -43,13 +43,13 @@ import { v4 as uuidv4 } from "uuid";
 import { logActivity } from "../utils/log-activity";
 
 export type Template = {
-  id?: string; // Reference to invoice_templates table
+  id?: string; // Reference to deal_templates table
   name?: string; // Template name for display
   isDefault?: boolean; // Whether this is the default template
   customerLabel: string;
   title: string;
   fromLabel: string;
-  invoiceNoLabel: string;
+  dealNoLabel: string;
   issueDateLabel: string;
   dueDateLabel: string;
   descriptionLabel: string;
@@ -85,7 +85,7 @@ export type Template = {
   paymentTermsDays?: number;
 };
 
-export type GetInvoicesParams = {
+export type GetDealsParams = {
   teamId: string;
   cursor?: string | null;
   pageSize?: number;
@@ -100,7 +100,7 @@ export type GetInvoicesParams = {
   recurring?: boolean | null;
 };
 
-export async function getInvoices(db: Database, params: GetInvoicesParams) {
+export async function getDeals(db: Database, params: GetDealsParams) {
   const {
     teamId,
     sort,
@@ -116,48 +116,48 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
     recurring,
   } = params;
 
-  const whereConditions: SQL[] = [eq(invoices.teamId, teamId)];
+  const whereConditions: SQL[] = [eq(deals.teamId, teamId)];
 
   // Apply IDs filter
   if (ids && ids.length > 0) {
-    whereConditions.push(inArray(invoices.id, ids));
+    whereConditions.push(inArray(deals.id, ids));
   }
 
-  // Apply recurring series IDs filter (shows all invoices from these recurring series)
+  // Apply recurring series IDs filter (shows all deals from these recurring series)
   if (recurringIds && recurringIds.length > 0) {
-    whereConditions.push(inArray(invoices.invoiceRecurringId, recurringIds));
+    whereConditions.push(inArray(deals.dealRecurringId, recurringIds));
   }
 
-  // Apply recurring filter (shows all invoices that are/aren't part of a recurring series)
+  // Apply recurring filter (shows all deals that are/aren't part of a recurring series)
   if (recurring === true) {
-    whereConditions.push(isNotNull(invoices.invoiceRecurringId));
+    whereConditions.push(isNotNull(deals.dealRecurringId));
   } else if (recurring === false) {
-    whereConditions.push(isNull(invoices.invoiceRecurringId));
+    whereConditions.push(isNull(deals.dealRecurringId));
   }
 
   // Apply status filter
   if (statuses && statuses.length > 0) {
     // Cast the statuses array to the correct enum type
     const validStatuses = statuses.filter((status) =>
-      invoiceStatusEnum.enumValues.includes(
-        status as (typeof invoiceStatusEnum.enumValues)[number],
+      dealStatusEnum.enumValues.includes(
+        status as (typeof dealStatusEnum.enumValues)[number],
       ),
-    ) as (typeof invoiceStatusEnum.enumValues)[number][];
+    ) as (typeof dealStatusEnum.enumValues)[number][];
 
     if (validStatuses.length > 0) {
-      whereConditions.push(inArray(invoices.status, validStatuses));
+      whereConditions.push(inArray(deals.status, validStatuses));
     }
   }
 
   // Apply date range filter
   if (start && end) {
-    whereConditions.push(gte(invoices.dueDate, start));
-    whereConditions.push(lte(invoices.dueDate, end));
+    whereConditions.push(gte(deals.dueDate, start));
+    whereConditions.push(lte(deals.dueDate, end));
   }
 
   // Apply merchant filter
   if (merchantIds && merchantIds.length > 0) {
-    whereConditions.push(inArray(invoices.merchantId, merchantIds));
+    whereConditions.push(inArray(deals.merchantId, merchantIds));
   }
 
   // Apply search query filter
@@ -165,14 +165,14 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
     // If the query is a number, search by amount
     if (!Number.isNaN(Number.parseInt(q))) {
       whereConditions.push(
-        sql`${invoices.amount}::text = ${Number(q).toString()}`,
+        sql`${deals.amount}::text = ${Number(q).toString()}`,
       );
     } else {
       const query = buildSearchQuery(q);
 
-      // Search using full-text search, invoiceNumber, or merchantName
+      // Search using full-text search, dealNumber, or merchantName
       whereConditions.push(
-        sql`(to_tsquery('english', ${query}) @@ ${invoices.fts} OR ${invoices.invoiceNumber} ILIKE '%' || ${q} || '%' OR ${invoices.merchantName} ILIKE '%' || ${q} || '%')`,
+        sql`(to_tsquery('english', ${query}) @@ ${deals.fts} OR ${deals.dealNumber} ILIKE '%' || ${q} || '%' OR ${deals.merchantName} ILIKE '%' || ${q} || '%')`,
       );
     }
   }
@@ -180,70 +180,70 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
   // Start building the query
   const query = db
     .select({
-      id: invoices.id,
-      dueDate: invoices.dueDate,
-      invoiceNumber: invoices.invoiceNumber,
-      createdAt: invoices.createdAt,
-      amount: invoices.amount,
-      currency: invoices.currency,
-      lineItems: invoices.lineItems,
-      paymentDetails: invoices.paymentDetails,
-      merchantDetails: invoices.merchantDetails,
-      reminderSentAt: invoices.reminderSentAt,
-      updatedAt: invoices.updatedAt,
-      note: invoices.note,
-      internalNote: invoices.internalNote,
-      paidAt: invoices.paidAt,
-      vat: invoices.vat,
-      tax: invoices.tax,
-      filePath: invoices.filePath,
-      status: invoices.status,
-      fileSize: invoices.fileSize,
-      viewedAt: invoices.viewedAt,
-      fromDetails: invoices.fromDetails,
-      issueDate: invoices.issueDate,
-      sentAt: invoices.sentAt,
-      template: invoices.template,
-      noteDetails: invoices.noteDetails,
-      merchantName: invoices.merchantName,
-      token: invoices.token,
-      sentTo: invoices.sentTo,
-      discount: invoices.discount,
-      subtotal: invoices.subtotal,
-      topBlock: invoices.topBlock,
-      bottomBlock: invoices.bottomBlock,
-      scheduledAt: invoices.scheduledAt,
-      scheduledJobId: invoices.scheduledJobId,
+      id: deals.id,
+      dueDate: deals.dueDate,
+      dealNumber: deals.dealNumber,
+      createdAt: deals.createdAt,
+      amount: deals.amount,
+      currency: deals.currency,
+      lineItems: deals.lineItems,
+      paymentDetails: deals.paymentDetails,
+      merchantDetails: deals.merchantDetails,
+      reminderSentAt: deals.reminderSentAt,
+      updatedAt: deals.updatedAt,
+      note: deals.note,
+      internalNote: deals.internalNote,
+      paidAt: deals.paidAt,
+      vat: deals.vat,
+      tax: deals.tax,
+      filePath: deals.filePath,
+      status: deals.status,
+      fileSize: deals.fileSize,
+      viewedAt: deals.viewedAt,
+      fromDetails: deals.fromDetails,
+      issueDate: deals.issueDate,
+      sentAt: deals.sentAt,
+      template: deals.template,
+      noteDetails: deals.noteDetails,
+      merchantName: deals.merchantName,
+      token: deals.token,
+      sentTo: deals.sentTo,
+      discount: deals.discount,
+      subtotal: deals.subtotal,
+      topBlock: deals.topBlock,
+      bottomBlock: deals.bottomBlock,
+      scheduledAt: deals.scheduledAt,
+      scheduledJobId: deals.scheduledJobId,
       merchant: {
         id: merchants.id,
         name: merchants.name,
         website: merchants.website,
         email: merchants.email,
       },
-      merchantId: invoices.merchantId,
+      merchantId: deals.merchantId,
       team: {
         name: teams.name,
       },
-      // Recurring invoice fields
-      invoiceRecurringId: invoices.invoiceRecurringId,
-      recurringSequence: invoices.recurringSequence,
+      // Recurring deal fields
+      dealRecurringId: deals.dealRecurringId,
+      recurringSequence: deals.recurringSequence,
       recurring: {
-        id: invoiceRecurring.id,
-        status: invoiceRecurring.status,
-        frequency: invoiceRecurring.frequency,
-        frequencyInterval: invoiceRecurring.frequencyInterval,
-        endType: invoiceRecurring.endType,
-        endCount: invoiceRecurring.endCount,
-        invoicesGenerated: invoiceRecurring.invoicesGenerated,
-        nextScheduledAt: invoiceRecurring.nextScheduledAt,
+        id: dealRecurring.id,
+        status: dealRecurring.status,
+        frequency: dealRecurring.frequency,
+        frequencyInterval: dealRecurring.frequencyInterval,
+        endType: dealRecurring.endType,
+        endCount: dealRecurring.endCount,
+        dealsGenerated: dealRecurring.dealsGenerated,
+        nextScheduledAt: dealRecurring.nextScheduledAt,
       },
     })
-    .from(invoices)
-    .leftJoin(merchants, eq(invoices.merchantId, merchants.id))
-    .leftJoin(teams, eq(invoices.teamId, teams.id))
+    .from(deals)
+    .leftJoin(merchants, eq(deals.merchantId, merchants.id))
+    .leftJoin(teams, eq(deals.teamId, teams.id))
     .leftJoin(
-      invoiceRecurring,
-      eq(invoices.invoiceRecurringId, invoiceRecurring.id),
+      dealRecurring,
+      eq(deals.dealRecurringId, dealRecurring.id),
     )
     .where(and(...whereConditions));
 
@@ -258,24 +258,24 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
         : query.orderBy(desc(merchants.name));
     } else if (column === "created_at") {
       isAscending
-        ? query.orderBy(asc(invoices.createdAt))
-        : query.orderBy(desc(invoices.createdAt));
+        ? query.orderBy(asc(deals.createdAt))
+        : query.orderBy(desc(deals.createdAt));
     } else if (column === "due_date") {
       isAscending
-        ? query.orderBy(asc(invoices.dueDate))
-        : query.orderBy(desc(invoices.dueDate));
+        ? query.orderBy(asc(deals.dueDate))
+        : query.orderBy(desc(deals.dueDate));
     } else if (column === "amount") {
       isAscending
-        ? query.orderBy(asc(invoices.amount))
-        : query.orderBy(desc(invoices.amount));
+        ? query.orderBy(asc(deals.amount))
+        : query.orderBy(desc(deals.amount));
     } else if (column === "status") {
       isAscending
-        ? query.orderBy(asc(invoices.status))
-        : query.orderBy(desc(invoices.status));
+        ? query.orderBy(asc(deals.status))
+        : query.orderBy(desc(deals.status));
     }
   } else {
     // Default sort by created_at descending
-    query.orderBy(desc(invoices.createdAt));
+    query.orderBy(desc(deals.createdAt));
   }
 
   // Apply pagination
@@ -301,57 +301,57 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
   };
 }
 
-export type GetInvoiceByIdParams = {
+export type GetDealByIdParams = {
   id: string;
   teamId?: string;
 };
 
-export async function getInvoiceById(
+export async function getDealById(
   db: Database,
-  params: GetInvoiceByIdParams,
+  params: GetDealByIdParams,
 ) {
   const { id, teamId } = params;
 
   const [result] = await db
     .select({
-      id: invoices.id,
-      dueDate: invoices.dueDate,
-      invoiceNumber: invoices.invoiceNumber,
-      createdAt: invoices.createdAt,
-      amount: invoices.amount,
-      currency: invoices.currency,
-      lineItems: invoices.lineItems,
-      paymentDetails: invoices.paymentDetails,
-      merchantDetails: invoices.merchantDetails,
-      reminderSentAt: invoices.reminderSentAt,
-      updatedAt: invoices.updatedAt,
-      note: invoices.note,
-      internalNote: invoices.internalNote,
-      paidAt: invoices.paidAt,
-      vat: invoices.vat,
-      tax: invoices.tax,
-      filePath: invoices.filePath,
-      status: invoices.status,
-      fileSize: invoices.fileSize,
-      viewedAt: invoices.viewedAt,
-      fromDetails: invoices.fromDetails,
-      issueDate: invoices.issueDate,
-      sentAt: invoices.sentAt,
-      template: invoices.template,
-      templateId: invoices.templateId,
-      noteDetails: invoices.noteDetails,
-      merchantName: invoices.merchantName,
-      token: invoices.token,
-      sentTo: invoices.sentTo,
-      discount: invoices.discount,
-      subtotal: invoices.subtotal,
-      topBlock: invoices.topBlock,
-      bottomBlock: invoices.bottomBlock,
-      scheduledAt: invoices.scheduledAt,
-      scheduledJobId: invoices.scheduledJobId,
-      paymentIntentId: invoices.paymentIntentId,
-      refundedAt: invoices.refundedAt,
-      teamId: invoices.teamId,
+      id: deals.id,
+      dueDate: deals.dueDate,
+      dealNumber: deals.dealNumber,
+      createdAt: deals.createdAt,
+      amount: deals.amount,
+      currency: deals.currency,
+      lineItems: deals.lineItems,
+      paymentDetails: deals.paymentDetails,
+      merchantDetails: deals.merchantDetails,
+      reminderSentAt: deals.reminderSentAt,
+      updatedAt: deals.updatedAt,
+      note: deals.note,
+      internalNote: deals.internalNote,
+      paidAt: deals.paidAt,
+      vat: deals.vat,
+      tax: deals.tax,
+      filePath: deals.filePath,
+      status: deals.status,
+      fileSize: deals.fileSize,
+      viewedAt: deals.viewedAt,
+      fromDetails: deals.fromDetails,
+      issueDate: deals.issueDate,
+      sentAt: deals.sentAt,
+      template: deals.template,
+      templateId: deals.templateId,
+      noteDetails: deals.noteDetails,
+      merchantName: deals.merchantName,
+      token: deals.token,
+      sentTo: deals.sentTo,
+      discount: deals.discount,
+      subtotal: deals.subtotal,
+      topBlock: deals.topBlock,
+      bottomBlock: deals.bottomBlock,
+      scheduledAt: deals.scheduledAt,
+      scheduledJobId: deals.scheduledJobId,
+      paymentIntentId: deals.paymentIntentId,
+      refundedAt: deals.refundedAt,
+      teamId: deals.teamId,
       merchant: {
         id: merchants.id,
         name: merchants.name,
@@ -361,7 +361,7 @@ export async function getInvoiceById(
         portalId: merchants.portalId,
         portalEnabled: merchants.portalEnabled,
       },
-      merchantId: invoices.merchantId,
+      merchantId: deals.merchantId,
       team: {
         name: teams.name,
         email: teams.email,
@@ -375,40 +375,40 @@ export async function getInvoiceById(
         timezone: users.timezone,
         locale: users.locale,
       },
-      // Join to get the template name and isDefault from invoice_templates
-      invoiceTemplate: {
-        id: invoiceTemplates.id,
-        name: invoiceTemplates.name,
-        isDefault: invoiceTemplates.isDefault,
+      // Join to get the template name and isDefault from deal_templates
+      dealTemplate: {
+        id: dealTemplates.id,
+        name: dealTemplates.name,
+        isDefault: dealTemplates.isDefault,
       },
-      // Recurring invoice data
-      invoiceRecurringId: invoices.invoiceRecurringId,
-      recurringSequence: invoices.recurringSequence,
+      // Recurring deal data
+      dealRecurringId: deals.dealRecurringId,
+      recurringSequence: deals.recurringSequence,
       recurring: {
-        id: invoiceRecurring.id,
-        frequency: invoiceRecurring.frequency,
-        frequencyInterval: invoiceRecurring.frequencyInterval,
-        status: invoiceRecurring.status,
-        nextScheduledAt: invoiceRecurring.nextScheduledAt,
-        endType: invoiceRecurring.endType,
-        endCount: invoiceRecurring.endCount,
-        invoicesGenerated: invoiceRecurring.invoicesGenerated,
+        id: dealRecurring.id,
+        frequency: dealRecurring.frequency,
+        frequencyInterval: dealRecurring.frequencyInterval,
+        status: dealRecurring.status,
+        nextScheduledAt: dealRecurring.nextScheduledAt,
+        endType: dealRecurring.endType,
+        endCount: dealRecurring.endCount,
+        dealsGenerated: dealRecurring.dealsGenerated,
       },
     })
-    .from(invoices)
-    .leftJoin(merchants, eq(invoices.merchantId, merchants.id))
-    .leftJoin(teams, eq(invoices.teamId, teams.id))
-    .leftJoin(users, eq(invoices.userId, users.id))
-    .leftJoin(invoiceTemplates, eq(invoices.templateId, invoiceTemplates.id))
+    .from(deals)
+    .leftJoin(merchants, eq(deals.merchantId, merchants.id))
+    .leftJoin(teams, eq(deals.teamId, teams.id))
+    .leftJoin(users, eq(deals.userId, users.id))
+    .leftJoin(dealTemplates, eq(deals.templateId, dealTemplates.id))
     .leftJoin(
-      invoiceRecurring,
-      eq(invoices.invoiceRecurringId, invoiceRecurring.id),
+      dealRecurring,
+      eq(deals.dealRecurringId, dealRecurring.id),
     )
     .where(
       and(
-        eq(invoices.id, id),
-        // This is when we use the token to get the invoice
-        teamId !== undefined ? eq(invoices.teamId, teamId) : undefined,
+        eq(deals.id, id),
+        // This is when we use the token to get the deal
+        teamId !== undefined ? eq(deals.teamId, teamId) : undefined,
       ),
     );
 
@@ -420,19 +420,19 @@ export async function getInvoiceById(
     deep: true,
   }) as Template;
 
-  // Populate template metadata from the joined invoice_templates table
+  // Populate template metadata from the joined deal_templates table
   // This ensures correct display even for drafts saved before multi-template feature
-  if (result.invoiceTemplate?.id) {
-    template.id = result.invoiceTemplate.id;
-    template.name = result.invoiceTemplate.name ?? "Default";
-    template.isDefault = result.invoiceTemplate.isDefault ?? false;
+  if (result.dealTemplate?.id) {
+    template.id = result.dealTemplate.id;
+    template.name = result.dealTemplate.name ?? "Default";
+    template.isDefault = result.dealTemplate.isDefault ?? false;
   } else if (result.templateId) {
     // Fallback: if templateId exists but join failed, at least set the id
     template.id = result.templateId;
   }
 
-  // Remove the invoiceTemplate from the result as it's merged into template
-  const { invoiceTemplate: _, ...restResult } = result;
+  // Remove the dealTemplate from the result as it's merged into template
+  const { dealTemplate: _, ...restResult } = result;
 
   return {
     ...restResult,
@@ -448,24 +448,24 @@ export async function getInvoiceById(
 }
 
 /**
- * Get an invoice by its Stripe payment intent ID.
- * Used by webhooks to find invoices when processing refunds.
+ * Get a deal by its Stripe payment intent ID.
+ * Used by webhooks to find deals when processing refunds.
  */
-export async function getInvoiceByPaymentIntentId(
+export async function getDealByPaymentIntentId(
   db: Database,
   paymentIntentId: string,
 ) {
   const [result] = await db
     .select({
-      id: invoices.id,
-      teamId: invoices.teamId,
-      status: invoices.status,
-      invoiceNumber: invoices.invoiceNumber,
-      merchantName: invoices.merchantName,
-      paymentIntentId: invoices.paymentIntentId,
+      id: deals.id,
+      teamId: deals.teamId,
+      status: deals.status,
+      dealNumber: deals.dealNumber,
+      merchantName: deals.merchantName,
+      paymentIntentId: deals.paymentIntentId,
     })
-    .from(invoices)
-    .where(eq(invoices.paymentIntentId, paymentIntentId))
+    .from(deals)
+    .where(eq(deals.paymentIntentId, paymentIntentId))
     .limit(1);
 
   return result;
@@ -485,7 +485,7 @@ export async function getPaymentStatus(
   db: Database,
   teamId: string,
 ): Promise<PaymentStatusResult> {
-  const invoiceData = await db.executeOnReplica(
+  const dealData = await db.executeOnReplica(
     sql`
       SELECT 
         i.id,
@@ -494,7 +494,7 @@ export async function getPaymentStatus(
         i.status,
         i.amount,
         i.currency
-      FROM invoices i
+      FROM deals i
       WHERE i.team_id = ${teamId}
         AND i.due_date IS NOT NULL
         AND (
@@ -507,41 +507,41 @@ export async function getPaymentStatus(
     `,
   );
 
-  if (!Array.isArray(invoiceData) || invoiceData.length === 0) {
+  if (!Array.isArray(dealData) || dealData.length === 0) {
     return {
       score: 0,
       paymentStatus: "none",
     };
   }
 
-  // Calculate weighted average days overdue (recent invoices matter more)
+  // Calculate weighted average days overdue (recent deals matter more)
   let totalWeightedDays = 0;
   let totalWeight = 0;
   let onTimeCount = 0;
   let lateCount = 0;
 
-  for (const invoice of invoiceData) {
-    if (!invoice.due_date) continue;
+  for (const deal of dealData) {
+    if (!deal.due_date) continue;
 
-    const dueDate = new Date(invoice.due_date as string);
+    const dueDate = new Date(deal.due_date as string);
     let daysOverdue = 0;
 
-    if (invoice.status === "paid" && invoice.paid_at) {
-      // For paid invoices, calculate days between due_date and paid_at
-      const paidDate = new Date(invoice.paid_at as string);
+    if (deal.status === "paid" && deal.paid_at) {
+      // For paid deals, calculate days between due_date and paid_at
+      const paidDate = new Date(deal.paid_at as string);
       daysOverdue =
         (paidDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24);
     } else if (
-      (invoice.status === "unpaid" || invoice.status === "overdue") &&
-      invoice.paid_at === null
+      (deal.status === "unpaid" || deal.status === "overdue") &&
+      deal.paid_at === null
     ) {
-      // For unpaid/overdue invoices, calculate days between due_date and current date
+      // For unpaid/overdue deals, calculate days between due_date and current date
       const currentDate = new Date();
       daysOverdue =
         (currentDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24);
     }
 
-    // Weight: recent invoices (last 90 days) get higher weight
+    // Weight: recent deals (last 90 days) get higher weight
     const daysSinceDue = Math.abs(
       (new Date().getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
     );
@@ -601,24 +601,24 @@ export async function getPaymentStatus(
   };
 }
 
-type SearchInvoiceNumberParams = {
+type SearchDealNumberParams = {
   teamId: string;
   query: string;
 };
 
-export async function searchInvoiceNumber(
+export async function searchDealNumber(
   db: Database,
-  params: SearchInvoiceNumberParams,
+  params: SearchDealNumberParams,
 ) {
   const [result] = await db
     .select({
-      invoiceNumber: invoices.invoiceNumber,
+      dealNumber: deals.dealNumber,
     })
-    .from(invoices)
+    .from(deals)
     .where(
       and(
-        eq(invoices.teamId, params.teamId),
-        ilike(invoices.invoiceNumber, `%${params.query}`),
+        eq(deals.teamId, params.teamId),
+        ilike(deals.dealNumber, `%${params.query}`),
       ),
     )
     .limit(1);
@@ -627,62 +627,62 @@ export async function searchInvoiceNumber(
 }
 
 /**
- * Generate the next invoice number for a team.
+ * Generate the next deal number for a team.
  * Format: INV-XXXX (e.g., INV-0001, INV-0042)
  *
  * Logic:
- * 1. Find the highest numeric suffix from existing invoice numbers
+ * 1. Find the highest numeric suffix from existing deal numbers
  * 2. If found, increment by 1
- * 3. If not found, count total invoices + 1
+ * 3. If not found, count total deals + 1
  * 4. Pad to 4 digits with leading zeros
  */
-export async function getNextInvoiceNumber(
+export async function getNextDealNumber(
   db: DatabaseOrTransaction,
   teamId: string,
 ): Promise<string> {
   const PREFIX = "INV-";
   const PAD_LENGTH = 4;
 
-  // Find the highest invoice number with a numeric suffix for this team
+  // Find the highest deal number with a numeric suffix for this team
   // Using raw SQL for the regex extraction since Drizzle doesn't support it natively
-  const maxInvoiceResult = await db
-    .select({ invoiceNumber: invoices.invoiceNumber })
-    .from(invoices)
+  const maxDealResult = await db
+    .select({ dealNumber: deals.dealNumber })
+    .from(deals)
     .where(
       and(
-        eq(invoices.teamId, teamId),
-        sql`${invoices.invoiceNumber} ~ '[0-9]+$'`,
+        eq(deals.teamId, teamId),
+        sql`${deals.dealNumber} ~ '[0-9]+$'`,
       ),
     )
     .orderBy(
-      sql`CAST(SUBSTRING(${invoices.invoiceNumber} FROM '[0-9]+$') AS INTEGER) DESC`,
+      sql`CAST(SUBSTRING(${deals.dealNumber} FROM '[0-9]+$') AS INTEGER) DESC`,
     )
     .limit(1);
 
   let nextNumber: number;
 
-  if (maxInvoiceResult.length > 0 && maxInvoiceResult[0]?.invoiceNumber) {
-    // Extract the numeric part from the invoice number
-    const match = maxInvoiceResult[0].invoiceNumber.match(/(\d+)$/);
+  if (maxDealResult.length > 0 && maxDealResult[0]?.dealNumber) {
+    // Extract the numeric part from the deal number
+    const match = maxDealResult[0].dealNumber.match(/(\d+)$/);
 
     if (match?.[1]) {
       // Increment the numeric part
       nextNumber = Number.parseInt(match[1], 10) + 1;
     } else {
-      // Fallback: count total invoices + 1
+      // Fallback: count total deals + 1
       const countResult = await db
         .select({ count: count() })
-        .from(invoices)
-        .where(eq(invoices.teamId, teamId));
+        .from(deals)
+        .where(eq(deals.teamId, teamId));
 
       nextNumber = (countResult[0]?.count ?? 0) + 1;
     }
   } else {
-    // No invoices with numeric suffix found, count total invoices + 1
+    // No deals with numeric suffix found, count total deals + 1
     const countResult = await db
       .select({ count: count() })
-      .from(invoices)
-      .where(eq(invoices.teamId, teamId));
+      .from(deals)
+      .where(eq(deals.teamId, teamId));
 
     nextNumber = (countResult[0]?.count ?? 0) + 1;
   }
@@ -693,20 +693,20 @@ export async function getNextInvoiceNumber(
   return `${PREFIX}${paddedNumber}`;
 }
 
-export async function isInvoiceNumberUsed(
+export async function isDealNumberUsed(
   db: Database,
   teamId: string,
-  invoiceNumber: string,
+  dealNumber: string,
 ): Promise<boolean> {
   const [result] = await db
     .select({
-      id: invoices.id,
+      id: deals.id,
     })
-    .from(invoices)
+    .from(deals)
     .where(
       and(
-        eq(invoices.teamId, teamId),
-        eq(invoices.invoiceNumber, invoiceNumber),
+        eq(deals.teamId, teamId),
+        eq(deals.dealNumber, dealNumber),
       ),
     )
     .limit(1);
@@ -714,7 +714,7 @@ export async function isInvoiceNumberUsed(
   return !!result;
 }
 
-type DraftInvoiceLineItemParams = {
+type DraftDealLineItemParams = {
   name?: string | null; // Stringified TipTap JSONContent
   quantity?: number;
   unit?: string | null;
@@ -723,11 +723,11 @@ type DraftInvoiceLineItemParams = {
   tax?: number | null;
 };
 
-type DraftInvoiceTemplateParams = {
+type DraftDealTemplateParams = {
   customerLabel?: string;
   title?: string;
   fromLabel?: string;
-  invoiceNoLabel?: string;
+  dealNoLabel?: string;
   issueDateLabel?: string;
   dueDateLabel?: string;
   descriptionLabel?: string;
@@ -761,9 +761,9 @@ type DraftInvoiceTemplateParams = {
   locale?: string;
 };
 
-type DraftInvoiceParams = {
+type DraftDealParams = {
   id: string;
-  template: DraftInvoiceTemplateParams;
+  template: DraftDealTemplateParams;
   templateId?: string | null;
   fromDetails?: string | null;
   merchantDetails?: string | null;
@@ -773,7 +773,7 @@ type DraftInvoiceParams = {
   noteDetails?: string | null;
   dueDate: string;
   issueDate: string;
-  invoiceNumber: string;
+  dealNumber: string;
   logoUrl?: string | null;
   vat?: number | null;
   tax?: number | null;
@@ -782,15 +782,15 @@ type DraftInvoiceParams = {
   topBlock?: string | null;
   bottomBlock?: string | null;
   amount?: number | null;
-  lineItems?: DraftInvoiceLineItemParams[];
+  lineItems?: DraftDealLineItemParams[];
   token?: string;
   teamId: string;
   userId: string;
 };
 
-export async function draftInvoice(
+export async function draftDeal(
   db: DatabaseOrTransaction,
-  params: DraftInvoiceParams,
+  params: DraftDealParams,
 ) {
   const {
     id,
@@ -811,7 +811,7 @@ export async function draftInvoice(
   const { paymentDetails: _, fromDetails: __, ...restTemplate } = template;
 
   const [result] = await db
-    .insert(invoices)
+    .insert(deals)
     .values({
       id,
       teamId,
@@ -827,7 +827,7 @@ export async function draftInvoice(
       noteDetails: noteDetails,
     })
     .onConflictDoUpdate({
-      target: invoices.id,
+      target: deals.id,
       set: {
         teamId,
         userId,
@@ -847,7 +847,7 @@ export async function draftInvoice(
   return result;
 }
 
-export type GetInvoiceSummaryParams = {
+export type GetDealSummaryParams = {
   teamId: string;
   statuses?: (
     | "paid"
@@ -859,17 +859,17 @@ export type GetInvoiceSummaryParams = {
   )[];
 };
 
-export async function getInvoiceSummary(
+export async function getDealSummary(
   db: Database,
-  params: GetInvoiceSummaryParams,
+  params: GetDealSummaryParams,
 ) {
   const { teamId, statuses } = params;
 
-  const whereConditions: SQL[] = [eq(invoices.teamId, teamId)];
+  const whereConditions: SQL[] = [eq(deals.teamId, teamId)];
 
   // Handle multiple statuses
   if (statuses && statuses.length > 0) {
-    whereConditions.push(inArray(invoices.status, statuses));
+    whereConditions.push(inArray(deals.status, statuses));
   }
 
   // Get team's base currency
@@ -881,19 +881,19 @@ export async function getInvoiceSummary(
 
   const baseCurrency = team?.baseCurrency || "USD";
 
-  // Get all invoices with their amounts and currencies
-  const invoiceData = await db
+  // Get all deals with their amounts and currencies
+  const dealData = await db
     .select({
-      amount: invoices.amount,
-      currency: invoices.currency,
+      amount: deals.amount,
+      currency: deals.currency,
     })
-    .from(invoices)
+    .from(deals)
     .where(and(...whereConditions));
 
-  if (invoiceData.length === 0) {
+  if (dealData.length === 0) {
     return {
       totalAmount: 0,
-      invoiceCount: 0,
+      dealCount: 0,
       currency: baseCurrency,
     };
   }
@@ -905,9 +905,9 @@ export async function getInvoiceSummary(
     { amount: number; count: number; convertedAmount: number }
   >();
 
-  for (const invoice of invoiceData) {
-    const amount = Number(invoice.amount) || 0;
-    const currency = invoice.currency || baseCurrency;
+  for (const deal of dealData) {
+    const amount = Number(deal.amount) || 0;
+    const currency = deal.currency || baseCurrency;
 
     if (currency === baseCurrency) {
       totalAmount += amount;
@@ -949,7 +949,7 @@ export async function getInvoiceSummary(
           convertedAmount: existing.convertedAmount + convertedAmount,
         });
       }
-      // Skip invoices with missing exchange rates to avoid mixing currencies
+      // Skip deals with missing exchange rates to avoid mixing currencies
       // This prevents silently producing incorrect totals
     }
   }
@@ -964,137 +964,137 @@ export async function getInvoiceSummary(
     }))
     .sort((a, b) => b.originalAmount - a.originalAmount);
 
-  // Count only invoices that were successfully included in the calculation
-  // (i.e., invoices with valid exchange rates or in base currency)
-  const invoiceCount = Array.from(currencyBreakdown.values()).reduce(
+  // Count only deals that were successfully included in the calculation
+  // (i.e., deals with valid exchange rates or in base currency)
+  const dealCount = Array.from(currencyBreakdown.values()).reduce(
     (sum, data) => sum + data.count,
     0,
   );
 
   return {
     totalAmount: Math.round(totalAmount * 100) / 100, // Round to 2 decimal places
-    invoiceCount,
+    dealCount,
     currency: baseCurrency,
     breakdown: breakdown.length > 1 ? breakdown : undefined, // Only include if multiple currencies
   };
 }
 
-export type DeleteInvoiceParams = {
+export type DeleteDealParams = {
   id: string;
   teamId: string;
 };
 
-export async function deleteInvoice(db: Database, params: DeleteInvoiceParams) {
+export async function deleteDeal(db: Database, params: DeleteDealParams) {
   const { id, teamId } = params;
 
   const [result] = await db
-    .delete(invoices)
+    .delete(deals)
     .where(
       and(
-        eq(invoices.id, id),
-        eq(invoices.teamId, teamId),
-        and(or(eq(invoices.status, "draft"), eq(invoices.status, "canceled"))),
+        eq(deals.id, id),
+        eq(deals.teamId, teamId),
+        and(or(eq(deals.status, "draft"), eq(deals.status, "canceled"))),
       ),
     )
     .returning({
-      id: invoices.id,
+      id: deals.id,
     });
 
   return result;
 }
 
-export type DuplicateInvoiceParams = {
+export type DuplicateDealParams = {
   id: string;
   userId: string;
-  invoiceNumber: string;
+  dealNumber: string;
   teamId: string;
 };
 
-export async function duplicateInvoice(
+export async function duplicateDeal(
   db: Database,
-  params: DuplicateInvoiceParams,
+  params: DuplicateDealParams,
 ) {
-  const { id, userId, invoiceNumber, teamId } = params;
+  const { id, userId, dealNumber, teamId } = params;
 
-  // 1. Fetch the invoice that needs to be duplicated
-  const [invoice] = await db
+  // 1. Fetch the deal that needs to be duplicated
+  const [deal] = await db
     .select({
-      teamId: invoices.teamId,
-      template: invoices.template,
-      merchantId: invoices.merchantId,
-      merchantName: invoices.merchantName,
-      vat: invoices.vat,
-      tax: invoices.tax,
-      discount: invoices.discount,
-      subtotal: invoices.subtotal,
-      amount: invoices.amount,
-      paymentDetails: invoices.paymentDetails,
-      noteDetails: invoices.noteDetails,
-      topBlock: invoices.topBlock,
-      bottomBlock: invoices.bottomBlock,
-      fromDetails: invoices.fromDetails,
-      merchantDetails: invoices.merchantDetails,
-      lineItems: invoices.lineItems,
+      teamId: deals.teamId,
+      template: deals.template,
+      merchantId: deals.merchantId,
+      merchantName: deals.merchantName,
+      vat: deals.vat,
+      tax: deals.tax,
+      discount: deals.discount,
+      subtotal: deals.subtotal,
+      amount: deals.amount,
+      paymentDetails: deals.paymentDetails,
+      noteDetails: deals.noteDetails,
+      topBlock: deals.topBlock,
+      bottomBlock: deals.bottomBlock,
+      fromDetails: deals.fromDetails,
+      merchantDetails: deals.merchantDetails,
+      lineItems: deals.lineItems,
     })
-    .from(invoices)
-    .where(and(eq(invoices.id, id), eq(invoices.teamId, teamId)));
+    .from(deals)
+    .where(and(eq(deals.id, id), eq(deals.teamId, teamId)));
 
-  if (!invoice) {
-    throw new Error("Invoice not found");
+  if (!deal) {
+    throw new Error("Deal not found");
   }
 
   const draftId = uuidv4();
   const token = await generateToken(draftId);
 
-  const result = await draftInvoice(db, {
+  const result = await draftDeal(db, {
     id: draftId,
     token,
     userId,
-    teamId: invoice.teamId,
-    template: invoice.template as DraftInvoiceTemplateParams,
+    teamId: deal.teamId,
+    template: deal.template as DraftDealTemplateParams,
     dueDate: addMonths(new Date(), 1).toISOString(),
     issueDate: new Date().toISOString(),
-    invoiceNumber,
-    merchantId: invoice.merchantId,
-    merchantName: invoice.merchantName,
-    vat: invoice.vat,
-    tax: invoice.tax,
-    discount: invoice.discount,
-    subtotal: invoice.subtotal,
-    amount: invoice.amount,
+    dealNumber,
+    merchantId: deal.merchantId,
+    merchantName: deal.merchantName,
+    vat: deal.vat,
+    tax: deal.tax,
+    discount: deal.discount,
+    subtotal: deal.subtotal,
+    amount: deal.amount,
 
     // @ts-expect-error - JSONB
-    paymentDetails: invoice.paymentDetails,
+    paymentDetails: deal.paymentDetails,
     // @ts-expect-error - JSONB
-    noteDetails: invoice.noteDetails,
+    noteDetails: deal.noteDetails,
     // @ts-expect-error - JSONB
-    topBlock: invoice.topBlock,
+    topBlock: deal.topBlock,
     // @ts-expect-error - JSONB
-    bottomBlock: invoice.bottomBlock,
+    bottomBlock: deal.bottomBlock,
     // @ts-expect-error - JSONB
-    fromDetails: invoice.fromDetails,
+    fromDetails: deal.fromDetails,
     // @ts-expect-error - JSONB
-    merchantDetails: invoice.merchantDetails,
+    merchantDetails: deal.merchantDetails,
     // @ts-expect-error - JSONB
-    lineItems: invoice.lineItems,
+    lineItems: deal.lineItems,
   });
 
   logActivity({
     db,
     teamId,
     userId,
-    type: "invoice_duplicated",
+    type: "deal_duplicated",
     metadata: {
-      originalInvoiceId: id,
-      newInvoiceId: result?.id,
-      newInvoiceNumber: result?.invoiceNumber,
+      originalDealId: id,
+      newDealId: result?.id,
+      newDealNumber: result?.dealNumber,
     },
   });
 
   return result;
 }
 
-export type UpdateInvoiceParams = {
+export type UpdateDealParams = {
   id: string;
   status?: "paid" | "canceled" | "unpaid" | "scheduled" | "draft" | "refunded";
   paidAt?: string | null;
@@ -1108,22 +1108,22 @@ export type UpdateInvoiceParams = {
   sentAt?: string | null;
   filePath?: string[] | null;
   fileSize?: number | null;
-  invoiceRecurringId?: string | null;
+  dealRecurringId?: string | null;
   recurringSequence?: number | null;
   teamId: string;
   userId?: string;
 };
 
-export async function updateInvoice(
+export async function updateDeal(
   db: DatabaseOrTransaction,
-  params: UpdateInvoiceParams,
+  params: UpdateDealParams,
 ) {
   const { id, teamId, userId, ...rest } = params;
 
   const [result] = await db
-    .update(invoices)
+    .update(deals)
     .set(rest)
-    .where(and(eq(invoices.id, id), eq(invoices.teamId, teamId)))
+    .where(and(eq(deals.id, id), eq(deals.teamId, teamId)))
     .returning();
 
   // Log activity if not draft
@@ -1133,10 +1133,10 @@ export async function updateInvoice(
       null;
 
     if (rest.status === "paid") {
-      activityType = "invoice_paid";
+      activityType = "deal_paid";
       priority = 3;
     } else if (rest.status === "canceled") {
-      activityType = "invoice_cancelled";
+      activityType = "deal_cancelled";
       priority = 3;
     }
 
@@ -1149,7 +1149,7 @@ export async function updateInvoice(
         priority,
         metadata: {
           recordId: id,
-          invoiceNumber: result?.invoiceNumber,
+          dealNumber: result?.dealNumber,
           merchantName: result?.merchantName,
           newStatus: rest.status,
           paidAt: rest.paidAt,
@@ -1178,19 +1178,19 @@ export async function getMostActiveMerchant(
     .select({
       merchantId: merchants.id,
       merchantName: merchants.name,
-      invoiceCount: sql<number>`COUNT(DISTINCT ${invoices.id})::int`,
+      dealCount: sql<number>`COUNT(DISTINCT ${deals.id})::int`,
     })
     .from(merchants)
     .innerJoin(
-      invoices,
+      deals,
       and(
-        eq(invoices.merchantId, merchants.id),
-        gte(invoices.createdAt, thirtyDaysAgo.toISOString()),
+        eq(deals.merchantId, merchants.id),
+        gte(deals.createdAt, thirtyDaysAgo.toISOString()),
       ),
     )
     .where(eq(merchants.teamId, teamId))
     .groupBy(merchants.id, merchants.name)
-    .orderBy(sql`COUNT(DISTINCT ${invoices.id}) DESC`)
+    .orderBy(sql`COUNT(DISTINCT ${deals.id}) DESC`)
     .limit(1);
 
   return result[0] || null;
@@ -1209,7 +1209,7 @@ export async function getInactiveMerchantsCount(
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  // Count merchants with no invoices in last 30 days
+  // Count merchants with no deals in last 30 days
   const [result] = await db
     .select({
       count: sql<number>`COUNT(*)::int`,
@@ -1221,15 +1221,15 @@ export async function getInactiveMerchantsCount(
         })
         .from(merchants)
         .leftJoin(
-          invoices,
+          deals,
           and(
-            eq(invoices.merchantId, merchants.id),
-            gte(invoices.createdAt, thirtyDaysAgo.toISOString()),
+            eq(deals.merchantId, merchants.id),
+            gte(deals.createdAt, thirtyDaysAgo.toISOString()),
           ),
         )
         .where(eq(merchants.teamId, teamId))
         .groupBy(merchants.id)
-        .having(sql`COUNT(DISTINCT ${invoices.id}) = 0`)
+        .having(sql`COUNT(DISTINCT ${deals.id}) = 0`)
         .as("inactive_merchants"),
     );
 
@@ -1251,29 +1251,29 @@ export async function getAverageDaysToPayment(
 
   const [result] = await db
     .select({
-      averageDays: sql<number>`ROUND(AVG(DATE_PART('day', ${invoices.paidAt}::timestamp - ${invoices.sentAt}::timestamp)))::int`,
+      averageDays: sql<number>`ROUND(AVG(DATE_PART('day', ${deals.paidAt}::timestamp - ${deals.sentAt}::timestamp)))::int`,
     })
-    .from(invoices)
+    .from(deals)
     .where(
       and(
-        eq(invoices.teamId, teamId),
-        eq(invoices.status, "paid"),
-        isNotNull(invoices.paidAt),
-        isNotNull(invoices.sentAt),
-        gte(invoices.paidAt, thirtyDaysAgo.toISOString()),
+        eq(deals.teamId, teamId),
+        eq(deals.status, "paid"),
+        isNotNull(deals.paidAt),
+        isNotNull(deals.sentAt),
+        gte(deals.paidAt, thirtyDaysAgo.toISOString()),
       ),
     );
 
   return result?.averageDays || 0;
 }
 
-export type GetAverageInvoiceSizeParams = {
+export type GetAverageDealSizeParams = {
   teamId: string;
 };
 
-export async function getAverageInvoiceSize(
+export async function getAverageDealSize(
   db: Database,
-  params: GetAverageInvoiceSizeParams,
+  params: GetAverageDealSizeParams,
 ) {
   const { teamId } = params;
 
@@ -1282,47 +1282,47 @@ export async function getAverageInvoiceSize(
 
   const result = await db
     .select({
-      currency: invoices.currency,
-      averageAmount: sql<number>`ROUND(AVG(${invoices.amount}), 2)::float`,
-      invoiceCount: sql<number>`COUNT(*)::int`,
+      currency: deals.currency,
+      averageAmount: sql<number>`ROUND(AVG(${deals.amount}), 2)::float`,
+      dealCount: sql<number>`COUNT(*)::int`,
     })
-    .from(invoices)
+    .from(deals)
     .where(
       and(
-        eq(invoices.teamId, teamId),
-        gte(invoices.sentAt, thirtyDaysAgo.toISOString()),
-        isNotNull(invoices.sentAt),
+        eq(deals.teamId, teamId),
+        gte(deals.sentAt, thirtyDaysAgo.toISOString()),
+        isNotNull(deals.sentAt),
       ),
     )
-    .groupBy(invoices.currency);
+    .groupBy(deals.currency);
 
   return result;
 }
 
-export type GetInvoicePaymentAnalysisParams = {
+export type GetDealPaymentAnalysisParams = {
   teamId: string;
   from: string;
   to: string;
   currency?: string;
 };
 
-export type InvoicePaymentAnalysisResult = {
+export type DealPaymentAnalysisResult = {
   metrics: {
     averageDaysToPay: number;
     paymentRate: number;
     overdueRate: number;
     paymentScore: number;
-    totalInvoices: number;
-    paidInvoices: number;
-    unpaidInvoices: number;
-    overdueInvoices: number;
+    totalDeals: number;
+    paidDeals: number;
+    unpaidDeals: number;
+    overdueDeals: number;
     overdueAmount: number;
   };
   paymentTrends: Array<{
     month: string;
     averageDaysToPay: number;
     paymentRate: number;
-    invoiceCount: number;
+    dealCount: number;
   }>;
   overdueSummary: {
     count: number;
@@ -1331,10 +1331,10 @@ export type InvoicePaymentAnalysisResult = {
   };
 };
 
-export async function getInvoicePaymentAnalysis(
+export async function getDealPaymentAnalysis(
   db: Database,
-  params: GetInvoicePaymentAnalysisParams,
-): Promise<InvoicePaymentAnalysisResult> {
+  params: GetDealPaymentAnalysisParams,
+): Promise<DealPaymentAnalysisResult> {
   const { teamId, from, to, currency: inputCurrency } = params;
 
   const fromDate = startOfMonth(new UTCDate(parseISO(from)));
@@ -1351,41 +1351,41 @@ export async function getInvoicePaymentAnalysis(
 
   // Build base conditions
   const baseConditions = [
-    eq(invoices.teamId, teamId),
-    gte(invoices.createdAt, format(fromDate, "yyyy-MM-dd")),
-    lte(invoices.createdAt, format(toDate, "yyyy-MM-dd")),
+    eq(deals.teamId, teamId),
+    gte(deals.createdAt, format(fromDate, "yyyy-MM-dd")),
+    lte(deals.createdAt, format(toDate, "yyyy-MM-dd")),
   ];
 
   if (inputCurrency) {
-    baseConditions.push(eq(invoices.currency, inputCurrency));
+    baseConditions.push(eq(deals.currency, inputCurrency));
   }
 
-  // Get all invoices in date range
-  const allInvoices = await db
+  // Get all deals in date range
+  const allDeals = await db
     .select({
-      id: invoices.id,
-      amount: invoices.amount,
-      currency: invoices.currency,
-      status: invoices.status,
-      dueDate: invoices.dueDate,
-      paidAt: invoices.paidAt,
-      createdAt: invoices.createdAt,
-      issueDate: invoices.issueDate,
+      id: deals.id,
+      amount: deals.amount,
+      currency: deals.currency,
+      status: deals.status,
+      dueDate: deals.dueDate,
+      paidAt: deals.paidAt,
+      createdAt: deals.createdAt,
+      issueDate: deals.issueDate,
     })
-    .from(invoices)
+    .from(deals)
     .where(and(...baseConditions));
 
-  if (allInvoices.length === 0) {
+  if (allDeals.length === 0) {
     return {
       metrics: {
         averageDaysToPay: 0,
         paymentRate: 0,
         overdueRate: 0,
         paymentScore: 0,
-        totalInvoices: 0,
-        paidInvoices: 0,
-        unpaidInvoices: 0,
-        overdueInvoices: 0,
+        totalDeals: 0,
+        paidDeals: 0,
+        unpaidDeals: 0,
+        overdueDeals: 0,
         overdueAmount: 0,
       },
       paymentTrends: [],
@@ -1398,11 +1398,11 @@ export async function getInvoicePaymentAnalysis(
   }
 
   // Calculate metrics
-  const paidInvoices = allInvoices.filter((inv) => inv.status === "paid");
-  const unpaidInvoices = allInvoices.filter(
+  const paidDeals = allDeals.filter((inv) => inv.status === "paid");
+  const unpaidDeals = allDeals.filter(
     (inv) => inv.status === "unpaid" || inv.status === "overdue",
   );
-  const overdueInvoices = allInvoices.filter(
+  const overdueDeals = allDeals.filter(
     (inv) =>
       (inv.status === "overdue" ||
         (inv.status === "unpaid" &&
@@ -1415,13 +1415,13 @@ export async function getInvoicePaymentAnalysis(
   let totalDaysToPay = 0;
   let paidCount = 0;
 
-  for (const invoice of paidInvoices) {
-    if (invoice.paidAt) {
+  for (const deal of paidDeals) {
+    if (deal.paidAt) {
       const issueDate =
-        invoice.issueDate || invoice.createdAt || invoice.dueDate;
+        deal.issueDate || deal.createdAt || deal.dueDate;
       if (issueDate) {
         const daysToPay =
-          (new Date(invoice.paidAt).getTime() - parseISO(issueDate).getTime()) /
+          (new Date(deal.paidAt).getTime() - parseISO(issueDate).getTime()) /
           (1000 * 60 * 60 * 24);
         if (daysToPay >= 0) {
           totalDaysToPay += daysToPay;
@@ -1436,21 +1436,21 @@ export async function getInvoicePaymentAnalysis(
 
   // Calculate payment rate
   const paymentRate =
-    allInvoices.length > 0
-      ? Math.round((paidInvoices.length / allInvoices.length) * 100)
+    allDeals.length > 0
+      ? Math.round((paidDeals.length / allDeals.length) * 100)
       : 0;
 
   // Calculate overdue rate
   const overdueRate =
-    allInvoices.length > 0
-      ? Math.round((overdueInvoices.length / allInvoices.length) * 100)
+    allDeals.length > 0
+      ? Math.round((overdueDeals.length / allDeals.length) * 100)
       : 0;
 
   // Calculate overdue amount (convert to target currency)
   let overdueAmount = 0;
-  for (const invoice of overdueInvoices) {
-    const amount = Number(invoice.amount) || 0;
-    if (invoice.currency === targetCurrency) {
+  for (const deal of overdueDeals) {
+    const amount = Number(deal.amount) || 0;
+    if (deal.currency === targetCurrency) {
       overdueAmount += amount;
     } else {
       // For simplicity, use amount as-is (could add currency conversion)
@@ -1477,24 +1477,24 @@ export async function getInvoicePaymentAnalysis(
     const monthEnd = endOfMonth(monthStart);
     const monthStr = format(monthStart, "yyyy-MM");
 
-    const monthInvoices = allInvoices.filter((inv) => {
+    const monthDeals = allDeals.filter((inv) => {
       const invDate = inv.createdAt || inv.issueDate;
       if (!invDate) return false;
       const invDateObj = parseISO(invDate);
       return invDateObj >= monthStart && invDateObj <= monthEnd;
     });
 
-    const monthPaid = monthInvoices.filter((inv) => inv.status === "paid");
+    const monthPaid = monthDeals.filter((inv) => inv.status === "paid");
     let monthTotalDays = 0;
     let monthPaidCount = 0;
 
-    for (const invoice of monthPaid) {
-      if (invoice.paidAt) {
+    for (const deal of monthPaid) {
+      if (deal.paidAt) {
         const issueDate =
-          invoice.issueDate || invoice.createdAt || invoice.dueDate;
+          deal.issueDate || deal.createdAt || deal.dueDate;
         if (issueDate) {
           const daysToPay =
-            (new Date(invoice.paidAt).getTime() -
+            (new Date(deal.paidAt).getTime() -
               parseISO(issueDate).getTime()) /
             (1000 * 60 * 60 * 24);
           if (daysToPay >= 0) {
@@ -1508,25 +1508,25 @@ export async function getInvoicePaymentAnalysis(
     const monthAvgDays =
       monthPaidCount > 0 ? Math.round(monthTotalDays / monthPaidCount) : 0;
     const monthPaymentRate =
-      monthInvoices.length > 0
-        ? Math.round((monthPaid.length / monthInvoices.length) * 100)
+      monthDeals.length > 0
+        ? Math.round((monthPaid.length / monthDeals.length) * 100)
         : 0;
 
     return {
       month: monthStr,
       averageDaysToPay: monthAvgDays,
       paymentRate: monthPaymentRate,
-      invoiceCount: monthInvoices.length,
+      dealCount: monthDeals.length,
     };
   });
 
   // Calculate overdue summary
   let oldestDays = 0;
   const now = new Date();
-  for (const invoice of overdueInvoices) {
-    if (invoice.dueDate) {
+  for (const deal of overdueDeals) {
+    if (deal.dueDate) {
       const daysOverdue =
-        (now.getTime() - parseISO(invoice.dueDate).getTime()) /
+        (now.getTime() - parseISO(deal.dueDate).getTime()) /
         (1000 * 60 * 60 * 24);
       oldestDays = Math.max(oldestDays, Math.round(daysOverdue));
     }
@@ -1538,15 +1538,15 @@ export async function getInvoicePaymentAnalysis(
       paymentRate,
       overdueRate,
       paymentScore: Math.round(paymentScore),
-      totalInvoices: allInvoices.length,
-      paidInvoices: paidInvoices.length,
-      unpaidInvoices: unpaidInvoices.length,
-      overdueInvoices: overdueInvoices.length,
+      totalDeals: allDeals.length,
+      paidDeals: paidDeals.length,
+      unpaidDeals: unpaidDeals.length,
+      overdueDeals: overdueDeals.length,
       overdueAmount: Math.round(overdueAmount * 100) / 100,
     },
     paymentTrends,
     overdueSummary: {
-      count: overdueInvoices.length,
+      count: overdueDeals.length,
       totalAmount: Math.round(overdueAmount * 100) / 100,
       oldestDays,
     },

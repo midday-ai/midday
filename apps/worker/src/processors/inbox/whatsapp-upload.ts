@@ -189,9 +189,6 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
         displayName: result.name ?? undefined,
         website: result.website ?? undefined,
         date: result.date ?? undefined,
-        taxAmount: result.tax_amount ?? undefined,
-        taxRate: result.tax_rate ?? undefined,
-        taxType: result.tax_type ?? undefined,
         type: result.type as "invoice" | "expense" | null | undefined,
         invoiceNumber: result.invoice_number ?? undefined,
         status: "analyzing",
@@ -232,15 +229,10 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
             : undefined;
 
           const formattedAmount = formatCurrencyAmount(updatedInbox.amount);
-          const formattedTaxAmount = updatedInbox.taxAmount
-            ? formatCurrencyAmount(updatedInbox.taxAmount)
-            : undefined;
 
           // Extract numeric amount and currency separately for the formatter
           const amountValue =
             formattedAmount?.replace(/[^\d.,]/g, "") || undefined;
-          const taxAmountValue =
-            formattedTaxAmount?.replace(/[^\d.,]/g, "") || undefined;
 
           const successMessage = formatDocumentProcessedSuccess({
             documentType,
@@ -254,8 +246,6 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
               updatedInbox.invoiceNumber
                 ? updatedInbox.invoiceNumber
                 : undefined,
-            taxAmount: taxAmountValue,
-            taxType: updatedInbox.taxType || undefined,
           });
 
           await whatsappClient.sendMessage(phoneNumber, successMessage);

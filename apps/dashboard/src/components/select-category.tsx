@@ -27,8 +27,6 @@ function transformCategory(category: {
   slug: string | null;
   description: string | null;
   system: boolean | null;
-  taxRate: number | null;
-  taxType: string | null;
   parentId: string | null;
   children?: any[];
 }): {

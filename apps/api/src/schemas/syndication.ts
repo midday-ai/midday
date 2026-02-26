@@ -67,3 +67,72 @@ export const upsertParticipantSchema = z.object({
 export const removeParticipantSchema = z.object({
   id: z.string().uuid(),
 });
+
+// ============================================================================
+// Syndicator Transaction Schemas
+// ============================================================================
+
+export const getSyndicatorTransactionsSchema = z.object({
+  syndicatorId: z.string().uuid(),
+  cursor: z.string().optional(),
+  pageSize: z.coerce.number().min(1).max(100).optional(),
+  transactionType: z
+    .enum([
+      "contribution",
+      "withdrawal",
+      "profit_distribution",
+      "refund",
+      "fee",
+      "chargeback",
+      "transfer",
+      "deal_allocation",
+    ])
+    .nullable()
+    .optional(),
+  dealId: z.string().uuid().nullable().optional(),
+  status: z.string().nullable().optional(),
+  dateFrom: z.string().nullable().optional(),
+  dateTo: z.string().nullable().optional(),
+});
+
+export const getSyndicatorBalanceSchema = z.object({
+  syndicatorId: z.string().uuid(),
+});
+
+export const createSyndicatorTransactionSchema = z.object({
+  syndicatorId: z.string().uuid(),
+  date: z.string(),
+  transactionType: z.enum([
+    "contribution",
+    "withdrawal",
+    "profit_distribution",
+    "refund",
+    "fee",
+    "chargeback",
+    "transfer",
+    "deal_allocation",
+  ]),
+  method: z
+    .enum(["ach", "wire", "check", "zelle", "other"])
+    .nullable()
+    .optional(),
+  amount: z.number().positive(),
+  currency: z.string().optional(),
+  description: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
+  dealId: z.string().uuid().nullable().optional(),
+  participationId: z.string().uuid().nullable().optional(),
+  counterpartySyndicatorId: z.string().uuid().nullable().optional(),
+  status: z
+    .enum(["pending", "completed", "failed", "reversed"])
+    .optional(),
+  linkedTransactionId: z.string().uuid().nullable().optional(),
+  reference: z.string().nullable().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+export const getPortalTransactionsSchema = z.object({
+  portalId: z.string(),
+  cursor: z.string().optional(),
+  pageSize: z.coerce.number().min(1).max(100).optional(),
+});

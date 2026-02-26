@@ -61,6 +61,14 @@ export function SyndicatorDetailContent({
     trpc.syndication.getDealStats.queryOptions({ syndicatorId }),
   );
 
+  const { data: balance } = useQuery(
+    trpc.syndication.getBalance.queryOptions({ syndicatorId }),
+  );
+
+  const { data: txResult } = useQuery(
+    trpc.syndication.getTransactions.queryOptions({ syndicatorId }),
+  );
+
   const togglePortalMutation = useMutation(
     trpc.syndication.togglePortal.mutationOptions({
       onSuccess: () => {
@@ -403,6 +411,159 @@ export function SyndicatorDetailContent({
         ) : (
           <p className="text-sm text-muted-foreground py-4">
             No syndicated deals yet.
+          </p>
+        )}
+      </div>
+
+      {/* Capital Activity */}
+      <div className="mb-8">
+        <h2 className="text-sm font-medium mb-3">Capital Activity</h2>
+
+        {/* Balance Summary */}
+        {balance && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div className="border rounded-lg p-4">
+              <p className="text-xs text-muted-foreground mb-1">
+                Available Balance
+              </p>
+              <p className="text-2xl font-mono font-medium">
+                ${Number(balance.availableBalance).toLocaleString()}
+              </p>
+            </div>
+            <div className="border rounded-lg p-4">
+              <p className="text-xs text-muted-foreground mb-1">
+                Total Contributed
+              </p>
+              <p className="text-2xl font-mono font-medium">
+                ${Number(balance.totalContributed).toLocaleString()}
+              </p>
+            </div>
+            <div className="border rounded-lg p-4">
+              <p className="text-xs text-muted-foreground mb-1">
+                Total Withdrawn
+              </p>
+              <p className="text-2xl font-mono font-medium">
+                ${Number(balance.totalWithdrawn).toLocaleString()}
+              </p>
+            </div>
+            <div className="border rounded-lg p-4">
+              <p className="text-xs text-muted-foreground mb-1">
+                Profit Distributed
+              </p>
+              <p className="text-2xl font-mono font-medium">
+                ${Number(balance.totalDistributed).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Transaction History */}
+        {txResult?.data && txResult.data.length > 0 ? (
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left text-xs font-medium text-muted-foreground py-2 px-3">
+                  Date
+                </th>
+                <th className="text-left text-xs font-medium text-muted-foreground py-2 px-3">
+                  Type
+                </th>
+                <th className="text-left text-xs font-medium text-muted-foreground py-2 px-3">
+                  Method
+                </th>
+                <th className="text-left text-xs font-medium text-muted-foreground py-2 px-3">
+                  Description
+                </th>
+                <th className="text-left text-xs font-medium text-muted-foreground py-2 px-3">
+                  Deal
+                </th>
+                <th className="text-left text-xs font-medium text-muted-foreground py-2 px-3">
+                  Status
+                </th>
+                <th className="text-right text-xs font-medium text-muted-foreground py-2 px-3">
+                  Amount
+                </th>
+                <th className="text-right text-xs font-medium text-muted-foreground py-2 px-3">
+                  Balance
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {txResult.data.map((tx) => {
+                const isCredit = ["contribution", "refund"].includes(
+                  tx.transactionType,
+                );
+                const isTransferIn =
+                  tx.transactionType === "transfer" &&
+                  !tx.counterpartySyndicatorId;
+                const positive = isCredit || isTransferIn;
+
+                return (
+                  <tr
+                    key={tx.id}
+                    className="border-b border-border hover:bg-muted/50"
+                  >
+                    <td className="py-2 px-3 text-sm font-mono">
+                      {tx.date}
+                    </td>
+                    <td className="py-2 px-3">
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                          positive
+                            ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                            : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400",
+                        )}
+                      >
+                        {tx.transactionType.replace(/_/g, " ")}
+                      </span>
+                    </td>
+                    <td className="py-2 px-3 text-sm text-muted-foreground uppercase">
+                      {tx.method ?? "—"}
+                    </td>
+                    <td className="py-2 px-3 text-sm">
+                      {tx.description ?? "—"}
+                    </td>
+                    <td className="py-2 px-3 text-sm font-mono">
+                      {tx.dealCode ?? "—"}
+                    </td>
+                    <td className="py-2 px-3">
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                          tx.status === "completed"
+                            ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                            : tx.status === "failed" ||
+                                tx.status === "reversed"
+                              ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                              : "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400",
+                        )}
+                      >
+                        {tx.status}
+                      </span>
+                    </td>
+                    <td
+                      className={cn(
+                        "py-2 px-3 text-sm text-right font-mono",
+                        positive ? "text-green-600" : "text-red-600",
+                      )}
+                    >
+                      {positive ? "+" : "−"}$
+                      {Number(tx.amount).toLocaleString()}
+                    </td>
+                    <td className="py-2 px-3 text-sm text-right font-mono">
+                      {tx.balanceAfter != null
+                        ? `$${Number(tx.balanceAfter).toLocaleString()}`
+                        : "—"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-sm text-muted-foreground py-4">
+            No capital activity recorded yet.
           </p>
         )}
       </div>

@@ -9,7 +9,9 @@ import {
   getMcaDealById,
   getMcaDealStats,
   getMcaDealStatusBreakdown,
+  updateMcaDeal,
 } from "@db/queries/mca-deals";
+import { createMcaPayment } from "@db/queries/mca-payments";
 import { createDealBankAccount } from "@db/queries/deal-bank-accounts";
 import { getBrokerById, upsertCommission } from "@db/queries";
 import { z } from "zod";
@@ -239,4 +241,61 @@ export const mcaDealsRouter = createTRPCRouter({
       });
     },
   ),
+
+  recordPayment: memberProcedure
+    .input(
+      z.object({
+        dealId: z.string().uuid(),
+        amount: z.number().positive(),
+        paymentDate: z.string(),
+        paymentType: z.enum(["ach", "wire", "check", "manual", "other"]).default("ach"),
+        note: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const deal = await getMcaDealById(db, { id: input.dealId, teamId: teamId! });
+      if (!deal) {
+        throw new Error("Deal not found");
+      }
+
+      const balanceBefore = deal.currentBalance ?? 0;
+      const balanceAfter = balanceBefore - input.amount;
+
+      const payment = await createMcaPayment(db, {
+        teamId: teamId!,
+        dealId: input.dealId,
+        amount: input.amount,
+        paymentDate: input.paymentDate,
+        paymentType: input.paymentType,
+        status: "completed",
+        description: input.note,
+        balanceBefore,
+        balanceAfter,
+      });
+
+      await updateMcaDeal(db, {
+        id: input.dealId,
+        teamId: teamId!,
+        currentBalance: balanceAfter,
+        totalPaid: (deal.totalPaid ?? 0) + input.amount,
+      });
+
+      return payment;
+    }),
+
+  updateStatus: memberProcedure
+    .input(
+      z.object({
+        dealId: z.string().uuid(),
+        status: z.enum(["active", "paid_off", "defaulted", "paused", "late", "in_collections"]),
+        note: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return updateMcaDeal(db, {
+        id: input.dealId,
+        teamId: teamId!,
+        status: input.status,
+      });
+    }),
 });

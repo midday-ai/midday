@@ -22,7 +22,6 @@ import {
 } from "@midday/categories";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { createLoggerWithContext } from "@midday/logger";
-import { resolveTaxValues } from "@midday/utils/tax";
 import {
   and,
   asc,
@@ -400,9 +399,6 @@ export async function getTransactions(
       name: transactions.name,
       description: transactions.description,
       createdAt: transactions.createdAt,
-      taxRate: transactions.taxRate,
-      taxType: transactions.taxType,
-      taxAmount: transactions.taxAmount,
       enrichmentCompleted: transactions.enrichmentCompleted,
       transactionType: transactions.transactionType,
       // MCA reconciliation fields
@@ -420,9 +416,9 @@ export async function getTransactions(
           "isFulfilled",
         ),
       hasPendingSuggestion: sql<boolean>`EXISTS (
-          SELECT 1 FROM ${transactionMatchSuggestions} tms 
-          WHERE tms.transaction_id = ${transactions.id} 
-          AND tms.team_id = ${teamId} 
+          SELECT 1 FROM ${transactionMatchSuggestions} tms
+          WHERE tms.transaction_id = ${transactions.id}
+          AND tms.team_id = ${teamId}
           AND tms.status = 'pending'
         )`.as("hasPendingSuggestion"),
       isExported: sql<boolean>`(
@@ -484,8 +480,6 @@ export async function getTransactions(
         name: transactionCategories.name,
         color: transactionCategories.color,
         slug: transactionCategories.slug,
-        taxRate: transactionCategories.taxRate,
-        taxType: transactionCategories.taxType,
       },
       account: {
         id: bankAccounts.id,
@@ -577,8 +571,6 @@ export async function getTransactions(
       transactionCategories.name,
       transactionCategories.color,
       transactionCategories.slug,
-      transactionCategories.taxRate,
-      transactionCategories.taxType,
       bankAccounts.id,
       bankAccounts.name,
       bankAccounts.currency,
@@ -670,21 +662,9 @@ export async function getTransactions(
         : null,
     };
 
-    const { taxAmount, taxRate, taxType } = resolveTaxValues({
-      transactionAmount: rest.amount,
-      transactionTaxAmount: rest.taxAmount,
-      transactionTaxRate: rest.taxRate,
-      transactionTaxType: rest.taxType,
-      categoryTaxRate: rest.category?.taxRate,
-      categoryTaxType: rest.category?.taxType,
-    });
-
     return {
       ...rest,
       account: newAccount,
-      taxRate,
-      taxType,
-      taxAmount,
     };
   });
 
@@ -724,9 +704,6 @@ export async function getTransactionById(
       name: transactions.name,
       description: transactions.description,
       createdAt: transactions.createdAt,
-      taxRate: transactions.taxRate,
-      taxType: transactions.taxType,
-      taxAmount: transactions.taxAmount,
       enrichmentCompleted: transactions.enrichmentCompleted,
       transactionType: transactions.transactionType,
       // MCA reconciliation fields
@@ -766,8 +743,6 @@ export async function getTransactionById(
         name: transactionCategories.name,
         color: transactionCategories.color,
         slug: transactionCategories.slug,
-        taxRate: transactionCategories.taxRate,
-        taxType: transactionCategories.taxType,
       },
       account: {
         id: bankAccounts.id,
@@ -878,8 +853,6 @@ export async function getTransactionById(
       transactionCategories.name,
       transactionCategories.color,
       transactionCategories.slug,
-      transactionCategories.taxRate,
-      transactionCategories.taxType,
       bankAccounts.id,
       bankConnections.id,
       transactions.date,
@@ -935,21 +908,9 @@ export async function getTransactionById(
       }
     : null;
 
-  const { taxAmount, taxRate, taxType } = resolveTaxValues({
-    transactionAmount: rest.amount,
-    transactionTaxAmount: rest.taxAmount,
-    transactionTaxRate: rest.taxRate,
-    transactionTaxType: rest.taxType,
-    categoryTaxRate: rest.category?.taxRate,
-    categoryTaxType: rest.category?.taxType,
-  });
-
   return {
     ...rest,
     account: newAccount,
-    taxRate,
-    taxType,
-    taxAmount,
   };
 }
 
@@ -1525,9 +1486,6 @@ type UpdateTransactionData = {
   assignedId?: string | null;
   recurring?: boolean;
   frequency?: "weekly" | "monthly" | "annually" | "irregular" | null;
-  taxRate?: number | null;
-  taxAmount?: number | null;
-  taxType?: string | null;
   dealCode?: string | null;
 };
 
@@ -1536,13 +1494,6 @@ export async function updateTransaction(
   params: UpdateTransactionData,
 ) {
   const { id, teamId, userId, ...dataToUpdate } = params;
-
-  // If category is being changed, clear tax fields so category's tax rate is used
-  if (dataToUpdate.categorySlug !== undefined) {
-    dataToUpdate.taxRate = null;
-    dataToUpdate.taxAmount = null;
-    dataToUpdate.taxType = null;
-  }
 
   const [result] = await db
     .update(transactions)
@@ -1616,9 +1567,6 @@ export async function getTransactionsByIds(
       balance: transactions.balance,
       currency: transactions.currency,
       counterparty_name: transactions.counterpartyName,
-      tax_type: transactions.taxType,
-      tax_rate: transactions.taxRate,
-      tax_amount: transactions.taxAmount,
       status: transactions.status,
       attachments: sql<
         Array<{
@@ -1635,10 +1583,7 @@ export async function getTransactionsByIds(
         id: string;
         name: string | null;
         description: string | null;
-        tax_rate: number | null;
-        tax_type: string | null;
-        tax_reporting_code: string | null;
-      } | null>`json_build_object('id', ${transactionCategories.id}, 'name', ${transactionCategories.name}, 'description', ${transactionCategories.description}, 'tax_rate', ${transactionCategories.taxRate}, 'tax_type', ${transactionCategories.taxType}, 'tax_reporting_code', ${transactionCategories.taxReportingCode})`.as(
+      } | null>`json_build_object('id', ${transactionCategories.id}, 'name', ${transactionCategories.name}, 'description', ${transactionCategories.description})`.as(
         "category",
       ),
       bank_account: sql<{
@@ -1692,9 +1637,6 @@ export async function getTransactionsByIds(
       transactionCategories.id,
       transactionCategories.name,
       transactionCategories.description,
-      transactionCategories.taxRate,
-      transactionCategories.taxType,
-      transactionCategories.taxReportingCode,
       bankAccounts.id,
       bankAccounts.name,
     );
@@ -1721,9 +1663,6 @@ type UpdateTransactionsData = {
   tagId?: string | null;
   recurring?: boolean;
   frequency?: "weekly" | "monthly" | "annually" | "irregular" | null;
-  taxRate?: number | null;
-  taxAmount?: number | null;
-  taxType?: string | null;
 };
 
 export async function updateTransactions(
@@ -1731,13 +1670,6 @@ export async function updateTransactions(
   data: UpdateTransactionsData,
 ) {
   const { ids, tagId, teamId, userId, ...input } = data;
-
-  // If category is being changed, clear tax fields so category's tax rate is used
-  if (input.categorySlug !== undefined) {
-    input.taxRate = null;
-    input.taxAmount = null;
-    input.taxType = null;
-  }
 
   if (tagId) {
     await db
@@ -1935,9 +1867,6 @@ export type UpsertTransactionData = {
   notified?: boolean;
   baseAmount?: number | null;
   baseCurrency?: string | null;
-  taxAmount?: number | null;
-  taxRate?: number | null;
-  taxType?: string | null;
   recurring?: boolean;
   frequency?:
     | "weekly"
@@ -1992,9 +1921,6 @@ export async function upsertTransactions(
         manual: sql`excluded.manual`,
         baseAmount: sql`excluded.base_amount`,
         baseCurrency: sql`excluded.base_currency`,
-        taxAmount: sql`excluded.tax_amount`,
-        taxRate: sql`excluded.tax_rate`,
-        taxType: sql`excluded.tax_type`,
         recurring: sql`excluded.recurring`,
         frequency: sql`excluded.frequency`,
         enrichmentCompleted: sql`excluded.enrichment_completed`,
@@ -2103,9 +2029,6 @@ export async function bulkUpdateTransactionsBaseCurrency(
             update?.baseAmount ??
             (tx.baseAmount ? Number(tx.baseAmount) : null),
           baseCurrency: update?.baseCurrency ?? tx.baseCurrency ?? null,
-          taxAmount: tx.taxAmount ? Number(tx.taxAmount) : null,
-          taxRate: tx.taxRate ? Number(tx.taxRate) : null,
-          taxType: tx.taxType,
           recurring: tx.recurring ?? false,
           frequency: tx.frequency as
             | "weekly"

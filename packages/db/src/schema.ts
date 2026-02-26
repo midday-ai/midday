@@ -118,19 +118,19 @@ export const inboxStatusEnum = pgEnum("inbox_status", [
   "deleted",
 ]);
 
-export const inboxTypeEnum = pgEnum("inbox_type", ["invoice", "expense"]);
+export const inboxTypeEnum = pgEnum("inbox_type", ["deal", "expense"]);
 export const inboxBlocklistTypeEnum = pgEnum("inbox_blocklist_type", [
   "email",
   "domain",
 ]);
-export const invoiceDeliveryTypeEnum = pgEnum("invoice_delivery_type", [
+export const dealDeliveryTypeEnum = pgEnum("deal_delivery_type", [
   "create",
   "create_and_send",
   "scheduled",
 ]);
 
-export const invoiceSizeEnum = pgEnum("invoice_size", ["a4", "letter"]);
-export const invoiceStatusEnum = pgEnum("invoice_status", [
+export const dealSizeEnum = pgEnum("deal_size", ["a4", "letter"]);
+export const dealStatusEnum = pgEnum("deal_status", [
   "draft",
   "overdue",
   "paid",
@@ -140,8 +140,8 @@ export const invoiceStatusEnum = pgEnum("invoice_status", [
   "refunded",
 ]);
 
-export const invoiceRecurringFrequencyEnum = pgEnum(
-  "invoice_recurring_frequency",
+export const dealRecurringFrequencyEnum = pgEnum(
+  "deal_recurring_frequency",
   [
     "weekly",
     "biweekly", // Every 2 weeks on the same weekday
@@ -155,12 +155,12 @@ export const invoiceRecurringFrequencyEnum = pgEnum(
   ],
 );
 
-export const invoiceRecurringEndTypeEnum = pgEnum(
-  "invoice_recurring_end_type",
+export const dealRecurringEndTypeEnum = pgEnum(
+  "deal_recurring_end_type",
   ["never", "on_date", "after_count"],
 );
 
-export const invoiceRecurringStatusEnum = pgEnum("invoice_recurring_status", [
+export const dealRecurringStatusEnum = pgEnum("deal_recurring_status", [
   "active",
   "paused",
   "completed",
@@ -275,31 +275,31 @@ export const activityTypeEnum = pgEnum("activity_type", [
   // System-generated activities
   "transactions_enriched",
   "transactions_created",
-  "invoice_paid",
+  "deal_paid",
   "inbox_new",
   "inbox_auto_matched",
   "inbox_needs_review",
   "inbox_cross_currency_matched",
-  "invoice_overdue",
-  "invoice_sent",
+  "deal_overdue",
+  "deal_sent",
   "inbox_match_confirmed",
-  "invoice_refunded",
+  "deal_refunded",
 
-  // Recurring invoice activities
+  // Recurring deal activities
   "recurring_series_started",
   "recurring_series_completed",
   "recurring_series_paused",
-  "recurring_invoice_upcoming",
+  "recurring_deal_upcoming",
 
   // User actions
   "document_uploaded",
   "document_processed",
-  "invoice_duplicated",
-  "invoice_scheduled",
-  "invoice_reminder_sent",
-  "invoice_cancelled",
-  "invoice_created",
-  "draft_invoice_created",
+  "deal_duplicated",
+  "deal_scheduled",
+  "deal_reminder_sent",
+  "deal_cancelled",
+  "deal_created",
+  "draft_deal_created",
   "transactions_categorized",
   "transactions_assigned",
   "transaction_attachment_created",
@@ -751,8 +751,8 @@ export const bankAccounts = pgTable(
   ],
 );
 
-export const invoiceRecurring = pgTable(
-  "invoice_recurring",
+export const dealRecurring = pgTable(
+  "deal_recurring",
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
@@ -766,17 +766,17 @@ export const invoiceRecurring = pgTable(
     userId: uuid("user_id").notNull(),
     merchantId: uuid("merchant_id"),
     // Frequency settings
-    frequency: invoiceRecurringFrequencyEnum().notNull(),
+    frequency: dealRecurringFrequencyEnum().notNull(),
     frequencyDay: integer("frequency_day"), // 0-6 for weekly (day of week), 1-31 for monthly_date
     frequencyWeek: integer("frequency_week"), // 1-5 for monthly_weekday (e.g., 1st, 2nd Friday)
     frequencyInterval: integer("frequency_interval"), // For custom: every X days
     // End conditions
-    endType: invoiceRecurringEndTypeEnum("end_type").notNull(),
+    endType: dealRecurringEndTypeEnum("end_type").notNull(),
     endDate: timestamp("end_date", { withTimezone: true, mode: "string" }),
     endCount: integer("end_count"),
     // Status tracking
-    status: invoiceRecurringStatusEnum().default("active").notNull(),
-    invoicesGenerated: integer("invoices_generated").default(0).notNull(),
+    status: dealRecurringStatusEnum().default("active").notNull(),
+    dealsGenerated: integer("deals_generated").default(0).notNull(),
     consecutiveFailures: integer("consecutive_failures").default(0).notNull(), // Track failures for auto-pause
     nextScheduledAt: timestamp("next_scheduled_at", {
       withTimezone: true,
@@ -787,12 +787,12 @@ export const invoiceRecurring = pgTable(
       mode: "string",
     }),
     timezone: text().notNull(), // User's timezone for correct day-of-week calculation
-    // Invoice template data
+    // Deal template data
     dueDateOffset: integer("due_date_offset").default(30).notNull(), // Days from issue date to due date
     amount: numericCasted({ precision: 10, scale: 2 }),
     currency: text(),
     lineItems: jsonb("line_items"),
-    template: jsonb(), // Invoice template snapshot (labels, settings, etc.)
+    template: jsonb(), // Deal template snapshot (labels, settings, etc.)
     paymentDetails: jsonb("payment_details"),
     fromDetails: jsonb("from_details"),
     noteDetails: jsonb("note_details"),
@@ -811,20 +811,20 @@ export const invoiceRecurring = pgTable(
     }),
   },
   (table) => [
-    index("invoice_recurring_team_id_idx").using(
+    index("deal_recurring_team_id_idx").using(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
     ),
-    index("invoice_recurring_next_scheduled_at_idx").using(
+    index("deal_recurring_next_scheduled_at_idx").using(
       "btree",
       table.nextScheduledAt.asc().nullsLast().op("timestamptz_ops"),
     ),
-    index("invoice_recurring_status_idx").using(
+    index("deal_recurring_status_idx").using(
       "btree",
       table.status.asc().nullsLast(),
     ),
     // Compound partial index for scheduler query
-    index("invoice_recurring_active_scheduled_idx")
+    index("deal_recurring_active_scheduled_idx")
       .using(
         "btree",
         table.nextScheduledAt.asc().nullsLast().op("timestamptz_ops"),
@@ -833,24 +833,24 @@ export const invoiceRecurring = pgTable(
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
-      name: "invoice_recurring_team_id_fkey",
+      name: "deal_recurring_team_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [users.id],
-      name: "invoice_recurring_user_id_fkey",
+      name: "deal_recurring_user_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.merchantId],
       foreignColumns: [merchants.id],
-      name: "invoice_recurring_merchant_id_fkey",
+      name: "deal_recurring_merchant_id_fkey",
     }).onDelete("set null"),
     foreignKey({
       columns: [table.templateId],
-      foreignColumns: [invoiceTemplates.id],
-      name: "invoice_recurring_template_id_fkey",
+      foreignColumns: [dealTemplates.id],
+      name: "deal_recurring_template_id_fkey",
     }).onDelete("set null"),
-    pgPolicy("Invoice recurring can be handled by a member of the team", {
+    pgPolicy("Deal recurring can be handled by a member of the team", {
       as: "permissive",
       for: "all",
       to: ["public"],
@@ -859,8 +859,8 @@ export const invoiceRecurring = pgTable(
   ],
 );
 
-export const invoices = pgTable(
-  "invoices",
+export const deals = pgTable(
+  "deals",
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
@@ -871,7 +871,7 @@ export const invoices = pgTable(
       mode: "string",
     }).defaultNow(),
     dueDate: timestamp("due_date", { withTimezone: true, mode: "string" }),
-    invoiceNumber: text("invoice_number"),
+    dealNumber: text("deal_number"),
     merchantId: uuid("merchant_id"),
     amount: numericCasted({ precision: 10, scale: 2 }),
     currency: text(),
@@ -890,7 +890,7 @@ export const invoices = pgTable(
         to_tsvector(
           'english',
           (
-            (COALESCE((amount)::text, ''::text) || ' '::text) || COALESCE(invoice_number, ''::text)
+            (COALESCE((amount)::text, ''::text) || ' '::text) || COALESCE(deal_number, ''::text)
           )
         )
       `,
@@ -899,7 +899,7 @@ export const invoices = pgTable(
     tax: numericCasted({ precision: 10, scale: 2 }),
     url: text(),
     filePath: text("file_path").array(),
-    status: invoiceStatusEnum().default("draft").notNull(),
+    status: dealStatusEnum().default("draft").notNull(),
     viewedAt: timestamp("viewed_at", { withTimezone: true, mode: "string" }),
     fromDetails: jsonb("from_details"),
     issueDate: timestamp("issue_date", { withTimezone: true, mode: "string" }),
@@ -930,62 +930,62 @@ export const invoices = pgTable(
       withTimezone: true,
       mode: "string",
     }),
-    // Recurring invoice fields
-    invoiceRecurringId: uuid("invoice_recurring_id"),
+    // Recurring deal fields
+    dealRecurringId: uuid("deal_recurring_id"),
     recurringSequence: integer("recurring_sequence"), // Which number in the series (1, 2, 3...)
   },
   (table) => [
-    index("invoices_created_at_idx").using(
+    index("deals_created_at_idx").using(
       "btree",
       table.createdAt.asc().nullsLast().op("timestamptz_ops"),
     ),
-    index("invoices_fts").using(
+    index("deals_fts").using(
       "gin",
       table.fts.asc().nullsLast().op("tsvector_ops"),
     ),
-    index("invoices_team_id_idx").using(
+    index("deals_team_id_idx").using(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
     ),
-    index("invoices_template_id_idx").using(
+    index("deals_template_id_idx").using(
       "btree",
       table.templateId.asc().nullsLast().op("uuid_ops"),
     ),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [users.id],
-      name: "invoices_created_by_fkey",
+      name: "deals_created_by_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.merchantId],
       foreignColumns: [merchants.id],
-      name: "invoices_merchant_id_fkey",
+      name: "deals_merchant_id_fkey",
     }).onDelete("set null"),
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
-      name: "invoices_team_id_fkey",
+      name: "deals_team_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.templateId],
-      foreignColumns: [invoiceTemplates.id],
-      name: "invoices_template_id_fkey",
+      foreignColumns: [dealTemplates.id],
+      name: "deals_template_id_fkey",
     }).onDelete("set null"),
     foreignKey({
-      columns: [table.invoiceRecurringId],
-      foreignColumns: [invoiceRecurring.id],
-      name: "invoices_invoice_recurring_id_fkey",
+      columns: [table.dealRecurringId],
+      foreignColumns: [dealRecurring.id],
+      name: "deals_deal_recurring_id_fkey",
     }).onDelete("set null"),
-    index("invoices_invoice_recurring_id_idx").using(
+    index("deals_deal_recurring_id_idx").using(
       "btree",
-      table.invoiceRecurringId.asc().nullsLast().op("uuid_ops"),
+      table.dealRecurringId.asc().nullsLast().op("uuid_ops"),
     ),
-    // Unique constraint for idempotency (prevents duplicate invoices for same sequence)
-    uniqueIndex("invoices_recurring_sequence_unique_idx")
-      .on(table.invoiceRecurringId, table.recurringSequence)
-      .where(sql`invoice_recurring_id IS NOT NULL`),
-    unique("invoices_scheduled_job_id_key").on(table.scheduledJobId),
-    pgPolicy("Invoices can be handled by a member of the team", {
+    // Unique constraint for idempotency (prevents duplicate deals for same sequence)
+    uniqueIndex("deals_recurring_sequence_unique_idx")
+      .on(table.dealRecurringId, table.recurringSequence)
+      .where(sql`deal_recurring_id IS NOT NULL`),
+    unique("deals_scheduled_job_id_key").on(table.scheduledJobId),
+    pgPolicy("Deals can be handled by a member of the team", {
       as: "permissive",
       for: "all",
       to: ["public"],
@@ -1164,7 +1164,7 @@ export const tags = pgTable(
   ],
 );
 
-export const invoiceComments = pgTable("invoice_comments", {
+export const dealComments = pgTable("deal_comments", {
   id: uuid().defaultRandom().primaryKey().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .defaultNow()
@@ -1722,8 +1722,8 @@ export const apps = pgTable(
   ],
 );
 
-export const invoiceTemplates = pgTable(
-  "invoice_templates",
+export const dealTemplates = pgTable(
+  "deal_templates",
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
@@ -1734,7 +1734,7 @@ export const invoiceTemplates = pgTable(
     isDefault: boolean("is_default").default(false),
     customerLabel: text("customer_label"),
     fromLabel: text("from_label"),
-    invoiceNoLabel: text("invoice_no_label"),
+    dealNoLabel: text("deal_no_label"),
     issueDateLabel: text("issue_date_label"),
     dueDateLabel: text("due_date_label"),
     descriptionLabel: text("description_label"),
@@ -1750,12 +1750,12 @@ export const invoiceTemplates = pgTable(
     paymentDetails: jsonb("payment_details"),
     fromDetails: jsonb("from_details"),
     noteDetails: jsonb("note_details"),
-    size: invoiceSizeEnum().default("a4"),
+    size: dealSizeEnum().default("a4"),
     dateFormat: text("date_format"),
     includeVat: boolean("include_vat"),
     includeTax: boolean("include_tax"),
     taxRate: numericCasted("tax_rate", { precision: 10, scale: 2 }),
-    deliveryType: invoiceDeliveryTypeEnum("delivery_type")
+    deliveryType: dealDeliveryTypeEnum("delivery_type")
       .default("create")
       .notNull(),
     discountLabel: text("discount_label"),
@@ -1778,10 +1778,10 @@ export const invoiceTemplates = pgTable(
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
-      name: "invoice_settings_team_id_fkey",
+      name: "deal_templates_team_id_fkey",
     }).onDelete("cascade"),
-    index("idx_invoice_templates_team_id").on(table.teamId),
-    pgPolicy("Invoice templates can be handled by a member of the team", {
+    index("idx_deal_templates_team_id").on(table.teamId),
+    pgPolicy("Deal templates can be handled by a member of the team", {
       as: "permissive",
       for: "all",
       to: ["public"],
@@ -1790,8 +1790,8 @@ export const invoiceTemplates = pgTable(
   ],
 );
 
-export const invoiceProducts = pgTable(
-  "invoice_products",
+export const dealProducts = pgTable(
+  "deal_products",
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
@@ -1833,23 +1833,23 @@ export const invoiceProducts = pgTable(
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
-      name: "invoice_products_team_id_fkey",
+      name: "deal_products_team_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.createdBy],
       foreignColumns: [users.id],
-      name: "invoice_products_created_by_fkey",
+      name: "deal_products_created_by_fkey",
     }).onDelete("set null"),
-    index("invoice_products_team_id_idx").on(table.teamId),
-    index("invoice_products_created_by_idx").on(table.createdBy),
-    index("invoice_products_fts_idx").using("gin", table.fts),
-    index("invoice_products_name_idx").on(table.name),
-    index("invoice_products_usage_count_idx").on(table.usageCount),
-    index("invoice_products_last_used_at_idx").on(table.lastUsedAt),
+    index("deal_products_team_id_idx").on(table.teamId),
+    index("deal_products_created_by_idx").on(table.createdBy),
+    index("deal_products_fts_idx").using("gin", table.fts),
+    index("deal_products_name_idx").on(table.name),
+    index("deal_products_usage_count_idx").on(table.usageCount),
+    index("deal_products_last_used_at_idx").on(table.lastUsedAt),
     // Composite index for team + active status for fast filtering
-    index("invoice_products_team_active_idx").on(table.teamId, table.isActive),
+    index("deal_products_team_active_idx").on(table.teamId, table.isActive),
     // Unique constraint for upsert operations (team + name + currency + price combination)
-    unique("invoice_products_team_name_currency_price_unique").on(
+    unique("deal_products_team_name_currency_price_unique").on(
       table.teamId,
       table.name,
       table.currency,
@@ -2022,7 +2022,7 @@ export const inbox = pgTable(
     baseAmount: numericCasted("base_amount", { precision: 10, scale: 2 }),
     baseCurrency: text("base_currency"),
     inboxAccountId: uuid("inbox_account_id"),
-    invoiceNumber: text("invoice_number"),
+    dealNumber: text("deal_number"),
     groupedInboxId: uuid("grouped_inbox_id"),
   },
   (table) => [
@@ -2046,9 +2046,9 @@ export const inbox = pgTable(
       "btree",
       table.inboxAccountId.asc().nullsLast().op("uuid_ops"),
     ),
-    index("inbox_invoice_number_idx").using(
+    index("inbox_deal_number_idx").using(
       "btree",
-      table.invoiceNumber.asc().nullsLast().op("text_ops"),
+      table.dealNumber.asc().nullsLast().op("text_ops"),
     ),
     index("inbox_grouped_inbox_id_idx").using(
       "btree",
@@ -2881,7 +2881,7 @@ export const transactionsRelations = relations(
 export const usersRelations = relations(users, ({ one, many }) => ({
   transactions: many(transactions),
   bankAccounts: many(bankAccounts),
-  invoices: many(invoices),
+  deals: many(deals),
   reports: many(reports),
   userInvites: many(userInvites),
   documents: many(documents),
@@ -2929,7 +2929,7 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   merchantTags: many(merchantTags),
   inboxAccounts: many(inboxAccounts),
   bankAccounts: many(bankAccounts),
-  invoices: many(invoices),
+  deals: many(deals),
   merchants: many(merchants),
   tags: many(tags),
   reports: many(reports),
@@ -2942,7 +2942,7 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   apps: many(apps),
   apiKeys: many(apiKeys),
   shortLinks: many(shortLinks),
-  invoiceTemplates: many(invoiceTemplates),
+  dealTemplates: many(dealTemplates),
   transactionEnrichments: many(transactionEnrichments),
   users: many(users),
   inboxes: many(inbox),
@@ -3008,7 +3008,7 @@ export const merchantTagsRelations = relations(merchantTags, ({ one }) => ({
 
 export const merchantsRelations = relations(merchants, ({ one, many }) => ({
   merchantTags: many(merchantTags),
-  invoices: many(invoices),
+  deals: many(deals),
   team: one(teams, {
     fields: [merchants.teamId],
     references: [teams.id],
@@ -3054,45 +3054,45 @@ export const bankConnectionsRelations = relations(
   }),
 );
 
-export const invoicesRelations = relations(invoices, ({ one }) => ({
+export const dealsRelations = relations(deals, ({ one }) => ({
   user: one(users, {
-    fields: [invoices.userId],
+    fields: [deals.userId],
     references: [users.id],
   }),
   merchant: one(merchants, {
-    fields: [invoices.merchantId],
+    fields: [deals.merchantId],
     references: [merchants.id],
   }),
   team: one(teams, {
-    fields: [invoices.teamId],
+    fields: [deals.teamId],
     references: [teams.id],
   }),
-  invoiceRecurring: one(invoiceRecurring, {
-    fields: [invoices.invoiceRecurringId],
-    references: [invoiceRecurring.id],
+  dealRecurring: one(dealRecurring, {
+    fields: [deals.dealRecurringId],
+    references: [dealRecurring.id],
   }),
 }));
 
-export const invoiceRecurringRelations = relations(
-  invoiceRecurring,
+export const dealRecurringRelations = relations(
+  dealRecurring,
   ({ one, many }) => ({
     team: one(teams, {
-      fields: [invoiceRecurring.teamId],
+      fields: [dealRecurring.teamId],
       references: [teams.id],
     }),
     user: one(users, {
-      fields: [invoiceRecurring.userId],
+      fields: [dealRecurring.userId],
       references: [users.id],
     }),
     merchant: one(merchants, {
-      fields: [invoiceRecurring.merchantId],
+      fields: [dealRecurring.merchantId],
       references: [merchants.id],
     }),
-    invoiceTemplate: one(invoiceTemplates, {
-      fields: [invoiceRecurring.templateId],
-      references: [invoiceTemplates.id],
+    dealTemplate: one(dealTemplates, {
+      fields: [dealRecurring.templateId],
+      references: [dealTemplates.id],
     }),
-    invoices: many(invoices),
+    deals: many(deals),
   }),
 );
 
@@ -3185,11 +3185,11 @@ export const appsRelations = relations(apps, ({ one }) => ({
   }),
 }));
 
-export const invoiceTemplatesRelations = relations(
-  invoiceTemplates,
+export const dealTemplatesRelations = relations(
+  dealTemplates,
   ({ one }) => ({
     team: one(teams, {
-      fields: [invoiceTemplates.teamId],
+      fields: [dealTemplates.teamId],
       references: [teams.id],
     }),
   }),
@@ -4435,6 +4435,11 @@ export const brokerCommissionStatusEnum = pgEnum("broker_commission_status", [
   "cancelled",
 ]);
 
+export const brokerCommissionTypeEnum = pgEnum("broker_commission_type", [
+  "percentage",
+  "flat",
+]);
+
 /**
  * Brokers - ISOs who originate MCA deals
  */
@@ -4466,11 +4471,15 @@ export const brokers = pgTable(
     zip: text(),
     country: text(),
 
-    // Default commission rate
+    // Default commission model
+    commissionType: brokerCommissionTypeEnum("commission_type").default(
+      "percentage",
+    ),
     commissionPercentage: numericCasted("commission_percentage", {
       precision: 5,
       scale: 2,
     }),
+    flatFee: numericCasted("flat_fee", { precision: 12, scale: 2 }),
 
     // Portal access
     portalEnabled: boolean("portal_enabled").default(false),
@@ -4518,10 +4527,13 @@ export const brokerCommissions = pgTable(
     teamId: uuid("team_id").notNull(),
 
     // Commission details
+    commissionType: brokerCommissionTypeEnum("commission_type").default(
+      "percentage",
+    ),
     commissionPercentage: numericCasted("commission_percentage", {
       precision: 5,
       scale: 2,
-    }).notNull(),
+    }),
     commissionAmount: numericCasted("commission_amount", {
       precision: 12,
       scale: 2,
@@ -5458,7 +5470,7 @@ export type DocumentSignerConfig = {
   collectionsNotices?: DocumentSigner;
   payoffLetters?: DocumentSigner;
   disclosureDocuments?: DocumentSigner;
-  invoices?: DocumentSigner;
+  deals?: DocumentSigner;
 };
 
 export type TeamBranding = {

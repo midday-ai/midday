@@ -34,7 +34,6 @@ const ARTIFACT_TYPE_LABELS: Record<string, string> = {
   "runway-canvas": "Runway",
   "spending-canvas": "Spending",
   "stress-test-canvas": "Stress Test",
-  "tax-summary-canvas": "Tax Summary",
   "breakdown-summary-canvas": "Summary",
 };
 

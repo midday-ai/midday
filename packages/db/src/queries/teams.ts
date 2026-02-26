@@ -9,11 +9,7 @@ import {
 import { chatCache } from "@midday/cache/chat-cache";
 import { teamCache } from "@midday/cache/team-cache";
 import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
-import {
-  CATEGORIES,
-  getTaxRateForCategory,
-  getTaxTypeForCountry,
-} from "@midday/categories";
+import { CATEGORIES } from "@midday/categories";
 import { and, eq } from "drizzle-orm";
 
 export const hasTeamAccess = async (
@@ -171,7 +167,6 @@ type CreateTeamParams = {
 async function createSystemCategoriesForTeam(
   db: Database,
   teamId: string,
-  countryCode: string | null | undefined,
 ) {
   // Since teams have no previous categories on creation, we can insert all categories directly
   const categoriesToInsert: Array<typeof transactionCategories.$inferInsert> =
@@ -179,9 +174,6 @@ async function createSystemCategoriesForTeam(
 
   // First, add all parent categories
   for (const parent of CATEGORIES) {
-    const taxRate = getTaxRateForCategory(countryCode, parent.slug);
-    const taxType = getTaxTypeForCountry(countryCode);
-
     categoriesToInsert.push({
       teamId,
       name: parent.name,
@@ -189,9 +181,7 @@ async function createSystemCategoriesForTeam(
       color: parent.color,
       system: parent.system,
       excluded: parent.excluded,
-      taxRate: taxRate > 0 ? taxRate : null,
-      taxType: taxRate > 0 ? taxType : null,
-      taxReportingCode: undefined,
+
       description: undefined,
       parentId: undefined, // Parent categories have no parent
     });
@@ -220,9 +210,6 @@ async function createSystemCategoriesForTeam(
     const parentId = parentSlugToId.get(parent.slug);
     if (parentId) {
       for (const child of parent.children) {
-        const taxRate = getTaxRateForCategory(countryCode, child.slug);
-        const taxType = getTaxTypeForCountry(countryCode);
-
         childCategoriesToInsert.push({
           teamId,
           name: child.name,
@@ -230,9 +217,7 @@ async function createSystemCategoriesForTeam(
           color: child.color,
           system: child.system,
           excluded: child.excluded,
-          taxRate: taxRate > 0 ? taxRate : null,
-          taxType: taxRate > 0 ? taxType : null,
-          taxReportingCode: undefined,
+    
           description: undefined,
           parentId: parentId,
         });
@@ -312,7 +297,7 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
       // Create system categories for the new team (atomic)
       console.log(`[${teamCreationId}] Creating system categories`);
       // @ts-expect-error - tx is a PgTransaction
-      await createSystemCategoriesForTeam(tx, newTeam.id, params.countryCode);
+      await createSystemCategoriesForTeam(tx, newTeam.id);
 
       // Optionally switch user to the new team (atomic)
       if (params.switchTeam) {

@@ -115,9 +115,6 @@ export const attachmentSearchResultSchema = z
       website: z.string().nullable(),
       baseAmount: z.number().nullable(),
       baseCurrency: z.string().nullable(),
-      taxAmount: z.number().nullable(),
-      taxRate: z.number().nullable(),
-      taxType: z.string().nullable(),
       createdAt: z.string(),
     }),
     z.object({

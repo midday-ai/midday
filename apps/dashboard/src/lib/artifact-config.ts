@@ -20,7 +20,6 @@ export type ArtifactType =
   | "balance-sheet-canvas"
   | "category-expenses-canvas"
   | "spending-canvas"
-  | "tax-summary-canvas"
   | "profit-analysis-canvas"
   | "forecast-canvas"
   | "stress-test-canvas"
@@ -50,8 +49,6 @@ export const TOOL_TO_ARTIFACT_MAP: Record<string, ArtifactType> = {
   expenses: "category-expenses-canvas",
   getSpending: "spending-canvas",
   spending: "spending-canvas",
-  getTaxSummary: "tax-summary-canvas",
-  taxSummary: "tax-summary-canvas",
   getForecast: "forecast-canvas",
   forecast: "forecast-canvas",
   cashFlowForecast: "forecast-canvas",
@@ -127,12 +124,6 @@ const CUSTOM_STAGE_MESSAGES: Partial<
   },
   "cash-flow-canvas": {
     loading: "Preparing cash flow analysis...",
-    chart_ready: "Chart data ready, calculating metrics...",
-    metrics_ready: "Metrics calculated, generating insights...",
-    analysis_ready: "Analysis complete",
-  },
-  "tax-summary-canvas": {
-    loading: "Preparing tax summary...",
     chart_ready: "Chart data ready, calculating metrics...",
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",

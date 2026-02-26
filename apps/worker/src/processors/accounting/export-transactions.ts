@@ -335,10 +335,6 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
                     providerTransactionId: txResult.providerTransactionId,
                     attachmentIds: attachments.map((a) => a.id),
                     providerEntityType: txResult.providerEntityType,
-                    // Tax info for history note (Xero) - only for new exports
-                    taxAmount: mappedTx?.taxAmount,
-                    taxRate: mappedTx?.taxRate,
-                    taxType: mappedTx?.taxType,
                     note: mappedTx?.note,
                     addHistoryNote: true, // New export - add summary note after attachments
                   },
@@ -352,9 +348,6 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
                   await provider.addTransactionHistoryNote?.({
                     tenantId: orgId,
                     transactionId: txResult.providerTransactionId,
-                    taxAmount: mappedTx.taxAmount,
-                    taxRate: mappedTx.taxRate,
-                    taxType: mappedTx.taxType,
                     note: mappedTx.note,
                   });
                 } catch (error) {

@@ -48,10 +48,6 @@ export const accountingAttachmentSyncSchema = z.object({
     .optional(),
   // Entity type for QuickBooks - avoids extra API call to determine Purchase vs Deposit
   providerEntityType: providerEntityTypeSchema.optional(),
-  // Tax info for history note (Xero only) - added after last attachment
-  taxAmount: z.number().optional(),
-  taxRate: z.number().optional(),
-  taxType: z.string().optional(),
   note: z.string().optional(),
   // Whether to add a summary history note after attachments (Xero only, new exports only)
   addHistoryNote: z.boolean().optional(),

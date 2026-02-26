@@ -11,7 +11,6 @@ import {
   getRevenueSchema,
   getRunwaySchema,
   getSpendingSchema,
-  getTaxSummarySchema,
 } from "@api/schemas/reports";
 import {
   getBalanceSheet,
@@ -25,7 +24,6 @@ import {
   getRevenueForecast,
   getRunway,
   getSpending,
-  getTaxSummary,
 } from "@midday/db/queries";
 import { READ_ONLY_ANNOTATIONS, type RegisterTools, hasScope } from "../types";
 
@@ -171,32 +169,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         from: params.from,
         to: params.to,
         currency: params.currency,
-      });
-
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-      };
-    },
-  );
-
-  server.registerTool(
-    "reports_tax_summary",
-    {
-      title: "Tax Summary Report",
-      description:
-        "Get tax summary for a date range. Shows total tax paid or collected, grouped by category and tax type.",
-      inputSchema: getTaxSummarySchema.shape,
-      annotations: READ_ONLY_ANNOTATIONS,
-    },
-    async (params) => {
-      const result = await getTaxSummary(db, {
-        teamId,
-        from: params.from,
-        to: params.to,
-        type: params.type,
-        currency: params.currency,
-        categorySlug: params.categorySlug,
-        taxType: params.taxType,
       });
 
       return {

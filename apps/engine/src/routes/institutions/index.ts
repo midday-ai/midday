@@ -1,9 +1,9 @@
 import type { Bindings } from "@engine/common/bindings";
 import { ErrorSchema } from "@engine/common/schema";
-import type { Providers } from "@engine/providers/types";
+import { PlaidApi } from "@engine/providers/plaid/plaid-api";
 import { createErrorResponse } from "@engine/utils/error";
-import { SearchClient } from "@engine/utils/search";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import type { CountryCode } from "plaid";
 import { env } from "hono/adapter";
 import {
   InstitutionByIdParamsSchema,
@@ -14,24 +14,6 @@ import {
   UpdateUsageSchema,
 } from "./schema";
 import { excludedInstitutions } from "./utils";
-
-type Document = {
-  id: string;
-  name: string;
-  logo: string | null;
-  available_history: number | null;
-  maximum_consent_validity: number | null;
-  provider: Providers;
-  popularity: number;
-  countries: string[];
-  type?: "personal" | "business";
-};
-
-type SearchResult = {
-  hits: {
-    document: Document;
-  }[];
-};
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>()
   .openapi(
@@ -65,56 +47,87 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       const envs = env(c);
       const { countryCode, q = "*", limit = "50" } = c.req.valid("query");
 
-      const typesense = SearchClient(envs);
+      const { mockInstitutions } = await import("./mock-data");
+      const isInitialLoad = !q || q === "*";
 
-      const searchParameters = {
-        q,
-        query_by: "name",
-        filter_by: `countries:=[${countryCode}]`,
-        limit: +limit,
-        sort_by: "popularity:desc",
-      };
+      if (isInitialLoad) {
+        // Show curated popular banks on initial load
+        const filtered = mockInstitutions
+          .filter((inst) => inst.countries.includes(countryCode))
+          .filter((inst) => !excludedInstitutions.includes(inst.id))
+          .sort((a, b) => b.popularity - a.popularity)
+          .slice(0, +limit);
+
+        return c.json(
+          {
+            data: filtered.map((inst) => ({
+              id: inst.id,
+              name: inst.name,
+              logo: inst.logo,
+              popularity: inst.popularity,
+              available_history: inst.available_history,
+              maximum_consent_validity: inst.maximum_consent_validity,
+              provider: inst.provider,
+              type: inst.type,
+            })),
+          },
+          200,
+        );
+      }
 
       try {
-        const result = await typesense
-          .collections("institutions")
-          .documents()
-          .search(searchParameters);
+        // Search Plaid for typed queries
+        const plaid = new PlaidApi({ envs });
+        const response = await plaid.institutionsSearch({
+          query: q,
+          countryCode: countryCode as CountryCode,
+          limit: +limit,
+        });
 
-        const resultString: string =
-          typeof result === "string" ? result : JSON.stringify(result);
-
-        const data: SearchResult = JSON.parse(resultString);
-
-        const filteredInstitutions = data.hits.filter(
-          ({ document }) => !excludedInstitutions.includes(document.id),
+        const filtered = response.filter(
+          (inst) => !excludedInstitutions.includes(inst.institution_id),
         );
 
         return c.json(
           {
-            data: filteredInstitutions.map(({ document }) => ({
-              id: document.id,
-              name: document.name,
-              logo: document.logo ?? null,
-              popularity: document.popularity,
-              available_history:
-                typeof document.available_history === "string"
-                  ? Number(document.available_history)
-                  : null,
-              maximum_consent_validity:
-                typeof document.maximum_consent_validity === "number"
-                  ? document.maximum_consent_validity
-                  : null,
-              provider: document.provider,
-              type: document.type ?? null,
+            data: filtered.map((inst) => ({
+              id: inst.institution_id,
+              name: inst.name,
+              logo: inst.logo ?? null,
+              popularity: 0,
+              available_history: null,
+              maximum_consent_validity: null,
+              provider: "plaid" as const,
+              type: null,
             })),
           },
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error);
+        // Fallback to mock data if Plaid search fails
+        const query = q.toLowerCase();
+        const filtered = mockInstitutions
+          .filter((inst) => inst.countries.includes(countryCode))
+          .filter((inst) => inst.name.toLowerCase().includes(query))
+          .filter((inst) => !excludedInstitutions.includes(inst.id))
+          .sort((a, b) => b.popularity - a.popularity)
+          .slice(0, +limit);
 
-        return c.json(errorResponse, 400);
+        return c.json(
+          {
+            data: filtered.map((inst) => ({
+              id: inst.id,
+              name: inst.name,
+              logo: inst.logo,
+              popularity: inst.popularity,
+              available_history: inst.available_history,
+              maximum_consent_validity: inst.maximum_consent_validity,
+              provider: inst.provider,
+              type: inst.type,
+            })),
+          },
+          200,
+        );
       }
     },
   )
@@ -146,56 +159,24 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       },
     }),
     async (c) => {
-      const envs = env(c);
+      // Usage tracking was Typesense-only; return a no-op success
       const id = c.req.param("id");
-
-      const typesense = SearchClient(envs);
-
-      try {
-        const original = await typesense
-          .collections("institutions")
-          .documents(id)
-          .retrieve();
-
-        const result = await typesense
-          .collections("institutions")
-          .documents(id)
-          .update({
-            // @ts-ignore
-            popularity: (original?.popularity ?? 0) + 1,
-          });
-
-        const data = result as Document;
-
-        return c.json(
-          {
-            data: {
-              id: data.id,
-              name: data.name,
-              logo: data.logo ?? null,
-              available_history:
-                typeof data.available_history === "string"
-                  ? Number(data.available_history)
-                  : null,
-              maximum_consent_validity:
-                typeof data.maximum_consent_validity === "string"
-                  ? data.maximum_consent_validity
-                  : null,
-              popularity: data.popularity,
-              provider: data.provider,
-              type: data.type ?? null,
-              country: Array.isArray(data.countries)
-                ? data.countries.at(0)
-                : undefined,
-            },
+      return c.json(
+        {
+          data: {
+            id,
+            name: "",
+            logo: null,
+            available_history: null,
+            maximum_consent_validity: null,
+            popularity: 0,
+            provider: "plaid",
+            type: null,
+            country: undefined,
           },
-          200,
-        );
-      } catch (error) {
-        const errorResponse = createErrorResponse(error);
-
-        return c.json(errorResponse, 400);
-      }
+        },
+        200,
+      );
     },
   )
   .openapi(
@@ -237,33 +218,22 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       const envs = env(c);
       const { id } = c.req.valid("param");
 
-      const typesense = SearchClient(envs);
-
       try {
-        const result = (await typesense
-          .collections("institutions")
-          .documents(id)
-          .retrieve()) as Document;
+        const plaid = new PlaidApi({ envs });
+        const { data } = await plaid.institutionsGetById(id);
+        const inst = data.institution;
 
         return c.json(
           {
-            name: result.name,
-            provider: result.provider,
-            id: result.id,
-            logo: result.logo ?? null,
-            available_history:
-              typeof result.available_history === "string"
-                ? Number(result.available_history)
-                : null,
-            maximum_consent_validity:
-              typeof result.maximum_consent_validity === "number"
-                ? result.maximum_consent_validity
-                : null,
-            country: Array.isArray(result.countries)
-              ? result.countries.at(0)
-              : undefined,
-            type: result.type ?? null,
-            popularity: result.popularity,
+            id: inst.institution_id,
+            name: inst.name,
+            provider: "plaid" as const,
+            logo: inst.logo ?? null,
+            available_history: null,
+            maximum_consent_validity: null,
+            country: inst.country_codes?.at(0) ?? undefined,
+            type: null,
+            popularity: 0,
           },
           200,
         );

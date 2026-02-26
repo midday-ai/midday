@@ -175,14 +175,8 @@ export async function deleteAttachment(
       );
   }
 
-  // Delete tax_rate and tax_type from the transaction
+  // Reset export status so transaction reappears in review
   if (result.transactionId) {
-    await db
-      .update(transactions)
-      .set({ taxRate: null, taxType: null })
-      .where(eq(transactions.id, result.transactionId));
-
-    // Reset export status so transaction reappears in review
     await db
       .delete(accountingSyncRecords)
       .where(

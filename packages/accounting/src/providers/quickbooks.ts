@@ -21,7 +21,6 @@ import {
   type UploadAttachmentParams,
 } from "../types";
 import {
-  buildPrivateNote,
   ensureFileExtension,
   generateTransactionIdempotencyKey,
   streamToBuffer,
@@ -925,10 +924,9 @@ export class QuickBooksProvider extends BaseAccountingProvider {
               },
             ],
           };
-          // Build PrivateNote with tax info and user notes
-          const privateNote = buildPrivateNote(tx);
-          if (privateNote) {
-            purchase.PrivateNote = privateNote;
+          // Add user note if available
+          if (tx.note) {
+            purchase.PrivateNote = tx.note;
           }
 
           const result = await this.withRetry(
@@ -961,10 +959,9 @@ export class QuickBooksProvider extends BaseAccountingProvider {
               },
             ],
           };
-          // Build PrivateNote with tax info and user notes
-          const privateNote = buildPrivateNote(tx);
-          if (privateNote) {
-            deposit.PrivateNote = privateNote;
+          // Add user note if available
+          if (tx.note) {
+            deposit.PrivateNote = tx.note;
           }
 
           const result = await this.withRetry(

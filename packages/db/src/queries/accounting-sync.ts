@@ -2,7 +2,6 @@ import type { Database } from "@db/client";
 import {
   accountingSyncRecords,
   transactionAttachments,
-  transactionCategories,
   transactions,
 } from "@db/schema";
 import { and, eq, gte, inArray, notInArray, sql } from "drizzle-orm";
@@ -190,20 +189,8 @@ export type TransactionForSync = {
   amount: number;
   currency: string;
   categorySlug: string | null;
-  /** Category's tax reporting code - used for Xero account code mapping */
-  categoryReportingCode: string | null;
   counterpartyName: string | null;
   status: string | null;
-  /** Tax amount from OCR or manual entry */
-  taxAmount: number | null;
-  /** Tax rate percentage (e.g., 25 for 25%) */
-  taxRate: number | null;
-  /** Tax type (e.g., "VAT", "moms", "GST") */
-  taxType: string | null;
-  /** Category's tax rate (fallback if transaction doesn't have one) */
-  categoryTaxRate: number | null;
-  /** Category's tax type (fallback if transaction doesn't have one) */
-  categoryTaxType: string | null;
   /** User's personal notes about the transaction */
   note: string | null;
   attachments: Array<{
@@ -283,14 +270,8 @@ export const getTransactionsForAccountingSync = async (
       amount: transactions.amount,
       currency: transactions.currency,
       categorySlug: transactions.categorySlug,
-      categoryReportingCode: transactionCategories.taxReportingCode,
       counterpartyName: transactions.counterpartyName,
       status: transactions.status,
-      taxAmount: transactions.taxAmount,
-      taxRate: transactions.taxRate,
-      taxType: transactions.taxType,
-      categoryTaxRate: transactionCategories.taxRate,
-      categoryTaxType: transactionCategories.taxType,
       note: transactions.note,
       attachments: sql<
         Array<{
@@ -306,13 +287,6 @@ export const getTransactionsForAccountingSync = async (
     })
     .from(transactions)
     .leftJoin(
-      transactionCategories,
-      and(
-        eq(transactions.categorySlug, transactionCategories.slug),
-        eq(transactionCategories.teamId, teamId),
-      ),
-    )
-    .leftJoin(
       transactionAttachments,
       and(
         eq(transactionAttachments.transactionId, transactions.id),
@@ -322,12 +296,6 @@ export const getTransactionsForAccountingSync = async (
     .where(and(...conditions))
     .groupBy(
       transactions.id,
-      transactionCategories.taxReportingCode,
-      transactions.taxAmount,
-      transactions.taxRate,
-      transactions.taxType,
-      transactionCategories.taxRate,
-      transactionCategories.taxType,
       transactions.note,
     )
     // Filter to only fulfilled transactions:

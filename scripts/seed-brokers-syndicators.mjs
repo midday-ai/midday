@@ -71,17 +71,7 @@ async function main() {
   console.log('Seeding MCA deals + broker & syndication demo data...\n');
 
   // ------------------------------------------------------------------
-  // 1. Check for existing brokers
-  // ------------------------------------------------------------------
-  const existingBrokers = await fetchAll('brokers', `team_id=eq.${TEAM_ID}&limit=1`);
-  if (existingBrokers.length > 0) {
-    console.log('Brokers already exist. Skipping to avoid duplicates.');
-    console.log('To re-seed, delete from brokers/syndicators first.');
-    process.exit(0);
-  }
-
-  // ------------------------------------------------------------------
-  // 2. Create MCA deals if they don't exist
+  // 1. Create MCA deals if they don't exist
   // ------------------------------------------------------------------
   console.log('1. Checking MCA deals...');
   let deals = await fetchAll('mca_deals', `team_id=eq.${TEAM_ID}&order=deal_code`);
@@ -165,9 +155,11 @@ async function main() {
       state: 'NY',
       zip: '10118',
       country: 'US',
-      commission_percentage: 10.00,
+      commission_type: 'percentage',
+      commission_percentage: 5.00,
+      flat_fee: null,
       status: 'active',
-      note: 'Top-performing ISO. Specializes in restaurant and hospitality deals. Consistent high-quality deal flow.',
+      note: 'Top-performing ISO. Specializes in restaurant and hospitality deals. 5% commission on all deals.',
     },
     {
       id: brokerIds.capital,
@@ -182,9 +174,11 @@ async function main() {
       state: 'FL',
       zip: '33131',
       country: 'US',
-      commission_percentage: 11.00,
+      commission_type: 'flat',
+      commission_percentage: null,
+      flat_fee: 2500.00,
       status: 'active',
-      note: 'Strong in construction and trades verticals. Growing deal volume.',
+      note: 'Flat fee broker — $2,500 per deal regardless of size. Strong in construction and trades.',
     },
     {
       id: brokerIds.southwest,
@@ -199,9 +193,11 @@ async function main() {
       state: 'AZ',
       zip: '85012',
       country: 'US',
-      commission_percentage: 11.00,
+      commission_type: 'percentage',
+      commission_percentage: 5.00,
+      flat_fee: null,
       status: 'active',
-      note: 'Regional ISO covering AZ, NM, NV. Good at service industry deals.',
+      note: 'Regional ISO covering AZ, NM, NV. 5% commission. Good at service industry deals.',
     },
   ];
 
@@ -245,8 +241,9 @@ async function main() {
     if (!deal) continue;
 
     const broker = brokers.find(b => b.id === brokerId);
-    const pct = broker.commission_percentage;
-    const amount = deal.funding_amount * (pct / 100);
+    const isFlat = broker.commission_type === 'flat';
+    const pct = isFlat ? null : broker.commission_percentage;
+    const amount = isFlat ? broker.flat_fee : deal.funding_amount * (pct / 100);
     const isPaid = ['paid_off', 'active', 'late'].includes(deal.status);
 
     commissions.push({
@@ -254,11 +251,14 @@ async function main() {
       deal_id: deal.id,
       broker_id: brokerId,
       team_id: TEAM_ID,
+      commission_type: broker.commission_type,
       commission_percentage: pct,
       commission_amount: amount,
       status: isPaid ? 'paid' : 'pending',
       paid_at: isPaid ? deal.funded_at : null,
-      note: `Commission on ${dealCode} (${pct}% of $${deal.funding_amount.toLocaleString()})`,
+      note: isFlat
+        ? `Flat fee commission on ${dealCode} ($${amount.toLocaleString()})`
+        : `Commission on ${dealCode} (${pct}% of $${deal.funding_amount.toLocaleString()})`,
     });
   }
 
@@ -445,21 +445,263 @@ async function main() {
   console.log(`   Total syndicated funding: $${totalSyndicated.toLocaleString()}`);
 
   // ------------------------------------------------------------------
+  // 8. Create Syndicator Transactions (Capital Activity)
+  // ------------------------------------------------------------------
+  console.log('\n7. Creating syndicator transactions...');
+
+  const syndicatorTxns = [
+    // Apex Capital Partners — $100K initial contribution, then deal allocations + profit
+    {
+      syndicator_id: syndicatorIds.apex,
+      transaction_type: 'contribution',
+      method: 'wire',
+      amount: 100000.00,
+      date: monthsAgo(9).toISOString().split('T')[0],
+      description: 'Initial capital contribution',
+      status: 'completed',
+      balance_before: 0,
+      balance_after: 100000,
+    },
+    {
+      syndicator_id: syndicatorIds.apex,
+      transaction_type: 'deal_allocation',
+      method: null,
+      amount: 22500.00,
+      date: monthsAgo(7).toISOString().split('T')[0],
+      deal_code: 'MCA-2025-006',
+      description: 'Allocated to Westside Construction (30%)',
+      status: 'completed',
+      balance_before: 100000,
+      balance_after: 77500,
+    },
+    {
+      syndicator_id: syndicatorIds.apex,
+      transaction_type: 'deal_allocation',
+      method: null,
+      amount: 15000.00,
+      date: monthsAgo(6).toISOString().split('T')[0],
+      deal_code: 'MCA-2024-001',
+      description: 'Allocated to Martinez Auto Repair (30%)',
+      status: 'completed',
+      balance_before: 77500,
+      balance_after: 62500,
+    },
+    {
+      syndicator_id: syndicatorIds.apex,
+      transaction_type: 'deal_allocation',
+      method: null,
+      amount: 10500.00,
+      date: monthsAgo(4).toISOString().split('T')[0],
+      deal_code: 'MCA-2025-005',
+      description: 'Allocated to Quick Print Solutions (15%)',
+      status: 'completed',
+      balance_before: 62500,
+      balance_after: 52000,
+    },
+    {
+      syndicator_id: syndicatorIds.apex,
+      transaction_type: 'deal_allocation',
+      method: null,
+      amount: 16000.00,
+      date: daysAgo(7).toISOString().split('T')[0],
+      deal_code: 'MCA-2026-002',
+      description: 'Allocated to Fitness First Gym (20%)',
+      status: 'completed',
+      balance_before: 52000,
+      balance_after: 36000,
+    },
+    {
+      syndicator_id: syndicatorIds.apex,
+      transaction_type: 'profit_distribution',
+      method: 'ach',
+      amount: 4800.00,
+      date: daysAgo(30).toISOString().split('T')[0],
+      description: 'Q4 profit distribution — Martinez Auto (paid off)',
+      status: 'completed',
+      balance_before: 36000,
+      balance_after: 31200,
+    },
+
+    // Harbor Funding Group — $75K contribution via ACH, deal allocations
+    {
+      syndicator_id: syndicatorIds.harbor,
+      transaction_type: 'contribution',
+      method: 'ach',
+      amount: 75000.00,
+      date: monthsAgo(6).toISOString().split('T')[0],
+      description: 'Initial capital contribution',
+      status: 'completed',
+      balance_before: 0,
+      balance_after: 75000,
+    },
+    {
+      syndicator_id: syndicatorIds.harbor,
+      transaction_type: 'deal_allocation',
+      method: null,
+      amount: 17500.00,
+      date: monthsAgo(4).toISOString().split('T')[0],
+      deal_code: 'MCA-2025-005',
+      description: 'Allocated to Quick Print Solutions (25%)',
+      status: 'completed',
+      balance_before: 75000,
+      balance_after: 57500,
+    },
+    {
+      syndicator_id: syndicatorIds.harbor,
+      transaction_type: 'deal_allocation',
+      method: null,
+      amount: 13000.00,
+      date: monthsAgo(3).toISOString().split('T')[0],
+      deal_code: 'MCA-2025-001',
+      description: 'Allocated to Sunrise Diner (20%)',
+      status: 'completed',
+      balance_before: 57500,
+      balance_after: 44500,
+    },
+    {
+      syndicator_id: syndicatorIds.harbor,
+      transaction_type: 'deal_allocation',
+      method: null,
+      amount: 12000.00,
+      date: daysAgo(7).toISOString().split('T')[0],
+      deal_code: 'MCA-2026-002',
+      description: 'Allocated to Fitness First Gym (15%)',
+      status: 'completed',
+      balance_before: 44500,
+      balance_after: 32500,
+    },
+    {
+      syndicator_id: syndicatorIds.harbor,
+      transaction_type: 'fee',
+      method: null,
+      amount: 750.00,
+      date: daysAgo(15).toISOString().split('T')[0],
+      description: 'Q1 2026 management fee',
+      status: 'completed',
+      balance_before: 32500,
+      balance_after: 31750,
+    },
+
+    // Meridian Investors — $50K wire + $10K Zelle contribution, deal allocations + withdrawal
+    {
+      syndicator_id: syndicatorIds.meridian,
+      transaction_type: 'contribution',
+      method: 'wire',
+      amount: 50000.00,
+      date: monthsAgo(10).toISOString().split('T')[0],
+      description: 'Initial capital contribution',
+      status: 'completed',
+      balance_before: 0,
+      balance_after: 50000,
+    },
+    {
+      syndicator_id: syndicatorIds.meridian,
+      transaction_type: 'contribution',
+      method: 'zelle',
+      amount: 10000.00,
+      date: monthsAgo(10).toISOString().split('T')[0],
+      description: 'Additional contribution via Zelle',
+      status: 'completed',
+      balance_before: 50000,
+      balance_after: 60000,
+    },
+    {
+      syndicator_id: syndicatorIds.meridian,
+      transaction_type: 'deal_allocation',
+      method: null,
+      amount: 18750.00,
+      date: monthsAgo(9).toISOString().split('T')[0],
+      deal_code: 'MCA-2024-002',
+      description: 'Allocated to Lucky Dragon Restaurant (25%)',
+      status: 'completed',
+      balance_before: 60000,
+      balance_after: 41250,
+    },
+    {
+      syndicator_id: syndicatorIds.meridian,
+      transaction_type: 'deal_allocation',
+      method: null,
+      amount: 15000.00,
+      date: monthsAgo(7).toISOString().split('T')[0],
+      deal_code: 'MCA-2025-006',
+      description: 'Allocated to Westside Construction (20%)',
+      status: 'completed',
+      balance_before: 41250,
+      balance_after: 26250,
+    },
+    {
+      syndicator_id: syndicatorIds.meridian,
+      transaction_type: 'profit_distribution',
+      method: 'ach',
+      amount: 6562.50,
+      date: daysAgo(45).toISOString().split('T')[0],
+      description: 'Profit distribution — Lucky Dragon (paid off, 25% of profit)',
+      status: 'completed',
+      balance_before: 26250,
+      balance_after: 19687.50,
+    },
+    {
+      syndicator_id: syndicatorIds.meridian,
+      transaction_type: 'withdrawal',
+      method: 'wire',
+      amount: 10000.00,
+      date: daysAgo(10).toISOString().split('T')[0],
+      description: 'Partial capital withdrawal',
+      status: 'completed',
+      balance_before: 19687.50,
+      balance_after: 9687.50,
+    },
+    {
+      syndicator_id: syndicatorIds.meridian,
+      transaction_type: 'chargeback',
+      method: null,
+      amount: 450.00,
+      date: daysAgo(5).toISOString().split('T')[0],
+      deal_code: 'MCA-2025-006',
+      description: 'NSF reversal — Westside Construction payment bounced',
+      status: 'completed',
+      balance_before: 9687.50,
+      balance_after: 9237.50,
+    },
+  ];
+
+  const txnRows = syndicatorTxns.map(tx => ({
+    id: uuid(),
+    team_id: TEAM_ID,
+    syndicator_id: tx.syndicator_id,
+    transaction_type: tx.transaction_type,
+    method: tx.method,
+    amount: tx.amount,
+    date: tx.date,
+    deal_id: tx.deal_code ? dealMap[tx.deal_code]?.id || null : null,
+    description: tx.description,
+    status: tx.status,
+    balance_before: tx.balance_before,
+    balance_after: tx.balance_after,
+    currency: 'USD',
+    metadata: {},
+  }));
+
+  await upsert('syndicator_transactions', txnRows);
+  console.log(`   ${txnRows.length} syndicator transactions created`);
+
+  // ------------------------------------------------------------------
   // Summary
   // ------------------------------------------------------------------
   console.log('\n' + '='.repeat(55));
   console.log('Done! Broker & syndication data seeded.\n');
   console.log('   Brokers:');
-  console.log('     - Pinnacle Funding Group (David Chen) — 4 deals');
-  console.log('     - Capital Brokers LLC (Marcus Williams) — 3 deals');
-  console.log('     - Southwest Funding Partners (Sarah Rodriguez) — 3 deals');
+  console.log('     - Pinnacle Funding Group (David Chen) — 4 deals, 5% commission');
+  console.log('     - Capital Brokers LLC (Marcus Williams) — 3 deals, $2,500 flat fee');
+  console.log('     - Southwest Funding Partners (Sarah Rodriguez) — 3 deals, 5% commission');
   console.log(`     - Total commissions: $${totalCommissions.toLocaleString()}`);
   console.log('');
   console.log('   Syndicators:');
-  console.log('     - Apex Capital Partners — 4 deals, $64K syndicated');
-  console.log('     - Harbor Funding Group — 3 deals, $42.5K syndicated');
-  console.log('     - Meridian Investors — 2 deals, $33.75K syndicated');
+  console.log('     - Apex Capital Partners — 4 deals, $64K syndicated, $100K contributed');
+  console.log('     - Harbor Funding Group — 3 deals, $42.5K syndicated, $75K contributed');
+  console.log('     - Meridian Investors — 2 deals, $33.75K syndicated, $60K contributed');
   console.log(`     - Total syndicated: $${totalSyndicated.toLocaleString()}`);
+  console.log(`     - ${txnRows.length} capital activity transactions seeded`);
   console.log('='.repeat(55));
 }
 

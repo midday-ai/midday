@@ -483,21 +483,6 @@ export interface MappedTransaction {
    */
   project?: string;
   /**
-   * Tax amount from OCR or manual entry
-   * - QuickBooks: Included in PrivateNote
-   * - Xero: Appended to LineItem description
-   * - Fortnox: Appended to VoucherRow description
-   */
-  taxAmount?: number;
-  /**
-   * Tax rate percentage (e.g., 25 for 25%)
-   */
-  taxRate?: number;
-  /**
-   * Tax type (e.g., "VAT", "moms", "GST")
-   */
-  taxType?: string;
-  /**
    * User's personal notes about the transaction
    */
   note?: string;

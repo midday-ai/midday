@@ -1,33 +1,33 @@
 import type { Database, DatabaseOrTransaction } from "@db/client";
 import {
   merchants,
-  invoiceRecurring,
-  invoiceRecurringStatusEnum,
-  invoices,
+  dealRecurring,
+  dealRecurringStatusEnum,
+  deals,
   teams,
 } from "@db/schema";
 import {
-  type InvoiceRecurringEndType,
-  type InvoiceRecurringFrequency,
-  type RecurringInvoiceParams,
+  type DealRecurringEndType,
+  type DealRecurringFrequency,
+  type RecurringDealParams,
   advanceToFutureDate,
   calculateFirstScheduledDate,
   calculateNextScheduledDate,
   calculateUpcomingDates,
   shouldMarkCompleted,
-} from "@db/utils/invoice-recurring";
+} from "@db/utils/deal-recurring";
 import { and, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 
-export type CreateInvoiceRecurringParams = {
+export type CreateDealRecurringParams = {
   teamId: string;
   userId: string;
   merchantId?: string | null;
   merchantName?: string | null;
-  frequency: InvoiceRecurringFrequency;
+  frequency: DealRecurringFrequency;
   frequencyDay?: number | null;
   frequencyWeek?: number | null;
   frequencyInterval?: number | null;
-  endType: InvoiceRecurringEndType;
+  endType: DealRecurringEndType;
   endDate?: string | null;
   endCount?: number | null;
   timezone: string;
@@ -47,16 +47,16 @@ export type CreateInvoiceRecurringParams = {
   bottomBlock?: unknown;
   templateId?: string | null;
   /**
-   * Optional issue date for the first invoice.
-   * If provided and in the future, the first invoice will be scheduled for this date.
-   * If not provided or in the past, the first invoice is generated immediately.
+   * Optional issue date for the first deal.
+   * If provided and in the future, the first deal will be scheduled for this date.
+   * If not provided or in the past, the first deal is generated immediately.
    */
   issueDate?: string | null;
 };
 
-export async function createInvoiceRecurring(
+export async function createDealRecurring(
   db: DatabaseOrTransaction,
-  params: CreateInvoiceRecurringParams,
+  params: CreateDealRecurringParams,
 ) {
   const {
     teamId,
@@ -92,7 +92,7 @@ export async function createInvoiceRecurring(
   // Calculate the first scheduled date based on issue date
   // If issue date is in the future, schedule for that date; otherwise generate immediately
   const now = new Date();
-  const recurringParams: RecurringInvoiceParams = {
+  const recurringParams: RecurringDealParams = {
     frequency,
     frequencyDay: frequencyDay ?? null,
     frequencyWeek: frequencyWeek ?? null,
@@ -109,7 +109,7 @@ export async function createInvoiceRecurring(
   );
 
   const [result] = await db
-    .insert(invoiceRecurring)
+    .insert(dealRecurring)
     .values({
       teamId,
       userId,
@@ -139,7 +139,7 @@ export async function createInvoiceRecurring(
       bottomBlock,
       templateId,
       status: "active",
-      invoicesGenerated: 0,
+      dealsGenerated: 0,
       nextScheduledAt: firstScheduledAt.toISOString(),
     })
     .returning();
@@ -147,16 +147,16 @@ export async function createInvoiceRecurring(
   return result;
 }
 
-export type UpdateInvoiceRecurringParams = {
+export type UpdateDealRecurringParams = {
   id: string;
   teamId: string;
   merchantId?: string | null;
   merchantName?: string | null;
-  frequency?: InvoiceRecurringFrequency;
+  frequency?: DealRecurringFrequency;
   frequencyDay?: number | null;
   frequencyWeek?: number | null;
   frequencyInterval?: number | null;
-  endType?: InvoiceRecurringEndType;
+  endType?: DealRecurringEndType;
   endDate?: string | null;
   endCount?: number | null;
   timezone?: string;
@@ -176,15 +176,15 @@ export type UpdateInvoiceRecurringParams = {
   bottomBlock?: unknown;
   templateId?: string | null;
   status?: "active" | "paused" | "completed" | "canceled";
-  invoicesGenerated?: number;
-  // Optional explicit scheduling fields (used when linking existing invoice)
+  dealsGenerated?: number;
+  // Optional explicit scheduling fields (used when linking existing deal)
   nextScheduledAt?: string;
   lastGeneratedAt?: string;
 };
 
-export async function updateInvoiceRecurring(
+export async function updateDealRecurring(
   db: DatabaseOrTransaction,
-  params: UpdateInvoiceRecurringParams,
+  params: UpdateDealRecurringParams,
 ) {
   const {
     id,
@@ -212,15 +212,15 @@ export async function updateInvoiceRecurring(
 
   // Fetch current record if we need to merge/validate
   let current:
-    | (typeof invoiceRecurring.$inferSelect & Record<string, unknown>)
+    | (typeof dealRecurring.$inferSelect & Record<string, unknown>)
     | null = null;
 
   if (frequencyFieldsChanged || endConditionsChanged) {
     const [fetchedCurrent] = await db
       .select()
-      .from(invoiceRecurring)
+      .from(dealRecurring)
       .where(
-        and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+        and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
       );
     current = fetchedCurrent ?? null;
   }
@@ -247,7 +247,7 @@ export async function updateInvoiceRecurring(
   // Calculate nextScheduledAt if frequency changed and series is active
   if (!nextScheduledAt && frequencyFieldsChanged && current) {
     if (current.status === "active") {
-      const recurringParams: RecurringInvoiceParams = {
+      const recurringParams: RecurringDealParams = {
         frequency: params.frequency ?? current.frequency,
         frequencyDay:
           params.frequencyDay !== undefined
@@ -270,7 +270,7 @@ export async function updateInvoiceRecurring(
   }
 
   const [result] = await db
-    .update(invoiceRecurring)
+    .update(dealRecurring)
     .set({
       ...updateData,
       ...(nextScheduledAt && { nextScheduledAt }),
@@ -280,60 +280,60 @@ export async function updateInvoiceRecurring(
       updatedAt: new Date().toISOString(),
     })
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     )
     .returning();
 
   return result;
 }
 
-export type GetInvoiceRecurringByIdParams = {
+export type GetDealRecurringByIdParams = {
   id: string;
   teamId: string;
 };
 
-export async function getInvoiceRecurringById(
+export async function getDealRecurringById(
   db: Database,
-  params: GetInvoiceRecurringByIdParams,
+  params: GetDealRecurringByIdParams,
 ) {
   const { id, teamId } = params;
 
   const [result] = await db
     .select({
-      id: invoiceRecurring.id,
-      createdAt: invoiceRecurring.createdAt,
-      updatedAt: invoiceRecurring.updatedAt,
-      teamId: invoiceRecurring.teamId,
-      userId: invoiceRecurring.userId,
-      merchantId: invoiceRecurring.merchantId,
-      frequency: invoiceRecurring.frequency,
-      frequencyDay: invoiceRecurring.frequencyDay,
-      frequencyWeek: invoiceRecurring.frequencyWeek,
-      frequencyInterval: invoiceRecurring.frequencyInterval,
-      endType: invoiceRecurring.endType,
-      endDate: invoiceRecurring.endDate,
-      endCount: invoiceRecurring.endCount,
-      status: invoiceRecurring.status,
-      invoicesGenerated: invoiceRecurring.invoicesGenerated,
-      nextScheduledAt: invoiceRecurring.nextScheduledAt,
-      lastGeneratedAt: invoiceRecurring.lastGeneratedAt,
-      timezone: invoiceRecurring.timezone,
-      dueDateOffset: invoiceRecurring.dueDateOffset,
-      amount: invoiceRecurring.amount,
-      currency: invoiceRecurring.currency,
-      lineItems: invoiceRecurring.lineItems,
-      template: invoiceRecurring.template,
-      paymentDetails: invoiceRecurring.paymentDetails,
-      fromDetails: invoiceRecurring.fromDetails,
-      noteDetails: invoiceRecurring.noteDetails,
-      merchantName: invoiceRecurring.merchantName,
-      vat: invoiceRecurring.vat,
-      tax: invoiceRecurring.tax,
-      discount: invoiceRecurring.discount,
-      subtotal: invoiceRecurring.subtotal,
-      topBlock: invoiceRecurring.topBlock,
-      bottomBlock: invoiceRecurring.bottomBlock,
-      templateId: invoiceRecurring.templateId,
+      id: dealRecurring.id,
+      createdAt: dealRecurring.createdAt,
+      updatedAt: dealRecurring.updatedAt,
+      teamId: dealRecurring.teamId,
+      userId: dealRecurring.userId,
+      merchantId: dealRecurring.merchantId,
+      frequency: dealRecurring.frequency,
+      frequencyDay: dealRecurring.frequencyDay,
+      frequencyWeek: dealRecurring.frequencyWeek,
+      frequencyInterval: dealRecurring.frequencyInterval,
+      endType: dealRecurring.endType,
+      endDate: dealRecurring.endDate,
+      endCount: dealRecurring.endCount,
+      status: dealRecurring.status,
+      dealsGenerated: dealRecurring.dealsGenerated,
+      nextScheduledAt: dealRecurring.nextScheduledAt,
+      lastGeneratedAt: dealRecurring.lastGeneratedAt,
+      timezone: dealRecurring.timezone,
+      dueDateOffset: dealRecurring.dueDateOffset,
+      amount: dealRecurring.amount,
+      currency: dealRecurring.currency,
+      lineItems: dealRecurring.lineItems,
+      template: dealRecurring.template,
+      paymentDetails: dealRecurring.paymentDetails,
+      fromDetails: dealRecurring.fromDetails,
+      noteDetails: dealRecurring.noteDetails,
+      merchantName: dealRecurring.merchantName,
+      vat: dealRecurring.vat,
+      tax: dealRecurring.tax,
+      discount: dealRecurring.discount,
+      subtotal: dealRecurring.subtotal,
+      topBlock: dealRecurring.topBlock,
+      bottomBlock: dealRecurring.bottomBlock,
+      templateId: dealRecurring.templateId,
       merchant: {
         id: merchants.id,
         name: merchants.name,
@@ -341,10 +341,10 @@ export async function getInvoiceRecurringById(
         website: merchants.website,
       },
     })
-    .from(invoiceRecurring)
-    .leftJoin(merchants, eq(invoiceRecurring.merchantId, merchants.id))
+    .from(dealRecurring)
+    .leftJoin(merchants, eq(dealRecurring.merchantId, merchants.id))
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     );
 
   if (!result) {
@@ -354,7 +354,7 @@ export async function getInvoiceRecurringById(
   return result;
 }
 
-export type GetInvoiceRecurringListParams = {
+export type GetDealRecurringListParams = {
   teamId: string;
   status?: ("active" | "paused" | "completed" | "canceled")[];
   merchantId?: string;
@@ -362,55 +362,55 @@ export type GetInvoiceRecurringListParams = {
   pageSize?: number;
 };
 
-export async function getInvoiceRecurringList(
+export async function getDealRecurringList(
   db: Database,
-  params: GetInvoiceRecurringListParams,
+  params: GetDealRecurringListParams,
 ) {
   const { teamId, status, merchantId, cursor, pageSize = 25 } = params;
 
-  const conditions = [eq(invoiceRecurring.teamId, teamId)];
+  const conditions = [eq(dealRecurring.teamId, teamId)];
 
   if (status && status.length > 0) {
     const validStatuses = status.filter((s) =>
-      invoiceRecurringStatusEnum.enumValues.includes(s),
+      dealRecurringStatusEnum.enumValues.includes(s),
     );
     if (validStatuses.length > 0) {
-      conditions.push(inArray(invoiceRecurring.status, validStatuses));
+      conditions.push(inArray(dealRecurring.status, validStatuses));
     }
   }
 
   if (merchantId) {
-    conditions.push(eq(invoiceRecurring.merchantId, merchantId));
+    conditions.push(eq(dealRecurring.merchantId, merchantId));
   }
 
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;
 
   const data = await db
     .select({
-      id: invoiceRecurring.id,
-      createdAt: invoiceRecurring.createdAt,
-      merchantId: invoiceRecurring.merchantId,
-      merchantName: invoiceRecurring.merchantName,
-      frequency: invoiceRecurring.frequency,
-      frequencyDay: invoiceRecurring.frequencyDay,
-      frequencyWeek: invoiceRecurring.frequencyWeek,
-      endType: invoiceRecurring.endType,
-      endCount: invoiceRecurring.endCount,
-      status: invoiceRecurring.status,
-      invoicesGenerated: invoiceRecurring.invoicesGenerated,
-      nextScheduledAt: invoiceRecurring.nextScheduledAt,
-      amount: invoiceRecurring.amount,
-      currency: invoiceRecurring.currency,
+      id: dealRecurring.id,
+      createdAt: dealRecurring.createdAt,
+      merchantId: dealRecurring.merchantId,
+      merchantName: dealRecurring.merchantName,
+      frequency: dealRecurring.frequency,
+      frequencyDay: dealRecurring.frequencyDay,
+      frequencyWeek: dealRecurring.frequencyWeek,
+      endType: dealRecurring.endType,
+      endCount: dealRecurring.endCount,
+      status: dealRecurring.status,
+      dealsGenerated: dealRecurring.dealsGenerated,
+      nextScheduledAt: dealRecurring.nextScheduledAt,
+      amount: dealRecurring.amount,
+      currency: dealRecurring.currency,
       merchant: {
         id: merchants.id,
         name: merchants.name,
         email: merchants.email,
       },
     })
-    .from(invoiceRecurring)
-    .leftJoin(merchants, eq(invoiceRecurring.merchantId, merchants.id))
+    .from(dealRecurring)
+    .leftJoin(merchants, eq(dealRecurring.merchantId, merchants.id))
     .where(and(...conditions))
-    .orderBy(desc(invoiceRecurring.createdAt))
+    .orderBy(desc(dealRecurring.createdAt))
     .limit(pageSize)
     .offset(offset);
 
@@ -430,20 +430,20 @@ export async function getInvoiceRecurringList(
 }
 
 /**
- * Default batch size for processing recurring invoices
- * Prevents overwhelming the system when many invoices are due at once
+ * Default batch size for processing recurring deals
+ * Prevents overwhelming the system when many deals are due at once
  */
 const DEFAULT_BATCH_SIZE = 50;
 
 /**
- * Get recurring invoices that are due for generation
- * Used by the scheduler to find invoices that need to be generated
+ * Get recurring deals that are due for generation
+ * Used by the scheduler to find deals that need to be generated
  *
  * @param db - Database instance
  * @param options.limit - Maximum number of records to return (default: 50)
  * @returns Object with data array and hasMore flag for pagination awareness
  */
-export async function getDueInvoiceRecurring(
+export async function getDueDealRecurring(
   db: Database,
   options?: { limit?: number },
 ) {
@@ -453,46 +453,46 @@ export async function getDueInvoiceRecurring(
   // Fetch limit + 1 to check if there are more records
   const data = await db
     .select({
-      id: invoiceRecurring.id,
-      teamId: invoiceRecurring.teamId,
-      userId: invoiceRecurring.userId,
-      merchantId: invoiceRecurring.merchantId,
-      merchantName: invoiceRecurring.merchantName,
-      frequency: invoiceRecurring.frequency,
-      frequencyDay: invoiceRecurring.frequencyDay,
-      frequencyWeek: invoiceRecurring.frequencyWeek,
-      frequencyInterval: invoiceRecurring.frequencyInterval,
-      endType: invoiceRecurring.endType,
-      endDate: invoiceRecurring.endDate,
-      endCount: invoiceRecurring.endCount,
-      invoicesGenerated: invoiceRecurring.invoicesGenerated,
-      nextScheduledAt: invoiceRecurring.nextScheduledAt,
-      timezone: invoiceRecurring.timezone,
-      dueDateOffset: invoiceRecurring.dueDateOffset,
-      amount: invoiceRecurring.amount,
-      currency: invoiceRecurring.currency,
-      lineItems: invoiceRecurring.lineItems,
-      template: invoiceRecurring.template,
-      paymentDetails: invoiceRecurring.paymentDetails,
-      fromDetails: invoiceRecurring.fromDetails,
-      noteDetails: invoiceRecurring.noteDetails,
-      vat: invoiceRecurring.vat,
-      tax: invoiceRecurring.tax,
-      discount: invoiceRecurring.discount,
-      subtotal: invoiceRecurring.subtotal,
-      topBlock: invoiceRecurring.topBlock,
-      bottomBlock: invoiceRecurring.bottomBlock,
-      templateId: invoiceRecurring.templateId,
+      id: dealRecurring.id,
+      teamId: dealRecurring.teamId,
+      userId: dealRecurring.userId,
+      merchantId: dealRecurring.merchantId,
+      merchantName: dealRecurring.merchantName,
+      frequency: dealRecurring.frequency,
+      frequencyDay: dealRecurring.frequencyDay,
+      frequencyWeek: dealRecurring.frequencyWeek,
+      frequencyInterval: dealRecurring.frequencyInterval,
+      endType: dealRecurring.endType,
+      endDate: dealRecurring.endDate,
+      endCount: dealRecurring.endCount,
+      dealsGenerated: dealRecurring.dealsGenerated,
+      nextScheduledAt: dealRecurring.nextScheduledAt,
+      timezone: dealRecurring.timezone,
+      dueDateOffset: dealRecurring.dueDateOffset,
+      amount: dealRecurring.amount,
+      currency: dealRecurring.currency,
+      lineItems: dealRecurring.lineItems,
+      template: dealRecurring.template,
+      paymentDetails: dealRecurring.paymentDetails,
+      fromDetails: dealRecurring.fromDetails,
+      noteDetails: dealRecurring.noteDetails,
+      vat: dealRecurring.vat,
+      tax: dealRecurring.tax,
+      discount: dealRecurring.discount,
+      subtotal: dealRecurring.subtotal,
+      topBlock: dealRecurring.topBlock,
+      bottomBlock: dealRecurring.bottomBlock,
+      templateId: dealRecurring.templateId,
     })
-    .from(invoiceRecurring)
+    .from(dealRecurring)
     .where(
       and(
-        eq(invoiceRecurring.status, "active"),
-        lte(invoiceRecurring.nextScheduledAt, now),
+        eq(dealRecurring.status, "active"),
+        lte(dealRecurring.nextScheduledAt, now),
       ),
     )
     // Order by nextScheduledAt to process oldest first (fairness)
-    .orderBy(invoiceRecurring.nextScheduledAt)
+    .orderBy(dealRecurring.nextScheduledAt)
     .limit(limit + 1);
 
   const hasMore = data.length > limit;
@@ -505,26 +505,26 @@ export async function getDueInvoiceRecurring(
 }
 
 /**
- * Mark a recurring invoice as generated and update the next scheduled date
- * This should be called after successfully generating an invoice
+ * Mark a recurring deal as generated and update the next scheduled date
+ * This should be called after successfully generating a deal
  */
-export type MarkInvoiceGeneratedParams = {
+export type MarkDealGeneratedParams = {
   id: string;
   teamId: string;
 };
 
-export async function markInvoiceGenerated(
+export async function markDealGenerated(
   db: DatabaseOrTransaction,
-  params: MarkInvoiceGeneratedParams,
+  params: MarkDealGeneratedParams,
 ) {
   const { id, teamId } = params;
 
-  // Get current recurring invoice data
+  // Get current recurring deal data
   const [current] = await db
     .select()
-    .from(invoiceRecurring)
+    .from(dealRecurring)
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     );
 
   if (!current) {
@@ -532,10 +532,10 @@ export async function markInvoiceGenerated(
   }
 
   const now = new Date();
-  const newInvoicesGenerated = current.invoicesGenerated + 1;
+  const newDealsGenerated = current.dealsGenerated + 1;
 
   // Calculate next scheduled date
-  const recurringParams: RecurringInvoiceParams = {
+  const recurringParams: RecurringDealParams = {
     frequency: current.frequency,
     frequencyDay: current.frequencyDay,
     frequencyWeek: current.frequencyWeek,
@@ -544,7 +544,7 @@ export async function markInvoiceGenerated(
   };
 
   // Use the original scheduled time as the base to preserve the intended schedule pattern
-  // (e.g., biweekly invoices stay on the same weekday, monthly on the same date)
+  // (e.g., biweekly deals stay on the same weekday, monthly on the same date)
   const baseDate = current.nextScheduledAt
     ? new Date(current.nextScheduledAt)
     : now;
@@ -563,14 +563,14 @@ export async function markInvoiceGenerated(
     current.endType,
     current.endDate ? new Date(current.endDate) : null,
     current.endCount,
-    newInvoicesGenerated,
+    newDealsGenerated,
     nextScheduledAt,
   );
 
   const [result] = await db
-    .update(invoiceRecurring)
+    .update(dealRecurring)
     .set({
-      invoicesGenerated: newInvoicesGenerated,
+      dealsGenerated: newDealsGenerated,
       consecutiveFailures: 0, // Reset failures on successful generation
       lastGeneratedAt: now.toISOString(),
       nextScheduledAt: isCompleted ? null : nextScheduledAt.toISOString(),
@@ -578,7 +578,7 @@ export async function markInvoiceGenerated(
       updatedAt: now.toISOString(),
     })
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     )
     .returning();
 
@@ -591,15 +591,15 @@ export async function markInvoiceGenerated(
 const MAX_CONSECUTIVE_FAILURES = 3;
 
 /**
- * Record a failure for a recurring invoice series
+ * Record a failure for a recurring deal series
  * Auto-pauses after MAX_CONSECUTIVE_FAILURES
  * @returns Object with updated record and whether it was auto-paused
  */
-export async function recordInvoiceGenerationFailure(
+export async function recordDealGenerationFailure(
   db: Database,
   params: { id: string; teamId: string },
 ): Promise<{
-  result: typeof invoiceRecurring.$inferSelect | null;
+  result: typeof dealRecurring.$inferSelect | null;
   autoPaused: boolean;
 }> {
   const { id, teamId } = params;
@@ -607,9 +607,9 @@ export async function recordInvoiceGenerationFailure(
   // Get current data
   const [current] = await db
     .select()
-    .from(invoiceRecurring)
+    .from(dealRecurring)
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     );
 
   if (!current) {
@@ -620,14 +620,14 @@ export async function recordInvoiceGenerationFailure(
   const shouldAutoPause = newFailureCount >= MAX_CONSECUTIVE_FAILURES;
 
   const [result] = await db
-    .update(invoiceRecurring)
+    .update(dealRecurring)
     .set({
       consecutiveFailures: newFailureCount,
       status: shouldAutoPause ? "paused" : current.status,
       updatedAt: new Date().toISOString(),
     })
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     )
     .returning();
 
@@ -635,22 +635,22 @@ export async function recordInvoiceGenerationFailure(
 }
 
 /**
- * Pause a recurring invoice series
+ * Pause a recurring deal series
  */
-export async function pauseInvoiceRecurring(
+export async function pauseDealRecurring(
   db: DatabaseOrTransaction,
   params: { id: string; teamId: string },
 ) {
   const { id, teamId } = params;
 
   const [result] = await db
-    .update(invoiceRecurring)
+    .update(dealRecurring)
     .set({
       status: "paused",
       updatedAt: new Date().toISOString(),
     })
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     )
     .returning();
 
@@ -658,10 +658,10 @@ export async function pauseInvoiceRecurring(
 }
 
 /**
- * Resume a paused recurring invoice series
+ * Resume a paused recurring deal series
  * Validates that the series hasn't already completed before resuming
  */
-export async function resumeInvoiceRecurring(
+export async function resumeDealRecurring(
   db: Database,
   params: { id: string; teamId: string },
 ) {
@@ -670,9 +670,9 @@ export async function resumeInvoiceRecurring(
   // Get current data to recalculate next scheduled date
   const [current] = await db
     .select()
-    .from(invoiceRecurring)
+    .from(dealRecurring)
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     );
 
   if (!current || current.status !== "paused") {
@@ -681,7 +681,7 @@ export async function resumeInvoiceRecurring(
 
   // Calculate next scheduled date from now
   const now = new Date();
-  const recurringParams: RecurringInvoiceParams = {
+  const recurringParams: RecurringDealParams = {
     frequency: current.frequency,
     frequencyDay: current.frequencyDay,
     frequencyWeek: current.frequencyWeek,
@@ -696,21 +696,21 @@ export async function resumeInvoiceRecurring(
     current.endType,
     current.endDate ? new Date(current.endDate) : null,
     current.endCount,
-    current.invoicesGenerated,
+    current.dealsGenerated,
     nextScheduledAt,
   );
 
   if (isCompleted) {
     // Mark as completed instead of resuming
     const [result] = await db
-      .update(invoiceRecurring)
+      .update(dealRecurring)
       .set({
         status: "completed",
         nextScheduledAt: null,
         updatedAt: now.toISOString(),
       })
       .where(
-        and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+        and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
       )
       .returning();
 
@@ -718,7 +718,7 @@ export async function resumeInvoiceRecurring(
   }
 
   const [result] = await db
-    .update(invoiceRecurring)
+    .update(dealRecurring)
     .set({
       status: "active",
       consecutiveFailures: 0, // Reset failures on resume
@@ -726,7 +726,7 @@ export async function resumeInvoiceRecurring(
       updatedAt: now.toISOString(),
     })
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     )
     .returning();
 
@@ -734,24 +734,24 @@ export async function resumeInvoiceRecurring(
 }
 
 /**
- * Delete a recurring invoice series (soft delete by setting status to canceled)
- * Generated invoices are kept
+ * Delete a recurring deal series (soft delete by setting status to canceled)
+ * Generated deals are kept
  */
-export async function deleteInvoiceRecurring(
+export async function deleteDealRecurring(
   db: DatabaseOrTransaction,
   params: { id: string; teamId: string },
 ) {
   const { id, teamId } = params;
 
   const [result] = await db
-    .update(invoiceRecurring)
+    .update(dealRecurring)
     .set({
       status: "canceled",
       nextScheduledAt: null,
       updatedAt: new Date().toISOString(),
     })
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     )
     .returning();
 
@@ -759,27 +759,27 @@ export async function deleteInvoiceRecurring(
 }
 
 /**
- * Get upcoming invoice preview for a recurring series
+ * Get upcoming deal preview for a recurring series
  */
-export type GetUpcomingInvoicesParams = {
+export type GetUpcomingDealsParams = {
   id: string;
   teamId: string;
   limit?: number;
 };
 
-export async function getUpcomingInvoices(
+export async function getUpcomingDeals(
   db: Database,
-  params: GetUpcomingInvoicesParams,
+  params: GetUpcomingDealsParams,
 ) {
   const { id, teamId, limit = 10 } = params;
 
-  const recurring = await getInvoiceRecurringById(db, { id, teamId });
+  const recurring = await getDealRecurringById(db, { id, teamId });
 
   if (!recurring) {
     return null;
   }
 
-  const recurringParams: RecurringInvoiceParams = {
+  const recurringParams: RecurringDealParams = {
     frequency: recurring.frequency,
     frequencyDay: recurring.frequencyDay,
     frequencyWeek: recurring.frequencyWeek,
@@ -799,41 +799,41 @@ export async function getUpcomingInvoices(
     recurring.endType,
     recurring.endDate ? new Date(recurring.endDate) : null,
     recurring.endCount,
-    recurring.invoicesGenerated,
+    recurring.dealsGenerated,
     limit,
   );
 }
 
 /**
- * Check if an invoice already exists for a recurring series and sequence number
+ * Check if a deal already exists for a recurring series and sequence number
  * Used for idempotency
  *
  * Returns:
- * - null if no invoice exists for this sequence
- * - { id, status, invoiceNumber } if an invoice exists
+ * - null if no deal exists for this sequence
+ * - { id, status, dealNumber } if a deal exists
  *
  * This allows the caller to decide whether to:
- * - Create a new invoice (if null)
+ * - Create a new deal (if null)
  * - Send an existing draft (if status is 'draft')
  * - Skip entirely (if already sent/paid)
  */
-export async function checkInvoiceExists(
+export async function checkDealExists(
   db: Database,
-  params: { invoiceRecurringId: string; recurringSequence: number },
+  params: { dealRecurringId: string; recurringSequence: number },
 ) {
-  const { invoiceRecurringId, recurringSequence } = params;
+  const { dealRecurringId, recurringSequence } = params;
 
   const [result] = await db
     .select({
-      id: invoices.id,
-      status: invoices.status,
-      invoiceNumber: invoices.invoiceNumber,
+      id: deals.id,
+      status: deals.status,
+      dealNumber: deals.dealNumber,
     })
-    .from(invoices)
+    .from(deals)
     .where(
       and(
-        eq(invoices.invoiceRecurringId, invoiceRecurringId),
-        eq(invoices.recurringSequence, recurringSequence),
+        eq(deals.dealRecurringId, dealRecurringId),
+        eq(deals.recurringSequence, recurringSequence),
       ),
     )
     .limit(1);
@@ -842,47 +842,47 @@ export async function checkInvoiceExists(
 }
 
 /**
- * Get recurring invoice info for an invoice (for display in invoice details)
+ * Get recurring deal info for a deal (for display in deal details)
  */
-export async function getInvoiceRecurringInfo(
+export async function getDealRecurringInfo(
   db: Database,
-  params: { invoiceId: string },
+  params: { dealId: string },
 ) {
-  const { invoiceId } = params;
+  const { dealId } = params;
 
-  const [invoice] = await db
+  const [deal] = await db
     .select({
-      invoiceRecurringId: invoices.invoiceRecurringId,
-      recurringSequence: invoices.recurringSequence,
+      dealRecurringId: deals.dealRecurringId,
+      recurringSequence: deals.recurringSequence,
     })
-    .from(invoices)
-    .where(eq(invoices.id, invoiceId));
+    .from(deals)
+    .where(eq(deals.id, dealId));
 
-  if (!invoice?.invoiceRecurringId) {
+  if (!deal?.dealRecurringId) {
     return null;
   }
 
   const [recurring] = await db
     .select({
-      frequency: invoiceRecurring.frequency,
-      frequencyDay: invoiceRecurring.frequencyDay,
-      frequencyWeek: invoiceRecurring.frequencyWeek,
-      endType: invoiceRecurring.endType,
-      endCount: invoiceRecurring.endCount,
-      invoicesGenerated: invoiceRecurring.invoicesGenerated,
-      nextScheduledAt: invoiceRecurring.nextScheduledAt,
-      status: invoiceRecurring.status,
+      frequency: dealRecurring.frequency,
+      frequencyDay: dealRecurring.frequencyDay,
+      frequencyWeek: dealRecurring.frequencyWeek,
+      endType: dealRecurring.endType,
+      endCount: dealRecurring.endCount,
+      dealsGenerated: dealRecurring.dealsGenerated,
+      nextScheduledAt: dealRecurring.nextScheduledAt,
+      status: dealRecurring.status,
     })
-    .from(invoiceRecurring)
-    .where(eq(invoiceRecurring.id, invoice.invoiceRecurringId));
+    .from(dealRecurring)
+    .where(eq(dealRecurring.id, deal.dealRecurringId));
 
   if (!recurring) {
     return null;
   }
 
   return {
-    recurringId: invoice.invoiceRecurringId,
-    sequence: invoice.recurringSequence,
+    recurringId: deal.dealRecurringId,
+    sequence: deal.recurringSequence,
     totalCount: recurring.endType === "after_count" ? recurring.endCount : null,
     frequency: recurring.frequency,
     frequencyDay: recurring.frequencyDay,
@@ -893,7 +893,7 @@ export async function getInvoiceRecurringInfo(
 }
 
 /**
- * Get recurring invoices that are upcoming within the specified hours
+ * Get recurring deals that are upcoming within the specified hours
  * and haven't had their upcoming notification sent yet
  * Used by the scheduler to send 24-hour advance notifications
  *
@@ -915,38 +915,38 @@ export async function getUpcomingDueRecurring(
   // for this specific upcoming cycle
   const data = await db
     .select({
-      id: invoiceRecurring.id,
-      teamId: invoiceRecurring.teamId,
-      userId: invoiceRecurring.userId,
-      merchantId: invoiceRecurring.merchantId,
-      merchantName: invoiceRecurring.merchantName,
-      frequency: invoiceRecurring.frequency,
-      nextScheduledAt: invoiceRecurring.nextScheduledAt,
-      amount: invoiceRecurring.amount,
-      currency: invoiceRecurring.currency,
-      upcomingNotificationSentAt: invoiceRecurring.upcomingNotificationSentAt,
+      id: dealRecurring.id,
+      teamId: dealRecurring.teamId,
+      userId: dealRecurring.userId,
+      merchantId: dealRecurring.merchantId,
+      merchantName: dealRecurring.merchantName,
+      frequency: dealRecurring.frequency,
+      nextScheduledAt: dealRecurring.nextScheduledAt,
+      amount: dealRecurring.amount,
+      currency: dealRecurring.currency,
+      upcomingNotificationSentAt: dealRecurring.upcomingNotificationSentAt,
     })
-    .from(invoiceRecurring)
+    .from(dealRecurring)
     .where(
       and(
-        eq(invoiceRecurring.status, "active"),
+        eq(dealRecurring.status, "active"),
         // Due within the look-ahead window
-        gt(invoiceRecurring.nextScheduledAt, now.toISOString()),
-        lte(invoiceRecurring.nextScheduledAt, futureDate.toISOString()),
+        gt(dealRecurring.nextScheduledAt, now.toISOString()),
+        lte(dealRecurring.nextScheduledAt, futureDate.toISOString()),
         // Notification not sent yet, or was sent for a previous cycle
         // (upcomingNotificationSentAt < nextScheduledAt - 24h means it was for a previous cycle)
         or(
-          isNull(invoiceRecurring.upcomingNotificationSentAt),
+          isNull(dealRecurring.upcomingNotificationSentAt),
           lte(
-            invoiceRecurring.upcomingNotificationSentAt,
+            dealRecurring.upcomingNotificationSentAt,
             // If notification was sent more than hoursAhead before current nextScheduledAt,
             // it was for a previous cycle
-            sql`${invoiceRecurring.nextScheduledAt}::timestamptz - interval '${sql.raw(String(hoursAhead + 1))} hours'`,
+            sql`${dealRecurring.nextScheduledAt}::timestamptz - interval '${sql.raw(String(hoursAhead + 1))} hours'`,
           ),
         ),
       ),
     )
-    .orderBy(invoiceRecurring.nextScheduledAt)
+    .orderBy(dealRecurring.nextScheduledAt)
     .limit(limit + 1);
 
   const hasMore = data.length > limit;
@@ -959,7 +959,7 @@ export async function getUpcomingDueRecurring(
 }
 
 /**
- * Mark that the upcoming notification has been sent for a recurring invoice series
+ * Mark that the upcoming notification has been sent for a recurring deal series
  */
 export async function markUpcomingNotificationSent(
   db: Database,
@@ -968,13 +968,13 @@ export async function markUpcomingNotificationSent(
   const { id, teamId } = params;
 
   const [result] = await db
-    .update(invoiceRecurring)
+    .update(dealRecurring)
     .set({
       upcomingNotificationSentAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
     .where(
-      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      and(eq(dealRecurring.id, id), eq(dealRecurring.teamId, teamId)),
     )
     .returning();
 

@@ -2,8 +2,6 @@
 
 import { InputColor } from "@/components/input-color";
 import { SelectParentCategory } from "@/components/select-parent-category";
-import { SelectTaxType } from "@/components/select-tax-type";
-import { TaxRateInput } from "@/components/tax-rate-input";
 import { useCategoryParams } from "@/hooks/use-category-params";
 import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
 import { useZodForm } from "@/hooks/use-zod-form";
@@ -20,7 +18,6 @@ import {
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Switch } from "@midday/ui/switch";
-import { taxTypes } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { z } from "zod/v3";
@@ -30,9 +27,6 @@ const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().nullable(),
   color: z.string().optional().nullable(),
-  taxRate: z.number().optional().nullable(),
-  taxType: z.string().optional().nullable(),
-  taxReportingCode: z.string().optional().nullable(),
   excluded: z.boolean().optional().nullable(),
   parentId: z.string().optional().nullable(),
 });
@@ -54,9 +48,6 @@ export function CategoryEditForm({ data }: Props) {
     name: data?.name || "",
     description: data?.description || "",
     color: data?.color || "",
-    taxRate: data?.taxRate ?? undefined,
-    taxType: data?.taxType || "",
-    taxReportingCode: data?.taxReportingCode || "",
     excluded: data?.excluded || false,
     parentId: data?.parentId || undefined,
   };
@@ -81,11 +72,9 @@ export function CategoryEditForm({ data }: Props) {
           queryKey: trpc.transactionCategories.getById.queryKey(),
         });
 
-        // Check if excluded or taxRate changed (affects calculations)
         const excludedChanged = data?.excluded !== variables.excluded;
-        const taxRateChanged = data?.taxRate !== variables.taxRate;
 
-        if (excludedChanged || taxRateChanged) {
+        if (excludedChanged) {
           invalidateTransactionQueries();
         }
 
@@ -100,9 +89,6 @@ export function CategoryEditForm({ data }: Props) {
       name: string;
       description: string | null;
       color: string | null;
-      taxRate: number | null;
-      taxType: string | null;
-      taxReportingCode: string | null;
       excluded: boolean | null;
       parentId?: string | null;
     } = {
@@ -110,9 +96,6 @@ export function CategoryEditForm({ data }: Props) {
       name: values.name,
       description: values.description || null,
       color: values.color || null,
-      taxRate: values.taxRate ?? null,
-      taxType: values.taxType || null,
-      taxReportingCode: values.taxReportingCode || null,
       excluded: values.excluded ?? null,
     };
 
@@ -213,90 +196,6 @@ export function CategoryEditForm({ data }: Props) {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="taxReportingCode"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel className="text-xs text-[#878787] font-normal">
-                    Report Code
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      autoFocus={false}
-                      placeholder="Report Code"
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <p className="text-xs text-muted-foreground pt-1">
-                    Maps to account codes when exporting to accounting software
-                  </p>
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div>
-            <div className="flex relative gap-2">
-              <FormField
-                control={form.control}
-                name="taxType"
-                render={({ field }) => (
-                  <FormItem className="w-[300px] space-y-1">
-                    <FormLabel className="text-xs text-[#878787] font-normal">
-                      Tax Type
-                    </FormLabel>
-                    <FormControl>
-                      <SelectTaxType
-                        value={field.value ?? ""}
-                        onChange={(value) => {
-                          field.onChange(value);
-                        }}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="taxRate"
-                render={({ field }) => (
-                  <FormItem className="flex-1 space-y-1">
-                    <FormLabel className="text-xs text-[#878787] font-normal">
-                      Tax Rate
-                    </FormLabel>
-                    <FormControl>
-                      <TaxRateInput
-                        value={field.value}
-                        name={form.watch("name") ?? ""}
-                        isNewProduct={false}
-                        onChange={(value: string) => {
-                          field.onChange(value ? Number(value) : undefined);
-                        }}
-                        onSelect={(taxRate) => {
-                          if (taxRate) {
-                            field.onChange(taxRate);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="flex relative gap-2 mt-2">
-              <span className="text-xs text-muted-foreground flex-1">
-                {
-                  taxTypes.find(
-                    (taxType) => taxType.value === form.watch("taxType"),
-                  )?.description
-                }
-              </span>
-            </div>
           </div>
 
           <FormField

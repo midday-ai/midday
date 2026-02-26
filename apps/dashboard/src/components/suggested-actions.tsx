@@ -154,11 +154,6 @@ export function SuggestedActions() {
       title: "Balance Sheet",
       description: "Show me my balance sheet",
     },
-    "get-tax-summary": {
-      icon: Icons.Tax,
-      title: "Tax Summary",
-      description: "Show me my tax summary",
-    },
   };
 
   const suggestedActions = suggestedActionsData.actions;

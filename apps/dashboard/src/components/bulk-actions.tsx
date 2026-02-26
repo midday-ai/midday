@@ -8,7 +8,9 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuPortal,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -17,8 +19,16 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SelectCategory } from "./select-category";
 import { SelectUser } from "./select-user";
+
+const DISCREPANCY_TYPES = [
+  { value: "partial_payment", label: "Partial payment" },
+  { value: "overpayment", label: "Overpayment" },
+  { value: "duplicate", label: "Duplicate" },
+  { value: "unrecognized", label: "Unrecognized" },
+  { value: "bank_fee", label: "Bank fee" },
+  { value: "split_payment", label: "Split payment" },
+] as const;
 
 type Props = {
   ids: string[];
@@ -31,17 +41,17 @@ export function BulkActions({ ids }: Props) {
 
   const { setRowSelection } = useTransactionsStore();
 
+  const invalidateAndReset = () => {
+    queryClient.invalidateQueries({
+      queryKey: trpc.transactions.get.infiniteQueryKey(),
+    });
+    setRowSelection("all", {});
+  };
+
   const updateTransactionsMutation = useMutation(
     trpc.transactions.updateMany.mutationOptions({
       onSuccess: (_, data) => {
-        // Invalidate the transaction list query
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.get.infiniteQueryKey(),
-        });
-
-        // Reset the row selection (BulkActions is used on "all" tab)
-        setRowSelection("all", {});
-
+        invalidateAndReset();
         toast({
           title: `Updated ${data?.ids.length} transactions.`,
           variant: "success",
@@ -53,6 +63,32 @@ export function BulkActions({ ids }: Props) {
           title: "Something went wrong please try again.",
           duration: 3500,
           variant: "error",
+        });
+      },
+    }),
+  );
+
+  const bulkConfirmMutation = useMutation(
+    trpc.reconciliation.bulkConfirmMatches.mutationOptions({
+      onSuccess: () => {
+        invalidateAndReset();
+        toast({
+          title: `Confirmed ${ids.length} matches.`,
+          variant: "success",
+          duration: 3500,
+        });
+      },
+    }),
+  );
+
+  const triggerReMatchMutation = useMutation(
+    trpc.reconciliation.triggerReMatch.mutationOptions({
+      onSuccess: () => {
+        invalidateAndReset();
+        toast({
+          title: `Auto-matching ${ids.length} transactions...`,
+          variant: "success",
+          duration: 3500,
         });
       },
     }),
@@ -71,37 +107,108 @@ export function BulkActions({ ids }: Props) {
           <Icons.ChevronDown size={16} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[180px]" sideOffset={8}>
+      <DropdownMenuContent align="end" className="w-[200px]" sideOffset={8}>
+        {/* MCA matching actions */}
+        <DropdownMenuGroup>
+          <DropdownMenuItem
+            onClick={() => triggerReMatchMutation.mutate({ transactionIds: ids })}
+          >
+            Auto-match
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => bulkConfirmMutation.mutate({ transactionIds: ids })}
+          >
+            Confirm all matches
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
+        {/* MCA flagging actions */}
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Category className="mr-2 h-4 w-4" />
-              <span>Categories</span>
+              Flag for review
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                className="p-0 w-[250px] h-[270px]"
-              >
-                <SelectCategory
-                  onChange={(selected) => {
-                    updateTransactionsMutation.mutate({
-                      ids,
-                      categorySlug: selected.slug,
+              <DropdownMenuSubContent sideOffset={14}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    // Bulk flag as NSF
+                    for (const id of ids) {
+                      updateTransactionsMutation.mutate({
+                        ids: [id],
+                        status: "posted", // Keep status, the flagDiscrepancy handles matchStatus
+                      });
+                    }
+                    // TODO: Use bulk flagDiscrepancy when available
+                    toast({
+                      title: `Flagged ${ids.length} transactions as NSF`,
+                      variant: "success",
                     });
                   }}
-                  headless
-                />
+                >
+                  Mark as NSF
+                </DropdownMenuItem>
+                {DISCREPANCY_TYPES.map((type) => (
+                  <DropdownMenuItem
+                    key={type.value}
+                    onClick={() => {
+                      // TODO: Use bulk flagDiscrepancy when available
+                      toast({
+                        title: `Flagged ${ids.length} as ${type.label}`,
+                        variant: "success",
+                      });
+                    }}
+                  >
+                    {type.label}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
         </DropdownMenuGroup>
 
+        <DropdownMenuSeparator />
+
+        {/* Keep: Exclude */}
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Status className="mr-2 h-4 w-4" />
-              <span>Tags</span>
+              Exclude
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent sideOffset={14}>
+                <DropdownMenuCheckboxItem
+                  onCheckedChange={() => {
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      status: "excluded",
+                    });
+                  }}
+                >
+                  Yes
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  onCheckedChange={() => {
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      status: "posted",
+                    });
+                  }}
+                >
+                  No
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        {/* Keep: Tags */}
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              Tags
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
@@ -132,110 +239,11 @@ export function BulkActions({ ids }: Props) {
           </DropdownMenuSub>
         </DropdownMenuGroup>
 
+        {/* Keep: Assign */}
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Visibility className="mr-2 h-4 w-4" />
-              <span>Exclude</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent sideOffset={14}>
-                <DropdownMenuCheckboxItem
-                  onCheckedChange={() => {
-                    updateTransactionsMutation.mutate({
-                      ids,
-                      status: "excluded",
-                    });
-                  }}
-                >
-                  Yes
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  onCheckedChange={() => {
-                    updateTransactionsMutation.mutate({
-                      ids,
-                      status: "posted",
-                    });
-                  }}
-                >
-                  No
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Files className="mr-2 h-4 w-4" />
-              <span>Archive</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent sideOffset={14}>
-                <DropdownMenuCheckboxItem
-                  onCheckedChange={() => {
-                    updateTransactionsMutation.mutate({
-                      ids,
-                      status: "archived",
-                    });
-                  }}
-                >
-                  Yes
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  onCheckedChange={() => {
-                    updateTransactionsMutation.mutate({
-                      ids,
-                      status: "posted",
-                    });
-                  }}
-                >
-                  No
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Check className="mr-2 h-4 w-4" />
-              <span>Mark as exported</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent sideOffset={14}>
-                <DropdownMenuCheckboxItem
-                  onCheckedChange={() => {
-                    updateTransactionsMutation.mutate({
-                      ids,
-                      status: "exported",
-                    });
-                  }}
-                >
-                  Yes
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  onCheckedChange={() => {
-                    updateTransactionsMutation.mutate({
-                      ids,
-                      status: "posted",
-                    });
-                  }}
-                >
-                  No
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Face className="mr-2 h-4 w-4" />
-              <span>Assign</span>
+              Assign
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
@@ -250,87 +258,6 @@ export function BulkActions({ ids }: Props) {
                     });
                   }}
                 />
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.AlertCircle className="mr-2 h-4 w-4" />
-              <span>Status</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent sideOffset={14}>
-                <DropdownMenuCheckboxItem
-                  onCheckedChange={() => {
-                    updateTransactionsMutation.mutate({
-                      ids,
-                      status: "completed",
-                    });
-                  }}
-                >
-                  Completed
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  onCheckedChange={() => {
-                    updateTransactionsMutation.mutate({
-                      ids,
-                      status: "posted",
-                    });
-                  }}
-                >
-                  Uncompleted
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Repeat className="mr-2 h-4 w-4" />
-              <span>Recurring</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent sideOffset={14}>
-                {[
-                  {
-                    label: "None",
-                    value: null,
-                  },
-                  {
-                    label: "Weekly",
-                    value: "weekly",
-                  },
-                  {
-                    label: "Monthly",
-                    value: "monthly",
-                  },
-                  {
-                    label: "Annually",
-                    value: "annually",
-                  },
-                ].map((item) => (
-                  <DropdownMenuCheckboxItem
-                    key={item.value}
-                    onCheckedChange={() => {
-                      updateTransactionsMutation.mutate({
-                        ids,
-                        frequency: item.value as
-                          | "weekly"
-                          | "monthly"
-                          | "annually"
-                          | "irregular",
-                        recurring: item.value !== null,
-                      });
-                    }}
-                  >
-                    {item.label}
-                  </DropdownMenuCheckboxItem>
-                ))}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>

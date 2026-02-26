@@ -3,7 +3,6 @@ import { processBatch } from "@jobs/utils/process-batch";
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
 import { ensureFileExtension } from "@midday/utils";
-import { getTaxTypeLabel, resolveTaxValues } from "@midday/utils/tax";
 import { schemaTask } from "@trigger.dev/sdk";
 import { format, parseISO } from "date-fns";
 import { z } from "zod";
@@ -39,11 +38,8 @@ export const processExport = schemaTask({
         balance,
         currency,
         counterparty_name,
-        tax_type,
-        tax_rate,
-        tax_amount,
         attachments:transaction_attachments(*),
-        category:transaction_categories(id, name, description, tax_rate, tax_type, tax_reporting_code),
+        category:transaction_categories(id, name, description, tax_reporting_code),
         bank_account:bank_accounts(id, name),
         tags:transaction_tags(id, tag:tags(id, name)),
         status
@@ -99,18 +95,6 @@ export const processExport = schemaTask({
     const rows = transactionsData
       ?.sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime())
       .map((transaction) => {
-        const { taxAmount, taxRate, taxType } = resolveTaxValues({
-          transactionAmount: transaction.amount,
-          transactionTaxAmount: transaction.tax_amount,
-          transactionTaxRate: transaction.tax_rate,
-          transactionTaxType: transaction.tax_type,
-          categoryTaxRate: transaction.category?.tax_rate,
-          categoryTaxType: transaction.category?.tax_type,
-        });
-
-        const formattedTaxType = getTaxTypeLabel(taxType ?? "");
-        const formattedTaxRate = taxRate != null ? `${taxRate}%` : "";
-
         return [
           transaction.id,
           format(parseISO(transaction.date), dateFormat ?? "LLL dd, y"),
@@ -122,12 +106,6 @@ export const processExport = schemaTask({
             style: "currency",
             currency: transaction.currency,
           }).format(transaction.amount),
-          formattedTaxType,
-          formattedTaxRate,
-          Intl.NumberFormat(locale, {
-            style: "currency",
-            currency: transaction.currency,
-          }).format(taxAmount ?? 0),
           transaction?.counterparty_name ?? "",
           transaction?.category?.name ?? "",
           transaction?.category?.description ?? "",

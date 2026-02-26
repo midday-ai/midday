@@ -19,6 +19,14 @@ export function SyndicatorPortalContent({ portalId }: Props) {
     trpc.syndication.getPortalDeals.queryOptions({ portalId }),
   );
 
+  const { data: portalBalance } = useQuery(
+    trpc.syndication.getPortalBalance.queryOptions({ portalId }),
+  );
+
+  const { data: portalTxResult } = useQuery(
+    trpc.syndication.getPortalTransactions.queryOptions({ portalId }),
+  );
+
   if (!syndicator) {
     return null;
   }
@@ -95,6 +103,36 @@ export function SyndicatorPortalContent({ portalId }: Props) {
             </p>
           </div>
         </div>
+
+        {/* Capital Activity Summary */}
+        {portalBalance && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="border rounded-lg p-4">
+              <p className="text-xs text-muted-foreground mb-1">
+                Account Balance
+              </p>
+              <p className="text-2xl font-mono font-medium">
+                ${Number(portalBalance.availableBalance).toLocaleString()}
+              </p>
+            </div>
+            <div className="border rounded-lg p-4">
+              <p className="text-xs text-muted-foreground mb-1">
+                Total Contributed
+              </p>
+              <p className="text-2xl font-mono font-medium">
+                ${Number(portalBalance.totalContributed).toLocaleString()}
+              </p>
+            </div>
+            <div className="border rounded-lg p-4">
+              <p className="text-xs text-muted-foreground mb-1">
+                Total Withdrawn
+              </p>
+              <p className="text-2xl font-mono font-medium">
+                ${Number(portalBalance.totalWithdrawn).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Deals Table */}
         <div>
@@ -180,6 +218,97 @@ export function SyndicatorPortalContent({ portalId }: Props) {
           ) : (
             <p className="text-sm text-muted-foreground py-8 text-center">
               No syndicated deals yet.
+            </p>
+          )}
+        </div>
+
+        {/* Capital Activity History */}
+        <div className="mt-8">
+          <h2 className="text-sm font-medium mb-3">Capital Activity</h2>
+          {portalTxResult?.data && portalTxResult.data.length > 0 ? (
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left text-xs font-medium text-muted-foreground py-3 px-4">
+                    Date
+                  </th>
+                  <th className="text-left text-xs font-medium text-muted-foreground py-3 px-4">
+                    Type
+                  </th>
+                  <th className="text-left text-xs font-medium text-muted-foreground py-3 px-4">
+                    Method
+                  </th>
+                  <th className="text-left text-xs font-medium text-muted-foreground py-3 px-4">
+                    Description
+                  </th>
+                  <th className="text-left text-xs font-medium text-muted-foreground py-3 px-4">
+                    Deal
+                  </th>
+                  <th className="text-right text-xs font-medium text-muted-foreground py-3 px-4">
+                    Amount
+                  </th>
+                  <th className="text-right text-xs font-medium text-muted-foreground py-3 px-4">
+                    Balance
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {portalTxResult.data.map((tx) => {
+                  const isCredit = ["contribution", "refund"].includes(
+                    tx.transactionType,
+                  );
+
+                  return (
+                    <tr
+                      key={tx.id}
+                      className="border-b border-border"
+                    >
+                      <td className="py-3 px-4 text-sm font-mono">
+                        {tx.date}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                            isCredit
+                              ? "bg-green-50 text-green-700"
+                              : "bg-red-50 text-red-700",
+                          )}
+                        >
+                          {tx.transactionType.replace(/_/g, " ")}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-muted-foreground uppercase">
+                        {tx.method ?? "—"}
+                      </td>
+                      <td className="py-3 px-4 text-sm">
+                        {tx.description ?? "—"}
+                      </td>
+                      <td className="py-3 px-4 text-sm font-mono">
+                        {tx.dealCode ?? "—"}
+                      </td>
+                      <td
+                        className={cn(
+                          "py-3 px-4 text-sm text-right font-mono",
+                          isCredit ? "text-green-600" : "text-red-600",
+                        )}
+                      >
+                        {isCredit ? "+" : "−"}$
+                        {Number(tx.amount).toLocaleString()}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-right font-mono">
+                        {tx.balanceAfter != null
+                          ? `$${Number(tx.balanceAfter).toLocaleString()}`
+                          : "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-sm text-muted-foreground py-8 text-center">
+              No capital activity recorded yet.
             </p>
           )}
         </div>

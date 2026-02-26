@@ -29,9 +29,6 @@ export const getCategories = async (
       slug: transactionCategories.slug,
       description: transactionCategories.description,
       system: transactionCategories.system,
-      taxRate: transactionCategories.taxRate,
-      taxType: transactionCategories.taxType,
-      taxReportingCode: transactionCategories.taxReportingCode,
       excluded: transactionCategories.excluded,
       parentId: transactionCategories.parentId,
     })
@@ -57,9 +54,6 @@ export const getCategories = async (
       slug: transactionCategories.slug,
       description: transactionCategories.description,
       system: transactionCategories.system,
-      taxRate: transactionCategories.taxRate,
-      taxType: transactionCategories.taxType,
-      taxReportingCode: transactionCategories.taxReportingCode,
       excluded: transactionCategories.excluded,
       parentId: transactionCategories.parentId,
     })
@@ -104,9 +98,6 @@ export const getCategoryById = async (
       slug: transactionCategories.slug,
       description: transactionCategories.description,
       system: transactionCategories.system,
-      taxRate: transactionCategories.taxRate,
-      taxType: transactionCategories.taxType,
-      taxReportingCode: transactionCategories.taxReportingCode,
       excluded: transactionCategories.excluded,
       parentId: transactionCategories.parentId,
       createdAt: transactionCategories.createdAt,
@@ -133,9 +124,6 @@ export const getCategoryById = async (
       slug: transactionCategories.slug,
       description: transactionCategories.description,
       system: transactionCategories.system,
-      taxRate: transactionCategories.taxRate,
-      taxType: transactionCategories.taxType,
-      taxReportingCode: transactionCategories.taxReportingCode,
       excluded: transactionCategories.excluded,
       parentId: transactionCategories.parentId,
     })
@@ -160,9 +148,6 @@ export type CreateTransactionCategoryParams = {
   name: string;
   color?: string | null;
   description?: string | null;
-  taxRate?: number | null;
-  taxType?: string | null;
-  taxReportingCode?: string | null;
   parentId?: string | null;
 };
 
@@ -176,9 +161,6 @@ export const createTransactionCategory = async (
     name,
     color,
     description,
-    taxRate,
-    taxType,
-    taxReportingCode,
     parentId,
   } = params;
 
@@ -189,9 +171,6 @@ export const createTransactionCategory = async (
       name,
       color,
       description,
-      taxRate,
-      taxType,
-      taxReportingCode,
       parentId,
     })
     .returning();
@@ -209,9 +188,6 @@ export const createTransactionCategory = async (
         categoryName: result.name,
         categoryColor: result.color,
         categoryDescription: result.description,
-        taxRate: result.taxRate,
-        taxType: result.taxType,
-        taxReportingCode: result.taxReportingCode,
         parentId: result.parentId,
       },
     });
@@ -237,9 +213,6 @@ export type UpdateTransactionCategoryParams = {
   name?: string;
   color?: string | null;
   description?: string | null;
-  taxRate?: number | null;
-  taxType?: string | null;
-  taxReportingCode?: string | null;
   parentId?: string | null;
 };
 
