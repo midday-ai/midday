@@ -1,68 +1,65 @@
 // Chart type identifiers
 export type ChartId =
-  | "monthly-revenue"
-  | "burn-rate"
-  | "expenses"
-  | "profit"
-  | "revenue-forecast"
-  | "runway"
-  | "category-expenses";
+  | "collection-performance"
+  | "funding-activity"
+  | "portfolio-composition"
+  | "factor-rate-returns"
+  | "rtr-aging"
+  | "nsf-default-trends"
+  | "repayment-velocity";
 
 // Report types for database storage
 export type ReportType =
-  | "profit"
-  | "revenue"
-  | "burn_rate"
-  | "expense"
-  | "monthly_revenue"
-  | "revenue_forecast"
-  | "runway"
-  | "category_expenses";
+  | "collection_performance"
+  | "funding_activity"
+  | "portfolio_composition"
+  | "factor_rate_returns"
+  | "rtr_aging"
+  | "nsf_default_trends"
+  | "repayment_velocity";
 
 // Default chart order matching current layout
 export const DEFAULT_CHART_ORDER: ChartId[] = [
-  "monthly-revenue",
-  "burn-rate",
-  "expenses",
-  "profit",
-  "revenue-forecast",
-  "runway",
-  "category-expenses",
+  "collection-performance",
+  "funding-activity",
+  "portfolio-composition",
+  "factor-rate-returns",
+  "rtr-aging",
+  "nsf-default-trends",
+  "repayment-velocity",
 ];
 
 // Mapping from ChartId to ReportType
 const chartToReportMap: Record<ChartId, ReportType> = {
-  "monthly-revenue": "monthly_revenue",
-  "burn-rate": "burn_rate",
-  expenses: "expense",
-  profit: "profit",
-  "revenue-forecast": "revenue_forecast",
-  runway: "runway",
-  "category-expenses": "category_expenses",
+  "collection-performance": "collection_performance",
+  "funding-activity": "funding_activity",
+  "portfolio-composition": "portfolio_composition",
+  "factor-rate-returns": "factor_rate_returns",
+  "rtr-aging": "rtr_aging",
+  "nsf-default-trends": "nsf_default_trends",
+  "repayment-velocity": "repayment_velocity",
 };
 
 // Mapping from ReportType to ChartId
 const reportToChartMap: Record<ReportType, ChartId> = {
-  profit: "profit",
-  revenue: "monthly-revenue",
-  burn_rate: "burn-rate",
-  expense: "expenses",
-  monthly_revenue: "monthly-revenue",
-  revenue_forecast: "revenue-forecast",
-  runway: "runway",
-  category_expenses: "category-expenses",
+  collection_performance: "collection-performance",
+  funding_activity: "funding-activity",
+  portfolio_composition: "portfolio-composition",
+  factor_rate_returns: "factor-rate-returns",
+  rtr_aging: "rtr-aging",
+  nsf_default_trends: "nsf-default-trends",
+  repayment_velocity: "repayment-velocity",
 };
 
 // Display names for chart types
 const chartDisplayNames: Record<ReportType, string> = {
-  profit: "Profit & Loss",
-  revenue: "Monthly Revenue",
-  burn_rate: "Monthly Burn Rate",
-  expense: "Expenses",
-  monthly_revenue: "Monthly Revenue",
-  revenue_forecast: "Revenue Forecast",
-  runway: "Runway",
-  category_expenses: "Spending by Category",
+  collection_performance: "Collection Performance",
+  funding_activity: "Funding Activity",
+  portfolio_composition: "Portfolio Composition",
+  factor_rate_returns: "Factor Rate Returns",
+  rtr_aging: "RTR Aging",
+  nsf_default_trends: "NSF & Default Trends",
+  repayment_velocity: "Repayment Velocity",
 };
 
 export function chartTypeToReportType(chartId: ChartId): ReportType {
