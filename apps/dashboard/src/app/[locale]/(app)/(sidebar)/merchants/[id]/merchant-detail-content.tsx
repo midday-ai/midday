@@ -26,6 +26,7 @@ import { format } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { MerchantCollectionsSection } from "@/components/collections/merchant-collections-section";
 import { PaymentLedgerSheet } from "./payment-ledger-sheet";
 
 type Merchant = {
@@ -305,6 +306,9 @@ export function MerchantDetailContent({ merchantId, merchant }: Props) {
           </div>
         )}
       </div>
+
+      {/* Collections Cases */}
+      <MerchantCollectionsSection merchantId={merchantId} />
 
       {/* Risk Score for selected deal */}
       {selectedDealId && <RiskScoreCard dealId={selectedDealId} />}
