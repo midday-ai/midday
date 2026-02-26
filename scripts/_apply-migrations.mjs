@@ -7,7 +7,11 @@ import pg from 'pg';
 import { readFileSync } from 'fs';
 const { Client } = pg;
 
-const DB_URL = 'postgresql://postgres:%3FENc%2BB-%3FqzM5bQU@db.ubbkuicqxbpagwfyidke.supabase.co:5432/postgres';
+const DB_URL = process.env.DATABASE_URL;
+if (!DB_URL) {
+  console.error('Missing DATABASE_URL env var');
+  process.exit(1);
+}
 
 const client = new Client({ connectionString: DB_URL, ssl: { rejectUnauthorized: false } });
 

@@ -5,8 +5,12 @@
  * Usage: node scripts/seed-brokers-syndicators.mjs
  */
 
-const SUPABASE_URL = 'https://ubbkuicqxbpagwfyidke.supabase.co';
-const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViYmt1aWNxeGJwYWd3ZnlpZGtlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODc3MzcxNSwiZXhwIjoyMDg0MzQ5NzE1fQ.Ok3Q4DVc-u6USP_-AEfuouQ4uS8dzkAASZJ2td9pWCs';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!SUPABASE_SERVICE_KEY) {
+  console.error('Missing SUPABASE_SERVICE_ROLE_KEY env var');
+  process.exit(1);
+}
 
 const TEAM_ID = 'a0000000-0000-0000-0000-000000000001';
 
