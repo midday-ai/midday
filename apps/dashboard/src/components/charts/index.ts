@@ -13,6 +13,15 @@ export { StressTestChart } from "./stress-test-chart";
 export { GrowthRateChart } from "./growth-rate-chart";
 export { InvoicePaymentChart } from "./invoice-payment-chart";
 
+// MCA Chart Components
+export { CollectionPerformanceChart } from "./collection-performance-chart";
+export { FundingActivityChart } from "./funding-activity-chart";
+export { PortfolioCompositionChart } from "./portfolio-composition-chart";
+export { FactorRateReturnsChart } from "./factor-rate-returns-chart";
+export { RtrAgingChart } from "./rtr-aging-chart";
+export { NsfDefaultTrendsChart } from "./nsf-default-trends-chart";
+export { RepaymentVelocityChart } from "./repayment-velocity-chart";
+
 // Base Chart Components
 export {
   BaseChart,
