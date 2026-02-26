@@ -25,22 +25,22 @@ const sourceConfig: Record<
     label: "Manual",
     description: "Manually created transaction",
     icon: "Edit",
-    color: "text-blue-600",
-    bgColor: "bg-blue-50 dark:bg-blue-950/30",
+    color: "text-[#1F6FEB]",
+    bgColor: "bg-[#DDEBFF] dark:bg-[#1F6FEB]/10",
   },
   bank_sync: {
     label: "Bank Sync",
     description: "Synced from bank connection",
     icon: "Accounts",
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50 dark:bg-emerald-950/30",
+    color: "text-[#00C969]",
+    bgColor: "bg-[#DDF1E4] dark:bg-[#00C969]/10",
   },
   import: {
     label: "Import",
     description: "Imported from CSV file",
     icon: "Import",
-    color: "text-orange-600",
-    bgColor: "bg-orange-50 dark:bg-orange-950/30",
+    color: "text-[#F97316]",
+    bgColor: "bg-[#FFEDD5] dark:bg-[#F97316]/10",
   },
 };
 

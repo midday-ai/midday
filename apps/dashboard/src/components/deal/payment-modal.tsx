@@ -233,7 +233,7 @@ export function PaymentModal({
         colorBackground: isDark ? "#0C0C0C" : "#FAFAF9",
         colorText: isDark ? "#F5F5F3" : "#121212",
         colorTextSecondary: isDark ? "#A1A1A1" : "#666666",
-        colorDanger: "#EF4444",
+        colorDanger: "#FF3638",
         fontFamily: "system-ui, -apple-system, sans-serif",
         spacingUnit: "4px",
         spacingGridRow: "16px",

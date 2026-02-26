@@ -115,7 +115,7 @@ export function NotificationCenter() {
                 <TabsTrigger value="collections" className="font-normal relative">
                   Collections
                   {hasCollectionsUnread && (
-                    <span className="ml-1 min-w-[16px] h-4 px-1 text-[10px] font-medium bg-red-500 text-white rounded-full inline-flex items-center justify-center">
+                    <span className="ml-1 min-w-[16px] h-4 px-1 text-[10px] font-medium bg-[#FF3638] text-white rounded-full inline-flex items-center justify-center">
                       {collectionsCount}
                     </span>
                   )}

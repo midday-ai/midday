@@ -26,7 +26,7 @@ export function BrokerOverview() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="border border-border rounded-lg p-4 animate-pulse"
+              className="border border-border p-4 animate-pulse"
             >
               <div className="h-3 w-20 bg-muted rounded" />
               <div className="h-7 w-16 bg-muted rounded mt-2" />
@@ -35,7 +35,7 @@ export function BrokerOverview() {
         </div>
         <div>
           <div className="h-4 w-24 bg-muted rounded mb-3" />
-          <div className="border border-border rounded-lg p-8 animate-pulse">
+          <div className="border border-border p-8 animate-pulse">
             <div className="h-4 w-48 bg-muted rounded mx-auto" />
           </div>
         </div>
@@ -70,7 +70,7 @@ export function BrokerOverview() {
         {recentDeals.length === 0 ? (
           <p className="text-sm text-muted-foreground">No deals yet.</p>
         ) : (
-          <div className="border border-border rounded-lg overflow-hidden">
+          <div className="border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50">

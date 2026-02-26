@@ -103,8 +103,8 @@ function SyndicatorStatusBadge({ status }: SyndicatorStatusBadgeProps) {
       className={cn(
         "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
         isActive
-          ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-          : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+          ? "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10"
+          : "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
       )}
     >
       {status}

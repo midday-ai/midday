@@ -85,7 +85,7 @@ export function CaseDealSummary({ data }: Props) {
               className={cn(
                 "px-2 py-0.5 rounded-full text-[11px] font-medium",
                 dealStatusStyles[data.dealStatus] ||
-                  "text-[#6b7280] bg-[#6b7280]/10",
+                  "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
               )}
             >
               {data.dealStatus.replace("_", " ")}

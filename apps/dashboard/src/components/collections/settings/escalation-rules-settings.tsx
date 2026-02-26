@@ -173,7 +173,7 @@ export function EscalationRulesSettings() {
                     className={cn(
                       "px-1.5 py-0.5 rounded text-[10px] font-medium",
                       rule.triggerType === "time_based"
-                        ? "bg-blue-100 text-blue-800"
+                        ? "text-[#1F6FEB] bg-[#DDEBFF] dark:bg-[#1F6FEB]/10"
                         : "bg-purple-100 text-purple-800",
                     )}
                   >
@@ -202,7 +202,7 @@ export function EscalationRulesSettings() {
                   <span
                     className={cn(
                       "inline-block w-2 h-2 rounded-full",
-                      rule.isActive ? "bg-green-500" : "bg-[#878787]",
+                      rule.isActive ? "bg-[#00C969]" : "bg-[#878787]",
                     )}
                   />
                 </span>

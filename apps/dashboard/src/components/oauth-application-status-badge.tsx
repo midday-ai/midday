@@ -16,11 +16,11 @@ export function OAuthApplicationStatusBadge({ status, className }: Props) {
   const getStatusColor = (status: OAuthApplicationStatus) => {
     switch (status) {
       case "approved":
-        return "dark:bg-green-900 dark:text-green-300 text-green-600 bg-green-100";
+        return "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10";
       case "rejected":
-        return "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400";
+        return "text-[#FF3638] bg-[#FF3638]/10";
       case "pending":
-        return "bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400";
+        return "text-[#FFD02B] bg-[#FFD02B]/10";
       case "draft":
         return "text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D]";
       default:

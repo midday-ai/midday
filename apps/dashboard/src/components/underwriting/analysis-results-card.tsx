@@ -20,7 +20,7 @@ export function AnalysisResultsCard({
   return (
     <div className="flex flex-col gap-6">
       {/* Merchant Summary */}
-      <div className="border border-border/40 shadow-sm rounded-lg p-6">
+      <div className="border border-border/40 shadow-sm p-6">
         <h2 className="text-base font-medium mb-4">Merchant Summary</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <InfoItem label="Business Name" value={result.merchantName} />
@@ -30,7 +30,7 @@ export function AnalysisResultsCard({
       </div>
 
       {/* Monthly Breakdown */}
-      <div className="border border-border/40 shadow-sm rounded-lg p-6">
+      <div className="border border-border/40 shadow-sm p-6">
         <h2 className="text-base font-medium mb-4">Monthly Breakdown</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -119,7 +119,7 @@ export function AnalysisResultsCard({
 
       {/* Buy Box Scorecard */}
       {result.buyBoxScorecard.length > 0 && (
-        <div className="border border-border/40 shadow-sm rounded-lg p-6">
+        <div className="border border-border/40 shadow-sm p-6">
           <h2 className="text-base font-medium mb-4">Buy Box Scorecard</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -168,13 +168,13 @@ export function AnalysisResultsCard({
       {/* Recommendation */}
       <div
         className={cn(
-          "border shadow-sm rounded-lg p-6",
+          "border shadow-sm p-6",
           result.recommendation === "approve" &&
-            "border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-900",
+            "border-[#00C969]/20 bg-[#DDF1E4] dark:bg-[#00C969]/10 dark:border-[#00C969]/20",
           result.recommendation === "decline" &&
-            "border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900",
+            "border-[#FF3638]/20 bg-[#FF3638]/10 dark:border-[#FF3638]/20",
           result.recommendation === "review" &&
-            "border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900",
+            "border-[#FFD02B]/20 bg-[#FFD02B]/10 dark:border-[#FFD02B]/20",
         )}
       >
         <div className="flex items-center justify-between">
@@ -244,7 +244,7 @@ function MetricCard({
   alert?: boolean;
 }) {
   return (
-    <div className="border border-border/40 shadow-sm rounded-lg p-4">
+    <div className="border border-border/40 shadow-sm p-4">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p
         className={cn(
@@ -263,10 +263,10 @@ function StatusBadge({ status }: { status: "pass" | "fail" | "borderline" }) {
     <span
       className={cn(
         "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
-        status === "pass" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-        status === "fail" && "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+        status === "pass" && "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10",
+        status === "fail" && "text-[#FF3638] bg-[#FF3638]/10",
         status === "borderline" &&
-          "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+          "text-[#FFD02B] bg-[#FFD02B]/10",
       )}
     >
       {status === "pass" && "Pass"}

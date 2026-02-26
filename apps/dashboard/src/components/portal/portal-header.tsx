@@ -72,7 +72,7 @@ export function PortalHeader({ merchant, portalId }: Props) {
               >
                 <Icons.Notifications className="h-5 w-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 flex items-center justify-center h-4 w-4 rounded-full bg-red-500 text-white text-[9px] font-bold">
+                  <span className="absolute top-1 right-1 flex items-center justify-center h-4 w-4 rounded-full bg-[#FF3638] text-white text-[9px] font-bold">
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}

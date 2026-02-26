@@ -47,7 +47,7 @@ export function StatementUploadCard({
   });
 
   return (
-    <div className="border border-border/40 shadow-sm rounded-lg p-6">
+    <div className="border border-border/40 shadow-sm p-6">
       <div className="mb-5">
         <h2 className="text-base font-medium">Bank Statements</h2>
         <p className="text-sm text-muted-foreground mt-0.5">

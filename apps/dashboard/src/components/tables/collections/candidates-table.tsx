@@ -131,7 +131,7 @@ export function CandidatesTable() {
                   <div
                     className={cn(
                       "px-2 py-0.5 rounded-full inline-flex text-[11px] font-medium",
-                      statusStyles[deal.status] || "text-[#6b7280] bg-[#6b7280]/10",
+                      statusStyles[deal.status] || "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
                     )}
                   >
                     {deal.status.replace("_", " ")}

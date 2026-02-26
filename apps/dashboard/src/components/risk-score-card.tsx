@@ -22,10 +22,10 @@ const subScoreLabels: Record<string, string> = {
 function SubScoreBar({ label, value }: { label: string; value: number }) {
   const barColor =
     value <= 33
-      ? "bg-emerald-500"
+      ? "bg-[#00C969]"
       : value <= 66
-        ? "bg-amber-500"
-        : "bg-red-500";
+        ? "bg-[#FFD02B]"
+        : "bg-[#FF3638]";
 
   return (
     <div className="space-y-1">
@@ -46,12 +46,12 @@ function SubScoreBar({ label, value }: { label: string; value: number }) {
 }
 
 const eventTypeLabels: Record<string, { label: string; color: string }> = {
-  on_time: { label: "On-time payment", color: "text-emerald-600" },
-  nsf: { label: "NSF / Returned", color: "text-red-600" },
-  missed: { label: "Missed payment", color: "text-red-600" },
-  partial: { label: "Partial payment", color: "text-amber-600" },
-  overpayment: { label: "Overpayment", color: "text-emerald-600" },
-  recovery: { label: "Recovery payment", color: "text-blue-600" },
+  on_time: { label: "On-time payment", color: "text-[#00C969]" },
+  nsf: { label: "NSF / Returned", color: "text-[#FF3638]" },
+  missed: { label: "Missed payment", color: "text-[#FF3638]" },
+  partial: { label: "Partial payment", color: "text-[#FFD02B]" },
+  overpayment: { label: "Overpayment", color: "text-[#00C969]" },
+  recovery: { label: "Recovery payment", color: "text-[#1F6FEB]" },
 };
 
 export function RiskScoreCard({ dealId }: Props) {

@@ -77,7 +77,7 @@ export function App({
           <Logo />
 
           {installed && (
-            <div className="text-green-600 bg-green-100 text-[10px] dark:bg-green-900 dark:text-green-300 px-3 py-1 rounded-full font-mono">
+            <div className="text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10 text-[10px] px-2 py-0.5 rounded-full font-mono">
               Installed
             </div>
           )}
@@ -150,7 +150,7 @@ export function App({
                   <div className="flex items-center space-x-2">
                     <h3 className="text-lg leading-none">{name}</h3>
                     {installed && (
-                      <div className="bg-green-600 text-[9px] dark:bg-green-300 rounded-full size-1" />
+                      <div className="bg-[#00C969] dark:bg-[#00C969] text-[9px] rounded-full size-1" />
                     )}
                   </div>
 

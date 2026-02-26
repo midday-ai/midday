@@ -210,7 +210,7 @@ export function PaymentHistoryList({ portalId, deals, statusFilter }: Props) {
                         </div>
                       )}
                       {payment.nsfAt && (
-                        <div className="p-2 bg-red-50 rounded border border-red-200 text-red-800 text-xs">
+                        <div className="p-2 bg-[#FF3638]/10 rounded border border-[#FF3638]/20 text-[#FF3638] text-xs">
                           <Icons.AlertCircle className="inline h-3 w-3 mr-1" />
                           Returned on{" "}
                           {format(parseISO(payment.nsfAt), "MMM d, yyyy")}

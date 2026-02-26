@@ -8,12 +8,12 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  active: { bg: "bg-green-500/10", text: "text-green-600" },
-  late: { bg: "bg-amber-500/10", text: "text-amber-600" },
-  paid_off: { bg: "bg-blue-500/10", text: "text-blue-600" },
-  defaulted: { bg: "bg-red-500/10", text: "text-red-600" },
-  paused: { bg: "bg-yellow-500/10", text: "text-yellow-600" },
-  in_collections: { bg: "bg-red-500/10", text: "text-red-600" },
+  active: { bg: "bg-[#DDF1E4] dark:bg-[#00C969]/10", text: "text-[#00C969]" },
+  late: { bg: "bg-[#FFD02B]/10", text: "text-[#FFD02B]" },
+  paid_off: { bg: "bg-[#DDEBFF] dark:bg-[#1F6FEB]/10", text: "text-[#1F6FEB]" },
+  defaulted: { bg: "bg-[#FF3638]/10", text: "text-[#FF3638]" },
+  paused: { bg: "bg-[#FFD02B]/10", text: "text-[#FFD02B]" },
+  in_collections: { bg: "bg-[#FF3638]/10", text: "text-[#FF3638]" },
 };
 
 const STATUS_LABELS: Record<string, string> = {

@@ -37,28 +37,28 @@ const discrepancyTypeConfig: Record<
 > = {
   nsf: {
     label: "NSF",
-    color: "text-red-600",
-    bg: "bg-red-50 dark:bg-red-950/30",
+    color: "text-[#FF3638]",
+    bg: "bg-[#FF3638]/10",
   },
   partial_payment: {
     label: "Partial",
-    color: "text-orange-600",
-    bg: "bg-orange-50 dark:bg-orange-950/30",
+    color: "text-[#F97316]",
+    bg: "bg-[#FFEDD5] dark:bg-[#F97316]/10",
   },
   overpayment: {
     label: "Overpayment",
-    color: "text-amber-600",
-    bg: "bg-amber-50 dark:bg-amber-950/30",
+    color: "text-[#FFD02B]",
+    bg: "bg-[#FFD02B]/10",
   },
   unrecognized: {
     label: "Unrecognized",
-    color: "text-gray-600",
-    bg: "bg-gray-50 dark:bg-gray-950/30",
+    color: "text-[#878787]",
+    bg: "bg-[#F2F1EF] dark:bg-[#1D1D1D]",
   },
   bank_fee: {
     label: "Bank Fee",
-    color: "text-slate-600",
-    bg: "bg-slate-50 dark:bg-slate-950/30",
+    color: "text-[#878787]",
+    bg: "bg-[#F2F1EF] dark:bg-[#1D1D1D]",
   },
   duplicate: {
     label: "Duplicate",

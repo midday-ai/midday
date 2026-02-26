@@ -11,9 +11,9 @@ type Props = {
 };
 
 const bandStyles = {
-  low: "bg-emerald-100 text-emerald-800",
-  medium: "bg-amber-100 text-amber-800",
-  high: "bg-red-100 text-red-800",
+  low: "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10",
+  medium: "text-[#FFD02B] bg-[#FFD02B]/10",
+  high: "text-[#FF3638] bg-[#FF3638]/10",
 };
 
 const bandLabels = {
@@ -77,7 +77,7 @@ export function RiskBadge({
             trend.includes("\u2193")
               ? "text-emerald-600"
               : trend.includes("\u2191")
-                ? "text-red-600"
+                ? "text-[#FF3638]"
                 : "text-[#878787]",
           )}
         >

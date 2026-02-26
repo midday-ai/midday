@@ -67,9 +67,9 @@ export function AlertBanner({ portalId }: Props) {
   if (alerts.length === 0) return null;
 
   const bgColors = {
-    danger: "bg-red-50 border-red-200 text-red-800",
-    warning: "bg-amber-50 border-amber-200 text-amber-800",
-    success: "bg-green-50 border-green-200 text-green-800",
+    danger: "bg-[#FF3638]/10 border-[#FF3638]/20 text-[#FF3638]",
+    warning: "bg-[#FFD02B]/10 border-[#FFD02B]/20 text-[#FFD02B]",
+    success: "bg-[#DDF1E4] border-[#00C969]/20 text-[#00C969]",
   };
 
   return (

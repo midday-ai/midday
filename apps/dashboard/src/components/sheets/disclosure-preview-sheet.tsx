@@ -83,11 +83,11 @@ export function DisclosurePreviewSheet() {
 
             {/* Acknowledgment status */}
             {disclosure.acknowledgedAt && (
-              <div className="rounded-md bg-green-50 p-3 text-sm">
-                <p className="font-medium text-green-800">
+              <div className="rounded-md bg-[#DDF1E4] dark:bg-[#00C969]/10 p-3 text-sm">
+                <p className="font-medium text-[#00C969]">
                   Acknowledged by {disclosure.acknowledgedBy}
                 </p>
-                <p className="text-green-600">
+                <p className="text-[#00C969]/70">
                   {new Date(disclosure.acknowledgedAt).toLocaleString()}
                 </p>
               </div>

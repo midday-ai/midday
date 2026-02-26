@@ -288,7 +288,7 @@ export function StagesSettings() {
                   </span>
                 )}
                 {stage.isTerminal && (
-                  <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-800 rounded">
+                  <span className="px-1.5 py-0.5 text-[10px] font-medium text-[#FFD02B] bg-[#FFD02B]/10 rounded">
                     Terminal
                   </span>
                 )}

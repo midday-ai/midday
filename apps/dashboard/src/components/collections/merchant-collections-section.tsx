@@ -31,10 +31,10 @@ const OUTCOME_LABELS: Record<string, string> = {
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: "bg-blue-100 text-blue-800",
-  medium: "bg-amber-100 text-amber-800",
-  high: "bg-orange-100 text-orange-800",
-  critical: "bg-red-100 text-red-800",
+  low: "text-[#1F6FEB] bg-[#DDEBFF] dark:bg-[#1F6FEB]/10",
+  medium: "text-[#FFD02B] bg-[#FFD02B]/10",
+  high: "text-[#F97316] bg-[#FFEDD5] dark:bg-[#F97316]/10",
+  critical: "text-[#FF3638] bg-[#FF3638]/10",
 };
 
 export function MerchantCollectionsSection({ merchantId }: Props) {
@@ -55,7 +55,7 @@ export function MerchantCollectionsSection({ merchantId }: Props) {
         <div className="flex items-center gap-2">
           <h2 className="text-[16px] font-medium">Collections</h2>
           {activeCases.length > 0 && (
-            <span className="px-1.5 py-0.5 text-[10px] font-medium bg-red-100 text-red-800 rounded">
+            <span className="px-1.5 py-0.5 text-[10px] font-medium text-[#FF3638] bg-[#FF3638]/10 rounded">
               {activeCases.length} active
             </span>
           )}
@@ -138,7 +138,7 @@ export function MerchantCollectionsSection({ merchantId }: Props) {
                 </TableCell>
                 <TableCell className="text-center">
                   {c.outcome ? (
-                    <span className="text-[11px] text-[#606060]">
+                    <span className="text-[11px] text-[#606060] capitalize">
                       {OUTCOME_LABELS[c.outcome] ?? c.outcome}
                     </span>
                   ) : (

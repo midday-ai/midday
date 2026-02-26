@@ -48,7 +48,7 @@ export function BrokerCommissionsPage() {
       {!commissions || commissions.length === 0 ? (
         <p className="text-sm text-muted-foreground">No commissions yet.</p>
       ) : (
-        <div className="border border-border rounded-lg overflow-hidden">
+        <div className="border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">

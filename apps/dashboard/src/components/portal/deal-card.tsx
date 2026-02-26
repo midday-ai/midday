@@ -99,7 +99,7 @@ export function DealCard({ deal }: Props) {
         </div>
 
         {/* Remaining balance summary */}
-        <div className="p-4 rounded-lg bg-muted/50 border border-border">
+        <div className="p-4 bg-muted/50 border border-border">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
               Remaining Balance
@@ -126,7 +126,7 @@ export function DealCard({ deal }: Props) {
 
         {/* NSF warning */}
         {deal.nsfCount != null && deal.nsfCount > 0 && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800 flex items-start gap-2">
+          <div className="p-3 bg-[#FF3638]/10 border border-[#FF3638]/20 rounded-lg text-sm text-[#FF3638] flex items-start gap-2">
             <Icons.AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <span>
               {deal.nsfCount} returned payment
@@ -150,7 +150,7 @@ export function DealCard({ deal }: Props) {
         </button>
 
         {showAdvanced && (
-          <div className="space-y-3 p-4 rounded-lg border border-border bg-muted/30">
+          <div className="space-y-3 p-4 border border-border bg-muted/30">
             <DetailRow
               label="Factor Rate"
               value={`${deal.factorRate}x`}

@@ -7,10 +7,10 @@ type Props = {
 };
 
 function getConfidenceColor(confidence: number): string {
-  if (confidence >= 0.9) return "bg-emerald-500";
-  if (confidence >= 0.7) return "bg-amber-500";
-  if (confidence >= 0.5) return "bg-orange-500";
-  return "bg-gray-300";
+  if (confidence >= 0.9) return "bg-[#00C969]";
+  if (confidence >= 0.7) return "bg-[#FFD02B]";
+  if (confidence >= 0.5) return "bg-[#F97316]";
+  return "bg-[#878787]";
 }
 
 function getConfidenceLabel(confidence: number): string {
@@ -31,7 +31,7 @@ export function MatchConfidenceBar({ confidence, className }: Props) {
     <Tooltip>
       <TooltipTrigger asChild>
         <div className={cn("flex items-center gap-2 min-w-[80px]", className)}>
-          <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+          <div className="flex-1 h-1.5 bg-[#F2F1EF] dark:bg-[#1D1D1D] rounded-full overflow-hidden">
             <div
               className={cn(
                 "h-full rounded-full transition-all",

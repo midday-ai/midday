@@ -27,7 +27,7 @@ export function BrokerDealsPage() {
       {!deals || deals.length === 0 ? (
         <p className="text-sm text-muted-foreground">No deals found.</p>
       ) : (
-        <div className="border border-border rounded-lg overflow-hidden">
+        <div className="border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">

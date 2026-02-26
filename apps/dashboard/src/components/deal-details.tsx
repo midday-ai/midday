@@ -295,23 +295,25 @@ export function DealDetails() {
           <div className="mt-6 border-t border-border pt-6">
             <div className="flex justify-between items-center mb-3">
               <span className="text-sm font-medium">Recurring Series</span>
-              <span
-                className={cn("text-xs px-2 py-0.5 rounded-full", {
-                  "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400":
+              <div
+                className={cn("text-[11px] px-2 py-0.5 rounded-full inline-flex max-w-full", {
+                  "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10":
                     recurring.status === "active",
-                  "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400":
+                  "text-[#FFD02B] bg-[#FFD02B]/10":
                     recurring.status === "paused",
-                  "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400":
+                  "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]":
                     recurring.status === "completed",
-                  "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400":
+                  "text-[#FF3638] bg-[#FF3638]/10":
                     recurring.status === "canceled",
                 })}
               >
-                {recurring.status === "active" && "Active"}
-                {recurring.status === "paused" && "Paused"}
-                {recurring.status === "completed" && "Completed"}
-                {recurring.status === "canceled" && "Canceled"}
-              </span>
+                <span className="line-clamp-1 truncate inline-block">
+                  {recurring.status === "active" && "Active"}
+                  {recurring.status === "paused" && "Paused"}
+                  {recurring.status === "completed" && "Completed"}
+                  {recurring.status === "canceled" && "Canceled"}
+                </span>
+              </div>
             </div>
 
             {/* Upcoming deals preview */}

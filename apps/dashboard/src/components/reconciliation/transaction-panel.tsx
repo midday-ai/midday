@@ -72,12 +72,12 @@ export function TransactionPanel({
             <div
               className={cn(
                 "w-2 h-2 rounded-full shrink-0",
-                tx.matchStatus === "auto_matched" && "bg-emerald-500",
-                tx.matchStatus === "manual_matched" && "bg-blue-500",
-                tx.matchStatus === "suggested" && "bg-amber-500",
-                tx.matchStatus === "flagged" && "bg-red-500",
-                tx.matchStatus === "unmatched" && "bg-gray-300",
-                tx.matchStatus === "excluded" && "bg-gray-200",
+                tx.matchStatus === "auto_matched" && "bg-[#00C969]",
+                tx.matchStatus === "manual_matched" && "bg-[#1F6FEB]",
+                tx.matchStatus === "suggested" && "bg-[#FFD02B]",
+                tx.matchStatus === "flagged" && "bg-[#FF3638]",
+                tx.matchStatus === "unmatched" && "bg-[#878787]",
+                tx.matchStatus === "excluded" && "bg-[#878787]/50",
               )}
             />
 

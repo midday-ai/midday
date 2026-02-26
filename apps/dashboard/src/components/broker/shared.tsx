@@ -48,7 +48,7 @@ export function DealStatusBadge({ status }: { status: string }) {
       )}
     >
       <span className="line-clamp-1 truncate inline-block">
-        {statusLabels[status] || status}
+        {statusLabels[status] || "Unknown"}
       </span>
     </div>
   );
@@ -77,7 +77,7 @@ export function CommissionStatusBadge({ status }: { status: string }) {
 
 export function CommissionStatusLabel({ status }: { status: string }) {
   const color = status === "paid" ? "text-[#00C969]" : "text-[#FFD02B]";
-  return <span className={cn("ml-1 text-[10px]", color)}>({status})</span>;
+  return <span className={cn("ml-1 text-[10px] capitalize", color)}>({status})</span>;
 }
 
 export function formatCurrency(
