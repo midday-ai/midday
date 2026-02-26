@@ -23,6 +23,10 @@ build
 # misc
 .DS_Store
 *.pem
+*.png
+*.jpg
+!packages/**/public/**
+!apps/**/public/**
 
 # debug
 npm-debug.log*
@@ -30,12 +34,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
+# local env files — catch ALL .env variants
 .env
+.env.*
 .env*.local
-.env.vercel
-.env.cloud
-.env.local.cloud
+!.env-template
+!.env-example
 
 # vercel
 **/.vercel/*
