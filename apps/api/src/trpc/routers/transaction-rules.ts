@@ -23,6 +23,10 @@ const createRuleSchema = z.object({
   addTagIds: z.array(z.string().uuid()).optional(),
   setExcluded: z.boolean().nullable().optional(),
   setAssignedId: z.string().uuid().nullable().optional(),
+  setDealCode: z.string().nullable().optional(),
+  autoResolveDeal: z.boolean().optional(),
+  dateStart: z.string().nullable().optional(),
+  dateEnd: z.string().nullable().optional(),
 });
 
 const updateRuleSchema = createRuleSchema.partial().extend({
