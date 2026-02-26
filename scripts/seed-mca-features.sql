@@ -1,4 +1,9 @@
 -- ============================================================================
+-- DEPRECATED: Use `supabase db reset` which runs supabase/seed.sql.
+-- This file is kept for reference only. All seed data is now consolidated
+-- in supabase/seed.sql for deterministic, single-command seeding.
+-- ============================================================================
+-- Original description:
 -- Abacus MCA Feature Seed Data
 -- Seeds all new MCA tables with realistic demo data
 -- Requires: existing merchants, deals, brokers, syndicators from prior seeds

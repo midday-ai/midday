@@ -1,4 +1,9 @@
 -- ============================================================================
+-- DEPRECATED: Use `supabase db reset` which runs supabase/seed.sql.
+-- This file is kept for reference only. All seed data is now consolidated
+-- in supabase/seed.sql for deterministic, single-command seeding.
+-- ============================================================================
+-- Original description:
 -- Abacus Portal & Config Seed Data
 -- Seeds: late_fee_settings, ach_providers, merchant portal tables,
 --        vault documents, inbox items, and backfills mca_deals columns

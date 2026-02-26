@@ -1,4 +1,9 @@
 -- ============================================================================
+-- DEPRECATED: Use `supabase db reset` which runs supabase/seed.sql.
+-- This file is kept for reference only. All seed data (including risk
+-- archetypes) is now consolidated in supabase/seed.sql.
+-- ============================================================================
+-- Original description:
 -- Risk Scoring Seed Data
 -- 8 Merchant Archetypes with payment histories for algorithm validation
 -- Team ID: a0000000-0000-0000-0000-000000000001 (matches seed-all.sh)

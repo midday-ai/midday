@@ -1,3 +1,9 @@
+-- ============================================================================
+-- DEPRECATED: Use `supabase db reset` which runs supabase/seed.sql.
+-- This file is kept for reference only. All seed data is now consolidated
+-- in supabase/seed.sql for deterministic, single-command seeding.
+-- ============================================================================
+-- Original description:
 -- Seed brokers, syndicators, broker commissions, syndication participants
 -- Fixes gap: these entities were missing from local DB
 

@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 /**
+ * DEPRECATED: Use `supabase db reset` which runs supabase/seed.sql.
+ * This file is kept for reference only. All seed data is now consolidated
+ * in supabase/seed.sql for deterministic, single-command seeding.
+ *
+ * Original description:
  * Seed demo data into LOCAL Supabase instance.
  * Assumes `npx supabase start` has been run.
  */

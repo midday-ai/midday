@@ -1470,7 +1470,7 @@ BEGIN
     (v_cc_nightowl, v_team_id, v_d_nightowl, v_cs_plan, v_user_id, 'high',
      NOW() + INTERVAL '5 days',
      NOW() - INTERVAL '8 days',
-     NOW() - INTERVAL '25 days')
+     NOW() - INTERVAL '18 days')
   ON CONFLICT (deal_id) DO NOTHING;
 
   -- Collection Notes (activity log for each case)
