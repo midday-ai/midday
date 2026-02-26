@@ -186,7 +186,6 @@ const ActionsCell = memo(
       onUpdateTransaction?.({ id: transaction.id, status: "completed" });
     }, [transaction.id, onUpdateTransaction]);
 
-
     const handleUpdateToExported = useCallback(() => {
       onUpdateTransaction?.({ id: transaction.id, status: "exported" });
     }, [transaction.id, onUpdateTransaction]);

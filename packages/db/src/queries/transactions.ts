@@ -163,6 +163,7 @@ export async function getTransactions(
     FROM ${transactionMatchSuggestions}
     WHERE ${transactionMatchSuggestions.transactionId} = ${transactions.id}
     AND ${transactionMatchSuggestions.teamId} = ${teamId}
+    AND ${transactionMatchSuggestions.status} = 'pending'
   )`;
 
   const isActiveWorkflowCondition = sql`${transactions.status} NOT IN ('excluded', 'archived')`;
@@ -235,6 +236,10 @@ export async function getTransactions(
 
     if (statusConditions.length > 0) {
       whereConditions.push(or(...statusConditions));
+    } else {
+      // All values were unrecognized — fall back to default exclusion so
+      // archived/excluded transactions don't leak into results.
+      whereConditions.push(isActiveWorkflowCondition);
     }
   } else {
     // Default All tab behavior: hide excluded/archived unless explicitly filtered.
@@ -2225,13 +2230,19 @@ export async function getTransactionsReadyForExportCount(
 export async function markTransactionsAsExported(
   db: Database,
   transactionIds: string[],
+  teamId: string,
 ): Promise<void> {
   if (transactionIds.length === 0) return;
 
   await db
     .update(transactions)
     .set({ status: "exported" })
-    .where(inArray(transactions.id, transactionIds));
+    .where(
+      and(
+        inArray(transactions.id, transactionIds),
+        eq(transactions.teamId, teamId),
+      ),
+    );
 }
 
 /**
