@@ -1,8 +1,9 @@
 "use client";
 
+import { useSortParams } from "@/hooks/use-sort-params";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { BrokersEmptyState, BrokersNoResults } from "./empty-states";
@@ -10,20 +11,22 @@ import { BrokersEmptyState, BrokersNoResults } from "./empty-states";
 export function BrokersDataTable() {
   const trpc = useTRPC();
   const [q] = useQueryState("q");
+  const { params } = useSortParams();
 
-  const { data, isLoading } = useQuery(
+  const { data } = useSuspenseQuery(
     trpc.brokers.get.queryOptions({
+      sort: params.sort,
       q,
     }),
   );
 
   const brokers = data?.data ?? [];
 
-  if (!isLoading && brokers.length === 0 && q) {
+  if (brokers.length === 0 && q) {
     return <BrokersNoResults />;
   }
 
-  if (!isLoading && brokers.length === 0) {
+  if (brokers.length === 0) {
     return <BrokersEmptyState />;
   }
 

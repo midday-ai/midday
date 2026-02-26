@@ -1,12 +1,8 @@
 "use client";
 
-import { useCurrentLocale } from "@/locales/client";
 import { Button } from "@midday/ui/button";
-import Link from "next/link";
 
 export default function ErrorPage({ reset }: { reset: () => void }) {
-  const locale = useCurrentLocale();
-
   return (
     <div className="h-[calc(100vh-200px)] w-full">
       <div className="mt-8 flex flex-col items-center justify-center h-full">
@@ -20,15 +16,10 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
 
         <div className="flex space-x-4">
           <Button variant="outline" asChild>
-            <Link href={`/${locale}/login`}>Go home</Link>
+            <a href="/login">Go home</a>
           </Button>
 
-          <Button
-            onClick={() => {
-              window.location.reload();
-            }}
-            variant="outline"
-          >
+          <Button onClick={() => reset()} variant="outline">
             Try again
           </Button>
 
