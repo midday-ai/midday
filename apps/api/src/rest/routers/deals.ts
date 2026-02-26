@@ -89,28 +89,17 @@ app.openapi(
           Array.isArray(deal.lineItems) &&
           deal.lineItems.length > 0
         ) {
-          const {
-            subTotal,
-            total,
-            vat: calculatedVAT,
-            tax: calculatedTax,
-          } = calculateTotal({
+          const { subTotal, total } = calculateTotal({
             lineItems: deal.lineItems.map((item: any) => ({
               price: item.price,
               quantity: item.quantity,
             })),
-            taxRate: (deal.template as any)?.taxRate ?? 0,
-            vatRate: (deal.template as any)?.vatRate ?? 0,
             discount: deal.discount ?? 0,
-            includeVat: (deal.template as any)?.includeVat ?? true,
-            includeTax: (deal.template as any)?.includeTax ?? true,
           });
 
           calculatedAmounts = {
             subtotal: subTotal,
             amount: total,
-            vat: calculatedVAT,
-            tax: calculatedTax,
           };
         }
 
@@ -264,28 +253,17 @@ app.openapi(
       Array.isArray(result.lineItems) &&
       result.lineItems.length > 0
     ) {
-      const {
-        subTotal,
-        total,
-        vat: calculatedVAT,
-        tax: calculatedTax,
-      } = calculateTotal({
+      const { subTotal, total } = calculateTotal({
         lineItems: result.lineItems.map((item: any) => ({
           price: item.price,
           quantity: item.quantity,
         })),
-        taxRate: (result.template as any)?.taxRate ?? 0,
-        vatRate: (result.template as any)?.vatRate ?? 0,
         discount: result.discount ?? 0,
-        includeVat: (result.template as any)?.includeVat ?? true,
-        includeTax: (result.template as any)?.includeTax ?? true,
       });
 
       calculatedAmounts = {
         subtotal: subTotal,
         amount: total,
-        vat: calculatedVAT,
-        tax: calculatedTax,
       };
     }
 
@@ -467,8 +445,6 @@ app.openapi(
       merchantId: input.merchantId,
       merchantName: merchant.name,
       logoUrl: input.logoUrl,
-      vat: input.vat,
-      tax: input.tax,
       discount: input.discount,
       topBlock: input.topBlock,
       bottomBlock: input.bottomBlock,

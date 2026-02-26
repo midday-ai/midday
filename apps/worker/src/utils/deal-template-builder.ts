@@ -16,9 +16,6 @@ export type DealLineItem = {
   quantity?: number;
   unit?: string | null;
   price?: number;
-  vat?: number | null;
-  tax?: number | null;
-  taxRate?: number | null;
   productId?: string;
 };
 
@@ -40,8 +37,6 @@ export interface RecurringDealData {
   noteDetails: unknown;
   topBlock: unknown;
   bottomBlock: unknown;
-  vat: number | null;
-  tax: number | null;
   discount: number | null;
   subtotal: number | null;
   amount: number | null;
@@ -63,9 +58,7 @@ export interface BuiltDealTemplate {
   quantityLabel: string;
   totalLabel: string;
   totalSummaryLabel: string;
-  vatLabel: string;
   subtotalLabel: string;
-  taxLabel: string;
   discountLabel: string;
   timezone: string;
   paymentLabel: string;
@@ -73,20 +66,14 @@ export interface BuiltDealTemplate {
   logoUrl: string | null;
   currency: string;
   dateFormat: string;
-  includeVat: boolean;
-  includeTax: boolean;
   includeDiscount: boolean;
   includeDecimals: boolean;
   includeUnits: boolean;
   includeQr: boolean;
   includePdf: boolean;
-  includeLineItemTax: boolean;
-  lineItemTaxLabel?: string;
   sendCopy: boolean;
   paymentEnabled: boolean;
   paymentTermsDays?: number;
-  taxRate: number;
-  vatRate: number;
   size: "a4" | "letter";
   deliveryType: "create_and_send";
   locale: string;
@@ -133,11 +120,9 @@ export function buildDealTemplateFromRecurring(
     totalSummaryLabel:
       (template.totalSummaryLabel as string) ??
       DEFAULT_TEMPLATE_LABELS.totalSummaryLabel,
-    vatLabel: (template.vatLabel as string) ?? DEFAULT_TEMPLATE_LABELS.vatLabel,
     subtotalLabel:
       (template.subtotalLabel as string) ??
       DEFAULT_TEMPLATE_LABELS.subtotalLabel,
-    taxLabel: (template.taxLabel as string) ?? DEFAULT_TEMPLATE_LABELS.taxLabel,
     discountLabel:
       (template.discountLabel as string) ??
       DEFAULT_TEMPLATE_LABELS.discountLabel,
@@ -158,10 +143,6 @@ export function buildDealTemplateFromRecurring(
     size: (template.size as "a4" | "letter") ?? DEFAULT_TEMPLATE_SETTINGS.size,
 
     // Boolean settings with defaults
-    includeVat:
-      (template.includeVat as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includeVat,
-    includeTax:
-      (template.includeTax as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includeTax,
     includeDiscount:
       (template.includeDiscount as boolean) ??
       DEFAULT_TEMPLATE_SETTINGS.includeDiscount,
@@ -175,12 +156,6 @@ export function buildDealTemplateFromRecurring(
       (template.includeQr as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includeQr,
     includePdf:
       (template.includePdf as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includePdf,
-    includeLineItemTax:
-      (template.includeLineItemTax as boolean) ??
-      DEFAULT_TEMPLATE_SETTINGS.includeLineItemTax,
-    lineItemTaxLabel:
-      (template.lineItemTaxLabel as string) ??
-      DEFAULT_TEMPLATE_LABELS.lineItemTaxLabel,
     sendCopy:
       (template.sendCopy as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.sendCopy,
     paymentEnabled:
@@ -189,10 +164,6 @@ export function buildDealTemplateFromRecurring(
     paymentTermsDays:
       (template.paymentTermsDays as number) ??
       DEFAULT_TEMPLATE_SETTINGS.paymentTermsDays,
-
-    // Numeric settings with defaults
-    taxRate: (template.taxRate as number) ?? DEFAULT_TEMPLATE_SETTINGS.taxRate,
-    vatRate: (template.vatRate as number) ?? DEFAULT_TEMPLATE_SETTINGS.vatRate,
 
     // Fixed value for recurring deals
     deliveryType: "create_and_send",

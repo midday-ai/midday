@@ -129,20 +129,12 @@ export const createDealRecurringSchema = z
     noteDetails: z.any().nullable().optional().openapi({
       description: "Note details in TipTap JSONContent format",
     }),
-    vat: z.number().nullable().optional().openapi({
-      description: "VAT amount",
-      example: 150.0,
-    }),
-    tax: z.number().nullable().optional().openapi({
-      description: "Tax amount",
-      example: 50.0,
-    }),
     discount: z.number().nullable().optional().openapi({
       description: "Discount amount",
       example: 100.0,
     }),
     subtotal: z.number().nullable().optional().openapi({
-      description: "Subtotal before taxes and discounts",
+      description: "Subtotal before discounts",
       example: 1400.0,
     }),
     topBlock: z.any().nullable().optional().openapi({
@@ -327,8 +319,6 @@ export const updateDealRecurringSchema = z
     paymentDetails: z.any().nullable().optional(),
     fromDetails: z.any().nullable().optional(),
     noteDetails: z.any().nullable().optional(),
-    vat: z.number().nullable().optional(),
-    tax: z.number().nullable().optional(),
     discount: z.number().nullable().optional(),
     subtotal: z.number().nullable().optional(),
     topBlock: z.any().nullable().optional(),

@@ -21,7 +21,6 @@ type DealProduct = {
   price: number | null;
   currency: string | null;
   unit: string | null;
-  taxRate: number | null;
 };
 
 function extractTextFromValue(value: string): string {
@@ -230,14 +229,6 @@ export function ProductAutocomplete({
 
       if (product.unit) {
         setValue(`lineItems.${index}.unit`, product.unit, {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-      }
-
-      // Auto-fill tax rate if product has one
-      if (product.taxRate !== null && product.taxRate !== undefined) {
-        setValue(`lineItems.${index}.taxRate`, product.taxRate, {
           shouldValidate: true,
           shouldDirty: true,
         });

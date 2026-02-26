@@ -57,9 +57,7 @@ export type Template = {
   quantityLabel: string;
   totalLabel: string;
   totalSummaryLabel: string;
-  vatLabel: string;
   subtotalLabel: string;
-  taxLabel: string;
   discountLabel: string;
   timezone: string;
   paymentLabel: string;
@@ -70,14 +68,10 @@ export type Template = {
   fromDetails: EditorDoc | null;
   noteDetails: EditorDoc | null;
   dateFormat: string;
-  includeVat: boolean;
-  includeTax: boolean;
   includeDiscount: boolean;
   includeDecimals: boolean;
   includeUnits: boolean;
   includeQr: boolean;
-  taxRate: number;
-  vatRate: number;
   size: "a4" | "letter";
   deliveryType: "create" | "create_and_send" | "scheduled";
   locale: string;
@@ -194,8 +188,6 @@ export async function getDeals(db: Database, params: GetDealsParams) {
       note: deals.note,
       internalNote: deals.internalNote,
       paidAt: deals.paidAt,
-      vat: deals.vat,
-      tax: deals.tax,
       filePath: deals.filePath,
       status: deals.status,
       fileSize: deals.fileSize,
@@ -328,8 +320,6 @@ export async function getDealById(
       note: deals.note,
       internalNote: deals.internalNote,
       paidAt: deals.paidAt,
-      vat: deals.vat,
-      tax: deals.tax,
       filePath: deals.filePath,
       status: deals.status,
       fileSize: deals.fileSize,
@@ -719,8 +709,6 @@ type DraftDealLineItemParams = {
   quantity?: number;
   unit?: string | null;
   price?: number;
-  vat?: number | null;
-  tax?: number | null;
 };
 
 type DraftDealTemplateParams = {
@@ -735,9 +723,7 @@ type DraftDealTemplateParams = {
   quantityLabel?: string;
   totalLabel?: string;
   totalSummaryLabel?: string;
-  vatLabel?: string;
   subtotalLabel?: string;
-  taxLabel?: string;
   discountLabel?: string;
   sendCopy?: boolean;
   timezone?: string;
@@ -748,14 +734,10 @@ type DraftDealTemplateParams = {
   paymentDetails?: string | null;
   fromDetails?: string | null;
   dateFormat?: string;
-  includeVat?: boolean;
-  includeTax?: boolean;
   includeDiscount?: boolean;
   includeDecimals?: boolean;
   includeUnits?: boolean;
   includeQr?: boolean;
-  taxRate?: number | null;
-  vatRate?: number | null;
   size?: "a4" | "letter";
   deliveryType?: "create" | "create_and_send" | "scheduled";
   locale?: string;
@@ -775,8 +757,6 @@ type DraftDealParams = {
   issueDate: string;
   dealNumber: string;
   logoUrl?: string | null;
-  vat?: number | null;
-  tax?: number | null;
   discount?: number | null;
   subtotal?: number | null;
   topBlock?: string | null;
@@ -1023,8 +1003,6 @@ export async function duplicateDeal(
       template: deals.template,
       merchantId: deals.merchantId,
       merchantName: deals.merchantName,
-      vat: deals.vat,
-      tax: deals.tax,
       discount: deals.discount,
       subtotal: deals.subtotal,
       amount: deals.amount,
@@ -1057,8 +1035,6 @@ export async function duplicateDeal(
     dealNumber,
     merchantId: deal.merchantId,
     merchantName: deal.merchantName,
-    vat: deal.vat,
-    tax: deal.tax,
     discount: deal.discount,
     subtotal: deal.subtotal,
     amount: deal.amount,

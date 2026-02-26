@@ -39,8 +39,6 @@ export type CreateDealRecurringParams = {
   paymentDetails?: unknown;
   fromDetails?: unknown;
   noteDetails?: unknown;
-  vat?: number | null;
-  tax?: number | null;
   discount?: number | null;
   subtotal?: number | null;
   topBlock?: unknown;
@@ -79,8 +77,6 @@ export async function createDealRecurring(
     paymentDetails,
     fromDetails,
     noteDetails,
-    vat,
-    tax,
     discount,
     subtotal,
     topBlock,
@@ -131,8 +127,6 @@ export async function createDealRecurring(
       paymentDetails,
       fromDetails,
       noteDetails,
-      vat,
-      tax,
       discount,
       subtotal,
       topBlock,
@@ -168,8 +162,6 @@ export type UpdateDealRecurringParams = {
   paymentDetails?: unknown;
   fromDetails?: unknown;
   noteDetails?: unknown;
-  vat?: number | null;
-  tax?: number | null;
   discount?: number | null;
   subtotal?: number | null;
   topBlock?: unknown;
@@ -327,8 +319,6 @@ export async function getDealRecurringById(
       fromDetails: dealRecurring.fromDetails,
       noteDetails: dealRecurring.noteDetails,
       merchantName: dealRecurring.merchantName,
-      vat: dealRecurring.vat,
-      tax: dealRecurring.tax,
       discount: dealRecurring.discount,
       subtotal: dealRecurring.subtotal,
       topBlock: dealRecurring.topBlock,
@@ -476,8 +466,6 @@ export async function getDueDealRecurring(
       paymentDetails: dealRecurring.paymentDetails,
       fromDetails: dealRecurring.fromDetails,
       noteDetails: dealRecurring.noteDetails,
-      vat: dealRecurring.vat,
-      tax: dealRecurring.tax,
       discount: dealRecurring.discount,
       subtotal: dealRecurring.subtotal,
       topBlock: dealRecurring.topBlock,

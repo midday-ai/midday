@@ -3,7 +3,6 @@
 import { useAppOAuth } from "@/hooks/use-app-oauth";
 import { useTRPC } from "@/trpc/client";
 import { localDateToUTCMidnight } from "@midday/deal/recurring";
-import { uniqueCurrencies } from "@midday/location/currencies";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,7 +41,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, parseISO } from "date-fns";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { SelectCurrency } from "../select-currency";
 
 const dateFormats = [
   { value: "dd/MM/yyyy", label: "DD/MM/YYYY" },
@@ -96,33 +94,6 @@ const menuItems = [
     label: "Deal size",
     options: dealSizes,
     key: "size",
-  },
-  {
-    icon: Icons.Tax,
-    label: "Add sales tax",
-    options: booleanOptions,
-    key: "includeTax",
-  },
-  {
-    icon: Icons.ListAlt,
-    label: "Line item tax",
-    options: booleanOptions,
-    key: "includeLineItemTax",
-  },
-  {
-    icon: Icons.Vat,
-    label: "Add VAT",
-    options: booleanOptions,
-    key: "includeVat",
-  },
-  {
-    icon: Icons.CurrencyOutline,
-    label: "Currency",
-    options: uniqueCurrencies.map((currency) => ({
-      value: currency,
-      label: currency,
-    })),
-    key: "currency",
   },
   {
     icon: Icons.ConfirmationNumber,
@@ -442,35 +413,6 @@ export function SettingsMenu() {
         <DropdownMenuContent align="end" className="w-48">
           {menuItems.map((item, index) => {
             const watchKey = `template.${item.key}`;
-
-            if (item.key === "currency") {
-              return (
-                <DropdownMenuSub key={index.toString()}>
-                  <DropdownMenuSubTrigger>
-                    <item.icon className="mr-2 size-4" />
-                    <span className="text-xs">{item.label}</span>
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="p-0">
-                    <SelectCurrency
-                      headless
-                      className="text-xs"
-                      currencies={uniqueCurrencies}
-                      value={watch(watchKey)}
-                      onChange={(value) => {
-                        setValue(watchKey, value, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        });
-                        updateTemplateMutation.mutate({
-                          id: templateId,
-                          [item.key]: value,
-                        });
-                      }}
-                    />
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-              );
-            }
 
             return (
               <DropdownMenuSub key={index.toString()}>

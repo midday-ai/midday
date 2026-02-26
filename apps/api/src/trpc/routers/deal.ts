@@ -134,11 +134,6 @@ export const dealRouter = createTRPCRouter({
       // Default to letter size for US/CA, A4 for rest of world
       const size = ["US", "CA"].includes(countryCode) ? "letter" : "a4";
 
-      // Default to include sales tax for countries where it's common
-      const includeTax = ["US", "CA", "AU", "NZ", "SG", "MY", "IN"].includes(
-        countryCode,
-      );
-
       const savedTemplate = {
         id: template?.id,
         name: template?.name ?? "Default",
@@ -147,18 +142,12 @@ export const dealRouter = createTRPCRouter({
         logoUrl,
         currency,
         size: template?.size ?? defaultTemplate.size,
-        includeTax: template?.includeTax ?? includeTax,
-        includeVat: template?.includeVat ?? !includeTax,
         includeDiscount:
           template?.includeDiscount ?? defaultTemplate.includeDiscount,
         includeDecimals:
           template?.includeDecimals ?? defaultTemplate.includeDecimals,
         includeUnits: template?.includeUnits ?? defaultTemplate.includeUnits,
         includeQr: template?.includeQr ?? defaultTemplate.includeQr,
-        includeLineItemTax:
-          template?.includeLineItemTax ?? defaultTemplate.includeLineItemTax,
-        lineItemTaxLabel:
-          template?.lineItemTaxLabel ?? defaultTemplate.lineItemTaxLabel,
         includePdf: template?.includePdf ?? defaultTemplate.includePdf,
         sendCopy: template?.sendCopy ?? defaultTemplate.sendCopy,
         customerLabel: template?.customerLabel ?? defaultTemplate.customerLabel,
@@ -177,14 +166,10 @@ export const dealRouter = createTRPCRouter({
         priceLabel: template?.priceLabel ?? defaultTemplate.priceLabel,
         quantityLabel: template?.quantityLabel ?? defaultTemplate.quantityLabel,
         totalLabel: template?.totalLabel ?? defaultTemplate.totalLabel,
-        vatLabel: template?.vatLabel ?? defaultTemplate.vatLabel,
-        taxLabel: template?.taxLabel ?? defaultTemplate.taxLabel,
         paymentLabel: template?.paymentLabel ?? defaultTemplate.paymentLabel,
         noteLabel: template?.noteLabel ?? defaultTemplate.noteLabel,
         dateFormat,
         deliveryType: template?.deliveryType ?? defaultTemplate.deliveryType,
-        taxRate: template?.taxRate ?? defaultTemplate.taxRate,
-        vatRate: template?.vatRate ?? defaultTemplate.vatRate,
         fromDetails: template?.fromDetails ?? defaultTemplate.fromDetails,
         paymentDetails:
           template?.paymentDetails ?? defaultTemplate.paymentDetails,
@@ -205,8 +190,6 @@ export const dealRouter = createTRPCRouter({
         currency,
         status: "draft",
         size,
-        includeTax: savedTemplate?.includeTax ?? includeTax,
-        includeVat: savedTemplate?.includeVat ?? !includeTax,
         includeDiscount: false,
         includeDecimals: false,
         includePdf: false,
@@ -223,8 +206,7 @@ export const dealRouter = createTRPCRouter({
         merchantId: undefined,
         issueDate: new UTCDate().toISOString(),
         dueDate: addDays(new UTCDate(), paymentTermsDays).toISOString(),
-        lineItems: [{ name: "", quantity: 0, price: 0, vat: 0 }],
-        tax: undefined,
+        lineItems: [{ name: "", quantity: 0, price: 0 }],
         token: undefined,
         discount: undefined,
         subtotal: undefined,
@@ -233,7 +215,6 @@ export const dealRouter = createTRPCRouter({
         amount: undefined,
         merchantName: undefined,
         logoUrl: undefined,
-        vat: undefined,
         template: savedTemplate,
       };
     },

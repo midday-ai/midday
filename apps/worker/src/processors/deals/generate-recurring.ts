@@ -349,8 +349,6 @@ export class DealRecurringSchedulerProcessor extends BaseProcessor<DealRecurring
             dueDate,
             issueDate,
             dealNumber,
-            vat: recurring.vat ?? undefined,
-            tax: recurring.tax ?? undefined,
             discount: recurring.discount ?? undefined,
             subtotal: recurring.subtotal ?? undefined,
             topBlock: stringifyJsonField(recurring.topBlock),

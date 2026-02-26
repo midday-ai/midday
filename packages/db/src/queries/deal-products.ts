@@ -14,7 +14,6 @@ export type DealProduct = {
   price: number | null;
   currency: string | null;
   unit: string | null;
-  taxRate: number | null;
   isActive: boolean;
   usageCount: number;
   lastUsedAt: string | null;
@@ -28,7 +27,6 @@ export type CreateDealProductParams = {
   price?: number | null;
   currency?: string | null;
   unit?: string | null;
-  taxRate?: number | null;
   isActive?: boolean;
 };
 
@@ -40,7 +38,6 @@ export type UpdateDealProductParams = {
   price?: number | null;
   currency?: string | null;
   unit?: string | null;
-  taxRate?: number | null;
   isActive?: boolean;
   usageCount?: number;
   lastUsedAt?: string | null;
@@ -79,7 +76,6 @@ export type UpsertDealProductParams = {
   price?: number | null;
   currency?: string | null;
   unit?: string | null;
-  taxRate?: number | null;
 };
 
 export async function upsertDealProduct(
@@ -108,7 +104,6 @@ export async function upsertDealProduct(
           description: params.description,
         }),
         ...(params.unit !== undefined && { unit: params.unit }),
-        ...(params.taxRate !== undefined && { taxRate: params.taxRate }),
         usageCount: sql`${dealProducts.usageCount} + 1`,
         lastUsedAt: now,
         updatedAt: now,

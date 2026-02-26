@@ -9,7 +9,6 @@ import { Reorder, useDragControls } from "framer-motion";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import type { DealFormValues } from "./form-context";
 import { LabelInput } from "./label-input";
-import { PercentInput } from "./percent-input";
 import { ProductAutocomplete } from "./product-autocomplete";
 import { ProductAwareAmountInput } from "./product-aware-amount-input";
 import { ProductAwareUnitInput } from "./product-aware-unit-input";
@@ -30,21 +29,10 @@ export function LineItems() {
     name: "template.includeUnits",
   });
 
-  const includeLineItemTax = useWatch({
-    control,
-    name: "template.includeLineItemTax",
-  });
-
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
   // Build grid columns based on settings
   const getGridCols = () => {
-    if (includeLineItemTax && includeUnits) {
-      return "grid-cols-[1.5fr_12%_20%_12%_15%]";
-    }
-    if (includeLineItemTax) {
-      return "grid-cols-[1.5fr_12%_12%_12%_15%]";
-    }
     if (includeUnits) {
       return "grid-cols-[1.5fr_15%_25%_15%]";
     }
@@ -107,17 +95,6 @@ export function LineItems() {
           className="truncate"
         />
 
-        {includeLineItemTax && (
-          <LabelInput
-            name="template.lineItemTaxLabel"
-            defaultValue="Tax"
-            onSave={(value) => {
-              updateTemplate({ lineItemTaxLabel: value });
-            }}
-            className="truncate"
-          />
-        )}
-
         <LabelInput
           name="template.totalLabel"
           onSave={(value) => {
@@ -145,7 +122,6 @@ export function LineItems() {
             currency={currency}
             maximumFractionDigits={maximumFractionDigits}
             includeUnits={includeUnits}
-            includeLineItemTax={includeLineItemTax}
             gridCols={gridCols}
           />
         ))}
@@ -177,7 +153,6 @@ function LineItemRow({
   currency,
   maximumFractionDigits,
   includeUnits,
-  includeLineItemTax,
   gridCols,
 }: {
   index: number;
@@ -187,7 +162,6 @@ function LineItemRow({
   currency: string;
   maximumFractionDigits: number;
   includeUnits?: boolean;
-  includeLineItemTax?: boolean;
   gridCols: string;
 }) {
   const controls = useDragControls();
@@ -263,10 +237,6 @@ function LineItemRow({
           />
         )}
       </div>
-
-      {includeLineItemTax && (
-        <PercentInput name={`lineItems.${index}.taxRate`} />
-      )}
 
       <div className="text-right">
         <span className="text-xs text-primary font-mono">

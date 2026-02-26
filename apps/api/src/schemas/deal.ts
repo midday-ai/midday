@@ -86,9 +86,7 @@ const baseDealTemplateSchema = z.object({
   quantityLabel: z.string().optional(),
   totalLabel: z.string().optional(),
   totalSummaryLabel: z.string().optional(),
-  vatLabel: z.string().optional(),
   subtotalLabel: z.string().optional(),
-  taxLabel: z.string().optional(),
   discountLabel: z.string().optional(),
   timezone: z
     .string()
@@ -102,18 +100,12 @@ const baseDealTemplateSchema = z.object({
   logoUrl: z.string().optional().nullable(),
   currency: z.string().optional(),
   dateFormat: z.string().optional(),
-  includeVat: z.boolean().optional(),
-  includeTax: z.boolean().optional(),
   includeDiscount: z.boolean().optional(),
   includeDecimals: z.boolean().optional(),
   includePdf: z.boolean().optional(),
   sendCopy: z.boolean().optional(),
   includeUnits: z.boolean().optional(),
   includeQr: z.boolean().optional(),
-  includeLineItemTax: z.boolean().optional(),
-  lineItemTaxLabel: z.string().optional(),
-  taxRate: z.number().min(0).max(100).optional().nullable(),
-  vatRate: z.number().min(0).max(100).optional().nullable(),
   size: z.enum(["a4", "letter"]).optional(),
   deliveryType: z.enum(["create", "create_and_send", "scheduled"]).optional(),
   locale: z.string().optional(),
@@ -149,9 +141,6 @@ const baseDraftLineItemSchema = z.object({
   quantity: z.number().min(0, "Quantity must be at least 0").optional(),
   unit: z.string().optional().nullable(),
   price: z.number().optional(),
-  vat: z.number().min(0, "VAT must be at least 0").nullable().optional(),
-  tax: z.number().min(0, "Tax must be at least 0").nullable().optional(),
-  taxRate: z.number().min(0).max(100).optional().nullable(),
 });
 
 // tRPC-compatible line item schema (uses string for name field)
@@ -228,14 +217,6 @@ const baseDraftDealSchema = z.object({
   logoUrl: z.string().optional().nullable().openapi({
     description: "URL of the logo to display on the deal",
     example: "https://example.com/logo.png",
-  }),
-  vat: z.number().nullable().optional().openapi({
-    description: "VAT amount for the deal",
-    example: 150.0,
-  }),
-  tax: z.number().nullable().optional().openapi({
-    description: "Tax amount for the deal",
-    example: 50.0,
   }),
   discount: z.number().nullable().optional().openapi({
     description: "Discount applied to the deal",
@@ -346,8 +327,6 @@ export const draftDealSchemaWithOpenApi = draftDealSchema.openapi({
       quantityLabel: "Quantity",
       totalLabel: "Total",
       totalSummaryLabel: "Total",
-      vatLabel: "VAT",
-      taxLabel: "Tax",
       paymentLabel: "Payment Details",
       noteLabel: "Note",
       logoUrl: "https://example.com/logo.png",
@@ -355,8 +334,6 @@ export const draftDealSchemaWithOpenApi = draftDealSchema.openapi({
       paymentDetails: "Bank: 123456, IBAN: DE1234567890",
       fromDetails: "Acme Inc, 123 Main St, City, Country",
       size: "a4",
-      includeVat: true,
-      includeTax: true,
       discountLabel: "Discount",
       includeDiscount: false,
       includeUnits: false,
@@ -365,8 +342,6 @@ export const draftDealSchemaWithOpenApi = draftDealSchema.openapi({
       sendCopy: false,
       includeQr: true,
       dateFormat: "dd/MM/yyyy",
-      taxRate: 0,
-      vatRate: 0,
       deliveryType: "create",
       timezone: "UTC",
       locale: "en-US",
@@ -380,8 +355,6 @@ export const draftDealSchemaWithOpenApi = draftDealSchema.openapi({
     issueDate: "2024-06-01T00:00:00.000Z",
     dealNumber: "D-0001",
     logoUrl: "https://example.com/logo.png",
-    vat: 150.0,
-    tax: 50.0,
     discount: 100.0,
     topBlock: null,
     bottomBlock: null,
@@ -392,8 +365,6 @@ export const draftDealSchemaWithOpenApi = draftDealSchema.openapi({
         quantity: 10,
         unit: "hours",
         price: 100.0,
-        vat: 15.0,
-        tax: 5.0,
       },
     ],
     token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -405,9 +376,6 @@ export const lineItemSchema = z.object({
   quantity: z.number().min(0, "Quantity must be at least 0"),
   unit: z.string().optional(),
   price: z.number(),
-  vat: z.number().min(0, "VAT must be at least 0").optional(),
-  tax: z.number().min(0, "Tax must be at least 0").optional(),
-  taxRate: z.number().min(0).max(100).optional(),
   // Optional product reference
   productId: z.string().uuid().optional(),
 });
@@ -419,7 +387,6 @@ export const createDealProductSchema = z.object({
   price: z.number().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
-  taxRate: z.number().min(0).max(100).optional().nullable(),
   isActive: z.boolean().optional(),
 });
 
@@ -430,7 +397,6 @@ export const updateDealProductSchema = z.object({
   price: z.number().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
-  taxRate: z.number().min(0).max(100).optional().nullable(),
   isActive: z.boolean().optional(),
 });
 
@@ -470,7 +436,6 @@ export const upsertDealProductSchema = z.object({
   price: z.number().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
-  taxRate: z.number().min(0).max(100).optional().nullable(),
 });
 
 export const dealTemplateSchema = z.object({
@@ -485,9 +450,7 @@ export const dealTemplateSchema = z.object({
   quantityLabel: z.string(),
   totalLabel: z.string(),
   totalSummaryLabel: z.string().optional(),
-  vatLabel: z.string().optional(),
   subtotalLabel: z.string().optional(),
-  taxLabel: z.string().optional(),
   discountLabel: z.string().optional(),
   paymentLabel: z.string(),
   noteLabel: z.string(),
@@ -496,17 +459,11 @@ export const dealTemplateSchema = z.object({
   paymentDetails: z.any().nullable().optional(),
   fromDetails: z.any().nullable().optional(),
   size: z.enum(["a4", "letter"]),
-  includeVat: z.boolean().optional(),
-  includeTax: z.boolean().optional(),
   includeDiscount: z.boolean().optional(),
   includeDecimals: z.boolean().optional(),
   includePdf: z.boolean().optional(),
   includeUnits: z.boolean().optional(),
   includeQr: z.boolean().optional(),
-  includeLineItemTax: z.boolean().optional(),
-  lineItemTaxLabel: z.string().optional(),
-  taxRate: z.number().min(0).max(100).optional(),
-  vatRate: z.number().min(0).max(100).optional(),
   dateFormat: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"]),
   deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
   locale: z.string().optional(),
@@ -807,14 +764,6 @@ export const createDealRequestSchema = z
       description: "URL of the logo to display on the deal",
       example: "https://example.com/logo.png",
     }),
-    vat: z.number().nullable().optional().openapi({
-      description: "VAT amount for the deal",
-      example: 150.0,
-    }),
-    tax: z.number().nullable().optional().openapi({
-      description: "Tax amount for the deal",
-      example: 50.0,
-    }),
     discount: z.number().nullable().optional().openapi({
       description: "Discount applied to the deal",
       example: 100.0,
@@ -860,8 +809,6 @@ export const createDealRequestSchema = z
         quantityLabel: "Qty",
         totalLabel: "Amount",
         totalSummaryLabel: "Total",
-        vatLabel: "VAT",
-        taxLabel: "Sales Tax",
         paymentLabel: "Payment Information",
         noteLabel: "Notes",
         logoUrl: "https://example.com/logo.png",
@@ -895,8 +842,6 @@ export const createDealRequestSchema = z
           ],
         },
         size: "letter",
-        includeVat: false,
-        includeTax: true,
         discountLabel: "Discount",
         includeDiscount: false,
         includeUnits: true,
@@ -905,8 +850,6 @@ export const createDealRequestSchema = z
         sendCopy: true,
         includeQr: false,
         dateFormat: "MM/dd/yyyy",
-        taxRate: 8.5,
-        vatRate: 0,
         deliveryType: "create",
         timezone: "America/Los_Angeles",
         locale: "en-US",
@@ -1006,8 +949,6 @@ export const createDealRequestSchema = z
       issueDate: "2024-06-15T00:00:00.000Z",
       dealNumber: "D-0001",
       logoUrl: "https://example.com/logo.png",
-      vat: undefined,
-      tax: 85.0,
       discount: undefined,
       topBlock: {
         type: "doc",
@@ -1135,7 +1076,6 @@ export const createDealRequestSchema = z
           },
           quantity: 40,
           price: 75.0,
-          tax: 8.5,
         },
         {
           name: {
@@ -1165,7 +1105,6 @@ export const createDealRequestSchema = z
           },
           quantity: 20,
           price: 50.0,
-          tax: 8.5,
         },
       ],
       deliveryType: "create",
@@ -1281,21 +1220,13 @@ export const dealResponseSchema = z
       description: "Optional note attached to the deal",
       example: "Thank you for your business.",
     }),
-    vat: z.number().nullable().openapi({
-      description: "Value-added tax amount, or null if not applicable",
-      example: 120.0,
-    }),
-    tax: z.number().nullable().openapi({
-      description: "Tax amount, or null if not applicable",
-      example: 80.0,
-    }),
     discount: z.number().nullable().openapi({
       description: "Discount amount applied to the deal, or null if none",
       example: 50.0,
     }),
     subtotal: z.number().nullable().openapi({
       description:
-        "Subtotal before taxes and discounts, or null if not calculated",
+        "Subtotal before discounts, or null if not calculated",
       example: 1400.0,
     }),
     viewedAt: z.string().nullable().openapi({

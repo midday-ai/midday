@@ -14,9 +14,7 @@ type DealTemplateParams = {
   quantityLabel?: string;
   totalLabel?: string;
   totalSummaryLabel?: string;
-  vatLabel?: string;
   subtotalLabel?: string;
-  taxLabel?: string;
   discountLabel?: string;
   sendCopy?: boolean;
   paymentLabel?: string;
@@ -27,16 +25,10 @@ type DealTemplateParams = {
   fromDetails?: string | null; // Stringified JSON
   noteDetails?: string | null; // Stringified JSON
   dateFormat?: string;
-  includeVat?: boolean;
-  includeTax?: boolean;
   includeDiscount?: boolean;
   includeDecimals?: boolean;
   includeUnits?: boolean;
   includeQr?: boolean;
-  includeLineItemTax?: boolean;
-  lineItemTaxLabel?: string;
-  taxRate?: number | null;
-  vatRate?: number | null;
   size?: "a4" | "letter";
   deliveryType?: "create" | "create_and_send" | "scheduled";
   includePdf?: boolean;
@@ -70,8 +62,6 @@ const templateSelectFields = {
   priceLabel: dealTemplates.priceLabel,
   quantityLabel: dealTemplates.quantityLabel,
   totalLabel: dealTemplates.totalLabel,
-  vatLabel: dealTemplates.vatLabel,
-  taxLabel: dealTemplates.taxLabel,
   paymentLabel: dealTemplates.paymentLabel,
   noteLabel: dealTemplates.noteLabel,
   logoUrl: dealTemplates.logoUrl,
@@ -82,19 +72,13 @@ const templateSelectFields = {
   noteDetails: dealTemplates.noteDetails,
   size: dealTemplates.size,
   dateFormat: dealTemplates.dateFormat,
-  includeVat: dealTemplates.includeVat,
-  includeTax: dealTemplates.includeTax,
-  taxRate: dealTemplates.taxRate,
   deliveryType: dealTemplates.deliveryType,
   discountLabel: dealTemplates.discountLabel,
   includeDiscount: dealTemplates.includeDiscount,
   includeDecimals: dealTemplates.includeDecimals,
   includeQr: dealTemplates.includeQr,
-  includeLineItemTax: dealTemplates.includeLineItemTax,
-  lineItemTaxLabel: dealTemplates.lineItemTaxLabel,
   totalSummaryLabel: dealTemplates.totalSummaryLabel,
   title: dealTemplates.title,
-  vatRate: dealTemplates.vatRate,
   includeUnits: dealTemplates.includeUnits,
   includePdf: dealTemplates.includePdf,
   sendCopy: dealTemplates.sendCopy,
