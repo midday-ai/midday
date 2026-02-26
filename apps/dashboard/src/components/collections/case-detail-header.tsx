@@ -39,9 +39,9 @@ type Props = {
 
 const priorityStyles: Record<string, string> = {
   critical: "text-[#FF3638] bg-[#FF3638]/10",
-  high: "text-[#f97316] bg-[#f97316]/10",
-  medium: "text-[#eab308] bg-[#eab308]/10",
-  low: "text-[#6b7280] bg-[#6b7280]/10",
+  high: "text-[#F97316] bg-[#FFEDD5] dark:bg-[#F97316]/10",
+  medium: "text-[#FFD02B] bg-[#FFD02B]/10",
+  low: "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
 };
 
 const outcomeLabels: Record<string, string> = {
@@ -159,8 +159,10 @@ export function CaseDetailHeader({ data }: Props) {
           )}
 
           {isResolved && data.outcome && (
-            <div className="px-3 py-1 rounded-full text-[12px] font-medium bg-[#DDF1E4] text-[#00C969]">
-              {outcomeLabels[data.outcome] || data.outcome}
+            <div className="px-2 py-0.5 rounded-full inline-flex max-w-full text-[11px] font-medium text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10">
+              <span className="line-clamp-1 truncate inline-block">
+                {outcomeLabels[data.outcome] || data.outcome}
+              </span>
             </div>
           )}
         </div>
@@ -203,7 +205,7 @@ export function CaseDetailHeader({ data }: Props) {
                       priorityStyles[data.priority ?? "low"] || priorityStyles.low,
                     )}
                   >
-                    {data.priority}
+                    <span className="capitalize">{data.priority}</span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
