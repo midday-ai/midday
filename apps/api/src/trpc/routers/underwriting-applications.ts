@@ -14,13 +14,18 @@ import {
   createUnderwritingDocument,
   updateUnderwritingDocument,
 } from "@db/queries/underwriting-documents";
-import { getUnderwritingScore } from "@db/queries/underwriting-scores";
+import {
+  getUnderwritingScore,
+  createUnderwritingScore,
+} from "@db/queries/underwriting-scores";
 import {
   getUnderwritingDocRequirements,
   upsertUnderwritingDocRequirement,
   deleteUnderwritingDocRequirement,
   seedDefaultDocRequirements,
 } from "@db/queries/underwriting-requirements";
+import { getUnderwritingBuyBox } from "@db/queries/underwriting";
+import { scoreUnderwritingApplication } from "@midday/underwriting";
 import { z } from "zod";
 
 export const underwritingApplicationsRouter = createTRPCRouter({
@@ -198,6 +203,24 @@ export const underwritingApplicationsRouter = createTRPCRouter({
         applicationId: input.applicationId,
         teamId: teamId!,
       });
+    }),
+
+  runScoring: memberProcedure
+    .input(z.object({ applicationId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      return scoreUnderwritingApplication(
+        input.applicationId,
+        ctx.teamId!,
+        ctx.db,
+        ctx.supabase,
+        {
+          getUnderwritingApplicationById,
+          getUnderwritingDocuments,
+          getUnderwritingBuyBox,
+          createUnderwritingScore,
+          updateUnderwritingApplication,
+        },
+      );
     }),
 
   // ===========================================================================

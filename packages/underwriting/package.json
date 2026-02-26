@@ -1,0 +1,24 @@
+{
+  "name": "@midday/underwriting",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "lint:fix": "biome format --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.0",
+    "@ai-sdk/google": "^3.0.4",
+    "ai": "^6.0.13",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@midday/tsconfig": "workspace:*",
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3"
+  }
+}
