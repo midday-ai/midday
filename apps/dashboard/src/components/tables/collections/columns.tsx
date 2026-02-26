@@ -54,13 +54,21 @@ const BalanceCell = memo(({ balance }: { balance: number | null }) => {
 BalanceCell.displayName = "BalanceCell";
 
 const stageColorMap: Record<string, string> = {
-  "#ef4444": "text-[#ef4444] bg-[#ef4444]/10",
-  "#f97316": "text-[#f97316] bg-[#f97316]/10",
-  "#eab308": "text-[#eab308] bg-[#eab308]/10",
-  "#22c55e": "text-[#22c55e] bg-[#22c55e]/10",
-  "#3b82f6": "text-[#3b82f6] bg-[#3b82f6]/10",
+  // Midday palette (preferred)
+  "#FF3638": "text-[#FF3638] bg-[#FF3638]/10",
+  "#F97316": "text-[#F97316] bg-[#FFEDD5] dark:bg-[#F97316]/10",
+  "#FFD02B": "text-[#FFD02B] bg-[#FFD02B]/10",
+  "#00C969": "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10",
+  "#1F6FEB": "text-[#1F6FEB] bg-[#DDEBFF] dark:bg-[#1F6FEB]/10",
+  "#878787": "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
+  // Legacy Tailwind defaults (backward compat with existing DB data)
+  "#ef4444": "text-[#FF3638] bg-[#FF3638]/10",
+  "#f97316": "text-[#F97316] bg-[#FFEDD5] dark:bg-[#F97316]/10",
+  "#eab308": "text-[#FFD02B] bg-[#FFD02B]/10",
+  "#22c55e": "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10",
+  "#3b82f6": "text-[#1F6FEB] bg-[#DDEBFF] dark:bg-[#1F6FEB]/10",
   "#8b5cf6": "text-[#8b5cf6] bg-[#8b5cf6]/10",
-  "#6b7280": "text-[#6b7280] bg-[#6b7280]/10",
+  "#6b7280": "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
 };
 
 const StageCell = memo(
@@ -74,7 +82,7 @@ const StageCell = memo(
     if (!stageName) return "-";
     const colorClass =
       stageColorMap[stageColor || ""] ||
-      "text-[#6b7280] bg-[#6b7280]/10";
+      "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]";
     return (
       <div
         className={cn(
@@ -91,9 +99,9 @@ StageCell.displayName = "StageCell";
 
 const priorityStyles: Record<string, string> = {
   critical: "text-[#FF3638] bg-[#FF3638]/10",
-  high: "text-[#f97316] bg-[#f97316]/10",
-  medium: "text-[#eab308] bg-[#eab308]/10",
-  low: "text-[#6b7280] bg-[#6b7280]/10",
+  high: "text-[#F97316] bg-[#FFEDD5] dark:bg-[#F97316]/10",
+  medium: "text-[#FFD02B] bg-[#FFD02B]/10",
+  low: "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
 };
 
 const PriorityCell = memo(({ priority }: { priority: string | null }) => {
