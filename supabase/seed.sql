@@ -148,6 +148,26 @@ DECLARE
   v_syndicator_meridian uuid := gen_random_uuid();
   v_syndicator_coastal  uuid := gen_random_uuid();
 
+  -- Collection Stage IDs (generated fresh)
+  v_cs_early       uuid := gen_random_uuid();
+  v_cs_promise     uuid := gen_random_uuid();
+  v_cs_plan        uuid := gen_random_uuid();
+  v_cs_escalated   uuid := gen_random_uuid();
+  v_cs_legal       uuid := gen_random_uuid();
+  v_cs_agency      uuid := gen_random_uuid();
+  v_cs_resolved    uuid := gen_random_uuid();
+
+  -- Collection Agency IDs
+  v_agency_premier uuid := gen_random_uuid();
+  v_agency_rapid   uuid := gen_random_uuid();
+
+  -- Collection Case IDs
+  v_cc_tonys       uuid := gen_random_uuid();
+  v_cc_westside    uuid := gen_random_uuid();
+  v_cc_redrock     uuid := gen_random_uuid();
+  v_cc_catering    uuid := gen_random_uuid();
+  v_cc_nightowl    uuid := gen_random_uuid();
+
 BEGIN
 
   -- ========================================================================
@@ -1333,6 +1353,163 @@ BEGIN
     (gen_random_uuid(), v_d_luckydragon_2, v_syndicator_meridian, v_team_id,
      35000.00, 0.3500, 'active', 'Renewal deal — returning client')
   ON CONFLICT ON CONSTRAINT syndication_participants_deal_syndicator_unique DO NOTHING;
+
+  -- ========================================================================
+  -- COLLECTIONS MODULE: Stages, Agencies, Cases, Notes, SLA, Escalation
+  -- ========================================================================
+
+  -- Collection Stages (configurable workflow)
+  INSERT INTO collection_stages (id, team_id, name, slug, position, color, is_default, is_terminal) VALUES
+    (v_cs_early,     v_team_id, 'Early Contact',   'early-contact',   1, '#3B82F6', true,  false),
+    (v_cs_promise,   v_team_id, 'Promise to Pay',  'promise-to-pay',  2, '#8B5CF6', false, false),
+    (v_cs_plan,      v_team_id, 'Payment Plan',    'payment-plan',    3, '#6366F1', false, false),
+    (v_cs_escalated, v_team_id, 'Escalated',       'escalated',       4, '#F59E0B', false, false),
+    (v_cs_legal,     v_team_id, 'Legal Review',    'legal-review',    5, '#EF4444', false, false),
+    (v_cs_agency,    v_team_id, 'Agency Referral', 'agency-referral', 6, '#DC2626', false, false),
+    (v_cs_resolved,  v_team_id, 'Resolved',        'resolved',        7, '#16A34A', false, true)
+  ON CONFLICT DO NOTHING;
+
+  -- Collection Agencies
+  INSERT INTO collection_agencies (id, team_id, name, contact_name, contact_email, contact_phone, notes, is_active) VALUES
+    (v_agency_premier, v_team_id, 'Premier Recovery Solutions', 'James Morrison', 'jmorrison@premierrecovery.com', '(555) 901-2345', 'Tier-1 agency. 30% contingency fee. Specializes in MCA collections. Avg 42-day resolution.', true),
+    (v_agency_rapid,   v_team_id, 'Rapid Collections Group',   'Diana Chen',     'dchen@rapidcollections.com',    '(555) 678-9012', 'Budget option. 22% contingency. Good for smaller balances under $40K.', true)
+  ON CONFLICT DO NOTHING;
+
+  -- Collection Cases
+  -- Tony's Italian Kitchen: late, 2 NSFs, in "Promise to Pay" stage, high priority
+  INSERT INTO collection_cases (id, team_id, deal_id, stage_id, assigned_to, priority, next_follow_up, stage_entered_at, entered_collections_at) VALUES
+    (v_cc_tonys, v_team_id, v_d_tonys, v_cs_promise, v_user_id, 'high',
+     NOW() + INTERVAL '2 days',
+     NOW() - INTERVAL '5 days',
+     NOW() - INTERVAL '18 days')
+  ON CONFLICT (deal_id) DO NOTHING;
+
+  -- Westside Auto Body: late, 4 NSFs, in "Escalated" stage, critical priority
+  INSERT INTO collection_cases (id, team_id, deal_id, stage_id, assigned_to, priority, next_follow_up, stage_entered_at, entered_collections_at) VALUES
+    (v_cc_westside, v_team_id, v_d_westside, v_cs_escalated, v_user_id, 'critical',
+     NOW() - INTERVAL '1 day',
+     NOW() - INTERVAL '3 days',
+     NOW() - INTERVAL '35 days')
+  ON CONFLICT (deal_id) DO NOTHING;
+
+  -- Redrock Excavation: defaulted, 6 NSFs, in "Agency Referral" stage, sent to agency
+  INSERT INTO collection_cases (id, team_id, deal_id, stage_id, priority, outcome, agency_id, stage_entered_at, entered_collections_at, resolved_at) VALUES
+    (v_cc_redrock, v_team_id, v_d_redrock, v_cs_agency, 'critical', 'sent_to_agency', v_agency_premier,
+     NOW() - INTERVAL '14 days',
+     NOW() - INTERVAL '90 days',
+     NOW() - INTERVAL '14 days')
+  ON CONFLICT (deal_id) DO NOTHING;
+
+  -- Coastal Catering: late, 2 NSFs, in "Early Contact" stage, medium priority
+  INSERT INTO collection_cases (id, team_id, deal_id, stage_id, assigned_to, priority, next_follow_up, stage_entered_at, entered_collections_at) VALUES
+    (v_cc_catering, v_team_id, v_d_catering, v_cs_early, v_user_id, 'medium',
+     NOW() + INTERVAL '1 day',
+     NOW() - INTERVAL '2 days',
+     NOW() - INTERVAL '2 days')
+  ON CONFLICT (deal_id) DO NOTHING;
+
+  -- NightOwl Printing: late, 3 NSFs, in "Payment Plan" stage, high priority
+  INSERT INTO collection_cases (id, team_id, deal_id, stage_id, assigned_to, priority, next_follow_up, stage_entered_at, entered_collections_at) VALUES
+    (v_cc_nightowl, v_team_id, v_d_nightowl, v_cs_plan, v_user_id, 'high',
+     NOW() + INTERVAL '5 days',
+     NOW() - INTERVAL '8 days',
+     NOW() - INTERVAL '25 days')
+  ON CONFLICT (deal_id) DO NOTHING;
+
+  -- Collection Notes (activity log for each case)
+  INSERT INTO collection_notes (case_id, author_id, contact_name, contact_method, follow_up_date, summary, created_at) VALUES
+    -- Tony's notes
+    (v_cc_tonys, v_user_id, 'Tony Rossi', 'phone', NOW() + INTERVAL '2 days',
+     'Spoke with Tony directly. He acknowledged the missed payments and says cash flow has been tight due to a kitchen renovation. Promised to resume daily payments by end of week. Will follow up in 2 days to confirm first payment hits.',
+     NOW() - INTERVAL '5 days'),
+    (v_cc_tonys, v_user_id, 'Tony Rossi', 'email', NULL,
+     'Sent formal collections notice via email with payment schedule and consequences of continued non-payment. Attached copy of signed MCA agreement.',
+     NOW() - INTERVAL '12 days'),
+    (v_cc_tonys, v_user_id, NULL, 'phone', NOW() - INTERVAL '5 days',
+     'Initial outreach call. Left voicemail requesting callback regarding account status. No answer on business or mobile number.',
+     NOW() - INTERVAL '18 days'),
+
+    -- Westside notes
+    (v_cc_westside, v_user_id, 'Marco Gutierrez', 'phone', NOW() - INTERVAL '1 day',
+     'Called Marco — very confrontational. Claims he never agreed to daily debits and is threatening to close his bank account. Explained the RTR agreement terms. He calmed down slightly and said he''d "think about it." Escalating to management review.',
+     NOW() - INTERVAL '3 days'),
+    (v_cc_westside, v_user_id, 'Receptionist', 'phone', NULL,
+     'Called shop, spoke with receptionist. Marco is "not available." Receptionist says they''ve been having financial difficulties. Left urgent message.',
+     NOW() - INTERVAL '10 days'),
+    (v_cc_westside, v_user_id, 'Marco Gutierrez', 'email', NULL,
+     'Sent 3rd formal notice. Mentioned potential legal action if no response by end of week. Cc''d our legal team.',
+     NOW() - INTERVAL '15 days'),
+    (v_cc_westside, v_user_id, NULL, NULL, NULL,
+     'System: Case auto-escalated from "Promise to Pay" to "Escalated" due to 14 days without payment after promise.',
+     NOW() - INTERVAL '3 days'),
+
+    -- Redrock notes
+    (v_cc_redrock, v_user_id, NULL, NULL, NULL,
+     'Case referred to Premier Recovery Solutions. Contact: James Morrison. 30% contingency fee. All documentation package sent including: original MCA agreement, payment history, NSF records, UCC filing.',
+     NOW() - INTERVAL '14 days'),
+    (v_cc_redrock, v_user_id, 'Bob Redfield', 'in_person', NULL,
+     'Met with Bob at his office. Company is clearly struggling — reduced staff, equipment idle. He admits he can''t make payments. Discussed settlement options but he said he needs to talk to his attorney first. Not optimistic about recovery.',
+     NOW() - INTERVAL '45 days'),
+    (v_cc_redrock, v_user_id, 'Bob Redfield', 'phone', NULL,
+     'Multiple attempts over 2 weeks. Finally reached Bob. Very evasive, keeps saying "next week." No concrete payment commitment. Recommending escalation to external agency.',
+     NOW() - INTERVAL '60 days'),
+
+    -- Catering notes
+    (v_cc_catering, v_user_id, 'Maria Vasquez', 'phone', NOW() + INTERVAL '1 day',
+     'First contact with Maria. She was apologetic about the missed payments — says they had two large event cancellations last month that hit revenue hard. She expects a $15K catering contract payment this week and promises to resume payments. Setting follow-up for tomorrow to verify.',
+     NOW() - INTERVAL '2 days'),
+
+    -- NightOwl notes
+    (v_cc_nightowl, v_user_id, 'Dave Kim', 'phone', NOW() + INTERVAL '5 days',
+     'Negotiated a restructured payment plan with Dave. He''ll pay $200/day (reduced from $310) for the next 60 days, then return to full payments. Plan starts Monday. He seems committed — signed the modification agreement today.',
+     NOW() - INTERVAL '8 days'),
+    (v_cc_nightowl, v_user_id, 'Dave Kim', 'phone', NULL,
+     'Dave called proactively to report another NSF. Says his biggest client is 45 days past due on a $12K invoice. Offered to show proof. Moved from Early Contact to Payment Plan stage.',
+     NOW() - INTERVAL '15 days'),
+    (v_cc_nightowl, v_user_id, NULL, 'email', NULL,
+     'Sent initial collections notice to Dave Kim at NightOwl Printing. Included account summary showing 3 NSF events and current balance of $40,000.',
+     NOW() - INTERVAL '25 days')
+  ON CONFLICT DO NOTHING;
+
+  -- SLA Configs (thresholds for the team)
+  INSERT INTO collection_sla_configs (team_id, stage_id, metric, threshold_minutes) VALUES
+    (v_team_id, v_cs_early,     'time_in_stage',  10080),  -- 7 days in Early Contact
+    (v_team_id, v_cs_promise,   'time_in_stage',  20160),  -- 14 days in Promise to Pay
+    (v_team_id, v_cs_plan,      'time_in_stage',  43200),  -- 30 days in Payment Plan
+    (v_team_id, v_cs_escalated, 'time_in_stage',  20160),  -- 14 days in Escalated
+    (v_team_id, v_cs_legal,     'time_in_stage',  43200),  -- 30 days in Legal Review
+    (v_team_id, NULL,           'response_time',  1440),   -- 24hr response time (global)
+    (v_team_id, NULL,           'resolution_time', 129600) -- 90 day resolution time (global)
+  ON CONFLICT DO NOTHING;
+
+  -- Escalation Rules
+  INSERT INTO collection_escalation_rules (team_id, trigger_type, from_stage_id, to_stage_id, condition, is_active) VALUES
+    (v_team_id, 'time_based',  v_cs_early,   v_cs_promise,  '{"days": 7}',  true),
+    (v_team_id, 'time_based',  v_cs_promise, v_cs_escalated, '{"days": 14}', true),
+    (v_team_id, 'event_based', v_cs_early,   v_cs_escalated, '{"event": "nsf_returned", "threshold": 3}', true),
+    (v_team_id, 'event_based', v_cs_plan,    v_cs_escalated, '{"event": "missed_payment", "threshold": 5}', true)
+  ON CONFLICT DO NOTHING;
+
+  -- Collection Notifications (sample unread notifications)
+  INSERT INTO collection_notifications (team_id, user_id, case_id, type, message, created_at) VALUES
+    (v_team_id, v_user_id, v_cc_westside, 'follow_up_due',
+     'Follow-up overdue for Westside Auto Body (MCA-2025-006). Was due yesterday.',
+     NOW() - INTERVAL '1 day'),
+    (v_team_id, v_user_id, v_cc_catering, 'assignment',
+     'New collection case assigned: Coastal Catering Co. (MCA-2025-012). Balance: $38,000. Priority: Medium.',
+     NOW() - INTERVAL '2 days'),
+    (v_team_id, v_user_id, v_cc_westside, 'sla_breach',
+     'SLA breach: Westside Auto Body has been in "Escalated" stage for 3 days (threshold: 14 days). 4 NSFs on record.',
+     NOW() - INTERVAL '3 days'),
+    (v_team_id, v_user_id, v_cc_nightowl, 'escalation',
+     'NightOwl Printing auto-escalated from "Early Contact" to "Payment Plan" after payment plan agreement.',
+     NOW() - INTERVAL '8 days')
+  ON CONFLICT DO NOTHING;
+
+  -- Grant collections permission to the demo user
+  UPDATE users_on_team
+  SET has_collections_permission = true
+  WHERE user_id = v_user_id AND team_id = v_team_id;
 
   RAISE NOTICE 'Demo data seeded successfully!';
 

@@ -58,24 +58,27 @@ alter table risk_config enable row level security;
 alter table risk_scores enable row level security;
 alter table risk_events enable row level security;
 
-create policy "Team members can manage risk config"
-  on risk_config for all to public
-  using (team_id in (select private.get_teams_for_authenticated_user()));
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'private') THEN
+    EXECUTE 'CREATE POLICY "Team members can manage risk config" ON risk_config FOR ALL TO public USING (team_id IN (SELECT private.get_teams_for_authenticated_user()))';
+    EXECUTE 'CREATE POLICY "Team members can manage risk scores" ON risk_scores FOR ALL TO public USING (team_id IN (SELECT private.get_teams_for_authenticated_user()))';
+    EXECUTE 'CREATE POLICY "Team members can manage risk events" ON risk_events FOR ALL TO public USING (team_id IN (SELECT private.get_teams_for_authenticated_user()))';
+  ELSE
+    RAISE NOTICE 'Skipping RLS policies for risk tables — private schema not found (local dev)';
+  END IF;
+END $$;
 
-create policy "Team members can manage risk scores"
-  on risk_scores for all to public
-  using (team_id in (select private.get_teams_for_authenticated_user()));
-
-create policy "Team members can manage risk events"
-  on risk_events for all to public
-  using (team_id in (select private.get_teams_for_authenticated_user()));
-
--- Updated-at trigger for risk_config
-create trigger set_risk_config_updated_at
-  before update on risk_config
-  for each row execute function moddatetime(updated_at);
-
--- Updated-at trigger for risk_scores
-create trigger set_risk_scores_updated_at
-  before update on risk_scores
-  for each row execute function moddatetime(updated_at);
+-- Updated-at triggers (moddatetime extension may not be available in all environments)
+DO $$
+BEGIN
+  CREATE EXTENSION IF NOT EXISTS moddatetime SCHEMA extensions;
+  CREATE TRIGGER set_risk_config_updated_at
+    BEFORE UPDATE ON risk_config
+    FOR EACH ROW EXECUTE FUNCTION moddatetime(updated_at);
+  CREATE TRIGGER set_risk_scores_updated_at
+    BEFORE UPDATE ON risk_scores
+    FOR EACH ROW EXECUTE FUNCTION moddatetime(updated_at);
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Skipping moddatetime triggers — extension not available: %', SQLERRM;
+END $$;
