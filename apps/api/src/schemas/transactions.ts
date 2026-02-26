@@ -123,7 +123,17 @@ export const getTransactionsSchema = z.object({
       },
     }),
   statuses: z
-    .array(z.string())
+    .array(
+      z.enum([
+        "blank",
+        "receipt_match",
+        "in_review",
+        "export_error",
+        "exported",
+        "excluded",
+        "archived",
+      ]),
+    )
     .nullable()
     .optional()
     .openapi({

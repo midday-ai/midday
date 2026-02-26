@@ -51,7 +51,17 @@ export type GetTransactionsParams = {
   sort?: string[] | null;
   pageSize?: number;
   q?: string | null;
-  statuses?: string[] | null;
+  statuses?:
+    | (
+        | "blank"
+        | "receipt_match"
+        | "in_review"
+        | "export_error"
+        | "exported"
+        | "excluded"
+        | "archived"
+      )[]
+    | null;
   attachments?: "include" | "exclude" | null;
   categories?: string[] | null;
   tags?: string[] | null;
