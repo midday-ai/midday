@@ -98,3 +98,6 @@ dist-ssr
 .serena/
 api/index.js
 .vercel
+
+# Git worktrees
+.worktrees/
