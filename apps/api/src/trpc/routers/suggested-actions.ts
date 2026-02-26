@@ -6,10 +6,24 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { suggestedActionsCache } from "@midday/cache/suggested-actions-cache";
 
 // Define the static suggested actions configuration
+// Order matters: first 6 shown to new users (before usage data accumulates)
 const SUGGESTED_ACTIONS_CONFIG = [
+  // MCA-first: Portfolio & merchant insights
   {
-    id: "get-burn-rate-analysis",
-    toolName: "getBurnRate",
+    id: "get-merchants",
+    toolName: "getMerchants",
+    toolParams: {
+      pageSize: 10,
+    },
+  },
+  {
+    id: "get-account-balances",
+    toolName: "getAccountBalances",
+    toolParams: {},
+  },
+  {
+    id: "get-cash-flow",
+    toolName: "getCashFlow",
     toolParams: {
       showCanvas: true,
     },
@@ -23,84 +37,8 @@ const SUGGESTED_ACTIONS_CONFIG = [
     },
   },
   {
-    id: "expenses-breakdown",
-    toolName: "getExpensesBreakdown",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "balance-sheet",
-    toolName: "getBalanceSheet",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-spending",
-    toolName: "getSpending",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-runway",
-    toolName: "getRunway",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-cash-flow",
-    toolName: "getCashFlow",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-revenue-summary",
-    toolName: "getRevenueSummary",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-account-balances",
-    toolName: "getAccountBalances",
-    toolParams: {},
-  },
-  {
-    id: "get-invoices",
-    toolName: "getInvoices",
-    toolParams: {
-      pageSize: 10,
-      sort: ["createdAt", "desc"],
-    },
-  },
-  {
-    id: "get-merchants",
-    toolName: "getMerchants",
-    toolParams: {
-      pageSize: 10,
-    },
-  },
-  {
-    id: "get-profit-analysis",
-    toolName: "getProfitAnalysis",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
     id: "get-invoice-payment-analysis",
     toolName: "getInvoicePaymentAnalysis",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-tax-summary",
-    toolName: "getTaxSummary",
     toolParams: {
       showCanvas: true,
     },
@@ -112,9 +50,54 @@ const SUGGESTED_ACTIONS_CONFIG = [
       showCanvas: true,
     },
   },
+  // Secondary: Financial analytics
+  {
+    id: "get-invoices",
+    toolName: "getInvoices",
+    toolParams: {
+      pageSize: 10,
+      sort: ["createdAt", "desc"],
+    },
+  },
+  {
+    id: "get-revenue-summary",
+    toolName: "getRevenueSummary",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-profit-analysis",
+    toolName: "getProfitAnalysis",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
   {
     id: "get-forecast",
     toolName: "getForecast",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-growth-rate",
+    toolName: "getGrowthRate",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-runway",
+    toolName: "getRunway",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  // Tertiary: Expense & operational
+  {
+    id: "get-burn-rate-analysis",
+    toolName: "getBurnRate",
     toolParams: {
       showCanvas: true,
     },
@@ -134,8 +117,29 @@ const SUGGESTED_ACTIONS_CONFIG = [
     },
   },
   {
-    id: "get-growth-rate",
-    toolName: "getGrowthRate",
+    id: "expenses-breakdown",
+    toolName: "getExpensesBreakdown",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-spending",
+    toolName: "getSpending",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "balance-sheet",
+    toolName: "getBalanceSheet",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-tax-summary",
+    toolName: "getTaxSummary",
     toolParams: {
       showCanvas: true,
     },

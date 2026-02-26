@@ -52,7 +52,7 @@ export function SuggestedActions() {
     });
   };
 
-  // UI configuration based on action ID
+  // UI configuration based on action ID (MCA-focused labels)
   const uiConfig: Record<
     string,
     {
@@ -61,85 +61,73 @@ export function SuggestedActions() {
       description: string;
     }
   > = {
-    "get-burn-rate-analysis": {
-      icon: Icons.Speed,
-      title: "Burn rate analysis",
-      description: "Show me my burn rate visual analytics",
-    },
-    "latest-transactions": {
-      icon: Icons.Transactions,
-      title: "Latest transactions",
-      description: "Show me my latest transactions",
-    },
-    "expenses-breakdown": {
-      icon: Icons.Amount,
-      title: "Expense Breakdown",
-      description: "Show me my expense breakdown",
-    },
-    "balance-sheet": {
-      icon: Icons.ReceiptLong,
-      title: "Balance Sheet",
-      description: "Show me my balance sheet",
-    },
-    "get-spending": {
-      icon: Icons.ShowChart,
-      title: "Spending Analysis",
-      description: "Show me my spending analysis",
-    },
-    "get-runway": {
-      icon: Icons.Speed,
-      title: "Runway",
-      description: "Show me my runway",
-    },
-    "get-cash-flow": {
-      icon: Icons.TrendingUp,
-      title: "Cash Flow",
-      description: "Show me my cash flow",
-    },
-    "get-revenue-summary": {
-      icon: Icons.Currency,
-      title: "Revenue Summary",
-      description: "Show me my revenue summary",
+    // MCA-first actions (shown first to new users)
+    "get-merchants": {
+      icon: Icons.Customers,
+      title: "Merchant Portfolio",
+      description: "Show me my merchant portfolio",
     },
     "get-account-balances": {
       icon: Icons.Accounts,
       title: "Account Balances",
       description: "Show me my account balances",
     },
+    "get-cash-flow": {
+      icon: Icons.TrendingUp,
+      title: "Cash Flow",
+      description: "Show me my cash flow",
+    },
+    "latest-transactions": {
+      icon: Icons.Transactions,
+      title: "Recent Transactions",
+      description: "Show me my latest transactions",
+    },
+    "get-invoice-payment-analysis": {
+      icon: Icons.Invoice,
+      title: "Collection Analysis",
+      description: "Show me my collection and payment analysis",
+    },
+    "get-business-health-score": {
+      icon: Icons.Info,
+      title: "Portfolio Health",
+      description: "Show me my portfolio health score",
+    },
+    // Secondary financial analytics
     "get-invoices": {
       icon: Icons.Invoice,
-      title: "Invoices",
-      description: "Show me my invoices",
+      title: "Advances",
+      description: "Show me my advances",
     },
-    "get-merchants": {
-      icon: Icons.Customers,
-      title: "Merchants",
-      description: "Show me my merchants",
+    "get-revenue-summary": {
+      icon: Icons.Currency,
+      title: "Revenue Summary",
+      description: "Show me my revenue summary",
     },
     "get-profit-analysis": {
       icon: Icons.PieChart,
       title: "Profit & Loss",
       description: "Show me my profit & loss statement",
     },
-    "get-invoice-payment-analysis": {
-      icon: Icons.Invoice,
-      title: "Payment Analysis",
-      description: "Show me my invoice payment analysis",
-    },
-    "get-tax-summary": {
-      icon: Icons.Tax,
-      title: "Tax Summary",
-      description: "Show me my tax summary",
-    },
-    "get-business-health-score": {
-      icon: Icons.Info,
-      title: "Business Health",
-      description: "Show me my business health score",
-    },
     "get-forecast": {
       icon: Icons.TrendingUp,
       title: "Revenue Forecast",
       description: "Show me my revenue forecast",
+    },
+    "get-growth-rate": {
+      icon: Icons.TrendingUp,
+      title: "Growth Rate",
+      description: "Show me my growth rate analysis",
+    },
+    "get-runway": {
+      icon: Icons.Speed,
+      title: "Cash Runway",
+      description: "Show me my cash runway",
+    },
+    // Tertiary operational
+    "get-burn-rate-analysis": {
+      icon: Icons.Speed,
+      title: "Burn Rate",
+      description: "Show me my burn rate analysis",
     },
     "get-cash-flow-stress-test": {
       icon: Icons.Speed,
@@ -151,10 +139,25 @@ export function SuggestedActions() {
       title: "Expenses",
       description: "Show me my expenses",
     },
-    "get-growth-rate": {
-      icon: Icons.TrendingUp,
-      title: "Growth Rate",
-      description: "Show me my growth rate analysis",
+    "expenses-breakdown": {
+      icon: Icons.Amount,
+      title: "Expense Breakdown",
+      description: "Show me my expense breakdown",
+    },
+    "get-spending": {
+      icon: Icons.ShowChart,
+      title: "Spending Analysis",
+      description: "Show me my spending analysis",
+    },
+    "balance-sheet": {
+      icon: Icons.ReceiptLong,
+      title: "Balance Sheet",
+      description: "Show me my balance sheet",
+    },
+    "get-tax-summary": {
+      icon: Icons.Tax,
+      title: "Tax Summary",
+      description: "Show me my tax summary",
     },
   };
 
