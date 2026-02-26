@@ -5,8 +5,6 @@ export type LineItem = {
   unit?: string;
   // Optional product reference for smart autocomplete
   productId?: string;
-  // Per-line-item tax rate (percentage, 0-100)
-  taxRate?: number;
 };
 
 export type DealProduct = {
@@ -20,7 +18,6 @@ export type DealProduct = {
   price: number | null;
   currency: string | null;
   unit: string | null;
-  taxRate: number | null;
   isActive: boolean;
   usageCount: number;
   lastUsedAt: string | null;
@@ -41,8 +38,6 @@ export type Deal = {
   note: string | null;
   internalNote: string | null;
   paidAt: string | null;
-  vat: number | null;
-  tax: number | null;
   filePath: string[] | null;
   status:
     | "draft"
@@ -87,9 +82,7 @@ export type Template = {
   quantityLabel: string;
   totalLabel: string;
   totalSummaryLabel: string;
-  vatLabel: string;
   subtotalLabel: string;
-  taxLabel: string;
   discountLabel: string;
   timezone: string;
   paymentLabel: string;
@@ -100,16 +93,10 @@ export type Template = {
   fromDetails: EditorDoc | null;
   noteDetails: EditorDoc | null;
   dateFormat: string;
-  includeVat: boolean;
-  includeTax: boolean;
   includeDiscount: boolean;
   includeDecimals: boolean;
   includeUnits: boolean;
   includeQr: boolean;
-  includeLineItemTax?: boolean;
-  lineItemTaxLabel?: string;
-  taxRate: number;
-  vatRate: number;
   size: "a4" | "letter";
   deliveryType: "create" | "create_and_send" | "scheduled";
   locale: string;

@@ -19,13 +19,10 @@ export const DEFAULT_TEMPLATE_LABELS = {
   quantityLabel: "Quantity",
   totalLabel: "Total",
   totalSummaryLabel: "Total",
-  vatLabel: "VAT",
   subtotalLabel: "Subtotal",
-  taxLabel: "Tax",
   discountLabel: "Discount",
   paymentLabel: "Payment Details",
   noteLabel: "Note",
-  lineItemTaxLabel: "Tax",
 } as const;
 
 /**
@@ -36,13 +33,7 @@ export const DEFAULT_TEMPLATE_SETTINGS = {
   locale: "en-US",
   dateFormat: "dd/MM/yyyy",
   size: "a4" as const,
-  // Tax/VAT settings - default to false, user enables as needed
-  includeVat: false,
-  includeTax: false,
   includeDiscount: false,
-  includeLineItemTax: false,
-  taxRate: 0,
-  vatRate: 0,
   // Display settings
   includeDecimals: false,
   includeUnits: false,
