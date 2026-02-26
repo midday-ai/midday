@@ -96,7 +96,7 @@ CREATE INDEX IF NOT EXISTS collection_cases_assigned_to_idx ON collection_cases(
 CREATE TABLE IF NOT EXISTS collection_notes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   case_id uuid NOT NULL REFERENCES collection_cases(id) ON DELETE CASCADE,
-  author_id uuid NOT NULL REFERENCES auth.users(id),
+  author_id uuid REFERENCES auth.users(id),
   contact_name text,
   contact_method collection_contact_method,
   follow_up_date timestamptz,

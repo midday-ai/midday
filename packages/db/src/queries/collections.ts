@@ -66,9 +66,8 @@ export const getCollectionCases = async (
     );
   }
 
-  if (cursor) {
-    whereConditions.push(sql`${collectionCases.createdAt} < ${cursor}`);
-  }
+  // Offset-based pagination (cursor is a stringified offset number)
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
 
   // Determine sort order
   let orderBy = desc(collectionCases.createdAt);
@@ -149,13 +148,12 @@ export const getCollectionCases = async (
     .leftJoin(users, eq(users.id, collectionCases.assignedTo))
     .where(and(...whereConditions))
     .orderBy(orderBy)
+    .offset(offset)
     .limit(pageSize + 1);
 
   const hasMore = data.length > pageSize;
   const cases = hasMore ? data.slice(0, pageSize) : data;
-  const nextCursor = hasMore
-    ? cases[cases.length - 1]?.createdAt
-    : null;
+  const nextCursor = hasMore ? String(offset + pageSize) : null;
 
   return {
     data: cases,
@@ -385,16 +383,14 @@ export const getCandidateDeals = async (
 ) => {
   const { teamId, cursor, pageSize = 25 } = params;
 
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
   const whereConditions: SQL[] = [
     eq(mcaDeals.teamId, teamId),
     inArray(mcaDeals.status, ["late", "defaulted", "in_collections"]),
     // Exclude deals that already have a collection case
     sql`${mcaDeals.id} not in (select ${collectionCases.dealId} from ${collectionCases})`,
   ];
-
-  if (cursor) {
-    whereConditions.push(sql`${mcaDeals.createdAt} < ${cursor}`);
-  }
 
   const data = await db
     .select({
@@ -416,11 +412,12 @@ export const getCandidateDeals = async (
     .leftJoin(merchants, eq(merchants.id, mcaDeals.merchantId))
     .where(and(...whereConditions))
     .orderBy(desc(mcaDeals.currentBalance))
+    .offset(offset)
     .limit(pageSize + 1);
 
   const hasMore = data.length > pageSize;
   const deals = hasMore ? data.slice(0, pageSize) : data;
-  const nextCursor = hasMore ? deals[deals.length - 1]?.createdAt : null;
+  const nextCursor = hasMore ? String(offset + pageSize) : null;
 
   return {
     data: deals,

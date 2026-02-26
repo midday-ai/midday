@@ -94,10 +94,10 @@ export class CollectionsAutoEscalateProcessor extends BaseProcessor<CollectionsA
             stageId: rule.toStageId,
           });
 
-          // Create a system note
+          // Create a system note (null authorId = system-generated)
           await createCollectionNote(db, {
             caseId: caseRow.id,
-            authorId: "system",
+            authorId: null,
             summary: `Auto-escalated from "${fromStage?.name ?? "unknown"}" to "${toStage?.name ?? "unknown"}" after ${daysThreshold} days in stage.`,
           });
 

@@ -83,10 +83,10 @@ export async function checkEventBasedEscalation(
       stageId: rule.toStageId,
     });
 
-    // Create system note
+    // Create system note (null authorId = system-generated)
     await createCollectionNote(db, {
       caseId: activeCase.id,
-      authorId: "system",
+      authorId: null,
       summary: `Event-based escalation: "${params.eventType}" triggered move from "${fromStage?.name ?? "unknown"}" to "${toStage?.name ?? "unknown"}".`,
     });
 

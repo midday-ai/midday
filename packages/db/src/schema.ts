@@ -3827,7 +3827,7 @@ export const collectionNotes = pgTable(
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     caseId: uuid("case_id").notNull(),
-    authorId: uuid("author_id").notNull(),
+    authorId: uuid("author_id"),
     contactName: text("contact_name"),
     contactMethod: collectionContactMethodEnum("contact_method"),
     followUpDate: timestamp("follow_up_date", { withTimezone: true, mode: "string" }),

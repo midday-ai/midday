@@ -101,35 +101,35 @@ DECLARE
   v_c_cardinal    uuid;
   v_c_urgentcare  uuid;
 
-  -- Deal IDs (generated fresh)
-  v_d_sunrise     uuid := gen_random_uuid();
-  v_d_martinez    uuid := gen_random_uuid();
-  v_d_bella       uuid := gen_random_uuid();
-  v_d_tonys       uuid := gen_random_uuid();
-  v_d_quickprint  uuid := gen_random_uuid();
-  v_d_westside    uuid := gen_random_uuid();
-  v_d_greenthumb  uuid := gen_random_uuid();
-  v_d_fitness     uuid := gen_random_uuid();
-  v_d_luckydragon uuid := gen_random_uuid();
-  v_d_smith       uuid := gen_random_uuid();
+  -- Deal IDs (deterministic for reproducible seeds)
+  v_d_sunrise     uuid := 'd0000000-0000-0000-0000-000000000001';
+  v_d_martinez    uuid := 'd0000000-0000-0000-0000-000000000002';
+  v_d_bella       uuid := 'd0000000-0000-0000-0000-000000000003';
+  v_d_tonys       uuid := 'd0000000-0000-0000-0000-000000000004';
+  v_d_quickprint  uuid := 'd0000000-0000-0000-0000-000000000005';
+  v_d_westside    uuid := 'd0000000-0000-0000-0000-000000000006';
+  v_d_greenthumb  uuid := 'd0000000-0000-0000-0000-000000000007';
+  v_d_fitness     uuid := 'd0000000-0000-0000-0000-000000000008';
+  v_d_luckydragon uuid := 'd0000000-0000-0000-0000-000000000009';
+  v_d_smith       uuid := 'd0000000-0000-0000-0000-000000000010';
   -- New deals (13 total: 10 single + 3 renewal second deals)
-  v_d_harbor         uuid := gen_random_uuid();
-  v_d_bluesky        uuid := gen_random_uuid();
-  v_d_crossfit       uuid := gen_random_uuid();
-  v_d_catering       uuid := gen_random_uuid();
-  v_d_nightowl       uuid := gen_random_uuid();
-  v_d_nailstudio     uuid := gen_random_uuid();
-  v_d_redrock        uuid := gen_random_uuid();
-  v_d_urgentcare     uuid := gen_random_uuid();
+  v_d_harbor         uuid := 'd0000000-0000-0000-0000-000000000011';
+  v_d_bluesky        uuid := 'd0000000-0000-0000-0000-000000000012';
+  v_d_crossfit       uuid := 'd0000000-0000-0000-0000-000000000013';
+  v_d_catering       uuid := 'd0000000-0000-0000-0000-000000000014';
+  v_d_nightowl       uuid := 'd0000000-0000-0000-0000-000000000015';
+  v_d_nailstudio     uuid := 'd0000000-0000-0000-0000-000000000016';
+  v_d_redrock        uuid := 'd0000000-0000-0000-0000-000000000017';
+  v_d_urgentcare     uuid := 'd0000000-0000-0000-0000-000000000018';
   -- Renewal chain deals (paid-off first deals + active second deals)
-  v_d_bookshelf_1    uuid := gen_random_uuid();
-  v_d_bookshelf_2    uuid := gen_random_uuid();
-  v_d_cardinal_1     uuid := gen_random_uuid();
-  v_d_cardinal_2     uuid := gen_random_uuid();
-  v_d_luckydragon_2  uuid := gen_random_uuid();
+  v_d_bookshelf_1    uuid := 'd0000000-0000-0000-0000-000000000019';
+  v_d_bookshelf_2    uuid := 'd0000000-0000-0000-0000-000000000020';
+  v_d_cardinal_1     uuid := 'd0000000-0000-0000-0000-000000000021';
+  v_d_cardinal_2     uuid := 'd0000000-0000-0000-0000-000000000022';
+  v_d_luckydragon_2  uuid := 'd0000000-0000-0000-0000-000000000023';
 
-  -- Invoice template
-  v_template_id uuid := gen_random_uuid();
+  -- Deal template
+  v_template_id uuid := 'd1000000-0000-0000-0000-000000000001';
 
   -- Tag IDs
   v_tag_vip        uuid;
@@ -138,35 +138,35 @@ DECLARE
   v_tag_newclient  uuid;
   v_tag_seasonal   uuid;
 
-  -- Broker IDs (generated fresh)
-  v_broker_pinnacle   uuid := gen_random_uuid();
-  v_broker_capital    uuid := gen_random_uuid();
-  v_broker_southwest  uuid := gen_random_uuid();
+  -- Broker IDs (deterministic)
+  v_broker_pinnacle   uuid := 'b0000000-0000-0000-0000-000000000001';
+  v_broker_capital    uuid := 'b0000000-0000-0000-0000-000000000002';
+  v_broker_southwest  uuid := 'b0000000-0000-0000-0000-000000000003';
 
-  -- Syndicator IDs (generated fresh)
-  v_syndicator_atlas    uuid := gen_random_uuid();
-  v_syndicator_meridian uuid := gen_random_uuid();
-  v_syndicator_coastal  uuid := gen_random_uuid();
+  -- Syndicator IDs (deterministic)
+  v_syndicator_atlas    uuid := 'c0000000-0000-0000-0000-000000000001';
+  v_syndicator_meridian uuid := 'c0000000-0000-0000-0000-000000000002';
+  v_syndicator_coastal  uuid := 'c0000000-0000-0000-0000-000000000003';
 
-  -- Collection Stage IDs (generated fresh)
-  v_cs_early       uuid := gen_random_uuid();
-  v_cs_promise     uuid := gen_random_uuid();
-  v_cs_plan        uuid := gen_random_uuid();
-  v_cs_escalated   uuid := gen_random_uuid();
-  v_cs_legal       uuid := gen_random_uuid();
-  v_cs_agency      uuid := gen_random_uuid();
-  v_cs_resolved    uuid := gen_random_uuid();
+  -- Collection Stage IDs (deterministic)
+  v_cs_early       uuid := 'c5000000-0000-0000-0000-000000000001';
+  v_cs_promise     uuid := 'c5000000-0000-0000-0000-000000000002';
+  v_cs_plan        uuid := 'c5000000-0000-0000-0000-000000000003';
+  v_cs_escalated   uuid := 'c5000000-0000-0000-0000-000000000004';
+  v_cs_legal       uuid := 'c5000000-0000-0000-0000-000000000005';
+  v_cs_agency      uuid := 'c5000000-0000-0000-0000-000000000006';
+  v_cs_resolved    uuid := 'c5000000-0000-0000-0000-000000000007';
 
-  -- Collection Agency IDs
-  v_agency_premier uuid := gen_random_uuid();
-  v_agency_rapid   uuid := gen_random_uuid();
+  -- Collection Agency IDs (deterministic)
+  v_agency_premier uuid := 'ca000000-0000-0000-0000-000000000001';
+  v_agency_rapid   uuid := 'ca000000-0000-0000-0000-000000000002';
 
-  -- Collection Case IDs
-  v_cc_tonys       uuid := gen_random_uuid();
-  v_cc_westside    uuid := gen_random_uuid();
-  v_cc_redrock     uuid := gen_random_uuid();
-  v_cc_catering    uuid := gen_random_uuid();
-  v_cc_nightowl    uuid := gen_random_uuid();
+  -- Collection Case IDs (deterministic)
+  v_cc_tonys       uuid := 'cc000000-0000-0000-0000-000000000001';
+  v_cc_westside    uuid := 'cc000000-0000-0000-0000-000000000002';
+  v_cc_redrock     uuid := 'cc000000-0000-0000-0000-000000000003';
+  v_cc_catering    uuid := 'cc000000-0000-0000-0000-000000000004';
+  v_cc_nightowl    uuid := 'cc000000-0000-0000-0000-000000000005';
 
 BEGIN
 
@@ -724,8 +724,8 @@ BEGIN
      -7500.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_luckydragon'),
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '14 months')::date,
-     'ISO Commission - Capital Brokers LLC', 'Commission on Martinez Auto deal (10%)',
-     -5000.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_martinez'),
+     'ISO Commission - Capital Brokers LLC', 'Commission on Martinez Auto deal (11%)',
+     -5500.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_martinez'),
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '12 months')::date,
      'ISO Commission - Southwest Funding Partners', 'Commission on Smith Plumbing deal (11%)',
@@ -744,8 +744,8 @@ BEGIN
      -6600.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_tonys'),
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '5 months')::date,
-     'ISO Commission - Pinnacle Funding Group', 'Commission on Bella Salon deal (11%)',
-     -4950.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_bella'),
+     'ISO Commission - Pinnacle Funding Group', 'Commission on Bella Salon deal (10%)',
+     -4500.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_bella'),
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '4 months')::date,
      'ISO Commission - Capital Brokers LLC', 'Commission on Quick Print deal (11%)',
@@ -756,17 +756,17 @@ BEGIN
      -4400.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_greenthumb'),
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '7 days')::date,
-     'ISO Commission - Pinnacle Funding Group', 'Commission on Fitness First deal (11%)',
-     -8800.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_fitness'),
+     'ISO Commission - Pinnacle Funding Group', 'Commission on Fitness First deal (10%)',
+     -8000.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_fitness'),
     -- New deals commissions (Redrock has no broker — direct deal)
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '24 months')::date,
-     'ISO Commission - Southwest Funding Partners', 'Commission on Bookshelf Cafe deal (10%)',
-     -3500.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_bookshelf1'),
+     'ISO Commission - Southwest Funding Partners', 'Commission on Bookshelf Cafe deal (11%)',
+     -3850.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_bookshelf1'),
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '22 months')::date,
-     'ISO Commission - Capital Brokers LLC', 'Commission on Cardinal Electric deal (10%)',
-     -6000.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_cardinal1'),
+     'ISO Commission - Capital Brokers LLC', 'Commission on Cardinal Electric deal (11%)',
+     -6600.00, 'USD', 'iso-commissions', 'posted', 'ach', 'demo_iso_cardinal1'),
     (gen_random_uuid(), v_team_id, v_bank_op,
      (NOW() - INTERVAL '10 months')::date,
      'ISO Commission - Capital Brokers LLC', 'Commission on Cardinal Electric renewal (11%)',
@@ -943,6 +943,63 @@ BEGIN
     (gen_random_uuid(), v_d_redrock,   v_team_id, 480.00,  (NOW() - INTERVAL '14 months')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '14 months', 35.00),
     (gen_random_uuid(), v_d_redrock,   v_team_id, 480.00,  (NOW() - INTERVAL '12 months')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '12 months', 35.00),
     (gen_random_uuid(), v_d_redrock,   v_team_id, 480.00,  (NOW() - INTERVAL '10 months')::date, 'ach', 'returned', 'NSF - Insufficient funds', NOW() - INTERVAL '10 months', 35.00);
+
+  -- ========================================================================
+  -- 11b. DYNAMIC BALANCE CALCULATION
+  --      Compute total_paid / current_balance from actual payment records
+  --      so balances never drift regardless of when the seed runs.
+  -- ========================================================================
+
+  UPDATE mca_deals d
+  SET total_paid = LEAST(sub.paid, d.payback_amount),
+      current_balance = GREATEST(d.payback_amount - sub.paid, 0)
+  FROM (
+    SELECT deal_id, SUM(amount) as paid
+    FROM mca_payments
+    WHERE status = 'completed' AND team_id = v_team_id
+    GROUP BY deal_id
+  ) sub
+  WHERE d.id = sub.deal_id AND d.team_id = v_team_id;
+
+  -- ========================================================================
+  -- 11c. BACKFILL balance_before / balance_after ON mca_payments
+  --      Uses a window function over payment order to compute running balances.
+  -- ========================================================================
+
+  WITH ordered_payments AS (
+    SELECT id, deal_id, amount,
+      ROW_NUMBER() OVER (PARTITION BY deal_id ORDER BY payment_date, id) as rn
+    FROM mca_payments WHERE team_id = v_team_id AND status = 'completed'
+  ),
+  running AS (
+    SELECT op.id,
+      d.payback_amount - COALESCE(SUM(op.amount) OVER (
+        PARTITION BY op.deal_id ORDER BY op.rn
+        ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+      ), 0) as balance_before,
+      d.payback_amount - SUM(op.amount) OVER (
+        PARTITION BY op.deal_id ORDER BY op.rn
+      ) as balance_after
+    FROM ordered_payments op JOIN mca_deals d ON d.id = op.deal_id
+  )
+  UPDATE mca_payments p
+  SET balance_before = r.balance_before, balance_after = r.balance_after
+  FROM running r WHERE p.id = r.id;
+
+  -- ========================================================================
+  -- 11d. FIX NSF COUNTS FROM ACTUAL DATA
+  --      Derive nsf_count from returned payment records.
+  -- ========================================================================
+
+  UPDATE mca_deals d
+  SET nsf_count = COALESCE(sub.cnt, 0)
+  FROM (
+    SELECT deal_id, COUNT(*) as cnt
+    FROM mca_payments
+    WHERE status = 'returned' AND team_id = v_team_id
+    GROUP BY deal_id
+  ) sub
+  WHERE d.id = sub.deal_id AND d.team_id = v_team_id;
 
   -- ========================================================================
   -- 12. DEAL TEMPLATE (formerly invoice_templates)
@@ -1209,13 +1266,13 @@ BEGIN
     (gen_random_uuid(), v_d_sunrise, v_broker_pinnacle, v_team_id,
      10.00, 6500.00, 'paid', NOW() - INTERVAL '8 months'),
     (gen_random_uuid(), v_d_bella, v_broker_pinnacle, v_team_id,
-     11.00, 4950.00, 'paid', NOW() - INTERVAL '5 months'),
+     10.00, 4500.00, 'paid', NOW() - INTERVAL '5 months'),
     (gen_random_uuid(), v_d_fitness, v_broker_pinnacle, v_team_id,
-     11.00, 8800.00, 'paid', NOW() - INTERVAL '7 days'),
+     10.00, 8000.00, 'paid', NOW() - INTERVAL '7 days'),
 
     -- Capital deals
     (gen_random_uuid(), v_d_martinez, v_broker_capital, v_team_id,
-     10.00, 5000.00, 'paid', NOW() - INTERVAL '14 months'),
+     11.00, 5500.00, 'paid', NOW() - INTERVAL '14 months'),
     (gen_random_uuid(), v_d_westside, v_broker_capital, v_team_id,
      11.00, 8250.00, 'paid', NOW() - INTERVAL '7 months'),
     (gen_random_uuid(), v_d_quickprint, v_broker_capital, v_team_id,
@@ -1246,13 +1303,13 @@ BEGIN
     (gen_random_uuid(), v_d_nightowl, v_broker_capital, v_team_id,
      11.00, 4950.00, 'paid', NOW() - INTERVAL '5 months'),
     (gen_random_uuid(), v_d_cardinal_1, v_broker_capital, v_team_id,
-     10.00, 6000.00, 'paid', NOW() - INTERVAL '22 months'),
+     11.00, 6600.00, 'paid', NOW() - INTERVAL '22 months'),
     (gen_random_uuid(), v_d_cardinal_2, v_broker_capital, v_team_id,
      11.00, 9350.00, 'paid', NOW() - INTERVAL '10 months'),
 
     -- Southwest deals
     (gen_random_uuid(), v_d_bookshelf_1, v_broker_southwest, v_team_id,
-     10.00, 3500.00, 'paid', NOW() - INTERVAL '24 months'),
+     11.00, 3850.00, 'paid', NOW() - INTERVAL '24 months'),
     (gen_random_uuid(), v_d_bookshelf_2, v_broker_southwest, v_team_id,
      11.00, 6050.00, 'paid', NOW() - INTERVAL '6 months'),
     (gen_random_uuid(), v_d_crossfit, v_broker_southwest, v_team_id,
@@ -1376,7 +1433,7 @@ BEGIN
   ON CONFLICT DO NOTHING;
 
   -- Collection Cases
-  -- Tony's Italian Kitchen: late, 2 NSFs, in "Promise to Pay" stage, high priority
+  -- Tony's Pizzeria: late, 2 NSFs, in "Promise to Pay" stage, high priority
   INSERT INTO collection_cases (id, team_id, deal_id, stage_id, assigned_to, priority, next_follow_up, stage_entered_at, entered_collections_at) VALUES
     (v_cc_tonys, v_team_id, v_d_tonys, v_cs_promise, v_user_id, 'high',
      NOW() + INTERVAL '2 days',
@@ -1384,7 +1441,7 @@ BEGIN
      NOW() - INTERVAL '18 days')
   ON CONFLICT (deal_id) DO NOTHING;
 
-  -- Westside Auto Body: late, 4 NSFs, in "Escalated" stage, critical priority
+  -- Westside Construction LLC: late, 4 NSFs, in "Escalated" stage, critical priority
   INSERT INTO collection_cases (id, team_id, deal_id, stage_id, assigned_to, priority, next_follow_up, stage_entered_at, entered_collections_at) VALUES
     (v_cc_westside, v_team_id, v_d_westside, v_cs_escalated, v_user_id, 'critical',
      NOW() - INTERVAL '1 day',
@@ -1484,22 +1541,22 @@ BEGIN
 
   -- Escalation Rules
   INSERT INTO collection_escalation_rules (team_id, trigger_type, from_stage_id, to_stage_id, condition, is_active) VALUES
-    (v_team_id, 'time_based',  v_cs_early,   v_cs_promise,  '{"days": 7}',  true),
-    (v_team_id, 'time_based',  v_cs_promise, v_cs_escalated, '{"days": 14}', true),
-    (v_team_id, 'event_based', v_cs_early,   v_cs_escalated, '{"event": "nsf_returned", "threshold": 3}', true),
-    (v_team_id, 'event_based', v_cs_plan,    v_cs_escalated, '{"event": "missed_payment", "threshold": 5}', true)
+    (v_team_id, 'time_based',  v_cs_early,   v_cs_promise,  '{"daysInStage": 7}',  true),
+    (v_team_id, 'time_based',  v_cs_promise, v_cs_escalated, '{"daysInStage": 14}', true),
+    (v_team_id, 'event_based', v_cs_early,   v_cs_escalated, '{"eventType": "nsf_returned", "threshold": 3}', true),
+    (v_team_id, 'event_based', v_cs_plan,    v_cs_escalated, '{"eventType": "missed_payment", "threshold": 5}', true)
   ON CONFLICT DO NOTHING;
 
   -- Collection Notifications (sample unread notifications)
   INSERT INTO collection_notifications (team_id, user_id, case_id, type, message, created_at) VALUES
     (v_team_id, v_user_id, v_cc_westside, 'follow_up_due',
-     'Follow-up overdue for Westside Auto Body (MCA-2025-006). Was due yesterday.',
+     'Follow-up overdue for Westside Construction LLC (MCA-2025-006). Was due yesterday.',
      NOW() - INTERVAL '1 day'),
     (v_team_id, v_user_id, v_cc_catering, 'assignment',
      'New collection case assigned: Coastal Catering Co. (MCA-2025-012). Balance: $38,000. Priority: Medium.',
      NOW() - INTERVAL '2 days'),
     (v_team_id, v_user_id, v_cc_westside, 'sla_breach',
-     'SLA breach: Westside Auto Body has been in "Escalated" stage for 3 days (threshold: 14 days). 4 NSFs on record.',
+     'SLA breach: Westside Construction LLC (MCA-2025-006) — follow-up overdue by 3 days in "Escalated" stage. 4 NSFs on record.',
      NOW() - INTERVAL '3 days'),
     (v_team_id, v_user_id, v_cc_nightowl, 'escalation',
      'NightOwl Printing auto-escalated from "Early Contact" to "Payment Plan" after payment plan agreement.',
@@ -1510,6 +1567,413 @@ BEGIN
   UPDATE users_on_team
   SET has_collections_permission = true
   WHERE user_id = v_user_id AND team_id = v_team_id;
+
+  -- ========================================================================
+  -- DEAL BANK ACCOUNTS (merchant bank details per deal)
+  -- ========================================================================
+
+  INSERT INTO deal_bank_accounts (deal_id, team_id, bank_name, routing_number, account_number, account_type, is_primary)
+  VALUES
+    -- Original 10 deals
+    (v_d_sunrise,      v_team_id, 'Chase Bank',          '021000021', '****4521', 'checking', true),
+    (v_d_martinez,     v_team_id, 'Citibank',            '021000089', '****7832', 'checking', true),
+    (v_d_bella,        v_team_id, 'Bank of America',     '026009593', '****6190', 'checking', true),
+    (v_d_tonys,        v_team_id, 'Wells Fargo',         '121000248', '****3344', 'checking', true),
+    (v_d_quickprint,   v_team_id, 'TD Bank',             '031101266', '****8877', 'checking', true),
+    (v_d_westside,     v_team_id, 'PNC Bank',            '043000096', '****2201', 'checking', true),
+    (v_d_greenthumb,   v_team_id, 'Chase Bank',          '021000021', '****5612', 'checking', true),
+    (v_d_fitness,      v_team_id, 'US Bank',             '091000019', '****9043', 'checking', true),
+    (v_d_luckydragon,  v_team_id, 'Capital One',         '051405515', '****1198', 'checking', true),
+    (v_d_smith,        v_team_id, 'Regions Bank',        '062005690', '****4400', 'checking', true),
+    -- New deals (13)
+    (v_d_harbor,       v_team_id, 'JPMorgan Chase',      '021000021', '****7701', 'checking', true),
+    (v_d_bluesky,      v_team_id, 'Bank of America',     '026009593', '****3355', 'checking', true),
+    (v_d_crossfit,     v_team_id, 'US Bank',             '091000019', '****6622', 'checking', true),
+    (v_d_catering,     v_team_id, 'Regions Bank',        '062005690', '****8833', 'checking', true),
+    (v_d_nightowl,     v_team_id, 'PNC Bank',            '043000096', '****1144', 'checking', true),
+    (v_d_nailstudio,   v_team_id, 'Silicon Valley Bank', '121140399', '****5500', 'checking', true),
+    (v_d_redrock,      v_team_id, 'Nevada State Bank',   '121201694', '****2277', 'checking', true),
+    (v_d_urgentcare,   v_team_id, 'BMO Harris',          '071000288', '****9988', 'checking', true),
+    (v_d_bookshelf_1,  v_team_id, 'Chase Bank',          '021000021', '****3301', 'checking', true),
+    (v_d_bookshelf_2,  v_team_id, 'Chase Bank',          '021000021', '****3302', 'checking', true),
+    (v_d_cardinal_1,   v_team_id, 'Wells Fargo',         '121000248', '****4401', 'checking', true),
+    (v_d_cardinal_2,   v_team_id, 'Wells Fargo',         '121000248', '****4402', 'checking', true),
+    (v_d_luckydragon_2,v_team_id, 'Capital One',         '051405515', '****1199', 'checking', true)
+  ON CONFLICT DO NOTHING;
+
+  -- ========================================================================
+  -- ACH BATCHES + ITEMS
+  -- ========================================================================
+
+  INSERT INTO ach_batches (
+    id, team_id, created_by, batch_number, effective_date, description,
+    total_amount, item_count, originator_bank_account_id,
+    originator_name, originator_routing, originator_account,
+    status, submitted_at, completed_at
+  ) VALUES (
+    'ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_user_id,
+    'ACH-2026-0218-001', '2026-02-18', 'Daily MCA collections — Feb 18',
+    1990.00, 5, v_bank_op,
+    'Abacus Capital LLC', '021000021', '****4521',
+    'completed', '2026-02-18 08:00:00-05', '2026-02-18 16:30:00-05'
+  ) ON CONFLICT DO NOTHING;
+
+  INSERT INTO ach_batches (
+    id, team_id, created_by, batch_number, effective_date, description,
+    total_amount, item_count, originator_bank_account_id,
+    originator_name, originator_routing, originator_account,
+    status, submitted_at
+  ) VALUES (
+    'ab000000-0000-0000-0000-000000000002'::uuid, v_team_id, v_user_id,
+    'ACH-2026-0224-001', '2026-02-24', 'Daily MCA collections — Feb 24',
+    1770.00, 4, v_bank_op,
+    'Abacus Capital LLC', '021000021', '****4521',
+    'processing', '2026-02-24 08:00:00-05'
+  ) ON CONFLICT DO NOTHING;
+
+  INSERT INTO ach_batches (
+    id, team_id, created_by, batch_number, effective_date, description,
+    total_amount, item_count, originator_bank_account_id,
+    originator_name, originator_routing, originator_account,
+    status
+  ) VALUES (
+    'ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_user_id,
+    'ACH-2026-0226-001', CURRENT_DATE, 'Daily MCA collections — today',
+    2065.00, 5, v_bank_op,
+    'Abacus Capital LLC', '021000021', '****4521',
+    'draft'
+  ) ON CONFLICT DO NOTHING;
+
+  -- ACH Batch Items (amounts match each deal's daily_payment)
+  -- Batch 1 (completed)
+  INSERT INTO ach_batch_items (batch_id, team_id, deal_id, receiver_name, receiver_routing, receiver_account, amount, transaction_code, status)
+  VALUES
+    ('ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_d_sunrise,    'Sunrise Diner LLC',        '021000021', '****4521', 485.00, '27', 'completed'),
+    ('ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_d_bella,      'Bella Salon & Spa Inc',    '026009593', '****6190', 275.00, '27', 'completed'),
+    ('ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_d_quickprint, 'Quick Print Solutions LLC', '031101266', '****8877', 425.00, '27', 'completed'),
+    ('ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_d_greenthumb, 'Green Thumb Landscaping',  '021000021', '****5612', 295.00, '27', 'completed'),
+    ('ab000000-0000-0000-0000-000000000001'::uuid, v_team_id, v_d_fitness,    'Fitness First Gym LLC',    '091000019', '****9043', 510.00, '27', 'completed')
+  ON CONFLICT DO NOTHING;
+
+  -- Batch 2 (processing)
+  INSERT INTO ach_batch_items (batch_id, team_id, deal_id, receiver_name, receiver_routing, receiver_account, amount, transaction_code, status)
+  VALUES
+    ('ab000000-0000-0000-0000-000000000002'::uuid, v_team_id, v_d_sunrise,    'Sunrise Diner LLC',        '021000021', '****4521', 485.00, '27', 'pending'),
+    ('ab000000-0000-0000-0000-000000000002'::uuid, v_team_id, v_d_bella,      'Bella Salon & Spa Inc',    '026009593', '****6190', 275.00, '27', 'pending'),
+    ('ab000000-0000-0000-0000-000000000002'::uuid, v_team_id, v_d_quickprint, 'Quick Print Solutions LLC', '031101266', '****8877', 425.00, '27', 'pending'),
+    ('ab000000-0000-0000-0000-000000000002'::uuid, v_team_id, v_d_fitness,    'Fitness First Gym LLC',    '091000019', '****9043', 510.00, '27', 'pending')
+  ON CONFLICT DO NOTHING;
+
+  -- Batch 3 (draft — today)
+  INSERT INTO ach_batch_items (batch_id, team_id, deal_id, receiver_name, receiver_routing, receiver_account, amount, transaction_code, status)
+  VALUES
+    ('ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_d_sunrise,    'Sunrise Diner LLC',        '021000021', '****4521', 485.00, '27', 'pending'),
+    ('ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_d_bella,      'Bella Salon & Spa Inc',    '026009593', '****6190', 275.00, '27', 'pending'),
+    ('ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_d_tonys,      'Tony''s Pizzeria Inc',     '121000248', '****3344', 380.00, '27', 'pending'),
+    ('ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_d_quickprint, 'Quick Print Solutions LLC', '031101266', '****8877', 425.00, '27', 'pending'),
+    ('ab000000-0000-0000-0000-000000000003'::uuid, v_team_id, v_d_fitness,    'Fitness First Gym LLC',    '091000019', '****9043', 510.00, '27', 'pending')
+  ON CONFLICT DO NOTHING;
+
+  -- ========================================================================
+  -- RISK SCORING: Test Merchant Archetypes (8 merchants)
+  -- Integrated from scripts/seed-risk-data.sql with fixes:
+  --   - Skip weekends
+  --   - Use 'mca-payments' (plural) for category_slug
+  --   - NSF counts dynamically calculated
+  -- ========================================================================
+
+  DECLARE
+    v_risk_merchant_id uuid;
+    v_risk_deal_id uuid;
+    v_risk_date date;
+    v_risk_i int;
+  BEGIN
+
+  -- 1. "The Rock" — Perfect payer, 60 consecutive on-time payments
+  INSERT INTO merchants (id, team_id, name, email, status)
+  VALUES (gen_random_uuid(), v_team_id, 'Rock Solid LLC', 'rock@example.com', 'active')
+  RETURNING id INTO v_risk_merchant_id;
+
+  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a1';
+  INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'ROCK-001', 50000, 1.35, 67500, 1125, 0, 67500, 'paid_off', now() - interval '90 days', 'daily');
+
+  v_risk_date := current_date - 90;
+  FOR v_risk_i IN 1..60 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status)
+      VALUES (v_team_id, v_risk_deal_id, 1125, v_risk_date, 'ach', 'completed');
+
+      INSERT INTO transactions (team_id, bank_account_id, amount, date, name, description, status, method, internal_id, category_slug, currency)
+      VALUES (v_team_id, v_bank_op, 1125, v_risk_date, 'Rock Solid LLC - Payment', 'MCA payment ROCK-001', 'posted', 'ach', 'ROCK-PAY-' || v_risk_i, 'mca-payments', 'USD');
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+
+  -- 2. "The Sprinter" — Overpays aggressively, will finish early
+  INSERT INTO merchants (id, team_id, name, email, status)
+  VALUES (gen_random_uuid(), v_team_id, 'Sprint Corp', 'sprint@example.com', 'active')
+  RETURNING id INTO v_risk_merchant_id;
+
+  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a2';
+  INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'SPRINT-001', 40000, 1.40, 56000, 933, 20000, 36000, 'active', now() - interval '30 days', 'daily');
+
+  v_risk_date := current_date - 30;
+  FOR v_risk_i IN 1..30 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status)
+      VALUES (v_team_id, v_risk_deal_id, 1200, v_risk_date, 'ach', 'completed');
+
+      INSERT INTO transactions (team_id, bank_account_id, amount, date, name, description, status, method, internal_id, category_slug, currency)
+      VALUES (v_team_id, v_bank_op, 1200, v_risk_date, 'Sprint Corp - Payment', 'MCA payment SPRINT-001', 'posted', 'ach', 'SPRINT-PAY-' || v_risk_i, 'mca-payments', 'USD');
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+
+  -- 3. "The Stumbler" — Missed 5 payments then caught up
+  INSERT INTO merchants (id, team_id, name, email, status)
+  VALUES (gen_random_uuid(), v_team_id, 'Stumble & Rise Inc', 'stumbler@example.com', 'active')
+  RETURNING id INTO v_risk_merchant_id;
+
+  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a3';
+  INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'STMBL-001', 30000, 1.38, 41400, 690, 17250, 24150, 0, 'active', now() - interval '45 days', 'daily');
+
+  v_risk_date := current_date - 45;
+  -- 20 good payments
+  FOR v_risk_i IN 1..20 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status)
+      VALUES (v_team_id, v_risk_deal_id, 690, v_risk_date, 'ach', 'completed');
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+  -- 5 NSF payments
+  FOR v_risk_i IN 1..5 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status, nsf_at, nsf_fee)
+      VALUES (v_team_id, v_risk_deal_id, 690, v_risk_date, 'ach', 'returned', v_risk_date::timestamptz, 35);
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+  -- 10 recovery payments
+  FOR v_risk_i IN 1..10 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status)
+      VALUES (v_team_id, v_risk_deal_id, 690, v_risk_date, 'ach', 'completed');
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+
+  -- 4. "The Drifter" — Pays partial amounts consistently
+  INSERT INTO merchants (id, team_id, name, email, status)
+  VALUES (gen_random_uuid(), v_team_id, 'Drift Along Co', 'drifter@example.com', 'active')
+  RETURNING id INTO v_risk_merchant_id;
+
+  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a4';
+  INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'DRIFT-001', 25000, 1.42, 35500, 591, 21300, 14200, 'active', now() - interval '40 days', 'daily');
+
+  v_risk_date := current_date - 40;
+  FOR v_risk_i IN 1..40 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status)
+      VALUES (v_team_id, v_risk_deal_id, 355, v_risk_date, 'ach', 'completed');
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+
+  -- 5. "The Slider" — Started strong, deteriorating over time
+  INSERT INTO merchants (id, team_id, name, email, status)
+  VALUES (gen_random_uuid(), v_team_id, 'Sliding Scale LLC', 'slider@example.com', 'active')
+  RETURNING id INTO v_risk_merchant_id;
+
+  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a5';
+  INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'SLIDE-001', 35000, 1.36, 47600, 793, 31920, 15680, 0, 'late', now() - interval '60 days', 'daily');
+
+  v_risk_date := current_date - 60;
+  -- 20 perfect payments
+  FOR v_risk_i IN 1..20 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status)
+      VALUES (v_team_id, v_risk_deal_id, 793, v_risk_date, 'ach', 'completed');
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+  -- 10 partial payments (declining amounts)
+  FOR v_risk_i IN 1..10 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status)
+      VALUES (v_team_id, v_risk_deal_id, 793 - v_risk_i*50, v_risk_date, 'ach', 'completed');
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+  -- 3 NSF events recently
+  FOR v_risk_i IN 1..3 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status, nsf_at, nsf_fee)
+      VALUES (v_team_id, v_risk_deal_id, 793, v_risk_date, 'ach', 'returned', v_risk_date::timestamptz, 35);
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+
+  -- 6. "The Bouncer" — Frequent NSFs throughout
+  INSERT INTO merchants (id, team_id, name, email, status)
+  VALUES (gen_random_uuid(), v_team_id, 'Bounce House Inc', 'bouncer@example.com', 'active')
+  RETURNING id INTO v_risk_merchant_id;
+
+  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a6';
+  INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'BNCE-001', 20000, 1.45, 29000, 483, 22000, 7000, 0, 'active', now() - interval '50 days', 'daily');
+
+  v_risk_date := current_date - 50;
+  FOR v_risk_i IN 1..50 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      IF v_risk_i % 3 = 0 THEN
+        INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status, nsf_at, nsf_fee)
+        VALUES (v_team_id, v_risk_deal_id, 483, v_risk_date, 'ach', 'returned', v_risk_date::timestamptz, 35);
+      ELSE
+        INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status)
+        VALUES (v_team_id, v_risk_deal_id, 483, v_risk_date, 'ach', 'completed');
+      END IF;
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+
+  -- 7. "The Comeback" — Bad start, strong recovery
+  INSERT INTO merchants (id, team_id, name, email, status)
+  VALUES (gen_random_uuid(), v_team_id, 'Comeback Kid LLC', 'comeback@example.com', 'active')
+  RETURNING id INTO v_risk_merchant_id;
+
+  v_risk_deal_id := 'd0000000-0000-0000-0000-0000000000a7';
+  INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'CMBK-001', 45000, 1.32, 59400, 990, 29700, 29700, 0, 'active', now() - interval '50 days', 'daily');
+
+  v_risk_date := current_date - 50;
+  -- 5 NSFs at start
+  FOR v_risk_i IN 1..5 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status, nsf_at, nsf_fee)
+      VALUES (v_team_id, v_risk_deal_id, 990, v_risk_date, 'ach', 'returned', v_risk_date::timestamptz, 35);
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+  -- 30 perfect payments since
+  FOR v_risk_i IN 1..30 LOOP
+    IF EXTRACT(DOW FROM v_risk_date) NOT IN (0, 6) THEN
+      INSERT INTO mca_payments (team_id, deal_id, amount, payment_date, payment_type, status)
+      VALUES (v_team_id, v_risk_deal_id, 990, v_risk_date, 'ach', 'completed');
+
+      INSERT INTO transactions (team_id, bank_account_id, amount, date, name, description, status, method, internal_id, category_slug, currency)
+      VALUES (v_team_id, v_bank_op, 990, v_risk_date, 'Comeback Kid LLC - Payment', 'MCA payment CMBK-001', 'posted', 'ach', 'CMBK-PAY-' || v_risk_i, 'mca-payments', 'USD');
+    END IF;
+    v_risk_date := v_risk_date + 1;
+  END LOOP;
+
+  -- 8. "The New Deal" — Just funded, no payment history yet
+  INSERT INTO merchants (id, team_id, name, email, status)
+  VALUES (gen_random_uuid(), v_team_id, 'Fresh Start Corp', 'newdeal@example.com', 'active')
+  RETURNING id INTO v_risk_merchant_id;
+
+  INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
+  VALUES ('d0000000-0000-0000-0000-0000000000a8', v_team_id, v_risk_merchant_id, 'NEW-001', 30000, 1.35, 40500, 675, 40500, 0, 'active', now(), 'daily');
+
+  -- Re-run dynamic balance + NSF calculation for risk merchants too
+  UPDATE mca_deals d
+  SET total_paid = LEAST(sub.paid, d.payback_amount),
+      current_balance = GREATEST(d.payback_amount - sub.paid, 0)
+  FROM (
+    SELECT deal_id, SUM(amount) as paid
+    FROM mca_payments
+    WHERE status = 'completed' AND team_id = v_team_id
+    GROUP BY deal_id
+  ) sub
+  WHERE d.id = sub.deal_id AND d.team_id = v_team_id;
+
+  UPDATE mca_deals d
+  SET nsf_count = COALESCE(sub.cnt, 0)
+  FROM (
+    SELECT deal_id, COUNT(*) as cnt
+    FROM mca_payments
+    WHERE status = 'returned' AND team_id = v_team_id
+    GROUP BY deal_id
+  ) sub
+  WHERE d.id = sub.deal_id AND d.team_id = v_team_id;
+
+  -- Backfill balance_before/balance_after for risk merchant payments too
+  WITH ordered_payments AS (
+    SELECT id, deal_id, amount,
+      ROW_NUMBER() OVER (PARTITION BY deal_id ORDER BY payment_date, id) as rn
+    FROM mca_payments WHERE team_id = v_team_id AND status = 'completed'
+      AND balance_before IS NULL
+  ),
+  running AS (
+    SELECT op.id,
+      d.payback_amount - COALESCE(SUM(op.amount) OVER (
+        PARTITION BY op.deal_id ORDER BY op.rn
+        ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+      ), 0) as balance_before,
+      d.payback_amount - SUM(op.amount) OVER (
+        PARTITION BY op.deal_id ORDER BY op.rn
+      ) as balance_after
+    FROM ordered_payments op JOIN mca_deals d ON d.id = op.deal_id
+  )
+  UPDATE mca_payments p
+  SET balance_before = r.balance_before, balance_after = r.balance_after
+  FROM running r WHERE p.id = r.id;
+
+  END; -- end risk archetype DECLARE block
+
+  -- ========================================================================
+  -- RISK CONFIG (team-level configuration)
+  -- ========================================================================
+
+  INSERT INTO risk_config (team_id, preset, weights, decay_half_life_days, baseline_score, band_thresholds)
+  VALUES (v_team_id, 'balanced',
+    '{"consistency": 0.25, "nsf": 0.25, "velocity": 0.15, "recovery": 0.15, "progress": 0.10, "amounts": 0.10}'::jsonb,
+    30, 50,
+    '{"low_max": 33, "high_min": 67}'::jsonb)
+  ON CONFLICT (team_id) DO NOTHING;
+
+  -- ========================================================================
+  -- RISK SCORES (pre-calculated for all active/late/defaulted deals)
+  -- Lower score = healthier. Bands: low (0-33), medium (34-66), high (67-100)
+  -- ========================================================================
+
+  INSERT INTO risk_scores (team_id, deal_id, overall_score, previous_score, band, sub_scores, calculated_at)
+  VALUES
+    -- Healthy active deals
+    (v_team_id, v_d_sunrise,       12.00, 14.00, 'low',    '{"consistency":0.95,"nsf":1.00,"velocity":0.90,"recovery":1.00,"progress":0.85,"amounts":0.95}'::jsonb, NOW()),
+    (v_team_id, v_d_bella,         18.00, 20.00, 'low',    '{"consistency":0.92,"nsf":1.00,"velocity":0.88,"recovery":1.00,"progress":0.60,"amounts":0.90}'::jsonb, NOW()),
+    (v_team_id, v_d_harbor,        15.00, 16.00, 'low',    '{"consistency":0.94,"nsf":1.00,"velocity":0.89,"recovery":1.00,"progress":0.45,"amounts":0.93}'::jsonb, NOW()),
+    (v_team_id, v_d_bluesky,       10.00, 12.00, 'low',    '{"consistency":0.96,"nsf":1.00,"velocity":0.92,"recovery":1.00,"progress":0.70,"amounts":0.96}'::jsonb, NOW()),
+    (v_team_id, v_d_crossfit,       8.00, 10.00, 'low',    '{"consistency":0.97,"nsf":1.00,"velocity":0.95,"recovery":1.00,"progress":0.99,"amounts":0.98}'::jsonb, NOW()),
+    (v_team_id, v_d_nailstudio,    20.00, 22.00, 'low',    '{"consistency":0.90,"nsf":1.00,"velocity":0.85,"recovery":1.00,"progress":0.42,"amounts":0.88}'::jsonb, NOW()),
+    (v_team_id, v_d_bookshelf_2,   16.00, 18.00, 'low',    '{"consistency":0.93,"nsf":1.00,"velocity":0.87,"recovery":1.00,"progress":0.65,"amounts":0.91}'::jsonb, NOW()),
+    (v_team_id, v_d_cardinal_2,     5.00,  7.00, 'low',    '{"consistency":0.98,"nsf":1.00,"velocity":0.97,"recovery":1.00,"progress":0.95,"amounts":0.99}'::jsonb, NOW()),
+    (v_team_id, v_d_luckydragon_2, 14.00, 15.00, 'low',    '{"consistency":0.94,"nsf":1.00,"velocity":0.90,"recovery":1.00,"progress":0.40,"amounts":0.92}'::jsonb, NOW()),
+    -- At-risk deals (late payments, some NSFs)
+    (v_team_id, v_d_tonys,         48.00, 42.00, 'medium', '{"consistency":0.65,"nsf":0.70,"velocity":0.55,"recovery":0.60,"progress":0.50,"amounts":0.70}'::jsonb, NOW()),
+    (v_team_id, v_d_quickprint,    42.00, 38.00, 'medium', '{"consistency":0.70,"nsf":0.80,"velocity":0.60,"recovery":0.65,"progress":0.55,"amounts":0.72}'::jsonb, NOW()),
+    -- Late deals (in collections or near it)
+    (v_team_id, v_d_westside,      72.00, 65.00, 'high',   '{"consistency":0.35,"nsf":0.40,"velocity":0.30,"recovery":0.25,"progress":0.48,"amounts":0.38}'::jsonb, NOW()),
+    (v_team_id, v_d_catering,      62.00, 55.00, 'medium', '{"consistency":0.50,"nsf":0.60,"velocity":0.42,"recovery":0.45,"progress":0.52,"amounts":0.55}'::jsonb, NOW()),
+    (v_team_id, v_d_nightowl,      68.00, 60.00, 'high',   '{"consistency":0.40,"nsf":0.50,"velocity":0.35,"recovery":0.38,"progress":0.44,"amounts":0.42}'::jsonb, NOW()),
+    -- Defaulted
+    (v_team_id, v_d_redrock,       90.00, 85.00, 'high',   '{"consistency":0.10,"nsf":0.15,"velocity":0.08,"recovery":0.05,"progress":0.45,"amounts":0.12}'::jsonb, NOW()),
+    -- Paid-off deals (frozen scores)
+    (v_team_id, v_d_martinez,       8.00,  8.00, 'low',    '{"consistency":0.97,"nsf":1.00,"velocity":0.95,"recovery":1.00,"progress":1.00,"amounts":0.97}'::jsonb, NOW()),
+    (v_team_id, v_d_luckydragon,   10.00, 10.00, 'low',    '{"consistency":0.96,"nsf":1.00,"velocity":0.93,"recovery":1.00,"progress":1.00,"amounts":0.95}'::jsonb, NOW()),
+    (v_team_id, v_d_smith,         12.00, 12.00, 'low',    '{"consistency":0.95,"nsf":1.00,"velocity":0.91,"recovery":1.00,"progress":1.00,"amounts":0.93}'::jsonb, NOW()),
+    (v_team_id, v_d_bookshelf_1,   15.00, 15.00, 'low',    '{"consistency":0.93,"nsf":1.00,"velocity":0.88,"recovery":1.00,"progress":1.00,"amounts":0.90}'::jsonb, NOW()),
+    (v_team_id, v_d_cardinal_1,    11.00, 11.00, 'low',    '{"consistency":0.95,"nsf":1.00,"velocity":0.92,"recovery":1.00,"progress":1.00,"amounts":0.94}'::jsonb, NOW()),
+    -- New deals (baseline score)
+    (v_team_id, v_d_greenthumb,    50.00, NULL,   'medium', '{"consistency":0.50,"nsf":1.00,"velocity":0.50,"recovery":0.50,"progress":0.05,"amounts":0.50}'::jsonb, NOW()),
+    (v_team_id, v_d_fitness,       50.00, NULL,   'medium', '{"consistency":0.50,"nsf":1.00,"velocity":0.50,"recovery":0.50,"progress":0.03,"amounts":0.50}'::jsonb, NOW()),
+    (v_team_id, v_d_urgentcare,    50.00, NULL,   'medium', '{"consistency":0.50,"nsf":1.00,"velocity":0.50,"recovery":0.50,"progress":0.07,"amounts":0.50}'::jsonb, NOW())
+  ON CONFLICT (deal_id) DO NOTHING;
 
   RAISE NOTICE 'Demo data seeded successfully!';
 

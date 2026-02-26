@@ -9,6 +9,7 @@ import type { SQL } from "drizzle-orm/sql/sql";
 
 type GetCollectionNotesParams = {
   caseId: string;
+  teamId: string;
   cursor?: string | null;
   pageSize?: number;
 };
@@ -17,9 +18,13 @@ export const getCollectionNotes = async (
   db: Database,
   params: GetCollectionNotesParams,
 ) => {
-  const { caseId, cursor, pageSize = 50 } = params;
+  const { caseId, teamId, cursor, pageSize = 50 } = params;
 
-  const whereConditions: SQL[] = [eq(collectionNotes.caseId, caseId)];
+  const whereConditions: SQL[] = [
+    eq(collectionNotes.caseId, caseId),
+    // Verify case belongs to the caller's team
+    eq(collectionCases.teamId, teamId),
+  ];
 
   if (cursor) {
     whereConditions.push(sql`${collectionNotes.createdAt} < ${cursor}`);
@@ -40,6 +45,7 @@ export const getCollectionNotes = async (
       authorAvatar: users.avatarUrl,
     })
     .from(collectionNotes)
+    .innerJoin(collectionCases, eq(collectionCases.id, collectionNotes.caseId))
     .leftJoin(users, eq(users.id, collectionNotes.authorId))
     .where(and(...whereConditions))
     .orderBy(desc(collectionNotes.createdAt))
@@ -64,7 +70,8 @@ export const getCollectionNotes = async (
 
 type CreateCollectionNoteParams = {
   caseId: string;
-  authorId: string;
+  teamId?: string;
+  authorId: string | null;
   contactName?: string;
   contactMethod?: string;
   followUpDate?: string;
@@ -89,13 +96,19 @@ export const createCollectionNote = async (
 
   // If follow-up date provided, update the parent case's nextFollowUp
   if (params.followUpDate) {
+    const whereConditions = [eq(collectionCases.id, params.caseId)];
+    // Add team check if teamId is provided (not available in system contexts)
+    if (params.teamId) {
+      whereConditions.push(eq(collectionCases.teamId, params.teamId));
+    }
+
     await db
       .update(collectionCases)
       .set({
         nextFollowUp: params.followUpDate,
         updatedAt: new Date().toISOString(),
       })
-      .where(eq(collectionCases.id, params.caseId));
+      .where(and(...whereConditions));
   }
 
   return note;
