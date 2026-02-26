@@ -62,19 +62,15 @@ export async function withDbConnectionRetry<T>(
   operation: () => Promise<T>,
   options: RetryOptions,
 ): Promise<T> {
-  const attempts = options.attempts ?? 3;
+  const maxAttempts = Math.max(1, options.attempts ?? 3);
   const baseDelayMs = options.baseDelayMs ?? 250;
   const maxDelayMs = options.maxDelayMs ?? 2000;
 
-  let lastError: unknown;
-
-  for (let attempt = 1; attempt <= attempts; attempt++) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       return await operation();
     } catch (error) {
-      lastError = error;
-
-      if (attempt >= attempts || !isRetryableConnectionError(error)) {
+      if (attempt >= maxAttempts || !isRetryableConnectionError(error)) {
         throw error;
       }
 
@@ -87,7 +83,7 @@ export async function withDbConnectionRetry<T>(
         {
           operation: options.operationName,
           attempt,
-          maxAttempts: attempts,
+          maxAttempts,
           retryInMs: delayMs,
           errorDetails: extractErrorDetails(error),
         },
@@ -97,5 +93,6 @@ export async function withDbConnectionRetry<T>(
     }
   }
 
-  throw lastError;
+  // The loop always returns or throws in practice; this guards type-checking.
+  throw new Error("Retry loop exited unexpectedly");
 }
