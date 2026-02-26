@@ -5,7 +5,7 @@ import { prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Inbox Settings | Abacus",
+  title: "Inbox Settings | abacus",
 };
 
 export default async function Page() {

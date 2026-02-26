@@ -6,11 +6,10 @@ import {
 } from "@api/ai/agents/config/shared";
 import { webSearchTool } from "@api/ai/tools/web-search";
 import { analyticsAgent } from "./analytics";
-import { customersAgent } from "./customers";
+import { merchantsAgent } from "./merchants";
 import { invoicesAgent } from "./invoices";
 import { operationsAgent } from "./operations";
 import { reportsAgent } from "./reports";
-import { timeTrackingAgent } from "./time-tracking";
 import { transactionsAgent } from "./transactions";
 
 export const generalAgent = createAgent({
@@ -42,9 +41,8 @@ ${COMMON_AGENT_RULES}
     reportsAgent,
     analyticsAgent,
     transactionsAgent,
-    customersAgent,
+    merchantsAgent,
     invoicesAgent,
-    timeTrackingAgent,
   ],
   maxTurns: 5,
 });

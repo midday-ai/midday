@@ -1,7 +1,7 @@
 import type { Database } from "@db/client";
 import { teams, users, usersOnTeam } from "@db/schema";
 import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 export const getUserById = async (db: Database, id: string) => {
   const [result] = await db
@@ -17,6 +17,9 @@ export const getUserById = async (db: Database, id: string) => {
       timezone: users.timezone,
       timezoneAutoSync: users.timezoneAutoSync,
       teamId: users.teamId,
+      role: usersOnTeam.role,
+      entityId: usersOnTeam.entityId,
+      entityType: usersOnTeam.entityType,
       team: {
         id: teams.id,
         name: teams.name,
@@ -31,6 +34,13 @@ export const getUserById = async (db: Database, id: string) => {
     })
     .from(users)
     .leftJoin(teams, eq(users.teamId, teams.id))
+    .leftJoin(
+      usersOnTeam,
+      and(
+        eq(usersOnTeam.userId, users.id),
+        eq(usersOnTeam.teamId, users.teamId),
+      ),
+    )
     .where(eq(users.id, id));
 
   return result;

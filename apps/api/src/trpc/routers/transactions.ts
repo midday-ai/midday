@@ -1,6 +1,8 @@
+import { openai } from "@ai-sdk/openai";
 import {
   createTransactionSchema,
   deleteTransactionsSchema,
+  explainTransactionSchema,
   exportTransactionsSchema,
   getSimilarTransactionsSchema,
   getTransactionByIdSchema,
@@ -11,7 +13,11 @@ import {
   updateTransactionSchema,
   updateTransactionsSchema,
 } from "@api/schemas/transactions";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createTRPCRouter,
+  memberProcedure,
+  protectedProcedure,
+} from "@api/trpc/init";
 import {
   createTransaction,
   deleteTransactions,
@@ -28,6 +34,7 @@ import {
 } from "@midday/db/queries";
 import { formatAmountValue } from "@midday/import";
 import { triggerJob } from "@midday/job-client";
+import { generateText } from "ai";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -50,7 +57,7 @@ export const transactionsRouter = createTRPCRouter({
       });
     }),
 
-  deleteMany: protectedProcedure
+  deleteMany: memberProcedure
     .input(deleteTransactionsSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return deleteTransactions(db, { ids: input, teamId: teamId! });
@@ -64,7 +71,7 @@ export const transactionsRouter = createTRPCRouter({
     return getTransactionsReadyForExportCount(db, teamId!);
   }),
 
-  update: protectedProcedure
+  update: memberProcedure
     .input(updateTransactionSchema)
     .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       return updateTransaction(db, {
@@ -74,7 +81,7 @@ export const transactionsRouter = createTRPCRouter({
       });
     }),
 
-  updateMany: protectedProcedure
+  updateMany: memberProcedure
     .input(updateTransactionsSchema)
     .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       return updateTransactions(db, {
@@ -109,7 +116,7 @@ export const transactionsRouter = createTRPCRouter({
       });
     }),
 
-  create: protectedProcedure
+  create: memberProcedure
     .input(createTransactionSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       const transaction = await createTransaction(db, {
@@ -132,7 +139,7 @@ export const transactionsRouter = createTRPCRouter({
       return transaction;
     }),
 
-  export: protectedProcedure
+  export: memberProcedure
     .input(exportTransactionsSchema)
     .mutation(async ({ input, ctx: { teamId, session } }) => {
       if (!teamId) {
@@ -153,7 +160,7 @@ export const transactionsRouter = createTRPCRouter({
       );
     }),
 
-  import: protectedProcedure
+  import: memberProcedure
     .input(importTransactionsSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       if (!teamId) {
@@ -186,7 +193,7 @@ export const transactionsRouter = createTRPCRouter({
       );
     }),
 
-  moveToReview: protectedProcedure
+  moveToReview: memberProcedure
     .input(moveToReviewSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       if (!teamId) {
@@ -199,5 +206,50 @@ export const transactionsRouter = createTRPCRouter({
       });
 
       return { success: true };
+    }),
+
+  explain: protectedProcedure
+    .input(explainTransactionSchema)
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      const transaction = await getTransactionById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      if (!transaction) {
+        throw new Error("Transaction not found");
+      }
+
+      const source = transaction.manual
+        ? "manually created"
+        : transaction.account
+          ? `synced from ${transaction.account.name ?? "bank account"}`
+          : "imported via CSV";
+
+      const details = [
+        `Name: ${transaction.name}`,
+        `Amount: ${transaction.amount} ${transaction.currency}`,
+        `Date: ${transaction.date}`,
+        transaction.category?.name && `Category: ${transaction.category.name}`,
+        transaction.account?.name && `Account: ${transaction.account.name}`,
+        transaction.method && `Method: ${transaction.method}`,
+        transaction.description && `Description: ${transaction.description}`,
+        transaction.counterpartyName &&
+          `Counterparty: ${transaction.counterpartyName}`,
+        transaction.merchantName &&
+          `Merchant: ${transaction.merchantName}`,
+        `Source: ${source}`,
+        transaction.recurring && `Recurring: ${transaction.frequency ?? "yes"}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      const { text } = await generateText({
+        model: openai("gpt-4o-mini"),
+        prompt: `You are a financial assistant for a Merchant Cash Advance (MCA) business. Explain the following transaction in 2-3 concise sentences. Help the user understand what this charge is, why it might have occurred, and any relevant context. Be helpful and specific.\n\nTransaction details:\n${details}`,
+        temperature: 0.3,
+      });
+
+      return { explanation: text };
     }),
 });

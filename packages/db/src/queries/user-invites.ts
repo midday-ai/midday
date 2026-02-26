@@ -159,7 +159,7 @@ type CreateTeamInvitesParams = {
   teamId: string;
   invites: {
     email: string;
-    role: "owner" | "member";
+    role: "owner" | "admin" | "member" | "broker" | "syndicate" | "merchant";
     invitedBy: string;
   }[];
 };
@@ -167,7 +167,7 @@ type CreateTeamInvitesParams = {
 type InviteValidationResult = {
   validInvites: {
     email: string;
-    role: "owner" | "member";
+    role: "owner" | "admin" | "member" | "broker" | "syndicate" | "merchant";
     invitedBy: string;
   }[];
   skippedInvites: {
@@ -184,7 +184,7 @@ async function validateInvites(
   teamId: string,
   invites: {
     email: string;
-    role: "owner" | "member";
+    role: "owner" | "admin" | "member" | "broker" | "syndicate" | "merchant";
     invitedBy: string;
   }[],
 ): Promise<InviteValidationResult> {

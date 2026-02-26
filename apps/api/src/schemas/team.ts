@@ -1,5 +1,14 @@
 import { z } from "@hono/zod-openapi";
 
+const teamRoleEnum = z.enum([
+  "owner",
+  "admin",
+  "member",
+  "broker",
+  "syndicate",
+  "merchant",
+]);
+
 export const teamResponseSchema = z.object({
   id: z.string().uuid().openapi({
     description: "Unique identifier of the team",
@@ -114,6 +123,65 @@ export const updateTeamByIdSchema = z.object({
     .openapi({
       description: "Export settings for transactions",
     }),
+  branding: z
+    .object({
+      displayName: z.string().max(100).optional(),
+      primaryColor: z
+        .string()
+        .regex(/^#[0-9A-Fa-f]{6}$/, "Must be a valid hex color")
+        .optional(),
+      secondaryColor: z
+        .string()
+        .regex(/^#[0-9A-Fa-f]{6}$/, "Must be a valid hex color")
+        .optional(),
+      emailFromName: z.string().max(100).optional(),
+      pdfFooterText: z.string().max(500).optional(),
+      emailReplyTo: z.string().email().optional().or(z.literal("")),
+      collectionsTeam: z
+        .array(
+          z.object({
+            userId: z.string().uuid(),
+            title: z.string().max(100).optional(),
+          }),
+        )
+        .optional(),
+      documentSigners: z
+        .object({
+          collectionsNotices: z
+            .object({
+              userId: z.string().uuid(),
+              signerTitle: z.string().max(100).optional(),
+              signatureLineText: z.string().max(200).optional(),
+            })
+            .optional(),
+          payoffLetters: z
+            .object({
+              userId: z.string().uuid(),
+              signerTitle: z.string().max(100).optional(),
+              signatureLineText: z.string().max(200).optional(),
+            })
+            .optional(),
+          disclosureDocuments: z
+            .object({
+              userId: z.string().uuid(),
+              signerTitle: z.string().max(100).optional(),
+              signatureLineText: z.string().max(200).optional(),
+            })
+            .optional(),
+          invoices: z
+            .object({
+              userId: z.string().uuid(),
+              signerTitle: z.string().max(100).optional(),
+              signatureLineText: z.string().max(200).optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+    })
+    .optional()
+    .openapi({
+      description: "Portal branding and configuration",
+    }),
 });
 
 export const createTeamSchema = z.object({
@@ -201,9 +269,9 @@ export const updateTeamMemberSchema = z.object({
     description: "Unique identifier of the user whose role to update",
     example: "456e7890-f12a-34b5-c678-901234567890",
   }),
-  role: z.enum(["owner", "member"]).openapi({
+  role: teamRoleEnum.openapi({
     description:
-      "New role for the team member. 'owner' has full permissions, 'member' has limited permissions",
+      "New role for the team member. 'owner'/'admin' have full permissions, 'member' has standard access, 'broker'/'syndicate'/'merchant' are external roles",
     example: "member",
   }),
 });
@@ -215,9 +283,9 @@ export const inviteTeamMembersSchema = z
         description: "Email address of the person to invite",
         example: "john.doe@acme.com",
       }),
-      role: z.enum(["owner", "member"]).openapi({
+      role: teamRoleEnum.openapi({
         description:
-          "Role to assign to the invited member. 'owner' has full permissions, 'member' has limited permissions",
+          "Role to assign to the invited member",
         example: "member",
       }),
     }),
@@ -250,9 +318,9 @@ export const teamMemberResponseSchema = z.object({
     description: "Unique identifier of the user",
     example: "123e4567-e89b-12d3-a456-426614174000",
   }),
-  role: z.enum(["owner", "member"]).openapi({
+  role: teamRoleEnum.openapi({
     description:
-      "Role of the team member. 'owner' has full permissions, 'member' has limited permissions",
+      "Role of the team member",
     example: "owner",
   }),
   fullName: z.string().openapi({

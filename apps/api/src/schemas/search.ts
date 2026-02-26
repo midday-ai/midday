@@ -37,7 +37,7 @@ export const searchResponseSchema = z
       }),
       type: z.string().openapi({
         description:
-          "Type of the entity returned (e.g., invoice, customer, transaction).",
+          "Type of the entity returned (e.g., invoice, merchant, transaction).",
         example: "invoice",
       }),
       relevance: z.number().openapi({
@@ -53,7 +53,7 @@ export const searchResponseSchema = z
           "Additional data for the search result, structure depends on the type.",
         example: {
           invoiceNumber: "INV-2024-001",
-          customerName: "Acme Corporation",
+          merchantName: "Acme Corporation",
           amount: 1500.75,
         },
       }),
@@ -69,7 +69,7 @@ export const searchResponseSchema = z
         created_at: "2024-06-01T00:00:00.000Z",
         data: {
           invoiceNumber: "INV-2024-001",
-          customerName: "Acme Corporation",
+          merchantName: "Acme Corporation",
           amount: 1500.75,
         },
       },
@@ -124,7 +124,7 @@ export const attachmentSearchResultSchema = z
       type: z.literal("invoice"),
       id: z.string(),
       invoiceNumber: z.string().nullable(),
-      customerName: z.string().nullable(),
+      merchantName: z.string().nullable(),
       amount: z.number().nullable(),
       currency: z.string().nullable(),
       filePath: z.array(z.string()).nullable(),

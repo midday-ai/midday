@@ -9,14 +9,11 @@ import {
   CommandList,
   Command as CommandPrimitive,
 } from "@midday/ui/command";
-import { useJsApiLoader } from "@react-google-maps/api";
+import { importLibrary, setOptions } from "@googlemaps/js-api-loader";
 import { Check } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import usePlacesAutoComplete, { getDetails } from "use-places-autocomplete";
 import { useOnClickOutside } from "usehooks-ts";
-
-type Libraries = Parameters<typeof useJsApiLoader>[0]["libraries"];
-const libraries: Libraries = ["places"];
 
 type Props = {
   id?: string;
@@ -93,10 +90,14 @@ export function SearchAddressInput({
   const [selected, setSelected] = useState<Option | null>(null);
   const [inputValue, setInputValue] = useState<string>(defaultValue || "");
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY as string,
-    libraries,
-  });
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setOptions({ key: process.env.NEXT_PUBLIC_GOOGLE_API_KEY as string });
+    importLibrary("places")
+      .then(() => setIsLoaded(true))
+      .catch(console.error);
+  }, []);
 
   const {
     ready,

@@ -75,12 +75,6 @@ export const GetStartedEmail = ({ fullName = "" }: Props) => {
             </li>
             <li className="mb-2">
               <Text>
-                <strong>Track your time</strong> – Stay on top of your hours and
-                never lose billable time.
-              </Text>
-            </li>
-            <li className="mb-2">
-              <Text>
                 <strong>Send your first invoice</strong> – Get paid faster and
                 track overdue payments effortlessly.
               </Text>

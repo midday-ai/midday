@@ -1,17 +1,21 @@
 import { ManageSubscription } from "@/components/manage-subscription";
 import { Orders } from "@/components/orders";
 import { Plans } from "@/components/plans";
+import { getCurrentUserOrNull } from "@/trpc/server";
 import { prefetch, trpc } from "@/trpc/server";
-import { getQueryClient } from "@/trpc/server";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Billing | Abacus",
+  title: "Billing | abacus",
 };
 
 export default async function Billing() {
-  const queryClient = getQueryClient();
-  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
+  const user = await getCurrentUserOrNull();
+
+  if (!user) {
+    redirect("/api/auth/logout");
+  }
 
   const team = user?.team;
 

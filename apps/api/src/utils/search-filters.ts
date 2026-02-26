@@ -19,7 +19,7 @@ const schema = z.object({
       z.enum([
         "transactions",
         "invoices",
-        "customers",
+        "merchants",
         "documents",
       ]),
     )
@@ -78,14 +78,14 @@ GUIDELINES:
 - For currency values, default to the user's local currency if not specified
 - Choose appropriate types based on the query context:
   * "transactions" for money movements, payments, expenses
-  * "invoices" are for user created invoices, "Unpaid invoices for customer X"
-  * "customers" for client or customer information
+  * "invoices" are for user created invoices, "Unpaid invoices for merchant X"
+  * "merchants" for merchant/business information
   * "documents" for files, attachments, contracts, receipts, bills, invoices etc, but also in the query like "invoices from vendor X"
 
 EXAMPLES:
 - "show me invoices from last month" → {types: ["documents"], startDate: "2023-05-01", endDate: "2023-05-31", language: "english"}
 - "show me invoices from vendor X" → {types: ["documents"], searchTerm: "vendor X", language: "english"}
-- "unpaid invoices for customer X" → {types: ["invoices"], searchTerm: "customer X", status: "unpaid", language: "english"}
+- "unpaid invoices for merchant X" → {types: ["invoices"], searchTerm: "merchant X", status: "unpaid", language: "english"}
 - "paid invoices last week" → {types: ["invoices"], status: "paid", startDate: "2023-05-01", endDate: "2023-05-31", language: "english"}
 - "transactions with Apple between January and March" → {types: ["transactions"], searchTerm: "Apple", startDate: "2024-01-01", endDate: "2024-03-31", language: "english"}
 

@@ -2,7 +2,7 @@ import { SupportForm } from "@/components/support-form";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Support | Abacus",
+  title: "Support | abacus",
 };
 
 export default function Support() {

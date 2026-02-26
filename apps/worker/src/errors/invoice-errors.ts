@@ -7,9 +7,9 @@
  * Error codes for recurring invoice failures
  */
 export type RecurringInvoiceErrorCode =
-  | "CUSTOMER_NO_EMAIL"
-  | "CUSTOMER_NOT_FOUND"
-  | "CUSTOMER_DELETED"
+  | "MERCHANT_NO_EMAIL"
+  | "MERCHANT_NOT_FOUND"
+  | "MERCHANT_DELETED"
   | "TEMPLATE_INVALID"
   | "INVOICE_EXISTS"
   | "DATABASE_ERROR"
@@ -23,7 +23,7 @@ export class RecurringInvoiceError extends Error {
   public readonly code: RecurringInvoiceErrorCode;
   public readonly recurringId: string;
   public readonly teamId?: string;
-  public readonly customerId?: string;
+  public readonly merchantId?: string;
 
   constructor(
     code: RecurringInvoiceErrorCode,
@@ -31,7 +31,7 @@ export class RecurringInvoiceError extends Error {
     message: string,
     options?: {
       teamId?: string;
-      customerId?: string;
+      merchantId?: string;
       cause?: Error;
     },
   ) {
@@ -40,7 +40,7 @@ export class RecurringInvoiceError extends Error {
     this.code = code;
     this.recurringId = recurringId;
     this.teamId = options?.teamId;
-    this.customerId = options?.customerId;
+    this.merchantId = options?.merchantId;
   }
 
   /**
@@ -55,9 +55,9 @@ export class RecurringInvoiceError extends Error {
    */
   get requiresUserAction(): boolean {
     return (
-      this.code === "CUSTOMER_NO_EMAIL" ||
-      this.code === "CUSTOMER_NOT_FOUND" ||
-      this.code === "CUSTOMER_DELETED" ||
+      this.code === "MERCHANT_NO_EMAIL" ||
+      this.code === "MERCHANT_NOT_FOUND" ||
+      this.code === "MERCHANT_DELETED" ||
       this.code === "TEMPLATE_INVALID"
     );
   }
@@ -67,12 +67,12 @@ export class RecurringInvoiceError extends Error {
    */
   getUserMessage(): string {
     switch (this.code) {
-      case "CUSTOMER_NO_EMAIL":
-        return "The customer associated with this recurring invoice series does not have an email address. Please update the customer profile.";
-      case "CUSTOMER_NOT_FOUND":
-        return "The customer associated with this recurring invoice series was not found. They may have been deleted.";
-      case "CUSTOMER_DELETED":
-        return "The customer associated with this recurring invoice series has been deleted. Please assign a new customer or cancel the series.";
+      case "MERCHANT_NO_EMAIL":
+        return "The merchant associated with this recurring invoice series does not have an email address. Please update the merchant profile.";
+      case "MERCHANT_NOT_FOUND":
+        return "The merchant associated with this recurring invoice series was not found. They may have been deleted.";
+      case "MERCHANT_DELETED":
+        return "The merchant associated with this recurring invoice series has been deleted. Please assign a new merchant or cancel the series.";
       case "TEMPLATE_INVALID":
         return "The invoice template data is invalid or corrupted. Please recreate the recurring invoice series.";
       case "INVOICE_EXISTS":
@@ -96,7 +96,7 @@ export class RecurringInvoiceError extends Error {
       message: this.message,
       recurringId: this.recurringId,
       teamId: this.teamId,
-      customerId: this.customerId,
+      merchantId: this.merchantId,
       isRecoverable: this.isRecoverable,
       requiresUserAction: this.requiresUserAction,
       stack: this.stack,
@@ -108,41 +108,41 @@ export class RecurringInvoiceError extends Error {
  * Factory functions for creating specific error types
  */
 export const RecurringInvoiceErrors = {
-  customerNoEmail(
+  merchantNoEmail(
     recurringId: string,
-    customerName: string | null,
+    merchantName: string | null,
     teamId?: string,
   ): RecurringInvoiceError {
     return new RecurringInvoiceError(
-      "CUSTOMER_NO_EMAIL",
+      "MERCHANT_NO_EMAIL",
       recurringId,
-      `Cannot generate recurring invoice: Customer ${customerName || "unknown"} has no email address. Please update the customer profile.`,
+      `Cannot generate recurring invoice: Merchant ${merchantName || "unknown"} has no email address. Please update the merchant profile.`,
       { teamId },
     );
   },
 
-  customerNotFound(
+  merchantNotFound(
     recurringId: string,
-    customerId: string,
+    merchantId: string,
     teamId?: string,
   ): RecurringInvoiceError {
     return new RecurringInvoiceError(
-      "CUSTOMER_NOT_FOUND",
+      "MERCHANT_NOT_FOUND",
       recurringId,
-      `Cannot generate recurring invoice: Customer ${customerId} not found. They may have been deleted.`,
-      { teamId, customerId },
+      `Cannot generate recurring invoice: Merchant ${merchantId} not found. They may have been deleted.`,
+      { teamId, merchantId },
     );
   },
 
-  customerDeleted(
+  merchantDeleted(
     recurringId: string,
-    customerName: string | null,
+    merchantName: string | null,
     teamId?: string,
   ): RecurringInvoiceError {
     return new RecurringInvoiceError(
-      "CUSTOMER_DELETED",
+      "MERCHANT_DELETED",
       recurringId,
-      `Cannot generate recurring invoice: The customer${customerName ? ` "${customerName}"` : ""} has been deleted. Please assign a new customer or cancel the series.`,
+      `Cannot generate recurring invoice: The merchant${merchantName ? ` "${merchantName}"` : ""} has been deleted. Please assign a new merchant or cancel the series.`,
       { teamId },
     );
   },

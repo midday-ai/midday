@@ -3,8 +3,8 @@ export const SCOPES = [
   "bank-accounts.write",
   "chat.read",
   "chat.write",
-  "customers.read",
-  "customers.write",
+  "merchants.read",
+  "merchants.write",
   "documents.read",
   "documents.write",
   "inbox.read",
@@ -23,6 +23,12 @@ export const SCOPES = [
   "users.write",
   "notifications.read",
   "notifications.write",
+  "reconciliation.read",
+  "reconciliation.write",
+  "ach.read",
+  "ach.write",
+  "exports.read",
+  "exports.write",
   "apis.all", // All API scopes
   "apis.read", // All read scopes
 ] as const;

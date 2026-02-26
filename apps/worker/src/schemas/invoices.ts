@@ -21,7 +21,7 @@ export const invoiceNotificationSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   teamId: z.string().uuid(),
-  customerName: z.string().optional(),
+  merchantName: z.string().optional(),
   paidAt: z.string().optional(),
   scheduledAt: z.string().optional(),
   refundedAt: z.string().optional(),

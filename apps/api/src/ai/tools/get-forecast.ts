@@ -31,7 +31,7 @@ const getForecastSchema = z.object({
 
 export const getForecastTool = tool({
   description:
-    "Generate revenue forecast and projections - shows historical revenue trends, forecasted future revenue, growth rates, peak months, unpaid invoices, and billable hours.",
+    "Generate revenue forecast and projections - shows historical revenue trends, forecasted future revenue, growth rates, peak months, and unpaid invoices.",
   inputSchema: getForecastSchema,
   execute: async function* (
     { from, to, currency, revenueType, forecastMonths, showCanvas },
@@ -177,7 +177,6 @@ export const getForecastTool = tool({
         },
         growthRate: summary.avgMonthlyGrowthRate,
         unpaidInvoices: summary.unpaidInvoices.totalAmount,
-        billableHours: summary.billableHours.totalHours,
       };
 
       // Update artifact with metrics
@@ -199,7 +198,6 @@ export const getForecastTool = tool({
             peakMonthValue: metrics.peakMonth.value,
             growthRate: metrics.growthRate,
             unpaidInvoices: metrics.unpaidInvoices,
-            billableHours: metrics.billableHours,
           },
         });
       }
@@ -236,7 +234,6 @@ Unpaid Invoices: ${formatAmount({
               currency: targetCurrency,
               locale,
             })}
-Billable Hours This Month: ${metrics.billableHours}h
 
 Provide a concise analysis (2-3 sentences) highlighting key insights about the revenue forecast, growth trends, and actionable recommendations. Write it as natural, flowing text.`,
           },
@@ -270,7 +267,6 @@ Provide a concise analysis (2-3 sentences) highlighting key insights about the r
             peakMonthValue: metrics.peakMonth.value,
             growthRate: metrics.growthRate,
             unpaidInvoices: metrics.unpaidInvoices,
-            billableHours: metrics.billableHours,
           },
           analysis: {
             summary: summaryText,
@@ -311,7 +307,6 @@ Provide a concise analysis (2-3 sentences) highlighting key insights about the r
         monthlyData,
         peakMonth: metrics.peakMonth,
         unpaidInvoices: metrics.unpaidInvoices,
-        billableHours: metrics.billableHours,
       };
     } catch (error) {
       yield {

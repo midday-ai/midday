@@ -1,33 +1,38 @@
 import {
   getAccountBalancesSchema,
-  getBillableHoursSchema,
+  getActiveDealsSchema,
   getCashFlowSchema,
   getCategoryExpensesSchema,
-  getCustomerLifetimeValueSchema,
+  getCollectionRateSchema,
+  getMerchantLifetimeValueSchema,
+  getDealPipelineSchema,
   getGrowthRateSchema,
   getInboxStatsSchema,
   getMonthlySpendingSchema,
   getNetPositionSchema,
+  getNsfAlertsSchema,
   getOutstandingInvoicesSchema,
   getOverdueInvoicesAlertSchema,
+  getPortfolioOverviewSchema,
   getProfitMarginSchema,
   getRecurringExpensesSchema,
   getRevenueSummarySchema,
   getRunwaySchema,
   getTaxSummarySchema,
-  getTrackedTimeSchema,
   getVaultActivitySchema,
   updateWidgetPreferencesSchema,
 } from "@api/schemas/widgets";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { widgetPreferencesCache } from "@midday/cache/widget-preferences-cache";
 import {
-  getBillableHours,
   getCashBalance,
   getCashFlow,
-  getCustomerLifetimeValue,
+  getMerchantLifetimeValue,
   getGrowthRate,
   getInboxStats,
+  getMcaDealStats,
+  getMcaDealStatusBreakdown,
+  getMcaPaymentStats,
   getNetPosition,
   getOutstandingInvoices,
   getOverdueInvoicesAlert,
@@ -39,11 +44,95 @@ import {
   getSpending,
   getSpendingForPeriod,
   getTaxSummary,
-  getTopRevenueClient,
-  getTrackedTime,
+  getTopRevenueMerchant,
 } from "@midday/db/queries";
 
 export const widgetsRouter = createTRPCRouter({
+  // ========================================================================
+  // MCA Portfolio Widgets
+  // ========================================================================
+
+  getPortfolioOverview: protectedProcedure
+    .input(getPortfolioOverviewSchema)
+    .query(async ({ ctx: { db, teamId } }) => {
+      const stats = await getMcaDealStats(db, { teamId: teamId! });
+
+      return {
+        result: {
+          totalFunded: stats?.totalFunded ?? 0,
+          totalDeals: stats?.totalDeals ?? 0,
+          totalOutstanding: stats?.totalOutstanding ?? 0,
+          totalPayback: stats?.totalPayback ?? 0,
+        },
+      };
+    }),
+
+  getActiveDeals: protectedProcedure
+    .input(getActiveDealsSchema)
+    .query(async ({ ctx: { db, teamId } }) => {
+      const stats = await getMcaDealStats(db, { teamId: teamId! });
+
+      return {
+        result: {
+          activeDeals: stats?.activeDeals ?? 0,
+          totalDeals: stats?.totalDeals ?? 0,
+        },
+      };
+    }),
+
+  getCollectionRate: protectedProcedure
+    .input(getCollectionRateSchema)
+    .query(async ({ ctx: { db, teamId } }) => {
+      const stats = await getMcaDealStats(db, { teamId: teamId! });
+      const totalPayback = stats?.totalPayback ?? 0;
+      const totalPaid = stats?.totalPaid ?? 0;
+      const collectionRate =
+        totalPayback > 0
+          ? Math.round((totalPaid / totalPayback) * 1000) / 10
+          : 0;
+
+      return {
+        result: {
+          collectionRate,
+          totalPaid,
+          totalPayback,
+        },
+      };
+    }),
+
+  getNsfAlerts: protectedProcedure
+    .input(getNsfAlertsSchema)
+    .query(async ({ ctx: { db, teamId } }) => {
+      const [dealStats, paymentStats] = await Promise.all([
+        getMcaDealStats(db, { teamId: teamId! }),
+        getMcaPaymentStats(db, { teamId: teamId! }),
+      ]);
+
+      return {
+        result: {
+          totalNsfCount: dealStats?.totalNsfCount ?? 0,
+          returnedPayments: paymentStats?.returnedPayments ?? 0,
+          totalNsfFees: paymentStats?.totalNsfFees ?? 0,
+        },
+      };
+    }),
+
+  getDealPipeline: protectedProcedure
+    .input(getDealPipelineSchema)
+    .query(async ({ ctx: { db, teamId } }) => {
+      const breakdown = await getMcaDealStatusBreakdown(db, {
+        teamId: teamId!,
+      });
+
+      return {
+        result: breakdown,
+      };
+    }),
+
+  // ========================================================================
+  // Generic Financial Widgets
+  // ========================================================================
+
   getRunway: protectedProcedure
     .input(getRunwaySchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
@@ -67,13 +156,13 @@ export const widgetsRouter = createTRPCRouter({
       };
     }),
 
-  getTopCustomer: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
-    const topCustomer = await getTopRevenueClient(db, {
+  getTopMerchant: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
+    const topMerchant = await getTopRevenueMerchant(db, {
       teamId: teamId!,
     });
 
     return {
-      result: topCustomer,
+      result: topMerchant,
     };
   }),
 
@@ -208,21 +297,6 @@ export const widgetsRouter = createTRPCRouter({
 
       return {
         result: inboxStats.result,
-      };
-    }),
-
-  getTrackedTime: protectedProcedure
-    .input(getTrackedTimeSchema)
-    .query(async ({ ctx: { db, teamId, session }, input }) => {
-      const trackedTime = await getTrackedTime(db, {
-        teamId: teamId!,
-        assignedId: input.assignedId ?? session.user.id,
-        from: input.from,
-        to: input.to,
-      });
-
-      return {
-        result: trackedTime,
       };
     }),
 
@@ -376,21 +450,10 @@ export const widgetsRouter = createTRPCRouter({
       };
     }),
 
-  getBillableHours: protectedProcedure
-    .input(getBillableHoursSchema)
+  getMerchantLifetimeValue: protectedProcedure
+    .input(getMerchantLifetimeValueSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      return getBillableHours(db, {
-        teamId: teamId!,
-        date: input.date,
-        view: input.view,
-        weekStartsOnMonday: input.weekStartsOnMonday,
-      });
-    }),
-
-  getCustomerLifetimeValue: protectedProcedure
-    .input(getCustomerLifetimeValueSchema)
-    .query(async ({ ctx: { db, teamId }, input }) => {
-      const result = await getCustomerLifetimeValue(db, {
+      const result = await getMerchantLifetimeValue(db, {
         teamId: teamId!,
         currency: input.currency,
       });
@@ -398,7 +461,7 @@ export const widgetsRouter = createTRPCRouter({
       return {
         result,
         toolCall: {
-          toolName: "getCustomerLifetimeValue",
+          toolName: "getMerchantLifetimeValue",
           toolParams: {
             currency: input.currency,
           },

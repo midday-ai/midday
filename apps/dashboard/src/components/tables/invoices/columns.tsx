@@ -2,7 +2,7 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
-import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useMerchantParams } from "@/hooks/use-merchant-params";
 import { getDueDateStatus } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -173,33 +173,33 @@ export const columns: ColumnDef<Invoice>[] = [
     },
   },
   {
-    id: "customer",
-    header: "Customer",
-    accessorKey: "customer",
+    id: "merchant",
+    header: "Merchant",
+    accessorKey: "merchant",
     size: 220,
     minSize: 160,
     maxSize: 350,
     enableResizing: true,
     meta: {
       skeleton: { type: "avatar-text", width: "w-32" },
-      headerLabel: "Customer",
-      sortField: "customer",
+      headerLabel: "Merchant",
+      sortField: "merchant",
       className: "w-[220px] min-w-[160px]",
     },
     cell: ({ row }) => {
-      const customer = row.original.customer;
-      const name = customer?.name || row.original.customerName;
+      const merchant = row.original.merchant;
+      const name = merchant?.name || row.original.merchantName;
       const viewAt = row.original.viewedAt;
-      const customerId = customer?.id || row.original.customerId;
-      const { setParams } = useCustomerParams();
+      const merchantId = merchant?.id || row.original.merchantId;
+      const { setParams } = useMerchantParams();
 
       if (!name) return "-";
 
-      const handleCustomerClick = (e: MouseEvent<HTMLButtonElement>) => {
+      const handleMerchantClick = (e: MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
-        if (customerId) {
+        if (merchantId) {
           setParams({
-            customerId,
+            merchantId,
             details: true,
           });
         }
@@ -207,16 +207,16 @@ export const columns: ColumnDef<Invoice>[] = [
 
       return (
         <div className="flex items-center space-x-2 min-w-0">
-          {customerId ? (
+          {merchantId ? (
             <button
               type="button"
-              onClick={handleCustomerClick}
+              onClick={handleMerchantClick}
               className="flex items-center space-x-2 text-left min-w-0"
             >
               <Avatar className="size-5 flex-shrink-0">
-                {customer?.website && (
+                {merchant?.website && (
                   <AvatarImageNext
-                    src={getWebsiteLogo(customer?.website)}
+                    src={getWebsiteLogo(merchant?.website)}
                     alt={`${name} logo`}
                     width={20}
                     height={20}
@@ -232,9 +232,9 @@ export const columns: ColumnDef<Invoice>[] = [
           ) : (
             <>
               <Avatar className="size-5 flex-shrink-0">
-                {customer?.website && (
+                {merchant?.website && (
                   <AvatarImageNext
-                    src={getWebsiteLogo(customer?.website)}
+                    src={getWebsiteLogo(merchant?.website)}
                     alt={`${name} logo`}
                     width={20}
                     height={20}

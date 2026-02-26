@@ -1,4 +1,5 @@
 import type { Session } from "@api/utils/auth";
+import type { TeamRole } from "@api/utils/role-permissions";
 import { withRetryOnPrimary } from "@api/utils/db-retry";
 import { teamCache } from "@midday/cache/team-cache";
 import type { Database } from "@midday/db/client";
@@ -14,6 +15,9 @@ export const withTeamPermission = async <TReturn>(opts: {
       session?: Session | null;
       db: Database;
       teamId: string | null;
+      role: TeamRole | null;
+      entityId: string | null;
+      entityType: string | null;
     };
   }) => Promise<TReturn>;
 }) => {
@@ -40,6 +44,9 @@ export const withTeamPermission = async <TReturn>(opts: {
             columns: {
               id: true,
               teamId: true,
+              role: true,
+              entityId: true,
+              entityType: true,
             },
           },
         },
@@ -57,17 +64,19 @@ export const withTeamPermission = async <TReturn>(opts: {
   }
 
   const teamId = result.teamId;
+  let role: TeamRole | null = null;
+  let entityId: string | null = null;
+  let entityType: string | null = null;
 
   // If teamId is null, user has no team assigned but this is now allowed
   if (teamId !== null) {
     const cacheKey = `user:${userId}:team:${teamId}`;
     let hasAccess = await teamCache.get(cacheKey);
 
-    if (hasAccess === undefined) {
-      hasAccess = result.usersOnTeams.some(
-        (membership) => membership.teamId === teamId,
-      );
+    const membership = result.usersOnTeams.find((m) => m.teamId === teamId);
 
+    if (hasAccess === undefined) {
+      hasAccess = !!membership;
       await teamCache.set(cacheKey, hasAccess);
     }
 
@@ -77,12 +86,21 @@ export const withTeamPermission = async <TReturn>(opts: {
         message: "No permission to access this team",
       });
     }
+
+    if (membership) {
+      role = (membership.role as TeamRole) ?? null;
+      entityId = membership.entityId ?? null;
+      entityType = membership.entityType ?? null;
+    }
   }
 
   return next({
     ctx: {
       session: ctx.session,
       teamId,
+      role,
+      entityId,
+      entityType,
       db: ctx.db,
     },
   });

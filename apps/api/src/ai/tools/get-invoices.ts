@@ -25,7 +25,7 @@ const getInvoicesSchema = z.object({
     .nullable()
     .optional()
     .describe("Status filter"),
-  customers: z.array(z.string()).nullable().optional().describe("Customer IDs"),
+  merchants: z.array(z.string()).nullable().optional().describe("Merchant IDs"),
 });
 
 export const getInvoicesTool = tool({
@@ -33,7 +33,7 @@ export const getInvoicesTool = tool({
     "Retrieve and filter invoices with pagination, sorting, and search.",
   inputSchema: getInvoicesSchema,
   execute: async function* (
-    { cursor, sort, pageSize = 10, q, start, end, statuses, customers },
+    { cursor, sort, pageSize = 10, q, start, end, statuses, merchants },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -56,7 +56,7 @@ export const getInvoicesTool = tool({
         start: start ?? null,
         end: end ?? null,
         statuses: statuses ?? null,
-        customers: customers ?? null,
+        merchants: merchants ?? null,
       };
 
       const result = await getInvoices(db, params);
@@ -79,8 +79,8 @@ export const getInvoicesTool = tool({
         return {
           id: invoice.id,
           invoiceNumber: invoice.invoiceNumber || "Draft",
-          customerName:
-            invoice.customerName || invoice.customer?.name || "No customer",
+          merchantName:
+            invoice.merchantName || invoice.merchant?.name || "No merchant",
           amount: formattedAmount,
           status: invoice.status,
           dueDate: invoice.dueDate ? formatDate(invoice.dueDate) : "N/A",
@@ -108,7 +108,7 @@ export const getInvoicesTool = tool({
         (inv) => inv.status === "overdue",
       ).length;
 
-      const response = `| Invoice # | Customer | Amount | Status | Due Date | Created |\n|-----------|---------|--------|--------|----------|----------|\n${formattedInvoices.map((inv) => `| ${inv.invoiceNumber} | ${inv.customerName} | ${inv.amount} | ${inv.status} | ${inv.dueDate} | ${inv.createdAt} |`).join("\n")}\n\n**${result.data.length} invoices** | Total: ${formattedTotalAmount} | Paid: ${paidCount} | Unpaid: ${unpaidCount} | Overdue: ${overdueCount}`;
+      const response = `| Invoice # | Merchant | Amount | Status | Due Date | Created |\n|-----------|---------|--------|--------|----------|----------|\n${formattedInvoices.map((inv) => `| ${inv.invoiceNumber} | ${inv.merchantName} | ${inv.amount} | ${inv.status} | ${inv.dueDate} | ${inv.createdAt} |`).join("\n")}\n\n**${result.data.length} invoices** | Total: ${formattedTotalAmount} | Paid: ${paidCount} | Unpaid: ${unpaidCount} | Overdue: ${overdueCount}`;
 
       yield {
         text: response,

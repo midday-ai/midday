@@ -32,7 +32,7 @@ export async function generateMetadata(props: {
     }
 
     const title = `Invoice ${invoice.invoiceNumber} | ${invoice.team?.name}`;
-    const description = `Invoice for ${invoice.customerName || invoice.customer?.name || "Customer"}`;
+    const description = `Invoice for ${invoice.merchantName || invoice.merchant?.name || "Merchant"}`;
 
     return {
       title,
@@ -105,7 +105,7 @@ export default async function Page(props: Props) {
     try {
       const decryptedEmail = decrypt(viewer);
 
-      if (decryptedEmail === invoice?.customer?.email) {
+      if (decryptedEmail === invoice?.merchant?.email) {
         // Only update the invoice viewed_at if the user is a viewer
         waitUntil(updateInvoiceViewedAt(invoice.id!));
       }
@@ -136,12 +136,12 @@ export default async function Page(props: Props) {
         amount={invoice.amount ?? undefined}
         currency={invoice.currency ?? undefined}
         initialStatus={invoice.status}
-        customerName={
-          invoice.customerName || (invoice.customer?.name as string)
+        merchantName={
+          invoice.merchantName || (invoice.merchant?.name as string)
         }
-        customerWebsite={invoice.customer?.website}
-        customerPortalEnabled={invoice.customer?.portalEnabled ?? false}
-        customerPortalId={invoice.customer?.portalId ?? undefined}
+        merchantWebsite={invoice.merchant?.website}
+        merchantPortalEnabled={invoice.merchant?.portalEnabled ?? false}
+        merchantPortalId={invoice.merchant?.portalId ?? undefined}
         invoiceWidth={width}
       >
         <div className="pb-24 md:pb-0">

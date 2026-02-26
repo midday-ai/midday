@@ -1,0 +1,21 @@
+{
+  "name": "@midday/ach",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "lint:fix": "biome format --write .",
+    "test": "bun test src",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./builder": "./src/nacha-builder.ts",
+    "./validator": "./src/nacha-validator.ts",
+    "./types": "./src/types.ts"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0"
+  }
+}

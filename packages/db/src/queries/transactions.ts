@@ -57,7 +57,7 @@ export type GetTransactionsParams = {
   tags?: string[] | null;
   accounts?: string[] | null;
   assignees?: string[] | null;
-  type?: "income" | "expense" | null;
+  type?: "income" | "expense" | "credit" | "debit" | "refund" | "fee" | "adjustment" | "transfer" | null;
   start?: string | null;
   end?: string | null;
   recurring?: string[] | null;
@@ -274,17 +274,22 @@ export async function getTransactions(
     }
   }
 
-  // Type filter (expense/income)
+  // Type filter
   if (type === "expense") {
+    // Legacy: filter by negative amount
     whereConditions.push(lt(transactions.amount, 0));
     whereConditions.push(ne(transactions.categorySlug, "transfer"));
   } else if (type === "income") {
+    // Legacy: filter by revenue categories
     whereConditions.push(
       inArray(transactions.categorySlug, REVENUE_CATEGORIES),
     );
     whereConditions.push(
       not(inArray(transactions.categorySlug, CONTRA_REVENUE_CATEGORIES)),
     );
+  } else if (type && ["credit", "debit", "refund", "fee", "adjustment", "transfer"].includes(type)) {
+    // New: filter by transactionType enum column
+    whereConditions.push(eq(transactions.transactionType, type));
   }
 
   // Accounts filter
@@ -416,6 +421,7 @@ export async function getTransactions(
       taxType: transactions.taxType,
       taxAmount: transactions.taxAmount,
       enrichmentCompleted: transactions.enrichmentCompleted,
+      transactionType: transactions.transactionType,
       isFulfilled:
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`.as(
           "isFulfilled",
@@ -561,6 +567,7 @@ export async function getTransactions(
       transactions.name,
       transactions.description,
       transactions.createdAt,
+      transactions.transactionType,
       users.id,
       users.fullName,
       users.email,
@@ -710,6 +717,7 @@ export async function getTransactionById(
       taxType: transactions.taxType,
       taxAmount: transactions.taxAmount,
       enrichmentCompleted: transactions.enrichmentCompleted,
+      transactionType: transactions.transactionType,
       isFulfilled:
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, params.teamId)})) OR ${transactions.status} = 'completed'`.as(
           "isFulfilled",
@@ -858,6 +866,7 @@ export async function getTransactionById(
       transactions.name,
       transactions.description,
       transactions.createdAt,
+      transactions.transactionType,
       transactionMatchSuggestions.id,
       transactionMatchSuggestions.inboxId,
       transactionMatchSuggestions.confidenceScore,

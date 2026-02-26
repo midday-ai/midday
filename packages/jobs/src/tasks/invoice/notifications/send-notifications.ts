@@ -12,9 +12,9 @@ export const sendInvoiceNotifications = schemaTask({
     invoiceNumber: z.string(),
     status: z.enum(["paid", "overdue"]),
     teamId: z.string(),
-    customerName: z.string(),
+    merchantName: z.string(),
   }),
-  run: async ({ invoiceId, invoiceNumber, status, teamId, customerName }) => {
+  run: async ({ invoiceId, invoiceNumber, status, teamId, merchantName }) => {
     const notifications = new Notifications(getDb());
 
     switch (status) {
@@ -40,7 +40,7 @@ export const sendInvoiceNotifications = schemaTask({
           {
             invoiceId,
             invoiceNumber,
-            customerName,
+            merchantName,
             source: "system",
           },
           {

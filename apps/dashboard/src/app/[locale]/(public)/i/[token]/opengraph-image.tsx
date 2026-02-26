@@ -27,7 +27,7 @@ export default async function Image({ params }: Props) {
     "https://cdn.midday.ai/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
   ).then((res) => res.arrayBuffer());
 
-  const logoUrl = getWebsiteLogo(invoice.customer?.website);
+  const logoUrl = getWebsiteLogo(invoice.merchant?.website);
 
   const isValidLogo = await isValidLogoUrl(logoUrl);
 

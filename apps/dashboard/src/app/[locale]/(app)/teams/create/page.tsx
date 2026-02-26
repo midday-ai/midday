@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Create Team | Abacus",
+  title: "Create Team | abacus",
 };
 
 export default function CreateTeam() {

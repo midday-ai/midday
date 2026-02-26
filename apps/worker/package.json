@@ -14,7 +14,7 @@
     "@fast-csv/format": "5.0.5",
     "@hono/node-server": "^1.19.7",
     "@midday/accounting": "workspace:*",
-    "@midday/customers": "workspace:*",
+    "@midday/merchants": "workspace:*",
     "@midday/db": "workspace:*",
     "@midday/documents": "workspace:*",
     "@midday/email": "workspace:*",

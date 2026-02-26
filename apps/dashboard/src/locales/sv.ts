@@ -63,10 +63,6 @@ export default {
     owner: "Ägare",
     member: "Medlem",
   },
-  tracker_status: {
-    in_progress: "Pågående",
-    completed: "Färdig",
-  },
   account_balance: {
     total_balance: "Total saldo",
   },

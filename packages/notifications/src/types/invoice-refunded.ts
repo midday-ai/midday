@@ -13,7 +13,7 @@ export const invoiceRefunded: NotificationHandler = {
     metadata: {
       recordId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
-      customerName: data.customerName,
+      merchantName: data.merchantName,
       refundedAt: data.refundedAt,
     },
   }),

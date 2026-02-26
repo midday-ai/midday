@@ -43,7 +43,6 @@ export const forecastArtifact = artifact(
         peakMonthValue: z.number(),
         growthRate: z.number(),
         unpaidInvoices: z.number(),
-        billableHours: z.number(),
       })
       .optional(),
 

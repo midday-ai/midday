@@ -13,7 +13,7 @@ export default async function Image({ params }: Props) {
   const queryClient = getQueryClient();
 
   const data = await queryClient.fetchQuery(
-    trpc.customers.getByPortalId.queryOptions({
+    trpc.merchants.getByPortalId.queryOptions({
       portalId,
     }),
   );
@@ -22,7 +22,7 @@ export default async function Image({ params }: Props) {
     return new Response("Not found", { status: 404 });
   }
 
-  const { customer, summary } = data;
+  const { merchant, summary } = data;
 
   const hedvigSansFont = fetch(
     "https://cdn.midday.ai/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
@@ -36,24 +36,24 @@ export default async function Image({ params }: Props) {
       {/* Header with logo */}
       <div tw="flex items-center justify-between mb-12">
         <div tw="flex items-center">
-          {customer.team.logoUrl && (
+          {merchant.team.logoUrl && (
             <img
-              src={customer.team.logoUrl}
+              src={merchant.team.logoUrl}
               alt=""
               tw="w-16 h-16 mr-4"
               style={{ objectFit: "contain" }}
             />
           )}
           <div tw="flex flex-col">
-            <span tw="text-white text-3xl">{customer.team.name}</span>
+            <span tw="text-white text-3xl">{merchant.team.name}</span>
           </div>
         </div>
       </div>
 
       {/* Main content */}
       <div tw="flex flex-col flex-1">
-        <span tw="text-[#606060] text-xl mb-2">Customer Portal</span>
-        <span tw="text-white text-5xl font-bold mb-12">{customer.name}</span>
+        <span tw="text-[#606060] text-xl mb-2">Merchant Portal</span>
+        <span tw="text-white text-5xl font-bold mb-12">{merchant.name}</span>
 
         {/* Summary stats */}
         <div tw="flex mt-auto">

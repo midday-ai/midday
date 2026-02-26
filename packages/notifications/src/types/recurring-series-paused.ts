@@ -12,7 +12,7 @@ export const recurringSeriesPaused: NotificationHandler = {
     priority: 4, // Slightly higher priority since it might need attention
     metadata: {
       recordId: data.recurringId,
-      customerName: data.customerName,
+      merchantName: data.merchantName,
       reason: data.reason,
       failureCount: data.failureCount,
       userName: user.full_name,

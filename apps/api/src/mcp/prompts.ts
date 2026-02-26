@@ -73,11 +73,11 @@ Format the analysis in a clear, executive-summary style.`,
 
 1. Use invoices_list to get all invoices with status "overdue" or "unpaid"
 2. For each overdue invoice, get details using invoices_get
-3. Get customer information using customers_get for context
+3. Get merchant information using merchants_get for context
 
 Then create a follow-up action plan:
 - List overdue invoices sorted by amount (highest first)
-- Include customer contact information
+- Include merchant contact information
 - Suggest follow-up actions based on how overdue each invoice is
 - Draft polite but firm reminder messages for each situation`,
             },
@@ -131,10 +131,10 @@ Provide insights on:
   );
 
   server.registerPrompt(
-    "customer_insights",
+    "merchant_insights",
     {
-      title: "Customer Insights",
-      description: "Analyze customer data to identify top customers and trends",
+      title: "Merchant Insights",
+      description: "Analyze merchant data to identify top merchants and trends",
     },
     async () => {
       return {
@@ -143,17 +143,17 @@ Provide insights on:
             role: "user",
             content: {
               type: "text",
-              text: `Please analyze my customer base and provide insights:
+              text: `Please analyze my merchant base and provide insights:
 
-1. Use customers_list to get all customers
-2. Use invoices_list to understand revenue per customer
+1. Use merchants_list to get all merchants
+2. Use invoices_list to understand revenue per merchant
 3. Cross-reference with transactions_list to see payment patterns
 
 Provide analysis including:
-- Top customers by revenue
-- Customer concentration risk (% of revenue from top customers)
+- Top merchants by revenue
+- Merchant concentration risk (% of revenue from top merchants)
 - Payment behavior patterns
-- Customers with outstanding balances
+- Merchants with outstanding balances
 - Opportunities for upselling or follow-up`,
             },
           },

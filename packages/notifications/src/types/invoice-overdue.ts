@@ -15,7 +15,7 @@ export const invoiceOverdue: NotificationHandler = {
     metadata: {
       recordId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
-      customerName: data.customerName,
+      merchantName: data.merchantName,
     },
   }),
 
@@ -31,7 +31,7 @@ export const invoiceOverdue: NotificationHandler = {
       user,
       data: {
         invoiceNumber: data.invoiceNumber,
-        customerName: data.customerName,
+        merchantName: data.merchantName,
         link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
       },
     };

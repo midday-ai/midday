@@ -11,7 +11,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   createInvoiceRecurring,
   deleteInvoiceRecurring,
-  getCustomerById,
+  getMerchantById,
   getInvoiceRecurringById,
   getInvoiceRecurringList,
   getUpcomingInvoices,
@@ -73,26 +73,26 @@ export const invoiceRecurringRouter = createTRPCRouter({
         }
       }
 
-      // Validate that the customer exists and has an email address for sending invoices
-      // Recurring invoices auto-send, so we need a valid customer with email
-      const customer = await getCustomerById(db, {
-        id: recurringData.customerId,
+      // Validate that the merchant exists and has an email address for sending invoices
+      // Recurring invoices auto-send, so we need a valid merchant with email
+      const merchant = await getMerchantById(db, {
+        id: recurringData.merchantId,
         teamId,
       });
 
-      if (!customer) {
+      if (!merchant) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Customer not found",
+          message: "Merchant not found",
         });
       }
 
-      const customerEmail = customer.billingEmail || customer.email;
-      if (!customerEmail) {
+      const merchantEmail = merchant.billingEmail || merchant.email;
+      if (!merchantEmail) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message:
-            "Customer must have an email address to receive recurring invoices. Please add an email to the customer profile.",
+            "Merchant must have an email address to receive recurring invoices. Please add an email to the merchant profile.",
         });
       }
 
@@ -190,7 +190,7 @@ export const invoiceRecurringRouter = createTRPCRouter({
           .create("recurring_series_started", teamId, {
             recurringId: result.id,
             invoiceId: invoiceId,
-            customerName: recurringData.customerName ?? undefined,
+            merchantName: recurringData.merchantName ?? undefined,
             frequency: recurringData.frequency,
             endType: recurringData.endType,
             endDate: recurringData.endDate ?? undefined,
@@ -408,27 +408,27 @@ export const invoiceRecurringRouter = createTRPCRouter({
         }
       }
 
-      // If customerId is being updated, validate the new customer has an email
+      // If merchantId is being updated, validate the new merchant has an email
       // Recurring invoices auto-send, so we need a valid email destination
-      if (input.customerId !== undefined) {
-        const customer = await getCustomerById(db, {
-          id: input.customerId,
+      if (input.merchantId !== undefined) {
+        const merchant = await getMerchantById(db, {
+          id: input.merchantId,
           teamId,
         });
 
-        if (!customer) {
+        if (!merchant) {
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Customer not found",
+            message: "Merchant not found",
           });
         }
 
-        const customerEmail = customer.billingEmail || customer.email;
-        if (!customerEmail) {
+        const merchantEmail = merchant.billingEmail || merchant.email;
+        if (!merchantEmail) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message:
-              "Customer must have an email address to receive recurring invoices. Please add an email to the customer profile.",
+              "Merchant must have an email address to receive recurring invoices. Please add an email to the merchant profile.",
           });
         }
       }
@@ -488,7 +488,7 @@ export const invoiceRecurringRouter = createTRPCRouter({
         cursor: input?.cursor ?? null,
         pageSize: input?.pageSize ?? 25,
         status: input?.status ?? undefined,
-        customerId: input?.customerId ?? undefined,
+        merchantId: input?.merchantId ?? undefined,
       });
     }),
 

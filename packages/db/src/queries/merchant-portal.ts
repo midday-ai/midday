@@ -1,15 +1,18 @@
 import type { Database } from "@db/client";
 import {
-  customers,
+  merchants,
   merchantPortalAccess,
   merchantPortalInvites,
   merchantPortalSessions,
   payoffLetterRequests,
+  merchantMessages,
+  merchantDocuments,
+  merchantNotifications,
   mcaDeals,
   teams,
   users,
 } from "@db/schema";
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, desc, eq, gt, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 // ============================================================================
@@ -17,7 +20,7 @@ import { nanoid } from "nanoid";
 // ============================================================================
 
 type CreateMerchantSessionParams = {
-  customerId: string;
+  merchantId: string;
   portalId: string;
   email: string;
   expiresInMinutes?: number;
@@ -33,7 +36,7 @@ export const createMerchantSession = async (
   const [session] = await db
     .insert(merchantPortalSessions)
     .values({
-      customerId: params.customerId,
+      merchantId: params.merchantId,
       portalId: params.portalId,
       email: params.email,
       verificationToken: nanoid(32),
@@ -70,9 +73,9 @@ export const verifyMerchantSession = async (
     return null;
   }
 
-  // Mark as verified and extend expiration to 24 hours
+  // Mark as verified and extend expiration to 30 days
   const newExpiresAt = new Date();
-  newExpiresAt.setHours(newExpiresAt.getHours() + 24);
+  newExpiresAt.setDate(newExpiresAt.getDate() + 30);
 
   const [updatedSession] = await db
     .update(merchantPortalSessions)
@@ -100,14 +103,14 @@ export const getMerchantSession = async (
   const [session] = await db
     .select({
       id: merchantPortalSessions.id,
-      customerId: merchantPortalSessions.customerId,
+      merchantId: merchantPortalSessions.merchantId,
       portalId: merchantPortalSessions.portalId,
       email: merchantPortalSessions.email,
       verifiedAt: merchantPortalSessions.verifiedAt,
       expiresAt: merchantPortalSessions.expiresAt,
-      // Customer info
-      customerName: customers.name,
-      teamId: customers.teamId,
+      // Merchant info
+      merchantName: merchants.name,
+      teamId: merchants.teamId,
     })
     .from(merchantPortalSessions)
     .where(
@@ -117,7 +120,7 @@ export const getMerchantSession = async (
         sql`${merchantPortalSessions.verifiedAt} IS NOT NULL`,
       ),
     )
-    .leftJoin(customers, eq(customers.id, merchantPortalSessions.customerId))
+    .leftJoin(merchants, eq(merchants.id, merchantPortalSessions.merchantId))
     .limit(1);
 
   return session;
@@ -142,7 +145,7 @@ export const updateMerchantSessionActivity = async (
 
 type CreateMerchantInviteParams = {
   email: string;
-  customerId: string;
+  merchantId: string;
   teamId: string;
   invitedBy: string;
 };
@@ -158,7 +161,7 @@ export const createMerchantInvite = async (
     .where(
       and(
         eq(merchantPortalInvites.email, params.email.toLowerCase()),
-        eq(merchantPortalInvites.customerId, params.customerId),
+        eq(merchantPortalInvites.merchantId, params.merchantId),
         eq(merchantPortalInvites.status, "pending"),
       ),
     )
@@ -172,7 +175,7 @@ export const createMerchantInvite = async (
     .insert(merchantPortalInvites)
     .values({
       email: params.email.toLowerCase(),
-      customerId: params.customerId,
+      merchantId: params.merchantId,
       teamId: params.teamId,
       invitedBy: params.invitedBy,
       code: nanoid(24),
@@ -196,13 +199,13 @@ export const getMerchantInviteByCode = async (
     .select({
       id: merchantPortalInvites.id,
       email: merchantPortalInvites.email,
-      customerId: merchantPortalInvites.customerId,
+      merchantId: merchantPortalInvites.merchantId,
       teamId: merchantPortalInvites.teamId,
       code: merchantPortalInvites.code,
       status: merchantPortalInvites.status,
       expiresAt: merchantPortalInvites.expiresAt,
-      // Customer info
-      customerName: customers.name,
+      // Merchant info
+      merchantName: merchants.name,
       // Team info
       teamName: teams.name,
       teamLogoUrl: teams.logoUrl,
@@ -215,7 +218,7 @@ export const getMerchantInviteByCode = async (
         gt(merchantPortalInvites.expiresAt, now),
       ),
     )
-    .leftJoin(customers, eq(customers.id, merchantPortalInvites.customerId))
+    .leftJoin(merchants, eq(merchants.id, merchantPortalInvites.merchantId))
     .leftJoin(teams, eq(teams.id, merchantPortalInvites.teamId))
     .limit(1);
 
@@ -242,7 +245,7 @@ export const acceptMerchantInvite = async (
     .insert(merchantPortalAccess)
     .values({
       userId: params.userId,
-      customerId: invite.customerId,
+      merchantId: invite.merchantId,
       teamId: invite.teamId,
     })
     .onConflictDoNothing()
@@ -262,7 +265,7 @@ export const acceptMerchantInvite = async (
 
 type GetMerchantInvitesByTeamParams = {
   teamId: string;
-  customerId?: string;
+  merchantId?: string;
   status?: string;
 };
 
@@ -272,8 +275,8 @@ export const getMerchantInvitesByTeam = async (
 ) => {
   const conditions = [eq(merchantPortalInvites.teamId, params.teamId)];
 
-  if (params.customerId) {
-    conditions.push(eq(merchantPortalInvites.customerId, params.customerId));
+  if (params.merchantId) {
+    conditions.push(eq(merchantPortalInvites.merchantId, params.merchantId));
   }
 
   if (params.status) {
@@ -284,17 +287,17 @@ export const getMerchantInvitesByTeam = async (
     .select({
       id: merchantPortalInvites.id,
       email: merchantPortalInvites.email,
-      customerId: merchantPortalInvites.customerId,
+      merchantId: merchantPortalInvites.merchantId,
       code: merchantPortalInvites.code,
       status: merchantPortalInvites.status,
       createdAt: merchantPortalInvites.createdAt,
       expiresAt: merchantPortalInvites.expiresAt,
-      customerName: customers.name,
+      merchantName: merchants.name,
       inviterName: users.fullName,
     })
     .from(merchantPortalInvites)
     .where(and(...conditions))
-    .leftJoin(customers, eq(customers.id, merchantPortalInvites.customerId))
+    .leftJoin(merchants, eq(merchants.id, merchantPortalInvites.merchantId))
     .leftJoin(users, eq(users.id, merchantPortalInvites.invitedBy));
 
   return invites;
@@ -333,14 +336,14 @@ export const getMerchantAccess = async (
   const access = await db
     .select({
       id: merchantPortalAccess.id,
-      customerId: merchantPortalAccess.customerId,
+      merchantId: merchantPortalAccess.merchantId,
       teamId: merchantPortalAccess.teamId,
       status: merchantPortalAccess.status,
       createdAt: merchantPortalAccess.createdAt,
-      // Customer info
-      customerName: customers.name,
-      customerEmail: customers.email,
-      portalId: customers.portalId,
+      // Merchant info
+      merchantName: merchants.name,
+      merchantEmail: merchants.email,
+      portalId: merchants.portalId,
       // Team info
       teamName: teams.name,
       teamLogoUrl: teams.logoUrl,
@@ -352,20 +355,20 @@ export const getMerchantAccess = async (
         eq(merchantPortalAccess.status, "active"),
       ),
     )
-    .leftJoin(customers, eq(customers.id, merchantPortalAccess.customerId))
+    .leftJoin(merchants, eq(merchants.id, merchantPortalAccess.merchantId))
     .leftJoin(teams, eq(teams.id, merchantPortalAccess.teamId));
 
   return access;
 };
 
-type GetMerchantAccessByCustomerParams = {
-  customerId: string;
+type GetMerchantAccessByMerchantParams = {
+  merchantId: string;
   teamId: string;
 };
 
-export const getMerchantAccessByCustomer = async (
+export const getMerchantAccessByMerchant = async (
   db: Database,
-  params: GetMerchantAccessByCustomerParams,
+  params: GetMerchantAccessByMerchantParams,
 ) => {
   const access = await db
     .select({
@@ -382,7 +385,7 @@ export const getMerchantAccessByCustomer = async (
     .from(merchantPortalAccess)
     .where(
       and(
-        eq(merchantPortalAccess.customerId, params.customerId),
+        eq(merchantPortalAccess.merchantId, params.merchantId),
         eq(merchantPortalAccess.teamId, params.teamId),
       ),
     )
@@ -427,7 +430,7 @@ export const revokeMerchantAccess = async (
 
 type CreatePayoffLetterRequestParams = {
   dealId: string;
-  customerId: string;
+  merchantId: string;
   teamId: string;
   requestedPayoffDate: string;
   requestedByEmail: string;
@@ -443,7 +446,7 @@ export const createPayoffLetterRequest = async (
     .insert(payoffLetterRequests)
     .values({
       dealId: params.dealId,
-      customerId: params.customerId,
+      merchantId: params.merchantId,
       teamId: params.teamId,
       requestedPayoffDate: params.requestedPayoffDate,
       requestedByEmail: params.requestedByEmail,
@@ -457,7 +460,7 @@ export const createPayoffLetterRequest = async (
 
 type GetPayoffLetterRequestsParams = {
   teamId: string;
-  customerId?: string;
+  merchantId?: string;
   dealId?: string;
   status?: string;
 };
@@ -468,8 +471,8 @@ export const getPayoffLetterRequests = async (
 ) => {
   const conditions = [eq(payoffLetterRequests.teamId, params.teamId)];
 
-  if (params.customerId) {
-    conditions.push(eq(payoffLetterRequests.customerId, params.customerId));
+  if (params.merchantId) {
+    conditions.push(eq(payoffLetterRequests.merchantId, params.merchantId));
   }
 
   if (params.dealId) {
@@ -485,7 +488,7 @@ export const getPayoffLetterRequests = async (
       id: payoffLetterRequests.id,
       createdAt: payoffLetterRequests.createdAt,
       dealId: payoffLetterRequests.dealId,
-      customerId: payoffLetterRequests.customerId,
+      merchantId: payoffLetterRequests.merchantId,
       requestedPayoffDate: payoffLetterRequests.requestedPayoffDate,
       requestedByEmail: payoffLetterRequests.requestedByEmail,
       balanceAtRequest: payoffLetterRequests.balanceAtRequest,
@@ -497,13 +500,13 @@ export const getPayoffLetterRequests = async (
       expiresAt: payoffLetterRequests.expiresAt,
       // Deal info
       dealCode: mcaDeals.dealCode,
-      // Customer info
-      customerName: customers.name,
+      // Merchant info
+      merchantName: merchants.name,
     })
     .from(payoffLetterRequests)
     .where(and(...conditions))
     .leftJoin(mcaDeals, eq(mcaDeals.id, payoffLetterRequests.dealId))
-    .leftJoin(customers, eq(customers.id, payoffLetterRequests.customerId));
+    .leftJoin(merchants, eq(merchants.id, payoffLetterRequests.merchantId));
 
   return requests;
 };
@@ -553,6 +556,335 @@ export const rejectPayoffLetterRequest = async (
         eq(payoffLetterRequests.teamId, params.teamId),
       ),
     )
+    .returning();
+
+  return result;
+};
+
+// ============================================================================
+// Payoff Letter Requests — Portal-facing (public, validated by portalId)
+// ============================================================================
+
+type GetPayoffRequestsByPortalParams = {
+  portalId: string;
+};
+
+export const getPayoffRequestsByPortal = async (
+  db: Database,
+  params: GetPayoffRequestsByPortalParams,
+) => {
+  const [merchant] = await db
+    .select({ id: merchants.id })
+    .from(merchants)
+    .where(eq(merchants.portalId, params.portalId))
+    .limit(1);
+
+  if (!merchant) return [];
+
+  const requests = await db
+    .select({
+      id: payoffLetterRequests.id,
+      createdAt: payoffLetterRequests.createdAt,
+      dealId: payoffLetterRequests.dealId,
+      requestedPayoffDate: payoffLetterRequests.requestedPayoffDate,
+      balanceAtRequest: payoffLetterRequests.balanceAtRequest,
+      payoffAmount: payoffLetterRequests.payoffAmount,
+      status: payoffLetterRequests.status,
+      approvedAt: payoffLetterRequests.approvedAt,
+      sentAt: payoffLetterRequests.sentAt,
+      documentPath: payoffLetterRequests.documentPath,
+      expiresAt: payoffLetterRequests.expiresAt,
+      dealCode: mcaDeals.dealCode,
+    })
+    .from(payoffLetterRequests)
+    .where(eq(payoffLetterRequests.merchantId, merchant.id))
+    .leftJoin(mcaDeals, eq(mcaDeals.id, payoffLetterRequests.dealId))
+    .orderBy(desc(payoffLetterRequests.createdAt));
+
+  return requests;
+};
+
+// ============================================================================
+// Merchant Messages Queries
+// ============================================================================
+
+type CreateMerchantMessageParams = {
+  merchantId: string;
+  teamId: string;
+  direction: "inbound" | "outbound";
+  subject?: string;
+  message: string;
+  fromEmail?: string;
+  fromName?: string;
+  sessionId?: string;
+  sentByUserId?: string;
+};
+
+export const createMerchantMessage = async (
+  db: Database,
+  params: CreateMerchantMessageParams,
+) => {
+  const [result] = await db
+    .insert(merchantMessages)
+    .values({
+      merchantId: params.merchantId,
+      teamId: params.teamId,
+      direction: params.direction,
+      subject: params.subject,
+      message: params.message,
+      fromEmail: params.fromEmail,
+      fromName: params.fromName,
+      sessionId: params.sessionId,
+      sentByUserId: params.sentByUserId,
+    })
+    .returning();
+
+  return result;
+};
+
+type GetMerchantMessagesParams = {
+  merchantId: string;
+  limit?: number;
+};
+
+export const getMerchantMessages = async (
+  db: Database,
+  params: GetMerchantMessagesParams,
+) => {
+  const messages = await db
+    .select()
+    .from(merchantMessages)
+    .where(eq(merchantMessages.merchantId, params.merchantId))
+    .orderBy(desc(merchantMessages.createdAt))
+    .limit(params.limit || 50);
+
+  return messages;
+};
+
+type GetMerchantMessagesByPortalParams = {
+  portalId: string;
+  limit?: number;
+};
+
+export const getMerchantMessagesByPortal = async (
+  db: Database,
+  params: GetMerchantMessagesByPortalParams,
+) => {
+  const [merchant] = await db
+    .select({ id: merchants.id })
+    .from(merchants)
+    .where(eq(merchants.portalId, params.portalId))
+    .limit(1);
+
+  if (!merchant) return [];
+
+  return getMerchantMessages(db, {
+    merchantId: merchant.id,
+    limit: params.limit,
+  });
+};
+
+// ============================================================================
+// Merchant Documents Queries
+// ============================================================================
+
+type CreateMerchantDocumentParams = {
+  merchantId: string;
+  teamId: string;
+  dealId?: string;
+  documentType: "contract" | "disclosure" | "payoff_letter" | "monthly_statement" | "tax_doc" | "other";
+  title: string;
+  description?: string;
+  filePath: string;
+  fileName: string;
+  fileSize?: number;
+  uploadedBy?: string;
+};
+
+export const createMerchantDocument = async (
+  db: Database,
+  params: CreateMerchantDocumentParams,
+) => {
+  const [result] = await db
+    .insert(merchantDocuments)
+    .values({
+      merchantId: params.merchantId,
+      teamId: params.teamId,
+      dealId: params.dealId,
+      documentType: params.documentType,
+      title: params.title,
+      description: params.description,
+      filePath: params.filePath,
+      fileName: params.fileName,
+      fileSize: params.fileSize,
+      uploadedBy: params.uploadedBy,
+    })
+    .returning();
+
+  return result;
+};
+
+type GetMerchantDocumentsByPortalParams = {
+  portalId: string;
+  documentType?: string;
+};
+
+export const getMerchantDocumentsByPortal = async (
+  db: Database,
+  params: GetMerchantDocumentsByPortalParams,
+) => {
+  const [merchant] = await db
+    .select({ id: merchants.id })
+    .from(merchants)
+    .where(eq(merchants.portalId, params.portalId))
+    .limit(1);
+
+  if (!merchant) return [];
+
+  const conditions = [
+    eq(merchantDocuments.merchantId, merchant.id),
+    eq(merchantDocuments.visibleInPortal, true),
+  ];
+
+  if (params.documentType) {
+    conditions.push(
+      eq(
+        merchantDocuments.documentType,
+        params.documentType as typeof merchantDocuments.documentType.enumValues[number],
+      ),
+    );
+  }
+
+  const docs = await db
+    .select({
+      id: merchantDocuments.id,
+      createdAt: merchantDocuments.createdAt,
+      documentType: merchantDocuments.documentType,
+      title: merchantDocuments.title,
+      description: merchantDocuments.description,
+      filePath: merchantDocuments.filePath,
+      fileName: merchantDocuments.fileName,
+      fileSize: merchantDocuments.fileSize,
+      dealId: merchantDocuments.dealId,
+      dealCode: mcaDeals.dealCode,
+    })
+    .from(merchantDocuments)
+    .where(and(...conditions))
+    .leftJoin(mcaDeals, eq(mcaDeals.id, merchantDocuments.dealId))
+    .orderBy(desc(merchantDocuments.createdAt));
+
+  return docs;
+};
+
+// ============================================================================
+// Merchant Notifications Queries
+// ============================================================================
+
+type CreateMerchantNotificationParams = {
+  merchantId: string;
+  teamId: string;
+  notificationType:
+    | "payment_received"
+    | "payment_nsf"
+    | "payoff_approved"
+    | "message_received"
+    | "document_uploaded"
+    | "balance_alert"
+    | "deal_paid_off"
+    | "general";
+  title: string;
+  message: string;
+  dealId?: string;
+  paymentId?: string;
+};
+
+export const createMerchantNotification = async (
+  db: Database,
+  params: CreateMerchantNotificationParams,
+) => {
+  const [result] = await db
+    .insert(merchantNotifications)
+    .values({
+      merchantId: params.merchantId,
+      teamId: params.teamId,
+      notificationType: params.notificationType,
+      title: params.title,
+      message: params.message,
+      dealId: params.dealId,
+      paymentId: params.paymentId,
+    })
+    .returning();
+
+  return result;
+};
+
+type GetMerchantNotificationsByPortalParams = {
+  portalId: string;
+  limit?: number;
+};
+
+export const getMerchantNotificationsByPortal = async (
+  db: Database,
+  params: GetMerchantNotificationsByPortalParams,
+) => {
+  const [merchant] = await db
+    .select({ id: merchants.id })
+    .from(merchants)
+    .where(eq(merchants.portalId, params.portalId))
+    .limit(1);
+
+  if (!merchant) return [];
+
+  const notifications = await db
+    .select()
+    .from(merchantNotifications)
+    .where(eq(merchantNotifications.merchantId, merchant.id))
+    .orderBy(desc(merchantNotifications.createdAt))
+    .limit(params.limit || 20);
+
+  return notifications;
+};
+
+type GetUnreadNotificationCountParams = {
+  portalId: string;
+};
+
+export const getUnreadNotificationCount = async (
+  db: Database,
+  params: GetUnreadNotificationCountParams,
+) => {
+  const [merchant] = await db
+    .select({ id: merchants.id })
+    .from(merchants)
+    .where(eq(merchants.portalId, params.portalId))
+    .limit(1);
+
+  if (!merchant) return 0;
+
+  const [result] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(merchantNotifications)
+    .where(
+      and(
+        eq(merchantNotifications.merchantId, merchant.id),
+        eq(merchantNotifications.readInPortal, false),
+      ),
+    );
+
+  return result?.count || 0;
+};
+
+export const markNotificationRead = async (
+  db: Database,
+  params: { notificationId: string },
+) => {
+  const [result] = await db
+    .update(merchantNotifications)
+    .set({
+      readInPortal: true,
+      readAt: new Date().toISOString(),
+    })
+    .where(eq(merchantNotifications.id, params.notificationId))
     .returning();
 
   return result;

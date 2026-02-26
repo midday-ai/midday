@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import {
-  customers,
+  merchants,
   mcaDeals,
   mcaPayments,
   teams,
@@ -26,7 +26,7 @@ export const getMcaDealById = async (
       id: mcaDeals.id,
       createdAt: mcaDeals.createdAt,
       updatedAt: mcaDeals.updatedAt,
-      customerId: mcaDeals.customerId,
+      merchantId: mcaDeals.merchantId,
       teamId: mcaDeals.teamId,
       dealCode: mcaDeals.dealCode,
       fundingAmount: mcaDeals.fundingAmount,
@@ -41,9 +41,9 @@ export const getMcaDealById = async (
       totalPaid: mcaDeals.totalPaid,
       nsfCount: mcaDeals.nsfCount,
       externalId: mcaDeals.externalId,
-      // Customer info
-      customerName: customers.name,
-      customerEmail: customers.email,
+      // Merchant info
+      merchantName: merchants.name,
+      merchantEmail: merchants.email,
       // Payment count
       paymentCount: sql<number>`cast(count(${mcaPayments.id}) as int)`,
     })
@@ -51,9 +51,9 @@ export const getMcaDealById = async (
     .where(
       and(eq(mcaDeals.id, params.id), eq(mcaDeals.teamId, params.teamId)),
     )
-    .leftJoin(customers, eq(customers.id, mcaDeals.customerId))
+    .leftJoin(merchants, eq(merchants.id, mcaDeals.merchantId))
     .leftJoin(mcaPayments, eq(mcaPayments.dealId, mcaDeals.id))
-    .groupBy(mcaDeals.id, customers.id);
+    .groupBy(mcaDeals.id, merchants.id);
 
   return result;
 };
@@ -85,7 +85,7 @@ export type GetMcaDealsParams = {
   teamId: string;
   cursor?: string | null;
   pageSize?: number;
-  customerId?: string | null;
+  merchantId?: string | null;
   status?: string | null;
   sort?: string[] | null;
 };
@@ -94,12 +94,12 @@ export const getMcaDeals = async (
   db: Database,
   params: GetMcaDealsParams,
 ) => {
-  const { teamId, cursor, pageSize = 25, customerId, status, sort } = params;
+  const { teamId, cursor, pageSize = 25, merchantId, status, sort } = params;
 
   const whereConditions: SQL[] = [eq(mcaDeals.teamId, teamId)];
 
-  if (customerId) {
-    whereConditions.push(eq(mcaDeals.customerId, customerId));
+  if (merchantId) {
+    whereConditions.push(eq(mcaDeals.merchantId, merchantId));
   }
 
   if (status) {
@@ -142,7 +142,7 @@ export const getMcaDeals = async (
     .select({
       id: mcaDeals.id,
       createdAt: mcaDeals.createdAt,
-      customerId: mcaDeals.customerId,
+      merchantId: mcaDeals.merchantId,
       dealCode: mcaDeals.dealCode,
       fundingAmount: mcaDeals.fundingAmount,
       factorRate: mcaDeals.factorRate,
@@ -153,9 +153,9 @@ export const getMcaDeals = async (
       currentBalance: mcaDeals.currentBalance,
       totalPaid: mcaDeals.totalPaid,
       nsfCount: mcaDeals.nsfCount,
-      // Customer info
-      customerName: customers.name,
-      customerEmail: customers.email,
+      // Merchant info
+      merchantName: merchants.name,
+      merchantEmail: merchants.email,
       // Calculated paid percentage
       paidPercentage: sql<number>`
         case
@@ -167,7 +167,7 @@ export const getMcaDeals = async (
     })
     .from(mcaDeals)
     .where(and(...whereConditions))
-    .leftJoin(customers, eq(customers.id, mcaDeals.customerId))
+    .leftJoin(merchants, eq(merchants.id, mcaDeals.merchantId))
     .orderBy(orderBy)
     .limit(pageSize + 1);
 
@@ -184,14 +184,14 @@ export const getMcaDeals = async (
   };
 };
 
-type GetMcaDealsByCustomerParams = {
-  customerId: string;
+type GetMcaDealsByMerchantParams = {
+  merchantId: string;
   teamId: string;
 };
 
-export const getMcaDealsByCustomer = async (
+export const getMcaDealsByMerchant = async (
   db: Database,
-  params: GetMcaDealsByCustomerParams,
+  params: GetMcaDealsByMerchantParams,
 ) => {
   const data = await db
     .select({
@@ -218,7 +218,7 @@ export const getMcaDealsByCustomer = async (
     .from(mcaDeals)
     .where(
       and(
-        eq(mcaDeals.customerId, params.customerId),
+        eq(mcaDeals.merchantId, params.merchantId),
         eq(mcaDeals.teamId, params.teamId),
       ),
     )
@@ -233,7 +233,7 @@ export const getMcaDealsByCustomer = async (
 
 export type CreateMcaDealParams = {
   teamId: string;
-  customerId: string;
+  merchantId: string;
   dealCode: string;
   fundingAmount: number;
   factorRate: number;
@@ -245,6 +245,18 @@ export type CreateMcaDealParams = {
   expectedPayoffDate?: string;
   currentBalance: number;
   externalId?: string;
+  brokerId?: string;
+  // Contract Dates
+  startDate?: string;
+  maturityDate?: string;
+  firstPaymentDate?: string;
+  // Holdback
+  holdbackPercentage?: number;
+  // Legal Terms
+  uccFilingStatus?: string;
+  personalGuarantee?: boolean;
+  defaultTerms?: string;
+  curePeriodDays?: number;
 };
 
 export const createMcaDeal = async (
@@ -255,7 +267,7 @@ export const createMcaDeal = async (
     .insert(mcaDeals)
     .values({
       teamId: params.teamId,
-      customerId: params.customerId,
+      merchantId: params.merchantId,
       dealCode: params.dealCode,
       fundingAmount: params.fundingAmount,
       factorRate: params.factorRate,
@@ -267,6 +279,15 @@ export const createMcaDeal = async (
       expectedPayoffDate: params.expectedPayoffDate,
       currentBalance: params.currentBalance,
       externalId: params.externalId,
+      brokerId: params.brokerId,
+      startDate: params.startDate,
+      maturityDate: params.maturityDate,
+      firstPaymentDate: params.firstPaymentDate,
+      holdbackPercentage: params.holdbackPercentage,
+      uccFilingStatus: params.uccFilingStatus,
+      personalGuarantee: params.personalGuarantee,
+      defaultTerms: params.defaultTerms,
+      curePeriodDays: params.curePeriodDays,
     })
     .returning();
 
@@ -338,7 +359,7 @@ export const deleteMcaDeal = async (
 
 type GetMcaDealStatsParams = {
   teamId: string;
-  customerId?: string;
+  merchantId?: string;
 };
 
 export const getMcaDealStats = async (
@@ -347,8 +368,8 @@ export const getMcaDealStats = async (
 ) => {
   const whereConditions: SQL[] = [eq(mcaDeals.teamId, params.teamId)];
 
-  if (params.customerId) {
-    whereConditions.push(eq(mcaDeals.customerId, params.customerId));
+  if (params.merchantId) {
+    whereConditions.push(eq(mcaDeals.merchantId, params.merchantId));
   }
 
   const [result] = await db
@@ -368,6 +389,45 @@ export const getMcaDealStats = async (
 };
 
 // ============================================================================
+// Status Breakdown (for dashboard widgets)
+// ============================================================================
+
+type GetMcaDealStatusBreakdownParams = {
+  teamId: string;
+};
+
+export const getMcaDealStatusBreakdown = async (
+  db: Database,
+  params: GetMcaDealStatusBreakdownParams,
+) => {
+  const results = await db
+    .select({
+      status: mcaDeals.status,
+      count: sql<number>`cast(count(*) as int)`,
+    })
+    .from(mcaDeals)
+    .where(eq(mcaDeals.teamId, params.teamId))
+    .groupBy(mcaDeals.status);
+
+  const breakdown: Record<string, number> = {
+    active: 0,
+    late: 0,
+    paid_off: 0,
+    defaulted: 0,
+    paused: 0,
+    in_collections: 0,
+  };
+
+  for (const row of results) {
+    if (row.status) {
+      breakdown[row.status] = row.count;
+    }
+  }
+
+  return breakdown;
+};
+
+// ============================================================================
 // Portal Queries (for merchant portal)
 // ============================================================================
 
@@ -379,30 +439,30 @@ export const getMcaDealsByPortalId = async (
   db: Database,
   params: GetMcaDealsByPortalIdParams,
 ) => {
-  // First get the customer by portal ID
-  const [customer] = await db
+  // First get the merchant by portal ID
+  const [merchant] = await db
     .select({
-      id: customers.id,
-      name: customers.name,
-      email: customers.email,
-      teamId: customers.teamId,
-      portalId: customers.portalId,
+      id: merchants.id,
+      name: merchants.name,
+      email: merchants.email,
+      teamId: merchants.teamId,
+      portalId: merchants.portalId,
       team: {
         name: teams.name,
         logoUrl: teams.logoUrl,
         branding: teams.branding,
       },
     })
-    .from(customers)
-    .where(eq(customers.portalId, params.portalId))
-    .leftJoin(teams, eq(teams.id, customers.teamId))
+    .from(merchants)
+    .where(eq(merchants.portalId, params.portalId))
+    .leftJoin(teams, eq(teams.id, merchants.teamId))
     .limit(1);
 
-  if (!customer) {
+  if (!merchant) {
     return null;
   }
 
-  // Get all MCA deals for this customer
+  // Get all MCA deals for this merchant
   const deals = await db
     .select({
       id: mcaDeals.id,
@@ -427,7 +487,7 @@ export const getMcaDealsByPortalId = async (
       `.as("paid_percentage"),
     })
     .from(mcaDeals)
-    .where(eq(mcaDeals.customerId, customer.id))
+    .where(eq(mcaDeals.merchantId, merchant.id))
     .orderBy(desc(mcaDeals.fundedAt));
 
   // Calculate summary
@@ -440,7 +500,7 @@ export const getMcaDealsByPortalId = async (
   };
 
   return {
-    customer,
+    merchant,
     deals,
     summary,
   };

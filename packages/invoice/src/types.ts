@@ -35,7 +35,7 @@ export type Invoice = {
   currency: string | null;
   lineItems: LineItem[];
   paymentDetails: EditorDoc | null;
-  customerDetails: EditorDoc | null;
+  merchantDetails: EditorDoc | null;
   reminderSentAt: string | null;
   updatedAt: string | null;
   note: string | null;
@@ -58,18 +58,18 @@ export type Invoice = {
   sentAt: string | null;
   template: Template;
   noteDetails: EditorDoc | null;
-  customerName: string | null;
+  merchantName: string | null;
   token: string;
   sentTo: string | null;
   discount: number | null;
   topBlock: EditorDoc | null;
   bottomBlock: EditorDoc | null;
-  customer: {
+  merchant: {
     name: string | null;
     website: string | null;
     email: string | null;
   } | null;
-  customerId: string | null;
+  merchantId: string | null;
   team: {
     name: string | null;
   } | null;

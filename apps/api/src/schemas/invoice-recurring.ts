@@ -40,13 +40,13 @@ export const createInvoiceRecurringSchema = z
         "Optional draft invoice ID to convert to the first recurring invoice",
       example: "d1e2f3a4-b5c6-7890-abcd-ef1234567890",
     }),
-    customerId: z.string().uuid().openapi({
+    merchantId: z.string().uuid().openapi({
       description:
-        "Customer ID for the recurring invoice series (required - recurring invoices auto-send)",
+        "Merchant ID for the recurring invoice series (required - recurring invoices auto-send)",
       example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     }),
-    customerName: z.string().nullable().optional().openapi({
-      description: "Customer name for display",
+    merchantName: z.string().nullable().optional().openapi({
+      description: "Merchant name for display",
       example: "Acme Corporation",
     }),
     // Frequency settings
@@ -309,8 +309,8 @@ export const updateInvoiceRecurringSchema = z
         example: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
         param: { in: "path", name: "id" },
       }),
-    customerId: z.string().uuid().optional(),
-    customerName: z.string().nullable().optional(),
+    merchantId: z.string().uuid().optional(),
+    merchantName: z.string().nullable().optional(),
     frequency: invoiceRecurringFrequencySchema.optional(),
     frequencyDay: z.number().int().min(0).max(31).nullable().optional(),
     frequencyWeek: z.number().int().min(1).max(5).nullable().optional(),
@@ -524,13 +524,13 @@ export const getInvoiceRecurringListSchema = z.object({
       description: "Filter by status",
       param: { in: "query" },
     }),
-  customerId: z
+  merchantId: z
     .string()
     .uuid()
     .nullable()
     .optional()
     .openapi({
-      description: "Filter by customer ID",
+      description: "Filter by merchant ID",
       param: { in: "query" },
     }),
 });
@@ -687,15 +687,15 @@ export const invoiceRecurringResponseSchema = z.object({
     description: "Currency code",
     example: "USD",
   }),
-  customerId: z.string().uuid().nullable().openapi({
-    description: "Customer ID",
+  merchantId: z.string().uuid().nullable().openapi({
+    description: "Merchant ID",
     example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   }),
-  customerName: z.string().nullable().openapi({
-    description: "Customer name",
+  merchantName: z.string().nullable().openapi({
+    description: "Merchant name",
     example: "Acme Corporation",
   }),
-  customer: z
+  merchant: z
     .object({
       id: z.string().uuid(),
       name: z.string(),
@@ -704,7 +704,7 @@ export const invoiceRecurringResponseSchema = z.object({
     })
     .nullable()
     .openapi({
-      description: "Customer details",
+      description: "Merchant details",
     }),
 });
 

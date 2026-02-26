@@ -11,7 +11,12 @@ import {
   updateTeamByIdSchema,
   updateTeamMemberSchema,
 } from "@api/schemas/team";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  adminProcedure,
+  createTRPCRouter,
+  ownerProcedure,
+  protectedProcedure,
+} from "@api/trpc/init";
 import type { InviteTeamMembersPayload } from "@jobs/schema";
 import {
   acceptTeamInvite,
@@ -47,7 +52,7 @@ export const teamRouter = createTRPCRouter({
     return getTeamById(db, teamId!);
   }),
 
-  update: protectedProcedure
+  update: adminProcedure
     .input(updateTeamByIdSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
       return updateTeamById(db, {
@@ -144,7 +149,7 @@ export const teamRouter = createTRPCRouter({
       });
     }),
 
-  delete: protectedProcedure
+  delete: ownerProcedure
     .input(deleteTeamSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
       // Check if the user has access to the team before deleting
@@ -204,7 +209,7 @@ export const teamRouter = createTRPCRouter({
       }
     }),
 
-  deleteMember: protectedProcedure
+  deleteMember: adminProcedure
     .input(deleteTeamMemberSchema)
     .mutation(async ({ ctx: { db }, input }) => {
       return deleteTeamMember(db, {
@@ -213,7 +218,7 @@ export const teamRouter = createTRPCRouter({
       });
     }),
 
-  updateMember: protectedProcedure
+  updateMember: adminProcedure
     .input(updateTeamMemberSchema)
     .mutation(async ({ ctx: { db }, input }) => {
       return updateTeamMember(db, input);
@@ -227,7 +232,7 @@ export const teamRouter = createTRPCRouter({
     return getInvitesByEmail(db, session.user.email!);
   }),
 
-  invite: protectedProcedure
+  invite: adminProcedure
     .input(inviteTeamMembersSchema)
     .mutation(async ({ ctx: { db, session, teamId, geo }, input }) => {
       const ip = geo.ip ?? "127.0.0.1";
@@ -270,7 +275,7 @@ export const teamRouter = createTRPCRouter({
       };
     }),
 
-  deleteInvite: protectedProcedure
+  deleteInvite: adminProcedure
     .input(deleteTeamInviteSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
       return deleteTeamInvite(db, {
@@ -283,7 +288,7 @@ export const teamRouter = createTRPCRouter({
     return getAvailablePlans(db, teamId!);
   }),
 
-  updateBaseCurrency: protectedProcedure
+  updateBaseCurrency: ownerProcedure
     .input(updateBaseCurrencySchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
       return triggerJob(

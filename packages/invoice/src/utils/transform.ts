@@ -1,5 +1,5 @@
-// Define a generic customer interface to avoid circular dependencies
-interface CustomerData {
+// Define a generic merchant interface to avoid circular dependencies
+interface MerchantData {
   name?: string | null;
   addressLine1?: string | null;
   addressLine2?: string | null;
@@ -12,74 +12,74 @@ interface CustomerData {
   vatNumber?: string | null;
 }
 
-export const transformCustomerToContent = (customer?: CustomerData | null) => {
-  if (!customer) return null;
+export const transformMerchantToContent = (merchant?: MerchantData | null) => {
+  if (!merchant) return null;
 
   const content = [];
 
-  if (customer.name) {
+  if (merchant.name) {
     content.push({
       type: "paragraph",
       content: [
         {
-          text: customer.name,
+          text: merchant.name,
           type: "text",
         },
       ],
     });
   }
 
-  if (customer.addressLine1) {
+  if (merchant.addressLine1) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.addressLine1, type: "text" }],
+      content: [{ text: merchant.addressLine1, type: "text" }],
     });
   }
 
-  if (customer.addressLine2) {
+  if (merchant.addressLine2) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.addressLine2, type: "text" }],
+      content: [{ text: merchant.addressLine2, type: "text" }],
     });
   }
 
-  if (customer.zip || customer.city) {
+  if (merchant.zip || merchant.city) {
     content.push({
       type: "paragraph",
       content: [
         {
-          text: `${customer.zip || ""} ${customer.city || ""}`.trim(),
+          text: `${merchant.zip || ""} ${merchant.city || ""}`.trim(),
           type: "text",
         },
       ],
     });
   }
 
-  if (customer.country) {
+  if (merchant.country) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.country, type: "text" }],
+      content: [{ text: merchant.country, type: "text" }],
     });
   }
 
-  if (customer.email) {
+  if (merchant.email) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.email, type: "text" }],
+      content: [{ text: merchant.email, type: "text" }],
     });
   }
 
-  if (customer.phone) {
+  if (merchant.phone) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.phone, type: "text" }],
+      content: [{ text: merchant.phone, type: "text" }],
     });
   }
 
-  if (customer.vatNumber) {
+  if (merchant.vatNumber) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.vatNumber, type: "text" }],
+      content: [{ text: merchant.vatNumber, type: "text" }],
     });
   }
 

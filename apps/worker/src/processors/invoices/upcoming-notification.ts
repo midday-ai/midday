@@ -90,7 +90,7 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
               invoiceCount: invoices.length,
               invoices: invoices.map((inv) => ({
                 recurringId: inv.id,
-                customerName: inv.customerName,
+                merchantName: inv.merchantName,
                 amount: inv.amount,
                 currency: inv.currency,
                 scheduledAt: inv.nextScheduledAt,
@@ -202,7 +202,7 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
           {
             invoices: teamInvoices.map((inv) => ({
               recurringId: inv.id,
-              customerName: inv.customerName ?? undefined,
+              merchantName: inv.merchantName ?? undefined,
               amount: inv.amount ?? undefined,
               currency: inv.currency ?? undefined,
               scheduledAt: inv.nextScheduledAt!,
@@ -224,8 +224,8 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
         this.logger.info("Sent batched upcoming invoice notification", {
           teamId,
           invoiceCount: teamInvoices.length,
-          customerNames: teamInvoices
-            .map((inv) => inv.customerName)
+          merchantNames: teamInvoices
+            .map((inv) => inv.merchantName)
             .filter(Boolean),
         });
 

@@ -42,14 +42,14 @@ export type MatchPayload = {
 export type InvoicePaidPayload = {
   invoiceId: string;
   invoiceNumber: string;
-  customerName?: string;
+  merchantName?: string;
   paidAt?: string;
 };
 
 export type InvoiceOverduePayload = {
   invoiceId: string;
   invoiceNumber: string;
-  customerName: string;
+  merchantName: string;
 };
 
 type ProviderPayload = {

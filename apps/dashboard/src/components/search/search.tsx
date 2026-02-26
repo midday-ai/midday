@@ -1,10 +1,11 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
-import { InvoiceStatus } from "@/components/invoice-status";
-import { useCustomerParams } from "@/hooks/use-customer-params";
+import { DealStatusBadge } from "@/components/deal-status-badge";
+import { useMerchantParams } from "@/hooks/use-merchant-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useFileUrl } from "@/hooks/use-file-url";
+import { useDealParams } from "@/hooks/use-deal-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useUserQuery } from "@/hooks/use-user";
@@ -149,12 +150,12 @@ const formatGroupName = (name: string): string | null => {
   switch (name) {
     case "shortcut":
       return "Shortcuts";
-    case "customer":
-      return "Customers";
+    case "merchant":
+      return "Merchants";
     case "vault":
       return "Vault";
     case "invoice":
-      return "Invoices";
+      return "Deals";
     case "transaction":
       return "Transactions";
     case "inbox":
@@ -169,7 +170,8 @@ const useSearchNavigation = () => {
   const router = useRouter();
   const { setOpen } = useSearchStore();
   const { setParams: setInvoiceParams } = useInvoiceParams();
-  const { setParams: setCustomerParams } = useCustomerParams();
+  const { setParams: setDealParams } = useDealParams();
+  const { setParams: setMerchantParams } = useMerchantParams();
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setDocumentParams } = useDocumentParams();
 
@@ -190,8 +192,8 @@ const useSearchNavigation = () => {
     navigateToDocument: (params: { documentId: string }) => {
       navigateWithParams(params, setDocumentParams);
     },
-    navigateToCustomer: (params: { customerId: string }) => {
-      navigateWithParams(params, setCustomerParams);
+    navigateToMerchant: (params: { merchantId: string }) => {
+      navigateWithParams(params, setMerchantParams);
     },
     navigateToInvoice: (params: {
       invoiceId: string;
@@ -209,11 +211,14 @@ const useSearchNavigation = () => {
       navigateToPath(path);
     },
     // Action helpers
+    createDeal: () => {
+      navigateWithParams({ createDeal: true }, setDealParams);
+    },
     createInvoice: () => {
       navigateWithParams({ type: "create" as const }, setInvoiceParams);
     },
-    createCustomer: (params = { createCustomer: true }) => {
-      navigateWithParams(params, setCustomerParams);
+    createMerchant: (params = { createMerchant: true }) => {
+      navigateWithParams(params, setMerchantParams);
     },
     createTransaction: () => {
       navigateWithParams(
@@ -282,8 +287,8 @@ const SearchResultItemDisplay = ({
         );
         break;
       }
-      case "customer": {
-        onSelect = () => nav.navigateToCustomer({ customerId: item.id });
+      case "merchant": {
+        onSelect = () => nav.navigateToMerchant({ merchantId: item.id });
 
         icon = (
           <Icons.Customers className="size-4 dark:text-[#666] text-primary" />
@@ -297,7 +302,7 @@ const SearchResultItemDisplay = ({
               </span>
             </div>
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
-              <CopyButton path={`?customerId=${item.id}`} />
+              <CopyButton path={`?merchantId=${item.id}`} />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
           </div>
@@ -316,14 +321,13 @@ const SearchResultItemDisplay = ({
           <div className="flex items-center w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
               <span>{item.data.invoice_number as string}</span>
-              {/* @ts-expect-error - Unstructured data */}
-              <InvoiceStatus status={item.data?.status} />
+              <DealStatusBadge status={item.data?.status as any} />
             </div>
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?invoiceId=${item.id}&type=details`} />
               <DownloadButton
                 href={`${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${item.id}&size=${item?.data?.template?.size}`}
-                filename={`${item.data.invoice_number || "invoice"}.pdf`}
+                filename={`${item.data.invoice_number || "deal"}.pdf`}
               />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
@@ -455,16 +459,16 @@ export function Search() {
 
   const sectionActions: SearchItem[] = [
     {
-      id: "sc-create-invoice",
+      id: "sc-create-deal",
       type: "invoice",
-      title: "Create invoice",
-      action: nav.createInvoice,
+      title: "Create deal",
+      action: nav.createDeal,
     },
     {
-      id: "sc-create-customer",
-      type: "customer",
-      title: "Create customer",
-      action: nav.createCustomer,
+      id: "sc-create-merchant",
+      type: "merchant",
+      title: "Add merchant",
+      action: nav.createMerchant,
     },
     {
       id: "sc-create-transaction",
@@ -479,10 +483,10 @@ export function Search() {
       action: () => nav.navigateToPath("/vault"),
     },
     {
-      id: "sc-view-customers",
-      type: "customer",
-      title: "View customers",
-      action: () => nav.navigateToPath("/customers"),
+      id: "sc-view-merchants",
+      type: "merchant",
+      title: "View merchants",
+      action: () => nav.navigateToPath("/merchants"),
     },
     {
       id: "sc-view-transactions",
@@ -497,9 +501,9 @@ export function Search() {
       action: () => nav.navigateToPath("/inbox"),
     },
     {
-      id: "sc-view-invoices",
+      id: "sc-view-deals",
       type: "invoice",
-      title: "View invoices",
+      title: "View deals",
       action: () => nav.navigateToPath("/invoices"),
     },
   ];
@@ -558,7 +562,7 @@ export function Search() {
 
     const definedGroupOrder = [
       "vault",
-      "customer",
+      "merchant",
       "invoice",
       "transaction",
       "inbox",

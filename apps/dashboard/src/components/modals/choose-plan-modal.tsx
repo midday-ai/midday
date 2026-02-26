@@ -48,7 +48,7 @@ export function ChoosePlanModal({
       const saveAmount = 99 - discountPrice;
       const savePercentage = Math.round((saveAmount / 99) * 100);
 
-      return `As a valued early customer, you qualify for our special discount pricing. Get the Pro plan for $${discountPrice}/month instead of the regular $99/month and save ${savePercentage}%.`;
+      return `As a valued early adopter, you qualify for our special discount pricing. Get the Pro plan for $${discountPrice}/month instead of the regular $99/month and save ${savePercentage}%.`;
     }
 
     return "Choose a plan to continue using Abacus.";

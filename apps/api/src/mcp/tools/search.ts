@@ -14,7 +14,7 @@ export const registerSearchTools: RegisterTools = (server, ctx) => {
     {
       title: "Global Search",
       description:
-        "Search across all data: invoices, transactions, customers, documents, and more. Returns ranked results by relevance.",
+        "Search across all data: invoices, transactions, merchants, documents, and more. Returns ranked results by relevance.",
       inputSchema: globalSearchSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
     },

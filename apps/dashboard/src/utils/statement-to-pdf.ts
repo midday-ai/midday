@@ -359,7 +359,7 @@ async function createPdfFromCanvas(
 
   // Add metadata
   pdf.setProperties({
-    title: "Customer Statement",
+    title: "Merchant Statement",
     subject: "Generated from Abacus Dashboard",
     author: "Abacus",
     creator: "Abacus Dashboard",
@@ -427,7 +427,7 @@ async function createPdfBlobFromCanvas(
 
   // Add metadata
   pdf.setProperties({
-    title: "Customer Statement",
+    title: "Merchant Statement",
     subject: "Generated from Abacus Dashboard",
     author: "Abacus",
     creator: "Abacus Dashboard",

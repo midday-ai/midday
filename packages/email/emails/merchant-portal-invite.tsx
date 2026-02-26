@@ -23,7 +23,7 @@ interface Props {
   inviterName?: string;
   teamName?: string;
   teamLogoUrl?: string;
-  customerName?: string;
+  merchantName?: string;
   inviteCode?: string;
 }
 
@@ -34,7 +34,7 @@ export const MerchantPortalInviteEmail = ({
   email = "merchant@example.com",
   teamName = "ABC Funding",
   teamLogoUrl,
-  customerName = "Mike's Diner",
+  merchantName = "Mike's Diner",
   inviteCode = "abc123xyz",
 }: Props) => {
   const inviteLink = `${baseAppUrl}/portal/i/${inviteCode}`;
@@ -95,7 +95,7 @@ export const MerchantPortalInviteEmail = ({
             style={{ color: lightStyles.text.color }}
           >
             {inviterName} from <strong>{teamName}</strong> has invited you to
-            access the merchant portal for <strong>{customerName}</strong>.
+            access the merchant portal for <strong>{merchantName}</strong>.
           </Text>
 
           <Text

@@ -252,10 +252,10 @@ describe("Account Type Edge Cases", () => {
   });
 
   test("overpaid credit card (negative balance on Plaid) should reduce debt", () => {
-    // Edge case: customer overpaid credit card
+    // Edge case: cardholder overpaid credit card
     const overpaidCard = {
       ...mockAccounts.creditCardPositive,
-      balance: -500, // Customer overpaid by $500
+      balance: -500, // Cardholder overpaid by $500
     };
 
     // Math.abs() treats this as $500 debt, which is technically wrong

@@ -45,13 +45,23 @@ export async function getTeamsByUserId(db: Database, userId: string) {
     return [];
   }
 
-  return result.map((row) => ({
-    id: row?.team?.id,
-    name: row?.team?.name,
-    plan: row?.team?.plan,
-    role: row?.role,
-    createdAt: row?.team?.createdAt,
-    updatedAt: row?.team?.createdAt,
-    logoUrl: row?.team?.logoUrl,
-  }));
+  // Deduplicate by team ID — the users_on_team PK includes a random `id` column,
+  // so duplicate memberships for the same (user_id, team_id) can exist in the DB.
+  const seen = new Set<string>();
+  return result
+    .filter((row) => {
+      const teamId = row?.team?.id;
+      if (!teamId || seen.has(teamId)) return false;
+      seen.add(teamId);
+      return true;
+    })
+    .map((row) => ({
+      id: row?.team?.id,
+      name: row?.team?.name,
+      plan: row?.team?.plan,
+      role: row?.role,
+      createdAt: row?.team?.createdAt,
+      updatedAt: row?.team?.createdAt,
+      logoUrl: row?.team?.logoUrl,
+    }));
 }

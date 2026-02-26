@@ -28,8 +28,8 @@ export type InvoiceLineItem = {
 export interface RecurringInvoiceData {
   teamId: string;
   userId: string;
-  customerId: string | null;
-  customerName: string | null;
+  merchantId: string | null;
+  merchantName: string | null;
   template: unknown;
   templateId: string | null;
   timezone: string;

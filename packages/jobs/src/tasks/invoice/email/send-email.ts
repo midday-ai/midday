@@ -22,7 +22,7 @@ export const sendInvoiceEmail = schemaTask({
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, token, template, invoice_number, team_id, customer:customer_id(name, website, email, billing_email), team:team_id(name, email), user:user_id(email)",
+        "id, token, template, invoice_number, team_id, merchant:merchant_id(name, website, email, billing_email), team:team_id(name, email), user:user_id(email)",
       )
       .eq("id", invoiceId)
       .single();
@@ -52,15 +52,15 @@ export const sendInvoiceEmail = schemaTask({
         : undefined;
     }
 
-    const customerEmail = invoice?.customer?.email;
+    const merchantEmail = invoice?.merchant?.email;
     const userEmail = invoice?.user?.email;
 
     // @ts-expect-error template is a jsonb field
     const shouldSendCopy = invoice?.template?.sendCopy;
 
     // Parse billing emails (supports comma-separated list)
-    const billingEmails = invoice?.customer?.billing_email
-      ? invoice.customer.billing_email
+    const billingEmails = invoice?.merchant?.billing_email
+      ? invoice.merchant.billing_email
           .split(",")
           .map((e) => e.trim())
           .filter(Boolean)
@@ -71,12 +71,12 @@ export const sendInvoiceEmail = schemaTask({
       ...(shouldSendCopy && userEmail ? [userEmail] : []),
     ];
 
-    if (!customerEmail) {
-      logger.error("Invoice customer email not found");
+    if (!merchantEmail) {
+      logger.error("Invoice merchant email not found");
       return;
     }
 
-    if (invoice.invoice_number && invoice.customer?.name) {
+    if (invoice.invoice_number && invoice.merchant?.name) {
       try {
         await notifications.create(
           "invoice_sent",
@@ -84,8 +84,8 @@ export const sendInvoiceEmail = schemaTask({
           {
             invoiceId,
             invoiceNumber: invoice.invoice_number,
-            customerName: invoice.customer?.name,
-            customerEmail,
+            merchantName: invoice.merchant?.name,
+            merchantEmail,
             token: invoice.token,
           },
           {
@@ -108,7 +108,7 @@ export const sendInvoiceEmail = schemaTask({
       .from("invoices")
       .update({
         status: "unpaid",
-        sent_to: customerEmail,
+        sent_to: merchantEmail,
         sent_at: new Date().toISOString(),
       })
       .eq("id", invoiceId);

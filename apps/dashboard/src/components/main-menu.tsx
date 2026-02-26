@@ -1,40 +1,55 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { usePermissions } from "@/hooks/use-permissions";
+import type { TeamRole } from "@/utils/role-permissions";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+const INTERNAL: TeamRole[] = ["owner", "admin", "member"];
 
 const icons = {
   "/": () => <Icons.Overview size={20} />,
+  "/accounts": () => <Icons.Accounts size={20} />,
   "/transactions": () => <Icons.Transactions size={20} />,
   "/invoices": () => <Icons.Invoice size={20} />,
-  "/customers": () => <Icons.Customers size={20} />,
-  "/vault": () => <Icons.Vault size={20} />,
+  "/merchants": () => <Icons.Customers size={20} />,
+  "/brokers": () => <Icons.Broker size={20} />,
+  "/syndications": () => <Icons.Syndication size={20} />,
+  "/underwriting": () => <Icons.Tax size={20} />,
+  "/reconciliation": () => <Icons.Reconciliation size={20} />,
   "/settings": () => <Icons.Settings size={20} />,
-  "/apps": () => <Icons.Apps size={20} />,
   "/inbox": () => <Icons.Inbox2 size={20} />,
 } as const;
 
-const items = [
+type MenuItem = {
+  path: string;
+  name: string;
+  roles?: TeamRole[];
+  children?: { path: string; name: string; roles?: TeamRole[] }[];
+};
+
+const allItems: MenuItem[] = [
   {
     path: "/",
     name: "Overview",
   },
   {
+    path: "/accounts",
+    name: "Accounts",
+    roles: INTERNAL,
+    children: [
+      { path: "/settings/accounts", name: "Connect a bank" },
+    ],
+  },
+  {
     path: "/transactions",
     name: "Transactions",
+    roles: INTERNAL,
     children: [
-      {
-        path: "/transactions/categories",
-        name: "Categories",
-      },
-      {
-        path: "/transactions?step=connect",
-        name: "Connect bank",
-      },
       {
         path: "/transactions?step=import&hide=true",
         name: "Import",
@@ -45,31 +60,49 @@ const items = [
   {
     path: "/inbox",
     name: "Inbox",
+    roles: INTERNAL,
     children: [{ path: "/inbox/settings", name: "Settings" }],
   },
   {
     path: "/invoices",
-    name: "Invoices",
+    name: "Deals",
     children: [
-      { path: "/invoices/products", name: "Products" },
-      { path: "/invoices?type=create", name: "Create new" },
+      { path: "/invoices?createDeal=true", name: "Create new", roles: INTERNAL },
     ],
   },
   {
-    path: "/customers",
-    name: "Customers",
-    children: [{ path: "/customers?createCustomer=true", name: "Create new" }],
+    path: "/merchants",
+    name: "Merchants",
+    roles: INTERNAL,
+    children: [{ path: "/merchants?createMerchant=true", name: "Add new" }],
   },
   {
-    path: "/vault",
-    name: "Vault",
+    path: "/brokers",
+    name: "Brokers",
+    roles: INTERNAL,
+    children: [{ path: "/brokers?createBroker=true", name: "Add new" }],
   },
   {
-    path: "/apps",
-    name: "Apps",
+    path: "/syndications",
+    name: "Syndications",
+    roles: [...INTERNAL, "syndicate"],
     children: [
-      { path: "/apps", name: "All" },
-      { path: "/apps?tab=installed", name: "Installed" },
+      { path: "/syndications?createSyndicator=true", name: "Add new", roles: INTERNAL },
+    ],
+  },
+  {
+    path: "/underwriting",
+    name: "Underwriting",
+    roles: INTERNAL,
+  },
+  {
+    path: "/reconciliation",
+    name: "Reconciliation",
+    roles: [...INTERNAL, "bookkeeper"],
+    children: [
+      { path: "/reconciliation", name: "Payment Feed" },
+      { path: "/reconciliation/ach", name: "ACH Batches" },
+      { path: "/reconciliation/exports", name: "Exports" },
     ],
   },
   {
@@ -77,23 +110,26 @@ const items = [
     name: "Settings",
     children: [
       { path: "/settings", name: "General" },
-      { path: "/settings/billing", name: "Billing" },
-      { path: "/settings/accounts", name: "Bank Connections" },
-      { path: "/settings/members", name: "Members" },
-      { path: "/settings/notifications", name: "Notifications" },
-      { path: "/settings/developer", name: "Developer" },
+      { path: "/settings/billing", name: "Billing", roles: ["owner"] },
+      { path: "/settings/accounts", name: "Bank Connections", roles: ["owner", "admin"] },
+      { path: "/settings/members", name: "Members", roles: ["owner", "admin"] },
+      { path: "/settings/notifications", name: "Notifications", roles: INTERNAL },
+      { path: "/settings/developer", name: "Developer", roles: ["owner"] },
     ],
   },
 ];
 
 // Known menu base paths that should not be treated as chat IDs
 const KNOWN_MENU_PATHS = [
+  "/accounts",
   "/transactions",
   "/inbox",
   "/invoices",
-  "/customers",
-  "/vault",
-  "/apps",
+  "/merchants",
+  "/brokers",
+  "/syndications",
+  "/underwriting",
+  "/reconciliation",
   "/settings",
 ];
 
@@ -281,8 +317,21 @@ type Props = {
 export function MainMenu({ onSelect, isExpanded = false }: Props) {
   const pathname = usePathname();
   const { isChatPage } = useChatInterface();
+  const { role } = usePermissions();
   const part = pathname?.split("/")[1];
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
+  // Filter menu items based on user's role
+  const items = useMemo(() => {
+    return allItems
+      .filter((item) => !item.roles || item.roles.includes(role))
+      .map((item) => ({
+        ...item,
+        children: item.children?.filter(
+          (child) => !child.roles || child.roles.includes(role),
+        ),
+      }));
+  }, [role]);
 
   // Check if current pathname is a known menu path (including sub-paths)
   const pathnameWithoutQuery = pathname?.split("?")[0] || "";

@@ -13,7 +13,7 @@ export const invoiceScheduled: NotificationHandler = {
     metadata: {
       recordId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
-      customerName: data.customerName,
+      merchantName: data.merchantName,
       scheduledAt: data.scheduledAt,
     },
   }),

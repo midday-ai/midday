@@ -1,0 +1,2 @@
+-- Demo data seeding moved to supabase/seed.sql so it runs after user creation.
+-- This migration is intentionally empty.

@@ -100,7 +100,7 @@ export class EmailService {
   async #filterEligibleEmails(emails: EmailInput[], notificationType: string) {
     const eligibleEmails = await Promise.all(
       emails.map(async (email) => {
-        // For customer emails (with explicit 'to' field), always send - decision made at notification level
+        // For merchant emails (with explicit 'to' field), always send - decision made at notification level
         if (email.to && email.to.length > 0) {
           return email;
         }

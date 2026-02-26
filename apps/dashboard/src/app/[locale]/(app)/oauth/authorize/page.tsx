@@ -9,7 +9,7 @@ import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Authorize API Access | Abacus",
+  title: "Authorize API Access | abacus",
 };
 
 type Props = {

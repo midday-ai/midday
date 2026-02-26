@@ -60,12 +60,6 @@ export const getInboxStatsSchema = z.object({
   currency: z.string().optional(),
 });
 
-export const getTrackedTimeSchema = z.object({
-  from: z.string(),
-  to: z.string(),
-  assignedId: z.string().uuid().optional(),
-});
-
 export const getVaultActivitySchema = z.object({
   limit: z.number().optional().default(5),
 });
@@ -109,15 +103,24 @@ export const getOverdueInvoicesAlertSchema = z
   })
   .optional();
 
-export const getBillableHoursSchema = z.object({
-  date: z.string(),
-  view: z.enum(["week", "month"]),
-  weekStartsOnMonday: z.boolean().optional().default(false),
-});
-
-export const getCustomerLifetimeValueSchema = z.object({
+export const getMerchantLifetimeValueSchema = z.object({
   currency: z.string().optional(),
 });
+
+// MCA widget schemas
+export const getPortfolioOverviewSchema = z.object({
+  currency: z.string().optional(),
+});
+
+export const getActiveDealsSchema = z.object({});
+
+export const getCollectionRateSchema = z.object({
+  currency: z.string().optional(),
+});
+
+export const getNsfAlertsSchema = z.object({});
+
+export const getDealPipelineSchema = z.object({});
 
 export const widgetTypeSchema = z.enum(WIDGET_TYPES);
 

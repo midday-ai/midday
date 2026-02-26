@@ -1,9 +1,9 @@
 type Props = {
   src?: string | null;
-  customerName: string;
+  merchantName: string;
 };
 
-export function Logo({ src, customerName }: Props) {
+export function Logo({ src, merchantName }: Props) {
   if (!src) return null;
-  return <img src={src} alt={customerName} width={112} height={112} />;
+  return <img src={src} alt={merchantName} width={112} height={112} />;
 }

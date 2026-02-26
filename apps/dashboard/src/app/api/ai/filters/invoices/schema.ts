@@ -27,11 +27,11 @@ export const invoiceFilterSchema = z.object({
     .describe(
       "The end date in ISO-8601 format. Only set this if the prompt explicitly mentions a date range or time period. Do NOT default to current date unless explicitly requested.",
     ),
-  customers: z
+  merchants: z
     .array(z.string())
     .optional()
     .describe(
-      "Only set this if the prompt explicitly mentions customer names from the available customers list.",
+      "Only set this if the prompt explicitly mentions merchant names from the available merchants list.",
     ),
 });
 
@@ -40,7 +40,7 @@ export type InvoiceFilterSchema = z.infer<typeof invoiceFilterSchema>;
 export const invoiceFilterOutputSchema = z.object({
   q: z.string().nullable(),
   statuses: z.array(z.string()).nullable(),
-  customers: z.array(z.string()).nullable(),
+  merchants: z.array(z.string()).nullable(),
   start: z.string().nullable(),
   end: z.string().nullable(),
 });

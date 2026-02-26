@@ -6,7 +6,12 @@ import { getCountryCode, getLocale, getTimezone } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
 import { HydrationBoundary } from "@tanstack/react-query";
 import { dehydrate } from "@tanstack/react-query";
-import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
+import {
+  TRPCClientError,
+  createTRPCClient,
+  httpBatchLink,
+  loggerLink,
+} from "@trpc/client";
 import {
   type TRPCQueryOptions,
   createTRPCOptionsProxy,
@@ -59,6 +64,35 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
     ],
   }),
 });
+
+export async function getCurrentUserOrNull() {
+  const queryClient = getQueryClient();
+
+  try {
+    return await queryClient.fetchQuery(trpc.user.me.queryOptions());
+  } catch (error) {
+    if (error instanceof TRPCClientError) {
+      const code = (error.data as { code?: string } | undefined)?.code;
+
+      if (code === "UNAUTHORIZED") {
+        return null;
+      }
+
+      if (
+        code === "FORBIDDEN" &&
+        error.message.includes("No permission to access this team")
+      ) {
+        return null;
+      }
+
+      if (code === "NOT_FOUND" && error.message.includes("User not found")) {
+        return null;
+      }
+    }
+
+    throw error;
+  }
+}
 
 export function HydrateClient(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();

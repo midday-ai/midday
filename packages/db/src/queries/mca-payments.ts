@@ -285,7 +285,7 @@ export const getMcaPaymentsByPortalDeal = async (
   db: Database,
   params: GetMcaPaymentsByPortalDealParams,
 ) => {
-  // Verify the deal belongs to the customer with this portal ID
+  // Verify the deal belongs to the merchant with this portal ID
   const [deal] = await db
     .select({
       id: mcaDeals.id,
@@ -293,7 +293,7 @@ export const getMcaPaymentsByPortalDeal = async (
     })
     .from(mcaDeals)
     .innerJoin(
-      sql`customers c ON c.id = ${mcaDeals.customerId} AND c.portal_id = ${params.portalId}`,
+      sql`merchants c ON c.id = ${mcaDeals.merchantId} AND c.portal_id = ${params.portalId}`,
     )
     .where(eq(mcaDeals.id, params.dealId))
     .limit(1);

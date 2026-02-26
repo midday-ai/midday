@@ -17,7 +17,7 @@ export const inviteMerchantToPortal = schemaTask({
     inviterName,
     teamName,
     teamLogoUrl,
-    customerName,
+    merchantName,
     inviteCode,
   }) => {
     const subject = `${inviterName} has invited you to access your merchant portal`;
@@ -28,7 +28,7 @@ export const inviteMerchantToPortal = schemaTask({
         inviterName,
         teamName,
         teamLogoUrl: teamLogoUrl || undefined,
-        customerName,
+        merchantName,
         inviteCode,
       }),
     );

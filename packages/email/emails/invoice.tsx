@@ -15,13 +15,13 @@ import {
 } from "../components/theme";
 
 interface Props {
-  customerName: string;
+  merchantName: string;
   teamName: string;
   link: string;
 }
 
 export const InvoiceEmail = ({
-  customerName = "Customer",
+  merchantName = "Merchant",
   teamName = "Abacus",
   link = "https://app.abacuslabs.co/i/1234567890",
 }: Props) => {
@@ -57,7 +57,7 @@ export const InvoiceEmail = ({
             className={`font-medium ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Hi {customerName},
+            Hi {merchantName},
           </span>
           <Text
             className={themeClasses.text}

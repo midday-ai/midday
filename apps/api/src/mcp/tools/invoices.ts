@@ -56,7 +56,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "List Invoices",
         description:
-          "List invoices with filtering by status, customer, date range, and search. Use this to find invoices.",
+          "List invoices with filtering by status, merchant, date range, and search. Use this to find invoices.",
         inputSchema: getInvoicesSchema.shape,
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -69,7 +69,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           start: params.start ?? null,
           end: params.end ?? null,
           statuses: params.statuses ?? null,
-          customers: params.customers ?? null,
+          merchants: params.merchants ?? null,
           sort: params.sort ?? null,
         });
 

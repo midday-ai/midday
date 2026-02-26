@@ -32,7 +32,7 @@ export function useChatInterface() {
     if (!potentialChatId) {
       setSelectedType(null);
       // Reset document title when navigating away from chat
-      document.title = "Overview | Abacus";
+      document.title = "Overview | abacus";
     }
   }, [pathname, setSelectedType]);
 
@@ -48,7 +48,7 @@ export function useChatInterface() {
       if (!potentialChatId) {
         setSelectedType(null);
         // Reset document title when navigating away from chat
-        document.title = "Overview | Abacus";
+        document.title = "Overview | abacus";
       }
     };
 

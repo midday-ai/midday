@@ -211,9 +211,9 @@ export const invoiceFormSchema = z.object({
   status: z.string(),
   template: invoiceTemplateSchema,
   fromDetails: z.any(),
-  customerDetails: z.any(),
-  customerId: z.string().uuid(),
-  customerName: z.string().optional(),
+  merchantDetails: z.any(),
+  merchantId: z.string().uuid(),
+  merchantName: z.string().optional(),
   paymentDetails: z.any(),
   noteDetails: z.any().optional(),
   dueDate: z.string(),
@@ -263,7 +263,7 @@ export function FormContext({
         ...(defaultSettings?.template ?? {}),
         ...(data?.template ?? {}),
       },
-      customerId: data?.customerId ?? defaultSettings?.customerId ?? undefined,
+      merchantId: data?.merchantId ?? defaultSettings?.merchantId ?? undefined,
     });
   }, [data, defaultSettings]);
 

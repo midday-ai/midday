@@ -10,7 +10,7 @@ import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Team Settings | Abacus",
+  title: "Team Settings | abacus",
 };
 
 export default async function Account() {

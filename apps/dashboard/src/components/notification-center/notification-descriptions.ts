@@ -78,7 +78,7 @@ const handleInvoicePaid: NotificationDescriptionHandler = (
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
-  const customerName = metadata?.customerName;
+  const merchantName = metadata?.merchantName;
   const source = metadata?.source;
   const paidAt = metadata?.paidAt;
 
@@ -87,26 +87,26 @@ const handleInvoicePaid: NotificationDescriptionHandler = (
     const paidDate = new Date(paidAt);
     const formattedDate = format(paidDate, userDateFormat);
 
-    if (customerName) {
+    if (merchantName) {
       return t("notifications.invoice_paid.manual_with_date", {
         invoiceNumber,
-        customerName,
+        merchantName,
         date: formattedDate,
       });
     }
-    return t("notifications.invoice_paid.manual_with_date_no_customer", {
+    return t("notifications.invoice_paid.manual_with_date_no_merchant", {
       invoiceNumber,
       date: formattedDate,
     });
   }
 
   if (invoiceNumber && source === "manual") {
-    return customerName
+    return merchantName
       ? t("notifications.invoice_paid.manual", {
           invoiceNumber,
-          customerName,
+          merchantName,
         })
-      : t("notifications.invoice_paid.manual_no_customer", {
+      : t("notifications.invoice_paid.manual_no_merchant", {
           invoiceNumber,
         });
   }
@@ -134,7 +134,7 @@ const handleInvoiceScheduled: NotificationDescriptionHandler = (
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
   const scheduledAt = metadata?.scheduledAt;
-  const customerName = metadata?.customerName;
+  const merchantName = metadata?.merchantName;
 
   if (invoiceNumber && scheduledAt) {
     const scheduledDate = new Date(scheduledAt);
@@ -142,15 +142,15 @@ const handleInvoiceScheduled: NotificationDescriptionHandler = (
     const formattedDate = format(scheduledDate, userDateFormat);
     const formattedTime = format(scheduledDate, "HH:mm");
 
-    if (customerName) {
-      return t("notifications.invoice_scheduled.with_customer", {
+    if (merchantName) {
+      return t("notifications.invoice_scheduled.with_merchant", {
         invoiceNumber,
-        customerName,
+        merchantName,
         date: formattedDate,
         time: formattedTime,
       });
     }
-    return t("notifications.invoice_scheduled.without_customer", {
+    return t("notifications.invoice_scheduled.without_merchant", {
       invoiceNumber,
       date: formattedDate,
       time: formattedTime,
@@ -168,15 +168,15 @@ const handleInvoiceSent: NotificationDescriptionHandler = (
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
-  const customerName = metadata?.customerName;
-  if (invoiceNumber && customerName) {
-    return t("notifications.invoice_sent.with_customer", {
+  const merchantName = metadata?.merchantName;
+  if (invoiceNumber && merchantName) {
+    return t("notifications.invoice_sent.with_merchant", {
       invoiceNumber,
-      customerName,
+      merchantName,
     });
   }
   if (invoiceNumber) {
-    return t("notifications.invoice_sent.without_customer", {
+    return t("notifications.invoice_sent.without_merchant", {
       invoiceNumber,
     });
   }
@@ -189,15 +189,15 @@ const handleInvoiceReminderSent: NotificationDescriptionHandler = (
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
-  const customerName = metadata?.customerName;
-  if (invoiceNumber && customerName) {
-    return t("notifications.invoice_reminder_sent.with_customer", {
-      customerName,
+  const merchantName = metadata?.merchantName;
+  if (invoiceNumber && merchantName) {
+    return t("notifications.invoice_reminder_sent.with_merchant", {
+      merchantName,
       invoiceNumber,
     });
   }
   if (invoiceNumber) {
-    return t("notifications.invoice_reminder_sent.without_customer", {
+    return t("notifications.invoice_reminder_sent.without_merchant", {
       invoiceNumber,
     });
   }
@@ -210,16 +210,16 @@ const handleInvoiceCancelled: NotificationDescriptionHandler = (
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
-  const customerName = metadata?.customerName;
+  const merchantName = metadata?.merchantName;
 
-  if (invoiceNumber && customerName) {
-    return t("notifications.invoice_cancelled.with_customer", {
+  if (invoiceNumber && merchantName) {
+    return t("notifications.invoice_cancelled.with_merchant", {
       invoiceNumber,
-      customerName,
+      merchantName,
     });
   }
   if (invoiceNumber) {
-    return t("notifications.invoice_cancelled.without_customer", {
+    return t("notifications.invoice_cancelled.without_merchant", {
       invoiceNumber,
     });
   }
@@ -232,11 +232,11 @@ const handleInvoiceCreated: NotificationDescriptionHandler = (
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
-  const customerName = metadata?.customerName;
+  const merchantName = metadata?.merchantName;
   const amount = metadata?.amount;
   const currency = metadata?.currency;
 
-  if (invoiceNumber && customerName && amount && currency) {
+  if (invoiceNumber && merchantName && amount && currency) {
     const formattedAmount =
       formatAmount({
         currency: currency,
@@ -247,20 +247,20 @@ const handleInvoiceCreated: NotificationDescriptionHandler = (
         style: "currency",
         currency: currency,
       }).format(amount);
-    return t("notifications.invoice_created.with_customer_and_amount", {
+    return t("notifications.invoice_created.with_merchant_and_amount", {
       invoiceNumber,
-      customerName,
+      merchantName,
       amount: formattedAmount,
     });
   }
-  if (invoiceNumber && customerName) {
-    return t("notifications.invoice_created.with_customer", {
+  if (invoiceNumber && merchantName) {
+    return t("notifications.invoice_created.with_merchant", {
       invoiceNumber,
-      customerName,
+      merchantName,
     });
   }
   if (invoiceNumber) {
-    return t("notifications.invoice_created.without_customer", {
+    return t("notifications.invoice_created.without_merchant", {
       invoiceNumber,
     });
   }
@@ -273,16 +273,16 @@ const handleInvoiceRefunded: NotificationDescriptionHandler = (
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
-  const customerName = metadata?.customerName;
+  const merchantName = metadata?.merchantName;
 
-  if (invoiceNumber && customerName) {
-    return t("notifications.invoice_refunded.with_customer", {
+  if (invoiceNumber && merchantName) {
+    return t("notifications.invoice_refunded.with_merchant", {
       invoiceNumber,
-      customerName,
+      merchantName,
     });
   }
   if (invoiceNumber) {
-    return t("notifications.invoice_refunded.without_customer", {
+    return t("notifications.invoice_refunded.without_merchant", {
       invoiceNumber,
     });
   }
@@ -294,7 +294,7 @@ const handleRecurringSeriesStarted: NotificationDescriptionHandler = (
   user,
   t,
 ) => {
-  const customerName = metadata?.customerName;
+  const merchantName = metadata?.merchantName;
   const rawFrequency = metadata?.frequency;
   const endType = metadata?.endType;
   const endCount = metadata?.endCount;
@@ -304,19 +304,19 @@ const handleRecurringSeriesStarted: NotificationDescriptionHandler = (
     ? getFrequencyShortLabel(rawFrequency)
     : undefined;
 
-  if (customerName && frequency) {
+  if (merchantName && frequency) {
     if (endType === "after_count" && endCount) {
       return t(
-        "notifications.recurring_series_started.with_customer_and_count",
+        "notifications.recurring_series_started.with_merchant_and_count",
         {
-          customerName,
+          merchantName,
           frequency,
           count: endCount,
         },
       );
     }
-    return t("notifications.recurring_series_started.with_customer", {
-      customerName,
+    return t("notifications.recurring_series_started.with_merchant", {
+      merchantName,
       frequency,
     });
   }
@@ -333,14 +333,14 @@ const handleRecurringSeriesCompleted: NotificationDescriptionHandler = (
   user,
   t,
 ) => {
-  const customerName = metadata?.customerName;
+  const merchantName = metadata?.merchantName;
   const totalGenerated = metadata?.totalGenerated;
 
-  if (customerName && totalGenerated) {
+  if (merchantName && totalGenerated) {
     return t(
-      "notifications.recurring_series_completed.with_customer_and_count",
+      "notifications.recurring_series_completed.with_merchant_and_count",
       {
-        customerName,
+        merchantName,
         count: totalGenerated,
       },
     );
@@ -358,16 +358,16 @@ const handleRecurringSeriesPaused: NotificationDescriptionHandler = (
   user,
   t,
 ) => {
-  const customerName = metadata?.customerName;
+  const merchantName = metadata?.merchantName;
   const reason = metadata?.reason;
   const failureCount = metadata?.failureCount;
 
   if (reason === "auto_failure" && failureCount) {
-    if (customerName) {
+    if (merchantName) {
       return t(
-        "notifications.recurring_series_paused.auto_failure_with_customer",
+        "notifications.recurring_series_paused.auto_failure_with_merchant",
         {
-          customerName,
+          merchantName,
           failureCount,
         },
       );
@@ -376,9 +376,9 @@ const handleRecurringSeriesPaused: NotificationDescriptionHandler = (
       failureCount,
     });
   }
-  if (customerName) {
-    return t("notifications.recurring_series_paused.with_customer", {
-      customerName,
+  if (merchantName) {
+    return t("notifications.recurring_series_paused.with_merchant", {
+      merchantName,
     });
   }
   return t("notifications.recurring_series_paused.title");
@@ -392,7 +392,7 @@ const handleRecurringInvoiceUpcoming: NotificationDescriptionHandler = (
   const count = metadata?.count ?? 1;
   const invoices = metadata?.invoices as
     | Array<{
-        customerName?: string;
+        merchantName?: string;
         amount?: number;
         currency?: string;
       }>
@@ -401,7 +401,7 @@ const handleRecurringInvoiceUpcoming: NotificationDescriptionHandler = (
   // Single invoice with details
   if (count === 1 && invoices?.[0]) {
     const invoice = invoices[0];
-    if (invoice.customerName && invoice.amount && invoice.currency) {
+    if (invoice.merchantName && invoice.amount && invoice.currency) {
       const formattedAmount =
         formatAmount({
           currency: invoice.currency,
@@ -414,15 +414,15 @@ const handleRecurringInvoiceUpcoming: NotificationDescriptionHandler = (
         }).format(invoice.amount);
 
       return t("notifications.recurring_invoice_upcoming.single_with_details", {
-        customerName: invoice.customerName,
+        merchantName: invoice.merchantName,
         amount: formattedAmount,
       });
     }
-    if (invoice.customerName) {
+    if (invoice.merchantName) {
       return t(
-        "notifications.recurring_invoice_upcoming.single_with_customer",
+        "notifications.recurring_invoice_upcoming.single_with_merchant",
         {
-          customerName: invoice.customerName,
+          merchantName: invoice.merchantName,
         },
       );
     }

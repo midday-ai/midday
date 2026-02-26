@@ -20,15 +20,20 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
 
         <div className="flex space-x-4">
           <Button variant="outline" asChild>
-            <Link href={`/${locale}`}>Go home</Link>
+            <Link href={`/${locale}/login`}>Go home</Link>
           </Button>
 
-          <Button onClick={() => reset()} variant="outline">
+          <Button
+            onClick={() => {
+              window.location.reload();
+            }}
+            variant="outline"
+          >
             Try again
           </Button>
 
           <Button asChild>
-            <Link href={`/${locale}/account/support`}>Contact us</Link>
+            <a href="mailto:support@abacuslabs.co">Contact us</a>
           </Button>
         </div>
       </div>

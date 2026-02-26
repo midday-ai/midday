@@ -13,7 +13,7 @@ import { useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useDebounceValue } from "usehooks-ts";
 import { OpenURL } from "../open-url";
-import { CustomerDetails } from "./customer-details";
+import { MerchantDetails } from "./merchant-details";
 import { EditBlock } from "./edit-block";
 import type { InvoiceFormValues } from "./form-context";
 import { FromDetails } from "./from-details";
@@ -156,9 +156,9 @@ export function Form() {
   const formValues = useWatch({
     control: form.control,
     name: [
-      "customerDetails",
-      "customerId",
-      "customerName",
+      "merchantDetails",
+      "merchantId",
+      "merchantName",
       "template",
       "lineItems",
       "amount",
@@ -184,7 +184,7 @@ export function Form() {
   const [debouncedValue] = useDebounceValue(formValues, 500);
 
   useEffect(() => {
-    if (isDirty && form.watch("customerId") && invoiceNumberValid) {
+    if (isDirty && form.watch("merchantId") && invoiceNumberValid) {
       const currentFormValues = form.getValues();
       draftInvoiceMutation.mutate(
         // @ts-expect-error
@@ -240,8 +240,8 @@ export function Form() {
         const recurringResult =
           await createRecurringInvoiceMutation.mutateAsync({
             invoiceId: values.id, // Link the draft invoice to the recurring series
-            customerId: values.customerId,
-            customerName: values.customerName ?? undefined,
+            merchantId: values.merchantId,
+            merchantName: values.merchantName ?? undefined,
             frequency: config.frequency,
             frequencyDay: config.frequencyDay,
             frequencyWeek: config.frequencyWeek,
@@ -356,7 +356,7 @@ export function Form() {
               <FromDetails />
             </div>
             <div>
-              <CustomerDetails />
+              <MerchantDetails />
             </div>
           </div>
 

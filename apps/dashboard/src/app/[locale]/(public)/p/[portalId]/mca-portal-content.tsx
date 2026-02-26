@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
 import { formatAmount } from "@midday/utils/format";
@@ -24,13 +25,13 @@ type Props = {
 
 type DealStatus = "active" | "paid_off" | "defaulted" | "paused" | "late" | "in_collections";
 
-const statusColors: Record<DealStatus, string> = {
-  active: "bg-green-100 text-green-800",
-  paid_off: "bg-blue-100 text-blue-800",
-  defaulted: "bg-red-100 text-red-800",
-  paused: "bg-yellow-100 text-yellow-800",
-  late: "bg-orange-100 text-orange-800",
-  in_collections: "bg-red-100 text-red-800",
+const statusStyles: Record<DealStatus, string> = {
+  active: "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10",
+  paid_off: "text-[#1F6FEB] bg-[#DDEBFF] dark:bg-[#1F6FEB]/10",
+  defaulted: "text-[#FF3638] bg-[#FF3638]/10 dark:bg-[#FF3638]/10",
+  paused: "text-[#FFD02B] bg-[#FFD02B]/10 dark:bg-[#FFD02B]/10",
+  late: "text-[#F97316] bg-[#FFEDD5] dark:bg-[#F97316]/10",
+  in_collections: "text-[#FF3638] bg-[#FF3638]/10 dark:bg-[#FF3638]/10",
 };
 
 const statusLabels: Record<DealStatus, string> = {
@@ -45,11 +46,16 @@ const statusLabels: Record<DealStatus, string> = {
 function DealStatusBadge({ status }: { status: DealStatus | null }) {
   const safeStatus = (status || "active") as DealStatus;
   return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusColors[safeStatus] || statusColors.active}`}
+    <div
+      className={cn(
+        "px-2 py-0.5 rounded-full inline-flex max-w-full text-[11px]",
+        statusStyles[safeStatus] || statusStyles.active,
+      )}
     >
-      {statusLabels[safeStatus] || "Active"}
-    </span>
+      <span className="line-clamp-1 truncate inline-block">
+        {statusLabels[safeStatus] || "Active"}
+      </span>
+    </div>
   );
 }
 
@@ -76,7 +82,7 @@ export function McaPortalContent({ portalId }: Props) {
     );
   }
 
-  const { customer, deals, summary } = portalData;
+  const { merchant, deals, summary } = portalData;
 
   const handleRequestPayoff = async () => {
     setShowVerificationForm(true);
@@ -103,16 +109,16 @@ export function McaPortalContent({ portalId }: Props) {
     : 0;
 
   return (
-    <BrandThemeProvider branding={customer.team?.branding as any}>
+    <BrandThemeProvider branding={merchant.team?.branding as any}>
       <div className="min-h-screen dotted-bg">
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-10">
-            {customer.team?.logoUrl && (
+            {merchant.team?.logoUrl && (
               <div className="mb-6">
                 <Image
-                  src={customer.team.logoUrl}
-                  alt={customer.team.name || "Company logo"}
+                  src={merchant.team.logoUrl}
+                  alt={merchant.team.name || "Company logo"}
                   width={80}
                   height={80}
                   className="object-contain"
@@ -120,10 +126,10 @@ export function McaPortalContent({ portalId }: Props) {
               </div>
             )}
             <h1 className="text-2xl font-serif tracking-tight">
-              {customer.name}
+              {merchant.name}
             </h1>
-            {customer.team?.name && (
-              <p className="text-sm text-[#606060] mt-1">{customer.team.name}</p>
+            {merchant.team?.name && (
+              <p className="text-sm text-[#606060] mt-1">{merchant.team.name}</p>
             )}
           </div>
 

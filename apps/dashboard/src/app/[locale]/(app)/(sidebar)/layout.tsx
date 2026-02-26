@@ -1,5 +1,4 @@
 import { ExportStatus } from "@/components/export-status";
-import { FeedbackWidget } from "@midday/ui/feedback-widget";
 import { Header } from "@/components/header";
 import { GlobalSheetsProvider } from "@/components/sheets/global-sheets-provider";
 import { Sidebar } from "@/components/sidebar";
@@ -8,9 +7,10 @@ import { TrialGuard } from "@/components/trial-guard";
 import {
   HydrateClient,
   batchPrefetch,
-  getQueryClient,
+  getCurrentUserOrNull,
   trpc,
 } from "@/trpc/server";
+import { FeedbackWidget } from "@midday/ui/feedback-widget";
 import { redirect } from "next/navigation";
 
 export default async function Layout({
@@ -18,7 +18,11 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const queryClient = getQueryClient();
+  const user = await getCurrentUserOrNull();
+
+  if (!user) {
+    redirect("/api/auth/logout");
+  }
 
   // NOTE: These are used in the global sheets
   batchPrefetch([
@@ -26,14 +30,6 @@ export default async function Layout({
     trpc.invoice.defaultSettings.queryOptions(),
     trpc.search.global.queryOptions({ searchTerm: "" }),
   ]);
-
-  // NOTE: Right now we want to fetch the user and hydrate the client
-  // Next steps would be to prefetch and suspense
-  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
-
-  if (!user) {
-    redirect("/login");
-  }
 
   if (!user.fullName) {
     redirect("/setup");
@@ -62,7 +58,10 @@ export default async function Layout({
         <ExportStatus />
         <GlobalSheetsProvider />
         <TimezoneDetector />
-        <FeedbackWidget source="dashboard" userEmail={user.email ?? undefined} />
+        <FeedbackWidget
+          source="dashboard"
+          userEmail={user.email ?? undefined}
+        />
       </div>
     </HydrateClient>
   );

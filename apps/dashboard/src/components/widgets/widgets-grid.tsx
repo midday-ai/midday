@@ -28,17 +28,21 @@ import type { inferRouterOutputs } from "@trpc/server";
 import { useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { AccountBalancesWidget } from "./account-balances";
+import { ActiveDealsWidget } from "./active-deals";
 import { CashFlowWidget } from "./cash-flow";
 import { CategoryExpensesWidget } from "./category-expenses";
-import { CustomerLifetimeValueWidget } from "./customer-lifetime-value";
+import { CollectionRateWidget } from "./collection-rate";
+import { MerchantLifetimeValueWidget } from "./merchant-lifetime-value";
+import { DealPipelineWidget } from "./deal-pipeline";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
-// import { Insights } from "./insights";
 import { InvoicePaymentScoreWidget } from "./invoice-payment-score";
 import { MonthlySpendingWidget } from "./monthly-spending";
 import { NetPositionWidget } from "./net-position";
+import { NsfAlertsWidget } from "./nsf-alerts";
 import { OutstandingInvoicesWidget } from "./outstanding-invoices";
 import { OverdueInvoicesAlertWidget } from "./overdue-invoices-alert";
+import { PortfolioOverviewWidget } from "./portfolio-overview";
 import { ProfitAnalysisWidget } from "./profit-analysis";
 import { ProfitMarginWidget } from "./profit-margin";
 import { RecurringExpensesWidget } from "./recurring-expenses";
@@ -46,7 +50,7 @@ import { RevenueForecastWidget } from "./revenue-forecast";
 import { RevenueSummaryWidget } from "./revenue-summary";
 import { RunwayWidget } from "./runway";
 import { TaxSummaryWidget } from "./tax-summary";
-import { TopCustomerWidget } from "./top-customer";
+import { TopMerchantWidget } from "./top-merchant";
 import { VaultWidget } from "./vault";
 import { WidgetErrorFallback } from "./widget-error-fallback";
 import {
@@ -109,8 +113,15 @@ function SortableCard({
 
 // Widget mapping to components
 const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
+  // MCA Portfolio Health
+  "portfolio-overview": PortfolioOverviewWidget,
+  "active-deals": ActiveDealsWidget,
+  "collection-rate": CollectionRateWidget,
+  "nsf-alerts": NsfAlertsWidget,
+  "deal-pipeline": DealPipelineWidget,
+  // Generic Financial
   runway: RunwayWidget,
-  "top-customer": TopCustomerWidget,
+  "top-merchant": TopMerchantWidget,
   "revenue-summary": RevenueSummaryWidget,
   "revenue-forecast": RevenueForecastWidget,
   "growth-rate": GrowthRateWidget,
@@ -128,7 +139,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "tax-summary": TaxSummaryWidget,
   "category-expenses": CategoryExpensesWidget,
   "overdue-invoices-alert": OverdueInvoicesAlertWidget,
-  "customer-lifetime-value": CustomerLifetimeValueWidget,
+  "merchant-lifetime-value": MerchantLifetimeValueWidget,
 };
 
 export function WidgetsGrid() {

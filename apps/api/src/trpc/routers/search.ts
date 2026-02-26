@@ -108,7 +108,7 @@ export const searchRouter = createTRPCRouter({
           type: "invoice" as const,
           id: invoice.id,
           invoiceNumber: invoice.invoiceNumber ?? null,
-          customerName: invoice.customerName ?? null,
+          merchantName: invoice.merchantName ?? null,
           amount: invoice.amount ?? null,
           currency: invoice.currency ?? null,
           filePath: invoice.filePath ?? [],

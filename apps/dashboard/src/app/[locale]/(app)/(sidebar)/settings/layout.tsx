@@ -7,6 +7,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <SecondaryMenu
         items={[
           { path: "/settings", label: "General" },
+          { path: "/settings/portal", label: "Portal" },
           { path: "/settings/billing", label: "Billing" },
           { path: "/settings/accounts", label: "Bank Connections" },
           { path: "/settings/members", label: "Members" },

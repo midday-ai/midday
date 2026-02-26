@@ -60,6 +60,76 @@ create type "public"."transactionStatus" as enum ('posted', 'pending', 'excluded
 
 create type "public"."transaction_frequency" as enum ('weekly', 'biweekly', 'monthly', 'semi_monthly', 'annually', 'irregular', 'unknown');
 
+-- Functions must be defined before tables that reference them in generated columns
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.extract_product_names(products_json json)
+ RETURNS text
+ LANGUAGE plpgsql
+ IMMUTABLE
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  result text := '';
+  product json;
+BEGIN
+  IF products_json IS NULL THEN
+    RETURN '';
+  END IF;
+  FOR product IN SELECT * FROM json_array_elements(products_json)
+  LOOP
+    IF result != '' THEN
+      result := result || ' ';
+    END IF;
+    result := result || COALESCE(product->>'name', '');
+  END LOOP;
+  RETURN result;
+EXCEPTION WHEN OTHERS THEN
+  RETURN '';
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.generate_inbox_fts(display_name_text text, product_names text)
+ RETURNS tsvector
+ LANGUAGE plpgsql
+ IMMUTABLE
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  RETURN to_tsvector('english', COALESCE(display_name_text, '') || ' ' || COALESCE(product_names, ''));
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.generate_id(size integer)
+ RETURNS text
+ LANGUAGE plpgsql
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  characters text := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  result text := '';
+  i integer;
+BEGIN
+  FOR i IN 1..size LOOP
+    result := result || substr(characters, floor(random() * length(characters) + 1)::integer, 1);
+  END LOOP;
+  RETURN result;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.generate_inbox(size integer)
+ RETURNS text
+ LANGUAGE plpgsql
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  RETURN public.generate_id(size);
+END;
+$function$
+;
 
   create table "public"."accounting_sync_records" (
     "id" uuid not null default gen_random_uuid(),

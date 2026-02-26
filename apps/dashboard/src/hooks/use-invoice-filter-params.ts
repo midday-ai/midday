@@ -9,7 +9,7 @@ import {
 const invoiceFilterParamsSchema = {
   q: parseAsString,
   statuses: parseAsArrayOf(parseAsString),
-  customers: parseAsArrayOf(parseAsString),
+  merchants: parseAsArrayOf(parseAsString),
   start: parseAsString,
   end: parseAsString,
   ids: parseAsArrayOf(parseAsString),

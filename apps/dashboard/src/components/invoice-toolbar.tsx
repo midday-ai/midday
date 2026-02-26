@@ -236,7 +236,7 @@ export default function InvoiceToolbar({
                     sideOffset={15}
                     className="text-[10px] px-2 py-1 rounded-none font-medium"
                   >
-                    <p>View customer portal</p>
+                    <p>View merchant portal</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

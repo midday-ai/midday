@@ -3,7 +3,7 @@ import { registerPrompts } from "./prompts";
 import { registerResources } from "./resources";
 import {
   registerBankAccountTools,
-  registerCustomerTools,
+  registerMerchantTools,
   registerDocumentTools,
   registerInboxTools,
   registerInvoiceTools,
@@ -11,7 +11,7 @@ import {
   registerSearchTools,
   registerTagTools,
   registerTeamTools,
-  registerTrackerTools,
+  registerSyndicatorTools,
   registerTransactionTools,
 } from "./tools";
 import type { McpContext } from "./types";
@@ -31,15 +31,15 @@ export function createMcpServer(ctx: McpContext): McpServer {
   // Register tools by domain
   registerTransactionTools(server, ctx);
   registerInvoiceTools(server, ctx);
-  registerCustomerTools(server, ctx);
+  registerMerchantTools(server, ctx);
   registerBankAccountTools(server, ctx);
   registerDocumentTools(server, ctx);
-  registerTrackerTools(server, ctx);
   registerReportTools(server, ctx);
   registerSearchTools(server, ctx);
   registerInboxTools(server, ctx);
   registerTagTools(server, ctx);
   registerTeamTools(server, ctx);
+  registerSyndicatorTools(server, ctx);
 
   return server;
 }

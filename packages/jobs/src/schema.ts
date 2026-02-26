@@ -104,7 +104,7 @@ export const inviteMerchantToPortalSchema = z.object({
   inviterName: z.string(),
   teamName: z.string(),
   teamLogoUrl: z.string().optional().nullable(),
-  customerName: z.string(),
+  merchantName: z.string(),
   inviteCode: z.string(),
 });
 

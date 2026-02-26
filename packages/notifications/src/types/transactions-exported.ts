@@ -20,7 +20,7 @@ export const transactionsExported: NotificationHandler = {
 
   createEmail: (data, user, team) => ({
     template: "transactions-exported",
-    emailType: "customer" as const,
+    emailType: "merchant" as const,
     replyTo: user.email,
     to: data.accountantEmail ? [data.accountantEmail] : [],
     subject: `Transaction Export from ${team.name}`,

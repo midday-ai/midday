@@ -69,12 +69,6 @@ export function ForecastCanvas() {
           ),
           subtitle: "Pending collection",
         },
-        {
-          id: "billable-hours",
-          title: "Billable Hours",
-          value: `${data.metrics.billableHours}h`,
-          subtitle: "This month tracked",
-        },
       ]
     : [];
 

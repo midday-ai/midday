@@ -54,13 +54,13 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
       }
     }
 
-    const customerEmail = invoice.customer?.email;
+    const merchantEmail = invoice.merchant?.email;
     const userEmail = invoice.user?.email;
     const shouldSendCopy = template?.sendCopy;
 
     // Parse billing emails (supports comma-separated list)
-    const billingEmails = invoice.customer?.billingEmail
-      ? invoice.customer.billingEmail
+    const billingEmails = invoice.merchant?.billingEmail
+      ? invoice.merchant.billingEmail
           .split(",")
           .map((e) => e.trim())
           .filter(Boolean)
@@ -72,16 +72,16 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
       ...(shouldSendCopy && userEmail ? [userEmail] : []),
     ];
 
-    if (!customerEmail) {
-      this.logger.error("Invoice customer email not found", { invoiceId });
-      throw new Error(`Invoice customer email not found: ${invoiceId}`);
+    if (!merchantEmail) {
+      this.logger.error("Invoice merchant email not found", { invoiceId });
+      throw new Error(`Invoice merchant email not found: ${invoiceId}`);
     }
 
-    if (!invoice.invoiceNumber || !invoice.customer?.name) {
+    if (!invoice.invoiceNumber || !invoice.merchant?.name) {
       this.logger.error("Invoice missing required fields", {
         invoiceId,
         hasInvoiceNumber: !!invoice.invoiceNumber,
-        hasCustomerName: !!invoice.customer?.name,
+        hasMerchantName: !!invoice.merchant?.name,
       });
       throw new Error(`Invoice missing required fields: ${invoiceId}`);
     }
@@ -94,8 +94,8 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
         {
           invoiceId,
           invoiceNumber: invoice.invoiceNumber,
-          customerName: invoice.customer.name,
-          customerEmail,
+          merchantName: invoice.merchant.name,
+          merchantEmail,
           token: invoice.token,
         },
         {
@@ -113,14 +113,14 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
       throw new Error("Invoice email failed to send");
     }
 
-    this.logger.debug("Invoice email sent", { invoiceId, customerEmail });
+    this.logger.debug("Invoice email sent", { invoiceId, merchantEmail });
 
     // Update invoice status using Drizzle
     const updated = await updateInvoice(db, {
       id: invoiceId,
       teamId: invoice.teamId,
       status: "unpaid",
-      sentTo: customerEmail,
+      sentTo: merchantEmail,
       sentAt: new Date().toISOString(),
     });
 
@@ -133,7 +133,7 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
 
     this.logger.info("Send invoice email completed", {
       invoiceId,
-      customerEmail,
+      merchantEmail,
     });
   }
 }

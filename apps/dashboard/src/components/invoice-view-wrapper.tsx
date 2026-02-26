@@ -4,7 +4,7 @@ import { cn } from "@midday/ui/cn";
 import { useMediaQuery } from "@midday/ui/hooks";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import CustomerHeader from "./customer-header";
+import MerchantHeader from "./merchant-header";
 import InvoiceToolbar from "./invoice-toolbar";
 
 type Props = {
@@ -14,10 +14,10 @@ type Props = {
   amount?: number;
   currency?: string;
   initialStatus?: string;
-  customerName: string;
-  customerWebsite?: string | null;
-  customerPortalEnabled?: boolean;
-  customerPortalId?: string | null;
+  merchantName: string;
+  merchantWebsite?: string | null;
+  merchantPortalEnabled?: boolean;
+  merchantPortalId?: string | null;
   children: ReactNode;
   onPaymentOpenChange?: (open: boolean) => void;
   isPaymentOpen?: boolean;
@@ -31,10 +31,10 @@ export function InvoiceViewWrapper({
   amount,
   currency,
   initialStatus,
-  customerName,
-  customerWebsite,
-  customerPortalEnabled,
-  customerPortalId,
+  merchantName,
+  merchantWebsite,
+  merchantPortalEnabled,
+  merchantPortalId,
   children,
   onPaymentOpenChange,
   isPaymentOpen,
@@ -81,9 +81,9 @@ export function InvoiceViewWrapper({
             className="flex flex-col w-full max-w-full py-6"
             style={{ maxWidth: invoiceWidth }}
           >
-            <CustomerHeader
-              name={customerName}
-              website={customerWebsite}
+            <MerchantHeader
+              name={merchantName}
+              website={merchantWebsite}
               status={
                 status as
                   | "overdue"
@@ -94,8 +94,8 @@ export function InvoiceViewWrapper({
                   | "scheduled"
                   | "refunded"
               }
-              portalEnabled={customerPortalEnabled}
-              portalId={customerPortalId}
+              portalEnabled={merchantPortalEnabled}
+              portalId={merchantPortalId}
             />
             {children}
           </div>
@@ -110,8 +110,8 @@ export function InvoiceViewWrapper({
         currency={currency}
         status={status}
         onPaymentSuccess={handlePaymentSuccess}
-        portalEnabled={customerPortalEnabled}
-        portalId={customerPortalId}
+        portalEnabled={merchantPortalEnabled}
+        portalId={merchantPortalId}
         onPaymentOpenChange={handlePaymentOpenChange}
         isPaymentOpen={paymentOpen}
         useOverlay={useOverlay}

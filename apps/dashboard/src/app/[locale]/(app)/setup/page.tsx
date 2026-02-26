@@ -1,21 +1,19 @@
 import { SetupForm } from "@/components/setup-form";
-import { getQueryClient, trpc } from "@/trpc/server";
-import { HydrateClient } from "@/trpc/server";
+import { HydrateClient, getCurrentUserOrNull } from "@/trpc/server";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Setup account | Abacus",
+  title: "Setup account | abacus",
 };
 
 export default async function Page() {
-  const queryClient = getQueryClient();
-  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
+  const user = await getCurrentUserOrNull();
 
   if (!user?.id) {
-    return redirect("/");
+    return redirect("/api/auth/logout");
   }
 
   return (

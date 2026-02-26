@@ -14,7 +14,7 @@ export const STICKY_COLUMNS: Record<TableId, StickyColumnConfig[]> = {
     { id: "select", width: 50 },
     { id: "invoiceNumber", width: 180 },
   ],
-  customers: [{ id: "name", width: 320 }],
+  merchants: [{ id: "name", width: 280 }],
   vault: [
     { id: "select", width: 50 },
     { id: "title", width: 250 },
@@ -42,21 +42,19 @@ export const SORT_FIELD_MAPS: Record<TableId, Record<string, string>> = {
     invoiceNumber: "invoice_number",
     status: "status",
     dueDate: "due_date",
-    customer: "customer",
+    merchant: "merchant",
     amount: "amount",
     issueDate: "issue_date",
   },
-  customers: {
+  merchants: {
     name: "name",
     contact: "contact",
     email: "email",
-    invoices: "invoices",
-    projects: "projects",
-    industry: "industry",
-    country: "country",
-    totalRevenue: "total_revenue",
-    outstanding: "outstanding",
-    lastInvoice: "last_invoice",
+    deals: "deals",
+    totalFunded: "total_funded",
+    payback: "total_payback",
+    balance: "balance",
+    totalNsf: "total_nsf",
     tags: "tags",
   },
   vault: {}, // Vault doesn't have sorting
@@ -68,7 +66,7 @@ export const SORT_FIELD_MAPS: Record<TableId, Record<string, string>> = {
 export const NON_REORDERABLE_COLUMNS: Record<TableId, Set<string>> = {
   transactions: new Set(["select", "date", "description", "actions"]),
   invoices: new Set(["select", "invoiceNumber", "actions"]),
-  customers: new Set(["name", "actions"]),
+  merchants: new Set(["name", "actions"]),
   vault: new Set(["select", "title", "actions"]),
 };
 
@@ -78,7 +76,7 @@ export const NON_REORDERABLE_COLUMNS: Record<TableId, Set<string>> = {
 export const ROW_HEIGHTS: Record<TableId, number> = {
   transactions: 45,
   invoices: 57,
-  customers: 45,
+  merchants: 45,
   vault: 45,
 };
 
@@ -87,7 +85,7 @@ export const ROW_HEIGHTS: Record<TableId, number> = {
  */
 export const SUMMARY_GRID_HEIGHTS: Partial<Record<TableId, number>> = {
   invoices: 180,
-  customers: 180,
+  merchants: 180,
 };
 
 /**
@@ -109,13 +107,13 @@ export const TABLE_CONFIGS: Record<TableId, TableConfig> = {
     rowHeight: ROW_HEIGHTS.invoices,
     summaryGridHeight: SUMMARY_GRID_HEIGHTS.invoices,
   },
-  customers: {
-    tableId: "customers",
-    stickyColumns: STICKY_COLUMNS.customers,
-    sortFieldMap: SORT_FIELD_MAPS.customers,
-    nonReorderableColumns: NON_REORDERABLE_COLUMNS.customers,
-    rowHeight: ROW_HEIGHTS.customers,
-    summaryGridHeight: SUMMARY_GRID_HEIGHTS.customers,
+  merchants: {
+    tableId: "merchants",
+    stickyColumns: STICKY_COLUMNS.merchants,
+    sortFieldMap: SORT_FIELD_MAPS.merchants,
+    nonReorderableColumns: NON_REORDERABLE_COLUMNS.merchants,
+    rowHeight: ROW_HEIGHTS.merchants,
+    summaryGridHeight: SUMMARY_GRID_HEIGHTS.merchants,
   },
   vault: {
     tableId: "vault",

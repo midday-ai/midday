@@ -15,7 +15,7 @@ type FilterKey =
   | "categories"
   | "tags"
   | "accounts"
-  | "customers"
+  | "merchants"
   | "assignees"
   | "owners"
   | "status"
@@ -31,7 +31,7 @@ type FilterValue = {
   categories: string[];
   tags: string[];
   accounts: string[];
-  customers: string[];
+  merchants: string[];
   assignees: string[];
   owners: string[];
   status: string;
@@ -50,7 +50,7 @@ interface Props {
   categories?: { id: string; name: string; slug: string | null }[];
   accounts?: { id: string; name: string; currency: string }[];
   members?: { id: string; name: string }[];
-  customers?: { id: string; name: string }[];
+  merchants?: { id: string; name: string }[];
   statusFilters?: { id: string; name: string }[];
   attachmentsFilters?: { id: string; name: string }[];
   recurringFilters?: { id: string; name: string }[];
@@ -66,7 +66,7 @@ export function FilterList({
   categories,
   accounts,
   members,
-  customers,
+  merchants,
   tags,
   statusFilters,
   attachmentsFilters,
@@ -172,11 +172,11 @@ export function FilterList({
           .join(", ");
       }
 
-      case "customers": {
-        const customersValue = value as FilterValue["customers"];
-        if (!customersValue) return null;
-        return customersValue
-          .map((id) => customers?.find((customer) => customer.id === id)?.name)
+      case "merchants": {
+        const merchantsValue = value as FilterValue["merchants"];
+        if (!merchantsValue) return null;
+        return merchantsValue
+          .map((id) => merchants?.find((merchant) => merchant.id === id)?.name)
           .join(", ");
       }
 

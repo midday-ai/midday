@@ -18,7 +18,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
       invoiceId,
       invoiceNumber,
       teamId,
-      customerName,
+      merchantName,
       paidAt,
       scheduledAt,
     } = job.data;
@@ -43,7 +43,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
           {
             invoiceId,
             invoiceNumber,
-            customerName,
+            merchantName,
             paidAt,
             source: "system",
           },
@@ -56,7 +56,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
         await sendToProviders(db, teamId, "invoice_paid", {
           invoiceId,
           invoiceNumber,
-          customerName,
+          merchantName,
           paidAt,
         });
 
@@ -75,7 +75,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
           {
             invoiceId,
             invoiceNumber,
-            customerName: customerName || "Unknown",
+            merchantName: merchantName || "Unknown",
             source: "system",
           },
           {
@@ -86,7 +86,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
         await sendToProviders(db, teamId, "invoice_overdue", {
           invoiceId,
           invoiceNumber,
-          customerName: customerName || "Unknown",
+          merchantName: merchantName || "Unknown",
         });
 
         this.logger.info("Invoice overdue notification sent", {
@@ -118,7 +118,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
           {
             invoiceId,
             invoiceNumber,
-            customerName,
+            merchantName,
           },
           {
             sendEmail: false,
@@ -141,7 +141,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
             invoiceId,
             invoiceNumber,
             scheduledAt: scheduledAt || new Date().toISOString(),
-            customerName,
+            merchantName,
           },
           {
             sendEmail: false,
@@ -181,7 +181,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
           {
             invoiceId,
             invoiceNumber,
-            customerName,
+            merchantName,
             refundedAt,
           },
           {
@@ -208,7 +208,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
           {
             invoiceId,
             invoiceNumber,
-            customerName,
+            merchantName,
           },
           {
             sendEmail: false, // Email is handled by generate-invoice task
@@ -236,7 +236,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
           {
             invoiceId,
             invoiceNumber,
-            customerName,
+            merchantName,
             recurringId: recurringId ?? invoiceId,
             totalGenerated: recurringTotalCount ?? recurringSequence ?? 0,
           },
@@ -249,7 +249,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
           recurringId,
           teamId,
           invoiceNumber,
-          customerName,
+          merchantName,
           totalGenerated: recurringTotalCount ?? recurringSequence,
         });
         break;
@@ -264,7 +264,7 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
           teamId,
           {
             recurringId: recurringId ?? invoiceId,
-            customerName,
+            merchantName,
             reason: "auto_failure",
             failureCount: 3,
           },

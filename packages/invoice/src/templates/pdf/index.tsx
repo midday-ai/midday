@@ -65,7 +65,7 @@ export async function PdfTemplate(
     paidAt,
     template,
     lineItems,
-    customerDetails,
+    merchantDetails,
     fromDetails,
     discount,
     paymentDetails,
@@ -154,7 +154,7 @@ export async function PdfTemplate(
               <Text style={{ fontSize: 9, fontWeight: 500 }}>
                 {template.customerLabel}
               </Text>
-              <EditorContent content={customerDetails} />
+              <EditorContent content={merchantDetails} />
             </View>
           </View>
         </View>

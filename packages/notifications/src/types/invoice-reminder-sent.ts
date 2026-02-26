@@ -16,8 +16,8 @@ export const invoiceReminderSent: NotificationHandler = {
     metadata: {
       recordId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
-      customerName: data.customerName,
-      customerEmail: data.customerEmail,
+      merchantName: data.merchantName,
+      merchantEmail: data.merchantEmail,
     },
   }),
 
@@ -26,19 +26,19 @@ export const invoiceReminderSent: NotificationHandler = {
 
     return {
       template: "invoice-reminder",
-      emailType: "customer",
-      to: [data.customerEmail],
+      emailType: "merchant",
+      to: [data.merchantEmail],
       subject: t("invoice.reminder.subject", {
         invoiceNumber: data.invoiceNumber,
       }),
       from: `${team.name} <middaybot@midday.ai>`,
       data: {
-        companyName: data.customerName,
+        companyName: data.merchantName,
         teamName: team.name,
         invoiceNumber: data.invoiceNumber,
         link: `${getAppUrl()}/i/${encodeURIComponent(
           data.token,
-        )}?viewer=${encodeURIComponent(encrypt(data.customerEmail))}`,
+        )}?viewer=${encodeURIComponent(encrypt(data.merchantEmail))}`,
       },
     };
   },

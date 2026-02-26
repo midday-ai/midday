@@ -78,8 +78,8 @@ const SUGGESTED_ACTIONS_CONFIG = [
     },
   },
   {
-    id: "get-customers",
-    toolName: "getCustomers",
+    id: "get-merchants",
+    toolName: "getMerchants",
     toolParams: {
       pageSize: 10,
     },

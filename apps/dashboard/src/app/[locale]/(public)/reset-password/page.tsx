@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Reset Password | Abacus",
+  title: "Reset Password | abacus",
 };
 
 export default function Page() {

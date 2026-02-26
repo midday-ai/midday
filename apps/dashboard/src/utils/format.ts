@@ -69,25 +69,6 @@ export function formatAmount({
   }
 }
 
-export function secondsToHoursAndMinutes(seconds: number) {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-
-  if (hours && minutes) {
-    return `${hours}h ${minutes}m`;
-  }
-
-  if (hours) {
-    return `${hours}h`;
-  }
-
-  if (minutes) {
-    return `${minutes}m`;
-  }
-
-  return "0m";
-}
-
 type BurnRateData = {
   value: number;
   date: string;

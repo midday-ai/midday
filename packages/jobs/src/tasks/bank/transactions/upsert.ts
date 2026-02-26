@@ -3,6 +3,7 @@ import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { embedTransaction } from "../../transactions/embed-transaction";
+import { reconcileTransactions } from "../../reconciliation/auto-match";
 
 const transactionSchema = z.object({
   id: z.string(),
@@ -70,7 +71,13 @@ export const upsertTransactions = schemaTask({
           teamId,
         });
 
-        logger.info("Triggered transaction embedding (non-blocking)", {
+        // Trigger auto-reconciliation (non-blocking)
+        await reconcileTransactions.trigger({
+          transactionIds,
+          teamId,
+        });
+
+        logger.info("Triggered transaction embedding and reconciliation", {
           transactionCount: transactionIds.length,
           teamId,
         });

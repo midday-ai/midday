@@ -153,7 +153,6 @@ export function SupportForm() {
                         <SelectItem value="Vault">Vault</SelectItem>
                         <SelectItem value="Inbox">Inbox</SelectItem>
                         <SelectItem value="Invoicing">Invoicing</SelectItem>
-                        <SelectItem value="Tracker">Tracker</SelectItem>
                         <SelectItem value="AI">AI</SelectItem>
                         <SelectItem value="General">General</SelectItem>
                       </SelectContent>

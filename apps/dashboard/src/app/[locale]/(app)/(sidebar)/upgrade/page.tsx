@@ -1,17 +1,21 @@
 import { OpenURL } from "@/components/open-url";
 import { Plans } from "@/components/plans";
-import { getQueryClient, trpc } from "@/trpc/server";
+import { getCurrentUserOrNull } from "@/trpc/server";
 import { getTrialDaysLeft } from "@/utils/trial";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Upgrade | Abacus",
+  title: "Upgrade | abacus",
 };
 
 export default async function UpgradePage() {
-  const queryClient = getQueryClient();
-  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
+  const user = await getCurrentUserOrNull();
+
+  if (!user) {
+    redirect("/api/auth/logout");
+  }
 
   const team = user?.team;
 
@@ -60,7 +64,7 @@ export default async function UpgradePage() {
       const saveAmount = 99 - discountPrice;
       const savePercentage = Math.round((saveAmount / 99) * 100);
 
-      return `${greeting}As a valued early customer, you qualify for our special discount pricing. Get the Pro plan for $${discountPrice}/month instead of the regular $99/month and save ${savePercentage}%.`;
+      return `${greeting}As a valued early adopter, you qualify for our special discount pricing. Get the Pro plan for $${discountPrice}/month instead of the regular $99/month and save ${savePercentage}%.`;
     }
 
     return `${greeting}Choose a plan to continue using all of Abacus's features.`;

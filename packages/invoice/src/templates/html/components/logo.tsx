@@ -1,14 +1,14 @@
 type Props = {
   logo: string;
-  customerName: string;
+  merchantName: string;
 };
 
-export function Logo({ logo, customerName }: Props) {
+export function Logo({ logo, merchantName }: Props) {
   return (
     <div className="max-w-[300px]">
       <img
         src={logo}
-        alt={customerName}
+        alt={merchantName}
         style={{
           height: 80,
           objectFit: "contain",

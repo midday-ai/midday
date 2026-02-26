@@ -19,7 +19,7 @@ import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
   deleteInvoice,
   draftInvoice,
-  getCustomerById,
+  getMerchantById,
   getInvoiceById,
   getInvoiceSummary,
   getInvoiceTemplate,
@@ -30,7 +30,7 @@ import {
   updateInvoice,
 } from "@midday/db/queries";
 import { calculateTotal } from "@midday/invoice/calculate";
-import { transformCustomerToContent } from "@midday/invoice/utils";
+import { transformMerchantToContent } from "@midday/invoice/utils";
 import { decodeJobId, getQueue, triggerJob } from "@midday/job-client";
 import { addDays } from "date-fns";
 import { HTTPException } from "hono/http-exception";
@@ -120,8 +120,8 @@ app.openapi(
           paymentDetails: invoice.paymentDetails
             ? JSON.stringify(invoice.paymentDetails)
             : null,
-          customerDetails: invoice.customerDetails
-            ? JSON.stringify(invoice.customerDetails)
+          merchantDetails: invoice.merchantDetails
+            ? JSON.stringify(invoice.merchantDetails)
             : null,
           fromDetails: invoice.fromDetails
             ? JSON.stringify(invoice.fromDetails)
@@ -295,8 +295,8 @@ app.openapi(
       paymentDetails: result.paymentDetails
         ? JSON.stringify(result.paymentDetails)
         : null,
-      customerDetails: result.customerDetails
-        ? JSON.stringify(result.customerDetails)
+      merchantDetails: result.merchantDetails
+        ? JSON.stringify(result.merchantDetails)
         : null,
       fromDetails: result.fromDetails
         ? JSON.stringify(result.fromDetails)
@@ -328,7 +328,7 @@ app.openapi(
     operationId: "createInvoice",
     "x-speakeasy-name-override": "create",
     description:
-      "Create an invoice for the authenticated team. The behavior depends on deliveryType: 'create' generates and finalizes the invoice immediately, 'create_and_send' also sends it to the customer, 'scheduled' schedules the invoice for automatic processing at the specified date.",
+      "Create an invoice for the authenticated team. The behavior depends on deliveryType: 'create' generates and finalizes the invoice immediately, 'create_and_send' also sends it to the merchant, 'scheduled' schedules the invoice for automatic processing at the specified date.",
     tags: ["Invoices"],
     request: {
       body: {
@@ -367,13 +367,13 @@ app.openapi(
         },
       },
       404: {
-        description: "Customer not found.",
+        description: "Merchant not found.",
         content: {
           "application/json": {
             schema: z.object({
               message: z.string().openapi({
                 description: "Error message",
-                example: "Customer not found",
+                example: "Merchant not found",
               }),
             }),
           },
@@ -440,17 +440,17 @@ app.openapi(
       input.dueDate ||
       addDays(new Date(issueDate), paymentTermsDays).toISOString();
 
-    // Fetch customer and generate customerDetails
-    const customer = await getCustomerById(db, {
-      id: input.customerId,
+    // Fetch merchant and generate merchantDetails
+    const merchant = await getMerchantById(db, {
+      id: input.merchantId,
       teamId,
     });
 
-    if (!customer) {
-      throw new HTTPException(404, { message: "Customer not found" });
+    if (!merchant) {
+      throw new HTTPException(404, { message: "Merchant not found" });
     }
 
-    const customerDetails = transformCustomerToContent(customer);
+    const merchantDetails = transformMerchantToContent(merchant);
 
     const result = await draftInvoice(db, {
       id: invoiceId,
@@ -462,10 +462,10 @@ app.openapi(
       template: input.template,
       paymentDetails: input.paymentDetails,
       fromDetails: input.fromDetails,
-      customerDetails: customerDetails ? JSON.stringify(customerDetails) : null,
+      merchantDetails: merchantDetails ? JSON.stringify(merchantDetails) : null,
       noteDetails: input.noteDetails,
-      customerId: input.customerId,
-      customerName: customer.name,
+      merchantId: input.merchantId,
+      merchantName: merchant.name,
       logoUrl: input.logoUrl,
       vat: input.vat,
       tax: input.tax,
@@ -592,7 +592,7 @@ app.openapi(
           invoiceId: result.id,
           invoiceNumber: finalResult.invoiceNumber!,
           scheduledAt: input.scheduledAt,
-          customerName: finalResult.customerName ?? undefined,
+          merchantName: finalResult.merchantName ?? undefined,
         },
         "invoices",
       ).catch(() => {
@@ -607,8 +607,8 @@ app.openapi(
       paymentDetails: result.paymentDetails
         ? JSON.stringify(result.paymentDetails)
         : null,
-      customerDetails: result.customerDetails
-        ? JSON.stringify(result.customerDetails)
+      merchantDetails: result.merchantDetails
+        ? JSON.stringify(result.merchantDetails)
         : null,
       fromDetails: result.fromDetails
         ? JSON.stringify(result.fromDetails)
@@ -689,8 +689,8 @@ app.openapi(
       paymentDetails: result.paymentDetails
         ? JSON.stringify(result.paymentDetails)
         : null,
-      customerDetails: result.customerDetails
-        ? JSON.stringify(result.customerDetails)
+      merchantDetails: result.merchantDetails
+        ? JSON.stringify(result.merchantDetails)
         : null,
       fromDetails: result.fromDetails
         ? JSON.stringify(result.fromDetails)

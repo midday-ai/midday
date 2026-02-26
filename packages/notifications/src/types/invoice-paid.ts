@@ -15,7 +15,7 @@ export const invoicePaid: NotificationHandler = {
     metadata: {
       recordId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
-      customerName: data.customerName,
+      merchantName: data.merchantName,
       paidAt: data.paidAt,
       source: data.source,
     },

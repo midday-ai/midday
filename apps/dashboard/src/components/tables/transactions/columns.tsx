@@ -2,10 +2,11 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InlineAssignUser } from "@/components/inline-assign-user";
-import { InlineSelectCategory } from "@/components/inline-select-category";
 import { InlineSelectTags } from "@/components/inline-select-tags";
+import { TransactionTypeBadge } from "@/components/transaction-type-badge";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
+import { TransactionSource } from "@/components/transaction-source";
 import { TransactionStatus } from "@/components/transaction-status";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
@@ -220,6 +221,10 @@ const ActionsCell = memo(
             <DropdownMenuItem onClick={handleViewDetails}>
               View details
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleViewDetails}>
+              <Icons.AI size={14} className="mr-2" />
+              Explain with AI
+            </DropdownMenuItem>
             {transaction.manual && (
               <DropdownMenuItem onClick={handleEditTransaction}>
                 Edit transaction
@@ -413,63 +418,20 @@ export const columns: ColumnDef<Transaction>[] = [
     ),
   },
   {
-    accessorKey: "category",
-    header: "Category",
-    size: 250,
-    minSize: 150,
-    maxSize: 400,
+    accessorKey: "transactionType",
+    header: "Type",
+    size: 140,
+    minSize: 100,
+    maxSize: 250,
     enableResizing: true,
     meta: {
-      skeleton: { type: "icon-text", width: "w-28" },
-      headerLabel: "Category",
-      className: "w-[250px] min-w-[150px]",
+      skeleton: { type: "badge", width: "w-16" },
+      headerLabel: "Type",
+      className: "w-[140px] min-w-[100px]",
     },
-    cell: ({ row, table }) => {
-      // Show analyzing state when enrichment is not completed
-      if (!row.original.enrichmentCompleted) {
-        return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center space-x-2 cursor-help">
-                <Spinner size={14} className="stroke-primary" />
-                <span className="text-[#878787] text-sm">Analyzing</span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent
-              className="px-3 py-1.5 text-xs max-w-[280px]"
-              side="top"
-              sideOffset={5}
-            >
-              Analyzing transaction details to determine the best category.
-            </TooltipContent>
-          </Tooltip>
-        );
-      }
-
-      const meta = table.options.meta;
-
-      return (
-        <InlineSelectCategory
-          selected={
-            row.original.category
-              ? {
-                  id: row.original.category.id,
-                  name: row.original.category.name,
-                  color: row.original.category.color,
-                  slug: row.original.category.slug ?? "",
-                }
-              : undefined
-          }
-          onChange={(category) => {
-            meta?.updateTransaction?.({
-              id: row.original.id,
-              categorySlug: category.slug,
-              categoryName: category.name,
-            });
-          }}
-        />
-      );
-    },
+    cell: ({ row }) => (
+      <TransactionTypeBadge type={row.original.transactionType} />
+    ),
   },
   {
     accessorKey: "counterparty",
@@ -540,6 +502,27 @@ export const columns: ColumnDef<Transaction>[] = [
       className: "w-[140px] min-w-[100px]",
     },
     cell: ({ row }) => <TransactionMethod method={row.original.method} />,
+  },
+  {
+    accessorKey: "source",
+    header: "Source",
+    size: 140,
+    minSize: 100,
+    maxSize: 250,
+    enableResizing: true,
+    enableSorting: false,
+    meta: {
+      skeleton: { type: "badge", width: "w-16" },
+      headerLabel: "Source",
+      className: "w-[140px] min-w-[100px]",
+    },
+    cell: ({ row }) => (
+      <TransactionSource
+        manual={row.original.manual ?? false}
+        hasAccount={Boolean(row.original.account)}
+        accountName={row.original.account?.name ?? undefined}
+      />
+    ),
   },
   {
     accessorKey: "assigned",

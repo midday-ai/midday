@@ -111,10 +111,10 @@ export function SuggestedActions() {
       title: "Invoices",
       description: "Show me my invoices",
     },
-    "get-customers": {
+    "get-merchants": {
       icon: Icons.Customers,
-      title: "Customers",
-      description: "Show me my customers",
+      title: "Merchants",
+      description: "Show me my merchants",
     },
     "get-profit-analysis": {
       icon: Icons.PieChart,

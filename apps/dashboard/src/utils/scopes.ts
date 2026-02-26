@@ -9,12 +9,12 @@ export const RESOURCES = [
     ],
   },
   {
-    key: "customers",
-    name: "Customers",
-    description: "Access to customer data",
+    key: "merchants",
+    name: "Merchants",
+    description: "Access to merchant data",
     scopes: [
-      { scope: "customers.read", type: "read", label: "Read" },
-      { scope: "customers.write", type: "write", label: "Write" },
+      { scope: "merchants.read", type: "read", label: "Read" },
+      { scope: "merchants.write", type: "write", label: "Write" },
     ],
   },
   {

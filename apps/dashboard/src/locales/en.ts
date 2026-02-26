@@ -82,12 +82,12 @@ export default {
     unverified: "Unverified",
   },
   roles: {
-    owner: "Owner",
-    member: "Member",
-  },
-  tracker_status: {
-    in_progress: "In progress",
-    completed: "Completed",
+    owner: "Admin",
+    admin: "Admin",
+    member: "Team Member",
+    broker: "Broker",
+    syndicate: "Syndicate",
+    merchant: "Merchant",
   },
   notifications: {
     categories: {
@@ -109,11 +109,11 @@ export default {
       title: "Invoice payment received",
       subtitle: "Your invoice has been paid",
       manual_with_date:
-        "Invoice {invoiceNumber} from {customerName} marked as paid on {date}",
-      manual_with_date_no_customer:
+        "Invoice {invoiceNumber} from {merchantName} marked as paid on {date}",
+      manual_with_date_no_merchant:
         "Invoice {invoiceNumber} marked as paid on {date}",
-      manual: "Invoice {invoiceNumber} from {customerName} marked as paid",
-      manual_no_customer: "Invoice {invoiceNumber} marked as paid",
+      manual: "Invoice {invoiceNumber} from {merchantName} marked as paid",
+      manual_no_merchant: "Invoice {invoiceNumber} marked as paid",
       automatic: "Payment received for invoice {invoiceNumber}",
     },
     invoice_overdue: {
@@ -128,9 +128,9 @@ export default {
       description: "Get notified when invoices are scheduled for sending",
       title: "Invoice scheduled",
       subtitle: "Invoice has been scheduled for automatic delivery",
-      with_customer:
-        "Invoice {invoiceNumber} scheduled to be sent to {customerName} on {date} at {time}",
-      without_customer:
+      with_merchant:
+        "Invoice {invoiceNumber} scheduled to be sent to {merchantName} on {date} at {time}",
+      without_merchant:
         "Invoice {invoiceNumber} scheduled for {date} at {time}",
       simple: "Invoice {invoiceNumber} has been scheduled",
     },
@@ -138,18 +138,18 @@ export default {
       name: "Sent",
       description: "Get notified when invoices are successfully sent",
       title: "Invoice sent",
-      subtitle: "Invoice has been delivered to customer",
-      with_customer: "Invoice {invoiceNumber} sent to {customerName}",
-      without_customer: "Invoice {invoiceNumber} has been sent",
+      subtitle: "Invoice has been delivered to merchant",
+      with_merchant: "Invoice {invoiceNumber} sent to {merchantName}",
+      without_merchant: "Invoice {invoiceNumber} has been sent",
     },
     invoice_reminder_sent: {
       name: "Reminder Sent",
       description: "Get notified when invoice reminders are sent",
       title: "Invoice reminder sent",
-      subtitle: "Payment reminder has been sent to customer",
-      with_customer:
-        "Payment reminder sent to {customerName} for invoice {invoiceNumber}",
-      without_customer: "Payment reminder sent for invoice {invoiceNumber}",
+      subtitle: "Payment reminder has been sent to merchant",
+      with_merchant:
+        "Payment reminder sent to {merchantName} for invoice {invoiceNumber}",
+      without_merchant: "Payment reminder sent for invoice {invoiceNumber}",
     },
 
     invoice_cancelled: {
@@ -157,44 +157,44 @@ export default {
       description: "Get notified when invoices are cancelled",
       title: "Invoice cancelled",
       subtitle: "Invoice has been cancelled",
-      with_customer:
-        "Invoice {invoiceNumber} for {customerName} has been cancelled",
-      without_customer: "Invoice {invoiceNumber} has been cancelled",
+      with_merchant:
+        "Invoice {invoiceNumber} for {merchantName} has been cancelled",
+      without_merchant: "Invoice {invoiceNumber} has been cancelled",
     },
     invoice_created: {
       name: "Created",
       description: "Get notified when new invoices are created",
       title: "Invoice created",
       subtitle: "A new invoice has been created",
-      with_customer_and_amount:
-        "Invoice {invoiceNumber} created for {customerName} - {amount}",
-      with_customer: "Invoice {invoiceNumber} created for {customerName}",
-      without_customer: "Invoice {invoiceNumber} has been created",
+      with_merchant_and_amount:
+        "Invoice {invoiceNumber} created for {merchantName} - {amount}",
+      with_merchant: "Invoice {invoiceNumber} created for {merchantName}",
+      without_merchant: "Invoice {invoiceNumber} has been created",
     },
     invoice_refunded: {
       name: "Refunded",
       description: "Get notified when invoice payments are refunded",
       title: "Invoice refunded",
       subtitle: "Invoice payment has been refunded",
-      with_customer:
-        "Invoice {invoiceNumber} for {customerName} has been refunded",
-      without_customer: "Invoice {invoiceNumber} has been refunded",
+      with_merchant:
+        "Invoice {invoiceNumber} for {merchantName} has been refunded",
+      without_merchant: "Invoice {invoiceNumber} has been refunded",
     },
     recurring_series_started: {
       name: "Recurring Series Started",
       description: "Get notified when a new recurring invoice series begins",
       title: "Recurring invoice series started",
-      with_customer_and_count:
-        "Started {frequency} recurring series for {customerName} ({count} invoices)",
-      with_customer: "Started {frequency} recurring series for {customerName}",
+      with_merchant_and_count:
+        "Started {frequency} recurring series for {merchantName} ({count} invoices)",
+      with_merchant: "Started {frequency} recurring series for {merchantName}",
       with_frequency: "Started {frequency} recurring invoice series",
     },
     recurring_series_completed: {
       name: "Recurring Series Completed",
       description: "Get notified when a recurring invoice series finishes",
       title: "Recurring invoice series completed",
-      with_customer_and_count:
-        "Recurring series for {customerName} completed ({count} invoices generated)",
+      with_merchant_and_count:
+        "Recurring series for {merchantName} completed ({count} invoices generated)",
       with_count:
         "Recurring invoice series completed ({count} invoices generated)",
     },
@@ -202,9 +202,9 @@ export default {
       name: "Recurring Series Paused",
       description: "Get notified when a recurring invoice series is paused",
       title: "Recurring invoice series paused",
-      with_customer: "Recurring series for {customerName} has been paused",
-      auto_failure_with_customer:
-        "Recurring series for {customerName} paused after {failureCount} failed attempts",
+      with_merchant: "Recurring series for {merchantName} has been paused",
+      auto_failure_with_merchant:
+        "Recurring series for {merchantName} paused after {failureCount} failed attempts",
       auto_failure:
         "Recurring series paused after {failureCount} failed attempts",
     },
@@ -215,9 +215,9 @@ export default {
       title: "Upcoming invoice generation",
       batch: "You have {count} invoice(s) scheduled for tomorrow",
       single_with_details:
-        "A {amount} invoice for {customerName} is scheduled for tomorrow",
-      single_with_customer:
-        "An invoice for {customerName} is scheduled for tomorrow",
+        "A {amount} invoice for {merchantName} is scheduled for tomorrow",
+      single_with_merchant:
+        "An invoice for {merchantName} is scheduled for tomorrow",
     },
     inbox_new: {
       name: "New Inbox Items",
@@ -301,7 +301,6 @@ export default {
     inbox: "Inbox",
     spending: "Spending",
     transactions: "Transactions",
-    tracker: "Tracker",
   },
   account_type: {
     depository: "Depository",
@@ -564,13 +563,111 @@ export default {
     "day#other": "days",
     view_overdue: "View overdue invoices",
   },
-  billable_hours: {
-    title: "Billable Hours",
-    no_hours: "No billable hours tracked",
-    "description#one": "{hours} hour tracked",
-    "description#other": "{hours} hours tracked",
-    "hour#one": "hour",
-    "hour#other": "hours",
-    view_tracker: "View time tracker",
+  portal: {
+    nav: {
+      home: "Home",
+      payments: "Payments",
+      deals: "Deals",
+      documents: "Docs",
+      help: "Help",
+    },
+    home: {
+      title: "Dashboard",
+      remaining_balance: "Remaining Balance",
+      next_payment: "Next Payment",
+      estimated_payoff: "Estimated Payoff",
+      progress: "Progress",
+      paid_off: "paid off",
+      no_active_payments: "No active payments",
+      all_paid: "All paid!",
+      today: "Today",
+      based_on_schedule: "Based on your current payment schedule",
+    },
+    payments: {
+      title: "Payment History",
+      no_payments: "No payments found",
+      completed: "Completed",
+      returned: "Returned",
+      pending: "Pending",
+      failed: "Failed",
+      all: "All",
+      payment_type: "Payment Type",
+      balance_after: "Balance After",
+      description: "Description",
+    },
+    deals: {
+      title: "Your Deals",
+      all_deals_combined: "All Deals Combined",
+      total_balance: "Total Balance",
+      total_paid: "Total Paid",
+      amount_received: "Amount You Received",
+      total_pay_back: "Total You Pay Back",
+      cost_of_funding: "Cost of Funding",
+      daily_payment: "Daily Payment",
+      weekly_payment: "Weekly Payment",
+      monthly_payment: "Monthly Payment",
+      payment_frequency: "Payment Frequency",
+      every_business_day: "Every business day",
+      every_week: "Every week",
+      every_month: "Every month",
+      started: "Started",
+      expected_payoff: "Expected Payoff",
+      remaining_balance: "Remaining Balance",
+      show_advanced: "Show Advanced Details",
+      hide_advanced: "Hide Advanced Details",
+      factor_rate: "Factor Rate",
+      holdback_percentage: "Holdback Percentage",
+      deal_code: "Deal Code",
+      nsf_warning: "returned payment(s) on record",
+    },
+    payoff: {
+      title: "Request Payoff",
+      current_balance: "Current Balance",
+      payoff_amount: "Payoff Amount",
+      good_through: "Good Through",
+      no_penalty: "Your payoff amount is the remaining balance. There is no additional discount or penalty for early payoff.",
+      request_letter: "Request Payoff Letter",
+      verify_to_request: "Verify Email to Request",
+      verify_email: "Verify Your Email",
+      enter_email: "Enter the email address on file for your account to receive a verification code.",
+      send_code: "Send Code",
+      enter_code: "Enter Verification Code",
+      check_email: "Check your email for a verification link or paste the code below.",
+      verify: "Verify",
+      requested: "Requested",
+      generated: "Generated",
+      sent: "Sent",
+      previous_requests: "Previous Requests",
+      letter_requested: "Payoff letter requested! You will receive it via email.",
+    },
+    documents: {
+      title: "Documents",
+      no_documents: "No documents available",
+      no_documents_hint: "Documents will appear here when uploaded by your funder.",
+      contracts: "Contracts",
+      disclosures: "Disclosures",
+      payoff_letters: "Payoff Letters",
+      statements: "Statements",
+      tax_documents: "Tax Documents",
+      other: "Other",
+    },
+    help: {
+      title: "Help & Support",
+      contact_funder: "Contact Your Funder",
+      call_us: "Call Us",
+      email_us: "Email Us",
+      faq: "Frequently Asked Questions",
+      send_message: "Send Us a Message",
+      message_sent: "Message sent!",
+      reply_time: "We will reply to your email within 1 business day.",
+      send_another: "Send another message",
+      your_email: "Your Email",
+      subject: "Subject (optional)",
+      message: "Message",
+    },
+    notifications: {
+      title: "Notifications",
+      no_notifications: "No notifications yet",
+    },
   },
 } as const;

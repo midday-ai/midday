@@ -2,7 +2,6 @@
 
 import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
-import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
 import { useTRPC } from "@/trpc/client";
 import {
   Accordion,
@@ -10,7 +9,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
+import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
 import { Label } from "@midday/ui/label";
 import {
   Select,
@@ -27,30 +28,24 @@ import { toast } from "@midday/ui/use-toast";
 import { getTaxTypeLabel } from "@midday/utils/tax";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
+import { useState } from "react";
 import { AssignUser } from "./assign-user";
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
-import { SelectCategory } from "./select-category";
 import { SelectTags } from "./select-tags";
 import { SuggestedMatch } from "./suggested-match";
 import { TaxAmount } from "./tax-amount";
 import { TransactionAttachments } from "./transaction-attachments";
 import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
+import { TransactionSource } from "./transaction-source";
+import { TransactionTypeBadge } from "./transaction-type-badge";
 
 export function TransactionDetails() {
   const trpc = useTRPC();
   const { transactionId } = useTransactionParams();
   const queryClient = useQueryClient();
   const invalidateTransactionQueries = useInvalidateTransactionQueries();
-
-  const { updateCategory } = useUpdateTransactionCategory({
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
-      });
-    },
-  });
 
   const { data, isLoading, isFetching } = useQuery({
     ...trpc.transactions.getById.queryOptions({ id: transactionId! }),
@@ -228,6 +223,17 @@ export function TransactionDetails() {
     }),
   );
 
+  const [showExplanation, setShowExplanation] = useState(false);
+
+  const {
+    data: explainData,
+    isLoading: isExplaining,
+    refetch: fetchExplanation,
+  } = useQuery({
+    ...trpc.transactions.explain.queryOptions({ id: transactionId! }),
+    enabled: false,
+  });
+
   if (isLoading || !data) {
     return null;
   }
@@ -252,26 +258,48 @@ export function TransactionDetails() {
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              {data?.account?.connection?.logoUrl && (
-                <TransactionBankAccount
-                  name={data?.account?.name ?? undefined}
-                  logoUrl={data.account.connection.logoUrl}
-                  className="text-[#606060] text-xs"
+              <div className="flex items-center gap-3">
+                {data?.account?.connection?.logoUrl && (
+                  <TransactionBankAccount
+                    name={data?.account?.name ?? undefined}
+                    logoUrl={data.account.connection.logoUrl}
+                    className="text-[#606060] text-xs"
+                  />
+                )}
+                <TransactionSource
+                  manual={data?.manual ?? false}
+                  hasAccount={Boolean(data?.account)}
+                  accountName={data?.account?.name ?? undefined}
                 />
-              )}
+              </div>
               <span className="text-[#606060] text-xs select-text">
                 {data?.date && format(parseISO(data.date), "MMM d, y")}
               </span>
             </div>
           )}
 
-          <h2 className="mt-6 mb-3 select-text">
-            {isLoading ? (
-              <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
-            ) : (
-              data?.name
-            )}
-          </h2>
+          <div className="flex items-center justify-between mt-6 mb-3">
+            <h2 className="select-text">
+              {isLoading ? (
+                <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
+              ) : (
+                data?.name
+              )}
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs h-7"
+              disabled={isExplaining}
+              onClick={() => {
+                setShowExplanation(true);
+                fetchExplanation();
+              }}
+            >
+              <Icons.AI size={14} />
+              Explain
+            </Button>
+          </div>
           <div className="flex justify-between items-center">
             <div className="flex flex-col w-full space-y-1">
               {isLoading ? (
@@ -312,26 +340,35 @@ export function TransactionDetails() {
         </div>
       )}
 
+      {showExplanation && (
+        <div className="mt-4 rounded-md border bg-blue-50/50 dark:bg-blue-950/20 px-4 py-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Icons.AI size={14} className="text-blue-600" />
+            <span className="text-xs font-medium text-blue-600">
+              AI Explanation
+            </span>
+          </div>
+          {isExplaining ? (
+            <div className="space-y-2">
+              <Skeleton className="w-full h-3 rounded" />
+              <Skeleton className="w-[80%] h-3 rounded" />
+              <Skeleton className="w-[60%] h-3 rounded" />
+            </div>
+          ) : (
+            <p className="text-sm text-foreground/80 select-text leading-relaxed">
+              {explainData?.explanation}
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4 mt-6 mb-2">
         <div>
-          <Label htmlFor="category" className="mb-2 block">
-            Category
+          <Label htmlFor="type" className="mb-2 block">
+            Type
           </Label>
 
-          <SelectCategory
-            id={transactionId}
-            // @ts-expect-error
-            selected={data?.category ?? undefined}
-            onChange={async (category) => {
-              if (category && data?.id && data?.name) {
-                await updateCategory(data.id, data.name, {
-                  id: category.id,
-                  name: category.name,
-                  slug: category.slug,
-                });
-              }
-            }}
-          />
+          <TransactionTypeBadge type={data?.transactionType} />
         </div>
 
         <div>

@@ -280,7 +280,7 @@ function getHeaderLabel(columnId: string): string {
     invoiceNumber: "Invoice no.",
     status: "Status",
     dueDate: "Due date",
-    customer: "Customer",
+    merchant: "Merchant",
     amount: "Amount",
     vatRate: "VAT Rate",
     vatAmount: "VAT Amount",

@@ -49,6 +49,7 @@ export const getTeamById = async (db: Database, id: string) => {
       stripeCustomerId: teams.stripeCustomerId,
       stripeSubscriptionId: teams.stripeSubscriptionId,
       stripePriceId: teams.stripePriceId,
+      branding: teams.branding,
     })
     .from(teams)
     .where(eq(teams.id, id));
@@ -504,13 +505,16 @@ export async function deleteTeamMember(
     )
     .returning();
 
+  // Invalidate cached team access so middleware re-checks
+  await teamCache.delete(`user:${params.userId}:team:${params.teamId}`);
+
   return deleted;
 }
 
 type UpdateTeamMemberParams = {
   userId: string;
   teamId: string;
-  role: "owner" | "member";
+  role: "owner" | "admin" | "member" | "broker" | "syndicate" | "merchant";
 };
 
 export async function updateTeamMember(
@@ -530,6 +534,9 @@ export async function updateTeamMember(
     .set({ role })
     .where(and(eq(usersOnTeam.userId, userId), eq(usersOnTeam.teamId, teamId)))
     .returning();
+
+  // Invalidate cached team access so middleware picks up the new role
+  await teamCache.delete(`user:${userId}:team:${teamId}`);
 
   return updated;
 }

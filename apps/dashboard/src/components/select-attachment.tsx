@@ -79,9 +79,9 @@ export function SelectAttachment({
         // Build secondary text with most important matching info
         let secondaryText: string | undefined;
         if (isInvoice) {
-          // For invoices: customer name + due date (most important for identification)
+          // For invoices: merchant name + due date (most important for identification)
           const parts: string[] = [];
-          if (item.customerName) parts.push(item.customerName);
+          if (item.merchantName) parts.push(item.merchantName);
           if (item.dueDate) {
             // Use TZDate for invoice dates (stored as UTC midnight)
             const tzDate = new TZDate(item.dueDate, "UTC");

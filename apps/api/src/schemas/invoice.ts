@@ -196,16 +196,16 @@ const baseDraftInvoiceSchema = z.object({
       "Reference to the invoice template used (for tracking which template was selected)",
     example: "c4d5e6f7-8901-2345-6789-abcdef012345",
   }),
-  customerDetails: z.string().nullable().optional().openapi({
-    description: "Customer details in stringified format",
+  merchantDetails: z.string().nullable().optional().openapi({
+    description: "Merchant details in stringified format",
     example: "John Doe, johndoe@email.com",
   }),
-  customerId: z.string().uuid().nullable().optional().openapi({
-    description: "Unique identifier for the customer",
+  merchantId: z.string().uuid().nullable().optional().openapi({
+    description: "Unique identifier for the merchant",
     example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   }),
-  customerName: z.string().nullable().optional().openapi({
-    description: "Name of the customer",
+  merchantName: z.string().nullable().optional().openapi({
+    description: "Name of the merchant",
     example: "Acme Corporation",
   }),
   noteDetails: z.string().nullable().optional().openapi({
@@ -222,7 +222,7 @@ const baseDraftInvoiceSchema = z.object({
   }),
   invoiceNumber: z.string().optional().openapi({
     description:
-      "Invoice number as shown to the customer (auto-generated if not provided)",
+      "Invoice number as shown on the invoice (auto-generated if not provided)",
     example: "INV-2024-001",
   }),
   logoUrl: z.string().optional().nullable().openapi({
@@ -372,8 +372,8 @@ export const draftInvoiceSchemaWithOpenApi = draftInvoiceSchema.openapi({
       locale: "en-US",
     },
     fromDetails: "Acme Inc, 123 Main St, City, Country",
-    customerDetails: "John Doe, johndoe@email.com",
-    customerId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    merchantDetails: "John Doe, johndoe@email.com",
+    merchantId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     paymentDetails: "Bank: 123456, IBAN: DE1234567890",
     noteDetails: "Thank you for your business.",
     dueDate: "2024-06-30T23:59:59.000Z",
@@ -585,14 +585,14 @@ export const getInvoicesSchema = z.object({
       param: { in: "query" },
       example: ["paid", "unpaid"],
     }),
-  customers: z
+  merchants: z
     .array(z.string())
     .nullable()
     .optional()
     .openapi({
-      description: "List of customer IDs to filter invoices.",
+      description: "List of merchant IDs to filter invoices.",
       param: { in: "query" },
-      example: ["customer-uuid-1", "customer-uuid-2"],
+      example: ["merchant-uuid-1", "merchant-uuid-2"],
     }),
   ids: z
     .array(z.string())
@@ -749,8 +749,8 @@ export const createInvoiceRequestSchema = z
         ],
       },
     }),
-    customerId: z.string().uuid().openapi({
-      description: "Unique identifier for the customer (required)",
+    merchantId: z.string().uuid().openapi({
+      description: "Unique identifier for the merchant (required)",
       example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     }),
     paymentDetails: editorFieldSchema.openapi({
@@ -800,7 +800,7 @@ export const createInvoiceRequestSchema = z
     }),
     invoiceNumber: z.string().optional().openapi({
       description:
-        "Invoice number as shown to the customer (auto-generated if not provided)",
+        "Invoice number as shown on the invoice (auto-generated if not provided)",
       example: "INV-2024-001",
     }),
     logoUrl: z.string().optional().nullable().openapi({
@@ -836,7 +836,7 @@ export const createInvoiceRequestSchema = z
     }),
     deliveryType: z.enum(["create", "create_and_send", "scheduled"]).openapi({
       description:
-        "How the invoice should be processed: 'create' - finalize immediately, 'create_and_send' - finalize and send to customer, 'scheduled' - schedule for automatic processing at specified date",
+        "How the invoice should be processed: 'create' - finalize immediately, 'create_and_send' - finalize and send to merchant, 'scheduled' - schedule for automatic processing at specified date",
       example: "create",
     }),
     scheduledAt: z.string().datetime({ offset: true }).optional().openapi({
@@ -944,7 +944,7 @@ export const createInvoiceRequestSchema = z
           },
         ],
       },
-      customerId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      merchantId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
       paymentDetails: {
         type: "doc",
         content: [
@@ -1233,7 +1233,7 @@ export const invoiceResponseSchema = z
     }),
     invoiceNumber: z.string().optional().openapi({
       description:
-        "Invoice number as shown to the customer (auto-generated if not provided)",
+        "Invoice number as shown on the invoice (auto-generated if not provided)",
       example: "INV-2024-001",
     }),
     amount: z.number().openapi({
@@ -1244,28 +1244,28 @@ export const invoiceResponseSchema = z
       description: "Currency code (ISO 4217) for the invoice amount",
       example: "USD",
     }),
-    customer: z
+    merchant: z
       .object({
         id: z.string().uuid().openapi({
-          description: "Unique identifier for the customer",
+          description: "Unique identifier for the merchant",
           example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         }),
         name: z.string().openapi({
-          description: "Name of the customer",
+          description: "Name of the merchant",
           example: "Acme Corporation",
         }),
         website: z.string().nullable().openapi({
-          description: "Website URL of the customer",
+          description: "Website URL of the merchant",
           example: "https://acme.com",
         }),
         email: z.string().email().nullable().openapi({
-          description: "Email address of the customer",
+          description: "Email address of the merchant",
           example: "info@acme.com",
         }),
       })
       .nullable()
       .openapi({
-        description: "Customer details",
+        description: "Merchant details",
       }),
     paidAt: z.string().nullable().openapi({
       description:
@@ -1300,12 +1300,12 @@ export const invoiceResponseSchema = z
     }),
     viewedAt: z.string().nullable().openapi({
       description:
-        "Timestamp when the invoice was viewed by the customer (ISO 8601), or null if never viewed",
+        "Timestamp when the invoice was viewed by the merchant (ISO 8601), or null if never viewed",
       example: "2024-06-05T14:30:00.000Z",
     }),
-    customerName: z.string().nullable().openapi({
+    merchantName: z.string().nullable().openapi({
       description:
-        "Name of the customer as shown on the invoice, or null if not set",
+        "Name of the merchant as shown on the invoice, or null if not set",
       example: "Acme Corporation",
     }),
     sentTo: z.string().email().nullable().openapi({

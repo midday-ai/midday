@@ -17,13 +17,13 @@ export async function updateInvoiceStatus({
     .from("invoices")
     .update({ status, paid_at })
     .eq("id", invoiceId)
-    .select("id, invoice_number, status, team_id, customer_name")
+    .select("id, invoice_number, status, team_id, merchant_name")
     .single();
 
   if (
     !updatedInvoice?.invoice_number ||
     !updatedInvoice?.team_id ||
-    !updatedInvoice?.customer_name
+    !updatedInvoice?.merchant_name
   ) {
     logger.error("Invoice data is missing");
     return;
@@ -36,6 +36,6 @@ export async function updateInvoiceStatus({
     invoiceNumber: updatedInvoice.invoice_number,
     status: updatedInvoice.status as "paid" | "overdue",
     teamId: updatedInvoice.team_id,
-    customerName: updatedInvoice.customer_name,
+    merchantName: updatedInvoice.merchant_name,
   });
 }

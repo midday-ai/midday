@@ -28,18 +28,18 @@ export class SendInvoiceReminderProcessor extends BaseProcessor<SendInvoiceRemin
       throw new Error(`Invoice not found: ${invoiceId}`);
     }
 
-    const customerEmail = invoice.customer?.email;
+    const merchantEmail = invoice.merchant?.email;
 
-    if (!customerEmail) {
-      this.logger.error("Invoice customer email not found", { invoiceId });
-      throw new Error(`Invoice customer email not found: ${invoiceId}`);
+    if (!merchantEmail) {
+      this.logger.error("Invoice merchant email not found", { invoiceId });
+      throw new Error(`Invoice merchant email not found: ${invoiceId}`);
     }
 
-    if (!invoice.invoiceNumber || !invoice.customer?.name) {
+    if (!invoice.invoiceNumber || !invoice.merchant?.name) {
       this.logger.error("Invoice missing required fields", {
         invoiceId,
         hasInvoiceNumber: !!invoice.invoiceNumber,
-        hasCustomerName: !!invoice.customer?.name,
+        hasMerchantName: !!invoice.merchant?.name,
       });
       throw new Error(`Invoice missing required fields: ${invoiceId}`);
     }
@@ -52,8 +52,8 @@ export class SendInvoiceReminderProcessor extends BaseProcessor<SendInvoiceRemin
         {
           invoiceId,
           invoiceNumber: invoice.invoiceNumber,
-          customerName: invoice.customer.name,
-          customerEmail,
+          merchantName: invoice.merchant.name,
+          merchantEmail,
           token: invoice.token,
         },
         {
@@ -71,7 +71,7 @@ export class SendInvoiceReminderProcessor extends BaseProcessor<SendInvoiceRemin
 
     this.logger.info("Invoice reminder email sent", {
       invoiceId,
-      customerEmail,
+      merchantEmail,
     });
   }
 }

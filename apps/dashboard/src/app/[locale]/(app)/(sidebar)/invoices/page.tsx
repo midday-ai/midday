@@ -22,7 +22,7 @@ import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Invoices | Abacus",
+  title: "Invoices | abacus",
 };
 
 type Props = {

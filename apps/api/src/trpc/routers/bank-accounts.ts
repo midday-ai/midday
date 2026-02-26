@@ -5,16 +5,22 @@ import {
   getBankAccountsSchema,
   updateBankAccountSchema,
 } from "@api/schemas/bank-accounts";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  adminProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+} from "@api/trpc/init";
 import {
   createBankAccount,
   deleteBankAccount,
+  getBankAccountById,
   getBankAccountDetails,
   getBankAccounts,
   getBankAccountsBalances,
   getBankAccountsCurrencies,
   updateBankAccount,
 } from "@midday/db/queries";
+import { z } from "zod";
 
 export const bankAccountsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -25,6 +31,12 @@ export const bankAccountsRouter = createTRPCRouter({
         enabled: input?.enabled,
         manual: input?.manual,
       });
+    }),
+
+  getById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return getBankAccountById(db, { id: input.id, teamId: teamId! });
     }),
 
   /**
@@ -48,7 +60,7 @@ export const bankAccountsRouter = createTRPCRouter({
     return getBankAccountsBalances(db, teamId!);
   }),
 
-  delete: protectedProcedure
+  delete: adminProcedure
     .input(deleteBankAccountSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return deleteBankAccount(db, {
@@ -57,7 +69,7 @@ export const bankAccountsRouter = createTRPCRouter({
       });
     }),
 
-  update: protectedProcedure
+  update: adminProcedure
     .input(updateBankAccountSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return updateBankAccount(db, {
@@ -67,7 +79,7 @@ export const bankAccountsRouter = createTRPCRouter({
       });
     }),
 
-  create: protectedProcedure
+  create: adminProcedure
     .input(createBankAccountSchema)
     .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       return createBankAccount(db, {

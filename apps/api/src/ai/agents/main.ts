@@ -1,13 +1,12 @@
 import { openai } from "@ai-sdk/openai";
 import { createAgent, formatContextForLLM } from "@api/ai/agents/config/shared";
 import { analyticsAgent } from "./analytics";
-import { customersAgent } from "./customers";
+import { merchantsAgent } from "./merchants";
 import { generalAgent } from "./general";
 import { invoicesAgent } from "./invoices";
 import { operationsAgent } from "./operations";
 import { reportsAgent } from "./reports";
 import { researchAgent } from "./research";
-import { timeTrackingAgent } from "./time-tracking";
 import { transactionsAgent } from "./transactions";
 
 export const mainAgent = createAgent({
@@ -34,8 +33,7 @@ reports: Financial reports (revenue, expenses, spending, spending patterns, burn
 analytics: Predictions, advanced analytics (excluding revenue forecast which goes to reports)
 transactions: Transaction history
 invoices: Invoice management
-customers: Customer management
-timeTracking: Time tracking
+merchants: Merchant management
 </agent-capabilities>
 </background-data>`,
   handoffs: [
@@ -46,8 +44,7 @@ timeTracking: Time tracking
     analyticsAgent,
     transactionsAgent,
     invoicesAgent,
-    customersAgent,
-    timeTrackingAgent,
+    merchantsAgent,
   ],
   maxTurns: 1,
 });

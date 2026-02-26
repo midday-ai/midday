@@ -28,7 +28,7 @@ export const createActivitySchema = z.object({
     "transaction_attachment_created",
     "transaction_category_created",
     "transactions_exported",
-    "customer_created",
+    "merchant_created",
     "recurring_series_completed",
     "recurring_series_started",
     "recurring_series_paused",
@@ -165,7 +165,7 @@ export const invoicePaidSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
-  customerName: z.string().optional(),
+  merchantName: z.string().optional(),
   paidAt: z.string().optional(),
   source: z.enum(["user", "system"]).default("system"),
 });
@@ -174,7 +174,7 @@ export const invoiceOverdueSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
-  customerName: z.string(),
+  merchantName: z.string(),
   source: z.enum(["user", "system"]).default("system"),
 });
 
@@ -183,7 +183,7 @@ export const invoiceScheduledSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   scheduledAt: z.string(),
-  customerName: z.string().optional(),
+  merchantName: z.string().optional(),
 });
 
 export const invoiceSentSchema = z.object({
@@ -191,8 +191,8 @@ export const invoiceSentSchema = z.object({
   invoiceId: z.string().uuid(),
   token: z.string(),
   invoiceNumber: z.string(),
-  customerName: z.string(),
-  customerEmail: z.string().email().optional(),
+  merchantName: z.string(),
+  merchantEmail: z.string().email().optional(),
 });
 
 export const invoiceReminderSentSchema = z.object({
@@ -200,22 +200,22 @@ export const invoiceReminderSentSchema = z.object({
   invoiceId: z.string().uuid(),
   token: z.string(),
   invoiceNumber: z.string(),
-  customerName: z.string(),
-  customerEmail: z.string().email().optional(),
+  merchantName: z.string(),
+  merchantEmail: z.string().email().optional(),
 });
 
 export const invoiceCancelledSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
-  customerName: z.string().optional(),
+  merchantName: z.string().optional(),
 });
 
 export const invoiceCreatedSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
-  customerName: z.string().optional(),
+  merchantName: z.string().optional(),
   amount: z.number().optional(),
   currency: z.string().optional(),
 });
@@ -224,7 +224,7 @@ export const invoiceRefundedSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
-  customerName: z.string().optional(),
+  merchantName: z.string().optional(),
   refundedAt: z.string().optional(),
 });
 
@@ -232,7 +232,7 @@ export const recurringSeriesCompletedSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
-  customerName: z.string().optional(),
+  merchantName: z.string().optional(),
   recurringId: z.string().uuid(),
   totalGenerated: z.number(),
 });
@@ -242,7 +242,7 @@ export const recurringSeriesStartedSchema = z.object({
   recurringId: z.string().uuid(),
   invoiceId: z.string().uuid().optional(), // First invoice ID if linked
   invoiceNumber: z.string().optional(),
-  customerName: z.string().optional(),
+  merchantName: z.string().optional(),
   frequency: z.string(),
   endType: z.enum(["never", "on_date", "after_count"]),
   endDate: z.string().optional(),
@@ -252,7 +252,7 @@ export const recurringSeriesStartedSchema = z.object({
 export const recurringSeriesPausedSchema = z.object({
   users: z.array(userSchema),
   recurringId: z.string().uuid(),
-  customerName: z.string().optional(),
+  merchantName: z.string().optional(),
   reason: z.enum(["manual", "auto_failure"]).default("manual"),
   failureCount: z.number().optional(),
 });
@@ -260,7 +260,7 @@ export const recurringSeriesPausedSchema = z.object({
 // Schema for individual invoice in the batch
 export const upcomingInvoiceItemSchema = z.object({
   recurringId: z.string().uuid(),
-  customerName: z.string().optional(),
+  merchantName: z.string().optional(),
   amount: z.number().optional(),
   currency: z.string().optional(),
   scheduledAt: z.string(), // ISO date when invoice will be generated

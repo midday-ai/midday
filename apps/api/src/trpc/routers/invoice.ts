@@ -15,6 +15,7 @@ import {
 } from "@api/schemas/invoice";
 import {
   createTRPCRouter,
+  memberProcedure,
   protectedProcedure,
   publicProcedure,
 } from "@api/trpc/init";
@@ -26,30 +27,28 @@ import {
   duplicateInvoice,
   getAverageDaysToPayment,
   getAverageInvoiceSize,
-  getCustomerById,
-  getInactiveClientsCount,
+  getInactiveMerchantsCount,
   getInvoiceById,
   getInvoiceSummary,
   getInvoiceTemplate,
   getInvoices,
-  getMostActiveClient,
-  getNewCustomersCount,
+  getMerchantById,
+  getMostActiveMerchant,
+  getNewMerchantsCount,
   getNextInvoiceNumber,
   getPaymentStatus,
   getTeamById,
-  getTopRevenueClient,
-  getTrackerProjectById,
-  getTrackerRecordsByRange,
+  getTopRevenueMerchant,
   getUserById,
   searchInvoiceNumber,
   updateInvoice,
 } from "@midday/db/queries";
 import { DEFAULT_TEMPLATE } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
-import { transformCustomerToContent } from "@midday/invoice/utils";
+import { transformMerchantToContent } from "@midday/invoice/utils";
 import { decodeJobId, getQueue, triggerJob } from "@midday/job-client";
 import { TRPCError } from "@trpc/server";
-import { addDays, format, parseISO } from "date-fns";
+import { addDays } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
@@ -111,159 +110,6 @@ export const invoiceRouter = createTRPCRouter({
         teamId: teamId!,
         statuses: input?.statuses,
       });
-    }),
-
-  createFromTracker: protectedProcedure
-    .input(
-      z.object({
-        projectId: z.string().uuid(),
-        dateFrom: z.string(),
-        dateTo: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
-      const { projectId, dateFrom, dateTo } = input;
-
-      // Get project data and tracker entries
-      const [projectData, trackerData] = await Promise.all([
-        getTrackerProjectById(db, { id: projectId, teamId: teamId! }),
-        getTrackerRecordsByRange(db, {
-          teamId: teamId!,
-          projectId,
-          from: dateFrom,
-          to: dateTo,
-        }),
-      ]);
-
-      if (!projectData) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "PROJECT_NOT_FOUND",
-        });
-      }
-
-      // Check if project is billable
-      if (!projectData.billable) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "PROJECT_NOT_BILLABLE",
-        });
-      }
-
-      // Check if project has a rate
-      if (!projectData.rate || projectData.rate <= 0) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "PROJECT_NO_RATE",
-        });
-      }
-
-      // Calculate total hours from tracker entries
-      const allEntries = Object.values(trackerData.result || {}).flat();
-      const totalDuration = allEntries.reduce(
-        (sum, entry) => sum + (entry.duration || 0),
-        0,
-      );
-      const totalHours = Math.round((totalDuration / 3600) * 100) / 100;
-
-      if (totalHours === 0) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "NO_TRACKED_HOURS",
-        });
-      }
-
-      // Get default invoice settings and customer details
-      const [nextInvoiceNumber, template, team, fullCustomer, user] =
-        await Promise.all([
-          getNextInvoiceNumber(db, teamId!),
-          getInvoiceTemplate(db, teamId!),
-          getTeamById(db, teamId!),
-          projectData.customerId
-            ? getCustomerById(db, {
-                id: projectData.customerId,
-                teamId: teamId!,
-              })
-            : null,
-          getUserById(db, session?.user.id!),
-        ]);
-
-      const invoiceId = uuidv4();
-      const currency = projectData.currency || team?.baseCurrency || "USD";
-      const amount = totalHours * Number(projectData.rate);
-
-      // Get user's preferred date format
-      const userDateFormat =
-        template?.dateFormat ?? user?.dateFormat ?? defaultTemplate.dateFormat;
-
-      // Format the date range for the line item description
-      // Use parseISO to avoid timezone shifts when parsing date strings
-      const formattedDateFrom = format(parseISO(dateFrom), userDateFormat);
-      const formattedDateTo = format(parseISO(dateTo), userDateFormat);
-      const dateRangeDescription = `${projectData.name} (${formattedDateFrom} - ${formattedDateTo})`;
-
-      // Create draft invoice with tracker data
-      const templateData = {
-        ...defaultTemplate,
-        currency: currency.toUpperCase(),
-        ...(template
-          ? Object.fromEntries(
-              Object.entries(template).map(([key, value]) => [
-                key,
-                value === null ? undefined : value,
-              ]),
-            )
-          : {}),
-        size: (template?.size === "a4" || template?.size === "letter"
-          ? template.size
-          : defaultTemplate.size) as "a4" | "letter",
-        deliveryType: (template?.deliveryType === "create" ||
-        template?.deliveryType === "create_and_send"
-          ? template.deliveryType
-          : defaultTemplate.deliveryType) as
-          | "create"
-          | "create_and_send"
-          | undefined,
-      };
-
-      const invoiceData = {
-        id: invoiceId,
-        teamId: teamId!,
-        userId: session?.user.id!,
-        customerId: projectData.customerId,
-        customerName: fullCustomer?.name,
-        invoiceNumber: nextInvoiceNumber,
-        currency: currency.toUpperCase(),
-        amount,
-        lineItems: [
-          {
-            name: dateRangeDescription,
-            quantity: totalHours,
-            price: Number(projectData.rate),
-            vat: 0,
-          },
-        ],
-        issueDate: new Date().toISOString(),
-        dueDate: addDays(
-          new Date(),
-          template?.paymentTermsDays ?? 30,
-        ).toISOString(),
-        template: templateData,
-        fromDetails: (template?.fromDetails || null) as string | null,
-        paymentDetails: (template?.paymentDetails || null) as string | null,
-        customerDetails: fullCustomer
-          ? JSON.stringify(transformCustomerToContent(fullCustomer))
-          : null,
-        noteDetails: null,
-        topBlock: null,
-        bottomBlock: null,
-        vat: null,
-        tax: null,
-        discount: null,
-        subtotal: null,
-      };
-
-      return draftInvoice(db, invoiceData);
     }),
 
   defaultSettings: protectedProcedure.query(
@@ -372,9 +218,9 @@ export const invoiceRouter = createTRPCRouter({
         locale,
         fromDetails: savedTemplate.fromDetails,
         paymentDetails: savedTemplate.paymentDetails,
-        customerDetails: undefined,
+        merchantDetails: undefined,
         noteDetails: savedTemplate.noteDetails,
-        customerId: undefined,
+        merchantId: undefined,
         issueDate: new UTCDate().toISOString(),
         dueDate: addDays(new UTCDate(), paymentTermsDays).toISOString(),
         lineItems: [{ name: "", quantity: 0, price: 0, vat: 0 }],
@@ -385,7 +231,7 @@ export const invoiceRouter = createTRPCRouter({
         topBlock: undefined,
         bottomBlock: undefined,
         amount: undefined,
-        customerName: undefined,
+        merchantName: undefined,
         logoUrl: undefined,
         vat: undefined,
         template: savedTemplate,
@@ -393,7 +239,7 @@ export const invoiceRouter = createTRPCRouter({
     },
   ),
 
-  update: protectedProcedure
+  update: memberProcedure
     .input(updateInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       return updateInvoice(db, {
@@ -403,7 +249,7 @@ export const invoiceRouter = createTRPCRouter({
       });
     }),
 
-  delete: protectedProcedure
+  delete: memberProcedure
     .input(deleteInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return deleteInvoice(db, {
@@ -412,7 +258,7 @@ export const invoiceRouter = createTRPCRouter({
       });
     }),
 
-  draft: protectedProcedure
+  draft: memberProcedure
     .input(draftInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       // Generate invoice number if not provided
@@ -426,12 +272,12 @@ export const invoiceRouter = createTRPCRouter({
         userId: session?.user.id!,
         paymentDetails: parseInputValue(input.paymentDetails),
         fromDetails: parseInputValue(input.fromDetails),
-        customerDetails: parseInputValue(input.customerDetails),
+        merchantDetails: parseInputValue(input.merchantDetails),
         noteDetails: parseInputValue(input.noteDetails),
       });
     }),
 
-  create: protectedProcedure
+  create: memberProcedure
     .input(createInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       // Handle different delivery types
@@ -554,7 +400,7 @@ export const invoiceRouter = createTRPCRouter({
             invoiceId: input.id,
             invoiceNumber: data.invoiceNumber!,
             scheduledAt: input.scheduledAt,
-            customerName: data.customerName ?? undefined,
+            merchantName: data.merchantName ?? undefined,
           },
           "invoices",
         ).catch(() => {
@@ -590,7 +436,7 @@ export const invoiceRouter = createTRPCRouter({
       return data;
     }),
 
-  remind: protectedProcedure
+  remind: memberProcedure
     .input(remindInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       await triggerJob(
@@ -608,7 +454,7 @@ export const invoiceRouter = createTRPCRouter({
       });
     }),
 
-  duplicate: protectedProcedure
+  duplicate: memberProcedure
     .input(duplicateInvoiceSchema)
     .mutation(async ({ input, ctx: { db, session, teamId } }) => {
       const nextInvoiceNumber = await getNextInvoiceNumber(db, teamId!);
@@ -621,7 +467,7 @@ export const invoiceRouter = createTRPCRouter({
       });
     }),
 
-  updateSchedule: protectedProcedure
+  updateSchedule: memberProcedure
     .input(updateScheduledInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       // Get the current invoice to find the old scheduled job ID
@@ -712,7 +558,7 @@ export const invoiceRouter = createTRPCRouter({
       return updatedInvoice;
     }),
 
-  cancelSchedule: protectedProcedure
+  cancelSchedule: memberProcedure
     .input(cancelScheduledInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       // Get the current invoice to find the scheduled job ID
@@ -751,15 +597,15 @@ export const invoiceRouter = createTRPCRouter({
       return updatedInvoice;
     }),
 
-  mostActiveClient: protectedProcedure.query(
+  mostActiveMerchant: protectedProcedure.query(
     async ({ ctx: { db, teamId } }) => {
-      return getMostActiveClient(db, { teamId: teamId! });
+      return getMostActiveMerchant(db, { teamId: teamId! });
     },
   ),
 
-  inactiveClientsCount: protectedProcedure.query(
+  inactiveMerchantsCount: protectedProcedure.query(
     async ({ ctx: { db, teamId } }) => {
-      return getInactiveClientsCount(db, { teamId: teamId! });
+      return getInactiveMerchantsCount(db, { teamId: teamId! });
     },
   ),
 
@@ -775,15 +621,15 @@ export const invoiceRouter = createTRPCRouter({
     },
   ),
 
-  topRevenueClient: protectedProcedure.query(
+  topRevenueMerchant: protectedProcedure.query(
     async ({ ctx: { db, teamId } }) => {
-      return getTopRevenueClient(db, { teamId: teamId! });
+      return getTopRevenueMerchant(db, { teamId: teamId! });
     },
   ),
 
-  newCustomersCount: protectedProcedure.query(
+  newMerchantsCount: protectedProcedure.query(
     async ({ ctx: { db, teamId } }) => {
-      return getNewCustomersCount(db, { teamId: teamId! });
+      return getNewMerchantsCount(db, { teamId: teamId! });
     },
   ),
 });

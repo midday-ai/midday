@@ -67,7 +67,7 @@ export function InvoiceDetails() {
 
   const {
     id,
-    customer,
+    merchant,
     amount,
     currency,
     status,
@@ -83,7 +83,7 @@ export function InvoiceDetails() {
     updatedAt,
     sentAt,
     sentTo,
-    customerName,
+    merchantName,
     scheduledAt,
     paymentIntentId,
     refundedAt,
@@ -97,21 +97,21 @@ export function InvoiceDetails() {
       <div className="flex justify-between items-center">
         <div className="flex space-x-2 mt-1 items-center">
           <Avatar className="size-5">
-            {customer?.website && (
+            {merchant?.website && (
               <AvatarImageNext
-                src={getWebsiteLogo(customer?.website)}
-                alt={`${customer?.name} logo`}
+                src={getWebsiteLogo(merchant?.website)}
+                alt={`${merchant?.name} logo`}
                 width={20}
                 height={20}
                 quality={100}
               />
             )}
             <AvatarFallback className="text-[9px] font-medium">
-              {customer?.name?.at(0) || customerName?.at(0)}
+              {merchant?.name?.at(0) || merchantName?.at(0)}
             </AvatarFallback>
           </Avatar>
 
-          <span className="text-sm line-clamp-1">{customer?.name}</span>
+          <span className="text-sm line-clamp-1">{merchant?.name}</span>
         </div>
         <InvoiceStatus status={status} />
       </div>
@@ -414,7 +414,7 @@ export function InvoiceDetails() {
           </div>
         )}
 
-        {customer && (
+        {merchant && (
           <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">
             <span className="text-sm text-[#606060]">Invoice link</span>
             <div className="flex w-full gap-2">

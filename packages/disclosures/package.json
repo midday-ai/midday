@@ -1,0 +1,31 @@
+{
+  "name": "@midday/disclosures",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./calculations": "./src/calculations/index.ts",
+    "./states": "./src/states/index.ts",
+    "./templates/pdf": "./src/templates/pdf/index.tsx",
+    "./types": "./src/types.ts",
+    "./engine": "./src/engine.ts",
+    "./hash": "./src/hash.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "lint:fix": "biome format --write .",
+    "test": "bun test src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-pdf/renderer": "^4.3.1",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@midday/tsconfig": "workspace:*",
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3"
+  }
+}

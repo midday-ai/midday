@@ -16,13 +16,13 @@ import {
 } from "../components/theme";
 
 interface Props {
-  customerName: string;
+  merchantName: string;
   invoiceNumber: string;
   link: string;
 }
 
 export const InvoiceOverdueEmail = ({
-  customerName = "Customer",
+  merchantName = "Merchant",
   invoiceNumber = "INV-0001",
   link = "https://app.abacuslabs.co/invoices?invoiceId=40b25275-258c-48e0-9678-57324cd770a6&type=details",
 }: Props) => {
@@ -60,7 +60,7 @@ export const InvoiceOverdueEmail = ({
             style={{ color: lightStyles.text.color }}
           >
             Invoice <span className="font-medium">{invoiceNumber}</span> to{" "}
-            <span className="font-medium">{customerName}</span> is now overdue.
+            <span className="font-medium">{merchantName}</span> is now overdue.
             We've checked your account but haven't found a matching transaction.
             <br />
             <br />
@@ -68,7 +68,7 @@ export const InvoiceOverdueEmail = ({
             made through another method.
             <br />
             <br />
-            If needed, you can send a payment reminder to your customer or
+            If needed, you can send a payment reminder to your merchant or
             update the invoice status manually if it has already been paid.
             <br />
             <br />

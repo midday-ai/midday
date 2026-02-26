@@ -13,7 +13,7 @@ export const invoiceCreated: NotificationHandler = {
     metadata: {
       recordId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
-      customerName: data.customerName,
+      merchantName: data.merchantName,
       amount: data.amount,
       currency: data.currency,
       userName: user.full_name,

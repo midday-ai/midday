@@ -1,7 +1,7 @@
 import type { Job } from "bullmq";
 import { isDevelopment } from "../utils/env";
 import { accountingProcessors } from "./accounting";
-import { customerProcessors } from "./customers";
+import { merchantProcessors } from "./merchants";
 import { documentProcessors } from "./documents";
 import { embeddingsProcessors } from "./embeddings";
 import { inboxProcessors } from "./inbox";
@@ -9,6 +9,7 @@ import { invoiceProcessors } from "./invoices";
 import { ratesProcessors } from "./rates";
 import { teamProcessors } from "./teams";
 import { transactionProcessors } from "./transactions";
+import { disclosureProcessors } from "./disclosures";
 
 /**
  * Processor registry - maps job names to processor instances
@@ -54,13 +55,18 @@ for (const [jobName, processor] of Object.entries(invoiceProcessors)) {
   processors.set(jobName, processor);
 }
 
-// Register customer processors
-for (const [jobName, processor] of Object.entries(customerProcessors)) {
+// Register merchant processors
+for (const [jobName, processor] of Object.entries(merchantProcessors)) {
   processors.set(jobName, processor);
 }
 
 // Register team processors
 for (const [jobName, processor] of Object.entries(teamProcessors)) {
+  processors.set(jobName, processor);
+}
+
+// Register disclosure processors
+for (const [jobName, processor] of Object.entries(disclosureProcessors)) {
   processors.set(jobName, processor);
 }
 

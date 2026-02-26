@@ -183,13 +183,13 @@ export const getTransactionsSchema = z.object({
       },
     }),
   type: z
-    .enum(["income", "expense"])
+    .enum(["income", "expense", "credit", "debit", "refund", "fee", "adjustment", "transfer"])
     .nullable()
     .optional()
     .openapi({
       description:
-        "Transaction type to filter by. 'income' for money received, 'expense' for money spent",
-      example: "expense",
+        "Transaction type to filter by. 'credit' for inbound funds, 'debit' for outbound, 'refund', 'fee', 'adjustment', 'transfer'. Legacy: 'income'/'expense'",
+      example: "credit",
       param: {
         in: "query",
       },
@@ -310,6 +310,13 @@ export const transactionResponseSchema = z
           taxRate: 10,
           taxType: "VAT",
         },
+      }),
+    transactionType: z
+      .enum(["credit", "debit", "refund", "fee", "adjustment", "transfer"])
+      .nullable()
+      .openapi({
+        description: "Transaction type classification",
+        example: "credit",
       }),
     status: z.string().openapi({
       description: "Current status of the transaction",
@@ -915,5 +922,11 @@ export const importTransactionsSchema = z.object({
 export const moveToReviewSchema = z.object({
   transactionId: z.string().uuid().openapi({
     description: "Transaction ID to move back to review.",
+  }),
+});
+
+export const explainTransactionSchema = z.object({
+  id: z.string().uuid().openapi({
+    description: "Transaction ID to explain.",
   }),
 });

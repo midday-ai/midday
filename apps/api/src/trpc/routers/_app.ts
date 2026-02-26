@@ -7,7 +7,7 @@ import { bankAccountsRouter } from "./bank-accounts";
 import { bankConnectionsRouter } from "./bank-connections";
 import { billingRouter } from "./billing";
 import { chatsRouter } from "./chats";
-import { customersRouter } from "./customers";
+import { merchantsRouter } from "./merchants";
 import { documentTagAssignmentsRouter } from "./document-tag-assignments";
 import { documentTagsRouter } from "./document-tags";
 import { documentsRouter } from "./documents";
@@ -32,11 +32,21 @@ import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
 import { transactionAttachmentsRouter } from "./transaction-attachments";
 import { transactionCategoriesRouter } from "./transaction-categories";
+import { transactionRulesRouter } from "./transaction-rules";
 import { transactionTagsRouter } from "./transaction-tags";
 import { transactionsRouter } from "./transactions";
 import { userRouter } from "./user";
 import { widgetsRouter } from "./widgets";
+import { mcaDealsRouter } from "./mca-deals";
 import { merchantPortalRouter } from "./merchant-portal";
+import { underwritingRouter } from "./underwriting";
+import { brokersRouter } from "./brokers";
+import { syndicationRouter } from "./syndication";
+import { disclosuresRouter } from "./disclosures";
+import { dealFeesRouter } from "./deal-fees";
+import { reconciliationRouter } from "./reconciliation";
+import { achBatchesRouter } from "./ach-batches";
+import { exportTemplatesRouter } from "./export-templates";
 
 export const appRouter = createTRPCRouter({
   accounting: accountingRouter,
@@ -46,7 +56,7 @@ export const appRouter = createTRPCRouter({
   bankAccounts: bankAccountsRouter,
   bankConnections: bankConnectionsRouter,
   chats: chatsRouter,
-  customers: customersRouter,
+  merchants: merchantsRouter,
   documents: documentsRouter,
   documentTagAssignments: documentTagAssignmentsRouter,
   documentTags: documentTagsRouter,
@@ -68,6 +78,7 @@ export const appRouter = createTRPCRouter({
   team: teamRouter,
   transactionAttachments: transactionAttachmentsRouter,
   transactionCategories: transactionCategoriesRouter,
+  transactionRules: transactionRulesRouter,
   transactions: transactionsRouter,
   transactionTags: transactionTagsRouter,
   user: userRouter,
@@ -75,7 +86,16 @@ export const appRouter = createTRPCRouter({
   shortLinks: shortLinksRouter,
   apiKeys: apiKeysRouter,
   widgets: widgetsRouter,
+  deals: mcaDealsRouter,
   merchantPortal: merchantPortalRouter,
+  underwriting: underwritingRouter,
+  brokers: brokersRouter,
+  syndication: syndicationRouter,
+  disclosures: disclosuresRouter,
+  dealFees: dealFeesRouter,
+  reconciliation: reconciliationRouter,
+  achBatches: achBatchesRouter,
+  exportTemplates: exportTemplatesRouter,
 });
 
 // export type definition of API

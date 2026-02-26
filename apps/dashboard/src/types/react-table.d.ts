@@ -37,9 +37,9 @@ declare module "@tanstack/table-core" {
     searchValue?: string;
     setSearchValue?: Dispatch<SetStateAction<string>>;
 
-    // Customers table meta
-    deleteCustomer?: (id: string) => void;
-    enrichCustomer?: (id: string) => void;
+    // Merchants table meta
+    deleteMerchant?: (id: string) => void;
+    enrichMerchant?: (id: string) => void;
 
     // Products table meta
     onEdit?: (id: string) => void;

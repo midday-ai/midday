@@ -6,7 +6,7 @@ import { WeekSettings } from "@/components/week-settings";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Date & Locale | Abacus",
+  title: "Date & Locale | abacus",
 };
 
 export default async function Page() {

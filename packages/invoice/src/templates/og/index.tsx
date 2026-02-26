@@ -11,14 +11,14 @@ type Props = {
 
 export function OgTemplate({ data, isValidLogo }: Props) {
   const {
-    customerName,
+    merchantName,
     status,
     template,
     invoiceNumber,
     issueDate,
     dueDate,
     fromDetails,
-    customerDetails,
+    merchantDetails,
   } = data;
 
   return (
@@ -27,14 +27,14 @@ export function OgTemplate({ data, isValidLogo }: Props) {
       style={{ fontFamily: "hedvig-sans" }}
     >
       <Header
-        customerName={customerName || ""}
+        merchantName={merchantName || ""}
         status={status}
         logoUrl={template.logoUrl}
         isValidLogo={isValidLogo}
       />
 
       <div tw="flex flex-col">
-        <Logo src={template.logoUrl} customerName={customerName || ""} />
+        <Logo src={template.logoUrl} merchantName={merchantName || ""} />
       </div>
 
       <Meta
@@ -64,7 +64,7 @@ export function OgTemplate({ data, isValidLogo }: Props) {
           >
             {template.customerLabel}
           </span>
-          <EditorContent content={customerDetails} />
+          <EditorContent content={merchantDetails} />
         </div>
       </div>
     </div>

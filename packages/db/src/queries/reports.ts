@@ -45,7 +45,6 @@ import {
 } from "../schema";
 import { getCashBalance } from "./bank-accounts";
 import { getExchangeRatesBatch } from "./exhange-rates";
-import { getBillableHours } from "./tracker-entries";
 
 function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
@@ -2341,7 +2340,6 @@ export async function getRevenueForecast(
   const [
     historicalData,
     outstandingInvoicesData,
-    billableHoursData,
     scheduledInvoicesData,
     paidInvoicesData,
   ] = await Promise.all([
@@ -2358,12 +2356,6 @@ export async function getRevenueForecast(
       teamId,
       currency: inputCurrency,
       status: ["unpaid", "overdue"],
-    }),
-    // Billable hours this month
-    getBillableHours(db, {
-      teamId,
-      date: new Date().toISOString(),
-      view: "month",
     }),
     // Scheduled invoices with issueDate in forecast period
     db
@@ -2461,11 +2453,6 @@ export async function getRevenueForecast(
           totalAmount: outstandingInvoicesData.summary.totalAmount,
           currency: outstandingInvoicesData.summary.currency,
         },
-        billableHours: {
-          totalHours: Math.round(billableHoursData.totalDuration / 3600),
-          totalAmount: Number(billableHoursData.totalAmount.toFixed(2)),
-          currency: billableHoursData.currency,
-        },
       },
       historical: historical.map((item: (typeof historical)[number]) => ({
         date: item.date,
@@ -2485,8 +2472,6 @@ export async function getRevenueForecast(
         basedOnMonths: historical.length,
         currency,
         includesUnpaidInvoices: outstandingInvoicesData.summary.count > 0,
-        includesBillableHours:
-          Math.round(billableHoursData.totalDuration / 3600) > 0,
       },
     };
   }
@@ -2886,10 +2871,6 @@ export async function getRevenueForecast(
     ...forecast,
   ];
 
-  // Calculate billable hours in hours (convert from seconds)
-  const billableHoursTotal = Math.round(billableHoursData.totalDuration / 3600);
-  const billableHoursAmount = billableHoursData.totalAmount;
-
   return {
     summary: {
       nextMonthProjection,
@@ -2902,16 +2883,10 @@ export async function getRevenueForecast(
       currency,
       revenueType,
       forecastStartDate: forecast[0]?.date,
-      // Include outstanding invoices and billable hours
       unpaidInvoices: {
         count: outstandingInvoicesData.summary.count,
         totalAmount: outstandingInvoicesData.summary.totalAmount,
         currency: outstandingInvoicesData.summary.currency,
-      },
-      billableHours: {
-        totalHours: billableHoursTotal,
-        totalAmount: Number(billableHoursAmount.toFixed(2)),
-        currency: billableHoursData.currency,
       },
     },
     historical: historical.map((item: (typeof historical)[number]) => ({
@@ -2932,7 +2907,6 @@ export async function getRevenueForecast(
       basedOnMonths: historical.length,
       currency,
       includesUnpaidInvoices: outstandingInvoicesData.summary.count > 0,
-      includesBillableHours: billableHoursTotal > 0,
       confidenceScore,
       outlierMonths: dataQuality.outlierCount,
       forecastMethod: "exponential_smoothing_with_seasonality",
@@ -3460,7 +3434,7 @@ export async function getBalanceSheet(
 
     // 9. Unmatched inbox items (bills/vendor invoices) for Accounts Payable
     // These are inbox items (both "invoice" and "expense" types) that haven't been matched to transactions yet
-    // Note: Customer invoices are tracked separately in the invoices table, so unmatched inbox items
+    // Note: Merchant invoices are tracked separately in the invoices table, so unmatched inbox items
     // represent bills/vendor invoices we need to pay
     db
       .select({

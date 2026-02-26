@@ -1,6 +1,6 @@
 export const Cookies = {
   PreferredSignInProvider: "preferred-signin-provider",
-  // Unified table settings cookie (used by transactions, customers, invoices)
+  // Unified table settings cookie (used by transactions, merchants, invoices)
   TableSettings: "table-settings",
   InboxFilter: "inbox-filter-v2",
   InboxOrder: "inbox-order",

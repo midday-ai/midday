@@ -14,7 +14,7 @@ export const recurringSeriesCompleted: NotificationHandler = {
       recordId: data.recurringId,
       invoiceId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
-      customerName: data.customerName,
+      merchantName: data.merchantName,
       totalGenerated: data.totalGenerated,
       userName: user.full_name,
     },

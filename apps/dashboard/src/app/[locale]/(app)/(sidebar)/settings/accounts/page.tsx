@@ -3,7 +3,7 @@ import { prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Bank Connections | Abacus",
+  title: "Bank Connections | abacus",
 };
 
 export default async function Page() {

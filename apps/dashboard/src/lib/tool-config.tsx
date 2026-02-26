@@ -165,31 +165,31 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     description: "Running stress test scenarios",
   },
 
-  // Customer tools
-  getCustomers: {
-    name: "Get Customers",
+  // Merchant tools
+  getMerchants: {
+    name: "Get Merchants",
     icon: Users,
-    description: "Fetching customers",
+    description: "Fetching merchants",
   },
-  getCustomer: {
-    name: "Get Customer",
+  getMerchant: {
+    name: "Get Merchant",
     icon: User,
-    description: "Fetching customer data",
+    description: "Fetching merchant data",
   },
-  createCustomer: {
-    name: "Create Customer",
+  createMerchant: {
+    name: "Create Merchant",
     icon: Users,
-    description: "Creating new customer",
+    description: "Creating new merchant",
   },
-  updateCustomer: {
-    name: "Update Customer",
+  updateMerchant: {
+    name: "Update Merchant",
     icon: User,
-    description: "Updating customer record",
+    description: "Updating merchant record",
   },
   profitabilityAnalysis: {
     name: "Profitability Analysis",
     icon: BarChart3,
-    description: "Analyzing customer profitability",
+    description: "Analyzing merchant profitability",
   },
 
   // Invoice tools

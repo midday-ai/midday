@@ -1,14 +1,21 @@
 import {
   createMerchantInvite,
+  createMerchantMessage,
   createMerchantSession,
   createPayoffLetterRequest,
-  getCustomerByPortalId,
+  getMerchantByPortalId,
   getMerchantAccess,
-  getMerchantAccessByCustomer,
+  getMerchantAccessByMerchant,
+  getMerchantDocumentsByPortal,
   getMerchantInviteByCode,
   getMerchantInvitesByTeam,
+  getMerchantMessagesByPortal,
+  getMerchantNotificationsByPortal,
   getMerchantSession,
   getPayoffLetterRequests,
+  getPayoffRequestsByPortal,
+  getUnreadNotificationCount,
+  markNotificationRead,
   acceptMerchantInvite,
   approvePayoffLetterRequest,
   rejectPayoffLetterRequest,
@@ -55,7 +62,7 @@ const requestPayoffLetterSchema = z.object({
 
 const createInviteSchema = z.object({
   email: z.string().email(),
-  customerId: z.string().uuid(),
+  merchantId: z.string().uuid(),
 });
 
 const getInviteByCodeSchema = z.object({
@@ -70,8 +77,8 @@ const revokeInviteSchema = z.object({
   id: z.string().uuid(),
 });
 
-const getAccessByCustomerSchema = z.object({
-  customerId: z.string().uuid(),
+const getAccessByMerchantSchema = z.object({
+  merchantId: z.string().uuid(),
 });
 
 const revokeAccessSchema = z.object({
@@ -80,7 +87,7 @@ const revokeAccessSchema = z.object({
 });
 
 const getPayoffRequestsSchema = z.object({
-  customerId: z.string().uuid().optional(),
+  merchantId: z.string().uuid().optional(),
   dealId: z.string().uuid().optional(),
   status: z.string().optional(),
 });
@@ -105,7 +112,7 @@ export const merchantPortalRouter = createTRPCRouter({
   // =========================================================================
 
   /**
-   * Get portal data including customer info, team branding, and MCA deals
+   * Get portal data including merchant info, team branding, and MCA deals
    */
   getPortalData: publicProcedure
     .input(getPortalDataSchema)
@@ -119,7 +126,7 @@ export const merchantPortalRouter = createTRPCRouter({
       }
 
       return {
-        customer: result.customer,
+        merchant: result.merchant,
         deals: result.deals,
         summary: result.summary,
       };
@@ -165,23 +172,23 @@ export const merchantPortalRouter = createTRPCRouter({
   requestVerification: publicProcedure
     .input(requestVerificationSchema)
     .mutation(async ({ ctx: { db }, input }) => {
-      // Get customer by portal ID
-      const customer = await getCustomerByPortalId(db, {
+      // Get merchant by portal ID
+      const merchant = await getMerchantByPortalId(db, {
         portalId: input.portalId,
       });
 
-      if (!customer) {
+      if (!merchant) {
         throw new Error("Portal not found");
       }
 
-      // Verify email matches customer email
-      if (customer.email.toLowerCase() !== input.email.toLowerCase()) {
+      // Verify email matches merchant email
+      if (merchant.email.toLowerCase() !== input.email.toLowerCase()) {
         throw new Error("Email does not match our records");
       }
 
       // Create verification session
       const session = await createMerchantSession(db, {
-        customerId: customer.id,
+        merchantId: merchant.id,
         portalId: input.portalId,
         email: input.email.toLowerCase(),
         expiresInMinutes: 15,
@@ -237,11 +244,123 @@ export const merchantPortalRouter = createTRPCRouter({
       return {
         id: invite.id,
         email: invite.email,
-        customerName: invite.customerName,
+        merchantName: invite.merchantName,
         teamName: invite.teamName,
         teamLogoUrl: invite.teamLogoUrl,
         expiresAt: invite.expiresAt,
       };
+    }),
+
+  // =========================================================================
+  // Portal Self-Service Procedures (public, validated by portalId)
+  // =========================================================================
+
+  /**
+   * Get documents for a merchant portal
+   */
+  getDocuments: publicProcedure
+    .input(
+      z.object({
+        portalId: z.string().min(1),
+        documentType: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx: { db }, input }) => {
+      return getMerchantDocumentsByPortal(db, {
+        portalId: input.portalId,
+        documentType: input.documentType,
+      });
+    }),
+
+  /**
+   * Get messages for a merchant portal
+   */
+  getMessages: publicProcedure
+    .input(z.object({ portalId: z.string().min(1) }))
+    .query(async ({ ctx: { db }, input }) => {
+      return getMerchantMessagesByPortal(db, { portalId: input.portalId });
+    }),
+
+  /**
+   * Send a message from the portal (merchant → funder)
+   */
+  sendMessage: publicProcedure
+    .input(
+      z.object({
+        portalId: z.string().min(1),
+        subject: z.string().optional(),
+        message: z.string().min(1),
+        fromEmail: z.string().email(),
+        fromName: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx: { db }, input }) => {
+      const merchant = await getMerchantByPortalId(db, {
+        portalId: input.portalId,
+      });
+
+      if (!merchant) {
+        throw new Error("Portal not found");
+      }
+
+      const result = await createMerchantMessage(db, {
+        merchantId: merchant.id,
+        teamId: merchant.teamId,
+        direction: "inbound",
+        subject: input.subject,
+        message: input.message,
+        fromEmail: input.fromEmail,
+        fromName: input.fromName,
+      });
+
+      return { success: true, messageId: result?.id };
+    }),
+
+  /**
+   * Get notifications for a merchant portal
+   */
+  getNotifications: publicProcedure
+    .input(
+      z.object({
+        portalId: z.string().min(1),
+        limit: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx: { db }, input }) => {
+      return getMerchantNotificationsByPortal(db, {
+        portalId: input.portalId,
+        limit: input.limit,
+      });
+    }),
+
+  /**
+   * Get unread notification count
+   */
+  getUnreadCount: publicProcedure
+    .input(z.object({ portalId: z.string().min(1) }))
+    .query(async ({ ctx: { db }, input }) => {
+      return getUnreadNotificationCount(db, { portalId: input.portalId });
+    }),
+
+  /**
+   * Mark a notification as read
+   */
+  markNotificationRead: publicProcedure
+    .input(z.object({ notificationId: z.string().uuid() }))
+    .mutation(async ({ ctx: { db }, input }) => {
+      const result = await markNotificationRead(db, {
+        notificationId: input.notificationId,
+      });
+      return { success: !!result };
+    }),
+
+  /**
+   * Get payoff requests for portal (public, validates by portalId)
+   */
+  getPayoffRequestsByPortal: publicProcedure
+    .input(z.object({ portalId: z.string().min(1) }))
+    .query(async ({ ctx: { db }, input }) => {
+      return getPayoffRequestsByPortal(db, { portalId: input.portalId });
     }),
 
   // =========================================================================
@@ -281,7 +400,7 @@ export const merchantPortalRouter = createTRPCRouter({
       // Create payoff letter request
       const request = await createPayoffLetterRequest(db, {
         dealId: input.dealId,
-        customerId: session.customerId,
+        merchantId: session.merchantId,
         teamId: session.teamId!,
         requestedPayoffDate: input.requestedPayoffDate,
         requestedByEmail: session.email,
@@ -307,7 +426,7 @@ export const merchantPortalRouter = createTRPCRouter({
     .mutation(async ({ ctx: { db, teamId, session }, input }) => {
       const result = await createMerchantInvite(db, {
         email: input.email,
-        customerId: input.customerId,
+        merchantId: input.merchantId,
         teamId: teamId!,
         invitedBy: session.user.id,
       });
@@ -347,14 +466,14 @@ export const merchantPortalRouter = createTRPCRouter({
   getInvites: protectedProcedure
     .input(
       z.object({
-        customerId: z.string().uuid().optional(),
+        merchantId: z.string().uuid().optional(),
         status: z.string().optional(),
       }),
     )
     .query(async ({ ctx: { db, teamId }, input }) => {
       const invites = await getMerchantInvitesByTeam(db, {
         teamId: teamId!,
-        customerId: input.customerId,
+        merchantId: input.merchantId,
         status: input.status,
       });
 
@@ -376,13 +495,13 @@ export const merchantPortalRouter = createTRPCRouter({
     }),
 
   /**
-   * Get merchant access records for a customer
+   * Get merchant access records for a merchant
    */
-  getAccessByCustomer: protectedProcedure
-    .input(getAccessByCustomerSchema)
+  getAccessByMerchant: protectedProcedure
+    .input(getAccessByMerchantSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      const access = await getMerchantAccessByCustomer(db, {
-        customerId: input.customerId,
+      const access = await getMerchantAccessByMerchant(db, {
+        merchantId: input.merchantId,
         teamId: teamId!,
       });
 
@@ -413,7 +532,7 @@ export const merchantPortalRouter = createTRPCRouter({
     .query(async ({ ctx: { db, teamId }, input }) => {
       const requests = await getPayoffLetterRequests(db, {
         teamId: teamId!,
-        customerId: input.customerId,
+        merchantId: input.merchantId,
         dealId: input.dealId,
         status: input.status,
       });

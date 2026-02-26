@@ -20,8 +20,8 @@ export const transformFormValuesToDraft = (values: InvoiceFormValues) => {
     ...(values.fromDetails && {
       fromDetails: JSON.stringify(values.fromDetails),
     }),
-    ...(values.customerDetails && {
-      customerDetails: JSON.stringify(values.customerDetails),
+    ...(values.merchantDetails && {
+      merchantDetails: JSON.stringify(values.merchantDetails),
     }),
     ...(values.noteDetails && {
       noteDetails: JSON.stringify(values.noteDetails),

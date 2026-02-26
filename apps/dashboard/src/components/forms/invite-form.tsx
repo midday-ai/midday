@@ -23,7 +23,7 @@ const formSchema = z.object({
   invites: z.array(
     z.object({
       email: z.string().email(),
-      role: z.enum(["owner", "member"]),
+      role: z.enum(["owner", "admin", "member", "broker", "syndicate", "merchant"]),
     }),
   ),
 });
@@ -133,8 +133,11 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="owner">Owner</SelectItem>
-                      <SelectItem value="member">Member</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="member">Team Member</SelectItem>
+                      <SelectItem value="broker">Broker</SelectItem>
+                      <SelectItem value="syndicate">Syndicate</SelectItem>
+                      <SelectItem value="merchant">Merchant</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>

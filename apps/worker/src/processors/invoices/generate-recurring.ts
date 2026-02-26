@@ -1,7 +1,7 @@
 import {
   checkInvoiceExists,
   draftInvoice,
-  getCustomerById,
+  getMerchantById,
   getDueInvoiceRecurring,
   getNextInvoiceNumber,
   markInvoiceGenerated,
@@ -10,7 +10,7 @@ import {
 } from "@midday/db/queries";
 import { getStartOfDayUTC } from "@midday/invoice/recurring";
 import { generateToken } from "@midday/invoice/token";
-import { transformCustomerToContent } from "@midday/invoice/utils";
+import { transformMerchantToContent } from "@midday/invoice/utils";
 import type { Job } from "bullmq";
 import { addDays } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
@@ -106,7 +106,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           recurringInvoices: dueRecurring.map((r) => ({
             id: r.id,
             teamId: r.teamId,
-            customerName: r.customerName,
+            merchantName: r.merchantName,
             nextScheduledAt: r.nextScheduledAt,
             sequence: r.invoicesGenerated + 1,
             amount: r.amount,
@@ -216,7 +216,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
                 invoiceId: existingInvoice.id,
                 invoiceNumber,
                 teamId: recurring.teamId,
-                customerName: recurring.customerName ?? undefined,
+                merchantName: recurring.merchantName ?? undefined,
                 recurringId: recurring.id,
                 recurringSequence: nextSequence,
                 recurringTotalCount: recurring.endCount ?? undefined,
@@ -266,45 +266,45 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           );
         }
 
-        // Get fresh customer details if customer exists
-        let customerDetails: string | null = null;
-        let customerEmail: string | null = null;
+        // Get fresh merchant details if merchant exists
+        let merchantDetails: string | null = null;
+        let merchantEmail: string | null = null;
 
-        if (recurring.customerId) {
-          const customer = await getCustomerById(db, {
-            id: recurring.customerId,
+        if (recurring.merchantId) {
+          const merchant = await getMerchantById(db, {
+            id: recurring.merchantId,
             teamId: recurring.teamId,
           });
 
-          // Defensive check: Customer was deleted after series creation
-          if (!customer) {
-            throw RecurringInvoiceErrors.customerNotFound(
+          // Defensive check: merchant was deleted after series creation
+          if (!merchant) {
+            throw RecurringInvoiceErrors.merchantNotFound(
               recurring.id,
-              recurring.customerId,
+              recurring.merchantId,
               recurring.teamId,
             );
           }
 
-          const customerContent = transformCustomerToContent(customer);
-          customerDetails = customerContent
-            ? JSON.stringify(customerContent)
+          const merchantContent = transformMerchantToContent(merchant);
+          merchantDetails = merchantContent
+            ? JSON.stringify(merchantContent)
             : null;
-          customerEmail = customer.billingEmail || customer.email;
+          merchantEmail = merchant.billingEmail || merchant.email;
 
-          // Defensive check: Customer exists but has no email
-          if (!customerEmail) {
-            throw RecurringInvoiceErrors.customerNoEmail(
+          // Defensive check: merchant exists but has no email
+          if (!merchantEmail) {
+            throw RecurringInvoiceErrors.merchantNoEmail(
               recurring.id,
-              recurring.customerName || customer.name,
+              recurring.merchantName || merchant.name,
               recurring.teamId,
             );
           }
         } else {
-          // No customer ID - customer was deleted (ON DELETE SET NULL in FK constraint)
-          // The customerName field preserves the original name for better error messages
-          throw RecurringInvoiceErrors.customerDeleted(
+          // No merchant ID - merchant was deleted (ON DELETE SET NULL in FK constraint)
+          // The merchantName DB field preserves the original name for better error messages
+          throw RecurringInvoiceErrors.merchantDeleted(
             recurring.id,
-            recurring.customerName,
+            recurring.merchantName,
             recurring.teamId,
           );
         }
@@ -344,7 +344,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             templateId: recurring.templateId ?? undefined,
             paymentDetails: stringifyJsonField(recurring.paymentDetails),
             fromDetails: stringifyJsonField(recurring.fromDetails),
-            customerDetails,
+            merchantDetails: merchantDetails,
             noteDetails: stringifyJsonField(recurring.noteDetails),
             dueDate,
             issueDate,
@@ -357,8 +357,8 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             bottomBlock: stringifyJsonField(recurring.bottomBlock),
             amount: recurring.amount ?? undefined,
             lineItems: parseLineItems(recurring.lineItems),
-            customerId: recurring.customerId ?? undefined,
-            customerName: recurring.customerName ?? undefined,
+            merchantId: recurring.merchantId ?? undefined,
+            merchantName: recurring.merchantName ?? undefined,
           });
 
           // Update invoice with recurring reference
@@ -367,7 +367,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           await updateInvoice(tx, {
             id: invoiceId,
             teamId: recurring.teamId,
-            sentTo: customerEmail,
+            sentTo: merchantEmail,
             invoiceRecurringId: recurring.id,
             recurringSequence: nextSequence,
           });
@@ -396,7 +396,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           invoiceNumber,
           recurringId: recurring.id,
           sequence: nextSequence,
-          customerName: recurring.customerName,
+          merchantName: recurring.merchantName,
         });
 
         // Queue jobs AFTER transaction commits successfully.
@@ -422,7 +422,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
               invoiceId,
               invoiceNumber,
               teamId: recurring.teamId,
-              customerName: recurring.customerName ?? undefined,
+              merchantName: recurring.merchantName ?? undefined,
               recurringId: recurring.id,
               recurringSequence: nextSequence,
               recurringTotalCount: recurring.endCount ?? undefined,
@@ -439,7 +439,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
                 invoiceId,
                 invoiceNumber,
                 teamId: recurring.teamId,
-                customerName: recurring.customerName ?? undefined,
+                merchantName: recurring.merchantName ?? undefined,
                 recurringId: recurring.id,
                 recurringSequence: nextSequence,
                 recurringTotalCount: recurring.endCount ?? undefined,
@@ -513,7 +513,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
               invoiceId: recurring.id, // Use recurring ID as placeholder
               invoiceNumber: `Recurring-${recurring.id.slice(0, 8)}`,
               teamId: recurring.teamId,
-              customerName: recurring.customerName ?? undefined,
+              merchantName: recurring.merchantName ?? undefined,
               recurringId: recurring.id,
             },
             DEFAULT_JOB_OPTIONS,

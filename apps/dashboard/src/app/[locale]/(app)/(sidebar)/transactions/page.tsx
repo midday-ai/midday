@@ -2,6 +2,7 @@ import { AddTransactions } from "@/components/add-transactions";
 import { ScrollableContent } from "@/components/scrollable-content";
 import { DataTable } from "@/components/tables/transactions/data-table";
 import { Loading } from "@/components/tables/transactions/loading";
+import { TransactionRulesButton } from "@/components/transaction-rules-button";
 import { TransactionTabs } from "@/components/transaction-tabs";
 import { TransactionsColumnVisibility } from "@/components/transactions-column-visibility";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
@@ -16,7 +17,7 @@ import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Transactions | Abacus",
+  title: "Transactions | abacus",
 };
 
 type Props = {
@@ -70,6 +71,7 @@ export default async function Transactions(props: Props) {
             <TransactionsSearchFilter />
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-2">
+                <TransactionRulesButton />
                 <TransactionsColumnVisibility />
                 <AddTransactions />
               </div>

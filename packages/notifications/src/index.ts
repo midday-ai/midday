@@ -298,8 +298,8 @@ export class Notifications {
           teamContext,
         );
 
-        if (sampleEmail.emailType === "customer") {
-          // Customer-facing email: send regardless of team preferences
+        if (sampleEmail.emailType === "merchant") {
+          // Merchant-facing email: send regardless of team preferences
           const emailInputs = [
             this.#createEmailInput(
               handler,
@@ -315,7 +315,7 @@ export class Notifications {
             type as string,
           );
 
-          console.log("📨 Email result for customer:", {
+          console.log("📨 Email result for merchant:", {
             sent: emails.sent,
             skipped: emails.skipped,
             failed: emails.failed || 0,

@@ -2,15 +2,13 @@ import { UTCDate } from "@date-fns/utc";
 import type { Database, DatabaseOrTransaction } from "@db/client";
 import {
   type activityTypeEnum,
-  customers,
+  merchants,
   exchangeRates,
   invoiceRecurring,
   invoiceStatusEnum,
   invoiceTemplates,
   invoices,
   teams,
-  trackerEntries,
-  trackerProjects,
   users,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
@@ -93,7 +91,7 @@ export type GetInvoicesParams = {
   pageSize?: number;
   q?: string | null;
   statuses?: string[] | null;
-  customers?: string[] | null;
+  merchants?: string[] | null;
   start?: string | null;
   end?: string | null;
   sort?: string[] | null;
@@ -112,7 +110,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
     statuses,
     start,
     end,
-    customers: customerIds,
+    merchants: merchantIds,
     ids,
     recurringIds,
     recurring,
@@ -157,9 +155,9 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
     whereConditions.push(lte(invoices.dueDate, end));
   }
 
-  // Apply customer filter
-  if (customerIds && customerIds.length > 0) {
-    whereConditions.push(inArray(invoices.customerId, customerIds));
+  // Apply merchant filter
+  if (merchantIds && merchantIds.length > 0) {
+    whereConditions.push(inArray(invoices.merchantId, merchantIds));
   }
 
   // Apply search query filter
@@ -172,9 +170,9 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
     } else {
       const query = buildSearchQuery(q);
 
-      // Search using full-text search, invoiceNumber, or customerName
+      // Search using full-text search, invoiceNumber, or merchantName
       whereConditions.push(
-        sql`(to_tsquery('english', ${query}) @@ ${invoices.fts} OR ${invoices.invoiceNumber} ILIKE '%' || ${q} || '%' OR ${invoices.customerName} ILIKE '%' || ${q} || '%')`,
+        sql`(to_tsquery('english', ${query}) @@ ${invoices.fts} OR ${invoices.invoiceNumber} ILIKE '%' || ${q} || '%' OR ${invoices.merchantName} ILIKE '%' || ${q} || '%')`,
       );
     }
   }
@@ -190,7 +188,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       currency: invoices.currency,
       lineItems: invoices.lineItems,
       paymentDetails: invoices.paymentDetails,
-      customerDetails: invoices.customerDetails,
+      merchantDetails: invoices.merchantDetails,
       reminderSentAt: invoices.reminderSentAt,
       updatedAt: invoices.updatedAt,
       note: invoices.note,
@@ -207,7 +205,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       sentAt: invoices.sentAt,
       template: invoices.template,
       noteDetails: invoices.noteDetails,
-      customerName: invoices.customerName,
+      merchantName: invoices.merchantName,
       token: invoices.token,
       sentTo: invoices.sentTo,
       discount: invoices.discount,
@@ -216,13 +214,13 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       bottomBlock: invoices.bottomBlock,
       scheduledAt: invoices.scheduledAt,
       scheduledJobId: invoices.scheduledJobId,
-      customer: {
-        id: customers.id,
-        name: customers.name,
-        website: customers.website,
-        email: customers.email,
+      merchant: {
+        id: merchants.id,
+        name: merchants.name,
+        website: merchants.website,
+        email: merchants.email,
       },
-      customerId: invoices.customerId,
+      merchantId: invoices.merchantId,
       team: {
         name: teams.name,
       },
@@ -241,7 +239,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       },
     })
     .from(invoices)
-    .leftJoin(customers, eq(invoices.customerId, customers.id))
+    .leftJoin(merchants, eq(invoices.merchantId, merchants.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
     .leftJoin(
       invoiceRecurring,
@@ -254,10 +252,10 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
     const [column, direction] = sort;
     const isAscending = direction === "asc";
 
-    if (column === "customer") {
+    if (column === "merchant") {
       isAscending
-        ? query.orderBy(asc(customers.name))
-        : query.orderBy(desc(customers.name));
+        ? query.orderBy(asc(merchants.name))
+        : query.orderBy(desc(merchants.name));
     } else if (column === "created_at") {
       isAscending
         ? query.orderBy(asc(invoices.createdAt))
@@ -324,7 +322,7 @@ export async function getInvoiceById(
       currency: invoices.currency,
       lineItems: invoices.lineItems,
       paymentDetails: invoices.paymentDetails,
-      customerDetails: invoices.customerDetails,
+      merchantDetails: invoices.merchantDetails,
       reminderSentAt: invoices.reminderSentAt,
       updatedAt: invoices.updatedAt,
       note: invoices.note,
@@ -342,7 +340,7 @@ export async function getInvoiceById(
       template: invoices.template,
       templateId: invoices.templateId,
       noteDetails: invoices.noteDetails,
-      customerName: invoices.customerName,
+      merchantName: invoices.merchantName,
       token: invoices.token,
       sentTo: invoices.sentTo,
       discount: invoices.discount,
@@ -354,16 +352,16 @@ export async function getInvoiceById(
       paymentIntentId: invoices.paymentIntentId,
       refundedAt: invoices.refundedAt,
       teamId: invoices.teamId,
-      customer: {
-        id: customers.id,
-        name: customers.name,
-        website: customers.website,
-        email: customers.email,
-        billingEmail: customers.billingEmail,
-        portalId: customers.portalId,
-        portalEnabled: customers.portalEnabled,
+      merchant: {
+        id: merchants.id,
+        name: merchants.name,
+        website: merchants.website,
+        email: merchants.email,
+        billingEmail: merchants.billingEmail,
+        portalId: merchants.portalId,
+        portalEnabled: merchants.portalEnabled,
       },
-      customerId: invoices.customerId,
+      merchantId: invoices.merchantId,
       team: {
         name: teams.name,
         email: teams.email,
@@ -398,7 +396,7 @@ export async function getInvoiceById(
       },
     })
     .from(invoices)
-    .leftJoin(customers, eq(invoices.customerId, customers.id))
+    .leftJoin(merchants, eq(invoices.merchantId, merchants.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
     .leftJoin(users, eq(invoices.userId, users.id))
     .leftJoin(invoiceTemplates, eq(invoices.templateId, invoiceTemplates.id))
@@ -441,7 +439,7 @@ export async function getInvoiceById(
     template,
     lineItems: result.lineItems as LineItem[],
     paymentDetails: result.paymentDetails as EditorDoc | null,
-    customerDetails: result.customerDetails as EditorDoc | null,
+    merchantDetails: result.merchantDetails as EditorDoc | null,
     fromDetails: result.fromDetails as EditorDoc | null,
     noteDetails: result.noteDetails as EditorDoc | null,
     topBlock: result.topBlock as EditorDoc | null,
@@ -463,7 +461,7 @@ export async function getInvoiceByPaymentIntentId(
       teamId: invoices.teamId,
       status: invoices.status,
       invoiceNumber: invoices.invoiceNumber,
-      customerName: invoices.customerName,
+      merchantName: invoices.merchantName,
       paymentIntentId: invoices.paymentIntentId,
     })
     .from(invoices)
@@ -768,9 +766,9 @@ type DraftInvoiceParams = {
   template: DraftInvoiceTemplateParams;
   templateId?: string | null;
   fromDetails?: string | null;
-  customerDetails?: string | null;
-  customerId?: string | null;
-  customerName?: string | null;
+  merchantDetails?: string | null;
+  merchantId?: string | null;
+  merchantName?: string | null;
   paymentDetails?: string | null;
   noteDetails?: string | null;
   dueDate: string;
@@ -803,7 +801,7 @@ export async function draftInvoice(
     templateId,
     paymentDetails,
     fromDetails,
-    customerDetails,
+    merchantDetails,
     noteDetails,
     ...restInput
   } = params;
@@ -825,7 +823,7 @@ export async function draftInvoice(
       template: restTemplate,
       paymentDetails: paymentDetails,
       fromDetails: fromDetails,
-      customerDetails: customerDetails,
+      merchantDetails: merchantDetails,
       noteDetails: noteDetails,
     })
     .onConflictDoUpdate({
@@ -840,7 +838,7 @@ export async function draftInvoice(
         template: camelcaseKeys(restTemplate, { deep: true }),
         paymentDetails: paymentDetails,
         fromDetails: fromDetails,
-        customerDetails: customerDetails,
+        merchantDetails: merchantDetails,
         noteDetails: noteDetails,
       },
     })
@@ -1023,8 +1021,8 @@ export async function duplicateInvoice(
     .select({
       teamId: invoices.teamId,
       template: invoices.template,
-      customerId: invoices.customerId,
-      customerName: invoices.customerName,
+      merchantId: invoices.merchantId,
+      merchantName: invoices.merchantName,
       vat: invoices.vat,
       tax: invoices.tax,
       discount: invoices.discount,
@@ -1035,7 +1033,7 @@ export async function duplicateInvoice(
       topBlock: invoices.topBlock,
       bottomBlock: invoices.bottomBlock,
       fromDetails: invoices.fromDetails,
-      customerDetails: invoices.customerDetails,
+      merchantDetails: invoices.merchantDetails,
       lineItems: invoices.lineItems,
     })
     .from(invoices)
@@ -1057,8 +1055,8 @@ export async function duplicateInvoice(
     dueDate: addMonths(new Date(), 1).toISOString(),
     issueDate: new Date().toISOString(),
     invoiceNumber,
-    customerId: invoice.customerId,
-    customerName: invoice.customerName,
+    merchantId: invoice.merchantId,
+    merchantName: invoice.merchantName,
     vat: invoice.vat,
     tax: invoice.tax,
     discount: invoice.discount,
@@ -1076,7 +1074,7 @@ export async function duplicateInvoice(
     // @ts-expect-error - JSONB
     fromDetails: invoice.fromDetails,
     // @ts-expect-error - JSONB
-    customerDetails: invoice.customerDetails,
+    merchantDetails: invoice.merchantDetails,
     // @ts-expect-error - JSONB
     lineItems: invoice.lineItems,
   });
@@ -1152,7 +1150,7 @@ export async function updateInvoice(
         metadata: {
           recordId: id,
           invoiceNumber: result?.invoiceNumber,
-          customerName: result?.customerName,
+          merchantName: result?.merchantName,
           newStatus: rest.status,
           paidAt: rest.paidAt,
         },
@@ -1163,13 +1161,13 @@ export async function updateInvoice(
   return result;
 }
 
-export type GetMostActiveClientParams = {
+export type GetMostActiveMerchantParams = {
   teamId: string;
 };
 
-export async function getMostActiveClient(
+export async function getMostActiveMerchant(
   db: Database,
-  params: GetMostActiveClientParams,
+  params: GetMostActiveMerchantParams,
 ) {
   const { teamId } = params;
 
@@ -1178,57 +1176,40 @@ export async function getMostActiveClient(
 
   const result = await db
     .select({
-      customerId: customers.id,
-      customerName: customers.name,
+      merchantId: merchants.id,
+      merchantName: merchants.name,
       invoiceCount: sql<number>`COUNT(DISTINCT ${invoices.id})::int`,
-      totalTrackerTime: sql<number>`COALESCE(SUM(${trackerEntries.duration}), 0)::int`,
     })
-    .from(customers)
-    .leftJoin(
+    .from(merchants)
+    .innerJoin(
       invoices,
       and(
-        eq(invoices.customerId, customers.id),
+        eq(invoices.merchantId, merchants.id),
         gte(invoices.createdAt, thirtyDaysAgo.toISOString()),
       ),
     )
-    .leftJoin(trackerProjects, eq(trackerProjects.customerId, customers.id))
-    .leftJoin(
-      trackerEntries,
-      and(
-        eq(trackerEntries.projectId, trackerProjects.id),
-        gte(
-          trackerEntries.date,
-          thirtyDaysAgo.toISOString().split("T")[0] ?? "",
-        ),
-      ),
-    )
-    .where(eq(customers.teamId, teamId))
-    .groupBy(customers.id, customers.name)
-    .having(
-      sql`COUNT(DISTINCT ${invoices.id}) > 0 OR COALESCE(SUM(${trackerEntries.duration}), 0) > 0`,
-    )
-    .orderBy(
-      sql`(COUNT(DISTINCT ${invoices.id}) + COALESCE(SUM(${trackerEntries.duration}) / 3600, 0)) DESC`,
-    )
+    .where(eq(merchants.teamId, teamId))
+    .groupBy(merchants.id, merchants.name)
+    .orderBy(sql`COUNT(DISTINCT ${invoices.id}) DESC`)
     .limit(1);
 
   return result[0] || null;
 }
 
-export type GetInactiveClientsCountParams = {
+export type GetInactiveMerchantsCountParams = {
   teamId: string;
 };
 
-export async function getInactiveClientsCount(
+export async function getInactiveMerchantsCount(
   db: Database,
-  params: GetInactiveClientsCountParams,
+  params: GetInactiveMerchantsCountParams,
 ) {
   const { teamId } = params;
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  // Use a subquery to properly count inactive clients
+  // Count merchants with no invoices in last 30 days
   const [result] = await db
     .select({
       count: sql<number>`COUNT(*)::int`,
@@ -1236,33 +1217,20 @@ export async function getInactiveClientsCount(
     .from(
       db
         .select({
-          customerId: customers.id,
+          merchantId: merchants.id,
         })
-        .from(customers)
+        .from(merchants)
         .leftJoin(
           invoices,
           and(
-            eq(invoices.customerId, customers.id),
+            eq(invoices.merchantId, merchants.id),
             gte(invoices.createdAt, thirtyDaysAgo.toISOString()),
           ),
         )
-        .leftJoin(trackerProjects, eq(trackerProjects.customerId, customers.id))
-        .leftJoin(
-          trackerEntries,
-          and(
-            eq(trackerEntries.projectId, trackerProjects.id),
-            gte(
-              trackerEntries.date,
-              thirtyDaysAgo.toISOString().split("T")[0] ?? "",
-            ),
-          ),
-        )
-        .where(eq(customers.teamId, teamId))
-        .groupBy(customers.id)
-        .having(
-          sql`COUNT(DISTINCT ${invoices.id}) = 0 AND COALESCE(SUM(${trackerEntries.duration}), 0) = 0`,
-        )
-        .as("inactive_customers"),
+        .where(eq(merchants.teamId, teamId))
+        .groupBy(merchants.id)
+        .having(sql`COUNT(DISTINCT ${invoices.id}) = 0`)
+        .as("inactive_merchants"),
     );
 
   return result?.count || 0;

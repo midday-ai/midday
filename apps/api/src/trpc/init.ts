@@ -2,6 +2,10 @@ import { createClient } from "@api/services/supabase";
 import { verifyAccessToken } from "@api/utils/auth";
 import type { Session } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
+import {
+  type TeamRole,
+  isInternalRole,
+} from "@api/utils/role-permissions";
 import type { Database } from "@midday/db/client";
 import { db } from "@midday/db/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -17,6 +21,9 @@ type TRPCContext = {
   db: Database;
   geo: ReturnType<typeof getGeoContext>;
   teamId?: string;
+  role?: TeamRole | null;
+  entityId?: string | null;
+  entityType?: string | null;
   forcePrimary?: boolean;
 };
 
@@ -81,7 +88,7 @@ export const protectedProcedure = t.procedure
   .use(withTeamPermissionMiddleware) // NOTE: This is needed to ensure that the teamId is set in the context
   .use(withPrimaryDbMiddleware)
   .use(async (opts) => {
-    const { teamId, session } = opts.ctx;
+    const { teamId, session, role, entityId, entityType } = opts.ctx;
 
     if (!session) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -91,6 +98,48 @@ export const protectedProcedure = t.procedure
       ctx: {
         teamId,
         session,
+        role,
+        entityId,
+        entityType,
       },
     });
   });
+
+/** Internal roles only (owner, admin, member). Excludes external portal users. */
+export const internalProcedure = protectedProcedure.use(async (opts) => {
+  const { role } = opts.ctx;
+  if (!role || !isInternalRole(role)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Internal team access required",
+    });
+  }
+  return opts.next({ ctx: opts.ctx });
+});
+
+/** Write access for internal roles (owner, admin, member). */
+export const memberProcedure = internalProcedure;
+
+/** Admin operations (owner or admin only). */
+export const adminProcedure = protectedProcedure.use(async (opts) => {
+  const { role } = opts.ctx;
+  if (role !== "owner" && role !== "admin") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Admin access required",
+    });
+  }
+  return opts.next({ ctx: opts.ctx });
+});
+
+/** Owner-only operations (billing, team deletion). */
+export const ownerProcedure = protectedProcedure.use(async (opts) => {
+  const { role } = opts.ctx;
+  if (role !== "owner") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Owner access required",
+    });
+  }
+  return opts.next({ ctx: opts.ctx });
+});

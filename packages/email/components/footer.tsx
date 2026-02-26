@@ -68,13 +68,6 @@ export function Footer() {
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.midday.ai/x7Fow9L"
-            style={{ color: lightStyles.mutedText.color }}
-          >
-            Tracker
-          </Link>
-          <Link
-            className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
             href="https://go.midday.ai/fkYXc95"
             style={{ color: lightStyles.mutedText.color }}
           >

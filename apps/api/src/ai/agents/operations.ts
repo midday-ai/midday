@@ -6,7 +6,7 @@ import {
 } from "@api/ai/agents/config/shared";
 import { getAccountBalancesTool } from "@api/ai/tools/get-account-balances";
 import { getBankAccountsTool } from "@api/ai/tools/get-bank-accounts";
-import { getCustomersTool } from "@api/ai/tools/get-customers";
+import { getMerchantsTool } from "@api/ai/tools/get-merchants";
 import { getDocumentsTool } from "@api/ai/tools/get-documents";
 import { getInboxTool } from "@api/ai/tools/get-inbox";
 import { getInvoicesTool } from "@api/ai/tools/get-invoices";
@@ -36,7 +36,7 @@ ${COMMON_AGENT_RULES}
     getBankAccounts: getBankAccountsTool,
     getTransactions: getTransactionsTool,
     getInvoices: getInvoicesTool,
-    getCustomers: getCustomersTool,
+    getMerchants: getMerchantsTool,
     getDocuments: getDocumentsTool,
     getInbox: getInboxTool,
   },

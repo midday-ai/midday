@@ -1,7 +1,6 @@
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { McaPortalContent } from "./mca-portal-content";
+import { notFound, redirect } from "next/navigation";
 import { PortalContent } from "./portal-content";
 
 export async function generateMetadata(props: {
@@ -19,8 +18,8 @@ export async function generateMetadata(props: {
     );
 
     if (mcaData) {
-      const title = `${mcaData.customer.name} | ${mcaData.customer.team?.name || "Portal"}`;
-      const description = `Merchant portal for ${mcaData.customer.name}`;
+      const title = `${mcaData.merchant.name} | ${mcaData.merchant.team?.name || "Portal"}`;
+      const description = `Merchant portal for ${mcaData.merchant.name}`;
 
       return {
         title,
@@ -43,7 +42,7 @@ export async function generateMetadata(props: {
 
     // Fall back to invoice portal data
     const data = await queryClient.fetchQuery(
-      trpc.customers.getByPortalId.queryOptions({
+      trpc.merchants.getByPortalId.queryOptions({
         portalId: params.portalId,
       }),
     );
@@ -58,8 +57,8 @@ export async function generateMetadata(props: {
       };
     }
 
-    const title = `${data.customer.name} | ${data.customer.team.name}`;
-    const description = `Customer portal for ${data.customer.name}`;
+    const title = `${data.merchant.name} | ${data.merchant.team.name}`;
+    const description = `Merchant portal for ${data.merchant.name}`;
 
     return {
       title,
@@ -104,18 +103,14 @@ export default async function Page(props: Props) {
     }),
   );
 
-  // If MCA deals exist, show MCA portal
+  // If MCA deals exist, redirect to the multi-screen portal
   if (mcaPortalData && mcaPortalData.deals && mcaPortalData.deals.length > 0) {
-    return (
-      <HydrateClient>
-        <McaPortalContent portalId={params.portalId} />
-      </HydrateClient>
-    );
+    redirect(`/p/${params.portalId}/home`);
   }
 
   // Fall back to invoice portal
   const portalData = await queryClient.fetchQuery(
-    trpc.customers.getByPortalId.queryOptions({
+    trpc.merchants.getByPortalId.queryOptions({
       portalId: params.portalId,
     }),
   );
@@ -126,7 +121,7 @@ export default async function Page(props: Props) {
 
   // Prefetch invoices
   await queryClient.fetchInfiniteQuery(
-    trpc.customers.getPortalInvoices.infiniteQueryOptions({
+    trpc.merchants.getPortalInvoices.infiniteQueryOptions({
       portalId: params.portalId,
     }),
   );

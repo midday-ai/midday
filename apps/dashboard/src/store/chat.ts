@@ -163,10 +163,10 @@ const COMMAND_SUGGESTIONS = [
   },
   {
     command: "/analyze",
-    title: "Analyze customer payment patterns",
+    title: "Analyze merchant payment patterns",
     toolName: "getInvoicePaymentAnalysis",
     toolParams: { showCanvas: true },
-    keywords: ["analyze", "customer", "payment", "patterns", "invoices"],
+    keywords: ["analyze", "merchant", "payment", "patterns", "invoices"],
   },
   // Tax Summary
   {
@@ -292,20 +292,20 @@ const COMMAND_SUGGESTIONS = [
     toolParams: { statuses: ["overdue"], pageSize: 20 },
     keywords: ["find", "overdue", "invoices", "late"],
   },
-  // Customers
+  // Merchants
   {
     command: "/show",
-    title: "Show customers",
-    toolName: "getCustomers",
+    title: "Show merchants",
+    toolName: "getMerchants",
     toolParams: { pageSize: 10 },
-    keywords: ["show", "customers", "clients", "list"],
+    keywords: ["show", "merchants", "clients", "list"],
   },
   {
     command: "/find",
-    title: "Find top customers",
-    toolName: "getCustomers",
+    title: "Find top merchants",
+    toolName: "getMerchants",
     toolParams: { pageSize: 10 },
-    keywords: ["find", "top", "customers", "clients"],
+    keywords: ["find", "top", "merchants", "clients"],
   },
   // Cash Flow
   {

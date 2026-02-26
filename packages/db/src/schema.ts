@@ -183,10 +183,14 @@ export const reportTypesEnum = pgEnum("reportTypes", [
   "category_expenses",
 ]);
 
-export const teamRolesEnum = pgEnum("teamRoles", ["owner", "member"]);
-export const trackerStatusEnum = pgEnum("trackerStatus", [
-  "in_progress",
-  "completed",
+export const teamRolesEnum = pgEnum("teamRoles", [
+  "owner",
+  "admin",
+  "member",
+  "broker",
+  "syndicate",
+  "merchant",
+  "bookkeeper",
 ]);
 
 export const transactionMethodsEnum = pgEnum("transactionMethods", [
@@ -222,6 +226,51 @@ export const transactionFrequencyEnum = pgEnum("transaction_frequency", [
   "unknown",
 ]);
 
+export const transactionTypeEnum = pgEnum("transaction_type", [
+  "credit",
+  "debit",
+  "refund",
+  "fee",
+  "adjustment",
+  "transfer",
+]);
+
+export const paymentStatusEnum = pgEnum("payment_status", [
+  "completed",
+  "failed",
+  "pending",
+  "refunded",
+]);
+
+export const matchStatusEnum = pgEnum("match_status", [
+  "unmatched",
+  "auto_matched",
+  "suggested",
+  "manual_matched",
+  "flagged",
+  "excluded",
+]);
+
+export const achBatchStatusEnum = pgEnum("ach_batch_status", [
+  "draft",
+  "validated",
+  "submitted",
+  "processing",
+  "completed",
+  "failed",
+  "cancelled",
+]);
+
+export const discrepancyTypeEnum = pgEnum("discrepancy_type", [
+  "nsf",
+  "partial_payment",
+  "overpayment",
+  "unrecognized",
+  "bank_fee",
+  "duplicate",
+  "split_payment",
+]);
+
 export const activityTypeEnum = pgEnum("activity_type", [
   // System-generated activities
   "transactions_enriched",
@@ -251,14 +300,12 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "invoice_cancelled",
   "invoice_created",
   "draft_invoice_created",
-  "tracker_entry_created",
-  "tracker_project_created",
   "transactions_categorized",
   "transactions_assigned",
   "transaction_attachment_created",
   "transaction_category_created",
   "transactions_exported",
-  "customer_created",
+  "merchant_created",
 ]);
 
 export const activitySourceEnum = pgEnum("activity_source", [
@@ -372,6 +419,20 @@ export const transactions = pgTable(
     frequency: transactionFrequencyEnum(),
     merchantName: text("merchant_name"),
     enrichmentCompleted: boolean("enrichment_completed").default(false),
+    dealCode: text("deal_code"),
+    transactionType: transactionTypeEnum("transaction_type"),
+    paymentStatus: paymentStatusEnum("payment_status"),
+    // Reconciliation columns
+    matchStatus: matchStatusEnum("match_status").default("unmatched"),
+    matchConfidence: numericCasted("match_confidence", { precision: 5, scale: 2 }),
+    matchedPaymentId: uuid("matched_payment_id"),
+    matchedDealId: uuid("matched_deal_id"),
+    matchedAt: timestamp("matched_at", { withTimezone: true, mode: "string" }),
+    matchedBy: uuid("matched_by"),
+    matchRule: text("match_rule"),
+    matchSuggestions: jsonb("match_suggestions"),
+    reconciliationNote: text("reconciliation_note"),
+    discrepancyType: discrepancyTypeEnum("discrepancy_type"),
     ftsVector: tsvector("fts_vector")
       .notNull()
       .generatedAlwaysAs(
@@ -473,6 +534,25 @@ export const transactions = pgTable(
       ],
       name: "transactions_category_slug_team_id_fkey",
     }),
+    // Reconciliation indexes and FKs
+    index("idx_transactions_match_status").on(table.matchStatus),
+    index("idx_transactions_matched_payment").on(table.matchedPaymentId),
+    index("idx_transactions_matched_deal").on(table.matchedDealId),
+    foreignKey({
+      columns: [table.matchedPaymentId],
+      foreignColumns: [mcaPayments.id],
+      name: "transactions_matched_payment_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.matchedDealId],
+      foreignColumns: [mcaDeals.id],
+      name: "transactions_matched_deal_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.matchedBy],
+      foreignColumns: [users.id],
+      name: "transactions_matched_by_fkey",
+    }).onDelete("set null"),
     unique("transactions_internal_id_key").on(table.internalId),
     pgPolicy("Transactions can be created by a member of the team", {
       as: "permissive",
@@ -498,98 +578,34 @@ export const transactions = pgTable(
   ],
 );
 
-export const trackerEntries = pgTable(
-  "tracker_entries",
+export const merchantTags = pgTable(
+  "merchant_tags",
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .defaultNow()
       .notNull(),
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    duration: bigint({ mode: "number" }),
-    projectId: uuid("project_id"),
-    start: timestamp({ withTimezone: true, mode: "string" }),
-    stop: timestamp({ withTimezone: true, mode: "string" }),
-    assignedId: uuid("assigned_id"),
-    teamId: uuid("team_id"),
-    description: text(),
-    rate: numericCasted({ precision: 10, scale: 2 }),
-    currency: text(),
-    billed: boolean().default(false),
-    date: date().defaultNow(),
-  },
-  (table) => [
-    index("tracker_entries_team_id_idx").using(
-      "btree",
-      table.teamId.asc().nullsLast().op("uuid_ops"),
-    ),
-    foreignKey({
-      columns: [table.assignedId],
-      foreignColumns: [users.id],
-      name: "tracker_entries_assigned_id_fkey",
-    }).onDelete("set null"),
-    foreignKey({
-      columns: [table.projectId],
-      foreignColumns: [trackerProjects.id],
-      name: "tracker_entries_project_id_fkey",
-    }).onDelete("cascade"),
-    foreignKey({
-      columns: [table.teamId],
-      foreignColumns: [teams.id],
-      name: "tracker_entries_team_id_fkey",
-    }).onDelete("cascade"),
-    pgPolicy("Entries can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Entries can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Entries can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Entries can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["authenticated"],
-    }),
-  ],
-);
-
-export const customerTags = pgTable(
-  "customer_tags",
-  {
-    id: uuid().defaultRandom().primaryKey().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
-      .defaultNow()
-      .notNull(),
-    customerId: uuid("customer_id").notNull(),
+    merchantId: uuid("merchant_id").notNull(),
     teamId: uuid("team_id").notNull(),
     tagId: uuid("tag_id").notNull(),
   },
   (table) => [
     foreignKey({
-      columns: [table.customerId],
-      foreignColumns: [customers.id],
-      name: "customer_tags_customer_id_fkey",
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "merchant_tags_merchant_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.tagId],
       foreignColumns: [tags.id],
-      name: "customer_tags_tag_id_fkey",
+      name: "merchant_tags_tag_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
-      name: "customer_tags_team_id_fkey",
+      name: "merchant_tags_team_id_fkey",
     }).onDelete("cascade"),
-    unique("unique_customer_tag").on(table.customerId, table.tagId),
+    unique("unique_merchant_tag").on(table.merchantId, table.tagId),
     pgPolicy("Tags can be handled by a member of the team", {
       as: "permissive",
       for: "all",
@@ -751,7 +767,7 @@ export const invoiceRecurring = pgTable(
     }).defaultNow(),
     teamId: uuid("team_id").notNull(),
     userId: uuid("user_id").notNull(),
-    customerId: uuid("customer_id"),
+    merchantId: uuid("merchant_id"),
     // Frequency settings
     frequency: invoiceRecurringFrequencyEnum().notNull(),
     frequencyDay: integer("frequency_day"), // 0-6 for weekly (day of week), 1-31 for monthly_date
@@ -783,7 +799,7 @@ export const invoiceRecurring = pgTable(
     paymentDetails: jsonb("payment_details"),
     fromDetails: jsonb("from_details"),
     noteDetails: jsonb("note_details"),
-    customerName: text("customer_name"),
+    merchantName: text("merchant_name"),
     vat: numericCasted({ precision: 10, scale: 2 }),
     tax: numericCasted({ precision: 10, scale: 2 }),
     discount: numericCasted({ precision: 10, scale: 2 }),
@@ -828,9 +844,9 @@ export const invoiceRecurring = pgTable(
       name: "invoice_recurring_user_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.customerId],
-      foreignColumns: [customers.id],
-      name: "invoice_recurring_customer_id_fkey",
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "invoice_recurring_merchant_id_fkey",
     }).onDelete("set null"),
     foreignKey({
       columns: [table.templateId],
@@ -859,12 +875,12 @@ export const invoices = pgTable(
     }).defaultNow(),
     dueDate: timestamp("due_date", { withTimezone: true, mode: "string" }),
     invoiceNumber: text("invoice_number"),
-    customerId: uuid("customer_id"),
+    merchantId: uuid("merchant_id"),
     amount: numericCasted({ precision: 10, scale: 2 }),
     currency: text(),
     lineItems: jsonb("line_items"),
     paymentDetails: jsonb("payment_details"),
-    customerDetails: jsonb("customer_details"),
+    merchantDetails: jsonb("merchant_details"),
     companyDatails: jsonb("company_datails"),
     note: text(),
     internalNote: text("internal_note"),
@@ -892,7 +908,7 @@ export const invoices = pgTable(
     issueDate: timestamp("issue_date", { withTimezone: true, mode: "string" }),
     template: jsonb(),
     noteDetails: jsonb("note_details"),
-    customerName: text("customer_name"),
+    merchantName: text("merchant_name"),
     token: text().default("").notNull(),
     sentTo: text("sent_to"),
     reminderSentAt: timestamp("reminder_sent_at", {
@@ -944,9 +960,9 @@ export const invoices = pgTable(
       name: "invoices_created_by_fkey",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.customerId],
-      foreignColumns: [customers.id],
-      name: "invoices_customer_id_fkey",
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "invoices_merchant_id_fkey",
     }).onDelete("set null"),
     foreignKey({
       columns: [table.teamId],
@@ -981,8 +997,8 @@ export const invoices = pgTable(
   ],
 );
 
-export const customers = pgTable(
-  "customers",
+export const merchants = pgTable(
+  "merchants",
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
@@ -1006,7 +1022,7 @@ export const customers = pgTable(
     token: text().default("").notNull(),
     contact: text(),
 
-    // Customer relationship fields
+    // Merchant relationship fields
     status: text().default("active"), // active, inactive, prospect, churned
     preferredCurrency: text("preferred_currency"),
     defaultPaymentTerms: integer("default_payment_terms"), // days (30, 60, etc.)
@@ -1047,6 +1063,11 @@ export const customers = pgTable(
     portalEnabled: boolean("portal_enabled").default(false),
     portalId: text("portal_id"),
 
+    // Notification preferences
+    notificationEmail: boolean("notification_email").default(true),
+    notificationSms: boolean("notification_sms").default(false),
+    notificationPhone: text("notification_phone"),
+
     fts: tsvector("fts")
       .notNull()
       .generatedAlwaysAs(
@@ -1068,21 +1089,21 @@ export const customers = pgTable(
       ),
   },
   (table) => [
-    index("customers_fts").using(
+    index("merchants_fts").using(
       "gin",
       table.fts.asc().nullsLast().op("tsvector_ops"),
     ),
-    index("idx_customers_status").on(table.status),
-    index("idx_customers_is_archived").on(table.isArchived),
-    index("idx_customers_enrichment_status").on(table.enrichmentStatus),
-    index("idx_customers_website").on(table.website),
-    index("idx_customers_industry").on(table.industry),
+    index("idx_merchants_status").on(table.status),
+    index("idx_merchants_is_archived").on(table.isArchived),
+    index("idx_merchants_enrichment_status").on(table.enrichmentStatus),
+    index("idx_merchants_website").on(table.website),
+    index("idx_merchants_industry").on(table.industry),
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
-      name: "customers_team_id_fkey",
+      name: "merchants_team_id_fkey",
     }).onDelete("cascade"),
-    pgPolicy("Customers can be handled by members of the team", {
+    pgPolicy("Merchants can be handled by members of the team", {
       as: "permissive",
       for: "all",
       to: ["public"],
@@ -1146,105 +1167,12 @@ export const tags = pgTable(
   ],
 );
 
-export const trackerReports = pgTable(
-  "tracker_reports",
-  {
-    id: uuid().defaultRandom().primaryKey().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
-      .defaultNow()
-      .notNull(),
-    linkId: text("link_id"),
-    shortLink: text("short_link"),
-    teamId: uuid("team_id").defaultRandom(),
-    projectId: uuid("project_id").defaultRandom(),
-    createdBy: uuid("created_by"),
-  },
-  (table) => [
-    index("tracker_reports_team_id_idx").using(
-      "btree",
-      table.teamId.asc().nullsLast().op("uuid_ops"),
-    ),
-    foreignKey({
-      columns: [table.createdBy],
-      foreignColumns: [users.id],
-      name: "public_tracker_reports_created_by_fkey",
-    }).onDelete("cascade"),
-    foreignKey({
-      columns: [table.projectId],
-      foreignColumns: [trackerProjects.id],
-      name: "public_tracker_reports_project_id_fkey",
-    })
-      .onUpdate("cascade")
-      .onDelete("cascade"),
-    foreignKey({
-      columns: [table.teamId],
-      foreignColumns: [teams.id],
-      name: "tracker_reports_team_id_fkey",
-    })
-      .onUpdate("cascade")
-      .onDelete("cascade"),
-    pgPolicy("Reports can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-  ],
-);
-
 export const invoiceComments = pgTable("invoice_comments", {
   id: uuid().defaultRandom().primaryKey().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
     .defaultNow()
     .notNull(),
 });
-
-export const trackerProjectTags = pgTable(
-  "tracker_project_tags",
-  {
-    id: uuid().defaultRandom().primaryKey().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
-      .defaultNow()
-      .notNull(),
-    trackerProjectId: uuid("tracker_project_id").notNull(),
-    tagId: uuid("tag_id").notNull(),
-    teamId: uuid("team_id").notNull(),
-  },
-  (table) => [
-    index("tracker_project_tags_team_id_idx").using(
-      "btree",
-      table.teamId.asc().nullsLast().op("uuid_ops"),
-    ),
-    index("tracker_project_tags_tracker_project_id_tag_id_team_id_idx").using(
-      "btree",
-      table.trackerProjectId.asc().nullsLast().op("uuid_ops"),
-      table.tagId.asc().nullsLast().op("uuid_ops"),
-      table.teamId.asc().nullsLast().op("uuid_ops"),
-    ),
-    foreignKey({
-      columns: [table.tagId],
-      foreignColumns: [tags.id],
-      name: "project_tags_tag_id_fkey",
-    }).onDelete("cascade"),
-    foreignKey({
-      columns: [table.trackerProjectId],
-      foreignColumns: [trackerProjects.id],
-      name: "project_tags_tracker_project_id_fkey",
-    }).onDelete("cascade"),
-    foreignKey({
-      columns: [table.teamId],
-      foreignColumns: [teams.id],
-      name: "tracker_project_tags_team_id_fkey",
-    }).onDelete("cascade"),
-    unique("unique_project_tag").on(table.trackerProjectId, table.tagId),
-    pgPolicy("Tags can be handled by a member of the team", {
-      as: "permissive",
-      for: "all",
-      to: ["public"],
-      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-  ],
-);
 
 export const reports = pgTable(
   "reports",
@@ -2061,79 +1989,6 @@ export const users = pgTable(
   ],
 );
 
-export const trackerProjects = pgTable(
-  "tracker_projects",
-  {
-    id: uuid().defaultRandom().primaryKey().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
-      .defaultNow()
-      .notNull(),
-    teamId: uuid("team_id"),
-    rate: numericCasted({ precision: 10, scale: 2 }),
-    currency: text(),
-    status: trackerStatusEnum().default("in_progress").notNull(),
-    description: text(),
-    name: text().notNull(),
-    billable: boolean().default(false),
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    estimate: bigint({ mode: "number" }),
-    customerId: uuid("customer_id"),
-    fts: tsvector("fts")
-      .notNull()
-      .generatedAlwaysAs(
-        (): SQL => sql`
-          to_tsvector(
-            'english'::regconfig,
-            (
-              (COALESCE(name, ''::text) || ' '::text) || COALESCE(description, ''::text)
-            )
-          )
-        `,
-      ),
-  },
-  (table) => [
-    index("tracker_projects_fts").using(
-      "gin",
-      table.fts.asc().nullsLast().op("tsvector_ops"),
-    ),
-    index("tracker_projects_team_id_idx").using(
-      "btree",
-      table.teamId.asc().nullsLast().op("uuid_ops"),
-    ),
-    foreignKey({
-      columns: [table.customerId],
-      foreignColumns: [customers.id],
-      name: "tracker_projects_customer_id_fkey",
-    }).onDelete("cascade"),
-    foreignKey({
-      columns: [table.teamId],
-      foreignColumns: [teams.id],
-      name: "tracker_projects_team_id_fkey",
-    }).onDelete("cascade"),
-    pgPolicy("Projects can be created by a member of the team", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
-    }),
-    pgPolicy("Projects can be deleted by a member of the team", {
-      as: "permissive",
-      for: "delete",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Projects can be selected by a member of the team", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-    }),
-    pgPolicy("Projects can be updated by a member of the team", {
-      as: "permissive",
-      for: "update",
-      to: ["authenticated"],
-    }),
-  ],
-);
-
 export const inbox = pgTable(
   "inbox",
   {
@@ -2520,6 +2375,8 @@ export const usersOnTeam = pgTable(
     teamId: uuid("team_id").notNull(),
     id: uuid().defaultRandom().notNull(),
     role: teamRolesEnum(),
+    entityId: uuid("entity_id"),
+    entityType: text("entity_type"),
     createdAt: timestamp("created_at", {
       withTimezone: true,
       mode: "string",
@@ -3032,10 +2889,8 @@ export const transactionsRelations = relations(
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   transactions: many(transactions),
-  trackerEntries: many(trackerEntries),
   bankAccounts: many(bankAccounts),
   invoices: many(invoices),
-  trackerReports: many(trackerReports),
   reports: many(reports),
   userInvites: many(userInvites),
   documents: many(documents),
@@ -3080,15 +2935,12 @@ export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
 
 export const teamsRelations = relations(teams, ({ many }) => ({
   transactions: many(transactions),
-  trackerEntries: many(trackerEntries),
-  customerTags: many(customerTags),
+  merchantTags: many(merchantTags),
   inboxAccounts: many(inboxAccounts),
   bankAccounts: many(bankAccounts),
   invoices: many(invoices),
-  customers: many(customers),
+  merchants: many(merchants),
   tags: many(tags),
-  trackerReports: many(trackerReports),
-  trackerProjectTags: many(trackerProjectTags),
   reports: many(reports),
   bankConnections: many(bankConnections),
   userInvites: many(userInvites),
@@ -3102,7 +2954,6 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   invoiceTemplates: many(invoiceTemplates),
   transactionEnrichments: many(transactionEnrichments),
   users: many(users),
-  trackerProjects: many(trackerProjects),
   inboxes: many(inbox),
   inboxBlocklist: many(inboxBlocklist),
   documentTagAssignments: many(documentTagAssignments),
@@ -3149,61 +3000,28 @@ export const transactionCategoriesRelations = relations(
   }),
 );
 
-export const trackerEntriesRelations = relations(trackerEntries, ({ one }) => ({
-  user: one(users, {
-    fields: [trackerEntries.assignedId],
-    references: [users.id],
-  }),
-  trackerProject: one(trackerProjects, {
-    fields: [trackerEntries.projectId],
-    references: [trackerProjects.id],
-  }),
-  team: one(teams, {
-    fields: [trackerEntries.teamId],
-    references: [teams.id],
-  }),
-}));
-
-export const trackerProjectsRelations = relations(
-  trackerProjects,
-  ({ one, many }) => ({
-    trackerEntries: many(trackerEntries),
-    trackerReports: many(trackerReports),
-    trackerProjectTags: many(trackerProjectTags),
-    customer: one(customers, {
-      fields: [trackerProjects.customerId],
-      references: [customers.id],
-    }),
-    team: one(teams, {
-      fields: [trackerProjects.teamId],
-      references: [teams.id],
-    }),
-  }),
-);
-
-export const customerTagsRelations = relations(customerTags, ({ one }) => ({
-  customer: one(customers, {
-    fields: [customerTags.customerId],
-    references: [customers.id],
+export const merchantTagsRelations = relations(merchantTags, ({ one }) => ({
+  merchant: one(merchants, {
+    fields: [merchantTags.merchantId],
+    references: [merchants.id],
   }),
   tag: one(tags, {
-    fields: [customerTags.tagId],
+    fields: [merchantTags.tagId],
     references: [tags.id],
   }),
   team: one(teams, {
-    fields: [customerTags.teamId],
+    fields: [merchantTags.teamId],
     references: [teams.id],
   }),
 }));
 
-export const customersRelations = relations(customers, ({ one, many }) => ({
-  customerTags: many(customerTags),
+export const merchantsRelations = relations(merchants, ({ one, many }) => ({
+  merchantTags: many(merchantTags),
   invoices: many(invoices),
   team: one(teams, {
-    fields: [customers.teamId],
+    fields: [merchants.teamId],
     references: [teams.id],
   }),
-  trackerProjects: many(trackerProjects),
   mcaDeals: many(mcaDeals),
   merchantPortalSessions: many(merchantPortalSessions),
   merchantPortalInvites: many(merchantPortalInvites),
@@ -3212,12 +3030,11 @@ export const customersRelations = relations(customers, ({ one, many }) => ({
 }));
 
 export const tagsRelations = relations(tags, ({ one, many }) => ({
-  customerTags: many(customerTags),
+  merchantTags: many(merchantTags),
   team: one(teams, {
     fields: [tags.teamId],
     references: [teams.id],
   }),
-  trackerProjectTags: many(trackerProjectTags),
   transactionTags: many(transactionTags),
 }));
 
@@ -3251,9 +3068,9 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
     fields: [invoices.userId],
     references: [users.id],
   }),
-  customer: one(customers, {
-    fields: [invoices.customerId],
-    references: [customers.id],
+  merchant: one(merchants, {
+    fields: [invoices.merchantId],
+    references: [merchants.id],
   }),
   team: one(teams, {
     fields: [invoices.teamId],
@@ -3276,48 +3093,15 @@ export const invoiceRecurringRelations = relations(
       fields: [invoiceRecurring.userId],
       references: [users.id],
     }),
-    customer: one(customers, {
-      fields: [invoiceRecurring.customerId],
-      references: [customers.id],
+    merchant: one(merchants, {
+      fields: [invoiceRecurring.merchantId],
+      references: [merchants.id],
     }),
     invoiceTemplate: one(invoiceTemplates, {
       fields: [invoiceRecurring.templateId],
       references: [invoiceTemplates.id],
     }),
     invoices: many(invoices),
-  }),
-);
-
-export const trackerReportsRelations = relations(trackerReports, ({ one }) => ({
-  user: one(users, {
-    fields: [trackerReports.createdBy],
-    references: [users.id],
-  }),
-  trackerProject: one(trackerProjects, {
-    fields: [trackerReports.projectId],
-    references: [trackerProjects.id],
-  }),
-  team: one(teams, {
-    fields: [trackerReports.teamId],
-    references: [teams.id],
-  }),
-}));
-
-export const trackerProjectTagsRelations = relations(
-  trackerProjectTags,
-  ({ one }) => ({
-    tag: one(tags, {
-      fields: [trackerProjectTags.tagId],
-      references: [tags.id],
-    }),
-    trackerProject: one(trackerProjects, {
-      fields: [trackerProjectTags.trackerProjectId],
-      references: [trackerProjects.id],
-    }),
-    team: one(teams, {
-      fields: [trackerProjectTags.teamId],
-      references: [teams.id],
-    }),
   }),
 );
 
@@ -3804,7 +3588,7 @@ export const mcaDeals = pgTable(
       .defaultNow(),
 
     // Relationships
-    customerId: uuid("customer_id").notNull(),
+    merchantId: uuid("merchant_id").notNull(),
     teamId: uuid("team_id").notNull(),
 
     // Deal Terms
@@ -3827,17 +3611,35 @@ export const mcaDeals = pgTable(
 
     // External References (for spreadsheet sync)
     externalId: text("external_id"),
+
+    // Broker who originated this deal
+    brokerId: uuid("broker_id"),
+
+    // Contract Dates
+    startDate: date("start_date"),
+    maturityDate: date("maturity_date"),
+    firstPaymentDate: date("first_payment_date"),
+
+    // Holdback
+    holdbackPercentage: numericCasted("holdback_percentage", { precision: 5, scale: 2 }),
+
+    // Legal Terms
+    uccFilingStatus: text("ucc_filing_status"),
+    personalGuarantee: boolean("personal_guarantee").default(false),
+    defaultTerms: text("default_terms"),
+    curePeriodDays: integer("cure_period_days"),
   },
   (table) => [
-    index("mca_deals_customer_id_idx").on(table.customerId),
+    index("mca_deals_merchant_id_idx").on(table.merchantId),
     index("mca_deals_team_id_idx").on(table.teamId),
     index("mca_deals_status_idx").on(table.status),
     index("mca_deals_deal_code_idx").on(table.dealCode),
+    index("mca_deals_broker_id_idx").on(table.brokerId),
     unique("mca_deals_team_deal_code_unique").on(table.teamId, table.dealCode),
     foreignKey({
-      columns: [table.customerId],
-      foreignColumns: [customers.id],
-      name: "mca_deals_customer_id_fkey",
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "mca_deals_merchant_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.teamId],
@@ -3921,8 +3723,8 @@ export const merchantPortalSessions = pgTable(
       .defaultNow()
       .notNull(),
 
-    // Link to customer
-    customerId: uuid("customer_id").notNull(),
+    // Link to merchant
+    merchantId: uuid("merchant_id").notNull(),
     portalId: text("portal_id").notNull(),
 
     // Email verification
@@ -3939,16 +3741,20 @@ export const merchantPortalSessions = pgTable(
     }),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
+
+    // Session type and device
+    sessionType: text("session_type").default("magic_link").notNull(),
+    deviceFingerprint: text("device_fingerprint"),
   },
   (table) => [
-    index("merchant_sessions_customer_idx").on(table.customerId),
+    index("merchant_sessions_merchant_idx").on(table.merchantId),
     index("merchant_sessions_token_idx").on(table.verificationToken),
     index("merchant_sessions_portal_idx").on(table.portalId),
     index("merchant_sessions_email_idx").on(table.email),
     foreignKey({
-      columns: [table.customerId],
-      foreignColumns: [customers.id],
-      name: "merchant_portal_sessions_customer_id_fkey",
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "merchant_portal_sessions_merchant_id_fkey",
     }).onDelete("cascade"),
   ],
 );
@@ -3970,7 +3776,7 @@ export const merchantPortalInvites = pgTable(
     email: text().notNull(),
 
     // What they're being invited to access
-    customerId: uuid("customer_id").notNull(),
+    merchantId: uuid("merchant_id").notNull(),
     teamId: uuid("team_id").notNull(),
 
     // Invite details
@@ -3984,16 +3790,16 @@ export const merchantPortalInvites = pgTable(
   (table) => [
     index("merchant_invites_code_idx").on(table.code),
     index("merchant_invites_email_idx").on(table.email),
-    index("merchant_invites_customer_idx").on(table.customerId),
+    index("merchant_invites_merchant_idx").on(table.merchantId),
     index("merchant_invites_team_idx").on(table.teamId),
-    unique("merchant_invites_email_customer_unique").on(
+    unique("merchant_invites_email_merchant_unique").on(
       table.email,
-      table.customerId,
+      table.merchantId,
     ),
     foreignKey({
-      columns: [table.customerId],
-      foreignColumns: [customers.id],
-      name: "merchant_portal_invites_customer_id_fkey",
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "merchant_portal_invites_merchant_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.teamId],
@@ -4023,7 +3829,7 @@ export const merchantPortalAccess = pgTable(
     userId: uuid("user_id").notNull(),
 
     // What they can access
-    customerId: uuid("customer_id").notNull(),
+    merchantId: uuid("merchant_id").notNull(),
     teamId: uuid("team_id").notNull(),
 
     // Status
@@ -4036,11 +3842,11 @@ export const merchantPortalAccess = pgTable(
   },
   (table) => [
     index("merchant_access_user_idx").on(table.userId),
-    index("merchant_access_customer_idx").on(table.customerId),
+    index("merchant_access_merchant_idx").on(table.merchantId),
     index("merchant_access_team_idx").on(table.teamId),
-    unique("merchant_access_user_customer_unique").on(
+    unique("merchant_access_user_merchant_unique").on(
       table.userId,
-      table.customerId,
+      table.merchantId,
     ),
     foreignKey({
       columns: [table.userId],
@@ -4048,9 +3854,9 @@ export const merchantPortalAccess = pgTable(
       name: "merchant_portal_access_user_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.customerId],
-      foreignColumns: [customers.id],
-      name: "merchant_portal_access_customer_id_fkey",
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "merchant_portal_access_merchant_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.teamId],
@@ -4078,7 +3884,7 @@ export const payoffLetterRequests = pgTable(
 
     // Relationships
     dealId: uuid("deal_id").notNull(),
-    customerId: uuid("customer_id").notNull(),
+    merchantId: uuid("merchant_id").notNull(),
     teamId: uuid("team_id").notNull(),
 
     // Request details
@@ -4101,7 +3907,7 @@ export const payoffLetterRequests = pgTable(
   },
   (table) => [
     index("payoff_requests_deal_idx").on(table.dealId),
-    index("payoff_requests_customer_idx").on(table.customerId),
+    index("payoff_requests_merchant_idx").on(table.merchantId),
     index("payoff_requests_team_idx").on(table.teamId),
     index("payoff_requests_status_idx").on(table.status),
     foreignKey({
@@ -4110,9 +3916,9 @@ export const payoffLetterRequests = pgTable(
       name: "payoff_letter_requests_deal_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.customerId],
-      foreignColumns: [customers.id],
-      name: "payoff_letter_requests_customer_id_fkey",
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "payoff_letter_requests_merchant_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.teamId],
@@ -4134,20 +3940,259 @@ export const payoffLetterRequests = pgTable(
 );
 
 // ============================================================================
+// Merchant Portal Self-Service Tables
+// ============================================================================
+
+export const merchantMessageStatusEnum = pgEnum("merchant_message_status", [
+  "pending",
+  "read",
+  "replied",
+  "archived",
+]);
+
+export const merchantMessageDirectionEnum = pgEnum(
+  "merchant_message_direction",
+  ["inbound", "outbound"],
+);
+
+export const merchantDocumentTypeEnum = pgEnum("merchant_document_type", [
+  "contract",
+  "disclosure",
+  "payoff_letter",
+  "monthly_statement",
+  "tax_doc",
+  "other",
+]);
+
+export const merchantNotificationTypeEnum = pgEnum(
+  "merchant_notification_type",
+  [
+    "payment_received",
+    "payment_nsf",
+    "payoff_approved",
+    "message_received",
+    "document_uploaded",
+    "balance_alert",
+    "deal_paid_off",
+    "general",
+  ],
+);
+
+/**
+ * Merchant Messages — merchant↔funder messaging
+ */
+export const merchantMessages = pgTable(
+  "merchant_messages",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    merchantId: uuid("merchant_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    direction: merchantMessageDirectionEnum().notNull(),
+    subject: text(),
+    message: text().notNull(),
+
+    status: merchantMessageStatusEnum().default("pending").notNull(),
+    readAt: timestamp("read_at", { withTimezone: true, mode: "string" }),
+    repliedAt: timestamp("replied_at", { withTimezone: true, mode: "string" }),
+
+    fromEmail: text("from_email"),
+    fromName: text("from_name"),
+    sentByUserId: uuid("sent_by_user_id"),
+    sessionId: uuid("session_id"),
+  },
+  (table) => [
+    index("merchant_messages_merchant_idx").on(table.merchantId),
+    index("merchant_messages_team_idx").on(table.teamId),
+    index("merchant_messages_status_idx").on(table.status),
+    index("merchant_messages_created_at_idx").on(table.createdAt),
+    foreignKey({
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "merchant_messages_merchant_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "merchant_messages_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.sentByUserId],
+      foreignColumns: [users.id],
+      name: "merchant_messages_sent_by_user_id_fkey",
+    }),
+    foreignKey({
+      columns: [table.sessionId],
+      foreignColumns: [merchantPortalSessions.id],
+      name: "merchant_messages_session_id_fkey",
+    }),
+    pgPolicy("Team members can manage merchant messages", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * Merchant Documents — document library for portal
+ */
+export const merchantDocuments = pgTable(
+  "merchant_documents",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    merchantId: uuid("merchant_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    dealId: uuid("deal_id"),
+
+    documentType: merchantDocumentTypeEnum("document_type").notNull(),
+    title: text().notNull(),
+    description: text(),
+
+    filePath: text("file_path").notNull(),
+    fileName: text("file_name").notNull(),
+    fileSize: integer("file_size"),
+    mimeType: text("mime_type").default("application/pdf"),
+
+    visibleInPortal: boolean("visible_in_portal").default(true).notNull(),
+    uploadedBy: uuid("uploaded_by"),
+  },
+  (table) => [
+    index("merchant_documents_merchant_idx").on(table.merchantId),
+    index("merchant_documents_team_idx").on(table.teamId),
+    index("merchant_documents_type_idx").on(table.documentType),
+    index("merchant_documents_deal_idx").on(table.dealId),
+    foreignKey({
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "merchant_documents_merchant_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "merchant_documents_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "merchant_documents_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.uploadedBy],
+      foreignColumns: [users.id],
+      name: "merchant_documents_uploaded_by_fkey",
+    }),
+    pgPolicy("Team members can manage merchant documents", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * Merchant Notifications — notification log for portal
+ */
+export const merchantNotifications = pgTable(
+  "merchant_notifications",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    merchantId: uuid("merchant_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    notificationType: merchantNotificationTypeEnum("notification_type").notNull(),
+    title: text().notNull(),
+    message: text().notNull(),
+
+    emailSent: boolean("email_sent").default(false),
+    emailSentAt: timestamp("email_sent_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    smsSent: boolean("sms_sent").default(false),
+    smsSentAt: timestamp("sms_sent_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+
+    readInPortal: boolean("read_in_portal").default(false),
+    readAt: timestamp("read_at", { withTimezone: true, mode: "string" }),
+
+    dealId: uuid("deal_id"),
+    paymentId: uuid("payment_id"),
+  },
+  (table) => [
+    index("merchant_notifications_merchant_idx").on(table.merchantId),
+    index("merchant_notifications_team_idx").on(table.teamId),
+    index("merchant_notifications_created_at_idx").on(table.createdAt),
+    foreignKey({
+      columns: [table.merchantId],
+      foreignColumns: [merchants.id],
+      name: "merchant_notifications_merchant_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "merchant_notifications_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "merchant_notifications_deal_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.paymentId],
+      foreignColumns: [mcaPayments.id],
+      name: "merchant_notifications_payment_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Team members can manage merchant notifications", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+// ============================================================================
 // MCA Relations
 // ============================================================================
 
 export const mcaDealsRelations = relations(mcaDeals, ({ one, many }) => ({
-  customer: one(customers, {
-    fields: [mcaDeals.customerId],
-    references: [customers.id],
+  merchant: one(merchants, {
+    fields: [mcaDeals.merchantId],
+    references: [merchants.id],
   }),
   team: one(teams, {
     fields: [mcaDeals.teamId],
     references: [teams.id],
   }),
+  broker: one(brokers, {
+    fields: [mcaDeals.brokerId],
+    references: [brokers.id],
+  }),
   payments: many(mcaPayments),
   payoffLetterRequests: many(payoffLetterRequests),
+  brokerCommissions: many(brokerCommissions),
+  syndicationParticipants: many(syndicationParticipants),
+  dealBankAccounts: many(dealBankAccounts),
 }));
 
 export const mcaPaymentsRelations = relations(mcaPayments, ({ one }) => ({
@@ -4164,9 +4209,9 @@ export const mcaPaymentsRelations = relations(mcaPayments, ({ one }) => ({
 export const merchantPortalSessionsRelations = relations(
   merchantPortalSessions,
   ({ one }) => ({
-    customer: one(customers, {
-      fields: [merchantPortalSessions.customerId],
-      references: [customers.id],
+    merchant: one(merchants, {
+      fields: [merchantPortalSessions.merchantId],
+      references: [merchants.id],
     }),
   }),
 );
@@ -4174,9 +4219,9 @@ export const merchantPortalSessionsRelations = relations(
 export const merchantPortalInvitesRelations = relations(
   merchantPortalInvites,
   ({ one }) => ({
-    customer: one(customers, {
-      fields: [merchantPortalInvites.customerId],
-      references: [customers.id],
+    merchant: one(merchants, {
+      fields: [merchantPortalInvites.merchantId],
+      references: [merchants.id],
     }),
     team: one(teams, {
       fields: [merchantPortalInvites.teamId],
@@ -4196,9 +4241,9 @@ export const merchantPortalAccessRelations = relations(
       fields: [merchantPortalAccess.userId],
       references: [users.id],
     }),
-    customer: one(customers, {
-      fields: [merchantPortalAccess.customerId],
-      references: [customers.id],
+    merchant: one(merchants, {
+      fields: [merchantPortalAccess.merchantId],
+      references: [merchants.id],
     }),
     team: one(teams, {
       fields: [merchantPortalAccess.teamId],
@@ -4218,9 +4263,9 @@ export const payoffLetterRequestsRelations = relations(
       fields: [payoffLetterRequests.dealId],
       references: [mcaDeals.id],
     }),
-    customer: one(customers, {
-      fields: [payoffLetterRequests.customerId],
-      references: [customers.id],
+    merchant: one(merchants, {
+      fields: [payoffLetterRequests.merchantId],
+      references: [merchants.id],
     }),
     team: one(teams, {
       fields: [payoffLetterRequests.teamId],
@@ -4234,8 +4279,1016 @@ export const payoffLetterRequestsRelations = relations(
 );
 
 // ============================================================================
+// Transaction Rules
+// ============================================================================
+
+export const transactionRules = pgTable(
+  "transaction_rules",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    name: text().notNull(),
+    enabled: boolean().notNull().default(true),
+    priority: integer().notNull().default(0),
+
+    // Criteria
+    merchantMatch: text("merchant_match"),
+    merchantMatchType: text("merchant_match_type").notNull().default("contains"),
+    amountOperator: text("amount_operator"),
+    amountValue: numericCasted("amount_value", { precision: 10, scale: 2 }),
+    amountValueMax: numericCasted("amount_value_max", {
+      precision: 10,
+      scale: 2,
+    }),
+    accountId: uuid("account_id"),
+
+    // Actions
+    setCategorySlug: text("set_category_slug"),
+    setMerchantName: text("set_merchant_name"),
+    addTagIds: text("add_tag_ids").array(),
+    setExcluded: boolean("set_excluded"),
+    setAssignedId: uuid("set_assigned_id"),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_transaction_rules_team_id").on(table.teamId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "transaction_rules_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.accountId],
+      foreignColumns: [bankAccounts.id],
+      name: "transaction_rules_account_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.setAssignedId],
+      foreignColumns: [users.id],
+      name: "transaction_rules_set_assigned_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Transaction rules can be managed by team members", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const transactionRulesRelations = relations(
+  transactionRules,
+  ({ one }) => ({
+    team: one(teams, {
+      fields: [transactionRules.teamId],
+      references: [teams.id],
+    }),
+    account: one(bankAccounts, {
+      fields: [transactionRules.accountId],
+      references: [bankAccounts.id],
+    }),
+    assignedUser: one(users, {
+      fields: [transactionRules.setAssignedId],
+      references: [users.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// Underwriting Buy Box
+// ============================================================================
+
+export const underwritingBuyBox = pgTable(
+  "underwriting_buy_box",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    teamId: uuid("team_id").notNull(),
+
+    // Criteria
+    minMonthlyRevenue: numericCasted("min_monthly_revenue", {
+      precision: 12,
+      scale: 2,
+    }),
+    minTimeInBusiness: integer("min_time_in_business"), // months
+    maxExistingPositions: integer("max_existing_positions"),
+    minAvgDailyBalance: numericCasted("min_avg_daily_balance", {
+      precision: 12,
+      scale: 2,
+    }),
+    maxNsfCount: integer("max_nsf_count"),
+    excludedIndustries: text("excluded_industries").array(),
+    minCreditScore: integer("min_credit_score"),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("underwriting_buy_box_team_id_unique").on(table.teamId),
+    index("idx_underwriting_buy_box_team_id").on(table.teamId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "underwriting_buy_box_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage underwriting buy box", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const underwritingBuyBoxRelations = relations(
+  underwritingBuyBox,
+  ({ one }) => ({
+    team: one(teams, {
+      fields: [underwritingBuyBox.teamId],
+      references: [teams.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// Brokers & Commissions
+// ============================================================================
+
+export const brokerStatusEnum = pgEnum("broker_status", [
+  "active",
+  "inactive",
+]);
+
+export const brokerCommissionStatusEnum = pgEnum("broker_commission_status", [
+  "pending",
+  "paid",
+  "cancelled",
+]);
+
+/**
+ * Brokers - ISOs who originate MCA deals
+ */
+export const brokers = pgTable(
+  "brokers",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow(),
+
+    // Team relationship
+    teamId: uuid("team_id").notNull(),
+
+    // Basic info
+    name: text().notNull(),
+    email: text(),
+    phone: text(),
+    companyName: text("company_name"),
+    website: text(),
+
+    // Address
+    addressLine1: text("address_line_1"),
+    addressLine2: text("address_line_2"),
+    city: text(),
+    state: text(),
+    zip: text(),
+    country: text(),
+
+    // Default commission rate
+    commissionPercentage: numericCasted("commission_percentage", {
+      precision: 5,
+      scale: 2,
+    }),
+
+    // Portal access
+    portalEnabled: boolean("portal_enabled").default(false),
+    portalId: text("portal_id").unique(),
+
+    // Status
+    status: brokerStatusEnum().default("active"),
+
+    // Notes & external sync
+    note: text(),
+    externalId: text("external_id"),
+  },
+  (table) => [
+    index("brokers_team_id_idx").on(table.teamId),
+    index("brokers_portal_id_idx").on(table.portalId),
+    index("brokers_status_idx").on(table.status),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "brokers_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage brokers", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * Broker Commissions - Per-deal commission tracking for brokers
+ */
+export const brokerCommissions = pgTable(
+  "broker_commissions",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Relationships
+    dealId: uuid("deal_id").notNull(),
+    brokerId: uuid("broker_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // Commission details
+    commissionPercentage: numericCasted("commission_percentage", {
+      precision: 5,
+      scale: 2,
+    }).notNull(),
+    commissionAmount: numericCasted("commission_amount", {
+      precision: 12,
+      scale: 2,
+    }).notNull(),
+
+    // Status
+    status: brokerCommissionStatusEnum().default("pending"),
+    paidAt: timestamp("paid_at", { withTimezone: true, mode: "string" }),
+
+    // Notes
+    note: text(),
+  },
+  (table) => [
+    index("broker_commissions_deal_id_idx").on(table.dealId),
+    index("broker_commissions_broker_id_idx").on(table.brokerId),
+    index("broker_commissions_team_id_idx").on(table.teamId),
+    index("broker_commissions_status_idx").on(table.status),
+    unique("broker_commissions_deal_broker_unique").on(
+      table.dealId,
+      table.brokerId,
+    ),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "broker_commissions_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.brokerId],
+      foreignColumns: [brokers.id],
+      name: "broker_commissions_broker_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "broker_commissions_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage broker commissions", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+// Broker Relations
+export const brokersRelations = relations(brokers, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [brokers.teamId],
+    references: [teams.id],
+  }),
+  deals: many(mcaDeals),
+  commissions: many(brokerCommissions),
+}));
+
+export const brokerCommissionsRelations = relations(
+  brokerCommissions,
+  ({ one }) => ({
+    deal: one(mcaDeals, {
+      fields: [brokerCommissions.dealId],
+      references: [mcaDeals.id],
+    }),
+    broker: one(brokers, {
+      fields: [brokerCommissions.brokerId],
+      references: [brokers.id],
+    }),
+    team: one(teams, {
+      fields: [brokerCommissions.teamId],
+      references: [teams.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// Syndicators - External funding partners who co-fund MCA deals
+// ============================================================================
+
+export const syndicatorStatusEnum = pgEnum("syndicator_status", [
+  "active",
+  "inactive",
+]);
+
+export const syndicationParticipantStatusEnum = pgEnum(
+  "syndication_participant_status",
+  ["active", "bought_out", "defaulted"],
+);
+
+/**
+ * Syndicators - External funding partners who co-fund MCA deals
+ */
+export const syndicators = pgTable(
+  "syndicators",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow(),
+
+    // Team relationship
+    teamId: uuid("team_id").notNull(),
+
+    // Basic info
+    name: text().notNull(),
+    email: text(),
+    phone: text(),
+    companyName: text("company_name"),
+    website: text(),
+
+    // Address
+    addressLine1: text("address_line_1"),
+    addressLine2: text("address_line_2"),
+    city: text(),
+    state: text(),
+    zip: text(),
+    country: text(),
+
+    // Portal access
+    portalEnabled: boolean("portal_enabled").default(false),
+    portalId: text("portal_id").unique(),
+
+    // Status
+    status: syndicatorStatusEnum().default("active"),
+
+    // Notes & external sync
+    note: text(),
+    externalId: text("external_id"),
+  },
+  (table) => [
+    index("syndicators_team_id_idx").on(table.teamId),
+    index("syndicators_portal_id_idx").on(table.portalId),
+    index("syndicators_status_idx").on(table.status),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "syndicators_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage syndicators", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * Syndication Participants - Per-deal participation tracking for syndicators
+ */
+export const syndicationParticipants = pgTable(
+  "syndication_participants",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Relationships
+    dealId: uuid("deal_id").notNull(),
+    syndicatorId: uuid("syndicator_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // Syndication details
+    fundingShare: numericCasted("funding_share", {
+      precision: 12,
+      scale: 2,
+    }).notNull(),
+    ownershipPercentage: numericCasted("ownership_percentage", {
+      precision: 5,
+      scale: 4,
+    }).notNull(),
+
+    // Status
+    status: syndicationParticipantStatusEnum().default("active"),
+
+    // Notes
+    note: text(),
+  },
+  (table) => [
+    index("syndication_participants_deal_id_idx").on(table.dealId),
+    index("syndication_participants_syndicator_id_idx").on(table.syndicatorId),
+    index("syndication_participants_team_id_idx").on(table.teamId),
+    index("syndication_participants_status_idx").on(table.status),
+    unique("syndication_participants_deal_syndicator_unique").on(
+      table.dealId,
+      table.syndicatorId,
+    ),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "syndication_participants_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.syndicatorId],
+      foreignColumns: [syndicators.id],
+      name: "syndication_participants_syndicator_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "syndication_participants_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage syndication participants", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+// Syndicator Relations
+export const syndicatorsRelations = relations(syndicators, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [syndicators.teamId],
+    references: [teams.id],
+  }),
+  participants: many(syndicationParticipants),
+}));
+
+export const syndicationParticipantsRelations = relations(
+  syndicationParticipants,
+  ({ one }) => ({
+    deal: one(mcaDeals, {
+      fields: [syndicationParticipants.dealId],
+      references: [mcaDeals.id],
+    }),
+    syndicator: one(syndicators, {
+      fields: [syndicationParticipants.syndicatorId],
+      references: [syndicators.id],
+    }),
+    team: one(teams, {
+      fields: [syndicationParticipants.teamId],
+      references: [teams.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// Deal Fees - Fee line items per MCA deal (for disclosure calculations)
+// ============================================================================
+
+export const dealFees = pgTable(
+  "deal_fees",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow(),
+
+    // Relationships
+    dealId: uuid("deal_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // Fee details
+    feeType: text("fee_type").notNull(),
+    feeName: text("fee_name").notNull(),
+    amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
+    percentage: numericCasted({ precision: 5, scale: 4 }),
+  },
+  (table) => [
+    index("deal_fees_deal_id_idx").on(table.dealId),
+    index("deal_fees_team_id_idx").on(table.teamId),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "deal_fees_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "deal_fees_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage deal fees", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const dealFeeRelations = relations(dealFees, ({ one }) => ({
+  deal: one(mcaDeals, {
+    fields: [dealFees.dealId],
+    references: [mcaDeals.id],
+  }),
+  team: one(teams, {
+    fields: [dealFees.teamId],
+    references: [teams.id],
+  }),
+}));
+
+// ============================================================================
+// Disclosures - State-mandated commercial financing disclosure documents
+// ============================================================================
+
+export const disclosures = pgTable(
+  "disclosures",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow(),
+
+    // Relationships
+    dealId: uuid("deal_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // State & Template versioning
+    stateCode: text("state_code").notNull(),
+    disclosureType: text("disclosure_type").notNull().default("mca"),
+    templateVersion: text("template_version").notNull(),
+
+    // Status lifecycle
+    status: text().notNull().default("pending"),
+
+    // Calculated figures (immutable snapshot)
+    figures: jsonb().notNull().default({}),
+
+    // Document artifact
+    documentHash: text("document_hash"),
+    filePath: text("file_path").array(),
+    fileSize: integer("file_size"),
+
+    // Audit trail
+    generatedBy: uuid("generated_by"),
+    generatedAt: timestamp("generated_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+
+    // Deal terms snapshot (frozen at generation time)
+    dealSnapshot: jsonb("deal_snapshot").notNull().default({}),
+
+    // Merchant acknowledgment / signature
+    acknowledgedAt: timestamp("acknowledged_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    acknowledgedBy: text("acknowledged_by"),
+    signatureData: jsonb("signature_data"),
+  },
+  (table) => [
+    index("disclosures_deal_id_idx").on(table.dealId),
+    index("disclosures_team_id_idx").on(table.teamId),
+    index("disclosures_state_code_idx").on(table.stateCode),
+    index("disclosures_status_idx").on(table.status),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "disclosures_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "disclosures_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage disclosures", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const disclosureRelations = relations(disclosures, ({ one }) => ({
+  deal: one(mcaDeals, {
+    fields: [disclosures.dealId],
+    references: [mcaDeals.id],
+  }),
+  team: one(teams, {
+    fields: [disclosures.teamId],
+    references: [teams.id],
+  }),
+}));
+
+// ============================================================================
+// Deal Bank Accounts - Merchant bank details linked to a specific deal
+// ============================================================================
+
+export const dealBankAccounts = pgTable(
+  "deal_bank_accounts",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Relationships
+    dealId: uuid("deal_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+
+    // Bank Details
+    bankName: text("bank_name").notNull(),
+    routingNumber: text("routing_number").notNull(),
+    accountNumber: text("account_number").notNull(),
+    accountType: text("account_type").default("checking"),
+
+    // Optional link to existing team bank account
+    linkedBankAccountId: uuid("linked_bank_account_id"),
+
+    // Flags
+    isPrimary: boolean("is_primary").default(true),
+  },
+  (table) => [
+    index("deal_bank_accounts_deal_id_idx").on(table.dealId),
+    index("deal_bank_accounts_team_id_idx").on(table.teamId),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "deal_bank_accounts_deal_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "deal_bank_accounts_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.linkedBankAccountId],
+      foreignColumns: [bankAccounts.id],
+      name: "deal_bank_accounts_linked_bank_account_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Team members can manage deal bank accounts", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const dealBankAccountsRelations = relations(
+  dealBankAccounts,
+  ({ one }) => ({
+    deal: one(mcaDeals, {
+      fields: [dealBankAccounts.dealId],
+      references: [mcaDeals.id],
+    }),
+    team: one(teams, {
+      fields: [dealBankAccounts.teamId],
+      references: [teams.id],
+    }),
+    linkedBankAccount: one(bankAccounts, {
+      fields: [dealBankAccounts.linkedBankAccountId],
+      references: [bankAccounts.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// Reconciliation Tables
+// ============================================================================
+
+/**
+ * Reconciliation Sessions - Tracks bookkeeper reconciliation work sessions
+ */
+export const reconciliationSessions = pgTable(
+  "reconciliation_sessions",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true, mode: "string" }),
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    bankAccountId: uuid("bank_account_id"),
+    dateFrom: date("date_from").notNull(),
+    dateTo: date("date_to").notNull(),
+    totalTransactions: integer("total_transactions").default(0),
+    autoMatched: integer("auto_matched").default(0),
+    manuallyMatched: integer("manually_matched").default(0),
+    flagged: integer("flagged").default(0),
+    unmatched: integer("unmatched").default(0),
+    status: text().default("in_progress"),
+  },
+  (table) => [
+    index("idx_recon_sessions_team").on(table.teamId),
+    index("idx_recon_sessions_user").on(table.userId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "reconciliation_sessions_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.bankAccountId],
+      foreignColumns: [bankAccounts.id],
+      name: "reconciliation_sessions_bank_account_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Team members can manage reconciliation sessions", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * ACH Batches - ACH payment batch generation and tracking
+ */
+export const achBatches = pgTable(
+  "ach_batches",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow(),
+    teamId: uuid("team_id").notNull(),
+    createdBy: uuid("created_by").notNull(),
+    batchNumber: text("batch_number").notNull(),
+    effectiveDate: date("effective_date").notNull(),
+    description: text(),
+    totalAmount: numericCasted("total_amount", { precision: 14, scale: 2 }).default(0),
+    itemCount: integer("item_count").default(0),
+    originatorBankAccountId: uuid("originator_bank_account_id"),
+    originatorName: text("originator_name"),
+    originatorRouting: text("originator_routing"),
+    originatorAccount: text("originator_account"),
+    status: achBatchStatusEnum().default("draft"),
+    submittedAt: timestamp("submitted_at", { withTimezone: true, mode: "string" }),
+    completedAt: timestamp("completed_at", { withTimezone: true, mode: "string" }),
+    nachaFilePath: text("nacha_file_path"),
+    validationErrors: jsonb("validation_errors").default([]),
+  },
+  (table) => [
+    index("idx_ach_batches_team").on(table.teamId),
+    index("idx_ach_batches_status").on(table.teamId, table.status),
+    unique("ach_batches_team_batch_number_unique").on(table.teamId, table.batchNumber),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "ach_batches_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.originatorBankAccountId],
+      foreignColumns: [bankAccounts.id],
+      name: "ach_batches_originator_bank_account_id_fkey",
+    }),
+    pgPolicy("Team members can manage ACH batches", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * ACH Batch Items - Individual entries within an ACH batch
+ */
+export const achBatchItems = pgTable(
+  "ach_batch_items",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    batchId: uuid("batch_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    dealId: uuid("deal_id").notNull(),
+    mcaPaymentId: uuid("mca_payment_id"),
+    receiverName: text("receiver_name").notNull(),
+    receiverRouting: text("receiver_routing").notNull(),
+    receiverAccount: text("receiver_account").notNull(),
+    amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
+    transactionCode: text("transaction_code").notNull().default("27"),
+    individualId: text("individual_id"),
+    addenda: text(),
+    status: text().default("pending"),
+  },
+  (table) => [
+    index("idx_ach_batch_items_batch").on(table.batchId),
+    index("idx_ach_batch_items_deal").on(table.dealId),
+    foreignKey({
+      columns: [table.batchId],
+      foreignColumns: [achBatches.id],
+      name: "ach_batch_items_batch_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "ach_batch_items_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "ach_batch_items_deal_id_fkey",
+    }),
+    foreignKey({
+      columns: [table.mcaPaymentId],
+      foreignColumns: [mcaPayments.id],
+      name: "ach_batch_items_mca_payment_id_fkey",
+    }),
+    pgPolicy("Team members can manage ACH batch items", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * Export Templates - Saved export configurations for reconciliation reports
+ */
+export const exportTemplates = pgTable(
+  "export_templates",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow(),
+    teamId: uuid("team_id").notNull(),
+    name: text().notNull(),
+    description: text(),
+    format: text().notNull(),
+    columns: jsonb().notNull().default([]),
+    filters: jsonb().default({}),
+    dateRange: text("date_range"),
+    scheduleEnabled: boolean("schedule_enabled").default(false),
+    scheduleCron: text("schedule_cron"),
+    scheduleEmail: text("schedule_email"),
+    lastExportedAt: timestamp("last_exported_at", { withTimezone: true, mode: "string" }),
+  },
+  (table) => [
+    index("idx_export_templates_team").on(table.teamId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "export_templates_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can manage export templates", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * Match Audit Log - Tracks all match decisions for compliance
+ */
+export const matchAuditLog = pgTable(
+  "match_audit_log",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    teamId: uuid("team_id").notNull(),
+    transactionId: uuid("transaction_id").notNull(),
+    action: text().notNull(),
+    dealId: uuid("deal_id"),
+    paymentId: uuid("payment_id"),
+    confidence: numericCasted({ precision: 5, scale: 2 }),
+    rule: text(),
+    previousStatus: matchStatusEnum("previous_status"),
+    newStatus: matchStatusEnum("new_status"),
+    userId: uuid("user_id"),
+    note: text(),
+    metadata: jsonb().default({}),
+  },
+  (table) => [
+    index("idx_match_audit_team").on(table.teamId),
+    index("idx_match_audit_transaction").on(table.transactionId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "match_audit_log_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.transactionId],
+      foreignColumns: [transactions.id],
+      name: "match_audit_log_transaction_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "match_audit_log_deal_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.paymentId],
+      foreignColumns: [mcaPayments.id],
+      name: "match_audit_log_payment_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Team members can view match audit log", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+// Reconciliation Relations
+export const reconciliationSessionsRelations = relations(
+  reconciliationSessions,
+  ({ one }) => ({
+    team: one(teams, {
+      fields: [reconciliationSessions.teamId],
+      references: [teams.id],
+    }),
+  }),
+);
+
+export const achBatchesRelations = relations(achBatches, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [achBatches.teamId],
+    references: [teams.id],
+  }),
+  originatorBankAccount: one(bankAccounts, {
+    fields: [achBatches.originatorBankAccountId],
+    references: [bankAccounts.id],
+  }),
+  items: many(achBatchItems),
+}));
+
+export const achBatchItemsRelations = relations(achBatchItems, ({ one }) => ({
+  batch: one(achBatches, {
+    fields: [achBatchItems.batchId],
+    references: [achBatches.id],
+  }),
+  deal: one(mcaDeals, {
+    fields: [achBatchItems.dealId],
+    references: [mcaDeals.id],
+  }),
+}));
+
+export const exportTemplatesRelations = relations(exportTemplates, ({ one }) => ({
+  team: one(teams, {
+    fields: [exportTemplates.teamId],
+    references: [teams.id],
+  }),
+}));
+
+// ============================================================================
 // Team Branding Type
 // ============================================================================
+
+export type CollectionsTeamMember = {
+  userId: string;
+  title?: string;
+};
+
+export type DocumentSigner = {
+  userId: string;
+  signerTitle?: string;
+  signatureLineText?: string;
+};
+
+export type DocumentSignerConfig = {
+  collectionsNotices?: DocumentSigner;
+  payoffLetters?: DocumentSigner;
+  disclosureDocuments?: DocumentSigner;
+  invoices?: DocumentSigner;
+};
 
 export type TeamBranding = {
   displayName?: string;
@@ -4243,4 +5296,7 @@ export type TeamBranding = {
   secondaryColor?: string;
   emailFromName?: string;
   pdfFooterText?: string;
+  emailReplyTo?: string;
+  collectionsTeam?: CollectionsTeamMember[];
+  documentSigners?: DocumentSignerConfig;
 };

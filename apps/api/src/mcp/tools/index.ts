@@ -1,5 +1,5 @@
 export { registerBankAccountTools } from "./bank-accounts";
-export { registerCustomerTools } from "./customers";
+export { registerMerchantTools } from "./merchants";
 export { registerDocumentTools } from "./documents";
 export { registerInboxTools } from "./inbox";
 export { registerInvoiceTools } from "./invoices";
@@ -7,5 +7,5 @@ export { registerReportTools } from "./reports";
 export { registerSearchTools } from "./search";
 export { registerTagTools } from "./tags";
 export { registerTeamTools } from "./team";
-export { registerTrackerTools } from "./tracker";
+export { registerSyndicatorTools } from "./syndicators";
 export { registerTransactionTools } from "./transactions";

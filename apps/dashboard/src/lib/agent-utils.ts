@@ -25,8 +25,7 @@ export const getStatusMessage = (status?: AgentStatus | null) => {
       reports: "Generating your financial reports...",
       transactions: "Retrieving your transaction history...",
       invoices: "Checking your invoice status...",
-      timeTracking: "Reviewing your time entries...",
-      customers: "Looking up customer information...",
+      merchants: "Looking up merchant information...",
       analytics: "Running business intelligence analysis...",
       operations: "Accessing your account data...",
       research: "Researching and analyzing your options...",
@@ -73,12 +72,12 @@ export const getToolMessage = (toolName: string | null) => {
     stressTest: "Running financial stress scenarios...",
     getCashFlowStressTest: "Running financial stress scenarios...",
 
-    // Customer tools
-    getCustomers: "Retrieving your customers...",
-    getCustomer: "Retrieving customer information...",
-    createCustomer: "Setting up new customer profile...",
-    updateCustomer: "Updating customer details...",
-    profitabilityAnalysis: "Analyzing customer profitability...",
+    // Merchant tools
+    getMerchants: "Retrieving your merchants...",
+    getMerchant: "Retrieving merchant information...",
+    createMerchant: "Setting up new merchant profile...",
+    updateMerchant: "Updating merchant details...",
+    profitabilityAnalysis: "Analyzing merchant profitability...",
 
     // Invoice tools
     getInvoices: "Retrieving your invoices...",
@@ -92,19 +91,6 @@ export const getToolMessage = (toolName: string | null) => {
     getTransactions: "Retrieving your transactions...",
     listTransactions: "Retrieving your transactions...",
     getTransaction: "Loading transaction details...",
-
-    // Time tracking tools
-    getTimeEntries: "Retrieving your time entries...",
-    createTimeEntry: "Recording your time...",
-    updateTimeEntry: "Updating time entry...",
-    deleteTimeEntry: "Removing time entry...",
-    getProjects: "Loading your projects...",
-    getTrackerProjects: "Loading your projects...",
-    getTrackerEntries: "Retrieving your time entries...",
-    createTrackerEntry: "Recording your time...",
-    startTimer: "Starting your timer...",
-    stopTimer: "Stopping your timer...",
-    getTimerStatus: "Checking timer status...",
 
     // Operations tools
     getInbox: "Checking your inbox...",

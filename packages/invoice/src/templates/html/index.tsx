@@ -25,13 +25,13 @@ export function HtmlTemplate({ data, width, height }: Props) {
     dueDate,
     template,
     lineItems,
-    customerDetails,
+    merchantDetails,
     fromDetails,
     paymentDetails,
     noteDetails,
     currency,
     discount,
-    customerName,
+    merchantName,
     topBlock,
     bottomBlock,
   } = data;
@@ -59,7 +59,7 @@ export function HtmlTemplate({ data, width, height }: Props) {
           />
 
           {template.logoUrl && (
-            <Logo logo={template.logoUrl} customerName={customerName || ""} />
+            <Logo logo={template.logoUrl} merchantName={merchantName || ""} />
           )}
         </div>
 
@@ -74,7 +74,7 @@ export function HtmlTemplate({ data, width, height }: Props) {
             <p className="text-[11px] text-[#878787] mb-2 block">
               {template.customerLabel}
             </p>
-            <EditorContent content={customerDetails} />
+            <EditorContent content={merchantDetails} />
           </div>
         </div>
 

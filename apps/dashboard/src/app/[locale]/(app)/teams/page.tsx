@@ -1,7 +1,12 @@
 import { SelectTeamTable } from "@/components/tables/select-team/table";
 import { TeamInvites } from "@/components/team-invites";
 import { UserMenu } from "@/components/user-menu";
-import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
+import {
+  HydrateClient,
+  getCurrentUserOrNull,
+  getQueryClient,
+  trpc,
+} from "@/trpc/server";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
@@ -9,17 +14,21 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Teams | Abacus",
+  title: "Teams | abacus",
 };
 
 export default async function Teams() {
-  const queryClient = getQueryClient();
-  const teams = await queryClient.fetchQuery(trpc.team.list.queryOptions());
-  const invites = await queryClient.fetchQuery(
-    trpc.team.invitesByEmail.queryOptions(),
-  );
+  const user = await getCurrentUserOrNull();
 
-  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
+  if (!user) {
+    redirect("/api/auth/logout");
+  }
+
+  const queryClient = getQueryClient();
+  const [teams, invites] = await Promise.all([
+    queryClient.fetchQuery(trpc.team.list.queryOptions()),
+    queryClient.fetchQuery(trpc.team.invitesByEmail.queryOptions()),
+  ]);
 
   // If no teams and no invites, redirect to create team
   if (!teams?.length && !invites?.length) {

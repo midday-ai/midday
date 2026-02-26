@@ -55,7 +55,7 @@ export function InvoiceSearchFilter() {
 
   const { setFilter, filter } = useInvoiceFilterParams();
 
-  const { data: customersData } = useQuery(trpc.customers.get.queryOptions());
+  const { data: merchantsData } = useQuery(trpc.merchants.get.queryOptions());
 
   const statusFilters = allowedStatuses.map((status) => ({
     id: status,
@@ -66,7 +66,7 @@ export function InvoiceSearchFilter() {
   const mapInvoiceFilters = useCallback(
     (
       object: InvoiceFilterSchema,
-      data?: { customersData?: { data?: Array<{ id: string; name: string }> } },
+      data?: { merchantsData?: { data?: Array<{ id: string; name: string }> } },
     ) => {
       const statuses = Array.isArray(object.statuses)
         ? validateEnumArray(object.statuses, [
@@ -88,17 +88,17 @@ export function InvoiceSearchFilter() {
             ] as const)
           : null;
 
-      const customerIds = mapStringArrayToIds(
-        object.customers,
+      const merchantIds = mapStringArrayToIds(
+        object.merchants,
         (name) =>
-          data?.customersData?.data?.find((customer) => customer.name === name)
+          data?.merchantsData?.data?.find((merchant) => merchant.name === name)
             ?.id ?? null,
       );
 
       return {
         q: normalizeString(object.name),
         statuses,
-        customers: customerIds,
+        merchants: merchantIds,
         start: normalizeString(object.start),
         end: normalizeString(object.end),
       };
@@ -112,7 +112,7 @@ export function InvoiceSearchFilter() {
     outputSchema: invoiceFilterOutputSchema,
     mapper: mapInvoiceFilters,
     onFilterApplied: setFilter,
-    data: { customersData },
+    data: { merchantsData },
   });
 
   useHotkeys(
@@ -149,7 +149,7 @@ export function InvoiceSearchFilter() {
 
     if (input.split(" ").length > 1) {
       const context = `Invoice payment statuses: ${statusFilters.map((filter) => filter.name).join(", ")}
-         Customers: ${customersData?.data?.map((customer) => customer.name).join(", ")}
+         Merchants: ${merchantsData?.data?.map((merchant) => merchant.name).join(", ")}
       `;
 
       submit({
@@ -214,7 +214,7 @@ export function InvoiceSearchFilter() {
           loading={isLoading}
           onRemove={setFilter}
           statusFilters={statusFilters}
-          customers={customersData?.data}
+          merchants={merchantsData?.data}
         />
       </div>
 
@@ -251,7 +251,7 @@ export function InvoiceSearchFilter() {
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <Icons.Face className="mr-2 h-4 w-4" />
-              <span>Customer</span>
+              <span>Merchant</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
@@ -259,24 +259,24 @@ export function InvoiceSearchFilter() {
                 alignOffset={-4}
                 className="p-0 max-h-[300px] overflow-auto"
               >
-                {customersData?.data?.map((customer) => (
+                {merchantsData?.data?.map((merchant) => (
                   <DropdownMenuCheckboxItem
-                    key={customer.id}
+                    key={merchant.id}
                     onCheckedChange={() => {
                       setFilter({
-                        customers: filter?.customers?.includes(customer.id)
-                          ? filter.customers.filter((s) => s !== customer.id)
-                          : [...(filter?.customers ?? []), customer.id],
+                        merchants: filter?.merchants?.includes(merchant.id)
+                          ? filter.merchants.filter((s) => s !== merchant.id)
+                          : [...(filter?.merchants ?? []), merchant.id],
                       });
                     }}
                   >
-                    {customer.name}
+                    {merchant.name}
                   </DropdownMenuCheckboxItem>
                 ))}
 
-                {!customersData?.data?.length && (
+                {!merchantsData?.data?.length && (
                   <DropdownMenuItem disabled>
-                    No customers found
+                    No merchants found
                   </DropdownMenuItem>
                 )}
               </DropdownMenuSubContent>

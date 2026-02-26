@@ -129,17 +129,19 @@ export const columns: ColumnDef<TeamMember>[] = [
       return (
         <div className="flex justify-end">
           <div className="flex space-x-2 items-center">
-            {(meta?.currentUser?.role === "owner" &&
-              meta?.currentUser?.user?.id !== row.original.user?.id) ||
+            {((meta?.currentUser?.role === "owner" || meta?.currentUser?.role === "admin") &&
+              meta?.currentUser?.user?.id !== row.original.user?.id &&
+              row.original.role !== "owner") ||
             (meta?.currentUser?.role === "owner" &&
-              (meta?.totalOwners ?? 0) > 1) ? (
+              (meta?.totalOwners ?? 0) > 1 &&
+              meta?.currentUser?.user?.id === row.original.user?.id) ? (
               <Select
                 value={row.original.role ?? undefined}
                 onValueChange={(role) => {
                   updateMemberMutation.mutate({
                     userId: row.original.user?.id!,
                     teamId: row.original.teamId!,
-                    role: role as "owner" | "member",
+                    role: role as "owner" | "admin" | "member" | "broker" | "syndicate" | "merchant",
                   });
                 }}
               >
@@ -149,8 +151,14 @@ export const columns: ColumnDef<TeamMember>[] = [
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="owner">Owner</SelectItem>
-                  <SelectItem value="member">Member</SelectItem>
+                  {meta?.currentUser?.role === "owner" && (
+                    <SelectItem value="owner">{t("roles.owner")}</SelectItem>
+                  )}
+                  <SelectItem value="admin">{t("roles.admin")}</SelectItem>
+                  <SelectItem value="member">{t("roles.member")}</SelectItem>
+                  <SelectItem value="broker">{t("roles.broker")}</SelectItem>
+                  <SelectItem value="syndicate">{t("roles.syndicate")}</SelectItem>
+                  <SelectItem value="merchant">{t("roles.merchant")}</SelectItem>
                 </SelectContent>
               </Select>
             ) : (
@@ -158,7 +166,7 @@ export const columns: ColumnDef<TeamMember>[] = [
                 {t(`roles.${row.original.role || "member"}`)}
               </span>
             )}
-            {meta?.currentUser?.role === "owner" && (
+            {(meta?.currentUser?.role === "owner" || meta?.currentUser?.role === "admin") && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">

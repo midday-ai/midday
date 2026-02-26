@@ -1,24 +1,31 @@
 import { RedisCache } from "./redis-client";
 
 export const WIDGET_TYPES = [
-  // Critical financial health (default primary widgets)
-  "runway",
-  "cash-flow",
+  // MCA Portfolio Health (default primary widgets, positions 1-5)
+  "portfolio-overview",
+  "active-deals",
+  "collection-rate",
+  "nsf-alerts",
+  "deal-pipeline",
+
+  // Financial Position (default primary, positions 6-8)
   "account-balances",
+  "cash-flow",
+  "outstanding-invoices",
+
+  // Generic Financial (available, not primary)
+  "runway",
   "profit-analysis",
   "revenue-forecast",
   "revenue-summary",
   "growth-rate",
-
-  // Financial position
   "net-position",
 
-  // Customer insights
-  "customer-lifetime-value",
-  "top-customer",
+  // Merchant insights
+  "merchant-lifetime-value",
+  "top-merchant",
 
   // Receivables & invoices
-  "outstanding-invoices",
   "overdue-invoices-alert",
   "invoice-payment-score",
 

@@ -37,15 +37,15 @@ export function PortalContent({ portalId }: Props) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  // Fetch customer and summary data
+  // Fetch merchant and summary data
   const { data: portalData } = useSuspenseQuery(
-    trpc.customers.getByPortalId.queryOptions({ portalId }),
+    trpc.merchants.getByPortalId.queryOptions({ portalId }),
   );
 
   // Fetch invoices with infinite query
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(
-      trpc.customers.getPortalInvoices.infiniteQueryOptions(
+      trpc.merchants.getPortalInvoices.infiniteQueryOptions(
         { portalId },
         {
           getNextPageParam: ({ meta }) => meta?.cursor,
@@ -53,14 +53,14 @@ export function PortalContent({ portalId }: Props) {
       ),
     );
 
-  const customer = portalData?.customer;
+  const merchant = portalData?.merchant;
   const summary = portalData?.summary;
 
   const invoices = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
-  if (!customer || !summary) {
+  if (!merchant || !summary) {
     return null;
   }
 
@@ -164,11 +164,11 @@ export function PortalContent({ portalId }: Props) {
       <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-10">
-          {customer.team.logoUrl && (
+          {merchant.team.logoUrl && (
             <div className="mb-6">
               <Image
-                src={customer.team.logoUrl}
-                alt={customer.team.name || "Company logo"}
+                src={merchant.team.logoUrl}
+                alt={merchant.team.name || "Company logo"}
                 width={80}
                 height={80}
                 className="object-contain"
@@ -176,10 +176,10 @@ export function PortalContent({ portalId }: Props) {
             </div>
           )}
           <h1 className="text-2xl font-serif tracking-tight">
-            {customer.name}
+            {merchant.name}
           </h1>
-          {customer.team.name && (
-            <p className="text-sm text-[#606060] mt-1">{customer.team.name}</p>
+          {merchant.team.name && (
+            <p className="text-sm text-[#606060] mt-1">{merchant.team.name}</p>
           )}
         </div>
 
@@ -368,7 +368,7 @@ export function PortalContent({ portalId }: Props) {
       {/* Footer */}
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a
-          href="https://abacuslabs.co?utm_source=customer-portal"
+          href="https://abacuslabs.co?utm_source=merchant-portal"
           target="_blank"
           rel="noreferrer"
           className="text-[9px] text-[#878787]"

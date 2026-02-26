@@ -38,27 +38,10 @@ export const primaryDb = drizzle(primaryPool, {
 // Only create replica pools if all replica URLs are available
 const createReplicaDb = () => {
   if (!hasReplicas) {
-    // In development or when replicas aren't configured, use primary for everything
-    // but still provide the executeOnReplica method for compatibility
-    const executeOnReplica = async <
-      TRow extends Record<string, unknown> = Record<string, unknown>,
-    >(
-      query: string | ReturnType<typeof import("drizzle-orm").sql>,
-    ): Promise<TRow[]> => {
-      const result = await primaryDb.execute(query);
-      if (Array.isArray(result)) {
-        return result as TRow[];
-      }
-      return (result as { rows: TRow[] }).rows;
-    };
-
-    return {
-      ...primaryDb,
-      executeOnReplica,
-      transactionOnReplica: primaryDb.transaction,
-      usePrimaryOnly: () => primaryDb,
-      $primary: primaryDb,
-    } as ReturnType<typeof withReplicas>;
+    // In development or when replicas aren't configured, use primary as both
+    // primary and replica. This preserves all Drizzle methods (select, insert, etc.)
+    // which would be lost by object spreading a class instance.
+    return withReplicas(primaryDb, [primaryDb], () => primaryDb);
   }
 
   const fraPool = new Pool({

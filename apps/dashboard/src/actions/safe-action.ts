@@ -1,4 +1,4 @@
-import { getQueryClient, trpc } from "@/trpc/server";
+import { getCurrentUserOrNull } from "@/trpc/server";
 import { logger } from "@/utils/logger";
 import { setupAnalytics } from "@midday/events/server";
 import { createClient } from "@midday/supabase/server";
@@ -54,8 +54,7 @@ export const authActionClient = actionClientWithMeta
     return result;
   })
   .use(async ({ next, metadata }) => {
-    const queryClient = getQueryClient();
-    const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
+    const user = await getCurrentUserOrNull();
 
     const supabase = await createClient();
 

@@ -1,6 +1,6 @@
 import type { Database, DatabaseOrTransaction } from "@db/client";
 import {
-  customers,
+  merchants,
   invoiceRecurring,
   invoiceRecurringStatusEnum,
   invoices,
@@ -21,8 +21,8 @@ import { and, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 export type CreateInvoiceRecurringParams = {
   teamId: string;
   userId: string;
-  customerId?: string | null;
-  customerName?: string | null;
+  merchantId?: string | null;
+  merchantName?: string | null;
   frequency: InvoiceRecurringFrequency;
   frequencyDay?: number | null;
   frequencyWeek?: number | null;
@@ -61,8 +61,8 @@ export async function createInvoiceRecurring(
   const {
     teamId,
     userId,
-    customerId,
-    customerName,
+    merchantId,
+    merchantName,
     frequency,
     frequencyDay,
     frequencyWeek,
@@ -113,8 +113,8 @@ export async function createInvoiceRecurring(
     .values({
       teamId,
       userId,
-      customerId,
-      customerName,
+      merchantId,
+      merchantName,
       frequency,
       frequencyDay,
       frequencyWeek,
@@ -150,8 +150,8 @@ export async function createInvoiceRecurring(
 export type UpdateInvoiceRecurringParams = {
   id: string;
   teamId: string;
-  customerId?: string | null;
-  customerName?: string | null;
+  merchantId?: string | null;
+  merchantName?: string | null;
   frequency?: InvoiceRecurringFrequency;
   frequencyDay?: number | null;
   frequencyWeek?: number | null;
@@ -305,7 +305,7 @@ export async function getInvoiceRecurringById(
       updatedAt: invoiceRecurring.updatedAt,
       teamId: invoiceRecurring.teamId,
       userId: invoiceRecurring.userId,
-      customerId: invoiceRecurring.customerId,
+      merchantId: invoiceRecurring.merchantId,
       frequency: invoiceRecurring.frequency,
       frequencyDay: invoiceRecurring.frequencyDay,
       frequencyWeek: invoiceRecurring.frequencyWeek,
@@ -326,7 +326,7 @@ export async function getInvoiceRecurringById(
       paymentDetails: invoiceRecurring.paymentDetails,
       fromDetails: invoiceRecurring.fromDetails,
       noteDetails: invoiceRecurring.noteDetails,
-      customerName: invoiceRecurring.customerName,
+      merchantName: invoiceRecurring.merchantName,
       vat: invoiceRecurring.vat,
       tax: invoiceRecurring.tax,
       discount: invoiceRecurring.discount,
@@ -334,15 +334,15 @@ export async function getInvoiceRecurringById(
       topBlock: invoiceRecurring.topBlock,
       bottomBlock: invoiceRecurring.bottomBlock,
       templateId: invoiceRecurring.templateId,
-      customer: {
-        id: customers.id,
-        name: customers.name,
-        email: customers.email,
-        website: customers.website,
+      merchant: {
+        id: merchants.id,
+        name: merchants.name,
+        email: merchants.email,
+        website: merchants.website,
       },
     })
     .from(invoiceRecurring)
-    .leftJoin(customers, eq(invoiceRecurring.customerId, customers.id))
+    .leftJoin(merchants, eq(invoiceRecurring.merchantId, merchants.id))
     .where(
       and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
     );
@@ -357,7 +357,7 @@ export async function getInvoiceRecurringById(
 export type GetInvoiceRecurringListParams = {
   teamId: string;
   status?: ("active" | "paused" | "completed" | "canceled")[];
-  customerId?: string;
+  merchantId?: string;
   cursor?: string | null;
   pageSize?: number;
 };
@@ -366,7 +366,7 @@ export async function getInvoiceRecurringList(
   db: Database,
   params: GetInvoiceRecurringListParams,
 ) {
-  const { teamId, status, customerId, cursor, pageSize = 25 } = params;
+  const { teamId, status, merchantId, cursor, pageSize = 25 } = params;
 
   const conditions = [eq(invoiceRecurring.teamId, teamId)];
 
@@ -379,8 +379,8 @@ export async function getInvoiceRecurringList(
     }
   }
 
-  if (customerId) {
-    conditions.push(eq(invoiceRecurring.customerId, customerId));
+  if (merchantId) {
+    conditions.push(eq(invoiceRecurring.merchantId, merchantId));
   }
 
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;
@@ -389,8 +389,8 @@ export async function getInvoiceRecurringList(
     .select({
       id: invoiceRecurring.id,
       createdAt: invoiceRecurring.createdAt,
-      customerId: invoiceRecurring.customerId,
-      customerName: invoiceRecurring.customerName,
+      merchantId: invoiceRecurring.merchantId,
+      merchantName: invoiceRecurring.merchantName,
       frequency: invoiceRecurring.frequency,
       frequencyDay: invoiceRecurring.frequencyDay,
       frequencyWeek: invoiceRecurring.frequencyWeek,
@@ -401,14 +401,14 @@ export async function getInvoiceRecurringList(
       nextScheduledAt: invoiceRecurring.nextScheduledAt,
       amount: invoiceRecurring.amount,
       currency: invoiceRecurring.currency,
-      customer: {
-        id: customers.id,
-        name: customers.name,
-        email: customers.email,
+      merchant: {
+        id: merchants.id,
+        name: merchants.name,
+        email: merchants.email,
       },
     })
     .from(invoiceRecurring)
-    .leftJoin(customers, eq(invoiceRecurring.customerId, customers.id))
+    .leftJoin(merchants, eq(invoiceRecurring.merchantId, merchants.id))
     .where(and(...conditions))
     .orderBy(desc(invoiceRecurring.createdAt))
     .limit(pageSize)
@@ -456,8 +456,8 @@ export async function getDueInvoiceRecurring(
       id: invoiceRecurring.id,
       teamId: invoiceRecurring.teamId,
       userId: invoiceRecurring.userId,
-      customerId: invoiceRecurring.customerId,
-      customerName: invoiceRecurring.customerName,
+      merchantId: invoiceRecurring.merchantId,
+      merchantName: invoiceRecurring.merchantName,
       frequency: invoiceRecurring.frequency,
       frequencyDay: invoiceRecurring.frequencyDay,
       frequencyWeek: invoiceRecurring.frequencyWeek,
@@ -918,8 +918,8 @@ export async function getUpcomingDueRecurring(
       id: invoiceRecurring.id,
       teamId: invoiceRecurring.teamId,
       userId: invoiceRecurring.userId,
-      customerId: invoiceRecurring.customerId,
-      customerName: invoiceRecurring.customerName,
+      merchantId: invoiceRecurring.merchantId,
+      merchantName: invoiceRecurring.merchantName,
       frequency: invoiceRecurring.frequency,
       nextScheduledAt: invoiceRecurring.nextScheduledAt,
       amount: invoiceRecurring.amount,
