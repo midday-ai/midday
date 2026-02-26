@@ -1811,11 +1811,12 @@ BEGIN
   ON CONFLICT DO NOTHING;
 
   -- ========================================================================
-  -- RISK SCORING: Test Merchant Archetypes (8 merchants)
-  -- Integrated from scripts/seed-risk-data.sql with fixes:
-  --   - Skip weekends
-  --   - Use 'mca-payments' (plural) for category_slug
-  --   - NSF counts dynamically calculated
+  -- ADDITIONAL MERCHANTS (8) — Diverse payment patterns for risk scoring
+  -- Each merchant has a distinct payment behavior profile:
+  --   1. Perfect payer (paid off)    5. Deteriorating payments
+  --   2. Aggressive overpayer        6. Chronic NSF pattern
+  --   3. NSF recovery arc            7. Bad start, strong recovery
+  --   4. Consistent partial payer    8. Just funded (no history)
   -- ========================================================================
 
   DECLARE
@@ -1835,7 +1836,7 @@ BEGIN
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a1';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
-  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'MCA-2025-015', 50000, 1.35, 67500, 1125, 0, 67500, 'paid_off', now() - interval '90 days', 'daily');
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0024', 50000, 1.35, 67500, 1125, 0, 67500, 'paid_off', now() - interval '90 days', 'daily');
 
   v_risk_date := current_date - 90;
   FOR v_risk_i IN 1..60 LOOP
@@ -1844,7 +1845,7 @@ BEGIN
       VALUES (v_team_id, v_risk_deal_id, 1125, v_risk_date, 'ach', 'completed');
 
       INSERT INTO transactions (team_id, bank_account_id, amount, date, name, description, status, method, internal_id, category_slug, currency)
-      VALUES (v_team_id, v_bank_op, 1125, v_risk_date, 'Patriot Towing & Recovery - ACH Payment', 'Daily MCA payment - MCA-2025-015', 'posted', 'ach', 'demo_mca_patriot_' || to_char(v_risk_date, 'YYYYMMDD'), 'mca-payments', 'USD');
+      VALUES (v_team_id, v_bank_op, 1125, v_risk_date, 'Patriot Towing & Recovery - ACH Payment', 'Daily MCA payment - D-0024', 'posted', 'ach', 'demo_mca_patriot_' || to_char(v_risk_date, 'YYYYMMDD'), 'mca-payments', 'USD');
     END IF;
     v_risk_date := v_risk_date + 1;
   END LOOP;
@@ -1859,7 +1860,7 @@ BEGIN
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a2';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
-  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'MCA-2026-005', 40000, 1.40, 56000, 933, 20000, 36000, 'active', now() - interval '30 days', 'daily');
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0025', 40000, 1.40, 56000, 933, 20000, 36000, 'active', now() - interval '30 days', 'daily');
 
   v_risk_date := current_date - 30;
   FOR v_risk_i IN 1..30 LOOP
@@ -1868,7 +1869,7 @@ BEGIN
       VALUES (v_team_id, v_risk_deal_id, 1200, v_risk_date, 'ach', 'completed');
 
       INSERT INTO transactions (team_id, bank_account_id, amount, date, name, description, status, method, internal_id, category_slug, currency)
-      VALUES (v_team_id, v_bank_op, 1200, v_risk_date, 'Summit Roofing Solutions - ACH Payment', 'Daily MCA payment - MCA-2026-005', 'posted', 'ach', 'demo_mca_summit_' || to_char(v_risk_date, 'YYYYMMDD'), 'mca-payments', 'USD');
+      VALUES (v_team_id, v_bank_op, 1200, v_risk_date, 'Summit Roofing Solutions - ACH Payment', 'Daily MCA payment - D-0025', 'posted', 'ach', 'demo_mca_summit_' || to_char(v_risk_date, 'YYYYMMDD'), 'mca-payments', 'USD');
     END IF;
     v_risk_date := v_risk_date + 1;
   END LOOP;
@@ -1883,7 +1884,7 @@ BEGIN
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a3';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
-  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'MCA-2025-016', 30000, 1.38, 41400, 690, 17250, 24150, 0, 'active', now() - interval '45 days', 'daily');
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0026', 30000, 1.38, 41400, 690, 17250, 24150, 0, 'active', now() - interval '45 days', 'daily');
 
   v_risk_date := current_date - 45;
   -- 20 good payments
@@ -1921,7 +1922,7 @@ BEGIN
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a4';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
-  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'MCA-2025-017', 25000, 1.42, 35500, 591, 21300, 14200, 'active', now() - interval '40 days', 'daily');
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0027', 25000, 1.42, 35500, 591, 21300, 14200, 'active', now() - interval '40 days', 'daily');
 
   v_risk_date := current_date - 40;
   FOR v_risk_i IN 1..40 LOOP
@@ -1942,7 +1943,7 @@ BEGIN
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a5';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
-  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'MCA-2025-018', 35000, 1.36, 47600, 793, 31920, 15680, 0, 'late', now() - interval '60 days', 'daily');
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0028', 35000, 1.36, 47600, 793, 31920, 15680, 0, 'late', now() - interval '60 days', 'daily');
 
   v_risk_date := current_date - 60;
   -- 20 perfect payments
@@ -1980,7 +1981,7 @@ BEGIN
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a6';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
-  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'MCA-2025-019', 20000, 1.45, 29000, 483, 22000, 7000, 0, 'active', now() - interval '50 days', 'daily');
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0029', 20000, 1.45, 29000, 483, 22000, 7000, 0, 'active', now() - interval '50 days', 'daily');
 
   v_risk_date := current_date - 50;
   FOR v_risk_i IN 1..50 LOOP
@@ -2006,7 +2007,7 @@ BEGIN
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a7';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
-  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'MCA-2025-020', 45000, 1.32, 59400, 990, 29700, 29700, 0, 'active', now() - interval '50 days', 'daily');
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0030', 45000, 1.32, 59400, 990, 29700, 29700, 0, 'active', now() - interval '50 days', 'daily');
 
   v_risk_date := current_date - 50;
   -- 5 NSFs at start
@@ -2024,7 +2025,7 @@ BEGIN
       VALUES (v_team_id, v_risk_deal_id, 990, v_risk_date, 'ach', 'completed');
 
       INSERT INTO transactions (team_id, bank_account_id, amount, date, name, description, status, method, internal_id, category_slug, currency)
-      VALUES (v_team_id, v_bank_op, 990, v_risk_date, 'Pacific Rim Auto Body - ACH Payment', 'Daily MCA payment - MCA-2025-020', 'posted', 'ach', 'demo_mca_pacificrim_' || to_char(v_risk_date, 'YYYYMMDD'), 'mca-payments', 'USD');
+      VALUES (v_team_id, v_bank_op, 990, v_risk_date, 'Pacific Rim Auto Body - ACH Payment', 'Daily MCA payment - D-0030', 'posted', 'ach', 'demo_mca_pacificrim_' || to_char(v_risk_date, 'YYYYMMDD'), 'mca-payments', 'USD');
     END IF;
     v_risk_date := v_risk_date + 1;
   END LOOP;
@@ -2038,7 +2039,7 @@ BEGIN
   RETURNING id INTO v_risk_merchant_id;
 
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
-  VALUES ('d0000000-0000-4000-a000-0000000000a8', v_team_id, v_risk_merchant_id, 'MCA-2026-006', 30000, 1.35, 40500, 675, 40500, 0, 'active', now(), 'daily');
+  VALUES ('d0000000-0000-4000-a000-0000000000a8', v_team_id, v_risk_merchant_id, 'D-0031', 30000, 1.35, 40500, 675, 40500, 0, 'active', now(), 'daily');
 
   -- Re-run dynamic balance + NSF calculation for risk merchants too
   UPDATE mca_deals d
