@@ -586,6 +586,9 @@ export const updateTransactionSchema = z.object({
   assignedId: z.string().nullable().optional().openapi({
     description: "Assigned user ID for the transaction.",
   }),
+  dealCode: z.string().nullable().optional().openapi({
+    description: "Deal code to associate with the transaction.",
+  }),
 });
 
 export const updateTransactionsSchema = z.object({

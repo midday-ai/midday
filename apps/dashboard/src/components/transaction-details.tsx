@@ -25,16 +25,14 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { Switch } from "@midday/ui/switch";
 import { ToastAction } from "@midday/ui/toast";
 import { toast } from "@midday/ui/use-toast";
-import { getTaxTypeLabel } from "@midday/utils/tax";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useState } from "react";
-import { AssignUser } from "./assign-user";
+import { DealPicker } from "./deal-picker";
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectTags } from "./select-tags";
 import { SuggestedMatch } from "./suggested-match";
-import { TaxAmount } from "./tax-amount";
 import { TransactionAttachments } from "./transaction-attachments";
 import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
@@ -238,7 +236,7 @@ export function TransactionDetails() {
     return null;
   }
 
-  const defaultValue = ["attachment"];
+  const defaultValue: string[] = [];
 
   if (data?.note) {
     defaultValue.push("note");
@@ -317,18 +315,7 @@ export function TransactionDetails() {
                   />
                 </span>
               )}
-              <div className="h-3">
-                {data?.taxAmount && data.taxAmount > 0 ? (
-                  <span className="text-[#606060] text-xs select-text">
-                    {data.taxType && `${getTaxTypeLabel(data.taxType)} `}
-                    <FormatAmount
-                      amount={data.taxAmount}
-                      currency={data.currency}
-                      maximumFractionDigits={2}
-                    />
-                  </span>
-                ) : null}
-              </div>
+              <div className="h-3" />
             </div>
           </div>
         </div>
@@ -372,8 +359,8 @@ export function TransactionDetails() {
         </div>
 
         <div>
-          <Label htmlFor="assign" className="mb-2 block">
-            Assign
+          <Label htmlFor="deal" className="mb-2 block">
+            Deal
           </Label>
 
           {isLoading ? (
@@ -381,15 +368,13 @@ export function TransactionDetails() {
               <Skeleton className="h-[14px] w-[60%] absolute left-3 top-[39px]" />
             </div>
           ) : (
-            <AssignUser
-              selectedId={data?.assigned?.id ?? undefined}
-              onSelect={(user) => {
-                if (user) {
-                  updateTransactionMutation.mutate({
-                    id: data?.id,
-                    assignedId: user.id,
-                  });
-                }
+            <DealPicker
+              selectedDealCode={data?.dealCode ?? undefined}
+              onSelect={(dealCode) => {
+                updateTransactionMutation.mutate({
+                  id: data?.id,
+                  dealCode,
+                });
               }}
             />
           )}

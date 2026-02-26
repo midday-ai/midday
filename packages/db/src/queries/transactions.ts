@@ -1528,6 +1528,7 @@ type UpdateTransactionData = {
   taxRate?: number | null;
   taxAmount?: number | null;
   taxType?: string | null;
+  dealCode?: string | null;
 };
 
 export async function updateTransaction(
