@@ -50,6 +50,7 @@ export const getTeamById = async (db: Database, id: string) => {
       stripeSubscriptionId: teams.stripeSubscriptionId,
       stripePriceId: teams.stripePriceId,
       branding: teams.branding,
+      underwritingEnabled: teams.underwritingEnabled,
     })
     .from(teams)
     .where(eq(teams.id, id));
