@@ -17,6 +17,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@api/trpc/init";
+import { checkEventBasedEscalation } from "@api/utils/collection-escalation";
 import {
   getPaymentFeed,
   getReconciliationStats,
@@ -222,6 +223,13 @@ export const reconciliationRouter = createTRPCRouter({
               eq(mcaDeals.teamId, ctx.teamId!),
             ),
           );
+
+        // Check event-based collection escalation rules
+        await checkEventBasedEscalation(ctx.db, {
+          dealId: result.matchedDealId,
+          teamId: ctx.teamId!,
+          eventType: "nsf_returned",
+        });
       }
 
       return result;
