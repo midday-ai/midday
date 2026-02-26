@@ -132,10 +132,9 @@ export const processExport = schemaTask({
           transaction?.category?.name ?? "",
           transaction?.category?.description ?? "",
           transaction?.category?.tax_reporting_code ?? "",
-          transaction?.attachments?.length > 0 ||
-          transaction?.status === "completed"
-            ? "Completed"
-            : "Not completed",
+          transaction?.status === "posted"
+            ? "Posted"
+            : transaction?.status ?? "Pending",
 
           attachments
             .filter((a) => a.id === transaction.id)

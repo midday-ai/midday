@@ -132,9 +132,10 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
                 internalId: t.internal_id,
                 status: t.status as
                   | "pending"
-                  | "completed"
-                  | "archived"
                   | "posted"
+                  | "failed"
+                  | "refund"
+                  | "funding"
                   | "excluded",
                 manual: t.manual,
                 categorySlug: t.category_slug ?? null,

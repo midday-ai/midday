@@ -23,11 +23,12 @@ export const transactionFilterParamsSchema = {
   ),
   statuses: parseAsArrayOf(
     parseAsStringLiteral([
-      "completed",
-      "uncompleted",
-      "archived",
+      "pending",
+      "posted",
+      "failed",
+      "refund",
+      "funding",
       "excluded",
-      "exported",
     ] as const),
   ),
   manual: parseAsStringLiteral(["exclude", "include"] as const),

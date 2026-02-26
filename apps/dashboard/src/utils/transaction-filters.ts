@@ -12,7 +12,7 @@ export type TransactionFilters = {
   amount?: string[] | null;
   recurring?: ("all" | "weekly" | "monthly" | "annually")[] | null;
   statuses?:
-    | ("completed" | "uncompleted" | "archived" | "excluded" | "exported")[]
+    | ("pending" | "posted" | "failed" | "refund" | "funding" | "excluded")[]
     | null;
   manual?: "include" | "exclude" | null;
 };

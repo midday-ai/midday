@@ -36,7 +36,7 @@ type MockTransaction = {
   baseAmount: number | null;
   baseCurrency: string | null;
   categorySlug: string | null;
-  status: "posted" | "pending" | "excluded" | "archived" | "completed";
+  status: "pending" | "posted" | "failed" | "refund" | "funding" | "excluded";
   internal: boolean;
   taxRate: number | null;
   taxAmount: number | null;

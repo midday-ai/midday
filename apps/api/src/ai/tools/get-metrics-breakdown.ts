@@ -322,7 +322,7 @@ export const getMetricsBreakdownTool = tool({
               sort: ["date", "desc"],
               pageSize: 10000,
               cursor: cursor ?? null,
-              statuses: ["posted", "completed"],
+              statuses: ["posted"],
             });
 
             allTransactions = allTransactions.concat(transactionsResult.data);
@@ -805,7 +805,7 @@ Write it as natural, flowing text.`,
           pageSize: 10000,
           cursor: cursor ?? null,
           // Filter out excluded status at database level
-          statuses: ["posted", "completed"],
+          statuses: ["posted"],
         });
 
         allTransactions = allTransactions.concat(transactionsResult.data);

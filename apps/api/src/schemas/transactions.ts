@@ -128,8 +128,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Array of transaction statuses to filter by. Available statuses: 'pending', 'completed', 'archived', 'posted', 'excluded'",
-      example: ["pending", "completed"],
+        "Array of transaction statuses to filter by. Available statuses: 'pending', 'posted', 'failed', 'refund', 'funding', 'excluded'",
+      example: ["pending", "posted"],
       param: {
         in: "query",
       },
@@ -246,18 +246,6 @@ export const transactionResponseSchema = z
       description: "Monetary amount of the transaction",
       example: 150.75,
     }),
-    taxAmount: z.number().nullable().openapi({
-      description: "Tax amount of the transaction",
-      example: 15.07,
-    }),
-    taxRate: z.number().nullable().openapi({
-      description: "Tax rate of the transaction",
-      example: 10,
-    }),
-    taxType: z.string().nullable().openapi({
-      description: "Tax type of the transaction",
-      example: "VAT",
-    }),
     currency: z.string().openapi({
       description: "Currency code of the transaction in ISO 4217 format",
       example: "USD",
@@ -285,14 +273,6 @@ export const transactionResponseSchema = z
             "Hex color code associated with the category for UI display",
           example: "#FF5733",
         }),
-        taxRate: z.number().nullable().openapi({
-          description: "Tax rate of the category",
-          example: 10,
-        }),
-        taxType: z.string().nullable().openapi({
-          description: "Tax type of the category",
-          example: "VAT",
-        }),
         slug: z.string().openapi({
           description: "URL-friendly slug of the category",
           example: "office-supplies",
@@ -307,8 +287,6 @@ export const transactionResponseSchema = z
           name: "Office Supplies",
           color: "#FF5733",
           slug: "office-supplies",
-          taxRate: 10,
-          taxType: "VAT",
         },
       }),
     transactionType: z
@@ -320,7 +298,7 @@ export const transactionResponseSchema = z
       }),
     status: z.string().openapi({
       description: "Current status of the transaction",
-      example: "completed",
+      example: "posted",
     }),
     internal: z.boolean().nullable().openapi({
       description: "Whether the transaction is internal (between own accounts)",
@@ -578,11 +556,11 @@ export const updateTransactionSchema = z.object({
   status: z
     .enum([
       "pending",
-      "archived",
-      "completed",
       "posted",
+      "failed",
+      "refund",
+      "funding",
       "excluded",
-      "exported",
     ])
     .nullable()
     .optional()
@@ -608,14 +586,6 @@ export const updateTransactionSchema = z.object({
   assignedId: z.string().nullable().optional().openapi({
     description: "Assigned user ID for the transaction.",
   }),
-  taxRate: z.number().nullable().optional().openapi({
-    description:
-      "Tax rate as a percentage (e.g., 25 for 25% VAT). Only set when tax is calculated from a percentage.",
-  }),
-  taxAmount: z.number().nullable().optional().openapi({
-    description:
-      "Tax amount in the transaction currency. Always set when tax is present.",
-  }),
 });
 
 export const updateTransactionsSchema = z.object({
@@ -628,11 +598,11 @@ export const updateTransactionsSchema = z.object({
   status: z
     .enum([
       "pending",
-      "archived",
-      "completed",
       "posted",
+      "failed",
+      "refund",
+      "funding",
       "excluded",
-      "exported",
     ])
     .nullable()
     .optional()

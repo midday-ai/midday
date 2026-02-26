@@ -208,12 +208,12 @@ export const transactionMethodsEnum = pgEnum("transactionMethods", [
 ]);
 
 export const transactionStatusEnum = pgEnum("transactionStatus", [
-  "posted",
   "pending",
+  "posted",
+  "failed",
+  "refund",
+  "funding",
   "excluded",
-  "completed",
-  "archived",
-  "exported",
 ]);
 
 export const transactionFrequencyEnum = pgEnum("transaction_frequency", [
@@ -412,9 +412,6 @@ export const transactions = pgTable(
     baseAmount: numericCasted({ precision: 10, scale: 2 }),
     counterpartyName: text("counterparty_name"),
     baseCurrency: text("base_currency"),
-    taxAmount: numericCasted("tax_amount", { precision: 10, scale: 2 }),
-    taxRate: numericCasted("tax_rate", { precision: 10, scale: 2 }),
-    taxType: text("tax_type"),
     recurring: boolean(),
     frequency: transactionFrequencyEnum(),
     merchantName: text("merchant_name"),
@@ -2024,9 +2021,6 @@ export const inbox = pgTable(
     description: text(),
     baseAmount: numericCasted("base_amount", { precision: 10, scale: 2 }),
     baseCurrency: text("base_currency"),
-    taxAmount: numericCasted("tax_amount", { precision: 10, scale: 2 }),
-    taxRate: numericCasted("tax_rate", { precision: 10, scale: 2 }),
-    taxType: text("tax_type"),
     inboxAccountId: uuid("inbox_account_id"),
     invoiceNumber: text("invoice_number"),
     groupedInboxId: uuid("grouped_inbox_id"),
@@ -2444,9 +2438,6 @@ export const transactionCategories = pgTable(
     }).defaultNow(),
     system: boolean().default(false),
     slug: text(), // Generated in database
-    taxRate: numericCasted("tax_rate", { precision: 10, scale: 2 }),
-    taxType: text("tax_type"),
-    taxReportingCode: text("tax_reporting_code"),
     excluded: boolean("excluded").default(false),
     description: text(),
     parentId: uuid("parent_id"),
@@ -4750,6 +4741,12 @@ export const syndicatorsRelations = relations(syndicators, ({ one, many }) => ({
     references: [teams.id],
   }),
   participants: many(syndicationParticipants),
+  transactions: many(syndicatorTransactions, {
+    relationName: "syndicatorTransactions",
+  }),
+  counterpartyTransactions: many(syndicatorTransactions, {
+    relationName: "counterpartyTransactions",
+  }),
 }));
 
 export const syndicationParticipantsRelations = relations(
@@ -4766,6 +4763,172 @@ export const syndicationParticipantsRelations = relations(
     team: one(teams, {
       fields: [syndicationParticipants.teamId],
       references: [teams.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// Syndicator Transactions - Per-syndicator capital flow ledger
+// ============================================================================
+
+export const syndicatorTransactionTypeEnum = pgEnum(
+  "syndicator_transaction_type",
+  [
+    "contribution",
+    "withdrawal",
+    "profit_distribution",
+    "refund",
+    "fee",
+    "chargeback",
+    "transfer",
+    "deal_allocation",
+  ],
+);
+
+export const syndicatorPaymentMethodEnum = pgEnum(
+  "syndicator_payment_method",
+  ["ach", "wire", "check", "zelle", "other"],
+);
+
+/**
+ * Syndicator Transactions - Per-syndicator capital flow ledger
+ *
+ * Tracks contributions, withdrawals, profit distributions, refunds, fees,
+ * chargebacks, transfers between syndicators, and deal allocations.
+ * Each syndicator has a virtual account with a running balance.
+ *
+ * Direction rules (amount is always positive):
+ *   Increases balance: contribution, refund, transfer (incoming)
+ *   Decreases balance: withdrawal, profit_distribution, fee, chargeback, deal_allocation, transfer (outgoing)
+ */
+export const syndicatorTransactions = pgTable(
+  "syndicator_transactions",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    date: date().notNull(),
+
+    // Team relationship
+    teamId: uuid("team_id").notNull(),
+
+    // Syndicator whose ledger this entry belongs to
+    syndicatorId: uuid("syndicator_id").notNull(),
+
+    // Transaction classification
+    transactionType: syndicatorTransactionTypeEnum("transaction_type").notNull(),
+    method: syndicatorPaymentMethodEnum(),
+
+    // Amount (always positive; transaction_type determines direction)
+    amount: numericCasted({ precision: 12, scale: 2 }).notNull(),
+    currency: text().notNull().default("USD"),
+
+    // Description & notes
+    description: text(),
+    note: text(),
+
+    // Optional deal link (null = unallocated capital)
+    dealId: uuid("deal_id"),
+    participationId: uuid("participation_id"),
+
+    // For transfers between syndicators (buyout scenarios)
+    counterpartySyndicatorId: uuid("counterparty_syndicator_id"),
+
+    // Status tracking
+    status: text().default("completed"),
+
+    // Balance snapshot (audit trail, same pattern as mca_payments)
+    balanceBefore: numericCasted("balance_before", { precision: 12, scale: 2 }),
+    balanceAfter: numericCasted("balance_after", { precision: 12, scale: 2 }),
+
+    // Bridge to bank transaction
+    linkedTransactionId: uuid("linked_transaction_id"),
+
+    // External reference number
+    reference: text(),
+
+    // Who created this entry
+    createdBy: uuid("created_by"),
+
+    // Flexible metadata
+    metadata: jsonb().default({}),
+  },
+  (table) => [
+    index("syndicator_transactions_team_id_idx").on(table.teamId),
+    index("syndicator_transactions_syndicator_id_idx").on(table.syndicatorId),
+    index("syndicator_transactions_deal_id_idx").on(table.dealId),
+    index("syndicator_transactions_date_idx").on(table.date),
+    index("syndicator_transactions_type_idx").on(table.transactionType),
+    index("syndicator_transactions_status_idx").on(table.status),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "syndicator_transactions_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.syndicatorId],
+      foreignColumns: [syndicators.id],
+      name: "syndicator_transactions_syndicator_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.dealId],
+      foreignColumns: [mcaDeals.id],
+      name: "syndicator_transactions_deal_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.participationId],
+      foreignColumns: [syndicationParticipants.id],
+      name: "syndicator_transactions_participation_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.counterpartySyndicatorId],
+      foreignColumns: [syndicators.id],
+      name: "syndicator_transactions_counterparty_syndicator_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.linkedTransactionId],
+      foreignColumns: [transactions.id],
+      name: "syndicator_transactions_linked_transaction_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Team members can manage syndicator transactions", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+// Syndicator Transaction Relations
+export const syndicatorTransactionsRelations = relations(
+  syndicatorTransactions,
+  ({ one }) => ({
+    team: one(teams, {
+      fields: [syndicatorTransactions.teamId],
+      references: [teams.id],
+    }),
+    syndicator: one(syndicators, {
+      fields: [syndicatorTransactions.syndicatorId],
+      references: [syndicators.id],
+      relationName: "syndicatorTransactions",
+    }),
+    deal: one(mcaDeals, {
+      fields: [syndicatorTransactions.dealId],
+      references: [mcaDeals.id],
+    }),
+    participation: one(syndicationParticipants, {
+      fields: [syndicatorTransactions.participationId],
+      references: [syndicationParticipants.id],
+    }),
+    counterpartySyndicator: one(syndicators, {
+      fields: [syndicatorTransactions.counterpartySyndicatorId],
+      references: [syndicators.id],
+      relationName: "counterpartyTransactions",
+    }),
+    linkedTransaction: one(transactions, {
+      fields: [syndicatorTransactions.linkedTransactionId],
+      references: [transactions.id],
     }),
   }),
 );
