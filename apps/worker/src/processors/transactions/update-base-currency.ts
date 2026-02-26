@@ -3,6 +3,7 @@ import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
 import type { UpdateBaseCurrencyPayload } from "../../schemas/transactions";
 import { getDb } from "../../utils/db";
+import { withDbConnectionRetry } from "../../utils/db-retry";
 import { BaseProcessor } from "../base";
 
 /**
@@ -23,10 +24,17 @@ export class UpdateBaseCurrencyProcessor extends BaseProcessor<UpdateBaseCurrenc
     await this.updateProgress(job, 5);
 
     // Get all enabled accounts
-    const accounts = await getBankAccounts(db, {
-      teamId,
-      enabled: true,
-    });
+    const accounts = await withDbConnectionRetry(
+      () =>
+        getBankAccounts(db, {
+          teamId,
+          enabled: true,
+        }),
+      {
+        operationName: "getBankAccounts(update-base-currency)",
+        logger: this.logger,
+      },
+    );
 
     if (!accounts || accounts.length === 0) {
       this.logger.info("No enabled accounts found", { teamId });

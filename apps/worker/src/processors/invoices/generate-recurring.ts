@@ -23,6 +23,7 @@ import { invoicesQueue } from "../../queues/invoices";
 import { notificationsQueue } from "../../queues/notifications";
 import type { InvoiceRecurringSchedulerPayload } from "../../schemas/invoices";
 import { getDb } from "../../utils/db";
+import { withDbConnectionRetry } from "../../utils/db-retry";
 import { isStaging } from "../../utils/env";
 import {
   buildInvoiceTemplateFromRecurring,
@@ -85,7 +86,13 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
         "[STAGING MODE] Recurring invoice scheduler - logging only, no execution",
       );
 
-      const { data: dueRecurring, hasMore } = await getDueInvoiceRecurring(db);
+      const { data: dueRecurring, hasMore } = await withDbConnectionRetry(
+        () => getDueInvoiceRecurring(db),
+        {
+          operationName: "getDueInvoiceRecurring(staging)",
+          logger: this.logger,
+        },
+      );
 
       if (dueRecurring.length === 0) {
         this.logger.info("[STAGING] No recurring invoices due for generation");
@@ -135,7 +142,13 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
     this.logger.info("Starting recurring invoice scheduler");
 
     // Get due recurring invoices (batched for safety, default limit: 50)
-    const { data: dueRecurring, hasMore } = await getDueInvoiceRecurring(db);
+    const { data: dueRecurring, hasMore } = await withDbConnectionRetry(
+      () => getDueInvoiceRecurring(db),
+      {
+        operationName: "getDueInvoiceRecurring",
+        logger: this.logger,
+      },
+    );
 
     if (dueRecurring.length === 0) {
       this.logger.info("No recurring invoices due for generation");

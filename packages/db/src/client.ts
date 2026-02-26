@@ -13,6 +13,7 @@ const logger = createLoggerWithContext("db");
 const isDevelopment = process.env.NODE_ENV === "development";
 const isProduction = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
 const DEBUG_PERF = process.env.DEBUG_PERF === "true";
+const DB_POOL_EVENT_LOGGING = process.env.DB_POOL_EVENT_LOGGING === "true";
 
 const connectionConfig = {
   max: isDevelopment ? 8 : isProduction ? 40 : 6,
@@ -28,6 +29,77 @@ const connectionConfig = {
 
 const drizzleLogger = DEBUG_PERF ? createDrizzleLogger() : undefined;
 
+function getPgErrorDetails(error: unknown) {
+  const details: Record<string, unknown> = {};
+
+  if (error && typeof error === "object") {
+    const err = error as Record<string, unknown>;
+    const fields = [
+      "name",
+      "message",
+      "code",
+      "errno",
+      "syscall",
+      "address",
+      "port",
+      "stack",
+    ];
+
+    for (const field of fields) {
+      if (err[field] !== undefined) {
+        details[field] = err[field];
+      }
+    }
+  } else {
+    details.message = String(error);
+  }
+
+  return details;
+}
+
+function getSinglePoolStats(pool: Pool) {
+  return {
+    total: pool.totalCount,
+    idle: pool.idleCount,
+    waiting: pool.waitingCount,
+  };
+}
+
+function attachPoolMonitoring(pool: Pool, poolName: "primary" | "replica") {
+  pool.on("error", (err) => {
+    logger.error(`${poolName} pool: idle client error`, {
+      pool: poolName,
+      ...getPgErrorDetails(err),
+      stats: getSinglePoolStats(pool),
+    });
+  });
+
+  if (!DB_POOL_EVENT_LOGGING) {
+    return;
+  }
+
+  pool.on("connect", () => {
+    logger.info(`${poolName} pool: client connected`, {
+      pool: poolName,
+      stats: getSinglePoolStats(pool),
+    });
+  });
+
+  pool.on("acquire", () => {
+    logger.info(`${poolName} pool: client acquired`, {
+      pool: poolName,
+      stats: getSinglePoolStats(pool),
+    });
+  });
+
+  pool.on("remove", () => {
+    logger.info(`${poolName} pool: client removed`, {
+      pool: poolName,
+      stats: getSinglePoolStats(pool),
+    });
+  });
+}
+
 // Primary pool — DATABASE_PRIMARY_URL
 const primaryPool = new Pool({
   connectionString: process.env.DATABASE_PRIMARY_URL!,
@@ -35,10 +107,7 @@ const primaryPool = new Pool({
 });
 
 if (DEBUG_PERF) instrumentPool(primaryPool, "primary");
-
-primaryPool.on("error", (err) => {
-  logger.error("Primary pool: idle client error", { error: err.message });
-});
+attachPoolMonitoring(primaryPool, "primary");
 
 export const primaryDb = drizzle(primaryPool, {
   schema,
@@ -86,10 +155,9 @@ const replicaPool = replicaUrl
   : null;
 
 if (DEBUG_PERF && replicaPool) instrumentPool(replicaPool, "replica");
-
-replicaPool?.on("error", (err) => {
-  logger.error("Replica pool: idle client error", { error: err.message });
-});
+if (replicaPool) {
+  attachPoolMonitoring(replicaPool, "replica");
+}
 
 const replicaDb = replicaPool
   ? drizzle(replicaPool, {
