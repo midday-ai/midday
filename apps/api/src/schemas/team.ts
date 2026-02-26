@@ -123,6 +123,11 @@ export const updateTeamByIdSchema = z.object({
     .openapi({
       description: "Export settings for transactions",
     }),
+  underwritingEnabled: z.boolean().optional().openapi({
+    description:
+      "Whether underwriting is enabled for this team. When enabled, merchants must complete underwriting before creating deals.",
+    example: true,
+  }),
   branding: z
     .object({
       displayName: z.string().max(100).optional(),

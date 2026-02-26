@@ -152,6 +152,7 @@ export const updateTeamById = async (
       baseCurrency: teams.baseCurrency,
       countryCode: teams.countryCode,
       fiscalYearStartMonth: teams.fiscalYearStartMonth,
+      underwritingEnabled: teams.underwritingEnabled,
     });
 
   return result;
