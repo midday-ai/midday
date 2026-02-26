@@ -6,13 +6,13 @@ import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useMemo, useRef } from "react";
 import { useOnClickOutside } from "usehooks-ts";
-import { BurnRateCard } from "./cards/burn-rate-card";
-import { CategoryExpensesCard } from "./cards/category-expenses-card";
-import { ExpensesCard } from "./cards/expenses-card";
-import { MonthlyRevenueCard } from "./cards/monthly-revenue-card";
-import { ProfitCard } from "./cards/profit-card";
-import { RevenueForecastCard } from "./cards/revenue-forecast-card";
-import { RunwayCard } from "./cards/runway-card";
+import { CollectionPerformanceCard } from "./cards/collection-performance-card";
+import { FundingActivityCard } from "./cards/funding-activity-card";
+import { PortfolioCompositionCard } from "./cards/portfolio-composition-card";
+import { FactorRateReturnsCard } from "./cards/factor-rate-returns-card";
+import { RtrAgingCard } from "./cards/rtr-aging-card";
+import { NsfDefaultTrendsCard } from "./cards/nsf-default-trends-card";
+import { RepaymentVelocityCard } from "./cards/repayment-velocity-card";
 import { MetricsGrid } from "./components/metrics-grid";
 import { SortableChartCard } from "./components/sortable-chart-card";
 import { type ChartId, DEFAULT_CHART_ORDER } from "./utils/chart-types";
@@ -67,20 +67,20 @@ export function MetricsView() {
 
     const chartContent = (() => {
       switch (chartId) {
-        case "monthly-revenue":
-          return <MonthlyRevenueCard {...commonProps} />;
-        case "burn-rate":
-          return <BurnRateCard {...commonProps} />;
-        case "expenses":
-          return <ExpensesCard {...commonProps} />;
-        case "profit":
-          return <ProfitCard {...commonProps} />;
-        case "revenue-forecast":
-          return <RevenueForecastCard {...commonProps} />;
-        case "runway":
-          return <RunwayCard {...commonProps} />;
-        case "category-expenses":
-          return <CategoryExpensesCard {...commonProps} />;
+        case "collection-performance":
+          return <CollectionPerformanceCard {...commonProps} />;
+        case "funding-activity":
+          return <FundingActivityCard {...commonProps} />;
+        case "portfolio-composition":
+          return <PortfolioCompositionCard {...commonProps} />;
+        case "factor-rate-returns":
+          return <FactorRateReturnsCard {...commonProps} />;
+        case "rtr-aging":
+          return <RtrAgingCard {...commonProps} />;
+        case "nsf-default-trends":
+          return <NsfDefaultTrendsCard {...commonProps} />;
+        case "repayment-velocity":
+          return <RepaymentVelocityCard {...commonProps} />;
         default:
           return null;
       }
