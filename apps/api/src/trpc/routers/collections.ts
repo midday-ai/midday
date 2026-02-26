@@ -1,4 +1,13 @@
 import {
+  getCollectionCasesSchema,
+  createCollectionCaseSchema,
+  updateCollectionCaseSchema,
+  resolveCollectionCaseSchema,
+  getCollectionNotesSchema,
+  addCollectionNoteSchema,
+  markNotificationReadSchema,
+} from "@api/schemas/collections";
+import {
   createTRPCRouter,
   memberProcedure,
   protectedProcedure,
@@ -27,17 +36,7 @@ import { z } from "zod";
 
 export const collectionsRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(
-      z.object({
-        status: z.enum(["active", "resolved"]).nullish(),
-        stageId: z.string().uuid().nullish(),
-        assignedTo: z.string().uuid().nullish(),
-        priority: z.enum(["low", "medium", "high", "critical"]).nullish(),
-        cursor: z.string().nullish(),
-        pageSize: z.number().min(1).max(100).optional(),
-        sort: z.array(z.string()).nullish(),
-      }),
-    )
+    .input(getCollectionCasesSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
       return getCollectionCases(db, {
         teamId: teamId!,
@@ -89,14 +88,7 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   create: memberProcedure
-    .input(
-      z.object({
-        dealId: z.string().uuid(),
-        stageId: z.string().uuid().optional(),
-        priority: z.enum(["low", "medium", "high", "critical"]).optional(),
-        assignedTo: z.string().uuid().optional(),
-      }),
-    )
+    .input(createCollectionCaseSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
       // Seed default stages if none exist yet
       await seedDefaultStages(db, { teamId: teamId! });
@@ -125,15 +117,7 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   update: memberProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-        stageId: z.string().uuid().optional(),
-        assignedTo: z.string().uuid().nullable().optional(),
-        priority: z.enum(["low", "medium", "high", "critical"]).optional(),
-        nextFollowUp: z.string().nullable().optional(),
-      }),
-    )
+    .input(updateCollectionCaseSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
       return updateCollectionCase(db, {
         id: input.id,
@@ -146,20 +130,7 @@ export const collectionsRouter = createTRPCRouter({
     }),
 
   resolve: memberProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-        outcome: z.enum([
-          "paid_in_full",
-          "settled",
-          "payment_plan",
-          "defaulted",
-          "written_off",
-          "sent_to_agency",
-        ]),
-        agencyId: z.string().uuid().optional(),
-      }),
-    )
+    .input(resolveCollectionCaseSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
       return updateCollectionCase(db, {
         id: input.id,
@@ -172,36 +143,22 @@ export const collectionsRouter = createTRPCRouter({
 
   // Notes
   getNotes: protectedProcedure
-    .input(
-      z.object({
-        caseId: z.string().uuid(),
-        cursor: z.string().nullish(),
-        pageSize: z.number().min(1).max(100).optional(),
-      }),
-    )
-    .query(async ({ ctx: { db }, input }) => {
+    .input(getCollectionNotesSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
       return getCollectionNotes(db, {
         caseId: input.caseId,
+        teamId: teamId!,
         cursor: input.cursor,
         pageSize: input.pageSize,
       });
     }),
 
   addNote: memberProcedure
-    .input(
-      z.object({
-        caseId: z.string().uuid(),
-        contactName: z.string().optional(),
-        contactMethod: z
-          .enum(["phone", "email", "text", "in_person", "other"])
-          .optional(),
-        followUpDate: z.string().optional(),
-        summary: z.string().min(1, "Summary is required"),
-      }),
-    )
-    .mutation(async ({ ctx: { db, session }, input }) => {
+    .input(addCollectionNoteSchema)
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
       return createCollectionNote(db, {
         caseId: input.caseId,
+        teamId: teamId!,
         authorId: session.user.id,
         contactName: input.contactName,
         contactMethod: input.contactMethod,
@@ -230,7 +187,7 @@ export const collectionsRouter = createTRPCRouter({
   ),
 
   markNotificationRead: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(markNotificationReadSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
       return markNotificationRead(db, {
         id: input.id,
