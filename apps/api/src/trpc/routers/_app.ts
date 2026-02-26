@@ -15,11 +15,11 @@ import { chatFeedbackRouter } from "./feedback";
 import { inboxRouter } from "./inbox";
 import { inboxAccountsRouter } from "./inbox-accounts";
 import { institutionsRouter } from "./institutions";
-import { invoiceRouter } from "./invoice";
-import { invoicePaymentsRouter } from "./invoice-payments";
-import { invoiceProductsRouter } from "./invoice-products";
-import { invoiceRecurringRouter } from "./invoice-recurring";
-import { invoiceTemplateRouter } from "./invoice-template";
+import { dealRouter } from "./deal";
+import { dealPaymentsRouter } from "./deal-payments";
+import { dealProductsRouter } from "./deal-products";
+import { dealRecurringRouter } from "./deal-recurring";
+import { dealTemplateRouter } from "./deal-template";
 import { jobsRouter } from "./jobs";
 import { notificationSettingsRouter } from "./notification-settings";
 import { notificationsRouter } from "./notifications";
@@ -47,6 +47,9 @@ import { dealFeesRouter } from "./deal-fees";
 import { reconciliationRouter } from "./reconciliation";
 import { achBatchesRouter } from "./ach-batches";
 import { exportTemplatesRouter } from "./export-templates";
+import { riskRouter } from "./risk";
+import { collectionsRouter } from "./collections";
+import { collectionConfigRouter } from "./collection-config";
 
 export const appRouter = createTRPCRouter({
   accounting: accountingRouter,
@@ -64,11 +67,11 @@ export const appRouter = createTRPCRouter({
   inbox: inboxRouter,
   inboxAccounts: inboxAccountsRouter,
   institutions: institutionsRouter,
-  invoice: invoiceRouter,
-  invoicePayments: invoicePaymentsRouter,
-  invoiceProducts: invoiceProductsRouter,
-  invoiceRecurring: invoiceRecurringRouter,
-  invoiceTemplate: invoiceTemplateRouter,
+  deal: dealRouter,
+  dealPayments: dealPaymentsRouter,
+  dealProducts: dealProductsRouter,
+  dealRecurring: dealRecurringRouter,
+  dealTemplate: dealTemplateRouter,
   jobs: jobsRouter,
   reports: reportsRouter,
   oauthApplications: oauthApplicationsRouter,
@@ -86,7 +89,7 @@ export const appRouter = createTRPCRouter({
   shortLinks: shortLinksRouter,
   apiKeys: apiKeysRouter,
   widgets: widgetsRouter,
-  deals: mcaDealsRouter,
+  mcaDeals: mcaDealsRouter,
   merchantPortal: merchantPortalRouter,
   underwriting: underwritingRouter,
   brokers: brokersRouter,
@@ -96,6 +99,9 @@ export const appRouter = createTRPCRouter({
   reconciliation: reconciliationRouter,
   achBatches: achBatchesRouter,
   exportTemplates: exportTemplatesRouter,
+  risk: riskRouter,
+  collections: collectionsRouter,
+  collectionConfig: collectionConfigRouter,
 });
 
 // export type definition of API
