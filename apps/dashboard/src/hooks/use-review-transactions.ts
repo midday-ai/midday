@@ -1,24 +1,21 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useSortParams } from "@/hooks/use-sort-params";
-import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTRPC } from "@/trpc/client";
 
 /**
- * Hook to fetch review transactions (fulfilled but not exported) with user-applied filters.
- * Used by export-bar and export-transactions-modal to ensure export respects current filters.
+ * Hook to fetch the full review queue (fulfilled but not exported).
+ * Review intentionally ignores user filters so the queue can reliably reach zero.
  */
 export function useReviewTransactions() {
   const trpc = useTRPC();
-  const { filter } = useTransactionFilterParamsWithPersistence();
-  const { params: sortParams } = useSortParams();
+  const { params } = useSortParams();
 
   const query = useInfiniteQuery(
     trpc.transactions.get.infiniteQueryOptions(
       {
-        ...filter,
-        amountRange: filter.amount_range ?? null,
-        sort: sortParams.sort,
+        // Review is a strict queue and does not apply user filters.
+        sort: params.sort,
         fulfilled: true,
         exported: false,
         pageSize: 10000,

@@ -23,8 +23,10 @@ export const transactionFilterParamsSchema = {
   ),
   statuses: parseAsArrayOf(
     parseAsStringLiteral([
-      "completed",
-      "uncompleted",
+      "blank",
+      "receipt_match",
+      "in_review",
+      "export_error",
       "archived",
       "excluded",
       "exported",

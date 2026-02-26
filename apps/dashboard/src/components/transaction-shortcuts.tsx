@@ -36,14 +36,22 @@ export function TransactionShortcuts() {
     }),
   );
 
+  const canToggleReviewReady =
+    !!transaction &&
+    (!transaction.attachments || transaction.attachments.length === 0) &&
+    transaction.status !== "excluded" &&
+    transaction.status !== "archived";
+
+  const isReviewReadyFromStatus = transaction?.status === "completed";
+
   useHotkeys(
     "meta+m",
     (event) => {
       event.preventDefault();
-      if (!transaction?.attachments || transaction.attachments.length === 0) {
+      if (canToggleReviewReady) {
         updateTransactionMutation.mutate({
           id: transactionId!,
-          status: transaction?.status === "completed" ? "posted" : "completed",
+          status: isReviewReadyFromStatus ? "posted" : "completed",
         });
       }
     },
@@ -58,9 +66,7 @@ export function TransactionShortcuts() {
             ⌘ M
           </span>
           <span className="text-[10px] text-[#666]">
-            {transaction?.isFulfilled
-              ? "Mark as uncompleted"
-              : "Mark as completed"}
+            {isReviewReadyFromStatus ? "Unmark ready" : "Mark ready"}
           </span>
         </div>
 

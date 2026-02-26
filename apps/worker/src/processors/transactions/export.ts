@@ -235,7 +235,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
     });
 
     // Mark transactions as exported so they disappear from review tab
-    await markTransactionsAsExported(db, transactionIds);
+    await markTransactionsAsExported(db, transactionIds, teamId);
 
     if (settings.sendEmail && settings.accountantEmail) {
       const expireIn = 7 * 24 * 60 * 60;

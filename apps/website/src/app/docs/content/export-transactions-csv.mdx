@@ -1,58 +1,91 @@
 ---
-title: Export Transactions to CSV
-description: Download your transactions for your accountant or analysis.
+title: Export Transactions
+description: How the transaction export flow works in Midday.
 section: export
 order: 1
 ---
 
-Export your transactions to CSV for your accountant, tax preparation, or your own analysis.
+Midday tracks each transaction through a clear lifecycle so you always know what needs attention and what's been exported.
 
-## Export transactions
+## Transaction statuses
 
-1. Go to [Transactions](https://app.midday.ai/transactions)
-2. Use filters to select the transactions you want (date range, category, etc.)
-3. Click **Export**
-4. Choose **CSV** format
-5. Download the file
+Every transaction has a status that tells you where it is in the flow:
 
-## What's included
+| Status | Meaning |
+|--------|---------|
+| **No receipt** | Default state. No receipt attached yet. |
+| **Receipt found** | Midday found a possible receipt match. Confirm or dismiss it. |
+| **Ready to export** | Receipt attached. This transaction is in the export queue. |
+| **Exporting** | Export is in progress. |
+| **Exported** | Successfully exported. Final state. |
+| **Export failed** | Something went wrong. Needs attention before retry. |
+| **Excluded** | Excluded from analytics and the export queue. |
+| **Archived** | No longer part of active workflows. |
 
-The export includes:
+## The export flow
 
-- Date
-- Description/Merchant
-- Amount
-- Category
-- Account (which bank account)
-- Tags (if any)
-- Attached receipts (as links or filenames)
-- Notes
+Transactions move through this lifecycle:
 
-## Preparing for export
+1. A transaction arrives from your bank connection (status: **No receipt**)
+2. Midday finds a matching receipt automatically (status: **Receipt found**)
+3. You confirm the match — or attach a receipt manually (status: **Ready to export**)
+4. You export from the Review tab (status: **Exporting** → **Exported**)
 
-Before exporting, make sure your transactions are:
+If an export fails, the transaction moves to **Export failed** and stays in the Review tab so you can fix the issue and retry.
 
-- **Categorized**: The AI does this automatically, but review for accuracy
-- **Matched with receipts**: Attach any missing receipts
-- **Tagged**: Add any tags you want included in the export
+## Tabs
 
-## Export for your accountant
+### All
 
-Accountants typically need:
+Shows every transaction across all statuses. Use filters to narrow by status, date, category, account, and more. Excluded and Archived transactions are hidden by default but available via the status filter.
 
-- All transactions for a date range (month, quarter, or year)
-- Proper categorization
-- Receipt documentation
+### Review
 
-Set up a monthly or quarterly export routine:
+The export queue. Shows only transactions that are **Ready to export** or have an **Export failed** status. No filters apply here — it always shows the full queue so it can reliably reach zero.
 
-1. Filter transactions for the period
-2. Review categories and receipts
-3. Export to CSV
-4. Send to your accountant
+When the Review tab is empty, you're done.
+
+## Exporting
+
+### To accounting software (Xero, QuickBooks, Fortnox)
+
+If you've connected an accounting provider:
+
+1. Go to the **Review** tab
+2. Select transactions (or export all)
+3. Click **Export** and choose your provider
+4. Transactions and receipts are sent to your accounting software
+
+[Connect Xero →](/docs/connect-xero) · [Connect QuickBooks →](/docs/connect-quickbooks) · [Connect Fortnox →](/docs/connect-fortnox)
+
+### To CSV
+
+If you export to a file instead:
+
+1. Go to the **Review** tab (or use filters in **All**)
+2. Select transactions
+3. Click **Export** → **CSV**
+4. Download the file
+
+The CSV includes date, description, amount, category, account, tags, receipt links, and notes.
+
+## Actions
+
+You can manage transactions with these actions:
+
+| Action | What it does |
+|--------|-------------|
+| **Mark ready** | Moves a transaction to the export queue (Review tab) |
+| **Unmark ready** | Removes from the export queue |
+| **Mark exported** | Manually marks as exported (use only if exported outside Midday) |
+| **Unmark exported** | Moves an exported transaction back to the Review tab |
+| **Exclude** | Removes from analytics and the export queue (bulk action) |
+| **Include** | Reverses an exclusion |
+| **Archive** | Hides from active workflows (bulk action) |
 
 ## Tips
 
-- Export after reconciling receipts for the period
-- Keep a copy for your own records
-- If your accountant uses Xero, QuickBooks, or Fortnox, consider [direct integration](/docs/connect-xero) instead
+- Export regularly (weekly or monthly) to keep your accounting software current
+- Attach receipts before exporting — they export with the transaction
+- Use the Review tab as your to-do list: when it's empty, you're caught up
+- If your accountant needs a file, use CSV export. If they use Xero, QuickBooks, or Fortnox, use the direct integration instead

@@ -19,6 +19,7 @@ import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
+import { useTransactionTab } from "@/hooks/use-transaction-tab";
 import { useTRPC } from "@/trpc/client";
 import { formatAccountName } from "@/utils/format";
 import { AmountRange } from "./amount-range";
@@ -27,8 +28,10 @@ import { FilterList } from "./filter-list";
 import { SelectCategory } from "./select-category";
 
 type StatusFilter =
-  | "completed"
-  | "uncompleted"
+  | "blank"
+  | "receipt_match"
+  | "in_review"
+  | "export_error"
   | "archived"
   | "excluded"
   | "exported";
@@ -76,11 +79,13 @@ const defaultSearch = {
 };
 
 const statusFilters: FilterItem<StatusFilter>[] = [
-  { id: "completed", name: "Completed" },
-  { id: "uncompleted", name: "Uncompleted" },
-  { id: "archived", name: "Archived" },
-  { id: "excluded", name: "Excluded" },
+  { id: "blank", name: "No receipt" },
+  { id: "receipt_match", name: "Receipt found" },
+  { id: "in_review", name: "Ready to export" },
+  { id: "export_error", name: "Export failed" },
   { id: "exported", name: "Exported" },
+  { id: "excluded", name: "Excluded" },
+  { id: "archived", name: "Archived" },
 ];
 
 const attachmentsFilters: FilterItem<AttachmentFilter>[] = [
@@ -135,6 +140,7 @@ function FilterCheckboxItem({
       key={id}
       checked={checked}
       onCheckedChange={onCheckedChange}
+      onSelect={(e) => e.preventDefault()}
       className={className}
     >
       {name}
@@ -208,6 +214,7 @@ function updateArrayFilter(
 }
 
 export function TransactionsSearchFilter() {
+  const { tab } = useTransactionTab();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -233,6 +240,10 @@ export function TransactionsSearchFilter() {
     evt.preventDefault();
     inputRef.current?.focus();
   });
+
+  if (tab === "review") {
+    return <h2 className="text-lg font-serif tracking-tight">Export</h2>;
+  }
 
   const handleSearch = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const value = evt.target.value;
