@@ -23,6 +23,8 @@ const icons = {
   "/reconciliation": () => <Icons.Reconciliation size={20} />,
   "/settings": () => <Icons.Settings size={20} />,
   "/inbox": () => <Icons.Inbox2 size={20} />,
+  "/broker/deals": () => <Icons.Invoice size={20} />,
+  "/broker/commissions": () => <Icons.Reconciliation size={20} />,
 } as const;
 
 type MenuItem = {
@@ -83,6 +85,16 @@ const allItems: MenuItem[] = [
     children: [{ path: "/brokers?createBroker=true", name: "Add new" }],
   },
   {
+    path: "/broker/deals",
+    name: "My Deals",
+    roles: ["broker"],
+  },
+  {
+    path: "/broker/commissions",
+    name: "My Commissions",
+    roles: ["broker"],
+  },
+  {
     path: "/syndications",
     name: "Syndications",
     roles: [...INTERNAL, "syndicate"],
@@ -108,6 +120,7 @@ const allItems: MenuItem[] = [
   {
     path: "/settings",
     name: "Settings",
+    roles: [...INTERNAL, "bookkeeper"],
     children: [
       { path: "/settings", name: "General" },
       { path: "/settings/billing", name: "Billing", roles: ["owner"] },
@@ -131,6 +144,7 @@ const KNOWN_MENU_PATHS = [
   "/underwriting",
   "/reconciliation",
   "/settings",
+  "/broker",
 ];
 
 interface ItemProps {

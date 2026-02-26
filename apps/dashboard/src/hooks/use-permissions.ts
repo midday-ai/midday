@@ -31,6 +31,8 @@ export function usePermissions() {
       role === "admin" ||
       role === "member" ||
       role === "bookkeeper",
+    isBroker: role === "broker",
+    canViewBrokerPortal: role === "broker",
     entityId: (user as any)?.entityId as string | null,
     entityType: (user as any)?.entityType as string | null,
   };
