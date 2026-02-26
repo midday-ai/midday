@@ -186,9 +186,6 @@ const ActionsCell = memo(
       onUpdateTransaction?.({ id: transaction.id, status: "completed" });
     }, [transaction.id, onUpdateTransaction]);
 
-    const handleUpdateToExcluded = useCallback(() => {
-      onUpdateTransaction?.({ id: transaction.id, status: "excluded" });
-    }, [transaction.id, onUpdateTransaction]);
 
     const handleUpdateToExported = useCallback(() => {
       onUpdateTransaction?.({ id: transaction.id, status: "exported" });
@@ -223,7 +220,10 @@ const ActionsCell = memo(
             <DropdownMenuItem onClick={handleCopyUrl}>
               Copy link
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            {(isWorkflowActive || transaction.status === "excluded") && (
+              <DropdownMenuSeparator />
+            )}
+
             {isWorkflowActive && !transaction.isFulfilled && (
               <DropdownMenuItem onClick={handleUpdateToCompleted}>
                 Mark ready
@@ -253,16 +253,9 @@ const ActionsCell = memo(
                 </DropdownMenuItem>
               )}
 
-            <DropdownMenuSeparator />
             {!transaction.manual && transaction.status === "excluded" && (
               <DropdownMenuItem onClick={handleUpdateToPosted}>
                 Include
-              </DropdownMenuItem>
-            )}
-
-            {!transaction.manual && transaction.status !== "excluded" && (
-              <DropdownMenuItem onClick={handleUpdateToExcluded}>
-                Exclude
               </DropdownMenuItem>
             )}
 
