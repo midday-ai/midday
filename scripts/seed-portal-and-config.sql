@@ -12,8 +12,8 @@
 -- ============================================================================
 
 -- Fixed constants (must match seed-mca-features.sql)
-\set team_id 'a0000000-0000-0000-0000-000000000001'
-\set user_id '00000000-0000-0000-0000-000000000001'
+\set team_id 'a0000000-0000-4000-a000-000000000001'
+\set user_id '00000000-0000-4000-a000-000000000001'
 
 BEGIN;
 
@@ -21,9 +21,9 @@ BEGIN;
 -- 0a. ADDITIONAL BANK ACCOUNTS (2 new accounts — total 4)
 -- ============================================================================
 INSERT INTO bank_accounts (id, team_id, created_by, name, currency, balance, type, manual, enabled, account_id) VALUES
-  ('ba000000-0000-0000-0000-000000000003'::uuid, :'team_id'::uuid, :'user_id'::uuid,
+  ('ba000000-0000-4000-a000-000000000003'::uuid, :'team_id'::uuid, :'user_id'::uuid,
    'Chase Business Checking', 'USD', 423150.00, 'depository', true, true, 'manual_chase_001'),
-  ('ba000000-0000-0000-0000-000000000004'::uuid, :'team_id'::uuid, :'user_id'::uuid,
+  ('ba000000-0000-4000-a000-000000000004'::uuid, :'team_id'::uuid, :'user_id'::uuid,
    'Wells Fargo Collections', 'USD', 185600.00, 'depository', true, true, 'manual_wells_001')
 ON CONFLICT (id) DO NOTHING;
 
@@ -36,17 +36,17 @@ ON CONFLICT (id) DO NOTHING;
 --   Chase (ba..03):     Bella Salon, Tony's Pizzeria, Lucky Dragon
 --   Wells Fargo (ba..04): Smith Plumbing, Westside Construction
 -- ============================================================================
-UPDATE transactions SET bank_account_id = 'ba000000-0000-0000-0000-000000000003'::uuid
+UPDATE transactions SET bank_account_id = 'ba000000-0000-4000-a000-000000000003'::uuid
 WHERE team_id = :'team_id'::uuid
-  AND bank_account_id = 'ba000000-0000-0000-0000-000000000001'::uuid
+  AND bank_account_id = 'ba000000-0000-4000-a000-000000000001'::uuid
   AND (
     name ILIKE '%Bella%' OR name ILIKE '%Tony%' OR name ILIKE '%Lucky Dragon%'
     OR deal_code IN ('MCA-2025-003', 'MCA-2025-004', 'MCA-2024-002')
   );
 
-UPDATE transactions SET bank_account_id = 'ba000000-0000-0000-0000-000000000004'::uuid
+UPDATE transactions SET bank_account_id = 'ba000000-0000-4000-a000-000000000004'::uuid
 WHERE team_id = :'team_id'::uuid
-  AND bank_account_id = 'ba000000-0000-0000-0000-000000000001'::uuid
+  AND bank_account_id = 'ba000000-0000-4000-a000-000000000001'::uuid
   AND (
     name ILIKE '%Smith%' OR name ILIKE '%Westside%'
     OR deal_code IN ('MCA-2024-003', 'MCA-2025-006')
@@ -61,43 +61,43 @@ INSERT INTO transactions (
   category_slug, status, method, internal_id
 ) VALUES
 -- Chase Business Checking — operating expenses
-(:'team_id'::uuid, 'ba000000-0000-0000-0000-000000000003'::uuid,
+(:'team_id'::uuid, 'ba000000-0000-4000-a000-000000000003'::uuid,
  (now() - interval '5 days')::date, 'WeWork - Office Space Feb',
  'Monthly coworking membership', -1850.00, 'USD',
  'operating-expenses', 'posted', 'ach', 'opex_chase_001'),
 
-(:'team_id'::uuid, 'ba000000-0000-0000-0000-000000000003'::uuid,
+(:'team_id'::uuid, 'ba000000-0000-4000-a000-000000000003'::uuid,
  (now() - interval '12 days')::date, 'AWS Cloud Services',
  'Monthly cloud infrastructure', -2340.00, 'USD',
  'operating-expenses', 'posted', 'ach', 'opex_chase_002'),
 
-(:'team_id'::uuid, 'ba000000-0000-0000-0000-000000000003'::uuid,
+(:'team_id'::uuid, 'ba000000-0000-4000-a000-000000000003'::uuid,
  (now() - interval '18 days')::date, 'Salesforce CRM License',
  'Monthly CRM subscription', -450.00, 'USD',
  'operating-expenses', 'posted', 'ach', 'opex_chase_003'),
 
-(:'team_id'::uuid, 'ba000000-0000-0000-0000-000000000003'::uuid,
+(:'team_id'::uuid, 'ba000000-0000-4000-a000-000000000003'::uuid,
  (now() - interval '25 days')::date, 'Iron Mountain - Document Storage',
  'Monthly secure document storage', -275.00, 'USD',
  'operating-expenses', 'posted', 'ach', 'opex_chase_004'),
 
 -- Wells Fargo Collections — operating expenses
-(:'team_id'::uuid, 'ba000000-0000-0000-0000-000000000004'::uuid,
+(:'team_id'::uuid, 'ba000000-0000-4000-a000-000000000004'::uuid,
  (now() - interval '3 days')::date, 'TransUnion - Credit Bureau',
  'Monthly credit report subscription', -595.00, 'USD',
  'operating-expenses', 'posted', 'ach', 'opex_wells_001'),
 
-(:'team_id'::uuid, 'ba000000-0000-0000-0000-000000000004'::uuid,
+(:'team_id'::uuid, 'ba000000-0000-4000-a000-000000000004'::uuid,
  (now() - interval '10 days')::date, 'LexisNexis - Skip Tracing',
  'Monthly skip tracing service', -890.00, 'USD',
  'operating-expenses', 'posted', 'ach', 'opex_wells_002'),
 
-(:'team_id'::uuid, 'ba000000-0000-0000-0000-000000000004'::uuid,
+(:'team_id'::uuid, 'ba000000-0000-4000-a000-000000000004'::uuid,
  (now() - interval '15 days')::date, 'Thompson Law - Collections Retainer',
  'Monthly legal collections retainer', -3500.00, 'USD',
  'operating-expenses', 'posted', 'ach', 'opex_wells_003'),
 
-(:'team_id'::uuid, 'ba000000-0000-0000-0000-000000000004'::uuid,
+(:'team_id'::uuid, 'ba000000-0000-4000-a000-000000000004'::uuid,
  (now() - interval '22 days')::date, 'Nacha - ACH Processing Fees',
  'Monthly ACH batch processing fees', -425.00, 'USD',
  'operating-expenses', 'posted', 'ach', 'opex_wells_004')
@@ -182,22 +182,22 @@ WHERE team_id = :'team_id'::uuid
 -- ============================================================================
 UPDATE brokers SET portal_id = 'pinnacle-funding-group'
 WHERE team_id = :'team_id'::uuid
-  AND id = 'b0000000-0000-0000-0000-000000000001'::uuid
+  AND id = 'b0000000-0000-4000-a000-000000000001'::uuid
   AND portal_id IS NULL;
 
 UPDATE brokers SET portal_id = 'capital-brokers-llc'
 WHERE team_id = :'team_id'::uuid
-  AND id = 'b0000000-0000-0000-0000-000000000002'::uuid
+  AND id = 'b0000000-0000-4000-a000-000000000002'::uuid
   AND portal_id IS NULL;
 
 UPDATE syndicators SET portal_id = 'apex-capital-partners'
 WHERE team_id = :'team_id'::uuid
-  AND id = 'c0000000-0000-0000-0000-000000000001'::uuid
+  AND id = 'c0000000-0000-4000-a000-000000000001'::uuid
   AND portal_id IS NULL;
 
 UPDATE syndicators SET portal_id = 'harbor-funding-group'
 WHERE team_id = :'team_id'::uuid
-  AND id = 'c0000000-0000-0000-0000-000000000002'::uuid
+  AND id = 'c0000000-0000-4000-a000-000000000002'::uuid
   AND portal_id IS NULL;
 
 -- ============================================================================
@@ -219,27 +219,27 @@ SELECT
   inv.expires_at
 FROM (VALUES
   -- Sunrise Diner — accepted
-  ('d1000000-0000-0000-0000-000000000001',
+  ('d1000000-0000-4000-a000-000000000001',
    'owner@sunrisediner.com', 'Sunrise Diner',
    'inv_sunrise_portal_001', 'accepted',
    now() - interval '7 months', now() + interval '1 year'),
   -- Bella Salon — accepted
-  ('d1000000-0000-0000-0000-000000000002',
+  ('d1000000-0000-4000-a000-000000000002',
    'bella@bellasalon.com', 'Bella Salon & Spa',
    'inv_bella_portal_001', 'accepted',
    now() - interval '4 months', now() + interval '1 year'),
   -- Fitness First — accepted (recently, requested payoff)
-  ('d1000000-0000-0000-0000-000000000003',
+  ('d1000000-0000-4000-a000-000000000003',
    'alex@fitnessfirstgym.com', 'Fitness First Gym',
    'inv_fitness_portal_001', 'accepted',
    now() - interval '6 days', now() + interval '1 year'),
   -- Green Thumb — pending (new client, not yet activated)
-  ('d1000000-0000-0000-0000-000000000004',
+  ('d1000000-0000-4000-a000-000000000004',
    'owner@greenthumb.com', 'Green Thumb Landscaping',
    'inv_greenthumb_portal_001', 'pending',
    NULL::timestamptz, now() + interval '7 days'),
   -- Westside — expired (never accepted despite NSF issues)
-  ('d1000000-0000-0000-0000-000000000005',
+  ('d1000000-0000-4000-a000-000000000005',
    'jim@westsideconstruction.com', 'Westside Construction LLC',
    'inv_westside_portal_001', 'expired',
    NULL::timestamptz, now() - interval '5 months')
@@ -270,7 +270,7 @@ SELECT
   'magic_link'
 FROM (VALUES
   -- Sunrise Diner — active, accessed 2 days ago from mobile
-  ('e1000000-0000-0000-0000-000000000001',
+  ('e1000000-0000-4000-a000-000000000001',
    'owner@sunrisediner.com', 'Sunrise Diner',
    'vtok_sunrise_portal_001',
    now() - interval '7 months',
@@ -278,7 +278,7 @@ FROM (VALUES
    now() - interval '2 days',
    '76.185.42.11', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605 Chrome/120'),
   -- Bella Salon — active, accessed 5 hours ago from Mac
-  ('e1000000-0000-0000-0000-000000000002',
+  ('e1000000-0000-4000-a000-000000000002',
    'bella@bellasalon.com', 'Bella Salon & Spa',
    'vtok_bella_portal_001',
    now() - interval '4 months',
@@ -286,7 +286,7 @@ FROM (VALUES
    now() - interval '5 hours',
    '98.244.113.5', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/17.0'),
   -- Fitness First — active, accessed 30 min ago from Android
-  ('e1000000-0000-0000-0000-000000000003',
+  ('e1000000-0000-4000-a000-000000000003',
    'alex@fitnessfirstgym.com', 'Fitness First Gym',
    'vtok_fitness_portal_001',
    now() - interval '6 days',
@@ -294,7 +294,7 @@ FROM (VALUES
    now() - interval '30 minutes',
    '104.28.52.87', 'Mozilla/5.0 (Linux; Android 14) Chrome/121'),
   -- Lucky Dragon — stale (paid off deal, session expired)
-  ('e1000000-0000-0000-0000-000000000004',
+  ('e1000000-0000-4000-a000-000000000004',
    'lucky@luckydragon.com', 'Lucky Dragon Restaurant',
    'vtok_luckydragon_portal_001',
    now() - interval '12 months',
@@ -328,7 +328,7 @@ INSERT INTO documents (
   path_tokens, processing_status, language
 ) VALUES
 -- MCA Agreement Template
-('f1000000-0000-0000-0000-000000000001'::uuid,
+('f1000000-0000-4000-a000-000000000001'::uuid,
  :'team_id'::uuid,
  'MCA-Agreement-Template-2026.pdf',
  'MCA Agreement Template 2026',
@@ -340,7 +340,7 @@ INSERT INTO documents (
  'en'),
 
 -- New York Disclosure Template
-('f1000000-0000-0000-0000-000000000002'::uuid,
+('f1000000-0000-4000-a000-000000000002'::uuid,
  :'team_id'::uuid,
  'NY-Disclosure-Template-v2.1.pdf',
  'New York MCA Disclosure Template v2.1',
@@ -352,7 +352,7 @@ INSERT INTO documents (
  'en'),
 
 -- California CFL Disclosure Template
-('f1000000-0000-0000-0000-000000000003'::uuid,
+('f1000000-0000-4000-a000-000000000003'::uuid,
  :'team_id'::uuid,
  'CA-CFL-Disclosure-v1.3.pdf',
  'California CFL Disclosure Template v1.3',
@@ -364,7 +364,7 @@ INSERT INTO documents (
  'en'),
 
 -- Underwriting Checklist
-('f1000000-0000-0000-0000-000000000004'::uuid,
+('f1000000-0000-4000-a000-000000000004'::uuid,
  :'team_id'::uuid,
  'Underwriting-Checklist-Q1-2026.pdf',
  'Underwriting Checklist Q1 2026',
@@ -376,7 +376,7 @@ INSERT INTO documents (
  'en'),
 
 -- Broker Commission Schedule
-('f1000000-0000-0000-0000-000000000005'::uuid,
+('f1000000-0000-4000-a000-000000000005'::uuid,
  :'team_id'::uuid,
  'Commission-Schedule-2026.pdf',
  'Broker Commission Schedule 2026',
@@ -388,7 +388,7 @@ INSERT INTO documents (
  'en'),
 
 -- Default & Collections Policy
-('f1000000-0000-0000-0000-000000000006'::uuid,
+('f1000000-0000-4000-a000-000000000006'::uuid,
  :'team_id'::uuid,
  'Default-Collection-Policy-2026.pdf',
  'Default and Collection Policy 2026',
@@ -437,7 +437,7 @@ INSERT INTO inbox (
   sender_email, description, content_type, size
 ) VALUES
 -- Chase ACH Statement (done — already processed)
-('a1100000-0000-0000-0000-000000000001'::uuid,
+('a1100000-0000-4000-a000-000000000001'::uuid,
  :'team_id'::uuid,
  'Chase Bank - ACH Statement Feb 2026',
  'chase-ach-statement-2026-02.pdf',
@@ -449,7 +449,7 @@ INSERT INTO inbox (
  'application/pdf', 524288),
 
 -- Gusto Payroll (done — matched to transaction)
-('a1100000-0000-0000-0000-000000000002'::uuid,
+('a1100000-0000-4000-a000-000000000002'::uuid,
  :'team_id'::uuid,
  'Gusto Payroll - February Invoice',
  'gusto-payroll-2026-02.pdf',
@@ -461,7 +461,7 @@ INSERT INTO inbox (
  'application/pdf', 245760),
 
 -- State Farm Insurance (suggested match — needs review)
-('a1100000-0000-0000-0000-000000000003'::uuid,
+('a1100000-0000-4000-a000-000000000003'::uuid,
  :'team_id'::uuid,
  'State Farm - Business Insurance',
  'state-farm-invoice-feb-2026.pdf',
@@ -473,7 +473,7 @@ INSERT INTO inbox (
  'application/pdf', 98304),
 
 -- Thompson Legal (done — archived)
-('a1100000-0000-0000-0000-000000000004'::uuid,
+('a1100000-0000-4000-a000-000000000004'::uuid,
  :'team_id'::uuid,
  'Thompson & Associates - Legal Retainer',
  'thompson-legal-invoice-jan-2026.pdf',
@@ -485,7 +485,7 @@ INSERT INTO inbox (
  'application/pdf', 176128),
 
 -- Unknown ACH Debit (pending — unprocessed, needs investigation)
-('a1100000-0000-0000-0000-000000000005'::uuid,
+('a1100000-0000-4000-a000-000000000005'::uuid,
  :'team_id'::uuid,
  'Unknown Sender - ACH Debit Notice',
  'unknown-ach-notice.pdf',
@@ -559,16 +559,16 @@ BEGIN
   RAISE NOTICE '';
   RAISE NOTICE '=== Portal & Config Seed Summary ===';
   FOR r IN
-    SELECT 'late_fee_settings' AS tbl, count(*) AS cnt FROM late_fee_settings WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'ach_providers', count(*) FROM ach_providers WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'merchant_portal_invites', count(*) FROM merchant_portal_invites WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'merchant_portal_sessions', count(*) FROM merchant_portal_sessions WHERE merchant_id IN (SELECT id FROM merchants WHERE team_id = 'a0000000-0000-0000-0000-000000000001')
-    UNION ALL SELECT 'merchant_portal_access', count(*) FROM merchant_portal_access WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'documents (vault)', count(*) FROM documents WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'document_tag_assignments', count(*) FROM document_tag_assignments WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'inbox', count(*) FROM inbox WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'mca_deals (start_date)', count(*) FROM mca_deals WHERE team_id = 'a0000000-0000-0000-0000-000000000001' AND start_date IS NOT NULL
-    UNION ALL SELECT 'bank_accounts', count(*) FROM bank_accounts WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
+    SELECT 'late_fee_settings' AS tbl, count(*) AS cnt FROM late_fee_settings WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'ach_providers', count(*) FROM ach_providers WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'merchant_portal_invites', count(*) FROM merchant_portal_invites WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'merchant_portal_sessions', count(*) FROM merchant_portal_sessions WHERE merchant_id IN (SELECT id FROM merchants WHERE team_id = 'a0000000-0000-4000-a000-000000000001')
+    UNION ALL SELECT 'merchant_portal_access', count(*) FROM merchant_portal_access WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'documents (vault)', count(*) FROM documents WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'document_tag_assignments', count(*) FROM document_tag_assignments WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'inbox', count(*) FROM inbox WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'mca_deals (start_date)', count(*) FROM mca_deals WHERE team_id = 'a0000000-0000-4000-a000-000000000001' AND start_date IS NOT NULL
+    UNION ALL SELECT 'bank_accounts', count(*) FROM bank_accounts WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
     ORDER BY 1
   LOOP
     RAISE NOTICE '  % : % rows', r.tbl, r.cnt;

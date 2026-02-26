@@ -6,12 +6,12 @@
 -- Original description:
 -- Risk Scoring Seed Data
 -- 8 Merchant Archetypes with payment histories for algorithm validation
--- Team ID: a0000000-0000-0000-0000-000000000001 (matches seed-all.sh)
+-- Team ID: a0000000-0000-4000-a000-000000000001 (matches seed-all.sh)
 -- ============================================================================
 
 DO $$
 DECLARE
-  v_team_id uuid := 'a0000000-0000-0000-0000-000000000001';
+  v_team_id uuid := 'a0000000-0000-4000-a000-000000000001';
   v_merchant_id uuid;
   v_deal_id uuid;
   v_payment_id uuid;

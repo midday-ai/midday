@@ -10,10 +10,10 @@
 -- ============================================================================
 
 -- Fixed constants
-\set team_id 'a0000000-0000-0000-0000-000000000001'
-\set user_id '00000000-0000-0000-0000-000000000001'
-\set operating_account 'ba000000-0000-0000-0000-000000000001'
-\set reserve_account 'ba000000-0000-0000-0000-000000000002'
+\set team_id 'a0000000-0000-4000-a000-000000000001'
+\set user_id '00000000-0000-4000-a000-000000000001'
+\set operating_account 'ba000000-0000-4000-a000-000000000001'
+\set reserve_account 'ba000000-0000-4000-a000-000000000002'
 
 BEGIN;
 
@@ -258,7 +258,7 @@ INSERT INTO ach_batches (
   originator_name, originator_routing, originator_account,
   status, submitted_at, completed_at
 ) VALUES (
-  'ab000000-0000-0000-0000-000000000001'::uuid,
+  'ab000000-0000-4000-a000-000000000001'::uuid,
   :'team_id'::uuid, :'user_id'::uuid,
   'ACH-2026-0218', '2026-02-18', 'Daily collections - Feb 18',
   2145.00, 5, :'operating_account'::uuid,
@@ -273,7 +273,7 @@ INSERT INTO ach_batches (
   originator_name, originator_routing, originator_account,
   status, submitted_at
 ) VALUES (
-  'ab000000-0000-0000-0000-000000000002'::uuid,
+  'ab000000-0000-4000-a000-000000000002'::uuid,
   :'team_id'::uuid, :'user_id'::uuid,
   'ACH-2026-0224', '2026-02-24', 'Daily collections - Feb 24',
   1870.00, 4, :'operating_account'::uuid,
@@ -288,7 +288,7 @@ INSERT INTO ach_batches (
   originator_name, originator_routing, originator_account,
   status
 ) VALUES (
-  'ab000000-0000-0000-0000-000000000003'::uuid,
+  'ab000000-0000-4000-a000-000000000003'::uuid,
   :'team_id'::uuid, :'user_id'::uuid,
   'ACH-2026-0225', '2026-02-25', 'Daily collections - Feb 25',
   2310.00, 5, :'operating_account'::uuid,
@@ -299,7 +299,7 @@ INSERT INTO ach_batches (
 -- ACH Batch Items for completed batch (Batch 1)
 INSERT INTO ach_batch_items (batch_id, team_id, deal_id, receiver_name, receiver_routing, receiver_account, amount, transaction_code, status)
 SELECT
-  'ab000000-0000-0000-0000-000000000001'::uuid,
+  'ab000000-0000-4000-a000-000000000001'::uuid,
   d.team_id,
   d.id,
   CASE d.deal_code
@@ -326,7 +326,7 @@ ON CONFLICT DO NOTHING;
 -- ACH Batch Items for processing batch (Batch 2)
 INSERT INTO ach_batch_items (batch_id, team_id, deal_id, receiver_name, receiver_routing, receiver_account, amount, transaction_code, status)
 SELECT
-  'ab000000-0000-0000-0000-000000000002'::uuid,
+  'ab000000-0000-4000-a000-000000000002'::uuid,
   d.team_id,
   d.id,
   CASE d.deal_code
@@ -351,7 +351,7 @@ ON CONFLICT DO NOTHING;
 -- ACH Batch Items for draft batch (Batch 3)
 INSERT INTO ach_batch_items (batch_id, team_id, deal_id, receiver_name, receiver_routing, receiver_account, amount, transaction_code, status)
 SELECT
-  'ab000000-0000-0000-0000-000000000003'::uuid,
+  'ab000000-0000-4000-a000-000000000003'::uuid,
   d.team_id,
   d.id,
   CASE d.deal_code
@@ -385,21 +385,21 @@ INSERT INTO reconciliation_sessions (
   status, completed_at
 ) VALUES
 -- Completed session from last week
-('a5000000-0000-0000-0000-000000000001'::uuid,
+('a5000000-0000-4000-a000-000000000001'::uuid,
  :'team_id'::uuid, :'user_id'::uuid, :'operating_account'::uuid,
  '2026-02-10', '2026-02-14',
  87, 72, 8, 3, 4,
  'completed', '2026-02-14 17:30:00-05'),
 
 -- Completed session from early Feb
-('a5000000-0000-0000-0000-000000000002'::uuid,
+('a5000000-0000-4000-a000-000000000002'::uuid,
  :'team_id'::uuid, :'user_id'::uuid, :'operating_account'::uuid,
  '2026-02-03', '2026-02-07',
  93, 81, 7, 2, 3,
  'completed', '2026-02-07 16:45:00-05'),
 
 -- In-progress session (current week)
-('a5000000-0000-0000-0000-000000000003'::uuid,
+('a5000000-0000-4000-a000-000000000003'::uuid,
  :'team_id'::uuid, :'user_id'::uuid, :'operating_account'::uuid,
  '2026-02-17', '2026-02-21',
  45, 32, 3, 5, 5,
@@ -732,21 +732,21 @@ DECLARE
 BEGIN
   RAISE NOTICE '=== Seed Data Summary ===';
   FOR r IN
-    SELECT 'underwriting_buy_box' as tbl, count(*) as cnt FROM underwriting_buy_box WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'deal_bank_accounts', count(*) FROM deal_bank_accounts WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'deal_fees', count(*) FROM deal_fees WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'disclosures', count(*) FROM disclosures WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'transaction_rules', count(*) FROM transaction_rules WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'export_templates', count(*) FROM export_templates WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'ach_batches', count(*) FROM ach_batches WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'ach_batch_items', count(*) FROM ach_batch_items WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'reconciliation_sessions', count(*) FROM reconciliation_sessions WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'merchant_documents', count(*) FROM merchant_documents WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'merchant_messages', count(*) FROM merchant_messages WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'merchant_notifications', count(*) FROM merchant_notifications WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'payoff_letter_requests', count(*) FROM payoff_letter_requests WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'match_audit_log', count(*) FROM match_audit_log WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
-    UNION ALL SELECT 'transactions (matched)', count(*) FROM transactions WHERE team_id = 'a0000000-0000-0000-0000-000000000001' AND match_status IS NOT NULL
+    SELECT 'underwriting_buy_box' as tbl, count(*) as cnt FROM underwriting_buy_box WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'deal_bank_accounts', count(*) FROM deal_bank_accounts WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'deal_fees', count(*) FROM deal_fees WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'disclosures', count(*) FROM disclosures WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'transaction_rules', count(*) FROM transaction_rules WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'export_templates', count(*) FROM export_templates WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'ach_batches', count(*) FROM ach_batches WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'ach_batch_items', count(*) FROM ach_batch_items WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'reconciliation_sessions', count(*) FROM reconciliation_sessions WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'merchant_documents', count(*) FROM merchant_documents WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'merchant_messages', count(*) FROM merchant_messages WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'merchant_notifications', count(*) FROM merchant_notifications WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'payoff_letter_requests', count(*) FROM payoff_letter_requests WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'match_audit_log', count(*) FROM match_audit_log WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
+    UNION ALL SELECT 'transactions (matched)', count(*) FROM transactions WHERE team_id = 'a0000000-0000-4000-a000-000000000001' AND match_status IS NOT NULL
     ORDER BY 1
   LOOP
     RAISE NOTICE '  % : % rows', r.tbl, r.cnt;

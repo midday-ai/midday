@@ -36,7 +36,7 @@ CROSS JOIN (VALUES
   (472.22, '2026-02-21', 'returned', 'RETURNED - NSF', NULL, 60111.12, 60111.12),
   (472.22, '2026-02-24', 'pending', 'Daily ACH payment - retry', NULL, 60111.12, NULL)
 ) p(amount, pay_date, status, description, nsf_at_unused, bal_before, bal_after)
-WHERE d.deal_code = 'MCA-2025-004' AND d.team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE d.deal_code = 'MCA-2025-004' AND d.team_id = 'a0000000-0000-4000-a000-000000000001'
 ON CONFLICT DO NOTHING;
 
 -- Notification about NSF storm
@@ -49,7 +49,7 @@ SELECT d.merchant_id, d.team_id,
   'You have had 5 returned payments in the last 2 weeks. Please contact us immediately to discuss your account. Continued non-payment may result in default proceedings.',
   true, d.id
 FROM mca_deals d
-WHERE d.deal_code = 'MCA-2025-004' AND d.team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE d.deal_code = 'MCA-2025-004' AND d.team_id = 'a0000000-0000-4000-a000-000000000001'
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -65,7 +65,7 @@ SELECT d.id, d.team_id, 557.27, gs::date, 'ach', 'completed',
   d.payback_amount - (557.27 * ((gs::date - '2026-01-15'::date)::int + 1))
 FROM mca_deals d,
   generate_series('2026-01-15'::date, '2026-02-24'::date, '1 day'::interval) gs
-WHERE d.deal_code = 'MCA-2026-002' AND d.team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE d.deal_code = 'MCA-2026-002' AND d.team_id = 'a0000000-0000-4000-a000-000000000001'
   AND extract(dow from gs) NOT IN (0, 6)  -- Weekdays only
 ON CONFLICT DO NOTHING;
 
@@ -80,7 +80,7 @@ SELECT d.merchant_id, d.team_id,
   'pending'::merchant_message_status,
   'alex@fitnessfirstgym.com', 'Alex Morgan'
 FROM mca_deals d
-WHERE d.deal_code = 'MCA-2026-002' AND d.team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE d.deal_code = 'MCA-2026-002' AND d.team_id = 'a0000000-0000-4000-a000-000000000001'
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -105,7 +105,7 @@ CROSS JOIN (VALUES
   (2187.50, '2026-02-17', 'completed', 'Weekly ACH payment'),
   (2187.50, '2026-02-24', 'pending', 'Weekly ACH payment - pending')
 ) p(amount, pay_date, status, description)
-WHERE d.deal_code = 'MCA-2025-006' AND d.team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE d.deal_code = 'MCA-2025-006' AND d.team_id = 'a0000000-0000-4000-a000-000000000001'
 ON CONFLICT DO NOTHING;
 
 -- Message from merchant explaining
@@ -119,7 +119,7 @@ SELECT d.merchant_id, d.team_id,
   'read'::merchant_message_status,
   'jim@westsideconstruction.com', 'Jim Westfield'
 FROM mca_deals d
-WHERE d.deal_code = 'MCA-2025-006' AND d.team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE d.deal_code = 'MCA-2025-006' AND d.team_id = 'a0000000-0000-4000-a000-000000000001'
 ON CONFLICT DO NOTHING;
 
 -- Response from team
@@ -131,9 +131,9 @@ SELECT d.merchant_id, d.team_id,
   'RE: Winter Slowdown - Payment Issues',
   'Hi Jim, we understand seasonal fluctuations. We can temporarily reduce to half-payments ($1,093.75/week) for the next 6 weeks, with the shortfall added to the remaining balance. The adjusted schedule will start next Monday. Please ensure the half-payment goes through consistently.',
   'read'::merchant_message_status,
-  '00000000-0000-0000-0000-000000000001'::uuid, 'Suphian Tweel'
+  '00000000-0000-4000-a000-000000000001'::uuid, 'Suphian Tweel'
 FROM mca_deals d
-WHERE d.deal_code = 'MCA-2025-006' AND d.team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE d.deal_code = 'MCA-2025-006' AND d.team_id = 'a0000000-0000-4000-a000-000000000001'
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -153,7 +153,7 @@ CROSS JOIN (VALUES
   (357.14, '2024-12-03', 'ach', 'Daily ACH payment', 714.28, 357.14),
   (357.14, '2024-12-04', 'ach', 'Final daily payment - PAID OFF', 357.14, 0.00)
 ) p(amount, pay_date, pay_type, description, bal_before, bal_after)
-WHERE d.deal_code = 'MCA-2024-001' AND d.team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE d.deal_code = 'MCA-2024-001' AND d.team_id = 'a0000000-0000-4000-a000-000000000001'
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -167,12 +167,12 @@ SET
   reconciliation_note = 'ATTENTION: Possible stacking detected. Multiple large ACH debits from unknown MCA providers (Rapid Advance LLC, QuickFund Capital). Review merchant bank statements.',
   discrepancy_type = 'unrecognized'::discrepancy_type,
   match_status = 'flagged'::match_status
-WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
   AND name LIKE '%Sunrise Diner%'
   AND match_status = 'auto_matched'
   AND id IN (
     SELECT id FROM transactions
-    WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
+    WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
       AND name LIKE '%Sunrise Diner%'
       AND match_status = 'auto_matched'
     ORDER BY date DESC
@@ -188,9 +188,9 @@ WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
 UPDATE broker_commissions
 SET status = 'pending', paid_at = NULL,
     note = 'DISPUTED: Broker claims 12% was agreed upon verbally, contract shows 11%. Under review by legal.'
-WHERE broker_id = 'b0000000-0000-0000-0000-000000000003'::uuid
-  AND deal_id = (SELECT id FROM mca_deals WHERE deal_code = 'MCA-2025-004' AND team_id = 'a0000000-0000-0000-0000-000000000001')
-  AND team_id = 'a0000000-0000-0000-0000-000000000001';
+WHERE broker_id = 'b0000000-0000-4000-a000-000000000003'::uuid
+  AND deal_id = (SELECT id FROM mca_deals WHERE deal_code = 'MCA-2025-004' AND team_id = 'a0000000-0000-4000-a000-000000000001')
+  AND team_id = 'a0000000-0000-4000-a000-000000000001';
 
 -- ============================================================================
 -- SCENARIO 7: "RECONCILIATION DISCREPANCY" - Bank shows different amounts
@@ -203,12 +203,12 @@ SET
   match_status = 'flagged'::match_status,
   discrepancy_type = 'partial_payment'::discrepancy_type,
   reconciliation_note = 'Bank amount ($' || ROUND(ABS(amount)::numeric, 2) || ') does not match expected daily payment. Possible bank fee deduction or split payment.'
-WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
   AND match_status = 'auto_matched'
   AND amount > 0 AND amount < 400
   AND id IN (
     SELECT id FROM transactions
-    WHERE team_id = 'a0000000-0000-0000-0000-000000000001'
+    WHERE team_id = 'a0000000-0000-4000-a000-000000000001'
       AND match_status = 'auto_matched' AND amount > 0 AND amount < 400
     ORDER BY random()
     LIMIT 4
@@ -237,10 +237,10 @@ SELECT d.id, d.team_id,
     'estimated_term_days', 180,
     'renewal_of', d.deal_code
   ),
-  '00000000-0000-0000-0000-000000000001'::uuid,
+  '00000000-0000-4000-a000-000000000001'::uuid,
   jsonb_build_object('deal_code', d.deal_code, 'type', 'renewal', 'original_funding', d.funding_amount)
 FROM mca_deals d
-WHERE d.deal_code = 'MCA-2025-001' AND d.team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE d.deal_code = 'MCA-2025-001' AND d.team_id = 'a0000000-0000-4000-a000-000000000001'
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -256,7 +256,7 @@ SELECT
   t.team_id, t.id, 'flag',
   NULL, NULL,
   'auto_matched'::match_status, 'flagged'::match_status,
-  '00000000-0000-0000-0000-000000000001'::uuid,
+  '00000000-0000-4000-a000-000000000001'::uuid,
   CASE (row_number() OVER ())::int % 4
     WHEN 0 THEN 'ACH Return Code R01: Insufficient Funds'
     WHEN 1 THEN 'ACH Return Code R02: Account Closed'
@@ -274,7 +274,7 @@ SELECT
     'original_amount', ABS(t.amount)
   )
 FROM transactions t
-WHERE t.team_id = 'a0000000-0000-0000-0000-000000000001'
+WHERE t.team_id = 'a0000000-0000-4000-a000-000000000001'
   AND t.match_status = 'flagged'
   AND t.discrepancy_type IS NOT NULL
 LIMIT 8
@@ -288,13 +288,13 @@ ON CONFLICT DO NOTHING;
 -- Add note to a struggling syndication participant
 UPDATE syndication_participants
 SET note = 'ATTENTION: Deal MCA-2025-006 experiencing payment issues. 3 NSFs in Feb. Syndicator notified of potential default risk. Current collection rate: 62%'
-WHERE syndicator_id = 'c0000000-0000-0000-0000-000000000001'::uuid
-  AND deal_id = (SELECT id FROM mca_deals WHERE deal_code = 'MCA-2025-006' AND team_id = 'a0000000-0000-0000-0000-000000000001');
+WHERE syndicator_id = 'c0000000-0000-4000-a000-000000000001'::uuid
+  AND deal_id = (SELECT id FROM mca_deals WHERE deal_code = 'MCA-2025-006' AND team_id = 'a0000000-0000-4000-a000-000000000001');
 
 UPDATE syndication_participants
 SET note = 'ATTENTION: Deal MCA-2025-006 experiencing payment issues. Syndicator requesting buyout option.'
-WHERE syndicator_id = 'c0000000-0000-0000-0000-000000000002'::uuid
-  AND deal_id = (SELECT id FROM mca_deals WHERE deal_code = 'MCA-2025-006' AND team_id = 'a0000000-0000-0000-0000-000000000001');
+WHERE syndicator_id = 'c0000000-0000-4000-a000-000000000002'::uuid
+  AND deal_id = (SELECT id FROM mca_deals WHERE deal_code = 'MCA-2025-006' AND team_id = 'a0000000-0000-4000-a000-000000000001');
 
 COMMIT;
 
