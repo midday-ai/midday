@@ -9,7 +9,7 @@ export type StatCardProps = {
 
 export function StatCard({ title, value, subtitle, className }: StatCardProps) {
   return (
-    <div className="border border-border rounded-lg p-4">
+    <div className="border border-border p-4">
       <p className="text-xs text-[#878787] font-normal">{title}</p>
       <p className={cn("text-2xl font-mono font-semibold mt-1", className)}>
         {value}
@@ -22,60 +22,61 @@ export function StatCard({ title, value, subtitle, className }: StatCardProps) {
 }
 
 export function DealStatusBadge({ status }: { status: string }) {
-  function getStatusStyles(s: string): string {
-    switch (s) {
-      case "active":
-        return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
-      case "paid_off":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400";
-      case "defaulted":
-        return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  }
+  const statusStyles: Record<string, string> = {
+    active: "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10",
+    paid_off: "text-[#1F6FEB] bg-[#DDEBFF] dark:bg-[#1F6FEB]/10",
+    defaulted: "text-[#FF3638] bg-[#FF3638]/10",
+    paused: "text-[#FFD02B] bg-[#FFD02B]/10",
+    late: "text-[#F97316] bg-[#FFEDD5] dark:bg-[#F97316]/10",
+    in_collections: "text-[#FF3638] bg-[#FF3638]/10",
+  };
+
+  const statusLabels: Record<string, string> = {
+    active: "Active",
+    paid_off: "Paid Off",
+    defaulted: "Default",
+    paused: "Paused",
+    late: "Late",
+    in_collections: "Collections",
+  };
 
   return (
-    <span
+    <div
       className={cn(
-        "text-xs px-2 py-0.5 rounded-full",
-        getStatusStyles(status),
+        "px-2 py-0.5 rounded-full inline-flex max-w-full text-[11px]",
+        statusStyles[status] || "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
       )}
     >
-      {status.replace("_", " ")}
-    </span>
+      <span className="line-clamp-1 truncate inline-block">
+        {statusLabels[status] || status}
+      </span>
+    </div>
   );
 }
 
 export function CommissionStatusBadge({ status }: { status: string }) {
-  function getStatusStyles(s: string): string {
-    switch (s) {
-      case "paid":
-        return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
-      case "pending":
-        return "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400";
-      case "cancelled":
-        return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  }
+  const statusStyles: Record<string, string> = {
+    paid: "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10",
+    pending: "text-[#FFD02B] bg-[#FFD02B]/10",
+    cancelled: "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
+  };
 
   return (
-    <span
+    <div
       className={cn(
-        "text-xs px-2 py-0.5 rounded-full",
-        getStatusStyles(status),
+        "px-2 py-0.5 rounded-full inline-flex max-w-full text-[11px]",
+        statusStyles[status] || "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
       )}
     >
-      {status}
-    </span>
+      <span className="line-clamp-1 truncate inline-block capitalize">
+        {status}
+      </span>
+    </div>
   );
 }
 
 export function CommissionStatusLabel({ status }: { status: string }) {
-  const color = status === "paid" ? "text-green-600" : "text-amber-600";
-
+  const color = status === "paid" ? "text-[#00C969]" : "text-[#FFD02B]";
   return <span className={cn("ml-1 text-[10px]", color)}>({status})</span>;
 }
 
