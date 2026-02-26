@@ -333,7 +333,7 @@ export function TransactionEditForm({ transaction }: Props) {
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g., Office supplies, Invoice payment"
+          placeholder="e.g., Office supplies, Deal payment"
           autoComplete="off"
           autoCapitalize="none"
           autoCorrect="off"
@@ -516,7 +516,7 @@ export function TransactionEditForm({ transaction }: Props) {
           <AccordionContent>
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">
-                Upload receipts, invoices, or other documents related to this
+                Upload receipts, deals, or other documents related to this
                 transaction
               </p>
               <TransactionAttachments

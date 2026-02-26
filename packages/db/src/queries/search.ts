@@ -34,7 +34,7 @@ export type GlobalSemanticSearchParams = {
  * - Dynamically builds a query for each table type requested in `params.types`
  * - Applies full-text search (with prefix matching) if a search term is provided
  * - Applies date, amount, status, and currency filters as appropriate for each table
- * - Handles due date filters for invoices
+ * - Handles due date filters for deals
  * - Returns a unified result set with type, id, relevance, created_at, and data
  * - Orders by relevance (if searching) or created_at, and limits results per table
  */

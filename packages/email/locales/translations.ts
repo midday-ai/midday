@@ -7,15 +7,15 @@ export function translations(locale: string, params?: TranslationParams) {
   switch (locale) {
     case "en":
       return {
-        "notifications.match": `We matched the transaction “${params?.transactionName}” against “${params?.fileName}”`,
+        "notifications.match": `We matched the transaction "${params?.transactionName}" against "${params?.fileName}"`,
         "notifications.transactions":
           params?.numberOfTransactions &&
           typeof params?.numberOfTransactions === "number" &&
           params?.numberOfTransactions > 1
             ? `You have ${params?.numberOfTransactions} new transactions`
             : `You have a new transaction of ${params?.amount} from ${params?.name}`,
-        "notifications.invoicePaid": `Invoice ${params?.invoiceNumber} has been paid`,
-        "notifications.invoiceOverdue": `Invoice ${params?.invoiceNumber} is overdue`,
+        "notifications.dealPaid": `Deal ${params?.dealNumber} has been paid`,
+        "notifications.dealOverdue": `Deal ${params?.dealNumber} is overdue`,
         "transactions.subject": "New transactions",
         "transactions.preview": `${params?.firstName ? `Hi ${params?.firstName}, ` : ""}You have ${
           params?.numberOfTransactions
@@ -55,26 +55,26 @@ export function translations(locale: string, params?: TranslationParams) {
         "invite.footer2": "This invite was sent from",
         "invite.footer4":
           "If you were not expecting this invitation, you can ignore this email. If you are concerned about your account's safety, please reply to this email to get in touch with us.",
-        "invoice.overdue.subject": `Invoice #${params?.invoiceNumber} is overdue`,
-        "invoice.paid.subject": `Invoice #${params?.invoiceNumber} has been paid`,
-        "invoice.sent.subject": `${params?.teamName} sent you an invoice`,
-        "invoice.reminder.subject": `Reminder: Payment for ${params?.invoiceNumber}`,
-        "invoice.upcoming.subject":
+        "deal.overdue.subject": `Deal #${params?.dealNumber} is overdue`,
+        "deal.paid.subject": `Deal #${params?.dealNumber} has been paid`,
+        "deal.sent.subject": `${params?.teamName} sent you a deal`,
+        "deal.reminder.subject": `Reminder: Payment for ${params?.dealNumber}`,
+        "deal.upcoming.subject":
           params?.count === 1
-            ? "You have 1 invoice scheduled for tomorrow"
-            : `You have ${params?.count} invoices scheduled for tomorrow`,
+            ? "You have 1 deal scheduled for tomorrow"
+            : `You have ${params?.count} deals scheduled for tomorrow`,
       };
     case "sv":
       return {
-        "notifications.match": `Vi matchade transaktionen “${params?.transactionName}” mot “${params?.fileName}”`,
+        "notifications.match": `Vi matchade transaktionen "${params?.transactionName}" mot "${params?.fileName}"`,
         "notifications.transactions":
           params?.numberOfTransactions &&
           typeof params?.numberOfTransactions === "number" &&
           params?.numberOfTransactions > 1
             ? `Du har ${params?.numberOfTransactions} nya transaktioner`
             : `Du har en ny transaktion på ${params?.amount} från ${params?.name}`,
-        "notifications.invoicePaid": `Faktura ${params?.invoiceNumber} har betalats`,
-        "notifications.invoiceOverdue": `Faktura ${params?.invoiceNumber} är försenad`,
+        "notifications.dealPaid": `Avtal ${params?.dealNumber} har betalats`,
+        "notifications.dealOverdue": `Avtal ${params?.dealNumber} är försenad`,
         "transactions.subject": "Nya transaktioner",
         "transactions.preview": `${params?.firstName ? `Hej ${params?.firstName}, ` : ""}Vi hittade ${
           params?.numberOfTransactions
@@ -117,14 +117,14 @@ export function translations(locale: string, params?: TranslationParams) {
         "invite.footer2": "Denna inbjudan skickades från",
         "invite.footer4":
           "Om du inte väntade dig den här inbjudan kan du ignorera det här e-postmeddelandet. Om du är orolig för ditt kontos säkerhet, vänligen svara på det här e-postmeddelandet för att komma i kontakt med oss.",
-        "invoice.overdue.subject": `Faktura #${params?.invoiceNumber} är försenad`,
-        "invoice.paid.subject": `Faktura #${params?.invoiceNumber} har betalats`,
-        "invoice.sent.subject": `${params?.teamName} har skickat dig en faktura`,
-        "invoice.reminder.subject": `Påminnelse: Betalning för ${params?.invoiceNumber}`,
-        "invoice.upcoming.subject":
+        "deal.overdue.subject": `Avtal #${params?.dealNumber} är försenad`,
+        "deal.paid.subject": `Avtal #${params?.dealNumber} har betalats`,
+        "deal.sent.subject": `${params?.teamName} har skickat dig ett avtal`,
+        "deal.reminder.subject": `Påminnelse: Betalning för ${params?.dealNumber}`,
+        "deal.upcoming.subject":
           params?.count === 1
-            ? "Du har 1 faktura schemalagd för imorgon"
-            : `Du har ${params?.count} fakturor schemalagda för imorgon`,
+            ? "Du har 1 avtal schemalagd för imorgon"
+            : `Du har ${params?.count} avtal schemalagda för imorgon`,
       };
 
     default:

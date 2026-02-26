@@ -11,15 +11,15 @@ export const taxTypeSchema = z.enum([
   "custom_tax",
 ]);
 
-export const invoiceSchema = z.object({
-  invoice_number: z
+export const dealSchema = z.object({
+  deal_number: z
     .string()
     .nullable()
-    .describe("Unique identifier for the invoice"),
-  invoice_date: z
+    .describe("Unique identifier for the deal"),
+  deal_date: z
     .string()
     .nullable()
-    .describe("Date of invoice in ISO 8601 format (YYYY-MM-DD)"),
+    .describe("Date of deal in ISO 8601 format (YYYY-MM-DD)"),
   due_date: z
     .string()
     .nullable()
@@ -27,8 +27,8 @@ export const invoiceSchema = z.object({
   currency: z
     .string()
     .describe("Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK)"),
-  total_amount: z.number().describe("Total amount for the invoice"),
-  tax_amount: z.number().nullable().describe("Tax amount for the invoice"),
+  total_amount: z.number().describe("Total amount for the deal"),
+  tax_amount: z.number().nullable().describe("Tax amount for the deal"),
   tax_rate: z
     .number()
     .nullable()
@@ -36,13 +36,13 @@ export const invoiceSchema = z.object({
   tax_type: taxTypeSchema
     .nullable()
     .describe(
-      "The type of tax applied to the invoice, such as VAT, Sales Tax, GST, Withholding Tax, Service Tax, Excise Tax, Reverse Charge, or Custom Tax. This field should reflect the tax regime or system referenced on the invoice, and is important for correct accounting and compliance. If the document does not specify a tax type, infer it based on the country or context if possible.",
+      "The type of tax applied to the deal, such as VAT, Sales Tax, GST, Withholding Tax, Service Tax, Excise Tax, Reverse Charge, or Custom Tax. This field should reflect the tax regime or system referenced on the deal, and is important for correct accounting and compliance. If the document does not specify a tax type, infer it based on the country or context if possible.",
     ),
   vendor_name: z
     .string()
     .nullable()
     .describe(
-      "The legal registered business name of the company issuing the invoice. Look for names that include entity types like 'Inc.', 'Ltd', 'AB', 'GmbH', 'LLC', etc. This name is typically found in the letterhead, header, or footer of the invoice. Do not extract brands, divisions, or 'Trading as' names unless no legal name is visible. If multiple company names appear, prioritize the one that appears to be issuing the invoice rather than subsidiaries or parent companies.",
+      "The legal registered business name of the company issuing the deal. Look for names that include entity types like 'Inc.', 'Ltd', 'AB', 'GmbH', 'LLC', etc. This name is typically found in the letterhead, header, or footer of the deal. Do not extract brands, divisions, or 'Trading as' names unless no legal name is visible. If multiple company names appear, prioritize the one that appears to be issuing the deal rather than subsidiaries or parent companies.",
     ),
   vendor_address: z
     .string()
@@ -153,7 +153,7 @@ export const documentClassifierSchema = z.object({
     .string()
     .nullable()
     .describe(
-      "A descriptive, meaningful title for this document that can be used as a filename. Include key identifying information like document number, company names, dates, or order numbers when available. Examples: 'Invoice INV-2024-001 from Acme Corp', 'Receipt from Starbucks Coffee - 2024-03-15', 'Service Agreement with Acme Corp - 2024-03-15'. Do NOT use generic names like 'Invoice', 'Receipt', or 'Document' - make it specific to this document.",
+      "A descriptive, meaningful title for this document that can be used as a filename. Include key identifying information like document number, company names, dates, or order numbers when available. Examples: 'Deal INV-2024-001 from Acme Corp', 'Receipt from Starbucks Coffee - 2024-03-15', 'Service Agreement with Acme Corp - 2024-03-15'. Do NOT use generic names like 'Deal', 'Receipt', or 'Document' - make it specific to this document.",
     ),
   summary: z
     .string()
@@ -166,7 +166,7 @@ export const documentClassifierSchema = z.object({
     .max(5)
     .nullable()
     .describe(
-      "Up to 5 relevant keywords or phrases for classifying and searching the document (e.g., 'Invoice', 'Acme Corp Contract', 'Marketing Report'). Prioritize document type, key names, and subject.",
+      "Up to 5 relevant keywords or phrases for classifying and searching the document (e.g., 'Deal', 'Acme Corp Contract', 'Marketing Report'). Prioritize document type, key names, and subject.",
     ),
   date: z
     .string()
@@ -187,20 +187,20 @@ export const imageClassifierSchema = z.object({
     .string()
     .nullable()
     .describe(
-      "A descriptive, meaningful title for this image that can be used as a filename. Include key identifying information like merchant/store names, dates, invoice numbers, or order numbers when visible. Examples: 'Receipt from Starbucks Coffee - 2024-03-15', 'Invoice INV-2024-001 from Acme Corp', 'Acme Corp Logo'. Do NOT use generic names like 'Receipt', 'Invoice', or 'Image' - make it specific to this document.",
+      "A descriptive, meaningful title for this image that can be used as a filename. Include key identifying information like merchant/store names, dates, deal numbers, or order numbers when visible. Examples: 'Receipt from Starbucks Coffee - 2024-03-15', 'Deal INV-2024-001 from Acme Corp', 'Acme Corp Logo'. Do NOT use generic names like 'Receipt', 'Deal', or 'Image' - make it specific to this document.",
     ),
   summary: z
     .string()
     .nullable()
     .describe(
-      "A brief, one-sentence summary identifying key business-related visual elements in the image (e.g., Logo, Branding, Letterhead, Invoice Design, Product Photo, Marketing Material, Website Screenshot).",
+      "A brief, one-sentence summary identifying key business-related visual elements in the image (e.g., Logo, Branding, Letterhead, Deal Design, Product Photo, Marketing Material, Website Screenshot).",
     ),
   tags: z
     .array(z.string())
     .max(5)
     .nullable()
     .describe(
-      "Up to 5 relevant keywords describing business-related visual content (e.g., 'Logo', 'Branding', 'Letterhead', 'Invoice Design', 'Product Photo', 'Marketing Material', 'Website Screenshot'). Prioritize brand elements and document types.",
+      "Up to 5 relevant keywords describing business-related visual content (e.g., 'Logo', 'Branding', 'Letterhead', 'Deal Design', 'Product Photo', 'Marketing Material', 'Website Screenshot'). Prioritize brand elements and document types.",
     ),
   content: z.string().nullable().describe("The content of the document."),
   language: z

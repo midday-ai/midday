@@ -18,7 +18,7 @@ const schema = z.object({
     .array(
       z.enum([
         "transactions",
-        "invoices",
+        "deals",
         "merchants",
         "documents",
       ]),
@@ -28,21 +28,21 @@ const schema = z.object({
     .number()
     .optional()
     .describe(
-      "The exact amount to search for if the type is transactions or invoices.",
+      "The exact amount to search for if the type is transactions or deals.",
     ),
   amountMin: z
     .number()
     .optional()
-    .describe("Minimum amount filter for transactions or invoices."),
+    .describe("Minimum amount filter for transactions or deals."),
   amountMax: z
     .number()
     .optional()
-    .describe("Maximum amount filter for transactions or invoices."),
+    .describe("Maximum amount filter for transactions or deals."),
   status: z
     .enum(["paid", "unpaid", "overdue", "draft"])
     .optional()
     .describe(
-      "The status filter (e.g. 'paid', 'unpaid', 'overdue', 'draft') for invoices or projects.",
+      "The status filter (e.g. 'paid', 'unpaid', 'overdue', 'draft') for deals or projects.",
     ),
   currency: z
     .string()
@@ -56,11 +56,11 @@ const schema = z.object({
   dueDateStart: z
     .string()
     .optional()
-    .describe("Start date for invoice due dates (ISO-8601)."),
+    .describe("Start date for deal due dates (ISO-8601)."),
   dueDateEnd: z
     .string()
     .optional()
-    .describe("End date for invoice due dates (ISO-8601)."),
+    .describe("End date for deal due dates (ISO-8601)."),
 });
 
 export async function generateLLMFilters(
@@ -78,15 +78,15 @@ GUIDELINES:
 - For currency values, default to the user's local currency if not specified
 - Choose appropriate types based on the query context:
   * "transactions" for money movements, payments, expenses
-  * "invoices" are for user created invoices, "Unpaid invoices for merchant X"
+  * "deals" are for user created deals, "Unpaid deals for merchant X"
   * "merchants" for merchant/business information
-  * "documents" for files, attachments, contracts, receipts, bills, invoices etc, but also in the query like "invoices from vendor X"
+  * "documents" for files, attachments, contracts, receipts, bills, etc, but also in the query like "documents from vendor X"
 
 EXAMPLES:
-- "show me invoices from last month" → {types: ["documents"], startDate: "2023-05-01", endDate: "2023-05-31", language: "english"}
-- "show me invoices from vendor X" → {types: ["documents"], searchTerm: "vendor X", language: "english"}
-- "unpaid invoices for merchant X" → {types: ["invoices"], searchTerm: "merchant X", status: "unpaid", language: "english"}
-- "paid invoices last week" → {types: ["invoices"], status: "paid", startDate: "2023-05-01", endDate: "2023-05-31", language: "english"}
+- "show me documents from last month" → {types: ["documents"], startDate: "2023-05-01", endDate: "2023-05-31", language: "english"}
+- "show me documents from vendor X" → {types: ["documents"], searchTerm: "vendor X", language: "english"}
+- "unpaid deals for merchant X" → {types: ["deals"], searchTerm: "merchant X", status: "unpaid", language: "english"}
+- "paid deals last week" → {types: ["deals"], status: "paid", startDate: "2023-05-01", endDate: "2023-05-31", language: "english"}
 - "transactions with Apple between January and March" → {types: ["transactions"], searchTerm: "Apple", startDate: "2024-01-01", endDate: "2024-03-31", language: "english"}
 
 For language, detect the appropriate language of the query for PostgreSQL text search.

@@ -1,7 +1,7 @@
 import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import Link from "next/link";
-import { InvoiceStatus } from "./invoice-status";
+import { DealStatus } from "./deal-status";
 
 type Props = {
   name: string;
@@ -60,7 +60,7 @@ export default function MerchantHeader({
         merchantInfo
       )}
 
-      <InvoiceStatus status={status} />
+      <DealStatus status={status} />
     </div>
   );
 }

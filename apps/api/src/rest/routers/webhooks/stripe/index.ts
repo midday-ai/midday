@@ -1,11 +1,11 @@
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
-  getInvoiceById,
-  getInvoiceByPaymentIntentId,
+  getDealById,
+  getDealByPaymentIntentId,
   getTeamByStripeAccountId,
   getTeamByStripeCustomerId,
-  updateInvoice,
+  updateDeal,
   updateTeamById,
 } from "@midday/db/queries";
 import { getPlanByStripePriceId } from "@midday/plans";
@@ -27,7 +27,7 @@ app.openapi(
     summary: "Stripe webhook handler",
     operationId: "stripeWebhook",
     description:
-      "Handles Stripe webhook events for subscription billing and invoice payments. Verifies webhook signature and processes payment and subscription events.",
+      "Handles Stripe webhook events for subscription billing and deal payments. Verifies webhook signature and processes payment and subscription events.",
     tags: ["Webhooks"],
     responses: {
       200: {
@@ -310,16 +310,16 @@ app.openapi(
         }
 
         // ==========================================
-        // INVOICE PAYMENT EVENTS (Stripe Connect)
+        // DEAL PAYMENT EVENTS (Stripe Connect)
         // ==========================================
 
         case "payment_intent.succeeded": {
           const paymentIntent = event.data.object as Stripe.PaymentIntent;
-          const invoiceId = paymentIntent.metadata?.invoice_id;
+          const dealId = paymentIntent.metadata?.invoice_id;
           const teamId = paymentIntent.metadata?.team_id;
 
-          if (!invoiceId || !teamId) {
-            logger.warn("Payment intent missing invoice metadata", {
+          if (!dealId || !teamId) {
+            logger.warn("Payment intent missing deal metadata", {
               paymentIntentId: paymentIntent.id,
             });
             break;
@@ -327,50 +327,50 @@ app.openapi(
 
           const paidAt = new Date().toISOString();
 
-          // Update invoice to paid status
-          const updatedInvoice = await updateInvoice(db, {
-            id: invoiceId,
+          // Update deal to paid status
+          const updatedDeal = await updateDeal(db, {
+            id: dealId,
             teamId,
             status: "paid",
             paidAt,
             paymentIntentId: paymentIntent.id,
           });
 
-          if (updatedInvoice) {
-            logger.info("Invoice marked as paid", {
-              invoiceId,
+          if (updatedDeal) {
+            logger.info("Deal marked as paid", {
+              dealId,
               paymentIntentId: paymentIntent.id,
               amount: paymentIntent.amount,
             });
 
-            // Fetch full invoice details for notification
-            const invoice = await getInvoiceById(db, { id: invoiceId });
+            // Fetch full deal details for notification
+            const deal = await getDealById(db, { id: dealId });
 
-            if (invoice) {
+            if (deal) {
               // Trigger notification job
               await triggerJob(
-                "invoice-notification",
+                "deal-notification",
                 {
                   type: "paid",
-                  invoiceId,
-                  invoiceNumber: invoice.invoiceNumber || "",
+                  dealId,
+                  dealNumber: deal.dealNumber || "",
                   teamId,
-                  merchantName: invoice.merchantName || "",
+                  merchantName: deal.merchantName || "",
                   paidAt,
                 },
-                "invoices",
+                "deals",
               );
 
-              logger.info("Invoice paid notification triggered", {
-                invoiceId,
-                invoiceNumber: invoice.invoiceNumber,
+              logger.info("Deal paid notification triggered", {
+                dealId,
+                dealNumber: deal.dealNumber,
               });
             }
           } else {
             logger.warn(
-              "Failed to update invoice - not found or unauthorized",
+              "Failed to update deal - not found or unauthorized",
               {
-                invoiceId,
+                dealId,
                 teamId,
               },
             );
@@ -381,10 +381,10 @@ app.openapi(
 
         case "payment_intent.payment_failed": {
           const paymentIntent = event.data.object as Stripe.PaymentIntent;
-          const invoiceId = paymentIntent.metadata?.invoice_id;
+          const dealId = paymentIntent.metadata?.invoice_id;
 
-          logger.info("Payment failed for invoice", {
-            invoiceId,
+          logger.info("Payment failed for deal", {
+            dealId,
             paymentIntentId: paymentIntent.id,
             error: paymentIntent.last_payment_error?.message,
           });
@@ -406,14 +406,14 @@ app.openapi(
             break;
           }
 
-          // Find the invoice by payment intent ID
-          const invoice = await getInvoiceByPaymentIntentId(
+          // Find the deal by payment intent ID
+          const deal = await getDealByPaymentIntentId(
             db,
             paymentIntentId,
           );
 
-          if (!invoice) {
-            logger.warn("No invoice found for refunded payment intent", {
+          if (!deal) {
+            logger.warn("No deal found for refunded payment intent", {
               paymentIntentId,
               chargeId: charge.id,
             });
@@ -422,38 +422,38 @@ app.openapi(
 
           const refundedAt = new Date().toISOString();
 
-          // Update invoice: set status to refunded, keep payment history, set refundedAt
-          const updatedInvoice = await updateInvoice(db, {
-            id: invoice.id,
-            teamId: invoice.teamId,
+          // Update deal: set status to refunded, keep payment history, set refundedAt
+          const updatedDeal = await updateDeal(db, {
+            id: deal.id,
+            teamId: deal.teamId,
             status: "refunded",
             refundedAt,
           });
 
-          if (updatedInvoice) {
-            logger.info("Invoice marked as refunded", {
-              invoiceId: invoice.id,
-              invoiceNumber: invoice.invoiceNumber,
+          if (updatedDeal) {
+            logger.info("Deal marked as refunded", {
+              dealId: deal.id,
+              dealNumber: deal.dealNumber,
               paymentIntentId,
             });
 
             // Trigger refund notification job
             await triggerJob(
-              "invoice-notification",
+              "deal-notification",
               {
                 type: "refunded",
-                invoiceId: invoice.id,
-                invoiceNumber: invoice.invoiceNumber || "",
-                teamId: invoice.teamId,
-                merchantName: invoice.merchantName || "",
+                dealId: deal.id,
+                dealNumber: deal.dealNumber || "",
+                teamId: deal.teamId,
+                merchantName: deal.merchantName || "",
                 refundedAt,
               },
-              "invoices",
+              "deals",
             );
 
-            logger.info("Invoice refund notification triggered", {
-              invoiceId: invoice.id,
-              invoiceNumber: invoice.invoiceNumber,
+            logger.info("Deal refund notification triggered", {
+              dealId: deal.id,
+              dealNumber: deal.dealNumber,
             });
           }
 

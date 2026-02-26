@@ -1,12 +1,12 @@
 import type { Database } from "@midday/db/client";
 import { shouldSendNotification } from "@midday/db/queries";
-import InvoiceEmail from "@midday/email/emails/invoice";
-import InvoiceOverdueEmail from "@midday/email/emails/invoice-overdue";
-import InvoicePaidEmail from "@midday/email/emails/invoice-paid";
-import InvoiceReminderEmail from "@midday/email/emails/invoice-reminder";
+import DealEmail from "@midday/email/emails/deal";
+import DealOverdueEmail from "@midday/email/emails/deal-overdue";
+import DealPaidEmail from "@midday/email/emails/deal-paid";
+import DealReminderEmail from "@midday/email/emails/deal-reminder";
 import TransactionsEmail from "@midday/email/emails/transactions";
 import TransactionsExportedEmail from "@midday/email/emails/transactions-exported";
-import UpcomingInvoicesEmail from "@midday/email/emails/upcoming-invoices";
+import UpcomingDealsEmail from "@midday/email/emails/upcoming-deals";
 import { render } from "@midday/email/render";
 import { nanoid } from "nanoid";
 import { type CreateEmailOptions, Resend } from "resend";
@@ -161,13 +161,13 @@ export class EmailService {
 
   #getTemplate(templateName: string) {
     const templates = {
-      "invoice-overdue": InvoiceOverdueEmail,
-      "invoice-paid": InvoicePaidEmail,
-      invoice: InvoiceEmail,
-      "invoice-reminder": InvoiceReminderEmail,
+      "deal-overdue": DealOverdueEmail,
+      "deal-paid": DealPaidEmail,
+      deal: DealEmail,
+      "deal-reminder": DealReminderEmail,
       transactions: TransactionsEmail,
       "transactions-exported": TransactionsExportedEmail,
-      "upcoming-invoices": UpcomingInvoicesEmail,
+      "upcoming-deals": UpcomingDealsEmail,
     };
 
     const template = templates[templateName as keyof typeof templates];

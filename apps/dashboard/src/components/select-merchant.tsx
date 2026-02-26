@@ -1,7 +1,7 @@
 "use client";
 
 import { useMerchantParams } from "@/hooks/use-merchant-params";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useDealParams } from "@/hooks/use-deal-params";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
@@ -19,7 +19,7 @@ import React from "react";
 export function SelectMerchant() {
   const trpc = useTRPC();
   const { setParams: setMerchantParams } = useMerchantParams();
-  const { setParams: setInvoiceParams } = useInvoiceParams();
+  const { setParams: setDealParams } = useDealParams();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
@@ -39,7 +39,7 @@ export function SelectMerchant() {
     if (id === "create-merchant") {
       setMerchantParams({ createMerchant: true, name: value });
     } else {
-      setInvoiceParams({ selectedMerchantId: id });
+      setDealParams({ selectedMerchantId: id });
     }
 
     setOpen(false);

@@ -110,7 +110,7 @@ export function Usage({
     number_of_users: number;
     number_of_bank_connections: number;
     inbox_created_this_month: number;
-    invoices_created_this_month: number;
+    deals_created_this_month: number;
   };
 }) {
   const GB = 1024 * 1024 * 1024;
@@ -155,9 +155,9 @@ export function Usage({
           period="month"
         />
         <UsageItem
-          label="Invoices"
-          current={data?.invoices_created_this_month ?? 0}
-          max={selectedPlan.invoices}
+          label="Deals"
+          current={data?.deals_created_this_month ?? 0}
+          max={selectedPlan.deals}
           period="month"
         />
       </Card>
@@ -172,7 +172,7 @@ export function UsageSkeleton() {
     "connections",
     // "storage",
     "inbox",
-    "invoices",
+    "deals",
   ];
 
   return (

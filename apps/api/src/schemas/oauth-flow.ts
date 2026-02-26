@@ -17,7 +17,7 @@ export const oauthAuthorizationRequestSchema = z.object({
   }),
   scope: z.string().openapi({
     description: "Space-separated list of requested scopes",
-    example: "transactions.read invoices.read",
+    example: "transactions.read deals.read",
   }),
   // SECURITY: Enhanced state parameter validation for CSRF protection
   state: z
@@ -103,7 +103,7 @@ export const oauthRefreshTokenRequestSchema = z.object({
   }),
   scope: z.string().optional().openapi({
     description: "Space-separated list of requested scopes (optional)",
-    example: "transactions.read invoices.read",
+    example: "transactions.read deals.read",
   }),
 });
 
@@ -127,7 +127,7 @@ export const oauthTokenResponseSchema = z.object({
   }),
   scope: z.string().openapi({
     description: "Space-separated list of granted scopes",
-    example: "transactions.read invoices.read",
+    example: "transactions.read deals.read",
   }),
 });
 
@@ -198,7 +198,7 @@ export const oauthAuthorizationDecisionSchema = z.object({
   }),
   scopes: z.array(z.enum(SCOPES)).openapi({
     description: "Scopes the user has approved",
-    example: ["transactions.read", "invoices.read"],
+    example: ["transactions.read", "deals.read"],
   }),
   redirect_uri: z.string().url().openapi({
     description: "Redirect URI for OAuth callback",
@@ -276,7 +276,7 @@ export const oauthApplicationInfoSchema = z.object({
   }),
   scopes: z.array(z.string()).openapi({
     description: "Requested scopes",
-    example: ["transactions.read", "invoices.read"],
+    example: ["transactions.read", "deals.read"],
   }),
   redirectUri: z.string().url().openapi({
     description: "Redirect URI",

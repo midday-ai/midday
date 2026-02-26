@@ -171,7 +171,7 @@ export const merchantEnrichmentSchema = z.object({
     .email()
     .nullable()
     .describe(
-      "Email address for the finance, accounting, or accounts payable department. Look for finance@, accounting@, ap@, invoices@ on Contact pages.",
+      "Email address for the finance, accounting, or accounts payable department. Look for finance@, accounting@, ap@, deals@ on Contact pages.",
     ),
 
   primaryLanguage: z
@@ -192,7 +192,7 @@ export const merchantEnrichmentSchema = z.object({
     .string()
     .nullable()
     .describe(
-      "VAT number, tax ID, or organization number (e.g. 'SE556703748501', 'GB123456789'). Found on business registries, invoices, or website footer/legal pages.",
+      "VAT number, tax ID, or organization number (e.g. 'SE556703748501', 'GB123456789'). Found on business registries, deals, or website footer/legal pages.",
     ),
 });
 

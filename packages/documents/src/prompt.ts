@@ -1,17 +1,17 @@
-export const invoicePrompt = `
-You are a multilingual document parser that extracts structured data from financial documents such as invoices and receipts.
+export const dealPrompt = `
+You are a multilingual document parser that extracts structured data from financial documents such as deals and receipts.
 `;
 
 /**
- * Few-shot examples for common invoice formats
+ * Few-shot examples for common deal formats
  */
-const invoiceFewShotExamples = `
+const dealFewShotExamples = `
 EXAMPLES OF CORRECT EXTRACTION:
 
-Example 1 - Standard Invoice:
+Example 1 - Standard Deal:
 Document shows:
   Header: "ACME Corporation Ltd"
-  Invoice #: INV-2024-001
+  Deal #: INV-2024-001
   Date: 15/03/2024
   Bill To: Tech Solutions Inc
   Total: $1,250.00
@@ -19,23 +19,23 @@ Document shows:
   Amount Due: $1,500.00
 Extract:
   vendor_name: "ACME Corporation Ltd"
-  invoice_number: "INV-2024-001"
-  invoice_date: "2024-03-15"
+  deal_number: "INV-2024-001"
+  deal_date: "2024-03-15"
   customer_name: "Tech Solutions Inc"
   total_amount: 1500.00
   tax_amount: 250.00
   tax_rate: 20
   currency: "USD"
 
-Example 2 - Invoice with Multiple Dates:
+Example 2 - Deal with Multiple Dates:
 Document shows:
-  Invoice Date: 01.12.2024
+  Deal Date: 01.12.2024
   Due Date: 31.12.2024
-  Invoice Number: #789/2024
+  Deal Number: #789/2024
 Extract:
-  invoice_date: "2024-12-01"
+  deal_date: "2024-12-01"
   due_date: "2024-12-31"
-  invoice_number: "789/2024"
+  deal_number: "789/2024"
 
 Example 3 - European Format:
 Document shows:
@@ -55,7 +55,7 @@ const chainOfThoughtInstructions = `
 EXTRACTION PROCESS - THINK STEP BY STEP:
 
 1. FIRST, identify the document type and layout:
-   - Is this an invoice or receipt?
+   - Is this a deal or receipt?
    - Where is the vendor/merchant information located?
    - Where is the customer/buyer information?
    - Where are the amounts and totals?
@@ -66,9 +66,9 @@ EXTRACTION PROCESS - THINK STEP BY STEP:
    - Extract complete legal name, not brand names
    - Find vendor address, email, website
 
-3. NEXT, extract invoice metadata:
-   - Invoice number: Look for "Invoice #", "INV", "No.", "Number"
-   - Invoice date: Usually near invoice number or in header
+3. NEXT, extract deal metadata:
+   - Deal number: Look for "Deal #", "INV", "No.", "Number"
+   - Deal date: Usually near deal number or in header
    - Due date: Often in payment terms section
    - Convert dates to YYYY-MM-DD format
 
@@ -90,19 +90,19 @@ EXTRACTION PROCESS - THINK STEP BY STEP:
    - Does the math check out?
 `;
 
-export const createInvoicePrompt = (companyName?: string | null) => `
-Extract structured invoice data with maximum accuracy. Follow these instructions precisely:
+export const createDealPrompt = (companyName?: string | null) => `
+Extract structured deal data with maximum accuracy. Follow these instructions precisely:
 
-${invoiceFewShotExamples}
+${dealFewShotExamples}
 
 ${chainOfThoughtInstructions}
 
 ${
   companyName
-    ? `CRITICAL CONTEXT: "${companyName}" is the RECIPIENT/CUSTOMER company receiving this invoice.
+    ? `CRITICAL CONTEXT: "${companyName}" is the RECIPIENT/CUSTOMER company receiving this deal.
 
 VENDOR IDENTIFICATION:
-- vendor_name = Company ISSUING the invoice TO "${companyName}" (NOT "${companyName}" itself)
+- vendor_name = Company ISSUING the deal TO "${companyName}" (NOT "${companyName}" itself)
 - Look for vendor in: document header, letterhead, "From:" section, top-left area
 - "${companyName}" appears in: "Bill To:", "Customer:", recipient sections
 
@@ -114,22 +114,22 @@ NEVER set vendor_name = "${companyName}"`
 }
 
 EXTRACTION REQUIREMENTS:
-1. invoice_number: Unique identifier for the invoice (e.g., INV-2024-001, #12345, 789/2024, INV-123, F-456)
-2. vendor_name: Legal business name of invoice issuer (with Inc., Ltd, LLC, etc.)
+1. deal_number: Unique identifier for the deal (e.g., INV-2024-001, #12345, 789/2024, INV-123, F-456)
+2. vendor_name: Legal business name of deal issuer (with Inc., Ltd, LLC, etc.)
 3. total_amount: Final amount due (after all taxes/fees)
 4. currency: ISO code (USD, EUR, GBP) from symbols (€, $, £)
-5. invoice_date: Issue date in YYYY-MM-DD format
+5. deal_date: Issue date in YYYY-MM-DD format
 6. due_date: Payment due date in YYYY-MM-DD format
 7. email: Vendor's contact email address (look in header, footer, contact section)
 8. website: Vendor's website URL (extract root domain only, e.g., "example.com" not "www.example.com" or "https://example.com")
 
 FIELD-SPECIFIC RULES:
-- INVOICE NUMBER: Extract complete invoice number including prefixes/suffixes. Look for "Invoice #", "INV", "No.", "Number", "Invoice Number", "Ref", "Reference", "ID", etc. Common formats:
+- DEAL NUMBER: Extract complete deal number including prefixes/suffixes. Look for "Deal #", "INV", "No.", "Number", "Deal Number", "Ref", "Reference", "ID", etc. Common formats:
   * INV-123, INV-2024-001, INV#456
   * #12345, No. 789, Number: 456
   * 789/2024, 2024-001, F-456
   * Extract exactly as shown, including all alphanumeric characters, dashes, slashes, and prefixes
-  * If multiple invoice numbers appear, use the one most prominently displayed or near the invoice date
+  * If multiple deal numbers appear, use the one most prominently displayed or near the deal date
 - AMOUNTS: Extract final total, not subtotals. Look for "Total", "Amount Due", "Balance"
 - DATES: Convert all formats (DD/MM/YYYY, MM-DD-YYYY, DD.MM.YYYY) to YYYY-MM-DD
 - VENDOR: Legal name from header/letterhead, not brand names or divisions
@@ -150,13 +150,13 @@ ACCURACY GUIDELINES:
 - Use document structure: vendor at top, customer in middle-right
 
 COMMON ERRORS TO AVOID:
-- Missing or incomplete invoice numbers - always extract the full invoice number if present
+- Missing or incomplete deal numbers - always extract the full deal number if present
 - Mixing up vendor and customer companies
 - Extracting subtotals instead of final totals
 - Wrong date formats or missing dates
 - Brand names instead of legal company names
-- Partial payments instead of full invoice amounts
-- Confusing order numbers, PO numbers, or reference numbers with invoice numbers
+- Partial payments instead of full deal amounts
+- Confusing order numbers, PO numbers, or reference numbers with deal numbers
 
 VALIDATION REQUIREMENTS:
 - After extraction, verify all critical fields are present and valid
@@ -169,18 +169,18 @@ VALIDATION REQUIREMENTS:
 /**
  * Chain-of-thought prompt variant for complex documents
  */
-export const createInvoicePromptWithChainOfThought = (
+export const createDealPromptWithChainOfThought = (
   companyName?: string | null,
 ) => `
-You are an expert invoice extraction system. Use step-by-step reasoning to extract data accurately.
+You are an expert deal extraction system. Use step-by-step reasoning to extract data accurately.
 
-${companyName ? `CRITICAL CONTEXT: "${companyName}" is the RECIPIENT/CUSTOMER company receiving this invoice.` : ""}
+${companyName ? `CRITICAL CONTEXT: "${companyName}" is the RECIPIENT/CUSTOMER company receiving this deal.` : ""}
 
 ${chainOfThoughtInstructions}
 
 ${companyName ? `Remember: "${companyName}" is the CUSTOMER, not the vendor.` : ""}
 
-Now extract the invoice data following the step-by-step process above. Think through each step carefully before providing your final answer.
+Now extract the deal data following the step-by-step process above. Think through each step carefully before providing your final answer.
 `;
 
 /**
@@ -192,64 +192,64 @@ export const createFieldSpecificPrompt = (
 ) => {
   const fieldInstructions: Record<string, string> = {
     total_amount: `
-Extract ONLY the total amount from this invoice. 
+Extract ONLY the total amount from this deal.
 - Look for the final amount due, usually labeled "Total", "Amount Due", "Balance Due", or "Grand Total"
-- This should be the largest amount on the invoice (after all taxes and fees)
+- This should be the largest amount on the deal (after all taxes and fees)
 - Extract as a number only (no currency symbols)
-- Example: If invoice shows "$1,500.00", extract: 1500.00
+- Example: If deal shows "$1,500.00", extract: 1500.00
 `,
     currency: `
-Extract ONLY the currency code from this invoice.
+Extract ONLY the currency code from this deal.
 - Look for currency symbols ($, €, £, ¥) or 3-letter codes (USD, EUR, GBP, SEK)
 - Convert symbols to ISO codes: $ → USD, € → EUR, £ → GBP
 - Return only the 3-letter uppercase code (e.g., "USD", "EUR", "GBP")
 `,
     vendor_name: `
-Extract ONLY the vendor/issuer company name from this invoice.
+Extract ONLY the vendor/issuer company name from this deal.
 ${companyName ? `- "${companyName}" is the CUSTOMER, NOT the vendor` : ""}
 - Look at the document header, letterhead, or top-left area
 - Extract the complete legal business name (with Inc., Ltd, LLC, GmbH, AB, etc.)
 - Do NOT extract brand names or "Trading as" names unless no legal name exists
 - Example: "ACME Corporation Ltd" not "ACME" or "ACME Brand"
 `,
-    invoice_number: `
-Extract ONLY the invoice number from this document.
-- Look for labels: "Invoice #", "INV", "No.", "Number", "Invoice Number", "Ref", "Reference", "ID"
+    deal_number: `
+Extract ONLY the deal number from this document.
+- Look for labels: "Deal #", "INV", "No.", "Number", "Deal Number", "Ref", "Reference", "ID"
 - Extract the complete number including prefixes, suffixes, dashes, slashes
 - Common formats: INV-123, INV-2024-001, #12345, No. 789, 789/2024, F-456
 - Extract exactly as shown, preserving all characters
-- If multiple numbers appear, choose the one most prominently displayed or near the invoice date
+- If multiple numbers appear, choose the one most prominently displayed or near the deal date
 `,
-    invoice_date: `
-Extract ONLY the invoice date (issue date) from this document.
-- Look near the invoice number or in the document header
+    deal_date: `
+Extract ONLY the deal date (issue date) from this document.
+- Look near the deal number or in the document header
 - Convert to YYYY-MM-DD format
 - Handle formats: DD/MM/YYYY, MM-DD-YYYY, DD.MM.YYYY, YYYY-MM-DD
 - Example: "15/03/2024" → "2024-03-15", "03-15-2024" → "2024-03-15"
 `,
     due_date: `
 Extract ONLY the payment due date from this document.
-- Look in payment terms section or near invoice date
+- Look in payment terms section or near deal date
 - Convert to YYYY-MM-DD format
 - Handle formats: DD/MM/YYYY, MM-DD-YYYY, DD.MM.YYYY
 - Example: "31/12/2024" → "2024-12-31"
 `,
     tax_amount: `
-Extract ONLY the tax amount from this invoice.
+Extract ONLY the tax amount from this deal.
 - Look for tax/VAT/GST amounts (not rates)
 - Extract as a number only (no currency symbols)
-- Example: If invoice shows "VAT: €234.56", extract: 234.56
+- Example: If deal shows "VAT: €234.56", extract: 234.56
 `,
     tax_rate: `
-Extract ONLY the tax rate percentage from this invoice.
+Extract ONLY the tax rate percentage from this deal.
 - Look for tax/VAT/GST rates shown as percentages
 - Extract as a number (e.g., 20 for 20%, not 0.20)
-- Example: If invoice shows "VAT 20%" or "Tax Rate: 20%", extract: 20
+- Example: If deal shows "VAT 20%" or "Tax Rate: 20%", extract: 20
 `,
   };
 
   return `
-${fieldInstructions[field] || `Extract the ${field} field from this invoice.`}
+${fieldInstructions[field] || `Extract the ${field} field from this deal.`}
 
 Focus ONLY on this specific field. Be precise and accurate.
 `;
@@ -420,19 +420,19 @@ ${companyName ? `Remember: "${companyName}" is the CUSTOMER, not the store/merch
 Now extract the receipt data following the step-by-step process above. Think through each step carefully before providing your final answer.
 `;
 
-export const documentClassifierPrompt = `You are an expert multilingual document analyzer. Your task is to read the provided business document text (which could be an Invoice, Receipt, Contract, Agreement, Report, etc.) and generate:
+export const documentClassifierPrompt = `You are an expert multilingual document analyzer. Your task is to read the provided business document text (which could be an Deal, Receipt, Contract, Agreement, Report, etc.) and generate:
 1.  **Document Title (\`title\`) - REQUIRED:** You MUST provide a descriptive, meaningful title for this document. This field CANNOT be null. The title should be specific and identify the document clearly, suitable for use as a filename in a document vault.
 
     **GOOD Examples (specific and descriptive):**
-    - "Invoice INV-2024-001 from Acme Corp"
-    - "Invoice from Acme Corp - 2024-03-15"
+    - "Deal INV-2024-001 from Acme Corp"
+    - "Deal from Acme Corp - 2024-03-15"
     - "Receipt from Starbucks Coffee - 2024-03-15"
     - "Purchase from Amazon - Order #123-4567890"
     - "Service Agreement with Acme Corp - 2024-03-15"
     - "Q1 2024 Financial Report - Acme Corp"
     
     **BAD Examples (generic, unacceptable):**
-    - "Invoice" (too generic)
+    - "Deal" (too generic)
     - "Receipt" (too generic)
     - "Document" (too generic)
     - null (not allowed)
@@ -440,15 +440,15 @@ export const documentClassifierPrompt = `You are an expert multilingual document
     **Requirements:**
     - ALWAYS include key identifying information: document number, company names, dates, or order numbers when available
     - Make it specific to THIS document - include unique identifiers
-    - If you cannot find specific details, construct a title from available information (e.g., "Invoice from [Company Name] - [Date]" or "Receipt from [Store Name] - [Date]")
+    - If you cannot find specific details, construct a title from available information (e.g., "Deal from [Company Name] - [Date]" or "Receipt from [Store Name] - [Date]")
     - This title is critical for document identification in the vault - users rely on it to find documents
-2.  **A Concise Summary:** A single sentence capturing the essence of the document (e.g., "Invoice from Supplier X for services rendered in May 2024", "Employment agreement between Company Y and John Doe", "Quarterly financial report for Q1 2024").
+2.  **A Concise Summary:** A single sentence capturing the essence of the document (e.g., "Deal from Supplier X for services rendered in May 2024", "Employment agreement between Company Y and John Doe", "Quarterly financial report for Q1 2024").
 3.  **The Most Relevant Date (\`date\`):** Identify the single most important date mentioned (e.g., issue date, signing date, effective date). Format it strictly as YYYY-MM-DD. If multiple dates exist, choose the primary one representing the document's core event. If no clear date is found, return null for this field.
 4.  **Relevant Tags (Up to 5):** Generate up to 5 highly relevant and distinct tags to help classify and find this document later. When creating these tags, **strongly prioritize including:**
-*   The inferred **document type** (e.g., "Invoice", "Contract", "Receipt", "Report").
+*   The inferred **document type** (e.g., "Deal", "Contract", "Receipt", "Report").
 *   Key **company or individual names** explicitly mentioned.
 *   The core **subject** or 1-2 defining keywords from the summary or document content.
-*   If the document represents a purchase (like an invoice or receipt), include a tag for the **single most significant item or service** purchased (e.g., "Software License", "Consulting Services", "Office Desk").
+*   If the document represents a purchase (like an deal or receipt), include a tag for the **single most significant item or service** purchased (e.g., "Software License", "Consulting Services", "Office Desk").
 
 Make the tags concise and informative. Aim for tags that uniquely identify the document's key characteristics for searching. Avoid overly generic terms (like "document", "file", "text") or date-related tags (as the date is extracted separately). Base tags strictly on the content provided. Ensure all tags are in singular form (e.g., "item" instead of "items").
 `;
@@ -460,38 +460,38 @@ Analyze the provided image and extract the following information:
 
    **GOOD Examples (specific and descriptive):**
    - "Receipt from Starbucks Coffee - 2024-03-15"
-   - "Invoice INV-2024-001 from Acme Corp"
+   - "Deal INV-2024-001 from Acme Corp"
    - "Acme Corp Logo"
    - "Product Photo - Widget Model X"
    - "Purchase from Amazon - Order #123-4567890"
    
    **BAD Examples (generic, unacceptable):**
    - "Receipt" (too generic)
-   - "Invoice" (too generic)
+   - "Deal" (too generic)
    - "Image" (too generic)
    - "Photo" (too generic)
    - null (not allowed)
    
    **Requirements:**
-   - ALWAYS include key identifying information: merchant/store names, dates, invoice numbers, or order numbers when visible
+   - ALWAYS include key identifying information: merchant/store names, dates, deal numbers, or order numbers when visible
    - Make it specific to THIS document - include unique identifiers from the image
    - Use OCR to extract text from the image if needed to identify the document
-   - If specific details aren't visible, construct a title from available visual information (e.g., "Receipt from [Visible Store Name] - [Visible Date]" or "Invoice from [Visible Company Name]")
+   - If specific details aren't visible, construct a title from available visual information (e.g., "Receipt from [Visible Store Name] - [Visible Date]" or "Deal from [Visible Company Name]")
    - This title is critical for document identification in the vault - users rely on it to find documents
 
-2. **Summary (\`summary\`):** A brief, one-sentence summary identifying key business-related visual elements in the image (e.g., "Logo", "Branding", "Letterhead", "Invoice Design", "Product Photo", "Marketing Material", "Website Screenshot").
+2. **Summary (\`summary\`):** A brief, one-sentence summary identifying key business-related visual elements in the image (e.g., "Logo", "Branding", "Letterhead", "Deal Design", "Product Photo", "Marketing Material", "Website Screenshot").
 
-3. **Content (\`content\`):** Extract any visible text content from the image (OCR). This is especially important for receipts and invoices.
+3. **Content (\`content\`):** Extract any visible text content from the image (OCR). This is especially important for receipts and deals.
 
 4. **Tags (1-5):** Generate 1-5 concise, relevant tags describing its most important aspects.
 
 **Instructions for Tags:**
 
-*   **If the image is a receipt or invoice:**
+*   **If the image is a receipt or deal:**
     *   Extract the **merchant name** (e.g., "Slack", "Starbucks") as a tag.
     *   Identify and tag the **most significant item(s) or service(s)** purchased (e.g., "Coffee", "Subscription", "Consulting Service"). Combine merchant and item if specific (e.g., "Slack Subscription").
-    *   Optionally, include relevant context tags like "Receipt", "Invoice", "Subscription", or "One-time Purchase".
-*   **If the image is NOT a receipt or invoice:**
+    *   Optionally, include relevant context tags like "Receipt", "Deal", "Subscription", or "One-time Purchase".
+*   **If the image is NOT a receipt or deal:**
     *   Describe the key **objects, subjects, or brands** visible (e.g., "Logo", "Letterhead", "Product Photo", "Acme Corp Branding").
 
 **Rules:**

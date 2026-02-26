@@ -12,7 +12,7 @@ export function TopRevenueMerchant() {
   const { data: team } = useTeamQuery();
   const { data: user } = useUserQuery();
   const { data } = useSuspenseQuery(
-    trpc.invoice.topRevenueMerchant.queryOptions(),
+    trpc.deal.topRevenueMerchant.queryOptions(),
   );
 
   if (!data) {
@@ -53,7 +53,7 @@ export function TopRevenueMerchant() {
               currency={data.currency || team?.baseCurrency || "USD"}
               locale={user?.locale ?? undefined}
             />{" "}
-            from {data.invoiceCount} invoice{data.invoiceCount !== 1 ? "s" : ""}{" "}
+            from {data.dealCount} deal{data.dealCount !== 1 ? "s" : ""}{" "}
             past 30 days
           </div>
         </div>

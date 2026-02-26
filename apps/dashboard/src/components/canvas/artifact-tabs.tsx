@@ -28,7 +28,7 @@ const ARTIFACT_TYPE_LABELS: Record<string, string> = {
   "forecast-canvas": "Forecast",
   "growth-rate-canvas": "Growth Rate",
   "health-report-canvas": "Health Report",
-  "invoice-payment-canvas": "Invoice Payment",
+  "deal-payment-canvas": "Deal Payment",
   "profit-canvas": "Profit",
   "profit-analysis-canvas": "Profit Analysis",
   "runway-canvas": "Runway",

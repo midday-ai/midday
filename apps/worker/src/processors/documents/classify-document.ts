@@ -101,8 +101,8 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
       // Try to extract company name or key info from content sample
       const contentSample = content.substring(0, 200).toLowerCase();
       let inferredType = "Document";
-      if (contentSample.includes("invoice") || contentSample.includes("inv")) {
-        inferredType = "Invoice";
+      if (contentSample.includes("deal") || contentSample.includes("mca")) {
+        inferredType = "Deal";
       } else if (contentSample.includes("receipt")) {
         inferredType = "Receipt";
       } else if (

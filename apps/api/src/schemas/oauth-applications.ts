@@ -55,7 +55,7 @@ export const createOAuthApplicationSchema = z.object({
     .default([])
     .openapi({
       description: "Array of scopes requested by the application",
-      example: ["transactions.read", "invoices.read"],
+      example: ["transactions.read", "deals.read"],
     }),
   isPublic: z.boolean().default(false).openapi({
     description: "Whether this is a public OAuth application",
@@ -123,7 +123,7 @@ export const updateOAuthApplicationSchema = z.object({
     .optional()
     .openapi({
       description: "Array of scopes requested by the application",
-      example: ["transactions.read", "invoices.read"],
+      example: ["transactions.read", "deals.read"],
     }),
   isPublic: z.boolean().optional().openapi({
     description: "Whether this is a public OAuth application",
@@ -219,7 +219,7 @@ export const oauthApplicationResponseSchema = z.object({
   }),
   scopes: z.array(z.string()).openapi({
     description: "Array of scopes for the application",
-    example: ["transactions.read", "invoices.read"],
+    example: ["transactions.read", "deals.read"],
   }),
   isPublic: z.boolean().openapi({
     description: "Whether this is a public OAuth application",

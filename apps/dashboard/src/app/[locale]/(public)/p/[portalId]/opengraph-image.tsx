@@ -88,8 +88,8 @@ export default async function Image({ params }: Props) {
           </div>
 
           <div tw="flex flex-col">
-            <span tw="text-[#606060] text-lg mb-1">Invoices</span>
-            <span tw="text-white text-3xl">{summary.invoiceCount}</span>
+            <span tw="text-[#606060] text-lg mb-1">Deals</span>
+            <span tw="text-white text-3xl">{summary.dealCount}</span>
           </div>
         </div>
       </div>

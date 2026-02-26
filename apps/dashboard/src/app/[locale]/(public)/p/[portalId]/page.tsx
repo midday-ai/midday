@@ -40,7 +40,7 @@ export async function generateMetadata(props: {
       };
     }
 
-    // Fall back to invoice portal data
+    // Fall back to deal portal data
     const data = await queryClient.fetchQuery(
       trpc.merchants.getByPortalId.queryOptions({
         portalId: params.portalId,
@@ -108,7 +108,7 @@ export default async function Page(props: Props) {
     redirect(`/p/${params.portalId}/home`);
   }
 
-  // Fall back to invoice portal
+  // Fall back to deal portal
   const portalData = await queryClient.fetchQuery(
     trpc.merchants.getByPortalId.queryOptions({
       portalId: params.portalId,
@@ -119,9 +119,9 @@ export default async function Page(props: Props) {
     notFound();
   }
 
-  // Prefetch invoices
+  // Prefetch deals
   await queryClient.fetchInfiniteQuery(
-    trpc.merchants.getPortalInvoices.infiniteQueryOptions({
+    trpc.merchants.getPortalDeals.infiniteQueryOptions({
       portalId: params.portalId,
     }),
   );

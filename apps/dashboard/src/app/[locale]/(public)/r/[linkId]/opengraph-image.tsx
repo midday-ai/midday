@@ -1,6 +1,6 @@
 import { getChartDisplayName } from "@/components/metrics/utils/chart-types";
 import { getQueryClient, trpc } from "@/trpc/server";
-import { isValidLogoUrl } from "@midday/invoice";
+import { isValidLogoUrl } from "@midday/deal";
 import { format, parseISO } from "date-fns";
 import { notFound } from "next/navigation";
 import { ImageResponse } from "next/og";

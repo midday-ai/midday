@@ -35,13 +35,13 @@ export function ProductEditSheet() {
   const isOpen = Boolean(productId);
 
   const { data: product } = useQuery(
-    trpc.invoiceProducts.getById.queryOptions(
+    trpc.dealProducts.getById.queryOptions(
       { id: productId! },
       {
         enabled: isOpen,
         initialData: () => {
           const pages = queryClient
-            .getQueriesData({ queryKey: trpc.invoiceProducts.get.queryKey() })
+            .getQueriesData({ queryKey: trpc.dealProducts.get.queryKey() })
             // @ts-expect-error
             .flatMap(([, data]) => data?.pages ?? [])
             .flatMap((page) => page.data ?? []);
@@ -53,10 +53,10 @@ export function ProductEditSheet() {
   );
 
   const deleteProductMutation = useMutation(
-    trpc.invoiceProducts.delete.mutationOptions({
+    trpc.dealProducts.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceProducts.get.queryKey(),
+          queryKey: trpc.dealProducts.get.queryKey(),
         });
         setParams(null);
       },

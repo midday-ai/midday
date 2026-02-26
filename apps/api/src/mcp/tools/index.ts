@@ -2,7 +2,7 @@ export { registerBankAccountTools } from "./bank-accounts";
 export { registerMerchantTools } from "./merchants";
 export { registerDocumentTools } from "./documents";
 export { registerInboxTools } from "./inbox";
-export { registerInvoiceTools } from "./invoices";
+export { registerDealTools } from "./deals";
 export { registerReportTools } from "./reports";
 export { registerSearchTools } from "./search";
 export { registerTagTools } from "./tags";

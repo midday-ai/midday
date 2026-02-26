@@ -82,8 +82,8 @@ export function SuggestedActions() {
       title: "Recent Transactions",
       description: "Show me my latest transactions",
     },
-    "get-invoice-payment-analysis": {
-      icon: Icons.Invoice,
+    "get-deal-payment-analysis": {
+      icon: Icons.Deal,
       title: "Collection Analysis",
       description: "Show me my collection and payment analysis",
     },
@@ -93,8 +93,8 @@ export function SuggestedActions() {
       description: "Show me my portfolio health score",
     },
     // Secondary financial analytics
-    "get-invoices": {
-      icon: Icons.Invoice,
+    "get-deals": {
+      icon: Icons.Deal,
       title: "Advances",
       description: "Show me my advances",
     },

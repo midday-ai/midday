@@ -25,7 +25,7 @@ export function DealPicker({ selectedDealCode, onSelect }: Props) {
   const trpc = useTRPC();
 
   const { data: deals } = useQuery({
-    ...trpc.deals.list.queryOptions({}),
+    ...trpc.mcaDeals.list.queryOptions({}),
     enabled: open,
   });
 

@@ -6,7 +6,6 @@ import { useMerchantParams } from "@/hooks/use-merchant-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useFileUrl } from "@/hooks/use-file-url";
 import { useDealParams } from "@/hooks/use-deal-params";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
@@ -39,7 +38,7 @@ interface SearchItem {
   data?: {
     name?: string;
     email?: string;
-    invoice_number?: string;
+    deal_number?: string;
     status?: string;
     amount?: number;
     currency?: string;
@@ -92,14 +91,14 @@ function DownloadButton({
   const [isDownloading, setIsDownloading] = useState(false);
 
   const isFileDownload = href.includes("/files/download/file");
-  const isInvoiceDownload = href.includes("/files/download/invoice");
-  const needsAuth = isFileDownload || isInvoiceDownload;
+  const isDealDownload = href.includes("/files/download/deal");
+  const needsAuth = isFileDownload || isDealDownload;
 
-  // Extract invoice ID if it's an invoice download
-  let invoiceId: string | null = null;
-  if (isInvoiceDownload) {
+  // Extract deal ID if it's an deal download
+  let dealId: string | null = null;
+  if (isDealDownload) {
     try {
-      invoiceId = new URL(href).searchParams.get("id");
+      dealId = new URL(href).searchParams.get("id");
     } catch {
       // Invalid URL, will fall back to url type
     }
@@ -107,8 +106,8 @@ function DownloadButton({
 
   const { url: authenticatedUrl, isLoading } = useFileUrl(
     needsAuth
-      ? isInvoiceDownload && invoiceId
-        ? { type: "invoice", invoiceId }
+      ? isDealDownload && dealId
+        ? { type: "deal", dealId }
         : { type: "url", url: href }
       : null,
   );
@@ -154,7 +153,7 @@ const formatGroupName = (name: string): string | null => {
       return "Merchants";
     case "vault":
       return "Vault";
-    case "invoice":
+    case "deal":
       return "Deals";
     case "transaction":
       return "Transactions";
@@ -169,7 +168,6 @@ const formatGroupName = (name: string): string | null => {
 const useSearchNavigation = () => {
   const router = useRouter();
   const { setOpen } = useSearchStore();
-  const { setParams: setInvoiceParams } = useInvoiceParams();
   const { setParams: setDealParams } = useDealParams();
   const { setParams: setMerchantParams } = useMerchantParams();
   const { setParams: setTransactionParams } = useTransactionParams();
@@ -195,11 +193,11 @@ const useSearchNavigation = () => {
     navigateToMerchant: (params: { merchantId: string }) => {
       navigateWithParams(params, setMerchantParams);
     },
-    navigateToInvoice: (params: {
-      invoiceId: string;
+    navigateToDeal: (params: {
+      dealId: string;
       type: "details" | "create" | "edit" | "success";
     }) => {
-      navigateWithParams(params, setInvoiceParams);
+      navigateWithParams(params, setDealParams);
     },
     navigateToTransaction: (params: {
       transactionId?: string;
@@ -214,8 +212,8 @@ const useSearchNavigation = () => {
     createDeal: () => {
       navigateWithParams({ createDeal: true }, setDealParams);
     },
-    createInvoice: () => {
-      navigateWithParams({ type: "create" as const }, setInvoiceParams);
+    createDeal: () => {
+      navigateWithParams({ type: "create" as const }, setDealParams);
     },
     createMerchant: (params = { createMerchant: true }) => {
       navigateWithParams(params, setMerchantParams);
@@ -241,7 +239,7 @@ const SearchResultItemDisplay = ({
   let onSelect: () => void;
 
   if (!item.data) {
-    // This is an action item (e.g., "Create Invoice", "View Documents")
+    // This is an action item (e.g., "Create Deal", "View Documents")
     icon = <Icons.Shortcut className="size-4 dark:text-[#666] text-primary" />;
     resultDisplay = item.title;
   } else {
@@ -310,24 +308,24 @@ const SearchResultItemDisplay = ({
 
         break;
       }
-      case "invoice": {
+      case "deal": {
         onSelect = () =>
-          nav.navigateToInvoice({ invoiceId: item.id, type: "details" });
+          nav.navigateToDeal({ dealId: item.id, type: "details" });
 
         icon = (
-          <Icons.Invoice className="size-4 dark:text-[#666] text-primary" />
+          <Icons.Deal className="size-4 dark:text-[#666] text-primary" />
         );
         resultDisplay = (
           <div className="flex items-center w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
-              <span>{item.data.invoice_number as string}</span>
+              <span>{item.data.deal_number as string}</span>
               <DealStatusBadge status={item.data?.status as any} />
             </div>
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
-              <CopyButton path={`?invoiceId=${item.id}&type=details`} />
+              <CopyButton path={`?dealId=${item.id}&type=details`} />
               <DownloadButton
-                href={`${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${item.id}&size=${item?.data?.template?.size}`}
-                filename={`${item.data.invoice_number || "deal"}.pdf`}
+                href={`${process.env.NEXT_PUBLIC_API_URL}/files/download/deal?id=${item.id}&size=${item?.data?.template?.size}`}
+                filename={`${item.data.deal_number || "deal"}.pdf`}
               />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
@@ -460,7 +458,7 @@ export function Search() {
   const sectionActions: SearchItem[] = [
     {
       id: "sc-create-deal",
-      type: "invoice",
+      type: "deal",
       title: "Create deal",
       action: nav.createDeal,
     },
@@ -502,9 +500,9 @@ export function Search() {
     },
     {
       id: "sc-view-deals",
-      type: "invoice",
+      type: "deal",
       title: "View deals",
-      action: () => nav.navigateToPath("/invoices"),
+      action: () => nav.navigateToPath("/deals"),
     },
   ];
 
@@ -563,7 +561,7 @@ export function Search() {
     const definedGroupOrder = [
       "vault",
       "merchant",
-      "invoice",
+      "deal",
       "transaction",
       "inbox",
     ];

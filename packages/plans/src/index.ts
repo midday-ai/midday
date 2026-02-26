@@ -132,7 +132,7 @@ export type PlanLimits = {
   bankConnections: number;
   storage: number;
   inbox: number;
-  invoices: number;
+  deals: number;
 };
 
 export function getPlanLimits(plan: string): PlanLimits {
@@ -143,7 +143,7 @@ export function getPlanLimits(plan: string): PlanLimits {
         bankConnections: 2,
         storage: 10 * 1024 * 1024 * 1024, // 10GB in bytes
         inbox: 50,
-        invoices: 10,
+        deals: 10,
       };
     case "trial":
     case "pro":
@@ -152,7 +152,7 @@ export function getPlanLimits(plan: string): PlanLimits {
         bankConnections: 10,
         storage: 100 * 1024 * 1024 * 1024, // 100GB in bytes
         inbox: 500,
-        invoices: 50,
+        deals: 50,
       };
     case "pro_plus":
       return {
@@ -160,7 +160,7 @@ export function getPlanLimits(plan: string): PlanLimits {
         bankConnections: Infinity,
         storage: 1024 * 1024 * 1024 * 1024, // 1TB in bytes
         inbox: Infinity,
-        invoices: Infinity,
+        deals: Infinity,
       };
     default:
       return {
@@ -168,7 +168,7 @@ export function getPlanLimits(plan: string): PlanLimits {
         bankConnections: 1,
         storage: 10 * 1024 * 1024 * 1024, // 10GB in bytes
         inbox: 50,
-        invoices: 10,
+        deals: 10,
       };
   }
 }

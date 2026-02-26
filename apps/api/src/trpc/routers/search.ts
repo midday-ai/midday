@@ -6,7 +6,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { generateLLMFilters } from "@api/utils/search-filters";
 import {
   getInboxSearch,
-  getInvoices,
+  getDeals,
   globalSearchQuery,
   globalSemanticSearchQuery,
 } from "@midday/db/queries";
@@ -62,14 +62,14 @@ export const searchRouter = createTRPCRouter({
     .query(async ({ input, ctx: { db, teamId } }) => {
       const { q, transactionId, limit = 30 } = input;
 
-      const [inboxResults, invoiceResults] = await Promise.all([
+      const [inboxResults, dealResults] = await Promise.all([
         getInboxSearch(db, {
           teamId: teamId!,
           q: q ?? undefined,
           transactionId: transactionId ?? undefined,
           limit: limit,
         }),
-        getInvoices(db, {
+        getDeals(db, {
           teamId: teamId!,
           q: q ?? undefined,
           statuses: ["unpaid", "overdue", "paid"],
@@ -99,23 +99,23 @@ export const searchRouter = createTRPCRouter({
           createdAt: item.createdAt,
         })) ?? [];
 
-      // Transform invoice results
-      const invoices =
-        invoiceResults.data.map((invoice) => ({
-          type: "invoice" as const,
-          id: invoice.id,
-          invoiceNumber: invoice.invoiceNumber ?? null,
-          merchantName: invoice.merchantName ?? null,
-          amount: invoice.amount ?? null,
-          currency: invoice.currency ?? null,
-          filePath: invoice.filePath ?? [],
-          dueDate: invoice.dueDate ?? null,
-          status: invoice.status,
-          size: invoice.fileSize ?? null,
-          createdAt: invoice.createdAt,
+      // Transform deal results
+      const deals =
+        dealResults.data.map((deal) => ({
+          type: "deal" as const,
+          id: deal.id,
+          dealNumber: deal.dealNumber ?? null,
+          merchantName: deal.merchantName ?? null,
+          amount: deal.amount ?? null,
+          currency: deal.currency ?? null,
+          filePath: deal.filePath ?? [],
+          dueDate: deal.dueDate ?? null,
+          status: deal.status,
+          size: deal.fileSize ?? null,
+          createdAt: deal.createdAt,
         })) ?? [];
 
       // Combine and return results
-      return [...inboxItems, ...invoices];
+      return [...inboxItems, ...deals];
     }),
 });

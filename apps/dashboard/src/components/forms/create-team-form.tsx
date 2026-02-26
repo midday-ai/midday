@@ -1,10 +1,8 @@
 "use client";
 
 import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
-import { SelectCurrency } from "@/components/select-currency";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
-import { uniqueCurrencies } from "@midday/location/currencies";
 import {
   Form,
   FormControl,
@@ -36,15 +34,12 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 type Props = {
-  defaultCurrencyPromise: Promise<string>;
   defaultCountryCodePromise: Promise<string>;
 };
 
 export function CreateTeamForm({
-  defaultCurrencyPromise,
   defaultCountryCodePromise,
 }: Props) {
-  const currency = use(defaultCurrencyPromise);
   const countryCode = use(defaultCountryCodePromise);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -91,7 +86,7 @@ export function CreateTeamForm({
   const form = useZodForm(formSchema, {
     defaultValues: {
       name: "",
-      baseCurrency: currency,
+      baseCurrency: "USD",
       countryCode: countryCode ?? "",
       fiscalYearStartMonth: getDefaultFiscalYearStartMonth(countryCode),
     },
@@ -175,28 +170,6 @@ export function CreateTeamForm({
                   }}
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="baseCurrency"
-          render={({ field }) => (
-            <FormItem className="mt-4 border-b border-border pb-4">
-              <FormLabel className="text-xs text-[#666] font-normal">
-                Base currency
-              </FormLabel>
-              <FormControl>
-                <SelectCurrency currencies={uniqueCurrencies} {...field} />
-              </FormControl>
-
-              <FormDescription>
-                If you have multiple accounts in different currencies, this will
-                be the default currency for your company. You can change it
-                later.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

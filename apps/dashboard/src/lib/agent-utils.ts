@@ -24,7 +24,7 @@ export const getStatusMessage = (status?: AgentStatus | null) => {
       general: "Getting information for you...",
       reports: "Generating your financial reports...",
       transactions: "Retrieving your transaction history...",
-      invoices: "Checking your invoice status...",
+      deals: "Checking your deal status...",
       merchants: "Looking up merchant information...",
       analytics: "Running business intelligence analysis...",
       operations: "Accessing your account data...",
@@ -77,13 +77,13 @@ export const getToolMessage = (toolName: string | null) => {
     updateMerchant: "Updating merchant details...",
     profitabilityAnalysis: "Analyzing merchant profitability...",
 
-    // Invoice tools
-    getInvoices: "Retrieving your invoices...",
-    listInvoices: "Retrieving your invoices...",
-    getInvoice: "Loading invoice details...",
-    createInvoice: "Creating your invoice...",
-    updateInvoice: "Updating invoice information...",
-    getInvoicePaymentAnalysis: "Analyzing invoice payment patterns...",
+    // Deal tools
+    getDeals: "Retrieving your deals...",
+    listDeals: "Retrieving your deals...",
+    getDeal: "Loading deal details...",
+    createDeal: "Creating your deal...",
+    updateDeal: "Updating deal information...",
+    getDealPaymentAnalysis: "Analyzing deal payment patterns...",
 
     // Transaction tools
     getTransactions: "Retrieving your transactions...",

@@ -11,18 +11,18 @@ export const createActivitySchema = z.object({
     "inbox_needs_review",
     "inbox_cross_currency_matched",
     "inbox_match_confirmed",
-    "invoice_paid",
-    "invoice_overdue",
-    "invoice_scheduled",
-    "invoice_sent",
-    "invoice_reminder_sent",
-    "invoice_cancelled",
-    "invoice_created",
-    "invoice_refunded",
-    "draft_invoice_created",
+    "deal_paid",
+    "deal_overdue",
+    "deal_scheduled",
+    "deal_sent",
+    "deal_reminder_sent",
+    "deal_cancelled",
+    "deal_created",
+    "deal_refunded",
+    "draft_deal_created",
     "document_uploaded",
     "document_processed",
-    "invoice_duplicated",
+    "deal_duplicated",
     "transactions_categorized",
     "transactions_assigned",
     "transaction_attachment_created",
@@ -32,7 +32,7 @@ export const createActivitySchema = z.object({
     "recurring_series_completed",
     "recurring_series_started",
     "recurring_series_paused",
-    "recurring_invoice_upcoming",
+    "recurring_deal_upcoming",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
@@ -62,7 +62,7 @@ export const transactionSchema = z.object({
   status: z.string().optional(),
 });
 
-export const invoiceSchema = z.object({
+export const dealSchema = z.object({
   id: z.string(),
   number: z.string(),
   amount: z.number(),
@@ -161,77 +161,77 @@ export const inboxCrossCurrencyMatchedSchema = z.object({
   matchType: z.enum(["auto_matched", "high_confidence", "suggested"]),
 });
 
-export const invoicePaidSchema = z.object({
+export const dealPaidSchema = z.object({
   users: z.array(userSchema),
-  invoiceId: z.string().uuid(),
-  invoiceNumber: z.string(),
+  dealId: z.string().uuid(),
+  dealNumber: z.string(),
   merchantName: z.string().optional(),
   paidAt: z.string().optional(),
   source: z.enum(["user", "system"]).default("system"),
 });
 
-export const invoiceOverdueSchema = z.object({
+export const dealOverdueSchema = z.object({
   users: z.array(userSchema),
-  invoiceId: z.string().uuid(),
-  invoiceNumber: z.string(),
+  dealId: z.string().uuid(),
+  dealNumber: z.string(),
   merchantName: z.string(),
   source: z.enum(["user", "system"]).default("system"),
 });
 
-export const invoiceScheduledSchema = z.object({
+export const dealScheduledSchema = z.object({
   users: z.array(userSchema),
-  invoiceId: z.string().uuid(),
-  invoiceNumber: z.string(),
+  dealId: z.string().uuid(),
+  dealNumber: z.string(),
   scheduledAt: z.string(),
   merchantName: z.string().optional(),
 });
 
-export const invoiceSentSchema = z.object({
+export const dealSentSchema = z.object({
   users: z.array(userSchema),
-  invoiceId: z.string().uuid(),
+  dealId: z.string().uuid(),
   token: z.string(),
-  invoiceNumber: z.string(),
+  dealNumber: z.string(),
   merchantName: z.string(),
   merchantEmail: z.string().email().optional(),
 });
 
-export const invoiceReminderSentSchema = z.object({
+export const dealReminderSentSchema = z.object({
   users: z.array(userSchema),
-  invoiceId: z.string().uuid(),
+  dealId: z.string().uuid(),
   token: z.string(),
-  invoiceNumber: z.string(),
+  dealNumber: z.string(),
   merchantName: z.string(),
   merchantEmail: z.string().email().optional(),
 });
 
-export const invoiceCancelledSchema = z.object({
+export const dealCancelledSchema = z.object({
   users: z.array(userSchema),
-  invoiceId: z.string().uuid(),
-  invoiceNumber: z.string(),
+  dealId: z.string().uuid(),
+  dealNumber: z.string(),
   merchantName: z.string().optional(),
 });
 
-export const invoiceCreatedSchema = z.object({
+export const dealCreatedSchema = z.object({
   users: z.array(userSchema),
-  invoiceId: z.string().uuid(),
-  invoiceNumber: z.string(),
+  dealId: z.string().uuid(),
+  dealNumber: z.string(),
   merchantName: z.string().optional(),
   amount: z.number().optional(),
   currency: z.string().optional(),
 });
 
-export const invoiceRefundedSchema = z.object({
+export const dealRefundedSchema = z.object({
   users: z.array(userSchema),
-  invoiceId: z.string().uuid(),
-  invoiceNumber: z.string(),
+  dealId: z.string().uuid(),
+  dealNumber: z.string(),
   merchantName: z.string().optional(),
   refundedAt: z.string().optional(),
 });
 
 export const recurringSeriesCompletedSchema = z.object({
   users: z.array(userSchema),
-  invoiceId: z.string().uuid(),
-  invoiceNumber: z.string(),
+  dealId: z.string().uuid(),
+  dealNumber: z.string(),
   merchantName: z.string().optional(),
   recurringId: z.string().uuid(),
   totalGenerated: z.number(),
@@ -240,8 +240,8 @@ export const recurringSeriesCompletedSchema = z.object({
 export const recurringSeriesStartedSchema = z.object({
   users: z.array(userSchema),
   recurringId: z.string().uuid(),
-  invoiceId: z.string().uuid().optional(), // First invoice ID if linked
-  invoiceNumber: z.string().optional(),
+  dealId: z.string().uuid().optional(), // First deal ID if linked
+  dealNumber: z.string().optional(),
   merchantName: z.string().optional(),
   frequency: z.string(),
   endType: z.enum(["never", "on_date", "after_count"]),
@@ -257,19 +257,19 @@ export const recurringSeriesPausedSchema = z.object({
   failureCount: z.number().optional(),
 });
 
-// Schema for individual invoice in the batch
-export const upcomingInvoiceItemSchema = z.object({
+// Schema for individual deal in the batch
+export const upcomingDealItemSchema = z.object({
   recurringId: z.string().uuid(),
   merchantName: z.string().optional(),
   amount: z.number().optional(),
   currency: z.string().optional(),
-  scheduledAt: z.string(), // ISO date when invoice will be generated
+  scheduledAt: z.string(), // ISO date when deal will be generated
   frequency: z.string(), // e.g., "weekly", "monthly_date"
 });
 
-export const recurringInvoiceUpcomingSchema = z.object({
+export const recurringDealUpcomingSchema = z.object({
   users: z.array(userSchema),
-  invoices: z.array(upcomingInvoiceItemSchema),
+  deals: z.array(upcomingDealItemSchema),
   count: z.number(),
 });
 
@@ -287,7 +287,7 @@ export const transactionsAssignedSchema = z.object({
 
 export type UserData = z.infer<typeof userSchema>;
 export type TransactionData = z.infer<typeof transactionSchema>;
-export type InvoiceData = z.infer<typeof invoiceSchema>;
+export type DealData = z.infer<typeof dealSchema>;
 export type TransactionsCreatedInput = z.infer<
   typeof transactionsCreatedSchema
 >;
@@ -306,16 +306,16 @@ export type InboxCrossCurrencyMatchedInput = z.infer<
   typeof inboxCrossCurrencyMatchedSchema
 >;
 
-export type InvoicePaidInput = z.infer<typeof invoicePaidSchema>;
-export type InvoiceOverdueInput = z.infer<typeof invoiceOverdueSchema>;
-export type InvoiceScheduledInput = z.infer<typeof invoiceScheduledSchema>;
-export type InvoiceSentInput = z.infer<typeof invoiceSentSchema>;
-export type InvoiceReminderSentInput = z.infer<
-  typeof invoiceReminderSentSchema
+export type DealPaidInput = z.infer<typeof dealPaidSchema>;
+export type DealOverdueInput = z.infer<typeof dealOverdueSchema>;
+export type DealScheduledInput = z.infer<typeof dealScheduledSchema>;
+export type DealSentInput = z.infer<typeof dealSentSchema>;
+export type DealReminderSentInput = z.infer<
+  typeof dealReminderSentSchema
 >;
-export type InvoiceCancelledInput = z.infer<typeof invoiceCancelledSchema>;
-export type InvoiceCreatedInput = z.infer<typeof invoiceCreatedSchema>;
-export type InvoiceRefundedInput = z.infer<typeof invoiceRefundedSchema>;
+export type DealCancelledInput = z.infer<typeof dealCancelledSchema>;
+export type DealCreatedInput = z.infer<typeof dealCreatedSchema>;
+export type DealRefundedInput = z.infer<typeof dealRefundedSchema>;
 export type RecurringSeriesCompletedInput = z.infer<
   typeof recurringSeriesCompletedSchema
 >;
@@ -325,9 +325,9 @@ export type RecurringSeriesStartedInput = z.infer<
 export type RecurringSeriesPausedInput = z.infer<
   typeof recurringSeriesPausedSchema
 >;
-export type UpcomingInvoiceItem = z.infer<typeof upcomingInvoiceItemSchema>;
-export type RecurringInvoiceUpcomingInput = z.infer<
-  typeof recurringInvoiceUpcomingSchema
+export type UpcomingDealItem = z.infer<typeof upcomingDealItemSchema>;
+export type RecurringDealUpcomingInput = z.infer<
+  typeof recurringDealUpcomingSchema
 >;
 export type TransactionsCategorizedInput = z.infer<
   typeof transactionsCategorizedSchema
@@ -348,16 +348,16 @@ export type NotificationTypes = {
   inbox_auto_matched: InboxAutoMatchedInput;
   inbox_needs_review: InboxNeedsReviewInput;
   inbox_cross_currency_matched: InboxCrossCurrencyMatchedInput;
-  invoice_paid: InvoicePaidInput;
-  invoice_overdue: InvoiceOverdueInput;
-  invoice_scheduled: InvoiceScheduledInput;
-  invoice_sent: InvoiceSentInput;
-  invoice_reminder_sent: InvoiceReminderSentInput;
-  invoice_cancelled: InvoiceCancelledInput;
-  invoice_created: InvoiceCreatedInput;
-  invoice_refunded: InvoiceRefundedInput;
+  deal_paid: DealPaidInput;
+  deal_overdue: DealOverdueInput;
+  deal_scheduled: DealScheduledInput;
+  deal_sent: DealSentInput;
+  deal_reminder_sent: DealReminderSentInput;
+  deal_cancelled: DealCancelledInput;
+  deal_created: DealCreatedInput;
+  deal_refunded: DealRefundedInput;
   recurring_series_completed: RecurringSeriesCompletedInput;
   recurring_series_started: RecurringSeriesStartedInput;
   recurring_series_paused: RecurringSeriesPausedInput;
-  recurring_invoice_upcoming: RecurringInvoiceUpcomingInput;
+  recurring_deal_upcoming: RecurringDealUpcomingInput;
 };

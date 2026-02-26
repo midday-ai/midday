@@ -79,8 +79,8 @@ export function TopMerchantWidget() {
                   amount={data.result.totalRevenue}
                   currency={data.result.currency}
                 />{" "}
-                from {data.result.invoiceCount} invoice
-                {data.result.invoiceCount !== 1 ? "s" : ""} past 30 days
+                from {data.result.dealCount} deal
+                {data.result.dealCount !== 1 ? "s" : ""} past 30 days
               </span>
             </>
           ) : (

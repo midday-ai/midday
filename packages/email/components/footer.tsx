@@ -71,7 +71,7 @@ export function Footer() {
             href="https://go.midday.ai/fkYXc95"
             style={{ color: lightStyles.mutedText.color }}
           >
-            Invoice
+            Deals
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}

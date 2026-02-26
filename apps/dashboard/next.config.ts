@@ -30,7 +30,7 @@ const config = {
   transpilePackages: [
     "@midday/ui",
     "@midday/tailwind",
-    "@midday/invoice",
+    "@midday/deal",
     "@midday/api",
   ],
   serverExternalPackages: ["@react-pdf/renderer", "pino"],
@@ -38,6 +38,20 @@ const config = {
     ignoreBuildErrors: true,
   },
   devIndicators: false,
+  async redirects() {
+    return [
+      {
+        source: "/invoices",
+        destination: "/deals",
+        permanent: true,
+      },
+      {
+        source: "/invoices/:path*",
+        destination: "/deals/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -15,8 +15,8 @@ import { MerchantEditSheet } from "@/components/sheets/merchant-edit-sheet";
 import { DocumentSheet } from "@/components/sheets/document-sheet";
 import { EditRecurringSheet } from "@/components/sheets/edit-recurring-sheet";
 import { InboxDetailsSheet } from "@/components/sheets/inbox-details-sheet";
-import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
-import { InvoiceSheet } from "@/components/sheets/invoice-sheet";
+import { DealDetailsSheet } from "@/components/sheets/deal-details-sheet";
+import { DealSheet } from "@/components/sheets/deal-sheet";
 import { ProductCreateSheet } from "@/components/sheets/product-create-sheet";
 import { ProductEditSheet } from "@/components/sheets/product-edit-sheet";
 import { TransactionCreateSheet } from "@/components/sheets/transaction-create-sheet";
@@ -56,8 +56,8 @@ export function GlobalSheets() {
       <ImportModal />
       <ConnectTransactionsModal />
 
-      <InvoiceDetailsSheet />
-      <InvoiceSheet />
+      <DealDetailsSheet />
+      <DealSheet />
       <EditRecurringSheet />
 
       <DisclosurePreviewSheet />

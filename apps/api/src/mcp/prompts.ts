@@ -38,7 +38,7 @@ export function registerPrompts(server: McpServer): void {
 4. Get burn rate using reports_burn_rate
 5. Get runway using reports_runway
 6. Get spending breakdown using reports_spending
-7. Get invoice summary using invoices_summary
+7. Get deal summary using deals_summary
 
 Then provide a clear analysis including:
 - Revenue trends and growth
@@ -57,10 +57,10 @@ Format the analysis in a clear, executive-summary style.`,
   );
 
   server.registerPrompt(
-    "invoice_followup",
+    "deal_followup",
     {
-      title: "Invoice Follow-up",
-      description: "Generate a follow-up plan for overdue or unpaid invoices",
+      title: "Deal Follow-up",
+      description: "Generate a follow-up plan for overdue or unpaid deals",
     },
     async () => {
       return {
@@ -69,16 +69,16 @@ Format the analysis in a clear, executive-summary style.`,
             role: "user",
             content: {
               type: "text",
-              text: `Please analyze my invoices and help me follow up on payments:
+              text: `Please analyze my deals and help me follow up on payments:
 
-1. Use invoices_list to get all invoices with status "overdue" or "unpaid"
-2. For each overdue invoice, get details using invoices_get
+1. Use deals_list to get all deals with status "overdue" or "unpaid"
+2. For each overdue deal, get details using deals_get
 3. Get merchant information using merchants_get for context
 
 Then create a follow-up action plan:
-- List overdue invoices sorted by amount (highest first)
+- List overdue deals sorted by amount (highest first)
 - Include merchant contact information
-- Suggest follow-up actions based on how overdue each invoice is
+- Suggest follow-up actions based on how overdue each deal is
 - Draft polite but firm reminder messages for each situation`,
             },
           },
@@ -146,7 +146,7 @@ Provide insights on:
               text: `Please analyze my merchant base and provide insights:
 
 1. Use merchants_list to get all merchants
-2. Use invoices_list to understand revenue per merchant
+2. Use deals_list to understand revenue per merchant
 3. Cross-reference with transactions_list to see payment patterns
 
 Provide analysis including:

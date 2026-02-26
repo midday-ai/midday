@@ -153,20 +153,20 @@ const COMMAND_SUGGESTIONS = [
     toolParams: { showCanvas: true, type: "revenue" },
     keywords: ["analyze", "revenue", "growth", "trends", "period"],
   },
-  // Invoice Payment Analysis
+  // Deal Payment Analysis
   {
     command: "/show",
-    title: "Show invoice payment analysis",
-    toolName: "getInvoicePaymentAnalysis",
+    title: "Show deal payment analysis",
+    toolName: "getDealPaymentAnalysis",
     toolParams: { showCanvas: true },
-    keywords: ["show", "invoice", "payment", "analysis", "days", "overdue"],
+    keywords: ["show", "deal", "payment", "analysis", "days", "overdue"],
   },
   {
     command: "/analyze",
     title: "Analyze merchant payment patterns",
-    toolName: "getInvoicePaymentAnalysis",
+    toolName: "getDealPaymentAnalysis",
     toolParams: { showCanvas: true },
-    keywords: ["analyze", "merchant", "payment", "patterns", "invoices"],
+    keywords: ["analyze", "merchant", "payment", "patterns", "deals"],
   },
   // Business Health Score
   {
@@ -255,27 +255,27 @@ const COMMAND_SUGGESTIONS = [
     toolParams: {},
     keywords: ["show", "account", "balances", "bank", "accounts"],
   },
-  // Invoices
+  // Deals
   {
     command: "/show",
-    title: "Show latest invoices",
-    toolName: "getInvoices",
+    title: "Show latest deals",
+    toolName: "getDeals",
     toolParams: { pageSize: 10, sort: ["createdAt", "desc"] },
-    keywords: ["show", "latest", "invoices", "recent"],
+    keywords: ["show", "latest", "deals", "recent"],
   },
   {
     command: "/find",
-    title: "Find unpaid invoices",
-    toolName: "getInvoices",
+    title: "Find unpaid deals",
+    toolName: "getDeals",
     toolParams: { statuses: ["unpaid"], pageSize: 20 },
-    keywords: ["find", "unpaid", "invoices", "outstanding"],
+    keywords: ["find", "unpaid", "deals", "outstanding"],
   },
   {
     command: "/find",
-    title: "Find overdue invoices",
-    toolName: "getInvoices",
+    title: "Find overdue deals",
+    toolName: "getDeals",
     toolParams: { statuses: ["overdue"], pageSize: 20 },
-    keywords: ["find", "overdue", "invoices", "late"],
+    keywords: ["find", "overdue", "deals", "late"],
   },
   // Merchants
   {

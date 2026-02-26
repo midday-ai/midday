@@ -12,8 +12,8 @@ export const recurringSeriesStarted: NotificationHandler = {
     priority: 3,
     metadata: {
       recordId: data.recurringId,
-      invoiceId: data.invoiceId,
-      invoiceNumber: data.invoiceNumber,
+      dealId: data.dealId,
+      dealNumber: data.dealNumber,
       merchantName: data.merchantName,
       frequency: data.frequency,
       endType: data.endType,

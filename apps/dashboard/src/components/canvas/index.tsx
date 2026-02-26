@@ -11,7 +11,7 @@ import { CategoryExpensesCanvas } from "./category-expenses-canvas";
 import { ForecastCanvas } from "./forecast-canvas";
 import { GrowthRateCanvas } from "./growth-rate-canvas";
 import { HealthReportCanvas } from "./health-report-canvas";
-import { InvoicePaymentCanvas } from "./invoice-payment-canvas";
+import { DealPaymentCanvas } from "./deal-payment-canvas";
 import { MetricsBreakdownSummaryCanvas } from "./metrics-breakdown-summary-canvas";
 import { ProfitCanvas } from "./profit-canvas";
 import { RevenueCanvas } from "./revenue-canvas";
@@ -65,8 +65,8 @@ export function Canvas() {
         return <ForecastCanvas />;
       case "stress-test-canvas":
         return <StressTestCanvas />;
-      case "invoice-payment-canvas":
-        return <InvoicePaymentCanvas />;
+      case "deal-payment-canvas":
+        return <DealPaymentCanvas />;
       case "breakdown-summary-canvas":
         return <MetricsBreakdownSummaryCanvas />;
       default:

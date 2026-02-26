@@ -8,7 +8,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 export function NewMerchantsThisMonth() {
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(
-    trpc.invoice.newMerchantsCount.queryOptions(),
+    trpc.deal.newMerchantsCount.queryOptions(),
   );
 
   return (

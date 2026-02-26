@@ -46,7 +46,7 @@ export const getCashFlowSchema = z.object({
   period: z.enum(["monthly", "quarterly"]).optional().default("monthly"),
 });
 
-export const getOutstandingInvoicesSchema = z.object({
+export const getOutstandingDealsSchema = z.object({
   currency: z.string().optional(),
   status: z
     .array(z.enum(["unpaid", "overdue"]))
@@ -91,7 +91,7 @@ export const getCategoryExpensesSchema = z.object({
   limit: z.number().optional().default(5),
 });
 
-export const getOverdueInvoicesAlertSchema = z
+export const getOverdueDealsAlertSchema = z
   .object({
     currency: z.string().optional(),
   })

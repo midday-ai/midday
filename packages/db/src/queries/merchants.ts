@@ -3,12 +3,12 @@ import {
   merchantTags,
   merchants,
   exchangeRates,
-  invoices,
+  deals,
   tags,
   teams,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
-import { generateToken } from "@midday/invoice/token";
+import { generateToken } from "@midday/deal/token";
 import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import { nanoid } from "nanoid";
@@ -77,7 +77,7 @@ export const getMerchantById = async (
       // Portal fields
       portalEnabled: merchants.portalEnabled,
       portalId: merchants.portalId,
-      invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
+      dealCount: sql<number>`cast(count(${deals.id}) as int)`,
       tags: sql<MerchantTag[]>`
         coalesce(
           json_agg(
@@ -94,7 +94,7 @@ export const getMerchantById = async (
     .where(
       and(eq(merchants.id, params.id), eq(merchants.teamId, params.teamId)),
     )
-    .leftJoin(invoices, eq(invoices.merchantId, merchants.id))
+    .leftJoin(deals, eq(deals.merchantId, merchants.id))
     .leftJoin(merchantTags, eq(merchantTags.merchantId, merchants.id))
     .leftJoin(tags, eq(tags.id, merchantTags.tagId))
     .groupBy(merchants.id);
@@ -189,14 +189,14 @@ export const getMerchants = async (
       // Portal fields
       portalEnabled: merchants.portalEnabled,
       portalId: merchants.portalId,
-      invoiceCount: sql<number>`cast(count(distinct ${invoices.id}) as int)`,
-      // Financial metrics (invoices)
-      totalRevenue: sql<number>`coalesce(sum(case when ${invoices.status} = 'paid' then ${invoices.amount} else 0 end), 0)`,
-      outstandingAmount: sql<number>`coalesce(sum(case when ${invoices.status} in ('unpaid', 'overdue') then ${invoices.amount} else 0 end), 0)`,
-      lastInvoiceDate: sql<string | null>`max(${invoices.issueDate})`,
-      invoiceCurrency: sql<
+      dealCount: sql<number>`cast(count(distinct ${deals.id}) as int)`,
+      // Financial metrics (deals)
+      totalRevenue: sql<number>`coalesce(sum(case when ${deals.status} = 'paid' then ${deals.amount} else 0 end), 0)`,
+      outstandingAmount: sql<number>`coalesce(sum(case when ${deals.status} in ('unpaid', 'overdue') then ${deals.amount} else 0 end), 0)`,
+      lastDealDate: sql<string | null>`max(${deals.issueDate})`,
+      dealCurrency: sql<
         string | null
-      >`(array_agg(${invoices.currency}) filter (where ${invoices.currency} is not null))[1]`,
+      >`(array_agg(${deals.currency}) filter (where ${deals.currency} is not null))[1]`,
       // MCA deal aggregates (scalar subqueries to avoid cartesian product with other JOINs)
       dealCount: sql<number>`(select cast(count(*) as int) from mca_deals where mca_deals.merchant_id = ${merchants.id})`,
       activeDealCount: sql<number>`(select cast(count(*) as int) from mca_deals where mca_deals.merchant_id = ${merchants.id} and mca_deals.status = 'active')`,
@@ -218,7 +218,7 @@ export const getMerchants = async (
       `.as("tags"),
     })
     .from(merchants)
-    .leftJoin(invoices, eq(invoices.merchantId, merchants.id))
+    .leftJoin(deals, eq(deals.merchantId, merchants.id))
     .leftJoin(merchantTags, eq(merchantTags.merchantId, merchants.id))
     .leftJoin(tags, eq(tags.id, merchantTags.tagId))
     .where(and(...whereConditions))
@@ -245,11 +245,11 @@ export const getMerchants = async (
       isAscending
         ? query.orderBy(asc(merchants.email))
         : query.orderBy(desc(merchants.email));
-    } else if (column === "invoices") {
-      // Sort by invoice count
+    } else if (column === "deals") {
+      // Sort by deal count
       isAscending
-        ? query.orderBy(asc(sql`count(${invoices.id})`))
-        : query.orderBy(desc(sql`count(${invoices.id})`));
+        ? query.orderBy(asc(sql`count(${deals.id})`))
+        : query.orderBy(desc(sql`count(${deals.id})`));
     } else if (column === "tags") {
       // Sort by first tag name (alphabetically)
       isAscending
@@ -267,30 +267,30 @@ export const getMerchants = async (
       isAscending
         ? query.orderBy(
             asc(
-              sql`coalesce(sum(case when ${invoices.status} = 'paid' then ${invoices.amount} else 0 end), 0)`,
+              sql`coalesce(sum(case when ${deals.status} = 'paid' then ${deals.amount} else 0 end), 0)`,
             ),
           )
         : query.orderBy(
             desc(
-              sql`coalesce(sum(case when ${invoices.status} = 'paid' then ${invoices.amount} else 0 end), 0)`,
+              sql`coalesce(sum(case when ${deals.status} = 'paid' then ${deals.amount} else 0 end), 0)`,
             ),
           );
     } else if (column === "outstanding") {
       isAscending
         ? query.orderBy(
             asc(
-              sql`coalesce(sum(case when ${invoices.status} in ('unpaid', 'overdue') then ${invoices.amount} else 0 end), 0)`,
+              sql`coalesce(sum(case when ${deals.status} in ('unpaid', 'overdue') then ${deals.amount} else 0 end), 0)`,
             ),
           )
         : query.orderBy(
             desc(
-              sql`coalesce(sum(case when ${invoices.status} in ('unpaid', 'overdue') then ${invoices.amount} else 0 end), 0)`,
+              sql`coalesce(sum(case when ${deals.status} in ('unpaid', 'overdue') then ${deals.amount} else 0 end), 0)`,
             ),
           );
-    } else if (column === "last_invoice") {
+    } else if (column === "last_deal") {
       isAscending
-        ? query.orderBy(asc(sql`max(${invoices.issueDate})`))
-        : query.orderBy(desc(sql`max(${invoices.issueDate})`));
+        ? query.orderBy(asc(sql`max(${deals.issueDate})`))
+        : query.orderBy(desc(sql`max(${deals.issueDate})`));
     } else if (column === "deals") {
       isAscending
         ? query.orderBy(asc(sql`(select count(*) from mca_deals where mca_deals.merchant_id = ${merchants.id})`))
@@ -501,7 +501,7 @@ export const upsertMerchant = async (
       contact: merchants.contact,
       portalEnabled: merchants.portalEnabled,
       portalId: merchants.portalId,
-      invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
+      dealCount: sql<number>`cast(count(${deals.id}) as int)`,
       tags: sql<MerchantTag[]>`
           coalesce(
             json_agg(
@@ -516,7 +516,7 @@ export const upsertMerchant = async (
     })
     .from(merchants)
     .where(and(eq(merchants.id, merchantId), eq(merchants.teamId, teamId)))
-    .leftJoin(invoices, eq(invoices.merchantId, merchants.id))
+    .leftJoin(deals, eq(deals.merchantId, merchants.id))
     .leftJoin(merchantTags, eq(merchantTags.merchantId, merchants.id))
     .leftJoin(tags, eq(tags.id, merchantTags.tagId))
     .groupBy(merchants.id);
@@ -551,14 +551,14 @@ export const deleteMerchant = async (
   return merchantToDelete;
 };
 
-export type GetMerchantInvoiceSummaryParams = {
+export type GetMerchantDealSummaryParams = {
   merchantId: string;
   teamId: string;
 };
 
-export async function getMerchantInvoiceSummary(
+export async function getMerchantDealSummary(
   db: Database,
-  params: GetMerchantInvoiceSummaryParams,
+  params: GetMerchantDealSummaryParams,
 ) {
   const { merchantId, teamId } = params;
 
@@ -571,24 +571,24 @@ export async function getMerchantInvoiceSummary(
 
   const baseCurrency = team?.baseCurrency || "USD";
 
-  // Get all invoices for this merchant
-  const invoiceData = await db
+  // Get all deals for this merchant
+  const dealData = await db
     .select({
-      amount: invoices.amount,
-      currency: invoices.currency,
-      status: invoices.status,
+      amount: deals.amount,
+      currency: deals.currency,
+      status: deals.status,
     })
-    .from(invoices)
+    .from(deals)
     .where(
-      and(eq(invoices.merchantId, merchantId), eq(invoices.teamId, teamId)),
+      and(eq(deals.merchantId, merchantId), eq(deals.teamId, teamId)),
     );
 
-  if (invoiceData.length === 0) {
+  if (dealData.length === 0) {
     return {
       totalAmount: 0,
       paidAmount: 0,
       outstandingAmount: 0,
-      invoiceCount: 0,
+      dealCount: 0,
       currency: baseCurrency,
     };
   }
@@ -596,7 +596,7 @@ export async function getMerchantInvoiceSummary(
   // Collect unique currencies that need conversion (excluding base currency)
   const currenciesToConvert = [
     ...new Set(
-      invoiceData
+      dealData
         .map((inv) => inv.currency || baseCurrency)
         .filter((currency) => currency !== baseCurrency),
     ),
@@ -630,11 +630,11 @@ export async function getMerchantInvoiceSummary(
   let totalAmount = 0;
   let paidAmount = 0;
   let outstandingAmount = 0;
-  let invoiceCount = 0;
+  let dealCount = 0;
 
-  for (const invoice of invoiceData) {
-    const amount = Number(invoice.amount) || 0;
-    const currency = invoice.currency || baseCurrency;
+  for (const deal of dealData) {
+    const amount = Number(deal.amount) || 0;
+    const currency = deal.currency || baseCurrency;
 
     let convertedAmount = amount;
     let canConvert = true;
@@ -645,23 +645,23 @@ export async function getMerchantInvoiceSummary(
       if (exchangeRate) {
         convertedAmount = amount * exchangeRate;
       } else {
-        // Skip invoices with missing exchange rates to avoid mixing currencies
+        // Skip deals with missing exchange rates to avoid mixing currencies
         // This prevents silently producing incorrect totals
         canConvert = false;
       }
     }
 
-    // Only include invoices that can be properly converted and are paid or outstanding
-    // Draft, canceled, and scheduled invoices don't count toward financial totals
+    // Only include deals that can be properly converted and are paid or outstanding
+    // Draft, canceled, and scheduled deals don't count toward financial totals
     if (canConvert) {
-      if (invoice.status === "paid") {
+      if (deal.status === "paid") {
         paidAmount += convertedAmount;
         totalAmount += convertedAmount;
-        invoiceCount++;
-      } else if (invoice.status === "unpaid" || invoice.status === "overdue") {
+        dealCount++;
+      } else if (deal.status === "unpaid" || deal.status === "overdue") {
         outstandingAmount += convertedAmount;
         totalAmount += convertedAmount;
-        invoiceCount++;
+        dealCount++;
       }
     }
   }
@@ -670,7 +670,7 @@ export async function getMerchantInvoiceSummary(
     totalAmount: Math.round(totalAmount * 100) / 100,
     paidAmount: Math.round(paidAmount * 100) / 100,
     outstandingAmount: Math.round(outstandingAmount * 100) / 100,
-    invoiceCount,
+    dealCount,
     currency: baseCurrency,
   };
 }
@@ -766,7 +766,7 @@ export async function getMerchantByPortalId(
   return result;
 }
 
-export type GetMerchantPortalInvoicesParams = {
+export type GetMerchantPortalDealsParams = {
   merchantId: string;
   teamId: string;
   cursor?: string | null;
@@ -774,12 +774,12 @@ export type GetMerchantPortalInvoicesParams = {
 };
 
 /**
- * Get invoices for merchant portal.
- * Only returns non-draft invoices (paid, unpaid, overdue).
+ * Get deals for merchant portal.
+ * Only returns non-draft deals (paid, unpaid, overdue).
  */
-export async function getMerchantPortalInvoices(
+export async function getMerchantPortalDeals(
   db: Database,
-  params: GetMerchantPortalInvoicesParams,
+  params: GetMerchantPortalDealsParams,
 ) {
   const { merchantId, teamId, cursor, pageSize = 10 } = params;
 
@@ -787,25 +787,25 @@ export async function getMerchantPortalInvoices(
 
   const data = await db
     .select({
-      id: invoices.id,
-      invoiceNumber: invoices.invoiceNumber,
-      status: invoices.status,
-      amount: invoices.amount,
-      currency: invoices.currency,
-      issueDate: invoices.issueDate,
-      dueDate: invoices.dueDate,
-      token: invoices.token,
+      id: deals.id,
+      dealNumber: deals.dealNumber,
+      status: deals.status,
+      amount: deals.amount,
+      currency: deals.currency,
+      issueDate: deals.issueDate,
+      dueDate: deals.dueDate,
+      token: deals.token,
     })
-    .from(invoices)
+    .from(deals)
     .where(
       and(
-        eq(invoices.merchantId, merchantId),
-        eq(invoices.teamId, teamId),
+        eq(deals.merchantId, merchantId),
+        eq(deals.teamId, teamId),
         // Only show paid, unpaid, overdue (exclude draft, canceled, scheduled, refunded)
-        sql`${invoices.status} IN ('paid', 'unpaid', 'overdue')`,
+        sql`${deals.status} IN ('paid', 'unpaid', 'overdue')`,
       ),
     )
-    .orderBy(desc(invoices.issueDate))
+    .orderBy(desc(deals.issueDate))
     .limit(pageSize)
     .offset(offset);
 

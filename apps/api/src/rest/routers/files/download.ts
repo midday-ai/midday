@@ -1,11 +1,11 @@
 import type { Context } from "@api/rest/types";
-import { downloadFileSchema, downloadInvoiceSchema } from "@api/schemas/files";
+import { downloadFileSchema, downloadDealSchema } from "@api/schemas/files";
 import { createAdminClient } from "@api/services/supabase";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { getInvoiceById } from "@midday/db/queries";
+import { getDealById } from "@midday/db/queries";
 import { verifyFileKey } from "@midday/encryption";
-import { PdfTemplate, renderToStream } from "@midday/invoice";
-import { verify } from "@midday/invoice/token";
+import { PdfTemplate, renderToStream } from "@midday/deal";
+import { verify } from "@midday/deal/token";
 import { download } from "@midday/supabase/storage";
 import { HTTPException } from "hono/http-exception";
 import { publicMiddleware } from "../../middleware";
@@ -119,17 +119,17 @@ app.openapi(
   },
 );
 
-// Download invoice route - public when using invoice token, protected when using id
+// Download deal route - public when using deal token, protected when using id
 // Apply public middleware first, then conditionally apply auth if ID is used
-const downloadInvoiceApp = new OpenAPIHono<Context>();
+const downloadDealApp = new OpenAPIHono<Context>();
 
 // Apply public middleware (database access)
-downloadInvoiceApp.use(...publicMiddleware);
+downloadDealApp.use(...publicMiddleware);
 
 // Conditionally apply file key auth middleware if ID is provided
 // When ID is used, authentication is required via fk (fileKey) query parameter
-// When only invoice token is provided, it's public access (no auth middleware)
-downloadInvoiceApp.use(async (c, next) => {
+// When only deal token is provided, it's public access (no auth middleware)
+downloadDealApp.use(async (c, next) => {
   const query = c.req.query();
   // If ID is provided, require file key authentication
   if (query.id) {
@@ -138,7 +138,7 @@ downloadInvoiceApp.use(async (c, next) => {
     if (!fk) {
       throw new HTTPException(401, {
         message:
-          "File key (fk) query parameter is required when using invoice ID.",
+          "File key (fk) query parameter is required when using deal ID.",
       });
     }
 
@@ -154,26 +154,26 @@ downloadInvoiceApp.use(async (c, next) => {
     // Set teamId in context for downstream handlers
     c.set("teamId", tokenTeamId);
   }
-  // Otherwise, continue without auth requirement (public access via invoice token)
+  // Otherwise, continue without auth requirement (public access via deal token)
   return next();
 });
 
-downloadInvoiceApp.openapi(
+downloadDealApp.openapi(
   createRoute({
     method: "get",
-    path: "/invoice",
-    summary: "Download invoice PDF",
-    operationId: "downloadInvoice",
-    "x-speakeasy-name-override": "downloadInvoice",
+    path: "/deal",
+    summary: "Download deal PDF",
+    operationId: "downloadDeal",
+    "x-speakeasy-name-override": "downloadDeal",
     description:
-      "Downloads an invoice as a PDF. Can be accessed with an invoice ID (requires team file key via fk query parameter) or invoice token (public access).",
+      "Downloads a deal as a PDF. Can be accessed with a deal ID (requires team file key via fk query parameter) or deal token (public access).",
     tags: ["Files"],
     request: {
-      query: downloadInvoiceSchema,
+      query: downloadDealSchema,
     },
     responses: {
       200: {
-        description: "Invoice PDF",
+        description: "Deal PDF",
         content: {
           "application/pdf": {
             schema: {
@@ -228,37 +228,37 @@ downloadInvoiceApp.openapi(
       });
     }
 
-    let invoiceData = null;
+    let dealData = null;
 
     if (id) {
       // Require authentication for ID-based access
       const teamId = c.get("teamId");
       if (!teamId) {
         throw new HTTPException(401, {
-          message: "Authentication required when using invoice ID",
+          message: "Authentication required when using deal ID",
         });
       }
 
-      invoiceData = await getInvoiceById(db, {
+      dealData = await getDealById(db, {
         id,
         teamId,
       });
     } else if (token) {
-      // Public access with token - verify token and get invoice
+      // Public access with token - verify token and get deal
       try {
-        const { id: invoiceId } = (await verify(decodeURIComponent(token))) as {
+        const { id: dealId } = (await verify(decodeURIComponent(token))) as {
           id: string;
         };
 
-        if (!invoiceId) {
-          throw new HTTPException(404, { message: "Invoice not found" });
+        if (!dealId) {
+          throw new HTTPException(404, { message: "Deal not found" });
         }
 
-        invoiceData = await getInvoiceById(db, {
-          id: invoiceId,
+        dealData = await getDealById(db, {
+          id: dealId,
         });
       } catch (error) {
-        // Re-throw HTTPException as-is (e.g., "Invoice not found" from line 253)
+        // Re-throw HTTPException as-is (e.g., "Deal not found" from line above)
         if (error instanceof HTTPException) {
           throw error;
         }
@@ -267,20 +267,20 @@ downloadInvoiceApp.openapi(
       }
     }
 
-    if (!invoiceData) {
-      throw new HTTPException(404, { message: "Invoice not found" });
+    if (!dealData) {
+      throw new HTTPException(404, { message: "Deal not found" });
     }
 
-    // For receipt, validate that invoice is paid
-    if (isReceipt && invoiceData.status !== "paid") {
+    // For receipt, validate that deal is paid
+    if (isReceipt && dealData.status !== "paid") {
       throw new HTTPException(400, {
-        message: "Receipt is only available for paid invoices",
+        message: "Receipt is only available for paid deals",
       });
     }
 
     try {
       const stream = await renderToStream(
-        await PdfTemplate(invoiceData, { isReceipt }),
+        await PdfTemplate(dealData, { isReceipt }),
       );
 
       // Convert stream to blob
@@ -293,15 +293,15 @@ downloadInvoiceApp.openapi(
 
       if (!preview) {
         const filename = isReceipt
-          ? `receipt-${invoiceData.invoiceNumber}.pdf`
-          : `${invoiceData.invoiceNumber}.pdf`;
+          ? `receipt-${dealData.dealNumber}.pdf`
+          : `${dealData.dealNumber}.pdf`;
         headers["Content-Disposition"] = `attachment; filename="${filename}"`;
       }
 
       return new Response(blob, { headers });
     } catch (error: unknown) {
       throw new HTTPException(500, {
-        message: `Failed to generate ${isReceipt ? "receipt" : "invoice"} PDF: ${
+        message: `Failed to generate ${isReceipt ? "receipt" : "deal"} PDF: ${
           error instanceof Error ? error.message : String(error)
         }`,
       });
@@ -309,7 +309,7 @@ downloadInvoiceApp.openapi(
   },
 );
 
-// Mount download invoice route
-app.route("/", downloadInvoiceApp);
+// Mount download deal route
+app.route("/", downloadDealApp);
 
 export { app as downloadRouter };

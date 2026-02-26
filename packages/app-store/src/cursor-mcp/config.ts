@@ -12,7 +12,7 @@ export default {
 
 **What you can do:**
 - Track time and log expenses without leaving your editor
-- Ask about transactions, invoices, and customers
+- Ask about transactions, deals, and customers
 - Generate financial reports and summaries
 - Query your business data using natural language
 

@@ -3,7 +3,7 @@
 import { CopyInput } from "@/components/copy-input";
 import { OpenURL } from "@/components/open-url";
 import { useMerchantParams } from "@/hooks/use-merchant-params";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useDealParams } from "@/hooks/use-deal-params";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
@@ -51,7 +51,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MerchantDetailsSkeleton } from "./merchant-details.loading";
 import { FormatAmount } from "./format-amount";
-import { InvoiceStatus } from "./invoice-status";
+import { DealStatus } from "./deal-status";
 
 // Format timezone with local time and relative difference
 function formatTimezoneWithLocalTime(timezone: string): {
@@ -97,7 +97,7 @@ export function MerchantDetails() {
   const queryClient = useQueryClient();
   const { data: user } = useUserQuery();
   const { merchantId, setParams } = useMerchantParams();
-  const { setParams: setInvoiceParams } = useInvoiceParams();
+  const { setParams: setDealParams } = useDealParams();
   const { toast } = useToast();
   const dropdownContainerRef = useRef<HTMLDivElement>(null!);
 
@@ -252,7 +252,7 @@ export function MerchantDetails() {
     },
   });
 
-  const infiniteQueryOptions = trpc.invoice.get.infiniteQueryOptions(
+  const infiniteQueryOptions = trpc.deal.get.infiniteQueryOptions(
     {
       merchants: merchantId ? [merchantId] : undefined,
       pageSize: 5,
@@ -263,7 +263,7 @@ export function MerchantDetails() {
   );
 
   const {
-    data: invoicesData,
+    data: dealsData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -272,27 +272,27 @@ export function MerchantDetails() {
     enabled: isOpen,
   });
 
-  const invoices = useMemo(() => {
-    return invoicesData?.pages.flatMap((page) => page.data) ?? [];
-  }, [invoicesData]);
+  const deals = useMemo(() => {
+    return dealsData?.pages.flatMap((page) => page.data) ?? [];
+  }, [dealsData]);
 
-  // Get invoice summary from server
+  // Get deal summary from server
   const { data: summary } = useQuery({
-    ...trpc.merchants.getInvoiceSummary.queryOptions({ id: merchantId! }),
+    ...trpc.merchants.getDealSummary.queryOptions({ id: merchantId! }),
     enabled: isOpen && Boolean(merchantId),
   });
 
-  const handleDownloadInvoice = (invoiceId: string) => {
+  const handleDownloadDeal = (dealId: string) => {
     if (!user?.fileKey) {
       console.error("File key not available");
       return;
     }
     const url = new URL(
-      `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice`,
+      `${process.env.NEXT_PUBLIC_API_URL}/files/download/deal`,
     );
-    url.searchParams.set("id", invoiceId);
+    url.searchParams.set("id", dealId);
     url.searchParams.set("fk", user.fileKey);
-    downloadFile(url.toString(), "invoice.pdf");
+    downloadFile(url.toString(), "deal.pdf");
   };
 
   if (isLoadingMerchant) {
@@ -1048,7 +1048,7 @@ export function MerchantDetails() {
               <div>
                 <h3 className="text-[16px] font-medium">Merchant Portal</h3>
                 <p className="text-[12px] text-[#606060] mt-1">
-                  Allow this merchant to view their invoices
+                  Allow this merchant to view their deals
                 </p>
               </div>
               <Switch
@@ -1154,22 +1154,22 @@ export function MerchantDetails() {
                   </div>
                   <div className="border border-border px-4 py-3">
                     <div className="text-[12px] text-[#606060] mb-2">
-                      Invoices
+                      Deals
                     </div>
                     <div className="text-[18px] font-medium">
-                      {summary?.invoiceCount ?? 0}
+                      {summary?.dealCount ?? 0}
                     </div>
                   </div>
                 </div>
 
-                {/* Invoice Table */}
-                {invoices.length > 0 ? (
+                {/* Deal Table */}
+                {deals.length > 0 ? (
                   <div ref={dropdownContainerRef}>
                     <Table>
                       <TableHeader className="bg-muted/50">
                         <TableRow>
                           <TableHead className="text-[12px] font-medium text-[#606060]">
-                            Invoice
+                            Deal
                           </TableHead>
                           <TableHead className="text-[12px] font-medium text-[#606060]">
                             Date
@@ -1192,52 +1192,52 @@ export function MerchantDetails() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {invoices.map((invoice) => (
+                        {deals.map((deal) => (
                           <TableRow
-                            key={invoice.id}
+                            key={deal.id}
                             className="cursor-pointer hover:bg-muted/50"
                             onClick={() => {
                               // Close merchant details sheet
                               setParams({ merchantId: null, details: null });
-                              // Open invoice details
-                              setInvoiceParams({
-                                invoiceId: invoice.id,
+                              // Open deal details
+                              setDealParams({
+                                dealId: deal.id,
                                 type: "details",
                               });
                             }}
                           >
                             <TableCell className="text-[12px] whitespace-nowrap min-w-[100px]">
-                              {invoice.invoiceNumber || "Draft"}
+                              {deal.dealNumber || "Draft"}
                             </TableCell>
                             <TableCell className="text-[12px] whitespace-nowrap">
-                              {invoice.issueDate
+                              {deal.issueDate
                                 ? format(
-                                    new TZDate(invoice.issueDate, "UTC"),
+                                    new TZDate(deal.issueDate, "UTC"),
                                     "MMM d",
                                   )
                                 : "-"}
                             </TableCell>
                             <TableCell className="text-[12px] whitespace-nowrap">
-                              {invoice.dueDate
+                              {deal.dueDate
                                 ? format(
-                                    new TZDate(invoice.dueDate, "UTC"),
+                                    new TZDate(deal.dueDate, "UTC"),
                                     "MMM d",
                                   )
                                 : "-"}
                             </TableCell>
                             <TableCell className="text-[12px] whitespace-nowrap">
-                              {invoice.amount != null && invoice.currency ? (
+                              {deal.amount != null && deal.currency ? (
                                 <FormatAmount
-                                  amount={invoice.amount}
-                                  currency={invoice.currency}
+                                  amount={deal.amount}
+                                  currency={deal.currency}
                                 />
                               ) : (
                                 "-"
                               )}
                             </TableCell>
                             <TableCell className="text-[12px] whitespace-nowrap">
-                              <InvoiceStatus
-                                status={invoice.status as any}
+                              <DealStatus
+                                status={deal.status as any}
                                 className="text-xs"
                                 textOnly
                               />
@@ -1262,11 +1262,11 @@ export function MerchantDetails() {
                                   align="end"
                                   className="z-[100]"
                                 >
-                                  {invoice.status !== "draft" ? (
+                                  {deal.status !== "draft" ? (
                                     <DropdownMenuItem
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleDownloadInvoice(invoice.id);
+                                        handleDownloadDeal(deal.id);
                                       }}
                                     >
                                       Download
@@ -1288,10 +1288,10 @@ export function MerchantDetails() {
                   <div className="flex items-center justify-center py-12">
                     <div className="flex flex-col items-center">
                       <div className="text-center mb-6 space-y-2">
-                        <h2 className="font-medium text-sm">No invoices</h2>
+                        <h2 className="font-medium text-sm">No deals</h2>
                         <p className="text-[#606060] text-xs">
-                          This merchant doesn't have any invoices yet. <br />
-                          Create your first invoice for them.
+                          This merchant doesn't have any deals yet. <br />
+                          Create your first deal for them.
                         </p>
                       </div>
 
@@ -1300,14 +1300,14 @@ export function MerchantDetails() {
                         onClick={() => {
                           // Close merchant details sheet
                           setParams({ merchantId: null, details: null });
-                          // Open invoice creation with merchant pre-selected
-                          setInvoiceParams({
+                          // Open deal creation with merchant pre-selected
+                          setDealParams({
                             type: "create",
                             selectedMerchantId: merchantId!,
                           });
                         }}
                       >
-                        Create Invoice
+                        Create Deal
                       </Button>
                     </div>
                   </div>

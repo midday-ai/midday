@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 
 /**
- * Hook for updating invoice templates with automatic templateId injection.
+ * Hook for updating deal templates with automatic templateId injection.
  * DRYs up the repeated pattern of:
  * 1. Getting templateId from form context
  * 2. Creating the upsert mutation
@@ -24,10 +24,10 @@ export function useTemplateUpdate() {
   const templateId = watch("template.id") as string | undefined;
 
   const mutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions({
+    trpc.dealTemplate.upsert.mutationOptions({
       onSuccess: (data) => {
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceTemplate.list.queryKey(),
+          queryKey: trpc.dealTemplate.list.queryKey(),
         });
 
         // If a new template was created and the form still doesn't have a template ID,

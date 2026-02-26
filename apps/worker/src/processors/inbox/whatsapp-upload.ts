@@ -189,8 +189,8 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
         displayName: result.name ?? undefined,
         website: result.website ?? undefined,
         date: result.date ?? undefined,
-        type: result.type as "invoice" | "expense" | null | undefined,
-        invoiceNumber: result.invoice_number ?? undefined,
+        type: result.type as "deal" | "expense" | null | undefined,
+        dealNumber: result.invoice_number ?? undefined,
         status: "analyzing",
       });
 
@@ -222,7 +222,7 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
           };
 
           const documentType =
-            updatedInbox.type === "invoice" ? "Invoice" : "Receipt";
+            updatedInbox.type === "deal" ? "Deal" : "Receipt";
 
           const formattedDate = updatedInbox.date
             ? format(parseISO(updatedInbox.date), "MMM d, yyyy")
@@ -240,11 +240,11 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
             date: formattedDate,
             amount: amountValue,
             currency: updatedInbox.currency || undefined,
-            invoiceNumber:
-              updatedInbox.type === "invoice" &&
-              "invoiceNumber" in updatedInbox &&
-              updatedInbox.invoiceNumber
-                ? updatedInbox.invoiceNumber
+            dealNumber:
+              updatedInbox.type === "deal" &&
+              "dealNumber" in updatedInbox &&
+              updatedInbox.dealNumber
+                ? updatedInbox.dealNumber
                 : undefined,
           });
 

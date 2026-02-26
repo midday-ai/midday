@@ -5,7 +5,7 @@ export default {
   content: [
     "./src/**/*.{ts,tsx}",
     "../../packages/ui/src/**/*.{ts,tsx}",
-    "../../packages/invoice/src/**/*.{ts,tsx}",
+    "../../packages/deal/src/**/*.{ts,tsx}",
   ],
   presets: [baseConfig],
 } satisfies Config;

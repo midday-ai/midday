@@ -1,7 +1,7 @@
 import { format, parseISO } from "date-fns";
 
 type FormatAmountParams = {
-  currency: string;
+  currency?: string;
   amount: number;
   locale?: string;
   minimumFractionDigits?: number;
@@ -9,16 +9,12 @@ type FormatAmountParams = {
 };
 
 export function formatAmount({
-  currency,
+  currency = "USD",
   amount,
   locale = "en-US",
   minimumFractionDigits,
   maximumFractionDigits,
 }: FormatAmountParams) {
-  if (!currency) {
-    return;
-  }
-
   return Intl.NumberFormat(locale, {
     style: "currency",
     currency,

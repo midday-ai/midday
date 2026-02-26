@@ -106,7 +106,7 @@ export function FilterList({
 
       case "recurring": {
         const recurringValue = value as FilterValue["recurring"];
-        // Handle boolean for invoice filters
+        // Handle boolean for deal filters
         if (typeof recurringValue === "boolean") {
           return recurringValue ? "Recurring" : "One-time";
         }

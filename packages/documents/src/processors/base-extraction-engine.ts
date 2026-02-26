@@ -55,7 +55,7 @@ export interface ExtractionOptions {
 
 /**
  * Base extraction engine that handles multi-pass extraction strategy
- * for both invoices and receipts
+ * for both deals and receipts
  */
 export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
   protected config: ExtractionConfig<T>;
@@ -378,7 +378,7 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
             // Use format-aware prompt if format is available
             let fieldPrompt = createFieldSpecificPrompt(
               field,
-              this.getDocumentType() as "invoice" | "receipt",
+              this.getDocumentType() as "deal" | "receipt",
               companyName,
             );
 
@@ -465,7 +465,7 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
             // Use format-aware prompt if format is available
             let fieldPrompt = createFieldSpecificPrompt(
               field,
-              this.getDocumentType() as "invoice" | "receipt",
+              this.getDocumentType() as "deal" | "receipt",
               companyName,
             );
 

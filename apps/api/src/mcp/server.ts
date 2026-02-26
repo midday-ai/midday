@@ -6,7 +6,7 @@ import {
   registerMerchantTools,
   registerDocumentTools,
   registerInboxTools,
-  registerInvoiceTools,
+  registerDealTools,
   registerReportTools,
   registerSearchTools,
   registerTagTools,
@@ -30,7 +30,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
 
   // Register tools by domain
   registerTransactionTools(server, ctx);
-  registerInvoiceTools(server, ctx);
+  registerDealTools(server, ctx);
   registerMerchantTools(server, ctx);
   registerBankAccountTools(server, ctx);
   registerDocumentTools(server, ctx);

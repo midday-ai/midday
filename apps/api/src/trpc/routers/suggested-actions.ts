@@ -37,8 +37,8 @@ const SUGGESTED_ACTIONS_CONFIG = [
     },
   },
   {
-    id: "get-invoice-payment-analysis",
-    toolName: "getInvoicePaymentAnalysis",
+    id: "get-deal-payment-analysis",
+    toolName: "getDealPaymentAnalysis",
     toolParams: {
       showCanvas: true,
     },
@@ -52,8 +52,8 @@ const SUGGESTED_ACTIONS_CONFIG = [
   },
   // Secondary: Financial analytics
   {
-    id: "get-invoices",
-    toolName: "getInvoices",
+    id: "get-deals",
+    toolName: "getDeals",
     toolParams: {
       pageSize: 10,
       sort: ["createdAt", "desc"],

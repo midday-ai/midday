@@ -75,7 +75,7 @@ export default {
     inbox: "Inbox",
     imports: "Imports",
     transactions: "Transactions",
-    invoices: "Invoices",
+    deals: "Deals",
   },
   mfa_status: {
     verified: "Verified",
@@ -92,7 +92,7 @@ export default {
   notifications: {
     categories: {
       transactions: "Transactions",
-      invoices: "Invoices",
+      deals: "Deals",
       inbox: "Inbox",
     },
     transactions_created: {
@@ -103,121 +103,121 @@ export default {
       "title_many#other": "{count} transactions imported",
       single_transaction: "New transaction from {name} {amount} on {date}",
     },
-    invoice_paid: {
+    deal_paid: {
       name: "Paid",
-      description: "Get notified when invoices are paid",
-      title: "Invoice payment received",
-      subtitle: "Your invoice has been paid",
+      description: "Get notified when deals are paid",
+      title: "Deal payment received",
+      subtitle: "Your deal has been paid",
       manual_with_date:
-        "Invoice {invoiceNumber} from {merchantName} marked as paid on {date}",
+        "Deal {dealNumber} from {merchantName} marked as paid on {date}",
       manual_with_date_no_merchant:
-        "Invoice {invoiceNumber} marked as paid on {date}",
-      manual: "Invoice {invoiceNumber} from {merchantName} marked as paid",
-      manual_no_merchant: "Invoice {invoiceNumber} marked as paid",
-      automatic: "Payment received for invoice {invoiceNumber}",
+        "Deal {dealNumber} marked as paid on {date}",
+      manual: "Deal {dealNumber} from {merchantName} marked as paid",
+      manual_no_merchant: "Deal {dealNumber} marked as paid",
+      automatic: "Payment received for deal {dealNumber}",
     },
-    invoice_overdue: {
+    deal_overdue: {
       name: "Overdue",
-      description: "Get notified when invoices become overdue",
-      title: "Invoice is overdue",
+      description: "Get notified when deals become overdue",
+      title: "Deal is overdue",
       subtitle: "Payment is past due date",
-      with_number: "Invoice {invoiceNumber} is now overdue",
+      with_number: "Deal {dealNumber} is now overdue",
     },
-    invoice_scheduled: {
+    deal_scheduled: {
       name: "Scheduled",
-      description: "Get notified when invoices are scheduled for sending",
-      title: "Invoice scheduled",
-      subtitle: "Invoice has been scheduled for automatic delivery",
+      description: "Get notified when deals are scheduled for sending",
+      title: "Deal scheduled",
+      subtitle: "Deal has been scheduled for automatic delivery",
       with_merchant:
-        "Invoice {invoiceNumber} scheduled to be sent to {merchantName} on {date} at {time}",
+        "Deal {dealNumber} scheduled to be sent to {merchantName} on {date} at {time}",
       without_merchant:
-        "Invoice {invoiceNumber} scheduled for {date} at {time}",
-      simple: "Invoice {invoiceNumber} has been scheduled",
+        "Deal {dealNumber} scheduled for {date} at {time}",
+      simple: "Deal {dealNumber} has been scheduled",
     },
-    invoice_sent: {
+    deal_sent: {
       name: "Sent",
-      description: "Get notified when invoices are successfully sent",
-      title: "Invoice sent",
-      subtitle: "Invoice has been delivered to merchant",
-      with_merchant: "Invoice {invoiceNumber} sent to {merchantName}",
-      without_merchant: "Invoice {invoiceNumber} has been sent",
+      description: "Get notified when deals are successfully sent",
+      title: "Deal sent",
+      subtitle: "Deal has been delivered to merchant",
+      with_merchant: "Deal {dealNumber} sent to {merchantName}",
+      without_merchant: "Deal {dealNumber} has been sent",
     },
-    invoice_reminder_sent: {
+    deal_reminder_sent: {
       name: "Reminder Sent",
-      description: "Get notified when invoice reminders are sent",
-      title: "Invoice reminder sent",
+      description: "Get notified when deal reminders are sent",
+      title: "Deal reminder sent",
       subtitle: "Payment reminder has been sent to merchant",
       with_merchant:
-        "Payment reminder sent to {merchantName} for invoice {invoiceNumber}",
-      without_merchant: "Payment reminder sent for invoice {invoiceNumber}",
+        "Payment reminder sent to {merchantName} for deal {dealNumber}",
+      without_merchant: "Payment reminder sent for deal {dealNumber}",
     },
 
-    invoice_cancelled: {
+    deal_cancelled: {
       name: "Cancelled",
-      description: "Get notified when invoices are cancelled",
-      title: "Invoice cancelled",
-      subtitle: "Invoice has been cancelled",
+      description: "Get notified when deals are cancelled",
+      title: "Deal cancelled",
+      subtitle: "Deal has been cancelled",
       with_merchant:
-        "Invoice {invoiceNumber} for {merchantName} has been cancelled",
-      without_merchant: "Invoice {invoiceNumber} has been cancelled",
+        "Deal {dealNumber} for {merchantName} has been cancelled",
+      without_merchant: "Deal {dealNumber} has been cancelled",
     },
-    invoice_created: {
+    deal_created: {
       name: "Created",
-      description: "Get notified when new invoices are created",
-      title: "Invoice created",
-      subtitle: "A new invoice has been created",
+      description: "Get notified when new deals are created",
+      title: "Deal created",
+      subtitle: "A new deal has been created",
       with_merchant_and_amount:
-        "Invoice {invoiceNumber} created for {merchantName} - {amount}",
-      with_merchant: "Invoice {invoiceNumber} created for {merchantName}",
-      without_merchant: "Invoice {invoiceNumber} has been created",
+        "Deal {dealNumber} created for {merchantName} - {amount}",
+      with_merchant: "Deal {dealNumber} created for {merchantName}",
+      without_merchant: "Deal {dealNumber} has been created",
     },
-    invoice_refunded: {
+    deal_refunded: {
       name: "Refunded",
-      description: "Get notified when invoice payments are refunded",
-      title: "Invoice refunded",
-      subtitle: "Invoice payment has been refunded",
+      description: "Get notified when deal payments are refunded",
+      title: "Deal refunded",
+      subtitle: "Deal payment has been refunded",
       with_merchant:
-        "Invoice {invoiceNumber} for {merchantName} has been refunded",
-      without_merchant: "Invoice {invoiceNumber} has been refunded",
+        "Deal {dealNumber} for {merchantName} has been refunded",
+      without_merchant: "Deal {dealNumber} has been refunded",
     },
     recurring_series_started: {
       name: "Recurring Series Started",
-      description: "Get notified when a new recurring invoice series begins",
-      title: "Recurring invoice series started",
+      description: "Get notified when a new recurring deal series begins",
+      title: "Recurring deal series started",
       with_merchant_and_count:
-        "Started {frequency} recurring series for {merchantName} ({count} invoices)",
+        "Started {frequency} recurring series for {merchantName} ({count} deals)",
       with_merchant: "Started {frequency} recurring series for {merchantName}",
-      with_frequency: "Started {frequency} recurring invoice series",
+      with_frequency: "Started {frequency} recurring deal series",
     },
     recurring_series_completed: {
       name: "Recurring Series Completed",
-      description: "Get notified when a recurring invoice series finishes",
-      title: "Recurring invoice series completed",
+      description: "Get notified when a recurring deal series finishes",
+      title: "Recurring deal series completed",
       with_merchant_and_count:
-        "Recurring series for {merchantName} completed ({count} invoices generated)",
+        "Recurring series for {merchantName} completed ({count} deals generated)",
       with_count:
-        "Recurring invoice series completed ({count} invoices generated)",
+        "Recurring deal series completed ({count} deals generated)",
     },
     recurring_series_paused: {
       name: "Recurring Series Paused",
-      description: "Get notified when a recurring invoice series is paused",
-      title: "Recurring invoice series paused",
+      description: "Get notified when a recurring deal series is paused",
+      title: "Recurring deal series paused",
       with_merchant: "Recurring series for {merchantName} has been paused",
       auto_failure_with_merchant:
         "Recurring series for {merchantName} paused after {failureCount} failed attempts",
       auto_failure:
         "Recurring series paused after {failureCount} failed attempts",
     },
-    recurring_invoice_upcoming: {
-      name: "Upcoming Recurring Invoice",
+    recurring_deal_upcoming: {
+      name: "Upcoming Recurring Deal",
       description:
-        "Get notified 24 hours before a recurring invoice is generated",
-      title: "Upcoming invoice generation",
-      batch: "You have {count} invoice(s) scheduled for tomorrow",
+        "Get notified 24 hours before a recurring deal is generated",
+      title: "Upcoming deal generation",
+      batch: "You have {count} deal(s) scheduled for tomorrow",
       single_with_details:
-        "A {amount} invoice for {merchantName} is scheduled for tomorrow",
+        "A {amount} deal for {merchantName} is scheduled for tomorrow",
       single_with_merchant:
-        "An invoice for {merchantName} is scheduled for tomorrow",
+        "An deal for {merchantName} is scheduled for tomorrow",
     },
     inbox_new: {
       name: "New Inbox Items",
@@ -318,7 +318,7 @@ export default {
     budget_reports: "Budget Reports",
     audit_reports: "Audit Reports",
     tax_returns: "Tax Returns",
-    invoices_and_receipts: "Invoices & Receipts",
+    deals_and_receipts: "Deals & Receipts",
     employee_handbook: "Employee Handbook",
     payroll_records: "Payroll Records",
     performance_reviews: "Performance Reviews",
@@ -384,7 +384,7 @@ export default {
     e_learning_materials: "E-learning Materials",
     competency_assessment_forms: "Competency Assessment Forms",
   },
-  invoice_status: {
+  deal_status: {
     draft: "Draft",
     overdue: "Overdue",
     paid: "Paid",
@@ -405,9 +405,9 @@ export default {
     average: "Mostly on time",
     bad: "Room for improvement",
   },
-  "invoice_count#zero": "No invoices",
-  "invoice_count#one": "1 invoice",
-  "invoice_count#other": "{count} invoices",
+  "deal_count#zero": "No deals",
+  "deal_count#one": "1 deal",
+  "deal_count#other": "{count} deals",
   account_balance: {
     total_balance: "Total balance",
   },
@@ -554,14 +554,14 @@ export default {
     credit_amount: "{amount} credit",
     open_assistant: "Open taxes assistant",
   },
-  overdue_invoices: {
-    title: "Overdue Invoices",
-    all_paid: "All invoices paid on time",
-    "description#one": "{count} invoice · Oldest {days} {dayText} overdue",
-    "description#other": "{count} invoices · Oldest {days} {dayText} overdue",
+  overdue_deals: {
+    title: "Overdue Deals",
+    all_paid: "All deals paid on time",
+    "description#one": "{count} deal · Oldest {days} {dayText} overdue",
+    "description#other": "{count} deals · Oldest {days} {dayText} overdue",
     "day#one": "day",
     "day#other": "days",
-    view_overdue: "View overdue invoices",
+    view_overdue: "View overdue deals",
   },
   portal: {
     nav: {

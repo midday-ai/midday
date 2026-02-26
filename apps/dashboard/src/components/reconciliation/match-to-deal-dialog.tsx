@@ -47,7 +47,7 @@ export function MatchToDealDialog({
   const [search, setSearch] = useState("");
 
   const { data: dealsData } = useQuery(
-    trpc.deals.list.queryOptions(
+    trpc.mcaDeals.list.queryOptions(
       { status: "active", pageSize: 100 },
       { enabled: open },
     ),

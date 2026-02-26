@@ -14,7 +14,7 @@ import {
 } from "../queries/reports";
 import {
   inbox,
-  invoices,
+  deals,
   teams,
   transactionCategories,
   transactions,
@@ -217,9 +217,9 @@ function createMockDatabase(mockData: {
     );
   };
 
-  // Helper to check if query is for invoices table
-  const isInvoicesQuery = (table: any) => {
-    return table?.name === "invoices" || table === invoices;
+  // Helper to check if query is for deals table
+  const isDealsQuery = (table: any) => {
+    return table?.name === "deals" || table === deals;
   };
 
   // Helper to check if query is for inbox table
@@ -291,11 +291,11 @@ function createMockDatabase(mockData: {
             };
           }
 
-          // Handle invoices queries
-          if (isInvoicesQuery(table)) {
+          // Handle deals queries
+          if (isDealsQuery(table)) {
             return {
               where: (conditions: any) => {
-                // Return empty array for invoices (no test data needed for balance sheet)
+                // Return empty array for deals (no test data needed for balance sheet)
                 return Promise.resolve([]);
               },
             };
@@ -741,7 +741,7 @@ const createTestTransactions = (): MockTransaction[] => [
     id: "tx-1",
     teamId: "team-1",
     date: "2024-08-01",
-    name: "Invoice Payment",
+    name: "Deal Payment",
     amount: 1000,
     currency: "GBP",
     baseAmount: 1000,
@@ -758,7 +758,7 @@ const createTestTransactions = (): MockTransaction[] => [
     id: "tx-2",
     teamId: "team-1",
     date: "2024-08-15",
-    name: "USD Invoice",
+    name: "USD Deal",
     amount: 1200,
     currency: "USD",
     baseAmount: 1000,
@@ -775,7 +775,7 @@ const createTestTransactions = (): MockTransaction[] => [
     id: "tx-3",
     teamId: "team-1",
     date: "2024-08-20",
-    name: "USD Invoice No Conversion",
+    name: "USD Deal No Conversion",
     amount: 500,
     currency: "USD",
     baseAmount: null,
@@ -1269,7 +1269,7 @@ describe("Report Calculations", () => {
  *
  * Assets include:
  * - Cash (depository + other_asset bank accounts)
- * - Accounts Receivable (unpaid invoices)
+ * - Accounts Receivable (unpaid deals)
  * - Prepaid Expenses
  * - Fixed Assets
  * - Inventory
@@ -1319,8 +1319,8 @@ describe("Balance Sheet Calculation Logic", () => {
     },
   ];
 
-  // Mock unpaid invoices (Accounts Receivable)
-  const mockUnpaidInvoices = [
+  // Mock unpaid deals (Accounts Receivable)
+  const mockUnpaidDeals = [
     { id: "inv-1", amount: 5000, currency: "USD", status: "unpaid" },
     { id: "inv-2", amount: 3000, currency: "USD", status: "overdue" },
   ];
@@ -1352,8 +1352,8 @@ describe("Balance Sheet Calculation Logic", () => {
     expect(totalCash).toBe(250000);
   });
 
-  test("accounts receivable should sum unpaid invoices", () => {
-    const accountsReceivable = mockUnpaidInvoices.reduce(
+  test("accounts receivable should sum unpaid deals", () => {
+    const accountsReceivable = mockUnpaidDeals.reduce(
       (sum, inv) => sum + inv.amount,
       0,
     );

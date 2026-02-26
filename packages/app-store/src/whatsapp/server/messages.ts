@@ -102,7 +102,7 @@ export function formatConnectionSuccess(teamName: string): string {
     .line(teamName)
     .blank()
     .section("What you can do:")
-    .bullet("Send receipts & invoices")
+    .bullet("Send receipts & deals")
     .bullet("Auto-extract data")
     .bullet("Match to transactions")
     .blank()
@@ -137,7 +137,7 @@ export function formatAlreadyConnectedMessage(): string {
     .blank()
     .line("You're already connected to Midday.")
     .blank()
-    .line("Simply send photos or PDFs of receipts and invoices here,")
+    .line("Simply send photos or PDFs of receipts and deals here,")
     .line("and I'll automatically extract the data and match them")
     .line("to your transactions.")
     .blank()
@@ -188,12 +188,12 @@ export function formatTeamNotFoundError(): string {
  * Format a document processing success message
  */
 export function formatDocumentProcessedSuccess(params: {
-  documentType: "Receipt" | "Invoice";
+  documentType: "Receipt" | "Deal";
   vendor?: string;
   date?: string;
   amount?: string;
   currency?: string;
-  invoiceNumber?: string;
+  dealNumber?: string;
   taxAmount?: string;
   taxType?: string;
 }): string {
@@ -208,8 +208,8 @@ export function formatDocumentProcessedSuccess(params: {
     builder.keyValue("Date", params.date);
   }
 
-  if (params.invoiceNumber) {
-    builder.keyValue("Invoice #", params.invoiceNumber);
+  if (params.dealNumber) {
+    builder.keyValue("Deal #", params.dealNumber);
   }
 
   if (params.amount) {

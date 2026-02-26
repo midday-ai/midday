@@ -101,7 +101,7 @@ export async function executeReadWebsite(
 15. FINANCE CONTACT: Name of CFO, Finance Director, Controller, or AP Manager
 16. FINANCE EMAIL: Look for these patterns in order of preference:
     - ap@, accounts.payable@, payable@
-    - invoices@, billing@
+    - deals@, billing@
     - finance@, accounting@
     - ar@ (accounts receivable sometimes handles both)
 
@@ -315,7 +315,7 @@ FINANCE CONTACT (prioritize department emails over personal):
 - financeContact: Name of CFO, Finance Director, Controller, or AP Manager
 - financeContactEmail: Email in priority order:
   1. ap@, accounts.payable@, payable@${input.domain}
-  2. invoices@, billing@${input.domain}
+  2. deals@, billing@${input.domain}
   3. finance@, accounting@${input.domain}
   4. Specific person's email if they handle finance
 

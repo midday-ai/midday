@@ -20,7 +20,7 @@ function getBalanceSheetTooltip(item: string): string {
   const tooltips: Record<string, string> = {
     cash: "Sum of all bank account balances (depository accounts)",
     accountsReceivable:
-      "Unpaid invoices that represent money owed to the business",
+      "Unpaid deals that represent money owed to the business",
     inventory: "Transactions categorized as inventory",
     prepaidExpenses: "Transactions categorized as prepaid expenses",
     fixedAssets: "Transactions categorized as fixed assets and equipment",
@@ -30,7 +30,7 @@ function getBalanceSheetTooltip(item: string): string {
     longTermInvestments:
       "Long-term investment transactions (currently not tracked)",
     otherAssets: "Other asset account balances",
-    accountsPayable: "Unmatched bills and vendor invoices from inbox",
+    accountsPayable: "Unmatched bills and vendor deals from inbox",
     accruedExpenses:
       "Expenses incurred but not yet paid (currently not tracked)",
     shortTermDebt: "Short-term loan obligations",

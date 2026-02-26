@@ -52,7 +52,7 @@ export function PortalEmailFromName() {
             <CardTitle>Email sender name</CardTitle>
             <CardDescription>
               The &quot;From&quot; name on emails sent to merchants (e.g.
-              invoices, portal invites, collection notices).
+              deals, portal invites, collection notices).
             </CardDescription>
           </CardHeader>
 

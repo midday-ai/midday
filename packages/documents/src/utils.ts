@@ -127,7 +127,7 @@ export function removeProtocolFromDomain(domain: string | null): string | null {
 }
 
 /**
- * Intelligently extract website from invoice/receipt data
+ * Intelligently extract website from deal/receipt data
  * Tries multiple sources: explicit website, email domain, vendor name lookup
  */
 export async function extractWebsite(
@@ -187,7 +187,7 @@ export function getDocumentTypeFromMimeType(mimetype: string): string {
   switch (mimetype) {
     case "application/pdf":
     case "application/octet-stream":
-      return "invoice";
+      return "deal";
     default:
       return "receipt";
   }

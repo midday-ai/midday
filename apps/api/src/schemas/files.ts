@@ -69,14 +69,14 @@ export const downloadFileSchema = z.object({
     }),
 });
 
-export const downloadInvoiceSchema = z.object({
+export const downloadDealSchema = z.object({
   id: z
     .string()
     .uuid()
     .optional()
     .openapi({
       description:
-        "Invoice ID (UUID). Requires team file key (fk) query parameter for authentication.",
+        "Deal ID (UUID). Requires team file key (fk) query parameter for authentication.",
       example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
       param: {
         in: "query",
@@ -89,7 +89,7 @@ export const downloadInvoiceSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Team file key for authenticated invoice access. Required when using invoice ID. This key is returned in the user data response (GET /users/me) as the `fileKey` field.",
+        "Team file key for authenticated deal access. Required when using deal ID. This key is returned in the user data response (GET /users/me) as the `fileKey` field.",
       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
       param: {
         in: "query",
@@ -101,7 +101,7 @@ export const downloadInvoiceSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Invoice access token for public access. When used alone (without id), allows public access to the invoice.",
+        "Deal access token for public access. When used alone (without id), allows public access to the deal.",
       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
       param: {
         in: "query",
@@ -124,13 +124,13 @@ export const downloadInvoiceSchema = z.object({
       },
     }),
   type: z
-    .enum(["invoice", "receipt"])
+    .enum(["deal", "receipt"])
     .optional()
-    .default("invoice")
+    .default("deal")
     .openapi({
       description:
-        "Type of document to download. Use 'receipt' to download a receipt for paid invoices.",
-      example: "invoice",
+        "Type of document to download. Use 'receipt' to download a receipt for paid deals.",
+      example: "deal",
       param: {
         in: "query",
         name: "type",

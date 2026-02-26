@@ -1,5 +1,5 @@
 import type { Database } from "@db/client";
-import { merchants, invoiceStatusEnum, invoices } from "@db/schema";
+import { merchants, dealStatusEnum, deals } from "@db/schema";
 import { parseISO } from "date-fns";
 import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
 
@@ -20,22 +20,22 @@ export async function getTopRevenueMerchant(
     .select({
       merchantId: merchants.id,
       merchantName: merchants.name,
-      totalRevenue: sql<number>`SUM(${invoices.amount})::float`,
-      currency: invoices.currency,
-      invoiceCount: sql<number>`COUNT(${invoices.id})::int`,
+      totalRevenue: sql<number>`SUM(${deals.amount})::float`,
+      currency: deals.currency,
+      dealCount: sql<number>`COUNT(${deals.id})::int`,
     })
     .from(merchants)
     .innerJoin(
-      invoices,
+      deals,
       and(
-        eq(invoices.merchantId, merchants.id),
-        gte(invoices.createdAt, thirtyDaysAgo.toISOString()),
-        inArray(invoices.status, ["paid", "unpaid", "overdue"]), // Exclude drafts
+        eq(deals.merchantId, merchants.id),
+        gte(deals.createdAt, thirtyDaysAgo.toISOString()),
+        inArray(deals.status, ["paid", "unpaid", "overdue"]), // Exclude drafts
       ),
     )
     .where(eq(merchants.teamId, teamId))
-    .groupBy(merchants.id, merchants.name, invoices.currency)
-    .orderBy(sql`SUM(${invoices.amount}) DESC`)
+    .groupBy(merchants.id, merchants.name, deals.currency)
+    .orderBy(sql`SUM(${deals.amount}) DESC`)
     .limit(1);
 
   return result[0] || null;
@@ -86,19 +86,19 @@ export async function getMerchantLifetimeValue(
       merchantId: merchants.id,
       merchantName: merchants.name,
       merchantCreatedAt: merchants.createdAt,
-      totalRevenue: sql<number>`COALESCE(SUM(${invoices.amount}), 0)::float`,
-      invoiceCount: sql<number>`COUNT(${invoices.id})::int`,
-      firstInvoiceDate: sql<string>`MIN(${invoices.createdAt})`,
-      lastInvoiceDate: sql<string>`MAX(${invoices.createdAt})`,
-      currency: invoices.currency,
+      totalRevenue: sql<number>`COALESCE(SUM(${deals.amount}), 0)::float`,
+      dealCount: sql<number>`COUNT(${deals.id})::int`,
+      firstDealDate: sql<string>`MIN(${deals.createdAt})`,
+      lastDealDate: sql<string>`MAX(${deals.createdAt})`,
+      currency: deals.currency,
     })
     .from(merchants)
     .leftJoin(
-      invoices,
+      deals,
       and(
-        eq(invoices.merchantId, merchants.id),
-        inArray(invoices.status, ["paid", "unpaid", "overdue"]), // Exclude drafts
-        currency ? eq(invoices.currency, currency) : sql`true`,
+        eq(deals.merchantId, merchants.id),
+        inArray(deals.status, ["paid", "unpaid", "overdue"]), // Exclude drafts
+        currency ? eq(deals.currency, currency) : sql`true`,
       ),
     )
     .where(eq(merchants.teamId, teamId))
@@ -106,9 +106,9 @@ export async function getMerchantLifetimeValue(
       merchants.id,
       merchants.name,
       merchants.createdAt,
-      invoices.currency,
+      deals.currency,
     )
-    .having(sql`COUNT(${invoices.id}) > 0`); // Only merchants with invoices
+    .having(sql`COUNT(${deals.id}) > 0`); // Only merchants with deals
 
   if (merchantValues.length === 0) {
     return {
@@ -133,24 +133,24 @@ export async function getMerchantLifetimeValue(
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const merchantsWithMetrics = merchantValues.map((merchant) => {
-    const lastInvoice = parseISO(merchant.lastInvoiceDate);
-    const firstInvoice = parseISO(merchant.firstInvoiceDate);
+    const lastDeal = parseISO(merchant.lastDealDate);
+    const firstDeal = parseISO(merchant.firstDealDate);
 
-    // Calculate lifespan (from first invoice to last invoice or now)
-    const lifespanMs = lastInvoice.getTime() - firstInvoice.getTime();
+    // Calculate lifespan (from first deal to last deal or now)
+    const lifespanMs = lastDeal.getTime() - firstDeal.getTime();
     const lifespanDays = Math.max(
       1,
       Math.floor(lifespanMs / (1000 * 60 * 60 * 24)),
     );
 
-    // Is merchant active? (invoice in last 30 days)
-    const isActive = lastInvoice >= thirtyDaysAgo;
+    // Is merchant active? (deal in last 30 days)
+    const isActive = lastDeal >= thirtyDaysAgo;
 
     return {
       merchantId: merchant.merchantId,
       merchantName: merchant.merchantName,
       totalRevenue: merchant.totalRevenue,
-      invoiceCount: merchant.invoiceCount,
+      dealCount: merchant.dealCount,
       lifespanDays,
       isActive,
       currency: merchant.currency || currency || "USD",
@@ -193,7 +193,7 @@ export async function getMerchantLifetimeValue(
       merchantId: c.merchantId,
       merchantName: c.merchantName,
       lifetimeValue: Number(c.totalRevenue.toFixed(2)),
-      invoiceCount: c.invoiceCount,
+      dealCount: c.dealCount,
       lifespanDays: c.lifespanDays,
       isActive: c.isActive,
       currency: c.currency,

@@ -1,19 +1,19 @@
 import { describe, expect, test } from "bun:test";
 import {
-  type RecurringInvoiceParams,
+  type RecurringDealParams,
   advanceToFutureDate,
   calculateFirstScheduledDate,
   calculateNextScheduledDate,
   calculateUpcomingDates,
   shouldMarkCompleted,
-} from "../utils/invoice-recurring";
+} from "../utils/deal-recurring";
 
 describe("calculateNextScheduledDate", () => {
   describe("weekly frequency", () => {
     test("returns next occurrence of target weekday", () => {
       // Tuesday, January 7, 2025
       const currentDate = new Date("2025-01-07T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "weekly",
         frequencyDay: 5, // Friday
         frequencyWeek: null,
@@ -31,7 +31,7 @@ describe("calculateNextScheduledDate", () => {
     test("skips to next week if target day is today or passed", () => {
       // Friday, January 10, 2025
       const currentDate = new Date("2025-01-10T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "weekly",
         frequencyDay: 5, // Friday
         frequencyWeek: null,
@@ -49,7 +49,7 @@ describe("calculateNextScheduledDate", () => {
     test("handles Sunday (day 0) correctly", () => {
       // Wednesday, January 8, 2025
       const currentDate = new Date("2025-01-08T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "weekly",
         frequencyDay: 0, // Sunday
         frequencyWeek: null,
@@ -68,7 +68,7 @@ describe("calculateNextScheduledDate", () => {
     test("returns same date next month", () => {
       // January 15, 2025
       const currentDate = new Date("2025-01-15T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "monthly_date",
         frequencyDay: 15,
         frequencyWeek: null,
@@ -86,7 +86,7 @@ describe("calculateNextScheduledDate", () => {
     test("handles 31st in month with 30 days (April)", () => {
       // March 31, 2025
       const currentDate = new Date("2025-03-31T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "monthly_date",
         frequencyDay: 31,
         frequencyWeek: null,
@@ -104,7 +104,7 @@ describe("calculateNextScheduledDate", () => {
     test("handles 31st in February (non-leap year)", () => {
       // January 31, 2025
       const currentDate = new Date("2025-01-31T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "monthly_date",
         frequencyDay: 31,
         frequencyWeek: null,
@@ -122,7 +122,7 @@ describe("calculateNextScheduledDate", () => {
     test("handles 29th in February (leap year)", () => {
       // January 29, 2024
       const currentDate = new Date("2024-01-29T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "monthly_date",
         frequencyDay: 29,
         frequencyWeek: null,
@@ -142,7 +142,7 @@ describe("calculateNextScheduledDate", () => {
     test("returns nth occurrence of weekday", () => {
       // January 1, 2025
       const currentDate = new Date("2025-01-01T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "monthly_weekday",
         frequencyDay: 5, // Friday
         frequencyWeek: 1, // 1st Friday
@@ -161,7 +161,7 @@ describe("calculateNextScheduledDate", () => {
     test("handles 2nd Tuesday correctly", () => {
       // January 1, 2025
       const currentDate = new Date("2025-01-01T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "monthly_weekday",
         frequencyDay: 2, // Tuesday
         frequencyWeek: 2, // 2nd Tuesday
@@ -182,7 +182,7 @@ describe("calculateNextScheduledDate", () => {
     test("returns current date plus interval days", () => {
       // January 1, 2025
       const currentDate = new Date("2025-01-01T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "custom",
         frequencyDay: null,
         frequencyWeek: null,
@@ -199,7 +199,7 @@ describe("calculateNextScheduledDate", () => {
 
     test("defaults to 1 day if interval not specified", () => {
       const currentDate = new Date("2025-01-01T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "custom",
         frequencyDay: null,
         frequencyWeek: null,
@@ -217,7 +217,7 @@ describe("calculateNextScheduledDate", () => {
     test("returns same date 3 months later", () => {
       // January 15, 2025
       const currentDate = new Date("2025-01-15T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "quarterly",
         frequencyDay: 15,
         frequencyWeek: null,
@@ -235,7 +235,7 @@ describe("calculateNextScheduledDate", () => {
     test("handles 31st in month with 30 days", () => {
       // January 31, 2025 -> April has 30 days
       const currentDate = new Date("2025-01-31T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "quarterly",
         frequencyDay: 31,
         frequencyWeek: null,
@@ -253,7 +253,7 @@ describe("calculateNextScheduledDate", () => {
     test("handles February edge case", () => {
       // November 30, 2024 -> February 2025 has 28 days
       const currentDate = new Date("2024-11-30T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "quarterly",
         frequencyDay: 30,
         frequencyWeek: null,
@@ -273,7 +273,7 @@ describe("calculateNextScheduledDate", () => {
     test("returns same date 6 months later", () => {
       // January 15, 2025
       const currentDate = new Date("2025-01-15T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "semi_annual",
         frequencyDay: 15,
         frequencyWeek: null,
@@ -291,7 +291,7 @@ describe("calculateNextScheduledDate", () => {
     test("handles month length differences", () => {
       // August 31, 2025 -> February 2026 has 28 days
       const currentDate = new Date("2025-08-31T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "semi_annual",
         frequencyDay: 31,
         frequencyWeek: null,
@@ -312,7 +312,7 @@ describe("calculateNextScheduledDate", () => {
     test("returns same date 12 months later", () => {
       // January 15, 2025
       const currentDate = new Date("2025-01-15T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "annual",
         frequencyDay: 15,
         frequencyWeek: null,
@@ -331,7 +331,7 @@ describe("calculateNextScheduledDate", () => {
     test("handles leap year to non-leap year (Feb 29)", () => {
       // February 29, 2024 (leap year) -> 2025 (non-leap year)
       const currentDate = new Date("2024-02-29T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "annual",
         frequencyDay: 29,
         frequencyWeek: null,
@@ -350,7 +350,7 @@ describe("calculateNextScheduledDate", () => {
     test("handles non-leap year to leap year (Feb 28)", () => {
       // February 28, 2023 (non-leap year) -> 2024 (leap year)
       const currentDate = new Date("2023-02-28T12:00:00.000Z");
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "annual",
         frequencyDay: 28,
         frequencyWeek: null,
@@ -424,19 +424,19 @@ describe("shouldMarkCompleted", () => {
   });
 
   describe("endType: after_count", () => {
-    test("returns true when invoices generated equals end count", () => {
+    test("returns true when deals generated equals end count", () => {
       expect(shouldMarkCompleted("after_count", null, 12, 12, new Date())).toBe(
         true,
       );
     });
 
-    test("returns true when invoices generated exceeds end count", () => {
+    test("returns true when deals generated exceeds end count", () => {
       expect(shouldMarkCompleted("after_count", null, 12, 15, new Date())).toBe(
         true,
       );
     });
 
-    test("returns false when invoices generated is less than end count", () => {
+    test("returns false when deals generated is less than end count", () => {
       expect(shouldMarkCompleted("after_count", null, 12, 5, new Date())).toBe(
         false,
       );
@@ -451,7 +451,7 @@ describe("shouldMarkCompleted", () => {
 });
 
 describe("calculateUpcomingDates", () => {
-  const baseParams: RecurringInvoiceParams = {
+  const baseParams: RecurringDealParams = {
     frequency: "weekly",
     frequencyDay: 5, // Friday
     frequencyWeek: null,
@@ -473,7 +473,7 @@ describe("calculateUpcomingDates", () => {
       5,
     );
 
-    expect(result.invoices).toHaveLength(5);
+    expect(result.deals).toHaveLength(5);
   });
 
   test("respects end date limit", () => {
@@ -493,8 +493,8 @@ describe("calculateUpcomingDates", () => {
     );
 
     // Should only include dates <= endDate
-    for (const invoice of result.invoices) {
-      expect(new Date(invoice.date) <= endDate).toBe(true);
+    for (const deal of result.deals) {
+      expect(new Date(deal.date) <= endDate).toBe(true);
     }
   });
 
@@ -514,10 +514,10 @@ describe("calculateUpcomingDates", () => {
       10,
     );
 
-    expect(result.invoices).toHaveLength(endCount);
+    expect(result.deals).toHaveLength(endCount);
   });
 
-  test("accounts for already generated invoices in count limit", () => {
+  test("accounts for already generated deals in count limit", () => {
     const startDate = new Date("2025-01-03T12:00:00.000Z");
     const endCount = 5;
     const alreadyGenerated = 2;
@@ -535,7 +535,7 @@ describe("calculateUpcomingDates", () => {
     );
 
     // Only 3 remaining (5 total - 2 already generated)
-    expect(result.invoices).toHaveLength(3);
+    expect(result.deals).toHaveLength(3);
   });
 
   test("calculates correct summary for after_count", () => {
@@ -581,7 +581,7 @@ describe("calculateUpcomingDates", () => {
     expect(result.summary.totalAmount).toBe(null);
   });
 
-  test("includes correct date in each invoice", () => {
+  test("includes correct date in each deal", () => {
     const startDate = new Date("2025-01-03T12:00:00.000Z"); // Friday
     const result = calculateUpcomingDates(
       baseParams,
@@ -595,17 +595,17 @@ describe("calculateUpcomingDates", () => {
       3,
     );
 
-    // Each invoice should have a valid ISO date string
-    for (const invoice of result.invoices) {
-      expect(invoice.date).toBeDefined();
-      expect(new Date(invoice.date).toISOString()).toBe(invoice.date);
-      expect(invoice.amount).toBe(100);
+    // Each deal should have a valid ISO date string
+    for (const deal of result.deals) {
+      expect(deal.date).toBeDefined();
+      expect(new Date(deal.date).toISOString()).toBe(deal.date);
+      expect(deal.amount).toBe(100);
     }
   });
 });
 
 describe("calculateFirstScheduledDate", () => {
-  const baseParams: RecurringInvoiceParams = {
+  const baseParams: RecurringDealParams = {
     frequency: "monthly_last_day",
     frequencyDay: null,
     frequencyWeek: null,
@@ -627,7 +627,7 @@ describe("calculateFirstScheduledDate", () => {
     });
 
     test("returns future issue date for different frequencies", () => {
-      const monthlyDateParams: RecurringInvoiceParams = {
+      const monthlyDateParams: RecurringDealParams = {
         frequency: "monthly_date",
         frequencyDay: 15,
         frequencyWeek: null,
@@ -737,7 +737,7 @@ describe("calculateFirstScheduledDate", () => {
 
 describe("advanceToFutureDate", () => {
   describe("biweekly frequency - late scheduler scenario", () => {
-    const biweeklyParams: RecurringInvoiceParams = {
+    const biweeklyParams: RecurringDealParams = {
       frequency: "biweekly",
       frequencyDay: null,
       frequencyWeek: null,
@@ -789,7 +789,7 @@ describe("advanceToFutureDate", () => {
   });
 
   describe("custom frequency - late scheduler scenario", () => {
-    const customParams: RecurringInvoiceParams = {
+    const customParams: RecurringDealParams = {
       frequency: "custom",
       frequencyDay: null,
       frequencyWeek: null,
@@ -813,7 +813,7 @@ describe("advanceToFutureDate", () => {
 
   describe("safety limit", () => {
     test("falls back to now when hitting safety limit", () => {
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "custom",
         frequencyDay: null,
         frequencyWeek: null,
@@ -836,7 +836,7 @@ describe("advanceToFutureDate", () => {
 
   describe("edge cases", () => {
     test("handles date exactly equal to now", () => {
-      const params: RecurringInvoiceParams = {
+      const params: RecurringDealParams = {
         frequency: "biweekly",
         frequencyDay: null,
         frequencyWeek: null,
@@ -855,7 +855,7 @@ describe("advanceToFutureDate", () => {
     });
 
     test("handles monthly frequencies correctly", () => {
-      const monthlyParams: RecurringInvoiceParams = {
+      const monthlyParams: RecurringDealParams = {
         frequency: "monthly_date",
         frequencyDay: 15,
         frequencyWeek: null,

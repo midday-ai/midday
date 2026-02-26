@@ -37,7 +37,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 type Props = {
-  data?: RouterOutputs["invoiceProducts"]["getById"];
+  data?: RouterOutputs["dealProducts"]["getById"];
   defaultCurrency?: string;
 };
 
@@ -61,10 +61,10 @@ export function ProductForm({ data, defaultCurrency }: Props) {
   });
 
   const createProductMutation = useMutation(
-    trpc.invoiceProducts.create.mutationOptions({
+    trpc.dealProducts.create.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceProducts.get.queryKey(),
+          queryKey: trpc.dealProducts.get.queryKey(),
         });
         setParams(null);
       },
@@ -86,15 +86,15 @@ export function ProductForm({ data, defaultCurrency }: Props) {
   );
 
   const updateProductMutation = useMutation(
-    trpc.invoiceProducts.updateProduct.mutationOptions({
+    trpc.dealProducts.updateProduct.mutationOptions({
       onSuccess: (result) => {
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceProducts.get.queryKey(),
+          queryKey: trpc.dealProducts.get.queryKey(),
         });
         // Invalidate the specific product query
         if (result?.id) {
           queryClient.invalidateQueries({
-            queryKey: trpc.invoiceProducts.getById.queryKey({ id: result.id }),
+            queryKey: trpc.dealProducts.getById.queryKey({ id: result.id }),
           });
         }
         setParams(null);
@@ -186,7 +186,7 @@ export function ProductForm({ data, defaultCurrency }: Props) {
                 />
               </FormControl>
               <FormDescription>
-                This is for internal use only and won't appear on invoices.
+                This is for internal use only and won't appear on deals.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -277,8 +277,8 @@ export function ProductForm({ data, defaultCurrency }: Props) {
                     </FormLabel>
                     <FormDescription className="text-xs text-muted-foreground">
                       {field.value
-                        ? "Product is active and can be used in invoices"
-                        : "Product is inactive and won't appear in invoice suggestions"}
+                        ? "Product is active and can be used in deals"
+                        : "Product is inactive and won't appear in deal suggestions"}
                     </FormDescription>
                   </div>
                   <FormControl>

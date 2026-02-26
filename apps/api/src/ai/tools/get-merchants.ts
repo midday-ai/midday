@@ -75,15 +75,15 @@ export const getMerchantsTool = tool({
           name: merchant.name,
           email: merchant.email || "N/A",
           contact: merchant.contact || "N/A",
-          invoiceCount: merchant.invoiceCount ?? 0,
+          dealCount: merchant.dealCount ?? 0,
           projectCount: merchant.projectCount ?? 0,
           tags: tagNames,
           createdAt: formatDate(merchant.createdAt),
         };
       });
 
-      const totalInvoices = filteredData.reduce(
-        (sum, m) => sum + (m.invoiceCount ?? 0),
+      const totalDeals = filteredData.reduce(
+        (sum, m) => sum + (m.dealCount ?? 0),
         0,
       );
       const totalProjects = filteredData.reduce(
@@ -91,7 +91,7 @@ export const getMerchantsTool = tool({
         0,
       );
 
-      const response = `| Name | Email | Contact | Invoices | Projects | Tags | Created |\n|------|-------|---------|----------|----------|------|----------|\n${formattedMerchants.map((m) => `| ${m.name} | ${m.email} | ${m.contact} | ${m.invoiceCount} | ${m.projectCount} | ${m.tags} | ${m.createdAt} |`).join("\n")}\n\n**${filteredData.length} merchants** | Total Invoices: ${totalInvoices} | Total Projects: ${totalProjects}`;
+      const response = `| Name | Email | Contact | Deals | Projects | Tags | Created |\n|------|-------|---------|-------|----------|------|----------|\n${formattedMerchants.map((m) => `| ${m.name} | ${m.email} | ${m.contact} | ${m.dealCount} | ${m.projectCount} | ${m.tags} | ${m.createdAt} |`).join("\n")}\n\n**${filteredData.length} merchants** | Total Deals: ${totalDeals} | Total Projects: ${totalProjects}`;
 
       yield {
         text: response,

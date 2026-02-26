@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { getAllowedAttachments, getDomainFromEmail } from "./utils";
 
 test("Get domain from email", () => {
-  expect(getDomainFromEmail("invoice@supabase.com")).toMatch("supabase.com");
+  expect(getDomainFromEmail("deal@supabase.com")).toMatch("supabase.com");
 });
 
 test("Should return 2 allowed attachments", () => {
@@ -10,7 +10,7 @@ test("Should return 2 allowed attachments", () => {
     getAllowedAttachments([
       {
         ContentLength: 51899,
-        Name: "DigitalOcean Invoice 2023 Apr (33-11).pdf",
+        Name: "DigitalOcean Deal 2023 Apr (33-11).pdf",
         ContentType: "application/pdf",
         ContentID: "",
         Content: "",

@@ -25,7 +25,7 @@ export function ConnectEmailModal({ children }: ConnectEmailModalProps) {
             <DialogTitle>Connect email</DialogTitle>
             <DialogDescription>
               Choose your email provider to automatically import receipts and
-              invoices from your inbox.
+              deals from your inbox.
             </DialogDescription>
           </DialogHeader>
 

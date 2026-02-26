@@ -136,10 +136,10 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
       if (contentSample.includes("receipt")) {
         inferredType = "Receipt";
       } else if (
-        contentSample.includes("invoice") ||
-        contentSample.includes("inv")
+        contentSample.includes("deal") ||
+        contentSample.includes("mca")
       ) {
-        inferredType = "Invoice";
+        inferredType = "Deal";
       } else if (contentSample.includes("logo")) {
         inferredType = "Logo";
       } else if (contentSample.includes("photo")) {

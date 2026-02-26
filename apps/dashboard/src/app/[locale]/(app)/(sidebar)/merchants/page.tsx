@@ -41,10 +41,10 @@ export default async function Page(props: Props) {
       ...filter,
       sort,
     }),
-    trpc.invoice.mostActiveMerchant.queryOptions(),
-    trpc.invoice.inactiveMerchantsCount.queryOptions(),
-    trpc.invoice.topRevenueMerchant.queryOptions(),
-    trpc.invoice.newMerchantsCount.queryOptions(),
+    trpc.deal.mostActiveMerchant.queryOptions(),
+    trpc.deal.inactiveMerchantsCount.queryOptions(),
+    trpc.deal.topRevenueMerchant.queryOptions(),
+    trpc.deal.newMerchantsCount.queryOptions(),
   ]);
 
   return (

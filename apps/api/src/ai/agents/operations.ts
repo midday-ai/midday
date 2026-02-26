@@ -9,7 +9,7 @@ import { getBankAccountsTool } from "@api/ai/tools/get-bank-accounts";
 import { getMerchantsTool } from "@api/ai/tools/get-merchants";
 import { getDocumentsTool } from "@api/ai/tools/get-documents";
 import { getInboxTool } from "@api/ai/tools/get-inbox";
-import { getInvoicesTool } from "@api/ai/tools/get-invoices";
+import { getDealsTool } from "@api/ai/tools/get-deals";
 import { getNetPositionTool } from "@api/ai/tools/get-net-position";
 import { getTransactionsTool } from "@api/ai/tools/get-transactions";
 
@@ -19,7 +19,7 @@ export const operationsAgent = createAgent({
   temperature: 0.3,
   instructions: (
     ctx,
-  ) => `You are an operations specialist for ${ctx.companyName}. Provide account balances, documents, transactions, and invoices with specific data.
+  ) => `You are an operations specialist for ${ctx.companyName}. Provide account balances, documents, transactions, and deals with specific data.
 
 <background-data>
 ${formatContextForLLM(ctx)}
@@ -35,7 +35,7 @@ ${COMMON_AGENT_RULES}
     getNetPosition: getNetPositionTool,
     getBankAccounts: getBankAccountsTool,
     getTransactions: getTransactionsTool,
-    getInvoices: getInvoicesTool,
+    getDeals: getDealsTool,
     getMerchants: getMerchantsTool,
     getDocuments: getDocumentsTool,
     getInbox: getInboxTool,

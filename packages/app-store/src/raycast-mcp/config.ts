@@ -12,7 +12,7 @@ export default {
 
 **What you can do:**
 - Quick answers about your finances with a keyboard shortcut
-- Check invoice status and customer details
+- Check deal status and customer details
 - Query transactions and expenses on the fly
 - Access reports without opening your browser
 

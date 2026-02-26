@@ -10,8 +10,8 @@ import { embeddingsQueue } from "./embeddings";
 import { embeddingsQueueConfig } from "./embeddings.config";
 import { inboxProviderQueue, inboxQueue } from "./inbox";
 import { inboxProviderQueueConfig, inboxQueueConfig } from "./inbox.config";
-import { invoicesQueue } from "./invoices";
-import { invoicesQueueConfig } from "./invoices.config";
+import { dealsQueue } from "./deals";
+import { dealsQueueConfig } from "./deals.config";
 import { ratesQueue } from "./rates";
 import { ratesQueueConfig } from "./rates.config";
 import { teamsQueue } from "./teams";
@@ -35,7 +35,7 @@ export const queueConfigs: QueueConfig[] = [
   embeddingsQueueConfig,
   ratesQueueConfig,
   accountingQueueConfig,
-  invoicesQueueConfig,
+  dealsQueueConfig,
   merchantsQueueConfig,
   teamsQueueConfig,
   disclosuresQueueConfig,
@@ -55,7 +55,7 @@ export function getAllQueues(): Queue[] {
     embeddingsQueue,
     ratesQueue,
     accountingQueue,
-    invoicesQueue,
+    dealsQueue,
     merchantsQueue,
     teamsQueue,
     disclosuresQueue,

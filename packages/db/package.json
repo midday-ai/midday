@@ -28,7 +28,8 @@
     "./utils/currency": "./src/utils/currency.ts",
     "./utils/tax": "./src/utils/tax.ts",
     "./utils/blocklist": "./src/utils/blocklist.ts",
-    "./utils/invoice-recurring": "./src/utils/invoice-recurring.ts"
+    "./utils/invoice-recurring": "./src/utils/invoice-recurring.ts",
+    "./utils/deal-recurring": "./src/utils/deal-recurring.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.4.1",
@@ -37,7 +38,7 @@
     "@midday/categories": "workspace:*",
     "@midday/encryption": "workspace:*",
     "@midday/engine": "workspace:*",
-    "@midday/invoice": "workspace:*",
+    "@midday/deal": "workspace:*",
     "@midday/logger": "workspace:*",
     "@midday/utils": "workspace:*",
     "@sindresorhus/slugify": "^3.0.0",

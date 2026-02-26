@@ -1,12 +1,12 @@
 import { parseISO } from "date-fns";
 import type { z } from "zod/v4";
-import type { invoiceSchema, receiptSchema } from "../schema";
+import type { dealSchema, receiptSchema } from "../schema";
 import {
   calculateQualityScore,
   calculateReceiptQualityScore,
 } from "./validation";
 
-type InvoiceData = z.infer<typeof invoiceSchema>;
+type DealData = z.infer<typeof dealSchema>;
 type ReceiptData = z.infer<typeof receiptSchema>;
 
 /**
@@ -14,7 +14,7 @@ type ReceiptData = z.infer<typeof receiptSchema>;
  * Based on quality score and field completeness
  */
 export function calculateExtractionConfidence(
-  result: InvoiceData,
+  result: DealData,
   qualityScore: { score: number; missingCriticalFields: string[] },
 ): number {
   // Base confidence from quality score (0-100 -> 0-1)
@@ -33,8 +33,8 @@ export function calculateExtractionConfidence(
     confidence = Math.min(1.0, confidence + 0.05);
   }
 
-  // Boost confidence if invoice_number is present
-  if (result.invoice_number) {
+  // Boost confidence if deal_number is present
+  if (result.deal_number) {
     confidence = Math.min(1.0, confidence + 0.05);
   }
 
@@ -68,9 +68,9 @@ export function calculateReceiptExtractionConfidence(
 }
 
 /**
- * Field-specific merge rules for invoices
+ * Field-specific merge rules for deals
  */
-const invoiceMergeRules: Record<string, (primary: any, secondary: any) => any> =
+const dealMergeRules: Record<string, (primary: any, secondary: any) => any> =
   {
     // Prefer longer vendor names (more complete)
     vendor_name: (primary, secondary) => {
@@ -81,12 +81,12 @@ const invoiceMergeRules: Record<string, (primary: any, secondary: any) => any> =
       return primary.length >= secondary.length ? primary : secondary;
     },
 
-    // Prefer more complete invoice numbers (with prefixes/suffixes)
-    invoice_number: (primary, secondary) => {
+    // Prefer more complete deal numbers (with prefixes/suffixes)
+    deal_number: (primary, secondary) => {
       if (!primary && !secondary) return null;
       if (!primary) return secondary;
       if (!secondary) return primary;
-      // Prefer the longer invoice number (more likely to be complete)
+      // Prefer the longer deal number (more likely to be complete)
       return primary.length >= secondary.length ? primary : secondary;
     },
 
@@ -104,7 +104,7 @@ const invoiceMergeRules: Record<string, (primary: any, secondary: any) => any> =
     },
 
     // Prefer more recent dates
-    invoice_date: (primary, secondary) => {
+    deal_date: (primary, secondary) => {
       if (!primary && !secondary) return null;
       if (!primary) return secondary;
       if (!secondary) return primary;
@@ -175,14 +175,14 @@ const receiptMergeRules: Record<string, (primary: any, secondary: any) => any> =
   };
 
 /**
- * Enhanced merge for invoices with field-specific rules and confidence weighting
+ * Enhanced merge for deals with field-specific rules and confidence weighting
  */
-export function mergeInvoiceResults(
-  primary: InvoiceData,
-  secondary: Partial<InvoiceData>,
+export function mergeDealResults(
+  primary: DealData,
+  secondary: Partial<DealData>,
   primaryConfidence?: number,
   secondaryConfidence?: number,
-): InvoiceData {
+): DealData {
   const merged: any = { ...primary };
 
   // Calculate confidence scores if not provided
@@ -191,10 +191,10 @@ export function mergeInvoiceResults(
     calculateExtractionConfidence(primary, calculateQualityScore(primary));
   const secondaryConf =
     secondaryConfidence ??
-    ((secondary as InvoiceData)
+    ((secondary as DealData)
       ? calculateExtractionConfidence(
-          secondary as InvoiceData,
-          calculateQualityScore(secondary as InvoiceData),
+          secondary as DealData,
+          calculateQualityScore(secondary as DealData),
         )
       : 0.5);
 
@@ -214,8 +214,8 @@ export function mergeInvoiceResults(
     ) {
       // If confidences are similar (within 0.1), use field-specific rules
       if (Math.abs(primaryConf - secondaryConf) < 0.1) {
-        if (invoiceMergeRules[field]) {
-          merged[field] = invoiceMergeRules[field](
+        if (dealMergeRules[field]) {
+          merged[field] = dealMergeRules[field](
             primaryValue,
             secondaryValue,
           );
@@ -234,7 +234,7 @@ export function mergeInvoiceResults(
     }
   }
 
-  return merged as InvoiceData;
+  return merged as DealData;
 }
 
 /**

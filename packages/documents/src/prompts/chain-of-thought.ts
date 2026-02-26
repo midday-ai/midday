@@ -6,7 +6,7 @@ export const chainOfThoughtInstructions = `
 EXTRACTION PROCESS - THINK STEP BY STEP:
 
 1. FIRST, identify the document type and layout:
-   - Is this an invoice or receipt?
+   - Is this a deal or receipt?
    - Where is the vendor/merchant information located?
    - Where is the customer/buyer information?
    - Where are the amounts and totals?
@@ -17,9 +17,9 @@ EXTRACTION PROCESS - THINK STEP BY STEP:
    - Extract complete legal name, not brand names
    - Find vendor address, email, website
 
-3. NEXT, extract invoice metadata:
-   - Invoice number: Look for "Invoice #", "INV", "No.", "Number"
-   - Invoice date: Usually near invoice number or in header
+3. NEXT, extract deal metadata:
+   - Deal number: Look for "Deal #", "INV", "No.", "Number"
+   - Deal date: Usually near deal number or in header
    - Due date: Often in payment terms section
    - Convert dates to YYYY-MM-DD format
 

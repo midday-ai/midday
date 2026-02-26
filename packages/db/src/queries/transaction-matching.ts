@@ -512,14 +512,14 @@ export async function findMatches(
   // Perfect match date ranges (account for 3-day banking delay)
   const perfectExpenseStart = "93 days";
   const perfectExpenseEnd = "10 days";
-  const perfectInvoiceStart = "10 days";
-  const perfectInvoiceEnd = "123 days";
+  const perfectDealStart = "10 days";
+  const perfectDealEnd = "123 days";
 
   // Semantic match date ranges (moderate ranges)
   const semanticExpenseStart = "63 days";
   const semanticExpenseEnd = "17 days";
-  const semanticInvoiceStart = "17 days";
-  const semanticInvoiceEnd = "93 days";
+  const semanticDealStart = "17 days";
+  const semanticDealEnd = "93 days";
 
   // Conservative date ranges
   const conservativeStart = "33 days";
@@ -609,9 +609,9 @@ export async function findMatches(
              AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(perfectExpenseStart)}' 
                  AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(perfectExpenseEnd)}')
             OR
-            (${inboxType} = 'invoice'
-             AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(perfectInvoiceStart)}'
-                 AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(perfectInvoiceEnd)}')
+            (${inboxType} = 'deal'
+             AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(perfectDealStart)}'
+                 AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(perfectDealEnd)}')
           )`,
           // Exclude already matched
           sql`NOT EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${transactionAttachments.transactionId} = ${transactions.id} AND ${transactionAttachments.teamId} = ${teamId})`,
@@ -735,9 +735,9 @@ export async function findMatches(
                AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(perfectExpenseStart)}' 
                    AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(perfectExpenseEnd)}')
               OR
-              (${inboxType} = 'invoice'
-               AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(perfectInvoiceStart)}'
-                   AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(perfectInvoiceEnd)}')
+              (${inboxType} = 'deal'
+               AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(perfectDealStart)}'
+                   AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(perfectDealEnd)}')
             )`,
             // Exclude already matched
             sql`NOT EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${transactionAttachments.transactionId} = ${transactions.id} AND ${transactionAttachments.teamId} = ${teamId})`,
@@ -853,9 +853,9 @@ export async function findMatches(
                AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(semanticExpenseStart)}'
                    AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(semanticExpenseEnd)}')
               OR
-              (${inboxType} = 'invoice'
-               AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(semanticInvoiceStart)}'
-                   AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(semanticInvoiceEnd)}')
+              (${inboxType} = 'deal'
+               AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(semanticDealStart)}'
+                   AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(semanticDealEnd)}')
             )`,
             // Exclude already matched
             sql`NOT EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${transactionAttachments.transactionId} = ${transactions.id} AND ${transactionAttachments.teamId} = ${teamId})`,
@@ -965,7 +965,7 @@ export async function findMatches(
                AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(conservativeStart)}'
                    AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(conservativeEnd)}')
               OR
-              (${inboxType} = 'invoice'
+              (${inboxType} = 'deal'
                AND ${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(conservativeStart)}'
                    AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(conservativeEnd)}')
             )`,

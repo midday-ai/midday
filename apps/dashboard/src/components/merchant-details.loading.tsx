@@ -38,7 +38,7 @@ export function MerchantDetailsSkeleton() {
 
           {/* Summary Stats Skeleton */}
           <div className="grid grid-cols-2 gap-4 mb-6">
-            {["total", "paid", "outstanding", "invoices"].map((stat) => (
+            {["total", "paid", "outstanding", "deals"].map((stat) => (
               <div key={stat} className="border border-border px-4 py-3">
                 <Skeleton className="h-3 w-20 mb-2" />
                 <Skeleton className="h-6 w-24" />

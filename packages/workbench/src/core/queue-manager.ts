@@ -1097,7 +1097,7 @@ export class QueueManager {
 
   /**
    * Search jobs across all queues
-   * Supports field:value syntax (e.g., "teamId:abc-123 invoice")
+   * Supports field:value syntax (e.g., "teamId:abc-123 deal")
    * Optimized with parallel processing, early exits, and count checks
    */
   async search(query: string, limit = 20): Promise<SearchResult[]> {

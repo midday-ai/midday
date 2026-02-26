@@ -8,7 +8,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 export function InactiveMerchants() {
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(
-    trpc.invoice.inactiveMerchantsCount.queryOptions(),
+    trpc.deal.inactiveMerchantsCount.queryOptions(),
   );
 
   return (
@@ -23,7 +23,7 @@ export function InactiveMerchants() {
         <div className="flex flex-col gap-2">
           <div>Inactive Merchants</div>
           <div className="text-sm text-muted-foreground">
-            No invoices or time tracked past 30 days
+            No deals or time tracked past 30 days
           </div>
         </div>
       </CardContent>

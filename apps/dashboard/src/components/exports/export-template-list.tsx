@@ -86,7 +86,7 @@ export function ExportTemplateList({ onCreateNew }: Props) {
       {templates.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="mb-4 rounded-full bg-muted p-4">
-            <Icons.Invoice size={24} className="text-muted-foreground" />
+            <Icons.Deal size={24} className="text-muted-foreground" />
           </div>
           <h3 className="text-lg font-medium">No export templates</h3>
           <p className="mt-1 text-sm text-muted-foreground max-w-[360px]">

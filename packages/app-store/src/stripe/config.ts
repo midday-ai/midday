@@ -7,7 +7,7 @@ export default {
   active: false,
   logo: Logo,
   short_description:
-    "Connect Stripe to automatically sync your payments, invoices, and revenue data with Midday.",
+    "Connect Stripe to automatically sync your payments, deals, and revenue data with Midday.",
   description: null,
   images: [],
 };

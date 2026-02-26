@@ -39,7 +39,7 @@ const oauthAppConfig: Record<
   quickbooks: { endpoint: "/apps/quickbooks/install-url", queryKey: "apps" },
   fortnox: { endpoint: "/apps/fortnox/install-url", queryKey: "apps" },
   "stripe-payments": {
-    endpoint: "/invoice-payments/connect-stripe",
+    endpoint: "/deal-payments/connect-stripe",
     queryKey: "stripeStatus",
   },
 };
@@ -128,7 +128,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
         });
       } else if (oauthConfig?.queryKey === "stripeStatus") {
         queryClient.invalidateQueries({
-          queryKey: trpc.invoicePayments.stripeStatus.queryKey(),
+          queryKey: trpc.dealPayments.stripeStatus.queryKey(),
         });
       } else {
         queryClient.invalidateQueries({
@@ -175,10 +175,10 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
 
   // Mutation to disconnect Stripe Payments
   const disconnectStripeMutation = useMutation(
-    trpc.invoicePayments.disconnectStripe.mutationOptions({
+    trpc.dealPayments.disconnectStripe.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.invoicePayments.stripeStatus.queryKey(),
+          queryKey: trpc.dealPayments.stripeStatus.queryKey(),
         });
       },
     }),

@@ -7,7 +7,7 @@ import {
 import { webSearchTool } from "@api/ai/tools/web-search";
 import { analyticsAgent } from "./analytics";
 import { merchantsAgent } from "./merchants";
-import { invoicesAgent } from "./invoices";
+import { dealsAgent } from "./deals";
 import { operationsAgent } from "./operations";
 import { reportsAgent } from "./reports";
 import { transactionsAgent } from "./transactions";
@@ -42,7 +42,7 @@ ${COMMON_AGENT_RULES}
     analyticsAgent,
     transactionsAgent,
     merchantsAgent,
-    invoicesAgent,
+    dealsAgent,
   ],
   maxTurns: 5,
 });

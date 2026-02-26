@@ -1,12 +1,12 @@
 import type { Database } from "@db/client";
-import { invoiceTemplates } from "@db/schema";
+import { dealTemplates } from "@db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
 
-type InvoiceTemplateParams = {
+type DealTemplateParams = {
   customerLabel?: string;
   title?: string;
   fromLabel?: string;
-  invoiceNoLabel?: string;
+  dealNoLabel?: string;
   issueDateLabel?: string;
   dueDateLabel?: string;
   descriptionLabel?: string;
@@ -44,89 +44,89 @@ type InvoiceTemplateParams = {
   paymentTermsDays?: number;
 };
 
-type CreateInvoiceTemplateParams = {
+type CreateDealTemplateParams = {
   teamId: string;
   name: string;
   isDefault?: boolean;
-} & InvoiceTemplateParams;
+} & DealTemplateParams;
 
-type UpsertInvoiceTemplateParams = {
+type UpsertDealTemplateParams = {
   id?: string; // Optional - if not provided, will upsert the default template
   teamId: string;
   name?: string;
-} & InvoiceTemplateParams;
+} & DealTemplateParams;
 
 // Select fields for template queries
 const templateSelectFields = {
-  id: invoiceTemplates.id,
-  name: invoiceTemplates.name,
-  isDefault: invoiceTemplates.isDefault,
-  customerLabel: invoiceTemplates.customerLabel,
-  fromLabel: invoiceTemplates.fromLabel,
-  invoiceNoLabel: invoiceTemplates.invoiceNoLabel,
-  issueDateLabel: invoiceTemplates.issueDateLabel,
-  dueDateLabel: invoiceTemplates.dueDateLabel,
-  descriptionLabel: invoiceTemplates.descriptionLabel,
-  priceLabel: invoiceTemplates.priceLabel,
-  quantityLabel: invoiceTemplates.quantityLabel,
-  totalLabel: invoiceTemplates.totalLabel,
-  vatLabel: invoiceTemplates.vatLabel,
-  taxLabel: invoiceTemplates.taxLabel,
-  paymentLabel: invoiceTemplates.paymentLabel,
-  noteLabel: invoiceTemplates.noteLabel,
-  logoUrl: invoiceTemplates.logoUrl,
-  currency: invoiceTemplates.currency,
-  subtotalLabel: invoiceTemplates.subtotalLabel,
-  paymentDetails: invoiceTemplates.paymentDetails,
-  fromDetails: invoiceTemplates.fromDetails,
-  noteDetails: invoiceTemplates.noteDetails,
-  size: invoiceTemplates.size,
-  dateFormat: invoiceTemplates.dateFormat,
-  includeVat: invoiceTemplates.includeVat,
-  includeTax: invoiceTemplates.includeTax,
-  taxRate: invoiceTemplates.taxRate,
-  deliveryType: invoiceTemplates.deliveryType,
-  discountLabel: invoiceTemplates.discountLabel,
-  includeDiscount: invoiceTemplates.includeDiscount,
-  includeDecimals: invoiceTemplates.includeDecimals,
-  includeQr: invoiceTemplates.includeQr,
-  includeLineItemTax: invoiceTemplates.includeLineItemTax,
-  lineItemTaxLabel: invoiceTemplates.lineItemTaxLabel,
-  totalSummaryLabel: invoiceTemplates.totalSummaryLabel,
-  title: invoiceTemplates.title,
-  vatRate: invoiceTemplates.vatRate,
-  includeUnits: invoiceTemplates.includeUnits,
-  includePdf: invoiceTemplates.includePdf,
-  sendCopy: invoiceTemplates.sendCopy,
-  paymentEnabled: invoiceTemplates.paymentEnabled,
-  paymentTermsDays: invoiceTemplates.paymentTermsDays,
+  id: dealTemplates.id,
+  name: dealTemplates.name,
+  isDefault: dealTemplates.isDefault,
+  customerLabel: dealTemplates.customerLabel,
+  fromLabel: dealTemplates.fromLabel,
+  dealNoLabel: dealTemplates.dealNoLabel,
+  issueDateLabel: dealTemplates.issueDateLabel,
+  dueDateLabel: dealTemplates.dueDateLabel,
+  descriptionLabel: dealTemplates.descriptionLabel,
+  priceLabel: dealTemplates.priceLabel,
+  quantityLabel: dealTemplates.quantityLabel,
+  totalLabel: dealTemplates.totalLabel,
+  vatLabel: dealTemplates.vatLabel,
+  taxLabel: dealTemplates.taxLabel,
+  paymentLabel: dealTemplates.paymentLabel,
+  noteLabel: dealTemplates.noteLabel,
+  logoUrl: dealTemplates.logoUrl,
+  currency: dealTemplates.currency,
+  subtotalLabel: dealTemplates.subtotalLabel,
+  paymentDetails: dealTemplates.paymentDetails,
+  fromDetails: dealTemplates.fromDetails,
+  noteDetails: dealTemplates.noteDetails,
+  size: dealTemplates.size,
+  dateFormat: dealTemplates.dateFormat,
+  includeVat: dealTemplates.includeVat,
+  includeTax: dealTemplates.includeTax,
+  taxRate: dealTemplates.taxRate,
+  deliveryType: dealTemplates.deliveryType,
+  discountLabel: dealTemplates.discountLabel,
+  includeDiscount: dealTemplates.includeDiscount,
+  includeDecimals: dealTemplates.includeDecimals,
+  includeQr: dealTemplates.includeQr,
+  includeLineItemTax: dealTemplates.includeLineItemTax,
+  lineItemTaxLabel: dealTemplates.lineItemTaxLabel,
+  totalSummaryLabel: dealTemplates.totalSummaryLabel,
+  title: dealTemplates.title,
+  vatRate: dealTemplates.vatRate,
+  includeUnits: dealTemplates.includeUnits,
+  includePdf: dealTemplates.includePdf,
+  sendCopy: dealTemplates.sendCopy,
+  paymentEnabled: dealTemplates.paymentEnabled,
+  paymentTermsDays: dealTemplates.paymentTermsDays,
 };
 
 /**
- * Get all invoice templates for a team
+ * Get all deal templates for a team
  */
-export async function getInvoiceTemplates(db: Database, teamId: string) {
+export async function getDealTemplates(db: Database, teamId: string) {
   return db
     .select(templateSelectFields)
-    .from(invoiceTemplates)
-    .where(eq(invoiceTemplates.teamId, teamId))
-    .orderBy(desc(invoiceTemplates.isDefault), invoiceTemplates.name);
+    .from(dealTemplates)
+    .where(eq(dealTemplates.teamId, teamId))
+    .orderBy(desc(dealTemplates.isDefault), dealTemplates.name);
 }
 
 /**
- * Get a single invoice template by ID
+ * Get a single deal template by ID
  */
-export async function getInvoiceTemplateById(
+export async function getDealTemplateById(
   db: Database,
   params: { id: string; teamId: string },
 ) {
   const [result] = await db
     .select(templateSelectFields)
-    .from(invoiceTemplates)
+    .from(dealTemplates)
     .where(
       and(
-        eq(invoiceTemplates.id, params.id),
-        eq(invoiceTemplates.teamId, params.teamId),
+        eq(dealTemplates.id, params.id),
+        eq(dealTemplates.teamId, params.teamId),
       ),
     )
     .limit(1);
@@ -135,17 +135,17 @@ export async function getInvoiceTemplateById(
 }
 
 /**
- * Get the default invoice template for a team, or the first template if no default exists
+ * Get the default deal template for a team, or the first template if no default exists
  */
-export async function getInvoiceTemplate(db: Database, teamId: string) {
+export async function getDealTemplate(db: Database, teamId: string) {
   // First try to get the default template
   const [defaultTemplate] = await db
     .select(templateSelectFields)
-    .from(invoiceTemplates)
+    .from(dealTemplates)
     .where(
       and(
-        eq(invoiceTemplates.teamId, teamId),
-        eq(invoiceTemplates.isDefault, true),
+        eq(dealTemplates.teamId, teamId),
+        eq(dealTemplates.isDefault, true),
       ),
     )
     .limit(1);
@@ -157,32 +157,32 @@ export async function getInvoiceTemplate(db: Database, teamId: string) {
   // Fall back to first template
   const [firstTemplate] = await db
     .select(templateSelectFields)
-    .from(invoiceTemplates)
-    .where(eq(invoiceTemplates.teamId, teamId))
-    .orderBy(invoiceTemplates.createdAt)
+    .from(dealTemplates)
+    .where(eq(dealTemplates.teamId, teamId))
+    .orderBy(dealTemplates.createdAt)
     .limit(1);
 
   return firstTemplate;
 }
 
 /**
- * Create a new invoice template
+ * Create a new deal template
  * Uses a transaction to prevent race conditions where concurrent requests
  * could both determine they are creating the "first" template and both
  * set isDefault: true.
  */
-export async function createInvoiceTemplate(
+export async function createDealTemplate(
   db: Database,
-  params: CreateInvoiceTemplateParams,
+  params: CreateDealTemplateParams,
 ) {
   const { teamId, name, isDefault, ...rest } = params;
 
   return db.transaction(async (tx) => {
     // Check if this is the first template for the team
     const existingTemplates = await tx
-      .select({ id: invoiceTemplates.id })
-      .from(invoiceTemplates)
-      .where(eq(invoiceTemplates.teamId, teamId))
+      .select({ id: dealTemplates.id })
+      .from(dealTemplates)
+      .where(eq(dealTemplates.teamId, teamId))
       .limit(1);
 
     const isFirstTemplate = existingTemplates.length === 0;
@@ -190,16 +190,16 @@ export async function createInvoiceTemplate(
     // If this is the first template or marked as default, ensure it's the only default
     if (isDefault || isFirstTemplate) {
       await tx
-        .update(invoiceTemplates)
+        .update(dealTemplates)
         .set({ isDefault: false })
-        .where(eq(invoiceTemplates.teamId, teamId));
+        .where(eq(dealTemplates.teamId, teamId));
     }
 
     // First template should always be the default, regardless of isDefault param
     const shouldBeDefault = isFirstTemplate || (isDefault ?? false);
 
     const [result] = await tx
-      .insert(invoiceTemplates)
+      .insert(dealTemplates)
       .values({
         teamId,
         name,
@@ -213,25 +213,25 @@ export async function createInvoiceTemplate(
 }
 
 /**
- * Upsert an invoice template
+ * Upsert an deal template
  * - If id is provided, updates that specific template
  * - If id is not provided, updates the default template or creates one if none exists
  * Uses a transaction for the create path to prevent race conditions where concurrent
  * requests could both create default templates.
  */
-export async function upsertInvoiceTemplate(
+export async function upsertDealTemplate(
   db: Database,
-  params: UpsertInvoiceTemplateParams,
+  params: UpsertDealTemplateParams,
 ) {
   const { id, teamId, ...rest } = params;
 
   // If ID is provided, update that specific template (no race condition here)
   if (id) {
     const [result] = await db
-      .update(invoiceTemplates)
+      .update(dealTemplates)
       .set(rest)
       .where(
-        and(eq(invoiceTemplates.id, id), eq(invoiceTemplates.teamId, teamId)),
+        and(eq(dealTemplates.id, id), eq(dealTemplates.teamId, teamId)),
       )
       .returning(templateSelectFields);
 
@@ -243,11 +243,11 @@ export async function upsertInvoiceTemplate(
     // First try to get the default template
     const [defaultTemplate] = await tx
       .select(templateSelectFields)
-      .from(invoiceTemplates)
+      .from(dealTemplates)
       .where(
         and(
-          eq(invoiceTemplates.teamId, teamId),
-          eq(invoiceTemplates.isDefault, true),
+          eq(dealTemplates.teamId, teamId),
+          eq(dealTemplates.isDefault, true),
         ),
       )
       .limit(1);
@@ -255,12 +255,12 @@ export async function upsertInvoiceTemplate(
     if (defaultTemplate) {
       // Update existing default template
       const [result] = await tx
-        .update(invoiceTemplates)
+        .update(dealTemplates)
         .set(rest)
         .where(
           and(
-            eq(invoiceTemplates.id, defaultTemplate.id),
-            eq(invoiceTemplates.teamId, teamId),
+            eq(dealTemplates.id, defaultTemplate.id),
+            eq(dealTemplates.teamId, teamId),
           ),
         )
         .returning(templateSelectFields);
@@ -271,20 +271,20 @@ export async function upsertInvoiceTemplate(
     // Fall back to first template if no default
     const [firstTemplate] = await tx
       .select(templateSelectFields)
-      .from(invoiceTemplates)
-      .where(eq(invoiceTemplates.teamId, teamId))
-      .orderBy(invoiceTemplates.createdAt)
+      .from(dealTemplates)
+      .where(eq(dealTemplates.teamId, teamId))
+      .orderBy(dealTemplates.createdAt)
       .limit(1);
 
     if (firstTemplate) {
       // Update existing first template
       const [result] = await tx
-        .update(invoiceTemplates)
+        .update(dealTemplates)
         .set(rest)
         .where(
           and(
-            eq(invoiceTemplates.id, firstTemplate.id),
-            eq(invoiceTemplates.teamId, teamId),
+            eq(dealTemplates.id, firstTemplate.id),
+            eq(dealTemplates.teamId, teamId),
           ),
         )
         .returning(templateSelectFields);
@@ -294,7 +294,7 @@ export async function upsertInvoiceTemplate(
 
     // No template exists - create a new default template with the provided values
     const [result] = await tx
-      .insert(invoiceTemplates)
+      .insert(dealTemplates)
       .values({
         teamId,
         name: "Default",
@@ -319,12 +319,12 @@ export async function setDefaultTemplate(
   return db.transaction(async (tx) => {
     // First, verify the target template exists and belongs to this team
     const [targetTemplate] = await tx
-      .select({ id: invoiceTemplates.id })
-      .from(invoiceTemplates)
+      .select({ id: dealTemplates.id })
+      .from(dealTemplates)
       .where(
         and(
-          eq(invoiceTemplates.id, params.id),
-          eq(invoiceTemplates.teamId, params.teamId),
+          eq(dealTemplates.id, params.id),
+          eq(dealTemplates.teamId, params.teamId),
         ),
       )
       .limit(1);
@@ -337,18 +337,18 @@ export async function setDefaultTemplate(
 
     // Now safe to unset all other defaults for this team
     await tx
-      .update(invoiceTemplates)
+      .update(dealTemplates)
       .set({ isDefault: false })
-      .where(eq(invoiceTemplates.teamId, params.teamId));
+      .where(eq(dealTemplates.teamId, params.teamId));
 
     // Set the specified template as default
     const [result] = await tx
-      .update(invoiceTemplates)
+      .update(dealTemplates)
       .set({ isDefault: true })
       .where(
         and(
-          eq(invoiceTemplates.id, params.id),
-          eq(invoiceTemplates.teamId, params.teamId),
+          eq(dealTemplates.id, params.id),
+          eq(dealTemplates.teamId, params.teamId),
         ),
       )
       .returning(templateSelectFields);
@@ -358,12 +358,12 @@ export async function setDefaultTemplate(
 }
 
 /**
- * Delete an invoice template
+ * Delete an deal template
  * Returns the deleted template and the new default template to switch to.
  * Uses a transaction to ensure atomicity - verifies at least one other template
  * exists, deletes the template, and sets a new default as a single atomic operation.
  */
-export async function deleteInvoiceTemplate(
+export async function deleteDealTemplate(
   db: Database,
   params: { id: string; teamId: string },
 ) {
@@ -371,14 +371,14 @@ export async function deleteInvoiceTemplate(
     // Get the template to delete and check if it's the default
     const [templateToDelete] = await tx
       .select({
-        id: invoiceTemplates.id,
-        isDefault: invoiceTemplates.isDefault,
+        id: dealTemplates.id,
+        isDefault: dealTemplates.isDefault,
       })
-      .from(invoiceTemplates)
+      .from(dealTemplates)
       .where(
         and(
-          eq(invoiceTemplates.id, params.id),
-          eq(invoiceTemplates.teamId, params.teamId),
+          eq(dealTemplates.id, params.id),
+          eq(dealTemplates.teamId, params.teamId),
         ),
       )
       .limit(1);
@@ -390,13 +390,13 @@ export async function deleteInvoiceTemplate(
     // Count templates EXCLUDING the one we're about to delete
     // This is more defensive than counting first then deleting
     const otherTemplates = await tx
-      .select({ id: invoiceTemplates.id })
-      .from(invoiceTemplates)
+      .select({ id: dealTemplates.id })
+      .from(dealTemplates)
       .where(
         and(
-          eq(invoiceTemplates.teamId, params.teamId),
+          eq(dealTemplates.teamId, params.teamId),
           // Exclude the template we're deleting
-          sql`${invoiceTemplates.id} != ${params.id}`,
+          sql`${dealTemplates.id} != ${params.id}`,
         ),
       )
       .limit(1);
@@ -409,11 +409,11 @@ export async function deleteInvoiceTemplate(
 
     // Delete the template
     const [deleted] = await tx
-      .delete(invoiceTemplates)
+      .delete(dealTemplates)
       .where(
         and(
-          eq(invoiceTemplates.id, params.id),
-          eq(invoiceTemplates.teamId, params.teamId),
+          eq(dealTemplates.id, params.id),
+          eq(dealTemplates.teamId, params.teamId),
         ),
       )
       .returning();
@@ -423,16 +423,16 @@ export async function deleteInvoiceTemplate(
     if (wasDefault) {
       const [firstRemaining] = await tx
         .select(templateSelectFields)
-        .from(invoiceTemplates)
-        .where(eq(invoiceTemplates.teamId, params.teamId))
-        .orderBy(invoiceTemplates.createdAt)
+        .from(dealTemplates)
+        .where(eq(dealTemplates.teamId, params.teamId))
+        .orderBy(dealTemplates.createdAt)
         .limit(1);
 
       if (firstRemaining) {
         await tx
-          .update(invoiceTemplates)
+          .update(dealTemplates)
           .set({ isDefault: true })
-          .where(eq(invoiceTemplates.id, firstRemaining.id));
+          .where(eq(dealTemplates.id, firstRemaining.id));
 
         newDefault = { ...firstRemaining, isDefault: true };
       }
@@ -441,11 +441,11 @@ export async function deleteInvoiceTemplate(
       // Note: We use tx here since we're still in the transaction context
       const [defaultTemplate] = await tx
         .select(templateSelectFields)
-        .from(invoiceTemplates)
+        .from(dealTemplates)
         .where(
           and(
-            eq(invoiceTemplates.teamId, params.teamId),
-            eq(invoiceTemplates.isDefault, true),
+            eq(dealTemplates.teamId, params.teamId),
+            eq(dealTemplates.isDefault, true),
           ),
         )
         .limit(1);
@@ -460,11 +460,11 @@ export async function deleteInvoiceTemplate(
 /**
  * Get template count for a team
  */
-export async function getInvoiceTemplateCount(db: Database, teamId: string) {
+export async function getDealTemplateCount(db: Database, teamId: string) {
   const result = await db
-    .select({ id: invoiceTemplates.id })
-    .from(invoiceTemplates)
-    .where(eq(invoiceTemplates.teamId, teamId));
+    .select({ id: dealTemplates.id })
+    .from(dealTemplates)
+    .where(eq(dealTemplates.teamId, teamId));
 
   return result.length;
 }

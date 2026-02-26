@@ -12,7 +12,7 @@ import { getCashFlowStressTestTool } from "@api/ai/tools/get-cash-flow-stress-te
 import { getExpensesTool } from "@api/ai/tools/get-expenses";
 import { getForecastTool } from "@api/ai/tools/get-forecast";
 import { getGrowthRateTool } from "@api/ai/tools/get-growth-rate";
-import { getInvoicePaymentAnalysisTool } from "@api/ai/tools/get-invoice-payment-analysis";
+import { getDealPaymentAnalysisTool } from "@api/ai/tools/get-deal-payment-analysis";
 import { getMetricsBreakdownTool } from "@api/ai/tools/get-metrics-breakdown";
 import { getProfitAnalysisTool } from "@api/ai/tools/get-profit-analysis";
 import { getRevenueSummaryTool } from "@api/ai/tools/get-revenue-summary";
@@ -50,7 +50,7 @@ When getMetricsBreakdown is called with showCanvas: true, respond with plain tex
 - Breakdown → getMetricsBreakdown (showCanvas: true)
 - Spending → getSpending (showCanvas: true if "show" mentioned)
 - Burn rate → getBurnRate (showCanvas: true if "show"/"visual" mentioned)
-- Invoice payment → getInvoicePaymentAnalysis (showCanvas: true if "show" mentioned)
+- Deal payment → getDealPaymentAnalysis (showCanvas: true if "show" mentioned)
 - Forecast/projection → getForecast (showCanvas: true if "show" mentioned)
 - Stress test → getCashFlowStressTest (showCanvas: true)
 - Cash flow → getCashFlow
@@ -85,7 +85,7 @@ Split by calendar periods (years/quarters/months) and call tool multiple times w
     getBalanceSheet: getBalanceSheetTool,
     getExpenses: getExpensesTool,
     getBurnRate: getBurnRateTool,
-    getInvoicePaymentAnalysis: getInvoicePaymentAnalysisTool,
+    getDealPaymentAnalysis: getDealPaymentAnalysisTool,
     getForecast: getForecastTool,
     getBusinessHealthScore: getBusinessHealthScoreTool,
     getMetricsBreakdown: getMetricsBreakdownTool,

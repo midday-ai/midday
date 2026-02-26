@@ -2,7 +2,7 @@ import type { DocumentFormat } from "../utils/format-detection";
 import { getFormatSpecificHints } from "../utils/format-detection";
 import {
   accuracyGuidelines,
-  baseInvoiceInstructions,
+  baseDealInstructions,
   baseReceiptInstructions,
   commonErrors,
   extractionRequirements,
@@ -13,7 +13,7 @@ import {
   chainOfThoughtInstructions,
   receiptChainOfThoughtInstructions,
 } from "./chain-of-thought";
-import { invoiceFewShotExamples, receiptFewShotExamples } from "./examples";
+import { dealFewShotExamples, receiptFewShotExamples } from "./examples";
 
 export interface PromptComponents {
   base: string;
@@ -29,18 +29,18 @@ export interface PromptComponents {
 }
 
 /**
- * Create invoice prompt components
+ * Create deal prompt components
  */
-export function createInvoicePromptComponents(
+export function createDealPromptComponents(
   companyName?: string | null,
   useChainOfThought = false,
   format?: DocumentFormat,
 ): PromptComponents {
   const context = companyName
-    ? `CRITICAL CONTEXT: "${companyName}" is the RECIPIENT/CUSTOMER company receiving this invoice.
+    ? `CRITICAL CONTEXT: "${companyName}" is the RECIPIENT/CUSTOMER company receiving this deal.
 
 VENDOR IDENTIFICATION:
-- vendor_name = Company ISSUING the invoice TO "${companyName}" (NOT "${companyName}" itself)
+- vendor_name = Company ISSUING the deal TO "${companyName}" (NOT "${companyName}" itself)
 - Look for vendor in: document header, letterhead, "From:" section, top-left area
 - "${companyName}" appears in: "Bill To:", "Customer:", recipient sections
 
@@ -51,13 +51,13 @@ NEVER set vendor_name = "${companyName}"`
     : undefined;
 
   return {
-    base: baseInvoiceInstructions,
-    examples: invoiceFewShotExamples,
+    base: baseDealInstructions,
+    examples: dealFewShotExamples,
     chainOfThought: useChainOfThought ? chainOfThoughtInstructions : "",
-    requirements: extractionRequirements.invoice,
-    fieldRules: fieldSpecificRules.invoice,
-    accuracyGuidelines: accuracyGuidelines.invoice,
-    commonErrors: commonErrors.invoice,
+    requirements: extractionRequirements.deal,
+    fieldRules: fieldSpecificRules.deal,
+    accuracyGuidelines: accuracyGuidelines.deal,
+    commonErrors: commonErrors.deal,
     validation: validationRequirements,
     context,
     formatHints: format ? getFormatSpecificHints(format) : undefined,
@@ -143,20 +143,20 @@ export function composePrompt(components: PromptComponents): string {
 }
 
 /**
- * Create full invoice prompt
+ * Create full deal prompt
  */
-export function createInvoicePrompt(companyName?: string | null): string {
-  const components = createInvoicePromptComponents(companyName, false);
+export function createDealPrompt(companyName?: string | null): string {
+  const components = createDealPromptComponents(companyName, false);
   return composePrompt(components);
 }
 
 /**
- * Create invoice prompt with chain-of-thought
+ * Create deal prompt with chain-of-thought
  */
-export function createInvoicePromptWithChainOfThought(
+export function createDealPromptWithChainOfThought(
   companyName?: string | null,
 ): string {
-  const components = createInvoicePromptComponents(companyName, true);
+  const components = createDealPromptComponents(companyName, true);
   return composePrompt(components);
 }
 

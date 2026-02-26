@@ -1,4 +1,3 @@
-import { BaseCurrency } from "@/components/base-currency/base-currency";
 import { CompanyCountry } from "@/components/company-country";
 import { CompanyEmail } from "@/components/company-email";
 import { CompanyFiscalYear } from "@/components/company-fiscal-year";
@@ -23,7 +22,6 @@ export default async function Account() {
         <CompanyName />
         <CompanyEmail />
         <CompanyCountry />
-        <BaseCurrency />
         <CompanyFiscalYear />
         <TeamIdSection />
         <DeleteTeam />

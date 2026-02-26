@@ -27,7 +27,7 @@ export default async function Layout({
   // NOTE: These are used in the global sheets
   batchPrefetch([
     trpc.team.current.queryOptions(),
-    trpc.invoice.defaultSettings.queryOptions(),
+    trpc.deal.defaultSettings.queryOptions(),
     trpc.search.global.queryOptions({ searchTerm: "" }),
   ]);
 

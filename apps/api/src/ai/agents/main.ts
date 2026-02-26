@@ -3,7 +3,7 @@ import { createAgent, formatContextForLLM } from "@api/ai/agents/config/shared";
 import { analyticsAgent } from "./analytics";
 import { merchantsAgent } from "./merchants";
 import { generalAgent } from "./general";
-import { invoicesAgent } from "./invoices";
+import { dealsAgent } from "./deals";
 import { operationsAgent } from "./operations";
 import { reportsAgent } from "./reports";
 import { researchAgent } from "./research";
@@ -29,10 +29,10 @@ general: General questions, greetings, web search
 
 research: AFFORDABILITY ANALYSIS ("can I afford X?", "should I buy X?"), purchase decisions, market comparisons
 operations: Account balances, documents, inbox
-reports: Financial reports (revenue, expenses, spending, spending patterns, burn rate, burn rate analysis, burn rate visual analytics, runway, P&L, cash flow, cash flow stress test, stress test, financial resilience, scenario analysis, invoice payment analysis, payment patterns, overdue invoices, growth rate, revenue growth, profit growth, period-over-period growth, balance sheet, financial position, assets and liabilities, statement of financial position, financial snapshot, business health score, business health scores, financial health, health metrics, revenue forecast, forecast, revenue projection, projection, show revenue forecast, show forecast)
+reports: Financial reports (revenue, expenses, spending, spending patterns, burn rate, burn rate analysis, burn rate visual analytics, runway, P&L, cash flow, cash flow stress test, stress test, financial resilience, scenario analysis, deal payment analysis, payment patterns, overdue deals, growth rate, revenue growth, profit growth, period-over-period growth, balance sheet, financial position, assets and liabilities, statement of financial position, financial snapshot, business health score, business health scores, financial health, health metrics, revenue forecast, forecast, revenue projection, projection, show revenue forecast, show forecast)
 analytics: Predictions, advanced analytics (excluding revenue forecast which goes to reports)
 transactions: Transaction history
-invoices: Invoice management
+deals: Deal management
 merchants: Merchant management
 </agent-capabilities>
 </background-data>`,
@@ -43,7 +43,7 @@ merchants: Merchant management
     reportsAgent,
     analyticsAgent,
     transactionsAgent,
-    invoicesAgent,
+    dealsAgent,
     merchantsAgent,
   ],
   maxTurns: 1,

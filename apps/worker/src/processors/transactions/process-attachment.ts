@@ -6,7 +6,7 @@ import { convertHeicToJpeg } from "../../utils/image-processing";
 import { BaseProcessor } from "../base";
 
 /**
- * Process transaction attachments (receipts/invoices)
+ * Process transaction attachments (receipts/deals)
  * Converts HEIC images and triggers document classification
  */
 export class ProcessTransactionAttachmentProcessor extends BaseProcessor<ProcessTransactionAttachmentPayload> {

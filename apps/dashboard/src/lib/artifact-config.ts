@@ -23,7 +23,7 @@ export type ArtifactType =
   | "profit-analysis-canvas"
   | "forecast-canvas"
   | "stress-test-canvas"
-  | "invoice-payment-canvas"
+  | "deal-payment-canvas"
   | "health-report-canvas"
   | "breakdown-summary-canvas";
 
@@ -54,7 +54,7 @@ export const TOOL_TO_ARTIFACT_MAP: Record<string, ArtifactType> = {
   cashFlowForecast: "forecast-canvas",
   stressTest: "stress-test-canvas",
   getCashFlowStressTest: "stress-test-canvas",
-  getInvoicePaymentAnalysis: "invoice-payment-canvas",
+  getDealPaymentAnalysis: "deal-payment-canvas",
   getMetricsBreakdown: "breakdown-summary-canvas",
 };
 
@@ -152,8 +152,8 @@ const CUSTOM_STAGE_MESSAGES: Partial<
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",
   },
-  "invoice-payment-canvas": {
-    loading: "Preparing invoice payment analysis...",
+  "deal-payment-canvas": {
+    loading: "Preparing deal payment analysis...",
     chart_ready: "Chart data ready, calculating metrics...",
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",

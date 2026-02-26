@@ -18,7 +18,7 @@ export default async function PortalLayout({ children, params }: Props) {
     trpc.merchantPortal.getPortalData.queryOptions({ portalId }),
   );
 
-  // If no MCA deals, render children directly (invoice portal fallback)
+  // If no MCA deals, render children directly (deal portal fallback)
   if (!portalData || !portalData.deals || portalData.deals.length === 0) {
     return <HydrateClient>{children}</HydrateClient>;
   }

@@ -237,7 +237,7 @@ export function getChartTypeName(chartId: string): string {
     "cash-flow": "cash flow",
     "growth-rate": "growth rate",
     "business-health-score": "business health score",
-    "invoice-payment": "invoice payments",
+    "deal-payment": "deal payments",
     "stress-test": "cash flow stress test",
     "collection-performance": "collection performance",
     "funding-activity": "funding activity",

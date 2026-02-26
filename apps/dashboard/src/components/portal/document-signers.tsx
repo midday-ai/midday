@@ -42,9 +42,9 @@ const DOCUMENT_TYPES = [
     description: "State-compliant MCA disclosures",
   },
   {
-    key: "invoices" as const,
-    label: "Invoices",
-    description: "Payment invoices and statements",
+    key: "deals" as const,
+    label: "Deals",
+    description: "Payment deals and statements",
   },
 ];
 

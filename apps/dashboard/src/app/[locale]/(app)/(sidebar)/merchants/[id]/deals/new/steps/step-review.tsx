@@ -59,13 +59,13 @@ export function StepReview({ merchantId }: { merchantId: string }) {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation(
-    trpc.deals.createWithBankAccount.mutationOptions({
+    trpc.mcaDeals.createWithBankAccount.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.deals.list.queryKey(),
+          queryKey: trpc.mcaDeals.list.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.deals.stats.queryKey(),
+          queryKey: trpc.mcaDeals.stats.queryKey(),
         });
         queryClient.invalidateQueries({
           queryKey: trpc.merchants.getMcaDeals.queryKey(),

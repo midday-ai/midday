@@ -11,8 +11,8 @@ import {
   getMonthlySpendingSchema,
   getNetPositionSchema,
   getNsfAlertsSchema,
-  getOutstandingInvoicesSchema,
-  getOverdueInvoicesAlertSchema,
+  getOutstandingDealsSchema,
+  getOverdueDealsAlertSchema,
   getPortfolioOverviewSchema,
   getProfitMarginSchema,
   getRecurringExpensesSchema,
@@ -33,8 +33,8 @@ import {
   getMcaDealStatusBreakdown,
   getMcaPaymentStats,
   getNetPosition,
-  getOutstandingInvoices,
-  getOverdueInvoicesAlert,
+  getOutstandingDeals,
+  getOverdueDealsAlert,
   getProfitMargin,
   getRecentDocuments,
   getRecurringExpenses,
@@ -263,10 +263,10 @@ export const widgetsRouter = createTRPCRouter({
       };
     }),
 
-  getOutstandingInvoices: protectedProcedure
-    .input(getOutstandingInvoicesSchema)
+  getOutstandingDeals: protectedProcedure
+    .input(getOutstandingDealsSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      const invoicesData = await getOutstandingInvoices(db, {
+      const dealsData = await getOutstandingDeals(db, {
         teamId: teamId!,
         currency: input.currency,
         status: input.status,
@@ -274,11 +274,11 @@ export const widgetsRouter = createTRPCRouter({
 
       return {
         result: {
-          count: invoicesData.summary.count,
-          totalAmount: invoicesData.summary.totalAmount,
-          currency: invoicesData.summary.currency,
-          status: invoicesData.summary.status,
-          meta: invoicesData.meta,
+          count: dealsData.summary.count,
+          totalAmount: dealsData.summary.totalAmount,
+          currency: dealsData.summary.currency,
+          status: dealsData.summary.status,
+          meta: dealsData.meta,
         },
       };
     }),
@@ -405,10 +405,10 @@ export const widgetsRouter = createTRPCRouter({
       };
     }),
 
-  getOverdueInvoicesAlert: protectedProcedure
-    .input(getOverdueInvoicesAlertSchema)
+  getOverdueDealsAlert: protectedProcedure
+    .input(getOverdueDealsAlertSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      const overdueData = await getOverdueInvoicesAlert(db, {
+      const overdueData = await getOverdueDealsAlert(db, {
         teamId: teamId!,
         currency: input?.currency,
       });

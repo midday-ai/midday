@@ -8,15 +8,15 @@ export const baseConfig = {
   active: true,
   logo: Logo,
   short_description:
-    "Forward receipts and invoices directly from WhatsApp. Midday automatically extracts data and matches them to transactions.",
+    "Forward receipts and deals directly from WhatsApp. Midday automatically extracts data and matches them to transactions.",
   description:
-    "Connect Midday with WhatsApp to capture receipts on the go.\n\n**Easy Setup**\nScan a QR code to connect your WhatsApp number to Midday. No app installation required.\n\n**Receipt & Invoice Upload**\nForward or send photos of receipts, invoices, or any documents directly from WhatsApp. Simply send an image or PDF and it will automatically be processed.\n\n**Smart Matching**\nMidday extracts key information (amount, date, vendor) from your documents and automatically matches them to the right transactions. You'll receive a message with the match result.\n\n**Approve or Decline**\nReview suggested matches and approve or decline them directly from WhatsApp with one tap—no need to open the Midday app.",
+    "Connect Midday with WhatsApp to capture receipts on the go.\n\n**Easy Setup**\nScan a QR code to connect your WhatsApp number to Midday. No app installation required.\n\n**Receipt & Deal Upload**\nForward or send photos of receipts, deals, or any documents directly from WhatsApp. Simply send an image or PDF and it will automatically be processed.\n\n**Smart Matching**\nMidday extracts key information (amount, date, vendor) from your documents and automatically matches them to the right transactions. You'll receive a message with the match result.\n\n**Approve or Decline**\nReview suggested matches and approve or decline them directly from WhatsApp with one tap—no need to open the Midday app.",
   settings: [
     {
       id: "receipts",
       label: "Receipt Processing",
       description:
-        "Automatically process receipts and invoices sent via WhatsApp.",
+        "Automatically process receipts and deals sent via WhatsApp.",
       type: "switch",
       required: false,
       value: true,

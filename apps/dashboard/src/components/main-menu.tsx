@@ -15,7 +15,7 @@ const icons = {
   "/": () => <Icons.Overview size={20} />,
   "/accounts": () => <Icons.Accounts size={20} />,
   "/transactions": () => <Icons.Transactions size={20} />,
-  "/invoices": () => <Icons.Invoice size={20} />,
+  "/deals": () => <Icons.Deal size={20} />,
   "/merchants": () => <Icons.Customers size={20} />,
   "/brokers": () => <Icons.Broker size={20} />,
   "/syndications": () => <Icons.Syndication size={20} />,
@@ -24,7 +24,7 @@ const icons = {
   "/collections": () => <Icons.Collections size={20} />,
   "/settings": () => <Icons.Settings size={20} />,
   "/inbox": () => <Icons.Inbox2 size={20} />,
-  "/broker/deals": () => <Icons.Invoice size={20} />,
+  "/broker/deals": () => <Icons.Deal size={20} />,
   "/broker/commissions": () => <Icons.Reconciliation size={20} />,
 } as const;
 
@@ -67,10 +67,10 @@ const allItems: MenuItem[] = [
     children: [{ path: "/inbox/settings", name: "Settings" }],
   },
   {
-    path: "/invoices",
+    path: "/deals",
     name: "Deals",
     children: [
-      { path: "/invoices?createDeal=true", name: "Create new", roles: INTERNAL },
+      { path: "/deals?createDeal=true", name: "Create new", roles: INTERNAL },
     ],
   },
   {
@@ -146,7 +146,7 @@ const KNOWN_MENU_PATHS = [
   "/accounts",
   "/transactions",
   "/inbox",
-  "/invoices",
+  "/deals",
   "/merchants",
   "/brokers",
   "/syndications",

@@ -8,8 +8,8 @@ type FileUrlOptions =
       filename?: string;
     }
   | {
-      type: "invoice";
-      invoiceId: string;
+      type: "deal";
+      dealId: string;
       isReceipt?: boolean;
     }
   | {
@@ -84,11 +84,11 @@ export function useFileUrl(options: FileUrlOptions | null) {
       };
     }
 
-    if (options.type === "invoice") {
-      // Build invoice download URL
-      const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice`;
+    if (options.type === "deal") {
+      // Build deal download URL
+      const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/deal`;
       const url = new URL(baseUrl);
-      url.searchParams.set("id", options.invoiceId);
+      url.searchParams.set("id", options.dealId);
       url.searchParams.set("fk", user.fileKey);
       if (options.isReceipt) {
         url.searchParams.set("type", "receipt");

@@ -8,37 +8,37 @@ import {
   setDay,
 } from "date-fns";
 
-// Re-export canonical types from @midday/invoice
-// This ensures a single source of truth for recurring invoice types
+// Re-export canonical types from @midday/deal
+// This ensures a single source of truth for recurring deal types
 export type {
-  InvoiceRecurringFrequency,
-  InvoiceRecurringEndType,
-  InvoiceRecurringStatus,
-} from "@midday/invoice/recurring";
+  DealRecurringFrequency,
+  DealRecurringEndType,
+  DealRecurringStatus,
+} from "@midday/deal/recurring";
 
 export {
   RECURRING_FREQUENCIES,
   RECURRING_END_TYPES,
   RECURRING_STATUSES,
   isDateInFutureUTC,
-} from "@midday/invoice/recurring";
+} from "@midday/deal/recurring";
 
 // Import types and utilities for local use
 import {
-  type InvoiceRecurringEndType,
-  type InvoiceRecurringFrequency,
+  type DealRecurringEndType,
+  type DealRecurringFrequency,
   isDateInFutureUTC,
-} from "@midday/invoice/recurring";
+} from "@midday/deal/recurring";
 
-export interface RecurringInvoiceParams {
-  frequency: InvoiceRecurringFrequency;
+export interface RecurringDealParams {
+  frequency: DealRecurringFrequency;
   frequencyDay: number | null; // 0-6 for weekly (day of week), 1-31 for monthly_date
   frequencyWeek: number | null; // 1-5 for monthly_weekday (e.g., 1st, 2nd Friday)
   frequencyInterval: number | null; // For custom: every X days
   timezone: string;
 }
 
-export interface UpcomingInvoice {
+export interface UpcomingDeal {
   date: string; // ISO date string
   amount: number;
 }
@@ -85,18 +85,18 @@ function getNthWeekdayOfMonth(
 }
 
 /**
- * Calculate the next scheduled date for a recurring invoice.
+ * Calculate the next scheduled date for a recurring deal.
  *
  * **Server-Side - Authoritative for Scheduling**
  *
  * This function handles proper timezone-aware date calculations using `@date-fns/tz`.
- * It should be used for all actual invoice scheduling operations.
+ * It should be used for all actual deal scheduling operations.
  *
- * Note: There is a similar `getNextDate` function in `@midday/invoice/recurring`
+ * Note: There is a similar `getNextDate` function in `@midday/deal/recurring`
  * that provides simplified client-side calculations for UI preview purposes only.
  * That version does NOT handle timezones and should not be used for scheduling.
  *
- * @param params - Recurring invoice parameters including frequency and timezone
+ * @param params - Recurring deal parameters including frequency and timezone
  * @param currentDate - The current/reference date (in UTC)
  * @returns The next scheduled date in UTC, adjusted for the user's timezone
  *
@@ -112,7 +112,7 @@ function getNthWeekdayOfMonth(
  * ```
  */
 export function calculateNextScheduledDate(
-  params: RecurringInvoiceParams,
+  params: RecurringDealParams,
   currentDate: Date,
 ): Date {
   const {
@@ -244,17 +244,17 @@ export function calculateNextScheduledDate(
 }
 
 /**
- * Calculate the first scheduled date for a new recurring invoice.
+ * Calculate the first scheduled date for a new recurring deal.
  *
- * This determines when the first invoice in a recurring series should be generated:
+ * This determines when the first deal in a recurring series should be generated:
  * - If issueDate is in the future: Schedule for that date
  * - If issueDate is today or in the past: Generate immediately (return now)
  *
  * Uses isDateInFutureUTC for consistent UTC day-level comparison across
  * frontend and backend, avoiding timezone-related edge cases.
  *
- * @param params - Recurring invoice parameters (unused currently, but available for future patterns)
- * @param issueDate - The issue date set by the user for the first invoice
+ * @param params - Recurring deal parameters (unused currently, but available for future patterns)
+ * @param issueDate - The issue date set by the user for the first deal
  * @param now - The current date (defaults to new Date())
  * @returns The first scheduled date in UTC
  *
@@ -270,7 +270,7 @@ export function calculateNextScheduledDate(
  * ```
  */
 export function calculateFirstScheduledDate(
-  _params: RecurringInvoiceParams,
+  _params: RecurringDealParams,
   issueDate: Date,
   now: Date = new Date(),
 ): Date {
@@ -285,35 +285,35 @@ export function calculateFirstScheduledDate(
 }
 
 /**
- * Calculate upcoming invoice dates for preview
- * @param params - Recurring invoice parameters
+ * Calculate upcoming deal dates for preview
+ * @param params - Recurring deal parameters
  * @param startDate - The start date for calculations
- * @param amount - The invoice amount
+ * @param amount - The deal amount
  * @param currency - The currency
  * @param endType - How the series ends
  * @param endDate - End date (if endType is 'on_date')
  * @param endCount - End count (if endType is 'after_count')
- * @param alreadyGenerated - Number of invoices already generated
+ * @param alreadyGenerated - Number of deals already generated
  * @param limit - Maximum number of previews to return
- * @returns Array of upcoming invoices and summary
+ * @returns Array of upcoming deals and summary
  */
 export function calculateUpcomingDates(
-  params: RecurringInvoiceParams,
+  params: RecurringDealParams,
   startDate: Date,
   amount: number,
   currency: string,
-  endType: InvoiceRecurringEndType,
+  endType: DealRecurringEndType,
   endDate: Date | null,
   endCount: number | null,
   alreadyGenerated = 0,
   limit = 10,
-): { invoices: UpcomingInvoice[]; summary: UpcomingSummary } {
-  const invoices: UpcomingInvoice[] = [];
+): { deals: UpcomingDeal[]; summary: UpcomingSummary } {
+  const deals: UpcomingDeal[] = [];
   let currentDate = startDate;
   let count = 0;
   const maxIterations = endType === "never" ? limit : Math.min(limit, 100);
 
-  // Calculate remaining invoices if there's a count limit
+  // Calculate remaining deals if there's a count limit
   const remaining =
     endType === "after_count" && endCount !== null
       ? endCount - alreadyGenerated
@@ -328,7 +328,7 @@ export function calculateUpcomingDates(
       break;
     }
 
-    invoices.push({
+    deals.push({
       date: currentDate.toISOString(),
       amount,
     });
@@ -347,7 +347,7 @@ export function calculateUpcomingDates(
     totalCount = endCount;
     totalAmount = endCount * amount;
   } else if (endType === "on_date" && endDate) {
-    // Count total invoices until end date
+    // Count total deals until end date
     let tempDate = startDate;
     let tempCount = 0;
     while (tempDate <= endDate && tempCount < 1000) {
@@ -360,7 +360,7 @@ export function calculateUpcomingDates(
   // For endType === "never", totalCount and totalAmount remain null
 
   return {
-    invoices,
+    deals,
     summary: {
       hasEndDate: endType !== "never",
       totalCount,
@@ -371,19 +371,19 @@ export function calculateUpcomingDates(
 }
 
 /**
- * Check if a recurring invoice should be marked as completed
+ * Check if a recurring deal should be marked as completed
  * @param endType - How the series ends
  * @param endDate - End date (if endType is 'on_date')
  * @param endCount - End count (if endType is 'after_count')
- * @param invoicesGenerated - Number of invoices generated
+ * @param dealsGenerated - Number of deals generated
  * @param nextScheduledAt - Next scheduled date
  * @returns Whether the series should be marked as completed
  */
 export function shouldMarkCompleted(
-  endType: InvoiceRecurringEndType,
+  endType: DealRecurringEndType,
   endDate: Date | null,
   endCount: number | null,
-  invoicesGenerated: number,
+  dealsGenerated: number,
   nextScheduledAt: Date | null,
 ): boolean {
   switch (endType) {
@@ -398,7 +398,7 @@ export function shouldMarkCompleted(
       );
 
     case "after_count":
-      return endCount !== null && invoicesGenerated >= endCount;
+      return endCount !== null && dealsGenerated >= endCount;
 
     default:
       return false;
@@ -412,7 +412,7 @@ export function shouldMarkCompleted(
  * scheduled date) might still be in the past. This function advances through
  * missed intervals until reaching a future date.
  *
- * @param params - Recurring invoice parameters
+ * @param params - Recurring deal parameters
  * @param scheduledDate - The initially calculated next scheduled date
  * @param now - The current time to compare against
  * @param maxIterations - Safety limit to prevent infinite loops (default: 1000)
@@ -420,7 +420,7 @@ export function shouldMarkCompleted(
  *
  * @example
  * ```ts
- * // Biweekly invoice scheduled for Jan 1, processed on Jan 21
+ * // Biweekly deal scheduled for Jan 1, processed on Jan 21
  * // Initial calculation: Jan 1 + 14 days = Jan 15 (still in past)
  * const result = advanceToFutureDate(params, new Date('2025-01-15'), new Date('2025-01-21'));
  * // result.date = Jan 29 (future)
@@ -428,7 +428,7 @@ export function shouldMarkCompleted(
  * ```
  */
 export function advanceToFutureDate(
-  params: RecurringInvoiceParams,
+  params: RecurringDealParams,
   scheduledDate: Date,
   now: Date,
   maxIterations = 1000,

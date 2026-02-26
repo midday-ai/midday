@@ -75,7 +75,7 @@ export const GetStartedEmail = ({ fullName = "" }: Props) => {
             </li>
             <li className="mb-2">
               <Text>
-                <strong>Send your first invoice</strong> – Get paid faster and
+                <strong>Create your first deal</strong> – Get paid faster and
                 track overdue payments effortlessly.
               </Text>
             </li>

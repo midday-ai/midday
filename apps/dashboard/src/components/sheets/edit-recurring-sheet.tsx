@@ -1,19 +1,19 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useDealParams } from "@/hooks/use-deal-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { TZDate } from "@date-fns/tz";
 import {
-  type InvoiceRecurringEndType,
-  type InvoiceRecurringFrequency,
+  type DealRecurringEndType,
+  type DealRecurringFrequency,
   type RecurringConfig,
   calculatePreviewDates,
   formatOrdinal,
   localDateToUTCMidnight,
   validateRecurringConfig,
-} from "@midday/invoice/recurring";
+} from "@midday/deal/recurring";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import { Icons } from "@midday/ui/icons";
@@ -50,7 +50,7 @@ const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th"];
 function getSmartOptions(referenceDate: Date): Array<{
   value: string;
   label: string;
-  frequency: InvoiceRecurringFrequency;
+  frequency: DealRecurringFrequency;
   frequencyDay: number | null;
   frequencyWeek: number | null;
 }> {
@@ -128,7 +128,7 @@ function getSmartOptions(referenceDate: Date): Array<{
 export function EditRecurringSheet() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { editRecurringId, setParams } = useInvoiceParams();
+  const { editRecurringId, setParams } = useDealParams();
   const { data: user } = useUserQuery();
 
   const isOpen = Boolean(editRecurringId);
@@ -146,7 +146,7 @@ export function EditRecurringSheet() {
 
   // Fetch current recurring series data
   const { data: recurring, isLoading } = useQuery({
-    ...trpc.invoiceRecurring.get.queryOptions({ id: editRecurringId! }),
+    ...trpc.dealRecurring.get.queryOptions({ id: editRecurringId! }),
     enabled: isOpen,
   });
 
@@ -155,11 +155,11 @@ export function EditRecurringSheet() {
     if (recurring) {
       setConfig({
         frequency:
-          (recurring.frequency as InvoiceRecurringFrequency) || "monthly_date",
+          (recurring.frequency as DealRecurringFrequency) || "monthly_date",
         frequencyDay: recurring.frequencyDay ?? null,
         frequencyWeek: recurring.frequencyWeek ?? null,
         frequencyInterval: recurring.frequencyInterval ?? null,
-        endType: (recurring.endType as InvoiceRecurringEndType) || "never",
+        endType: (recurring.endType as DealRecurringEndType) || "never",
         endDate: recurring.endDate ?? null,
         endCount: recurring.endCount ?? null,
       });
@@ -174,22 +174,22 @@ export function EditRecurringSheet() {
   const isValid = validationErrors.length === 0;
 
   const updateMutation = useMutation(
-    trpc.invoiceRecurring.update.mutationOptions({
+    trpc.dealRecurring.update.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.invoice.getById.queryKey(),
+          queryKey: trpc.deal.getById.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.invoice.get.infiniteQueryKey(),
+          queryKey: trpc.deal.get.infiniteQueryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceRecurring.get.queryKey(),
+          queryKey: trpc.dealRecurring.get.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceRecurring.list.queryKey(),
+          queryKey: trpc.dealRecurring.list.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceRecurring.getUpcoming.queryKey(),
+          queryKey: trpc.dealRecurring.getUpcoming.queryKey(),
         });
         setParams({ editRecurringId: null });
       },
@@ -243,15 +243,15 @@ export function EditRecurringSheet() {
   const previewDates = React.useMemo(() => {
     if (!recurring?.nextScheduledAt) return [];
 
-    // Calculate remaining invoices, ensuring limit is never negative
-    // (e.g., when user sets endCount lower than already generated invoices)
-    const remainingInvoices =
+    // Calculate remaining deals, ensuring limit is never negative
+    // (e.g., when user sets endCount lower than already generated deals)
+    const remainingDeals =
       config.endType === "after_count" && config.endCount
-        ? Math.max(0, config.endCount - (recurring.invoicesGenerated ?? 0))
+        ? Math.max(0, config.endCount - (recurring.dealsGenerated ?? 0))
         : null;
 
     const limit =
-      remainingInvoices !== null ? Math.min(remainingInvoices, 5) : 3;
+      remainingDeals !== null ? Math.min(remainingDeals, 5) : 3;
 
     return calculatePreviewDates(
       config,
@@ -278,7 +278,7 @@ export function EditRecurringSheet() {
   const handleEndTypeChange = (value: string) => {
     setConfig((prev) => ({
       ...prev,
-      endType: value as InvoiceRecurringEndType,
+      endType: value as DealRecurringEndType,
       endDate: value === "on_date" ? prev.endDate : null,
       endCount: value === "after_count" ? prev.endCount || 12 : null,
     }));
@@ -436,7 +436,7 @@ export function EditRecurringSheet() {
                             className="w-20"
                           />
                           <span className="text-sm text-muted-foreground">
-                            invoices
+                            deals
                           </span>
                         </div>
                       )}
@@ -448,15 +448,15 @@ export function EditRecurringSheet() {
                 <div className="pt-4 border-t border-border space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      Invoices generated
+                      Deals generated
                     </span>
-                    <span>{recurring?.invoicesGenerated ?? 0}</span>
+                    <span>{recurring?.dealsGenerated ?? 0}</span>
                   </div>
                   {recurring?.nextScheduledAt &&
                     recurring.status === "active" && (
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">
-                          Next invoice
+                          Next deal
                         </span>
                         <span>
                           {format(
@@ -472,9 +472,9 @@ export function EditRecurringSheet() {
                 {previewDates.length > 0 && (
                   <div className="pt-4 border-t border-border space-y-3">
                     <span className="text-sm font-medium">
-                      Upcoming invoices
+                      Upcoming deals
                     </span>
-                    {previewDates.map((invoice, index) => (
+                    {previewDates.map((deal, index) => (
                       <div
                         key={index.toString()}
                         className="flex items-center justify-between text-sm"
@@ -482,16 +482,16 @@ export function EditRecurringSheet() {
                         <div className="flex">
                           <span className="w-[100px]">
                             {format(
-                              new TZDate(invoice.date, "UTC"),
+                              new TZDate(deal.date, "UTC"),
                               "MMM d, yyyy",
                             )}
                           </span>
                           <span className="text-muted-foreground">
-                            {format(new TZDate(invoice.date, "UTC"), "EEE")}
+                            {format(new TZDate(deal.date, "UTC"), "EEE")}
                           </span>
                         </div>
                         <FormatAmount
-                          amount={invoice.amount}
+                          amount={deal.amount}
                           currency={recurring?.currency ?? "USD"}
                         />
                       </div>

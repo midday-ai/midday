@@ -27,7 +27,7 @@ const STATUS_OPTIONS = [
 
 /**
  * Parse a search query into structured filters
- * e.g., "teamId:abc-123 invoice" -> { tags: { teamId: "abc-123" }, text: "invoice" }
+ * e.g., "teamId:abc-123 deal" -> { tags: { teamId: "abc-123" }, text: "deal" }
  */
 export function parseSearchQuery(query: string): ParsedFilters {
   const tags: Record<string, string> = {};

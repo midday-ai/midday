@@ -5,32 +5,32 @@ import {
   inboxCrossCurrencyMatchedSchema,
   inboxNeedsReviewSchema,
   inboxNewSchema,
-  invoiceCancelledSchema,
-  invoiceCreatedSchema,
-  invoiceOverdueSchema,
-  invoicePaidSchema,
-  invoiceReminderSentSchema,
-  invoiceScheduledSchema,
-  invoiceSentSchema,
+  dealCancelledSchema,
+  dealCreatedSchema,
+  dealOverdueSchema,
+  dealPaidSchema,
+  dealReminderSentSchema,
+  dealScheduledSchema,
+  dealSentSchema,
   transactionsCreatedSchema,
   transactionsExportedSchema,
 } from "@midday/notifications";
 import { z } from "zod";
 
-export const sendInvoiceReminderSchema = z.object({
-  invoiceId: z.string().uuid(),
+export const sendDealReminderSchema = z.object({
+  dealId: z.string().uuid(),
 });
 
-export type SendInvoiceReminderPayload = z.infer<
-  typeof sendInvoiceReminderSchema
+export type SendDealReminderPayload = z.infer<
+  typeof sendDealReminderSchema
 >;
 
-export const generateInvoiceSchema = z.object({
-  invoiceId: z.string().uuid(),
+export const generateDealSchema = z.object({
+  dealId: z.string().uuid(),
   deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
 });
 
-export type GenerateInvoicePayload = z.infer<typeof generateInvoiceSchema>;
+export type GenerateDealPayload = z.infer<typeof generateDealSchema>;
 
 export const deleteConnectionSchema = z.object({
   referenceId: z.string().optional().nullable(),
@@ -208,13 +208,13 @@ export const embedTransactionSchema = z.object({
 
 export type EmbedTransactionPayload = z.infer<typeof embedTransactionSchema>;
 
-export const scheduleInvoiceJobSchema = z.object({
-  invoiceId: z.string().uuid(),
+export const scheduleDealJobSchema = z.object({
+  dealId: z.string().uuid(),
   scheduledAt: z.string().datetime(),
 });
 
-export type ScheduleInvoiceJobPayload = z.infer<
-  typeof scheduleInvoiceJobSchema
+export type ScheduleDealJobPayload = z.infer<
+  typeof scheduleDealJobSchema
 >;
 
 const baseJobSchema = z.object({
@@ -237,45 +237,45 @@ export const notificationSchema = z.discriminatedUnion("type", [
 
   baseJobSchema
     .extend({
-      type: z.literal("invoice_paid"),
+      type: z.literal("deal_paid"),
     })
-    .extend(invoicePaidSchema.omit({ users: true }).shape),
+    .extend(dealPaidSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
-      type: z.literal("invoice_overdue"),
+      type: z.literal("deal_overdue"),
     })
-    .extend(invoiceOverdueSchema.omit({ users: true }).shape),
+    .extend(dealOverdueSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
-      type: z.literal("invoice_scheduled"),
+      type: z.literal("deal_scheduled"),
     })
-    .extend(invoiceScheduledSchema.omit({ users: true }).shape),
+    .extend(dealScheduledSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
-      type: z.literal("invoice_sent"),
+      type: z.literal("deal_sent"),
     })
-    .extend(invoiceSentSchema.omit({ users: true }).shape),
+    .extend(dealSentSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
-      type: z.literal("invoice_reminder_sent"),
+      type: z.literal("deal_reminder_sent"),
     })
-    .extend(invoiceReminderSentSchema.omit({ users: true }).shape),
+    .extend(dealReminderSentSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
-      type: z.literal("invoice_cancelled"),
+      type: z.literal("deal_cancelled"),
     })
-    .extend(invoiceCancelledSchema.omit({ users: true }).shape),
+    .extend(dealCancelledSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
-      type: z.literal("invoice_created"),
+      type: z.literal("deal_created"),
     })
-    .extend(invoiceCreatedSchema.omit({ users: true }).shape),
+    .extend(dealCreatedSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({

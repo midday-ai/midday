@@ -333,7 +333,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   );
 
   const recordPaymentMutation = useMutation(
-    trpc.deals.recordPayment.mutationOptions({
+    trpc.mcaDeals.recordPayment.mutationOptions({
       onSuccess: () => {
         invalidateTransactions();
         setCollectionDialogTx(null);
@@ -343,7 +343,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   );
 
   const updateDealStatusMutation = useMutation(
-    trpc.deals.updateStatus.mutationOptions({
+    trpc.mcaDeals.updateStatus.mutationOptions({
       onSuccess: () => {
         invalidateTransactions();
         setEscalateDialogTx(null);

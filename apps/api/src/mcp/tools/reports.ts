@@ -279,7 +279,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Revenue Forecast Report",
       description:
-        "Get revenue forecast based on historical data, outstanding invoices, and scheduled invoices. Projects future revenue.",
+        "Get revenue forecast based on historical data, outstanding deals, and scheduled deals. Projects future revenue.",
       inputSchema: getRevenueForecastSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
     },

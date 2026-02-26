@@ -1,20 +1,20 @@
 "use client";
 
 import { useInboxParams } from "@/hooks/use-inbox-params";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useDealParams } from "@/hooks/use-deal-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
 const SUPPORTED_NOTIFICATION_TYPES = [
-  "invoice_paid",
-  "invoice_overdue",
-  "invoice_created",
-  "invoice_sent",
-  "invoice_scheduled",
-  "invoice_reminder_sent",
-  "invoice_cancelled",
-  "invoice_refunded",
+  "deal_paid",
+  "deal_overdue",
+  "deal_created",
+  "deal_sent",
+  "deal_scheduled",
+  "deal_reminder_sent",
+  "deal_cancelled",
+  "deal_refunded",
   "transactions_created",
   "inbox_new",
   "inbox_needs_review",
@@ -23,7 +23,7 @@ const SUPPORTED_NOTIFICATION_TYPES = [
   "recurring_series_started",
   "recurring_series_completed",
   "recurring_series_paused",
-  "recurring_invoice_upcoming",
+  "recurring_deal_upcoming",
 ];
 
 export function isNotificationClickable(activityType: string): boolean {
@@ -49,7 +49,7 @@ export function NotificationLink({
   className,
   actionButton,
 }: NotificationLinkProps) {
-  const { setParams: setInvoiceParams } = useInvoiceParams();
+  const { setParams: setDealParams } = useDealParams();
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setInboxParams } = useInboxParams();
   const router = useRouter();
@@ -61,15 +61,15 @@ export function NotificationLink({
 
     try {
       switch (activityType) {
-        case "invoice_paid":
-        case "invoice_overdue":
-        case "invoice_created":
-        case "invoice_sent":
-        case "invoice_scheduled":
-        case "invoice_reminder_sent":
-        case "invoice_cancelled":
-        case "invoice_refunded":
-          setInvoiceParams({ invoiceId: recordId!, type: "details" });
+        case "deal_paid":
+        case "deal_overdue":
+        case "deal_created":
+        case "deal_sent":
+        case "deal_scheduled":
+        case "deal_reminder_sent":
+        case "deal_cancelled":
+        case "deal_refunded":
+          setDealParams({ dealId: recordId!, type: "details" });
           break;
 
         case "transactions_created":
@@ -100,29 +100,29 @@ export function NotificationLink({
 
         case "recurring_series_started":
         case "recurring_series_completed":
-          // Open the invoice details for the generated invoice
-          if (metadata?.invoiceId) {
-            setInvoiceParams({
-              invoiceId: metadata.invoiceId,
+          // Open the deal details for the generated deal
+          if (metadata?.dealId) {
+            setDealParams({
+              dealId: metadata.dealId,
               type: "details",
             });
           } else if (recordId) {
             // Fallback: open the edit recurring sheet
-            setInvoiceParams({ editRecurringId: recordId });
+            setDealParams({ editRecurringId: recordId });
           }
           break;
 
         case "recurring_series_paused":
           // Open the edit recurring sheet to let user resume/review the series
           if (recordId) {
-            setInvoiceParams({ editRecurringId: recordId });
+            setDealParams({ editRecurringId: recordId });
           }
           break;
 
-        case "recurring_invoice_upcoming":
+        case "recurring_deal_upcoming":
           // Open the edit recurring sheet to let user review/modify the series
           if (recordId) {
-            setInvoiceParams({ editRecurringId: recordId });
+            setDealParams({ editRecurringId: recordId });
           }
           break;
 

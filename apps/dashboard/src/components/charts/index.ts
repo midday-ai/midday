@@ -10,7 +10,7 @@ export { RunwayChart } from "./runway-chart";
 export { CashFlowChart } from "./cash-flow-chart";
 export { StressTestChart } from "./stress-test-chart";
 export { GrowthRateChart } from "./growth-rate-chart";
-export { InvoicePaymentChart } from "./invoice-payment-chart";
+export { DealPaymentChart } from "./deal-payment-chart";
 
 // MCA Chart Components
 export { CollectionPerformanceChart } from "./collection-performance-chart";

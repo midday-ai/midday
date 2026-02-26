@@ -36,12 +36,12 @@ import { MerchantLifetimeValueWidget } from "./merchant-lifetime-value";
 import { DealPipelineWidget } from "./deal-pipeline";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
-import { InvoicePaymentScoreWidget } from "./invoice-payment-score";
+import { DealPaymentScoreWidget } from "./deal-payment-score";
 import { MonthlySpendingWidget } from "./monthly-spending";
 import { NetPositionWidget } from "./net-position";
 import { NsfAlertsWidget } from "./nsf-alerts";
-import { OutstandingInvoicesWidget } from "./outstanding-invoices";
-import { OverdueInvoicesAlertWidget } from "./overdue-invoices-alert";
+import { OutstandingDealsWidget } from "./outstanding-deals";
+import { OverdueDealsAlertWidget } from "./overdue-deals-alert";
 import { PortfolioOverviewWidget } from "./portfolio-overview";
 import { ProfitAnalysisWidget } from "./profit-analysis";
 import { ProfitMarginWidget } from "./profit-margin";
@@ -127,16 +127,16 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "profit-margin": ProfitMarginWidget,
   "profit-analysis": ProfitAnalysisWidget,
   "cash-flow": CashFlowWidget,
-  "outstanding-invoices": OutstandingInvoicesWidget,
+  "outstanding-deals": OutstandingDealsWidget,
   inbox: InboxWidget,
   vault: VaultWidget,
   "account-balances": AccountBalancesWidget,
   "net-position": NetPositionWidget,
   "monthly-spending": MonthlySpendingWidget,
-  "invoice-payment-score": InvoicePaymentScoreWidget,
+  "deal-payment-score": DealPaymentScoreWidget,
   "recurring-expenses": RecurringExpensesWidget,
   "category-expenses": CategoryExpensesWidget,
-  "overdue-invoices-alert": OverdueInvoicesAlertWidget,
+  "overdue-deals-alert": OverdueDealsAlertWidget,
   "merchant-lifetime-value": MerchantLifetimeValueWidget,
 };
 

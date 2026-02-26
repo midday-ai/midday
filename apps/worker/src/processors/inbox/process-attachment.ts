@@ -318,12 +318,12 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         displayName: result.name ?? undefined,
         website: result.website ?? undefined,
         date: result.date ?? undefined,
-        type: result.type as "invoice" | "expense" | null | undefined,
-        invoiceNumber: result.invoice_number ?? undefined,
+        type: result.type as "deal" | "expense" | null | undefined,
+        dealNumber: result.invoice_number ?? undefined,
         status: "analyzing", // Keep analyzing until matching is complete
       });
 
-      // Group related inbox items after storing invoice number
+      // Group related inbox items after storing deal number
       try {
         await groupRelatedInboxItems(db, {
           inboxId: inboxData.id,

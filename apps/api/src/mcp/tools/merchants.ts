@@ -228,7 +228,7 @@ export const registerMerchantTools: RegisterTools = (server, ctx) => {
       {
         title: "Delete Merchant",
         description:
-          "Delete a merchant by their ID. This will fail if the merchant has associated invoices or projects.",
+          "Delete a merchant by their ID. This will fail if the merchant has associated deals or projects.",
         inputSchema: {
           id: deleteMerchantSchema.shape.id,
         },

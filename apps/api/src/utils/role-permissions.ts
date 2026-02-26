@@ -57,8 +57,8 @@ export function getScopesForRole(role: TeamRole): Scope[] {
         "documents.write",
         "inbox.read",
         "inbox.write",
-        "invoices.read",
-        "invoices.write",
+        "deals.read",
+        "deals.write",
         "reports.read",
         "search.read",
         "tags.read",
@@ -90,8 +90,8 @@ export function getScopesForRole(role: TeamRole): Scope[] {
         "documents.write",
         "inbox.read",
         "inbox.write",
-        "invoices.read",
-        "invoices.write",
+        "deals.read",
+        "deals.write",
         "reports.read",
         "search.read",
         "tags.read",
@@ -116,7 +116,7 @@ export function getScopesForRole(role: TeamRole): Scope[] {
         "transactions.read",
         "transactions.write",
         "merchants.read",
-        "invoices.read",
+        "deals.read",
         "teams.read",
         "users.read",
         "search.read",
@@ -130,7 +130,7 @@ export function getScopesForRole(role: TeamRole): Scope[] {
 
     case "broker":
       return [
-        "invoices.read",
+        "deals.read",
         "merchants.read",
         "search.read",
         "teams.read",
@@ -139,7 +139,7 @@ export function getScopesForRole(role: TeamRole): Scope[] {
 
     case "syndicate":
       return [
-        "invoices.read",
+        "deals.read",
         "merchants.read",
         "search.read",
         "teams.read",
@@ -148,7 +148,7 @@ export function getScopesForRole(role: TeamRole): Scope[] {
 
     case "merchant":
       return [
-        "invoices.read",
+        "deals.read",
         "transactions.read",
         "teams.read",
         "users.read",

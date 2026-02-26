@@ -10,8 +10,8 @@ const logger = createLoggerWithContext("provider-notifications");
 export type ProviderNotificationType =
   | "transaction"
   | "match"
-  | "invoice_paid"
-  | "invoice_overdue";
+  | "deal_paid"
+  | "deal_overdue";
 
 // Payload types for each notification
 export type TransactionPayload = {
@@ -39,24 +39,24 @@ export type MatchPayload = {
   matchType: "auto_matched" | "high_confidence" | "suggested";
 };
 
-export type InvoicePaidPayload = {
-  invoiceId: string;
-  invoiceNumber: string;
+export type DealPaidPayload = {
+  dealId: string;
+  dealNumber: string;
   merchantName?: string;
   paidAt?: string;
 };
 
-export type InvoiceOverduePayload = {
-  invoiceId: string;
-  invoiceNumber: string;
+export type DealOverduePayload = {
+  dealId: string;
+  dealNumber: string;
   merchantName: string;
 };
 
 type ProviderPayload = {
   transaction: TransactionPayload;
   match: MatchPayload;
-  invoice_paid: InvoicePaidPayload;
-  invoice_overdue: InvoiceOverduePayload;
+  deal_paid: DealPaidPayload;
+  deal_overdue: DealOverduePayload;
 };
 
 // App config from database
@@ -91,8 +91,8 @@ export type SendToProvidersOptions = {
 const SETTING_MAP: Record<ProviderNotificationType, string> = {
   transaction: "transactions",
   match: "matches",
-  invoice_paid: "invoices",
-  invoice_overdue: "invoices",
+  deal_paid: "deals",
+  deal_overdue: "deals",
 };
 
 /**

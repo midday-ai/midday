@@ -1,0 +1,148 @@
+export type LineItem = {
+  name: string;
+  quantity?: number;
+  price?: number;
+  unit?: string;
+  // Optional product reference for smart autocomplete
+  productId?: string;
+  // Per-line-item tax rate (percentage, 0-100)
+  taxRate?: number;
+};
+
+export type DealProduct = {
+  id: string;
+  createdAt: string;
+  updatedAt: string | null;
+  teamId: string;
+  createdBy: string | null;
+  name: string;
+  description: string | null;
+  price: number | null;
+  currency: string | null;
+  unit: string | null;
+  taxRate: number | null;
+  isActive: boolean;
+  usageCount: number;
+  lastUsedAt: string | null;
+};
+
+export type Deal = {
+  id: string;
+  dueDate: string | null;
+  dealNumber: string | null;
+  createdAt: string;
+  amount: number | null;
+  currency: string | null;
+  lineItems: LineItem[];
+  paymentDetails: EditorDoc | null;
+  merchantDetails: EditorDoc | null;
+  reminderSentAt: string | null;
+  updatedAt: string | null;
+  note: string | null;
+  internalNote: string | null;
+  paidAt: string | null;
+  vat: number | null;
+  tax: number | null;
+  filePath: string[] | null;
+  status:
+    | "draft"
+    | "overdue"
+    | "paid"
+    | "unpaid"
+    | "canceled"
+    | "scheduled"
+    | "refunded";
+  viewedAt: string | null;
+  fromDetails: EditorDoc | null;
+  issueDate: string | null;
+  sentAt: string | null;
+  template: Template;
+  noteDetails: EditorDoc | null;
+  merchantName: string | null;
+  token: string;
+  sentTo: string | null;
+  discount: number | null;
+  topBlock: EditorDoc | null;
+  bottomBlock: EditorDoc | null;
+  merchant: {
+    name: string | null;
+    website: string | null;
+    email: string | null;
+  } | null;
+  merchantId: string | null;
+  team: {
+    name: string | null;
+  } | null;
+};
+
+export type Template = {
+  customerLabel: string;
+  title: string;
+  fromLabel: string;
+  dealNoLabel: string;
+  issueDateLabel: string;
+  dueDateLabel: string;
+  descriptionLabel: string;
+  priceLabel: string;
+  quantityLabel: string;
+  totalLabel: string;
+  totalSummaryLabel: string;
+  vatLabel: string;
+  subtotalLabel: string;
+  taxLabel: string;
+  discountLabel: string;
+  timezone: string;
+  paymentLabel: string;
+  noteLabel: string;
+  logoUrl: string | null;
+  currency: string;
+  paymentDetails: EditorDoc | null;
+  fromDetails: EditorDoc | null;
+  noteDetails: EditorDoc | null;
+  dateFormat: string;
+  includeVat: boolean;
+  includeTax: boolean;
+  includeDiscount: boolean;
+  includeDecimals: boolean;
+  includeUnits: boolean;
+  includeQr: boolean;
+  includeLineItemTax?: boolean;
+  lineItemTaxLabel?: string;
+  taxRate: number;
+  vatRate: number;
+  size: "a4" | "letter";
+  deliveryType: "create" | "create_and_send" | "scheduled";
+  locale: string;
+  paymentEnabled?: boolean;
+};
+
+export interface EditorDoc {
+  type: "doc";
+  content: EditorNode[];
+}
+
+export interface EditorNode {
+  type: string;
+  content?: InlineContent[];
+}
+
+interface InlineContent {
+  type: string;
+  text?: string;
+  marks?: Mark[];
+}
+
+export interface Mark {
+  type: string;
+  attrs?: {
+    href?: string;
+  };
+}
+
+export interface TextStyle {
+  fontSize: number;
+  fontWeight?: number;
+  fontStyle?: "normal" | "italic" | "oblique";
+  color?: string;
+  textDecoration?: string;
+}

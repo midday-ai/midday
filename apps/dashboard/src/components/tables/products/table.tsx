@@ -33,7 +33,7 @@ export function DataTable() {
   const { setParams } = useProductParams();
 
   const { data } = useSuspenseQuery(
-    trpc.invoiceProducts.get.queryOptions({
+    trpc.dealProducts.get.queryOptions({
       sortBy: "recent",
       limit: 100,
       includeInactive: true,
@@ -41,10 +41,10 @@ export function DataTable() {
   );
 
   const deleteProductMutation = useMutation(
-    trpc.invoiceProducts.delete.mutationOptions({
+    trpc.dealProducts.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceProducts.get.queryKey(),
+          queryKey: trpc.dealProducts.get.queryKey(),
         });
       },
     }),

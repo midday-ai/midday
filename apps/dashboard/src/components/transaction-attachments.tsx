@@ -70,11 +70,11 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
     }),
   );
 
-  const updateInvoiceMutation = useMutation(
-    trpc.invoice.update.mutationOptions({
+  const updateDealMutation = useMutation(
+    trpc.deal.update.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.invoice.get.queryKey(),
+          queryKey: trpc.deal.get.queryKey(),
         });
       },
     }),
@@ -138,10 +138,10 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
 
   // @ts-expect-error
   const handleOnSelectFile = async (file) => {
-    const isInvoice = file.type === "invoice";
+    const isDeal = file.type === "deal";
 
-    if (isInvoice) {
-      // Handle invoice selection
+    if (isDeal) {
+      // Handle deal selection
       try {
         // Fetch transaction to get the date
         const transactionData = await queryClient.fetchQuery(
@@ -160,28 +160,28 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         // Convert transaction date (ISO date string) to ISO datetime for paidAt
         const transactionDate = parseISO(transactionData.date).toISOString();
 
-        // Update invoice status to paid
-        await updateInvoiceMutation.mutateAsync({
+        // Update deal status to paid
+        await updateDealMutation.mutateAsync({
           id: file.data.id,
           status: "paid",
           paidAt: transactionDate,
         });
 
-        // Create transaction attachment using invoice filePath
+        // Create transaction attachment using deal filePath
         if (!file.data.filePath || file.data.filePath.length === 0) {
           toast({
             variant: "error",
             duration: 2500,
-            title: "Invoice PDF not found",
+            title: "Deal PDF not found",
           });
           return;
         }
 
-        const invoiceFilename =
-          file.data.invoiceNumber || `invoice-${file.data.id}.pdf`;
+        const dealFilename =
+          file.data.dealNumber || `deal-${file.data.id}.pdf`;
 
         const attachmentItem = {
-          name: stripSpecialCharacters(invoiceFilename),
+          name: stripSpecialCharacters(dealFilename),
           size: file.data.size ?? 0,
           type: "application/pdf",
           path: file.data.filePath,
@@ -191,11 +191,11 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         setFiles((prev) => [attachmentItem, ...prev]);
         createAttachmentsMutation.mutate([attachmentItem]);
       } catch (error) {
-        console.error("Error handling invoice selection:", error);
+        console.error("Error handling deal selection:", error);
         toast({
           variant: "error",
           duration: 2500,
-          title: "Failed to attach invoice",
+          title: "Failed to attach deal",
           description:
             error instanceof Error ? error.message : "Unknown error occurred",
         });

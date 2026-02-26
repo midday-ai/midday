@@ -1,8 +1,8 @@
 import { parseISO } from "date-fns";
 import type { z } from "zod/v4";
-import type { invoiceSchema, receiptSchema } from "../schema";
+import type { dealSchema, receiptSchema } from "../schema";
 
-type InvoiceData = z.infer<typeof invoiceSchema>;
+type DealData = z.infer<typeof dealSchema>;
 type ReceiptData = z.infer<typeof receiptSchema>;
 
 /**
@@ -133,7 +133,7 @@ export interface QualityScore {
   invalidFields: string[];
 }
 
-export function calculateQualityScore(result: InvoiceData): QualityScore {
+export function calculateQualityScore(result: DealData): QualityScore {
   const issues: string[] = [];
   const missingCriticalFields: string[] = [];
   const invalidFields: string[] = [];
@@ -161,19 +161,19 @@ export function calculateQualityScore(result: InvoiceData): QualityScore {
     score -= 20;
   }
 
-  if (!result.invoice_date && !result.due_date) {
-    missingCriticalFields.push("invoice_date/due_date");
+  if (!result.deal_date && !result.due_date) {
+    missingCriticalFields.push("deal_date/due_date");
     score -= 15;
   } else {
-    if (result.invoice_date && !isValidDateFormat(result.invoice_date)) {
-      invalidFields.push("invoice_date");
+    if (result.deal_date && !isValidDateFormat(result.deal_date)) {
+      invalidFields.push("deal_date");
       score -= 5;
     } else if (
-      result.invoice_date &&
-      !isDateInReasonableRange(result.invoice_date)
+      result.deal_date &&
+      !isDateInReasonableRange(result.deal_date)
     ) {
-      invalidFields.push("invoice_date");
-      issues.push("invoice_date out of reasonable range");
+      invalidFields.push("deal_date");
+      issues.push("deal_date out of reasonable range");
       score -= 5;
     }
 
@@ -216,8 +216,8 @@ export function calculateQualityScore(result: InvoiceData): QualityScore {
   }
 
   // Check for important optional fields
-  if (!result.invoice_number) {
-    issues.push("invoice_number missing (optional but important)");
+  if (!result.deal_number) {
+    issues.push("deal_number missing (optional but important)");
     score -= 5;
   }
 
@@ -238,7 +238,7 @@ export function calculateQualityScore(result: InvoiceData): QualityScore {
  * @param threshold - Quality score threshold (default: 70)
  */
 export function isDataQualityPoor(
-  result: InvoiceData,
+  result: DealData,
   threshold = 70,
 ): boolean {
   const qualityScore = calculateQualityScore(result);
@@ -253,7 +253,7 @@ export function isDataQualityPoor(
 /**
  * Get list of fields that need re-extraction
  */
-export function getFieldsNeedingReExtraction(result: InvoiceData): string[] {
+export function getFieldsNeedingReExtraction(result: DealData): string[] {
   const qualityScore = calculateQualityScore(result);
   const fieldsToReExtract: string[] = [];
 
@@ -271,12 +271,12 @@ export function getFieldsNeedingReExtraction(result: InvoiceData): string[] {
  * Prefers non-null values, and if both are present, prefers the one from the first result
  */
 export function mergeExtractionResults(
-  primary: InvoiceData,
-  secondary: Partial<InvoiceData>,
-): InvoiceData {
+  primary: DealData,
+  secondary: Partial<DealData>,
+): DealData {
   return {
-    invoice_number: primary.invoice_number || secondary.invoice_number || null,
-    invoice_date: primary.invoice_date || secondary.invoice_date || null,
+    deal_number: primary.deal_number || secondary.deal_number || null,
+    deal_date: primary.deal_date || secondary.deal_date || null,
     due_date: primary.due_date || secondary.due_date || null,
     currency: primary.currency || secondary.currency || "USD", // Default to USD if missing
     total_amount:

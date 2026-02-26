@@ -63,7 +63,7 @@ export function Plans() {
               <li className="flex items-start">
                 <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
                 <span className="text-xs">
-                  Send up to 10 invoices per month
+                  Send up to 10 deals per month
                 </span>
               </li>
               <li className="flex items-start">
@@ -164,7 +164,7 @@ export function Plans() {
               <li className="flex items-start">
                 <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
                 <span className="text-xs">
-                  Send up to 50 invoices per month
+                  Send up to 50 deals per month
                 </span>
               </li>
               <li className="flex items-start">
@@ -236,7 +236,7 @@ export function Plans() {
               <li className="flex items-start">
                 <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
                 <span className="text-xs">
-                  Unlimited invoices
+                  Unlimited deals
                 </span>
               </li>
               <li className="flex items-start">

@@ -182,36 +182,36 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     description: "Analyzing merchant profitability",
   },
 
-  // Invoice tools
-  getInvoices: {
-    name: "Get Invoices",
+  // Deal tools
+  getDeals: {
+    name: "Get Deals",
     icon: FileText,
-    description: "Fetching invoices",
+    description: "Fetching deals",
   },
-  listInvoices: {
-    name: "List Invoices",
+  listDeals: {
+    name: "List Deals",
     icon: FileText,
-    description: "Fetching invoices (legacy)",
+    description: "Fetching deals (legacy)",
   },
-  getInvoice: {
-    name: "Get Invoice",
+  getDeal: {
+    name: "Get Deal",
     icon: FileText,
-    description: "Fetching invoice details",
+    description: "Fetching deal details",
   },
-  createInvoice: {
-    name: "Create Invoice",
+  createDeal: {
+    name: "Create Deal",
     icon: FileText,
-    description: "Creating invoice",
+    description: "Creating deal",
   },
-  updateInvoice: {
-    name: "Update Invoice",
+  updateDeal: {
+    name: "Update Deal",
     icon: FileText,
-    description: "Updating invoice",
+    description: "Updating deal",
   },
-  getInvoicePaymentAnalysis: {
-    name: "Invoice Payment Analysis",
+  getDealPaymentAnalysis: {
+    name: "Deal Payment Analysis",
     icon: FileText,
-    description: "Analyzing invoice payment patterns",
+    description: "Analyzing deal payment patterns",
   },
 
   // Transaction tools

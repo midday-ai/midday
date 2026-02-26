@@ -108,7 +108,7 @@ export const transactionSchema = z.object({
   status: z.string().optional(),
 });
 
-export const invoiceSchema = z.object({
+export const dealSchema = z.object({
   id: z.string(),
   number: z.string(),
   amount: z.number(),

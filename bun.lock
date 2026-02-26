@@ -31,6 +31,7 @@
         "@midday/cache": "workspace:*",
         "@midday/categories": "workspace:*",
         "@midday/db": "workspace:*",
+        "@midday/deal": "workspace:*",
         "@midday/documents": "workspace:*",
         "@midday/encryption": "workspace:*",
         "@midday/engine": "workspace:*",
@@ -38,7 +39,6 @@
         "@midday/events": "workspace:*",
         "@midday/import": "workspace:*",
         "@midday/inbox": "workspace:*",
-        "@midday/invoice": "workspace:*",
         "@midday/job-client": "workspace:*",
         "@midday/jobs": "workspace:*",
         "@midday/location": "workspace:*",
@@ -95,11 +95,11 @@
         "@hookform/resolvers": "^5.2.2",
         "@midday/api": "workspace:*",
         "@midday/app-store": "workspace:*",
+        "@midday/deal": "workspace:*",
         "@midday/documents": "workspace:*",
         "@midday/engine": "workspace:*",
         "@midday/events": "workspace:*",
         "@midday/inbox": "workspace:*",
-        "@midday/invoice": "workspace:*",
         "@midday/location": "workspace:*",
         "@midday/plans": "workspace:*",
         "@midday/supabase": "workspace:*",
@@ -232,12 +232,12 @@
         "@midday/accounting": "workspace:*",
         "@midday/app-store": "workspace:*",
         "@midday/db": "workspace:*",
+        "@midday/deal": "workspace:*",
         "@midday/documents": "workspace:*",
         "@midday/email": "workspace:*",
         "@midday/engine": "workspace:*",
         "@midday/engine-client": "workspace:*",
         "@midday/import": "workspace:*",
-        "@midday/invoice": "workspace:*",
         "@midday/job-client": "workspace:*",
         "@midday/jobs": "workspace:*",
         "@midday/logger": "workspace:*",
@@ -329,9 +329,9 @@
         "@date-fns/utc": "^2.1.1",
         "@midday/cache": "workspace:*",
         "@midday/categories": "workspace:*",
+        "@midday/deal": "workspace:*",
         "@midday/encryption": "workspace:*",
         "@midday/engine": "workspace:*",
-        "@midday/invoice": "workspace:*",
         "@midday/logger": "workspace:*",
         "@midday/utils": "workspace:*",
         "@sindresorhus/slugify": "^3.0.0",
@@ -345,6 +345,20 @@
       "devDependencies": {
         "@types/bun": "latest",
         "drizzle-kit": "^0.31.8",
+      },
+    },
+    "packages/deal": {
+      "name": "@midday/deal",
+      "dependencies": {
+        "@midday/ui": "workspace:*",
+        "@midday/utils": "workspace:*",
+        "@react-pdf/renderer": "^4.3.1",
+        "date-fns": "^4.1.0",
+        "jose": "^6.1.3",
+        "qrcode": "^1.5.4",
+      },
+      "devDependencies": {
+        "@types/qrcode": "^1.5.6",
       },
     },
     "packages/disclosures": {
@@ -449,20 +463,6 @@
         "@midday/utils": "workspace:*",
         "googleapis": "^168.0.0",
         "zod": "^4.1.13",
-      },
-    },
-    "packages/invoice": {
-      "name": "@midday/invoice",
-      "dependencies": {
-        "@midday/ui": "workspace:*",
-        "@midday/utils": "workspace:*",
-        "@react-pdf/renderer": "^4.3.1",
-        "date-fns": "^4.1.0",
-        "jose": "^6.1.3",
-        "qrcode": "^1.5.4",
-      },
-      "devDependencies": {
-        "@types/qrcode": "^1.5.6",
       },
     },
     "packages/job-client": {
@@ -1209,6 +1209,8 @@
 
     "@midday/db": ["@midday/db@workspace:packages/db"],
 
+    "@midday/deal": ["@midday/deal@workspace:packages/deal"],
+
     "@midday/disclosures": ["@midday/disclosures@workspace:packages/disclosures"],
 
     "@midday/docs": ["@midday/docs@workspace:apps/docs"],
@@ -1228,8 +1230,6 @@
     "@midday/import": ["@midday/import@workspace:packages/import"],
 
     "@midday/inbox": ["@midday/inbox@workspace:packages/inbox"],
-
-    "@midday/invoice": ["@midday/invoice@workspace:packages/invoice"],
 
     "@midday/job-client": ["@midday/job-client@workspace:packages/job-client"],
 

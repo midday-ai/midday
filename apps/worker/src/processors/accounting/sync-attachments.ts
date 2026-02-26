@@ -39,7 +39,7 @@ const RATE_LIMIT_RETRY_BASE_DELAY_MS = 30000; // 30 seconds
 
 /**
  * Sync attachments to accounting provider processor
- * Uploads transaction attachments (receipts, invoices) to the accounting provider
+ * Uploads transaction attachments (receipts, deals) to the accounting provider
  *
  * Supports:
  * - Uploading new attachments

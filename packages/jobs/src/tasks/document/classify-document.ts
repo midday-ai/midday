@@ -40,10 +40,10 @@ export const classifyDocument = schemaTask({
         const contentSample = content.substring(0, 200).toLowerCase();
         let inferredType = "Document";
         if (
-          contentSample.includes("invoice") ||
-          contentSample.includes("inv")
+          contentSample.includes("deal") ||
+          contentSample.includes("mca")
         ) {
-          inferredType = "Invoice";
+          inferredType = "Deal";
         } else if (contentSample.includes("receipt")) {
           inferredType = "Receipt";
         } else if (

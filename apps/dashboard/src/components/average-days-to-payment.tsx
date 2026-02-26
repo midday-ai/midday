@@ -8,7 +8,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 export function AverageDaysToPayment() {
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(
-    trpc.invoice.averageDaysToPayment.queryOptions(),
+    trpc.deal.averageDaysToPayment.queryOptions(),
   );
 
   return (
@@ -23,7 +23,7 @@ export function AverageDaysToPayment() {
         <div className="flex flex-col gap-2">
           <div>Average Days to Payment</div>
           <div className="text-sm text-muted-foreground">
-            Cross all paid invoices this month
+            Cross all paid deals this month
           </div>
         </div>
       </CardContent>

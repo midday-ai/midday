@@ -1,7 +1,7 @@
 "use client";
 
 import { useMerchantParams } from "@/hooks/use-merchant-params";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useDealParams } from "@/hooks/use-deal-params";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -109,8 +109,8 @@ export function MerchantForm({ data }: Props) {
   const isEdit = !!data;
 
   const { setParams: setMerchantParams, name } = useMerchantParams();
-  const { setParams: setInvoiceParams, type } = useInvoiceParams();
-  const fromInvoice = type === "create" || type === "edit";
+  const { setParams: setDealParams, type } = useDealParams();
+  const fromDeal = type === "create" || type === "edit";
 
   const upsertMerchantMutation = useMutation(
     trpc.merchants.upsert.mutationOptions({
@@ -135,9 +135,9 @@ export function MerchantForm({ data }: Props) {
         // Close the merchant form
         setMerchantParams(null);
 
-        // If the merchant is created from an invoice, set the merchant as the selected merchant
-        if (data && fromInvoice) {
-          setInvoiceParams({ selectedMerchantId: data.id });
+        // If the merchant is created from an deal, set the merchant as the selected merchant
+        if (data && fromDeal) {
+          setDealParams({ selectedMerchantId: data.id });
         }
       },
     }),
@@ -301,7 +301,7 @@ export function MerchantForm({ data }: Props) {
                             />
                           </FormControl>
                           <FormDescription>
-                            Additional emails to BCC when sending invoices.
+                            Additional emails to BCC when sending deals.
                             Press Enter or comma to add.
                           </FormDescription>
                           <FormMessage />

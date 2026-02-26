@@ -17,7 +17,7 @@ type Attachment = {
   id: string;
   name: string;
   data?: unknown;
-  type?: "inbox" | "invoice";
+  type?: "inbox" | "deal";
 };
 
 type Props = {
@@ -60,9 +60,9 @@ export function SelectAttachment({
 
   const options = hasResults
     ? items.map((item, index) => {
-        const isInvoice = item.type === "invoice";
+        const isDeal = item.type === "deal";
         // Handle filePath - can be array or null/empty
-        // For invoices, filePath should be teamId/invoices/filename.pdf format
+        // For deals, filePath should be teamId/deals/filename.pdf format
         let filePath: string | null = null;
         if (Array.isArray(item.filePath) && item.filePath.length > 0) {
           filePath = item.filePath.join("/");
@@ -70,20 +70,20 @@ export function SelectAttachment({
           filePath = null;
         }
 
-        // For invoices, ensure filePath is valid before showing preview
+        // For deals, ensure filePath is valid before showing preview
         const canShowPreview = filePath && filePath.length > 0;
-        const displayName = isInvoice
-          ? item.invoiceNumber || "Invoice"
+        const displayName = isDeal
+          ? item.dealNumber || "Deal"
           : item.displayName || item.fileName || "";
 
         // Build secondary text with most important matching info
         let secondaryText: string | undefined;
-        if (isInvoice) {
-          // For invoices: merchant name + due date (most important for identification)
+        if (isDeal) {
+          // For deals: merchant name + due date (most important for identification)
           const parts: string[] = [];
           if (item.merchantName) parts.push(item.merchantName);
           if (item.dueDate) {
-            // Use TZDate for invoice dates (stored as UTC midnight)
+            // Use TZDate for deal dates (stored as UTC midnight)
             const tzDate = new TZDate(item.dueDate, "UTC");
             parts.push(format(tzDate, user?.dateFormat ?? "MMM d"));
           }
@@ -129,7 +129,7 @@ export function SelectAttachment({
                     >
                       <FilePreview
                         mimeType={
-                          isInvoice
+                          isDeal
                             ? "application/pdf"
                             : item.contentType || "application/pdf"
                         }

@@ -1,7 +1,7 @@
 import type { z } from "zod/v4";
-import type { invoiceSchema, receiptSchema } from "../schema";
+import type { dealSchema, receiptSchema } from "../schema";
 
-type InvoiceData = z.infer<typeof invoiceSchema>;
+type DealData = z.infer<typeof dealSchema>;
 type ReceiptData = z.infer<typeof receiptSchema>;
 
 export interface DocumentFormat {
@@ -15,7 +15,7 @@ export interface DocumentFormat {
 /**
  * Detect document format from extracted data
  */
-export function detectInvoiceFormat(data: InvoiceData): DocumentFormat {
+export function detectDealFormat(data: DealData): DocumentFormat {
   const format: DocumentFormat = {
     numberFormat: "us",
     dateFormat: "iso",
@@ -29,9 +29,9 @@ export function detectInvoiceFormat(data: InvoiceData): DocumentFormat {
   // European formats often use comma as decimal separator
   // We'll default to US format unless we have strong indicators
 
-  // Detect date format from invoice_date
-  if (data.invoice_date) {
-    const dateParts = data.invoice_date.split("-");
+  // Detect date format from deal_date
+  if (data.deal_date) {
+    const dateParts = data.deal_date.split("-");
     if (dateParts.length === 3) {
       // We always normalize to ISO format, so dateFormat detection is based on language/currency
       format.dateFormat = "iso";

@@ -1,10 +1,10 @@
 import type { z } from "zod/v4";
 import {
   type PromptComponents,
-  createInvoicePromptComponents,
+  createDealPromptComponents,
   createReceiptPromptComponents,
 } from "../prompts/factory";
-import { invoiceSchema, receiptSchema } from "../schema";
+import { dealSchema, receiptSchema } from "../schema";
 import type { DocumentFormat } from "../utils/format-detection";
 
 export type AIProvider = "mistral" | "google";
@@ -35,10 +35,10 @@ export interface ExtractionConfig<T extends z.ZodSchema> {
 }
 
 /**
- * Invoice extraction configuration
+ * Deal extraction configuration
  */
-export const invoiceConfig: ExtractionConfig<typeof invoiceSchema> = {
-  schema: invoiceSchema,
+export const dealConfig: ExtractionConfig<typeof dealSchema> = {
+  schema: dealSchema,
   models: {
     primary: { provider: "mistral", model: "mistral-small-latest" },
     secondary: { provider: "google", model: "gemini-3-flash-preview" },
@@ -53,15 +53,15 @@ export const invoiceConfig: ExtractionConfig<typeof invoiceSchema> = {
     "total_amount",
     "currency",
     "vendor_name",
-    "invoice_date",
+    "deal_date",
     "due_date",
   ],
   fieldPriority: {
     total_amount: 10,
     currency: 10,
     vendor_name: 9,
-    invoice_number: 8,
-    invoice_date: 8,
+    deal_number: 8,
+    deal_date: 8,
     due_date: 7,
     tax_amount: 6,
     tax_rate: 6,
@@ -75,7 +75,7 @@ export const invoiceConfig: ExtractionConfig<typeof invoiceSchema> = {
     language: 1,
   },
   promptFactory: (companyName, format) => {
-    return createInvoicePromptComponents(companyName, false, format);
+    return createDealPromptComponents(companyName, false, format);
   },
 };
 

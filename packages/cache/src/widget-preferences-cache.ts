@@ -11,7 +11,7 @@ export const WIDGET_TYPES = [
   // Financial Position (default primary, positions 6-8)
   "account-balances",
   "cash-flow",
-  "outstanding-invoices",
+  "outstanding-deals",
 
   // Generic Financial (available, not primary)
   "runway",
@@ -25,9 +25,9 @@ export const WIDGET_TYPES = [
   "merchant-lifetime-value",
   "top-merchant",
 
-  // Receivables & invoices
-  "overdue-invoices-alert",
-  "invoice-payment-score",
+  // Receivables & deals
+  "overdue-deals-alert",
+  "deal-payment-score",
 
   // Expenses & spending
   "monthly-spending",

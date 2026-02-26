@@ -223,7 +223,7 @@ const MIME_TO_EXTENSION: Record<string, string> = {
  * @returns Filename with proper extension
  *
  * @example
- * ensureFileExtension("invoice", "application/pdf") // "invoice.pdf"
+ * ensureFileExtension("deal", "application/pdf") // "deal.pdf"
  * ensureFileExtension("receipt.", "image/jpeg") // "receipt.jpg"
  * ensureFileExtension("doc.pdf", "application/pdf") // "doc.pdf" (unchanged)
  */

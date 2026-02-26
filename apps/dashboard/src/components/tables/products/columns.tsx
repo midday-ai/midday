@@ -16,7 +16,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
 import { memo, useCallback } from "react";
 
-export type Product = RouterOutputs["invoiceProducts"]["get"][number];
+export type Product = RouterOutputs["dealProducts"]["get"][number];
 
 const ActionsCell = memo(
   ({

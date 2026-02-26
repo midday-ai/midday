@@ -52,7 +52,7 @@ export function PortalPdfFooterText() {
             <CardTitle>PDF footer text</CardTitle>
             <CardDescription>
               Custom text displayed at the bottom of generated PDF documents
-              (invoices, disclosures, payoff letters).
+              (deals, disclosures, payoff letters).
             </CardDescription>
           </CardHeader>
 

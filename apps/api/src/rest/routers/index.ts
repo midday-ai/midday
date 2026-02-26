@@ -7,8 +7,8 @@ import { merchantsRouter } from "./merchants";
 import { documentsRouter } from "./documents";
 import { filesRouter } from "./files";
 import { inboxRouter } from "./inbox";
-import { invoicePaymentsRouter } from "./invoice-payments";
-import { invoicesRouter } from "./invoices";
+import { dealPaymentsRouter } from "./deal-payments";
+import { dealsRouter } from "./deals";
 import { mcpRouter } from "./mcp";
 import { notificationsRouter } from "./notifications";
 import oauthRouter from "./oauth";
@@ -29,7 +29,7 @@ routers.route("/oauth", oauthRouter);
 routers.route("/webhook", webhookRouter);
 routers.route("/files", filesRouter);
 routers.route("/apps", appsRouter);
-routers.route("/invoice-payments", invoicePaymentsRouter);
+routers.route("/deal-payments", dealPaymentsRouter);
 
 // Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);
@@ -44,7 +44,7 @@ routers.route("/bank-accounts", bankAccountsRouter);
 routers.route("/tags", tagsRouter);
 routers.route("/documents", documentsRouter);
 routers.route("/inbox", inboxRouter);
-routers.route("/invoices", invoicesRouter);
+routers.route("/deals", dealsRouter);
 routers.route("/search", searchRouter);
 routers.route("/reports", reportsRouter);
 routers.route("/chat", chatRouter);

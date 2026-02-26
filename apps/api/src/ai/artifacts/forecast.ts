@@ -42,7 +42,7 @@ export const forecastArtifact = artifact(
         peakMonth: z.string(),
         peakMonthValue: z.number(),
         growthRate: z.number(),
-        unpaidInvoices: z.number(),
+        unpaidDeals: z.number(),
       })
       .optional(),
 

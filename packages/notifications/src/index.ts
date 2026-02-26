@@ -14,21 +14,21 @@ import type {
 } from "./base";
 import { type NotificationTypes, createActivitySchema } from "./schemas";
 import { EmailService } from "./services/email-service";
+import { dealCancelled } from "./types/deal-cancelled";
+import { dealCreated } from "./types/deal-created";
+import { dealOverdue } from "./types/deal-overdue";
+import { dealPaid } from "./types/deal-paid";
+import { dealRefunded } from "./types/deal-refunded";
+import { dealReminderSent } from "./types/deal-reminder-sent";
+import { dealScheduled } from "./types/deal-scheduled";
+import { dealSent } from "./types/deal-sent";
 import { documentProcessed } from "./types/document-processed";
 import { documentUploaded } from "./types/document-uploaded";
 import { inboxAutoMatched } from "./types/inbox-auto-matched";
 import { inboxCrossCurrencyMatched } from "./types/inbox-cross-currency-matched";
 import { inboxNeedsReview } from "./types/inbox-needs-review";
 import { inboxNew } from "./types/inbox-new";
-import { invoiceCancelled } from "./types/invoice-cancelled";
-import { invoiceCreated } from "./types/invoice-created";
-import { invoiceOverdue } from "./types/invoice-overdue";
-import { invoicePaid } from "./types/invoice-paid";
-import { invoiceRefunded } from "./types/invoice-refunded";
-import { invoiceReminderSent } from "./types/invoice-reminder-sent";
-import { invoiceScheduled } from "./types/invoice-scheduled";
-import { invoiceSent } from "./types/invoice-sent";
-import { recurringInvoiceUpcoming } from "./types/recurring-invoice-upcoming";
+import { recurringDealUpcoming } from "./types/recurring-deal-upcoming";
 import { recurringSeriesCompleted } from "./types/recurring-series-completed";
 import { recurringSeriesPaused } from "./types/recurring-series-paused";
 import { recurringSeriesStarted } from "./types/recurring-series-started";
@@ -48,18 +48,18 @@ const handlers = {
   inbox_auto_matched: inboxAutoMatched,
   inbox_needs_review: inboxNeedsReview,
   inbox_cross_currency_matched: inboxCrossCurrencyMatched,
-  invoice_paid: invoicePaid,
-  invoice_overdue: invoiceOverdue,
-  invoice_scheduled: invoiceScheduled,
-  invoice_sent: invoiceSent,
-  invoice_reminder_sent: invoiceReminderSent,
-  invoice_cancelled: invoiceCancelled,
-  invoice_created: invoiceCreated,
-  invoice_refunded: invoiceRefunded,
+  deal_paid: dealPaid,
+  deal_overdue: dealOverdue,
+  deal_scheduled: dealScheduled,
+  deal_sent: dealSent,
+  deal_reminder_sent: dealReminderSent,
+  deal_cancelled: dealCancelled,
+  deal_created: dealCreated,
+  deal_refunded: dealRefunded,
   recurring_series_completed: recurringSeriesCompleted,
   recurring_series_started: recurringSeriesStarted,
   recurring_series_paused: recurringSeriesPaused,
-  recurring_invoice_upcoming: recurringInvoiceUpcoming,
+  recurring_deal_upcoming: recurringDealUpcoming,
 } as const;
 
 export class Notifications {
@@ -395,7 +395,7 @@ export type {
   NotificationOptions,
   NotificationResult,
 } from "./base";
-export { userSchema, transactionSchema, invoiceSchema } from "./base";
+export { userSchema, transactionSchema, dealSchema } from "./base";
 
 // Export schemas and types
 export {
@@ -407,18 +407,18 @@ export {
   inboxAutoMatchedSchema,
   inboxNeedsReviewSchema,
   inboxCrossCurrencyMatchedSchema,
-  invoicePaidSchema,
-  invoiceOverdueSchema,
-  invoiceScheduledSchema,
-  invoiceSentSchema,
-  invoiceReminderSentSchema,
-  invoiceCancelledSchema,
-  invoiceCreatedSchema,
-  invoiceRefundedSchema,
+  dealPaidSchema,
+  dealOverdueSchema,
+  dealScheduledSchema,
+  dealSentSchema,
+  dealReminderSentSchema,
+  dealCancelledSchema,
+  dealCreatedSchema,
+  dealRefundedSchema,
   recurringSeriesCompletedSchema,
   recurringSeriesStartedSchema,
   recurringSeriesPausedSchema,
-  recurringInvoiceUpcomingSchema,
+  recurringDealUpcomingSchema,
 } from "./schemas";
 export type { NotificationTypes } from "./schemas";
 

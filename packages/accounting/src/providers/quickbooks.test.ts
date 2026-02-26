@@ -137,7 +137,7 @@ describe("QuickBooksProvider", () => {
                     {
                       Attachable: {
                         Id: "att-456",
-                        FileName: "invoice.pdf",
+                        FileName: "deal.pdf",
                       },
                     },
                   ],
@@ -152,7 +152,7 @@ describe("QuickBooksProvider", () => {
       const result = await provider.uploadAttachment({
         transactionId: "deposit-456",
         tenantId: "tenant-123",
-        fileName: "invoice.pdf",
+        fileName: "deal.pdf",
         mimeType: "application/pdf",
         content: Buffer.from("%PDF-1.4 test"),
         entityType: "Deposit",

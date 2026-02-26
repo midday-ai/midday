@@ -36,12 +36,12 @@ export const RESOURCES = [
     ],
   },
   {
-    key: "invoices",
-    name: "Invoices",
-    description: "Access to invoice data",
+    key: "deals",
+    name: "Deals",
+    description: "Access to deal data",
     scopes: [
-      { scope: "invoices.read", type: "read", label: "Read" },
-      { scope: "invoices.write", type: "write", label: "Write" },
+      { scope: "deals.read", type: "read", label: "Read" },
+      { scope: "deals.write", type: "write", label: "Write" },
     ],
   },
   {

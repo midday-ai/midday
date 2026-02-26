@@ -13,7 +13,7 @@ export default {
 **What you can do:**
 - Analyze financial trends and patterns
 - Get insights from your transaction history
-- Ask questions about invoices, customers, and reports
+- Ask questions about deals, customers, and reports
 - Have conversations grounded in your real business data
 
 **How it works:**

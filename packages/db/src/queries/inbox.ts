@@ -1741,8 +1741,8 @@ export type UpdateInboxWithProcessedDataParams = {
   displayName?: string;
   website?: string;
   date?: string;
-  type?: "invoice" | "expense" | null;
-  invoiceNumber?: string;
+  type?: "deal" | "expense" | null;
+  dealNumber?: string;
   status?:
     | "pending"
     | "new"
@@ -1780,7 +1780,7 @@ export async function updateInboxWithProcessedData(
       referenceId: inbox.referenceId,
       size: inbox.size,
       type: inbox.type,
-      invoiceNumber: inbox.invoiceNumber,
+      dealNumber: inbox.dealNumber,
     });
 
   return result;
@@ -1894,7 +1894,7 @@ export async function findRelatedInboxItems(
   const [currentItem] = await db
     .select({
       id: inbox.id,
-      invoiceNumber: inbox.invoiceNumber,
+      dealNumber: inbox.dealNumber,
       website: inbox.website,
       amount: inbox.amount,
       date: inbox.date,
@@ -1916,12 +1916,12 @@ export async function findRelatedInboxItems(
     sql`${inbox.groupedInboxId} IS NULL`, // Only find items that aren't already grouped
   ];
 
-  // Primary matching: invoice number
-  if (currentItem.invoiceNumber) {
-    const relatedByInvoiceNumber = await db
+  // Primary matching: deal number
+  if (currentItem.dealNumber) {
+    const relatedByDealNumber = await db
       .select({
         id: inbox.id,
-        invoiceNumber: inbox.invoiceNumber,
+        dealNumber: inbox.dealNumber,
         website: inbox.website,
         amount: inbox.amount,
         date: inbox.date,
@@ -1930,26 +1930,26 @@ export async function findRelatedInboxItems(
       })
       .from(inbox)
       .where(
-        and(...conditions, eq(inbox.invoiceNumber, currentItem.invoiceNumber)),
+        and(...conditions, eq(inbox.dealNumber, currentItem.dealNumber)),
       );
 
-    if (relatedByInvoiceNumber.length > 0) {
-      return relatedByInvoiceNumber;
+    if (relatedByDealNumber.length > 0) {
+      return relatedByDealNumber;
     }
   }
 
   // Fallback matching: same website + same amount + same date + different type
-  // Only match when current item has a known type (invoice or expense)
+  // Only match when current item has a known type (deal or expense)
   if (
     currentItem.website &&
     currentItem.amount &&
     currentItem.date &&
-    (currentItem.type === "invoice" || currentItem.type === "expense")
+    (currentItem.type === "deal" || currentItem.type === "expense")
   ) {
     const relatedByFallback = await db
       .select({
         id: inbox.id,
-        invoiceNumber: inbox.invoiceNumber,
+        dealNumber: inbox.dealNumber,
         website: inbox.website,
         amount: inbox.amount,
         date: inbox.date,
@@ -1963,10 +1963,10 @@ export async function findRelatedInboxItems(
           eq(inbox.website, currentItem.website),
           eq(inbox.amount, currentItem.amount),
           eq(inbox.date, currentItem.date),
-          // Different type (invoice vs expense)
-          currentItem.type === "invoice"
+          // Different type (deal vs expense)
+          currentItem.type === "deal"
             ? eq(inbox.type, "expense")
-            : eq(inbox.type, "invoice"),
+            : eq(inbox.type, "deal"),
         ),
       );
 
@@ -1998,7 +1998,7 @@ export async function groupRelatedInboxItems(
   const [currentItem] = await db
     .select({
       id: inbox.id,
-      invoiceNumber: inbox.invoiceNumber,
+      dealNumber: inbox.dealNumber,
       type: inbox.type,
       createdAt: inbox.createdAt,
     })
@@ -2024,9 +2024,9 @@ export async function groupRelatedInboxItems(
     })),
   ];
 
-  // Determine primary item: prefer invoice type, then oldest
+  // Determine primary item: prefer deal type, then oldest
   const primaryItem = allItems.reduce((primary, item) => {
-    if (item.type === "invoice" && primary.type !== "invoice") {
+    if (item.type === "deal" && primary.type !== "deal") {
       return item;
     }
     if (item.type === primary.type) {

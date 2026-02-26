@@ -13,7 +13,7 @@ export type AgentStatus = {
     | "orchestrator"
     | "reports"
     | "transactions"
-    | "invoices"
+    | "deals"
     | "merchants"
     | "analytics"
     | "operations"

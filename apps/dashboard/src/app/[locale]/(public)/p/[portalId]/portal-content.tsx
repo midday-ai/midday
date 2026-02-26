@@ -1,6 +1,6 @@
 "use client";
 
-import { InvoiceStatus } from "@/components/invoice-status";
+import { DealStatus } from "@/components/deal-status";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { TZDate } from "@date-fns/tz";
@@ -42,10 +42,10 @@ export function PortalContent({ portalId }: Props) {
     trpc.merchants.getByPortalId.queryOptions({ portalId }),
   );
 
-  // Fetch invoices with infinite query
+  // Fetch deals with infinite query
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(
-      trpc.merchants.getPortalInvoices.infiniteQueryOptions(
+      trpc.merchants.getPortalDeals.infiniteQueryOptions(
         { portalId },
         {
           getNextPageParam: ({ meta }) => meta?.cursor,
@@ -56,7 +56,7 @@ export function PortalContent({ portalId }: Props) {
   const merchant = portalData?.merchant;
   const summary = portalData?.summary;
 
-  const invoices = useMemo(() => {
+  const deals = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
@@ -65,15 +65,15 @@ export function PortalContent({ portalId }: Props) {
   }
 
   const allSelected =
-    invoices.length > 0 && selectedIds.size === invoices.length;
+    deals.length > 0 && selectedIds.size === deals.length;
   const someSelected =
-    selectedIds.size > 0 && selectedIds.size < invoices.length;
+    selectedIds.size > 0 && selectedIds.size < deals.length;
 
   const toggleAll = () => {
     if (allSelected) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(invoices.map((inv) => inv.id)));
+      setSelectedIds(new Set(deals.map((inv) => inv.id)));
     }
   };
 
@@ -87,12 +87,12 @@ export function PortalContent({ portalId }: Props) {
     setSelectedIds(newSet);
   };
 
-  const handleDownloadSingle = async (invoice: (typeof invoices)[number]) => {
-    setDownloadingId(invoice.id);
+  const handleDownloadSingle = async (deal: (typeof deals)[number]) => {
+    setDownloadingId(deal.id);
     try {
       downloadFile(
-        `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${invoice.token}`,
-        `${invoice.invoiceNumber || "invoice"}.pdf`,
+        `${process.env.NEXT_PUBLIC_API_URL}/files/download/deal?token=${deal.token}`,
+        `${deal.dealNumber || "deal"}.pdf`,
       );
     } finally {
       setTimeout(() => setDownloadingId(null), 1000);
@@ -100,7 +100,7 @@ export function PortalContent({ portalId }: Props) {
   };
 
   const handleDownloadSelected = async () => {
-    const selected = invoices.filter((inv) => selectedIds.has(inv.id));
+    const selected = deals.filter((inv) => selectedIds.has(inv.id));
     if (selected.length === 0) return;
 
     if (selected.length === 1) {
@@ -114,16 +114,16 @@ export function PortalContent({ portalId }: Props) {
       const zip = new JSZip();
       const usedFilenames = new Set<string>();
 
-      const filePromises = selected.map(async (invoice) => {
+      const filePromises = selected.map(async (deal) => {
         try {
-          const url = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${invoice.token}`;
+          const url = `${process.env.NEXT_PUBLIC_API_URL}/files/download/deal?token=${deal.token}`;
           const response = await fetch(url);
           if (!response.ok) {
-            throw new Error(`Failed to fetch invoice ${invoice.id}`);
+            throw new Error(`Failed to fetch deal ${deal.id}`);
           }
 
           const blob = await response.blob();
-          const baseName = invoice.invoiceNumber ?? `invoice-${invoice.id}`;
+          const baseName = deal.dealNumber ?? `deal-${deal.id}`;
           let filename = `${baseName}.pdf`;
           let counter = 1;
           while (usedFilenames.has(filename)) {
@@ -133,7 +133,7 @@ export function PortalContent({ portalId }: Props) {
           usedFilenames.add(filename);
           zip.file(filename, blob);
         } catch (error) {
-          console.error(`Error processing invoice ${invoice.id}:`, error);
+          console.error(`Error processing deal ${deal.id}:`, error);
         }
       });
 
@@ -141,7 +141,7 @@ export function PortalContent({ portalId }: Props) {
 
       const fileCount = Object.keys(zip.files).length;
       if (fileCount === 0) {
-        throw new Error("No invoices could be downloaded.");
+        throw new Error("No deals could be downloaded.");
       }
 
       const zipBlob = await zip.generateAsync({
@@ -151,9 +151,9 @@ export function PortalContent({ portalId }: Props) {
       });
 
       const timestamp = new Date().toISOString().split("T")[0];
-      saveAs(zipBlob, `invoices-${timestamp}.zip`);
+      saveAs(zipBlob, `deals-${timestamp}.zip`);
     } catch (error) {
-      console.error("Failed to create invoice ZIP:", error);
+      console.error("Failed to create deal ZIP:", error);
     } finally {
       setIsDownloading(false);
     }
@@ -213,20 +213,20 @@ export function PortalContent({ portalId }: Props) {
             </div>
           </div>
           <div className="bg-background border border-border px-4 py-3">
-            <div className="text-[12px] text-[#606060] mb-2">Invoices</div>
+            <div className="text-[12px] text-[#606060] mb-2">Deals</div>
             <div className="text-[18px] font-medium">
-              {summary.invoiceCount}
+              {summary.dealCount}
             </div>
           </div>
         </div>
 
-        {/* Invoices Section */}
+        {/* Deals Section */}
         <div className="mb-6">
-          <h2 className="text-[16px] font-medium mb-4">Invoices</h2>
+          <h2 className="text-[16px] font-medium mb-4">Deals</h2>
         </div>
 
-        {/* Invoice Table */}
-        {invoices.length > 0 ? (
+        {/* Deal Table */}
+        {deals.length > 0 ? (
           <div className="bg-background border border-border overflow-hidden">
             {/* Table Header */}
             <div className="grid grid-cols-[32px_minmax(80px,1.2fr)_minmax(70px,1fr)_minmax(70px,1fr)_minmax(70px,1fr)_minmax(60px,0.8fr)_32px] gap-2 px-3 py-3 bg-muted/50 border-b border-border text-[12px] font-medium text-[#606060] items-center">
@@ -238,7 +238,7 @@ export function PortalContent({ portalId }: Props) {
                   onCheckedChange={toggleAll}
                 />
               </div>
-              <div>Invoice</div>
+              <div>Deal</div>
               <div>Date</div>
               <div>Due Date</div>
               <div className="text-right">Amount</div>
@@ -248,9 +248,9 @@ export function PortalContent({ portalId }: Props) {
 
             {/* Table Body */}
             <div className="divide-y divide-border">
-              {invoices.map((invoice) => (
+              {deals.map((deal) => (
                 <div
-                  key={invoice.id}
+                  key={deal.id}
                   className="grid grid-cols-[32px_minmax(80px,1.2fr)_minmax(70px,1fr)_minmax(70px,1fr)_minmax(70px,1fr)_minmax(60px,0.8fr)_32px] gap-2 px-3 py-3 hover:bg-muted/50 transition-colors group items-center"
                 >
                   <div
@@ -258,49 +258,49 @@ export function PortalContent({ portalId }: Props) {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Checkbox
-                      checked={selectedIds.has(invoice.id)}
-                      onCheckedChange={() => toggleOne(invoice.id)}
+                      checked={selectedIds.has(deal.id)}
+                      onCheckedChange={() => toggleOne(deal.id)}
                     />
                   </div>
                   <Link
-                    href={`/i/${invoice.token}`}
+                    href={`/i/${deal.token}`}
                     target="_blank"
                     className="text-[12px] hover:underline"
                   >
-                    {invoice.invoiceNumber || "-"}
+                    {deal.dealNumber || "-"}
                   </Link>
                   <div className="text-[12px] text-[#606060]">
-                    {invoice.issueDate
+                    {deal.issueDate
                       ? format(
-                          new TZDate(invoice.issueDate, "UTC"),
+                          new TZDate(deal.issueDate, "UTC"),
                           "MMM d, yyyy",
                         )
                       : "-"}
                   </div>
                   <div className="text-[12px] text-[#606060]">
-                    {invoice.dueDate
+                    {deal.dueDate
                       ? format(
-                          new TZDate(invoice.dueDate, "UTC"),
+                          new TZDate(deal.dueDate, "UTC"),
                           "MMM d, yyyy",
                         )
                       : "-"}
                   </div>
                   <div className="text-[12px] text-right">
-                    {invoice.amount != null && invoice.currency
+                    {deal.amount != null && deal.currency
                       ? formatAmount({
-                          amount: invoice.amount,
-                          currency: invoice.currency,
+                          amount: deal.amount,
+                          currency: deal.currency,
                         })
                       : "-"}
                   </div>
                   <div className="text-right">
-                    <InvoiceStatus status={invoice.status as any} />
+                    <DealStatus status={deal.status as any} />
                   </div>
                   <div className="flex items-center justify-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
-                          {downloadingId === invoice.id ? (
+                          {downloadingId === deal.id ? (
                             <Spinner size={16} />
                           ) : (
                             <Icons.MoreHoriz className="h-4 w-4" />
@@ -309,21 +309,21 @@ export function PortalContent({ portalId }: Props) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link href={`/i/${invoice.token}`} target="_blank">
-                            View invoice
+                          <Link href={`/i/${deal.token}`} target="_blank">
+                            View deal
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDownloadSingle(invoice)}
+                          onClick={() => handleDownloadSingle(deal)}
                         >
                           Download
                         </DropdownMenuItem>
-                        {invoice.status === "paid" && (
+                        {deal.status === "paid" && (
                           <DropdownMenuItem
                             onClick={() => {
                               downloadFile(
-                                `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${invoice.token}&type=receipt`,
-                                `receipt-${invoice.invoiceNumber || "invoice"}.pdf`,
+                                `${process.env.NEXT_PUBLIC_API_URL}/files/download/deal?token=${deal.token}&type=receipt`,
+                                `receipt-${deal.dealNumber || "deal"}.pdf`,
                               );
                             }}
                           >
@@ -339,7 +339,7 @@ export function PortalContent({ portalId }: Props) {
           </div>
         ) : (
           <div className="bg-background border border-border py-16 text-center">
-            <p className="text-[#606060]">No invoices yet</p>
+            <p className="text-[#606060]">No deals yet</p>
           </div>
         )}
 

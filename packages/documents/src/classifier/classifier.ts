@@ -37,7 +37,7 @@ export class DocumentClassifier {
 
 CRITICAL: The previous attempt returned a null title, which is not acceptable. You MUST provide a title. Even if the document is unclear, construct a descriptive title from available information. Examples of acceptable titles even for unclear documents:
 - "Business Document - [Date if available]"
-- "Invoice from [Company Name if visible]"
+- "Deal from [Company Name if visible]"
 - "Receipt from [Store Name if visible]"
 - "Contract Document - [Date if available]"
 Never return null for the title field.`;
@@ -92,7 +92,7 @@ Never return null for the title field.`;
 
 CRITICAL: The previous attempt returned a null title, which is not acceptable. You MUST provide a title. Even if the image is unclear, construct a descriptive title from visible information. Use OCR to extract text if needed. Examples of acceptable titles even for unclear images:
 - "Receipt from [Store Name if visible] - [Date if visible]"
-- "Invoice from [Company Name if visible]"
+- "Deal from [Company Name if visible]"
 - "Business Document Image - [Date if visible]"
 - "Product Photo - [Product Name if visible]"
 Never return null for the title field.`;

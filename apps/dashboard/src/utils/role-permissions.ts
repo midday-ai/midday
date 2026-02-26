@@ -57,7 +57,7 @@ export function getRoleDescription(role: TeamRole): string {
     case "syndicate":
       return "Can view their syndication positions and returns";
     case "merchant":
-      return "Can view their deals, payments, and invoices";
+      return "Can view their deals, payments, and deals";
     case "bookkeeper":
       return "Can reconcile transactions, generate ACH batches, and export reports";
   }

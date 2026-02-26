@@ -426,8 +426,8 @@ describe("PROVIDER_ATTACHMENT_CONFIG", () => {
 
 describe("ensureFileExtension", () => {
   test("returns unchanged if filename has valid extension", () => {
-    expect(ensureFileExtension("invoice.pdf", "application/pdf")).toBe(
-      "invoice.pdf",
+    expect(ensureFileExtension("deal.pdf", "application/pdf")).toBe(
+      "deal.pdf",
     );
     expect(ensureFileExtension("receipt.jpg", "image/jpeg")).toBe(
       "receipt.jpg",
@@ -436,8 +436,8 @@ describe("ensureFileExtension", () => {
   });
 
   test("adds extension based on MIME type", () => {
-    expect(ensureFileExtension("invoice", "application/pdf")).toBe(
-      "invoice.pdf",
+    expect(ensureFileExtension("deal", "application/pdf")).toBe(
+      "deal.pdf",
     );
     expect(ensureFileExtension("receipt", "image/jpeg")).toBe("receipt.jpg");
     expect(ensureFileExtension("scan", "image/png")).toBe("scan.png");

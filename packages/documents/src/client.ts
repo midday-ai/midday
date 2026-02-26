@@ -1,17 +1,17 @@
-import { InvoiceProcessor } from "./processors/invoice/invoice-processor";
+import { DealProcessor } from "./processors/deal/deal-processor";
 import { ReceiptProcessor } from "./processors/receipt/receipt-processor";
-import type { GetDocumentRequest, GetInvoiceOrReceiptResponse } from "./types";
+import type { GetDocumentRequest, GetDealOrReceiptResponse } from "./types";
 import { getDocumentTypeFromMimeType } from "./utils";
 
 export class DocumentClient {
-  public async getInvoiceOrReceipt(
+  public async getDealOrReceipt(
     params: GetDocumentRequest,
-  ): Promise<GetInvoiceOrReceiptResponse> {
+  ): Promise<GetDealOrReceiptResponse> {
     const documentType = getDocumentTypeFromMimeType(params.mimetype);
 
-    if (documentType === "invoice") {
-      const processor = new InvoiceProcessor();
-      return processor.getInvoice(params);
+    if (documentType === "deal") {
+      const processor = new DealProcessor();
+      return processor.getDeal(params);
     }
 
     const processor = new ReceiptProcessor();

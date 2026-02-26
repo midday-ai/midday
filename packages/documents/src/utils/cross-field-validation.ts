@@ -1,12 +1,12 @@
 import type { z } from "zod/v4";
-import type { invoiceSchema, receiptSchema } from "../schema";
+import type { dealSchema, receiptSchema } from "../schema";
 import {
   isDateInReasonableRange,
   isValidAmount,
   isValidDateFormat,
 } from "./validation";
 
-type InvoiceData = z.infer<typeof invoiceSchema>;
+type DealData = z.infer<typeof dealSchema>;
 type ReceiptData = z.infer<typeof receiptSchema>;
 
 export interface ConsistencyIssue {
@@ -31,10 +31,10 @@ export interface ConsistencyValidationResult {
 }
 
 /**
- * Validate cross-field consistency for invoices
+ * Validate cross-field consistency for deals
  */
-export function validateInvoiceConsistency(
-  result: InvoiceData,
+export function validateDealConsistency(
+  result: DealData,
 ): ConsistencyValidationResult {
   const issues: ConsistencyIssue[] = [];
   const suggestedFixes: Array<{
@@ -111,20 +111,20 @@ export function validateInvoiceConsistency(
     }
   }
 
-  // 2. Validate: due_date >= invoice_date
+  // 2. Validate: due_date >= deal_date
   if (
     result.due_date &&
-    result.invoice_date &&
+    result.deal_date &&
     isValidDateFormat(result.due_date) &&
-    isValidDateFormat(result.invoice_date)
+    isValidDateFormat(result.deal_date)
   ) {
-    const invoiceDate = new Date(result.invoice_date);
+    const dealDate = new Date(result.deal_date);
     const dueDate = new Date(result.due_date);
 
-    if (dueDate < invoiceDate) {
+    if (dueDate < dealDate) {
       issues.push({
         field: "due_date",
-        issue: `Due date (${result.due_date}) is before invoice date (${result.invoice_date})`,
+        issue: `Due date (${result.due_date}) is before deal date (${result.deal_date})`,
         severity: "error",
       });
     }
@@ -329,7 +329,7 @@ export function validateReceiptConsistency(
  * Calculate subtotal from line items
  */
 function calculateSubtotalFromLineItems(
-  lineItems: InvoiceData["line_items"] | null | undefined,
+  lineItems: DealData["line_items"] | null | undefined,
 ): number {
   if (!lineItems || lineItems.length === 0) {
     return 0;
@@ -347,12 +347,12 @@ function calculateSubtotalFromLineItems(
 }
 
 /**
- * Apply suggested fixes to invoice data
+ * Apply suggested fixes to deal data
  */
-export function applyInvoiceFixes(
-  data: InvoiceData,
+export function applyDealFixes(
+  data: DealData,
   fixes: Array<{ field: string; value: any; reason: string }>,
-): InvoiceData {
+): DealData {
   const fixed = { ...data };
 
   for (const fix of fixes) {

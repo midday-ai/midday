@@ -1,9 +1,9 @@
 import type { Database } from "@db/client";
-import { invoiceProducts } from "@db/schema";
-import type { LineItem } from "@midday/invoice/types";
+import { dealProducts } from "@db/schema";
+import type { LineItem } from "@midday/deal/types";
 import { and, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
 
-export type InvoiceProduct = {
+export type DealProduct = {
   id: string;
   createdAt: string;
   updatedAt: string | null;
@@ -20,7 +20,7 @@ export type InvoiceProduct = {
   lastUsedAt: string | null;
 };
 
-export type CreateInvoiceProductParams = {
+export type CreateDealProductParams = {
   teamId: string;
   createdBy: string;
   name: string;
@@ -32,7 +32,7 @@ export type CreateInvoiceProductParams = {
   isActive?: boolean;
 };
 
-export type UpdateInvoiceProductParams = {
+export type UpdateDealProductParams = {
   id: string;
   teamId: string;
   name?: string;
@@ -46,18 +46,18 @@ export type UpdateInvoiceProductParams = {
   lastUsedAt?: string | null;
 };
 
-export type SearchInvoiceProductsParams = {
+export type SearchDealProductsParams = {
   teamId: string;
   query: string;
   limit?: number;
 };
 
-export async function createInvoiceProduct(
+export async function createDealProduct(
   db: Database,
-  params: CreateInvoiceProductParams,
-): Promise<InvoiceProduct> {
+  params: CreateDealProductParams,
+): Promise<DealProduct> {
   const [result] = await db
-    .insert(invoiceProducts)
+    .insert(dealProducts)
     .values({
       ...params,
       lastUsedAt: new Date().toISOString(),
@@ -65,13 +65,13 @@ export async function createInvoiceProduct(
     .returning();
 
   if (!result) {
-    throw new Error("Failed to create invoice product");
+    throw new Error("Failed to create deal product");
   }
 
   return result;
 }
 
-export type UpsertInvoiceProductParams = {
+export type UpsertDealProductParams = {
   teamId: string;
   createdBy: string;
   name: string;
@@ -82,14 +82,14 @@ export type UpsertInvoiceProductParams = {
   taxRate?: number | null;
 };
 
-export async function upsertInvoiceProduct(
+export async function upsertDealProduct(
   db: Database,
-  params: UpsertInvoiceProductParams,
-): Promise<InvoiceProduct> {
+  params: UpsertDealProductParams,
+): Promise<DealProduct> {
   const now = new Date().toISOString();
 
   const [result] = await db
-    .insert(invoiceProducts)
+    .insert(dealProducts)
     .values({
       ...params,
       usageCount: 1,
@@ -97,10 +97,10 @@ export async function upsertInvoiceProduct(
     })
     .onConflictDoUpdate({
       target: [
-        invoiceProducts.teamId,
-        invoiceProducts.name,
-        invoiceProducts.currency,
-        invoiceProducts.price,
+        dealProducts.teamId,
+        dealProducts.name,
+        dealProducts.currency,
+        dealProducts.price,
       ],
       set: {
         // Update product details with latest information (only if provided)
@@ -109,7 +109,7 @@ export async function upsertInvoiceProduct(
         }),
         ...(params.unit !== undefined && { unit: params.unit }),
         ...(params.taxRate !== undefined && { taxRate: params.taxRate }),
-        usageCount: sql`${invoiceProducts.usageCount} + 1`,
+        usageCount: sql`${dealProducts.usageCount} + 1`,
         lastUsedAt: now,
         updatedAt: now,
         // Keep original createdBy, don't overwrite
@@ -118,72 +118,72 @@ export async function upsertInvoiceProduct(
     .returning();
 
   if (!result) {
-    throw new Error("Failed to upsert invoice product");
+    throw new Error("Failed to upsert deal product");
   }
 
   return result;
 }
 
-export async function updateInvoiceProduct(
+export async function updateDealProduct(
   db: Database,
-  params: UpdateInvoiceProductParams,
-): Promise<InvoiceProduct | null> {
+  params: UpdateDealProductParams,
+): Promise<DealProduct | null> {
   const { id, teamId, ...updateData } = params;
 
   const [result] = await db
-    .update(invoiceProducts)
+    .update(dealProducts)
     .set({
       ...updateData,
       updatedAt: new Date().toISOString(),
     })
-    .where(and(eq(invoiceProducts.id, id), eq(invoiceProducts.teamId, teamId)))
+    .where(and(eq(dealProducts.id, id), eq(dealProducts.teamId, teamId)))
     .returning();
 
   return result || null;
 }
 
-export async function getInvoiceProductById(
+export async function getDealProductById(
   db: Database,
   id: string,
   teamId: string,
-): Promise<InvoiceProduct | null> {
+): Promise<DealProduct | null> {
   const [result] = await db
     .select()
-    .from(invoiceProducts)
-    .where(and(eq(invoiceProducts.id, id), eq(invoiceProducts.teamId, teamId)))
+    .from(dealProducts)
+    .where(and(eq(dealProducts.id, id), eq(dealProducts.teamId, teamId)))
     .limit(1);
 
   return result || null;
 }
 
-export async function searchInvoiceProducts(
+export async function searchDealProducts(
   db: Database,
-  params: SearchInvoiceProductsParams,
-): Promise<InvoiceProduct[]> {
+  params: SearchDealProductsParams,
+): Promise<DealProduct[]> {
   const { teamId, query, limit = 10 } = params;
 
   return await db
     .select()
-    .from(invoiceProducts)
+    .from(dealProducts)
     .where(
       and(
-        eq(invoiceProducts.teamId, teamId),
-        eq(invoiceProducts.isActive, true),
+        eq(dealProducts.teamId, teamId),
+        eq(dealProducts.isActive, true),
         or(
           // Full-text search for better matching
-          sql`${invoiceProducts.fts} @@ plainto_tsquery('english', ${query})`,
+          sql`${dealProducts.fts} @@ plainto_tsquery('english', ${query})`,
           // Partial name match for shorter queries
-          ilike(invoiceProducts.name, `%${query}%`),
+          ilike(dealProducts.name, `%${query}%`),
         ),
       ),
     )
     .orderBy(
       // Order by relevance, then usage frequency, then recency
       desc(
-        sql`ts_rank(${invoiceProducts.fts}, plainto_tsquery('english', ${query}))`,
+        sql`ts_rank(${dealProducts.fts}, plainto_tsquery('english', ${query}))`,
       ),
-      desc(invoiceProducts.usageCount),
-      desc(invoiceProducts.lastUsedAt),
+      desc(dealProducts.usageCount),
+      desc(dealProducts.lastUsedAt),
     )
     .limit(limit);
 }
@@ -194,63 +194,63 @@ export async function incrementProductUsage(
   teamId: string,
 ): Promise<void> {
   await db
-    .update(invoiceProducts)
+    .update(dealProducts)
     .set({
-      usageCount: sql`${invoiceProducts.usageCount} + 1`,
+      usageCount: sql`${dealProducts.usageCount} + 1`,
       lastUsedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
-    .where(and(eq(invoiceProducts.id, id), eq(invoiceProducts.teamId, teamId)));
+    .where(and(eq(dealProducts.id, id), eq(dealProducts.teamId, teamId)));
 }
 
-export async function getPopularInvoiceProducts(
+export async function getPopularDealProducts(
   db: Database,
   teamId: string,
   limit = 20,
-): Promise<InvoiceProduct[]> {
+): Promise<DealProduct[]> {
   return await db
     .select()
-    .from(invoiceProducts)
+    .from(dealProducts)
     .where(
       and(
-        eq(invoiceProducts.teamId, teamId),
-        eq(invoiceProducts.isActive, true),
+        eq(dealProducts.teamId, teamId),
+        eq(dealProducts.isActive, true),
       ),
     )
-    .orderBy(desc(invoiceProducts.usageCount), desc(invoiceProducts.lastUsedAt))
+    .orderBy(desc(dealProducts.usageCount), desc(dealProducts.lastUsedAt))
     .limit(limit);
 }
 
-export async function getRecentInvoiceProducts(
+export async function getRecentDealProducts(
   db: Database,
   teamId: string,
   limit = 10,
-): Promise<InvoiceProduct[]> {
+): Promise<DealProduct[]> {
   return await db
     .select()
-    .from(invoiceProducts)
+    .from(dealProducts)
     .where(
       and(
-        eq(invoiceProducts.teamId, teamId),
-        eq(invoiceProducts.isActive, true),
+        eq(dealProducts.teamId, teamId),
+        eq(dealProducts.isActive, true),
       ),
     )
-    .orderBy(desc(invoiceProducts.lastUsedAt))
+    .orderBy(desc(dealProducts.lastUsedAt))
     .limit(limit);
 }
 
-export type GetInvoiceProductsParams = {
+export type GetDealProductsParams = {
   sortBy?: "popular" | "recent";
   limit?: number;
   includeInactive?: boolean;
   currency?: string | null;
 };
 
-export async function getInvoiceProducts(
+export async function getDealProducts(
   db: Database,
   teamId: string,
-  params: GetInvoiceProductsParams = {},
-): Promise<InvoiceProduct[]> {
+  params: GetDealProductsParams = {},
+): Promise<DealProduct[]> {
   const {
     sortBy = "popular",
     limit = 50,
@@ -258,45 +258,45 @@ export async function getInvoiceProducts(
     currency,
   } = params;
 
-  const whereConditions = [eq(invoiceProducts.teamId, teamId)];
+  const whereConditions = [eq(dealProducts.teamId, teamId)];
 
   // Only filter by isActive if includeInactive is false
   if (!includeInactive) {
-    whereConditions.push(eq(invoiceProducts.isActive, true));
+    whereConditions.push(eq(dealProducts.isActive, true));
   }
 
   if (currency) {
-    whereConditions.push(eq(invoiceProducts.currency, currency));
+    whereConditions.push(eq(dealProducts.currency, currency));
   }
 
   const query = db
     .select()
-    .from(invoiceProducts)
+    .from(dealProducts)
     .where(and(...whereConditions));
 
   // Apply sorting based on sortBy parameter
   if (sortBy === "recent") {
-    query.orderBy(desc(invoiceProducts.lastUsedAt));
+    query.orderBy(desc(dealProducts.lastUsedAt));
   } else {
     // Default to popular (usage count first, then recency)
     query.orderBy(
-      desc(invoiceProducts.usageCount),
-      desc(invoiceProducts.lastUsedAt),
+      desc(dealProducts.usageCount),
+      desc(dealProducts.lastUsedAt),
     );
   }
 
   return await query.limit(limit);
 }
 
-export async function deleteInvoiceProduct(
+export async function deleteDealProduct(
   db: Database,
   id: string,
   teamId: string,
 ): Promise<boolean> {
   const [result] = await db
-    .delete(invoiceProducts)
-    .where(and(eq(invoiceProducts.id, id), eq(invoiceProducts.teamId, teamId)))
-    .returning({ id: invoiceProducts.id });
+    .delete(dealProducts)
+    .where(and(eq(dealProducts.id, id), eq(dealProducts.teamId, teamId)))
+    .returning({ id: dealProducts.id });
 
   return !!result;
 }
@@ -311,7 +311,7 @@ export async function saveLineItemAsProduct(
   userId: string,
   lineItem: LineItem,
   currency?: string,
-): Promise<{ product: InvoiceProduct | null; shouldClearProductId: boolean }> {
+): Promise<{ product: DealProduct | null; shouldClearProductId: boolean }> {
   // If name is empty, signal to clear productId (don't save anything)
   if (!lineItem.name || lineItem.name.trim().length === 0) {
     return { product: null, shouldClearProductId: true };
@@ -322,7 +322,7 @@ export async function saveLineItemAsProduct(
   try {
     // If line item has a productId, update the existing product
     if (lineItem.productId) {
-      const existingProduct = await getInvoiceProductById(
+      const existingProduct = await getDealProductById(
         db,
         lineItem.productId,
         teamId,
@@ -330,7 +330,7 @@ export async function saveLineItemAsProduct(
 
       if (existingProduct) {
         // Update the existing product with new values
-        const updatedProduct = await updateInvoiceProduct(db, {
+        const updatedProduct = await updateDealProduct(db, {
           id: lineItem.productId,
           teamId,
           name: trimmedName,
@@ -352,7 +352,7 @@ export async function saveLineItemAsProduct(
     }
 
     // No productId or product not found - create new product based on team + name + currency + price
-    const product = await upsertInvoiceProduct(db, {
+    const product = await upsertDealProduct(db, {
       teamId,
       createdBy: userId,
       name: trimmedName,

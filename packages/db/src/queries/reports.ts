@@ -37,7 +37,7 @@ import {
 import {
   bankAccounts,
   inbox,
-  invoices,
+  deals,
   reports,
   teams,
   transactionCategories,
@@ -1712,48 +1712,48 @@ export async function getCashFlow(db: Database, params: GetCashFlowParams) {
   };
 }
 
-export type GetOutstandingInvoicesParams = {
+export type GetOutstandingDealsParams = {
   teamId: string;
   currency?: string;
   status?: ("unpaid" | "overdue")[];
 };
 
-export type GetOverdueInvoicesAlertParams = {
+export type GetOverdueDealsAlertParams = {
   teamId: string;
   currency?: string;
 };
 
-export async function getOverdueInvoicesAlert(
+export async function getOverdueDealsAlert(
   db: Database,
-  params: GetOverdueInvoicesAlertParams,
+  params: GetOverdueDealsAlertParams,
 ) {
   const { teamId, currency: inputCurrency } = params;
 
   // Get target currency
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
 
-  // Build query conditions for overdue invoices only
+  // Build query conditions for overdue deals only
   const conditions = [
-    eq(invoices.teamId, teamId),
-    eq(invoices.status, "overdue"),
+    eq(deals.teamId, teamId),
+    eq(deals.status, "overdue"),
   ];
 
   // Add currency filter if specified
   if (inputCurrency && targetCurrency) {
-    conditions.push(eq(invoices.currency, targetCurrency));
+    conditions.push(eq(deals.currency, targetCurrency));
   }
 
-  // Get overdue invoices details
+  // Get overdue deals details
   const result = await db
     .select({
       count: sql<number>`COUNT(*)`,
-      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)`,
-      oldestDueDate: sql<string>`MIN(${invoices.dueDate})`,
-      currency: invoices.currency,
+      totalAmount: sql<number>`COALESCE(SUM(${deals.amount}), 0)`,
+      oldestDueDate: sql<string>`MIN(${deals.dueDate})`,
+      currency: deals.currency,
     })
-    .from(invoices)
+    .from(deals)
     .where(and(...conditions))
-    .groupBy(invoices.currency);
+    .groupBy(deals.currency);
 
   // Calculate totals
   let totalCount = 0;
@@ -1785,7 +1785,7 @@ export async function getOverdueInvoicesAlert(
     }
   }
 
-  // Calculate days overdue from oldest invoice
+  // Calculate days overdue from oldest deal
   let daysOverdue = 0;
   if (oldestDueDate) {
     const now = new Date();
@@ -1804,15 +1804,15 @@ export async function getOverdueInvoicesAlert(
       daysOverdue,
     },
     meta: {
-      type: "overdue_invoices_alert",
+      type: "overdue_deals_alert",
       currency: mainCurrency,
     },
   };
 }
 
-export async function getOutstandingInvoices(
+export async function getOutstandingDeals(
   db: Database,
-  params: GetOutstandingInvoicesParams,
+  params: GetOutstandingDealsParams,
 ) {
   const {
     teamId,
@@ -1825,25 +1825,25 @@ export async function getOutstandingInvoices(
 
   // Build query conditions
   const conditions = [
-    eq(invoices.teamId, teamId),
-    inArray(invoices.status, status),
+    eq(deals.teamId, teamId),
+    inArray(deals.status, status),
   ];
 
   // Add currency filter if specified
   if (inputCurrency && targetCurrency) {
-    conditions.push(eq(invoices.currency, targetCurrency));
+    conditions.push(eq(deals.currency, targetCurrency));
   }
 
-  // Get outstanding invoices summary
+  // Get outstanding deals summary
   const result = await db
     .select({
       count: sql<number>`COUNT(*)`,
-      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)`,
-      currency: invoices.currency,
+      totalAmount: sql<number>`COALESCE(SUM(${deals.amount}), 0)`,
+      currency: deals.currency,
     })
-    .from(invoices)
+    .from(deals)
     .where(and(...conditions))
-    .groupBy(invoices.currency);
+    .groupBy(deals.currency);
 
   // Calculate totals across all currencies (if no currency filter)
   let totalCount = 0;
@@ -1881,7 +1881,7 @@ export async function getOutstandingInvoices(
       status,
     },
     meta: {
-      type: "outstanding_invoices",
+      type: "outstanding_deals",
       currency: mainCurrency,
       status,
     },
@@ -2129,9 +2129,9 @@ export async function getRevenueForecast(
   // Fetch all required data in parallel for better performance
   const [
     historicalData,
-    outstandingInvoicesData,
-    scheduledInvoicesData,
-    paidInvoicesData,
+    outstandingDealsData,
+    scheduledDealsData,
+    paidDealsData,
   ] = await Promise.all([
     // Historical revenue data
     getRevenue(db, {
@@ -2141,44 +2141,44 @@ export async function getRevenueForecast(
       currency: inputCurrency,
       revenueType,
     }),
-    // Outstanding invoices (unpaid revenue)
-    getOutstandingInvoices(db, {
+    // Outstanding deals (unpaid revenue)
+    getOutstandingDeals(db, {
       teamId,
       currency: inputCurrency,
       status: ["unpaid", "overdue"],
     }),
-    // Scheduled invoices with issueDate in forecast period
+    // Scheduled deals with issueDate in forecast period
     db
       .select({
-        amount: invoices.amount,
-        issueDate: invoices.issueDate,
-        currency: invoices.currency,
+        amount: deals.amount,
+        issueDate: deals.issueDate,
+        currency: deals.currency,
       })
-      .from(invoices)
+      .from(deals)
       .where(
         and(
-          eq(invoices.teamId, teamId),
-          eq(invoices.status, "scheduled"),
-          isNotNull(invoices.issueDate),
-          gte(invoices.issueDate, forecastStartDate),
-          lte(invoices.issueDate, forecastEndDate),
+          eq(deals.teamId, teamId),
+          eq(deals.status, "scheduled"),
+          isNotNull(deals.issueDate),
+          gte(deals.issueDate, forecastStartDate),
+          lte(deals.issueDate, forecastEndDate),
         ),
       ),
-    // Paid invoices for collection rate calculation
+    // Paid deals for collection rate calculation
     db
       .select({
-        issueDate: invoices.issueDate,
-        paidAt: invoices.paidAt,
-        amount: invoices.amount,
-        dueDate: invoices.dueDate,
+        issueDate: deals.issueDate,
+        paidAt: deals.paidAt,
+        amount: deals.amount,
+        dueDate: deals.dueDate,
       })
-      .from(invoices)
+      .from(deals)
       .where(
         and(
-          eq(invoices.teamId, teamId),
-          eq(invoices.status, "paid"),
-          isNotNull(invoices.paidAt),
-          isNotNull(invoices.issueDate),
+          eq(deals.teamId, teamId),
+          eq(deals.status, "paid"),
+          isNotNull(deals.paidAt),
+          isNotNull(deals.issueDate),
         ),
       ),
   ]);
@@ -2238,10 +2238,10 @@ export async function getRevenueForecast(
         currency,
         revenueType,
         forecastStartDate: forecast[0]?.date,
-        unpaidInvoices: {
-          count: outstandingInvoicesData.summary.count,
-          totalAmount: outstandingInvoicesData.summary.totalAmount,
-          currency: outstandingInvoicesData.summary.currency,
+        unpaidDeals: {
+          count: outstandingDealsData.summary.count,
+          totalAmount: outstandingDealsData.summary.totalAmount,
+          currency: outstandingDealsData.summary.currency,
         },
       },
       historical: historical.map((item: (typeof historical)[number]) => ({
@@ -2261,7 +2261,7 @@ export async function getRevenueForecast(
         avgGrowthRate: 0,
         basedOnMonths: historical.length,
         currency,
-        includesUnpaidInvoices: outstandingInvoicesData.summary.count > 0,
+        includesUnpaidDeals: outstandingDealsData.summary.count > 0,
       },
     };
   }
@@ -2371,30 +2371,30 @@ export async function getRevenueForecast(
   // Apply seasonality adjustment to smoothed baseline
   const lastActualValue = smoothedValue * seasonalityFactor;
 
-  // Calculate dynamic collection rate from historical paid invoices
+  // Calculate dynamic collection rate from historical paid deals
   const calculateCollectionRate = (
-    paidInvoices: Array<{
+    paidDeals: Array<{
       issueDate: string | null;
       paidAt: string | null;
       amount: number | null;
       dueDate: string | null;
     }>,
-    outstandingInvoices: Array<{
+    outstandingDeals: Array<{
       issueDate?: string | null;
       dueDate?: string | null;
     }>,
   ): number => {
-    if (paidInvoices.length === 0) {
+    if (paidDeals.length === 0) {
       // No historical data, use conservative default
       return 0.7;
     }
 
     // Calculate average days to payment from historical data
     const paymentDelays: number[] = [];
-    for (const invoice of paidInvoices) {
-      if (invoice.issueDate && invoice.paidAt) {
-        const issueDate = parseISO(invoice.issueDate);
-        const paidDate = parseISO(invoice.paidAt);
+    for (const deal of paidDeals) {
+      if (deal.issueDate && deal.paidAt) {
+        const issueDate = parseISO(deal.issueDate);
+        const paidDate = parseISO(deal.paidAt);
         const daysToPayment = Math.floor(
           (paidDate.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24),
         );
@@ -2412,26 +2412,26 @@ export async function getRevenueForecast(
     const avgDaysToPayment =
       paymentDelays.reduce((sum, days) => sum + days, 0) / paymentDelays.length;
 
-    // Calculate collection rate by invoice age
+    // Calculate collection rate by deal age
     const now = new UTCDate();
     let totalOutstanding = 0;
     let weightedCollection = 0;
 
-    for (const invoice of outstandingInvoices) {
-      if (!invoice.issueDate) continue;
+    for (const deal of outstandingDeals) {
+      if (!deal.issueDate) continue;
 
-      const issueDate = parseISO(invoice.issueDate);
+      const issueDate = parseISO(deal.issueDate);
       const daysSinceIssue = Math.floor(
         (now.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24),
       );
 
-      // Determine collection probability based on invoice age
+      // Determine collection probability based on deal age
       let collectionRate = 0.7; // Default
       if (daysSinceIssue < 30) {
-        // Recent invoices (< 30 days): Higher probability
+        // Recent deals (< 30 days): Higher probability
         collectionRate = 0.85;
-      } else if (invoice.dueDate) {
-        const dueDate = parseISO(invoice.dueDate);
+      } else if (deal.dueDate) {
+        const dueDate = parseISO(deal.dueDate);
         const daysSinceDue = Math.floor(
           (now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
         );
@@ -2443,11 +2443,11 @@ export async function getRevenueForecast(
           collectionRate = 0.7;
         }
       } else if (daysSinceIssue > 90) {
-        // Very old invoices (> 90 days): Lower probability
+        // Very old deals (> 90 days): Lower probability
         collectionRate = 0.5;
       }
 
-      // Weight by expected payment timing (invoices closer to avg payment time have higher weight)
+      // Weight by expected payment timing (deals closer to avg payment time have higher weight)
       const daysUntilExpectedPayment = Math.max(
         0,
         avgDaysToPayment - daysSinceIssue,
@@ -2460,46 +2460,46 @@ export async function getRevenueForecast(
       totalOutstanding += weight;
     }
 
-    // Return weighted average collection rate, or default if no outstanding invoices
+    // Return weighted average collection rate, or default if no outstanding deals
     return totalOutstanding > 0
       ? Math.max(0.5, Math.min(0.9, weightedCollection / totalOutstanding))
       : 0.7;
   };
 
-  // Get outstanding invoices with dates for collection rate calculation
-  const outstandingInvoicesWithDates = await db
+  // Get outstanding deals with dates for collection rate calculation
+  const outstandingDealsWithDates = await db
     .select({
-      issueDate: invoices.issueDate,
-      dueDate: invoices.dueDate,
+      issueDate: deals.issueDate,
+      dueDate: deals.dueDate,
     })
-    .from(invoices)
+    .from(deals)
     .where(
       and(
-        eq(invoices.teamId, teamId),
-        inArray(invoices.status, ["unpaid", "overdue"]),
+        eq(deals.teamId, teamId),
+        inArray(deals.status, ["unpaid", "overdue"]),
       ),
     );
 
   const collectionRate = calculateCollectionRate(
-    paidInvoicesData as Array<{
+    paidDealsData as Array<{
       issueDate: string | null;
       paidAt: string | null;
       amount: number | null;
       dueDate: string | null;
     }>,
-    outstandingInvoicesWithDates as Array<{
+    outstandingDealsWithDates as Array<{
       issueDate: string | null;
       dueDate: string | null;
     }>,
   );
 
-  // Group scheduled invoices by month
+  // Group scheduled deals by month
   const scheduledByMonth = new Map<string, number>();
-  for (const invoice of scheduledInvoicesData) {
-    if (!invoice.issueDate) continue;
-    const issueDate = parseISO(invoice.issueDate);
+  for (const deal of scheduledDealsData) {
+    if (!deal.issueDate) continue;
+    const issueDate = parseISO(deal.issueDate);
     const monthKey = format(issueDate, "yyyy-MM");
-    const amount = Number(invoice.amount) || 0;
+    const amount = Number(deal.amount) || 0;
     scheduledByMonth.set(
       monthKey,
       (scheduledByMonth.get(monthKey) || 0) + amount,
@@ -2509,9 +2509,9 @@ export async function getRevenueForecast(
   // Step 6: Generate forecast with conservative dampening
   const forecast: ForecastDataPoint[] = [];
 
-  // Calculate expected collection from unpaid invoices using dynamic rate
-  const expectedInvoiceCollection =
-    outstandingInvoicesData.summary.totalAmount * collectionRate;
+  // Calculate expected collection from unpaid deals using dynamic rate
+  const expectedDealCollection =
+    outstandingDealsData.summary.totalAmount * collectionRate;
 
   for (let i = 1; i <= forecastMonths; i++) {
     const forecastDate = endOfMonth(
@@ -2543,12 +2543,12 @@ export async function getRevenueForecast(
       projectedValue * (1 - regressionWeight) +
       historicalAvg * regressionWeight;
 
-    // Add expected invoice collection to first month only (one-time boost)
-    if (i === 1 && expectedInvoiceCollection > 0) {
-      finalValue += expectedInvoiceCollection;
+    // Add expected deal collection to first month only (one-time boost)
+    if (i === 1 && expectedDealCollection > 0) {
+      finalValue += expectedDealCollection;
     }
 
-    // Add scheduled invoices for this month
+    // Add scheduled deals for this month
     const monthKey = format(forecastDate, "yyyy-MM");
     const scheduledAmount = scheduledByMonth.get(monthKey) || 0;
     if (scheduledAmount > 0) {
@@ -2673,10 +2673,10 @@ export async function getRevenueForecast(
       currency,
       revenueType,
       forecastStartDate: forecast[0]?.date,
-      unpaidInvoices: {
-        count: outstandingInvoicesData.summary.count,
-        totalAmount: outstandingInvoicesData.summary.totalAmount,
-        currency: outstandingInvoicesData.summary.currency,
+      unpaidDeals: {
+        count: outstandingDealsData.summary.count,
+        totalAmount: outstandingDealsData.summary.totalAmount,
+        currency: outstandingDealsData.summary.currency,
       },
     },
     historical: historical.map((item: (typeof historical)[number]) => ({
@@ -2696,7 +2696,7 @@ export async function getRevenueForecast(
       avgGrowthRate: avgMonthlyGrowthRate,
       basedOnMonths: historical.length,
       currency,
-      includesUnpaidInvoices: outstandingInvoicesData.summary.count > 0,
+      includesUnpaidDeals: outstandingDealsData.summary.count > 0,
       confidenceScore,
       outlierMonths: dataQuality.outlierCount,
       forecastMethod: "exponential_smoothing_with_seasonality",
@@ -2713,14 +2713,14 @@ export async function getRevenueForecast(
         historical.length === 12 && seasonalityFactor !== 1.0,
       seasonalityFactor: Number(seasonalityFactor.toFixed(2)),
       revenueStability: Number(((1 - coefficientOfVariation) * 100).toFixed(2)), // 0-100%
-      expectedInvoiceCollection: Number(expectedInvoiceCollection.toFixed(2)),
+      expectedDealCollection: Number(expectedDealCollection.toFixed(2)),
       collectionRate: Number((collectionRate * 100).toFixed(1)), // as percentage
-      scheduledInvoicesTotal: Number(
+      scheduledDealsTotal: Number(
         Array.from(scheduledByMonth.values())
           .reduce((sum, amount) => sum + amount, 0)
           .toFixed(2),
       ),
-      scheduledInvoicesCount: scheduledByMonth.size,
+      scheduledDealsCount: scheduledByMonth.size,
     },
   };
 }
@@ -2804,7 +2804,7 @@ export async function getBalanceSheet(
   // Fetch all data in parallel
   const [
     accountBalanceData,
-    outstandingInvoicesData,
+    outstandingDealsData,
     assetTransactions,
     fixedAssetTransactionsForDepreciation,
     liabilityTransactions,
@@ -2821,23 +2821,23 @@ export async function getBalanceSheet(
       currency: inputCurrency,
     }),
 
-    // 2. Unpaid invoices (Accounts Receivable) - fetch directly for currency conversion
+    // 2. Unpaid deals (Accounts Receivable) - fetch directly for currency conversion
     db
       .select({
-        amount: invoices.amount,
-        currency: invoices.currency,
+        amount: deals.amount,
+        currency: deals.currency,
       })
-      .from(invoices)
+      .from(deals)
       .where(
         and(
-          eq(invoices.teamId, teamId),
-          // Include unpaid and overdue invoices, plus scheduled invoices with issueDate on or before balance sheet date
+          eq(deals.teamId, teamId),
+          // Include unpaid and overdue deals, plus scheduled deals with issueDate on or before balance sheet date
           or(
-            inArray(invoices.status, ["unpaid", "overdue"]),
+            inArray(deals.status, ["unpaid", "overdue"]),
             and(
-              eq(invoices.status, "scheduled"),
-              isNotNull(invoices.issueDate),
-              lte(invoices.issueDate, asOfDateStr),
+              eq(deals.status, "scheduled"),
+              isNotNull(deals.issueDate),
+              lte(deals.issueDate, asOfDateStr),
             ),
           )!,
         ),
@@ -3222,10 +3222,10 @@ export async function getBalanceSheet(
       },
     }),
 
-    // 9. Unmatched inbox items (bills/vendor invoices) for Accounts Payable
-    // These are inbox items (both "invoice" and "expense" types) that haven't been matched to transactions yet
-    // Note: Merchant invoices are tracked separately in the invoices table, so unmatched inbox items
-    // represent bills/vendor invoices we need to pay
+    // 9. Unmatched inbox items (bills/vendor deals) for Accounts Payable
+    // These are inbox items (both "deal" and "expense" types) that haven't been matched to transactions yet
+    // Note: Merchant deals are tracked separately in the deals table, so unmatched inbox items
+    // represent bills/vendor deals we need to pay
     db
       .select({
         amount: inbox.amount,
@@ -3339,7 +3339,7 @@ export async function getBalanceSheet(
   const accruedExpenses: number = 0;
   const accruedExpensesName: string | undefined = undefined;
 
-  // Calculate Accounts Payable from unmatched inbox items (bills/vendor invoices)
+  // Calculate Accounts Payable from unmatched inbox items (bills/vendor deals)
   let accountsPayable = 0;
   const billsData = unmatchedBillsData as Array<{
     amount: number | null;
@@ -3415,29 +3415,29 @@ export async function getBalanceSheet(
   // Get cash from bank accounts (already converted to target currency)
   const cash: number = accountBalanceData.totalBalance;
 
-  // Get accounts receivable from unpaid invoices with proper currency conversion
+  // Get accounts receivable from unpaid deals with proper currency conversion
   let accountsReceivable = 0;
-  const invoiceData = outstandingInvoicesData as Array<{
+  const dealData = outstandingDealsData as Array<{
     amount: number;
     currency: string;
   }>;
 
   // Collect unique currency pairs that need conversion
-  const invoiceCurrencyPairs: Array<{ base: string; target: string }> = [];
-  const invoicesNeedingConversion: Array<{
+  const dealCurrencyPairs: Array<{ base: string; target: string }> = [];
+  const dealsNeedingConversion: Array<{
     amount: number;
     currency: string;
   }> = [];
 
-  for (const invoice of invoiceData) {
-    const amount = Number(invoice.amount) || 0;
-    const invoiceCurrency = invoice.currency || currency;
+  for (const deal of dealData) {
+    const amount = Number(deal.amount) || 0;
+    const dealCurrency = deal.currency || currency;
 
-    if (invoiceCurrency === currency) {
+    if (dealCurrency === currency) {
       accountsReceivable += amount;
     } else {
-      invoicesNeedingConversion.push({ amount, currency: invoiceCurrency });
-      invoiceCurrencyPairs.push({ base: invoiceCurrency, target: currency });
+      dealsNeedingConversion.push({ amount, currency: dealCurrency });
+      dealCurrencyPairs.push({ base: dealCurrency, target: currency });
     }
   }
 
@@ -3508,7 +3508,7 @@ export async function getBalanceSheet(
 
   // Combine all currency pairs and fetch exchange rates in one batch query
   const allCurrencyPairs = [
-    ...invoiceCurrencyPairs,
+    ...dealCurrencyPairs,
     ...accountCurrencyPairs,
     ...billsCurrencyPairs,
   ];
@@ -3517,15 +3517,15 @@ export async function getBalanceSheet(
       ? await getExchangeRatesBatch(db, { pairs: allCurrencyPairs })
       : new Map<string, number>();
 
-  // Convert invoices using batch-fetched rates
-  for (const invoice of invoicesNeedingConversion) {
-    const key = `${invoice.currency}-${currency}`;
+  // Convert deals using batch-fetched rates
+  for (const deal of dealsNeedingConversion) {
+    const key = `${deal.currency}-${currency}`;
     const rate = exchangeRateMap.get(key);
     if (rate) {
-      const convertedAmount = invoice.amount * rate;
+      const convertedAmount = deal.amount * rate;
       accountsReceivable += convertedAmount;
     }
-    // Skip invoices with missing exchange rates to avoid mixing currencies
+    // Skip deals with missing exchange rates to avoid mixing currencies
     // This prevents silently producing incorrect totals
   }
 

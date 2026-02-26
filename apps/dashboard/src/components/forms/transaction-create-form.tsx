@@ -224,7 +224,7 @@ export function TransactionCreateForm() {
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="e.g., Office supplies, Invoice payment"
+                  placeholder="e.g., Office supplies, Deal payment"
                   autoComplete="off"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -444,7 +444,7 @@ export function TransactionCreateForm() {
             <AccordionContent>
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Upload receipts, invoices, or other documents related to this
+                  Upload receipts, deals, or other documents related to this
                   transaction
                 </p>
                 <TransactionAttachments

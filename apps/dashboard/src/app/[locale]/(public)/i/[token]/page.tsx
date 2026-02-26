@@ -1,7 +1,7 @@
-import { InvoiceViewWrapper } from "@/components/invoice-view-wrapper";
+import { DealViewWrapper } from "@/components/deal-view-wrapper";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { decrypt } from "@midday/encryption";
-import { HtmlTemplate } from "@midday/invoice/templates/html";
+import { HtmlTemplate } from "@midday/deal/templates/html";
 import { createClient } from "@midday/supabase/server";
 import { waitUntil } from "@vercel/functions";
 import type { Metadata } from "next";
@@ -15,15 +15,15 @@ export async function generateMetadata(props: {
   const queryClient = getQueryClient();
 
   try {
-    const invoice = await queryClient.fetchQuery(
-      trpc.invoice.getInvoiceByToken.queryOptions({
+    const deal = await queryClient.fetchQuery(
+      trpc.deal.getDealByToken.queryOptions({
         token: params.token,
       }),
     );
 
-    if (!invoice) {
+    if (!deal) {
       return {
-        title: "Invoice Not Found",
+        title: "Deal Not Found",
         robots: {
           index: false,
           follow: false,
@@ -31,8 +31,8 @@ export async function generateMetadata(props: {
       };
     }
 
-    const title = `Invoice ${invoice.invoiceNumber} | ${invoice.team?.name}`;
-    const description = `Invoice for ${invoice.merchantName || invoice.merchant?.name || "Merchant"}`;
+    const title = `Deal ${deal.dealNumber} | ${deal.team?.name}`;
+    const description = `Deal for ${deal.merchantName || deal.merchant?.name || "Merchant"}`;
 
     return {
       title,
@@ -53,7 +53,7 @@ export async function generateMetadata(props: {
     };
   } catch (error) {
     return {
-      title: "Invoice Not Found",
+      title: "Deal Not Found",
       robots: {
         index: false,
         follow: false,
@@ -67,11 +67,11 @@ type Props = {
   searchParams: Promise<SearchParams>;
 };
 
-async function updateInvoiceViewedAt(id: string) {
+async function updateDealViewedAt(id: string) {
   const supabase = await createClient({ admin: true });
 
   await supabase
-    .from("invoices")
+    .from("deals")
     .update({
       viewed_at: new Date().toISOString(),
     })
@@ -91,13 +91,13 @@ export default async function Page(props: Props) {
 
   const queryClient = getQueryClient();
 
-  const invoice = await queryClient.fetchQuery(
-    trpc.invoice.getInvoiceByToken.queryOptions({
+  const deal = await queryClient.fetchQuery(
+    trpc.deal.getDealByToken.queryOptions({
       token: params.token,
     }),
   );
 
-  if (!invoice) {
+  if (!deal) {
     notFound();
   }
 
@@ -105,55 +105,55 @@ export default async function Page(props: Props) {
     try {
       const decryptedEmail = decrypt(viewer);
 
-      if (decryptedEmail === invoice?.merchant?.email) {
-        // Only update the invoice viewed_at if the user is a viewer
-        waitUntil(updateInvoiceViewedAt(invoice.id!));
+      if (decryptedEmail === deal?.merchant?.email) {
+        // Only update the deal viewed_at if the user is a viewer
+        waitUntil(updateDealViewedAt(deal.id!));
       }
     } catch (error) {
       // Silently fail if decryption fails - viewer might be invalid or malformed
-      // This is expected when accessing the invoice without a valid viewer parameter
+      // This is expected when accessing the deal without a valid viewer parameter
     }
   }
 
-  // If the invoice is draft and the user is not logged in, return 404 or if the invoice is not found
-  if (!invoice || (invoice.status === "draft" && !session)) {
+  // If the deal is draft and the user is not logged in, return 404 or if the deal is not found
+  if (!deal || (deal.status === "draft" && !session)) {
     notFound();
   }
 
-  const width = invoice.template.size === "letter" ? 750 : 595;
-  const height = invoice.template.size === "letter" ? 1056 : 842;
+  const width = deal.template.size === "letter" ? 750 : 595;
+  const height = deal.template.size === "letter" ? 1056 : 842;
 
   // Payment is only enabled if: template has it enabled AND team has Stripe connected
   const paymentEnabled =
-    invoice.template.paymentEnabled && invoice.team?.stripeConnected === true;
+    deal.template.paymentEnabled && deal.team?.stripeConnected === true;
 
   return (
     <>
-      <InvoiceViewWrapper
-        token={invoice.token}
-        invoiceNumber={invoice.invoiceNumber || "invoice"}
+      <DealViewWrapper
+        token={deal.token}
+        dealNumber={deal.dealNumber || "deal"}
         paymentEnabled={paymentEnabled}
-        amount={invoice.amount ?? undefined}
-        currency={invoice.currency ?? undefined}
-        initialStatus={invoice.status}
+        amount={deal.amount ?? undefined}
+        currency={deal.currency ?? undefined}
+        initialStatus={deal.status}
         merchantName={
-          invoice.merchantName || (invoice.merchant?.name as string)
+          deal.merchantName || (deal.merchant?.name as string)
         }
-        merchantWebsite={invoice.merchant?.website}
-        merchantPortalEnabled={invoice.merchant?.portalEnabled ?? false}
-        merchantPortalId={invoice.merchant?.portalId ?? undefined}
-        invoiceWidth={width}
+        merchantWebsite={deal.merchant?.website}
+        merchantPortalEnabled={deal.merchant?.portalEnabled ?? false}
+        merchantPortalId={deal.merchant?.portalId ?? undefined}
+        dealWidth={width}
       >
         <div className="pb-24 md:pb-0">
           <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
-            <HtmlTemplate data={invoice} width={width} height={height} />
+            <HtmlTemplate data={deal} width={width} height={height} />
           </div>
         </div>
-      </InvoiceViewWrapper>
+      </DealViewWrapper>
 
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a
-          href="https://abacuslabs.co?utm_source=invoice"
+          href="https://abacuslabs.co?utm_source=deal"
           target="_blank"
           rel="noreferrer"
           className="text-[9px] text-[#878787]"

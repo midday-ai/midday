@@ -14,7 +14,7 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
     {
       title: "List Inbox Items",
       description:
-        "List inbox items (uploaded receipts, invoices, documents). Filter by status to find pending or matched items.",
+        "List inbox items (uploaded receipts, deals, documents). Filter by status to find pending or matched items.",
       inputSchema: getInboxSchema.shape,
       annotations: READ_ONLY_ANNOTATIONS,
     },

@@ -36,8 +36,8 @@ export function NotificationItem({
   const getNotificationIcon = (activityType: string) => {
     if (activityType.startsWith("recurring_"))
       return <Icons.Repeat className="size-4" />;
-    if (activityType.startsWith("invoice_"))
-      return <Icons.Invoice className="size-4" />;
+    if (activityType.startsWith("deal_"))
+      return <Icons.Deal className="size-4" />;
     if (activityType.startsWith("transaction"))
       return <Icons.Transactions className="size-4" />;
     if (activityType === "inbox_new")

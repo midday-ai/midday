@@ -31,19 +31,19 @@ export function ActionsMenu({ order }: Props) {
   const [progress, setProgress] = useState(0);
   const [pollCount, setPollCount] = useState(0);
 
-  // Use React Query for polling invoice status
-  const { data: invoiceStatus, error: invoiceError } = useQuery({
-    ...trpc.billing.checkInvoiceStatus.queryOptions(order.id),
+  // Use React Query for polling deal status
+  const { data: dealStatus, error: dealError } = useQuery({
+    ...trpc.billing.checkDealStatus.queryOptions(order.id),
     enabled: shouldPoll,
     refetchInterval: shouldPoll ? 2000 : false, // Poll every 2 seconds when enabled
     refetchIntervalInBackground: false,
   });
 
-  // Handle invoice status changes
+  // Handle deal status changes
   useEffect(() => {
-    if (!shouldPoll || !invoiceStatus) return;
+    if (!shouldPoll || !dealStatus) return;
 
-    if (invoiceStatus.status === "ready" && invoiceStatus.downloadUrl) {
+    if (dealStatus.status === "ready" && dealStatus.downloadUrl) {
       // Stop polling
       setShouldPoll(false);
 
@@ -54,8 +54,8 @@ export function ActionsMenu({ order }: Props) {
 
       // Download the file
       const link = document.createElement("a");
-      link.href = invoiceStatus.downloadUrl;
-      link.download = `invoice-${order.id}.pdf`;
+      link.href = dealStatus.downloadUrl;
+      link.download = `deal-${order.id}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -64,7 +64,7 @@ export function ActionsMenu({ order }: Props) {
       setCurrentToast(null);
       setProgress(0);
       setPollCount(0);
-    } else if (invoiceStatus.status === "generating" && currentToast) {
+    } else if (dealStatus.status === "generating" && currentToast) {
       // Increment poll count for progress simulation
       setPollCount((prev) => prev + 1);
 
@@ -74,25 +74,25 @@ export function ActionsMenu({ order }: Props) {
 
       // Update existing toast with current status and progress
       currentToast.update({
-        title: "Generating invoice...",
-        description: `Processing your invoice (${Math.round(newProgress)}% complete)`,
+        title: "Generating deal...",
+        description: `Processing your deal (${Math.round(newProgress)}% complete)`,
         duration: Number.POSITIVE_INFINITY,
         variant: "progress",
         progress: newProgress,
       });
     }
-  }, [invoiceStatus, shouldPoll, order.id, toast, pollCount]);
+  }, [dealStatus, shouldPoll, order.id, toast, pollCount]);
 
-  // Handle invoice status errors
+  // Handle deal status errors
   useEffect(() => {
-    if (invoiceError && shouldPoll) {
+    if (dealError && shouldPoll) {
       setShouldPoll(false);
 
       // Update existing toast with error
       if (currentToast) {
         currentToast.update({
           title: "Generation failed",
-          description: "Unable to generate invoice. Please try again later.",
+          description: "Unable to generate deal. Please try again later.",
           variant: "error",
           duration: 5000,
         });
@@ -103,7 +103,7 @@ export function ActionsMenu({ order }: Props) {
       setProgress(0);
       setPollCount(0);
     }
-  }, [invoiceError, shouldPoll, currentToast]);
+  }, [dealError, shouldPoll, currentToast]);
 
   // Stop polling after 2 minutes
   useEffect(() => {
@@ -114,7 +114,7 @@ export function ActionsMenu({ order }: Props) {
           currentToast.update({
             title: "Generation timeout",
             description:
-              "Invoice generation is taking longer than expected. Please try again later.",
+              "Deal generation is taking longer than expected. Please try again later.",
             variant: "error",
             duration: 5000,
           });
@@ -129,14 +129,14 @@ export function ActionsMenu({ order }: Props) {
     }
   }, [shouldPoll, currentToast]);
 
-  const downloadInvoiceMutation = useMutation(
-    trpc.billing.getInvoice.mutationOptions({
+  const downloadDealMutation = useMutation(
+    trpc.billing.getDeal.mutationOptions({
       onSuccess: (result) => {
         if (result.status === "ready" && result.downloadUrl) {
           // Download immediately if ready
           const link = document.createElement("a");
           link.href = result.downloadUrl;
-          link.download = `invoice-${order.id}.pdf`;
+          link.download = `deal-${order.id}.pdf`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -148,7 +148,7 @@ export function ActionsMenu({ order }: Props) {
           setPollCount(0);
 
           const toastInstance = toast({
-            title: "Generating invoice...",
+            title: "Generating deal...",
             description: "This may take a few moments",
             duration: Number.POSITIVE_INFINITY,
             variant: "progress",
@@ -162,7 +162,7 @@ export function ActionsMenu({ order }: Props) {
       onError: (error) => {
         toast({
           title: "Download failed",
-          description: "Unable to download invoice. Please try again later.",
+          description: "Unable to download deal. Please try again later.",
           variant: "error",
         });
         setIsDownloading(false);
@@ -175,8 +175,8 @@ export function ActionsMenu({ order }: Props) {
 
   const handleDownload = useCallback(() => {
     setIsDownloading(true);
-    downloadInvoiceMutation.mutate(order.id);
-  }, [downloadInvoiceMutation, order.id]);
+    downloadDealMutation.mutate(order.id);
+  }, [downloadDealMutation, order.id]);
 
   return (
     <DropdownMenu>
@@ -188,7 +188,7 @@ export function ActionsMenu({ order }: Props) {
 
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={handleDownload} disabled={isDownloading}>
-          {isDownloading ? "Preparing..." : "Download Invoice"}
+          {isDownloading ? "Preparing..." : "Download Deal"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

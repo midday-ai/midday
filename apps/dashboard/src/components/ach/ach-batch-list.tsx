@@ -75,7 +75,7 @@ export function AchBatchList({ onCreateNew, onSelectBatch }: Props) {
       {batches.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="mb-4 rounded-full bg-muted p-4">
-            <Icons.Invoice size={24} className="text-[#606060]" />
+            <Icons.Deal size={24} className="text-[#606060]" />
           </div>
           <h3 className="text-lg font-medium">No ACH batches yet</h3>
           <p className="mt-1 text-sm text-[#606060] max-w-[360px]">

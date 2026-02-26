@@ -31,7 +31,7 @@ const getForecastSchema = z.object({
 
 export const getForecastTool = tool({
   description:
-    "Generate revenue forecast and projections - shows historical revenue trends, forecasted future revenue, growth rates, peak months, and unpaid invoices.",
+    "Generate revenue forecast and projections - shows historical revenue trends, forecasted future revenue, growth rates, peak months, and unpaid deals.",
   inputSchema: getForecastSchema,
   execute: async function* (
     { from, to, currency, revenueType, forecastMonths, showCanvas },
@@ -176,7 +176,7 @@ export const getForecastTool = tool({
           value: summary.peakMonth.value,
         },
         growthRate: summary.avgMonthlyGrowthRate,
-        unpaidInvoices: summary.unpaidInvoices.totalAmount,
+        unpaidDeals: summary.unpaidDeals.totalAmount,
       };
 
       // Update artifact with metrics
@@ -197,7 +197,7 @@ export const getForecastTool = tool({
             peakMonth: metrics.peakMonth.month,
             peakMonthValue: metrics.peakMonth.value,
             growthRate: metrics.growthRate,
-            unpaidInvoices: metrics.unpaidInvoices,
+            unpaidDeals: metrics.unpaidDeals,
           },
         });
       }
@@ -229,8 +229,8 @@ Peak Month: ${metrics.peakMonth.month} - ${formatAmount({
               currency: targetCurrency,
               locale,
             })}
-Unpaid Invoices: ${formatAmount({
-              amount: metrics.unpaidInvoices,
+Unpaid Deals: ${formatAmount({
+              amount: metrics.unpaidDeals,
               currency: targetCurrency,
               locale,
             })}
@@ -266,7 +266,7 @@ Provide a concise analysis (2-3 sentences) highlighting key insights about the r
             peakMonth: metrics.peakMonth.month,
             peakMonthValue: metrics.peakMonth.value,
             growthRate: metrics.growthRate,
-            unpaidInvoices: metrics.unpaidInvoices,
+            unpaidDeals: metrics.unpaidDeals,
           },
           analysis: {
             summary: summaryText,
@@ -306,7 +306,7 @@ Provide a concise analysis (2-3 sentences) highlighting key insights about the r
         currency: targetCurrency,
         monthlyData,
         peakMonth: metrics.peakMonth,
-        unpaidInvoices: metrics.unpaidInvoices,
+        unpaidDeals: metrics.unpaidDeals,
       };
     } catch (error) {
       yield {

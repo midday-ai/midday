@@ -7,7 +7,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 export function MostActiveMerchant() {
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(
-    trpc.invoice.mostActiveMerchant.queryOptions(),
+    trpc.deal.mostActiveMerchant.queryOptions(),
   );
 
   if (!data) {
@@ -43,9 +43,9 @@ export function MostActiveMerchant() {
         <div className="flex flex-col gap-2">
           <div>Most Active Merchant</div>
           <div className="text-sm text-muted-foreground">
-            {data.invoiceCount > 0 && (
+            {data.dealCount > 0 && (
               <>
-                {data.invoiceCount} invoice{data.invoiceCount !== 1 ? "s" : ""}
+                {data.dealCount} deal{data.dealCount !== 1 ? "s" : ""}
               </>
             )}
             {" past 30 days"}

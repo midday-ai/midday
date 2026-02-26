@@ -60,10 +60,10 @@ export function ForecastCanvas() {
           subtitle: "Average monthly",
         },
         {
-          id: "unpaid-invoices",
-          title: "Unpaid Invoices",
+          id: "unpaid-deals",
+          title: "Unpaid Deals",
           value: formatCurrencyAmount(
-            data.metrics.unpaidInvoices,
+            data.metrics.unpaidDeals,
             currency,
             locale,
           ),

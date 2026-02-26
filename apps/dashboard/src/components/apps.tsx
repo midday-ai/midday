@@ -31,7 +31,7 @@ export function Apps() {
         });
         // Also invalidate Stripe status for Stripe Payments app
         queryClient.invalidateQueries({
-          queryKey: trpc.invoicePayments.stripeStatus.queryKey(),
+          queryKey: trpc.dealPayments.stripeStatus.queryKey(),
         });
       }
     };
@@ -62,7 +62,7 @@ export function Apps() {
 
   // Fetch Stripe status for Stripe Payments app
   const { data: stripeStatus } = useSuspenseQuery(
-    trpc.invoicePayments.stripeStatus.queryOptions(),
+    trpc.dealPayments.stripeStatus.queryOptions(),
   );
 
   const searchParams = useSearchParams();

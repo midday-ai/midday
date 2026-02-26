@@ -1,6 +1,6 @@
 import { getQueryClient, trpc } from "@/trpc/server";
 import { getWebsiteLogo } from "@/utils/logos";
-import { OgTemplate, isValidLogoUrl } from "@midday/invoice";
+import { OgTemplate, isValidLogoUrl } from "@midday/deal";
 import { ImageResponse } from "next/og";
 
 export const contentType = "image/png";
@@ -13,13 +13,13 @@ export default async function Image({ params }: Props) {
   const { token } = await params;
   const queryClient = getQueryClient();
 
-  const invoice = await queryClient.fetchQuery(
-    trpc.invoice.getInvoiceByToken.queryOptions({
+  const deal = await queryClient.fetchQuery(
+    trpc.deal.getDealByToken.queryOptions({
       token,
     }),
   );
 
-  if (!invoice) {
+  if (!deal) {
     return new Response("Not found", { status: 404 });
   }
 
@@ -27,12 +27,12 @@ export default async function Image({ params }: Props) {
     "https://cdn.midday.ai/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
   ).then((res) => res.arrayBuffer());
 
-  const logoUrl = getWebsiteLogo(invoice.merchant?.website);
+  const logoUrl = getWebsiteLogo(deal.merchant?.website);
 
   const isValidLogo = await isValidLogoUrl(logoUrl);
 
   return new ImageResponse(
-    <OgTemplate data={invoice} isValidLogo={isValidLogo} />,
+    <OgTemplate data={deal} isValidLogo={isValidLogo} />,
     {
       width: 1200,
       height: 630,

@@ -19,7 +19,7 @@ Technical documentation for Midday's accounting software integrations (Xero, Qui
 
 ## Overview
 
-The accounting integration enables Midday users to export their enriched financial transactions and attachments (receipts, invoices) to external accounting software. The system uses manual export only, giving users full control over when data is sent to their accounting provider.
+The accounting integration enables Midday users to export their enriched financial transactions and attachments (receipts, deals) to external accounting software. The system uses manual export only, giving users full control over when data is sent to their accounting provider.
 
 ### Supported Providers
 
