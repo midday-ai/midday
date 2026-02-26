@@ -238,8 +238,14 @@ export function getChartTypeName(chartId: string): string {
     "growth-rate": "growth rate",
     "business-health-score": "business health score",
     "invoice-payment": "invoice payments",
-    "tax-trend": "tax trends",
     "stress-test": "cash flow stress test",
+    "collection-performance": "collection performance",
+    "funding-activity": "funding activity",
+    "portfolio-composition": "portfolio composition",
+    "factor-rate-returns": "factor rate returns",
+    "rtr-aging": "RTR aging",
+    "nsf-default-trends": "NSF & default trends",
+    "repayment-velocity": "repayment velocity",
   };
 
   return chartTypeMap[chartId] || chartId;
