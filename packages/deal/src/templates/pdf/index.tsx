@@ -71,8 +71,6 @@ export async function PdfTemplate(
     paymentDetails,
     noteDetails,
     currency,
-    vat,
-    tax,
     amount,
     topBlock,
     bottomBlock,
@@ -171,8 +169,6 @@ export async function PdfTemplate(
           locale={template.locale}
           includeDecimals={template.includeDecimals}
           includeUnits={template.includeUnits}
-          includeLineItemTax={template.includeLineItemTax}
-          lineItemTaxLabel={template.lineItemTaxLabel}
         />
 
         <View
@@ -186,21 +182,12 @@ export async function PdfTemplate(
           <View wrap={false}>
             <Summary
               amount={amount}
-              tax={tax}
-              vat={vat}
               currency={currency}
               totalLabel={template.totalSummaryLabel}
-              taxLabel={template.taxLabel}
-              vatLabel={template.vatLabel}
-              taxRate={template.taxRate}
-              vatRate={template.vatRate}
               locale={template.locale}
               discount={discount}
               discountLabel={template.discountLabel}
               includeDiscount={template.includeDiscount}
-              includeVat={template.includeVat}
-              includeTax={template.includeTax}
-              includeLineItemTax={template.includeLineItemTax}
               includeDecimals={template.includeDecimals}
               subtotalLabel={template.subtotalLabel}
               lineItems={lineItems}
