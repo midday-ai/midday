@@ -18,6 +18,8 @@ import { teamsQueue } from "./teams";
 import { teamsQueueConfig } from "./teams.config";
 import { transactionsQueue } from "./transactions";
 import { transactionsQueueConfig } from "./transactions.config";
+import { collectionsQueue } from "./collections";
+import { collectionsQueueConfig } from "./collections.config";
 import { disclosuresQueue } from "./disclosures";
 import { disclosuresQueueConfig } from "./disclosures.config";
 
@@ -37,6 +39,7 @@ export const queueConfigs: QueueConfig[] = [
   merchantsQueueConfig,
   teamsQueueConfig,
   disclosuresQueueConfig,
+  collectionsQueueConfig,
 ];
 
 /**
@@ -56,5 +59,6 @@ export function getAllQueues(): Queue[] {
     merchantsQueue,
     teamsQueue,
     disclosuresQueue,
+    collectionsQueue,
   ];
 }
