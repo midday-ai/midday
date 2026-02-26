@@ -67,7 +67,7 @@ const stageColorMap: Record<string, string> = {
   "#eab308": "text-[#FFD02B] bg-[#FFD02B]/10",
   "#22c55e": "text-[#00C969] bg-[#DDF1E4] dark:bg-[#00C969]/10",
   "#3b82f6": "text-[#1F6FEB] bg-[#DDEBFF] dark:bg-[#1F6FEB]/10",
-  "#8b5cf6": "text-[#8b5cf6] bg-[#8b5cf6]/10",
+  "#8b5cf6": "text-[#1F6FEB] bg-[#DDEBFF] dark:bg-[#1F6FEB]/10",
   "#6b7280": "text-[#878787] bg-[#F2F1EF] dark:bg-[#1D1D1D]",
 };
 
@@ -131,9 +131,9 @@ const AssignedToCell = memo(
   }) => {
     if (!name) {
       return (
-        <span className="text-[11px] text-[#FF3638] bg-[#FF3638]/10 px-2 py-0.5 rounded-full">
-          Unassigned
-        </span>
+        <div className="text-[#FF3638] bg-[#FF3638]/10 px-2 py-0.5 rounded-full inline-flex max-w-full text-[11px]">
+          <span className="line-clamp-1 truncate inline-block">Unassigned</span>
+        </div>
       );
     }
     return (
