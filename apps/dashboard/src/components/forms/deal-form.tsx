@@ -5,6 +5,7 @@ import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
+import { cn } from "@midday/ui/cn";
 import {
   Form,
   FormControl,
@@ -42,7 +43,9 @@ const formSchema = z.object({
   fundedAt: z.string().optional(),
   expectedPayoffDate: z.string().optional(),
   brokerId: z.string().uuid().optional(),
+  commissionType: z.enum(["percentage", "flat"]).default("percentage"),
   commissionPercentage: z.coerce.number().min(0).max(100).optional(),
+  commissionAmount: z.coerce.number().min(0).optional(),
 });
 
 const frequencyLabels: Record<string, string> = {
@@ -149,6 +152,7 @@ export function DealForm() {
 
   const selectedBrokerId = form.watch("brokerId");
   const selectedBroker = brokers?.data?.find((b) => b.id === selectedBrokerId);
+  const commissionType = form.watch("commissionType");
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
     createDealMutation.mutate({
@@ -157,7 +161,13 @@ export function DealForm() {
       fundedAt: data.fundedAt || undefined,
       expectedPayoffDate: data.expectedPayoffDate || undefined,
       brokerId: data.brokerId || undefined,
-      commissionPercentage: data.commissionPercentage,
+      commissionType: data.brokerId ? data.commissionType : undefined,
+      commissionPercentage:
+        data.commissionType === "percentage"
+          ? data.commissionPercentage
+          : undefined,
+      commissionAmount:
+        data.commissionType === "flat" ? data.commissionAmount : undefined,
     });
   };
 
@@ -207,19 +217,25 @@ export function DealForm() {
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value);
-                      // Pre-fill commission % from broker default
                       const broker = brokers?.data?.find(
                         (b) => b.id === value,
                       );
-                      if (
-                        broker?.commissionPercentage &&
-                        !form.getValues("commissionPercentage")
-                      ) {
-                        form.setValue(
-                          "commissionPercentage",
-                          Number(broker.commissionPercentage),
-                          { shouldDirty: true },
-                        );
+                      if (broker) {
+                        if (
+                          !form.getValues("commissionPercentage") &&
+                          !form.getValues("commissionAmount")
+                        ) {
+                          if (broker.commissionPercentage) {
+                            form.setValue("commissionType", "percentage", {
+                              shouldDirty: true,
+                            });
+                            form.setValue(
+                              "commissionPercentage",
+                              Number(broker.commissionPercentage),
+                              { shouldDirty: true },
+                            );
+                          }
+                        }
                       }
                     }}
                     defaultValue={field.value}
@@ -244,35 +260,114 @@ export function DealForm() {
             />
 
             {selectedBrokerId && (
-              <FormField
-                control={form.control}
-                name="commissionPercentage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs text-[#878787] font-normal">
-                      Commission %
-                      {selectedBroker?.commissionPercentage && (
-                        <span className="ml-1 text-[10px] text-muted-foreground">
-                          (default: {Number(selectedBroker.commissionPercentage)}%)
-                        </span>
-                      )}
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        placeholder="10"
-                        autoComplete="off"
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="space-y-3 p-3 border border-border rounded-md">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[#878787] font-normal">
+                    Commission
+                  </span>
+                  <FormField
+                    control={form.control}
+                    name="commissionType"
+                    render={({ field }) => (
+                      <div className="flex gap-1 bg-muted rounded-md p-0.5">
+                        <button
+                          type="button"
+                          className={cn(
+                            "px-2 py-1 text-[10px] rounded transition-colors",
+                            field.value === "percentage"
+                              ? "bg-background shadow-sm text-foreground"
+                              : "text-muted-foreground",
+                          )}
+                          onClick={() => field.onChange("percentage")}
+                        >
+                          Percentage
+                        </button>
+                        <button
+                          type="button"
+                          className={cn(
+                            "px-2 py-1 text-[10px] rounded transition-colors",
+                            field.value === "flat"
+                              ? "bg-background shadow-sm text-foreground"
+                              : "text-muted-foreground",
+                          )}
+                          onClick={() => field.onChange("flat")}
+                        >
+                          Flat Fee
+                        </button>
+                      </div>
+                    )}
+                  />
+                </div>
+
+                {commissionType === "percentage" ? (
+                  <FormField
+                    control={form.control}
+                    name="commissionPercentage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs text-[#878787] font-normal">
+                          Rate (%)
+                          {selectedBroker?.commissionPercentage && (
+                            <span className="ml-1 text-[10px] text-muted-foreground">
+                              (default:{" "}
+                              {Number(selectedBroker.commissionPercentage)}%)
+                            </span>
+                          )}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            placeholder="10"
+                            autoComplete="off"
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        {fundingAmount && field.value ? (
+                          <p className="text-[10px] text-muted-foreground">
+                            Commission: $
+                            {(
+                              fundingAmount *
+                              (Number(field.value) / 100)
+                            ).toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </p>
+                        ) : null}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name="commissionAmount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs text-[#878787] font-normal">
+                          Flat Fee ($)
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="2500"
+                            autoComplete="off"
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
+              </div>
             )}
 
             <FormField

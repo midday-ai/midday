@@ -30,7 +30,9 @@ const createDealSchema = z.object({
   expectedPayoffDate: z.string().optional(),
   externalId: z.string().optional(),
   brokerId: z.string().uuid().optional(),
+  commissionType: z.enum(["percentage", "flat"]).optional(),
   commissionPercentage: z.number().min(0).max(100).optional(),
+  commissionAmount: z.number().min(0).optional(),
 });
 
 const bankAccountSchema = z.discriminatedUnion("mode", [
@@ -85,23 +87,52 @@ export const mcaDealsRouter = createTRPCRouter({
 
       // Auto-create broker commission if a broker is assigned
       if (deal && input.brokerId) {
+        let type = input.commissionType;
         let pct = input.commissionPercentage;
+        let amount = input.commissionAmount;
 
-        // Fall back to broker's default commission percentage
-        if (pct === undefined) {
+        // Fall back to broker defaults if not overridden
+        if (type === undefined || (pct === undefined && amount === undefined)) {
           const broker = await getBrokerById(db, {
             id: input.brokerId,
             teamId: teamId!,
           });
-          pct = broker?.commissionPercentage ?? 0;
+
+          if (type === undefined) {
+            type =
+              (broker?.commissionType as "percentage" | "flat") ?? "percentage";
+          }
+
+          if (type === "percentage" && pct === undefined) {
+            pct = broker?.commissionPercentage
+              ? Number(broker.commissionPercentage)
+              : 0;
+          }
+
+          if (type === "flat" && amount === undefined) {
+            amount = broker?.commissionAmount
+              ? Number(broker.commissionAmount)
+              : 0;
+          }
         }
 
-        const amount = +(input.fundingAmount * (pct / 100)).toFixed(2);
+        // Calculate amount from percentage if needed
+        if (type === "percentage") {
+          pct = pct ?? 0;
+          amount = +(input.fundingAmount * (pct / 100)).toFixed(2);
+        } else {
+          amount = amount ?? 0;
+          pct =
+            input.fundingAmount > 0
+              ? +((amount / input.fundingAmount) * 100).toFixed(2)
+              : 0;
+        }
 
         await upsertCommission(db, {
           dealId: deal.id,
           brokerId: input.brokerId,
           teamId: teamId!,
+          commissionType: type ?? "percentage",
           commissionPercentage: pct,
           commissionAmount: amount,
           status: "pending",
@@ -170,22 +201,52 @@ export const mcaDealsRouter = createTRPCRouter({
 
       // Auto-create broker commission if a broker is assigned
       if (dealInput.brokerId) {
+        let type = dealInput.commissionType;
         let pct = dealInput.commissionPercentage;
+        let amount = dealInput.commissionAmount;
 
-        if (pct === undefined) {
+        // Fall back to broker defaults if not overridden
+        if (type === undefined || (pct === undefined && amount === undefined)) {
           const broker = await getBrokerById(db, {
             id: dealInput.brokerId,
             teamId: teamId!,
           });
-          pct = broker?.commissionPercentage ?? 0;
+
+          if (type === undefined) {
+            type =
+              (broker?.commissionType as "percentage" | "flat") ?? "percentage";
+          }
+
+          if (type === "percentage" && pct === undefined) {
+            pct = broker?.commissionPercentage
+              ? Number(broker.commissionPercentage)
+              : 0;
+          }
+
+          if (type === "flat" && amount === undefined) {
+            amount = broker?.commissionAmount
+              ? Number(broker.commissionAmount)
+              : 0;
+          }
         }
 
-        const amount = +(dealInput.fundingAmount * (pct / 100)).toFixed(2);
+        // Calculate amount from percentage if needed
+        if (type === "percentage") {
+          pct = pct ?? 0;
+          amount = +(dealInput.fundingAmount * (pct / 100)).toFixed(2);
+        } else {
+          amount = amount ?? 0;
+          pct =
+            dealInput.fundingAmount > 0
+              ? +((amount / dealInput.fundingAmount) * 100).toFixed(2)
+              : 0;
+        }
 
         await upsertCommission(db, {
           dealId: deal.id,
           brokerId: dealInput.brokerId,
           teamId: teamId!,
+          commissionType: type ?? "percentage",
           commissionPercentage: pct,
           commissionAmount: amount,
           status: "pending",
