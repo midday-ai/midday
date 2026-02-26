@@ -14,8 +14,6 @@ type Props = {
   locale: string;
   includeDecimals?: boolean;
   includeUnits?: boolean;
-  includeLineItemTax?: boolean;
-  lineItemTaxLabel?: string;
 };
 
 export function LineItems({
@@ -28,8 +26,6 @@ export function LineItems({
   locale,
   includeDecimals,
   includeUnits,
-  includeLineItemTax = false,
-  lineItemTaxLabel = "Tax",
 }: Props) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
@@ -53,11 +49,6 @@ export function LineItems({
         <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
           {priceLabel}
         </Text>
-        {includeLineItemTax && (
-          <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
-            {lineItemTaxLabel}
-          </Text>
-        )}
         <Text
           style={{
             flex: 1,
@@ -97,12 +88,6 @@ export function LineItems({
               })}
             {includeUnits && item.unit ? ` / ${item.unit}` : null}
           </Text>
-
-          {includeLineItemTax && (
-            <Text style={{ flex: 1, fontSize: 9 }}>
-              {item.taxRate != null ? `${item.taxRate}%` : "0%"}
-            </Text>
-          )}
 
           <Text style={{ flex: 1, fontSize: 9, textAlign: "right" }}>
             {currency &&

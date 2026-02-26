@@ -13,8 +13,6 @@ type Props = {
   includeDecimals?: boolean;
   locale: string;
   includeUnits?: boolean;
-  includeLineItemTax?: boolean;
-  lineItemTaxLabel?: string;
 };
 
 export function LineItems({
@@ -26,15 +24,11 @@ export function LineItems({
   totalLabel,
   includeDecimals = false,
   includeUnits = false,
-  includeLineItemTax = false,
-  lineItemTaxLabel = "Tax",
   locale,
 }: Props) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
-  const gridCols = includeLineItemTax
-    ? "grid-cols-[1.5fr_12%_12%_12%_15%]"
-    : "grid-cols-[1.5fr_15%_15%_15%]";
+  const gridCols = "grid-cols-[1.5fr_15%_15%_15%]";
 
   return (
     <div className="mt-5 font-mono">
@@ -44,9 +38,6 @@ export function LineItems({
         <div className="text-[11px] text-[#878787]">{descriptionLabel}</div>
         <div className="text-[11px] text-[#878787]">{quantityLabel}</div>
         <div className="text-[11px] text-[#878787]">{priceLabel}</div>
-        {includeLineItemTax && (
-          <div className="text-[11px] text-[#878787]">{lineItemTaxLabel}</div>
-        )}
         <div className="text-[11px] text-[#878787] text-right">
           {totalLabel}
         </div>
@@ -77,11 +68,6 @@ export function LineItems({
                   locale,
                 })}
           </div>
-          {includeLineItemTax && (
-            <div className="text-[11px] self-start">
-              {item.taxRate != null ? `${item.taxRate}%` : "0%"}
-            </div>
-          )}
           <div className="text-[11px] text-right self-start">
             {currency &&
               formatAmount({
