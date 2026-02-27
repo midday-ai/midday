@@ -1811,11 +1811,12 @@ BEGIN
   ON CONFLICT DO NOTHING;
 
   -- ========================================================================
-  -- RISK SCORING: Test Merchant Archetypes (8 merchants)
-  -- Integrated from scripts/seed-risk-data.sql with fixes:
-  --   - Skip weekends
-  --   - Use 'mca-payments' (plural) for category_slug
-  --   - NSF counts dynamically calculated
+  -- ADDITIONAL MERCHANTS (8) — Diverse payment patterns for risk scoring
+  -- Each merchant has a distinct payment behavior profile:
+  --   1. Perfect payer (paid off)    5. Deteriorating payments
+  --   2. Aggressive overpayer        6. Chronic NSF pattern
+  --   3. NSF recovery arc            7. Bad start, strong recovery
+  --   4. Consistent partial payer    8. Just funded (no history)
   -- ========================================================================
 
   DECLARE
@@ -1825,9 +1826,12 @@ BEGIN
     v_risk_i int;
   BEGIN
 
-  -- 1. "The Rock" — Perfect payer, 60 consecutive on-time payments
-  INSERT INTO merchants (id, team_id, name, email, status)
-  VALUES (gen_random_uuid(), v_team_id, 'Rock Solid LLC', 'rock@example.com', 'active')
+  -- 1. Patriot Towing — Perfect payer, 60 consecutive on-time payments, paid off
+  INSERT INTO merchants (id, team_id, name, email, phone, contact, industry, address_line_1, city, state, zip, country, status, note, website)
+  VALUES (gen_random_uuid(), v_team_id, 'Patriot Towing & Recovery', 'frank@patriottowing.com', '(804) 555-2100', 'Frank Russo',
+   'Automotive Services', '3400 Broad Rock Blvd', 'Richmond', 'VA', '23224', 'US', 'active',
+   '✅ PAID OFF: Perfect payment history — 60 consecutive on-time. 12 years in business, fleet of 8 trucks. Renewal candidate.',
+   'patriottowingva.com')
   RETURNING id INTO v_risk_merchant_id;
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a1';
@@ -1841,14 +1845,17 @@ BEGIN
       VALUES (v_team_id, v_risk_deal_id, 1125, v_risk_date, 'ach', 'completed');
 
       INSERT INTO transactions (team_id, bank_account_id, amount, date, name, description, status, method, internal_id, category_slug, currency)
-      VALUES (v_team_id, v_bank_op, 1125, v_risk_date, 'Rock Solid LLC - Payment', 'MCA payment D-0024', 'posted', 'ach', 'ROCK-PAY-' || v_risk_i, 'mca-payments', 'USD');
+      VALUES (v_team_id, v_bank_op, 1125, v_risk_date, 'Patriot Towing & Recovery - ACH Payment', 'Daily MCA payment - D-0024', 'posted', 'ach', 'demo_mca_patriot_' || to_char(v_risk_date, 'YYYYMMDD'), 'mca-payments', 'USD');
     END IF;
     v_risk_date := v_risk_date + 1;
   END LOOP;
 
-  -- 2. "The Sprinter" — Overpays aggressively, will finish early
-  INSERT INTO merchants (id, team_id, name, email, status)
-  VALUES (gen_random_uuid(), v_team_id, 'Sprint Corp', 'sprint@example.com', 'active')
+  -- 2. Summit Roofing — Overpays aggressively, will finish early
+  INSERT INTO merchants (id, team_id, name, email, phone, contact, industry, address_line_1, city, state, zip, country, status, note, website)
+  VALUES (gen_random_uuid(), v_team_id, 'Summit Roofing Solutions', 'tyler@summitroofing.com', '(615) 555-2200', 'Tyler Brooks',
+   'Construction', '1800 West End Ave', 'Nashville', 'TN', '37203', 'US', 'active',
+   'Commercial roofing contractor. Overpays daily ACH — sends $1,200 vs required $933. On track to pay off 40% early. Factor: 1.40.',
+   'summitroofingtn.com')
   RETURNING id INTO v_risk_merchant_id;
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a2';
@@ -1862,14 +1869,17 @@ BEGIN
       VALUES (v_team_id, v_risk_deal_id, 1200, v_risk_date, 'ach', 'completed');
 
       INSERT INTO transactions (team_id, bank_account_id, amount, date, name, description, status, method, internal_id, category_slug, currency)
-      VALUES (v_team_id, v_bank_op, 1200, v_risk_date, 'Sprint Corp - Payment', 'MCA payment D-0025', 'posted', 'ach', 'SPRINT-PAY-' || v_risk_i, 'mca-payments', 'USD');
+      VALUES (v_team_id, v_bank_op, 1200, v_risk_date, 'Summit Roofing Solutions - ACH Payment', 'Daily MCA payment - D-0025', 'posted', 'ach', 'demo_mca_summit_' || to_char(v_risk_date, 'YYYYMMDD'), 'mca-payments', 'USD');
     END IF;
     v_risk_date := v_risk_date + 1;
   END LOOP;
 
-  -- 3. "The Stumbler" — Missed 5 payments then caught up
-  INSERT INTO merchants (id, team_id, name, email, status)
-  VALUES (gen_random_uuid(), v_team_id, 'Stumble & Rise Inc', 'stumbler@example.com', 'active')
+  -- 3. Lone Star BBQ — Missed 5 payments then caught up
+  INSERT INTO merchants (id, team_id, name, email, phone, contact, industry, address_line_1, city, state, zip, country, status, note, website)
+  VALUES (gen_random_uuid(), v_team_id, 'Lone Star BBQ & Grill', 'hector@lonestarbq.com', '(405) 555-2300', 'Hector Ramirez',
+   'Restaurant', '2200 NW 23rd St', 'Oklahoma City', 'OK', '73107', 'US', 'active',
+   '⚠️ Had 5 NSFs mid-deal but caught up. Claims temporary cash crunch from kitchen expansion. Factor: 1.38, Daily ACH $690. Back on track.',
+   'lonestarbqgrill.com')
   RETURNING id INTO v_risk_merchant_id;
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a3';
@@ -1902,9 +1912,12 @@ BEGIN
     v_risk_date := v_risk_date + 1;
   END LOOP;
 
-  -- 4. "The Drifter" — Pays partial amounts consistently
-  INSERT INTO merchants (id, team_id, name, email, status)
-  VALUES (gen_random_uuid(), v_team_id, 'Drift Along Co', 'drifter@example.com', 'active')
+  -- 4. Precision CNC — Pays partial amounts consistently
+  INSERT INTO merchants (id, team_id, name, email, phone, contact, industry, address_line_1, city, state, zip, country, status, note, website)
+  VALUES (gen_random_uuid(), v_team_id, 'Precision CNC Machining', 'walt@precisioncnc.com', '(414) 555-2400', 'Walt Kowalski',
+   'Manufacturing', '5500 W State St', 'Milwaukee', 'WI', '53208', 'US', 'active',
+   '⚠️ Consistently underpays daily ACH — sends ~$355 instead of $591. Claims revenue dip from lost manufacturing contract. Factor: 1.42, Daily ACH $591.',
+   'precisioncncmfg.com')
   RETURNING id INTO v_risk_merchant_id;
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a4';
@@ -1920,9 +1933,12 @@ BEGIN
     v_risk_date := v_risk_date + 1;
   END LOOP;
 
-  -- 5. "The Slider" — Started strong, deteriorating over time
-  INSERT INTO merchants (id, team_id, name, email, status)
-  VALUES (gen_random_uuid(), v_team_id, 'Sliding Scale LLC', 'slider@example.com', 'active')
+  -- 5. Bayshore Pool — Started strong, deteriorating over time
+  INSERT INTO merchants (id, team_id, name, email, phone, contact, industry, address_line_1, city, state, zip, country, status, note, website)
+  VALUES (gen_random_uuid(), v_team_id, 'Bayshore Pool & Spa', 'craig@bayshorepool.com', '(904) 555-2500', 'Craig Daniels',
+   'Home Services', '7200 Beach Blvd', 'Jacksonville', 'FL', '32216', 'US', 'active',
+   '🔴 HIGH RISK: Started strong but payments declining rapidly. 3 recent NSFs. Seasonal business — winter slowdown. Factor: 1.36, Daily ACH $793. MONITOR.',
+   'bayshorepoolspa.com')
   RETURNING id INTO v_risk_merchant_id;
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a5';
@@ -1955,14 +1971,17 @@ BEGIN
     v_risk_date := v_risk_date + 1;
   END LOOP;
 
-  -- 6. "The Bouncer" — Frequent NSFs throughout
-  INSERT INTO merchants (id, team_id, name, email, status)
-  VALUES (gen_random_uuid(), v_team_id, 'Bounce House Inc', 'bouncer@example.com', 'active')
+  -- 6. Metro Courier — Frequent NSFs throughout (every 3rd payment bounces)
+  INSERT INTO merchants (id, team_id, name, email, phone, contact, industry, address_line_1, city, state, zip, country, status, note, website)
+  VALUES (gen_random_uuid(), v_team_id, 'Metro Courier Express', 'andre@metrocourier.com', '(410) 555-2600', 'Andre Washington',
+   'Logistics', '1100 E Baltimore St', 'Baltimore', 'MD', '21202', 'US', 'active',
+   '⚠️ Chronic NSF pattern — bounces roughly every 3rd payment. Claims irregular client payment cycles. Factor: 1.45, Daily ACH $483. On close watch.',
+   'metrocourierexpress.com')
   RETURNING id INTO v_risk_merchant_id;
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a6';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
-  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0030', 20000, 1.45, 29000, 483, 22000, 7000, 0, 'active', now() - interval '50 days', 'daily');
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0029', 20000, 1.45, 29000, 483, 22000, 7000, 0, 'active', now() - interval '50 days', 'daily');
 
   v_risk_date := current_date - 50;
   FOR v_risk_i IN 1..50 LOOP
@@ -1978,14 +1997,17 @@ BEGIN
     v_risk_date := v_risk_date + 1;
   END LOOP;
 
-  -- 7. "The Comeback" — Bad start, strong recovery
-  INSERT INTO merchants (id, team_id, name, email, status)
-  VALUES (gen_random_uuid(), v_team_id, 'Comeback Kid LLC', 'comeback@example.com', 'active')
+  -- 7. Pacific Rim Auto Body — Bad start (5 NSFs), strong recovery since
+  INSERT INTO merchants (id, team_id, name, email, phone, contact, industry, address_line_1, city, state, zip, country, status, note, website)
+  VALUES (gen_random_uuid(), v_team_id, 'Pacific Rim Auto Body', 'danny@pacificrimautobody.com', '(916) 555-2700', 'Danny Nakamura',
+   'Automotive', '4300 Stockton Blvd', 'Sacramento', 'CA', '95820', 'US', 'active',
+   'Rocky start — 5 NSFs in first week after funding. Since then, 30 consecutive on-time payments. Claims initial issue was bank account transition. Factor: 1.32, Daily ACH $990.',
+   'pacificrimautobody.com')
   RETURNING id INTO v_risk_merchant_id;
 
   v_risk_deal_id := 'd0000000-0000-4000-a000-0000000000a7';
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, nsf_count, status, funded_at, payment_frequency)
-  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0031', 45000, 1.32, 59400, 990, 29700, 29700, 0, 'active', now() - interval '50 days', 'daily');
+  VALUES (v_risk_deal_id, v_team_id, v_risk_merchant_id, 'D-0030', 45000, 1.32, 59400, 990, 29700, 29700, 0, 'active', now() - interval '50 days', 'daily');
 
   v_risk_date := current_date - 50;
   -- 5 NSFs at start
@@ -2003,18 +2025,21 @@ BEGIN
       VALUES (v_team_id, v_risk_deal_id, 990, v_risk_date, 'ach', 'completed');
 
       INSERT INTO transactions (team_id, bank_account_id, amount, date, name, description, status, method, internal_id, category_slug, currency)
-      VALUES (v_team_id, v_bank_op, 990, v_risk_date, 'Comeback Kid LLC - Payment', 'MCA payment D-0031', 'posted', 'ach', 'CMBK-PAY-' || v_risk_i, 'mca-payments', 'USD');
+      VALUES (v_team_id, v_bank_op, 990, v_risk_date, 'Pacific Rim Auto Body - ACH Payment', 'Daily MCA payment - D-0030', 'posted', 'ach', 'demo_mca_pacificrim_' || to_char(v_risk_date, 'YYYYMMDD'), 'mca-payments', 'USD');
     END IF;
     v_risk_date := v_risk_date + 1;
   END LOOP;
 
-  -- 8. "The New Deal" — Just funded, no payment history yet
-  INSERT INTO merchants (id, team_id, name, email, status)
-  VALUES (gen_random_uuid(), v_team_id, 'Fresh Start Corp', 'newdeal@example.com', 'active')
+  -- 8. Riverside Family Dentistry — Just funded, no payment history yet
+  INSERT INTO merchants (id, team_id, name, email, phone, contact, industry, address_line_1, city, state, zip, country, status, note, website)
+  VALUES (gen_random_uuid(), v_team_id, 'Riverside Family Dentistry', 'karen@riversidefamilydental.com', '(612) 555-2800', 'Dr. Karen Mitchell',
+   'Healthcare', '2800 Hennepin Ave', 'Minneapolis', 'MN', '55408', 'US', 'active',
+   'New deal — just funded today. Single-location dental practice, insurance-backed revenue. Factor: 1.35, Daily ACH $675. First payment expected tomorrow.',
+   'riversidefamilydental.com')
   RETURNING id INTO v_risk_merchant_id;
 
   INSERT INTO mca_deals (id, team_id, merchant_id, deal_code, funding_amount, factor_rate, payback_amount, daily_payment, current_balance, total_paid, status, funded_at, payment_frequency)
-  VALUES ('d0000000-0000-4000-a000-0000000000a8', v_team_id, v_risk_merchant_id, 'D-0029', 30000, 1.35, 40500, 675, 40500, 0, 'active', now(), 'daily');
+  VALUES ('d0000000-0000-4000-a000-0000000000a8', v_team_id, v_risk_merchant_id, 'D-0031', 30000, 1.35, 40500, 675, 40500, 0, 'active', now(), 'daily');
 
   -- Re-run dynamic balance + NSF calculation for risk merchants too
   UPDATE mca_deals d
