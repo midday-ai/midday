@@ -324,16 +324,8 @@ export async function getJobStatus(
 
   return {
     status,
-<<<<<<< HEAD
     progress,
     progressStep,
-=======
-    progress:
-      typeof progress === "number" ||
-      (typeof progress === "object" && progress !== null)
-        ? (progress as number | Record<string, unknown>)
-        : undefined,
->>>>>>> 86c62dca5 (wip)
     result: returnValue,
     error: failedReason,
   };
