@@ -1,10 +1,10 @@
 import { createInvoicePromptComponents } from "../prompts/factory";
 import type { InvoiceData } from "../schema";
 import {
-  OCR_MODEL,
   composeAnnotationPrompt,
   getMistralClient,
   invoiceJsonSchema,
+  OCR_MODEL,
 } from "./client";
 
 export interface BatchExtractionItem {
@@ -35,9 +35,7 @@ export async function submitBatchExtraction(
 
   const jsonlLines = items.map((item) => {
     const prompt = item.companyName
-      ? composeAnnotationPrompt(
-          createInvoicePromptComponents(item.companyName),
-        )
+      ? composeAnnotationPrompt(createInvoicePromptComponents(item.companyName))
       : defaultPrompt;
 
     return JSON.stringify({

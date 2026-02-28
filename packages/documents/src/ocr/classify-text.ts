@@ -54,12 +54,24 @@ export async function classifyText(params: {
 
   const content = result.choices?.[0]?.message?.content;
   if (!content || typeof content !== "string") {
-    return { title: null, summary: null, tags: null, date: null, language: null };
+    return {
+      title: null,
+      summary: null,
+      tags: null,
+      date: null,
+      language: null,
+    };
   }
 
   try {
     return JSON.parse(content) as ClassificationData;
   } catch {
-    return { title: null, summary: null, tags: null, date: null, language: null };
+    return {
+      title: null,
+      summary: null,
+      tags: null,
+      date: null,
+      language: null,
+    };
   }
 }
