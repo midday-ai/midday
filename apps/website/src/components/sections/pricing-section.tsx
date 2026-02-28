@@ -78,7 +78,7 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 2 connected banks
+                    Up to 3 connected banks
                   </span>
                 </div>
                 <div className="flex items-start gap-2">

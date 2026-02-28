@@ -166,7 +166,7 @@ export function Plans() {
               </li>
               <li className="flex items-start">
                 <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">2 connected banks</span>
+                <span className="text-xs">3 connected banks</span>
               </li>
               <li className="flex items-start">
                 <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />

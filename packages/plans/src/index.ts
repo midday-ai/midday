@@ -99,8 +99,8 @@ export function getPlanLimits(plan: string): PlanLimits {
   switch (plan) {
     case "starter":
       return {
-        users: 1,
-        bankConnections: 1,
+        users: 2,
+        bankConnections: 3,
         storage: 10 * 1024 * 1024 * 1024, // 10GB in bytes
         inbox: 50,
         invoices: 10,
@@ -116,8 +116,8 @@ export function getPlanLimits(plan: string): PlanLimits {
       };
     default:
       return {
-        users: 1,
-        bankConnections: 1,
+        users: 2,
+        bankConnections: 3,
         storage: 10 * 1024 * 1024 * 1024, // 10GB in bytes
         inbox: 50,
         invoices: 10,

@@ -517,8 +517,8 @@ export async function getAvailablePlans(
   const teamMembersCount = teamMembersCountResult.length;
   const bankConnectionsCount = bankConnectionsCountResult.length;
 
-  // Can choose starter if team has 2 or fewer members and 2 or fewer bank connections
-  const starter = teamMembersCount <= 2 && bankConnectionsCount <= 2;
+  // Can choose starter if team has 2 or fewer members and 3 or fewer bank connections
+  const starter = teamMembersCount <= 2 && bankConnectionsCount <= 3;
 
   // Can always choose pro plan
   return {

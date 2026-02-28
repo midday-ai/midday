@@ -77,7 +77,7 @@ export const middayPricing: PricingTier[] = [
       "Receipts and file storage",
       "Up to 10 invoices per month",
       "Time tracking",
-      "Up to 2 connected banks",
+      "Up to 3 connected banks",
       "Up to 2 team members",
     ],
   },
