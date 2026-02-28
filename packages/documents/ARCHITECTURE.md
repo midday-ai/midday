@@ -56,8 +56,8 @@ flowchart TD
     OAuthSync --> SyncScheduler
     BackgroundSync --> SyncScheduler
 
-    SyncScheduler -->|"more than 20 items"| BatchExtract
-    SyncScheduler -->|"20 or fewer items"| ProcessAttachment
+    SyncScheduler -->|"more than 5 items"| BatchExtract
+    SyncScheduler -->|"5 or fewer items"| ProcessAttachment
 
     ProcessAttachment --> MistralOCR
     ProcessTransaction --> MistralOCR

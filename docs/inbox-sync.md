@@ -130,7 +130,7 @@ sequenceDiagram
     Sync->>Storage: Upload PDFs to vault
     Sync->>DB: Create inbox rows (status: new)
 
-    alt Full sync or >20 attachments
+    alt Full sync or >5 attachments
         Sync->>Batch: triggerJob("batch-extract-inbox")
     else ≤20 attachments (incremental)
         Sync->>RT: triggerJob("process-attachment") per item
@@ -190,7 +190,7 @@ Filtering statistics are logged per sync for monitoring.
 |--|-----------|------------------|
 | **When** | Manual sync or first sync (`lastAccessed` is null) | Background scheduler syncs |
 | **Date range** | From fiscal year start or 3 months ago (whichever is earlier) | Since `lastAccessed` |
-| **Extraction path** | Always batch (Mistral Batch API) | Real-time if ≤20 attachments, batch if >20 |
+| **Extraction path** | Always batch (Mistral Batch API) | Real-time if ≤5 attachments, batch if >5 |
 
 ## Dashboard Progress Feedback
 

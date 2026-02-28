@@ -203,7 +203,7 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         }
       }
 
-      const BATCH_THRESHOLD = 20;
+      const BATCH_THRESHOLD = 5;
 
       const uploadedAttachments = await processBatch(
         filteredAttachments,

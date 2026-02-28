@@ -59,8 +59,8 @@ flowchart TD
     OAuthSync --> SyncScheduler
     BackgroundSync --> SyncScheduler
 
-    SyncScheduler -->|"more than 20 items"| BatchExtract
-    SyncScheduler -->|"20 or fewer items"| ProcessAttachment
+    SyncScheduler -->|"more than 5 items"| BatchExtract
+    SyncScheduler -->|"5 or fewer items"| ProcessAttachment
 
     ProcessAttachment --> MistralOCR
     ProcessTransaction --> MistralOCR
@@ -318,5 +318,5 @@ Classification (title, summary, tags, embeddings) is an enrichment step, not cri
 |----------|-----|--------|
 | Manual upload, API upload | Sync | User is waiting for feedback |
 | Email webhook, Slack, WhatsApp | Sync | Near-real-time processing |
-| Initial OAuth sync (20+ items) | Batch | Cost-efficient, no urgency |
-| Scheduled background sync (20+ items) | Batch | Cost-efficient, no urgency |
+| Initial OAuth sync (>5 items) | Batch | Cost-efficient, no urgency |
+| Scheduled background sync (>5 items) | Batch | Cost-efficient, no urgency |
