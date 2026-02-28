@@ -100,7 +100,9 @@ export function SyncPeriodPicker({
             mode="single"
             selected={selectedDate}
             onSelect={handleDateSelect}
-            disabled={(date) => date > new Date()}
+            disabled={(date) =>
+              date > new Date() || date < subYears(new Date(), 1)
+            }
             defaultMonth={selectedDate}
           />
         </div>
