@@ -32,4 +32,3 @@ export interface Attachment {
 }
 
 export type Attachments = Attachment[];
-
