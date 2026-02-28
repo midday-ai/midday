@@ -18,6 +18,10 @@ export type SyncMetadata = z.infer<typeof syncMetadataSchema>;
 export type SyncResult = z.infer<typeof syncResultSchema>;
 
 const POLL_INTERVAL_MS = 2000;
+// How many consecutive "unknown" responses before we give up and treat as completed.
+// "unknown" means the job wasn't found — either a race condition before registration,
+// or the job was removed after completion (removeOnComplete: { age: 60 }).
+const MAX_UNKNOWN_RETRIES = 5;
 
 export function useSyncStatus({ jobId: initialJobId }: { jobId?: string }) {
   const trpc = useTRPC();
@@ -28,6 +32,7 @@ export function useSyncStatus({ jobId: initialJobId }: { jobId?: string }) {
   const [result, setResult] = useState<SyncResult | undefined>();
   const [syncMetadata, setSyncMetadata] = useState<SyncMetadata | undefined>();
   const settled = useRef(false);
+  const unknownCount = useRef(0);
 
   const { data } = useQuery(
     trpc.jobs.getStatus.queryOptions(jobId ? { jobId } : skipToken, {
@@ -40,6 +45,7 @@ export function useSyncStatus({ jobId: initialJobId }: { jobId?: string }) {
   useEffect(() => {
     if (initialJobId) {
       settled.current = false;
+      unknownCount.current = 0;
       setJobId(initialJobId);
       setStatus("SYNCING");
       setSyncMetadata(undefined);
@@ -58,13 +64,21 @@ export function useSyncStatus({ jobId: initialJobId }: { jobId?: string }) {
       setSyncMetadata(metadata.data);
     }
 
-    if (data.status === "completed" || data.status === "unknown") {
+    if (data.status === "completed") {
       settled.current = true;
+      unknownCount.current = 0;
       setStatus("COMPLETED");
 
       const parsed = syncResultSchema.safeParse(data.result);
       if (parsed.success) {
         setResult(parsed.data);
+      }
+    } else if (data.status === "unknown") {
+      unknownCount.current += 1;
+
+      if (unknownCount.current >= MAX_UNKNOWN_RETRIES) {
+        settled.current = true;
+        setStatus("COMPLETED");
       }
     } else if (data.status === "failed") {
       settled.current = true;
@@ -74,6 +88,7 @@ export function useSyncStatus({ jobId: initialJobId }: { jobId?: string }) {
       data.status === "waiting" ||
       data.status === "delayed"
     ) {
+      unknownCount.current = 0;
       setStatus("SYNCING");
     }
   }, [data]);
