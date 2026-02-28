@@ -35,13 +35,6 @@ You are a multilingual document parser that extracts structured data from financ
 ${documentTypeClassification}
 `;
 
-export const baseReceiptInstructions = `
-You are a multilingual document parser specialized in extracting structured data from retail receipts and point-of-sale documents.
-Focus on identifying transaction details, itemized purchases, payment information, and store details.
-
-${documentTypeClassification}
-`;
-
 export const extractionRequirements = {
   invoice: `
 EXTRACTION REQUIREMENTS:
@@ -53,17 +46,6 @@ EXTRACTION REQUIREMENTS:
 6. due_date: Payment due date in YYYY-MM-DD format
 7. email: Vendor's contact email address (look in header, footer, contact section)
 8. website: Vendor's website URL (extract root domain only, e.g., "example.com" not "www.example.com" or "https://example.com")
-`,
-
-  receipt: `
-EXTRACTION REQUIREMENTS:
-1. store_name: Business name of merchant/retailer
-2. total_amount: Final amount paid (including all taxes)
-3. date: Transaction date in YYYY-MM-DD format
-4. payment_method: How payment was made (cash, card, etc.)
-5. currency: ISO code (USD, EUR, GBP) from symbols
-6. email: Store/merchant's contact email (look in header, footer, or contact section)
-7. website: Store/merchant's website URL (extract root domain only, e.g., "example.com")
 `,
 };
 
@@ -88,17 +70,6 @@ FIELD-SPECIFIC RULES:
   * "example.com/path" → "example.com"
   * Remove protocol (http://, https://), www prefix, and paths
 `,
-
-  receipt: `
-FIELD-SPECIFIC RULES:
-- AMOUNTS: Extract final total paid, not subtotals. Look for "TOTAL", "AMOUNT DUE"
-- DATES: Convert all formats (DD/MM/YYYY, MM-DD-YYYY) to YYYY-MM-DD
-- STORE: Business name from header/logo, not customer names
-- PAYMENT: Cash, credit card, debit card, contactless, mobile payment
-- TAX: Extract tax amount and rate if clearly shown
-- EMAIL: Look for email addresses in header, footer, or contact section. Extract complete email
-- WEBSITE: Look for website URLs in header, footer, or contact section. Extract root domain only (remove protocol, www, paths)
-`,
 };
 
 export const accuracyGuidelines = {
@@ -109,15 +80,6 @@ ACCURACY GUIDELINES:
 - Support number formats: 1,234.56 and 1.234,56
 - Prioritize bold/highlighted amounts for totals
 - Use document structure: vendor at top, customer in middle-right
-`,
-
-  receipt: `
-ACCURACY GUIDELINES:
-- Process multilingual receipts (English, Spanish, French, German, Portuguese)
-- Handle international tax terms: VAT, IVA, TVA, MwSt, GST
-- Support number formats: 1,234.56 and 1.234,56
-- Store info typically at top, customer info at bottom
-- Receipt numbers and register IDs indicate merchant data
 `,
 };
 
@@ -131,15 +93,6 @@ COMMON ERRORS TO AVOID:
 - Brand names instead of legal company names
 - Partial payments instead of full invoice amounts
 - Confusing order numbers, PO numbers, or reference numbers with invoice numbers
-`,
-
-  receipt: `
-COMMON ERRORS TO AVOID:
-- Mixing up store name with customer name
-- Extracting subtotals instead of final totals
-- Wrong date formats or missing transaction dates
-- Missing payment method information
-- Confusing item codes with product descriptions
 `,
 };
 

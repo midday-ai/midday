@@ -1,29 +1,31 @@
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import { z } from "zod";
 import { useTRPC } from "@/trpc/client";
 
-type UseSyncStatusProps = {
-  jobId?: string;
-};
+const syncMetadataSchema = z.object({
+  discoveredCount: z.number().optional(),
+  uploadedCount: z.number().optional(),
+  processedCount: z.number().optional(),
+  status: z.enum(["discovering", "extracting", "complete"]).optional(),
+});
 
-export type SyncMetadata = {
-  discoveredCount?: number;
-  uploadedCount?: number;
-  processedCount?: number;
-  status?: "discovering" | "extracting" | "complete";
-};
+const syncResultSchema = z.object({
+  attachmentsProcessed: z.number().optional(),
+});
+
+export type SyncMetadata = z.infer<typeof syncMetadataSchema>;
+export type SyncResult = z.infer<typeof syncResultSchema>;
 
 const POLL_INTERVAL_MS = 2000;
 
-export function useSyncStatus({ jobId: initialJobId }: UseSyncStatusProps) {
+export function useSyncStatus({ jobId: initialJobId }: { jobId?: string }) {
   const trpc = useTRPC();
   const [jobId, setJobId] = useState<string | undefined>(initialJobId);
   const [status, setStatus] = useState<
     "FAILED" | "SYNCING" | "COMPLETED" | null
   >(null);
-  const [result, setResult] = useState<
-    { attachmentsProcessed?: number } | undefined
-  >();
+  const [result, setResult] = useState<SyncResult | undefined>();
   const [syncMetadata, setSyncMetadata] = useState<SyncMetadata | undefined>();
   const settled = useRef(false);
 
@@ -51,37 +53,18 @@ export function useSyncStatus({ jobId: initialJobId }: UseSyncStatusProps) {
   useEffect(() => {
     if (!data || settled.current) return;
 
-    if (
-      data.progress &&
-      typeof data.progress === "object" &&
-      !Array.isArray(data.progress)
-    ) {
-      const p = data.progress;
-      setSyncMetadata({
-        discoveredCount:
-          typeof p.discoveredCount === "number" ? p.discoveredCount : undefined,
-        uploadedCount:
-          typeof p.uploadedCount === "number" ? p.uploadedCount : undefined,
-        processedCount:
-          typeof p.processedCount === "number" ? p.processedCount : undefined,
-        status:
-          typeof p.status === "string"
-            ? (p.status as SyncMetadata["status"])
-            : undefined,
-      });
+    const metadata = syncMetadataSchema.safeParse(data.progressData);
+    if (metadata.success) {
+      setSyncMetadata(metadata.data);
     }
 
-    if (data.status === "completed") {
+    if (data.status === "completed" || data.status === "unknown") {
       settled.current = true;
       setStatus("COMPLETED");
-      if (data.result && typeof data.result === "object") {
-        const r = data.result as Record<string, unknown>;
-        setResult({
-          attachmentsProcessed:
-            typeof r.attachmentsProcessed === "number"
-              ? r.attachmentsProcessed
-              : undefined,
-        });
+
+      const parsed = syncResultSchema.safeParse(data.result);
+      if (parsed.success) {
+        setResult(parsed.data);
       }
     } else if (data.status === "failed") {
       settled.current = true;

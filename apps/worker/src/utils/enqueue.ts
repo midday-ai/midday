@@ -17,7 +17,7 @@ import type { ProcessTransactionAttachmentPayload } from "../schemas/transaction
 export async function enqueueProcessAttachment(
   payload: ProcessAttachmentPayload,
 ) {
-  return triggerJob("process-attachment", payload, "inbox");
+  return triggerJob("process-attachment", payload, "extraction");
 }
 
 export async function enqueueSlackUpload(payload: SlackUploadPayload) {
@@ -47,5 +47,5 @@ export async function enqueueSyncScheduler(
 export async function enqueueProcessTransactionAttachment(
   payload: ProcessTransactionAttachmentPayload,
 ) {
-  return triggerJob("process-transaction-attachment", payload, "transactions");
+  return triggerJob("process-transaction-attachment", payload, "extraction");
 }

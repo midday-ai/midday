@@ -13,7 +13,7 @@ import {
   downloadBatchResults,
   getBatchJobStatus,
   submitBatchExtraction,
-} from "@midday/documents/batch";
+} from "@midday/documents/ocr";
 import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
@@ -21,6 +21,7 @@ import {
   type BatchExtractInboxPayload,
   batchExtractInboxSchema,
 } from "../../schemas/inbox";
+import { classifyFromExtraction } from "../../utils/classify-from-extraction";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
 
@@ -286,7 +287,8 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
               mimetype: item.mimetype ?? "application/pdf",
               inboxAccountId,
             },
-            "inbox",
+            "extraction",
+            { priority: 10 },
           ).catch((error) => {
             this.logger.error("Failed to queue fallback extraction", {
               inboxItemId: item.id,
@@ -421,6 +423,8 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
     }> = [];
     const dbUpdates: UpdateInboxWithProcessedDataParams[] = [];
 
+    const classifyPromises: Promise<void>[] = [];
+
     for (const result of results) {
       if (result.success && result.data) {
         const data = result.data;
@@ -452,6 +456,26 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
 
         if (docType !== "other") {
           embeddableIds.push(result.id);
+        }
+
+        const originalItem = items.find((i) => i.id === result.id);
+        if (originalItem) {
+          classifyPromises.push(
+            classifyFromExtraction({
+              filePath: originalItem.filePath,
+              teamId,
+              title: data.title ?? null,
+              summary: data.summary ?? null,
+              tags: data.tags ?? null,
+              content: result.content ?? null,
+              date: data.invoice_date ?? null,
+              language: data.language ?? null,
+              documentType: data.document_type ?? null,
+              vendorName: data.vendor_name ?? null,
+              invoiceNumber: data.invoice_number ?? null,
+              logger: this.logger,
+            }),
+          );
         }
 
         succeeded++;
@@ -486,6 +510,8 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
       }
     }
 
+    await Promise.allSettled(classifyPromises);
+
     if (fallbackItems.length > 0) {
       await Promise.allSettled(
         fallbackItems.map(({ inboxId, item }) =>
@@ -498,7 +524,8 @@ export class BatchExtractInboxProcessor extends BaseProcessor<BatchExtractInboxP
               mimetype: item.mimetype ?? "application/pdf",
               inboxAccountId,
             },
-            "inbox",
+            "extraction",
+            { priority: 10 },
           ).catch((error) => {
             this.logger.error("Failed to queue fallback extraction", {
               inboxId,

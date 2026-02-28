@@ -22,7 +22,8 @@ export const jobStatusSchema = z.object({
   ]),
   progress: z.number().optional(),
   progressStep: z.string().optional(),
-  result: z.unknown().optional(),
+  progressData: z.record(z.string(), z.unknown()).optional(),
+  result: z.record(z.string(), z.unknown()).optional(),
   error: z.string().optional(),
 });
 
