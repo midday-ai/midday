@@ -1,12 +1,11 @@
 import { loadDocument } from "@midday/documents/loader";
-import {
-  getContentSample,
-  isMimeTypeSupportedForProcessing,
-} from "@midday/documents/utils";
-import { triggerJob, triggerJobAndWait } from "@midday/job-client";
+import { classifyText, extractDocument } from "@midday/documents/ocr";
+import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
+import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import type { ProcessDocumentPayload } from "../../schemas/documents";
+import { classifyFromExtraction } from "../../utils/classify-from-extraction";
 import { getDb } from "../../utils/db";
 import { detectFileTypeFromBlob } from "../../utils/detect-file-type";
 import { updateDocumentWithRetry } from "../../utils/document-update";
@@ -21,9 +20,20 @@ import {
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
+const PDF_IMAGE_TYPES = new Set([
+  "application/pdf",
+  "application/x-pdf",
+  "application/octet-stream",
+]);
+
+function isPdfOrImage(mimetype: string): boolean {
+  return PDF_IMAGE_TYPES.has(mimetype) || mimetype.startsWith("image/");
+}
+
 /**
- * Process documents and images for classification
- * Handles HEIC conversion, document loading, and triggers classification
+ * Process documents for classification using Mistral.
+ * PDFs and images: Mistral OCR (extractDocument)
+ * Other file types: langchain text extraction + Mistral completion (classifyText)
  */
 export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPayload> {
   async process(job: Job<ProcessDocumentPayload>): Promise<void> {
@@ -40,35 +50,31 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       mimetype,
     });
 
-    // Create activity for document upload
     try {
       await triggerJob(
         "notification",
         {
           type: "document_uploaded",
           teamId,
-          fileName: filePath.join("/"),
-          filePath: filePath,
+          fileName,
+          filePath,
           mimeType: mimetype,
         },
         "notifications",
       );
     } catch (error) {
-      // Don't fail the entire process if notification fails
       this.logger.warn("Failed to trigger document_uploaded notification", {
         teamId,
-        fileName: filePath.join("/"),
+        fileName,
         error: error instanceof Error ? error.message : "Unknown error",
       });
     }
 
     try {
-      const fileName = filePath.join("/");
       let fileData: Blob | null = null;
       let processedMimetype = mimetype;
 
-      // Download file once and reuse for all operations
-      // For HEIC files, we'll convert and reuse the converted data
+      // HEIC conversion
       if (mimetype === "image/heic") {
         this.logger.info("Converting HEIC to JPG", { filePath: fileName });
 
@@ -86,42 +92,21 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           );
         }
 
-        await this.updateProgress(
-          job,
-          this.ProgressMilestones.FETCHED,
-          "HEIC file downloaded",
-        );
-
         const buffer = await data.arrayBuffer();
-
-        // Log file size for debugging memory issues
         const fileSizeMB = (buffer.byteLength / (1024 * 1024)).toFixed(2);
-        this.logger.info("HEIC file size", {
-          fileName,
-          sizeBytes: buffer.byteLength,
-          sizeMB: fileSizeMB,
-        });
 
-        // Skip AI classification for very large HEIC files to prevent OOM
-        // 15MB HEIC ≈ 24MP ≈ ~100MB decoded. Complete with filename instead.
         if (buffer.byteLength > MAX_HEIC_FILE_SIZE) {
           this.logger.warn(
-            "HEIC file too large for AI classification - completing with filename",
-            {
-              fileName,
-              teamId,
-              sizeBytes: buffer.byteLength,
-              maxSizeBytes: MAX_HEIC_FILE_SIZE,
-            },
+            "HEIC file too large for processing - completing with filename",
+            { fileName, teamId, sizeBytes: buffer.byteLength },
           );
-
           await updateDocumentWithRetry(
             db,
             {
               pathTokens: filePath,
               teamId,
               title: filePath.at(-1) ?? "Large HEIC Image",
-              summary: `Large image (${fileSizeMB}MB) - AI classification skipped`,
+              summary: `Large image (${fileSizeMB}MB) - processing skipped`,
               processingStatus: "completed",
             },
             this.logger,
@@ -129,20 +114,12 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           return;
         }
 
-        // Try to convert HEIC to JPEG - use graceful degradation if it fails (e.g., OOM)
         try {
           const { buffer: image } = await convertHeicToJpeg(
             buffer,
             this.logger,
           );
 
-          await this.updateProgress(
-            job,
-            this.ProgressMilestones.PROCESSING,
-            "HEIC converted to JPEG",
-          );
-
-          // Upload the converted image
           const { data: uploadedData } = await withTimeout(
             supabase.storage.from("vault").upload(fileName, image, {
               contentType: "image/jpeg",
@@ -156,31 +133,20 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
             throw new Error("Failed to upload converted image");
           }
 
-          await this.updateProgress(
-            job,
-            this.ProgressMilestones.HALFWAY,
-            "Converted image uploaded",
-          );
-
-          // Create Blob from converted image for reuse
           fileData = new Blob([image], { type: "image/jpeg" });
           processedMimetype = "image/jpeg";
         } catch (conversionError) {
-          // HEIC conversion failed (possibly OOM) - complete with fallback
-          // User can still see the file and retry later
           this.logger.error(
             "HEIC conversion failed - completing with fallback",
             {
               fileName,
               teamId,
-              fileSizeMB,
               error:
                 conversionError instanceof Error
                   ? conversionError.message
                   : "Unknown error",
             },
           );
-
           await updateDocumentWithRetry(
             db,
             {
@@ -195,29 +161,11 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           return;
         }
       } else {
-        // Download file for non-HEIC files
-        const downloadStartTime = Date.now();
-        this.logger.info("Downloading file from storage", {
-          jobId: job.id,
-          fileName,
-          teamId,
-          mimetype: processedMimetype,
-        });
-
         const { data } = await withTimeout(
           supabase.storage.from("vault").download(fileName),
           TIMEOUTS.FILE_DOWNLOAD,
           `File download timed out after ${TIMEOUTS.FILE_DOWNLOAD}ms`,
         );
-
-        const downloadDuration = Date.now() - downloadStartTime;
-        this.logger.info("File downloaded", {
-          jobId: job.id,
-          fileName,
-          teamId,
-          fileSize: data?.size,
-          duration: `${downloadDuration}ms`,
-        });
 
         if (!data) {
           throw new NonRetryableError(
@@ -230,36 +178,25 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         fileData = data;
       }
 
-      // Detect actual file type for application/octet-stream by checking magic bytes
+      // Detect actual file type for application/octet-stream
       if (processedMimetype === "application/octet-stream" && fileData) {
         try {
           const detectionResult = await detectFileTypeFromBlob(fileData);
 
           if (detectionResult.detected) {
-            this.logger.info(
-              "Detected file type from application/octet-stream",
-              {
-                fileName,
-                teamId,
-                detectedMimetype: detectionResult.mimetype,
-              },
-            );
+            this.logger.info("Detected file type from octet-stream", {
+              fileName,
+              detectedMimetype: detectionResult.mimetype,
+            });
             processedMimetype = detectionResult.mimetype;
-            // Recreate Blob with correct mimetype for further processing
             fileData = new Blob([detectionResult.buffer], {
               type: detectionResult.mimetype,
             });
           } else {
-            // Unknown file type - log warning and skip processing
-            this.logger.warn(
-              "application/octet-stream file type could not be detected - skipping processing",
-              {
-                fileName,
-                teamId,
-                header: detectionResult.buffer.subarray(0, 8).toString("hex"),
-              },
-            );
-            // Update document status to indicate it's not processable
+            this.logger.warn("Could not detect file type - skipping", {
+              fileName,
+              teamId,
+            });
             await updateDocumentWithRetry(
               db,
               {
@@ -272,269 +209,155 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
             return;
           }
         } catch (error) {
-          this.logger.error(
-            "Failed to detect file type for application/octet-stream - will attempt to process as PDF",
-            {
-              fileName,
-              teamId,
-              error: error instanceof Error ? error.message : "Unknown error",
-            },
-          );
-          // If detection fails, try to process as PDF (most common case)
-          // Re-download the file since we may have consumed the buffer
-          const { data: redownloadedData } = await withTimeout(
-            supabase.storage.from("vault").download(fileName),
-            TIMEOUTS.FILE_DOWNLOAD,
-            `File re-download timed out after ${TIMEOUTS.FILE_DOWNLOAD}ms`,
-          );
-          if (redownloadedData) {
-            fileData = redownloadedData;
-            processedMimetype = "application/pdf";
-          } else {
-            throw new Error("Failed to re-download file for type detection");
-          }
+          this.logger.error("File type detection failed - trying as PDF", {
+            fileName,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+          processedMimetype = "application/pdf";
         }
       }
 
-      // Check if file type is supported - throw error for queue config to handle
       if (!isMimeTypeSupportedForProcessing(processedMimetype)) {
         throw new UnsupportedFileTypeError(processedMimetype, fileName);
       }
 
-      // If the file is an image, trigger image classification
-      if (processedMimetype.startsWith("image/")) {
-        this.logger.info("Triggering image classification", {
-          fileName,
-          teamId,
-        });
-
-        // Trigger image classification via BullMQ and wait for completion
-        // This ensures errors propagate and status is properly updated
-        // Use CLASSIFICATION_JOB_WAIT timeout to ensure we don't timeout before the child job completes
-        // Child job uses AI_CLASSIFICATION (90s) + FILE_DOWNLOAD (60s), so we need at least 150s
-        // NOTE: Job IDs must include timestamp for reprocessing to work - BullMQ returns existing
-        // jobs instead of creating new ones when IDs match (completed retained 24h, failed 7 days)
-        await triggerJobAndWait(
-          "classify-image",
-          {
-            fileName,
-            teamId,
-          },
-          "documents",
-          {
-            jobId: `classify-img_${teamId}_${fileName}_${Date.now()}`,
-            timeout: TIMEOUTS.CLASSIFICATION_JOB_WAIT,
-          },
+      // Route: PDFs and images -> Mistral OCR
+      if (isPdfOrImage(processedMimetype)) {
+        const { data: signedUrlData } = await withTimeout(
+          supabase.storage.from("vault").createSignedUrl(fileName, 600),
+          TIMEOUTS.EXTERNAL_API,
+          `Signed URL creation timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
         );
 
-        return;
-      }
-
-      // Process document: load and classify
-      // Use graceful degradation - if content extraction fails, complete with null values
-      let document: string | null = null;
-      let documentLoadFailed = false;
-
-      try {
-        const parseStartTime = Date.now();
-        this.logger.info("Parsing document content (extracting text)", {
-          jobId: job.id,
-          fileName,
-          teamId,
-          mimetype: processedMimetype,
-          fileSize: fileData?.size,
-        });
-
-        // 60 second timeout for document parsing - prevents hanging on corrupt/problematic files
-        const loadedDoc = await withTimeout(
-          loadDocument({
-            content: fileData,
-            metadata: { mimetype: processedMimetype },
-          }),
-          60_000,
-          "Document parsing timed out after 60000ms",
-        );
-
-        if (!loadedDoc) {
-          throw new Error("Failed to load document");
+        if (!signedUrlData) {
+          throw new Error("Failed to create signed URL");
         }
 
-        document = loadedDoc;
-        const parseDuration = Date.now() - parseStartTime;
-        this.logger.info("Document parsed successfully", {
-          jobId: job.id,
+        this.logger.info("Extracting with Mistral OCR", {
           fileName,
-          teamId,
-          contentLength: document.length,
-          duration: `${parseDuration}ms`,
+          mimetype: processedMimetype,
         });
-      } catch (error) {
-        // Log error but don't fail - complete with null values so user can still access file
-        documentLoadFailed = true;
-        this.logger.warn(
-          "Failed to extract document content - completing with fallback",
-          {
-            jobId: job.id,
-            fileName,
-            teamId,
+
+        const { data, content } = await withTimeout(
+          extractDocument({
+            documentUrl: signedUrlData.signedUrl,
             mimetype: processedMimetype,
-            error: error instanceof Error ? error.message : "Unknown error",
-          },
+          }),
+          TIMEOUTS.DOCUMENT_PROCESSING,
+          `OCR extraction timed out after ${TIMEOUTS.DOCUMENT_PROCESSING}ms`,
         );
-      }
 
-      // If document loading failed, complete with null values
-      // User can still view/download the file and retry classification later
-      if (documentLoadFailed || !document) {
-        this.logger.info(
-          "Completing document with null values - user can retry classification",
-          {
-            fileName,
-            teamId,
-            documentLoadFailed,
-          },
-        );
-        await updateDocumentWithRetry(
-          db,
-          {
-            pathTokens: filePath,
-            teamId,
-            title: undefined, // null - UI will show filename + retry option
-            summary: undefined,
-            processingStatus: "completed",
-          },
-          this.logger,
-        );
-        return;
-      }
-
-      // Edge case: Validate document has content
-      if (document.trim().length === 0) {
-        this.logger.warn("Document loaded but has no extractable content", {
-          fileName,
+        await classifyFromExtraction({
+          filePath,
           teamId,
+          title: data.title ?? null,
+          summary: data.summary ?? null,
+          tags: data.tags ?? null,
+          content: content || null,
+          date: data.invoice_date ?? null,
+          language: data.language ?? null,
+          documentType: data.document_type ?? null,
+          vendorName: data.vendor_name ?? null,
+          invoiceNumber: data.invoice_number ?? null,
+          logger: this.logger,
         });
-        // Complete with null - user can still access the file
-        await updateDocumentWithRetry(
-          db,
-          {
-            pathTokens: filePath,
-            teamId,
-            title: undefined,
-            summary: undefined,
-            processingStatus: "completed",
-          },
-          this.logger,
-        );
-        return;
-      }
-
-      const sample = getContentSample(document);
-
-      // Edge case: Validate sample has content
-      if (!sample || sample.trim().length === 0) {
-        this.logger.warn(
-          "Document sample is empty, marking as completed without classification",
-          {
-            fileName,
-            teamId,
-            contentLength: document.length,
-          },
-        );
-        // Mark as completed - document exists but has no extractable content to classify
-        await updateDocumentWithRetry(
-          db,
-          {
-            pathTokens: filePath,
-            teamId,
-            processingStatus: "completed",
-          },
-          this.logger,
-        );
-        return;
-      }
-
-      const classificationStartTime = Date.now();
-      this.logger.info("Triggering document classification", {
-        jobId: job.id,
-        fileName,
-        teamId,
-        contentLength: document.length,
-        sampleLength: sample.length,
-      });
-
-      // Trigger document classification via BullMQ and wait for completion
-      // This ensures errors propagate and status is properly updated
-      // Use CLASSIFICATION_JOB_WAIT timeout to ensure we don't timeout before the child job completes
-      // Child job uses AI_CLASSIFICATION (90s), so we need at least that + overhead
-      // NOTE: Job IDs must include timestamp for reprocessing to work - BullMQ returns existing
-      // jobs instead of creating new ones when IDs match (completed retained 24h, failed 7 days)
-      const classificationJobResult = await triggerJobAndWait(
-        "classify-document",
-        {
-          content: sample,
+      } else {
+        // Route: Other file types -> langchain + Mistral completion
+        this.logger.info("Extracting text with langchain", {
           fileName,
-          teamId,
-        },
-        "documents",
-        {
-          jobId: `classify-doc_${teamId}_${fileName}_${Date.now()}`,
-          timeout: TIMEOUTS.CLASSIFICATION_JOB_WAIT,
-        },
-      );
+          mimetype: processedMimetype,
+        });
 
-      const classificationDuration = Date.now() - classificationStartTime;
-      this.logger.info("Document classification job completed", {
-        jobId: job.id,
-        fileName,
-        teamId,
-        triggeredJobId: classificationJobResult.id,
-        triggeredJobName: "classify-document",
-        duration: `${classificationDuration}ms`,
-      });
+        let textContent: string | null = null;
 
-      // Create activity for successful document processing
-      try {
-        await triggerJob(
-          "notification",
-          {
-            type: "document_processed",
-            teamId,
-            fileName,
-            filePath: filePath,
-            mimeType: mimetype,
-            contentLength: document.length,
-            sampleLength: sample.length,
-          },
-          "notifications",
-        );
-      } catch (error) {
-        // Don't fail the entire process if notification fails
-        this.logger.warn("Failed to trigger document_processed notification", {
-          teamId,
+        try {
+          textContent = await withTimeout(
+            loadDocument({
+              content: fileData,
+              metadata: { mimetype: processedMimetype },
+            }),
+            60_000,
+            "Document parsing timed out after 60000ms",
+          );
+        } catch (error) {
+          this.logger.warn(
+            "Text extraction failed - completing with fallback",
+            {
+              fileName,
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+          );
+        }
+
+        if (!textContent || textContent.trim().length === 0) {
+          await updateDocumentWithRetry(
+            db,
+            {
+              pathTokens: filePath,
+              teamId,
+              processingStatus: "completed",
+            },
+            this.logger,
+          );
+          return;
+        }
+
+        this.logger.info("Classifying with Mistral completion", {
           fileName,
-          error: error instanceof Error ? error.message : "Unknown error",
+          contentLength: textContent.length,
+        });
+
+        let classification: Awaited<ReturnType<typeof classifyText>> | null =
+          null;
+
+        try {
+          classification = await withTimeout(
+            classifyText({
+              content: textContent,
+              fileName: filePath.at(-1),
+            }),
+            TIMEOUTS.DOCUMENT_PROCESSING,
+            `Text classification timed out after ${TIMEOUTS.DOCUMENT_PROCESSING}ms`,
+          );
+        } catch (error) {
+          this.logger.warn(
+            "Text classification failed - completing with content only",
+            {
+              fileName,
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+          );
+        }
+
+        await classifyFromExtraction({
+          filePath,
+          teamId,
+          title: classification?.title ?? null,
+          summary: classification?.summary ?? null,
+          tags: classification?.tags ?? null,
+          content: textContent,
+          date: classification?.date ?? null,
+          language: classification?.language ?? null,
+          documentType: null,
+          vendorName: null,
+          invoiceNumber: null,
+          logger: this.logger,
         });
       }
 
       const totalDuration = Date.now() - processStartTime;
-      this.logger.info("process-document job completed successfully", {
+      this.logger.info("process-document completed", {
         jobId: job.id,
         fileName,
         teamId,
-        contentLength: document.length,
-        sampleLength: sample.length,
         totalDuration: `${totalDuration}ms`,
       });
     } catch (error) {
       this.logger.error("Document processing failed", {
-        fileName: filePath.join("/"),
+        fileName,
         teamId,
         error: error instanceof Error ? error.message : "Unknown error",
       });
-
-      // Status update to "failed" is handled by handleDocumentJobFinalFailure
-      // in documents.config.ts when all retries are exhausted
       throw error;
     }
   }

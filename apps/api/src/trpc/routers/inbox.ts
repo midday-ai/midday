@@ -211,7 +211,8 @@ export const inboxRouter = createTRPCRouter({
                 senderEmail: item.senderEmail,
                 inboxAccountId: item.inboxAccountId,
               },
-              "inbox",
+              "extraction",
+              { priority: 5 },
             ),
           ),
         );

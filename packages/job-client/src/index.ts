@@ -281,21 +281,23 @@ export async function getJobStatus(
 
   let progress: number | undefined;
   let progressStep: string | undefined;
+  let progressData: Record<string, unknown> | undefined;
 
   if (typeof rawProgress === "number") {
     progress = rawProgress;
-  } else if (rawProgress && typeof rawProgress === "object") {
-    const progressObject = rawProgress as {
-      progress?: unknown;
-      step?: unknown;
-    };
+  } else if (
+    rawProgress &&
+    typeof rawProgress === "object" &&
+    !Array.isArray(rawProgress)
+  ) {
+    progressData = rawProgress as Record<string, unknown>;
 
-    if (typeof progressObject.progress === "number") {
-      progress = progressObject.progress;
+    if (typeof progressData.progress === "number") {
+      progress = progressData.progress;
     }
 
-    if (typeof progressObject.step === "string") {
-      progressStep = progressObject.step;
+    if (typeof progressData.step === "string") {
+      progressStep = progressData.step;
     }
   }
 
@@ -326,7 +328,11 @@ export async function getJobStatus(
     status,
     progress,
     progressStep,
-    result: returnValue,
+    progressData,
+    result:
+      returnValue && typeof returnValue === "object"
+        ? (returnValue as Record<string, unknown>)
+        : undefined,
     error: failedReason,
   };
 }

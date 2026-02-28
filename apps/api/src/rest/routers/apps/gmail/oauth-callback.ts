@@ -160,6 +160,7 @@ app.openapi(
           {
             jobId: `sync-${account.id}`,
             removeOnComplete: { age: 60 },
+            priority: 5,
           },
         );
         finalUrl.searchParams.set("syncJobId", syncJob.id);

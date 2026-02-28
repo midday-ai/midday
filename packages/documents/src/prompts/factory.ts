@@ -3,17 +3,13 @@ import { getFormatSpecificHints } from "../utils/format-detection";
 import {
   accuracyGuidelines,
   baseInvoiceInstructions,
-  baseReceiptInstructions,
   commonErrors,
   extractionRequirements,
   fieldSpecificRules,
   validationRequirements,
 } from "./base";
-import {
-  chainOfThoughtInstructions,
-  receiptChainOfThoughtInstructions,
-} from "./chain-of-thought";
-import { invoiceFewShotExamples, receiptFewShotExamples } from "./examples";
+import { chainOfThoughtInstructions } from "./chain-of-thought";
+import { invoiceFewShotExamples } from "./examples";
 
 export interface PromptComponents {
   base: string;
@@ -28,9 +24,6 @@ export interface PromptComponents {
   formatHints?: string;
 }
 
-/**
- * Create invoice prompt components
- */
 export function createInvoicePromptComponents(
   companyName?: string | null,
   useChainOfThought = false,
@@ -62,118 +55,4 @@ NEVER set vendor_name = "${companyName}"`
     context,
     formatHints: format ? getFormatSpecificHints(format) : undefined,
   };
-}
-
-/**
- * Create receipt prompt components
- */
-export function createReceiptPromptComponents(
-  companyName?: string | null,
-  useChainOfThought = false,
-  format?: DocumentFormat,
-): PromptComponents {
-  const context = companyName
-    ? `CRITICAL CONTEXT: "${companyName}" is the CUSTOMER/BUYER making the purchase.
-
-MERCHANT IDENTIFICATION:
-- store_name = BUSINESS/MERCHANT that sold items TO "${companyName}" (NOT "${companyName}" itself)
-- Look for merchant in: receipt header, store logo, business address at top
-- "${companyName}" appears in: loyalty card sections, customer info areas
-
-EXAMPLE:
-Header shows "Starbucks Coffee" → store_name = "Starbucks Coffee"
-Loyalty card shows "${companyName}" → customer is "${companyName}"
-NEVER set store_name = "${companyName}"`
-    : undefined;
-
-  return {
-    base: baseReceiptInstructions,
-    examples: receiptFewShotExamples,
-    chainOfThought: useChainOfThought ? receiptChainOfThoughtInstructions : "",
-    requirements: extractionRequirements.receipt,
-    fieldRules: fieldSpecificRules.receipt,
-    accuracyGuidelines: accuracyGuidelines.receipt,
-    commonErrors: commonErrors.receipt,
-    validation: validationRequirements,
-    context,
-    formatHints: format ? getFormatSpecificHints(format) : undefined,
-  };
-}
-
-/**
- * Compose prompt components into a single prompt string
- */
-export function composePrompt(components: PromptComponents): string {
-  const parts: string[] = [];
-
-  parts.push(components.base);
-  parts.push(
-    "Extract structured data with maximum accuracy. Follow these instructions precisely:",
-  );
-  parts.push("");
-  parts.push(components.examples);
-
-  if (components.chainOfThought) {
-    parts.push("");
-    parts.push(components.chainOfThought);
-  }
-
-  if (components.context) {
-    parts.push("");
-    parts.push(components.context);
-  }
-
-  if (components.formatHints) {
-    parts.push("");
-    parts.push(components.formatHints);
-  }
-
-  parts.push("");
-  parts.push(components.requirements);
-  parts.push("");
-  parts.push(components.fieldRules);
-  parts.push("");
-  parts.push(components.accuracyGuidelines);
-  parts.push("");
-  parts.push(components.commonErrors);
-  parts.push("");
-  parts.push(components.validation);
-
-  return parts.join("\n");
-}
-
-/**
- * Create full invoice prompt
- */
-export function createInvoicePrompt(companyName?: string | null): string {
-  const components = createInvoicePromptComponents(companyName, false);
-  return composePrompt(components);
-}
-
-/**
- * Create invoice prompt with chain-of-thought
- */
-export function createInvoicePromptWithChainOfThought(
-  companyName?: string | null,
-): string {
-  const components = createInvoicePromptComponents(companyName, true);
-  return composePrompt(components);
-}
-
-/**
- * Create full receipt prompt
- */
-export function createReceiptPrompt(companyName?: string | null): string {
-  const components = createReceiptPromptComponents(companyName, false);
-  return composePrompt(components);
-}
-
-/**
- * Create receipt prompt with chain-of-thought
- */
-export function createReceiptPromptWithChainOfThought(
-  companyName?: string | null,
-): string {
-  const components = createReceiptPromptComponents(companyName, true);
-  return composePrompt(components);
 }

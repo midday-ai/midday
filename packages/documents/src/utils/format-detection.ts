@@ -1,8 +1,7 @@
 import type { z } from "zod/v4";
-import type { invoiceSchema, receiptSchema } from "../schema";
+import type { invoiceSchema } from "../schema";
 
 type InvoiceData = z.infer<typeof invoiceSchema>;
-type ReceiptData = z.infer<typeof receiptSchema>;
 
 export interface DocumentFormat {
   numberFormat: "us" | "european"; // 1,234.56 vs 1.234,56
@@ -74,69 +73,6 @@ export function detectInvoiceFormat(data: InvoiceData): DocumentFormat {
 
   // Detect date format from language
   // European languages often use DD/MM/YYYY
-  const europeanLanguages = [
-    "german",
-    "french",
-    "spanish",
-    "italian",
-    "portuguese",
-    "swedish",
-    "danish",
-    "norwegian",
-  ];
-  if (data.language && europeanLanguages.includes(data.language)) {
-    format.dateFormat = "european";
-  }
-
-  return format;
-}
-
-/**
- * Detect document format from extracted receipt data
- */
-export function detectReceiptFormat(data: ReceiptData): DocumentFormat {
-  const format: DocumentFormat = {
-    numberFormat: "us",
-    dateFormat: "iso",
-    language: data.language,
-    currency: data.currency,
-    taxTerm: "unknown",
-  };
-
-  // Detect tax term from tax_type
-  if (data.tax_type) {
-    // Map tax types to our format categories
-    if (
-      data.tax_type === "vat" ||
-      data.tax_type === "sales_tax" ||
-      data.tax_type === "gst"
-    ) {
-      format.taxTerm = data.tax_type;
-    } else {
-      format.taxTerm = "unknown";
-    }
-  } else {
-    // Infer from currency/language
-    if (
-      data.currency === "EUR" ||
-      data.language === "german" ||
-      data.language === "french"
-    ) {
-      format.taxTerm = "vat";
-    } else if (data.currency === "USD" || data.currency === "CAD") {
-      format.taxTerm = "sales_tax";
-    } else if (data.currency === "AUD" || data.currency === "NZD") {
-      format.taxTerm = "gst";
-    }
-  }
-
-  // Detect number format from currency
-  const europeanCurrenciesReceipt = ["EUR", "SEK", "DKK", "NOK", "PLN", "CZK"];
-  if (data.currency && europeanCurrenciesReceipt.includes(data.currency)) {
-    format.numberFormat = "european";
-  }
-
-  // Detect date format from language
   const europeanLanguages = [
     "german",
     "french",

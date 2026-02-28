@@ -7,18 +7,20 @@ import {
 import {
   createInbox,
   groupRelatedInboxItems,
-  updateInbox,
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
 import { triggerJob, triggerJobAndWait } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import { getExtensionFromMimeType } from "@midday/utils";
+import type { KnownBlock } from "@slack/types";
 import { generateText } from "ai";
 import type { Job } from "bullmq";
 import { format, parseISO } from "date-fns";
 import type { SlackUploadPayload } from "../../schemas/inbox";
+import { classifyFromExtraction } from "../../utils/classify-from-extraction";
 import { getDb } from "../../utils/db";
+import { NonRetryableError } from "../../utils/error-classification";
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
@@ -114,19 +116,27 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
       });
 
       if (!fileData) {
-        throw new Error("Failed to download file from Slack");
+        throw new NonRetryableError(
+          "Failed to download file from Slack",
+          undefined,
+          "validation",
+        );
       }
 
-      // Validate file data is not empty
       if (fileData.byteLength === 0) {
-        throw new Error("Downloaded file from Slack is empty");
+        throw new NonRetryableError(
+          "Downloaded file from Slack is empty",
+          undefined,
+          "validation",
+        );
       }
 
-      // Validate file size (max 20MB for images/documents)
-      const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+      const MAX_FILE_SIZE = 20 * 1024 * 1024;
       if (fileData.byteLength > MAX_FILE_SIZE) {
-        throw new Error(
+        throw new NonRetryableError(
           `File size (${(fileData.byteLength / 1024 / 1024).toFixed(2)}MB) exceeds maximum allowed size (20MB)`,
+          undefined,
+          "validation",
         );
       }
 
@@ -201,12 +211,12 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
         teamId,
       });
 
-      // Get signed URL for document processing (30 minutes expiration)
       const pathForSignedUrl = uploadData.path || filePathStr;
-      const { data: signedUrlData, error: signedUrlError } =
-        await supabase.storage
-          .from("vault")
-          .createSignedUrl(pathForSignedUrl, 1800);
+      const { data: signedUrlData, error: signedUrlError } = await withTimeout(
+        supabase.storage.from("vault").createSignedUrl(pathForSignedUrl, 600),
+        TIMEOUTS.EXTERNAL_API,
+        `Signed URL creation timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
+      );
 
       if (signedUrlError) {
         this.logger.error("Failed to create signed URL", {
@@ -313,7 +323,7 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
         taxAmount: result.tax_amount ?? undefined,
         taxRate: result.tax_rate ?? undefined,
         taxType: result.tax_type ?? undefined,
-        type: result.type as "invoice" | "expense" | null | undefined,
+        type: result.type ?? undefined,
         invoiceNumber: result.invoice_number ?? undefined,
         status: "analyzing", // Keep analyzing until matching is complete
       });
@@ -338,9 +348,6 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
           // Ensure bot is in channel before sending message (auto-joins public channels)
           await ensureBotInChannel({ client: slackClient, channelId });
 
-          // Determine document type for message
-          const _documentType =
-            updatedInbox.type === "invoice" ? "invoice" : "receipt";
           const documentTypeLabel =
             updatedInbox.type === "invoice" ? "invoice" : "receipt";
 
@@ -353,9 +360,7 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
             }).format(amount);
           };
 
-          // Get invoice number if available
-          const invoiceNumber =
-            "invoiceNumber" in updatedInbox ? updatedInbox.invoiceNumber : null;
+          const invoiceNumber = updatedInbox.invoiceNumber ?? null;
 
           // Generate AI summary of the purchase
           let purchaseSummary: string | null = null;
@@ -383,7 +388,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
           }
 
           // Build message blocks for better formatting
-          const blocks: any[] = [];
+          const blocks: KnownBlock[] = [];
 
           // Summary block (if available) - make it prominent
           if (purchaseSummary) {
@@ -398,7 +403,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
           }
 
           // Details block using fields for better layout
-          const detailFields: Array<{ type: string; text: string }> = [];
+          const detailFields: Array<{ type: "mrkdwn"; text: string }> = [];
 
           detailFields.push({
             type: "mrkdwn",
@@ -427,7 +432,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
           }
 
           // Financial details block - use fields for side-by-side layout
-          const financialFields: Array<{ type: string; text: string }> = [];
+          const financialFields: Array<{ type: "mrkdwn"; text: string }> = [];
 
           if (
             updatedInbox.taxAmount &&
@@ -509,56 +514,76 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
         }
       }
 
-      // Trigger document classification (same as process-attachment.ts)
-      await triggerJob(
-        "process-document",
-        {
-          mimetype: file.mimetype,
-          filePath,
-          teamId,
-        },
-        "documents",
-      );
-
-      // Trigger embedding and wait for completion before matching
-      // This ensures the embedding exists when batch-process-matching runs
-      this.logger.info("Triggering embed-inbox job", {
-        inboxId: inboxData.id,
+      await classifyFromExtraction({
+        filePath,
         teamId,
+        title: result.title,
+        summary: result.summary,
+        tags: result.tags,
+        content: result.content,
+        date: result.date,
+        language: result.language,
+        documentType: result.document_type,
+        vendorName: result.name,
+        invoiceNumber: result.invoice_number,
+        logger: this.logger,
       });
 
-      const embedStartTime = Date.now();
-      await triggerJobAndWait(
-        "embed-inbox",
-        {
+      try {
+        const embedStartTime = Date.now();
+        await triggerJobAndWait(
+          "embed-inbox",
+          {
+            inboxId: inboxData.id,
+            teamId,
+          },
+          "embeddings",
+          { timeout: 60000 },
+        );
+
+        const embedDuration = Date.now() - embedStartTime;
+        this.logger.info("Embed-inbox job completed", {
           inboxId: inboxData.id,
           teamId,
-        },
-        "embeddings",
-        { timeout: 60000 }, // 60 second timeout
-      );
+          duration: `${embedDuration}ms`,
+        });
 
-      const embedDuration = Date.now() - embedStartTime;
-      this.logger.info("Embed-inbox job completed", {
-        inboxId: inboxData.id,
-        teamId,
-        duration: `${embedDuration}ms`,
-      });
+        await triggerJob(
+          "batch-process-matching",
+          {
+            teamId,
+            inboxIds: [inboxData.id],
+          },
+          "inbox",
+        );
 
-      // After embedding completes, trigger matching
-      await triggerJob(
-        "batch-process-matching",
-        {
+        this.logger.info("Triggered batch-process-matching", {
+          inboxId: inboxData.id,
           teamId,
-          inboxIds: [inboxData.id],
-        },
-        "inbox",
-      );
-
-      this.logger.info("Triggered batch-process-matching", {
-        inboxId: inboxData.id,
-        teamId,
-      });
+        });
+      } catch (error) {
+        this.logger.error("Failed to complete embedding/matching", {
+          inboxId: inboxData.id,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+        try {
+          await updateInboxWithProcessedData(db, {
+            id: inboxData.id,
+            status: "pending",
+          });
+        } catch (updateError) {
+          this.logger.error(
+            "Failed to update inbox status after embed failure",
+            {
+              inboxId: inboxData.id,
+              error:
+                updateError instanceof Error
+                  ? updateError.message
+                  : "Unknown error",
+            },
+          );
+        }
+      }
 
       this.logger.info("Slack upload processed successfully", {
         inboxId: inboxData.id,
@@ -568,53 +593,16 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      const isGeminiImageError =
-        errorMessage.includes("Unable to process input image") ||
-        errorMessage.includes("INVALID_ARGUMENT");
 
       this.logger.error("Failed to process Slack upload", {
         inboxId: inboxData?.id ?? "not-created",
         error: errorMessage,
-        isGeminiImageError,
         mimetype: file.mimetype,
         fileName: file.name,
       });
 
       // Always remove processing reaction on any error
       await removeProcessingReaction();
-
-      // For Gemini image processing errors, mark as pending with fallback name
-      // This allows the file to be manually reviewed later
-      if (isGeminiImageError && inboxData) {
-        this.logger.info(
-          "Gemini failed to process image, marking as pending for manual review",
-          {
-            inboxId: inboxData.id,
-            fileName: file.name,
-            mimetype: file.mimetype,
-            error: errorMessage,
-          },
-        );
-
-        try {
-          await updateInbox(db, {
-            id: inboxData.id,
-            teamId,
-            status: "pending",
-          });
-        } catch (updateError) {
-          this.logger.error("Failed to update inbox status to pending", {
-            inboxId: inboxData.id,
-            error:
-              updateError instanceof Error
-                ? updateError.message
-                : "Unknown error",
-          });
-        }
-
-        // Don't re-throw - we've handled the error gracefully
-        return;
-      }
 
       // Re-throw timeout errors to trigger retry
       if (error instanceof Error && error.name === "AbortError") {

@@ -11,6 +11,7 @@ import { triggerJob, triggerJobAndWait } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import type { ProcessAttachmentPayload } from "../../schemas/inbox";
+import { classifyFromExtraction } from "../../utils/classify-from-extraction";
 import { getDb } from "../../utils/db";
 import { NonRetryableError } from "../../utils/error-classification";
 import { convertHeicToJpeg } from "../../utils/image-processing";
@@ -343,7 +344,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         taxAmount: result.tax_amount ?? undefined,
         taxRate: result.tax_rate ?? undefined,
         taxType: result.tax_type ?? undefined,
-        type: result.type as "invoice" | "expense" | null | undefined,
+        type: result.type ?? undefined,
         invoiceNumber: result.invoice_number ?? undefined,
         status: "analyzing", // Keep analyzing until matching is complete
       });
@@ -362,50 +363,20 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         // Don't fail the entire process if grouping fails
       }
 
-      // Trigger parallel jobs (non-blocking)
-      // Process documents and embedding in parallel for better performance
-      const parallelJobsStartTime = Date.now();
-      this.logger.info(
-        "Triggering parallel jobs (process-document + embed-inbox)",
-        {
-          jobId: job.id,
-          inboxId: inboxData.id,
-          teamId,
-        },
-      );
-
-      // Trigger document processing (non-blocking, can run in parallel)
-      const documentJobPromise = triggerJob(
-        "process-document",
-        {
-          mimetype: processedMimetype,
-          filePath,
-          teamId,
-        },
-        "documents",
-        { jobId: `process-doc_${teamId}_${filePath.join("/")}` },
-      )
-        .then((result) => {
-          this.logger.info("Triggered process-document job", {
-            jobId: job.id,
-            inboxId: inboxData.id,
-            triggeredJobId: result.id,
-            triggeredJobName: "process-document",
-          });
-          return result;
-        })
-        .catch((error) => {
-          this.logger.warn(
-            "Failed to trigger document processing (non-critical)",
-            {
-              jobId: job.id,
-              inboxId: inboxData.id,
-              error: error instanceof Error ? error.message : "Unknown error",
-            },
-          );
-          // Don't fail the entire process if document processing fails
-          return null;
-        });
+      const classifyPromise = classifyFromExtraction({
+        filePath,
+        teamId,
+        title: result.title,
+        summary: result.summary,
+        tags: result.tags,
+        content: result.content,
+        date: result.date,
+        language: result.language,
+        documentType: result.document_type,
+        vendorName: result.name,
+        invoiceNumber: result.invoice_number,
+        logger: this.logger,
+      });
 
       // Wait for embed-inbox to complete before triggering matching
       // This ensures the embedding exists when batch-process-matching runs
@@ -532,18 +503,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         // Don't throw - allow document processing to continue
       }
 
-      // Wait for document processing to complete (non-blocking, but log completion)
-      const documentJobResult = await Promise.allSettled([documentJobPromise]);
-      const parallelJobsDuration = Date.now() - parallelJobsStartTime;
-      this.logger.info("Parallel jobs completed", {
-        jobId: job.id,
-        inboxId: inboxData.id,
-        documentJobStatus: documentJobResult[0]?.status,
-        embedJobCompleted: embedJobResult !== null,
-        duration: `${parallelJobsDuration}ms`,
-      });
-
-      // If embed-inbox failed, matching will be handled by the scheduler when embedding eventually completes
+      await classifyPromise;
 
       const totalDuration = Date.now() - processStartTime;
       this.logger.info("process-attachment job completed successfully", {

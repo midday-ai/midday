@@ -1,47 +1,11 @@
-import { Mistral } from "@mistralai/mistralai";
-import { z } from "zod/v4";
-import { invoiceConfig } from "../config/extraction-config";
-import type { PromptComponents } from "../prompts/factory";
-import { type InvoiceData, invoiceSchema } from "../schema";
-
-const OCR_MODEL = "mistral-ocr-latest";
-
-const invoiceJsonSchema = z.toJSONSchema(invoiceSchema, {
-  target: "draft-07",
-});
-
-function getMistralClient(): Mistral {
-  const apiKey = process.env.MISTRAL_API_KEY;
-  if (!apiKey) {
-    throw new Error("MISTRAL_API_KEY environment variable is required");
-  }
-  return new Mistral({ apiKey });
-}
-
-function composeAnnotationPrompt(components: PromptComponents): string {
-  const parts: string[] = [];
-  parts.push(components.base);
-  parts.push(
-    "Extract structured data with maximum accuracy. Follow these instructions precisely:",
-  );
-  parts.push("");
-  parts.push(components.examples);
-  if (components.context) {
-    parts.push("");
-    parts.push(components.context);
-  }
-  parts.push("");
-  parts.push(components.requirements);
-  parts.push("");
-  parts.push(components.fieldRules);
-  parts.push("");
-  parts.push(components.accuracyGuidelines);
-  parts.push("");
-  parts.push(components.commonErrors);
-  parts.push("");
-  parts.push(components.validation);
-  return parts.join("\n");
-}
+import { createInvoicePromptComponents } from "../prompts/factory";
+import type { InvoiceData } from "../schema";
+import {
+  OCR_MODEL,
+  composeAnnotationPrompt,
+  getMistralClient,
+  invoiceJsonSchema,
+} from "./client";
 
 export interface BatchExtractionItem {
   id: string;
@@ -53,25 +17,27 @@ export interface BatchExtractionResult {
   id: string;
   success: boolean;
   data?: Partial<InvoiceData>;
+  content?: string;
   error?: string;
 }
 
 /**
  * Submit a batch of PDFs for extraction via Mistral Batch OCR API
  * with document annotations for structured data extraction.
- * Uses the dedicated OCR model for better accuracy on invoices/receipts.
  * Returns the batch job ID for polling.
  */
 export async function submitBatchExtraction(
   items: BatchExtractionItem[],
 ): Promise<string> {
   const client = getMistralClient();
-  const defaultPromptComponents = invoiceConfig.promptFactory();
+  const defaultPromptComponents = createInvoicePromptComponents();
   const defaultPrompt = composeAnnotationPrompt(defaultPromptComponents);
 
   const jsonlLines = items.map((item) => {
     const prompt = item.companyName
-      ? composeAnnotationPrompt(invoiceConfig.promptFactory(item.companyName))
+      ? composeAnnotationPrompt(
+          createInvoicePromptComponents(item.companyName),
+        )
       : defaultPrompt;
 
     return JSON.stringify({
@@ -163,7 +129,6 @@ export async function downloadBatchResults(
   const client = getMistralClient();
   const fileContent = await client.files.download({ fileId: outputFileId });
 
-  // SDK returns ReadableStream<Uint8Array>
   const text = await new Response(fileContent).text();
 
   const lines = text.trim().split("\n").filter(Boolean);
@@ -178,21 +143,34 @@ export async function downloadBatchResults(
       if (response?.status_code === 200 && response?.body) {
         const body = response.body;
 
-        // OCR endpoint returns document_annotation as a JSON string
+        const pageMarkdown = (body.pages ?? [])
+          .map((page: { markdown?: string }) => page.markdown)
+          .filter(Boolean)
+          .join("\n");
+
         const annotation = body.document_annotation;
         if (annotation) {
           const data =
             typeof annotation === "string"
               ? JSON.parse(annotation)
               : annotation;
-          results.push({ id: customId, success: true, data });
+          results.push({
+            id: customId,
+            success: true,
+            data,
+            content: pageMarkdown || undefined,
+          });
         } else {
-          // Fallback: check for chat completion format
           const content = body.choices?.[0]?.message?.content;
           if (content) {
             const data =
               typeof content === "string" ? JSON.parse(content) : content;
-            results.push({ id: customId, success: true, data });
+            results.push({
+              id: customId,
+              success: true,
+              data,
+              content: pageMarkdown || undefined,
+            });
           } else {
             results.push({
               id: customId,
@@ -228,7 +206,6 @@ export async function downloadBatchErrors(
   const client = getMistralClient();
   const fileContent = await client.files.download({ fileId: errorFileId });
 
-  // SDK returns ReadableStream<Uint8Array>
   const text = await new Response(fileContent).text();
 
   const lines = text.trim().split("\n").filter(Boolean);

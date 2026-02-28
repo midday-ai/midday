@@ -9,18 +9,25 @@ import {
   inboxPreSignedUrlResponseSchema,
   inboxResponseSchema,
   updateInboxSchema,
+  uploadInboxItemResponseSchema,
 } from "@api/schemas/inbox";
 import { createAdminClient } from "@api/services/supabase";
 import { validateResponse } from "@api/utils/validate-response";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
+  createInbox,
   deleteInbox,
   getInbox,
   getInboxById,
   updateInbox,
 } from "@midday/db/queries";
+import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
+import { triggerJob } from "@midday/job-client";
+import { logger } from "@midday/logger";
 import { signedUrl } from "@midday/supabase/storage";
+import { nanoid } from "nanoid";
 import { withRequiredScope } from "../middleware";
+import { generateUniqueFileName } from "./webhooks/inbox/utils";
 
 const app = new OpenAPIHono<Context>();
 
@@ -300,6 +307,215 @@ app.openapi(
     const result = await updateInbox(db, { ...body, id, teamId });
 
     return c.json(validateResponse(result, inboxItemResponseSchema));
+  },
+);
+
+const MAX_UPLOAD_SIZE = 20 * 1024 * 1024; // 20MB
+
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/upload",
+    summary: "Upload a document to inbox",
+    operationId: "uploadInboxItem",
+    "x-speakeasy-name-override": "upload",
+    description:
+      "Upload a document (invoice, receipt, etc.) to the inbox via multipart form data. " +
+      "The file will be stored and automatically processed (OCR, classification, transaction matching). " +
+      "Accepts optional metadata fields (currency, amount) as additional form fields.",
+    tags: ["Inbox"],
+    request: {
+      body: {
+        content: {
+          "multipart/form-data": {
+            schema: z.object({
+              file: z.any().openapi({
+                type: "string",
+                format: "binary",
+                description: "The document file to upload (PDF, image, etc.)",
+              }),
+              currency: z.string().length(3).optional().openapi({
+                description: "ISO 4217 currency code",
+                example: "USD",
+              }),
+              amount: z.coerce.number().optional().openapi({
+                description: "Known amount for the document",
+                example: 150.0,
+              }),
+            }),
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      201: {
+        description: "Document uploaded and processing started",
+        content: {
+          "application/json": {
+            schema: uploadInboxItemResponseSchema,
+          },
+        },
+      },
+      400: {
+        description:
+          "Bad request - missing file, unsupported type, or file too large",
+        content: {
+          "application/json": {
+            schema: z.object({ error: z.string() }),
+          },
+        },
+      },
+      500: {
+        description: "Internal server error - upload or processing failed",
+        content: {
+          "application/json": {
+            schema: z.object({ error: z.string() }),
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("inbox.write")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+
+    const body = await c.req.parseBody();
+    const file = body.file;
+
+    if (!file || !(file instanceof File)) {
+      return c.json(
+        { error: "Missing required 'file' field in multipart form data" },
+        400,
+      );
+    }
+
+    if (file.size === 0) {
+      return c.json({ error: "Uploaded file is empty" }, 400);
+    }
+
+    if (file.size > MAX_UPLOAD_SIZE) {
+      return c.json(
+        {
+          error: `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds maximum allowed size (20MB)`,
+        },
+        400,
+      );
+    }
+
+    const mimetype = file.type || "application/octet-stream";
+
+    if (
+      mimetype !== "application/octet-stream" &&
+      !isMimeTypeSupportedForProcessing(mimetype)
+    ) {
+      return c.json({ error: `Unsupported file type: ${mimetype}` }, 400);
+    }
+
+    const uniqueFileName = generateUniqueFileName(file.name, mimetype);
+    const filePath = [teamId, "inbox", uniqueFileName];
+    const filePathStr = filePath.join("/");
+
+    const supabase = await createAdminClient();
+
+    const arrayBuffer = await file.arrayBuffer();
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("vault")
+      .upload(filePathStr, new Uint8Array(arrayBuffer), {
+        contentType: mimetype,
+        upsert: true,
+      });
+
+    if (uploadError || !uploadData) {
+      logger.error("Failed to upload file to storage", {
+        error: uploadError?.message,
+        filePath: filePathStr,
+        teamId,
+      });
+      return c.json({ error: "Failed to upload file to storage" }, 500);
+    }
+
+    const referenceId = `api_upload_${nanoid(12)}`;
+
+    const currency =
+      typeof body.currency === "string" && body.currency.length === 3
+        ? body.currency.toUpperCase()
+        : undefined;
+    const amount =
+      typeof body.amount === "string" && !Number.isNaN(Number(body.amount))
+        ? Number(body.amount)
+        : undefined;
+
+    const inboxData = await createInbox(db, {
+      displayName: file.name,
+      teamId,
+      filePath,
+      fileName: uniqueFileName,
+      contentType: mimetype,
+      size: file.size,
+      referenceId,
+      meta: { source: "api" },
+      status: "processing",
+    });
+
+    if (!inboxData) {
+      return c.json({ error: "Failed to create inbox item" }, 500);
+    }
+
+    if (currency || amount) {
+      await updateInbox(db, {
+        id: inboxData.id,
+        teamId,
+        ...(currency && { currency }),
+        ...(amount && { amount }),
+      });
+    }
+
+    try {
+      await triggerJob(
+        "process-attachment",
+        {
+          filePath,
+          mimetype,
+          size: file.size,
+          teamId,
+          referenceId,
+        },
+        "extraction",
+        { priority: 1 },
+      );
+    } catch (error) {
+      logger.error("Failed to trigger process-attachment job", {
+        inboxId: inboxData.id,
+        teamId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+
+    try {
+      await triggerJob(
+        "notification",
+        {
+          type: "inbox_new",
+          teamId,
+          totalCount: 1,
+          inboxType: "api",
+        },
+        "notifications",
+      );
+    } catch {
+      // Non-critical
+    }
+
+    const result = {
+      id: inboxData.id,
+      fileName: uniqueFileName,
+      filePath,
+      status: "processing",
+    };
+
+    return c.json(validateResponse(result, uploadInboxItemResponseSchema), 201);
   },
 );
 

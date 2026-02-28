@@ -103,92 +103,11 @@ export const invoiceSchema = z.object({
     .describe(
       "The language of the document as a PostgreSQL text search configuration name (e.g., 'english', 'swedish', 'german', 'french')",
     ),
-});
-
-export const receiptSchema = z.object({
-  document_type: documentTypeSchema.describe(
-    "Classify this document type FIRST before extracting data:\n" +
-      "- 'invoice': A bill requesting payment with amounts due, from vendor to customer\n" +
-      "- 'receipt': Proof of completed purchase showing items and payment made\n" +
-      "- 'other': Any non-financial document (contracts, agreements, newsletters, shipping notifications, confirmations without amounts, terms of service, correspondence)\n" +
-      "If 'other', financial fields (amount, currency, etc.) may be left as null.",
-  ),
-  date: z
-    .string()
-    .nullable()
-    .describe("Date of receipt in ISO 8601 format (YYYY-MM-DD)"),
-  currency: z
-    .string()
-    .nullable()
-    .describe(
-      "Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK). Null if document_type is 'other'.",
-    ),
-  total_amount: z
-    .number()
-    .nullable()
-    .describe("Total amount including tax. Null if document_type is 'other'."),
-  subtotal_amount: z.number().nullable().describe("Subtotal amount before tax"),
-  tax_amount: z
-    .number()
-    .nullable()
-    .describe("Tax amount. Null if document_type is 'other'."),
-  tax_rate: z
-    .number()
-    .optional()
-    .describe("Tax rate percentage (e.g., 20 for 20%)"),
-  tax_type: taxTypeSchema
-    .nullable()
-    .describe(
-      "The type of tax applied to the receipt, such as VAT, Sales Tax, GST, Withholding Tax, Service Tax, Excise Tax, Reverse Charge, or Custom Tax. This field should reflect the tax regime or system referenced on the receipt, and is important for correct accounting and compliance. If the document does not specify a tax type, infer it based on the country or context if possible.",
-    ),
-  store_name: z.string().nullable().describe("Name of the store/merchant"),
-  website: z
-    .string()
-    .nullable()
-    .describe(
-      "Look for the store/merchant's website URL directly on the receipt (often found near the address, phone number, or logo). It typically ends in .com, .org, .net, etc. If no website URL is explicitly printed, try to infer it from the store name or domain name in an email address if present, but prioritize finding it directly on the receipt.",
-    ),
-  payment_method: z
-    .string()
-    .nullable()
-    .describe("Method of payment (e.g., cash, credit card, debit card)"),
-  items: z
-    .array(
-      z.object({
-        description: z.string().nullable().describe("Description of the item"),
-        quantity: z.number().nullable().describe("Quantity of items"),
-        unit_price: z.number().nullable().describe("Price per unit"),
-        total_price: z
-          .number()
-          .nullable()
-          .describe("Total price for this item"),
-        discount: z
-          .number()
-          .nullable()
-          .describe("Discount amount applied to this item if any"),
-      }),
-    )
-    .describe("Array of items purchased"),
-  cashier_name: z.string().nullable().describe("Name or ID of the cashier"),
-  email: z.string().nullable().describe("Email of the store/merchant"),
-  register_number: z
-    .string()
-    .nullable()
-    .describe("POS terminal or register number"),
-  language: z
-    .string()
-    .nullable()
-    .describe(
-      "The language of the document as a PostgreSQL text search configuration name (e.g., 'english', 'swedish', 'german', 'french')",
-    ),
-});
-
-export const documentClassifierSchema = z.object({
   title: z
     .string()
     .nullable()
     .describe(
-      "A descriptive, meaningful title for this document that can be used as a filename. Include key identifying information like document number, company names, dates, or order numbers when available. Examples: 'Invoice INV-2024-001 from Acme Corp', 'Receipt from Starbucks Coffee - 2024-03-15', 'Service Agreement with Acme Corp - 2024-03-15'. Do NOT use generic names like 'Invoice', 'Receipt', or 'Document' - make it specific to this document.",
+      "A descriptive title for this document suitable as a filename. Include key identifying info like document number, company names, dates. Examples: 'Invoice INV-2024-001 from Acme Corp', 'Receipt from Starbucks Coffee - 2024-03-15'. Do NOT use generic names like 'Invoice' or 'Receipt' alone.",
     ),
   summary: z
     .string()
@@ -201,7 +120,29 @@ export const documentClassifierSchema = z.object({
     .max(5)
     .nullable()
     .describe(
-      "Up to 5 relevant keywords or phrases for classifying and searching the document (e.g., 'Invoice', 'Acme Corp Contract', 'Marketing Report'). Prioritize document type, key names, and subject.",
+      "Up to 5 relevant keywords or phrases for classifying and searching the document. Prioritize document type, key names, and subject.",
+    ),
+});
+
+export const classificationSchema = z.object({
+  title: z
+    .string()
+    .nullable()
+    .describe(
+      "A descriptive title for this document suitable as a filename. Include key identifying info like document number, company names, dates. Do NOT use generic names like 'Document' alone.",
+    ),
+  summary: z
+    .string()
+    .nullable()
+    .describe(
+      "A brief, one-sentence summary of the document's main purpose or content.",
+    ),
+  tags: z
+    .array(z.string())
+    .max(5)
+    .nullable()
+    .describe(
+      "Up to 5 relevant keywords or phrases for classifying and searching the document. Prioritize document type, key names, and subject.",
     ),
   date: z
     .string()
@@ -217,37 +158,4 @@ export const documentClassifierSchema = z.object({
     ),
 });
 
-export const imageClassifierSchema = z.object({
-  title: z
-    .string()
-    .nullable()
-    .describe(
-      "A descriptive, meaningful title for this image that can be used as a filename. Include key identifying information like merchant/store names, dates, invoice numbers, or order numbers when visible. Examples: 'Receipt from Starbucks Coffee - 2024-03-15', 'Invoice INV-2024-001 from Acme Corp', 'Acme Corp Logo'. Do NOT use generic names like 'Receipt', 'Invoice', or 'Image' - make it specific to this document.",
-    ),
-  summary: z
-    .string()
-    .nullable()
-    .describe(
-      "A brief, one-sentence summary identifying key business-related visual elements in the image (e.g., Logo, Branding, Letterhead, Invoice Design, Product Photo, Marketing Material, Website Screenshot).",
-    ),
-  tags: z
-    .array(z.string())
-    .max(5)
-    .nullable()
-    .describe(
-      "Up to 5 relevant keywords describing business-related visual content (e.g., 'Logo', 'Branding', 'Letterhead', 'Invoice Design', 'Product Photo', 'Marketing Material', 'Website Screenshot'). Prioritize brand elements and document types.",
-    ),
-  content: z.string().nullable().describe("The content of the document."),
-  language: z
-    .string()
-    .nullable()
-    .describe(
-      "The language of the document as a PostgreSQL text search configuration name (e.g., 'english', 'swedish', 'german', 'french')",
-    ),
-  date: z
-    .string()
-    .nullable()
-    .describe(
-      "The single most relevant date found in the document (e.g., issue date, signing date) in ISO 8601 format (YYYY-MM-DD)",
-    ),
-});
+export type ClassificationData = z.infer<typeof classificationSchema>;

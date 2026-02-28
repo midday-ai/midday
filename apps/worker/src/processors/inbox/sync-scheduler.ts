@@ -344,7 +344,9 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
 
           await Promise.all(
             uploadedAttachments.map((attachment) =>
-              triggerJob("process-attachment", attachment, "inbox"),
+              triggerJob("process-attachment", attachment, "extraction", {
+                priority: 10,
+              }),
             ),
           );
         }

@@ -1,11 +1,16 @@
 import { updateTransaction } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
-import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import type { ProcessTransactionAttachmentPayload } from "../../schemas/transactions";
+import { classifyFromExtraction } from "../../utils/classify-from-extraction";
 import { getDb } from "../../utils/db";
-import { convertHeicToJpeg } from "../../utils/image-processing";
+import { NonRetryableError } from "../../utils/error-classification";
+import {
+  convertHeicToJpeg,
+  MAX_HEIC_FILE_SIZE,
+} from "../../utils/image-processing";
+import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
 /**
@@ -24,62 +29,78 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
       teamId,
     });
 
-    // If the file is a HEIC we need to convert it to a JPG
     if (mimetype === "image/heic") {
       this.logger.info("Converting HEIC to JPG", {
         filePath: filePath.join("/"),
       });
 
-      const { data } = await supabase.storage
-        .from("vault")
-        .download(filePath.join("/"));
+      const { data } = await withTimeout(
+        supabase.storage.from("vault").download(filePath.join("/")),
+        TIMEOUTS.FILE_DOWNLOAD,
+        `File download timed out after ${TIMEOUTS.FILE_DOWNLOAD}ms`,
+      );
 
       if (!data) {
-        throw new Error("File not found");
+        throw new NonRetryableError("File not found", undefined, "validation");
       }
 
       const buffer = await data.arrayBuffer();
 
-      // Use shared HEIC conversion utility (resizes to 2048px)
+      if (buffer.byteLength > MAX_HEIC_FILE_SIZE) {
+        const sizeMB = (buffer.byteLength / (1024 * 1024)).toFixed(2);
+        this.logger.warn("HEIC file too large for processing", {
+          transactionId,
+          filePath: filePath.join("/"),
+          sizeMB,
+        });
+        throw new NonRetryableError(
+          `HEIC file too large (${sizeMB}MB)`,
+          undefined,
+          "validation",
+        );
+      }
+
       const { buffer: image } = await convertHeicToJpeg(buffer, this.logger);
 
-      // Upload the converted image
-      const { data: uploadedData } = await supabase.storage
-        .from("vault")
-        .upload(filePath.join("/"), image, {
+      const { data: uploadedData } = await withTimeout(
+        supabase.storage.from("vault").upload(filePath.join("/"), image, {
           contentType: "image/jpeg",
           upsert: true,
-        });
+        }),
+        TIMEOUTS.FILE_UPLOAD,
+        `File upload timed out after ${TIMEOUTS.FILE_UPLOAD}ms`,
+      );
 
       if (!uploadedData) {
         throw new Error("Failed to upload converted image");
       }
     }
 
-    const filename = filePath.at(-1);
-
-    // Use 10 minutes expiration to ensure URL doesn't expire during processing
-    // (document processing can take up to 120s, plus buffer for retries)
-    const { data: signedUrlData } = await supabase.storage
-      .from("vault")
-      .createSignedUrl(filePath.join("/"), 600);
+    const { data: signedUrlData } = await withTimeout(
+      supabase.storage.from("vault").createSignedUrl(filePath.join("/"), 600),
+      TIMEOUTS.EXTERNAL_API,
+      `Signed URL creation timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
+    );
 
     if (!signedUrlData) {
-      throw new Error("File not found");
+      throw new NonRetryableError("File not found", undefined, "validation");
     }
 
     const document = new DocumentClient();
 
     this.logger.info("Extracting tax information from document", {
       transactionId,
-      filename,
       mimetype,
     });
 
-    const result = await document.getInvoiceOrReceipt({
-      documentUrl: signedUrlData.signedUrl,
-      mimetype,
-    });
+    const result = await withTimeout(
+      document.getInvoiceOrReceipt({
+        documentUrl: signedUrlData.signedUrl,
+        mimetype,
+      }),
+      TIMEOUTS.DOCUMENT_PROCESSING,
+      `Document extraction timed out after ${TIMEOUTS.DOCUMENT_PROCESSING}ms`,
+    );
 
     // Update the transaction with the tax information
     if (result.tax_rate && result.tax_type) {
@@ -108,29 +129,19 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
       });
     }
 
-    // NOTE: Process documents and images for classification
-    // This is non-blocking, classification happens separately
-    try {
-      await triggerJob(
-        "process-document",
-        {
-          mimetype,
-          filePath,
-          teamId,
-        },
-        "documents",
-      );
-
-      this.logger.info("Triggered document processing for classification", {
-        transactionId,
-        filePath: filePath.join("/"),
-      });
-    } catch (error) {
-      this.logger.warn("Failed to trigger document processing (non-critical)", {
-        transactionId,
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-      // Don't fail the entire process if document processing fails
-    }
+    await classifyFromExtraction({
+      filePath,
+      teamId,
+      title: result.title,
+      summary: result.summary,
+      tags: result.tags,
+      content: result.content,
+      date: result.date,
+      language: result.language,
+      documentType: result.document_type,
+      vendorName: result.name,
+      invoiceNumber: result.invoice_number,
+      logger: this.logger,
+    });
   }
 }
