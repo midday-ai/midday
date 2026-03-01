@@ -1,43 +1,38 @@
-import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
-import type { PopoverContent } from "@midday/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@midday/ui/select";
 
 const companyTypeOptions = [
-  { id: "freelancer", value: "freelancer", label: "Freelancer / Consultant" },
-  { id: "solo_founder", value: "solo_founder", label: "Solo founder" },
-  { id: "small_team", value: "small_team", label: "2–10 person team" },
-  { id: "agency", value: "agency", label: "Agency" },
-  { id: "exploring", value: "exploring", label: "Just exploring" },
+  { value: "freelancer", label: "Freelancer / Consultant" },
+  { value: "solo_founder", label: "Solo founder" },
+  { value: "small_team", label: "2–10 person team" },
+  { value: "agency", label: "Agency" },
+  { value: "exploring", label: "Just exploring" },
 ];
 
 type Props = {
   value?: string;
   onChange: (value: string) => void;
-  triggerClassName?: string;
-  popoverProps?: React.ComponentProps<typeof PopoverContent>;
-  listClassName?: string;
+  className?: string;
 };
 
-export function SelectCompanyType({
-  value,
-  onChange,
-  triggerClassName,
-  popoverProps,
-  listClassName,
-}: Props) {
-  const selectedItem = companyTypeOptions.find((item) => item.value === value);
-
+export function SelectCompanyType({ value, onChange, className }: Props) {
   return (
-    <ComboboxDropdown
-      placeholder="Select one"
-      selectedItem={selectedItem}
-      searchPlaceholder="Search"
-      items={companyTypeOptions}
-      triggerClassName={triggerClassName}
-      popoverProps={popoverProps}
-      listClassName={listClassName}
-      onSelect={(item) => {
-        onChange(item.value);
-      }}
-    />
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className={className}>
+        <SelectValue placeholder="Select one" />
+      </SelectTrigger>
+      <SelectContent>
+        {companyTypeOptions.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
