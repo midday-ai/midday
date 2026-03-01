@@ -36,7 +36,16 @@ function fetchWithTimeout(
     ? AbortSignal.any([init.signal, timeoutSignal])
     : timeoutSignal;
 
-  return fetch(input, { ...init, signal });
+  const headers = new Headers(init?.headers);
+
+  // Prevent HTTP keep-alive connection reuse on internal networking.
+  // Without this, long-lived connections hold onto old API instance IPs
+  // after a deployment, causing requests to hit draining/dead instances.
+  if (process.env.API_INTERNAL_URL) {
+    headers.set("Connection", "close");
+  }
+
+  return fetch(input, { ...init, signal, headers });
 }
 
 export const trpc = createTRPCOptionsProxy<AppRouter>({
@@ -138,6 +147,7 @@ export async function getTRPCClient(options?: { forcePrimary?: boolean }) {
       httpLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
+        fetch: fetchWithTimeout,
         headers: buildTRPCRequestHeaders({
           session: requestContext.session,
           forcePrimary: shouldForcePrimary,
