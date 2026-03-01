@@ -50,11 +50,13 @@ const stepTransition = {
 type CancellationDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  continent?: string;
 };
 
 export function CancellationDialog({
   open,
   onOpenChange,
+  continent,
 }: CancellationDialogProps) {
   const [step, setStep] = useState<Step>(1);
   const [reason, setReason] = useState<CancellationReason | null>(null);
@@ -75,6 +77,9 @@ export function CancellationDialog({
       checkoutRef.current?.close();
     };
   }, []);
+
+  const pricing = getPlanPricing(continent);
+  const checkoutCurrency = pricing.currency as "USD" | "EUR";
 
   const createCheckoutMutation = useMutation(
     trpc.billing.createCheckout.mutationOptions(),
@@ -128,9 +133,13 @@ export function CancellationDialog({
         plan: planKey,
         planType,
         embedOrigin: window.location.origin,
+        currency: checkoutCurrency,
       });
 
-      const checkout = await PolarEmbedCheckout.create(url, theme);
+      const checkout = await PolarEmbedCheckout.create(url, {
+        theme,
+        locale: user?.locale,
+      });
       checkoutRef.current = checkout;
 
       checkout.addEventListener("success", (event: any) => {
@@ -152,7 +161,7 @@ export function CancellationDialog({
     } catch (error) {
       console.error("Failed to open checkout", error);
     }
-  }, [plan, theme, handleClose, createCheckoutMutation, queryClient, trpc]);
+  }, [plan, theme, handleClose, checkoutCurrency]);
 
   const handleReasonSelect = useCallback((value: CancellationReason) => {
     setReason(value);
@@ -164,7 +173,6 @@ export function CancellationDialog({
     cancelMutation.mutate({ reason, comment: comment || undefined });
   }, [reason, comment, cancelMutation]);
 
-  const pricing = getPlanPricing();
   const annualSavings =
     plan === "pro"
       ? (pricing.pro.monthly - pricing.pro.yearly) * 12
@@ -194,6 +202,7 @@ export function CancellationDialog({
                     onStillCancel={() => setStep(3)}
                     onBack={() => {
                       setReason(null);
+                      setComment("");
                       setStep(1);
                     }}
                   />

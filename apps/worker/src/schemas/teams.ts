@@ -26,3 +26,12 @@ export const cancellationEmailsSchema = z.object({
 export type CancellationEmailsPayload = z.infer<
   typeof cancellationEmailsSchema
 >;
+
+export const paymentIssueSchema = z.object({
+  teamId: z.string().uuid(),
+  email: z.string().email(),
+  fullName: z.string(),
+  teamName: z.string(),
+});
+
+export type PaymentIssuePayload = z.infer<typeof paymentIssueSchema>;

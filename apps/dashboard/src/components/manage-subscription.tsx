@@ -10,7 +10,7 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { CancellationDialog } from "./cancellation-dialog";
 
-export function ManageSubscription() {
+export function ManageSubscription({ continent }: { continent?: string }) {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
   const { data: user } = useUserQuery();
@@ -69,7 +69,11 @@ export function ManageSubscription() {
         )}
       </Card>
 
-      <CancellationDialog open={cancelOpen} onOpenChange={setCancelOpen} />
+      <CancellationDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        continent={continent}
+      />
     </div>
   );
 }

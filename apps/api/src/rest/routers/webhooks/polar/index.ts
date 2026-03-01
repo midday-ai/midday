@@ -1,6 +1,7 @@
 import type { Context } from "@api/rest/types";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
+  getTeamById,
   getTeamOwnerContact,
   hasTeamData,
   updateTeamById,
@@ -171,7 +172,6 @@ app.openapi(
             break;
           }
 
-          // Payment failed but recoverable - mark as past_due
           await updateTeamById(db, {
             id: teamId,
             data: {
@@ -180,6 +180,33 @@ app.openapi(
           });
 
           logger.info("Team subscription past due", { teamId });
+
+          try {
+            const [owner, team] = await Promise.all([
+              getTeamOwnerContact(db, teamId),
+              getTeamById(db, teamId),
+            ]);
+
+            if (owner?.email && team) {
+              await triggerJob(
+                "payment-issue",
+                {
+                  teamId,
+                  email: owner.email,
+                  fullName: owner.fullName ?? "there",
+                  teamName: team.name ?? "Midday",
+                },
+                "teams",
+                { jobId: `payment-issue-${teamId}` },
+              );
+            }
+          } catch (err) {
+            logger.error("Failed to trigger payment issue email", {
+              teamId,
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+
           break;
         }
 

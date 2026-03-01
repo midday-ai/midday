@@ -25,7 +25,7 @@ export default async function Billing() {
 
   return (
     <div className="space-y-12">
-      {team?.plan !== "trial" && <ManageSubscription />}
+      {team?.plan !== "trial" && <ManageSubscription continent={continent} />}
 
       {team?.plan === "trial" && (
         <div>

@@ -761,15 +761,18 @@ export async function isTeamStillCanceled(db: Database, teamId: string) {
 }
 
 export async function hasTeamData(db: Database, teamId: string) {
-  const [result] = await db.select({
-    hasData: sql<boolean>`EXISTS (
-      SELECT 1 FROM ${transactions} WHERE ${transactions.teamId} = ${teamId}
-    ) OR EXISTS (
-      SELECT 1 FROM ${bankConnections} WHERE ${bankConnections.teamId} = ${teamId}
-    ) OR EXISTS (
-      SELECT 1 FROM ${invoices} WHERE ${invoices.teamId} = ${teamId}
-    )`,
-  });
+  const [result] = await db
+    .select({
+      hasData: sql<boolean>`EXISTS (
+        SELECT 1 FROM ${transactions} WHERE ${transactions.teamId} = ${teamId}
+      ) OR EXISTS (
+        SELECT 1 FROM ${bankConnections} WHERE ${bankConnections.teamId} = ${teamId}
+      ) OR EXISTS (
+        SELECT 1 FROM ${invoices} WHERE ${invoices.teamId} = ${teamId}
+      )`,
+    })
+    .from(teams)
+    .limit(1);
 
   return result?.hasData ?? false;
 }
