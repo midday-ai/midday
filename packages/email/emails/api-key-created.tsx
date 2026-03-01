@@ -54,7 +54,7 @@ export const ApiKeyCreatedEmail = ({
         >
           <Logo />
           <Heading
-            className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
+            className={`font-serif text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
             New Team API Key Created

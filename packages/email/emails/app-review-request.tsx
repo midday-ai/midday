@@ -50,7 +50,7 @@ export const AppReviewRequestEmail = ({
         >
           <Logo />
           <Heading
-            className={`mx-0 my-[30px] p-0 text-[24px] font-normal text-center ${themeClasses.heading}`}
+            className={`font-serif mx-0 my-[30px] p-0 text-[24px] font-normal text-center ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
             Application Review Request

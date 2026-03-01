@@ -1,17 +1,16 @@
-import { getEmailUrl } from "@midday/utils/envs";
 import {
   Body,
   Container,
   Heading,
-  Img,
   Link,
   Preview,
+  Section,
   Text,
 } from "@react-email/components";
 import { Footer } from "../components/footer";
-import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
 import {
+  Button,
   EmailThemeProvider,
   getEmailInlineStyles,
   getEmailThemeClasses,
@@ -21,11 +20,9 @@ interface Props {
   fullName: string;
 }
 
-const baseUrl = getEmailUrl();
-
 export const WelcomeEmail = ({ fullName = "" }: Props) => {
   const firstName = fullName ? fullName.split(" ").at(0) : "";
-  const text = `${firstName ? `Hi ${firstName}, ` : ""}Welcome to Midday! I'm Pontus, one of the founders. It's really important to us that you have a great experience ramping up.`;
+  const text = `${firstName ? `Hi ${firstName}, welcome` : "Welcome"} to Midday — built for founders like you.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -45,7 +42,7 @@ export const WelcomeEmail = ({ fullName = "" }: Props) => {
         >
           <Logo />
           <Heading
-            className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
+            className={`font-serif text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
             Welcome to Midday
@@ -63,76 +60,36 @@ export const WelcomeEmail = ({ fullName = "" }: Props) => {
             className={themeClasses.text}
             style={{ color: lightStyles.text.color }}
           >
-            Welcome to Midday! I'm Pontus, one of the founders.
+            I'm Pontus, one of the founders of Midday.
             <br />
             <br />
-            We built Midday from over 10 years of running our own businesses,
-            knowing firsthand the challenges that come with it. Midday is built
-            together with our customers, and it's important to us that you know
-            we're here when you need us.
+            We started Midday after years of running our own companies — tired
+            of juggling tools just to know where things stand. If that sounds
+            familiar, you're in the right place.
             <br />
             <br />
-            Take your time to explore Midday at your own pace. If you ever want
-            to chat with us founders, you can schedule a time{" "}
-            <Link
-              href="https://cal.com/pontus-midday/15min"
-              className={`underline ${themeClasses.link}`}
-              style={{ color: lightStyles.text.color }}
-            >
-              here
-            </Link>
-            <br />
-            <br />
-            If there's anything we can do to help, just reply. We're always one
-            message away.
+            The best way to get started: connect your bank account. Everything
+            else follows from there.
           </Text>
 
-          <br />
-
-          <Img
-            src={`${baseUrl}/email/founders.jpeg`}
-            alt="Founders"
-            className="my-0 mx-auto block w-full"
-          />
+          <Section className="text-center mt-[32px] mb-[32px]">
+            <Button href="https://app.midday.ai">Get started</Button>
+          </Section>
 
           <Text
-            className={themeClasses.mutedText}
+            className={`text-[14px] ${themeClasses.mutedText}`}
             style={{ color: lightStyles.mutedText.color }}
           >
-            Best regards, founders
+            P.S. Want to talk? Reply here or{" "}
+            <Link
+              href="https://cal.com/pontus-midday/15min"
+              className={`underline ${themeClasses.mutedLink}`}
+              style={{ color: lightStyles.mutedText.color }}
+            >
+              book a quick call
+            </Link>
+            .
           </Text>
-
-          <style>{`
-            .signature-blend {
-              filter: none;
-            }
-            
-            /* Regular dark mode - exclude Outlook.com */
-            @media (prefers-color-scheme: dark) {
-              .signature-blend:not([class^="x_"]) {
-                filter: invert(1) brightness(1);
-              }
-            }
-            
-            /* Outlook.com specific dark mode targeting */
-            [data-ogsb] .signature-blend,
-            [data-ogsc] .signature-blend,
-            [data-ogac] .signature-blend,
-            [data-ogab] .signature-blend {
-              filter: invert(1) brightness(1);
-            }
-          `}</style>
-
-          <Img
-            src={`${baseUrl}/email/signature.png`}
-            alt="Signature"
-            className="block w-full w-[143px] h-[20px] signature-blend"
-          />
-
-          <br />
-          <br />
-
-          <GetStarted />
 
           <br />
 
