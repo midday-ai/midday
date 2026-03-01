@@ -77,6 +77,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
     rowSelectionByTab,
     setColumns,
     setCanDelete,
+    setTransactionIds,
     lastClickedIndex,
     setLastClickedIndex,
   } = useTransactionsStore();
@@ -246,6 +247,10 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   const ids = useMemo(() => {
     return tableData.map((row) => row?.id);
   }, [tableData]);
+
+  useEffect(() => {
+    setTransactionIds(ids);
+  }, [ids, setTransactionIds]);
 
   // Handle shift-click range selection
   // Note: This function will be updated after table creation to use table.getRowModel().rows
@@ -517,19 +522,19 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   useHotkeys(
     "ArrowUp, ArrowDown",
     ({ key }) => {
-      if (key === "ArrowUp" && transactionId) {
-        const currentIndex = ids?.indexOf(transactionId) ?? 0;
-        const prevId = ids[currentIndex - 1];
+      if (!transactionId) return;
+      const currentIndex = ids?.indexOf(transactionId) ?? -1;
+      if (currentIndex === -1) return;
 
+      if (key === "ArrowUp") {
+        const prevId = ids[currentIndex - 1];
         if (prevId) {
           setParams({ transactionId: prevId });
         }
       }
 
-      if (key === "ArrowDown" && transactionId) {
-        const currentIndex = ids?.indexOf(transactionId) ?? 0;
+      if (key === "ArrowDown") {
         const nextId = ids[currentIndex + 1];
-
         if (nextId) {
           setParams({ transactionId: nextId });
         }
