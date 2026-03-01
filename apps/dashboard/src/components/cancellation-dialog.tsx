@@ -50,13 +50,11 @@ const stepTransition = {
 type CancellationDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  continent?: string;
 };
 
 export function CancellationDialog({
   open,
   onOpenChange,
-  continent,
 }: CancellationDialogProps) {
   const [step, setStep] = useState<Step>(1);
   const [reason, setReason] = useState<CancellationReason | null>(null);
@@ -83,8 +81,18 @@ export function CancellationDialog({
   );
   const isYearly = subscription?.isYearly ?? false;
 
-  const pricing = getPlanPricing(continent);
-  const checkoutCurrency = pricing.currency as "USD" | "EUR";
+  const [checkoutCurrency, setCheckoutCurrency] = useState<"USD" | "EUR">(
+    "USD",
+  );
+
+  useEffect(() => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz?.startsWith("Europe/")) {
+        setCheckoutCurrency("EUR");
+      }
+    } catch {}
+  }, []);
 
   const createCheckoutMutation = useMutation(
     trpc.billing.createCheckout.mutationOptions(),
@@ -180,6 +188,8 @@ export function CancellationDialog({
     if (!reason) return;
     cancelMutation.mutate({ reason, comment: comment || undefined });
   }, [reason, comment, cancelMutation]);
+
+  const pricing = getPlanPricing(checkoutCurrency === "EUR" ? "EU" : undefined);
 
   const annualSavings =
     plan === "pro"

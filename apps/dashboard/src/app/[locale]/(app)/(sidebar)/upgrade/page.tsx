@@ -1,4 +1,3 @@
-import { getContinent } from "@midday/location";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { OpenURL } from "@/components/open-url";
@@ -22,7 +21,6 @@ export default async function UpgradePage() {
   }
 
   const daysLeft = getTrialDaysLeft(team.createdAt);
-  const continent = await getContinent();
 
   const getDescription = () => {
     if (daysLeft && daysLeft > 0) {
@@ -44,7 +42,7 @@ export default async function UpgradePage() {
           </p>
         </div>
 
-        <Plans continent={continent} />
+        <Plans />
 
         <UpgradeFAQ />
 

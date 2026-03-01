@@ -38,12 +38,6 @@ export async function getCountryCode() {
   return headersList.get("cf-ipcountry") || "SE";
 }
 
-export async function getContinent() {
-  const headersList = await headers();
-
-  return headersList.get("cf-ipcontinent") || "EU";
-}
-
 export async function getTimezone() {
   const headersList = await headers();
 

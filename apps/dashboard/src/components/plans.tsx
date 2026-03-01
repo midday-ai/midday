@@ -2,7 +2,6 @@
 
 import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
-import { getPlanPricing } from "@midday/plans";
 import { cn } from "@midday/ui/cn";
 import { PlanCards } from "@midday/ui/plan-cards";
 import { SubmitButton } from "@midday/ui/submit-button";
@@ -16,14 +15,9 @@ import { useTRPC } from "@/trpc/client";
 
 const POLLING_TIMEOUT_MS = 30_000;
 
-type PlansProps = {
-  continent?: string;
-};
-
-export function Plans({ continent }: PlansProps) {
-  const defaultCurrency = getPlanPricing(continent).currency as "USD" | "EUR";
+export function Plans() {
   const [checkoutCurrency, setCheckoutCurrency] = useState<"USD" | "EUR">(
-    defaultCurrency,
+    "USD",
   );
   const [isSubmitting, setIsSubmitting] = useState(0);
   const [isPollingForPlan, setIsPollingForPlan] = useState(false);
@@ -151,7 +145,6 @@ export function Plans({ continent }: PlansProps) {
 
   return (
     <PlanCards
-      continent={continent}
       onCurrencyChange={setCheckoutCurrency}
       renderStarterAction={(billingPeriod) => (
         <>

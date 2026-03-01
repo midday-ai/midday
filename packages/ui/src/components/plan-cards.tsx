@@ -8,7 +8,7 @@ import {
 } from "@midday/plans";
 import NumberFlow from "@number-flow/react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "../utils/cn";
 import {
   Tooltip,
@@ -59,12 +59,27 @@ export function PlanCards({
   onCurrencyChange,
   footnote,
 }: PlanCardsProps) {
-  const defaultCurrency = getPlanPricing(continent).currency as "USD" | "EUR";
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "yearly",
   );
-  const [currency, setCurrency] = useState<"USD" | "EUR">(defaultCurrency);
+  const [currency, setCurrency] = useState<"USD" | "EUR">(() => {
+    if (continent) {
+      return getPlanPricing(continent).currency as "USD" | "EUR";
+    }
+    return "USD";
+  });
   const pricing = getPlanPricing(currency === "EUR" ? "EU" : "NA");
+
+  useEffect(() => {
+    if (continent) return;
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz?.startsWith("Europe/")) {
+        setCurrency("EUR");
+        onCurrencyChange?.("EUR");
+      }
+    } catch {}
+  }, []);
 
   return (
     <TooltipProvider delayDuration={0}>

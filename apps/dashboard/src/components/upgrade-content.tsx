@@ -26,10 +26,9 @@ type UpgradeContentProps = {
   user: {
     fullName: string | null;
   };
-  continent?: string;
 };
 
-export function UpgradeContent({ user, continent }: UpgradeContentProps) {
+export function UpgradeContent({ user }: UpgradeContentProps) {
   const supabase = createClient();
   const trpc = useTRPC();
   const router = useRouter();
@@ -60,7 +59,7 @@ export function UpgradeContent({ user, continent }: UpgradeContentProps) {
           </p>
         </div>
 
-        <Plans continent={continent} />
+        <Plans />
 
         <UpgradeFAQ />
 
