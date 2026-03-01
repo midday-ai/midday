@@ -95,11 +95,10 @@ export default async function Teams() {
                 </Button>
               </Link>
             ) : (
-              <Link href="/upgrade" className="w-full">
-                <Button className="w-full mt-2" variant="outline">
-                  Upgrade to create another team
-                </Button>
-              </Link>
+              <p className="text-sm text-[#878787] mt-2">
+                All existing teams must be on a paid plan before creating
+                another. Switch to the team you'd like to upgrade.
+              </p>
             )}
           </div>
         </div>

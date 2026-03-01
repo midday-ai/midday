@@ -1,10 +1,11 @@
+import { UTCDate } from "@date-fns/utc";
 import {
   CATEGORIES,
   getTaxRateForCategory,
   getTaxTypeForCountry,
 } from "@midday/categories";
 import { createLoggerWithContext } from "@midday/logger";
-import { subDays } from "date-fns";
+import { addDays, differenceInDays, subDays } from "date-fns";
 import {
   and,
   eq,
@@ -256,13 +257,12 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
         .innerJoin(teams, eq(teams.id, usersOnTeam.teamId))
         .where(eq(usersOnTeam.userId, params.userId));
 
-      const now = new Date();
+      const today = new UTCDate();
       const activeTeamCount = existingTeams.filter((t) => {
         if (t.plan === "starter" || t.plan === "pro") return true;
         if (t.plan === "trial" && !t.canceledAt && t.createdAt) {
-          const trialEnd = new Date(t.createdAt);
-          trialEnd.setDate(trialEnd.getDate() + TRIAL_PERIOD_DAYS);
-          return trialEnd > now;
+          const trialEnd = addDays(new UTCDate(t.createdAt), TRIAL_PERIOD_DAYS);
+          return differenceInDays(trialEnd, today) > 0;
         }
         return false;
       }).length;
