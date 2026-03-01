@@ -20,7 +20,7 @@ const CustomUnorderedList = ({
   children?: React.ReactNode;
   className?: string;
 }) => (
-  <ul className={cn("list-none m-0 p-0 leading-relaxed", className)} {...props}>
+  <ul className={cn("list-none leading-relaxed", className)} {...props}>
     {children}
   </ul>
 );
@@ -37,7 +37,7 @@ const CustomOrderedList = ({
   className?: string;
 }) => (
   <ol
-    className={cn("list-none m-0 p-0 leading-relaxed", className)}
+    className={cn("list-none leading-relaxed", className)}
     {...props}
     data-streamdown="unordered-list"
   >
@@ -57,7 +57,7 @@ const CustomListItem = ({
   className?: string;
 }) => (
   <li
-    className={cn("py-0 my-0 leading-relaxed", className)}
+    className={cn("leading-relaxed", className)}
     {...props}
     data-streamdown="list-item"
   >
@@ -68,35 +68,23 @@ const CustomListItem = ({
 export const Response = memo(
   ({ className, ...props }: ResponseProps) => (
     <Streamdown
-      className={cn(
-        "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 space-y-4 [&>h3+ul]:!mt-2 [&>h3+ol]:!mt-2 [&>h4+ul]:!mt-2 [&>h4+ol]:!mt-2 [&>ul]:!my-0 [&>ul]:!-mt-4 [&>*+ul]:!mt-2 [&>ol]:!my-0 [&>ol]:!-mt-4 [&>*+ol]:!mt-2",
-        className,
-      )}
+      className={cn("size-full whitespace-normal", className)}
       components={{
         ul: (props) => <CustomUnorderedList {...props} />,
         ol: (props) => <CustomOrderedList {...props} />,
         li: (props) => <CustomListItem {...props} />,
         h2: ({ children, node, ...props }) => (
-          <h3
-            className="font-medium text-sm text-primary tracking-wide"
-            {...props}
-          >
+          <h3 className="text-sm text-primary tracking-wide" {...props}>
             {children}
           </h3>
         ),
         h3: ({ children, node, ...props }) => (
-          <h3
-            className="font-medium text-sm text-primary tracking-wide"
-            {...props}
-          >
+          <h3 className="text-sm text-primary tracking-wide" {...props}>
             {children}
           </h3>
         ),
         h4: ({ children, node, ...props }) => (
-          <h4
-            className="font-medium text-sm text-primary tracking-wide"
-            {...props}
-          >
+          <h4 className="text-sm text-primary tracking-wide" {...props}>
             {children}
           </h4>
         ),
