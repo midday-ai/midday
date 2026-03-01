@@ -4,12 +4,24 @@ import {
   getTaxTypeForCountry,
 } from "@midday/categories";
 import { subDays } from "date-fns";
-import { and, eq, gt, gte, inArray, isNotNull, isNull, or } from "drizzle-orm";
+import {
+  and,
+  eq,
+  gt,
+  gte,
+  inArray,
+  isNotNull,
+  isNull,
+  or,
+  sql,
+} from "drizzle-orm";
 import type { Database } from "../client";
 import {
   bankConnections,
+  invoices,
   teams,
   transactionCategories,
+  transactions,
   users,
   usersOnTeam,
 } from "../schema";
@@ -722,4 +734,42 @@ function getHourInTimezone(date: Date, timezone: string): number {
     // Invalid timezone, fall back to UTC
     return date.getUTCHours();
   }
+}
+
+export async function getTeamOwnerContact(db: Database, teamId: string) {
+  const [result] = await db
+    .select({
+      email: users.email,
+      fullName: users.fullName,
+    })
+    .from(usersOnTeam)
+    .innerJoin(users, eq(usersOnTeam.userId, users.id))
+    .where(and(eq(usersOnTeam.teamId, teamId), eq(usersOnTeam.role, "owner")))
+    .limit(1);
+
+  return result ?? null;
+}
+
+export async function isTeamStillCanceled(db: Database, teamId: string) {
+  const [result] = await db
+    .select({ id: teams.id })
+    .from(teams)
+    .where(and(eq(teams.id, teamId), isNotNull(teams.canceledAt)))
+    .limit(1);
+
+  return !!result;
+}
+
+export async function hasTeamData(db: Database, teamId: string) {
+  const [result] = await db.select({
+    hasData: sql<boolean>`EXISTS (
+      SELECT 1 FROM ${transactions} WHERE ${transactions.teamId} = ${teamId}
+    ) OR EXISTS (
+      SELECT 1 FROM ${bankConnections} WHERE ${bankConnections.teamId} = ${teamId}
+    ) OR EXISTS (
+      SELECT 1 FROM ${invoices} WHERE ${invoices.teamId} = ${teamId}
+    )`,
+  });
+
+  return result?.hasData ?? false;
 }

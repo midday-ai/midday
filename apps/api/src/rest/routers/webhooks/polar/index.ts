@@ -1,6 +1,11 @@
 import type { Context } from "@api/rest/types";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { updateTeamById } from "@midday/db/queries";
+import {
+  getTeamOwnerContact,
+  hasTeamData,
+  updateTeamById,
+} from "@midday/db/queries";
+import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
 import { getPlanByProductId } from "@midday/plans";
 import {
@@ -52,16 +57,16 @@ app.openapi(
       });
     }
 
-    let event: ReturnType<typeof validateEvent>;
+    let event: any;
+
+    const rawBody = await c.req.text();
+    const webhookHeaders = {
+      "webhook-id": c.req.header("webhook-id") ?? "",
+      "webhook-timestamp": c.req.header("webhook-timestamp") ?? "",
+      "webhook-signature": c.req.header("webhook-signature") ?? "",
+    };
 
     try {
-      const rawBody = await c.req.text();
-      const webhookHeaders = {
-        "webhook-id": c.req.header("webhook-id") ?? "",
-        "webhook-timestamp": c.req.header("webhook-timestamp") ?? "",
-        "webhook-signature": c.req.header("webhook-signature") ?? "",
-      };
-
       event = validateEvent(rawBody, webhookHeaders, webhookSecret);
     } catch (err) {
       if (err instanceof WebhookVerificationError) {
@@ -70,7 +75,14 @@ app.openapi(
         });
         throw new HTTPException(400, { message: "Invalid webhook signature" });
       }
-      throw err;
+
+      // Signature was already verified by standardwebhooks inside
+      // validateEvent — the SDK just can't parse this event type yet.
+      // Fall back to the raw JSON so our own switch-case can handle it.
+      logger.warn("Polar SDK could not parse event, using raw payload", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+      event = JSON.parse(rawBody);
     }
 
     logger.info("Polar webhook received", {
@@ -123,14 +135,36 @@ app.openapi(
 
           logger.info("Team subscription canceled", { teamId });
 
+          try {
+            const [owner, teamHasData] = await Promise.all([
+              getTeamOwnerContact(db, teamId),
+              hasTeamData(db, teamId),
+            ]);
+
+            if (owner?.email && teamHasData) {
+              await triggerJob(
+                "cancellation-email-immediate",
+                {
+                  teamId,
+                  email: owner.email,
+                  fullName: owner.fullName ?? "there",
+                },
+                "teams",
+                { jobId: `cancellation-email-${teamId}` },
+              );
+            }
+          } catch (err) {
+            logger.error("Failed to trigger cancellation email", {
+              teamId,
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+
           break;
         }
 
-        // @ts-expect-error - subscription.past_due is a new Polar event not yet in SDK types
-        // See: https://polar.sh/docs/api-reference/webhooks/subscription.past_due
         case "subscription.past_due": {
-          // @ts-expect-error - data is not typed
-          const teamId = event.data.metadata?.teamId as string | undefined;
+          const teamId = event.data?.metadata?.teamId as string | undefined;
 
           if (!teamId) {
             logger.warn("Subscription past_due event missing teamId metadata");

@@ -39,7 +39,7 @@
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
     "@number-flow/react": "^0.5.11",
-    "@polar-sh/checkout": "^0.1.14",
+    "@polar-sh/checkout": "^0.2.0",
     "@polar-sh/nextjs": "^0.9.3",
     "@react-google-maps/api": "^2.20.8",
     "@react-pdf/renderer": "catalog:",
