@@ -69,7 +69,7 @@ export function PlanCards({
   return (
     <TooltipProvider delayDuration={0}>
       <div className="w-full">
-        <div className="flex justify-center mb-8 sm:mb-8 lg:mb-16">
+        <div className="flex justify-center mb-6 sm:mb-6 lg:mb-12">
           <div
             className="relative flex items-stretch bg-muted"
             style={{ width: "fit-content" }}
