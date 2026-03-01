@@ -107,6 +107,7 @@ export class InboxConnector extends Connector {
         maxResults: options.maxResults,
         lastAccessed: account.lastAccessed,
         fullSync: options.fullSync,
+        syncStartDate: options.syncStartDate,
       });
     } catch (error) {
       // Handle structured auth errors
@@ -171,6 +172,7 @@ export class InboxConnector extends Connector {
       maxResults: options.maxResults,
       lastAccessed: account.lastAccessed,
       fullSync: options.fullSync,
+      syncStartDate: options.syncStartDate,
     });
   }
 

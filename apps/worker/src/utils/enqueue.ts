@@ -1,8 +1,8 @@
 import { triggerJob } from "@midday/job-client";
 import type {
+  BatchEmbedInboxPayload,
   BatchProcessMatchingPayload,
   EmbedInboxPayload,
-  InboxProviderInitialSetupPayload,
   InboxProviderSyncAccountPayload,
   ProcessAttachmentPayload,
   SlackUploadPayload,
@@ -17,7 +17,7 @@ import type { ProcessTransactionAttachmentPayload } from "../schemas/transaction
 export async function enqueueProcessAttachment(
   payload: ProcessAttachmentPayload,
 ) {
-  return triggerJob("process-attachment", payload, "inbox");
+  return triggerJob("process-attachment", payload, "extraction");
 }
 
 export async function enqueueSlackUpload(payload: SlackUploadPayload) {
@@ -28,16 +28,14 @@ export async function enqueueEmbedInbox(payload: EmbedInboxPayload) {
   return triggerJob("embed-inbox", payload, "embeddings");
 }
 
+export async function enqueueBatchEmbedInbox(payload: BatchEmbedInboxPayload) {
+  return triggerJob("batch-embed-inbox", payload, "inbox");
+}
+
 export async function enqueueBatchProcessMatching(
   payload: BatchProcessMatchingPayload,
 ) {
   return triggerJob("batch-process-matching", payload, "inbox");
-}
-
-export async function enqueueInitialSetup(
-  payload: InboxProviderInitialSetupPayload,
-) {
-  return triggerJob("initial-setup", payload, "inbox-provider");
 }
 
 export async function enqueueSyncScheduler(
@@ -49,5 +47,5 @@ export async function enqueueSyncScheduler(
 export async function enqueueProcessTransactionAttachment(
   payload: ProcessTransactionAttachmentPayload,
 ) {
-  return triggerJob("process-transaction-attachment", payload, "transactions");
+  return triggerJob("process-transaction-attachment", payload, "extraction");
 }

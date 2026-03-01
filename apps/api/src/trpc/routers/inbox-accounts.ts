@@ -2,7 +2,6 @@ import {
   connectInboxAccountSchema,
   deleteInboxAccountSchema,
   exchangeCodeForAccountSchema,
-  // initialSetupInboxAccountSchema,
   syncInboxAccountSchema,
 } from "@api/schemas/inbox-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
@@ -13,8 +12,8 @@ import {
 } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { encryptOAuthState } from "@midday/inbox/utils";
+import { triggerJob } from "@midday/job-client";
 import { createLoggerWithContext } from "@midday/logger";
-import { schedules, tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 const logger = createLoggerWithContext("trpc:inbox-accounts");
@@ -35,7 +34,6 @@ export const inboxAccountsRouter = createTRPCRouter({
       }
 
       try {
-        // Encrypt state to prevent tampering with teamId
         const state = encryptOAuthState({
           teamId,
           provider: input.provider,
@@ -87,17 +85,12 @@ export const inboxAccountsRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      if (data?.scheduleId) {
-        await schedules.del(data.scheduleId);
-      }
-
       return data;
     }),
 
   sync: protectedProcedure
     .input(syncInboxAccountSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
-      // Verify the inbox account belongs to the caller's team
       const account = await getInboxAccountById(db, {
         id: input.id,
         teamId: teamId!,
@@ -110,25 +103,23 @@ export const inboxAccountsRouter = createTRPCRouter({
         });
       }
 
-      const event = await tasks.trigger("sync-inbox-account", {
-        id: input.id,
-        manualSync: input.manualSync || false,
-      });
+      const job = await triggerJob(
+        "sync-scheduler",
+        {
+          id: input.id,
+          manualSync: input.manualSync || false,
+          teamId: teamId!,
+          syncStartDate: input.syncStartDate,
+          maxResults: input.maxResults,
+        },
+        "inbox-provider",
+        {
+          priority: 1,
+          jobId: `sync-${input.id}`,
+          removeOnComplete: { age: 60 },
+        },
+      );
 
-      return event;
+      return { id: job.id };
     }),
-
-  // initialSetup: protectedProcedure
-  //   .input(initialSetupInboxAccountSchema)
-  //   .mutation(async ({ input }) => {
-  //     const job = await triggerJob(
-  //       "initial-setup",
-  //       {
-  //         inboxAccountId: input.inboxAccountId,
-  //       },
-  //       "inbox-provider",
-  //     );
-
-  //     return { id: job.id };
-  //   }),
 });

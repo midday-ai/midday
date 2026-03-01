@@ -6,6 +6,7 @@ import { ErrorFallback } from "@/components/error-fallback";
 import { Inbox } from "@/components/inbox";
 import { InboxConnectedEmpty } from "@/components/inbox/inbox-empty";
 import { InboxGetStarted } from "@/components/inbox/inbox-get-started";
+import { InboxInitialSync } from "@/components/inbox/inbox-initial-sync";
 import { InboxViewSkeleton } from "@/components/inbox/inbox-skeleton";
 import { InboxView } from "@/components/inbox/inbox-view";
 import { loadInboxFilterParams } from "@/hooks/use-inbox-filter-params";
@@ -57,9 +58,35 @@ export default async function Page(props: Props) {
     return <InboxGetStarted />;
   }
 
-  // Accounts exist and have been synced, but no items (and no filter, on "all" tab) -> show connected empty
   const hasSyncedAccounts = accounts?.some((a) => a.lastAccessed !== null);
+  const unsyncedAccount = accounts?.find((a) => a.lastAccessed === null);
+  const syncJobId =
+    typeof searchParams.syncJobId === "string"
+      ? searchParams.syncJobId
+      : undefined;
 
+  // Account connected but never synced -> track the sync job started by OAuth callback
+  if (
+    isAllTab &&
+    hasConnectedAccounts &&
+    !hasSyncedAccounts &&
+    unsyncedAccount &&
+    !hasInboxItems &&
+    !hasFilter
+  ) {
+    return (
+      <HydrateClient>
+        <Inbox>
+          <InboxInitialSync
+            accountId={unsyncedAccount.id}
+            syncJobId={syncJobId}
+          />
+        </Inbox>
+      </HydrateClient>
+    );
+  }
+
+  // Accounts synced but no items (and no filter, on "all" tab) -> show empty state
   if (
     isAllTab &&
     hasConnectedAccounts &&
@@ -70,7 +97,7 @@ export default async function Page(props: Props) {
   ) {
     return (
       <Inbox>
-        <InboxConnectedEmpty />
+        <InboxConnectedEmpty accountId={accounts?.[0]?.id} />
       </Inbox>
     );
   }

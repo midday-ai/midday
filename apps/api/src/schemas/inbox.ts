@@ -173,6 +173,7 @@ export const processAttachmentsSchema = z.array(
     mimetype: z.string(),
     size: z.number(),
     filePath: z.array(z.string()),
+    inboxId: z.string().uuid().optional(),
     referenceId: z.string().optional(),
     website: z.string().optional(),
     senderEmail: z.string().email().optional(),
@@ -309,6 +310,45 @@ export const inboxPreSignedUrlResponseSchema = z.object({
     example: "invoice.pdf",
   }),
 });
+
+export const uploadInboxItemSchema = z
+  .object({
+    currency: z.string().length(3).optional().openapi({
+      description: "ISO 4217 currency code for the document amount",
+      example: "USD",
+    }),
+    amount: z.coerce.number().optional().openapi({
+      description: "Known amount for the document",
+      example: 150.0,
+    }),
+  })
+  .openapi({
+    description:
+      "Optional metadata to attach to the uploaded inbox item. Sent as additional form fields alongside the file.",
+  });
+
+export const uploadInboxItemResponseSchema = z
+  .object({
+    id: z.string().uuid().openapi({
+      description: "The unique identifier of the created inbox item",
+      example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+    }),
+    fileName: z.string().openapi({
+      description: "The stored file name (with unique suffix)",
+      example: "invoice-123_a1b2.pdf",
+    }),
+    filePath: z.array(z.string()).openapi({
+      description: "Path segments to the file in storage",
+      example: ["team-id", "inbox", "invoice-123_a1b2.pdf"],
+    }),
+    status: z.string().openapi({
+      description: "Processing status of the inbox item",
+      example: "processing",
+    }),
+  })
+  .openapi({
+    description: "Response after successfully uploading a document to inbox",
+  });
 
 export const createInboxBlocklistSchema = z.object({
   type: z.enum(["email", "domain"]).openapi({

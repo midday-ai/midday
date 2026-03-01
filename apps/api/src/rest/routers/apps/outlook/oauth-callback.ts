@@ -8,8 +8,8 @@ import {
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { InboxConnector } from "@midday/inbox/connector";
 import { decryptOAuthState } from "@midday/inbox/utils";
+import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
-import { tasks } from "@trigger.dev/sdk";
 import { HTTPException } from "hono/http-exception";
 
 const app = new OpenAPIHono<Context>();
@@ -142,13 +142,7 @@ app.openapi(
         );
       }
 
-      // Trigger initial inbox setup job
-      await tasks.trigger("initial-inbox-setup", {
-        id: account.id,
-      });
-
-      // Redirect based on source
-      return c.redirect(
+      const finalUrl = new URL(
         buildSuccessRedirect(
           dashboardUrl,
           "outlook",
@@ -156,8 +150,29 @@ app.openapi(
           "/inbox",
           redirectPath,
         ),
-        302,
       );
+
+      try {
+        const syncJob = await triggerJob(
+          "sync-scheduler",
+          { id: account.id, maxResults: 30 },
+          "inbox-provider",
+          {
+            jobId: `sync-${account.id}`,
+            removeOnComplete: { age: 60 },
+            priority: 5,
+          },
+        );
+        finalUrl.searchParams.set("syncJobId", syncJob.id);
+      } catch (syncError) {
+        logger.warn("Failed to trigger initial sync job after Outlook OAuth", {
+          accountId: account.id,
+          error:
+            syncError instanceof Error ? syncError.message : String(syncError),
+        });
+      }
+
+      return c.redirect(finalUrl.toString(), 302);
     } catch (err) {
       logger.error("Outlook OAuth callback error", {
         error: err instanceof Error ? err.message : String(err),

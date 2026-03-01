@@ -150,7 +150,8 @@ export async function triggerProcessingJobs(
         teamId,
         referenceId: item.reference_id,
       },
-      "inbox",
+      "extraction",
+      { priority: 5 },
     ),
   );
 

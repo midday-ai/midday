@@ -18,6 +18,10 @@ export interface TriggerJobOptions {
   delay?: number;
   /** Custom job ID for deduplication - BullMQ will reject duplicates with the same jobId */
   jobId?: string;
+  /** Job priority - lower number = higher priority. Used to let manual syncs jump ahead of background work. */
+  priority?: number;
+  /** Override per-job removal policy after completion. Set a short age (seconds) for dedup keys that should expire quickly. */
+  removeOnComplete?: boolean | number | { age: number; count?: number };
 }
 
 /**
@@ -41,6 +45,10 @@ export async function triggerJob(
     const job = await queue.add(jobName, payload, {
       delay: options?.delay,
       jobId: options?.jobId,
+      priority: options?.priority,
+      ...(options?.removeOnComplete !== undefined && {
+        removeOnComplete: options.removeOnComplete,
+      }),
     });
 
     if (!job?.id) {
@@ -56,6 +64,7 @@ export async function triggerJob(
       jobId: compositeId,
       queueName,
       customJobId: options?.jobId,
+      priority: options?.priority,
       duration: `${enqueueDuration}ms`,
     });
 
@@ -272,21 +281,23 @@ export async function getJobStatus(
 
   let progress: number | undefined;
   let progressStep: string | undefined;
+  let progressData: Record<string, unknown> | undefined;
 
   if (typeof rawProgress === "number") {
     progress = rawProgress;
-  } else if (rawProgress && typeof rawProgress === "object") {
-    const progressObject = rawProgress as {
-      progress?: unknown;
-      step?: unknown;
-    };
+  } else if (
+    rawProgress &&
+    typeof rawProgress === "object" &&
+    !Array.isArray(rawProgress)
+  ) {
+    progressData = rawProgress as Record<string, unknown>;
 
-    if (typeof progressObject.progress === "number") {
-      progress = progressObject.progress;
+    if (typeof progressData.progress === "number") {
+      progress = progressData.progress;
     }
 
-    if (typeof progressObject.step === "string") {
-      progressStep = progressObject.step;
+    if (typeof progressData.step === "string") {
+      progressStep = progressData.step;
     }
   }
 
@@ -317,7 +328,11 @@ export async function getJobStatus(
     status,
     progress,
     progressStep,
-    result: returnValue,
+    progressData,
+    result:
+      returnValue && typeof returnValue === "object"
+        ? (returnValue as Record<string, unknown>)
+        : undefined,
     error: failedReason,
   };
 }

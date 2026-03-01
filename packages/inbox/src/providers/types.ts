@@ -28,6 +28,7 @@ export interface GetAttachmentsOptions {
   maxResults?: number;
   lastAccessed?: string;
   fullSync?: boolean;
+  syncStartDate?: Date;
 }
 
 export abstract class Connector {

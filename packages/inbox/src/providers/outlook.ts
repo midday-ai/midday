@@ -487,7 +487,11 @@ export class OutlookProvider implements OAuthProviderInterface {
       throw new Error("Graph client not initialized. Set tokens first.");
     }
 
-    const { maxResults = 50, lastAccessed, fullSync = false } = options;
+    const { lastAccessed, fullSync = false, syncStartDate } = options;
+
+    const DISCOVERY_MAX = 500;
+    const explicitMaxResults = options.maxResults;
+    const defaultMaxResults = 50;
 
     // Get the current user's email to exclude self-sent messages
     const userInfo = await this.getUserInfo();
@@ -496,16 +500,26 @@ export class OutlookProvider implements OAuthProviderInterface {
     // Build date filter based on sync type and lastAccessed
     let dateFilter: string;
     if (fullSync || !lastAccessed) {
-      // For full syncs, fetch last 30 days
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      dateFilter = `receivedDateTime ge ${thirtyDaysAgo.toISOString()}`;
+      if (syncStartDate) {
+        dateFilter = `receivedDateTime ge ${syncStartDate.toISOString()}`;
+      } else {
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        dateFilter = `receivedDateTime ge ${threeMonthsAgo.toISOString()}`;
+      }
     } else {
       // For subsequent syncs, sync from last access date minus 1 day
       const lastAccessDate = new Date(lastAccessed);
       lastAccessDate.setDate(lastAccessDate.getDate() - 1);
       dateFilter = `receivedDateTime ge ${lastAccessDate.toISOString()}`;
     }
+
+    const isFullSync = fullSync || !lastAccessed;
+    const maxMessages = explicitMaxResults
+      ? explicitMaxResults
+      : isFullSync
+        ? DISCOVERY_MAX
+        : defaultMaxResults;
 
     try {
       // Query for messages with attachments
@@ -516,7 +530,7 @@ export class OutlookProvider implements OAuthProviderInterface {
       // "The restriction or sort order is too complex" error
       const allMessages: OutlookMessage[] = [];
       let nextLink: string | undefined;
-      const maxPagesToFetch = 3;
+      const maxPagesToFetch = isFullSync ? 100 : 3;
       let pagesFetched = 0;
 
       // receivedDateTime must come first since we order by it
@@ -527,7 +541,7 @@ export class OutlookProvider implements OAuthProviderInterface {
         .api("/me/messages")
         .filter(filter)
         .select("id,from,hasAttachments")
-        .top(Math.min(maxResults, 50))
+        .top(Math.min(maxMessages, 50))
         .orderby("receivedDateTime desc")
         .get();
 
@@ -540,7 +554,7 @@ export class OutlookProvider implements OAuthProviderInterface {
       // Pagination
       while (
         nextLink &&
-        allMessages.length < maxResults &&
+        allMessages.length < maxMessages &&
         pagesFetched < maxPagesToFetch
       ) {
         response = await this.#graphClient.api(nextLink).get();
@@ -552,14 +566,14 @@ export class OutlookProvider implements OAuthProviderInterface {
         pagesFetched++;
       }
 
-      // Filter out self-sent messages and limit to maxResults
+      // Filter out self-sent messages and limit to maxMessages
       const messages = allMessages
         .filter((msg) => {
           if (!userEmail) return true;
           const senderEmail = msg.from?.emailAddress?.address?.toLowerCase();
           return senderEmail !== userEmail;
         })
-        .slice(0, maxResults);
+        .slice(0, maxMessages);
 
       if (!messages || messages.length === 0) {
         console.log(

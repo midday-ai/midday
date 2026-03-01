@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { Database } from "../client";
 import { inbox, inboxEmbeddings } from "../schema";
 
@@ -55,6 +55,49 @@ export async function checkInboxEmbeddingExists(
     .limit(1);
 
   return result.length > 0;
+}
+
+export type CreateInboxEmbeddingsParams = {
+  items: Array<{
+    inboxId: string;
+    teamId: string;
+    embedding: number[];
+    sourceText: string;
+    model: string;
+  }>;
+};
+
+export async function createInboxEmbeddings(
+  db: Database,
+  params: CreateInboxEmbeddingsParams,
+) {
+  if (params.items.length === 0) return [];
+
+  return db.insert(inboxEmbeddings).values(params.items).returning({
+    id: inboxEmbeddings.id,
+    inboxId: inboxEmbeddings.inboxId,
+  });
+}
+
+export type GetInboxItemsForEmbeddingParams = {
+  inboxIds: string[];
+};
+
+export async function getInboxItemsForEmbedding(
+  db: Database,
+  params: GetInboxItemsForEmbeddingParams,
+) {
+  if (params.inboxIds.length === 0) return [];
+
+  return db
+    .select({
+      id: inbox.id,
+      displayName: inbox.displayName,
+      website: inbox.website,
+      description: inbox.description,
+    })
+    .from(inbox)
+    .where(inArray(inbox.id, params.inboxIds));
 }
 
 export type DeleteInboxEmbeddingParams = {

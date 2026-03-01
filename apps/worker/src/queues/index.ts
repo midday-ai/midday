@@ -8,6 +8,8 @@ import { documentsQueue } from "./documents";
 import { documentsQueueConfig } from "./documents.config";
 import { embeddingsQueue } from "./embeddings";
 import { embeddingsQueueConfig } from "./embeddings.config";
+import { extractionQueue } from "./extraction";
+import { extractionQueueConfig } from "./extraction.config";
 import { inboxProviderQueue, inboxQueue } from "./inbox";
 import { inboxProviderQueueConfig, inboxQueueConfig } from "./inbox.config";
 import { insightsQueue } from "./insights";
@@ -32,6 +34,7 @@ import { transactionsQueueConfig } from "./transactions.config";
 export const queueConfigs: QueueConfig[] = [
   inboxQueueConfig,
   inboxProviderQueueConfig,
+  extractionQueueConfig,
   transactionsQueueConfig,
   documentsQueueConfig,
   embeddingsQueueConfig,
@@ -53,6 +56,7 @@ export function getAllQueues(): Queue[] {
   return [
     inboxQueue,
     inboxProviderQueue,
+    extractionQueue,
     transactionsQueue,
     documentsQueue,
     embeddingsQueue,
