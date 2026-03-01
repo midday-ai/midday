@@ -3,7 +3,7 @@
 import { getPlanName } from "@midday/plans";
 import { Card } from "@midday/ui/card";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
@@ -16,12 +16,23 @@ export function ManageSubscription({ continent }: { continent?: string }) {
   const { data: user } = useUserQuery();
   const [cancelOpen, setCancelOpen] = useState(false);
 
+  const queryClient = useQueryClient();
   const isCanceling = !!user?.team?.canceledAt;
 
   const getPortalUrlMutation = useMutation(
     trpc.billing.getPortalUrl.mutationOptions({
       onSuccess: ({ url }) => {
         window.location.href = url;
+      },
+    }),
+  );
+
+  const reactivateMutation = useMutation(
+    trpc.billing.reactivateSubscription.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.user.me.queryKey(),
+        });
       },
     }),
   );
@@ -40,14 +51,25 @@ export function ManageSubscription({ continent }: { continent?: string }) {
           </div>
 
           <div className="mt-auto">
-            <SubmitButton
-              variant="secondary"
-              className="h-9 hover:bg-primary hover:text-secondary"
-              isSubmitting={getPortalUrlMutation.isPending}
-              onClick={() => getPortalUrlMutation.mutate()}
-            >
-              Manage subscription
-            </SubmitButton>
+            {isCanceling ? (
+              <SubmitButton
+                variant="secondary"
+                className="h-9 hover:bg-primary hover:text-secondary"
+                isSubmitting={reactivateMutation.isPending}
+                onClick={() => reactivateMutation.mutate()}
+              >
+                Reactivate subscription
+              </SubmitButton>
+            ) : (
+              <SubmitButton
+                variant="secondary"
+                className="h-9 hover:bg-primary hover:text-secondary"
+                isSubmitting={getPortalUrlMutation.isPending}
+                onClick={() => getPortalUrlMutation.mutate()}
+              >
+                Manage subscription
+              </SubmitButton>
+            )}
           </div>
         </div>
 

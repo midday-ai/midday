@@ -95,6 +95,10 @@ export function CancellationDialog({
       onSuccess: () => {
         setStep("done");
 
+        queryClient.invalidateQueries({
+          queryKey: trpc.user.me.queryKey(),
+        });
+
         track({
           event: LogEvents.SubscriptionCanceled.name,
           channel: LogEvents.SubscriptionCanceled.channel,

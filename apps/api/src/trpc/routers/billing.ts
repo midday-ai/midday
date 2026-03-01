@@ -5,7 +5,7 @@ import {
 } from "@api/schemas/billing";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { api } from "@api/utils/polar";
-import { getTeamById } from "@midday/db/queries";
+import { getTeamById, updateTeamById } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
 import { getPlanIntervalByProductId, getPlanProductId } from "@midday/plans";
 import { TRPCError } from "@trpc/server";
@@ -234,7 +234,7 @@ export const billingRouter = createTRPCRouter({
 
   cancelSubscription: protectedProcedure
     .input(cancelSubscriptionSchema)
-    .mutation(async ({ input, ctx: { teamId } }) => {
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
       const subscriptions = await api.subscriptions.list({
         externalCustomerId: teamId!,
       });
@@ -278,6 +278,11 @@ export const billingRouter = createTRPCRouter({
         },
       });
 
+      await updateTeamById(db, {
+        id: teamId!,
+        data: { canceledAt: new Date().toISOString() },
+      });
+
       logger.info("Subscription canceled", {
         teamId,
         reason: input.reason,
@@ -285,4 +290,41 @@ export const billingRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  reactivateSubscription: protectedProcedure.mutation(
+    async ({ ctx: { db, teamId } }) => {
+      const subscriptions = await api.subscriptions.list({
+        externalCustomerId: teamId!,
+      });
+
+      const subscription = subscriptions.result.items.find(
+        (s) =>
+          (s.status === "active" || s.status === "past_due") &&
+          s.cancelAtPeriodEnd,
+      );
+
+      if (!subscription) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No canceled subscription found to reactivate",
+        });
+      }
+
+      await api.subscriptions.update({
+        id: subscription.id,
+        subscriptionUpdate: {
+          cancelAtPeriodEnd: false,
+        },
+      });
+
+      await updateTeamById(db, {
+        id: teamId!,
+        data: { canceledAt: null },
+      });
+
+      logger.info("Subscription reactivated", { teamId });
+
+      return { success: true };
+    },
+  ),
 });
