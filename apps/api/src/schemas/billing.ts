@@ -21,3 +21,16 @@ export const checkoutResponseSchema = z.object({
 });
 
 export type CheckoutResponseSchema = z.infer<typeof checkoutResponseSchema>;
+
+export const cancelSubscriptionSchema = z.object({
+  reason: z.enum([
+    "too_expensive",
+    "missing_features",
+    "unused",
+    "switched_service",
+    "other",
+  ]),
+  comment: z.string().optional(),
+});
+
+export type CancelSubscriptionSchema = z.infer<typeof cancelSubscriptionSchema>;

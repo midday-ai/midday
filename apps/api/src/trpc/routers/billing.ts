@@ -1,4 +1,5 @@
 import {
+  cancelSubscriptionSchema,
   createCheckoutSchema,
   getBillingOrdersSchema,
 } from "@api/schemas/billing";
@@ -205,4 +206,36 @@ export const billingRouter = createTRPCRouter({
 
     return { url: result.customerPortalUrl };
   }),
+
+  cancelSubscription: protectedProcedure
+    .input(cancelSubscriptionSchema)
+    .mutation(async ({ input, ctx: { teamId } }) => {
+      const subscriptions = await api.subscriptions.list({
+        externalCustomerId: teamId!,
+      });
+
+      const activeSubscription = subscriptions.result.items.find(
+        (s) => s.status === "active",
+      );
+
+      if (!activeSubscription) {
+        throw new Error("No active subscription found");
+      }
+
+      await api.subscriptions.update({
+        id: activeSubscription.id,
+        subscriptionUpdate: {
+          cancelAtPeriodEnd: true,
+          customerCancellationReason: input.reason,
+          customerCancellationComment: input.comment,
+        },
+      });
+
+      logger.info("Subscription canceled", {
+        teamId,
+        reason: input.reason,
+      });
+
+      return { success: true };
+    }),
 });
