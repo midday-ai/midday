@@ -8,14 +8,10 @@ export function ChoosePlanButton({
   children,
   initialIsOpen,
   daysLeft,
-  hasDiscount,
-  discountPrice,
 }: {
   children: React.ReactNode;
   initialIsOpen?: boolean;
   daysLeft?: number;
-  hasDiscount?: boolean;
-  discountPrice?: number;
 }) {
   const [isOpen, setIsOpen] = useState(initialIsOpen ?? false);
 
@@ -33,8 +29,6 @@ export function ChoosePlanButton({
         isOpen={isOpen}
         onOpenChange={setIsOpen}
         daysLeft={daysLeft}
-        hasDiscount={hasDiscount}
-        discountPrice={discountPrice}
       />
     </>
   );

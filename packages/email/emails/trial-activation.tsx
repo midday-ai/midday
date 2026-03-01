@@ -2,6 +2,7 @@ import {
   Body,
   Container,
   Heading,
+  Link,
   Preview,
   Section,
   Text,
@@ -19,9 +20,9 @@ interface Props {
   fullName: string;
 }
 
-export const TrialEndedEmail = ({ fullName = "" }: Props) => {
+export const TrialActivationEmail = ({ fullName = "" }: Props) => {
   const firstName = fullName ? fullName.split(" ").at(0) : "";
-  const text = `${firstName ? `Hi ${firstName}, ` : ""}Your Midday trial has ended — upgrade now to pick up right where you left off.`;
+  const text = `${firstName ? `Hi ${firstName}, ` : ""}Connect your bank account to get the most out of your Midday trial.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -44,7 +45,7 @@ export const TrialEndedEmail = ({ fullName = "" }: Props) => {
             className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
-            Your Midday Trial Has Ended
+            Get the most out of your trial
           </Heading>
 
           <br />
@@ -59,32 +60,34 @@ export const TrialEndedEmail = ({ fullName = "" }: Props) => {
             className={themeClasses.text}
             style={{ color: lightStyles.text.color }}
           >
-            Your Midday trial has ended. Your account is now in read-only mode,
-            but all your data — transactions, invoices, reports — is still there
-            waiting for you.
+            You signed up for Midday a few days ago — great start. The teams
+            that get the most value all do one thing early: connect their bank
+            account.
           </Text>
           <Text
             className={`text-[14px] ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Upgrade to pick up right where you left off. It takes less than a
-            minute.
+            Once connected, your transactions, spending overview, and financial
+            reports update automatically. No spreadsheets, no manual entry.
           </Text>
           <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href="https://app.midday.ai/upgrade">Upgrade now</Button>
+            <Button href="https://app.midday.ai">Connect your bank</Button>
           </Section>
           <Text
             className={`text-[14px] ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            If Midday isn't the right fit, we'd genuinely appreciate your
-            feedback — just reply and let us know. We read every response.
-          </Text>
-          <Text
-            className={`text-[14px] ${themeClasses.text}`}
-            style={{ color: lightStyles.text.color }}
-          >
-            Either way, thanks for giving us a try. You're always welcome back.
+            It takes about 30 seconds, and you'll immediately see your
+            transactions flow in. If you need help getting set up,{" "}
+            <Link
+              href="https://cal.com/pontus-midday/15min"
+              className={`underline ${themeClasses.link}`}
+              style={{ color: lightStyles.text.color }}
+            >
+              book a quick call
+            </Link>{" "}
+            — we'll walk you through it.
           </Text>
           <Text
             className={`text-[14px] ${themeClasses.text}`}
@@ -104,4 +107,4 @@ export const TrialEndedEmail = ({ fullName = "" }: Props) => {
   );
 };
 
-export default TrialEndedEmail;
+export default TrialActivationEmail;

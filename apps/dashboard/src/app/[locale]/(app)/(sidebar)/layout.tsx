@@ -1,4 +1,4 @@
-import { getCurrency } from "@midday/location";
+import { getContinent } from "@midday/location";
 import { redirect } from "next/navigation";
 import { ExportStatus } from "@/components/export-status";
 import { GlobalTimerProvider } from "@/components/global-timer-provider";
@@ -43,7 +43,7 @@ export default async function Layout({
     redirect("/onboarding");
   }
 
-  const currency = await getCurrency();
+  const continent = await getContinent();
 
   return (
     <HydrateClient>
@@ -56,7 +56,7 @@ export default async function Layout({
             plan={user.team?.plan}
             createdAt={user.team?.createdAt}
             user={{ fullName: user.fullName }}
-            currency={currency}
+            continent={continent}
           >
             <div className="px-4 md:px-8">{children}</div>
           </TrialGuard>

@@ -14,14 +14,10 @@ export function ChoosePlanModal({
   isOpen,
   onOpenChange,
   daysLeft,
-  hasDiscount,
-  discountPrice,
 }: {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   daysLeft?: number;
-  hasDiscount?: boolean;
-  discountPrice?: number;
 }) {
   const handleClose = (value: boolean) => {
     onOpenChange(value);
@@ -29,10 +25,10 @@ export function ChoosePlanModal({
 
   const getTitle = () => {
     if (daysLeft && daysLeft > 0) {
-      return `Pro trial - ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`;
+      return `Pro trial — ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`;
     }
 
-    return hasDiscount ? "Special Discount Offer" : "Choose plan";
+    return "Choose plan";
   };
 
   const getDescription = () => {
@@ -42,13 +38,6 @@ export function ChoosePlanModal({
       }
 
       return "Your trial period has ended. Please choose a plan to continue using Midday.";
-    }
-
-    if (hasDiscount && discountPrice) {
-      const saveAmount = 99 - discountPrice;
-      const savePercentage = Math.round((saveAmount / 99) * 100);
-
-      return `As a valued early customer, you qualify for our special discount pricing. Get the Pro plan for $${discountPrice}/month instead of the regular $99/month and save ${savePercentage}%.`;
     }
 
     return "Choose a plan to continue using Midday.";

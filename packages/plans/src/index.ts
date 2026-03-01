@@ -115,8 +115,8 @@ export type PlanPricing = {
   symbol: string;
 };
 
-export function getPlanPricing(currency?: string | null): PlanPricing {
-  const isEUR = currency === "EUR";
+export function getPlanPricing(continent?: string | null): PlanPricing {
+  const isEUR = continent === "EU";
   return {
     starter: { monthly: 29, yearly: 23 },
     pro: { monthly: 49, yearly: 39 },
@@ -178,6 +178,11 @@ export const proFeatures: PlanFeature[] = [
   { label: "10 banks · 50 invoices · 100GB storage" },
   { label: "Up to 10 team members" },
   {
+    label: "Custom invoice branding",
+    tooltip:
+      "Add your logo, colors, and custom fields to every invoice for a fully branded experience.",
+  },
+  {
     label: "API access and integrations",
     tooltip:
       "Build custom integrations with the Midday API. SDKs available for all major languages.",
@@ -186,6 +191,11 @@ export const proFeatures: PlanFeature[] = [
     label: "Shareable report links",
     tooltip:
       "Generate view-only links with optional expiration for revenue, profit, burn rate, and other reports.",
+  },
+  {
+    label: "Dedicated account manager",
+    tooltip:
+      "Get direct access to our team for onboarding, migration help, and ongoing support.",
   },
   { label: "Priority support" },
 ];

@@ -1,4 +1,5 @@
-import { getCurrency } from "@midday/location";
+import { getContinent } from "@midday/location";
+import { getPlanPricing } from "@midday/plans";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { OpenURL } from "@/components/open-url";
@@ -22,7 +23,7 @@ export default async function UpgradePage() {
   }
 
   const daysLeft = getTrialDaysLeft(team.createdAt);
-  const currency = await getCurrency();
+  const continent = await getContinent();
 
   const getDescription = () => {
     if (daysLeft && daysLeft > 0) {
@@ -33,7 +34,7 @@ export default async function UpgradePage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:py-12 md:-ml-8">
+    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:py-6 md:-ml-8">
       <div className="w-full max-w-[960px] p-8">
         <div className="mb-8 md:mt-8 text-center">
           <h1 className="font-serif text-2xl text-foreground mb-2">
@@ -44,10 +45,10 @@ export default async function UpgradePage() {
           </p>
         </div>
 
-        <Plans currency={currency} />
+        <Plans continent={continent} />
 
         <p className="font-sans text-xs text-muted-foreground mt-6 text-center">
-          Cancel anytime · Prices in {currency === "EUR" ? "EUR" : "USD"} excl.
+          Cancel anytime · Prices in {getPlanPricing(continent).currency} excl.
           VAT
         </p>
 

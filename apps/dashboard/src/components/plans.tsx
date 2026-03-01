@@ -14,10 +14,10 @@ import { useTRPC } from "@/trpc/client";
 const POLLING_TIMEOUT_MS = 30_000;
 
 type PlansProps = {
-  currency?: string;
+  continent?: string;
 };
 
-export function Plans({ currency }: PlansProps) {
+export function Plans({ continent }: PlansProps) {
   const [isSubmitting, setIsSubmitting] = useState(0);
   const [isPollingForPlan, setIsPollingForPlan] = useState(false);
   const isPollingRef = useRef(false);
@@ -124,7 +124,7 @@ export function Plans({ currency }: PlansProps) {
 
   return (
     <PlanCards
-      currency={currency}
+      continent={continent}
       renderStarterAction={(billingPeriod) => (
         <>
           <Tooltip>
@@ -150,7 +150,7 @@ export function Plans({ currency }: PlansProps) {
                   }}
                   disabled={!isLoading && !data?.starter}
                 >
-                  Start with Starter
+                  Get Starter
                 </SubmitButton>
               </div>
             </TooltipTrigger>
@@ -163,29 +163,21 @@ export function Plans({ currency }: PlansProps) {
               </TooltipContent>
             )}
           </Tooltip>
-          <p className="font-sans text-xs text-muted-foreground text-center">
-            Cancel anytime
-          </p>
         </>
       )}
       renderProAction={(billingPeriod) => (
-        <>
-          <SubmitButton
-            className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors"
-            onClick={() =>
-              handleCheckout(
-                "pro",
-                billingPeriod === "yearly" ? "pro_yearly" : "pro",
-              )
-            }
-            isSubmitting={isSubmitting === 2}
-          >
-            Start with Pro
-          </SubmitButton>
-          <p className="font-sans text-xs text-muted-foreground text-center">
-            Cancel anytime
-          </p>
-        </>
+        <SubmitButton
+          className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors"
+          onClick={() =>
+            handleCheckout(
+              "pro",
+              billingPeriod === "yearly" ? "pro_yearly" : "pro",
+            )
+          }
+          isSubmitting={isSubmitting === 2}
+        >
+          Get Pro
+        </SubmitButton>
       )}
     />
   );

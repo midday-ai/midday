@@ -44,20 +44,20 @@ function FeatureRow({ label, tooltip }: PlanFeature) {
 }
 
 type PlanCardsProps = {
-  currency?: string;
+  continent?: string;
   renderStarterAction: (billingPeriod: "monthly" | "yearly") => ReactNode;
   renderProAction: (billingPeriod: "monthly" | "yearly") => ReactNode;
 };
 
 export function PlanCards({
-  currency,
+  continent,
   renderStarterAction,
   renderProAction,
 }: PlanCardsProps) {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "yearly",
   );
-  const pricing = getPlanPricing(currency);
+  const pricing = getPlanPricing(continent);
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -106,7 +106,7 @@ export function PlanCards({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full max-w-[800px] mx-auto">
           {/* Starter Plan */}
           <div className="bg-background border border-border p-4 py-6 h-full flex flex-col">
             <div className="mb-4">

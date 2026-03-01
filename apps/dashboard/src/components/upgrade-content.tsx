@@ -1,5 +1,6 @@
 "use client";
 
+import { getPlanPricing } from "@midday/plans";
 import { createClient } from "@midday/supabase/client";
 import {
   AlertDialog,
@@ -26,10 +27,10 @@ type UpgradeContentProps = {
   user: {
     fullName: string | null;
   };
-  currency?: string;
+  continent?: string;
 };
 
-export function UpgradeContent({ user, currency }: UpgradeContentProps) {
+export function UpgradeContent({ user, continent }: UpgradeContentProps) {
   const supabase = createClient();
   const trpc = useTRPC();
   const router = useRouter();
@@ -44,72 +45,80 @@ export function UpgradeContent({ user, currency }: UpgradeContentProps) {
     }),
   );
 
+  const firstName = user.fullName ? user.fullName.split(" ").at(0) : null;
+
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:py-12 md:-ml-8">
+    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:py-6 md:-ml-8">
       <div className="w-full max-w-[960px] p-8">
         <div className="mb-8 md:mt-8 text-center">
           <h1 className="font-serif text-2xl text-foreground mb-2">
-            Choose the plan that works for you
+            {firstName
+              ? `${firstName}, your data is waiting for you`
+              : "Your data is waiting for you"}
           </h1>
-          <p className="font-sans text-base text-muted-foreground leading-normal">
-            Your trial has ended.
+          <p className="font-sans text-base text-muted-foreground leading-normal max-w-md mx-auto">
+            Your trial has ended and your account is read-only. Everything you
+            set up — transactions, invoices, reports — is still here. Pick a
+            plan to unlock it all again.
           </p>
         </div>
 
-        <Plans currency={currency} />
+        <Plans continent={continent} />
 
         <p className="font-sans text-xs text-muted-foreground mt-6 text-center">
-          Cancel anytime · Prices in {currency === "EUR" ? "EUR" : "USD"} excl.
+          Cancel anytime · Prices in {getPlanPricing(continent).currency} excl.
           VAT
         </p>
 
         <UpgradeFAQ />
 
-        <p className="text-xs text-muted-foreground/50 mt-8 text-center">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button type="button" className="hover:underline">
-                Delete account
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete
-                  your account and remove your data from our servers.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
+        <div className="mt-24 text-center">
+          <p className="text-xs text-muted-foreground/30">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button type="button" className="hover:underline">
+                  Delete account
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your account and remove your data from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
 
-              <div className="flex flex-col gap-2 mt-2">
-                <Label htmlFor="confirm-delete">
-                  Type <span className="font-medium">DELETE</span> to confirm.
-                </Label>
-                <Input
-                  id="confirm-delete"
-                  value={deleteValue}
-                  onChange={(e) => setDeleteValue(e.target.value)}
-                />
-              </div>
+                <div className="flex flex-col gap-2 mt-2">
+                  <Label htmlFor="confirm-delete">
+                    Type <span className="font-medium">DELETE</span> to confirm.
+                  </Label>
+                  <Input
+                    id="confirm-delete"
+                    value={deleteValue}
+                    onChange={(e) => setDeleteValue(e.target.value)}
+                  />
+                </div>
 
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => deleteUserMutation.mutate()}
-                  disabled={
-                    deleteValue !== "DELETE" || deleteUserMutation.isPending
-                  }
-                >
-                  {deleteUserMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    "Continue"
-                  )}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </p>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteUserMutation.mutate()}
+                    disabled={
+                      deleteValue !== "DELETE" || deleteUserMutation.isPending
+                    }
+                  >
+                    {deleteUserMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Continue"
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </p>
+        </div>
       </div>
     </div>
   );
