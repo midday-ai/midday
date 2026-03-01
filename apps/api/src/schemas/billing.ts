@@ -11,6 +11,7 @@ export const createCheckoutSchema = z.object({
   plan: z.enum(["starter", "pro"]),
   planType: z.string().optional(),
   embedOrigin: z.string(),
+  currency: z.enum(["USD", "EUR"]).optional(),
 });
 
 export type CreateCheckoutSchema = z.infer<typeof createCheckoutSchema>;

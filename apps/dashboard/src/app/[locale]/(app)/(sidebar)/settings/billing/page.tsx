@@ -1,3 +1,4 @@
+import { getContinent } from "@midday/location";
 import type { Metadata } from "next";
 import { ManageSubscription } from "@/components/manage-subscription";
 import { Orders } from "@/components/orders";
@@ -20,17 +21,17 @@ export default async function Billing() {
     }),
   );
 
+  const continent = await getContinent();
+
   return (
     <div className="space-y-12">
       {team?.plan !== "trial" && <ManageSubscription />}
 
       {team?.plan === "trial" && (
         <div>
-          <h2 className="text-lg font-medium leading-none tracking-tight mb-4">
-            Plans
-          </h2>
+          <h2 className="font-serif text-2xl text-foreground mb-4">Plans</h2>
 
-          <Plans />
+          <Plans continent={continent} />
         </div>
       )}
 

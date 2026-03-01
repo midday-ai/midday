@@ -21,7 +21,7 @@ interface Props {
 
 export const TrialEndedEmail = ({ fullName = "" }: Props) => {
   const firstName = fullName ? fullName.split(" ").at(0) : "";
-  const text = `${firstName ? `Hi ${firstName}, ` : ""}Your Midday trial has now ended, which means you have read-only access.`;
+  const text = `${firstName ? `Hi ${firstName}, ` : ""}Your Midday trial has ended — upgrade now to pick up right where you left off.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -41,7 +41,7 @@ export const TrialEndedEmail = ({ fullName = "" }: Props) => {
         >
           <Logo />
           <Heading
-            className={`text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
+            className={`font-serif text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
             Your Midday Trial Has Ended
@@ -59,34 +59,32 @@ export const TrialEndedEmail = ({ fullName = "" }: Props) => {
             className={themeClasses.text}
             style={{ color: lightStyles.text.color }}
           >
-            Your Midday trial has now ended, which means you have read-only
-            access.
+            Your Midday trial has ended. Your account is now in read-only mode,
+            but all your data — transactions, invoices, reports — is still there
+            waiting for you.
           </Text>
           <Text
             className={`text-[14px] ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            We know running a business is stressful, so if you need more time,
-            your discount is still valid and applied to your account for{" "}
-            <strong>1 more day</strong>.
+            Upgrade to pick up right where you left off. It takes less than a
+            minute.
           </Text>
           <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href="https://app.midday.ai">Upgrade now</Button>
+            <Button href="https://app.midday.ai/upgrade">Upgrade now</Button>
           </Section>
           <Text
             className={`text-[14px] ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            If you decide not to continue, we'd truly appreciate your honest
-            feedback—just reply and let us know why. We read every response.
+            If Midday isn't the right fit, we'd genuinely appreciate your
+            feedback — just reply and let us know. We read every response.
           </Text>
           <Text
             className={`text-[14px] ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            If this is the last time we hear from you, thanks for giving Midday
-            a try. We won't send any more emails, but you're always welcome
-            back.
+            Either way, thanks for giving us a try. You're always welcome back.
           </Text>
           <Text
             className={`text-[14px] ${themeClasses.text}`}

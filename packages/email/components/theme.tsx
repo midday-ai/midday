@@ -8,19 +8,19 @@ export { Button } from "./button";
 export const emailTheme = {
   light: {
     background: "#ffffff",
-    foreground: "#0e0e0e", // Slightly off-black to prevent auto-inversion
-    muted: "#6b7280",
-    border: "#e5e7eb",
-    accent: "#0e0e0e",
-    secondary: "#9ca3af",
+    foreground: "#121212",
+    muted: "#616161",
+    border: "#dbd9d5",
+    accent: "#121212",
+    secondary: "#878787",
   },
   dark: {
-    background: "#0C0C0C",
-    foreground: "#fefefe", // Slightly off-white to prevent auto-inversion
-    muted: "#a1a1aa",
-    border: "#1D1D1D",
-    accent: "#fefefe",
-    secondary: "#6b7280",
+    background: "#0d0d0d",
+    foreground: "#fafafa",
+    muted: "#616161",
+    border: "#1c1c1c",
+    accent: "#fafafa",
+    secondary: "#616161",
   },
 } as const;
 
@@ -202,16 +202,29 @@ export function EmailThemeProvider({
 }: EmailThemeProviderProps) {
   return (
     <Html>
-      <Tailwind>
+      <Tailwind
+        config={{
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: [
+                  "Hedvig Letters Sans",
+                  "system-ui",
+                  "Arial",
+                  "sans-serif",
+                ],
+                serif: ["Hedvig Letters Serif", "Georgia", "serif"],
+              },
+            },
+          },
+        }}
+      >
         <Head>
-          {/* Essential meta tags for email dark mode support */}
           <meta name="color-scheme" content="light dark" />
           <meta name="supported-color-schemes" content="light dark" />
-
-          {/* Additional Gmail dark mode hints */}
           <meta
             name="theme-color"
-            content="#0C0C0C"
+            content="#0d0d0d"
             media="(prefers-color-scheme: dark)"
           />
           <meta
@@ -219,35 +232,32 @@ export function EmailThemeProvider({
             content="#ffffff"
             media="(prefers-color-scheme: light)"
           />
-          <meta name="msapplication-navbutton-color" content="#0C0C0C" />
+          <meta name="msapplication-navbutton-color" content="#0d0d0d" />
 
-          {/* Dark mode styles */}
           <style>{getEmailDarkModeCSS()}</style>
 
-          {/* Default fonts for all emails */}
+          {/* Body font — Hedvig Letters Sans (matches website) */}
           <Font
-            fontFamily="Geist"
-            fallbackFontFamily="Helvetica"
+            fontFamily="Hedvig Letters Sans"
+            fallbackFontFamily={["Arial", "Helvetica"]}
             webFont={{
-              url: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.1/files/geist-sans-latin-400-normal.woff2",
+              url: "https://fonts.gstatic.com/s/hedvigletterssans/v2/CHy_V_PfGVjobSBkihHWDT98RVp37w8jcJpH3B4jm10.woff2",
               format: "woff2",
             }}
             fontWeight={400}
             fontStyle="normal"
           />
 
-          <Font
-            fontFamily="Geist"
-            fallbackFontFamily="Helvetica"
-            webFont={{
-              url: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.1/files/geist-sans-latin-500-normal.woff2",
-              format: "woff2",
-            }}
-            fontWeight={500}
-            fontStyle="normal"
-          />
+          {/* Heading font — Hedvig Letters Serif (loaded via @font-face only, not applied globally) */}
+          <style>{`
+            @font-face {
+              font-family: 'Hedvig Letters Serif';
+              font-style: normal;
+              font-weight: 400;
+              src: url(https://fonts.gstatic.com/s/hedviglettersserif/v4/OD5puN2I2mekHmyoU1Kj2AREd0--KMm6yXkk.woff2) format('woff2');
+            }
+          `}</style>
 
-          {/* Additional head content */}
           {additionalHeadContent}
         </Head>
         {preview}
