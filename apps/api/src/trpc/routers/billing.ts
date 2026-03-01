@@ -6,7 +6,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { api } from "@api/utils/polar";
 import { getTeamById } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
-import { getDiscount, getPlans } from "@midday/plans";
+import { getPlanProductId } from "@midday/plans";
 import { z } from "zod";
 
 const logger = createLoggerWithContext("trpc:billing");
@@ -14,7 +14,7 @@ const logger = createLoggerWithContext("trpc:billing");
 export const billingRouter = createTRPCRouter({
   createCheckout: protectedProcedure
     .input(createCheckoutSchema)
-    .mutation(async ({ input, ctx: { db, session, teamId, geo } }) => {
+    .mutation(async ({ input, ctx: { db, session, teamId } }) => {
       const { plan, planType, embedOrigin } = input;
 
       // Get team data
@@ -24,30 +24,16 @@ export const billingRouter = createTRPCRouter({
         throw new Error("Team not found");
       }
 
-      // Get plan configuration
-      const plans = getPlans();
-      const selectedPlan = plans[plan as keyof typeof plans];
-
-      if (!selectedPlan) {
-        throw new Error("Invalid plan");
-      }
-
-      // Get discount if applicable
-      const discountId = getDiscount(planType);
-
-      // Get country code from team or geo context
-      const countryCode = team.countryCode ?? geo?.country;
+      const yearly = planType?.endsWith("_yearly") ?? false;
+      const productId = getPlanProductId(plan, yearly);
 
       // Create Polar checkout
       const checkout = await api.checkouts.create({
-        products: [selectedPlan.id],
+        products: [productId],
+        allowDiscountCodes: false,
         externalCustomerId: team.id,
         customerEmail: session.user.email ?? undefined,
         customerName: team.name ?? undefined,
-        customerBillingAddress: countryCode
-          ? { country: countryCode as never }
-          : undefined,
-        discountId: discountId?.id,
         metadata: {
           teamId: team.id,
           companyName: team.name ?? "",

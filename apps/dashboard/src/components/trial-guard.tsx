@@ -10,6 +10,7 @@ type TrialGuardProps = {
   user: {
     fullName: string | null;
   };
+  currency?: string;
   children: React.ReactNode;
 };
 
@@ -17,6 +18,7 @@ export function TrialGuard({
   plan,
   createdAt,
   user,
+  currency,
   children,
 }: TrialGuardProps) {
   const pathname = usePathname();
@@ -29,7 +31,7 @@ export function TrialGuard({
   );
 
   if (showUpgradeContent) {
-    return <UpgradeContent user={user} />;
+    return <UpgradeContent user={user} currency={currency} />;
   }
 
   return <>{children}</>;

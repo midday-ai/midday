@@ -10,7 +10,6 @@ import {
 } from "@midday/ui/tooltip";
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Check } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { revalidateAfterCheckout } from "@/actions/revalidate-action";
@@ -19,7 +18,15 @@ import { useTRPC } from "@/trpc/client";
 // Polling timeout in milliseconds (30 seconds)
 const POLLING_TIMEOUT_MS = 30_000;
 
-export function Plans() {
+type PlansProps = {
+  currency?: string;
+};
+
+export function Plans({ currency }: PlansProps) {
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
+    "yearly",
+  );
+  const currencySymbol = currency === "EUR" ? "€" : "$";
   const [isSubmitting, setIsSubmitting] = useState(0);
   const [isPollingForPlan, setIsPollingForPlan] = useState(false);
   const isPollingRef = useRef(false); // Ref to track polling state for event handlers
@@ -141,196 +148,267 @@ export function Plans() {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
-        {/* Starter Plan */}
-        <div className="flex flex-col p-6 border bg-background">
-          <h2 className="text-xl mb-2 text-left">Starter</h2>
-          <div className="mt-1 flex items-baseline">
-            <span className="text-2xl font-medium tracking-tight">$29</span>
-            <span className="ml-1 text-xl font-medium">/mo</span>
-            <span className="ml-2 text-xs text-muted-foreground">
-              Excl. VAT
-            </span>
-          </div>
-
-          <div className="mt-4">
-            <h3 className="text-xs font-medium uppercase tracking-wide text-left text-[#878787] font-mono">
-              INCLUDING
-            </h3>
-            <ul className="mt-4 space-y-2">
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">
-                  Send up to 10 invoices per month
-                </span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">3 connected banks</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Unlimited bank accounts</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Financial overview</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Time Tracker</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">50 inbox items per month</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Customer management</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Export CSV & reports</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Assistant</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">10GB Vault Storage</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">2 users</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="mt-8 border-t-[1px] border-border pt-4">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <SubmitButton
-                    variant="secondary"
-                    className={cn(
-                      "h-9 hover:bg-primary hover:text-secondary w-full",
-                      !isLoading &&
-                        !data?.starter &&
-                        "pointer-events-none opacity-50",
-                    )}
-                    isSubmitting={isSubmitting === 1}
-                    onClick={() => {
-                      if (!data?.starter || isLoading) {
-                        return;
-                      }
-                      handleCheckout("starter", "starter");
-                    }}
-                    disabled={!isLoading && !data?.starter}
-                  >
-                    Choose starter plan
-                  </SubmitButton>
-                </div>
-              </TooltipTrigger>
-              {!isLoading && !data?.starter && (
-                <TooltipContent className="text-xs max-w-[300px]">
-                  <p>
-                    This plan is not applicable since you have exceeded the
-                    limits for this subscription (users or bank connections).
-                  </p>
-                </TooltipContent>
-              )}
-            </Tooltip>
+      <div className="w-full">
+        <div className="flex justify-center mb-8 sm:mb-8 lg:mb-16">
+          <div
+            className="relative flex items-stretch bg-muted"
+            style={{ width: "fit-content" }}
+          >
+            <div className="flex items-stretch">
+              <button
+                type="button"
+                onClick={() => setBillingPeriod("monthly")}
+                className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
+                  billingPeriod === "monthly"
+                    ? "text-foreground bg-background border-border"
+                    : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
+                }`}
+                style={{
+                  WebkitTapHighlightColor: "transparent",
+                  marginBottom: billingPeriod === "monthly" ? "-1px" : "0px",
+                  position: "relative",
+                  zIndex: billingPeriod === "monthly" ? 10 : 1,
+                }}
+              >
+                <span>Monthly</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setBillingPeriod("yearly")}
+                className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
+                  billingPeriod === "yearly"
+                    ? "text-foreground bg-background border-border"
+                    : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
+                }`}
+                style={{
+                  WebkitTapHighlightColor: "transparent",
+                  marginBottom: billingPeriod === "yearly" ? "-1px" : "0px",
+                  position: "relative",
+                  zIndex: billingPeriod === "yearly" ? 10 : 1,
+                }}
+              >
+                <span>Yearly (Save 20%)</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Pro Plan */}
-        <div className="flex flex-col p-6 border border-primary bg-background relative">
-          <div className="absolute top-6 right-6 rounded-full text-[#878787] text-[9px] font-normal border px-2 py-1 font-mono">
-            Limited offer
-          </div>
-          <h2 className="text-xl text-left mb-2">Pro</h2>
-          <div className="mt-1 flex items-baseline">
-            <span
-              className={cn(
-                "text-2xl font-medium tracking-tight",
-                "line-through text-[#878787]",
-              )}
-            >
-              $99
-            </span>
-            <span className="ml-1 text-2xl font-medium tracking-tight">
-              $49
-            </span>
-
-            <span className="ml-1 text-xl font-medium">/mo</span>
-            <span className="ml-2 text-xs text-muted-foreground">
-              Excl. VAT
-            </span>
-          </div>
-
-          <div className="mt-4">
-            <h3 className="text-xs font-medium uppercase tracking-wide text-left text-[#878787] font-mono">
-              INCLUDING
-            </h3>
-            <ul className="mt-4 space-y-2">
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">
-                  Send up to 50 invoices per month
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-14 w-full">
+          {/* Starter Plan */}
+          <div className="bg-background border border-border p-4 py-6 h-full flex flex-col">
+            <div className="mb-4">
+              <h3 className="font-sans text-base text-foreground mb-1">
+                Starter
+              </h3>
+              <p className="font-sans text-sm text-muted-foreground mb-3">
+                For founders running their business solo
+              </p>
+              <div className="flex items-baseline gap-2">
+                <span className="font-sans text-2xl text-foreground">
+                  {billingPeriod === "monthly"
+                    ? `${currencySymbol}29`
+                    : `${currencySymbol}23`}
                 </span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">10 connected banks</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Unlimited bank accounts</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Financial overview</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Time Tracker</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">500 inbox items per month</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Customer management</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Export CSV & reports</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">Assistant</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">100GB Vault Storage</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">10 users</span>
-              </li>
-            </ul>
+                <span className="font-sans text-sm text-muted-foreground">
+                  /month
+                </span>
+              </div>
+              <p className="font-sans text-xs text-muted-foreground mt-1">
+                {billingPeriod === "monthly"
+                  ? "Billed monthly"
+                  : "Billed yearly"}
+              </p>
+            </div>
+
+            <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Invoicing with recurring and online payments
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Automatic bank sync and categorization
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Receipt capture via Gmail, Outlook, or upload
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Financial reports, burn rate, and tax summaries
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  AI assistant for financial insights
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Time tracking and project billing
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Multi-currency support
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Export to Xero, QuickBooks, or Fortnox
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  3 banks · 15 invoices · 10GB storage
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <SubmitButton
+                      variant="secondary"
+                      className={cn(
+                        "w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors",
+                        !isLoading &&
+                          !data?.starter &&
+                          "pointer-events-none opacity-50",
+                      )}
+                      isSubmitting={isSubmitting === 1}
+                      onClick={() => {
+                        if (!data?.starter || isLoading) {
+                          return;
+                        }
+                        handleCheckout(
+                          "starter",
+                          billingPeriod === "yearly"
+                            ? "starter_yearly"
+                            : "starter",
+                        );
+                      }}
+                      disabled={!isLoading && !data?.starter}
+                    >
+                      Start with Starter
+                    </SubmitButton>
+                  </div>
+                </TooltipTrigger>
+                {!isLoading && !data?.starter && (
+                  <TooltipContent className="text-xs max-w-[300px]">
+                    <p>
+                      This plan is not applicable since you have exceeded the
+                      limits for this subscription (users or bank connections).
+                    </p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+              <p className="font-sans text-xs text-muted-foreground text-center">
+                Cancel anytime
+              </p>
+            </div>
           </div>
 
-          <div className="mt-8 border-t border-border pt-4">
-            <SubmitButton
-              className="h-9 w-full"
-              onClick={() => handleCheckout("pro", "pro")}
-              isSubmitting={isSubmitting === 2}
-            >
-              Choose pro plan
-            </SubmitButton>
+          {/* Pro Plan */}
+          <div className="bg-background border border-primary p-4 py-6 h-full flex flex-col relative">
+            <div className="absolute top-0 right-4 -translate-y-1/2">
+              <div className="bg-background border border-primary px-2 py-1 rounded-full flex items-center justify-center">
+                <span className="font-sans text-xs text-foreground">
+                  Most popular
+                </span>
+              </div>
+            </div>
+            <div className="mb-4">
+              <h3 className="font-sans text-base text-foreground mb-1">Pro</h3>
+              <p className="font-sans text-sm text-muted-foreground mb-3">
+                For small teams that need more room to grow
+              </p>
+              <div className="flex items-baseline gap-2">
+                <span className="font-sans text-2xl text-foreground">
+                  {billingPeriod === "monthly"
+                    ? `${currencySymbol}49`
+                    : `${currencySymbol}39`}
+                </span>
+                <span className="font-sans text-sm text-muted-foreground">
+                  /month
+                </span>
+              </div>
+              <p className="font-sans text-xs text-muted-foreground mt-1">
+                {billingPeriod === "monthly"
+                  ? "Billed monthly"
+                  : "Billed yearly"}
+              </p>
+            </div>
+
+            <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Everything in Starter
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  10 banks · 50 invoices · 100GB storage
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Up to 10 team members
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  API access and integrations
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Shareable report links
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-foreground leading-[1.5rem]">•</span>
+                <span className="font-sans text-sm text-foreground leading-relaxed">
+                  Priority support
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <SubmitButton
+                className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors"
+                onClick={() =>
+                  handleCheckout(
+                    "pro",
+                    billingPeriod === "yearly" ? "pro_yearly" : "pro",
+                  )
+                }
+                isSubmitting={isSubmitting === 2}
+              >
+                Start with Pro
+              </SubmitButton>
+              <p className="font-sans text-xs text-muted-foreground text-center">
+                Cancel anytime
+              </p>
+            </div>
           </div>
         </div>
       </div>

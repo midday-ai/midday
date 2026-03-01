@@ -26,9 +26,7 @@ export default async function Billing() {
 
       {team?.plan === "trial" && (
         <div>
-          <h2 className="text-lg font-medium leading-none tracking-tight mb-4">
-            Plans
-          </h2>
+          <h2 className="font-serif text-2xl text-foreground mb-4">Plans</h2>
 
           <Plans />
         </div>

@@ -1,8 +1,13 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
+import { useState } from "react";
 
 export function PricingSection() {
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
+    "yearly",
+  );
+
   return (
     <section className="bg-background py-12 sm:py-16 lg:py-24">
       <div className="max-w-[1400px] mx-auto">
@@ -15,6 +20,51 @@ export function PricingSection() {
           </p>
         </div>
 
+        {/* Billing Toggle */}
+        <div className="flex justify-center mb-8 sm:mb-8 lg:mb-16">
+          <div
+            className="relative flex items-stretch bg-muted"
+            style={{ width: "fit-content" }}
+          >
+            <div className="flex items-stretch">
+              <button
+                type="button"
+                onClick={() => setBillingPeriod("monthly")}
+                className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
+                  billingPeriod === "monthly"
+                    ? "text-foreground bg-background border-border"
+                    : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
+                }`}
+                style={{
+                  WebkitTapHighlightColor: "transparent",
+                  marginBottom: billingPeriod === "monthly" ? "-1px" : "0px",
+                  position: "relative",
+                  zIndex: billingPeriod === "monthly" ? 10 : 1,
+                }}
+              >
+                <span>Monthly</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setBillingPeriod("yearly")}
+                className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
+                  billingPeriod === "yearly"
+                    ? "text-foreground bg-background border-border"
+                    : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
+                }`}
+                style={{
+                  WebkitTapHighlightColor: "transparent",
+                  marginBottom: billingPeriod === "yearly" ? "-1px" : "0px",
+                  position: "relative",
+                  zIndex: billingPeriod === "yearly" ? 10 : 1,
+                }}
+              >
+                <span>Yearly (Save 20%)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Pricing Cards */}
         <div className="flex flex-col lg:flex-row gap-14 justify-center items-center lg:items-stretch max-w-6xl mx-auto">
           {/* Starter */}
@@ -25,66 +75,76 @@ export function PricingSection() {
                   Starter
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground mb-3">
-                  For solo founders who want a clean starting point for their
-                  business finances
+                  For founders running their business solo
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
-                    $29
+                    {billingPeriod === "monthly" ? "$29" : "$23"}
                   </span>
                   <span className="font-sans text-sm text-muted-foreground">
                     /month
                   </span>
                 </div>
+                <p className="font-sans text-xs text-muted-foreground mt-1">
+                  {billingPeriod === "monthly"
+                    ? "Billed monthly"
+                    : "Billed yearly"}
+                </p>
               </div>
 
-              <div className="flex-1 space-y-1 border-t border-border pt-6 pb-6">
+              <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Financial overview and widgets
+                    Invoicing with recurring and online payments
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Weekly summaries and insights
+                    Automatic bank sync and categorization
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Transactions with categorization
+                    Receipt capture via Gmail, Outlook, or upload
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Receipts and file storage
+                    Financial reports, burn rate, and tax summaries
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Invoicing (up to 10 invoices per month)
+                    AI assistant for financial insights
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Time tracking
+                    Time tracking and project billing
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 3 connected banks
+                    Multi-currency support
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 2 team members
+                    Export to Xero, QuickBooks, or Fortnox
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    3 banks · 15 invoices · 10GB storage
                   </span>
                 </div>
               </div>
@@ -118,66 +178,58 @@ export function PricingSection() {
                   Pro
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground mb-3">
-                  For founders and small teams running weekly finance workflows
-                  end to end
+                  For small teams that need more room to grow
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
-                    $49
+                    {billingPeriod === "monthly" ? "$49" : "$39"}
                   </span>
                   <span className="font-sans text-sm text-muted-foreground">
                     /month
                   </span>
                 </div>
+                <p className="font-sans text-xs text-muted-foreground mt-1">
+                  {billingPeriod === "monthly"
+                    ? "Billed monthly"
+                    : "Billed yearly"}
+                </p>
               </div>
 
-              <div className="flex-1 space-y-1 border-t border-border pt-6 pb-6">
+              <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Financial overview and widgets
+                    Everything in Starter
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Weekly summaries and insights
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Transactions with categorization
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Receipts and file storage
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Invoicing (up to 50 invoices per month)
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Time tracking
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 10 connected banks
+                    10 banks · 50 invoices · 100GB storage
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
                     Up to 10 team members
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    API access and integrations
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Shareable report links
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Priority support
                   </span>
                 </div>
               </div>
