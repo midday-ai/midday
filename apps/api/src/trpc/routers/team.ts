@@ -70,12 +70,27 @@ export const teamRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createTeamSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
-      const teamId = await createTeam(db, {
-        ...input,
-        userId: session.user.id,
-        email: session.user.email!,
-        companyType: input.companyType,
-      });
+      let teamId: string;
+
+      try {
+        teamId = await createTeam(db, {
+          ...input,
+          userId: session.user.id,
+          email: session.user.email!,
+          companyType: input.companyType,
+        });
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === "PAID_PLAN_REQUIRED") {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message:
+                "All existing teams must be on a paid plan before creating another",
+            });
+          }
+        }
+        throw error;
+      }
 
       if (input.switchTeam) {
         try {

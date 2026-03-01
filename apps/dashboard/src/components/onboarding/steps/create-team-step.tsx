@@ -155,12 +155,16 @@ export function CreateTeamStep({
         transition={{ duration: 0.35, delay: 0.3 }}
       >
         <Form {...form}>
-          <form id="create-team-form" onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            id="create-team-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-3"
+          >
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem className="mt-4 w-full">
+                <FormItem>
                   <FormLabel className="text-xs text-primary font-normal">
                     Company name
                   </FormLabel>
@@ -183,31 +187,9 @@ export function CreateTeamStep({
 
             <FormField
               control={form.control}
-              name="companyType"
-              render={({ field }) => (
-                <FormItem className="mt-4 w-full">
-                  <FormLabel className="text-xs text-primary font-normal">
-                    What best describes you?
-                  </FormLabel>
-                  <FormControl>
-                    <SelectCompanyType
-                      value={field.value}
-                      triggerClassName="bg-secondary border-border text-foreground"
-                      popoverProps={{ side: "bottom", avoidCollisions: false }}
-                      listClassName="max-h-[150px]"
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="countryCode"
               render={({ field }) => (
-                <FormItem className="mt-4 w-full">
+                <FormItem>
                   <FormLabel className="text-xs text-primary font-normal">
                     Country
                   </FormLabel>
@@ -226,51 +208,73 @@ export function CreateTeamStep({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="baseCurrency"
-              render={({ field }) => (
-                <FormItem className="mt-4">
-                  <FormLabel className="text-xs text-primary font-normal">
-                    Base currency
-                  </FormLabel>
-                  <FormControl>
-                    <SelectCurrency
-                      currencies={uniqueCurrencies}
-                      triggerClassName="bg-secondary border-border text-foreground"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
-                    If you have multiple accounts in different currencies, this
-                    will be the default currency for your company. You can
-                    change it later.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-1.5">
+              <div className="grid grid-cols-2 gap-3">
+                <FormField
+                  control={form.control}
+                  name="baseCurrency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs text-primary font-normal">
+                        Base currency
+                      </FormLabel>
+                      <FormControl>
+                        <SelectCurrency
+                          currencies={uniqueCurrencies}
+                          triggerClassName="bg-secondary border-border text-foreground"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="fiscalYearStartMonth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs text-primary font-normal">
+                        Fiscal year starts
+                      </FormLabel>
+                      <FormControl>
+                        <SelectFiscalMonth
+                          triggerClassName="bg-secondary border-border text-foreground"
+                          popoverProps={{
+                            side: "bottom",
+                            avoidCollisions: false,
+                          }}
+                          listClassName="max-h-[150px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormDescription className="text-[11px] text-muted-foreground">
+                Used for reports and default date ranges. You can change these
+                later.
+              </FormDescription>
+            </div>
 
             <FormField
               control={form.control}
-              name="fiscalYearStartMonth"
+              name="companyType"
               render={({ field }) => (
-                <FormItem className="mt-4">
+                <FormItem>
                   <FormLabel className="text-xs text-primary font-normal">
-                    Fiscal year starts
+                    What best describes you?
                   </FormLabel>
                   <FormControl>
-                    <SelectFiscalMonth
-                      triggerClassName="bg-secondary border-border text-foreground"
-                      popoverProps={{ side: "bottom", avoidCollisions: false }}
-                      listClassName="max-h-[150px]"
-                      {...field}
+                    <SelectCompanyType
+                      value={field.value}
+                      onChange={field.onChange}
+                      className="bg-secondary border-border text-foreground"
                     />
                   </FormControl>
-                  <FormDescription className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
-                    When does your company's fiscal year begin? This determines
-                    default date ranges for reports. You can change it later.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

@@ -378,7 +378,7 @@ export function OnboardingPage({
             )}
           </div>
 
-          <div className="flex-1 flex flex-col justify-center pt-20 min-h-0">
+          <div className="flex-1 flex flex-col justify-center pt-20 min-h-0 overflow-y-auto scrollbar-hide">
             <motion.div
               layout
               transition={{ layout: { duration: 0.3, ease: "easeInOut" } }}

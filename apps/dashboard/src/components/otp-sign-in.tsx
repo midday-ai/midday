@@ -3,7 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
-import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import { Spinner } from "@midday/ui/spinner";
@@ -16,7 +22,12 @@ import { z } from "zod/v3";
 import { verifyOtpAction } from "@/actions/verify-otp-action";
 
 const formSchema = z.object({
-  email: z.string().email(),
+  email: z
+    .string()
+    .email()
+    .refine((email) => !email.includes("+"), {
+      message: "Email addresses with '+' are not allowed",
+    }),
 });
 
 type Props = {
@@ -131,6 +142,7 @@ export function OTPSignIn({ className }: Props) {
                     spellCheck="false"
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />

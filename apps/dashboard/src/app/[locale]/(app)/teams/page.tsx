@@ -7,6 +7,7 @@ import { SelectTeamTable } from "@/components/tables/select-team/table";
 import { TeamInvites } from "@/components/team-invites";
 import { UserMenu } from "@/components/user-menu";
 import { getQueryClient, HydrateClient, trpc } from "@/trpc/server";
+import { isTrialExpired } from "@/utils/trial";
 
 export const metadata: Metadata = {
   title: "Teams | Midday",
@@ -25,6 +26,17 @@ export default async function Teams() {
   if (!teams?.length && !invites?.length) {
     redirect("/onboarding");
   }
+
+  const activeTeamCount =
+    teams?.filter((t) => {
+      if (t.plan === "starter" || t.plan === "pro") return true;
+      if (t.plan === "trial" && !t.canceledAt && t.createdAt) {
+        return !isTrialExpired(t.createdAt);
+      }
+      return false;
+    }).length ?? 0;
+
+  const canCreateTeam = !teams?.length || activeTeamCount >= teams.length;
 
   return (
     <HydrateClient>
@@ -76,11 +88,18 @@ export default async function Teams() {
             <span className="absolute left-1/2 -translate-x-1/2 text-sm text-[#878787] bg-background -top-3 px-4">
               Or
             </span>
-            <Link href="/onboarding" className="w-full">
-              <Button className="w-full mt-2" variant="outline">
-                Create team
-              </Button>
-            </Link>
+            {canCreateTeam ? (
+              <Link href="/onboarding" className="w-full">
+                <Button className="w-full mt-2" variant="outline">
+                  Create team
+                </Button>
+              </Link>
+            ) : (
+              <p className="text-sm text-[#878787] mt-2">
+                All existing teams must be on a paid plan before creating
+                another. Switch to the team you'd like to upgrade.
+              </p>
+            )}
           </div>
         </div>
       </div>
