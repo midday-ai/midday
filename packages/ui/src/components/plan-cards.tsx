@@ -145,19 +145,19 @@ export function PlanCards({
                     value={
                       billingPeriod === "monthly"
                         ? pricing.starter.monthly
-                        : pricing.starter.yearly
+                        : pricing.starter.yearly * 12
                     }
                     willChange
                   />
                 </span>
                 <span className="font-sans text-sm text-muted-foreground">
-                  /month
+                  {billingPeriod === "monthly" ? "/month" : "/year"}
                 </span>
               </div>
               <p className="font-sans text-xs text-muted-foreground mt-1">
                 {billingPeriod === "monthly"
                   ? "Billed monthly"
-                  : "Billed yearly"}
+                  : `${pricing.symbol}${pricing.starter.yearly}/mo equivalent`}
               </p>
             </div>
 
@@ -193,19 +193,19 @@ export function PlanCards({
                     value={
                       billingPeriod === "monthly"
                         ? pricing.pro.monthly
-                        : pricing.pro.yearly
+                        : pricing.pro.yearly * 12
                     }
                     willChange
                   />
                 </span>
                 <span className="font-sans text-sm text-muted-foreground">
-                  /month
+                  {billingPeriod === "monthly" ? "/month" : "/year"}
                 </span>
               </div>
               <p className="font-sans text-xs text-muted-foreground mt-1">
                 {billingPeriod === "monthly"
                   ? "Billed monthly"
-                  : "Billed yearly"}
+                  : `${pricing.symbol}${pricing.pro.yearly}/mo equivalent`}
               </p>
             </div>
 
@@ -220,7 +220,9 @@ export function PlanCards({
         </div>
 
         <p className="font-sans text-xs text-muted-foreground mt-6 text-center">
-          {footnote && <>{footnote} · </>}Cancel anytime · Prices in{" "}
+          {footnote && <>{footnote} · </>}
+          {billingPeriod === "yearly" && <>30-day money-back guarantee · </>}
+          Prices in{" "}
           <button
             type="button"
             onClick={() => {
