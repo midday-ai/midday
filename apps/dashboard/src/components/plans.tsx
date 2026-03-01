@@ -19,8 +19,10 @@ type PlansProps = {
 };
 
 export function Plans({ continent }: PlansProps) {
-  const pricing = getPlanPricing(continent);
-  const checkoutCurrency = pricing.currency as "USD" | "EUR";
+  const defaultCurrency = getPlanPricing(continent).currency as "USD" | "EUR";
+  const [checkoutCurrency, setCheckoutCurrency] = useState<"USD" | "EUR">(
+    defaultCurrency,
+  );
   const [isSubmitting, setIsSubmitting] = useState(0);
   const [isPollingForPlan, setIsPollingForPlan] = useState(false);
   const isPollingRef = useRef(false);
@@ -129,6 +131,7 @@ export function Plans({ continent }: PlansProps) {
   return (
     <PlanCards
       continent={continent}
+      onCurrencyChange={setCheckoutCurrency}
       renderStarterAction={(billingPeriod) => (
         <>
           <Tooltip>

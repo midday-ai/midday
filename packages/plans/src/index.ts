@@ -151,7 +151,7 @@ export const starterFeatures: PlanFeature[] = [
       "Includes profit & loss, runway, revenue forecast, balance sheet, cash flow, and more.",
   },
   {
-    label: "AI assistant for financial insights",
+    label: "AI assistant",
     tooltip:
       "Ask questions about revenue, spending, runway, and invoices in plain language.",
   },
@@ -168,7 +168,7 @@ export const starterFeatures: PlanFeature[] = [
   {
     label: "Export to Xero, QuickBooks, or Fortnox",
     tooltip:
-      "Sync categorized transactions and attachments. CSV export also available.",
+      "Export categorized transactions and attachments to your accounting software. CSV export also available.",
   },
   { label: "3 banks · 15 invoices · 10GB storage" },
 ];
@@ -178,24 +178,34 @@ export const proFeatures: PlanFeature[] = [
   { label: "10 banks · 50 invoices · 100GB storage" },
   { label: "Up to 10 team members" },
   {
-    label: "Custom invoice branding",
+    label: "Custom transaction categories",
     tooltip:
-      "Add your logo, colors, and custom fields to every invoice for a fully branded experience.",
+      "Create your own categories and rules to match how your business operates.",
+  },
+  {
+    label: "Invoice templates",
+    tooltip:
+      "Save and reuse invoice layouts for different clients or services.",
+  },
+  {
+    label: "Customer portal",
+    tooltip:
+      "Let customers view and pay invoices through their own branded portal.",
+  },
+  {
+    label: "Advanced AI insights",
+    tooltip:
+      "Get alerts on unusual spending, cash flow trends, and automated suggestions based on your financial data.",
+  },
+  {
+    label: "Shareable report and document links",
+    tooltip:
+      "Generate view-only links with optional expiration for reports, receipts, and vault documents.",
   },
   {
     label: "API access and integrations",
     tooltip:
       "Build custom integrations with the Midday API. SDKs available for all major languages.",
-  },
-  {
-    label: "Shareable report links",
-    tooltip:
-      "Generate view-only links with optional expiration for revenue, profit, burn rate, and other reports.",
-  },
-  {
-    label: "Dedicated account manager",
-    tooltip:
-      "Get direct access to our team for onboarding, migration help, and ongoing support.",
   },
   { label: "Priority support" },
 ];

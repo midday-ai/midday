@@ -48,17 +48,23 @@ type PlanCardsProps = {
   continent?: string;
   renderStarterAction: (billingPeriod: "monthly" | "yearly") => ReactNode;
   renderProAction: (billingPeriod: "monthly" | "yearly") => ReactNode;
+  onCurrencyChange?: (currency: "USD" | "EUR") => void;
+  footnote?: string;
 };
 
 export function PlanCards({
   continent,
   renderStarterAction,
   renderProAction,
+  onCurrencyChange,
+  footnote,
 }: PlanCardsProps) {
+  const defaultCurrency = getPlanPricing(continent).currency as "USD" | "EUR";
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "yearly",
   );
-  const pricing = getPlanPricing(continent);
+  const [currency, setCurrency] = useState<"USD" | "EUR">(defaultCurrency);
+  const pricing = getPlanPricing(currency === "EUR" ? "EU" : "NA");
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -197,6 +203,46 @@ export function PlanCards({
             <div className="space-y-3">{renderProAction(billingPeriod)}</div>
           </div>
         </div>
+
+        <p className="font-sans text-xs text-muted-foreground mt-6 text-center">
+          {footnote && <>{footnote} · </>}Cancel anytime · Prices in{" "}
+          <button
+            type="button"
+            onClick={() => {
+              if (currency !== "USD") {
+                setCurrency("USD");
+                onCurrencyChange?.("USD");
+              }
+            }}
+            className={cn(
+              "transition-colors",
+              currency === "USD"
+                ? "text-foreground"
+                : "text-muted-foreground/50 hover:text-muted-foreground cursor-pointer",
+            )}
+          >
+            USD
+          </button>
+          {" / "}
+          <button
+            type="button"
+            onClick={() => {
+              if (currency !== "EUR") {
+                setCurrency("EUR");
+                onCurrencyChange?.("EUR");
+              }
+            }}
+            className={cn(
+              "transition-colors",
+              currency === "EUR"
+                ? "text-foreground"
+                : "text-muted-foreground/50 hover:text-muted-foreground cursor-pointer",
+            )}
+          >
+            EUR
+          </button>{" "}
+          excl. VAT
+        </p>
       </div>
     </TooltipProvider>
   );

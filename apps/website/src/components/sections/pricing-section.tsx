@@ -17,6 +17,7 @@ export function PricingSection() {
         </div>
 
         <PlanCards
+          footnote="14-day free trial"
           renderStarterAction={() => (
             <>
               <Button
@@ -44,15 +45,6 @@ export function PricingSection() {
             </>
           )}
         />
-
-        <div className="text-center mt-16 space-y-1">
-          <p className="font-sans text-xs text-muted-foreground">
-            14-day free trial · Cancel anytime
-          </p>
-          <p className="font-sans text-xs text-muted-foreground">
-            Prices shown in USD. Local taxes may apply.
-          </p>
-        </div>
       </div>
     </section>
   );

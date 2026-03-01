@@ -1,6 +1,5 @@
 "use client";
 
-import { getPlanPricing } from "@midday/plans";
 import { createClient } from "@midday/supabase/client";
 import {
   AlertDialog,
@@ -62,11 +61,6 @@ export function UpgradeContent({ user, continent }: UpgradeContentProps) {
         </div>
 
         <Plans continent={continent} />
-
-        <p className="font-sans text-xs text-muted-foreground mt-6 text-center">
-          Cancel anytime · Prices in {getPlanPricing(continent).currency} excl.
-          VAT
-        </p>
 
         <UpgradeFAQ />
 

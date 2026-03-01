@@ -1,5 +1,4 @@
 import { getContinent } from "@midday/location";
-import { getPlanPricing } from "@midday/plans";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { OpenURL } from "@/components/open-url";
@@ -46,11 +45,6 @@ export default async function UpgradePage() {
         </div>
 
         <Plans continent={continent} />
-
-        <p className="font-sans text-xs text-muted-foreground mt-6 text-center">
-          Cancel anytime · Prices in {getPlanPricing(continent).currency} excl.
-          VAT
-        </p>
 
         <UpgradeFAQ />
 
