@@ -157,7 +157,7 @@ export function PlanCards({
               <p className="font-sans text-xs text-muted-foreground mt-1">
                 {billingPeriod === "monthly"
                   ? "Billed monthly"
-                  : `${pricing.symbol}${pricing.starter.yearly}/mo billed yearly`}
+                  : `${pricing.symbol}${pricing.starter.yearly}/mo equivalent`}
               </p>
             </div>
 
@@ -205,7 +205,7 @@ export function PlanCards({
               <p className="font-sans text-xs text-muted-foreground mt-1">
                 {billingPeriod === "monthly"
                   ? "Billed monthly"
-                  : `${pricing.symbol}${pricing.pro.yearly}/mo billed yearly`}
+                  : `${pricing.symbol}${pricing.pro.yearly}/mo equivalent`}
               </p>
             </div>
 
