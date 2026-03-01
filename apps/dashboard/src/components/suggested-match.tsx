@@ -1,7 +1,6 @@
 "use client";
 
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -182,16 +181,17 @@ export function SuggestedMatch({
 
       <div className="border border-border overflow-hidden">
         {/* Document Preview */}
-        <div className="relative bg-[#F6F6F3] dark:bg-[#1A1A1A] p-4 h-[300px] flex items-center justify-center">
+        <div
+          className={cn(
+            "relative bg-[#F6F6F3] dark:bg-[#1A1A1A] p-4 h-[300px] flex items-center justify-center",
+            filePath && "cursor-pointer group",
+          )}
+          onClick={filePath ? handleExpandDocument : undefined}
+        >
           {filePath && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleExpandDocument}
-              className="absolute top-2 right-2 z-10 h-8 w-8 p-0 "
-            >
+            <div className="absolute top-2 right-2 z-10 h-8 w-8 flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity">
               <Icons.ExpandContent className="h-4 w-4 text-[#878787]" />
-            </Button>
+            </div>
           )}
           {filePath ? (
             <div className="relative w-full h-full max-w-[190px] mx-auto">

@@ -303,24 +303,24 @@ export function StartPage() {
       {/* Hero Section */}
       <div className="bg-background relative min-h-screen overflow-visible lg:overflow-hidden">
         <div className="flex flex-col min-h-screen relative pt-32 pb-12 sm:py-32 md:pt-24 lg:pt-0 overflow-hidden">
-          {/* Header content - centered */}
-          <div className="flex-1 lg:flex-none flex flex-col justify-center md:justify-start md:pt-16 lg:pt-48 items-center space-y-8 z-20 px-3 sm:px-4 lg:px-0 lg:max-w-[1400px] lg:mx-auto lg:w-full lg:mb-12 xl:mb-12 2xl:mb-12 3xl:mb-16">
-            <div className="flex flex-col items-center w-full space-y-8">
-              <div className="space-y-4 text-center max-w-2xl mx-auto px-2 lg:px-0">
-                <h1 className="font-serif text-4xl sm:text-5xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-6xl 3xl:text-6xl leading-tight">
+          {/* Header content - centered on mobile, side-by-side on desktop */}
+          <div className="flex-1 lg:flex-none flex flex-col justify-center md:justify-start md:pt-16 lg:pt-56 items-center lg:items-stretch space-y-8 lg:space-y-0 z-20 px-3 sm:px-4 lg:px-0 lg:max-w-[1400px] lg:mx-auto lg:w-full lg:mb-12 xl:mb-12 2xl:mb-12 3xl:mb-16">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end w-full space-y-8 lg:space-y-0">
+              <div className="space-y-4 lg:space-y-3 text-center lg:text-left max-w-xl mx-auto lg:mx-0 px-2 lg:px-0">
+                <h1 className="font-serif text-3xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3]">
                   <span className="text-foreground">
-                    You didn't start a company to run it from spreadsheets
+                    Run your business finances without manual work.
                   </span>
                 </h1>
 
-                <p className="text-muted-foreground text-base leading-normal font-sans max-w-lg mx-auto">
-                  Your finances, invoices, receipts, and time tracking — in one
-                  place, organized automatically.
+                <p className="text-muted-foreground text-base leading-normal font-sans max-w-md lg:max-w-none text-center mx-auto lg:text-left lg:mx-0">
+                  One place for transactions, receipts, invoices and everything
+                  around it.
                 </p>
               </div>
 
-              <div className="space-y-4 text-center w-full lg:w-auto flex flex-col items-center">
-                <div className="flex flex-col gap-3 w-full max-w-md mx-auto lg:w-auto">
+              <div className="space-y-4 text-center lg:text-right w-full lg:w-auto lg:flex lg:flex-col lg:items-end">
+                <div className="flex flex-col gap-3 w-full max-w-md mx-auto lg:mx-0 lg:w-auto">
                   <Button
                     asChild
                     className="w-full lg:w-auto btn-inverse h-11 px-5 lg:px-4 transition-colors"
@@ -344,7 +344,12 @@ export function StartPage() {
                 </div>
 
                 <p className="text-muted-foreground text-xs font-sans">
-                  14-day free trial · Cancel anytime
+                  <span className="lg:hidden">
+                    14-day free trial · Cancel anytime
+                  </span>
+                  <span className="hidden lg:inline">
+                    14-day free trial. Cancel anytime.
+                  </span>
                 </p>
               </div>
             </div>

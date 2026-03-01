@@ -1,43 +1,31 @@
 "use client";
 
 import { Icons } from "@midday/ui/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 
-export function TransactionShortcuts() {
+type Props = {
+  isFulfilled: boolean;
+  status: string;
+};
+
+export function TransactionShortcuts({ isFulfilled, status }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { transactionId, setParams } = useTransactionParams();
   const transactionIds = useTransactionsStore((s) => s.transactionIds);
-
-  const { data: transaction } = useQuery(
-    trpc.transactions.getById.queryOptions(
-      {
-        id: transactionId!,
-      },
-      {
-        enabled: !!transactionId,
-      },
-    ),
-  );
 
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions(),
   );
 
   const canToggleReviewReady =
-    !!transaction &&
-    (!transaction.attachments || transaction.attachments.length === 0) &&
-    transaction.status !== "excluded" &&
-    transaction.status !== "archived";
+    !isFulfilled && status !== "excluded" && status !== "archived";
 
-  const hasAttachments =
-    !!transaction?.attachments && transaction.attachments.length > 0;
-  const isReviewReadyFromStatus =
-    transaction?.status === "completed" && !hasAttachments;
+  const isReviewReadyFromStatus = status === "completed" && !isFulfilled;
 
   const toggleReviewReady = async () => {
     if (!canToggleReviewReady || !transactionId) return;
@@ -99,7 +87,7 @@ export function TransactionShortcuts() {
   return (
     <div className="absolute bottom-4 right-4 left-4 bg-[#FAFAF9] dark:bg-[#0C0C0C]">
       <div className="flex justify-between">
-        {!hasAttachments && (
+        {!isFulfilled && (
           <button
             type="button"
             className="flex items-center gap-2 cursor-pointer"

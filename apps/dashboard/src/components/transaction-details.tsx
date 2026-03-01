@@ -573,7 +573,10 @@ export function TransactionDetails() {
         </AccordionItem>
       </Accordion>
 
-      <TransactionShortcuts />
+      <TransactionShortcuts
+        isFulfilled={data?.isFulfilled ?? false}
+        status={data?.status ?? ""}
+      />
     </div>
   );
 }
