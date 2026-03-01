@@ -1,5 +1,7 @@
 "use client";
 
+import { track } from "@midday/events/client";
+import { LogEvents } from "@midday/events/events";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import dynamic from "next/dynamic";
@@ -323,7 +325,17 @@ export function StartPage() {
                     asChild
                     className="w-full lg:w-auto btn-inverse h-11 px-5 lg:px-4 transition-colors"
                   >
-                    <a href="https://app.midday.ai/">
+                    <a
+                      href="https://app.midday.ai/"
+                      onClick={() =>
+                        track({
+                          event: LogEvents.CTA.name,
+                          channel: LogEvents.CTA.channel,
+                          label: "Set up your business",
+                          position: "hero",
+                        })
+                      }
+                    >
                       <span className="text-inherit text-sm">
                         Set up your business
                       </span>

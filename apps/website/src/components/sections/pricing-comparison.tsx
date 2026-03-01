@@ -1,5 +1,7 @@
 "use client";
 
+import { track } from "@midday/events/client";
+import { LogEvents } from "@midday/events/events";
 import { Button } from "@midday/ui/button";
 import type { Competitor } from "@/data/competitors";
 
@@ -59,7 +61,20 @@ export function PricingComparison({ competitor }: Props) {
           </div>
           <div className="mt-6 text-center">
             <Button asChild className="btn-inverse h-10 px-6">
-              <a href="https://app.midday.ai/">Start free trial</a>
+              <a
+                href="https://app.midday.ai/"
+                onClick={() =>
+                  track({
+                    event: LogEvents.CTA.name,
+                    channel: LogEvents.CTA.channel,
+                    label: "Start free trial",
+                    position: "pricing_comparison",
+                    competitor: competitor.name,
+                  })
+                }
+              >
+                Start free trial
+              </a>
             </Button>
             <p className="font-sans text-xs text-muted-foreground mt-2">
               14-day free trial. Cancel anytime.

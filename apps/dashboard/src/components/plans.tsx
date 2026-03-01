@@ -1,5 +1,7 @@
 "use client";
 
+import { track } from "@midday/events/client";
+import { LogEvents } from "@midday/events/events";
 import { getPlanPricing } from "@midday/plans";
 import { cn } from "@midday/ui/cn";
 import { PlanCards } from "@midday/ui/plan-cards";
@@ -97,6 +99,14 @@ export function Plans({ continent }: PlansProps) {
     try {
       setIsSubmitting(plan === "starter" ? 1 : 2);
 
+      track({
+        event: LogEvents.CheckoutStarted.name,
+        channel: LogEvents.CheckoutStarted.channel,
+        plan,
+        planType,
+        currency: checkoutCurrency,
+      });
+
       const { url } = await createCheckoutMutation.mutateAsync({
         plan,
         planType,
@@ -109,6 +119,15 @@ export function Plans({ continent }: PlansProps) {
 
       checkout.addEventListener("success", (event: any) => {
         event.preventDefault();
+
+        track({
+          event: LogEvents.CheckoutCompleted.name,
+          channel: LogEvents.CheckoutCompleted.channel,
+          plan,
+          planType,
+          currency: checkoutCurrency,
+        });
+
         pollingStartedAtRef.current = Date.now();
         isPollingRef.current = true;
         setIsPollingForPlan(true);
