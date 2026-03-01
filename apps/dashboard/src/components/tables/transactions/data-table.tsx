@@ -77,6 +77,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
     rowSelectionByTab,
     setColumns,
     setCanDelete,
+    setTransactionIds,
     lastClickedIndex,
     setLastClickedIndex,
   } = useTransactionsStore();
@@ -246,6 +247,10 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   const ids = useMemo(() => {
     return tableData.map((row) => row?.id);
   }, [tableData]);
+
+  useEffect(() => {
+    setTransactionIds(ids);
+  }, [ids, setTransactionIds]);
 
   // Handle shift-click range selection
   // Note: This function will be updated after table creation to use table.getRowModel().rows

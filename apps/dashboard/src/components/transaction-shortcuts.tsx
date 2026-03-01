@@ -2,15 +2,16 @@
 
 import { Icons } from "@midday/ui/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 
 export function TransactionShortcuts() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { transactionId, setParams } = useTransactionParams();
+  const transactionIds = useTransactionsStore((s) => s.transactionIds);
 
   const { data: transaction } = useQuery(
     trpc.transactions.getById.queryOptions(
@@ -22,16 +23,6 @@ export function TransactionShortcuts() {
       },
     ),
   );
-
-  const getTransactionIds = useCallback(() => {
-    const pages = queryClient
-      .getQueriesData({ queryKey: trpc.transactions.get.infiniteQueryKey() })
-      // @ts-expect-error
-      .flatMap(([, data]) => data?.pages ?? [])
-      .flatMap((page) => page.data ?? []);
-
-    return pages.map((row) => row.id);
-  }, [queryClient, trpc.transactions.get]);
 
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions({
@@ -61,11 +52,10 @@ export function TransactionShortcuts() {
   const toggleReviewReady = async () => {
     if (!canToggleReviewReady || !transactionId) return;
 
-    const currentIds = getTransactionIds();
-    const currentIndex = currentIds.indexOf(transactionId);
+    const currentIndex = transactionIds.indexOf(transactionId);
     const adjacentId =
       currentIndex !== -1
-        ? (currentIds[currentIndex + 1] ?? currentIds[currentIndex - 1])
+        ? (transactionIds[currentIndex + 1] ?? transactionIds[currentIndex - 1])
         : undefined;
 
     await updateTransactionMutation.mutateAsync({
@@ -73,7 +63,7 @@ export function TransactionShortcuts() {
       status: isReviewReadyFromStatus ? "posted" : "completed",
     });
 
-    const updatedIds = getTransactionIds();
+    const updatedIds = useTransactionsStore.getState().transactionIds;
     if (!updatedIds.includes(transactionId)) {
       setParams(adjacentId ? { transactionId: adjacentId } : null);
     }
@@ -90,10 +80,9 @@ export function TransactionShortcuts() {
 
   const navigate = (direction: "up" | "down") => {
     if (!transactionId) return;
-    const currentIds = getTransactionIds();
-    const currentIndex = currentIds.indexOf(transactionId);
+    const currentIndex = transactionIds.indexOf(transactionId);
     if (currentIndex === -1) return;
-    const nextId = currentIds[currentIndex + (direction === "up" ? -1 : 1)];
+    const nextId = transactionIds[currentIndex + (direction === "up" ? -1 : 1)];
     if (nextId) {
       setParams({ transactionId: nextId });
     }
