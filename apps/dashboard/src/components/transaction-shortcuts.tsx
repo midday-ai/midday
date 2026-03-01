@@ -64,7 +64,9 @@ export function TransactionShortcuts() {
     const currentIds = getTransactionIds();
     const currentIndex = currentIds.indexOf(transactionId);
     const adjacentId =
-      currentIds[currentIndex + 1] ?? currentIds[currentIndex - 1];
+      currentIndex !== -1
+        ? (currentIds[currentIndex + 1] ?? currentIds[currentIndex - 1])
+        : undefined;
 
     await updateTransactionMutation.mutateAsync({
       id: transactionId,
