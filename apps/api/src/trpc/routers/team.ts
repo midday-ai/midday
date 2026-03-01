@@ -74,6 +74,7 @@ export const teamRouter = createTRPCRouter({
         ...input,
         userId: session.user.id,
         email: session.user.email!,
+        companyType: input.companyType,
       });
 
       if (input.switchTeam) {

@@ -219,7 +219,7 @@ export function PlanCards({
           </div>
         </div>
 
-        <p className="font-sans text-xs text-muted-foreground mt-6 text-center">
+        <p className="font-sans text-xs text-muted-foreground/50 mt-6 text-center">
           {footnote && <>{footnote} · </>}
           {billingPeriod === "yearly" && <>30-day money-back guarantee · </>}
           Prices in{" "}

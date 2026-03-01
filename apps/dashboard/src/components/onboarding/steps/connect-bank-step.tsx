@@ -66,8 +66,8 @@ export function ConnectBankStep({
         transition={{ duration: 0.4, delay: 0.2 }}
         className="text-sm text-muted-foreground leading-relaxed"
       >
-        Connect your bank account to automatically sync transactions and keep
-        your finances up to date.
+        Get runway, burn rate, and weekly summaries automatically — just connect
+        your bank.
       </motion.p>
 
       <motion.div
@@ -98,6 +98,10 @@ export function ConnectBankStep({
           />
         </Suspense>
       </motion.div>
+
+      <p className="text-[11px] text-muted-foreground text-center pt-4">
+        Read-only access · Encrypted · Disconnect anytime
+      </p>
     </div>
   );
 }

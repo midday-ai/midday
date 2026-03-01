@@ -19,6 +19,7 @@ import { motion } from "framer-motion";
 import { use, useEffect, useRef, useState } from "react";
 import { z } from "zod/v3";
 import { CountrySelector } from "@/components/country-selector";
+import { SelectCompanyType } from "@/components/select-company-type";
 import { SelectCurrency } from "@/components/select-currency";
 import { SelectFiscalMonth } from "@/components/select-fiscal-month";
 import { useZodForm } from "@/hooks/use-zod-form";
@@ -26,6 +27,9 @@ import { useTRPC } from "@/trpc/client";
 
 const formSchema = z.object({
   name: z.string().min(2, "Company name must be at least 2 characters."),
+  companyType: z
+    .enum(["freelancer", "solo_founder", "small_team", "agency", "exploring"])
+    .optional(),
   countryCode: z.string(),
   baseCurrency: z.string(),
   fiscalYearStartMonth: z.number().int().min(1).max(12).nullable().optional(),
@@ -63,6 +67,7 @@ export function CreateTeamStep({
           channel: LogEvents.OnboardingTeamCreated.channel,
           countryCode: form.getValues("countryCode"),
           currency: form.getValues("baseCurrency"),
+          companyType: form.getValues("companyType"),
         });
         await queryClient.invalidateQueries();
         onComplete();
@@ -114,6 +119,7 @@ export function CreateTeamStep({
         baseCurrency: values.baseCurrency,
         countryCode: values.countryCode,
         fiscalYearStartMonth: values.fiscalYearStartMonth,
+        companyType: values.companyType,
         switchTeam: true,
       });
     } catch {
@@ -168,6 +174,28 @@ export function CreateTeamStep({
                       spellCheck="false"
                       className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                       {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="companyType"
+              render={({ field }) => (
+                <FormItem className="mt-4 w-full">
+                  <FormLabel className="text-xs text-primary font-normal">
+                    What best describes you?
+                  </FormLabel>
+                  <FormControl>
+                    <SelectCompanyType
+                      value={field.value}
+                      triggerClassName="bg-secondary border-border text-foreground"
+                      popoverProps={{ side: "bottom", avoidCollisions: false }}
+                      listClassName="max-h-[150px]"
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />

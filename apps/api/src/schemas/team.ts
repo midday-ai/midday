@@ -147,6 +147,13 @@ export const createTeamSchema = z.object({
     description: "URL to the team's logo image",
     example: "https://cdn.midday.ai/logos/acme-corp.png",
   }),
+  companyType: z
+    .enum(["freelancer", "solo_founder", "small_team", "agency", "exploring"])
+    .optional()
+    .openapi({
+      description: "Type of company or team",
+      example: "solo_founder",
+    }),
   switchTeam: z.boolean().optional().default(false).openapi({
     description:
       "Whether to automatically switch the user to the newly created team",

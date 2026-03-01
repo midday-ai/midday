@@ -436,7 +436,10 @@ export function OnboardingPage({
                         onClick={handleNavigation}
                         className="px-4 py-2 bg-secondary border border-border text-foreground text-sm hover:bg-accent transition-colors"
                       >
-                        {navLabel}
+                        {currentStep.key === "connect-bank" ||
+                        currentStep.key === "connect-inbox"
+                          ? "Skip for now"
+                          : navLabel}
                       </button>
                     )}
                     {currentStep.navigation === "finish" && (
