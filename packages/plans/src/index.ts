@@ -87,6 +87,19 @@ export function getPlanByProductId(productId: string): PlanKey {
   return plan.key as PlanKey;
 }
 
+export function getPlanIntervalByProductId(
+  productId: string,
+): "month" | "year" {
+  const plans = getPlans();
+  const plan = Object.values(plans).find((p) => p.id === productId);
+
+  if (!plan) {
+    throw new Error("Plan not found");
+  }
+
+  return plan.interval;
+}
+
 export function getPlanName(plan: string | null | undefined): string {
   switch (plan) {
     case "starter":

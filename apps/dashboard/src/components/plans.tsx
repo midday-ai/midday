@@ -114,7 +114,9 @@ export function Plans({ continent }: PlansProps) {
         currency: checkoutCurrency,
       });
 
-      const checkout = await PolarEmbedCheckout.create(url, theme);
+      const checkout = await PolarEmbedCheckout.create(url, {
+        theme,
+      });
       checkoutInstanceRef.current = checkout;
 
       checkout.addEventListener("success", (event: any) => {

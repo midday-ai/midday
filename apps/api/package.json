@@ -48,7 +48,7 @@
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "@polar-sh/sdk": "^0.42.1",
+    "@polar-sh/sdk": "^0.45.1",
     "@scalar/hono-api-reference": "^0.9.26",
     "@sentry/bun": "catalog:",
     "@sindresorhus/slugify": "catalog:",

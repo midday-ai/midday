@@ -183,4 +183,8 @@ export const LogEvents = {
     name: "Checkout Completed",
     channel: "billing",
   },
+  SubscriptionCanceled: {
+    name: "Subscription Canceled",
+    channel: "billing",
+  },
 };
