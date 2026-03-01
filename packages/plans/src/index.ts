@@ -183,12 +183,12 @@ export const starterFeatures: PlanFeature[] = [
     tooltip:
       "Export categorized transactions and attachments to your accounting software. CSV export also available.",
   },
-  { label: "3 banks · 15 invoices · 10GB storage" },
+  { label: "3 banks · 15 invoices/mo · 10GB storage" },
 ];
 
 export const proFeatures: PlanFeature[] = [
   { label: "Everything in Starter" },
-  { label: "10 banks · 50 invoices · 100GB storage" },
+  { label: "10 banks · 50 invoices/mo · 100GB storage" },
   { label: "Up to 10 team members" },
   {
     label: "Custom transaction categories",

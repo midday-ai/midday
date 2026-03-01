@@ -79,7 +79,7 @@ export const middayPricing: PricingTier[] = [
       "Time tracking and project billing",
       "Multi-currency support",
       "Export to Xero, QuickBooks, or Fortnox",
-      "3 banks · 15 invoices · 10GB storage",
+      "3 banks · 15 invoices/mo · 10GB storage",
     ],
   },
   {
@@ -88,7 +88,7 @@ export const middayPricing: PricingTier[] = [
     period: "/month",
     features: [
       "Everything in Starter",
-      "10 banks · 50 invoices · 100GB storage",
+      "10 banks · 50 invoices/mo · 100GB storage",
       "Up to 10 team members",
       "Custom transaction categories",
       "Invoice templates",
