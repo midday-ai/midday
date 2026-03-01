@@ -68,14 +68,14 @@ export const middayDifferentiators = [
 export const middayPricing: PricingTier[] = [
   {
     name: "Starter",
-    price: "$29",
+    price: "$23",
     period: "/month",
     features: [
       "Invoicing with recurring and online payments",
       "Automatic bank sync and categorization",
       "Receipt capture via Gmail, Outlook, or upload",
       "Financial reports, burn rate, and tax summaries",
-      "AI assistant for financial insights",
+      "AI assistant",
       "Time tracking and project billing",
       "Multi-currency support",
       "Export to Xero, QuickBooks, or Fortnox",
@@ -84,14 +84,18 @@ export const middayPricing: PricingTier[] = [
   },
   {
     name: "Pro",
-    price: "$49",
+    price: "$39",
     period: "/month",
     features: [
       "Everything in Starter",
       "10 banks · 50 invoices · 100GB storage",
       "Up to 10 team members",
+      "Custom transaction categories",
+      "Invoice templates",
+      "Customer portal",
+      "Advanced AI insights",
+      "Shareable report and document links",
       "API access and integrations",
-      "Shareable report links",
       "Priority support",
     ],
   },
@@ -1409,7 +1413,7 @@ export const competitors: Competitor[] = [
       },
       {
         title: "Cost",
-        midday: "Predictable $29-49/mo",
+        midday: "From $23/mo",
         competitor: "$299+/month",
       },
     ],

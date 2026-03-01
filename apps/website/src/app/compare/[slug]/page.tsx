@@ -98,9 +98,10 @@ export default async function Page({ params }: Props) {
         "Business finance software for invoicing, expense tracking, time tracking, and financial insights. Built for founders, not accountants.",
       offers: {
         "@type": "Offer",
-        price: "29",
+        price: "23",
         priceCurrency: "USD",
-        description: "Starting at $29/month with 14-day free trial",
+        description:
+          "Starting at $23/month billed yearly with 14-day free trial",
       },
       aggregateRating: {
         "@type": "AggregateRating",
