@@ -312,8 +312,8 @@ export function StartPage() {
                 </h1>
 
                 <p className="text-muted-foreground text-base leading-normal font-sans max-w-lg mx-auto">
-                  One place for your finances, invoices, and time tracking —
-                  always organized, always up to date.
+                  Your finances, invoices, receipts, and time tracking — in one
+                  place, organized automatically.
                 </p>
               </div>
 

@@ -57,9 +57,7 @@ export function UpgradeContent({ user, continent }: UpgradeContentProps) {
               : "Your data is waiting for you"}
           </h1>
           <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto">
-            Your trial has ended and your account is read-only. Everything you
-            set up — transactions, invoices, reports — is still here. Pick a
-            plan to unlock it all again.
+            Your trial has ended — pick a plan to continue.
           </p>
         </div>
 
