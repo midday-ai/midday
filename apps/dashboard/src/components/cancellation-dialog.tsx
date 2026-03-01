@@ -513,8 +513,8 @@ function StepThree({
 
       <div className="space-y-3">
         <SubmitButton
-          variant="destructive"
-          className="w-full"
+          variant="outline"
+          className="w-full text-destructive hover:text-destructive"
           isSubmitting={isSubmitting}
           onClick={onConfirm}
         >

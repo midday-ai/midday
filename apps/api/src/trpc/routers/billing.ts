@@ -8,6 +8,7 @@ import { api } from "@api/utils/polar";
 import { getTeamById } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
 import { getPlanIntervalByProductId, getPlanProductId } from "@midday/plans";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 const logger = createLoggerWithContext("trpc:billing");
@@ -243,7 +244,29 @@ export const billingRouter = createTRPCRouter({
       );
 
       if (!activeSubscription) {
-        throw new Error("No active subscription found");
+        const alreadyCanceled = subscriptions.result.items.some(
+          (s) => s.status === "canceled" || s.cancelAtPeriodEnd,
+        );
+
+        if (alreadyCanceled) {
+          logger.info("Subscription already canceled", { teamId });
+          return { success: true };
+        }
+
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No active subscription found",
+        });
+      }
+
+      if (activeSubscription.cancelAtPeriodEnd) {
+        logger.info("Subscription already scheduled for cancellation", {
+          teamId,
+        });
+
+        return {
+          success: true,
+        };
       }
 
       await api.subscriptions.update({
