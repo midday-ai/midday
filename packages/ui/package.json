@@ -91,6 +91,7 @@
     "./text-effect": "./src/components/text-effect.tsx",
     "./tool-call-indicator": "./src/components/tool-call-indicator.tsx",
     "./web-search-sources": "./src/components/web-search-sources.tsx",
+    "./plan-cards": "./src/components/plan-cards.tsx",
     "./animations/ai-assistant": "./src/components/animations/ai-assistant-animation.tsx",
     "./animations/assistant-question": "./src/components/animations/assistant-question-animation.tsx",
     "./animations/bulk-reconciliation": "./src/components/animations/bulk-reconciliation-animation.tsx",
@@ -108,6 +109,7 @@
     "./animations/widgets": "./src/components/animations/widgets-animation.tsx"
   },
   "dependencies": {
+    "@midday/plans": "workspace:*",
     "@midday/utils": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",

@@ -1,3 +1,4 @@
+import { getCurrency } from "@midday/location";
 import type { Metadata } from "next";
 import { ManageSubscription } from "@/components/manage-subscription";
 import { Orders } from "@/components/orders";
@@ -20,6 +21,8 @@ export default async function Billing() {
     }),
   );
 
+  const currency = await getCurrency();
+
   return (
     <div className="space-y-12">
       {team?.plan !== "trial" && <ManageSubscription />}
@@ -28,7 +31,7 @@ export default async function Billing() {
         <div>
           <h2 className="font-serif text-2xl text-foreground mb-4">Plans</h2>
 
-          <Plans />
+          <Plans currency={currency} />
         </div>
       )}
 

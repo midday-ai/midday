@@ -118,12 +118,77 @@ export type PlanPricing = {
 export function getPlanPricing(currency?: string | null): PlanPricing {
   const isEUR = currency === "EUR";
   return {
-    starter: { monthly: isEUR ? 29 : 29, yearly: isEUR ? 23 : 23 },
-    pro: { monthly: isEUR ? 49 : 49, yearly: isEUR ? 39 : 39 },
+    starter: { monthly: 29, yearly: 23 },
+    pro: { monthly: 49, yearly: 39 },
     currency: isEUR ? "EUR" : "USD",
     symbol: isEUR ? "€" : "$",
   };
 }
+
+export type PlanFeature = {
+  label: string;
+  tooltip?: string;
+};
+
+export const starterFeatures: PlanFeature[] = [
+  {
+    label: "Invoicing with recurring and online payments",
+    tooltip:
+      "Set up weekly to yearly recurring schedules. Accept online payments by card.",
+  },
+  {
+    label: "Automatic bank sync and categorization",
+    tooltip: "Connect to 20,000+ banks across the US, Canada, UK, and Europe.",
+  },
+  {
+    label: "Receipt capture via Gmail, Outlook, or upload",
+    tooltip:
+      "Also supports Slack, WhatsApp, and email forwarding. AI matches receipts to transactions.",
+  },
+  {
+    label: "Financial reports, burn rate, and tax summaries",
+    tooltip:
+      "Includes profit & loss, runway, revenue forecast, balance sheet, cash flow, and more.",
+  },
+  {
+    label: "AI assistant for financial insights",
+    tooltip:
+      "Ask questions about revenue, spending, runway, and invoices in plain language.",
+  },
+  {
+    label: "Time tracking and project billing",
+    tooltip:
+      "Track billable hours per project, export to spreadsheet, and create invoices from tracked time.",
+  },
+  {
+    label: "Multi-currency support",
+    tooltip:
+      "View all financials in one base currency, send invoices in any currency, and match cross-currency receipts.",
+  },
+  {
+    label: "Export to Xero, QuickBooks, or Fortnox",
+    tooltip:
+      "Sync categorized transactions and attachments. CSV export also available.",
+  },
+  { label: "3 banks · 15 invoices · 10GB storage" },
+];
+
+export const proFeatures: PlanFeature[] = [
+  { label: "Everything in Starter" },
+  { label: "10 banks · 50 invoices · 100GB storage" },
+  { label: "Up to 10 team members" },
+  {
+    label: "API access and integrations",
+    tooltip:
+      "Build custom integrations with the Midday API. SDKs available for all major languages.",
+  },
+  {
+    label: "Shareable report links",
+    tooltip:
+      "Generate view-only links with optional expiration for revenue, profit, burn rate, and other reports.",
+  },
+  { label: "Priority support" },
+];
 
 export function getPlanLimits(plan: string): PlanLimits {
   switch (plan) {
