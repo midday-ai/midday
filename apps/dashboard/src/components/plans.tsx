@@ -171,7 +171,7 @@ export function Plans() {
                   }}
                   disabled={!isLoading && !data?.starter}
                 >
-                  Get Starter
+                  Continue with Starter
                 </SubmitButton>
               </div>
             </TooltipTrigger>
@@ -197,7 +197,7 @@ export function Plans() {
           }
           isSubmitting={isSubmitting === 2}
         >
-          Get Pro
+          Continue with Pro
         </SubmitButton>
       )}
     />

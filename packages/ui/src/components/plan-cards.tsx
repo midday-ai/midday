@@ -157,7 +157,7 @@ export function PlanCards({
               <p className="font-sans text-xs text-muted-foreground mt-1">
                 {billingPeriod === "monthly"
                   ? "Billed monthly"
-                  : `${pricing.symbol}${pricing.starter.yearly}/mo equivalent`}
+                  : `Save ${pricing.symbol}${(pricing.starter.monthly - pricing.starter.yearly) * 12}/year vs monthly`}
               </p>
             </div>
 
@@ -205,7 +205,7 @@ export function PlanCards({
               <p className="font-sans text-xs text-muted-foreground mt-1">
                 {billingPeriod === "monthly"
                   ? "Billed monthly"
-                  : `${pricing.symbol}${pricing.pro.yearly}/mo equivalent`}
+                  : `Save ${pricing.symbol}${(pricing.pro.monthly - pricing.pro.yearly) * 12}/year vs monthly`}
               </p>
             </div>
 
@@ -258,7 +258,7 @@ export function PlanCards({
           >
             EUR
           </button>{" "}
-          excl. VAT
+          · Prices exclude tax
         </p>
       </div>
     </TooltipProvider>
