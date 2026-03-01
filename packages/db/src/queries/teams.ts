@@ -242,30 +242,42 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
   // Use transaction to ensure atomicity and prevent race conditions
   const teamId = await db.transaction(async (tx) => {
     try {
+      const TRIAL_PERIOD_DAYS = 14;
+
       const existingTeams = await tx
-        .select({ id: teams.id, name: teams.name, plan: teams.plan })
+        .select({
+          id: teams.id,
+          name: teams.name,
+          plan: teams.plan,
+          createdAt: teams.createdAt,
+          canceledAt: teams.canceledAt,
+        })
         .from(usersOnTeam)
         .innerJoin(teams, eq(teams.id, usersOnTeam.teamId))
         .where(eq(usersOnTeam.userId, params.userId));
 
+      const now = new Date();
+      const activeTeamCount = existingTeams.filter((t) => {
+        if (t.plan === "starter" || t.plan === "pro") return true;
+        if (t.plan === "trial" && !t.canceledAt && t.createdAt) {
+          const trialEnd = new Date(t.createdAt);
+          trialEnd.setDate(trialEnd.getDate() + TRIAL_PERIOD_DAYS);
+          return trialEnd > now;
+        }
+        return false;
+      }).length;
+
       logger.info(`User existing teams count: ${existingTeams.length}`, {
-        existingTeams: existingTeams.map((t) => ({ id: t.id, name: t.name })),
+        existingTeams: existingTeams.map((t) => ({
+          id: t.id,
+          name: t.name,
+          plan: t.plan,
+        })),
+        activeTeamCount,
       });
 
-      const MAX_TEAMS_PER_USER = 3;
-
-      if (existingTeams.length >= MAX_TEAMS_PER_USER) {
-        throw new Error("TEAM_LIMIT_REACHED");
-      }
-
-      if (existingTeams.length > 0) {
-        const hasPaidTeam = existingTeams.some(
-          (t) => t.plan === "starter" || t.plan === "pro",
-        );
-
-        if (!hasPaidTeam) {
-          throw new Error("PAID_PLAN_REQUIRED");
-        }
+      if (existingTeams.length > 0 && activeTeamCount < existingTeams.length) {
+        throw new Error("PAID_PLAN_REQUIRED");
       }
 
       // Create the team

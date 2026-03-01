@@ -85,13 +85,7 @@ export const teamRouter = createTRPCRouter({
             throw new TRPCError({
               code: "FORBIDDEN",
               message:
-                "You must subscribe to a plan before creating additional teams",
-            });
-          }
-          if (error.message === "TEAM_LIMIT_REACHED") {
-            throw new TRPCError({
-              code: "FORBIDDEN",
-              message: "You have reached the maximum number of teams",
+                "All existing teams must be on a paid plan before creating another",
             });
           }
         }

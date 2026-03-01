@@ -7,6 +7,7 @@ import { SelectTeamTable } from "@/components/tables/select-team/table";
 import { TeamInvites } from "@/components/team-invites";
 import { UserMenu } from "@/components/user-menu";
 import { getQueryClient, HydrateClient, trpc } from "@/trpc/server";
+import { isTrialExpired } from "@/utils/trial";
 
 export const metadata: Metadata = {
   title: "Teams | Midday",
@@ -26,11 +27,16 @@ export default async function Teams() {
     redirect("/onboarding");
   }
 
-  const hasPaidTeam = teams?.some(
-    (t) => t.team?.plan === "starter" || t.team?.plan === "pro",
-  );
+  const activeTeamCount =
+    teams?.filter((t) => {
+      if (t.plan === "starter" || t.plan === "pro") return true;
+      if (t.plan === "trial" && !t.canceledAt && t.createdAt) {
+        return !isTrialExpired(t.createdAt);
+      }
+      return false;
+    }).length ?? 0;
 
-  const canCreateTeam = !teams?.length || hasPaidTeam;
+  const canCreateTeam = !teams?.length || activeTeamCount >= teams.length;
 
   return (
     <HydrateClient>
