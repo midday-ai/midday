@@ -147,6 +147,7 @@ export async function getTRPCClient(options?: { forcePrimary?: boolean }) {
       httpLink({
         url: `${API_BASE_URL}/trpc`,
         transformer: superjson,
+        fetch: fetchWithTimeout,
         headers: buildTRPCRequestHeaders({
           session: requestContext.session,
           forcePrimary: shouldForcePrimary,
