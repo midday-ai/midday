@@ -116,7 +116,6 @@ export function Plans({ continent }: PlansProps) {
 
       const checkout = await PolarEmbedCheckout.create(url, {
         theme,
-        locale: user?.locale,
       });
       checkoutInstanceRef.current = checkout;
 

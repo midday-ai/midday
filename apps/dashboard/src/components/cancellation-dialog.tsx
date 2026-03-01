@@ -16,7 +16,7 @@ import {
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -78,6 +78,11 @@ export function CancellationDialog({
     };
   }, []);
 
+  const { data: subscription } = useQuery(
+    trpc.billing.getActiveSubscription.queryOptions(),
+  );
+  const isYearly = subscription?.isYearly ?? false;
+
   const pricing = getPlanPricing(continent);
   const checkoutCurrency = pricing.currency as "USD" | "EUR";
 
@@ -138,7 +143,6 @@ export function CancellationDialog({
 
       const checkout = await PolarEmbedCheckout.create(url, {
         theme,
-        locale: user?.locale,
       });
       checkoutRef.current = checkout;
 
@@ -198,6 +202,7 @@ export function CancellationDialog({
                     onCommentChange={setComment}
                     annualSavings={annualSavings}
                     currency={pricing.symbol}
+                    isYearly={isYearly}
                     onSwitchToAnnual={handleSwitchToAnnual}
                     onStillCancel={() => setStep(3)}
                     onBack={() => {
@@ -276,6 +281,7 @@ function StepTwo({
   onCommentChange,
   annualSavings,
   currency,
+  isYearly,
   onSwitchToAnnual,
   onStillCancel,
   onBack,
@@ -285,6 +291,7 @@ function StepTwo({
   onCommentChange: (value: string) => void;
   annualSavings: number;
   currency: string;
+  isYearly: boolean;
   onSwitchToAnnual: () => void;
   onStillCancel: () => void;
   onBack: () => void;
@@ -299,22 +306,35 @@ function StepTwo({
 
       {reason === "too_expensive" && (
         <div className="space-y-4">
-          <p className="text-sm text-[#878787]">
-            You could save{" "}
-            <span className="text-foreground font-medium">
-              {currency}
-              {annualSavings}/year
-            </span>{" "}
-            by{" "}
-            <button
-              type="button"
-              onClick={onSwitchToAnnual}
-              className="text-foreground underline underline-offset-2 hover:text-foreground/80"
-            >
-              switching to annual billing
-            </button>
-            .
-          </p>
+          {isYearly ? (
+            <p className="text-sm text-[#878787]">
+              We're sorry to hear that. You're already on annual billing — our
+              best rate. Is there anything else we could do to make it work?
+            </p>
+          ) : (
+            <p className="text-sm text-[#878787]">
+              You could save{" "}
+              <span className="text-foreground font-medium">
+                {currency}
+                {annualSavings}/year
+              </span>{" "}
+              by{" "}
+              <button
+                type="button"
+                onClick={onSwitchToAnnual}
+                className="text-foreground underline underline-offset-2 hover:text-foreground/80"
+              >
+                switching to annual billing
+              </button>
+              .
+            </p>
+          )}
+          <Textarea
+            placeholder="Tell us more..."
+            className="resize-none h-[60px]"
+            value={comment}
+            onChange={(e) => onCommentChange(e.target.value)}
+          />
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={onBack}>
               Back

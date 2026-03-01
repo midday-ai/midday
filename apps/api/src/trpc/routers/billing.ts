@@ -7,7 +7,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { api } from "@api/utils/polar";
 import { getTeamById } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
-import { getPlanProductId } from "@midday/plans";
+import { getPlanIntervalByProductId, getPlanProductId } from "@midday/plans";
 import { z } from "zod";
 
 const logger = createLoggerWithContext("trpc:billing");
@@ -199,6 +199,30 @@ export const billingRouter = createTRPCRouter({
       }
     }),
 
+  getActiveSubscription: protectedProcedure.query(
+    async ({ ctx: { teamId } }) => {
+      try {
+        const subscriptions = await api.subscriptions.list({
+          externalCustomerId: teamId!,
+        });
+
+        const active = subscriptions.result.items.find(
+          (s) => s.status === "active" || s.status === "past_due",
+        );
+
+        if (!active) {
+          return null;
+        }
+
+        const interval = getPlanIntervalByProductId(active.productId);
+
+        return { isYearly: interval === "year" };
+      } catch {
+        return null;
+      }
+    },
+  ),
+
   getPortalUrl: protectedProcedure.mutation(async ({ ctx: { teamId } }) => {
     const result = await api.customerSessions.create({
       externalCustomerId: teamId!,
@@ -215,7 +239,7 @@ export const billingRouter = createTRPCRouter({
       });
 
       const activeSubscription = subscriptions.result.items.find(
-        (s) => s.status === "active",
+        (s) => s.status === "active" || s.status === "past_due",
       );
 
       if (!activeSubscription) {
