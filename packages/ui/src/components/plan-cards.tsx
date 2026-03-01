@@ -6,6 +6,7 @@ import {
   proFeatures,
   starterFeatures,
 } from "@midday/plans";
+import NumberFlow from "@number-flow/react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { cn } from "../utils/cn";
@@ -118,9 +119,15 @@ export function PlanCards({
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="font-sans text-2xl text-foreground">
-                  {billingPeriod === "monthly"
-                    ? `${pricing.symbol}${pricing.starter.monthly}`
-                    : `${pricing.symbol}${pricing.starter.yearly}`}
+                  {pricing.symbol}
+                  <NumberFlow
+                    value={
+                      billingPeriod === "monthly"
+                        ? pricing.starter.monthly
+                        : pricing.starter.yearly
+                    }
+                    willChange
+                  />
                 </span>
                 <span className="font-sans text-sm text-muted-foreground">
                   /month
@@ -160,9 +167,15 @@ export function PlanCards({
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="font-sans text-2xl text-foreground">
-                  {billingPeriod === "monthly"
-                    ? `${pricing.symbol}${pricing.pro.monthly}`
-                    : `${pricing.symbol}${pricing.pro.yearly}`}
+                  {pricing.symbol}
+                  <NumberFlow
+                    value={
+                      billingPeriod === "monthly"
+                        ? pricing.pro.monthly
+                        : pricing.pro.yearly
+                    }
+                    willChange
+                  />
                 </span>
                 <span className="font-sans text-sm text-muted-foreground">
                   /month
