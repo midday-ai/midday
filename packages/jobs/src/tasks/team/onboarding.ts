@@ -2,6 +2,7 @@ import { onboardTeamSchema } from "@jobs/schema";
 import { shouldSendEmail } from "@jobs/utils/check-team-plan";
 import { resend } from "@jobs/utils/resend";
 import { TrialActivationEmail } from "@midday/email/emails/trial-activation";
+import { TrialDeactivatedEmail } from "@midday/email/emails/trial-deactivated";
 import { TrialEndedEmail } from "@midday/email/emails/trial-ended";
 import { TrialExpiringEmail } from "@midday/email/emails/trial-expiring";
 import { WelcomeEmail } from "@midday/email/emails/welcome";
@@ -103,6 +104,27 @@ export const onboardTeam = schemaTask({
         subject: "Your Midday trial has ended",
         html: await render(TrialEndedEmail({ fullName: user.full_name })),
       });
+    }
+
+    // Day 17: Bank sync deactivation warning (only if they have bank connections)
+    await wait.for({ days: 3 });
+
+    if (await shouldSendEmail(user.team_id)) {
+      const { count: bankCount } = await supabase
+        .from("bank_connections")
+        .select("id", { count: "exact", head: true })
+        .eq("team_id", user.team_id);
+
+      if (bankCount && bankCount > 0) {
+        await resend.emails.send({
+          from: "Pontus from Midday <pontus@midday.ai>",
+          to: user.email,
+          subject: "Your bank sync will be paused soon",
+          html: await render(
+            TrialDeactivatedEmail({ fullName: user.full_name }),
+          ),
+        });
+      }
     }
   },
 });
