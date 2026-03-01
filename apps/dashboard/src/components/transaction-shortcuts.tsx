@@ -25,20 +25,7 @@ export function TransactionShortcuts() {
   );
 
   const updateTransactionMutation = useMutation(
-    trpc.transactions.update.mutationOptions({
-      onSuccess: async () => {
-        await Promise.all([
-          queryClient.invalidateQueries({
-            queryKey: trpc.transactions.getById.queryKey({
-              id: transactionId!,
-            }),
-          }),
-          queryClient.invalidateQueries({
-            queryKey: trpc.transactions.get.infiniteQueryKey(),
-          }),
-        ]);
-      },
-    }),
+    trpc.transactions.update.mutationOptions(),
   );
 
   const canToggleReviewReady =
@@ -47,7 +34,10 @@ export function TransactionShortcuts() {
     transaction.status !== "excluded" &&
     transaction.status !== "archived";
 
-  const isReviewReadyFromStatus = transaction?.status === "completed";
+  const hasAttachments =
+    !!transaction?.attachments && transaction.attachments.length > 0;
+  const isReviewReadyFromStatus =
+    transaction?.status === "completed" && !hasAttachments;
 
   const toggleReviewReady = async () => {
     if (!canToggleReviewReady || !transactionId) return;
@@ -63,7 +53,25 @@ export function TransactionShortcuts() {
       status: isReviewReadyFromStatus ? "posted" : "completed",
     });
 
-    const updatedIds = useTransactionsStore.getState().transactionIds;
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.getById.queryKey({ id: transactionId }),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.get.infiniteQueryKey(),
+      }),
+    ]);
+
+    const updatedIds = queryClient
+      .getQueriesData({
+        queryKey: trpc.transactions.get.infiniteQueryKey(),
+        type: "active",
+      })
+      // @ts-expect-error
+      .flatMap(([, data]) => data?.pages ?? [])
+      .flatMap((page) => page.data ?? [])
+      .map((row) => row.id);
+
     if (!updatedIds.includes(transactionId)) {
       setParams(adjacentId ? { transactionId: adjacentId } : null);
     }
@@ -91,21 +99,23 @@ export function TransactionShortcuts() {
   return (
     <div className="absolute bottom-4 right-4 left-4 bg-[#FAFAF9] dark:bg-[#0C0C0C]">
       <div className="flex justify-between">
-        <button
-          type="button"
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={toggleReviewReady}
-          disabled={!canToggleReviewReady}
-        >
-          <span className="text-[10px] h-6 flex items-center justify-center text-[#666] border border-border px-2">
-            ⌘ M
-          </span>
-          <span className="text-[10px] text-[#666]">
-            {isReviewReadyFromStatus ? "Unmark ready" : "Mark ready"}
-          </span>
-        </button>
+        {!hasAttachments && (
+          <button
+            type="button"
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={toggleReviewReady}
+            disabled={!canToggleReviewReady}
+          >
+            <span className="text-[10px] h-6 flex items-center justify-center text-[#666] border border-border px-2">
+              ⌘ M
+            </span>
+            <span className="text-[10px] text-[#666]">
+              {isReviewReadyFromStatus ? "Unmark ready" : "Mark ready"}
+            </span>
+          </button>
+        )}
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-auto">
           <button
             type="button"
             className="flex h-6 w-6 items-center justify-center border border-border text-[#666] cursor-pointer hover:bg-accent"
