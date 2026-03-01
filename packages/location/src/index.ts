@@ -41,7 +41,7 @@ export async function getCountryCode() {
 export async function getContinent() {
   const headersList = await headers();
 
-  return headersList.get("cf-ipcontinent") || "NA";
+  return headersList.get("cf-ipcontinent") || "EU";
 }
 
 export async function getTimezone() {
