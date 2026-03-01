@@ -40,7 +40,16 @@ export async function fetchWithRetry(
         ? AbortSignal.any([init.signal, timeout])
         : timeout;
 
-      return await fetch(input, { ...init, signal });
+      const headers = new Headers(init?.headers);
+
+      // Force fresh TCP connections so DNS re-resolves to current instances
+      // after a deployment, instead of reusing keep-alive connections to
+      // draining/dead containers on Railway's private network.
+      if (process.env.API_INTERNAL_URL) {
+        headers.set("Connection", "close");
+      }
+
+      return await fetch(input, { ...init, signal, headers });
     } catch (err: any) {
       lastError = err;
       if (!isRetryable(err) || attempt === MAX_RETRIES) throw err;
