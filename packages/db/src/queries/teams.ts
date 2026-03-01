@@ -3,6 +3,7 @@ import {
   getTaxRateForCategory,
   getTaxTypeForCountry,
 } from "@midday/categories";
+import { createLoggerWithContext } from "@midday/logger";
 import { subDays } from "date-fns";
 import {
   and,
@@ -228,38 +229,47 @@ async function createSystemCategoriesForTeam(
 export const createTeam = async (db: Database, params: CreateTeamParams) => {
   const startTime = Date.now();
   const teamCreationId = `team_creation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const logger = createLoggerWithContext(teamCreationId);
 
-  console.log(
-    `[${teamCreationId}] Starting team creation for user ${params.userId}`,
-    {
-      teamName: params.name,
-      baseCurrency: params.baseCurrency,
-      countryCode: params.countryCode,
-      email: params.email,
-      switchTeam: params.switchTeam,
-      timestamp: new Date().toISOString(),
-    },
-  );
+  logger.info(`Starting team creation for user ${params.userId}`, {
+    teamName: params.name,
+    baseCurrency: params.baseCurrency,
+    countryCode: params.countryCode,
+    email: params.email,
+    switchTeam: params.switchTeam,
+  });
 
   // Use transaction to ensure atomicity and prevent race conditions
   const teamId = await db.transaction(async (tx) => {
     try {
-      // Check if user already has teams to prevent duplicate creation
       const existingTeams = await tx
-        .select({ id: teams.id, name: teams.name })
+        .select({ id: teams.id, name: teams.name, plan: teams.plan })
         .from(usersOnTeam)
         .innerJoin(teams, eq(teams.id, usersOnTeam.teamId))
         .where(eq(usersOnTeam.userId, params.userId));
 
-      console.log(
-        `[${teamCreationId}] User existing teams count: ${existingTeams.length}`,
-        {
-          existingTeams: existingTeams.map((t) => ({ id: t.id, name: t.name })),
-        },
-      );
+      logger.info(`User existing teams count: ${existingTeams.length}`, {
+        existingTeams: existingTeams.map((t) => ({ id: t.id, name: t.name })),
+      });
+
+      const MAX_TEAMS_PER_USER = 3;
+
+      if (existingTeams.length >= MAX_TEAMS_PER_USER) {
+        throw new Error("TEAM_LIMIT_REACHED");
+      }
+
+      if (existingTeams.length > 0) {
+        const hasPaidTeam = existingTeams.some(
+          (t) => t.plan === "starter" || t.plan === "pro",
+        );
+
+        if (!hasPaidTeam) {
+          throw new Error("PAID_PLAN_REQUIRED");
+        }
+      }
 
       // Create the team
-      console.log(`[${teamCreationId}] Creating team record`);
+      logger.info("Creating team record");
       const [newTeam] = await tx
         .insert(teams)
         .values({
@@ -277,12 +287,10 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
         throw new Error("Failed to create team.");
       }
 
-      console.log(
-        `[${teamCreationId}] Team created successfully with ID: ${newTeam.id}`,
-      );
+      logger.info(`Team created successfully with ID: ${newTeam.id}`);
 
       // Add user to team membership (atomic with team creation)
-      console.log(`[${teamCreationId}] Adding user to team membership`);
+      logger.info("Adding user to team membership");
       await tx.insert(usersOnTeam).values({
         userId: params.userId,
         teamId: newTeam.id,
@@ -290,13 +298,13 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
       });
 
       // Create system categories for the new team (atomic)
-      console.log(`[${teamCreationId}] Creating system categories`);
+      logger.info("Creating system categories");
       // @ts-expect-error - tx is a PgTransaction
       await createSystemCategoriesForTeam(tx, newTeam.id, params.countryCode);
 
       // Optionally switch user to the new team (atomic)
       if (params.switchTeam) {
-        console.log(`[${teamCreationId}] Switching user to new team`);
+        logger.info("Switching user to new team");
         await tx
           .update(users)
           .set({ teamId: newTeam.id })
@@ -304,31 +312,25 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
       }
 
       const duration = Date.now() - startTime;
-      console.log(
-        `[${teamCreationId}] Team creation completed successfully in ${duration}ms`,
-        {
-          teamId: newTeam.id,
-          duration,
-        },
-      );
+      logger.info(`Team creation completed successfully in ${duration}ms`, {
+        teamId: newTeam.id,
+        duration,
+      });
 
       return newTeam.id;
     } catch (error) {
       const duration = Date.now() - startTime;
-      console.error(
-        `[${teamCreationId}] Team creation failed after ${duration}ms:`,
-        {
-          error: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined,
-          params: {
-            userId: params.userId,
-            teamName: params.name,
-            baseCurrency: params.baseCurrency,
-            countryCode: params.countryCode,
-          },
-          duration,
+      logger.error(`Team creation failed after ${duration}ms`, {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        params: {
+          userId: params.userId,
+          teamName: params.name,
+          baseCurrency: params.baseCurrency,
+          countryCode: params.countryCode,
         },
-      );
+        duration,
+      });
 
       // Re-throw with more specific error messages
       if (error instanceof Error) {

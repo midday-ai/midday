@@ -70,12 +70,33 @@ export const teamRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createTeamSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
-      const teamId = await createTeam(db, {
-        ...input,
-        userId: session.user.id,
-        email: session.user.email!,
-        companyType: input.companyType,
-      });
+      let teamId: string;
+
+      try {
+        teamId = await createTeam(db, {
+          ...input,
+          userId: session.user.id,
+          email: session.user.email!,
+          companyType: input.companyType,
+        });
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === "PAID_PLAN_REQUIRED") {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message:
+                "You must subscribe to a plan before creating additional teams",
+            });
+          }
+          if (error.message === "TEAM_LIMIT_REACHED") {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "You have reached the maximum number of teams",
+            });
+          }
+        }
+        throw error;
+      }
 
       if (input.switchTeam) {
         try {

@@ -26,6 +26,12 @@ export default async function Teams() {
     redirect("/onboarding");
   }
 
+  const hasPaidTeam = teams?.some(
+    (t) => t.team?.plan === "starter" || t.team?.plan === "pro",
+  );
+
+  const canCreateTeam = !teams?.length || hasPaidTeam;
+
   return (
     <HydrateClient>
       <header className="w-full absolute left-0 right-0 flex justify-between items-center">
@@ -76,11 +82,19 @@ export default async function Teams() {
             <span className="absolute left-1/2 -translate-x-1/2 text-sm text-[#878787] bg-background -top-3 px-4">
               Or
             </span>
-            <Link href="/onboarding" className="w-full">
-              <Button className="w-full mt-2" variant="outline">
-                Create team
-              </Button>
-            </Link>
+            {canCreateTeam ? (
+              <Link href="/onboarding" className="w-full">
+                <Button className="w-full mt-2" variant="outline">
+                  Create team
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/upgrade" className="w-full">
+                <Button className="w-full mt-2" variant="outline">
+                  Upgrade to create another team
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
