@@ -29,15 +29,15 @@ export function SelectableChartWrapper({
   onSelectionStateChange,
   chartType,
 }: SelectableChartWrapperProps) {
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const [containerReady, setContainerReady] = useState(false);
   const sizeRef = useRef<HTMLDivElement>(null);
-  const previousSizeRef = useRef({ width: 0, height: 0 });
 
   const {
     selection,
     isSelecting,
     containerRef,
     chartRef,
+    getPlotArea,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
@@ -51,69 +51,17 @@ export function SelectableChartWrapper({
     },
   });
 
-  // Notify parent when selection state changes
   useEffect(() => {
     onSelectionStateChange?.(isSelecting);
   }, [isSelecting, onSelectionStateChange]);
 
-  // Measure container size for overlay positioning
   const handleContainerRef = (node: HTMLDivElement | null) => {
     if (node) {
       containerRef.current = node;
       sizeRef.current = node;
-
-      const updateSize = () => {
-        if (node) {
-          const newWidth = node.offsetWidth;
-          const newHeight = node.offsetHeight;
-
-          // Only update if size actually changed
-          if (
-            previousSizeRef.current.width !== newWidth ||
-            previousSizeRef.current.height !== newHeight
-          ) {
-            previousSizeRef.current = { width: newWidth, height: newHeight };
-            setContainerSize({
-              width: newWidth,
-              height: newHeight,
-            });
-          }
-        }
-      };
-
-      updateSize();
+      setContainerReady(true);
     }
   };
-
-  // Set up ResizeObserver for container size tracking
-  useEffect(() => {
-    const node = sizeRef.current;
-    if (!node) return;
-
-    const updateSize = () => {
-      const newWidth = node.offsetWidth;
-      const newHeight = node.offsetHeight;
-
-      // Only update if size actually changed
-      if (
-        previousSizeRef.current.width !== newWidth ||
-        previousSizeRef.current.height !== newHeight
-      ) {
-        previousSizeRef.current = { width: newWidth, height: newHeight };
-        setContainerSize({
-          width: newWidth,
-          height: newHeight,
-        });
-      }
-    };
-
-    // Use ResizeObserver if available
-    if (typeof ResizeObserver !== "undefined") {
-      const observer = new ResizeObserver(updateSize);
-      observer.observe(node);
-      return () => observer.disconnect();
-    }
-  }, []);
 
   if (!enableSelection) {
     return <>{children}</>;
@@ -128,15 +76,15 @@ export function SelectableChartWrapper({
       style={{
         position: "relative",
         cursor: selection.isSelecting ? "col-resize" : "default",
+        userSelect: selection.isSelecting ? "none" : "auto",
       }}
     >
       <div ref={chartRef}>{children}</div>
-      {containerSize.width > 0 && containerSize.height > 0 && (
+      {containerReady && (
         <ChartSelectionOverlay
           data={data}
           selection={selection}
-          containerWidth={containerSize.width}
-          containerHeight={containerSize.height}
+          plotArea={getPlotArea()}
         />
       )}
     </div>

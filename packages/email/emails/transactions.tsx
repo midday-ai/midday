@@ -185,7 +185,7 @@ export const TransactionsEmail = ({
             style={{ color: lightStyles.text.color }}
           >
             {t("transactions.title1")}
-            <span className="font-serif font-semibold">
+            <span className="font-serif">
               {t("transactions.title2", {
                 numberOfTransactions: transactions.length,
               })}{" "}

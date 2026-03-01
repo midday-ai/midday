@@ -8,6 +8,13 @@ export interface ChartSelection {
   isSelecting: boolean;
 }
 
+export interface PlotArea {
+  x: number;
+  width: number;
+  y: number;
+  height: number;
+}
+
 export interface UseChartSelectionOptions {
   data: any[];
   dateKey: string;
@@ -17,6 +24,33 @@ export interface UseChartSelectionOptions {
     endDate: string | null,
   ) => void;
   onSelectionComplete?: (startDate: string, endDate: string) => void;
+}
+
+function readPlotArea(chartEl: HTMLElement | null): PlotArea | null {
+  if (!chartEl) return null;
+
+  const hLine = chartEl.querySelector(
+    ".recharts-cartesian-grid-horizontal line",
+  );
+  const vLine = chartEl.querySelector(".recharts-cartesian-grid-vertical line");
+
+  if (!hLine) return null;
+
+  const x = Number.parseFloat(hLine.getAttribute("x1") || "0");
+  const x2 = Number.parseFloat(hLine.getAttribute("x2") || "0");
+  const width = x2 - x;
+
+  let y = 0;
+  let height = 0;
+  if (vLine) {
+    y = Number.parseFloat(vLine.getAttribute("y1") || "0");
+    const y2 = Number.parseFloat(vLine.getAttribute("y2") || "0");
+    height = y2 - y;
+  }
+
+  if (width <= 0) return null;
+
+  return { x, width, y, height };
 }
 
 export function useChartSelection({
@@ -33,69 +67,41 @@ export function useChartSelection({
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<any>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
 
-  // Convert pixel X coordinate to data index
+  const getPlotArea = useCallback((): PlotArea | null => {
+    return readPlotArea(chartRef.current);
+  }, []);
+
   const pixelToDataIndex = useCallback(
     (x: number): number | null => {
-      if (!containerRef.current || !chartRef.current || data.length === 0) {
-        return null;
-      }
+      if (!containerRef.current || data.length === 0) return null;
 
-      const container = containerRef.current;
-      const rect = container.getBoundingClientRect();
-      const chartWidth = rect.width;
+      const plotArea = getPlotArea();
+      if (!plotArea) return null;
+
+      const rect = containerRef.current.getBoundingClientRect();
       const chartX = x - rect.left;
 
-      // Get chart margins (approximate, Recharts uses these defaults)
-      const marginLeft = 0; // Charts use negative marginLeft
-      const marginRight = 6;
-      const plotWidth = chartWidth - marginLeft - marginRight;
-
-      // Calculate the X position within the plot area
-      const plotX = chartX - marginLeft;
-
-      // Map to data index
-      const dataLength = data.length;
-      const barWidth = plotWidth / dataLength;
+      const barWidth = plotArea.width / data.length;
+      const plotX = chartX - plotArea.x;
       const index = Math.floor(plotX / barWidth);
 
-      // Clamp to valid range
       if (index < 0) return 0;
-      if (index >= dataLength) return dataLength - 1;
+      if (index >= data.length) return data.length - 1;
 
       return index;
     },
-    [data],
+    [data, getPlotArea],
   );
 
-  // Get date from data index
   const getDateFromIndex = useCallback(
     (index: number): string | null => {
       if (index < 0 || index >= data.length) return null;
       const item = data[index];
       const dateValue = item[dateKey];
 
-      // Handle different date formats
       if (typeof dateValue === "string") {
-        // Try to parse month names (e.g., "Jan", "Feb")
-        const _monthMap: Record<string, string> = {
-          Jan: "01",
-          Feb: "02",
-          Mar: "03",
-          Apr: "04",
-          May: "05",
-          Jun: "06",
-          Jul: "07",
-          Aug: "08",
-          Sep: "09",
-          Oct: "10",
-          Nov: "11",
-          Dec: "12",
-        };
-
-        // If it's a month abbreviation, we need to construct a full date
-        // For now, return the month string as-is
         return dateValue;
       }
 
@@ -112,7 +118,6 @@ export function useChartSelection({
     (e: React.MouseEvent) => {
       if (!enabled) return;
 
-      // Stop propagation to prevent parent long press handlers from triggering
       e.stopPropagation();
 
       const index = pixelToDataIndex(e.clientX);
@@ -135,7 +140,6 @@ export function useChartSelection({
     (e: React.MouseEvent) => {
       if (!enabled || !selection.isSelecting) return;
 
-      // Stop propagation to prevent parent handlers from interfering
       e.stopPropagation();
 
       const index = pixelToDataIndex(e.clientX);
@@ -167,7 +171,6 @@ export function useChartSelection({
     (e?: React.MouseEvent | MouseEvent) => {
       if (!enabled || !selection.isSelecting) return;
 
-      // Stop propagation to prevent parent handlers from interfering
       if (e && "stopPropagation" in e) {
         e.stopPropagation();
       }
@@ -239,6 +242,7 @@ export function useChartSelection({
     isSelecting: selection.isSelecting,
     containerRef,
     chartRef,
+    getPlotArea,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
