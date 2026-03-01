@@ -15,7 +15,7 @@ export const billingRouter = createTRPCRouter({
   createCheckout: protectedProcedure
     .input(createCheckoutSchema)
     .mutation(async ({ input, ctx: { db, session, teamId } }) => {
-      const { plan, planType, embedOrigin } = input;
+      const { plan, planType, embedOrigin, currency } = input;
 
       // Get team data
       const team = await getTeamById(db, teamId!);
@@ -39,6 +39,7 @@ export const billingRouter = createTRPCRouter({
           companyName: team.name ?? "",
         },
         embedOrigin,
+        currency: currency === "EUR" ? "eur" : "usd",
       });
 
       return { url: checkout.url };

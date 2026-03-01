@@ -1,5 +1,6 @@
 "use client";
 
+import { getPlanPricing } from "@midday/plans";
 import { cn } from "@midday/ui/cn";
 import { PlanCards } from "@midday/ui/plan-cards";
 import { SubmitButton } from "@midday/ui/submit-button";
@@ -18,6 +19,8 @@ type PlansProps = {
 };
 
 export function Plans({ continent }: PlansProps) {
+  const pricing = getPlanPricing(continent);
+  const checkoutCurrency = pricing.currency as "USD" | "EUR";
   const [isSubmitting, setIsSubmitting] = useState(0);
   const [isPollingForPlan, setIsPollingForPlan] = useState(false);
   const isPollingRef = useRef(false);
@@ -96,6 +99,7 @@ export function Plans({ continent }: PlansProps) {
         plan,
         planType,
         embedOrigin: window.location.origin,
+        currency: checkoutCurrency,
       });
 
       const checkout = await PolarEmbedCheckout.create(url, theme);
