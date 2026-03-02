@@ -145,19 +145,19 @@ export function PlanCards({
                     value={
                       billingPeriod === "monthly"
                         ? pricing.starter.monthly
-                        : pricing.starter.yearly * 12
+                        : pricing.starter.yearly
                     }
                     willChange
                   />
                 </span>
                 <span className="font-sans text-sm text-muted-foreground">
-                  {billingPeriod === "monthly" ? "/month" : "/year"}
+                  /month
                 </span>
               </div>
               <p className="font-sans text-xs text-muted-foreground mt-1">
                 {billingPeriod === "monthly"
                   ? "Billed monthly"
-                  : `${pricing.symbol}${pricing.starter.yearly}/mo equivalent`}
+                  : `${pricing.symbol}${pricing.starter.yearly * 12}/year · billed annually`}
               </p>
             </div>
 
@@ -193,19 +193,19 @@ export function PlanCards({
                     value={
                       billingPeriod === "monthly"
                         ? pricing.pro.monthly
-                        : pricing.pro.yearly * 12
+                        : pricing.pro.yearly
                     }
                     willChange
                   />
                 </span>
                 <span className="font-sans text-sm text-muted-foreground">
-                  {billingPeriod === "monthly" ? "/month" : "/year"}
+                  /month
                 </span>
               </div>
               <p className="font-sans text-xs text-muted-foreground mt-1">
                 {billingPeriod === "monthly"
                   ? "Billed monthly"
-                  : `${pricing.symbol}${pricing.pro.yearly}/mo equivalent`}
+                  : `${pricing.symbol}${pricing.pro.yearly * 12}/year · billed annually`}
               </p>
             </div>
 
