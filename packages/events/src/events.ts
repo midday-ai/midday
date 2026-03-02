@@ -147,10 +147,6 @@ export const LogEvents = {
     name: "Onboarding Team Created",
     channel: "onboarding",
   },
-  OnboardingHeardAbout: {
-    name: "Onboarding Heard About",
-    channel: "onboarding",
-  },
   OnboardingBankConnected: {
     name: "Onboarding Bank Connected",
     channel: "onboarding",
