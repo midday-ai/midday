@@ -222,7 +222,6 @@ export function PlanCards({
         <p className="font-sans text-xs text-muted-foreground/50 mt-6 text-center">
           {footnote && <>{footnote} · </>}
           {billingPeriod === "yearly" && <>30-day money-back guarantee · </>}
-          Prices in{" "}
           <button
             type="button"
             onClick={() => {
@@ -234,7 +233,7 @@ export function PlanCards({
             className={cn(
               "transition-colors",
               currency === "USD"
-                ? "text-foreground"
+                ? "text-foreground underline underline-offset-4"
                 : "text-muted-foreground/50 hover:text-muted-foreground cursor-pointer",
             )}
           >
@@ -252,13 +251,13 @@ export function PlanCards({
             className={cn(
               "transition-colors",
               currency === "EUR"
-                ? "text-foreground"
+                ? "text-foreground underline underline-offset-4"
                 : "text-muted-foreground/50 hover:text-muted-foreground cursor-pointer",
             )}
           >
             EUR
-          </button>{" "}
-          · Prices exclude tax
+          </button>
+          {" · Excl. tax"}
         </p>
       </div>
     </TooltipProvider>
