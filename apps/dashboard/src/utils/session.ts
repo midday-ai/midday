@@ -6,58 +6,37 @@ import { createClient } from "@midday/supabase/client";
 // every request queues behind the lock and the dashboard freezes.
 // Safari doesn't use navigator.locks, which is why it doesn't hang.
 // See: https://github.com/supabase/supabase-js/issues/2013
+//
+// Instead we subscribe to onAuthStateChange once. The INITIAL_SESSION event
+// delivers the current session (internally one getSession() call), and
+// TOKEN_REFRESHED keeps the cached token up to date automatically.
+// This reduces lock contention from N-concurrent-requests to a single init call.
 
 let cachedAccessToken: string | null = null;
-let tokenInitialized = false;
-let refreshPromise: Promise<string | null> | null = null;
+let sessionReady: Promise<void> | null = null;
 
-const TOKEN_EXPIRY_MARGIN_MS = 60_000;
-
-function isTokenExpiringSoon(token: string): boolean {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]!));
-    return payload.exp * 1000 < Date.now() + TOKEN_EXPIRY_MARGIN_MS;
-  } catch {
-    return true;
-  }
-}
-
-export function initSessionCache() {
-  if (tokenInitialized) return;
-  tokenInitialized = true;
+function ensureInitialized() {
+  if (sessionReady) return;
 
   const supabase = createClient();
 
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    cachedAccessToken = session?.access_token ?? null;
-  });
+  sessionReady = new Promise<void>((resolve) => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      cachedAccessToken = session?.access_token ?? null;
 
-  supabase.auth.onAuthStateChange((_event, session) => {
-    cachedAccessToken = session?.access_token ?? null;
+      if (event === "INITIAL_SESSION") {
+        resolve();
+      }
+    });
   });
 }
 
+export function initSessionCache() {
+  ensureInitialized();
+}
+
 export async function getAccessToken(): Promise<string | null> {
-  if (cachedAccessToken && !isTokenExpiringSoon(cachedAccessToken)) {
-    return cachedAccessToken;
-  }
-
-  // Deduplicate: if a refresh is already in-flight, all callers share it
-  // instead of each acquiring navigator.locks independently.
-  if (!refreshPromise) {
-    refreshPromise = (async () => {
-      try {
-        const supabase = createClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        cachedAccessToken = session?.access_token ?? null;
-        return cachedAccessToken;
-      } finally {
-        refreshPromise = null;
-      }
-    })();
-  }
-
-  return refreshPromise;
+  ensureInitialized();
+  await sessionReady;
+  return cachedAccessToken;
 }

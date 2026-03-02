@@ -1,5 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
-import { type NextRequest, NextResponse } from "next/server";
+import type { NextRequest, NextResponse } from "next/server";
 
 export async function updateSession(
   request: NextRequest,
@@ -18,17 +18,8 @@ export async function updateSession(
             request.cookies.set(name, value);
           }
 
-          // Re-create the response so it picks up the mutated request cookies.
-          // This mirrors the pattern from the Supabase SSR docs.
-          const nextResponse = NextResponse.next({ request });
           for (const { name, value, options } of cookiesToSet) {
-            nextResponse.cookies.set(name, value, options);
-          }
-
-          // Copy updated cookies onto the original response object so the
-          // caller (middleware.ts) can continue adding headers/redirects to it.
-          for (const cookie of nextResponse.cookies.getAll()) {
-            response.cookies.set(cookie.name, cookie.value);
+            response.cookies.set(name, value, options);
           }
         },
       },
