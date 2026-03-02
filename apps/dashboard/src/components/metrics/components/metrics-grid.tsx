@@ -75,7 +75,7 @@ export function MetricsGrid({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-8 pb-8" ref={gridRef}>
+      <div className="space-y-8 pb-20" ref={gridRef}>
         {isCustomizing ? (
           <SortableContext items={orderedCharts}>
             {orderedCharts.map((chartId, index) => {

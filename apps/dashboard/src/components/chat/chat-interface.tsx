@@ -13,6 +13,7 @@ import { Portal } from "@/components/portal";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useChatStatus } from "@/hooks/use-chat-status";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import type { Geo } from "@/utils/geo";
 import {
   ChatHeader,
@@ -123,6 +124,7 @@ export function ChatInterface({ geo }: Props) {
   } = useChatStatus(messages, status);
 
   const [selectedType] = useQueryState("artifact-type", parseAsString);
+  const { isMetricsTab } = useOverviewTab();
 
   const hasMessages = messages.length > 0;
 
@@ -134,6 +136,7 @@ export function ChatInterface({ geo }: Props) {
         "relative flex size-full",
         isHome && "h-[calc(100vh-764px)] chat-interface-container-scrollable",
         !isHome && "h-[calc(100vh-88px)] overflow-hidden",
+        isMetricsTab && "h-auto",
       )}
     >
       {/* Canvas slides in from right when artifacts are present */}
@@ -213,18 +216,30 @@ export function ChatInterface({ geo }: Props) {
           </>
         )}
 
-        <Portal>
+        {isHome ? (
           <div
             className={cn(
               "fixed bottom-0 left-0",
               hasMessages && "transition-all duration-300 ease-in-out",
               showCanvas ? "right-0 md:right-[600px]" : "right-0",
-              isHome && "chat-input-wrapper-static",
+              "chat-input-wrapper-static",
             )}
           >
             <ChatInput />
           </div>
-        </Portal>
+        ) : (
+          <Portal>
+            <div
+              className={cn(
+                "fixed bottom-0 left-0",
+                hasMessages && "transition-all duration-300 ease-in-out",
+                showCanvas ? "right-0 md:right-[600px]" : "right-0",
+              )}
+            >
+              <ChatInput />
+            </div>
+          </Portal>
+        )}
       </div>
     </div>
   );

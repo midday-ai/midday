@@ -413,23 +413,25 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 /* Chat input positioning for small viewport heights on homepage */
 @media (max-height: 860px) {
   .chat-input-wrapper-static {
-    position: relative;
-    bottom: auto;
-    left: 0;
-    right: 0;
+    position: relative !important;
+    bottom: auto !important;
+    left: 0 !important;
+    right: 0 !important;
     width: 100%;
     margin-top: auto;
     margin-bottom: 0;
+    z-index: auto !important;
   }
 
   .chat-input-static {
-    position: relative;
-    bottom: 30px;
-    left: 0;
-    right: 0;
-    width: 100%;
+    position: relative !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
+    z-index: auto !important;
   }
 
   .widgets-container-spacing {
@@ -440,8 +442,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   .chat-interface-container-scrollable {
     overflow-y: auto;
     overflow-x: hidden;
-    height: auto;
-    min-height: calc(100vh - 764px);
+    height: auto !important;
+    min-height: 0;
   }
 }
 

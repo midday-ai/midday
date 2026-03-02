@@ -53,6 +53,9 @@
       },
       "performance": {
         "noImgElement": "off"
+      },
+      "complexity": {
+        "noImportantStyles": "off"
       }
     }
   },
