@@ -145,6 +145,7 @@ type CreateTeamParams = {
   fiscalYearStartMonth?: number | null;
   logoUrl?: string;
   companyType?: string;
+  heardAbout?: string;
   switchTeam?: boolean;
 };
 
@@ -292,6 +293,7 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
           logoUrl: params.logoUrl,
           email: params.email,
           companyType: params.companyType,
+          heardAbout: params.heardAbout,
         })
         .returning({ id: teams.id });
 
