@@ -1,11 +1,15 @@
 "use client";
 
+import { Button } from "@midday/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { useQueryState } from "nuqs";
 import { useMemo, useRef } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { BurnRateCard } from "./cards/burn-rate-card";
 import { CategoryExpensesCard } from "./cards/category-expenses-card";
 import { ExpensesCard } from "./cards/expenses-card";
@@ -18,7 +22,11 @@ import { SortableChartCard } from "./components/sortable-chart-card";
 import { type ChartId, DEFAULT_CHART_ORDER } from "./utils/chart-types";
 
 export function MetricsView() {
+  const trpc = useTRPC();
   const { data: user } = useUserQuery();
+  const { data: connections } = useQuery(
+    trpc.bankConnections.get.queryOptions(),
+  );
   const { from, to, currency, revenueType } = useMetricsFilter();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
   const [chartOrder, setChartOrder] = useLocalStorage<ChartId[]>(
@@ -52,7 +60,10 @@ export function MetricsView() {
     return `wiggle-${wiggleIndex}`;
   };
 
-  // Chart component mapping
+  const [_, setStep] = useQueryState("step");
+  const hasConnections = connections && connections.length > 0;
+  const showConnectOverlay = connections !== undefined && !hasConnections;
+
   const renderChart = (chartId: ChartId, index: number) => {
     const wiggleClass = getWiggleClass(index);
     const commonProps = {
@@ -97,6 +108,32 @@ export function MetricsView() {
         >
           {chartContent}
         </SortableChartCard>
+      );
+    }
+
+    if (showConnectOverlay) {
+      return (
+        <div
+          key={chartId}
+          className="relative overflow-hidden group/connect cursor-pointer border border-border bg-background"
+          onClick={() => setStep("connect")}
+          onKeyDown={(e) => e.key === "Enter" && setStep("connect")}
+          role="button"
+          tabIndex={0}
+        >
+          <div className="transition-all duration-200 group-hover/connect:blur-[7px] group-hover/connect:opacity-20 group-hover/connect:pointer-events-none group-hover/connect:select-none [&>*]:border-0">
+            {chartContent}
+          </div>
+          <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 pointer-events-none group-hover/connect:opacity-100 transition-opacity duration-200">
+            <div className="text-center flex flex-col items-center">
+              <h2 className="text-lg font-medium mb-2">No data available</h2>
+              <p className="text-sm text-[#878787] mb-4">
+                Connect your bank account to unlock this metric.
+              </p>
+              <Button>Connect Bank</Button>
+            </div>
+          </div>
+        </div>
       );
     }
 
