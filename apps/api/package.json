@@ -21,7 +21,7 @@
     "@ai-sdk/openai": "catalog:",
     "@ai-sdk/react": "catalog:",
     "@date-fns/tz": "catalog:",
-    "@hono/mcp": "^0.2.3",
+    "@hono/mcp": "^0.2.4",
     "@hono/trpc-server": "^0.4.2",
     "@hono/zod-openapi": "1.2.2",
     "@hono/zod-validator": "^0.7.6",
@@ -53,7 +53,7 @@
     "@sentry/bun": "catalog:",
     "@sindresorhus/slugify": "catalog:",
     "@trigger.dev/sdk": "catalog:",
-    "@trpc/server": "^11.10.0",
+    "@trpc/server": "^11.11.0",
     "ai": "catalog:",
     "camelcase-keys": "catalog:",
     "date-fns": "catalog:",
@@ -69,7 +69,7 @@
     "superjson": "^2.2.6",
     "uuid": "catalog:",
     "zod": "catalog:",
-    "zod-openapi": "^5.4.5"
+    "zod-openapi": "^5.4.6"
   },
   "devDependencies": {
     "@types/bun": "latest"

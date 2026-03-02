@@ -463,12 +463,12 @@ app.openapi(
       return c.json({ error: "Failed to create inbox item" }, 500);
     }
 
-    if (currency || amount) {
+    if (currency !== undefined || amount !== undefined) {
       await updateInbox(db, {
         id: inboxData.id,
         teamId,
-        ...(currency && { currency }),
-        ...(amount && { amount }),
+        ...(currency !== undefined && { currency }),
+        ...(amount !== undefined && { amount }),
       });
     }
 
