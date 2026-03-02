@@ -85,9 +85,12 @@ app.openapi(
     });
 
     if (!isValid) {
-      throw new HTTPException(401, {
-        message: "Invalid webhook signature",
+      logger.warn("Invalid Plaid webhook signature", {
+        ip: c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for"),
+        userAgent: c.req.header("user-agent"),
       });
+
+      return c.json({ error: "Invalid webhook signature" }, 401);
     }
 
     const body = JSON.parse(rawBody);
