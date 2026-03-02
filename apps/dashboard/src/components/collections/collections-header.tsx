@@ -20,11 +20,12 @@ export function CollectionsHeader() {
   const handleValueChange = (value: string) => {
     setFilter({
       tab: value,
-      // Reset other filters when switching tabs
+      // Reset all filters when switching tabs
       stage: null,
       assignedTo: null,
       priority: null,
       q: null,
+      sort: null,
     });
   };
 

@@ -4,6 +4,7 @@ import {
   mcaDeals,
   mcaPayments,
   merchants,
+  bankAccounts,
   reconciliationSessions,
   matchAuditLog,
 } from "@db/schema";
@@ -20,7 +21,10 @@ export type GetPaymentFeedParams = {
   start?: string | null;
   end?: string | null;
   bankAccountId?: string | null;
+  bankAccountIds?: string[] | null;
   dealId?: string | null;
+  dealIds?: string[] | null;
+  confidenceMin?: number | null;
   q?: string | null;
   amountMin?: number | null;
   amountMax?: number | null;
@@ -39,7 +43,10 @@ export const getPaymentFeed = async (
     start,
     end,
     bankAccountId,
+    bankAccountIds,
     dealId,
+    dealIds,
+    confidenceMin,
     q,
     amountMin,
     amountMax,
@@ -67,12 +74,20 @@ export const getPaymentFeed = async (
     whereConditions.push(lte(transactions.date, end));
   }
 
-  if (bankAccountId) {
+  if (bankAccountIds && bankAccountIds.length > 0) {
+    whereConditions.push(inArray(transactions.bankAccountId, bankAccountIds));
+  } else if (bankAccountId) {
     whereConditions.push(eq(transactions.bankAccountId, bankAccountId));
   }
 
-  if (dealId) {
+  if (dealIds && dealIds.length > 0) {
+    whereConditions.push(inArray(transactions.matchedDealId, dealIds));
+  } else if (dealId) {
     whereConditions.push(eq(transactions.matchedDealId, dealId));
+  }
+
+  if (confidenceMin !== undefined && confidenceMin !== null) {
+    whereConditions.push(gte(transactions.matchConfidence, confidenceMin));
   }
 
   if (q) {
@@ -142,12 +157,15 @@ export const getPaymentFeed = async (
       reconciliationNote: transactions.reconciliationNote,
       discrepancyType: transactions.discrepancyType,
       // Joined deal info
-      dealCode: mcaDeals.dealCode,
+      matchedDealCode: mcaDeals.dealCode,
       dealMerchantName: merchants.name,
+      // Joined bank account info
+      bankAccountName: bankAccounts.name,
     })
     .from(transactions)
     .leftJoin(mcaDeals, eq(mcaDeals.id, transactions.matchedDealId))
     .leftJoin(merchants, eq(merchants.id, mcaDeals.merchantId))
+    .leftJoin(bankAccounts, eq(bankAccounts.id, transactions.bankAccountId))
     .where(and(...whereConditions))
     .orderBy(orderBy)
     .limit(pageSize + 1);

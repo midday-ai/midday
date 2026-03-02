@@ -778,7 +778,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                   collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}
                 >
-                  <Table className="w-full min-w-full">
+                  <Table style={{ minWidth: table.getTotalSize() }}>
                     <DataTableHeader table={table} tableScroll={tableScroll} />
 
                     <TableBody

@@ -7,6 +7,7 @@ import { cn } from "@midday/ui/cn";
 import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { parseISO } from "date-fns";
+import { useToast } from "@midday/ui/use-toast";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { type Attachment, AttachmentItem } from "./attachment-item";

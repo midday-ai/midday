@@ -26,7 +26,10 @@ export default async function Page(props: Props) {
   const searchParams = await props.searchParams;
 
   const filter = loadCollectionsFilterParams(searchParams);
-  const { sort } = loadSortParams(searchParams);
+  const { sort: rawSort } = loadSortParams(searchParams);
+
+  // Sanitize sort — filter out "undefined" string values that can leak from stale URL params
+  const sort = rawSort?.filter((s) => s !== "undefined") ?? null;
 
   const initialSettings = await getInitialTableSettings("collections");
 
@@ -34,7 +37,7 @@ export default async function Page(props: Props) {
     trpc.collections.getStats.queryOptions(),
     trpc.collections.get.infiniteQueryOptions({
       status: "active",
-      sort,
+      sort: sort && sort.length > 0 ? sort : null,
     }),
   ]);
 

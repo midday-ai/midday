@@ -6,9 +6,12 @@ import { DataTable } from "@/components/tables/reconciliation/data-table";
 import { Loading } from "@/components/tables/reconciliation/loading";
 import { loadReconciliationFilterParams } from "@/hooks/use-reconciliation-filter-params";
 import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
+import type { matchStatusValues } from "@api/schemas/reconciliation";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
+
+type MatchStatus = (typeof matchStatusValues)[number];
 
 export const metadata: Metadata = {
   title: "Reconciliation | Abacus",
@@ -24,7 +27,7 @@ export default async function ReconciliationPage(props: Props) {
 
   batchPrefetch([
     trpc.reconciliation.getPaymentFeed.infiniteQueryOptions({
-      matchStatus: filter.matchStatus ?? undefined,
+      matchStatus: (filter.matchStatus ?? undefined) as MatchStatus[] | undefined,
       q: filter.q ?? undefined,
       start: filter.start ?? undefined,
       end: filter.end ?? undefined,
@@ -32,7 +35,7 @@ export default async function ReconciliationPage(props: Props) {
       dealIds: filter.deals ?? undefined,
       confidenceMin: filter.confidenceMin ?? undefined,
     }),
-    trpc.reconciliation.getStats.queryOptions(),
+    trpc.reconciliation.getStats.queryOptions({}),
   ]);
 
   return (

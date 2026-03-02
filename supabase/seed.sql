@@ -23,7 +23,7 @@ INSERT INTO auth.users (
   reauthentication_token
 ) VALUES (
   '00000000-0000-4000-a000-000000000001',
-  '00000000-0000-4000-a000-000000000000',
+  '00000000-0000-0000-0000-000000000000',
   'suph.tweel@gmail.com',
   crypt('admin123', gen_salt('bf')),
   NOW(),
