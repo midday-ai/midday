@@ -30,7 +30,7 @@ type Props = {
   transaction: Transaction | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (dealId: string, note?: string) => void;
+  onConfirm: (dealId: string, dealCode: string, merchantName: string, note?: string) => void;
   isPending: boolean;
 };
 
@@ -65,8 +65,13 @@ export function MatchToDealDialog({
   };
 
   const handleConfirm = () => {
-    if (!selectedDealId) return;
-    onConfirm(selectedDealId, note || undefined);
+    if (!selectedDealId || !selectedDeal) return;
+    onConfirm(
+      selectedDealId,
+      selectedDeal.dealCode ?? "",
+      selectedDeal.merchantName ?? "",
+      note || undefined,
+    );
   };
 
   const selectedDeal = deals.find((d) => d.id === selectedDealId);

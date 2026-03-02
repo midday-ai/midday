@@ -26,6 +26,7 @@ import type { TableSettings } from "@/utils/table-settings";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { Table, TableBody } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
+import { ToastAction } from "@midday/ui/toast";
 import { toast } from "@midday/ui/use-toast";
 import {
   useMutation,
@@ -48,6 +49,7 @@ import { EscalateDialog } from "@/components/reconciliation/escalate-dialog";
 import { MarkNsfDialog } from "@/components/reconciliation/mark-nsf-dialog";
 import { MatchToDealDialog } from "@/components/reconciliation/match-to-deal-dialog";
 import { RecordCollectionDialog } from "@/components/reconciliation/record-collection-dialog";
+import { TransactionRulesModal } from "@/components/modals/transaction-rules-modal";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { BulkEditBar } from "./bulk-edit-bar";
 import { columns } from "./columns";
@@ -260,6 +262,20 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   const [collectionDialogTx, setCollectionDialogTx] = useState<Transaction | null>(null);
   const [escalateDialogTx, setEscalateDialogTx] = useState<Transaction | null>(null);
 
+  // Rule suggestion state (prompted after manual deal match)
+  const [rulesModalOpen, setRulesModalOpen] = useState(false);
+  const [rulePrefill, setRulePrefill] = useState<{
+    merchantMatch?: string;
+    merchantMatchType?: "contains" | "exact" | "starts_with";
+    setDealCode?: string;
+    name?: string;
+  } | undefined>(undefined);
+  const matchMetaRef = useRef<{
+    transactionName: string;
+    dealCode: string;
+    merchantName: string;
+  } | null>(null);
+
   // MCA mutations
   const invalidateTransactions = useCallback(() => {
     queryClient.invalidateQueries({
@@ -271,8 +287,37 @@ export function DataTable({ initialSettings, initialTab }: Props) {
     trpc.reconciliation.manualMatch.mutationOptions({
       onSuccess: () => {
         invalidateTransactions();
+        const meta = matchMetaRef.current;
         setMatchDialogTx(null);
-        toast({ title: "Transaction matched to deal", variant: "success" });
+
+        if (meta) {
+          const prefill = {
+            name: `${meta.merchantName || meta.transactionName} → ${meta.dealCode}`,
+            merchantMatch: meta.transactionName,
+            merchantMatchType: "contains" as const,
+            setDealCode: meta.dealCode,
+          };
+
+          toast({
+            title: `Matched to ${meta.dealCode}`,
+            description: "Create a rule to auto-assign future transactions?",
+            variant: "success",
+            action: (
+              <ToastAction
+                altText="Create Rule"
+                onClick={() => {
+                  setRulePrefill(prefill);
+                  setRulesModalOpen(true);
+                }}
+              >
+                Create Rule
+              </ToastAction>
+            ),
+          });
+          matchMetaRef.current = null;
+        } else {
+          toast({ title: "Transaction matched to deal", variant: "success" });
+        }
       },
     }),
   );

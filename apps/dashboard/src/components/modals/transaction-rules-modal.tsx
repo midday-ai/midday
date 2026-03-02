@@ -22,7 +22,7 @@ import {
 } from "@midday/ui/select";
 import { Switch } from "@midday/ui/switch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type RuleFormData = {
   name: string;
@@ -59,7 +59,10 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   prefill?: {
     merchantMatch?: string;
+    merchantMatchType?: "contains" | "exact" | "starts_with";
     setCategorySlug?: string;
+    setDealCode?: string;
+    name?: string;
   };
 };
 
@@ -127,11 +130,29 @@ export function TransactionRulesModal({
   const handleCreate = () => {
     setForm({
       ...emptyForm,
+      name: prefill?.name ?? "",
       merchantMatch: prefill?.merchantMatch ?? "",
+      merchantMatchType: prefill?.merchantMatchType ?? "contains",
       setCategorySlug: prefill?.setCategorySlug ?? "",
+      setDealCode: prefill?.setDealCode ?? "",
     });
     setView("create");
   };
+
+  // Auto-open create view when prefill includes deal data
+  useEffect(() => {
+    if (open && prefill?.setDealCode) {
+      setForm({
+        ...emptyForm,
+        name: prefill?.name ?? "",
+        merchantMatch: prefill?.merchantMatch ?? "",
+        merchantMatchType: prefill?.merchantMatchType ?? "contains",
+        setCategorySlug: prefill?.setCategorySlug ?? "",
+        setDealCode: prefill?.setDealCode ?? "",
+      });
+      setView("create");
+    }
+  }, [open, prefill]);
 
   const handleEdit = (rule: NonNullable<typeof rules>[number]) => {
     setEditingId(rule.id);
@@ -182,7 +203,7 @@ export function TransactionRulesModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] max-h-[80vh] overflow-auto">
+      <DialogContent className="sm:max-w-[680px] max-h-[80vh] overflow-auto">
         <div className="p-4">
         <DialogHeader>
           <DialogTitle>
@@ -293,7 +314,7 @@ export function TransactionRulesModal({
             <div className="border-t pt-4">
               <p className="text-sm font-medium mb-3">Match criteria</p>
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="mb-2 block text-xs text-muted-foreground">
                     Merchant name
@@ -393,7 +414,7 @@ export function TransactionRulesModal({
                   </div>
                 </div>
 
-                <div>
+                <div className="col-span-2">
                   <Label className="mb-2 block text-xs text-muted-foreground">
                     Date range (optional)
                   </Label>
