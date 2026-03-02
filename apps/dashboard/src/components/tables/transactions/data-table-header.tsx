@@ -281,7 +281,6 @@ function getHeaderLabel(columnId: string): string {
     description: "Description",
     amount: "Amount",
     category: "Category",
-    counterparty: "From / To",
     tags: "Tags",
     bank_account: "Account",
     method: "Method",
