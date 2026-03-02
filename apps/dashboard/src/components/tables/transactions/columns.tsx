@@ -5,7 +5,6 @@ import { InlineSelectTags } from "@/components/inline-select-tags";
 import { TransactionTypeBadge } from "@/components/transaction-type-badge";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
-import { TransactionSource } from "@/components/transaction-source";
 import { TransactionStatus } from "@/components/transaction-status";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
@@ -24,7 +23,6 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { Spinner } from "@midday/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { formatDate } from "@midday/utils/format";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -71,29 +69,17 @@ const DescriptionCell = memo(
   ({
     name,
     description,
-    status,
     amount,
   }: {
     name: string;
     description?: string;
-    status?: string;
     amount: number;
   }) => (
     <div className="flex items-center space-x-2">
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className={cn(amount > 0 && "text-[#00C969]")}>
-            <div className="flex space-x-2 items-center">
-              <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
-                {name}
-              </span>
-
-              {status === "pending" && (
-                <div className="flex space-x-1 items-center border rounded-md text-[10px] py-1 px-2 h-[22px] text-[#878787]">
-                  <span>Pending</span>
-                </div>
-              )}
-            </div>
+          <span className={cn("line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none", amount > 0 && "text-[#00C969]")}>
+            {name}
           </span>
         </TooltipTrigger>
 
@@ -244,10 +230,6 @@ const ActionsCell = memo(
             {/* Core actions */}
             <DropdownMenuItem onClick={() => onViewDetails?.(transaction.id)}>
               View details
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onViewDetails?.(transaction.id)}>
-              <Icons.AI size={14} className="mr-2" />
-              Explain with AI
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onCopyUrl?.(transaction.id)}>
               Share URL
@@ -471,7 +453,6 @@ export const columns: ColumnDef<Transaction>[] = [
       <DescriptionCell
         name={row.original.name}
         description={row.original.description ?? undefined}
-        status={row.original.status ?? undefined}
         amount={row.original.amount}
       />
     ),
@@ -526,24 +507,6 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => <DealCell dealCode={row.original.dealCode ?? null} />,
   },
   {
-    accessorKey: "counterparty",
-    header: "From / To",
-    size: 200,
-    minSize: 120,
-    maxSize: 400,
-    enableResizing: true,
-    meta: {
-      skeleton: { type: "text", width: "w-28" },
-      headerLabel: "From / To",
-      className: "w-[200px] min-w-[120px]",
-    },
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {row.original.counterpartyName ?? "-"}
-      </span>
-    ),
-  },
-  {
     accessorKey: "tags",
     header: "Tags",
     size: 280,
@@ -596,27 +559,6 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => <TransactionMethod method={row.original.method} />,
   },
   {
-    accessorKey: "source",
-    header: "Source",
-    size: 140,
-    minSize: 100,
-    maxSize: 250,
-    enableResizing: true,
-    enableSorting: false,
-    meta: {
-      skeleton: { type: "badge", width: "w-16" },
-      headerLabel: "Source",
-      className: "w-[140px] min-w-[100px]",
-    },
-    cell: ({ row }) => (
-      <TransactionSource
-        manual={row.original.manual ?? false}
-        hasAccount={Boolean(row.original.account)}
-        accountName={row.original.account?.name ?? undefined}
-      />
-    ),
-  },
-  {
     accessorKey: "status",
     header: "Status",
     size: 160,
@@ -628,30 +570,11 @@ export const columns: ColumnDef<Transaction>[] = [
       headerLabel: "Status",
       className: "w-[160px] min-w-[120px]",
     },
-    cell: ({ row, table }) => {
-      const meta = table.options.meta;
-
-      // Show exporting state when transaction is being exported
-      if (meta?.exportingTransactionIds?.includes(row.original.id)) {
-        return (
-          <div className="flex items-center space-x-2">
-            <Spinner size={14} className="stroke-primary" />
-            <span className="text-[#878787] text-sm">Exporting</span>
-          </div>
-        );
-      }
-
+    cell: ({ row }) => {
       return (
         <TransactionStatus
-          isFulfilled={
-            row.original.status === "completed" || row.original.isFulfilled
-          }
-          isExported={row.original.isExported ?? false}
-          hasExportError={row.original.hasExportError}
-          exportErrorCode={row.original.exportErrorCode}
-          exportProvider={row.original.exportProvider}
-          exportedAt={row.original.exportedAt}
-          hasPendingSuggestion={row.original.hasPendingSuggestion}
+          status={row.original.status}
+          discrepancyType={row.original.discrepancyType}
         />
       );
     },

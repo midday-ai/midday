@@ -4,7 +4,6 @@ import { createLoader, parseAsArrayOf, parseAsString } from "nuqs/server";
 export const collectionsFilterParamsSchema = {
   q: parseAsString,
   sort: parseAsArrayOf(parseAsString),
-  status: parseAsString,
   stage: parseAsString,
   assignedTo: parseAsString,
   priority: parseAsString,

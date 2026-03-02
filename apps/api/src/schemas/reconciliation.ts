@@ -24,12 +24,16 @@ export const getPaymentFeedSchema = z.object({
   start: z.string().optional(),
   end: z.string().optional(),
   bankAccountId: z.string().uuid().optional(),
+  bankAccountIds: z.array(z.string().uuid()).optional(),
   dealId: z.string().uuid().optional(),
+  dealIds: z.array(z.string().uuid()).optional(),
+  confidenceMin: z.number().optional(),
   q: z.string().optional(),
   amountMin: z.number().optional(),
   amountMax: z.number().optional(),
   sort: z.array(z.string()).optional(),
   cursor: z.string().nullish(),
+  pageSize: z.number().optional(),
 });
 
 export const getReconciliationViewSchema = z.object({

@@ -79,28 +79,28 @@ export function MatchToDealDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Match to Deal</DialogTitle>
-          <DialogDescription>
-            Link this transaction to an MCA deal for reconciliation.
-          </DialogDescription>
-        </DialogHeader>
+        <div className="p-6 space-y-4">
+          <DialogHeader>
+            <DialogTitle>Match to Deal</DialogTitle>
+            <DialogDescription>
+              Link this transaction to an MCA deal for reconciliation.
+            </DialogDescription>
+          </DialogHeader>
 
-        {transaction && (
-          <div className="rounded-md border p-3 bg-muted/50 text-sm space-y-1">
-            <div className="font-medium">{transaction.name}</div>
-            <div className="text-muted-foreground flex items-center gap-2">
-              <FormatAmount
-                amount={transaction.amount}
-                currency={transaction.currency}
-              />
-              <span>&middot;</span>
-              <span>{transaction.date}</span>
+          {transaction && (
+            <div className="rounded-md border p-3 bg-muted/50 text-sm space-y-1">
+              <div className="font-medium">{transaction.name}</div>
+              <div className="text-muted-foreground flex items-center gap-2">
+                <FormatAmount
+                  amount={transaction.amount}
+                  currency={transaction.currency}
+                />
+                <span>&middot;</span>
+                <span>{transaction.date}</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="space-y-3">
           <Command className="rounded-md border" shouldFilter={false}>
             <CommandInput
               placeholder="Search deals by code or merchant..."
@@ -178,23 +178,23 @@ export function MatchToDealDialog({
             onChange={(e) => setNote(e.target.value)}
             rows={2}
           />
-        </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => handleClose(false)}
-            disabled={isPending}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={isPending || !selectedDealId}
-          >
-            {isPending ? "Matching..." : "Match to Deal"}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => handleClose(false)}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirm}
+              disabled={isPending || !selectedDealId}
+            >
+              {isPending ? "Matching..." : "Match to Deal"}
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

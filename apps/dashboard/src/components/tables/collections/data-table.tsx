@@ -62,15 +62,19 @@ export function DataTable({ initialSettings }: Props) {
   });
 
   // Map tab filter to status for the API
-  const status = filter.tab === "resolved" ? "resolved" : filter.tab === "active" ? "active" : "active";
+  const status = filter.tab === "resolved" ? "resolved" : "active";
+
+  // Sanitize filter values — convert stale "undefined" strings (from URL params) to null
+  const sanitize = <T extends string | null>(v: T): T | null =>
+    v === "undefined" ? null : v;
 
   const infiniteQueryOptions = trpc.collections.get.infiniteQueryOptions(
     {
       status: status as "active" | "resolved",
-      stageId: filter.stage,
-      assignedTo: filter.assignedTo,
-      priority: filter.priority as "low" | "medium" | "high" | "critical" | null,
-      sort: params.sort,
+      stageId: sanitize(filter.stage),
+      assignedTo: sanitize(filter.assignedTo),
+      priority: sanitize(filter.priority) as "low" | "medium" | "high" | "critical" | null,
+      sort: params.sort?.filter((s) => s !== "undefined") ?? null,
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,

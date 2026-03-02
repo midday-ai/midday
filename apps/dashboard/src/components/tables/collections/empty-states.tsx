@@ -38,7 +38,6 @@ export function NoResults() {
           onClick={() =>
             setFilter({
               q: null,
-              status: null,
               stage: null,
               assignedTo: null,
               priority: null,

@@ -28,12 +28,11 @@ function getTimeBasedGreeting(timezone?: string): string {
 export function WidgetsHeader() {
   const { data: user } = useUserQuery();
   const isCustomizing = useIsCustomizing();
-  const [greeting, setGreeting] = useState(() =>
-    getTimeBasedGreeting(user?.timezone ?? undefined),
-  );
+  const [greeting, setGreeting] = useState<string | null>(null);
 
   useEffect(() => {
-    // Update greeting immediately when user timezone changes
+    // Set greeting on client only to avoid SSR/client hydration mismatch
+    // (server runs in UTC, client uses local timezone)
     setGreeting(getTimeBasedGreeting(user?.timezone ?? undefined));
 
     // Set up interval to update greeting every 5 minutes
@@ -53,7 +52,7 @@ export function WidgetsHeader() {
     <div className="flex justify-between items-end mb-6">
       <div>
         <h1 className="text-[30px] font-serif leading-normal mb-1">
-          <span>{greeting} </span>
+          {greeting && <span>{greeting} </span>}
           <span className="text-[#666666]">
             {user?.fullName?.split(" ")[0]},
           </span>

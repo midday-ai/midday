@@ -51,13 +51,8 @@ export function TransactionListItem({ transaction, disabled }: Props) {
 
           <div className="ml-auto">
             <TransactionStatus
-              isFulfilled={transaction.isFulfilled ?? false}
-              isExported={transaction.isExported ?? false}
-              hasExportError={transaction.hasExportError}
-              exportErrorCode={transaction.exportErrorCode}
-              exportProvider={transaction.exportProvider}
-              exportedAt={transaction.exportedAt}
-              hasPendingSuggestion={transaction.hasPendingSuggestion}
+              status={transaction.status}
+              discrepancyType={transaction.discrepancyType}
             />
           </div>
         </div>

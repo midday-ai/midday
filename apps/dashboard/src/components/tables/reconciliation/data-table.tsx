@@ -5,9 +5,11 @@ import { useReconciliationFilterParams } from "@/hooks/use-reconciliation-filter
 import { useReconciliationParams } from "@/hooks/use-reconciliation-params";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useScrollHeader } from "@/hooks/use-scroll-header";
+import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { useUserQuery } from "@/hooks/use-user";
 import { useReconciliationStore } from "@/store/reconciliation";
 import { useTRPC } from "@/trpc/client";
+import type { matchStatusValues } from "@api/schemas/reconciliation";
 import { Table, TableBody } from "@midday/ui/table";
 import { TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
@@ -29,6 +31,8 @@ import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
 import { NoReconciliationData, NoResults } from "./empty-states";
 
+type MatchStatus = (typeof matchStatusValues)[number];
+
 const ROW_HEIGHT = 45;
 const OVERSCAN = 10;
 
@@ -37,7 +41,7 @@ export function DataTable() {
   const queryClient = useQueryClient();
   const { data: user } = useUserQuery();
   const { filter, hasFilters } = useReconciliationFilterParams();
-  const { transactionId, setTransactionId } = useReconciliationParams();
+  const { setTransactionId } = useReconciliationParams();
   const { selectedTransactionIds, setSelectedTransactionIds, clearSelection } =
     useReconciliationStore();
   const parentRef = useRef<HTMLDivElement>(null);
@@ -47,8 +51,7 @@ export function DataTable() {
 
   const queryFilter = useMemo(
     () => ({
-      teamId: user?.teamId ?? "",
-      matchStatus: filter.matchStatus ?? undefined,
+      matchStatus: (filter.matchStatus ?? undefined) as MatchStatus[] | undefined,
       q: deferredSearch ?? undefined,
       start: filter.start ?? undefined,
       end: filter.end ?? undefined,
@@ -57,7 +60,7 @@ export function DataTable() {
       confidenceMin: filter.confidenceMin ?? undefined,
       pageSize: hasFilters ? 10000 : undefined,
     }),
-    [filter, deferredSearch, user?.teamId, hasFilters],
+    [filter, deferredSearch, hasFilters],
   );
 
   const infiniteQueryOptions =
@@ -120,6 +123,12 @@ export function DataTable() {
 
   const { rows } = table.getRowModel();
 
+  // Provide getStickyStyle/getStickyClassName for VirtualRow (no sticky columns for reconciliation)
+  const { getStickyStyle, getStickyClassName } = useStickyColumns({
+    table,
+    stickyColumns: [],
+  });
+
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
@@ -139,11 +148,15 @@ export function DataTable() {
     fetchNextPage();
   }
 
-  const handleRowClick = useCallback(
-    (id: string) => {
-      setTransactionId(id);
+  const handleCellClick = useCallback(
+    (rowId: string) => {
+      // rowId is the tanstack table row ID (index-based); get the original transaction ID
+      const row = rows[Number(rowId)];
+      if (row) {
+        setTransactionId(row.original.id);
+      }
     },
-    [setTransactionId],
+    [setTransactionId, rows],
   );
 
   // Bulk actions
@@ -216,8 +229,11 @@ export function DataTable() {
                         <VirtualRow
                           key={row.id}
                           row={row}
-                          virtualRow={virtualRow}
-                          onClick={() => handleRowClick(row.original.id)}
+                          virtualStart={virtualRow.start}
+                          rowHeight={ROW_HEIGHT}
+                          getStickyStyle={getStickyStyle}
+                          getStickyClassName={getStickyClassName}
+                          onCellClick={handleCellClick}
                         />
                       );
                     })}

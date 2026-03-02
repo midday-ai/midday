@@ -102,9 +102,10 @@ export const getSyndicatorById = async (
       note: syndicators.note,
       externalId: syndicators.externalId,
       // Syndication aggregates
-      dealCount: sql<number>`(select cast(count(*) as int) from syndication_participants where syndication_participants.syndicator_id = ${syndicators.id})`,
-      activeDealCount: sql<number>`(select cast(count(*) as int) from syndication_participants sp inner join mca_deals md on md.id = sp.deal_id where sp.syndicator_id = ${syndicators.id} and md.status = 'active')`,
-      totalFundingShare: sql<number>`(select coalesce(sum(funding_share), 0) from syndication_participants where syndication_participants.syndicator_id = ${syndicators.id})`,
+      // NOTE: We use sql.raw for the outer table reference (see getSyndicators for explanation)
+      dealCount: sql<number>`(select cast(count(*) as int) from syndication_participants where syndication_participants.syndicator_id = ${sql.raw('"syndicators"."id"')})`,
+      activeDealCount: sql<number>`(select cast(count(*) as int) from syndication_participants sp inner join mca_deals md on md.id = sp.deal_id where sp.syndicator_id = ${sql.raw('"syndicators"."id"')} and md.status = 'active')`,
+      totalFundingShare: sql<number>`(select coalesce(sum(funding_share), 0) from syndication_participants where syndication_participants.syndicator_id = ${sql.raw('"syndicators"."id"')})`,
     })
     .from(syndicators)
     .where(
@@ -144,9 +145,12 @@ export const getSyndicators = async (
       status: syndicators.status,
       portalEnabled: syndicators.portalEnabled,
       // Syndication aggregates (scalar subqueries)
-      dealCount: sql<number>`(select cast(count(*) as int) from syndication_participants where syndication_participants.syndicator_id = ${syndicators.id})`,
-      activeDealCount: sql<number>`(select cast(count(*) as int) from syndication_participants sp inner join mca_deals md on md.id = sp.deal_id where sp.syndicator_id = ${syndicators.id} and md.status = 'active')`,
-      totalFundingShare: sql<number>`(select coalesce(sum(funding_share), 0) from syndication_participants where syndication_participants.syndicator_id = ${syndicators.id})`,
+      // NOTE: We use sql.raw for the outer table reference because Drizzle's ${syndicators.id}
+      // renders as just "id" (unqualified), which PostgreSQL resolves to the subquery's own
+      // table columns rather than the outer syndicators table.
+      dealCount: sql<number>`(select cast(count(*) as int) from syndication_participants where syndication_participants.syndicator_id = ${sql.raw('"syndicators"."id"')})`,
+      activeDealCount: sql<number>`(select cast(count(*) as int) from syndication_participants sp inner join mca_deals md on md.id = sp.deal_id where sp.syndicator_id = ${sql.raw('"syndicators"."id"')} and md.status = 'active')`,
+      totalFundingShare: sql<number>`(select coalesce(sum(funding_share), 0) from syndication_participants where syndication_participants.syndicator_id = ${sql.raw('"syndicators"."id"')})`,
     })
     .from(syndicators)
     .where(and(...whereConditions));
@@ -176,24 +180,24 @@ export const getSyndicators = async (
       isAscending
         ? query.orderBy(
             asc(
-              sql`(select count(*) from syndication_participants where syndication_participants.syndicator_id = ${syndicators.id})`,
+              sql`(select count(*) from syndication_participants where syndication_participants.syndicator_id = ${sql.raw('"syndicators"."id"')})`,
             ),
           )
         : query.orderBy(
             desc(
-              sql`(select count(*) from syndication_participants where syndication_participants.syndicator_id = ${syndicators.id})`,
+              sql`(select count(*) from syndication_participants where syndication_participants.syndicator_id = ${sql.raw('"syndicators"."id"')})`,
             ),
           );
     } else if (column === "total_funding") {
       isAscending
         ? query.orderBy(
             asc(
-              sql`(select coalesce(sum(funding_share), 0) from syndication_participants where syndication_participants.syndicator_id = ${syndicators.id})`,
+              sql`(select coalesce(sum(funding_share), 0) from syndication_participants where syndication_participants.syndicator_id = ${sql.raw('"syndicators"."id"')})`,
             ),
           )
         : query.orderBy(
             desc(
-              sql`(select coalesce(sum(funding_share), 0) from syndication_participants where syndication_participants.syndicator_id = ${syndicators.id})`,
+              sql`(select coalesce(sum(funding_share), 0) from syndication_participants where syndication_participants.syndicator_id = ${sql.raw('"syndicators"."id"')})`,
             ),
           );
     }

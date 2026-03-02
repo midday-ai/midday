@@ -4685,7 +4685,7 @@ export const transactionRules = pgTable(
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     teamId: uuid("team_id").notNull(),
-    name: text().notNull(),
+    name: text(),
     enabled: boolean().notNull().default(true),
     priority: integer().notNull().default(0),
 
@@ -4699,12 +4699,20 @@ export const transactionRules = pgTable(
       scale: 2,
     }),
     accountId: uuid("account_id"),
+    descriptionMatch: text("description_match"),
+    descriptionMatchType: text("description_match_type")
+      .notNull()
+      .default("contains"),
+    transactionTypeFilter: text("transaction_type_filter").array(),
+    paymentStatusFilter: text("payment_status_filter").array(),
 
     // Actions
     setCategorySlug: text("set_category_slug"),
     setMerchantName: text("set_merchant_name"),
     addTagIds: text("add_tag_ids").array(),
     setExcluded: boolean("set_excluded"),
+    setTransactionType: text("set_transaction_type"),
+    setPaymentStatus: text("set_payment_status"),
     setAssignedId: uuid("set_assigned_id"),
 
     // Deal assignment actions
