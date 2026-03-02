@@ -291,7 +291,12 @@ export function OnboardingPage({
       {
         key: "start-trial",
         animation: <DashboardImageAnimation />,
-        content: <StartTrialStep />,
+        content: (
+          <StartTrialStep
+            hasBankConnected={!!bankSync}
+            hasInboxConnected={!!inboxSync}
+          />
+        ),
         overlay: true,
         navigation: "finish",
         canGoBack: true,
@@ -308,6 +313,8 @@ export function OnboardingPage({
       handleLoadingChange,
       handleBankSyncStarted,
       nextStep,
+      bankSync,
+      inboxSync,
     ],
   );
 

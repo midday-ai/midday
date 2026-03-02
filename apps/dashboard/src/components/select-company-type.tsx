@@ -10,7 +10,12 @@ const companyTypeOptions = [
   { value: "freelancer", label: "Freelancer / Consultant" },
   { value: "solo_founder", label: "Solo founder" },
   { value: "small_team", label: "2–10 person team" },
+  { value: "startup", label: "Startup (11–50)" },
   { value: "agency", label: "Agency" },
+  { value: "ecommerce", label: "E-commerce" },
+  { value: "creator", label: "Creator / Content" },
+  { value: "non_profit", label: "Non-profit" },
+  { value: "accountant", label: "Accountant / Bookkeeper" },
   { value: "exploring", label: "Just exploring" },
 ];
 

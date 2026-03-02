@@ -23,17 +23,43 @@ import { CountrySelector } from "@/components/country-selector";
 import { SelectCompanyType } from "@/components/select-company-type";
 import { SelectCurrency } from "@/components/select-currency";
 import { SelectFiscalMonth } from "@/components/select-fiscal-month";
+import { SelectHeardAbout } from "@/components/select-heard-about";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 
 const formSchema = z.object({
   name: z.string().min(2, "Company name must be at least 2 characters."),
-  companyType: z
-    .enum(["freelancer", "solo_founder", "small_team", "agency", "exploring"])
-    .optional(),
   countryCode: z.string(),
   baseCurrency: z.string(),
   fiscalYearStartMonth: z.number().int().min(1).max(12).nullable().optional(),
+  companyType: z.enum(
+    [
+      "freelancer",
+      "solo_founder",
+      "small_team",
+      "startup",
+      "agency",
+      "ecommerce",
+      "creator",
+      "non_profit",
+      "accountant",
+      "exploring",
+    ],
+    { required_error: "Please select a company type." },
+  ),
+  heardAbout: z.enum(
+    [
+      "twitter",
+      "youtube",
+      "friend",
+      "google",
+      "blog",
+      "podcast",
+      "github",
+      "other",
+    ],
+    { required_error: "Please select an option." },
+  ),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -70,6 +96,7 @@ export function CreateTeamStep({
           countryCode: form.getValues("countryCode"),
           currency: form.getValues("baseCurrency"),
           companyType: form.getValues("companyType"),
+          heardAbout: form.getValues("heardAbout"),
         });
         await queryClient.invalidateQueries();
         onComplete();
@@ -132,6 +159,7 @@ export function CreateTeamStep({
         countryCode: values.countryCode,
         fiscalYearStartMonth: values.fiscalYearStartMonth,
         companyType: values.companyType,
+        heardAbout: values.heardAbout,
         switchTeam: true,
       });
     } catch {
@@ -170,7 +198,7 @@ export function CreateTeamStep({
           <form
             id="create-team-form"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-3"
+            className="space-y-4"
           >
             <FormField
               control={form.control}
@@ -272,25 +300,47 @@ export function CreateTeamStep({
               </FormDescription>
             </div>
 
-            <FormField
-              control={form.control}
-              name="companyType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs text-primary font-normal">
-                    What best describes you?
-                  </FormLabel>
-                  <FormControl>
-                    <SelectCompanyType
-                      value={field.value}
-                      onChange={field.onChange}
-                      className="bg-secondary border-border text-foreground"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-3 border-t border-border pt-4">
+              <FormField
+                control={form.control}
+                name="companyType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs text-primary font-normal">
+                      What best describes you?
+                    </FormLabel>
+                    <FormControl>
+                      <SelectCompanyType
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="bg-secondary border-border text-foreground"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="heardAbout"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs text-primary font-normal">
+                      How did you hear about us?
+                    </FormLabel>
+                    <FormControl>
+                      <SelectHeardAbout
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="bg-secondary border-border text-foreground"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </form>
         </Form>
       </motion.div>
