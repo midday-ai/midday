@@ -13,7 +13,6 @@ import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
 import { convertHeic } from "../document/convert-heic";
 import { processDocument } from "../document/process-document";
-import { embedInbox } from "./embed-inbox";
 
 export const processAttachment = schemaTask({
   id: "process-attachment",
@@ -200,18 +199,7 @@ export const processAttachment = schemaTask({
         teamId,
       });
 
-      // Create embedding and wait for completion
-      await embedInbox.triggerAndWait({
-        inboxId: inboxData.id,
-        teamId,
-      });
-
-      logger.info("Inbox embedding completed", {
-        inboxId: inboxData.id,
-        teamId,
-      });
-
-      // After embedding is complete, trigger efficient matching
+      // Trigger matching immediately (no embedding dependency in V2).
       await tasks.trigger("batch-process-matching", {
         teamId,
         inboxIds: [inboxData.id],

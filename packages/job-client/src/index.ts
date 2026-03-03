@@ -77,7 +77,7 @@ export async function triggerJob(
 
 /**
  * Trigger a job and wait for it to complete
- * @param jobName - Name of the job (e.g., "embed-inbox")
+ * @param jobName - Name of the job
  * @param payload - Job payload data
  * @param queueName - Name of the queue (e.g., "inbox")
  * @param options - Optional parameters

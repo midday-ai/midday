@@ -70,7 +70,7 @@ export function Inbox() {
                 <span className="text-foreground">Receipts matched</span>
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
-                Receipts and invoices are matched automatically to transactions.
+                Midday auto-matches obvious receipts and asks for review only when needed.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
                 Receipts and invoices are pulled in from email, uploads, and
@@ -113,8 +113,9 @@ export function Inbox() {
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
                 Receipts and invoices are pulled in from email, uploads, and
-                payments, then matched to transactions so reconciliation doesn't
-                require manual work.
+                payments, then matched to transactions. Obvious matches are
+                handled automatically, and edge cases are surfaced for quick
+                review.
               </p>
             </div>
 
@@ -259,8 +260,9 @@ export function Inbox() {
                     Matched to transactions
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Documents are matched to the right transactions and surfaced
-                    when something is missing so reconciliation stays simple.
+                    Documents are matched to the right transactions
+                    automatically when confidence is high. Lower-confidence
+                    cases are surfaced as suggestions so you stay in control.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">

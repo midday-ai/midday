@@ -4,13 +4,6 @@ import { z } from "zod";
  * Inbox job schemas (independent from @midday/jobs)
  */
 
-export const embedInboxSchema = z.object({
-  inboxId: z.string().uuid(),
-  teamId: z.string().uuid(),
-});
-
-export type EmbedInboxPayload = z.infer<typeof embedInboxSchema>;
-
 export const batchProcessMatchingSchema = z.object({
   teamId: z.string().uuid(),
   inboxIds: z.array(z.string().uuid()),

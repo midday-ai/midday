@@ -6,6 +6,13 @@ import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { createLoggerWithContext } from "@midday/logger";
 import { resolveTaxValues } from "@midday/utils/tax";
 import {
+  calculateAmountScore,
+  calculateCurrencyScore,
+  calculateDateScore,
+  calculateNameScore,
+  scoreMatch,
+} from "../utils/transaction-matching";
+import {
   and,
   asc,
   cosineDistance,
@@ -1399,7 +1406,6 @@ export async function searchTransactionMatch(
 
   if (inboxId) {
     try {
-      // Implement the matching logic using Drizzle instead of stored procedure
       const inboxItem = await db
         .select({
           id: inbox.id,
@@ -1418,9 +1424,10 @@ export async function searchTransactionMatch(
         return [];
       }
 
-      const item = inboxItem[0]!; // Safe to use non-null assertion since we checked length above
+      const item = inboxItem[0]!;
+      const inboxAmount = Math.abs(item.amount || 0);
+      const inboxBaseAmount = Math.abs(item.baseAmount || 0);
 
-      // Find candidate transactions including those with attachments
       const candidateTransactions = await db
         .select({
           transactionId: transactions.id,
@@ -1430,95 +1437,94 @@ export async function searchTransactionMatch(
           transactionDate: transactions.date,
           baseAmount: transactions.baseAmount,
           baseCurrency: transactions.baseCurrency,
-          // Check if transaction is already matched (has attachments or completed status)
           isAlreadyMatched: sql<boolean>`
             (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')
           `.as("is_already_matched"),
-          // Get the first attachment filename if it exists
           attachmentFilename: sql<string | null>`
             (SELECT ${transactionAttachments.name} FROM ${transactionAttachments} 
              WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)} 
              LIMIT 1)
           `.as("attachment_filename"),
-          // Use pg_trgm similarity for accurate name matching
-          nameScore:
-            sql<number>`similarity(${transactions.name}, ${item.displayName ?? ""})`.as(
-              "name_score",
-            ),
-          // More flexible amount matching with currency conversion support
-          amountScore: sql<number>`
-            GREATEST(
-              -- Direct currency match
-              (CASE WHEN ${transactions.currency} = ${item.currency ?? ""} THEN
-                (1 - LEAST(ABS(ABS(${transactions.amount}) - ${item.amount ?? 0}::DOUBLE PRECISION) / GREATEST(${item.amount ?? 1}::DOUBLE PRECISION, 1), 1))::DOUBLE PRECISION
-               ELSE 0 END),
-              -- Base currency match (if both have base currency data)
-              (CASE WHEN ${transactions.baseCurrency} IS NOT NULL AND ${item.baseCurrency ?? ""} != '' AND ${transactions.baseCurrency} = ${item.baseCurrency ?? ""} THEN
-                (1 - LEAST(ABS(ABS(${transactions.baseAmount}) - ${item.baseAmount ?? 0}::DOUBLE PRECISION) / GREATEST(${item.baseAmount ?? 1}::DOUBLE PRECISION, 1), 1))::DOUBLE PRECISION
-               ELSE 0 END),
-              -- Cross-currency fallback for common ratios
-              (CASE WHEN ${transactions.currency} != ${item.currency ?? ""} THEN
-                LEAST(
-                  (1 - LEAST(ABS(ABS(${transactions.amount}) / 10.0 - ${item.amount ?? 0}::DOUBLE PRECISION) / GREATEST(${item.amount ?? 1}::DOUBLE PRECISION, 1), 1))::DOUBLE PRECISION * 0.4,
-                  0.6
-                )
-               ELSE 0 END)
-            )
-          `.as("amount_score"),
-          // Currency matching score - give partial credit for different currencies
-          currencyScore: sql<number>`
-            (CASE
-              WHEN ${transactions.currency} = ${item.currency ?? ""} THEN 1.0
-              WHEN ${transactions.baseCurrency} IS NOT NULL AND ${item.baseCurrency ?? ""} != '' AND ${transactions.baseCurrency} = ${item.baseCurrency ?? ""} THEN 0.8
-              ELSE 0.3
-            END)::DOUBLE PRECISION
-          `.as("currency_score"),
-          // Date proximity score (within 30 days gets full score, linear decay after)
-          dateScore: sql<number>`
-            (1 - LEAST(ABS(${transactions.date}::date - ${item.date}::date) / 30.0, 1))::DOUBLE PRECISION
-          `.as("date_score"),
+          merchantName: transactions.merchantName,
         })
         .from(transactions)
         .where(
           and(
             eq(transactions.teamId, teamId),
             eq(transactions.status, "posted"),
-            // Date range filter: within 90 days of inbox date
-            sql`${transactions.date} BETWEEN ${item.date}::date - INTERVAL '90 days' AND ${item.date}::date + INTERVAL '90 days'`,
-            // Conditionally exclude already matched transactions
+            sql`${transactions.date} IS NOT NULL`,
+            sql`${transactions.date} BETWEEN ${item.date}::date - INTERVAL '90 days' AND ${item.date}::date + INTERVAL '30 days'`,
             ...(includeAlreadyMatched
               ? []
               : [
                   sql`NOT (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
                 ]),
-            // More lenient amount filtering: allow a wider range for cross-currency matching
             or(
-              // Direct currency match with 20% tolerance
               and(
                 eq(transactions.currency, item.currency ?? ""),
-                sql`ABS(${transactions.amount}) BETWEEN ${(item.amount ?? 0) * 0.8}::DOUBLE PRECISION AND ${(item.amount ?? 0) * 1.2}::DOUBLE PRECISION`,
+                sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) < GREATEST(1, ${inboxAmount} * 0.25)`,
               ),
-              // Base currency match with 20% tolerance (only if both have base currency)
+              sql`word_similarity(${item.displayName ?? ""}, COALESCE(${transactions.merchantName}, ${transactions.name})) > 0.3`,
               and(
                 sql`${transactions.baseCurrency} IS NOT NULL`,
                 sql`${item.baseCurrency ?? ""} != ''`,
                 eq(transactions.baseCurrency, item.baseCurrency ?? ""),
-                sql`ABS(${transactions.baseAmount}) BETWEEN ${(item.baseAmount ?? 0) * 0.8}::DOUBLE PRECISION AND ${(item.baseAmount ?? 0) * 1.2}::DOUBLE PRECISION`,
+                sql`ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ${inboxBaseAmount}) < GREATEST(50, ${inboxBaseAmount} * 0.15)`,
               ),
-              // Cross-currency: allow 10:1 ratio for common conversions like SEK:USD
-              sql`ABS(${transactions.amount}) BETWEEN ${(item.amount ?? 0) * 8}::DOUBLE PRECISION AND ${(item.amount ?? 0) * 12}::DOUBLE PRECISION`,
             ),
           ),
-        );
+        )
+        .orderBy(
+          sql`word_similarity(${item.displayName ?? ""}, COALESCE(${transactions.merchantName}, ${transactions.name})) DESC`,
+          sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) / GREATEST(1, ${inboxAmount})`,
+          sql`ABS(${transactions.date} - ${item.date}::date)`,
+        )
+        .limit(Math.max(maxResults * 3, 30));
 
-      // Calculate confidence scores and filter results
       const scoredResults = candidateTransactions
         .map((transaction) => {
-          const confidenceScore =
-            transaction.nameScore * 0.4 + // Name similarity weight: 40% (slightly reduced)
-            transaction.amountScore * 0.4 + // Amount match weight: 40% (increased importance)
-            transaction.currencyScore * 0.1 + // Currency match weight: 10%
-            transaction.dateScore * 0.1; // Date proximity weight: 10%
+          const nameScore = calculateNameScore(
+            item.displayName,
+            transaction.name,
+            transaction.merchantName,
+          );
+          const amountScore = calculateAmountScore(
+            {
+              amount: item.amount,
+              currency: item.currency,
+              baseAmount: item.baseAmount,
+              baseCurrency: item.baseCurrency,
+            },
+            {
+              amount: transaction.transactionAmount,
+              currency: transaction.transactionCurrency,
+              baseAmount: transaction.baseAmount,
+              baseCurrency: transaction.baseCurrency,
+            },
+          );
+          const currencyScore = calculateCurrencyScore(
+            item.currency || undefined,
+            transaction.transactionCurrency || undefined,
+            item.baseCurrency || undefined,
+            transaction.baseCurrency || undefined,
+          );
+          const dateScore = calculateDateScore(item.date!, transaction.transactionDate);
+          const isExactAmount =
+            item.amount !== null &&
+            Math.abs(
+              Math.abs(item.amount || 0) - Math.abs(transaction.transactionAmount || 0),
+            ) < 0.01;
+          const isSameCurrency = item.currency === transaction.transactionCurrency;
+          const { confidence } = scoreMatch({
+            nameScore,
+            amountScore,
+            dateScore,
+            currencyScore,
+            isSameCurrency,
+            isExactAmount,
+            autoThreshold: 0.9,
+            suggestedThreshold: minConfidenceScore,
+          });
 
           const result = {
             transaction_id: transaction.transactionId,
@@ -1526,11 +1532,11 @@ export async function searchTransactionMatch(
             transaction_amount: transaction.transactionAmount,
             transaction_currency: transaction.transactionCurrency,
             transaction_date: transaction.transactionDate,
-            name_score: Math.round(transaction.nameScore * 10) / 10,
-            amount_score: Math.round(transaction.amountScore * 10) / 10,
-            currency_score: Math.round(transaction.currencyScore * 10) / 10,
-            date_score: Math.round(transaction.dateScore * 10) / 10,
-            confidence_score: Math.round(confidenceScore * 10) / 10,
+            name_score: Math.round(nameScore * 1000) / 1000,
+            amount_score: Math.round(amountScore * 1000) / 1000,
+            currency_score: Math.round(currencyScore * 1000) / 1000,
+            date_score: Math.round(dateScore * 1000) / 1000,
+            confidence_score: Math.round(confidence * 1000) / 1000,
             is_already_matched: transaction.isAlreadyMatched,
             matched_attachment_filename:
               transaction.attachmentFilename ?? undefined,
@@ -1540,12 +1546,10 @@ export async function searchTransactionMatch(
         })
         .filter((result) => result.confidence_score >= minConfidenceScore)
         .sort((a, b) => {
-          // Sort by confidence score first (highest first), then by match status (unmatched first)
           if (a.confidence_score !== b.confidence_score) {
             return b.confidence_score - a.confidence_score;
           }
 
-          // If confidence scores are equal, prioritize unmatched transactions
           if (a.is_already_matched !== b.is_already_matched) {
             return a.is_already_matched ? 1 : -1;
           }

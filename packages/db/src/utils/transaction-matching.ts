@@ -26,6 +26,12 @@ type AmountComparableItem = {
   baseCurrency?: string | null;
 };
 
+export const COMMON_VAT_RATES = [
+  0.05, 0.06, 0.07, 0.075, 0.08, 0.1, 0.12, 0.19, 0.2, 0.21, 0.22, 0.25,
+] as const;
+
+export type MatchType = "auto_matched" | "high_confidence" | "suggested";
+
 type CrossCurrencyComparableItem = {
   amount?: number | null;
   currency?: string | null;
@@ -144,21 +150,39 @@ export function calculateAmountScore(
   const amount2 = item2.amount;
   const currency2 = item2.currency;
 
-  // If both amounts are missing, return neutral score
   if (!amount1 || !amount2) return 0.5;
 
-  // PRIORITY 1: Exact currency and amount match
+  const absAmount1 = Math.abs(amount1);
+  const absAmount2 = Math.abs(amount2);
+  const maxAmount = Math.max(absAmount1, absAmount2);
+  const percentageDiff = Math.abs(absAmount1 - absAmount2) / maxAmount;
+
+  // Same-currency amount scoring with VAT-aware fallback.
   if (currency1 && currency2 && currency1 === currency2) {
-    return calculateAmountDifferenceScore(amount1, amount2, "exact_currency");
+    if (percentageDiff === 0) return 1.0;
+    if (percentageDiff <= 0.01) return 0.98;
+    if (percentageDiff <= 0.02) return 0.95;
+    if (percentageDiff <= 0.05) return 0.85;
+    if (percentageDiff <= 0.1) return 0.6;
+    if (percentageDiff <= 0.2) return 0.3;
+
+    const ratio = maxAmount / Math.max(Math.min(absAmount1, absAmount2), 1e-9);
+    const ratioMinusOne = ratio - 1;
+    for (const vatRate of COMMON_VAT_RATES) {
+      if (Math.abs(ratioMinusOne - vatRate) <= 0.015) {
+        return 0.88;
+      }
+    }
+
+    return 0;
   }
 
-  // PRIORITY 2: Use base currency amounts if available and different currencies
-  const baseAmount1 = item1.baseAmount;
+  // Cross-currency scoring should primarily use base amounts.
+  const baseAmount1 = item1.baseAmount ? Math.abs(item1.baseAmount) : null;
+  const baseAmount2 = item2.baseAmount ? Math.abs(item2.baseAmount) : null;
   const baseCurrency1 = item1.baseCurrency;
-  const baseAmount2 = item2.baseAmount;
   const baseCurrency2 = item2.baseCurrency;
 
-  // If we have base amounts and they're in the same base currency, use those
   if (
     baseAmount1 &&
     baseAmount2 &&
@@ -166,39 +190,26 @@ export function calculateAmountScore(
     baseCurrency2 &&
     baseCurrency1 === baseCurrency2
   ) {
-    // Enhanced base currency matching - more tolerant for cross-currency transactions
-    const matchType =
-      currency1 !== currency2 ? "cross_currency_base" : "base_currency";
-    return calculateAmountDifferenceScore(baseAmount1, baseAmount2, matchType);
+    const maxBaseAmount = Math.max(baseAmount1, baseAmount2);
+    const basePercentageDiff =
+      Math.abs(baseAmount1 - baseAmount2) / maxBaseAmount;
+
+    if (basePercentageDiff === 0) return 1.0;
+    if (basePercentageDiff <= 0.02) return 0.9;
+    if (basePercentageDiff <= 0.05) return 0.8;
+    if (basePercentageDiff <= 0.1) return 0.65;
+    if (basePercentageDiff <= 0.15) return 0.45;
+    if (basePercentageDiff <= 0.25) return 0.25;
+    return 0;
   }
 
-  // PRIORITY 4: Different currencies, no base amount conversion available
-  // Give partial credit but penalize for currency mismatch
-  if (currency1 !== currency2) {
-    // Additional check: if signs are different AND amounts are vastly different, this is likely wrong
-    const sameSign =
-      (amount1 > 0 && amount2 > 0) || (amount1 < 0 && amount2 < 0);
-    const absAmount1 = Math.abs(amount1);
-    const absAmount2 = Math.abs(amount2);
-    const ratio =
-      Math.max(absAmount1, absAmount2) / Math.min(absAmount1, absAmount2);
-
-    // If opposite signs AND ratio > 5:1, this is very likely a false match
-    if (!sameSign && ratio > 5) {
-      return 0.1; // Very low score for suspicious cross-currency matches
-    }
-
-    const rawScore = calculateAmountDifferenceScore(
-      amount1,
-      amount2,
-      "different_currency",
-    );
-    // Increased penalty for cross-currency matches that we can't properly convert
-    return rawScore * 0.4; // 60% penalty for unresolved currency difference
-  }
-
-  // Fallback: same logic as before
-  return calculateAmountDifferenceScore(amount1, amount2, "fallback");
+  // Fallback for cross-currency without usable base amounts.
+  const ratio =
+    Math.max(absAmount1, absAmount2) / Math.max(Math.min(absAmount1, absAmount2), 1e-9);
+  if (ratio > 5) return 0.1;
+  if (percentageDiff <= 0.05) return 0.7;
+  if (percentageDiff <= 0.2) return 0.4;
+  return 0.1;
 }
 
 function calculateAmountDifferenceScore(
@@ -305,15 +316,210 @@ function calculateAmountDifferenceScore(
 export function calculateCurrencyScore(
   currency1?: string,
   currency2?: string,
+  baseCurrency1?: string | null,
+  baseCurrency2?: string | null,
 ): number {
   if (!currency1 || !currency2) return 0.5;
 
   // HIGHEST PRIORITY: Exact currency match
   if (currency1 === currency2) return 1.0;
 
-  // LOWER PRIORITY: Different currencies - be more conservative
-  // Cross-currency matching should have lower confidence
-  return 0.3; // Reduced from 0.5 to be more conservative
+  // Lower confidence, but still meaningful if both convert to same base currency.
+  if (baseCurrency1 && baseCurrency2 && baseCurrency1 === baseCurrency2) {
+    return 0.7;
+  }
+
+  return 0.3;
+}
+
+const COMPANY_SUFFIXES = new Set([
+  "inc",
+  "llc",
+  "ltd",
+  "ab",
+  "gmbh",
+  "pty",
+  "co",
+  "corp",
+  "sa",
+  "srl",
+  "as",
+  "oy",
+  "oyj",
+  "ag",
+  "bv",
+  "nv",
+  "se",
+  "plc",
+  "pbc",
+  "sarl",
+  "oü",
+  "ou",
+  "ug",
+  "kg",
+  "mbh",
+  "lda",
+  "limited",
+  "incorporated",
+  "corporation",
+]);
+
+function normalizeNameTokens(name: string): string[] {
+  if (!name) return [];
+  return name
+    .toLowerCase()
+    .replace(/[.,\-_'"()&]/g, " ")
+    .split(/\s+/)
+    .map((t) => t.trim())
+    .filter((t) => t.length > 0 && !COMPANY_SUFFIXES.has(t));
+}
+
+/**
+ * Scores name similarity between an inbox display name and a transaction name/merchant.
+ * Uses multiple strategies: Jaccard token overlap, substring containment, and prefix matching.
+ * Takes the best score from comparing against both transactionName and merchantName.
+ */
+export function calculateNameScore(
+  inboxName: string | null | undefined,
+  transactionName: string | null | undefined,
+  merchantName: string | null | undefined,
+  aliasScore?: number,
+  globalAliasScore?: number,
+): number {
+  if (!inboxName) return 0;
+
+  const inboxTokens = normalizeNameTokens(inboxName);
+  if (inboxTokens.length === 0) return 0;
+
+  const scores: number[] = [];
+
+  for (const compareName of [merchantName, transactionName]) {
+    if (!compareName) continue;
+
+    const compareTokens = normalizeNameTokens(compareName);
+    if (compareTokens.length === 0) continue;
+
+    const inboxSet = new Set(inboxTokens);
+    const compareSet = new Set(compareTokens);
+    const intersection = new Set(
+      [...inboxSet].filter((t) => compareSet.has(t)),
+    );
+    const union = new Set([...inboxSet, ...compareSet]);
+
+    if (union.size > 0) {
+      scores.push(intersection.size / union.size);
+    }
+
+    // Containment: one name fully contained in the other
+    const inboxJoined = inboxTokens.join(" ");
+    const compareJoined = compareTokens.join(" ");
+    if (
+      inboxJoined.length >= 3 &&
+      compareJoined.length >= 3 &&
+      (inboxJoined.includes(compareJoined) ||
+        compareJoined.includes(inboxJoined))
+    ) {
+      scores.push(0.85);
+    }
+
+    // Prefix match: first significant token matches
+    if (
+      inboxTokens[0] &&
+      compareTokens[0] &&
+      inboxTokens[0].length >= 3 &&
+      inboxTokens[0] === compareTokens[0]
+    ) {
+      scores.push(0.6);
+    }
+
+    // Concatenated token match handles names like "ElevenLabs" vs "Eleven Labs".
+    const inboxConcatenated = inboxTokens.join("");
+    const compareConcatenated = compareTokens.join("");
+    if (
+      inboxConcatenated.length >= 4 &&
+      compareConcatenated.length >= 4 &&
+      (inboxConcatenated === compareConcatenated ||
+        inboxConcatenated.includes(compareConcatenated) ||
+        compareConcatenated.includes(inboxConcatenated))
+    ) {
+      scores.push(
+        inboxConcatenated === compareConcatenated
+          ? 0.95
+          : 0.8,
+      );
+    }
+  }
+
+  if (typeof aliasScore === "number" && aliasScore > 0) {
+    scores.push(aliasScore);
+  }
+  if (typeof globalAliasScore === "number" && globalAliasScore > 0) {
+    scores.push(globalAliasScore);
+  }
+
+  return scores.length > 0 ? Math.max(...scores) : 0;
+}
+
+type ScoreMatchInput = {
+  nameScore: number;
+  amountScore: number;
+  dateScore: number;
+  currencyScore: number;
+  isSameCurrency: boolean;
+  isExactAmount: boolean;
+  declinePenalty?: number;
+  autoThreshold?: number;
+  suggestedThreshold?: number;
+};
+
+export function scoreMatch({
+  nameScore,
+  amountScore,
+  dateScore,
+  currencyScore,
+  isSameCurrency,
+  isExactAmount,
+  declinePenalty = 0,
+  autoThreshold = 0.9,
+  suggestedThreshold = 0.6,
+}: ScoreMatchInput): { confidence: number; matchType: MatchType } {
+  const weightedBase =
+    (nameScore * 10 + amountScore * 30 + dateScore * 15 + currencyScore * 5) /
+    60;
+
+  let confidence = weightedBase;
+
+  if (isExactAmount && nameScore >= 0.5 && dateScore >= 0.7) {
+    confidence = Math.max(confidence, 0.92);
+  } else if (isExactAmount && nameScore >= 0.3 && dateScore >= 0.5) {
+    confidence = Math.max(confidence, 0.85);
+  } else if (isExactAmount && isSameCurrency && dateScore >= 0.6) {
+    confidence = Math.max(confidence, 0.78);
+  }
+
+  // Cross-currency boost when financial conversion and name/date align strongly.
+  if (!isSameCurrency && nameScore >= 0.5 && amountScore >= 0.6 && dateScore >= 0.3) {
+    confidence = Math.max(confidence, 0.8);
+  }
+
+  if (nameScore === 0) {
+    confidence *= 0.55;
+  }
+
+  if (declinePenalty > 0) {
+    confidence -= declinePenalty;
+  }
+
+  confidence = Math.max(0, Math.min(1, confidence));
+
+  const matchType: MatchType =
+    confidence >= autoThreshold
+      ? "auto_matched"
+      : confidence >= suggestedThreshold
+        ? "high_confidence"
+        : "suggested";
+
+  return { confidence, matchType };
 }
 
 export function calculateDateScore(

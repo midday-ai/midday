@@ -12,7 +12,7 @@ import {
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
-import { triggerJob, triggerJobAndWait } from "@midday/job-client";
+import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import { getExtensionFromMimeType } from "@midday/utils";
 import type { Job } from "bullmq";
@@ -314,31 +314,7 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
         "documents",
       );
 
-      // Trigger embedding and wait for completion
-      this.logger.info("Triggering embed-inbox job", {
-        inboxId: inboxData.id,
-        teamId,
-      });
-
-      const embedStartTime = Date.now();
-      await triggerJobAndWait(
-        "embed-inbox",
-        {
-          inboxId: inboxData.id,
-          teamId,
-        },
-        "embeddings",
-        { timeout: 60000 },
-      );
-
-      const embedDuration = Date.now() - embedStartTime;
-      this.logger.info("Embed-inbox job completed", {
-        inboxId: inboxData.id,
-        teamId,
-        duration: `${embedDuration}ms`,
-      });
-
-      // Trigger matching
+      // Trigger matching immediately in V2 (no embed-inbox dependency).
       await triggerJob(
         "batch-process-matching",
         {

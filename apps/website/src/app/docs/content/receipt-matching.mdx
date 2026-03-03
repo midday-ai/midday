@@ -1,99 +1,90 @@
 ---
 title: Receipt Matching
-description: How Midday's AI automatically matches receipts to transactions and learns from your feedback.
+description: How Midday automatically matches receipts and invoices to the right transactions, and what to expect in daily use.
 section: inbox
 order: 1
 ---
 
-Midday's inbox captures receipts and invoices, then uses AI to match them to your bank transactions. No more manual filing or searching for receipts at tax time.
+Midday captures receipts and invoices, then matches them to your bank transactions so reconciliation takes minutes instead of hours.
+
+The goal is simple: get the obvious matches done automatically, and show you only the few that need review.
 
 ## How it works
 
 1. A receipt arrives in your inbox (via email forward, connected email, or upload)
-2. AI extracts the merchant, amount, and date
+2. Midday extracts merchant, amount, date, and document details
 3. The system searches your transactions for matches
-4. When confident, it attaches the receipt automatically
+4. High-confidence matches are attached automatically
 5. Uncertain matches are flagged for your review
 
 ## Matching intelligence
 
-The AI uses multiple signals to find the right match:
+Midday uses multiple signals together:
 
 - **Amount**: Receipt total vs transaction amount (exact matches score highest)
 - **Date**: Purchase date vs transaction clearing date (accounting for banking delays)
 - **Merchant**: Company name on receipt vs bank description
-- **Semantic understanding**: AI understands that "AMZN" means "Amazon.com"
-- **Your patterns**: Past matching decisions for similar merchants
+- **Currency context**: Handles same-currency and cross-currency scenarios
+- **Your patterns**: Learns from confirmed, declined, and unmatched feedback
 
-### How scoring works
+This is why you may see:
 
-Each potential match gets a confidence score based on weighted factors:
-
-| Factor | Weight | What it measures |
-|--------|--------|------------------|
-| Semantic similarity | 50% | How similar the merchant names and descriptions are |
-| Amount accuracy | 35% | How close the receipt amount matches the transaction |
-| Currency alignment | 10% | Whether currencies match |
-| Date alignment | 5% | Whether the dates make sense |
+- an instant auto-match for very obvious cases,
+- a suggestion when Midday is likely right but wants confirmation,
+- or "pending" when there isn't enough evidence yet.
 
 ## Confidence levels
 
-Based on the confidence score, matches fall into three categories:
+Matches fall into three categories:
 
-### Auto-matched (95%+ confidence)
+### Auto-matched
 
-The AI is highly confident this is correct. The receipt is attached automatically without requiring your review.
+Midday is highly confident this is correct and attaches the receipt automatically.
 
 This happens when:
 - Amount matches exactly
-- Merchant name is clearly the same
+- Merchant signals are strong
 - Date is within expected range
-- Similar matches have been confirmed before
+- Similar matches have been reliable before
 
-### Suggested match (70-95% confidence)
+### Suggested match
 
-The AI thinks this is likely correct but wants your confirmation. You'll see these in your inbox with a "Suggested match" indicator.
+Midday thinks this is likely correct, but asks you to confirm.
 
 Review and either:
-- **Confirm**: The receipt is attached and the AI learns from your confirmation
-- **Reject**: The AI learns this wasn't correct and won't suggest it again
+- **Confirm**: Receipt is attached and matching gets smarter for similar cases
+- **Reject**: Midday records this as negative feedback
 
-### No match (below 70% confidence)
+### No match yet
 
-No transaction was found that meets the confidence threshold. The receipt stays in your inbox as "Pending."
+No transaction currently meets the quality threshold. The receipt stays in "Pending."
 
 You can:
 - Wait for the transaction to sync (it might not have cleared yet)
 - Manually match to any transaction
 - Leave it unmatched if it doesn't need matching
 
-## How the AI learns
+## How it improves over time
 
-Midday's matching improves over time through several learning mechanisms:
+Midday continuously improves through your team's actions:
 
 ### Merchant pattern learning
 
-When you confirm matches, the AI learns:
-- "This merchant name on receipts matches this description in bank statements"
-- After 3+ confirmed matches with 90%+ accuracy, similar merchants can auto-match
+When your team repeatedly confirms the same merchant pairings, Midday starts treating those as safer and faster to match.
 
 ### Team-specific calibration
 
 The system adapts to your team's patterns:
-- If you confirm many suggested matches, thresholds adjust to auto-match more
-- If you reject suggestions, thresholds become more conservative
+- If suggestions are frequently confirmed, matching can become more automatic
+- If suggestions are often rejected, matching becomes more conservative
 
 ### Dismissed match memory
 
-When you reject a match, the AI remembers:
-- That specific receipt-transaction pair is never suggested again
-- This prevents the same incorrect suggestion from reappearing
+When you reject a match, Midday remembers that pair and avoids repeating it.
 
 ### Post-match learning
 
-Even after matching, the AI learns from your actions:
-- If you later unmatch a receipt, that counts as negative feedback
-- High-confidence matches that were wrong trigger more conservative thresholds
+Even after confirmation, unmatching later is treated as negative feedback so the system avoids repeating similar mistakes.
 
 ## Getting receipts into Midday
 
@@ -228,7 +219,7 @@ Poor quality images, partial receipts, or handwritten notes are harder to match.
 If matching consistently fails for certain merchants:
 
 1. Check if transactions are syncing from that account
-2. Try manually matching a few times—the AI learns from this
+2. Manually confirm a few correct matches so Midday learns your pattern
 3. Ensure receipt images are clear and complete
 
 ## Privacy and security
