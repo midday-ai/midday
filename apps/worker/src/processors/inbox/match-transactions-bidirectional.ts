@@ -31,10 +31,9 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
 
     // PHASE 1: Forward matching - Find inbox items for new transactions
     const forwardMatches = new Map<string, string>(); // transactionId -> inboxId
+    const claimedInboxIds = new Set<string>();
     let forwardMatchCount = 0;
     let forwardSuggestionCount = 0;
-
-    const phase1Progress = 40; // 40% for phase 1
 
     for (let i = 0; i < newTransactionIds.length; i++) {
       const transactionId = newTransactionIds[i];
@@ -44,10 +43,12 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
         const inboxMatch = await findInboxMatches(db, {
           teamId,
           transactionId,
+          excludeInboxIds: claimedInboxIds,
         });
 
         if (inboxMatch) {
           forwardMatches.set(transactionId, inboxMatch.inboxId);
+          claimedInboxIds.add(inboxMatch.inboxId);
 
           // Determine if this should be auto-matched or suggested
           const shouldAutoMatch = inboxMatch.matchType === "auto_matched";
@@ -145,70 +146,58 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
     let reverseSuggestionCount = 0;
     let noMatchCount = 0;
 
-    // Process inbox items in smaller batches for better performance
-    const BATCH_SIZE = 10;
-    const _phase2StartProgress = phase1Progress;
-    const _phase2ProgressRange = 60; // 60% for phase 2
+    const claimedTransactionIds = new Set<string>();
 
-    for (let i = 0; i < unmatchedInboxItems.length; i += BATCH_SIZE) {
-      const batch = unmatchedInboxItems.slice(i, i + BATCH_SIZE);
-      const _batchIndex = Math.floor(i / BATCH_SIZE);
-      const _totalBatches = Math.ceil(unmatchedInboxItems.length / BATCH_SIZE);
+    for (const inboxItem of unmatchedInboxItems) {
+      try {
+        const result = await calculateInboxSuggestions(db, {
+          teamId,
+          inboxId: inboxItem.id,
+          excludeTransactionIds: claimedTransactionIds,
+        });
 
-      await Promise.allSettled(
-        batch.map(async (inboxItem) => {
-          try {
-            const result = await calculateInboxSuggestions(db, {
+        if (hasSuggestion(result)) {
+          claimedTransactionIds.add(result.suggestion.transactionId);
+          await triggerMatchingNotification({
+            db,
+            teamId,
+            inboxId: inboxItem.id,
+            result,
+          });
+        }
+
+        switch (result.action) {
+          case "auto_matched":
+            reverseMatchCount++;
+            this.logger.info("Auto-matched inbox item to transaction", {
               teamId,
               inboxId: inboxItem.id,
+              transactionId: result.suggestion?.transactionId,
+              confidence: result.suggestion?.confidenceScore,
             });
+            break;
 
-            // Send notifications based on matching result
-            if (hasSuggestion(result)) {
-              // Type guard narrows the type here
-              const resultWithSuggestion = result;
-              await triggerMatchingNotification({
-                db,
-                teamId,
-                inboxId: inboxItem.id,
-                result: resultWithSuggestion,
-              });
-            }
-
-            switch (result.action) {
-              case "auto_matched":
-                reverseMatchCount++;
-                this.logger.info("Auto-matched inbox item to transaction", {
-                  teamId,
-                  inboxId: inboxItem.id,
-                  transactionId: result.suggestion?.transactionId,
-                  confidence: result.suggestion?.confidenceScore,
-                });
-                break;
-
-              case "suggestion_created":
-                reverseSuggestionCount++;
-                this.logger.info("Created reverse match suggestion", {
-                  teamId,
-                  inboxId: inboxItem.id,
-                  transactionId: result.suggestion?.transactionId,
-                  confidence: result.suggestion?.confidenceScore,
-                });
-                break;
-
-              case "no_match_yet":
-                noMatchCount++;
-                break;
-            }
-          } catch (error) {
-            this.logger.error("Failed to process reverse match", {
+          case "suggestion_created":
+            reverseSuggestionCount++;
+            this.logger.info("Created reverse match suggestion", {
               teamId,
               inboxId: inboxItem.id,
-              error: error instanceof Error ? error.message : "Unknown error",
+              transactionId: result.suggestion?.transactionId,
+              confidence: result.suggestion?.confidenceScore,
             });
-          }
-        }),
-      );
+            break;
+
+          case "no_match_yet":
+            noMatchCount++;
+            break;
+        }
+      } catch (error) {
+        this.logger.error("Failed to process reverse match", {
+          teamId,
+          inboxId: inboxItem.id,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
     }
 
     // Final summary

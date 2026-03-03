@@ -23,12 +23,16 @@ export function hasSuggestion(result: {
 // Calculate and store suggestions for an inbox item
 export async function calculateInboxSuggestions(
   db: Database,
-  params: { teamId: string; inboxId: string },
+  params: {
+    teamId: string;
+    inboxId: string;
+    excludeTransactionIds?: Set<string>;
+  },
 ): Promise<{
   action: "auto_matched" | "suggestion_created" | "no_match_yet";
   suggestion?: MatchResult;
 }> {
-  const { teamId, inboxId } = params;
+  const { teamId, inboxId, excludeTransactionIds } = params;
 
   // Set status to analyzing while we process
   await updateInbox(db, {
@@ -38,7 +42,11 @@ export async function calculateInboxSuggestions(
   });
 
   // Find the best match using our matching algorithm
-  const bestMatch = await findMatches(db, { teamId, inboxId });
+  const bestMatch = await findMatches(db, {
+    teamId,
+    inboxId,
+    excludeTransactionIds,
+  });
 
   if (!bestMatch) {
     // Update inbox status to pending - we'll keep looking when new transactions arrive

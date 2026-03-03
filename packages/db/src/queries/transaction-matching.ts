@@ -605,9 +605,9 @@ function resolveMatchType(
 
 export async function findMatches(
   db: Database,
-  params: FindMatchesParams,
+  params: FindMatchesParams & { excludeTransactionIds?: Set<string> },
 ): Promise<MatchResult | null> {
-  const { teamId, inboxId } = params;
+  const { teamId, inboxId, excludeTransactionIds } = params;
   const calibration = await getTeamCalibration(db, teamId);
   const suggestedThreshold = Math.max(
     0.6,
@@ -696,6 +696,12 @@ export async function findMatches(
             sql`ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ${inboxBaseAmount}) < GREATEST(50, ${inboxBaseAmount} * 0.15)`,
           ),
         ),
+        excludeTransactionIds && excludeTransactionIds.size > 0
+          ? sql`${transactions.id} NOT IN (${sql.join(
+              [...excludeTransactionIds].map((id) => sql.param(id)),
+              sql`, `,
+            )})`
+          : undefined,
       ),
     )
     .orderBy(
@@ -707,7 +713,7 @@ export async function findMatches(
 
   const teamPairHistory = await fetchTeamPairHistory(db, teamId);
 
-  let bestMatch: MatchResult | null = null;
+  const scoredCandidates: MatchResult[] = [];
   for (const candidate of candidates) {
     const normalizedTransactionName = normalizeNameForLearning(
       candidate.merchantName || candidate.name,
@@ -798,31 +804,33 @@ export async function findMatches(
       isAlreadyMatched: candidate.isAlreadyMatched,
     };
 
-    if (!bestMatch || proposed.confidenceScore > bestMatch.confidenceScore) {
-      bestMatch = proposed;
+    scoredCandidates.push(proposed);
+  }
+
+  scoredCandidates.sort((a, b) => b.confidenceScore - a.confidenceScore);
+
+  for (const candidate of scoredCandidates) {
+    if (
+      await wasPreviouslyDismissed(db, teamId, inboxId, candidate.transactionId)
+    ) {
+      logger.info("Skipping dismissed match candidate, trying next", {
+        teamId,
+        inboxId,
+        transactionId: candidate.transactionId,
+      });
+      continue;
     }
+    return candidate;
   }
 
-  if (!bestMatch) return null;
-  if (
-    await wasPreviouslyDismissed(db, teamId, inboxId, bestMatch.transactionId)
-  ) {
-    logger.info("Skipping dismissed match candidate", {
-      teamId,
-      inboxId,
-      transactionId: bestMatch.transactionId,
-    });
-    return null;
-  }
-
-  return bestMatch;
+  return null;
 }
 
 export async function findInboxMatches(
   db: Database,
-  params: FindInboxMatchesParams,
+  params: FindInboxMatchesParams & { excludeInboxIds?: Set<string> },
 ): Promise<InboxMatchResult | null> {
-  const { teamId, transactionId } = params;
+  const { teamId, transactionId, excludeInboxIds } = params;
   const calibration = await getTeamCalibration(db, teamId);
   const suggestedThreshold = Math.max(
     0.6,
@@ -877,7 +885,7 @@ export async function findInboxMatches(
         eq(inbox.teamId, teamId),
         isNull(inbox.transactionId),
         sql`${inbox.date} IS NOT NULL`,
-        sql`${inbox.date} BETWEEN ${sql.param(transactionItem.date)}::date - INTERVAL '90 days' AND ${sql.param(transactionItem.date)}::date + INTERVAL '30 days'`,
+        sql`${inbox.date} BETWEEN ${sql.param(transactionItem.date)}::date - (CASE WHEN ${inbox.type} = 'invoice' THEN INTERVAL '123 days' ELSE INTERVAL '90 days' END) AND ${sql.param(transactionItem.date)}::date + INTERVAL '30 days'`,
         or(
           and(
             eq(inbox.currency, transactionItem.currency || ""),
@@ -890,6 +898,12 @@ export async function findInboxMatches(
             sql`ABS(ABS(COALESCE(${inbox.baseAmount}, 0)) - ${transactionBaseAmount}) < GREATEST(50, ${transactionBaseAmount} * 0.15)`,
           ),
         ),
+        excludeInboxIds && excludeInboxIds.size > 0
+          ? sql`${inbox.id} NOT IN (${sql.join(
+              [...excludeInboxIds].map((id) => sql.param(id)),
+              sql`, `,
+            )})`
+          : undefined,
       ),
     )
     .orderBy(
@@ -901,7 +915,7 @@ export async function findInboxMatches(
 
   const teamPairHistory = await fetchTeamPairHistory(db, teamId);
 
-  let bestMatch: InboxMatchResult | null = null;
+  const scoredCandidates: InboxMatchResult[] = [];
   for (const candidate of candidates) {
     const normalizedInboxName = normalizeNameForLearning(candidate.displayName);
     const aliasScore = computeAliasScore(
@@ -990,24 +1004,26 @@ export async function findInboxMatches(
       isAlreadyMatched: candidate.isAlreadyMatched,
     };
 
-    if (!bestMatch || proposed.confidenceScore > bestMatch.confidenceScore) {
-      bestMatch = proposed;
+    scoredCandidates.push(proposed);
+  }
+
+  scoredCandidates.sort((a, b) => b.confidenceScore - a.confidenceScore);
+
+  for (const candidate of scoredCandidates) {
+    if (
+      await wasPreviouslyDismissed(db, teamId, candidate.inboxId, transactionId)
+    ) {
+      logger.info("Skipping dismissed reverse match candidate, trying next", {
+        teamId,
+        transactionId,
+        inboxId: candidate.inboxId,
+      });
+      continue;
     }
+    return candidate;
   }
 
-  if (!bestMatch) return null;
-  if (
-    await wasPreviouslyDismissed(db, teamId, bestMatch.inboxId, transactionId)
-  ) {
-    logger.info("Skipping dismissed reverse match candidate", {
-      teamId,
-      transactionId,
-      inboxId: bestMatch.inboxId,
-    });
-    return null;
-  }
-
-  return bestMatch;
+  return null;
 }
 
 export async function createMatchSuggestion(
