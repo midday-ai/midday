@@ -150,16 +150,12 @@ function scoreRecord(
   r: EvalRecord,
   pairConfirmedCount: Map<string, number>,
   pairDeclinedCount: Map<string, number>,
-  pairConfirmedTeams: Map<string, Set<string>>,
 ) {
   const txnPrimaryName = r.transactionMerchantName || r.transactionName;
   const memoryKey = pairKey(r.inboxDisplayName, txnPrimaryName);
   const confirmedCount = pairConfirmedCount.get(memoryKey) ?? 0;
   const declinedCount = pairDeclinedCount.get(memoryKey) ?? 0;
-  const globalTeams = pairConfirmedTeams.get(memoryKey)?.size ?? 0;
-
   const aliasScore = confirmedCount >= 2 ? 0.9 : 0;
-  const globalAliasScore = globalTeams >= 3 ? 0.85 : 0;
   const declinePenalty = declinedCount >= 2 ? 0.15 : 0;
 
   let nameScore = calculateNameScore(
@@ -167,7 +163,6 @@ function scoreRecord(
     r.transactionName,
     r.transactionMerchantName,
     aliasScore,
-    globalAliasScore,
   );
 
   const amountScore = calculateAmountScore(
@@ -389,7 +384,6 @@ function evaluateAtThreshold(
   threshold: number,
   pairConfirmedCount: Map<string, number>,
   pairDeclinedCount: Map<string, number>,
-  pairConfirmedTeams: Map<string, Set<string>>,
 ) {
   const totalRealMatches =
     suggestions.filter((r) => r.userAction === "confirmed").length +
@@ -403,7 +397,6 @@ function evaluateAtThreshold(
       r,
       pairConfirmedCount,
       pairDeclinedCount,
-      pairConfirmedTeams,
     );
     if (confidence >= threshold) {
       if (r.userAction === "confirmed") foundFromSuggestions++;
@@ -415,7 +408,6 @@ function evaluateAtThreshold(
       r,
       pairConfirmedCount,
       pairDeclinedCount,
-      pairConfirmedTeams,
     );
     if (confidence >= threshold) foundFromManual++;
   }
@@ -446,7 +438,6 @@ function printReviewList(
   threshold: number,
   pairConfirmedCount: Map<string, number>,
   pairDeclinedCount: Map<string, number>,
-  pairConfirmedTeams: Map<string, Set<string>>,
   reviewLimit: number,
 ) {
   const scored = suggestions.map((record) => ({
@@ -455,7 +446,6 @@ function printReviewList(
       record,
       pairConfirmedCount,
       pairDeclinedCount,
-      pairConfirmedTeams,
     ),
   }));
 
@@ -590,16 +580,12 @@ async function main() {
     const { suggestions, manualMatches } = await fetchRecords(pool, opts);
     const pairConfirmedCount = new Map<string, number>();
     const pairDeclinedCount = new Map<string, number>();
-    const pairConfirmedTeams = new Map<string, Set<string>>();
 
     for (const row of suggestions) {
       const txnName = row.transactionMerchantName || row.transactionName;
       const key = pairKey(row.inboxDisplayName, txnName);
       if (row.userAction === "confirmed") {
         pairConfirmedCount.set(key, (pairConfirmedCount.get(key) ?? 0) + 1);
-        const teams = pairConfirmedTeams.get(key) ?? new Set<string>();
-        if (row.teamId) teams.add(row.teamId);
-        pairConfirmedTeams.set(key, teams);
       }
       if (row.userAction === "declined" || row.userAction === "unmatched") {
         pairDeclinedCount.set(key, (pairDeclinedCount.get(key) ?? 0) + 1);
@@ -621,7 +607,6 @@ async function main() {
         opts.fixedThreshold,
         pairConfirmedCount,
         pairDeclinedCount,
-        pairConfirmedTeams,
       );
       console.log("Fixed threshold result");
       console.log(`  Threshold: ${fixed.threshold.toFixed(3)}`);
@@ -640,7 +625,6 @@ async function main() {
           fixed.threshold,
           pairConfirmedCount,
           pairDeclinedCount,
-          pairConfirmedTeams,
           opts.reviewLimit,
         );
       }
@@ -659,7 +643,6 @@ async function main() {
           threshold,
           pairConfirmedCount,
           pairDeclinedCount,
-          pairConfirmedTeams,
         );
         if (!best || result.f1 > best.f1) best = result;
       }
@@ -684,7 +667,6 @@ async function main() {
           best.threshold,
           pairConfirmedCount,
           pairDeclinedCount,
-          pairConfirmedTeams,
           opts.reviewLimit,
         );
       }

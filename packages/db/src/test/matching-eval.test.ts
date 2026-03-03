@@ -157,7 +157,6 @@ function extractDomainToken(url: string): string {
 
 const pairConfirmedCount = new Map<string, number>();
 const pairDeclinedCount = new Map<string, number>();
-const pairConfirmedTeams = new Map<string, Set<string>>();
 
 // --- Scoring simulation ---
 
@@ -182,10 +181,7 @@ function scoreRecord(
   const memoryKey = pairKey(r.inboxDisplayName, txnPrimaryName);
   const confirmedCount = pairConfirmedCount.get(memoryKey) ?? 0;
   const declinedCount = pairDeclinedCount.get(memoryKey) ?? 0;
-  const globalTeams = pairConfirmedTeams.get(memoryKey)?.size ?? 0;
-
   const aliasScore = confirmedCount >= 2 ? 0.9 : 0;
-  const globalAliasScore = globalTeams >= 3 ? 0.85 : 0;
   const declinePenalty = declinedCount >= 2 ? 0.15 : 0;
 
   let nameScore = calculateNameScore(
@@ -193,7 +189,6 @@ function scoreRecord(
     r.transactionName,
     r.transactionMerchantName,
     aliasScore,
-    globalAliasScore,
   );
 
   const inboxItem = {
@@ -363,15 +358,11 @@ beforeAll(() => {
 
   pairConfirmedCount.clear();
   pairDeclinedCount.clear();
-  pairConfirmedTeams.clear();
   for (const row of suggestions) {
     const txnName = row.transactionMerchantName || row.transactionName;
     const key = pairKey(row.inboxDisplayName, txnName);
     if (row.userAction === "confirmed") {
       pairConfirmedCount.set(key, (pairConfirmedCount.get(key) ?? 0) + 1);
-      const teams = pairConfirmedTeams.get(key) ?? new Set<string>();
-      if (row.teamId) teams.add(row.teamId);
-      pairConfirmedTeams.set(key, teams);
     }
     if (row.userAction === "declined" || row.userAction === "unmatched") {
       pairDeclinedCount.set(key, (pairDeclinedCount.get(key) ?? 0) + 1);

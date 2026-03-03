@@ -114,10 +114,25 @@ export type TeamCalibrationData = {
   lastUpdated: string;
 };
 
+type TeamPairHistoryRow = {
+  status: string;
+  confidenceScore: number | null;
+  createdAt: string;
+  inboxName: string | null;
+  transactionName: string;
+  merchantName: string | null;
+};
+type TeamPairHistoryMap = Map<string, TeamPairHistoryRow[]>;
 const CALIBRATION_CACHE_TTL_MS = 5 * 60 * 1000;
 const calibrationCache = new Map<
   string,
   { data: TeamCalibrationData; expiresAt: number }
+>();
+
+const PAIR_HISTORY_CACHE_TTL_MS = 5 * 60 * 1000;
+const pairHistoryCache = new Map<
+  string,
+  { data: TeamPairHistoryMap; expiresAt: number }
 >();
 
 function clamp(value: number, min: number, max: number): number {
@@ -376,7 +391,15 @@ function extractDomainToken(url: string | null | undefined): string {
   return cleaned?.split(".")[0]?.toLowerCase() ?? "";
 }
 
-async function fetchTeamPairHistory(db: Database, teamId: string) {
+async function fetchTeamPairHistory(
+  db: Database,
+  teamId: string,
+): Promise<TeamPairHistoryMap> {
+  const cached = pairHistoryCache.get(teamId);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+
   const rows = await db
     .select({
       status: transactionMatchSuggestions.status,
@@ -406,8 +429,7 @@ async function fetchTeamPairHistory(db: Database, teamId: string) {
     .orderBy(desc(transactionMatchSuggestions.createdAt))
     .limit(2000);
 
-  type HistoryRow = (typeof rows)[number];
-  const map = new Map<string, HistoryRow[]>();
+  const map: TeamPairHistoryMap = new Map();
   for (const row of rows) {
     const key = `${normalizeNameForLearning(row.inboxName)}\0${normalizeNameForLearning(row.merchantName || row.transactionName)}`;
     let entries = map.get(key);
@@ -417,10 +439,14 @@ async function fetchTeamPairHistory(db: Database, teamId: string) {
     }
     entries.push(row);
   }
+  pairHistoryCache.set(teamId, {
+    data: map,
+    expiresAt: Date.now() + PAIR_HISTORY_CACHE_TTL_MS,
+  });
   return map;
 }
 
-type TeamPairHistory = Awaited<ReturnType<typeof fetchTeamPairHistory>>;
+type TeamPairHistory = TeamPairHistoryMap;
 
 function lookupPairHistory(
   historyMap: TeamPairHistory,
@@ -562,59 +588,13 @@ function computeDeclinePenalty(
   return clamp(0.08 + netSignal * 0.08, 0, 0.35);
 }
 
-type GlobalAliasMap = Map<string, Set<string>>;
-
-async function fetchGlobalAliasMap(db: Database): Promise<GlobalAliasMap> {
-  const rows = await db
-    .select({
-      teamId: transactionMatchSuggestions.teamId,
-      inboxName: inbox.displayName,
-      transactionName: transactions.name,
-      merchantName: transactions.merchantName,
-    })
-    .from(transactionMatchSuggestions)
-    .innerJoin(inbox, eq(transactionMatchSuggestions.inboxId, inbox.id))
-    .innerJoin(
-      transactions,
-      eq(transactionMatchSuggestions.transactionId, transactions.id),
-    )
-    .where(
-      and(
-        eq(transactionMatchSuggestions.status, "confirmed"),
-        sql`${transactionMatchSuggestions.createdAt} > NOW() - INTERVAL '12 months'`,
-      ),
-    )
-    .limit(2000);
-
-  const pairTeams: GlobalAliasMap = new Map();
-  for (const row of rows) {
-    const key = `${normalizeNameForLearning(row.inboxName)}\0${normalizeNameForLearning(row.merchantName || row.transactionName)}`;
-    let teams = pairTeams.get(key);
-    if (!teams) {
-      teams = new Set();
-      pairTeams.set(key, teams);
-    }
-    teams.add(row.teamId);
-  }
-  return pairTeams;
-}
-
-function lookupGlobalAliasScore(
-  globalAliasMap: GlobalAliasMap,
-  normalizedInboxName: string,
-  normalizedTransactionName: string,
-): number {
-  const key = `${normalizedInboxName}\0${normalizedTransactionName}`;
-  const teams = globalAliasMap.get(key);
-  return teams && teams.size >= 3 ? 0.85 : 0;
-}
-
 function resolveMatchType(
   confidence: number,
   canAutoMatch: boolean,
   nameScore: number,
+  autoThreshold: number,
 ): MatchType {
-  if (confidence >= 0.9 && canAutoMatch && nameScore >= 0.4) {
+  if (confidence >= autoThreshold && canAutoMatch && nameScore >= 0.4) {
     return "auto_matched";
   }
   if (confidence >= 0.72) {
@@ -723,20 +703,12 @@ export async function findMatches(
     )
     .limit(30);
 
-  const [globalAliasMap, teamPairHistory] = await Promise.all([
-    fetchGlobalAliasMap(db),
-    fetchTeamPairHistory(db, teamId),
-  ]);
+  const teamPairHistory = await fetchTeamPairHistory(db, teamId);
 
   let bestMatch: MatchResult | null = null;
   for (const candidate of candidates) {
     const normalizedTransactionName = normalizeNameForLearning(
       candidate.merchantName || candidate.name,
-    );
-    const globalAliasScore = lookupGlobalAliasScore(
-      globalAliasMap,
-      normalizedInboxName,
-      normalizedTransactionName,
     );
     const aliasScore = computeAliasScore(
       teamPairHistory,
@@ -759,7 +731,6 @@ export async function findMatches(
       candidate.name,
       candidate.merchantName || candidate.counterpartyName,
       aliasScore,
-      globalAliasScore,
     );
 
     const searchableText = normalizeNameForLearning(
@@ -818,7 +789,7 @@ export async function findMatches(
       currencyScore: Math.round(currencyScore * 1000) / 1000,
       dateScore: Math.round(dateScore * 1000) / 1000,
       confidenceScore: Math.round(confidence * 1000) / 1000,
-      matchType: resolveMatchType(confidence, pattern.canAutoMatch, nameScore),
+      matchType: resolveMatchType(confidence, pattern.canAutoMatch, nameScore, autoThreshold),
       isAlreadyMatched: candidate.isAlreadyMatched,
     };
 
@@ -923,19 +894,11 @@ export async function findInboxMatches(
     )
     .limit(30);
 
-  const [globalAliasMap, teamPairHistory] = await Promise.all([
-    fetchGlobalAliasMap(db),
-    fetchTeamPairHistory(db, teamId),
-  ]);
+  const teamPairHistory = await fetchTeamPairHistory(db, teamId);
 
   let bestMatch: InboxMatchResult | null = null;
   for (const candidate of candidates) {
     const normalizedInboxName = normalizeNameForLearning(candidate.displayName);
-    const globalAliasScore = lookupGlobalAliasScore(
-      globalAliasMap,
-      normalizedInboxName,
-      normalizedTransactionName,
-    );
     const aliasScore = computeAliasScore(
       teamPairHistory,
       normalizedInboxName,
@@ -957,7 +920,6 @@ export async function findInboxMatches(
       transactionItem.name,
       transactionItem.merchantName || transactionItem.counterpartyName,
       aliasScore,
-      globalAliasScore,
     );
 
     const searchableText = normalizeNameForLearning(
@@ -1016,7 +978,7 @@ export async function findInboxMatches(
       currencyScore: Math.round(currencyScore * 1000) / 1000,
       dateScore: Math.round(dateScore * 1000) / 1000,
       confidenceScore: Math.round(confidence * 1000) / 1000,
-      matchType: resolveMatchType(confidence, pattern.canAutoMatch, nameScore),
+      matchType: resolveMatchType(confidence, pattern.canAutoMatch, nameScore, autoThreshold),
       isAlreadyMatched: candidate.isAlreadyMatched,
     };
 

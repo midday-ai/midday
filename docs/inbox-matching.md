@@ -79,10 +79,9 @@ Confidence receives additional guarded adjustments:
 
 For a normalized `(inboxName, transactionName)` pair:
 
-- if a team has repeated confirmations, alias score boosts name matching,
-- if the same pair appears across multiple teams, global alias boost applies.
+- if a team has repeated confirmations, alias score boosts name matching.
 
-This improves recurring merchant variant matching (e.g. legal entity vs card statement name).
+This improves recurring merchant variant matching (e.g. legal entity vs card statement name). Alias learning is scoped per-team — one team's data never influences another team's matching.
 
 ### 2) Hard Negative Memory
 

@@ -284,7 +284,6 @@ export function calculateNameScore(
   transactionName: string | null | undefined,
   merchantName: string | null | undefined,
   aliasScore?: number,
-  globalAliasScore?: number,
 ): number {
   if (!inboxName) return 0;
 
@@ -348,9 +347,6 @@ export function calculateNameScore(
 
   if (typeof aliasScore === "number" && aliasScore > 0) {
     scores.push(aliasScore);
-  }
-  if (typeof globalAliasScore === "number" && globalAliasScore > 0) {
-    scores.push(globalAliasScore);
   }
 
   return scores.length > 0 ? Math.max(...scores) : 0;
