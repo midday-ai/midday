@@ -39,6 +39,8 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
     for (let i = 0; i < newTransactionIds.length; i++) {
       const transactionId = newTransactionIds[i];
       if (!transactionId) continue;
+      let processingInboxId: string | null = null;
+      let workflowPersisted = false;
 
       try {
         const inboxMatch = await findInboxMatches(db, {
@@ -48,6 +50,7 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
         });
 
         if (inboxMatch) {
+          processingInboxId = inboxMatch.inboxId;
           forwardMatches.set(transactionId, inboxMatch.inboxId);
           claimedInboxIds.add(inboxMatch.inboxId);
 
@@ -71,6 +74,15 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
             },
             source: "forward_match",
           });
+
+          this.logger.info("Persisted inbox suggestion workflow", {
+            teamId,
+            transactionId,
+            inboxId: inboxMatch.inboxId,
+            action,
+          });
+
+          workflowPersisted = true;
 
           if (action === "auto_matched") {
             forwardMatchCount++;
@@ -126,6 +138,36 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
           }
         }
       } catch (error) {
+        // Release optimistic claim so this inbox can be retried in the same run.
+        forwardMatches.delete(transactionId);
+        if (processingInboxId) {
+          claimedInboxIds.delete(processingInboxId);
+        }
+
+        // If persistence did not complete, avoid leaving the inbox stuck in "analyzing".
+        if (processingInboxId && !workflowPersisted) {
+          try {
+            await updateInbox(db, {
+              id: processingInboxId,
+              teamId,
+              status: "pending",
+            });
+          } catch (rollbackError) {
+            this.logger.error(
+              "Failed to reset inbox status after forward match error",
+              {
+                teamId,
+                transactionId,
+                inboxId: processingInboxId,
+                error:
+                  rollbackError instanceof Error
+                    ? rollbackError.message
+                    : "Unknown error",
+              },
+            );
+          }
+        }
+
         this.logger.error("Failed to process forward match", {
           teamId,
           transactionId,
