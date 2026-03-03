@@ -6,6 +6,7 @@ import {
   getTransactionById,
   hasSuggestion,
   persistInboxSuggestionWorkflow,
+  shouldResetInboxToPendingAfterSuggestionFailure,
   updateInbox,
 } from "@midday/db/queries";
 import type { Job } from "bullmq";
@@ -13,21 +14,6 @@ import type { MatchTransactionsBidirectionalPayload } from "../../schemas/inbox"
 import { getDb } from "../../utils/db";
 import { triggerMatchingNotification } from "../../utils/inbox-matching-notifications";
 import { BaseProcessor } from "../base";
-
-export function shouldRollbackForwardInboxToPending(params: {
-  workflowPersisted: boolean;
-  inboxState: {
-    status: string | null;
-    transactionId: string | null;
-  } | null;
-}): boolean {
-  const { workflowPersisted, inboxState } = params;
-  if (workflowPersisted) {
-    return false;
-  }
-
-  return inboxState?.status === "analyzing" && !inboxState.transactionId;
-}
 
 export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<MatchTransactionsBidirectionalPayload> {
   async process(job: Job<MatchTransactionsBidirectionalPayload>): Promise<{
@@ -168,17 +154,15 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
               teamId,
             });
 
-            // Avoid clobbering a successful concurrent match from another worker.
             if (
-              shouldRollbackForwardInboxToPending({
-                workflowPersisted,
-                inboxState: inboxState
+              shouldResetInboxToPendingAfterSuggestionFailure(
+                inboxState
                   ? {
                       status: inboxState.status,
                       transactionId: inboxState.transactionId,
                     }
                   : null,
-              })
+              )
             ) {
               await updateInbox(db, {
                 id: processingInboxId,

@@ -1188,6 +1188,19 @@ export async function matchTransaction(
     throw new Error("A related inbox item is already matched to a transaction");
   }
 
+  // Verify the target transaction belongs to this team
+  const [targetTransaction] = await db
+    .select({ id: transactions.id })
+    .from(transactions)
+    .where(
+      and(eq(transactions.id, transactionId), eq(transactions.teamId, teamId)),
+    )
+    .limit(1);
+
+  if (!targetTransaction) {
+    throw new Error("Transaction not found or belongs to another team");
+  }
+
   // Check if the target transaction is already matched to another inbox item (not in this group)
   const [existingMatch] = await db
     .select({ id: inbox.id })
@@ -1199,7 +1212,7 @@ export async function matchTransaction(
         notInArray(
           inbox.id,
           relatedItems.map((item) => item.id),
-        ), // Not any of the related items
+        ),
       ),
     )
     .limit(1);
@@ -1257,7 +1270,12 @@ export async function matchTransaction(
     await db
       .update(transactions)
       .set(taxUpdates)
-      .where(eq(transactions.id, transactionId));
+      .where(
+        and(
+          eq(transactions.id, transactionId),
+          eq(transactions.teamId, teamId),
+        ),
+      );
   }
 
   // Update all related inbox items with attachment and transaction IDs
