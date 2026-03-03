@@ -789,7 +789,12 @@ export async function findMatches(
       currencyScore: Math.round(currencyScore * 1000) / 1000,
       dateScore: Math.round(dateScore * 1000) / 1000,
       confidenceScore: Math.round(confidence * 1000) / 1000,
-      matchType: resolveMatchType(confidence, pattern.canAutoMatch, nameScore, autoThreshold),
+      matchType: resolveMatchType(
+        confidence,
+        pattern.canAutoMatch,
+        nameScore,
+        autoThreshold,
+      ),
       isAlreadyMatched: candidate.isAlreadyMatched,
     };
 
@@ -978,7 +983,12 @@ export async function findInboxMatches(
       currencyScore: Math.round(currencyScore * 1000) / 1000,
       dateScore: Math.round(dateScore * 1000) / 1000,
       confidenceScore: Math.round(confidence * 1000) / 1000,
-      matchType: resolveMatchType(confidence, pattern.canAutoMatch, nameScore, autoThreshold),
+      matchType: resolveMatchType(
+        confidence,
+        pattern.canAutoMatch,
+        nameScore,
+        autoThreshold,
+      ),
       isAlreadyMatched: candidate.isAlreadyMatched,
     };
 

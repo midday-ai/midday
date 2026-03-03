@@ -442,11 +442,7 @@ function printReviewList(
 ) {
   const scored = suggestions.map((record) => ({
     record,
-    ...scoreRecord(
-      record,
-      pairConfirmedCount,
-      pairDeclinedCount,
-    ),
+    ...scoreRecord(record, pairConfirmedCount, pairDeclinedCount),
   }));
 
   const likelyFalsePositives = scored

@@ -532,7 +532,8 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
     },
     matchType: "perfect_match", // Dates match, just conceptually old
     category: "large_amount",
-    notes: "Scoring should be high — the scheduler handles inbox age expiration separately",
+    notes:
+      "Scoring should be high — the scheduler handles inbox age expiration separately",
   },
 
   {
