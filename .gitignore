@@ -86,3 +86,6 @@ dist-ssr
 *.sw?
 
 *.csv
+
+# Matching eval history (local progress tracking)
+.matching-eval-history.json

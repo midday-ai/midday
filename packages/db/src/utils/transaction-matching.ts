@@ -271,6 +271,8 @@ const COMPANY_SUFFIXES = new Set([
 function normalizeNameTokens(name: string): string[] {
   if (!name) return [];
   return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[.,\-_'"()&]/g, " ")
     .split(/\s+/)
