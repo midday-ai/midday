@@ -95,7 +95,7 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
                     amountScore: inboxMatch.amountScore,
                     currencyScore: inboxMatch.currencyScore,
                     dateScore: inboxMatch.dateScore,
-                    embeddingScore: inboxMatch.embeddingScore,
+                    nameScore: inboxMatch.nameScore,
                     isAlreadyMatched: false,
                   },
                 },

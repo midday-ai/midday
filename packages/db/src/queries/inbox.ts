@@ -820,6 +820,7 @@ export async function getInboxSearch(
           baseAmount: transactions.baseAmount,
           baseCurrency: transactions.baseCurrency,
           date: transactions.date,
+          merchantName: transactions.merchantName,
           counterpartyName: transactions.counterpartyName,
           description: transactions.description,
         })
@@ -892,7 +893,7 @@ export async function getInboxSearch(
                   eq(inbox.currency, transaction.currency || ""),
                   sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) < GREATEST(1, ${unifiedTransactionAmount} * 0.25)`,
                 ),
-                sql`word_similarity(${transaction.name || ""}, COALESCE(${inbox.displayName}, '')) > 0.3`,
+                sql`word_similarity(${transaction.merchantName || transaction.name}, COALESCE(${inbox.displayName}, '')) > 0.3`,
                 and(
                   eq(inbox.baseCurrency, transaction.baseCurrency || ""),
                   sql`${inbox.baseCurrency} IS NOT NULL`,
@@ -902,7 +903,7 @@ export async function getInboxSearch(
             ),
           )
           .orderBy(
-            sql`word_similarity(${transaction.name || ""}, COALESCE(${inbox.displayName}, '')) DESC`,
+            sql`word_similarity(${transaction.merchantName || transaction.name}, COALESCE(${inbox.displayName}, '')) DESC`,
             sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) / GREATEST(1, ${unifiedTransactionAmount})`,
             sql`ABS(${inbox.date} - ${sql.param(transaction.date)}::date)`,
           )
@@ -913,7 +914,7 @@ export async function getInboxSearch(
             const nameScore = calculateUnifiedNameScore(
               candidate.displayName,
               transaction.name,
-              transaction.counterpartyName,
+              transaction.merchantName || transaction.counterpartyName,
             );
             const amountScore = calculateUnifiedAmountScore(
               candidate,
