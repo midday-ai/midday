@@ -1,5 +1,5 @@
 import { createLoggerWithContext } from "@midday/logger";
-import type { Database } from "../client";
+import type { Database, DatabaseOrTransaction } from "../client";
 import {
   inbox,
   inboxAccounts,
@@ -1014,7 +1014,10 @@ export type UpdateInboxParams = {
   contentType?: string;
 };
 
-export async function updateInbox(db: Database, params: UpdateInboxParams) {
+export async function updateInbox(
+  db: DatabaseOrTransaction,
+  params: UpdateInboxParams,
+) {
   const { id, teamId, ...data } = params;
 
   // Special handling for status: "deleted" - need to clean up transaction attachments
@@ -1120,7 +1123,7 @@ export type MatchTransactionParams = {
 };
 
 export async function matchTransaction(
-  db: Database,
+  db: DatabaseOrTransaction,
   params: MatchTransactionParams,
 ) {
   const { id, transactionId, teamId } = params;

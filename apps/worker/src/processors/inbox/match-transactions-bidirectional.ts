@@ -1,6 +1,7 @@
 import {
   calculateInboxSuggestions,
   findInboxMatches,
+  getInboxById,
   getPendingInboxForMatching,
   getTransactionById,
   hasSuggestion,
@@ -12,6 +13,21 @@ import type { MatchTransactionsBidirectionalPayload } from "../../schemas/inbox"
 import { getDb } from "../../utils/db";
 import { triggerMatchingNotification } from "../../utils/inbox-matching-notifications";
 import { BaseProcessor } from "../base";
+
+export function shouldRollbackForwardInboxToPending(params: {
+  workflowPersisted: boolean;
+  inboxState: {
+    status: string | null;
+    transactionId: string | null;
+  } | null;
+}): boolean {
+  const { workflowPersisted, inboxState } = params;
+  if (workflowPersisted) {
+    return false;
+  }
+
+  return inboxState?.status === "analyzing" && !inboxState.transactionId;
+}
 
 export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<MatchTransactionsBidirectionalPayload> {
   async process(job: Job<MatchTransactionsBidirectionalPayload>): Promise<{
@@ -147,11 +163,29 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
         // If persistence did not complete, avoid leaving the inbox stuck in "analyzing".
         if (processingInboxId && !workflowPersisted) {
           try {
-            await updateInbox(db, {
+            const inboxState = await getInboxById(db, {
               id: processingInboxId,
               teamId,
-              status: "pending",
             });
+
+            // Avoid clobbering a successful concurrent match from another worker.
+            if (
+              shouldRollbackForwardInboxToPending({
+                workflowPersisted,
+                inboxState: inboxState
+                  ? {
+                      status: inboxState.status,
+                      transactionId: inboxState.transactionId,
+                    }
+                  : null,
+              })
+            ) {
+              await updateInbox(db, {
+                id: processingInboxId,
+                teamId,
+                status: "pending",
+              });
+            }
           } catch (rollbackError) {
             this.logger.error(
               "Failed to reset inbox status after forward match error",

@@ -9,7 +9,7 @@ import {
   or,
   sql,
 } from "drizzle-orm";
-import type { Database } from "../client";
+import type { Database, DatabaseOrTransaction } from "../client";
 import {
   inbox,
   transactionAttachments,
@@ -816,10 +816,15 @@ export async function findMatches(
 
   scoredCandidates.sort((a, b) => b.confidenceScore - a.confidenceScore);
 
+  const dismissedTxIds = await getDismissedTransactionIds(
+    db,
+    teamId,
+    inboxId,
+    scoredCandidates.map((c) => c.transactionId),
+  );
+
   for (const candidate of scoredCandidates) {
-    if (
-      await wasPreviouslyDismissed(db, teamId, inboxId, candidate.transactionId)
-    ) {
+    if (dismissedTxIds.has(candidate.transactionId)) {
       logger.info("Skipping dismissed match candidate, trying next", {
         teamId,
         inboxId,
@@ -1017,10 +1022,15 @@ export async function findInboxMatches(
 
   scoredCandidates.sort((a, b) => b.confidenceScore - a.confidenceScore);
 
+  const dismissedInboxIds = await getDismissedInboxIds(
+    db,
+    teamId,
+    transactionId,
+    scoredCandidates.map((c) => c.inboxId),
+  );
+
   for (const candidate of scoredCandidates) {
-    if (
-      await wasPreviouslyDismissed(db, teamId, candidate.inboxId, transactionId)
-    ) {
+    if (dismissedInboxIds.has(candidate.inboxId)) {
       logger.info("Skipping dismissed reverse match candidate, trying next", {
         teamId,
         transactionId,
@@ -1035,7 +1045,7 @@ export async function findInboxMatches(
 }
 
 export async function createMatchSuggestion(
-  db: Database,
+  db: DatabaseOrTransaction,
   params: CreateMatchSuggestionParams,
 ) {
   const [result] = await db
@@ -1060,6 +1070,10 @@ export async function createMatchSuggestion(
         transactionMatchSuggestions.inboxId,
         transactionMatchSuggestions.transactionId,
       ],
+      setWhere: and(
+        eq(transactionMatchSuggestions.inboxId, sql`excluded.inbox_id`),
+        sql`${transactionMatchSuggestions.status} NOT IN ('confirmed', 'declined')`,
+      ),
       set: {
         confidenceScore: params.confidenceScore,
         amountScore: params.amountScore,
@@ -1078,24 +1092,48 @@ export async function createMatchSuggestion(
   return result;
 }
 
-async function wasPreviouslyDismissed(
+async function getDismissedTransactionIds(
   db: Database,
   teamId: string,
   inboxId: string,
-  transactionId: string,
-): Promise<boolean> {
-  const dismissedMatch = await db
-    .select({ id: transactionMatchSuggestions.id })
+  transactionIds: string[],
+): Promise<Set<string>> {
+  if (transactionIds.length === 0) return new Set();
+
+  const dismissed = await db
+    .select({ transactionId: transactionMatchSuggestions.transactionId })
     .from(transactionMatchSuggestions)
     .where(
       and(
         eq(transactionMatchSuggestions.teamId, teamId),
         eq(transactionMatchSuggestions.inboxId, inboxId),
-        eq(transactionMatchSuggestions.transactionId, transactionId),
+        inArray(transactionMatchSuggestions.transactionId, transactionIds),
         inArray(transactionMatchSuggestions.status, ["declined", "unmatched"]),
       ),
-    )
-    .limit(1);
+    );
 
-  return dismissedMatch.length > 0;
+  return new Set(dismissed.map((d) => d.transactionId));
+}
+
+async function getDismissedInboxIds(
+  db: Database,
+  teamId: string,
+  transactionId: string,
+  inboxIds: string[],
+): Promise<Set<string>> {
+  if (inboxIds.length === 0) return new Set();
+
+  const dismissed = await db
+    .select({ inboxId: transactionMatchSuggestions.inboxId })
+    .from(transactionMatchSuggestions)
+    .where(
+      and(
+        eq(transactionMatchSuggestions.teamId, teamId),
+        eq(transactionMatchSuggestions.transactionId, transactionId),
+        inArray(transactionMatchSuggestions.inboxId, inboxIds),
+        inArray(transactionMatchSuggestions.status, ["declined", "unmatched"]),
+      ),
+    );
+
+  return new Set(dismissed.map((d) => d.inboxId));
 }

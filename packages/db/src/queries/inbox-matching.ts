@@ -1,3 +1,4 @@
+import { createLoggerWithContext } from "@midday/logger";
 import { and, desc, eq, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { inbox, transactionMatchSuggestions } from "../schema";
@@ -8,6 +9,8 @@ import {
   findMatches,
   type MatchResult,
 } from "./transaction-matching";
+
+const logger = createLoggerWithContext("inbox-matching");
 
 // Type guard to check if result has a suggestion
 export function hasSuggestion(result: {
@@ -45,8 +48,42 @@ export async function persistInboxSuggestionWorkflow(
   const { teamId, inboxId, candidate, source } = params;
   const shouldAutoMatch = candidate.matchType === "auto_matched";
 
-  if (shouldAutoMatch) {
-    await createMatchSuggestion(db, {
+  return db.transaction(async (tx) => {
+    if (shouldAutoMatch) {
+      await createMatchSuggestion(tx, {
+        teamId,
+        inboxId,
+        transactionId: candidate.transactionId,
+        confidenceScore: candidate.confidenceScore,
+        amountScore: candidate.amountScore,
+        currencyScore: candidate.currencyScore,
+        dateScore: candidate.dateScore,
+        nameScore: candidate.nameScore,
+        matchType: "auto_matched",
+        status: "confirmed",
+        matchDetails: {
+          autoMatched: true,
+          calculatedAt: new Date().toISOString(),
+          ...(source ? { source } : {}),
+          criteria: {
+            confidence: candidate.confidenceScore,
+            amount: candidate.amountScore,
+            currency: candidate.currencyScore,
+            date: candidate.dateScore,
+          },
+        },
+      });
+
+      await matchTransaction(tx, {
+        id: inboxId,
+        transactionId: candidate.transactionId,
+        teamId,
+      });
+
+      return { action: "auto_matched" as const };
+    }
+
+    await createMatchSuggestion(tx, {
       teamId,
       inboxId,
       transactionId: candidate.transactionId,
@@ -55,60 +92,37 @@ export async function persistInboxSuggestionWorkflow(
       currencyScore: candidate.currencyScore,
       dateScore: candidate.dateScore,
       nameScore: candidate.nameScore,
-      matchType: "auto_matched",
-      status: "confirmed",
+      matchType: candidate.matchType,
+      status: "pending",
       matchDetails: {
-        autoMatched: true,
         calculatedAt: new Date().toISOString(),
         ...(source ? { source } : {}),
-        criteria: {
-          confidence: candidate.confidenceScore,
+        scores: {
           amount: candidate.amountScore,
           currency: candidate.currencyScore,
           date: candidate.dateScore,
+          name: candidate.nameScore,
         },
       },
     });
 
-    await matchTransaction(db, {
+    await updateInbox(tx, {
       id: inboxId,
-      transactionId: candidate.transactionId,
       teamId,
+      status: "suggested_match",
     });
 
-    return { action: "auto_matched" };
-  }
-
-  await createMatchSuggestion(db, {
-    teamId,
-    inboxId,
-    transactionId: candidate.transactionId,
-    confidenceScore: candidate.confidenceScore,
-    amountScore: candidate.amountScore,
-    currencyScore: candidate.currencyScore,
-    dateScore: candidate.dateScore,
-    nameScore: candidate.nameScore,
-    matchType: candidate.matchType,
-    status: "pending",
-    matchDetails: {
-      calculatedAt: new Date().toISOString(),
-      ...(source ? { source } : {}),
-      scores: {
-        amount: candidate.amountScore,
-        currency: candidate.currencyScore,
-        date: candidate.dateScore,
-        name: candidate.nameScore,
-      },
-    },
+    return { action: "suggestion_created" as const };
   });
+}
 
-  await updateInbox(db, {
-    id: inboxId,
-    teamId,
-    status: "suggested_match",
-  });
-
-  return { action: "suggestion_created" };
+export function shouldResetInboxToPendingAfterSuggestionFailure(
+  state: {
+    status: string | null;
+    transactionId: string | null;
+  } | null,
+): boolean {
+  return state?.status === "analyzing" && !state.transactionId;
 }
 
 // Calculate and store suggestions for an inbox item
@@ -125,42 +139,80 @@ export async function calculateInboxSuggestions(
 }> {
   const { teamId, inboxId, excludeTransactionIds } = params;
 
-  // Set status to analyzing while we process
-  await updateInbox(db, {
-    id: inboxId,
-    teamId,
-    status: "analyzing",
-  });
-
-  // Find the best match using our matching algorithm
-  const bestMatch = await findMatches(db, {
-    teamId,
-    inboxId,
-    excludeTransactionIds,
-  });
-
-  if (!bestMatch) {
-    // Update inbox status to pending - we'll keep looking when new transactions arrive
-    // The no_match status is only set by the scheduler after 90 days
+  try {
+    // Set status to analyzing while we process
     await updateInbox(db, {
       id: inboxId,
       teamId,
-      status: "pending",
+      status: "analyzing",
     });
 
-    return { action: "no_match_yet" };
+    // Find the best match using our matching algorithm
+    const bestMatch = await findMatches(db, {
+      teamId,
+      inboxId,
+      excludeTransactionIds,
+    });
+
+    if (!bestMatch) {
+      // Update inbox status to pending - we'll keep looking when new transactions arrive
+      // The no_match status is only set by the scheduler after 90 days
+      await updateInbox(db, {
+        id: inboxId,
+        teamId,
+        status: "pending",
+      });
+
+      return { action: "no_match_yet" };
+    }
+
+    const { action } = await persistInboxSuggestionWorkflow(db, {
+      teamId,
+      inboxId,
+      candidate: bestMatch,
+    });
+
+    return {
+      action,
+      suggestion: bestMatch,
+    };
+  } catch (error) {
+    // Best-effort recovery: avoid leaving items stuck in "analyzing".
+    try {
+      const [currentInbox] = await db
+        .select({
+          status: inbox.status,
+          transactionId: inbox.transactionId,
+        })
+        .from(inbox)
+        .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
+        .limit(1);
+
+      if (
+        shouldResetInboxToPendingAfterSuggestionFailure(currentInbox ?? null)
+      ) {
+        await updateInbox(db, {
+          id: inboxId,
+          teamId,
+          status: "pending",
+        });
+      }
+    } catch (rollbackError) {
+      logger.error(
+        "Failed to reset inbox after suggestion calculation failure",
+        {
+          teamId,
+          inboxId,
+          error:
+            rollbackError instanceof Error
+              ? rollbackError.message
+              : "Unknown error",
+        },
+      );
+    }
+
+    throw error;
   }
-
-  const { action } = await persistInboxSuggestionWorkflow(db, {
-    teamId,
-    inboxId,
-    candidate: bestMatch,
-  });
-
-  return {
-    action,
-    suggestion: bestMatch,
-  };
 }
 
 // Confirm a suggested match
@@ -176,46 +228,46 @@ export async function confirmSuggestedMatch(
 ) {
   const { teamId, suggestionId, inboxId, transactionId, userId } = params;
 
-  // Update suggestion status in transactionMatchSuggestions table
-  const [suggestion] = await db
-    .update(transactionMatchSuggestions)
-    .set({
-      status: "confirmed",
-      userActionAt: new Date().toISOString(),
-      userId,
-    })
-    .where(
-      and(
-        eq(transactionMatchSuggestions.id, suggestionId),
-        eq(transactionMatchSuggestions.teamId, teamId),
-      ),
-    )
-    .returning();
+  return db.transaction(async (tx) => {
+    const [suggestion] = await tx
+      .update(transactionMatchSuggestions)
+      .set({
+        status: "confirmed",
+        userActionAt: new Date().toISOString(),
+        userId,
+      })
+      .where(
+        and(
+          eq(transactionMatchSuggestions.id, suggestionId),
+          eq(transactionMatchSuggestions.teamId, teamId),
+        ),
+      )
+      .returning();
 
-  // Perform the actual match (this will update inbox status to 'done')
-  const result = await matchTransaction(db, {
-    id: inboxId,
-    transactionId,
-    teamId,
+    const result = await matchTransaction(tx, {
+      id: inboxId,
+      transactionId,
+      teamId,
+    });
+
+    await createActivity(tx, {
+      teamId,
+      userId: userId ?? undefined,
+      type: "inbox_match_confirmed",
+      source: "user",
+      priority: 7,
+      metadata: {
+        inboxId,
+        transactionId: result?.transactionId,
+        documentName: result?.displayName,
+        amount: result?.amount,
+        currency: result?.currency,
+        confidenceScore: Number(suggestion?.confidenceScore),
+      },
+    });
+
+    return result;
   });
-
-  createActivity(db, {
-    teamId,
-    userId: userId ?? undefined,
-    type: "inbox_match_confirmed",
-    source: "user",
-    priority: 7,
-    metadata: {
-      inboxId,
-      transactionId: result?.transactionId,
-      documentName: result?.displayName,
-      amount: result?.amount,
-      currency: result?.currency,
-      confidenceScore: Number(suggestion?.confidenceScore),
-    },
-  });
-
-  return result;
 }
 
 // Decline a suggested match
@@ -230,26 +282,26 @@ export async function declineSuggestedMatch(
 ) {
   const { suggestionId, inboxId, userId, teamId } = params;
 
-  // Update suggestion status in transactionMatchSuggestions table
-  await db
-    .update(transactionMatchSuggestions)
-    .set({
-      status: "declined",
-      userActionAt: new Date().toISOString(),
-      userId,
-    })
-    .where(
-      and(
-        eq(transactionMatchSuggestions.id, suggestionId),
-        eq(transactionMatchSuggestions.teamId, teamId),
-      ),
-    );
+  await db.transaction(async (tx) => {
+    await tx
+      .update(transactionMatchSuggestions)
+      .set({
+        status: "declined",
+        userActionAt: new Date().toISOString(),
+        userId,
+      })
+      .where(
+        and(
+          eq(transactionMatchSuggestions.id, suggestionId),
+          eq(transactionMatchSuggestions.teamId, teamId),
+        ),
+      );
 
-  // Update inbox status back to 'pending' since suggestion was declined
-  await updateInbox(db, {
-    id: inboxId,
-    teamId,
-    status: "pending",
+    await updateInbox(tx, {
+      id: inboxId,
+      teamId,
+      status: "pending",
+    });
   });
 }
 
