@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Skeleton } from "@midday/ui/skeleton";
+import { formatDate } from "@midday/utils/format";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
@@ -208,6 +209,25 @@ export const columns: ColumnDef<Document>[] = [
           <div className="absolute group-hover:hidden right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
         </div>
       );
+    },
+  },
+  {
+    id: "date",
+    header: "Date",
+    accessorKey: "date",
+    size: 130,
+    minSize: 100,
+    maxSize: 200,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Date",
+      className: "w-[130px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      const date = row.original.date;
+      if (!date) return <span className="text-muted-foreground">-</span>;
+      return <span>{formatDate(date)}</span>;
     },
   },
   {

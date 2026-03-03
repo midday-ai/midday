@@ -36,6 +36,14 @@ export const getDocumentsSchema = z
         description: "Array of tag IDs to filter documents by tags.",
         example: ["tag1", "tag2"],
       }),
+    start: z.string().nullable().optional().openapi({
+      description: "Start date for filtering documents (ISO 8601 date).",
+      example: "2024-01-01",
+    }),
+    end: z.string().nullable().optional().openapi({
+      description: "End date for filtering documents (ISO 8601 date).",
+      example: "2024-12-31",
+    }),
   })
   .openapi({
     description: "Query parameters for listing documents.",
