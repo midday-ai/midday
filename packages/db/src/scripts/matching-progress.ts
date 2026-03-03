@@ -121,10 +121,13 @@ function parseArgs() {
 
   return {
     teamId: flags["team-id"] ?? null,
-    fromDaysAgo: Number.parseInt(flags["from-days-ago"] ?? flags.days ?? "180"),
-    toDaysAgo: Number.parseInt(flags["to-days-ago"] ?? "0"),
-    suggestionLimit: Number.parseInt(flags["suggestion-limit"] ?? "20000"),
-    manualLimit: Number.parseInt(flags["manual-limit"] ?? "20000"),
+    fromDaysAgo: Number.parseInt(
+      flags["from-days-ago"] ?? flags.days ?? "180",
+      10,
+    ),
+    toDaysAgo: Number.parseInt(flags["to-days-ago"] ?? "0", 10),
+    suggestionLimit: Number.parseInt(flags["suggestion-limit"] ?? "20000", 10),
+    manualLimit: Number.parseInt(flags["manual-limit"] ?? "20000", 10),
     suggestedThreshold: flags.threshold
       ? Number.parseFloat(flags.threshold)
       : 0.6,
@@ -134,10 +137,10 @@ function parseArgs() {
     sweep: booleans.has("sweep"),
     historyOnly: booleans.has("history"),
     noSave: booleans.has("no-save"),
-    errorCount: Number.parseInt(flags.errors ?? "5"),
+    errorCount: Number.parseInt(flags.errors ?? "5", 10),
     help: booleans.has("help") || booleans.has("h"),
     live: booleans.has("live"),
-    limit: Number.parseInt(flags.limit ?? "500"),
+    limit: Number.parseInt(flags.limit ?? "500", 10),
   };
 }
 
