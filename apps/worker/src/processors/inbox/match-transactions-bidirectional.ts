@@ -1,10 +1,12 @@
 import {
   calculateInboxSuggestions,
+  createMatchSuggestion,
   findInboxMatches,
   getPendingInboxForMatching,
   getTransactionById,
   hasSuggestion,
   matchTransaction,
+  updateInbox,
 } from "@midday/db/queries";
 import type { Job } from "bullmq";
 import type { MatchTransactionsBidirectionalPayload } from "../../schemas/inbox";
@@ -54,7 +56,30 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
           const shouldAutoMatch = inboxMatch.matchType === "auto_matched";
 
           if (shouldAutoMatch && transactionId) {
-            // Auto-match the transaction to inbox
+            await createMatchSuggestion(db, {
+              teamId,
+              inboxId: inboxMatch.inboxId,
+              transactionId,
+              confidenceScore: inboxMatch.confidenceScore,
+              amountScore: inboxMatch.amountScore,
+              currencyScore: inboxMatch.currencyScore,
+              dateScore: inboxMatch.dateScore,
+              nameScore: inboxMatch.nameScore,
+              matchType: "auto_matched",
+              status: "confirmed",
+              matchDetails: {
+                autoMatched: true,
+                calculatedAt: new Date().toISOString(),
+                source: "forward_match",
+                criteria: {
+                  confidence: inboxMatch.confidenceScore,
+                  amount: inboxMatch.amountScore,
+                  currency: inboxMatch.currencyScore,
+                  date: inboxMatch.dateScore,
+                },
+              },
+            });
+
             await matchTransaction(db, {
               id: inboxMatch.inboxId,
               teamId,
@@ -101,8 +126,37 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
                 },
               });
             }
-          } else {
-            // Create suggestion for manual review
+          } else if (transactionId) {
+            // Write suggestion record and notify user for manual review
+            await createMatchSuggestion(db, {
+              teamId,
+              inboxId: inboxMatch.inboxId,
+              transactionId,
+              confidenceScore: inboxMatch.confidenceScore,
+              amountScore: inboxMatch.amountScore,
+              currencyScore: inboxMatch.currencyScore,
+              dateScore: inboxMatch.dateScore,
+              nameScore: inboxMatch.nameScore,
+              matchType: inboxMatch.matchType,
+              status: "pending",
+              matchDetails: {
+                calculatedAt: new Date().toISOString(),
+                source: "forward_match",
+                scores: {
+                  amount: inboxMatch.amountScore,
+                  currency: inboxMatch.currencyScore,
+                  date: inboxMatch.dateScore,
+                  name: inboxMatch.nameScore,
+                },
+              },
+            });
+
+            await updateInbox(db, {
+              id: inboxMatch.inboxId,
+              teamId,
+              status: "suggested_match",
+            });
+
             forwardSuggestionCount++;
 
             this.logger.info("Created forward match suggestion", {
@@ -111,6 +165,36 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
               inboxId: inboxMatch.inboxId,
               confidence: inboxMatch.confidenceScore,
             });
+
+            const transaction = await getTransactionById(db, {
+              id: transactionId,
+              teamId,
+            });
+
+            if (transaction) {
+              await triggerMatchingNotification({
+                db,
+                teamId,
+                inboxId: inboxMatch.inboxId,
+                result: {
+                  action: "suggestion_created",
+                  suggestion: {
+                    transactionId,
+                    name: transaction.name,
+                    amount: transaction.amount,
+                    currency: transaction.currency,
+                    date: transaction.date,
+                    confidenceScore: inboxMatch.confidenceScore,
+                    matchType: inboxMatch.matchType,
+                    amountScore: inboxMatch.amountScore,
+                    currencyScore: inboxMatch.currencyScore,
+                    dateScore: inboxMatch.dateScore,
+                    nameScore: inboxMatch.nameScore,
+                    isAlreadyMatched: false,
+                  },
+                },
+              });
+            }
           }
         }
       } catch (error) {

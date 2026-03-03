@@ -588,13 +588,20 @@ function computeDeclinePenalty(
   return clamp(0.08 + netSignal * 0.08, 0, 0.35);
 }
 
+const AUTO_MATCH_ENABLED = process.env.MATCH_AUTO_ENABLED === "true";
+
 function resolveMatchType(
   confidence: number,
   canAutoMatch: boolean,
   nameScore: number,
   autoThreshold: number,
 ): MatchType {
-  if (confidence >= autoThreshold && canAutoMatch && nameScore >= 0.4) {
+  if (
+    AUTO_MATCH_ENABLED &&
+    confidence >= autoThreshold &&
+    canAutoMatch &&
+    nameScore >= 0.4
+  ) {
     return "auto_matched";
   }
   if (confidence >= 0.72) {
@@ -884,6 +891,7 @@ export async function findInboxMatches(
       and(
         eq(inbox.teamId, teamId),
         isNull(inbox.transactionId),
+        inArray(inbox.status, ["pending", "no_match"]),
         sql`${inbox.date} IS NOT NULL`,
         sql`${inbox.date} BETWEEN ${sql.param(transactionItem.date)}::date - (CASE WHEN ${inbox.type} = 'invoice' THEN INTERVAL '123 days' ELSE INTERVAL '90 days' END) AND ${sql.param(transactionItem.date)}::date + INTERVAL '30 days'`,
         or(

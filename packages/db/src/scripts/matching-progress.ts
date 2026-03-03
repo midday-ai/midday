@@ -18,6 +18,7 @@
 import { execSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Pool } from "pg";
 import {
   calculateAmountScore,
@@ -147,7 +148,8 @@ function parseArgs() {
 // ─── History persistence ────────────────────────────────
 
 const HISTORY_PATH = join(
-  dirname(import.meta.dir),
+  // @ts-expect-error
+  dirname(fileURLToPath(new URL(".", import.meta.url))),
   ".matching-eval-history.json",
 );
 

@@ -2,11 +2,13 @@ import { getDb } from "@jobs/init";
 import { triggerMatchingNotification } from "@jobs/utils/inbox-matching-notifications";
 import {
   calculateInboxSuggestions,
+  createMatchSuggestion,
   findInboxMatches,
   getPendingInboxForMatching,
   getTransactionById,
   hasSuggestion,
   matchTransaction,
+  updateInbox,
 } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
@@ -48,6 +50,30 @@ export const matchTransactionsBidirectional = schemaTask({
           const shouldAutoMatch = inboxMatch.matchType === "auto_matched";
 
           if (shouldAutoMatch) {
+            await createMatchSuggestion(db, {
+              teamId,
+              inboxId: inboxMatch.inboxId,
+              transactionId,
+              confidenceScore: inboxMatch.confidenceScore,
+              amountScore: inboxMatch.amountScore,
+              currencyScore: inboxMatch.currencyScore,
+              dateScore: inboxMatch.dateScore,
+              nameScore: inboxMatch.nameScore,
+              matchType: "auto_matched",
+              status: "confirmed",
+              matchDetails: {
+                autoMatched: true,
+                calculatedAt: new Date().toISOString(),
+                source: "forward_match",
+                criteria: {
+                  confidence: inboxMatch.confidenceScore,
+                  amount: inboxMatch.amountScore,
+                  currency: inboxMatch.currencyScore,
+                  date: inboxMatch.dateScore,
+                },
+              },
+            });
+
             await matchTransaction(db, {
               id: inboxMatch.inboxId,
               teamId,
@@ -86,13 +112,42 @@ export const matchTransactionsBidirectional = schemaTask({
                     amountScore: inboxMatch.amountScore,
                     currencyScore: inboxMatch.currencyScore,
                     dateScore: inboxMatch.dateScore,
-                    embeddingScore: inboxMatch.embeddingScore,
+                    nameScore: inboxMatch.nameScore,
                     isAlreadyMatched: false,
                   },
                 },
               });
             }
           } else {
+            await createMatchSuggestion(db, {
+              teamId,
+              inboxId: inboxMatch.inboxId,
+              transactionId,
+              confidenceScore: inboxMatch.confidenceScore,
+              amountScore: inboxMatch.amountScore,
+              currencyScore: inboxMatch.currencyScore,
+              dateScore: inboxMatch.dateScore,
+              nameScore: inboxMatch.nameScore,
+              matchType: inboxMatch.matchType,
+              status: "pending",
+              matchDetails: {
+                calculatedAt: new Date().toISOString(),
+                source: "forward_match",
+                scores: {
+                  amount: inboxMatch.amountScore,
+                  currency: inboxMatch.currencyScore,
+                  date: inboxMatch.dateScore,
+                  name: inboxMatch.nameScore,
+                },
+              },
+            });
+
+            await updateInbox(db, {
+              id: inboxMatch.inboxId,
+              teamId,
+              status: "suggested_match",
+            });
+
             forwardSuggestionCount++;
 
             logger.info("Created forward match suggestion", {
@@ -101,6 +156,36 @@ export const matchTransactionsBidirectional = schemaTask({
               inboxId: inboxMatch.inboxId,
               confidence: inboxMatch.confidenceScore,
             });
+
+            const transaction = await getTransactionById(db, {
+              id: transactionId,
+              teamId,
+            });
+
+            if (transaction) {
+              await triggerMatchingNotification({
+                db,
+                teamId,
+                inboxId: inboxMatch.inboxId,
+                result: {
+                  action: "suggestion_created",
+                  suggestion: {
+                    transactionId,
+                    name: transaction.name,
+                    amount: transaction.amount,
+                    currency: transaction.currency,
+                    date: transaction.date,
+                    confidenceScore: inboxMatch.confidenceScore,
+                    matchType: inboxMatch.matchType,
+                    amountScore: inboxMatch.amountScore,
+                    currencyScore: inboxMatch.currencyScore,
+                    dateScore: inboxMatch.dateScore,
+                    nameScore: inboxMatch.nameScore,
+                    isAlreadyMatched: false,
+                  },
+                },
+              });
+            }
           }
         }
       } catch (error) {
