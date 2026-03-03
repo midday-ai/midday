@@ -1,5 +1,6 @@
 import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
+import { DEFAULT_TEMPLATE_SETTINGS } from "../../../defaults";
 import type { Template } from "../../../types";
 
 type Props = {
@@ -13,6 +14,9 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
   if (!template) {
     return null;
   }
+
+  const dateFormat =
+    template.dateFormat || DEFAULT_TEMPLATE_SETTINGS.dateFormat;
 
   return (
     <div className="mb-2">
@@ -50,7 +54,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
                 </span>
                 <span className="text-[11px] flex-shrink-0">
                   {issueDate
-                    ? format(new TZDate(issueDate, "UTC"), template.dateFormat)
+                    ? format(new TZDate(issueDate, "UTC"), dateFormat)
                     : ""}
                 </span>
               </div>
@@ -66,7 +70,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
                 </span>
                 <span className="text-[11px] flex-shrink-0">
                   {dueDate
-                    ? format(new TZDate(dueDate, "UTC"), template.dateFormat)
+                    ? format(new TZDate(dueDate, "UTC"), dateFormat)
                     : ""}
                 </span>
               </div>

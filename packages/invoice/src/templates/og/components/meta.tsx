@@ -1,5 +1,6 @@
 import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
+import { DEFAULT_TEMPLATE_SETTINGS } from "../../../defaults";
 import type { Template } from "../../../types";
 
 type Props = {
@@ -13,6 +14,9 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
   if (!template) {
     return null;
   }
+
+  const dateFormat =
+    template.dateFormat || DEFAULT_TEMPLATE_SETTINGS.dateFormat;
 
   return (
     <div tw="flex justify-between items-center mt-14 mb-2">
@@ -36,9 +40,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
           {template.issueDateLabel}:
         </span>
         <span tw="text-[22px] text-white" style={{ fontFamily: "hedvig-sans" }}>
-          {issueDate
-            ? format(new TZDate(issueDate, "UTC"), template.dateFormat)
-            : ""}
+          {issueDate ? format(new TZDate(issueDate, "UTC"), dateFormat) : ""}
         </span>
       </div>
 
@@ -50,9 +52,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
           {template.dueDateLabel}:
         </span>
         <span tw="text-[22px] text-white" style={{ fontFamily: "hedvig-sans" }}>
-          {dueDate
-            ? format(new TZDate(dueDate, "UTC"), template.dateFormat)
-            : ""}
+          {dueDate ? format(new TZDate(dueDate, "UTC"), dateFormat) : ""}
         </span>
       </div>
     </div>
