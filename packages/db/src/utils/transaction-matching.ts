@@ -191,10 +191,22 @@ export function calculateAmountScore(
     baseCurrency1 === baseCurrency2
   ) {
     const maxBaseAmount = Math.max(baseAmount1, baseAmount2);
+    const avgBaseAmount = (baseAmount1 + baseAmount2) / 2;
     const basePercentageDiff =
       Math.abs(baseAmount1 - baseAmount2) / maxBaseAmount;
 
     if (basePercentageDiff === 0) return 1.0;
+
+    if (avgBaseAmount >= 5000) {
+      // Large cross-currency: tighter scoring — exchange rate spreads
+      // should be minimal for large transfers.
+      if (basePercentageDiff <= 0.015) return 0.95;
+      if (basePercentageDiff <= 0.03) return 0.75;
+      if (basePercentageDiff <= 0.05) return 0.5;
+      if (basePercentageDiff <= 0.1) return 0.3;
+      return 0;
+    }
+
     if (basePercentageDiff <= 0.02) return 0.9;
     if (basePercentageDiff <= 0.05) return 0.8;
     if (basePercentageDiff <= 0.1) return 0.65;
@@ -401,6 +413,12 @@ export function scoreMatch({
 
   if (nameScore === 0) {
     confidence *= 0.55;
+  }
+
+  // Date veto: a very large date gap (60+ days) likely means the amount
+  // match is coincidental, even if exact.
+  if (dateScore < 0.2) {
+    confidence *= 0.65;
   }
 
   if (declinePenalty > 0) {
