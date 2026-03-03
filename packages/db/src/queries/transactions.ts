@@ -193,7 +193,6 @@ export async function getTransactions(
         sql`(
           ${isActiveWorkflowCondition}
           AND NOT (${isFulfilledCondition})
-          AND NOT (${hasPendingSuggestionCondition})
           AND NOT (${isExportedCondition})
           AND NOT (${hasExportErrorCondition})
         )`,
