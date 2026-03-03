@@ -225,7 +225,7 @@ function scoreRecord(
     nameScore = Math.max(nameScore, 0.88);
   }
 
-  const { confidence } = scoreMatch({
+  const confidence = scoreMatch({
     nameScore,
     amountScore,
     dateScore,
@@ -233,8 +233,6 @@ function scoreRecord(
     isSameCurrency: sameCurrency,
     isExactAmount,
     declinePenalty,
-    autoThreshold: 0.9,
-    suggestedThreshold: 0.4,
   });
 
   return { confidence, nameScore };

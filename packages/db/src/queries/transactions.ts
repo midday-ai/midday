@@ -1520,15 +1520,13 @@ export async function searchTransactionMatch(
             ) < 0.01;
           const isSameCurrency =
             item.currency === transaction.transactionCurrency;
-          const { confidence } = scoreMatch({
+          const confidence = scoreMatch({
             nameScore,
             amountScore,
             dateScore,
             currencyScore,
             isSameCurrency,
             isExactAmount,
-            autoThreshold: 0.9,
-            suggestedThreshold: minConfidenceScore,
           });
 
           const result = {

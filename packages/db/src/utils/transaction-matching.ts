@@ -3,14 +3,6 @@ import { parseISO } from "date-fns";
 
 const logger = createLoggerWithContext("matching");
 
-// Configuration constants
-export const EMBEDDING_THRESHOLDS = {
-  PERFECT_MATCH: 0.15, // Very similar embeddings
-  STRONG_MATCH: 0.35, // Strong semantic similarity
-  GOOD_MATCH: 0.45, // Moderate similarity (original value)
-  WEAK_MATCH: 0.6, // Weak but possible match (original value)
-} as const;
-
 export const CALIBRATION_LIMITS = {
   MAX_ADJUSTMENT: 0.03, // Max 3% threshold adjustment per calibration
   MIN_SAMPLES_AUTO: 5, // Minimum samples for auto-match calibration
@@ -372,8 +364,6 @@ type ScoreMatchInput = {
   isSameCurrency: boolean;
   isExactAmount: boolean;
   declinePenalty?: number;
-  autoThreshold?: number;
-  suggestedThreshold?: number;
 };
 
 export function scoreMatch({
@@ -384,9 +374,7 @@ export function scoreMatch({
   isSameCurrency,
   isExactAmount,
   declinePenalty = 0,
-  autoThreshold = 0.9,
-  suggestedThreshold = 0.6,
-}: ScoreMatchInput): { confidence: number; matchType: MatchType } {
+}: ScoreMatchInput): number {
   const weightedBase =
     (nameScore * 10 + amountScore * 30 + dateScore * 15 + currencyScore * 5) /
     60;
@@ -425,16 +413,7 @@ export function scoreMatch({
     confidence -= declinePenalty;
   }
 
-  confidence = Math.max(0, Math.min(1, confidence));
-
-  const matchType: MatchType =
-    confidence >= autoThreshold
-      ? "auto_matched"
-      : confidence >= suggestedThreshold
-        ? "high_confidence"
-        : "suggested";
-
-  return { confidence, matchType };
+  return Math.max(0, Math.min(1, confidence));
 }
 
 export function calculateDateScore(

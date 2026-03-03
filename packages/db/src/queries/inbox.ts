@@ -874,6 +874,7 @@ export async function getInboxSearch(
             baseAmount: inbox.baseAmount,
             baseCurrency: inbox.baseCurrency,
             status: inbox.status,
+            type: inbox.type,
             website: inbox.website,
             taxAmount: inbox.taxAmount,
             taxRate: inbox.taxRate,
@@ -884,7 +885,7 @@ export async function getInboxSearch(
             and(
               ...whereConditions,
               sql`${inbox.date} IS NOT NULL`,
-              sql`${inbox.date} BETWEEN (${sql.param(transaction.date)}::date - INTERVAL '90 days') 
+              sql`${inbox.date} BETWEEN (${sql.param(transaction.date)}::date - INTERVAL '123 days') 
                   AND (${sql.param(transaction.date)}::date + INTERVAL '30 days')`,
               or(
                 and(
@@ -927,7 +928,7 @@ export async function getInboxSearch(
             const dateScore = calculateUnifiedDateScore(
               candidate.date!,
               transaction.date,
-              candidate.status,
+              candidate.type,
             );
             const isExactAmount =
               candidate.amount !== null &&
@@ -936,15 +937,13 @@ export async function getInboxSearch(
                   Math.abs(transaction.amount || 0),
               ) < 0.01;
             const isSameCurrency = candidate.currency === transaction.currency;
-            const { confidence } = scoreMatch({
+            const confidence = scoreMatch({
               nameScore,
               amountScore,
               dateScore,
               currencyScore,
               isSameCurrency,
               isExactAmount,
-              autoThreshold: 0.9,
-              suggestedThreshold: 0.6,
             });
 
             return {

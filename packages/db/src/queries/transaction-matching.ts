@@ -658,7 +658,9 @@ export async function findMatches(
         eq(transactions.teamId, teamId),
         eq(transactions.status, "posted"),
         sql`${transactions.date} IS NOT NULL`,
-        sql`${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '90 days' AND ${sql.param(inboxItem.date)}::date + INTERVAL '30 days'`,
+        inboxItem.type === "invoice"
+          ? sql`${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '90 days' AND ${sql.param(inboxItem.date)}::date + INTERVAL '123 days'`
+          : sql`${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '90 days' AND ${sql.param(inboxItem.date)}::date + INTERVAL '30 days'`,
         notExists(
           db
             .select({ id: transactionAttachments.id })
@@ -764,7 +766,7 @@ export async function findMatches(
       ) < 0.01;
     const isSameCurrency = inboxItem.currency === candidate.currency;
 
-    const { confidence } = scoreMatch({
+    const confidence = scoreMatch({
       nameScore,
       amountScore,
       dateScore,
@@ -772,8 +774,6 @@ export async function findMatches(
       isSameCurrency,
       isExactAmount,
       declinePenalty,
-      autoThreshold,
-      suggestedThreshold,
     });
 
     if (confidence < suggestedThreshold) continue;
@@ -958,7 +958,7 @@ export async function findInboxMatches(
       ) < 0.01;
     const isSameCurrency = candidate.currency === transactionItem.currency;
 
-    const { confidence } = scoreMatch({
+    const confidence = scoreMatch({
       nameScore,
       amountScore,
       dateScore,
@@ -966,8 +966,6 @@ export async function findInboxMatches(
       isSameCurrency,
       isExactAmount,
       declinePenalty,
-      autoThreshold,
-      suggestedThreshold,
     });
 
     if (confidence < suggestedThreshold) continue;
