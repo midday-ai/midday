@@ -31,7 +31,6 @@ jobs:
       dashboard: ${{ steps.affected.outputs.dashboard }}
       worker: ${{ steps.affected.outputs.worker }}
       website: ${{ steps.affected.outputs.website }}
-      email: ${{ steps.affected.outputs.email }}
       jobs: ${{ steps.affected.outputs.jobs }}
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +48,6 @@ jobs:
           echo "dashboard=$(echo "$AFFECTED" | grep -q '@midday/dashboard' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "worker=$(echo "$AFFECTED" | grep -q '@midday/worker' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "website=$(echo "$AFFECTED" | grep -q '@midday/website' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "email=$(echo "$AFFECTED" | grep -q '@midday/email' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "jobs=$(echo "$AFFECTED" | grep -q '@midday/jobs' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
   # ---------------------------------------------------------------------------
@@ -189,40 +187,6 @@ jobs:
         run: |
           bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
           bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $(cat domain.txt) midday.ai
-
-  # ---------------------------------------------------------------------------
-  # Deploy Email to Vercel
-  # ---------------------------------------------------------------------------
-  deploy-email:
-    name: Deploy Email
-    needs: [detect-changes, validate]
-    if: >-
-      always() &&
-      needs.validate.result == 'success' &&
-      needs.detect-changes.outputs.email == 'true'
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 10
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_EMAIL }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/setup
-
-      - name: Pull Vercel environment
-        run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Pull Vercel project config
-        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build
-        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy
-        run: |
-          bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
-          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $(cat domain.txt) email.midday.ai
 
   # ---------------------------------------------------------------------------
   # Deploy Jobs to Trigger.dev
