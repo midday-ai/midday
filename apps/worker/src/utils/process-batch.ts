@@ -3,8 +3,9 @@ import { createLoggerWithContext } from "@midday/logger";
 const logger = createLoggerWithContext("worker:batch");
 
 /**
- * Process items in batches with error isolation
- * Each batch is processed independently - failures in one batch don't stop others
+ * Process items in sequential batches.
+ * Throws on the first batch failure -- use processBatchWithErrorIsolation
+ * if you need remaining batches to continue after a failure.
  */
 export async function processBatch<T, R>(
   items: T[],
@@ -19,12 +20,10 @@ export async function processBatch<T, R>(
       const batchResults = await processor(batch);
       results.push(...batchResults);
     } catch (error) {
-      // Log error but continue processing remaining batches
-      // This provides error isolation - one failed batch doesn't stop the rest
       logger.error(`Batch processing failed at index ${i}`, {
         error: error instanceof Error ? error.message : String(error),
       });
-      throw error; // Re-throw to allow caller to decide how to handle
+      throw error;
     }
   }
 

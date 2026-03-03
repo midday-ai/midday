@@ -164,27 +164,62 @@ export const inboxRouter = createTRPCRouter({
   processAttachments: protectedProcedure
     .input(processAttachmentsSchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      const jobResults = await Promise.all(
-        input.map((item) =>
-          triggerJob(
-            "process-attachment",
-            {
-              filePath: item.filePath,
-              mimetype: item.mimetype,
-              size: item.size,
-              teamId: teamId!,
-              referenceId: item.referenceId,
-              website: item.website,
-              senderEmail: item.senderEmail,
-              inboxAccountId: item.inboxAccountId,
-            },
-            "inbox",
-          ),
-        ),
+      const BATCH_THRESHOLD = 3;
+
+      const batchCandidates = input.filter(
+        (item) => item.inboxId && item.mimetype === "application/pdf",
       );
 
-      // Send notification for user uploads
-      // This is a non-critical operation, so we don't await it
+      const realTimeItems =
+        batchCandidates.length >= BATCH_THRESHOLD
+          ? input.filter(
+              (item) => !item.inboxId || item.mimetype !== "application/pdf",
+            )
+          : input;
+
+      const jobResults: { id: string }[] = [];
+
+      if (batchCandidates.length >= BATCH_THRESHOLD) {
+        const batchResult = await triggerJob(
+          "batch-extract-inbox",
+          {
+            teamId: teamId!,
+            items: batchCandidates.map((item) => ({
+              id: item.inboxId!,
+              filePath: item.filePath,
+              teamId: teamId!,
+            })),
+          },
+          "inbox-provider",
+        );
+
+        jobResults.push({ id: batchResult.id });
+      }
+
+      if (realTimeItems.length > 0) {
+        const realTimeResults = await Promise.all(
+          realTimeItems.map((item) =>
+            triggerJob(
+              "process-attachment",
+              {
+                filePath: item.filePath,
+                mimetype: item.mimetype,
+                size: item.size,
+                teamId: teamId!,
+                referenceId: item.referenceId,
+                website: item.website,
+                senderEmail: item.senderEmail,
+                inboxAccountId: item.inboxAccountId,
+              },
+              "extraction",
+              { priority: 5 },
+            ),
+          ),
+        );
+
+        jobResults.push(...realTimeResults.map((r) => ({ id: r.id })));
+      }
+
       if (input.length > 0) {
         try {
           await triggerJob(
@@ -198,7 +233,6 @@ export const inboxRouter = createTRPCRouter({
             "notifications",
           );
         } catch (error) {
-          // Don't fail the entire process if notification fails
           logger.warn("Failed to trigger inbox_new notification", {
             teamId: teamId!,
             error: error instanceof Error ? error.message : "Unknown error",
@@ -207,7 +241,7 @@ export const inboxRouter = createTRPCRouter({
       }
 
       return {
-        jobs: jobResults.map((result) => ({ id: result.id })),
+        jobs: jobResults,
       };
     }),
 

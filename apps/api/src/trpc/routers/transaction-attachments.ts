@@ -50,7 +50,8 @@ export const transactionAttachmentsRouter = createTRPCRouter({
               teamId: teamId!,
               transactionId: item.transactionId,
             },
-            "transactions",
+            "extraction",
+            { priority: 1 },
           ),
         ),
       );

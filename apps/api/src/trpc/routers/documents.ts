@@ -126,8 +126,11 @@ export const documentsRouter = createTRPCRouter({
               mimetype: item.mimetype,
               teamId: teamId!,
             },
-            "documents",
-            { jobId: `process-doc_${teamId}_${item.filePath.join("/")}` },
+            "extraction",
+            {
+              jobId: `process-doc_${teamId}_${item.filePath.join("/")}`,
+              priority: 1,
+            },
           ),
         ),
       );
@@ -198,9 +201,10 @@ export const documentsRouter = createTRPCRouter({
           mimetype,
           teamId: teamId!,
         },
-        "documents",
+        "extraction",
         {
           jobId: `reprocess-doc_${teamId}_${document.pathTokens.join("/")}_${Date.now()}`,
+          priority: 1,
         },
       );
 

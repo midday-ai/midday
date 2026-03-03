@@ -16,7 +16,9 @@ export interface JobStatusResponse {
   status: JobStatus;
   progress?: number;
   progressStep?: string;
-  result?: unknown;
+  /** Raw structured progress data from the job (when progress is an object) */
+  progressData?: Record<string, unknown>;
+  result?: Record<string, unknown>;
   error?: string;
 }
 

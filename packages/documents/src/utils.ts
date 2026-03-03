@@ -183,23 +183,6 @@ export async function extractWebsite(
   return null;
 }
 
-export function getDocumentTypeFromMimeType(mimetype: string): string {
-  switch (mimetype) {
-    case "application/pdf":
-    case "application/octet-stream":
-      return "invoice";
-    default:
-      return "receipt";
-  }
-}
-
-export function getContentSample(text: string, maxTokens = 1200): string {
-  const words = text.split(/\s+/);
-  const approxWordsPerToken = 0.75; // Rough estimate
-  const maxWords = Math.floor(maxTokens / approxWordsPerToken);
-  return words.slice(0, maxWords).join(" ");
-}
-
 const supportedMimeTypesForProcessing = new Set([
   "application/pdf",
   "application/x-pdf",
@@ -219,10 +202,8 @@ const supportedMimeTypesForProcessing = new Set([
 ]);
 
 /**
- * Checks if a given MIME type is supported for document or image processing.
- * This includes types loadable by `loadDocument` and image types handled by `classifyImage`.
- * @param mimetype The MIME type string to check.
- * @returns True if the MIME type is supported, false otherwise.
+ * Checks if a given MIME type is supported for document processing.
+ * Includes types loadable by `loadDocument` and image types handled by Mistral OCR.
  */
 export function isMimeTypeSupportedForProcessing(mimetype: string): boolean {
   // Check exact matches first

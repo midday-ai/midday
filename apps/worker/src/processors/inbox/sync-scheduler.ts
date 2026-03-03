@@ -1,4 +1,5 @@
 import {
+  createInbox,
   getExistingInboxAttachmentsByReferenceIds,
   getInboxAccountInfo,
   getInboxBlocklist,
@@ -21,11 +22,15 @@ import { processBatch } from "../../utils/process-batch";
 import { BaseProcessor } from "../base";
 
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
-const BATCH_SIZE = 5;
+const UPLOAD_CONCURRENCY = 10;
+
+function releaseBuffer(obj: { data: unknown }) {
+  delete (obj as Record<string, unknown>).data;
+}
 
 /**
- * Sync scheduler processor - triggered by dynamic scheduler for each inbox account
- * Receives inbox account ID and syncs attachments from the provider
+ * Syncs attachments from a connected inbox account (Gmail/Outlook).
+ * Triggered by manual sync or the centralized sync-accounts-scheduler.
  */
 export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccountPayload> {
   async process(job: Job<InboxProviderSyncAccountPayload>): Promise<{
@@ -41,7 +46,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       throw new Error("inboxAccountId is required");
     }
 
-    // Get the account info to access provider and teamId
     const accountRow = await getInboxAccountInfo(db, { id: inboxAccountId });
 
     if (!accountRow) {
@@ -58,14 +62,17 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
     });
 
     try {
-      const maxResults = 50;
+      const syncStartDate = job.data.syncStartDate
+        ? new Date(job.data.syncStartDate)
+        : undefined;
 
       const attachments = await connector.getAttachments({
         id: inboxAccountId,
         teamId: accountRow.teamId,
-        maxResults,
         lastAccessed: accountRow.lastAccessed,
         fullSync: manualSync,
+        syncStartDate,
+        maxResults: job.data.maxResults,
       });
 
       this.logger.info("Fetched attachments from provider", {
@@ -74,7 +81,11 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         provider: accountRow.provider,
       });
 
-      // Filter out attachments that are already processed
+      await job.updateProgress({
+        discoveredCount: attachments.length,
+        status: "discovering",
+      });
+
       const referenceIds = attachments.map(
         (attachment) => attachment.referenceId,
       );
@@ -105,7 +116,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         })),
       };
 
-      // Get blocklist entries for the team
       const blocklistEntries = await getInboxBlocklist(db, {
         teamId: accountRow.teamId,
       });
@@ -113,13 +123,11 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       const { blockedDomains, blockedEmails } =
         separateBlocklistEntries(blocklistEntries);
 
-      // Track filtering statistics
       let skippedAlreadyProcessed = 0;
       let skippedTooLarge = 0;
       let skippedBlockedDomain = 0;
       let skippedBlockedEmail = 0;
 
-      // Create a Set for O(1) lookup
       const existingReferenceIdSet = new Set(
         existingAttachments.data?.map((e) => e.reference_id) ?? [],
       );
@@ -135,7 +143,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       });
 
       const filteredAttachments = attachments.filter((attachment) => {
-        // Skip if already exists in database
         const exists = existingReferenceIdSet.has(attachment.referenceId);
         if (exists) {
           skippedAlreadyProcessed++;
@@ -146,7 +153,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           return false;
         }
 
-        // Skip if attachment is too large
         if (attachment.size > MAX_ATTACHMENT_SIZE) {
           skippedTooLarge++;
           this.logger.warn("Attachment exceeds size limit", {
@@ -158,7 +164,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           return false;
         }
 
-        // Skip if domain is blocked
         if (attachment.website) {
           const domain = attachment.website.toLowerCase();
           if (blockedDomains.includes(domain)) {
@@ -167,7 +172,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           }
         }
 
-        // Skip if sender email is blocked
         if (attachment.senderEmail) {
           const email = attachment.senderEmail.toLowerCase();
           if (blockedEmails.includes(email)) {
@@ -192,28 +196,68 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         },
       });
 
+      // Release file buffers on skipped attachments to free memory before uploads
+      for (const att of attachments) {
+        if (!filteredAttachments.includes(att)) {
+          releaseBuffer(att);
+        }
+      }
+
+      const BATCH_THRESHOLD = 5;
+
       const uploadedAttachments = await processBatch(
         filteredAttachments,
-        BATCH_SIZE,
+        UPLOAD_CONCURRENCY,
         async (batch) => {
-          const results = [];
-          for (const item of batch) {
-            // Ensure filename has proper extension as final safety check
-            const safeFilename = ensureFileExtension(
-              item.filename,
-              item.mimeType,
-            );
+          const settled = await Promise.allSettled(
+            batch.map(async (item) => {
+              const safeFilename = ensureFileExtension(
+                item.filename,
+                item.mimeType,
+              );
 
-            const { data: uploadData } = await supabase.storage
-              .from("vault")
-              .upload(`${accountRow.teamId}/inbox/${safeFilename}`, item.data, {
+              const { data: uploadData } = await supabase.storage
+                .from("vault")
+                .upload(
+                  `${accountRow.teamId}/inbox/${safeFilename}`,
+                  item.data,
+                  { contentType: item.mimeType, upsert: true },
+                );
+
+              releaseBuffer(item);
+
+              if (!uploadData) return null;
+
+              const filePath = uploadData.path.split("/");
+
+              const inboxItem = await createInbox(db, {
+                displayName: item.filename,
+                teamId: accountRow.teamId,
+                filePath,
+                fileName: safeFilename,
                 contentType: item.mimeType,
-                upsert: true,
+                size: item.size,
+                referenceId: item.referenceId,
+                website: item.website,
+                senderEmail: item.senderEmail,
+                inboxAccountId: inboxAccountId,
+                status: "new",
               });
 
-            if (uploadData) {
-              results.push({
-                filePath: uploadData.path.split("/"),
+              if (!inboxItem?.id) {
+                this.logger.warn(
+                  "Failed to create inbox item, skipping attachment",
+                  {
+                    referenceId: item.referenceId,
+                    filename: item.filename,
+                    accountId: inboxAccountId,
+                  },
+                );
+                return null;
+              }
+
+              return {
+                filePath,
                 size: item.size,
                 mimetype: item.mimeType,
                 website: item.website,
@@ -221,6 +265,22 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
                 referenceId: item.referenceId,
                 teamId: accountRow.teamId,
                 inboxAccountId: inboxAccountId,
+                inboxItemId: inboxItem.id,
+              };
+            }),
+          );
+
+          const results = [];
+          for (const result of settled) {
+            if (result.status === "fulfilled" && result.value) {
+              results.push(result.value);
+            } else if (result.status === "rejected") {
+              this.logger.warn("Upload failed for attachment in batch", {
+                accountId: inboxAccountId,
+                error:
+                  result.reason instanceof Error
+                    ? result.reason.message
+                    : "Unknown error",
               });
             }
           }
@@ -236,20 +296,61 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         uploaded: uploadedAttachments.length,
       });
 
+      await job.updateProgress({
+        discoveredCount: attachments.length,
+        uploadedCount: uploadedAttachments.length,
+        status: "extracting",
+      });
+
       if (uploadedAttachments.length > 0) {
-        this.logger.info("Triggering document processing", {
-          accountId: inboxAccountId,
-          attachmentCount: uploadedAttachments.length,
-        });
+        const useBatchExtraction =
+          !manualSync ||
+          !!syncStartDate ||
+          uploadedAttachments.length > BATCH_THRESHOLD;
 
-        // Trigger process-attachment jobs for each uploaded attachment
-        await Promise.all(
-          uploadedAttachments.map((attachment) =>
-            triggerJob("process-attachment", attachment, "inbox"),
-          ),
-        );
+        if (useBatchExtraction) {
+          const reason = !manualSync
+            ? "background_sync"
+            : syncStartDate
+              ? "user_initiated"
+              : "above_threshold";
 
-        // Send notification for new inbox items
+          this.logger.info("Routing to batch extraction path", {
+            accountId: inboxAccountId,
+            attachmentCount: uploadedAttachments.length,
+            reason,
+          });
+
+          await triggerJob(
+            "batch-extract-inbox",
+            {
+              items: uploadedAttachments.map((a) => ({
+                id: a.inboxItemId,
+                filePath: a.filePath,
+                teamId: a.teamId,
+                mimetype: a.mimetype,
+                size: a.size,
+              })),
+              teamId: accountRow.teamId,
+              inboxAccountId: inboxAccountId,
+            },
+            "inbox-provider",
+          );
+        } else {
+          this.logger.info("Routing to real-time extraction path", {
+            accountId: inboxAccountId,
+            attachmentCount: uploadedAttachments.length,
+          });
+
+          await Promise.all(
+            uploadedAttachments.map((attachment) =>
+              triggerJob("process-attachment", attachment, "extraction", {
+                priority: 10,
+              }),
+            ),
+          );
+        }
+
         try {
           await triggerJob(
             "notification",
@@ -264,7 +365,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
             "notifications",
           );
         } catch (error) {
-          // Don't fail the entire process if notification fails
           this.logger.warn("Failed to trigger inbox_new notification", {
             accountId: inboxAccountId,
             teamId: accountRow.teamId,
@@ -276,15 +376,21 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           accountId: inboxAccountId,
           teamId: accountRow.teamId,
           totalCount: uploadedAttachments.length,
+          extractionPath: useBatchExtraction ? "batch" : "realtime",
         });
       }
 
-      // Update account with successful sync - mark as connected and clear errors
       await updateInboxAccount(db, {
         id: inboxAccountId,
         lastAccessed: new Date().toISOString(),
         status: "connected",
         errorMessage: null,
+      });
+
+      await job.updateProgress({
+        discoveredCount: attachments.length,
+        uploadedCount: uploadedAttachments.length,
+        status: "complete",
       });
 
       this.logger.info("Inbox sync completed", {
@@ -298,7 +404,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         syncedAt: new Date().toISOString(),
       };
     } catch (error) {
-      // Handle structured InboxAuthError
       if (isInboxAuthError(error)) {
         assertInboxAuthError(error);
 
@@ -311,7 +416,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         });
 
         if (error.requiresReauth) {
-          // Mark as disconnected - user needs to re-authenticate
           await updateInboxAccount(db, {
             id: inboxAccountId,
             status: "disconnected",
@@ -327,7 +431,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
             },
           );
         } else {
-          // Transient auth error - don't change status, let retry handle it
           this.logger.warn("Transient auth error - will retry", {
             accountId: inboxAccountId,
             errorCode: error.code,
@@ -338,7 +441,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         throw error;
       }
 
-      // Handle structured InboxSyncError
       if (error instanceof InboxSyncError) {
         this.logger.warn("Inbox sync failed - sync error", {
           accountId: inboxAccountId,
@@ -348,11 +450,9 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           provider: error.provider,
         });
 
-        // Sync errors are typically transient - don't change connection status
         throw error;
       }
 
-      // Handle unknown errors (fallback)
       const errorMessage =
         error instanceof Error ? error.message : "Unknown sync error";
 
@@ -362,7 +462,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         provider: accountRow.provider,
       });
 
-      // For unknown errors, don't change connection status
       throw error;
     }
   }

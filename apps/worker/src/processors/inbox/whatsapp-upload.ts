@@ -1,14 +1,12 @@
 import {
   createWhatsAppClient,
   formatDocumentProcessedSuccess,
-  formatExtractionFailedMessage,
   formatProcessingErrorMessage,
   REACTION_EMOJIS,
 } from "@midday/app-store/whatsapp/server";
 import {
   createInbox,
   groupRelatedInboxItems,
-  updateInbox,
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
@@ -19,7 +17,9 @@ import type { Job } from "bullmq";
 import { format, parseISO } from "date-fns";
 import { nanoid } from "nanoid";
 import type { WhatsAppUploadPayload } from "../../schemas/inbox";
+import { classifyFromExtraction } from "../../utils/classify-from-extraction";
 import { getDb } from "../../utils/db";
+import { NonRetryableError } from "../../utils/error-classification";
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
@@ -73,16 +73,19 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
       const fileData = await whatsappClient.downloadMedia(mediaId);
 
       if (!fileData || fileData.byteLength === 0) {
-        throw new Error(
+        throw new NonRetryableError(
           "Failed to download media from WhatsApp or file is empty",
+          undefined,
+          "validation",
         );
       }
 
-      // Validate file size (max 20MB)
       const MAX_FILE_SIZE = 20 * 1024 * 1024;
       if (fileData.byteLength > MAX_FILE_SIZE) {
-        throw new Error(
+        throw new NonRetryableError(
           `File size (${(fileData.byteLength / 1024 / 1024).toFixed(2)}MB) exceeds maximum allowed size (20MB)`,
+          undefined,
+          "validation",
         );
       }
 
@@ -154,12 +157,12 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
         teamId,
       });
 
-      // Get signed URL for document processing
       const pathForSignedUrl = uploadData.path || filePathStr;
-      const { data: signedUrlData, error: signedUrlError } =
-        await supabase.storage
-          .from("vault")
-          .createSignedUrl(pathForSignedUrl, 1800);
+      const { data: signedUrlData, error: signedUrlError } = await withTimeout(
+        supabase.storage.from("vault").createSignedUrl(pathForSignedUrl, 600),
+        TIMEOUTS.EXTERNAL_API,
+        `Signed URL creation timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
+      );
 
       if (signedUrlError || !signedUrlData?.signedUrl) {
         throw new Error(
@@ -229,7 +232,7 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
         taxAmount: result.tax_amount ?? undefined,
         taxRate: result.tax_rate ?? undefined,
         taxType: result.tax_type ?? undefined,
-        type: result.type as "invoice" | "expense" | null | undefined,
+        type: result.type ?? undefined,
         invoiceNumber: result.invoice_number ?? undefined,
         status: "analyzing",
       });
@@ -286,9 +289,7 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
             amount: amountValue,
             currency: updatedInbox.currency || undefined,
             invoiceNumber:
-              updatedInbox.type === "invoice" &&
-              "invoiceNumber" in updatedInbox &&
-              updatedInbox.invoiceNumber
+              updatedInbox.type === "invoice" && updatedInbox.invoiceNumber
                 ? updatedInbox.invoiceNumber
                 : undefined,
             taxAmount: taxAmountValue,
@@ -303,50 +304,76 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
         }
       }
 
-      // Trigger document classification
-      await triggerJob(
-        "process-document",
-        {
-          mimetype: mimeType,
-          filePath,
-          teamId,
-        },
-        "documents",
-      );
-
-      // Trigger embedding and wait for completion
-      this.logger.info("Triggering embed-inbox job", {
-        inboxId: inboxData.id,
+      await classifyFromExtraction({
+        filePath,
         teamId,
+        title: result.title,
+        summary: result.summary,
+        tags: result.tags,
+        content: result.content,
+        date: result.date,
+        language: result.language,
+        documentType: result.document_type,
+        vendorName: result.name,
+        invoiceNumber: result.invoice_number,
+        logger: this.logger,
       });
 
-      const embedStartTime = Date.now();
-      await triggerJobAndWait(
-        "embed-inbox",
-        {
+      try {
+        const embedStartTime = Date.now();
+        await triggerJobAndWait(
+          "embed-inbox",
+          {
+            inboxId: inboxData.id,
+            teamId,
+          },
+          "embeddings",
+          { timeout: 60000 },
+        );
+
+        const embedDuration = Date.now() - embedStartTime;
+        this.logger.info("Embed-inbox job completed", {
           inboxId: inboxData.id,
           teamId,
-        },
-        "embeddings",
-        { timeout: 60000 },
-      );
+          duration: `${embedDuration}ms`,
+        });
 
-      const embedDuration = Date.now() - embedStartTime;
-      this.logger.info("Embed-inbox job completed", {
-        inboxId: inboxData.id,
-        teamId,
-        duration: `${embedDuration}ms`,
-      });
+        await triggerJob(
+          "batch-process-matching",
+          {
+            teamId,
+            inboxIds: [inboxData.id],
+          },
+          "inbox",
+        );
 
-      // Trigger matching
-      await triggerJob(
-        "batch-process-matching",
-        {
+        this.logger.info("Triggered batch-process-matching", {
+          inboxId: inboxData.id,
           teamId,
-          inboxIds: [inboxData.id],
-        },
-        "inbox",
-      );
+        });
+      } catch (error) {
+        this.logger.error("Failed to complete embedding/matching", {
+          inboxId: inboxData.id,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+        try {
+          await updateInboxWithProcessedData(db, {
+            id: inboxData.id,
+            status: "pending",
+          });
+        } catch (updateError) {
+          this.logger.error(
+            "Failed to update inbox status after embed failure",
+            {
+              inboxId: inboxData.id,
+              error:
+                updateError instanceof Error
+                  ? updateError.message
+                  : "Unknown error",
+            },
+          );
+        }
+      }
 
       this.logger.info("WhatsApp upload processed successfully", {
         inboxId: inboxData.id,
@@ -356,54 +383,15 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      const isGeminiImageError =
-        errorMessage.includes("Unable to process input image") ||
-        errorMessage.includes("INVALID_ARGUMENT");
 
       this.logger.error("Failed to process WhatsApp upload", {
         inboxId: inboxData?.id ?? "not-created",
         error: errorMessage,
-        isGeminiImageError,
         mimeType,
       });
 
       // Update reaction to error
       await updateReaction(REACTION_EMOJIS.ERROR);
-
-      // For Gemini image processing errors, mark as pending for manual review
-      if (isGeminiImageError && inboxData) {
-        this.logger.info(
-          "Gemini failed to process image, marking as pending for manual review",
-          {
-            inboxId: inboxData.id,
-            mimeType,
-            error: errorMessage,
-          },
-        );
-
-        try {
-          await updateInbox(db, {
-            id: inboxData.id,
-            teamId,
-            status: "pending",
-          });
-
-          await whatsappClient.sendMessage(
-            phoneNumber,
-            formatExtractionFailedMessage(),
-          );
-        } catch (updateError) {
-          this.logger.error("Failed to update inbox status to pending", {
-            inboxId: inboxData.id,
-            error:
-              updateError instanceof Error
-                ? updateError.message
-                : "Unknown error",
-          });
-        }
-
-        return;
-      }
 
       // Re-throw timeout errors to trigger retry
       if (error instanceof Error && error.name === "AbortError") {

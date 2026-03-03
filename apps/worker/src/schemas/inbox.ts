@@ -11,6 +11,18 @@ export const embedInboxSchema = z.object({
 
 export type EmbedInboxPayload = z.infer<typeof embedInboxSchema>;
 
+export const batchEmbedInboxSchema = z.object({
+  items: z.array(
+    z.object({
+      inboxId: z.string().uuid(),
+      teamId: z.string().uuid(),
+    }),
+  ),
+  teamId: z.string().uuid(),
+});
+
+export type BatchEmbedInboxPayload = z.infer<typeof batchEmbedInboxSchema>;
+
 export const batchProcessMatchingSchema = z.object({
   teamId: z.string().uuid(),
   inboxIds: z.array(z.string().uuid()),
@@ -77,20 +89,39 @@ export const whatsappUploadSchema = z.object({
 
 export type WhatsAppUploadPayload = z.infer<typeof whatsappUploadSchema>;
 
-// Provider schemas
-export const inboxProviderInitialSetupSchema = z.object({
-  inboxAccountId: z.string().uuid(),
+export const batchExtractInboxSchema = z.object({
+  items: z.array(
+    z.object({
+      id: z.string().uuid(),
+      filePath: z.array(z.string()),
+      teamId: z.string().uuid(),
+      mimetype: z.string().optional(),
+      size: z.number().optional(),
+    }),
+  ),
+  teamId: z.string().uuid(),
+  inboxAccountId: z.string().uuid().optional(),
 });
 
-export type InboxProviderInitialSetupPayload = z.infer<
-  typeof inboxProviderInitialSetupSchema
->;
+export type BatchExtractInboxPayload = z.infer<typeof batchExtractInboxSchema>;
 
+// Provider schemas
 export const inboxProviderSyncAccountSchema = z.object({
-  id: z.string().uuid(), // Inbox account ID
+  id: z.string().uuid(),
   manualSync: z.boolean().optional(),
+  teamId: z.string().uuid().optional(),
+  syncStartDate: z.string().optional(),
+  maxResults: z.number().optional(),
 });
 
 export type InboxProviderSyncAccountPayload = z.infer<
   typeof inboxProviderSyncAccountSchema
+>;
+
+export const syncAccountsSchedulerSchema = z.object({
+  // Empty payload - scheduler runs globally
+});
+
+export type SyncAccountsSchedulerPayload = z.infer<
+  typeof syncAccountsSchedulerSchema
 >;

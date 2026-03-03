@@ -65,14 +65,18 @@ export function AppConnectionToast() {
         });
       }
 
-      const providerName = formatProviderName(provider);
+      const hasSyncJobId = searchParams.has("syncJobId");
 
-      toast({
-        duration: 3000,
-        variant: "success",
-        title: "Connected Successfully",
-        description: `${providerName} has been connected to your account.`,
-      });
+      if (!hasSyncJobId) {
+        const providerName = formatProviderName(provider);
+
+        toast({
+          duration: 3000,
+          variant: "success",
+          title: "Connected Successfully",
+          description: `${providerName} has been connected to your account.`,
+        });
+      }
 
       // Clear the URL params after a short delay
       timeout = setTimeout(() => {

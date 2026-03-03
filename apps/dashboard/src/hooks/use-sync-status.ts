@@ -1,48 +1,102 @@
-import { useRealtimeRun } from "@trigger.dev/react-hooks";
-import { useEffect, useState } from "react";
+import { skipToken, useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { z } from "zod";
+import { useTRPC } from "@/trpc/client";
 
-type UseSyncStatusProps = {
-  runId?: string;
-  accessToken?: string;
-};
+const syncMetadataSchema = z.object({
+  discoveredCount: z.number().optional(),
+  uploadedCount: z.number().optional(),
+  processedCount: z.number().optional(),
+  status: z.enum(["discovering", "extracting", "complete"]).optional(),
+});
 
-export function useSyncStatus({
-  runId: initialRunId,
-  accessToken: initialAccessToken,
-}: UseSyncStatusProps) {
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    initialAccessToken,
-  );
-  const [runId, setRunId] = useState<string | undefined>(initialRunId);
+const syncResultSchema = z.object({
+  attachmentsProcessed: z.number().optional(),
+});
+
+export type SyncMetadata = z.infer<typeof syncMetadataSchema>;
+export type SyncResult = z.infer<typeof syncResultSchema>;
+
+const POLL_INTERVAL_MS = 2000;
+// How many consecutive "unknown" responses before we give up and treat as completed.
+// "unknown" means the job wasn't found — either a race condition before registration,
+// or the job was removed after completion (removeOnComplete: { age: 60 }).
+const MAX_UNKNOWN_RETRIES = 5;
+
+export function useSyncStatus({ jobId: initialJobId }: { jobId?: string }) {
+  const trpc = useTRPC();
+  const [jobId, setJobId] = useState<string | undefined>(initialJobId);
   const [status, setStatus] = useState<
     "FAILED" | "SYNCING" | "COMPLETED" | null
   >(null);
-  const { run, error } = useRealtimeRun(runId, {
-    enabled: !!runId && !!accessToken,
-    accessToken,
-  });
+  const [result, setResult] = useState<SyncResult | undefined>();
+  const [syncMetadata, setSyncMetadata] = useState<SyncMetadata | undefined>();
+  const settled = useRef(false);
+  const unknownCount = useRef(0);
+
+  const { data } = useQuery(
+    trpc.jobs.getStatus.queryOptions(jobId ? { jobId } : skipToken, {
+      enabled: !settled.current,
+      refetchInterval: POLL_INTERVAL_MS,
+      refetchIntervalInBackground: false,
+    }),
+  );
 
   useEffect(() => {
-    if (initialRunId && initialAccessToken) {
-      setAccessToken(initialAccessToken);
-      setRunId(initialRunId);
+    if (initialJobId) {
+      settled.current = false;
+      unknownCount.current = 0;
+      setJobId(initialJobId);
+      setStatus("SYNCING");
+      setSyncMetadata(undefined);
+      setResult(undefined);
+    } else {
+      settled.current = true;
+      setJobId(undefined);
+    }
+  }, [initialJobId]);
+
+  useEffect(() => {
+    if (!data || settled.current) return;
+
+    const metadata = syncMetadataSchema.safeParse(data.progressData);
+    if (metadata.success) {
+      setSyncMetadata(metadata.data);
+    }
+
+    if (data.status === "completed") {
+      settled.current = true;
+      unknownCount.current = 0;
+      setStatus("COMPLETED");
+
+      const parsed = syncResultSchema.safeParse(data.result);
+      if (parsed.success) {
+        setResult(parsed.data);
+      }
+    } else if (data.status === "unknown") {
+      unknownCount.current += 1;
+
+      if (unknownCount.current >= MAX_UNKNOWN_RETRIES) {
+        settled.current = true;
+        setStatus("COMPLETED");
+      }
+    } else if (data.status === "failed") {
+      settled.current = true;
+      setStatus("FAILED");
+    } else if (
+      data.status === "active" ||
+      data.status === "waiting" ||
+      data.status === "delayed"
+    ) {
+      unknownCount.current = 0;
       setStatus("SYNCING");
     }
-  }, [initialRunId, initialAccessToken]);
-
-  useEffect(() => {
-    if (error || run?.status === "FAILED") {
-      setStatus("FAILED");
-    }
-
-    if (run?.status === "COMPLETED") {
-      setStatus("COMPLETED");
-    }
-  }, [error, run]);
+  }, [data]);
 
   return {
     status,
     setStatus,
-    result: run?.output,
+    result,
+    syncMetadata,
   };
 }

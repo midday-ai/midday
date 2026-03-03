@@ -48,7 +48,7 @@ const inboxWorkerOptions: WorkerOptions = {
 /**
  * Inbox queue configuration
  * Main queue for inbox processing jobs
- * Jobs: batch-process-matching, match-transactions-bidirectional, process-attachment, slack-upload, whatsapp-upload
+ * Jobs: batch-process-matching, match-transactions-bidirectional, slack-upload, whatsapp-upload, batch-embed-inbox, no-match-scheduler
  */
 export const inboxQueueConfig: QueueConfig = {
   name: "inbox",
@@ -81,17 +81,24 @@ const inboxProviderQueueOptions: QueueOptions = {
 
 /**
  * Worker options for inbox provider queue
- * Concurrency: 10
+ * Concurrency: 5 (each sync job hits external Gmail/Outlook APIs)
+ * No global rate limiter -- BullMQ limiters are priority-blind, so a global
+ * limiter would let background scheduler traffic block user-initiated manual
+ * syncs even when they have higher priority. Concurrency alone is sufficient
+ * to cap external API pressure; priority ordering ensures manual syncs are
+ * picked up ahead of background work as soon as a slot opens.
+ * Lock/stalled intervals support batch extraction jobs (up to 35 min)
  */
 const inboxProviderWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
-  concurrency: 10,
+  concurrency: 5,
+  lockDuration: 1800000, // 30 minutes -- batch extraction can poll for up to 30 min
+  stalledInterval: 2100000, // 35 minutes -- longer than lockDuration to avoid false stalls
 };
 
 /**
  * Inbox provider queue configuration
- * Gmail provider sync jobs
- * Jobs: initial-setup, scheduler, sync-account
+ * Jobs: sync-scheduler, sync-accounts-scheduler, batch-extract-inbox
  */
 export const inboxProviderQueueConfig: QueueConfig = {
   name: "inbox-provider",
