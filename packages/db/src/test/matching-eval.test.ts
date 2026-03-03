@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeAll } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -241,12 +241,18 @@ function scoreRecord(
   const searchableTransactionText = normalizeNameForMemory(
     `${r.transactionName} ${r.transactionMerchantName} ${r.transactionDescription}`,
   );
-  if (invoiceNumber.length >= 4 && searchableTransactionText.includes(invoiceNumber)) {
+  if (
+    invoiceNumber.length >= 4 &&
+    searchableTransactionText.includes(invoiceNumber)
+  ) {
     nameScore = Math.max(nameScore, 0.95);
   }
 
   const domainToken = extractDomainToken(r.inboxWebsite);
-  if (domainToken.length >= 4 && searchableTransactionText.includes(domainToken)) {
+  if (
+    domainToken.length >= 4 &&
+    searchableTransactionText.includes(domainToken)
+  ) {
     nameScore = Math.max(nameScore, 0.88);
   }
 
@@ -343,11 +349,11 @@ let suggestions: EvalRecord[] = [];
 let manualMatches: EvalRecord[] = [];
 
 const WEIGHTS = {
-  name: 0.20,
-  amount: 0.30,
+  name: 0.2,
+  amount: 0.3,
   embedding: 0.25,
   date: 0.15,
-  currency: 0.10,
+  currency: 0.1,
 };
 
 beforeAll(() => {
@@ -492,7 +498,7 @@ describe("Matching Engine Evaluation", () => {
   describe("New scoring evaluation", () => {
     test("should evaluate at multiple thresholds", () => {
       console.log("\n=== NEW SCORING - THRESHOLD SENSITIVITY ===");
-      const thresholds = [0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75];
+      const thresholds = [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75];
 
       let bestF1 = 0;
       let bestThreshold = 0;
@@ -618,8 +624,7 @@ describe("Matching Engine Evaluation", () => {
         );
         if (confidence >= threshold) {
           recovered++;
-          const hasEmbed =
-            !!r.inboxEmbeddingSourceText && embeddingScore > 0;
+          const hasEmbed = !!r.inboxEmbeddingSourceText && embeddingScore > 0;
           const sameCurr = r.inboxCurrency === r.transactionCurrency;
 
           if (hasEmbed) withEmbed++;
@@ -629,9 +634,7 @@ describe("Matching Engine Evaluation", () => {
         }
       }
 
-      console.log(
-        `\n=== RECOVERY ANALYSIS (threshold=${threshold}) ===`,
-      );
+      console.log(`\n=== RECOVERY ANALYSIS (threshold=${threshold}) ===`);
       console.log(
         `  Recovered: ${recovered} / ${manualMatches.length} (${((recovered / manualMatches.length) * 100).toFixed(1)}%)`,
       );

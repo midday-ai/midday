@@ -70,7 +70,8 @@ export function Inbox() {
                 <span className="text-foreground">Receipts matched</span>
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
-                Midday auto-matches obvious receipts and asks for review only when needed.
+                Midday auto-matches obvious receipts and asks for review only
+                when needed.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
                 Receipts and invoices are pulled in from email, uploads, and

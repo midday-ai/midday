@@ -6,13 +6,6 @@ import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { createLoggerWithContext } from "@midday/logger";
 import { resolveTaxValues } from "@midday/utils/tax";
 import {
-  calculateAmountScore,
-  calculateCurrencyScore,
-  calculateDateScore,
-  calculateNameScore,
-  scoreMatch,
-} from "../utils/transaction-matching";
-import {
   and,
   asc,
   cosineDistance,
@@ -47,6 +40,13 @@ import {
   transactionTags,
   users,
 } from "../schema";
+import {
+  calculateAmountScore,
+  calculateCurrencyScore,
+  calculateDateScore,
+  calculateNameScore,
+  scoreMatch,
+} from "../utils/transaction-matching";
 import { createActivity } from "./activities";
 import { type Attachment, createAttachments } from "./transaction-attachments";
 
@@ -1508,13 +1508,18 @@ export async function searchTransactionMatch(
             item.baseCurrency || undefined,
             transaction.baseCurrency || undefined,
           );
-          const dateScore = calculateDateScore(item.date!, transaction.transactionDate);
+          const dateScore = calculateDateScore(
+            item.date!,
+            transaction.transactionDate,
+          );
           const isExactAmount =
             item.amount !== null &&
             Math.abs(
-              Math.abs(item.amount || 0) - Math.abs(transaction.transactionAmount || 0),
+              Math.abs(item.amount || 0) -
+                Math.abs(transaction.transactionAmount || 0),
             ) < 0.01;
-          const isSameCurrency = item.currency === transaction.transactionCurrency;
+          const isSameCurrency =
+            item.currency === transaction.transactionCurrency;
           const { confidence } = scoreMatch({
             nameScore,
             amountScore,

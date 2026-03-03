@@ -914,7 +914,10 @@ export async function getInboxSearch(
               transaction.name,
               transaction.counterpartyName,
             );
-            const amountScore = calculateUnifiedAmountScore(candidate, transaction);
+            const amountScore = calculateUnifiedAmountScore(
+              candidate,
+              transaction,
+            );
             const currencyScore = calculateUnifiedCurrencyScore(
               candidate.currency || undefined,
               transaction.currency || undefined,

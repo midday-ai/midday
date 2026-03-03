@@ -367,13 +367,16 @@ function normalizeNameForLearning(input: string | null | undefined): string {
     .trim();
 }
 
-async function getPairHistory(
-  db: Database,
-  teamId: string,
-  normalizedInboxName: string,
-  normalizedTransactionName: string,
-  interval: "6 months" | "90 days" = "6 months",
-) {
+function extractDomainToken(url: string | null | undefined): string {
+  if (!url) return "";
+  const cleaned = url
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .split("/")[0];
+  return cleaned?.split(".")[0]?.toLowerCase() ?? "";
+}
+
+async function fetchTeamPairHistory(db: Database, teamId: string) {
   const rows = await db
     .select({
       status: transactionMatchSuggestions.status,
@@ -382,7 +385,6 @@ async function getPairHistory(
       inboxName: inbox.displayName,
       transactionName: transactions.name,
       merchantName: transactions.merchantName,
-      teamId: transactionMatchSuggestions.teamId,
     })
     .from(transactionMatchSuggestions)
     .innerJoin(inbox, eq(transactionMatchSuggestions.inboxId, inbox.id))
@@ -398,36 +400,52 @@ async function getPairHistory(
           "declined",
           "unmatched",
         ]),
-        sql`${transactionMatchSuggestions.createdAt} > NOW() - INTERVAL '${sql.raw(interval)}'`,
+        sql`${transactionMatchSuggestions.createdAt} > NOW() - INTERVAL '6 months'`,
       ),
     )
     .orderBy(desc(transactionMatchSuggestions.createdAt))
-    .limit(500);
+    .limit(2000);
 
-  return rows.filter((row) => {
-    const rowInboxName = normalizeNameForLearning(row.inboxName);
-    const rowTransactionName = normalizeNameForLearning(
-      row.merchantName || row.transactionName,
-    );
-    return (
-      rowInboxName === normalizedInboxName &&
-      rowTransactionName === normalizedTransactionName
-    );
-  });
+  type HistoryRow = (typeof rows)[number];
+  const map = new Map<string, HistoryRow[]>();
+  for (const row of rows) {
+    const key = `${normalizeNameForLearning(row.inboxName)}\0${normalizeNameForLearning(row.merchantName || row.transactionName)}`;
+    let entries = map.get(key);
+    if (!entries) {
+      entries = [];
+      map.set(key, entries);
+    }
+    entries.push(row);
+  }
+  return map;
 }
 
-async function findSimilarMerchantPatterns(
-  db: Database,
-  teamId: string,
+type TeamPairHistory = Awaited<ReturnType<typeof fetchTeamPairHistory>>;
+
+function lookupPairHistory(
+  historyMap: TeamPairHistory,
   normalizedInboxName: string,
   normalizedTransactionName: string,
-): Promise<{
+  maxAgeDays?: number,
+) {
+  const key = `${normalizedInboxName}\0${normalizedTransactionName}`;
+  const rows = historyMap.get(key) ?? [];
+  if (maxAgeDays == null) return rows;
+  const cutoff = Date.now() - maxAgeDays * 24 * 60 * 60 * 1000;
+  return rows.filter((r) => new Date(r.createdAt).getTime() > cutoff);
+}
+
+function computeMerchantPatterns(
+  historyMap: TeamPairHistory,
+  normalizedInboxName: string,
+  normalizedTransactionName: string,
+): {
   canAutoMatch: boolean;
   confidence: number;
   historicalAccuracy: number;
   matchCount: number;
   reason: string;
-}> {
+} {
   if (!normalizedInboxName || !normalizedTransactionName) {
     return {
       canAutoMatch: false,
@@ -438,9 +456,8 @@ async function findSimilarMerchantPatterns(
     };
   }
 
-  const historicalMatches = await getPairHistory(
-    db,
-    teamId,
+  const historicalMatches = lookupPairHistory(
+    historyMap,
     normalizedInboxName,
     normalizedTransactionName,
   );
@@ -483,15 +500,13 @@ async function findSimilarMerchantPatterns(
   };
 }
 
-async function getAliasScore(
-  db: Database,
-  teamId: string,
+function computeAliasScore(
+  historyMap: TeamPairHistory,
   normalizedInboxName: string,
   normalizedTransactionName: string,
-): Promise<number> {
-  const historicalMatches = await getPairHistory(
-    db,
-    teamId,
+): number {
+  const historicalMatches = lookupPairHistory(
+    historyMap,
     normalizedInboxName,
     normalizedTransactionName,
   );
@@ -500,18 +515,16 @@ async function getAliasScore(
     : 0;
 }
 
-async function getDeclinePenalty(
-  db: Database,
-  teamId: string,
+function computeDeclinePenalty(
+  historyMap: TeamPairHistory,
   normalizedInboxName: string,
   normalizedTransactionName: string,
-): Promise<number> {
-  const historicalMatches = await getPairHistory(
-    db,
-    teamId,
+): number {
+  const historicalMatches = lookupPairHistory(
+    historyMap,
     normalizedInboxName,
     normalizedTransactionName,
-    "90 days",
+    90,
   );
   if (historicalMatches.length === 0) return 0;
 
@@ -546,15 +559,12 @@ async function getDeclinePenalty(
   const netSignal = Math.max(0, negativeSignal - confirmedWeight * 0.7);
   if (netSignal <= 0.3) return 0;
 
-  // Hard-negative memory with cap to avoid suppressing true positives too much.
   return clamp(0.08 + netSignal * 0.08, 0, 0.35);
 }
 
-async function getGlobalAliasScore(
-  db: Database,
-  normalizedInboxName: string,
-  normalizedTransactionName: string,
-): Promise<number> {
+type GlobalAliasMap = Map<string, Set<string>>;
+
+async function fetchGlobalAliasMap(db: Database): Promise<GlobalAliasMap> {
   const rows = await db
     .select({
       teamId: transactionMatchSuggestions.teamId,
@@ -576,27 +586,35 @@ async function getGlobalAliasScore(
     )
     .limit(2000);
 
-  const teams = new Set<string>();
+  const pairTeams: GlobalAliasMap = new Map();
   for (const row of rows) {
-    const rowInboxName = normalizeNameForLearning(row.inboxName);
-    const rowTransactionName = normalizeNameForLearning(
-      row.merchantName || row.transactionName,
-    );
-    if (
-      rowInboxName === normalizedInboxName &&
-      rowTransactionName === normalizedTransactionName
-    ) {
-      teams.add(row.teamId);
+    const key = `${normalizeNameForLearning(row.inboxName)}\0${normalizeNameForLearning(row.merchantName || row.transactionName)}`;
+    let teams = pairTeams.get(key);
+    if (!teams) {
+      teams = new Set();
+      pairTeams.set(key, teams);
     }
+    teams.add(row.teamId);
   }
-  return teams.size >= 3 ? 0.85 : 0;
+  return pairTeams;
+}
+
+function lookupGlobalAliasScore(
+  globalAliasMap: GlobalAliasMap,
+  normalizedInboxName: string,
+  normalizedTransactionName: string,
+): number {
+  const key = `${normalizedInboxName}\0${normalizedTransactionName}`;
+  const teams = globalAliasMap.get(key);
+  return teams && teams.size >= 3 ? 0.85 : 0;
 }
 
 function resolveMatchType(
   confidence: number,
   canAutoMatch: boolean,
+  nameScore: number,
 ): MatchType {
-  if (confidence >= 0.9 && canAutoMatch && confidence >= 0.4) {
+  if (confidence >= 0.9 && canAutoMatch && nameScore >= 0.4) {
     return "auto_matched";
   }
   if (confidence >= 0.72) {
@@ -627,6 +645,8 @@ export async function findMatches(
       baseCurrency: inbox.baseCurrency,
       date: inbox.date,
       type: inbox.type,
+      website: inbox.website,
+      invoiceNumber: inbox.invoiceNumber,
     })
     .from(inbox)
     .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
@@ -648,6 +668,8 @@ export async function findMatches(
       baseCurrency: transactions.baseCurrency,
       date: transactions.date,
       merchantName: transactions.merchantName,
+      description: transactions.description,
+      counterpartyName: transactions.counterpartyName,
       isAlreadyMatched: sql<boolean>`false`,
     })
     .from(transactions)
@@ -701,41 +723,57 @@ export async function findMatches(
     )
     .limit(30);
 
+  const [globalAliasMap, teamPairHistory] = await Promise.all([
+    fetchGlobalAliasMap(db),
+    fetchTeamPairHistory(db, teamId),
+  ]);
+
   let bestMatch: MatchResult | null = null;
   for (const candidate of candidates) {
     const normalizedTransactionName = normalizeNameForLearning(
       candidate.merchantName || candidate.name,
     );
-    const [aliasScore, globalAliasScore, declinePenalty, pattern] =
-      await Promise.all([
-        getAliasScore(
-          db,
-          teamId,
-          normalizedInboxName,
-          normalizedTransactionName,
-        ),
-        getGlobalAliasScore(db, normalizedInboxName, normalizedTransactionName),
-        getDeclinePenalty(
-          db,
-          teamId,
-          normalizedInboxName,
-          normalizedTransactionName,
-        ),
-        findSimilarMerchantPatterns(
-          db,
-          teamId,
-          normalizedInboxName,
-          normalizedTransactionName,
-        ),
-      ]);
+    const globalAliasScore = lookupGlobalAliasScore(
+      globalAliasMap,
+      normalizedInboxName,
+      normalizedTransactionName,
+    );
+    const aliasScore = computeAliasScore(
+      teamPairHistory,
+      normalizedInboxName,
+      normalizedTransactionName,
+    );
+    const declinePenalty = computeDeclinePenalty(
+      teamPairHistory,
+      normalizedInboxName,
+      normalizedTransactionName,
+    );
+    const pattern = computeMerchantPatterns(
+      teamPairHistory,
+      normalizedInboxName,
+      normalizedTransactionName,
+    );
 
-    const nameScore = calculateNameScore(
+    let nameScore = calculateNameScore(
       inboxItem.displayName,
       candidate.name,
-      candidate.merchantName,
+      candidate.merchantName || candidate.counterpartyName,
       aliasScore,
       globalAliasScore,
     );
+
+    const searchableText = normalizeNameForLearning(
+      `${candidate.name} ${candidate.merchantName || ""} ${candidate.description || ""} ${candidate.counterpartyName || ""}`,
+    );
+    const invoiceNumber = normalizeNameForLearning(inboxItem.invoiceNumber);
+    if (invoiceNumber.length >= 4 && searchableText.includes(invoiceNumber)) {
+      nameScore = Math.max(nameScore, 0.95);
+    }
+    const domainToken = extractDomainToken(inboxItem.website);
+    if (domainToken.length >= 4 && searchableText.includes(domainToken)) {
+      nameScore = Math.max(nameScore, 0.88);
+    }
+
     const amountScore = calculateAmountScore(inboxItem, candidate);
     const currencyScore = calculateCurrencyScore(
       inboxItem.currency || undefined,
@@ -780,7 +818,7 @@ export async function findMatches(
       currencyScore: Math.round(currencyScore * 1000) / 1000,
       dateScore: Math.round(dateScore * 1000) / 1000,
       confidenceScore: Math.round(confidence * 1000) / 1000,
-      matchType: resolveMatchType(confidence, pattern.canAutoMatch),
+      matchType: resolveMatchType(confidence, pattern.canAutoMatch, nameScore),
       isAlreadyMatched: candidate.isAlreadyMatched,
     };
 
@@ -826,6 +864,8 @@ export async function findInboxMatches(
       baseCurrency: transactions.baseCurrency,
       date: transactions.date,
       merchantName: transactions.merchantName,
+      description: transactions.description,
+      counterpartyName: transactions.counterpartyName,
     })
     .from(transactions)
     .where(
@@ -851,6 +891,8 @@ export async function findInboxMatches(
       baseCurrency: inbox.baseCurrency,
       date: inbox.date,
       type: inbox.type,
+      website: inbox.website,
+      invoiceNumber: inbox.invoiceNumber,
       isAlreadyMatched: sql<boolean>`${inbox.transactionId} IS NOT NULL`,
     })
     .from(inbox)
@@ -881,39 +923,55 @@ export async function findInboxMatches(
     )
     .limit(30);
 
+  const [globalAliasMap, teamPairHistory] = await Promise.all([
+    fetchGlobalAliasMap(db),
+    fetchTeamPairHistory(db, teamId),
+  ]);
+
   let bestMatch: InboxMatchResult | null = null;
   for (const candidate of candidates) {
     const normalizedInboxName = normalizeNameForLearning(candidate.displayName);
-    const [aliasScore, globalAliasScore, declinePenalty, pattern] =
-      await Promise.all([
-        getAliasScore(
-          db,
-          teamId,
-          normalizedInboxName,
-          normalizedTransactionName,
-        ),
-        getGlobalAliasScore(db, normalizedInboxName, normalizedTransactionName),
-        getDeclinePenalty(
-          db,
-          teamId,
-          normalizedInboxName,
-          normalizedTransactionName,
-        ),
-        findSimilarMerchantPatterns(
-          db,
-          teamId,
-          normalizedInboxName,
-          normalizedTransactionName,
-        ),
-      ]);
+    const globalAliasScore = lookupGlobalAliasScore(
+      globalAliasMap,
+      normalizedInboxName,
+      normalizedTransactionName,
+    );
+    const aliasScore = computeAliasScore(
+      teamPairHistory,
+      normalizedInboxName,
+      normalizedTransactionName,
+    );
+    const declinePenalty = computeDeclinePenalty(
+      teamPairHistory,
+      normalizedInboxName,
+      normalizedTransactionName,
+    );
+    const pattern = computeMerchantPatterns(
+      teamPairHistory,
+      normalizedInboxName,
+      normalizedTransactionName,
+    );
 
-    const nameScore = calculateNameScore(
+    let nameScore = calculateNameScore(
       candidate.displayName,
       transactionItem.name,
-      transactionItem.merchantName,
+      transactionItem.merchantName || transactionItem.counterpartyName,
       aliasScore,
       globalAliasScore,
     );
+
+    const searchableText = normalizeNameForLearning(
+      `${transactionItem.name} ${transactionItem.merchantName || ""} ${transactionItem.description || ""} ${transactionItem.counterpartyName || ""}`,
+    );
+    const invoiceNumber = normalizeNameForLearning(candidate.invoiceNumber);
+    if (invoiceNumber.length >= 4 && searchableText.includes(invoiceNumber)) {
+      nameScore = Math.max(nameScore, 0.95);
+    }
+    const domainToken = extractDomainToken(candidate.website);
+    if (domainToken.length >= 4 && searchableText.includes(domainToken)) {
+      nameScore = Math.max(nameScore, 0.88);
+    }
+
     const amountScore = calculateAmountScore(candidate, transactionItem);
     const currencyScore = calculateCurrencyScore(
       candidate.currency || undefined,
@@ -958,7 +1016,7 @@ export async function findInboxMatches(
       currencyScore: Math.round(currencyScore * 1000) / 1000,
       dateScore: Math.round(dateScore * 1000) / 1000,
       confidenceScore: Math.round(confidence * 1000) / 1000,
-      matchType: resolveMatchType(confidence, pattern.canAutoMatch),
+      matchType: resolveMatchType(confidence, pattern.canAutoMatch, nameScore),
       isAlreadyMatched: candidate.isAlreadyMatched,
     };
 

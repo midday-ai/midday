@@ -205,112 +205,12 @@ export function calculateAmountScore(
 
   // Fallback for cross-currency without usable base amounts.
   const ratio =
-    Math.max(absAmount1, absAmount2) / Math.max(Math.min(absAmount1, absAmount2), 1e-9);
+    Math.max(absAmount1, absAmount2) /
+    Math.max(Math.min(absAmount1, absAmount2), 1e-9);
   if (ratio > 5) return 0.1;
   if (percentageDiff <= 0.05) return 0.7;
   if (percentageDiff <= 0.2) return 0.4;
   return 0.1;
-}
-
-function calculateAmountDifferenceScore(
-  amount1: number,
-  amount2: number,
-  matchType:
-    | "exact_currency"
-    | "base_currency"
-    | "cross_currency_base"
-    | "team_base"
-    | "different_currency"
-    | "fallback",
-): number {
-  // Smart cross-perspective matching: only use absolute values for specific cases
-  let useAbsoluteValues = false;
-
-  // Handle invoice (positive) to payment (negative) scenarios
-  // This applies to all match types, not just cross-currency
-  const _sameSign =
-    (amount1 > 0 && amount2 > 0) || (amount1 < 0 && amount2 < 0);
-  const oppositeSigns =
-    (amount1 > 0 && amount2 < 0) || (amount1 < 0 && amount2 > 0);
-
-  // Use absolute values for opposite signs (invoice vs payment scenario)
-  if (oppositeSigns) {
-    useAbsoluteValues = true;
-  }
-
-  const compareAmount1 = useAbsoluteValues ? Math.abs(amount1) : amount1;
-  const compareAmount2 = useAbsoluteValues ? Math.abs(amount2) : amount2;
-  const diff = Math.abs(compareAmount1 - compareAmount2);
-  const maxAmount = Math.max(
-    Math.abs(compareAmount1),
-    Math.abs(compareAmount2),
-  );
-
-  if (maxAmount === 0) return amount1 === amount2 ? 1 : 0;
-
-  const percentageDiff = diff / maxAmount;
-
-  // Adjust scoring based on match type
-  let baseScore = 0;
-
-  // Apply penalty for cross-perspective matching to reduce false positives
-  let crossPerspectivePenalty = 1.0;
-  if (useAbsoluteValues) {
-    // Require tighter tolerance for opposite-sign matching
-    // For cross-currency different-sign matches, be much more conservative
-    if (matchType === "different_currency") {
-      crossPerspectivePenalty = 0.3; // 70% penalty for cross-currency opposite signs
-    } else {
-      crossPerspectivePenalty = 0.7; // 30% penalty for same-currency opposite signs
-    }
-  }
-
-  if (percentageDiff === 0) {
-    baseScore = 1.0;
-  } else if (percentageDiff <= 0.01) {
-    // 1% tolerance
-    baseScore = 0.98;
-  } else if (percentageDiff <= 0.02) {
-    // 2% tolerance
-    baseScore = 0.95;
-  } else if (percentageDiff <= 0.025) {
-    // 2.5% tolerance
-    baseScore = 0.92;
-  } else if (percentageDiff <= 0.03) {
-    // 3% tolerance
-    baseScore = 0.9;
-  } else if (percentageDiff <= 0.05) {
-    // 5% tolerance
-    baseScore = 0.85;
-  } else if (percentageDiff <= 0.1) {
-    // 10% tolerance
-    baseScore = 0.6;
-  } else if (percentageDiff <= 0.2) {
-    // 20% tolerance
-    baseScore = 0.3;
-  } else {
-    baseScore = 0;
-  }
-
-  // Apply bonuses/penalties based on match type
-  switch (matchType) {
-    case "exact_currency":
-      // Bonus for exact currency match - this is the strongest signal
-      return Math.min(1.0, baseScore * 1.1);
-
-    case "base_currency":
-    case "team_base":
-      // Slight bonus for proper base currency conversion
-      return Math.min(1.0, baseScore * 1.05);
-
-    case "cross_currency_base":
-      // Cross-currency but using base amounts - good conversion, apply cross-perspective penalty if needed
-      return Math.min(1.0, baseScore * 1.03 * crossPerspectivePenalty);
-
-    default:
-      // For different_currency and fallback cases, apply cross-perspective penalty
-      return baseScore * crossPerspectivePenalty;
-  }
 }
 
 export function calculateCurrencyScore(
@@ -442,11 +342,7 @@ export function calculateNameScore(
         inboxConcatenated.includes(compareConcatenated) ||
         compareConcatenated.includes(inboxConcatenated))
     ) {
-      scores.push(
-        inboxConcatenated === compareConcatenated
-          ? 0.95
-          : 0.8,
-      );
+      scores.push(inboxConcatenated === compareConcatenated ? 0.95 : 0.8);
     }
   }
 
@@ -498,7 +394,12 @@ export function scoreMatch({
   }
 
   // Cross-currency boost when financial conversion and name/date align strongly.
-  if (!isSameCurrency && nameScore >= 0.5 && amountScore >= 0.6 && dateScore >= 0.3) {
+  if (
+    !isSameCurrency &&
+    nameScore >= 0.5 &&
+    amountScore >= 0.6 &&
+    dateScore >= 0.3
+  ) {
     confidence = Math.max(confidence, 0.8);
   }
 
