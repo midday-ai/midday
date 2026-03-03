@@ -1,11 +1,10 @@
 import {
   calculateInboxSuggestions,
-  createMatchSuggestion,
   findInboxMatches,
   getPendingInboxForMatching,
   getTransactionById,
   hasSuggestion,
-  matchTransaction,
+  persistInboxSuggestionWorkflow,
   updateInbox,
 } from "@midday/db/queries";
 import type { Job } from "bullmq";
@@ -52,40 +51,28 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
           forwardMatches.set(transactionId, inboxMatch.inboxId);
           claimedInboxIds.add(inboxMatch.inboxId);
 
-          // Determine if this should be auto-matched or suggested
-          const shouldAutoMatch = inboxMatch.matchType === "auto_matched";
+          await updateInbox(db, {
+            id: inboxMatch.inboxId,
+            teamId,
+            status: "analyzing",
+          });
 
-          if (shouldAutoMatch && transactionId) {
-            await createMatchSuggestion(db, {
-              teamId,
-              inboxId: inboxMatch.inboxId,
+          const { action } = await persistInboxSuggestionWorkflow(db, {
+            teamId,
+            inboxId: inboxMatch.inboxId,
+            candidate: {
               transactionId,
               confidenceScore: inboxMatch.confidenceScore,
               amountScore: inboxMatch.amountScore,
               currencyScore: inboxMatch.currencyScore,
               dateScore: inboxMatch.dateScore,
               nameScore: inboxMatch.nameScore,
-              matchType: "auto_matched",
-              status: "confirmed",
-              matchDetails: {
-                autoMatched: true,
-                calculatedAt: new Date().toISOString(),
-                source: "forward_match",
-                criteria: {
-                  confidence: inboxMatch.confidenceScore,
-                  amount: inboxMatch.amountScore,
-                  currency: inboxMatch.currencyScore,
-                  date: inboxMatch.dateScore,
-                },
-              },
-            });
+              matchType: inboxMatch.matchType,
+            },
+            source: "forward_match",
+          });
 
-            await matchTransaction(db, {
-              id: inboxMatch.inboxId,
-              teamId,
-              transactionId,
-            });
-
+          if (action === "auto_matched") {
             forwardMatchCount++;
 
             this.logger.info("Auto-matched transaction to inbox", {
@@ -94,69 +81,7 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
               inboxId: inboxMatch.inboxId,
               confidence: inboxMatch.confidenceScore,
             });
-
-            // Send notification for auto-match
-            // Get transaction data to create complete MatchResult
-            const transaction = await getTransactionById(db, {
-              id: transactionId,
-              teamId,
-            });
-
-            if (transaction) {
-              await triggerMatchingNotification({
-                db,
-                teamId,
-                inboxId: inboxMatch.inboxId,
-                result: {
-                  action: "auto_matched",
-                  suggestion: {
-                    transactionId,
-                    name: transaction.name,
-                    amount: transaction.amount,
-                    currency: transaction.currency,
-                    date: transaction.date,
-                    confidenceScore: inboxMatch.confidenceScore,
-                    matchType: "auto_matched",
-                    amountScore: inboxMatch.amountScore,
-                    currencyScore: inboxMatch.currencyScore,
-                    dateScore: inboxMatch.dateScore,
-                    nameScore: inboxMatch.nameScore,
-                    isAlreadyMatched: false,
-                  },
-                },
-              });
-            }
-          } else if (transactionId) {
-            // Write suggestion record and notify user for manual review
-            await createMatchSuggestion(db, {
-              teamId,
-              inboxId: inboxMatch.inboxId,
-              transactionId,
-              confidenceScore: inboxMatch.confidenceScore,
-              amountScore: inboxMatch.amountScore,
-              currencyScore: inboxMatch.currencyScore,
-              dateScore: inboxMatch.dateScore,
-              nameScore: inboxMatch.nameScore,
-              matchType: inboxMatch.matchType,
-              status: "pending",
-              matchDetails: {
-                calculatedAt: new Date().toISOString(),
-                source: "forward_match",
-                scores: {
-                  amount: inboxMatch.amountScore,
-                  currency: inboxMatch.currencyScore,
-                  date: inboxMatch.dateScore,
-                  name: inboxMatch.nameScore,
-                },
-              },
-            });
-
-            await updateInbox(db, {
-              id: inboxMatch.inboxId,
-              teamId,
-              status: "suggested_match",
-            });
-
+          } else {
             forwardSuggestionCount++;
 
             this.logger.info("Created forward match suggestion", {
@@ -165,36 +90,39 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
               inboxId: inboxMatch.inboxId,
               confidence: inboxMatch.confidenceScore,
             });
+          }
 
-            const transaction = await getTransactionById(db, {
-              id: transactionId,
+          const transaction = await getTransactionById(db, {
+            id: transactionId,
+            teamId,
+          });
+
+          if (transaction) {
+            await triggerMatchingNotification({
+              db,
               teamId,
-            });
-
-            if (transaction) {
-              await triggerMatchingNotification({
-                db,
-                teamId,
-                inboxId: inboxMatch.inboxId,
-                result: {
-                  action: "suggestion_created",
-                  suggestion: {
-                    transactionId,
-                    name: transaction.name,
-                    amount: transaction.amount,
-                    currency: transaction.currency,
-                    date: transaction.date,
-                    confidenceScore: inboxMatch.confidenceScore,
-                    matchType: inboxMatch.matchType,
-                    amountScore: inboxMatch.amountScore,
-                    currencyScore: inboxMatch.currencyScore,
-                    dateScore: inboxMatch.dateScore,
-                    nameScore: inboxMatch.nameScore,
-                    isAlreadyMatched: false,
-                  },
+              inboxId: inboxMatch.inboxId,
+              result: {
+                action,
+                suggestion: {
+                  transactionId,
+                  name: transaction.name,
+                  amount: transaction.amount,
+                  currency: transaction.currency,
+                  date: transaction.date,
+                  confidenceScore: inboxMatch.confidenceScore,
+                  matchType:
+                    action === "auto_matched"
+                      ? "auto_matched"
+                      : inboxMatch.matchType,
+                  amountScore: inboxMatch.amountScore,
+                  currencyScore: inboxMatch.currencyScore,
+                  dateScore: inboxMatch.dateScore,
+                  nameScore: inboxMatch.nameScore,
+                  isAlreadyMatched: false,
                 },
-              });
-            }
+              },
+            });
           }
         }
       } catch (error) {

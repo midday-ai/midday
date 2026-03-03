@@ -20,6 +20,97 @@ export function hasSuggestion(result: {
   return result.action !== "no_match_yet" && result.suggestion !== undefined;
 }
 
+type PersistInboxSuggestionCandidate = Pick<
+  MatchResult,
+  | "transactionId"
+  | "confidenceScore"
+  | "amountScore"
+  | "currencyScore"
+  | "dateScore"
+  | "nameScore"
+  | "matchType"
+>;
+
+export async function persistInboxSuggestionWorkflow(
+  db: Database,
+  params: {
+    teamId: string;
+    inboxId: string;
+    candidate: PersistInboxSuggestionCandidate;
+    source?: string;
+  },
+): Promise<{
+  action: "auto_matched" | "suggestion_created";
+}> {
+  const { teamId, inboxId, candidate, source } = params;
+  const shouldAutoMatch = candidate.matchType === "auto_matched";
+
+  if (shouldAutoMatch) {
+    await createMatchSuggestion(db, {
+      teamId,
+      inboxId,
+      transactionId: candidate.transactionId,
+      confidenceScore: candidate.confidenceScore,
+      amountScore: candidate.amountScore,
+      currencyScore: candidate.currencyScore,
+      dateScore: candidate.dateScore,
+      nameScore: candidate.nameScore,
+      matchType: "auto_matched",
+      status: "confirmed",
+      matchDetails: {
+        autoMatched: true,
+        calculatedAt: new Date().toISOString(),
+        ...(source ? { source } : {}),
+        criteria: {
+          confidence: candidate.confidenceScore,
+          amount: candidate.amountScore,
+          currency: candidate.currencyScore,
+          date: candidate.dateScore,
+        },
+      },
+    });
+
+    await matchTransaction(db, {
+      id: inboxId,
+      transactionId: candidate.transactionId,
+      teamId,
+    });
+
+    return { action: "auto_matched" };
+  }
+
+  await createMatchSuggestion(db, {
+    teamId,
+    inboxId,
+    transactionId: candidate.transactionId,
+    confidenceScore: candidate.confidenceScore,
+    amountScore: candidate.amountScore,
+    currencyScore: candidate.currencyScore,
+    dateScore: candidate.dateScore,
+    nameScore: candidate.nameScore,
+    matchType: candidate.matchType,
+    status: "pending",
+    matchDetails: {
+      calculatedAt: new Date().toISOString(),
+      ...(source ? { source } : {}),
+      scores: {
+        amount: candidate.amountScore,
+        currency: candidate.currencyScore,
+        date: candidate.dateScore,
+        name: candidate.nameScore,
+      },
+    },
+  });
+
+  await updateInbox(db, {
+    id: inboxId,
+    teamId,
+    status: "suggested_match",
+  });
+
+  return { action: "suggestion_created" };
+}
+
 // Calculate and store suggestions for an inbox item
 export async function calculateInboxSuggestions(
   db: Database,
@@ -60,79 +151,14 @@ export async function calculateInboxSuggestions(
     return { action: "no_match_yet" };
   }
 
-  // Check if this should be auto-matched (very strict criteria)
-  const shouldAutoMatch = bestMatch.matchType === "auto_matched";
-
-  if (shouldAutoMatch) {
-    // Store the auto-match record for tracking
-    await createMatchSuggestion(db, {
-      teamId,
-      inboxId,
-      transactionId: bestMatch.transactionId,
-      confidenceScore: bestMatch.confidenceScore,
-      amountScore: bestMatch.amountScore,
-      currencyScore: bestMatch.currencyScore,
-      dateScore: bestMatch.dateScore,
-      nameScore: bestMatch.nameScore,
-      matchType: "auto_matched",
-      status: "confirmed", // Already confirmed by system
-      matchDetails: {
-        autoMatched: true,
-        calculatedAt: new Date().toISOString(),
-        criteria: {
-          confidence: bestMatch.confidenceScore,
-          amount: bestMatch.amountScore,
-          currency: bestMatch.currencyScore,
-          date: bestMatch.dateScore,
-        },
-      },
-    });
-
-    // Perform the actual match
-    await matchTransaction(db, {
-      id: inboxId,
-      transactionId: bestMatch.transactionId,
-      teamId,
-    });
-
-    return {
-      action: "auto_matched",
-      suggestion: bestMatch,
-    };
-  }
-
-  // Create suggestion and update inbox status to 'suggested_match'
-  await createMatchSuggestion(db, {
+  const { action } = await persistInboxSuggestionWorkflow(db, {
     teamId,
     inboxId,
-    transactionId: bestMatch.transactionId,
-    confidenceScore: bestMatch.confidenceScore,
-    amountScore: bestMatch.amountScore,
-    currencyScore: bestMatch.currencyScore,
-    dateScore: bestMatch.dateScore,
-    nameScore: bestMatch.nameScore,
-    matchType: bestMatch.matchType,
-    status: "pending",
-    matchDetails: {
-      calculatedAt: new Date().toISOString(),
-      scores: {
-        amount: bestMatch.amountScore,
-        currency: bestMatch.currencyScore,
-        date: bestMatch.dateScore,
-        name: bestMatch.nameScore,
-      },
-    },
-  });
-
-  // Update inbox status to indicate suggestion is available
-  await updateInbox(db, {
-    id: inboxId,
-    teamId,
-    status: "suggested_match",
+    candidate: bestMatch,
   });
 
   return {
-    action: "suggestion_created",
+    action,
     suggestion: bestMatch,
   };
 }
