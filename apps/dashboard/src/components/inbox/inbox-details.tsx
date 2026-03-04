@@ -178,13 +178,21 @@ export function InboxDetails() {
 
   const handleRetryMatching = () => {
     if (data?.id) {
-      queryClient.setQueryData(
-        trpc.inbox.getById.queryKey({ id: data.id }),
-        (old: typeof data) =>
-          old ? { ...old, status: "analyzing" as const } : old,
+      const queryKey = trpc.inbox.getById.queryKey({ id: data.id });
+      const previousData = queryClient.getQueryData(queryKey);
+
+      queryClient.setQueryData(queryKey, (old) =>
+        old ? { ...old, status: "analyzing" as const } : old,
       );
 
-      retryMatchingMutation.mutate({ id: data.id });
+      retryMatchingMutation.mutate(
+        { id: data.id },
+        {
+          onError: () => {
+            queryClient.setQueryData(queryKey, previousData);
+          },
+        },
+      );
     }
   };
 

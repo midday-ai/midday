@@ -217,12 +217,17 @@ export function InboxView() {
     for (const item of tableData) {
       if (realtimeInsertIdsRef.current.has(item.id)) {
         newIds.add(item.id);
-        realtimeInsertIdsRef.current.delete(item.id);
       }
     }
 
     return newIds;
   }, [tableData]);
+
+  useEffect(() => {
+    for (const id of newItemIds) {
+      realtimeInsertIdsRef.current.delete(id);
+    }
+  }, [newItemIds]);
 
   useEffect(() => {
     if (tableData.length > 0) {
