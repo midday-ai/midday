@@ -657,7 +657,6 @@ export async function findMatches(
       merchantName: transactions.merchantName,
       description: transactions.description,
       counterpartyName: transactions.counterpartyName,
-      isAlreadyMatched: sql<boolean>`false`,
     })
     .from(transactions)
     .where(
@@ -713,7 +712,7 @@ export async function findMatches(
     )
     .orderBy(
       sql`word_similarity(${inboxItem.displayName || ""}, COALESCE(${transactions.merchantName}, ${transactions.name})) DESC`,
-      sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) / GREATEST(1, ${inboxAmount})`,
+      sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) / GREATEST(1.0, ${inboxAmount})`,
       sql`ABS(${transactions.date} - ${sql.param(inboxItem.date)}::date)`,
     )
     .limit(30);
@@ -808,7 +807,7 @@ export async function findMatches(
         nameScore,
         autoThreshold,
       ),
-      isAlreadyMatched: candidate.isAlreadyMatched,
+      isAlreadyMatched: false,
     };
 
     scoredCandidates.push(proposed);
@@ -889,7 +888,6 @@ export async function findInboxMatches(
       type: inbox.type,
       website: inbox.website,
       invoiceNumber: inbox.invoiceNumber,
-      isAlreadyMatched: sql<boolean>`${inbox.transactionId} IS NOT NULL`,
     })
     .from(inbox)
     .where(
@@ -921,7 +919,7 @@ export async function findInboxMatches(
     )
     .orderBy(
       sql`word_similarity(${transactionItem.merchantName || transactionItem.name}, COALESCE(${inbox.displayName}, '')) DESC`,
-      sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${transactionAmount}) / GREATEST(1, ${transactionAmount})`,
+      sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${transactionAmount}) / GREATEST(1.0, ${transactionAmount})`,
       sql`ABS(${inbox.date} - ${sql.param(transactionItem.date)}::date)`,
     )
     .limit(30);
@@ -1014,7 +1012,7 @@ export async function findInboxMatches(
         nameScore,
         autoThreshold,
       ),
-      isAlreadyMatched: candidate.isAlreadyMatched,
+      isAlreadyMatched: false,
     };
 
     scoredCandidates.push(proposed);

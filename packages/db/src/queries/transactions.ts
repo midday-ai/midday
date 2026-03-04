@@ -1475,7 +1475,7 @@ export async function searchTransactionMatch(
         )
         .orderBy(
           sql`word_similarity(${item.displayName ?? ""}, COALESCE(${transactions.merchantName}, ${transactions.name})) DESC`,
-          sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) / GREATEST(1, ${inboxAmount})`,
+          sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) / GREATEST(1.0, ${inboxAmount})`,
           sql`ABS(${transactions.date} - ${item.date}::date)`,
         )
         .limit(Math.max(maxResults * 3, 30));
