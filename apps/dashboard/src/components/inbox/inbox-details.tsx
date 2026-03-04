@@ -84,17 +84,7 @@ export function InboxDetails() {
   );
 
   const retryMatchingMutation = useMutation(
-    trpc.inbox.retryMatching.mutationOptions({
-      onSuccess: () => {
-        // Refresh queries after retry matching completes
-        queryClient.invalidateQueries({
-          queryKey: trpc.inbox.getById.queryKey({ id: data?.id }),
-        });
-        queryClient.invalidateQueries({
-          queryKey: trpc.inbox.get.infiniteQueryKey(),
-        });
-      },
-    }),
+    trpc.inbox.retryMatching.mutationOptions(),
   );
 
   const blockSenderMutation = useMutation(
@@ -188,12 +178,21 @@ export function InboxDetails() {
 
   const handleRetryMatching = () => {
     if (data?.id) {
-      updateInboxMutation.mutate({
-        id: data.id,
-        status: "analyzing",
-      });
+      const queryKey = trpc.inbox.getById.queryKey({ id: data.id });
+      const previousData = queryClient.getQueryData(queryKey);
 
-      retryMatchingMutation.mutate({ id: data.id });
+      queryClient.setQueryData(queryKey, (old) =>
+        old ? { ...old, status: "analyzing" as const } : old,
+      );
+
+      retryMatchingMutation.mutate(
+        { id: data.id },
+        {
+          onError: () => {
+            queryClient.setQueryData(queryKey, previousData);
+          },
+        },
+      );
     }
   };
 
