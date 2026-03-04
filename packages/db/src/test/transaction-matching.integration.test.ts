@@ -19,7 +19,6 @@ const REAL_WORLD_SCENARIOS = {
         currency: "SEK",
         date: "2024-08-23",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.5), // Mock embedding
         status: "pending",
       },
       transaction: {
@@ -29,7 +28,6 @@ const REAL_WORLD_SCENARIOS = {
         currency: "SEK",
         date: "2024-08-25",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.52), // Slightly different embedding
       },
       expected: {
         shouldMatch: true,
@@ -48,7 +46,6 @@ const REAL_WORLD_SCENARIOS = {
         currency: "USD",
         date: "2025-02-26",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.6),
         status: "pending",
       },
       transaction: {
@@ -58,7 +55,6 @@ const REAL_WORLD_SCENARIOS = {
         currency: "USD",
         date: "2025-02-26",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.65),
       },
       expected: {
         shouldMatch: true,
@@ -82,7 +78,6 @@ const REAL_WORLD_SCENARIOS = {
         baseCurrency: "SEK",
         date: "2025-08-22",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.7),
         status: "pending",
       },
       transaction: {
@@ -94,7 +89,6 @@ const REAL_WORLD_SCENARIOS = {
         baseCurrency: "SEK",
         date: "2025-08-24",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.75),
       },
       expected: {
         shouldMatch: true,
@@ -115,7 +109,6 @@ const REAL_WORLD_SCENARIOS = {
         baseCurrency: "SEK",
         date: "2024-08-25",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.6),
         status: "pending",
       },
       transaction: {
@@ -127,7 +120,6 @@ const REAL_WORLD_SCENARIOS = {
         baseCurrency: "SEK",
         date: "2024-08-25",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.62),
       },
       expected: {
         shouldMatch: true,
@@ -151,7 +143,6 @@ const REAL_WORLD_SCENARIOS = {
         baseCurrency: "SEK",
         date: "2025-08-22",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.8),
         status: "pending",
       },
       transaction: {
@@ -163,7 +154,6 @@ const REAL_WORLD_SCENARIOS = {
         baseCurrency: "SEK",
         date: "2025-08-24",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.3), // Low semantic similarity
       },
       expected: {
         shouldMatch: false,
@@ -184,7 +174,6 @@ const REAL_WORLD_SCENARIOS = {
         baseCurrency: "SEK",
         date: "2024-08-25",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.7),
         status: "pending",
       },
       transaction: {
@@ -196,7 +185,6 @@ const REAL_WORLD_SCENARIOS = {
         baseCurrency: "SEK",
         date: "2024-08-25",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.72),
       },
       expected: {
         shouldMatch: false,
@@ -219,7 +207,6 @@ const REAL_WORLD_SCENARIOS = {
         currency: "USD",
         date: "2024-08-25",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.7),
         status: "pending",
       },
       transaction: {
@@ -229,7 +216,6 @@ const REAL_WORLD_SCENARIOS = {
         currency: "USD",
         date: "2024-08-25",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.72),
         // This transaction already has a match
         existingMatch: {
           inboxId: "other-inbox-id",
@@ -269,13 +255,12 @@ describe("Integration Tests - Real-World Scenarios", () => {
         );
         const dateScore = calculateDateScore(inbox.date, transaction.date);
 
-        // Calculate overall confidence (simplified version)
-        const embeddingScore = 0.8; // Mock high embedding similarity
+        const nameScore = 0.8;
         const overallConfidence =
           amountScore * 0.3 +
           currencyScore * 0.2 +
           dateScore * 0.2 +
-          embeddingScore * 0.3;
+          nameScore * 0.3;
 
         console.log(
           `Scores: Amount=${amountScore.toFixed(3)}, Currency=${currencyScore.toFixed(3)}, Date=${dateScore.toFixed(3)}, Overall=${overallConfidence.toFixed(3)}`,
@@ -346,12 +331,12 @@ describe("Integration Tests - Real-World Scenarios", () => {
         );
         const dateScore = calculateDateScore(inbox.date, transaction.date);
 
-        const embeddingScore = 0.3; // Mock low embedding similarity
+        const nameScore = 0.3;
         const overallConfidence =
           amountScore * 0.3 +
           currencyScore * 0.2 +
           dateScore * 0.2 +
-          embeddingScore * 0.3;
+          nameScore * 0.3;
 
         console.log(
           `Low scores: Amount=${amountScore.toFixed(3)}, Currency=${currencyScore.toFixed(3)}, Overall=${overallConfidence.toFixed(3)}`,
@@ -374,7 +359,6 @@ describe("Integration Tests - Real-World Scenarios", () => {
         currency: "USD",
         date: "2024-08-25",
         teamId: "team-1",
-        embedding: new Array(1536).fill(0.8),
         status: "pending",
       };
 
@@ -384,8 +368,7 @@ describe("Integration Tests - Real-World Scenarios", () => {
         amount: -100,
         currency: "USD",
         date: "2024-08-25",
-        teamId: "team-2", // Different team!
-        embedding: new Array(1536).fill(0.82),
+        teamId: "team-2",
       };
 
       // In a real integration test, the query would filter by teamId
@@ -418,26 +401,6 @@ describe("Integration Tests - Real-World Scenarios", () => {
         // In real integration test, only "pending" items would be returned by query
         expect(shouldProcess).toBe(status === "pending");
       }
-    });
-  });
-
-  describe("Embedding Requirements", () => {
-    test("should skip items without embeddings", () => {
-      const withEmbedding = {
-        displayName: "Has Embedding",
-        embedding: new Array(1536).fill(0.5),
-      };
-
-      const withoutEmbedding = {
-        displayName: "No Embedding",
-        embedding: null,
-      };
-
-      // Items without embeddings should be skipped
-      expect(withEmbedding.embedding).not.toBeNull();
-      expect(withoutEmbedding.embedding).toBeNull();
-
-      console.log("Embedding requirement enforced");
     });
   });
 });

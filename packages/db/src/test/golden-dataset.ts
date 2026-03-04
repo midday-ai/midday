@@ -46,7 +46,7 @@ export interface GoldenMatch {
     amountScore: number;
     currencyScore: number;
     dateScore: number;
-    embeddingScore: number;
+    nameScore: number;
   };
   matchType:
     | "perfect_match"
@@ -82,7 +82,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 1.0,
       currencyScore: 1.0,
       dateScore: 0.85, // Expense logic with banking delay
-      embeddingScore: 0.75,
+      nameScore: 0.75,
     },
     matchType: "perfect_match",
     category: "medium_amount",
@@ -109,7 +109,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 1.0,
       currencyScore: 1.0,
       dateScore: 0.85, // Same date still gets 0.85 with expense logic
-      embeddingScore: 0.85,
+      nameScore: 0.85,
     },
     matchType: "perfect_match",
     category: "small_amount",
@@ -135,7 +135,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 1.0,
       currencyScore: 1.0,
       dateScore: 0.85,
-      embeddingScore: 0.8,
+      nameScore: 0.8,
     },
     matchType: "perfect_match",
     category: "large_amount",
@@ -167,7 +167,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 1.0, // Perfect base amount match
       currencyScore: 0.3,
       dateScore: 0.85, // Expense logic date scoring
-      embeddingScore: 0.8,
+      nameScore: 0.8,
     },
     matchType: "cross_currency",
     category: "medium_amount",
@@ -198,7 +198,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 0.618, // Actual score for 8% difference
       currencyScore: 0.3,
       dateScore: 0.85, // Expense logic date scoring
-      embeddingScore: 0.7,
+      nameScore: 0.7,
     },
     matchType: "cross_currency",
     category: "small_amount",
@@ -231,7 +231,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 0.0, // Should be 0 for >20% difference
       currencyScore: 0.3,
       dateScore: 0.9,
-      embeddingScore: 0.4,
+      nameScore: 0.4,
     },
     matchType: "false_positive",
     category: "medium_amount",
@@ -262,7 +262,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 0.5, // Large cross-currency (avg 20K): 3.85% diff in tighter tier
       currencyScore: 0.3,
       dateScore: 0.85,
-      embeddingScore: 0.6,
+      nameScore: 0.6,
     },
     matchType: "false_positive",
     category: "large_amount",
@@ -291,7 +291,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 1.0,
       currencyScore: 1.0,
       dateScore: 0.1, // Very low date score
-      embeddingScore: 0.7,
+      nameScore: 0.7,
     },
     matchType: "date_mismatch",
     category: "medium_amount",
@@ -318,7 +318,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 0.0, // >20% difference gets 0 score
       currencyScore: 1.0,
       dateScore: 0.85, // Expense logic date scoring
-      embeddingScore: 0.9, // High semantic similarity
+      nameScore: 0.9, // High semantic similarity
     },
     matchType: "amount_mismatch",
     category: "small_amount",
@@ -347,7 +347,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 0.85, // 5% difference within tolerance band
       currencyScore: 1.0,
       dateScore: 0.85,
-      embeddingScore: 0.6,
+      nameScore: 0.6,
     },
     matchType: "perfect_match",
     category: "small_amount",
@@ -382,7 +382,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 0.8, // Cross-currency base amount comparison
       currencyScore: 0.3, // Cross-currency conservative penalty
       dateScore: 0.85, // 3-day difference with expense type logic
-      embeddingScore: 0.85, // Mock embedding score for testing
+      nameScore: 0.85, // Mock embedding score for testing
     },
     matchType: "perfect_match", // USD invoice to SEK payment with base amounts
     category: "medium_amount",
@@ -413,7 +413,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 1.0, // Perfect amount match
       currencyScore: 1.0, // Same currency
       dateScore: 0.85, // Same date with expense logic
-      embeddingScore: 0.85, // High semantic similarity expected
+      nameScore: 0.85, // High semantic similarity expected
     },
     matchType: "perfect_match",
     category: "small_amount",
@@ -441,7 +441,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 1.0, // Perfect amount match
       currencyScore: 1.0, // Same currency
       dateScore: 0.85, // 5-day delay within tolerance
-      embeddingScore: 0.85, // Good semantic match
+      nameScore: 0.85, // Good semantic match
     },
     matchType: "perfect_match",
     category: "large_amount",
@@ -470,7 +470,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 0.85, // 2.5% difference within tolerance band
       currencyScore: 1.0, // Same currency
       dateScore: 0.85, // Same date
-      embeddingScore: 0.85, // High semantic similarity
+      nameScore: 0.85, // High semantic similarity
     },
     matchType: "amount_mismatch",
     category: "small_amount",
@@ -498,7 +498,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 0.0, // Large amount difference (50%)
       currencyScore: 1.0, // Same currency
       dateScore: 0.85, // 5-day delay
-      embeddingScore: 0.85, // Good semantic match
+      nameScore: 0.85, // Good semantic match
     },
     matchType: "amount_mismatch",
     category: "large_amount",
@@ -528,7 +528,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 1.0, // Perfect amount match
       currencyScore: 1.0, // Same currency
       dateScore: 0.85, // Same date
-      embeddingScore: 0.85, // Good semantic match
+      nameScore: 0.85, // Good semantic match
     },
     matchType: "perfect_match", // Dates match, just conceptually old
     category: "large_amount",
@@ -558,7 +558,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 0.0, // Algorithm gives 0 for 40% difference (actual behavior)
       currencyScore: 1.0, // Same currency
       dateScore: 0.85, // Same date
-      embeddingScore: 0.95, // Perfect name match
+      nameScore: 0.95, // Perfect name match
     },
     matchType: "amount_mismatch",
     category: "medium_amount",
@@ -587,7 +587,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       amountScore: 1.0, // Very close amounts - perfect match
       currencyScore: 1.0, // Same currency
       dateScore: 0.85, // Same date
-      embeddingScore: 0.85, // Good semantic match
+      nameScore: 0.85, // Good semantic match
     },
     matchType: "perfect_match",
     category: "small_amount", // Very small amount
@@ -600,10 +600,8 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
 export function captureAlgorithmBaseline(
   _inbox: any,
   _transaction: any,
-  embeddingScore = 0.85,
+  nameScore = 0.85,
 ): any {
-  // This would use the actual algorithm functions to capture current behavior
-  // Useful when adding new real-world cases to establish regression baselines
   console.log("To capture baseline for new case:");
   console.log("1. Run the algorithm with this data");
   console.log("2. Copy the actual scores as expectedScores");
@@ -614,7 +612,7 @@ export function captureAlgorithmBaseline(
     amountScore: "CAPTURE_FROM_ACTUAL_RUN",
     currencyScore: "CAPTURE_FROM_ACTUAL_RUN",
     dateScore: "CAPTURE_FROM_ACTUAL_RUN",
-    embeddingScore,
+    nameScore,
   };
 }
 

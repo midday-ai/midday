@@ -7,6 +7,7 @@
     "test": "bun test --exit",
     "eval:matching:db": "bun run src/scripts/matching-eval-db.ts",
     "eval:progress": "bun run src/scripts/matching-progress.ts",
+    "eval:similar": "bun run src/scripts/eval-similar-transactions.ts",
     "test:matching": "bun test src/test/transaction-matching.test.ts",
     "test:performance": "bun test src/test/transaction-matching.performance.test.ts",
     "test:integration": "bun test src/test/transaction-matching.integration.test.ts",

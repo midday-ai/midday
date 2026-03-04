@@ -218,21 +218,25 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
 
     await this.updateProgress(job, 80, undefined, "finalizing");
 
-    // Trigger embeddings for imported transactions
     if (allTransactionIds.length > 0) {
-      this.logger.info("Triggering embeddings for imported transactions", {
-        count: allTransactionIds.length,
-        teamId,
-      });
-
       await triggerJob(
-        "embed-transaction",
+        "enrich-transactions",
         {
           transactionIds: allTransactionIds,
           teamId,
         },
         "transactions",
       );
+
+      await triggerJob(
+        "match-transactions-bidirectional",
+        {
+          teamId,
+          newTransactionIds: allTransactionIds,
+        },
+        "inbox",
+      );
+
       await this.updateProgress(job, 90, undefined, "enriching");
     }
 
