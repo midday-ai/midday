@@ -170,12 +170,13 @@ export function CustomerForm({ data }: Props) {
   });
 
   const onSelectAddress = (address: AddressDetails) => {
-    form.setValue("addressLine1", address.address_line_1);
-    form.setValue("city", address.city);
-    form.setValue("state", address.state);
-    form.setValue("country", address.country);
-    form.setValue("countryCode", address.country_code);
-    form.setValue("zip", address.zip);
+    const opts = { shouldDirty: true, shouldValidate: true } as const;
+    form.setValue("addressLine1", address.address_line_1, opts);
+    form.setValue("city", address.city, opts);
+    form.setValue("state", address.state, opts);
+    form.setValue("country", address.country, opts);
+    form.setValue("countryCode", address.country_code, opts);
+    form.setValue("zip", address.zip, opts);
   };
 
   const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
