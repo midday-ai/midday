@@ -102,7 +102,7 @@ export const updateInvoiceTool = tool({
               quantity: item.quantity ?? 0,
               price: item.price ?? 0,
             })),
-            dueDate: existing.dueDate?.toISOString() ?? "",
+            dueDate: existing.dueDate ?? "",
             status: existing.status ?? "draft",
           },
         },
@@ -211,10 +211,8 @@ export const updateInvoiceTool = tool({
         changes.push(`VAT set to ${input.vat}`);
       }
 
-      const resolvedDueDate =
-        input.dueDate ?? existing.dueDate?.toISOString() ?? "";
-      const resolvedIssueDate =
-        input.issueDate ?? existing.issueDate?.toISOString() ?? "";
+      const resolvedDueDate = input.dueDate ?? existing.dueDate ?? "";
+      const resolvedIssueDate = input.issueDate ?? existing.issueDate ?? "";
       const resolvedCurrency =
         input.currency?.toUpperCase() ?? existing.currency ?? "USD";
 
