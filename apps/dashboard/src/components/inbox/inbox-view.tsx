@@ -40,6 +40,7 @@ export function InboxView() {
   const { play: playMatchSound } = useMatchSound();
 
   const realtimeInsertIdsRef = useRef(new Set<string>());
+  const animatedIdsRef = useRef(new Set<string>());
   const parentRef = useRef<HTMLDivElement>(null);
   const shouldScrollRef = useRef(false);
 
@@ -369,7 +370,12 @@ export function InboxView() {
             {virtualItems.map((virtualRow) => {
               const item = tableData[virtualRow.index];
               if (!item) return null;
-              const isNewItem = newItemIds.has(item.id);
+              const shouldAnimate =
+                newItemIds.has(item.id) && !animatedIdsRef.current.has(item.id);
+
+              if (shouldAnimate) {
+                animatedIdsRef.current.add(item.id);
+              }
 
               return (
                 <div
@@ -386,11 +392,13 @@ export function InboxView() {
                 >
                   <motion.div
                     initial={
-                      isNewItem ? { opacity: 0, y: -30, scale: 0.95 } : false
+                      shouldAnimate
+                        ? { opacity: 0, y: -30, scale: 0.95 }
+                        : false
                     }
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={
-                      isNewItem
+                      shouldAnimate
                         ? {
                             duration: 0.4,
                             ease: [0.23, 1, 0.32, 1],
