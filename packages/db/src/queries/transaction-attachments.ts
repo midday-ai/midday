@@ -1,9 +1,10 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import {
   accountingSyncRecords,
   inbox,
   transactionAttachments,
+  transactionMatchSuggestions,
   transactions,
 } from "../schema";
 import { createActivity } from "./activities";
@@ -147,8 +148,23 @@ export async function deleteAttachment(
     throw new Error("Attachment not found");
   }
 
+  // Collect affected inbox IDs BEFORE clearing their foreign keys, so we can
+  // update the corresponding match suggestions afterwards.
+  const affectedInboxIds: string[] = [];
+  if (result.transactionId) {
+    const rows = await db
+      .select({ id: inbox.id })
+      .from(inbox)
+      .where(
+        and(
+          eq(inbox.teamId, params.teamId),
+          sql`(${inbox.attachmentId} = ${result.id} OR ${inbox.transactionId} = ${result.transactionId})`,
+        ),
+      );
+    for (const r of rows) affectedInboxIds.push(r.id);
+  }
+
   // Update inbox items connected to this attachment
-  // First, update inbox items that have this specific attachmentId
   await db
     .update(inbox)
     .set({
@@ -158,7 +174,6 @@ export async function deleteAttachment(
     })
     .where(eq(inbox.attachmentId, result.id));
 
-  // Also update inbox items by transaction_id (in case there are multiple inbox items for the same transaction)
   if (result.transactionId) {
     await db
       .update(inbox)
@@ -169,10 +184,43 @@ export async function deleteAttachment(
       .where(
         and(
           eq(inbox.transactionId, result.transactionId),
-          // Only update if attachmentId is null or doesn't match (to avoid double updates)
           sql`(${inbox.attachmentId} IS NULL OR ${inbox.attachmentId} != ${result.id})`,
         ),
       );
+  }
+
+  // Mark match suggestions as "unmatched" so retry matching can create fresh ones.
+  // Without this, createMatchSuggestion's onConflictDoUpdate silently skips rows
+  // with status "confirmed", leaving the inbox stuck in "suggested_match" with no
+  // pending suggestion the user can act on.
+  if (result.transactionId && affectedInboxIds.length > 0) {
+    for (const inboxId of affectedInboxIds) {
+      const [originalSuggestion] = await db
+        .select({ id: transactionMatchSuggestions.id })
+        .from(transactionMatchSuggestions)
+        .where(
+          and(
+            eq(transactionMatchSuggestions.inboxId, inboxId),
+            eq(
+              transactionMatchSuggestions.transactionId,
+              result.transactionId!,
+            ),
+            eq(transactionMatchSuggestions.teamId, params.teamId),
+          ),
+        )
+        .orderBy(desc(transactionMatchSuggestions.createdAt))
+        .limit(1);
+
+      if (originalSuggestion) {
+        await db
+          .update(transactionMatchSuggestions)
+          .set({
+            status: "unmatched",
+            userActionAt: new Date().toISOString(),
+          })
+          .where(eq(transactionMatchSuggestions.id, originalSuggestion.id));
+      }
+    }
   }
 
   // Delete tax_rate and tax_type from the transaction

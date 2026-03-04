@@ -83,7 +83,7 @@ export async function persistInboxSuggestionWorkflow(
       return { action: "auto_matched" as const };
     }
 
-    await createMatchSuggestion(tx, {
+    const suggestionRow = await createMatchSuggestion(tx, {
       teamId,
       inboxId,
       transactionId: candidate.transactionId,
@@ -105,6 +105,19 @@ export async function persistInboxSuggestionWorkflow(
         },
       },
     });
+
+    if (!suggestionRow) {
+      logger.warn(
+        "createMatchSuggestion no-op: existing row blocked upsert, resetting inbox to pending",
+        { teamId, inboxId, transactionId: candidate.transactionId },
+      );
+      await updateInbox(tx, {
+        id: inboxId,
+        teamId,
+        status: "pending",
+      });
+      return { action: "suggestion_created" as const };
+    }
 
     await updateInbox(tx, {
       id: inboxId,
