@@ -140,6 +140,11 @@ const SUGGESTED_ACTIONS_CONFIG = [
       showCanvas: true,
     },
   },
+  {
+    id: "create-invoice",
+    toolName: "createInvoice",
+    toolParams: {},
+  },
 ] as const;
 
 export const suggestedActionsRouter = createTRPCRouter({
