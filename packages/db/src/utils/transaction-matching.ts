@@ -377,9 +377,20 @@ export function scoreMatch({
   isExactAmount,
   declinePenalty = 0,
 }: ScoreMatchInput): number {
+  // Cross-currency with a strong name match: the vendor is already identified,
+  // so amount differences are mostly FX noise. Shift weight toward date to
+  // disambiguate recurring charges from different months.
+  const isCrossCurrencyKnownVendor = !isSameCurrency && nameScore >= 0.8;
+  const amountWeight = isCrossCurrencyKnownVendor ? 20 : 30;
+  const dateWeight = isCrossCurrencyKnownVendor ? 25 : 15;
+  const totalWeight = 10 + amountWeight + dateWeight + 5;
+
   const weightedBase =
-    (nameScore * 10 + amountScore * 30 + dateScore * 15 + currencyScore * 5) /
-    60;
+    (nameScore * 10 +
+      amountScore * amountWeight +
+      dateScore * dateWeight +
+      currencyScore * 5) /
+    totalWeight;
 
   let confidence = weightedBase;
 
@@ -391,22 +402,21 @@ export function scoreMatch({
     confidence = Math.max(confidence, 0.78);
   }
 
-  // Cross-currency boost when financial conversion and name/date align strongly.
+  // Cross-currency additive boost instead of a hard floor — preserves the
+  // natural score spread so date can still discriminate between months.
   if (
     !isSameCurrency &&
     nameScore >= 0.5 &&
     amountScore >= 0.6 &&
     dateScore >= 0.3
   ) {
-    confidence = Math.max(confidence, 0.8);
+    confidence = Math.max(confidence, confidence + 0.05);
   }
 
   if (nameScore === 0) {
     confidence *= 0.55;
   }
 
-  // Date veto: a very large date gap (60+ days) likely means the amount
-  // match is coincidental, even if exact.
   if (dateScore < 0.2) {
     confidence *= 0.65;
   }

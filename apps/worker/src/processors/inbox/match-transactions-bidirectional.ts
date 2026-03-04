@@ -140,10 +140,14 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
           }
         }
       } catch (error) {
-        // Release optimistic claim so this inbox can be retried in the same run.
-        forwardMatches.delete(transactionId);
-        if (processingInboxId) {
-          claimedInboxIds.delete(processingInboxId);
+        // Only release the in-memory claim when the DB workflow was NOT persisted.
+        // If workflowPersisted is true the match/suggestion is committed — releasing
+        // the claim would let Phase 2 reprocess an already-matched inbox item.
+        if (!workflowPersisted) {
+          forwardMatches.delete(transactionId);
+          if (processingInboxId) {
+            claimedInboxIds.delete(processingInboxId);
+          }
         }
 
         // If persistence did not complete, avoid leaving the inbox stuck in "analyzing".
