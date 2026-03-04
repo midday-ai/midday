@@ -44,7 +44,6 @@ export type MatchResult = {
   amount: number;
   currency: string;
   date: string;
-  embeddingScore?: number;
   nameScore?: number;
   amountScore: number;
   currencyScore: number;
@@ -60,7 +59,6 @@ export type InboxMatchResult = {
   amount: number | null;
   currency: string | null;
   date: string;
-  embeddingScore?: number;
   nameScore?: number;
   amountScore: number;
   currencyScore: number;
@@ -78,7 +76,6 @@ export type CreateMatchSuggestionParams = {
   amountScore: number;
   currencyScore: number;
   dateScore: number;
-  embeddingScore?: number;
   nameScore?: number;
   matchType: MatchType;
   matchDetails: Record<string, any>;
@@ -1056,7 +1053,6 @@ export async function createMatchSuggestion(
       amountScore: params.amountScore,
       currencyScore: params.currencyScore,
       dateScore: params.dateScore,
-      embeddingScore: null,
       nameScore: params.nameScore,
       matchType: params.matchType,
       matchDetails: params.matchDetails,
@@ -1077,7 +1073,6 @@ export async function createMatchSuggestion(
         amountScore: params.amountScore,
         currencyScore: params.currencyScore,
         dateScore: params.dateScore,
-        embeddingScore: null,
         nameScore: params.nameScore,
         matchType: params.matchType,
         matchDetails: params.matchDetails,

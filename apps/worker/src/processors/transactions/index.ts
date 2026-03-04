@@ -1,4 +1,3 @@
-import { EmbedTransactionProcessor } from "./embed-transaction";
 import { EnrichTransactionProcessor } from "./enrich-transaction";
 import { ExportTransactionsProcessor } from "./export";
 import { ImportTransactionsProcessor } from "./import-transactions";
@@ -10,7 +9,6 @@ import { UpdateBaseCurrencyProcessor } from "./update-base-currency";
 /**
  * Export all transaction processors (for type imports)
  */
-export { EmbedTransactionProcessor } from "./embed-transaction";
 export { EnrichTransactionProcessor } from "./enrich-transaction";
 export { ExportTransactionsProcessor } from "./export";
 export { ImportTransactionsProcessor } from "./import-transactions";
@@ -25,7 +23,6 @@ export { UpdateBaseCurrencyProcessor } from "./update-base-currency";
  * Job names are derived from class names: ExportTransactionsProcessor -> export-transactions
  */
 export const transactionProcessors = {
-  "embed-transaction": new EmbedTransactionProcessor(),
   "enrich-transactions": new EnrichTransactionProcessor(),
   "export-transactions": new ExportTransactionsProcessor(),
   "import-transactions": new ImportTransactionsProcessor(),

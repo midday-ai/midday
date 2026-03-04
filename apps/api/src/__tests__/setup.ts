@@ -223,7 +223,6 @@ const dbQueriesMock = new Proxy(
     unmatchTransaction: mock(() => ({})),
     confirmSuggestedMatch: mock(() => ({})),
     declineSuggestedMatch: mock(() => ({})),
-    deleteInboxEmbedding: mock(() => ({})),
 
     // API Keys
     getApiKeyByToken: mocks.getApiKeyByToken,

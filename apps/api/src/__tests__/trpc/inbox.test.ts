@@ -34,7 +34,6 @@ mock.module("@midday/db/queries", () => ({
   unmatchTransaction: mock(() => ({})),
   confirmSuggestedMatch: mock(() => ({})),
   declineSuggestedMatch: mock(() => ({})),
-  deleteInboxEmbedding: mock(() => ({})),
 }));
 
 // Import after mocking

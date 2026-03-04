@@ -16,7 +16,6 @@ type EvalRecord = {
   matchType: string;
   confidenceScore: number | null;
   amountScore: number | null;
-  embeddingScore: number | null;
   inboxDisplayName: string;
   inboxAmount: number;
   inboxCurrency: string;
@@ -37,7 +36,6 @@ type EvalRecord = {
   transactionBaseCurrency: string;
   transactionCategory: string;
   transactionRecurring: boolean;
-  inboxEmbeddingSourceText: string;
   teamId: string;
 };
 
@@ -54,8 +52,6 @@ function toEvalRecord(row: Record<string, unknown>): EvalRecord {
       row.confidence_score === null ? null : Number(row.confidence_score ?? 0),
     amountScore:
       row.amount_score === null ? null : Number(row.amount_score ?? 0),
-    embeddingScore:
-      row.embedding_score === null ? null : Number(row.embedding_score ?? 0),
     inboxDisplayName: String(row.inbox_display_name ?? ""),
     inboxAmount: Number(row.inbox_amount ?? 0),
     inboxCurrency: String(row.inbox_currency ?? ""),
@@ -78,7 +74,6 @@ function toEvalRecord(row: Record<string, unknown>): EvalRecord {
     transactionBaseCurrency: String(row.transaction_base_currency ?? ""),
     transactionCategory: String(row.transaction_category ?? ""),
     transactionRecurring: Boolean(row.transaction_recurring),
-    inboxEmbeddingSourceText: String(row.inbox_embedding_source_text ?? ""),
     teamId: String(row.team_id ?? ""),
   };
 }
@@ -268,7 +263,6 @@ async function fetchRecords(
         COALESCE(s.match_type, '')::text AS match_type,
         s.confidence_score::float8 AS confidence_score,
         s.amount_score::float8 AS amount_score,
-        s.embedding_score::float8 AS embedding_score,
         COALESCE(i.display_name, '')::text AS inbox_display_name,
         COALESCE(i.amount, 0)::float8 AS inbox_amount,
         COALESCE(i.currency, '')::text AS inbox_currency,
@@ -289,7 +283,6 @@ async function fetchRecords(
         COALESCE(t.base_currency, '')::text AS transaction_base_currency,
         COALESCE(t.category::text, '')::text AS transaction_category,
         COALESCE(t.recurring, false)::boolean AS transaction_recurring,
-        ''::text AS inbox_embedding_source_text,
         s.team_id::text AS team_id
       FROM transaction_match_suggestions s
       JOIN inbox i ON i.id = s.inbox_id
@@ -312,7 +305,6 @@ async function fetchRecords(
         'manual'::text AS match_type,
         NULL::float8 AS confidence_score,
         NULL::float8 AS amount_score,
-        NULL::float8 AS embedding_score,
         COALESCE(i.display_name, '')::text AS inbox_display_name,
         COALESCE(i.amount, 0)::float8 AS inbox_amount,
         COALESCE(i.currency, '')::text AS inbox_currency,
@@ -333,7 +325,6 @@ async function fetchRecords(
         COALESCE(t.base_currency, '')::text AS transaction_base_currency,
         COALESCE(t.category::text, '')::text AS transaction_category,
         COALESCE(t.recurring, false)::boolean AS transaction_recurring,
-        ''::text AS inbox_embedding_source_text,
         i.team_id::text AS team_id
       FROM inbox i
       JOIN transactions t ON t.id = i.transaction_id

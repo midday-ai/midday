@@ -62,13 +62,12 @@ describe("Golden Dataset Tests", () => {
         console.log(
           `Expected scores: Amount=${expectedScores.amountScore.toFixed(3)}, Currency=${expectedScores.currencyScore.toFixed(3)}, Date=${expectedScores.dateScore.toFixed(3)}`,
         );
-        // Calculate overall confidence (simplified)
-        const mockEmbeddingScore = expectedScores.embeddingScore;
+        const mockNameScore = expectedScores.nameScore;
         const overallConfidence =
           amountScore * 0.3 +
           currencyScore * 0.2 +
           dateScore * 0.2 +
-          mockEmbeddingScore * 0.3;
+          mockNameScore * 0.3;
         expect(overallConfidence).toBeCloseTo(
           expectedScores.confidenceScore,
           1,
@@ -137,13 +136,12 @@ describe("Golden Dataset Tests", () => {
         console.log(
           `False positive scores: Amount=${amountScore.toFixed(3)}, Currency=${currencyScore.toFixed(3)}, Date=${dateScore.toFixed(3)}`,
         );
-        // Should have low overall confidence
-        const mockEmbeddingScore = expectedScores.embeddingScore;
+        const mockNameScore = expectedScores.nameScore;
         const overallConfidence =
           amountScore * 0.3 +
           currencyScore * 0.2 +
           dateScore * 0.2 +
-          mockEmbeddingScore * 0.3;
+          mockNameScore * 0.3;
         expect(overallConfidence).toBeLessThan(0.7); // Below adjusted match threshold
         expect(overallConfidence).toBeCloseTo(
           expectedScores.confidenceScore,
@@ -260,13 +258,12 @@ describe("Golden Dataset Tests", () => {
           transaction.currency,
         );
         const dateScore = calculateDateScore(inbox.date, transaction.date);
-        const mockEmbeddingScore = expectedScores.embeddingScore;
+        const mockNameScore = expectedScores.nameScore;
         const actualConfidence =
           amountScore * 0.3 +
           currencyScore * 0.2 +
           dateScore * 0.2 +
-          mockEmbeddingScore * 0.3;
-        // Predict match/no-match based on threshold
+          mockNameScore * 0.3;
         const predictedMatch = actualConfidence > 0.6;
         const actualMatch = userFeedback === "confirmed";
         if (predictedMatch === actualMatch) {
@@ -298,12 +295,12 @@ describe("Golden Dataset Tests", () => {
           transaction.currency,
         );
         const dateScore = calculateDateScore(inbox.date, transaction.date);
-        const mockEmbeddingScore = expectedScores.embeddingScore;
+        const mockNameScore = expectedScores.nameScore;
         const actualConfidence =
           amountScore * 0.3 +
           currencyScore * 0.2 +
           dateScore * 0.2 +
-          mockEmbeddingScore * 0.3;
+          mockNameScore * 0.3;
         if (userFeedback === "confirmed") {
           confirmedScores.push(actualConfidence);
         } else if (userFeedback === "declined") {

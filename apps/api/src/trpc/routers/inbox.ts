@@ -26,7 +26,6 @@ import {
   declineSuggestedMatch,
   deleteInbox,
   deleteInboxBlocklist,
-  deleteInboxEmbedding,
   deleteInboxMany,
   getInbox,
   getInboxBlocklist,
@@ -92,12 +91,6 @@ export const inboxRouter = createTRPCRouter({
           });
         }
       }
-
-      // Delete embedding
-      await deleteInboxEmbedding(db, {
-        inboxId: input.id,
-        teamId: teamId!,
-      });
     }),
 
   deleteMany: protectedProcedure
@@ -126,22 +119,6 @@ export const inboxRouter = createTRPCRouter({
               });
             }
           }),
-      );
-
-      await Promise.all(
-        results.map(async (result) => {
-          try {
-            await deleteInboxEmbedding(db, {
-              inboxId: result.id,
-              teamId: teamId!,
-            });
-          } catch (error) {
-            logger.error("Failed to delete embedding", {
-              inboxId: result.id,
-              error: error instanceof Error ? error.message : String(error),
-            });
-          }
-        }),
       );
 
       return results;

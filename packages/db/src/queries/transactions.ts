@@ -8,10 +8,8 @@ import { resolveTaxValues } from "@midday/utils/tax";
 import {
   and,
   asc,
-  cosineDistance,
   desc,
   eq,
-  gt,
   gte,
   inArray,
   isNull,
@@ -33,7 +31,6 @@ import {
   tags,
   transactionAttachments,
   transactionCategories,
-  transactionEmbeddings,
   type transactionFrequencyEnum,
   transactionMatchSuggestions,
   transactions,
@@ -1073,184 +1070,74 @@ export async function deleteTransactionsByInternalIds(
     .returning({ id: transactions.id });
 }
 
+const MIN_SIMILARITY_THRESHOLD = 0.6;
+const TRGM_CANDIDATE_THRESHOLD = 0.3;
+const EXACT_MERCHANT_SCORE = 0.95;
+const MAX_CANDIDATES = 200;
+
 type GetSimilarTransactionsParams = {
   name: string;
   teamId: string;
   categorySlug?: string;
   frequency?: "weekly" | "monthly" | "annually" | "irregular";
-  transactionId?: string; // Optional: if we want to exclude the source transaction
-  limit?: number;
-  minSimilarityScore?: number; // Alternative to limit: quality-based filtering
+  transactionId?: string;
 };
 
 /**
- * Find similar transactions using hybrid search: combines embeddings AND FTS for comprehensive results
- *
- * @param db - Database connection
- * @param params - Search parameters including optional embedding settings
- * @returns Array of similar transactions, ordered by relevance (embedding matches first, then FTS matches)
+ * Find similar transactions using pg_trgm + multi-field name scoring.
+ * Designed for vendor matching: when a user changes a category or frequency,
+ * find all other transactions from the same vendor across all time.
  */
 export async function getSimilarTransactions(
   db: Database,
   params: GetSimilarTransactionsParams,
 ) {
-  const {
-    name,
-    teamId,
-    categorySlug,
-    frequency,
-    transactionId,
-    minSimilarityScore = 0.9,
-  } = params;
+  const { name, teamId, categorySlug, transactionId } = params;
 
-  logger.info("Starting hybrid search for similar transactions", {
-    name,
-    teamId,
-    minSimilarityScore,
-    transactionId,
-    categorySlug,
-    frequency,
-  });
-
-  let embeddingResults: any[] = [];
-  let ftsResults: any[] = [];
-  let embeddingSourceText: string | null = null;
-
-  // 1. EMBEDDING SEARCH (if transactionId provided)
+  // Resolve the source transaction's merchant_name when we have a transactionId
+  let sourceMerchantName: string | null = null;
   if (transactionId) {
-    logger.info("Attempting embedding search", {
-      transactionId,
-      teamId,
-    });
-
-    try {
-      const sourceEmbedding = await db
-        .select({
-          embedding: transactionEmbeddings.embedding,
-          sourceText: transactionEmbeddings.sourceText,
-        })
-        .from(transactionEmbeddings)
-        .where(
-          and(
-            eq(transactionEmbeddings.transactionId, transactionId),
-            eq(transactionEmbeddings.teamId, teamId),
-          ),
-        )
-        .limit(1);
-
-      if (sourceEmbedding.length > 0 && sourceEmbedding[0]!.embedding) {
-        const sourceEmbeddingVector = sourceEmbedding[0]!.embedding;
-        const sourceText = sourceEmbedding[0]!.sourceText;
-        embeddingSourceText = sourceText; // Store for FTS search
-
-        logger.info("Found embedding for transaction", {
-          transactionId,
-          sourceText,
-          embeddingExists: true,
-        });
-
-        // Calculate similarity using cosineDistance function from Drizzle
-        const similarity = sql<number>`1 - (${cosineDistance(transactionEmbeddings.embedding, sourceEmbeddingVector)})`;
-
-        const embeddingConditions: (SQL | undefined)[] = [
+    const source = await db
+      .select({ merchantName: transactions.merchantName })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.id, transactionId),
           eq(transactions.teamId, teamId),
-          ne(transactions.id, transactionId), // Exclude the source transaction
-          gt(similarity, minSimilarityScore), // Use configurable similarity threshold
-        ];
+        ),
+      )
+      .limit(1);
 
-        if (categorySlug) {
-          embeddingConditions.push(
-            or(
-              isNull(transactions.categorySlug),
-              ne(transactions.categorySlug, categorySlug),
-            ),
-          );
-        }
-
-        // Note: We don't filter by frequency here because we want to find similar transactions
-        // regardless of their current frequency so we can update them to the new frequency
-
-        const finalEmbeddingConditions = embeddingConditions.filter(
-          (c) => c !== undefined,
-        ) as SQL[];
-
-        embeddingResults = await db
-          .select({
-            id: transactions.id,
-            amount: transactions.amount,
-            teamId: transactions.teamId,
-            name: transactions.name,
-            date: transactions.date,
-            categorySlug: transactions.categorySlug,
-            frequency: transactions.frequency,
-            similarity,
-            source: sql<string>`'embedding'`.as("source"),
-          })
-          .from(transactions)
-          .innerJoin(
-            transactionEmbeddings,
-            eq(transactionEmbeddings.transactionId, transactions.id),
-          )
-          .where(and(...finalEmbeddingConditions))
-          .orderBy(desc(similarity)); // No limit - let similarity threshold determine results
-
-        logger.info("Embedding search completed", {
-          resultsFound: embeddingResults.length,
-          minSimilarityScore,
-          transactionId,
-        });
-      } else {
-        logger.warn(
-          "No embedding found for transaction - will rely on FTS only",
-          {
-            transactionId,
-            teamId,
-            transactionName: name,
-          },
-        );
-      }
-    } catch (error) {
-      logger.error("Embedding search failed", {
-        error: error instanceof Error ? error.message : String(error),
-        transactionId,
-        teamId,
-      });
-    }
+    sourceMerchantName = source[0]?.merchantName ?? null;
   }
 
-  // 2. FTS SEARCH (always run to complement embeddings)
-  logger.info("Running FTS search", {
-    name,
-    teamId,
-    hasEmbeddingResults: embeddingResults.length > 0,
-    hasSourceEmbedding: !!embeddingSourceText,
-  });
+  // Build OR conditions for candidate retrieval:
+  // Path A: exact merchant_name match (handles "AMZN MKTP US" ↔ "Amazon.com" via enrichment)
+  // Path B: trigram similarity on name/merchant fields
+  const candidateConditions: SQL[] = [
+    sql`word_similarity(${name}, COALESCE(${transactions.merchantName}, ${transactions.name})) > ${TRGM_CANDIDATE_THRESHOLD}`,
+  ];
 
-  const ftsConditions: (SQL | undefined)[] = [eq(transactions.teamId, teamId)];
+  if (sourceMerchantName) {
+    candidateConditions.push(
+      sql`LOWER(${transactions.merchantName}) = LOWER(${sourceMerchantName})`,
+    );
+    candidateConditions.push(
+      sql`word_similarity(${sourceMerchantName}, COALESCE(${transactions.merchantName}, ${transactions.name})) > ${TRGM_CANDIDATE_THRESHOLD}`,
+    );
+  }
+
+  const whereConditions: (SQL | undefined)[] = [
+    eq(transactions.teamId, teamId),
+    or(...candidateConditions),
+  ];
 
   if (transactionId) {
-    ftsConditions.push(ne(transactions.id, transactionId));
+    whereConditions.push(ne(transactions.id, transactionId));
   }
-
-  // Always use the original transaction name for FTS search to ensure we find exact matches
-  // The embedding source text might be different from the actual transaction names
-  const searchTerm = name;
-  const searchQuery = buildSearchQuery(searchTerm);
-  ftsConditions.push(
-    sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
-  );
-
-  logger.info("FTS search using term", {
-    searchTerm,
-    searchQuery,
-    usingEmbeddingSourceText: false, // Always false now - we use original name
-    originalName: name,
-    embeddingSourceText: embeddingSourceText || "none",
-    reason: "Using original transaction name to find exact matches",
-  });
 
   if (categorySlug) {
-    ftsConditions.push(
+    whereConditions.push(
       or(
         isNull(transactions.categorySlug),
         ne(transactions.categorySlug, categorySlug),
@@ -1258,32 +1145,7 @@ export async function getSimilarTransactions(
     );
   }
 
-  // Exclude transactions already found by embeddings
-  if (embeddingResults.length > 0) {
-    const embeddingIds = embeddingResults.map((r) => r.id);
-    ftsConditions.push(
-      sql`${transactions.id} NOT IN (${sql.join(
-        embeddingIds.map((id) => sql`${id}`),
-        sql`, `,
-      )})`,
-    );
-  }
-
-  const finalFtsConditions = ftsConditions.filter(
-    (c) => c !== undefined,
-  ) as SQL[];
-
-  logger.info("FTS search conditions", {
-    searchTerm,
-    searchQuery,
-    conditionsCount: finalFtsConditions.length,
-    teamId,
-    transactionId,
-    categorySlug,
-    frequency,
-  });
-
-  ftsResults = await db
+  const candidates = await db
     .select({
       id: transactions.id,
       amount: transactions.amount,
@@ -1292,59 +1154,62 @@ export async function getSimilarTransactions(
       date: transactions.date,
       categorySlug: transactions.categorySlug,
       frequency: transactions.frequency,
-      source: sql<string>`'fts'`.as("source"),
+      merchantName: transactions.merchantName,
     })
     .from(transactions)
-    .where(and(...finalFtsConditions)); // No limit - get all FTS matches
+    .where(and(...(whereConditions.filter(Boolean) as SQL[])))
+    .orderBy(
+      sql`GREATEST(
+        word_similarity(${name}, COALESCE(${transactions.merchantName}, ${transactions.name})),
+        word_similarity(${name}, ${transactions.name})
+      ) DESC`,
+    )
+    .limit(MAX_CANDIDATES);
 
-  logger.info("FTS search completed", {
-    resultsFound: ftsResults.length,
-    searchTerm,
-    searchQuery,
-    teamId,
-    sampleResults: ftsResults.slice(0, 3).map((r) => ({
-      name: r.name,
-      id: r.id,
-    })),
-  });
+  // Score each candidate using a cross-field comparison matrix
+  const scored = candidates
+    .map((candidate) => {
+      // Exact merchant_name match is the strongest signal
+      if (
+        sourceMerchantName &&
+        candidate.merchantName &&
+        sourceMerchantName.toLowerCase() ===
+          candidate.merchantName.toLowerCase()
+      ) {
+        return { ...candidate, score: EXACT_MERCHANT_SCORE };
+      }
 
-  // 3. COMBINE AND DEDUPLICATE RESULTS
-  const allResults = [
-    ...embeddingResults.map(({ similarity, source, ...rest }) => ({
-      ...rest,
-      matchType: source,
-    })),
-    ...ftsResults.map(({ source, ...rest }) => ({
-      ...rest,
-      matchType: source,
-    })),
-  ];
+      // Cross-field comparison matrix: try source name and source merchant
+      // against candidate name and candidate merchant. calculateNameScore
+      // already compares the first arg against both the second and third args.
+      const scores: number[] = [
+        calculateNameScore(name, candidate.name, candidate.merchantName),
+      ];
 
-  // Remove duplicates based on transaction ID (most accurate)
-  // If same ID appears in both embedding and FTS results, prioritize embedding
-  const uniqueResults = allResults.filter((transaction, index, array) => {
-    return index === array.findIndex((t) => t.id === transaction.id);
-  });
+      if (sourceMerchantName) {
+        scores.push(
+          calculateNameScore(
+            sourceMerchantName,
+            candidate.name,
+            candidate.merchantName,
+          ),
+        );
+      }
 
-  // Log final results with structured data
-  logger.info("Hybrid search completed", {
-    totalResults: allResults.length,
-    uniqueResults: uniqueResults.length,
-    embeddingMatches: embeddingResults.length,
-    ftsMatches: ftsResults.length,
+      return { ...candidate, score: Math.max(...scores) };
+    })
+    .filter((r) => r.score >= MIN_SIMILARITY_THRESHOLD)
+    .sort((a, b) => b.score - a.score);
+
+  logger.info("getSimilarTransactions completed", {
     name,
     teamId,
-    minSimilarityScore,
-    results: uniqueResults.map((t, i) => ({
-      rank: i + 1,
-      name: t.name,
-      matchType: t.matchType,
-      id: t.id,
-    })),
+    sourceMerchantName,
+    candidatesRetrieved: candidates.length,
+    resultsAfterScoring: scored.length,
   });
 
-  // Remove matchType field and return all quality matches
-  return uniqueResults.map(({ matchType, ...rest }) => rest);
+  return scored.map(({ merchantName: _m, score: _s, ...rest }) => rest);
 }
 
 type SearchTransactionMatchParams = {

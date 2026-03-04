@@ -1,8 +1,8 @@
 import { transformTransaction } from "@jobs/utils/transform";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk";
+import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
 import { z } from "zod";
-import { embedTransaction } from "../../transactions/embed-transaction";
+import { enrichTransactions } from "../../transactions/enrich-transaction";
 
 const transactionSchema = z.object({
   id: z.string(),
@@ -57,20 +57,20 @@ export const upsertTransactions = schemaTask({
         .select("id")
         .throwOnError();
 
-      // Extract transaction IDs for embedding
       const transactionIds = upsertedTransactions?.map((tx) => tx.id) || [];
 
-      // Process new transactions: embedding and matching (non-blocking)
-      // Embed/enrich runs in background so users see transactions faster
       if (transactionIds.length > 0) {
-        // Trigger embedding (which includes enrichment) without waiting
-        // This allows the initial sync to complete faster
-        await embedTransaction.trigger({
+        await enrichTransactions.trigger({
           transactionIds,
           teamId,
         });
 
-        logger.info("Triggered transaction embedding (non-blocking)", {
+        await tasks.trigger("match-transactions-bidirectional", {
+          teamId,
+          newTransactionIds: transactionIds,
+        });
+
+        logger.info("Triggered enrichment and matching", {
           transactionCount: transactionIds.length,
           teamId,
         });

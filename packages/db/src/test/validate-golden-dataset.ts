@@ -75,13 +75,13 @@ GOLDEN_DATASET.forEach((goldenCase, _index) => {
     transaction.currency,
   );
   const dateScore = calculateDateScore(inbox.date, transaction.date);
-  const mockEmbeddingScore = expectedScores.embeddingScore;
+  const mockNameScore = expectedScores.nameScore;
 
   const actualConfidence =
     amountScore * 0.3 +
     currencyScore * 0.2 +
     dateScore * 0.2 +
-    mockEmbeddingScore * 0.3;
+    mockNameScore * 0.3;
 
   // Check prediction accuracy
   const predictedMatch = actualConfidence > 0.6;

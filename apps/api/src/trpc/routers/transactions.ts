@@ -135,15 +135,23 @@ export const transactionsRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      // Trigger embedding for the newly created manual transaction
       if (transaction?.id) {
         await triggerJob(
-          "embed-transaction",
+          "enrich-transactions",
           {
             transactionIds: [transaction.id],
             teamId: teamId!,
           },
           "transactions",
+        );
+
+        await triggerJob(
+          "match-transactions-bidirectional",
+          {
+            teamId: teamId!,
+            newTransactionIds: [transaction.id],
+          },
+          "inbox",
         );
       }
 
