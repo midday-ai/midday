@@ -84,3 +84,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+*.csv
+
+# Matching eval history (local progress tracking)
+.matching-eval-history.json

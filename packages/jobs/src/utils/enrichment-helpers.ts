@@ -84,10 +84,10 @@ CATEGORIZATION RULES:
 Assign categories based on merchant name and business purpose. Only return category if confidence >= 0.7, otherwise return null.
 
 CONFIDENCE EXAMPLES:
-• "Slack Technologies" → software (0.95) ✅
-• "Delta Air Lines" → travel (0.95) ✅
-• "ConEd Electric" → utilities (0.90) ✅
-• "ABC Corp payment" → null (0.4) ❌ Too uncertain
+• "Slack Technologies" → software (0.95)
+• "Delta Air Lines" → travel (0.95)
+• "ConEd Electric" → utilities (0.90)
+• "ABC Corp payment" → null (0.4) (too uncertain)
 
 COMMON CATEGORIES (only use if confident):
 • software: SaaS tools (Slack, Google Workspace, GitHub, AWS)

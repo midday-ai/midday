@@ -7,7 +7,6 @@ const logger = createLoggerWithContext("worker:registry");
 import { accountingProcessors } from "./accounting";
 import { customerProcessors } from "./customers";
 import { documentProcessors } from "./documents";
-import { embeddingsProcessors } from "./embeddings";
 import { inboxProcessors } from "./inbox";
 import { insightsProcessors } from "./insights";
 import { institutionsProcessors } from "./institutions";
@@ -28,11 +27,6 @@ const processors = new Map<
 
 // Register inbox processors
 for (const [jobName, processor] of Object.entries(inboxProcessors)) {
-  processors.set(jobName, processor);
-}
-
-// Register embeddings processors (separate queue to prevent worker starvation)
-for (const [jobName, processor] of Object.entries(embeddingsProcessors)) {
   processors.set(jobName, processor);
 }
 

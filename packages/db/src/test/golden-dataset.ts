@@ -258,10 +258,10 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
     },
     userFeedback: "declined",
     expectedScores: {
-      confidenceScore: 0.67, // Higher than expected due to good amount score
-      amountScore: 0.875, // Doesn't fail cross-currency - gets good score
+      confidenceScore: 0.56, // 0.5*0.3 + 0.3*0.2 + 0.85*0.2 + 0.6*0.3
+      amountScore: 0.5, // Large cross-currency (avg 20K): 3.85% diff in tighter tier
       currencyScore: 0.3,
-      dateScore: 0.85, // Expense logic date scoring
+      dateScore: 0.85,
       embeddingScore: 0.6,
     },
     matchType: "false_positive",
@@ -287,7 +287,7 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
     },
     userFeedback: "declined",
     expectedScores: {
-      confidenceScore: 0.55,
+      confidenceScore: 0.73, // 1.0*0.3 + 1.0*0.2 + 0.1*0.2 + 0.7*0.3
       amountScore: 1.0,
       currencyScore: 1.0,
       dateScore: 0.1, // Very low date score
@@ -343,10 +343,10 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
     },
     userFeedback: "confirmed",
     expectedScores: {
-      confidenceScore: 0.785, // Adjusted for actual algorithm behavior
-      amountScore: 0.935, // 5% difference gets better score
+      confidenceScore: 0.805, // 0.85*0.3 + 1.0*0.2 + 0.85*0.2 + 0.6*0.3
+      amountScore: 0.85, // 5% difference within tolerance band
       currencyScore: 1.0,
-      dateScore: 0.85, // Expense logic date scoring
+      dateScore: 0.85,
       embeddingScore: 0.6,
     },
     matchType: "perfect_match",
@@ -378,8 +378,8 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
     },
     userFeedback: "confirmed",
     expectedScores: {
-      confidenceScore: 0.669, // Captured from current algorithm (v1.0 baseline)
-      amountScore: 0.613, // Current algorithm behavior - USD vs SEK original amounts
+      confidenceScore: 0.725, // 0.8*0.3 + 0.3*0.2 + 0.85*0.2 + 0.85*0.3
+      amountScore: 0.8, // Cross-currency base amount comparison
       currencyScore: 0.3, // Cross-currency conservative penalty
       dateScore: 0.85, // 3-day difference with expense type logic
       embeddingScore: 0.85, // Mock embedding score for testing
@@ -466,8 +466,8 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
     },
     userFeedback: "declined",
     expectedScores: {
-      confidenceScore: 0.925, // v1.0 baseline - Jan 2025 (algorithm sees 2.5% as perfect)
-      amountScore: 1.0, // Algorithm treats 2.5% as perfect match (within tolerance)
+      confidenceScore: 0.88, // 0.85*0.3 + 1.0*0.2 + 0.85*0.2 + 0.85*0.3
+      amountScore: 0.85, // 2.5% difference within tolerance band
       currencyScore: 1.0, // Same currency
       dateScore: 0.85, // Same date
       embeddingScore: 0.85, // High semantic similarity
@@ -522,9 +522,9 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
       currency: "SEK",
       date: "2024-05-01",
     },
-    userFeedback: "declined", // Simulating that it's too old to be relevant
+    userFeedback: "confirmed", // Scoring is correct — age-based filtering is a scheduler concern, not scoring
     expectedScores: {
-      confidenceScore: 0.91, // v1.0 baseline - Jan 2025
+      confidenceScore: 0.925, // Perfect match on all signals
       amountScore: 1.0, // Perfect amount match
       currencyScore: 1.0, // Same currency
       dateScore: 0.85, // Same date
@@ -532,7 +532,8 @@ export const GOLDEN_DATASET: GoldenMatch[] = [
     },
     matchType: "perfect_match", // Dates match, just conceptually old
     category: "large_amount",
-    notes: "Old items eventually get marked as no_match by scheduler",
+    notes:
+      "Scoring should be high — the scheduler handles inbox age expiration separately",
   },
 
   {

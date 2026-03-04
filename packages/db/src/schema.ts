@@ -434,6 +434,10 @@ export const transactions = pgTable(
       "gin",
       table.name.asc().nullsLast().op("gin_trgm_ops"),
     ),
+    index("idx_transactions_merchant_name_trgm").using(
+      "gin",
+      table.merchantName.asc().nullsLast().op("gin_trgm_ops"),
+    ),
     index("idx_transactions_team_id_date_name").using(
       "btree",
       table.teamId.asc().nullsLast().op("date_ops"),
@@ -2296,6 +2300,10 @@ export const inbox = pgTable(
       "btree",
       table.groupedInboxId.asc().nullsLast().op("uuid_ops"),
     ),
+    index("idx_inbox_display_name_trgm").using(
+      "gin",
+      table.displayName.asc().nullsLast().op("gin_trgm_ops"),
+    ),
     // Composite index for insights activity queries
     index("inbox_team_status_created_at_idx").on(
       table.teamId,
@@ -2537,6 +2545,12 @@ export const transactionMatchSuggestions = pgTable(
       table.transactionId.asc().nullsLast().op("uuid_ops"),
       table.teamId.asc().nullsLast().op("uuid_ops"),
       table.status.asc().nullsLast().op("text_ops"),
+    ),
+    index("transaction_match_suggestions_team_status_created_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+      table.status.asc().nullsLast().op("text_ops"),
+      table.createdAt.desc().nullsLast(),
     ),
     foreignKey({
       columns: [table.inboxId],

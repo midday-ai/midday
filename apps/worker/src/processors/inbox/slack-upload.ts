@@ -11,7 +11,7 @@ import {
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
-import { triggerJob, triggerJobAndWait } from "@midday/job-client";
+import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import { getExtensionFromMimeType } from "@midday/utils";
 import { generateText } from "ai";
@@ -520,32 +520,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
         "documents",
       );
 
-      // Trigger embedding and wait for completion before matching
-      // This ensures the embedding exists when batch-process-matching runs
-      this.logger.info("Triggering embed-inbox job", {
-        inboxId: inboxData.id,
-        teamId,
-      });
-
-      const embedStartTime = Date.now();
-      await triggerJobAndWait(
-        "embed-inbox",
-        {
-          inboxId: inboxData.id,
-          teamId,
-        },
-        "embeddings",
-        { timeout: 60000 }, // 60 second timeout
-      );
-
-      const embedDuration = Date.now() - embedStartTime;
-      this.logger.info("Embed-inbox job completed", {
-        inboxId: inboxData.id,
-        teamId,
-        duration: `${embedDuration}ms`,
-      });
-
-      // After embedding completes, trigger matching
+      // Trigger matching immediately in V2 (no embed-inbox dependency).
       await triggerJob(
         "batch-process-matching",
         {

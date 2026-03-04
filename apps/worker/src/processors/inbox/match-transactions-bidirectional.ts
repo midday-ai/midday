@@ -1,10 +1,13 @@
 import {
   calculateInboxSuggestions,
   findInboxMatches,
+  getInboxById,
   getPendingInboxForMatching,
   getTransactionById,
   hasSuggestion,
-  matchTransaction,
+  persistInboxSuggestionWorkflow,
+  shouldResetInboxToPendingAfterSuggestionFailure,
+  updateInbox,
 } from "@midday/db/queries";
 import type { Job } from "bullmq";
 import type { MatchTransactionsBidirectionalPayload } from "../../schemas/inbox";
@@ -31,35 +34,59 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
 
     // PHASE 1: Forward matching - Find inbox items for new transactions
     const forwardMatches = new Map<string, string>(); // transactionId -> inboxId
+    const claimedInboxIds = new Set<string>();
     let forwardMatchCount = 0;
     let forwardSuggestionCount = 0;
-
-    const phase1Progress = 40; // 40% for phase 1
 
     for (let i = 0; i < newTransactionIds.length; i++) {
       const transactionId = newTransactionIds[i];
       if (!transactionId) continue;
+      let processingInboxId: string | null = null;
+      let workflowPersisted = false;
 
       try {
         const inboxMatch = await findInboxMatches(db, {
           teamId,
           transactionId,
+          excludeInboxIds: claimedInboxIds,
         });
 
         if (inboxMatch) {
+          processingInboxId = inboxMatch.inboxId;
           forwardMatches.set(transactionId, inboxMatch.inboxId);
+          claimedInboxIds.add(inboxMatch.inboxId);
 
-          // Determine if this should be auto-matched or suggested
-          const shouldAutoMatch = inboxMatch.matchType === "auto_matched";
+          await updateInbox(db, {
+            id: inboxMatch.inboxId,
+            teamId,
+            status: "analyzing",
+          });
 
-          if (shouldAutoMatch && transactionId) {
-            // Auto-match the transaction to inbox
-            await matchTransaction(db, {
-              id: inboxMatch.inboxId,
-              teamId,
+          const { action } = await persistInboxSuggestionWorkflow(db, {
+            teamId,
+            inboxId: inboxMatch.inboxId,
+            candidate: {
               transactionId,
-            });
+              confidenceScore: inboxMatch.confidenceScore,
+              amountScore: inboxMatch.amountScore,
+              currencyScore: inboxMatch.currencyScore,
+              dateScore: inboxMatch.dateScore,
+              nameScore: inboxMatch.nameScore,
+              matchType: inboxMatch.matchType,
+            },
+            source: "forward_match",
+          });
 
+          this.logger.info("Persisted inbox suggestion workflow", {
+            teamId,
+            transactionId,
+            inboxId: inboxMatch.inboxId,
+            action,
+          });
+
+          workflowPersisted = true;
+
+          if (action === "auto_matched") {
             forwardMatchCount++;
 
             this.logger.info("Auto-matched transaction to inbox", {
@@ -68,40 +95,7 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
               inboxId: inboxMatch.inboxId,
               confidence: inboxMatch.confidenceScore,
             });
-
-            // Send notification for auto-match
-            // Get transaction data to create complete MatchResult
-            const transaction = await getTransactionById(db, {
-              id: transactionId,
-              teamId,
-            });
-
-            if (transaction) {
-              await triggerMatchingNotification({
-                db,
-                teamId,
-                inboxId: inboxMatch.inboxId,
-                result: {
-                  action: "auto_matched",
-                  suggestion: {
-                    transactionId,
-                    name: transaction.name,
-                    amount: transaction.amount,
-                    currency: transaction.currency,
-                    date: transaction.date,
-                    confidenceScore: inboxMatch.confidenceScore,
-                    matchType: "auto_matched",
-                    amountScore: inboxMatch.amountScore,
-                    currencyScore: inboxMatch.currencyScore,
-                    dateScore: inboxMatch.dateScore,
-                    embeddingScore: inboxMatch.embeddingScore,
-                    isAlreadyMatched: false,
-                  },
-                },
-              });
-            }
           } else {
-            // Create suggestion for manual review
             forwardSuggestionCount++;
 
             this.logger.info("Created forward match suggestion", {
@@ -111,8 +105,91 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
               confidence: inboxMatch.confidenceScore,
             });
           }
+
+          const transaction = await getTransactionById(db, {
+            id: transactionId,
+            teamId,
+          });
+
+          if (transaction) {
+            await triggerMatchingNotification({
+              db,
+              teamId,
+              inboxId: inboxMatch.inboxId,
+              result: {
+                action,
+                suggestion: {
+                  transactionId,
+                  name: transaction.name,
+                  amount: transaction.amount,
+                  currency: transaction.currency,
+                  date: transaction.date,
+                  confidenceScore: inboxMatch.confidenceScore,
+                  matchType:
+                    action === "auto_matched"
+                      ? "auto_matched"
+                      : inboxMatch.matchType,
+                  amountScore: inboxMatch.amountScore,
+                  currencyScore: inboxMatch.currencyScore,
+                  dateScore: inboxMatch.dateScore,
+                  nameScore: inboxMatch.nameScore,
+                  isAlreadyMatched: false,
+                },
+              },
+            });
+          }
         }
       } catch (error) {
+        // Only release the in-memory claim when the DB workflow was NOT persisted.
+        // If workflowPersisted is true the match/suggestion is committed — releasing
+        // the claim would let Phase 2 reprocess an already-matched inbox item.
+        if (!workflowPersisted) {
+          forwardMatches.delete(transactionId);
+          if (processingInboxId) {
+            claimedInboxIds.delete(processingInboxId);
+          }
+        }
+
+        // If persistence did not complete, avoid leaving the inbox stuck in "analyzing".
+        if (processingInboxId && !workflowPersisted) {
+          try {
+            const inboxState = await getInboxById(db, {
+              id: processingInboxId,
+              teamId,
+            });
+
+            if (
+              shouldResetInboxToPendingAfterSuggestionFailure(
+                inboxState
+                  ? {
+                      status: inboxState.status,
+                      transactionId: inboxState.transactionId,
+                    }
+                  : null,
+              )
+            ) {
+              await updateInbox(db, {
+                id: processingInboxId,
+                teamId,
+                status: "pending",
+              });
+            }
+          } catch (rollbackError) {
+            this.logger.error(
+              "Failed to reset inbox status after forward match error",
+              {
+                teamId,
+                transactionId,
+                inboxId: processingInboxId,
+                error:
+                  rollbackError instanceof Error
+                    ? rollbackError.message
+                    : "Unknown error",
+              },
+            );
+          }
+        }
+
         this.logger.error("Failed to process forward match", {
           teamId,
           transactionId,
@@ -145,70 +222,58 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
     let reverseSuggestionCount = 0;
     let noMatchCount = 0;
 
-    // Process inbox items in smaller batches for better performance
-    const BATCH_SIZE = 10;
-    const _phase2StartProgress = phase1Progress;
-    const _phase2ProgressRange = 60; // 60% for phase 2
+    const claimedTransactionIds = new Set<string>();
 
-    for (let i = 0; i < unmatchedInboxItems.length; i += BATCH_SIZE) {
-      const batch = unmatchedInboxItems.slice(i, i + BATCH_SIZE);
-      const _batchIndex = Math.floor(i / BATCH_SIZE);
-      const _totalBatches = Math.ceil(unmatchedInboxItems.length / BATCH_SIZE);
+    for (const inboxItem of unmatchedInboxItems) {
+      try {
+        const result = await calculateInboxSuggestions(db, {
+          teamId,
+          inboxId: inboxItem.id,
+          excludeTransactionIds: claimedTransactionIds,
+        });
 
-      await Promise.allSettled(
-        batch.map(async (inboxItem) => {
-          try {
-            const result = await calculateInboxSuggestions(db, {
+        if (hasSuggestion(result)) {
+          claimedTransactionIds.add(result.suggestion.transactionId);
+          await triggerMatchingNotification({
+            db,
+            teamId,
+            inboxId: inboxItem.id,
+            result,
+          });
+        }
+
+        switch (result.action) {
+          case "auto_matched":
+            reverseMatchCount++;
+            this.logger.info("Auto-matched inbox item to transaction", {
               teamId,
               inboxId: inboxItem.id,
+              transactionId: result.suggestion?.transactionId,
+              confidence: result.suggestion?.confidenceScore,
             });
+            break;
 
-            // Send notifications based on matching result
-            if (hasSuggestion(result)) {
-              // Type guard narrows the type here
-              const resultWithSuggestion = result;
-              await triggerMatchingNotification({
-                db,
-                teamId,
-                inboxId: inboxItem.id,
-                result: resultWithSuggestion,
-              });
-            }
-
-            switch (result.action) {
-              case "auto_matched":
-                reverseMatchCount++;
-                this.logger.info("Auto-matched inbox item to transaction", {
-                  teamId,
-                  inboxId: inboxItem.id,
-                  transactionId: result.suggestion?.transactionId,
-                  confidence: result.suggestion?.confidenceScore,
-                });
-                break;
-
-              case "suggestion_created":
-                reverseSuggestionCount++;
-                this.logger.info("Created reverse match suggestion", {
-                  teamId,
-                  inboxId: inboxItem.id,
-                  transactionId: result.suggestion?.transactionId,
-                  confidence: result.suggestion?.confidenceScore,
-                });
-                break;
-
-              case "no_match_yet":
-                noMatchCount++;
-                break;
-            }
-          } catch (error) {
-            this.logger.error("Failed to process reverse match", {
+          case "suggestion_created":
+            reverseSuggestionCount++;
+            this.logger.info("Created reverse match suggestion", {
               teamId,
               inboxId: inboxItem.id,
-              error: error instanceof Error ? error.message : "Unknown error",
+              transactionId: result.suggestion?.transactionId,
+              confidence: result.suggestion?.confidenceScore,
             });
-          }
-        }),
-      );
+            break;
+
+          case "no_match_yet":
+            noMatchCount++;
+            break;
+        }
+      } catch (error) {
+        this.logger.error("Failed to process reverse match", {
+          teamId,
+          inboxId: inboxItem.id,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
     }
 
     // Final summary

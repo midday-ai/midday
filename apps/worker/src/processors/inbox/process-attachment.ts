@@ -7,7 +7,7 @@ import {
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
-import { triggerJob, triggerJobAndWait } from "@midday/job-client";
+import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import type { ProcessAttachmentPayload } from "../../schemas/inbox";
@@ -362,17 +362,13 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         // Don't fail the entire process if grouping fails
       }
 
-      // Trigger parallel jobs (non-blocking)
-      // Process documents and embedding in parallel for better performance
+      // Trigger document processing and matching (no inbox embedding dependency).
       const parallelJobsStartTime = Date.now();
-      this.logger.info(
-        "Triggering parallel jobs (process-document + embed-inbox)",
-        {
-          jobId: job.id,
-          inboxId: inboxData.id,
-          teamId,
-        },
-      );
+      this.logger.info("Triggering process-document + matching jobs", {
+        jobId: job.id,
+        inboxId: inboxData.id,
+        teamId,
+      });
 
       // Trigger document processing (non-blocking, can run in parallel)
       const documentJobPromise = triggerJob(
@@ -407,110 +403,35 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           return null;
         });
 
-      // Wait for embed-inbox to complete before triggering matching
-      // This ensures the embedding exists when batch-process-matching runs
-      const embedStartTime = Date.now();
-      let embedJobResult: Awaited<ReturnType<typeof triggerJobAndWait>> | null =
-        null;
-
-      this.logger.info("Starting embed-inbox with wait", {
-        jobId: job.id,
-        inboxId: inboxData.id,
-        teamId,
-      });
-
       try {
-        embedJobResult = await triggerJobAndWait(
-          "embed-inbox",
+        const matchingJobResult = await triggerJob(
+          "batch-process-matching",
           {
-            inboxId: inboxData.id,
             teamId,
+            inboxIds: [inboxData.id],
           },
-          "embeddings",
-          { timeout: 60000 }, // 60 second timeout
+          "inbox",
         );
-
-        const embedDuration = Date.now() - embedStartTime;
-        this.logger.info("Embed-inbox job completed", {
+        this.logger.info("Triggered batch-process-matching", {
           jobId: job.id,
           inboxId: inboxData.id,
-          embedJobId: embedJobResult.id,
-          duration: `${embedDuration}ms`,
+          matchingJobId: matchingJobResult.id,
+          triggeredJobName: "batch-process-matching",
         });
-
-        // Now that embedding is complete, trigger matching
-        const matchingStartTime = Date.now();
-
-        try {
-          const matchingJobResult = await triggerJob(
-            "batch-process-matching",
-            {
-              teamId,
-              inboxIds: [inboxData.id],
-            },
-            "inbox",
-          );
-
-          const matchingDuration = Date.now() - matchingStartTime;
-          this.logger.info("Triggered batch-process-matching", {
-            jobId: job.id,
-            inboxId: inboxData.id,
-            embedJobId: embedJobResult.id,
-            matchingJobId: matchingJobResult.id,
-            triggeredJobName: "batch-process-matching",
-            duration: `${matchingDuration}ms`,
-          });
-        } catch (error) {
-          this.logger.error("Failed to trigger batch-process-matching job", {
-            jobId: job.id,
-            inboxId: inboxData.id,
-            error: error instanceof Error ? error.message : "Unknown error",
-            errorStack: error instanceof Error ? error.stack : undefined,
-          });
-          // Don't fail the entire process if matching job fails to enqueue
-          // The matching can be retried later via scheduler or manual trigger
-          // However, we should update status to pending to prevent getting stuck in "analyzing"
-          try {
-            await updateInboxWithProcessedData(db, {
-              id: inboxData.id,
-              status: "pending",
-            });
-            this.logger.info(
-              "Updated inbox status to pending after matching job failed to trigger",
-              {
-                jobId: job.id,
-                inboxId: inboxData.id,
-              },
-            );
-          } catch (updateError) {
-            this.logger.error(
-              "Failed to update inbox status after matching job failure",
-              {
-                jobId: job.id,
-                inboxId: inboxData.id,
-                error:
-                  updateError instanceof Error
-                    ? updateError.message
-                    : "Unknown error",
-              },
-            );
-          }
-        }
       } catch (error) {
-        this.logger.error("Failed to complete embed-inbox job", {
+        this.logger.error("Failed to trigger batch-process-matching job", {
           jobId: job.id,
           inboxId: inboxData.id,
           error: error instanceof Error ? error.message : "Unknown error",
           errorStack: error instanceof Error ? error.stack : undefined,
         });
-        // If embedding fails, update status to pending so it can be retried
         try {
           await updateInboxWithProcessedData(db, {
             id: inboxData.id,
             status: "pending",
           });
           this.logger.info(
-            "Updated inbox status to pending after embed-inbox job failed",
+            "Updated inbox status to pending after matching job failed",
             {
               jobId: job.id,
               inboxId: inboxData.id,
@@ -518,7 +439,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           );
         } catch (updateError) {
           this.logger.error(
-            "Failed to update inbox status after embed-inbox failure",
+            "Failed to update inbox status after matching job failure",
             {
               jobId: job.id,
               inboxId: inboxData.id,
@@ -529,7 +450,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
             },
           );
         }
-        // Don't throw - allow document processing to continue
+        // Don't throw - allow document processing to continue.
       }
 
       // Wait for document processing to complete (non-blocking, but log completion)
@@ -539,11 +460,8 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         jobId: job.id,
         inboxId: inboxData.id,
         documentJobStatus: documentJobResult[0]?.status,
-        embedJobCompleted: embedJobResult !== null,
         duration: `${parallelJobsDuration}ms`,
       });
-
-      // If embed-inbox failed, matching will be handled by the scheduler when embedding eventually completes
 
       const totalDuration = Date.now() - processStartTime;
       this.logger.info("process-attachment job completed successfully", {
