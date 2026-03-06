@@ -167,7 +167,6 @@ export function PlanCards({
           </div>
 
           <IncludedSection />
-
         </div>
         <p className="font-sans text-xs text-muted-foreground mt-8 text-center">
           {footnote && <>{footnote} · </>}
