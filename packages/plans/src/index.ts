@@ -86,7 +86,7 @@ function findProductById(productId: string) {
   return legacy ?? null;
 }
 
-export function getPlanByProductId(productId: string): string {
+export function getPlanByProductId(productId: string): "starter" | "pro" {
   const plan = findProductById(productId);
 
   if (!plan) {
