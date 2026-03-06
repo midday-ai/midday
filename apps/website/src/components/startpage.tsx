@@ -107,8 +107,7 @@ const videos = [
   {
     id: "overview",
     title: "Overview",
-    subtitle:
-      "See how Midday helps you run your business without the admin.",
+    subtitle: "See how Midday helps you run your business without the admin.",
     url: "https://cdn.midday.ai/videos/login-video.mp4",
   },
   {
@@ -317,8 +316,7 @@ export function StartPage() {
 
                 <p className="text-muted-foreground text-base lg:text-lg leading-relaxed font-sans max-w-xl mx-auto">
                   Midday takes care of admin, matches receipts automatically,
-                  gives you clarity and exports cleanly to your
-                  accountant.
+                  gives you financial clarity and exports cleanly to your accountant.
                 </p>
               </div>
 

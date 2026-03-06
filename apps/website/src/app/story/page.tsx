@@ -64,8 +64,8 @@ export default function StoryPage() {
                   piece the story together yourself.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  For someone running a company alone, that overhead adds
-                  up quickly. You are not lacking information. You are lacking a
+                  For someone running a company alone, that overhead adds up
+                  quickly. You are not lacking information. You are lacking a
                   system that keeps everything connected.
                 </p>
               </section>
@@ -119,9 +119,8 @@ export default function StoryPage() {
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
                   Midday is built for founders who run real businesses without
-                  building large teams
-                  and who want to stay on top of their company without spending
-                  their time managing admin.
+                  building large teams and who want to stay on top of their
+                  company without spending their time managing admin.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
                   We focus on reducing manual and repetitive work, keeping

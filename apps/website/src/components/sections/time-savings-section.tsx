@@ -13,8 +13,8 @@ export function TimeSavingsSection() {
             Less admin. More focus.
           </h2>
           <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
-            Midday removes manual work so you can spend time on what
-            actually matters.
+            Midday removes manual work so you can spend time on what actually
+            matters.
           </p>
         </div>
 
@@ -144,8 +144,8 @@ export function TimeSavingsSection() {
                       Manual work caused by disconnected tools.
                     </span>
                     <span className="hidden group-hover:inline transition-opacity duration-200">
-                      Midday handles the busywork so you can focus on
-                      running the business.
+                      Midday handles the busywork so you can focus on running
+                      the business.
                     </span>
                   </p>
                 </div>
