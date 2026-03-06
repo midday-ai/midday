@@ -525,35 +525,14 @@ export async function updateTeamMember(
 
 type GetAvailablePlansResult = {
   starter: boolean;
-  pro: boolean;
 };
 
 export async function getAvailablePlans(
-  db: Database,
-  teamId: string,
+  _db: Database,
+  _teamId: string,
 ): Promise<GetAvailablePlansResult> {
-  const [teamMembersCountResult, bankConnectionsCountResult] =
-    await Promise.all([
-      db.query.usersOnTeam.findMany({
-        where: eq(usersOnTeam.teamId, teamId),
-        columns: { id: true },
-      }),
-      db.query.bankConnections.findMany({
-        where: eq(bankConnections.teamId, teamId),
-        columns: { id: true },
-      }),
-    ]);
-
-  const teamMembersCount = teamMembersCountResult.length;
-  const bankConnectionsCount = bankConnectionsCountResult.length;
-
-  // Can choose starter if team has 2 or fewer members and 3 or fewer bank connections
-  const starter = teamMembersCount <= 2 && bankConnectionsCount <= 3;
-
-  // Can always choose pro plan
   return {
-    starter,
-    pro: true,
+    starter: true,
   };
 }
 

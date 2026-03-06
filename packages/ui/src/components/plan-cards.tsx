@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  getPlanPricing,
-  type PlanFeature,
-  proFeatures,
-  starterFeatures,
-} from "@midday/plans";
+import { getPlanPricing, type PlanFeature, planFeatures } from "@midday/plans";
 import NumberFlow from "@number-flow/react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -46,16 +41,14 @@ function FeatureRow({ label, tooltip }: PlanFeature) {
 
 type PlanCardsProps = {
   continent?: string;
-  renderStarterAction: (billingPeriod: "monthly" | "yearly") => ReactNode;
-  renderProAction: (billingPeriod: "monthly" | "yearly") => ReactNode;
+  renderAction: (billingPeriod: "monthly" | "yearly") => ReactNode;
   onCurrencyChange?: (currency: "USD" | "EUR") => void;
   footnote?: string;
 };
 
 export function PlanCards({
   continent,
-  renderStarterAction,
-  renderProAction,
+  renderAction,
   onCurrencyChange,
   footnote,
 }: PlanCardsProps) {
@@ -128,16 +121,9 @@ export function PlanCards({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full max-w-[800px] mx-auto">
-          {/* Starter Plan */}
-          <div className="bg-background border border-border p-4 py-6 h-full flex flex-col">
+        <div className="w-full max-w-[500px] mx-auto">
+          <div className="bg-background border border-border p-4 py-6 flex flex-col">
             <div className="mb-4">
-              <h3 className="font-sans text-base text-foreground mb-1">
-                Starter
-              </h3>
-              <p className="font-sans text-sm text-muted-foreground mb-3">
-                Everything you need to get going
-              </p>
               <div className="flex items-baseline gap-2">
                 <span className="font-sans text-2xl text-foreground">
                   {pricing.symbol}
@@ -162,60 +148,12 @@ export function PlanCards({
             </div>
 
             <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
-              {starterFeatures.map((f) => (
+              {planFeatures.map((f) => (
                 <FeatureRow key={f.label} {...f} />
               ))}
             </div>
 
-            <div className="space-y-3">
-              {renderStarterAction(billingPeriod)}
-            </div>
-          </div>
-
-          {/* Pro Plan */}
-          <div className="bg-background border border-primary p-4 py-6 h-full flex flex-col relative">
-            <div className="absolute top-0 right-4 -translate-y-1/2">
-              <div className="bg-background border border-primary px-2 py-1 rounded-full flex items-center justify-center">
-                <span className="font-sans text-xs text-foreground">
-                  Most popular
-                </span>
-              </div>
-            </div>
-            <div className="mb-4">
-              <h3 className="font-sans text-base text-foreground mb-1">Pro</h3>
-              <p className="font-sans text-sm text-muted-foreground mb-3">
-                More power as your business grows
-              </p>
-              <div className="flex items-baseline gap-2">
-                <span className="font-sans text-2xl text-foreground">
-                  {pricing.symbol}
-                  <NumberFlow
-                    value={
-                      billingPeriod === "monthly"
-                        ? pricing.pro.monthly
-                        : pricing.pro.yearly
-                    }
-                    willChange
-                  />
-                </span>
-                <span className="font-sans text-sm text-muted-foreground">
-                  /month
-                </span>
-              </div>
-              <p className="font-sans text-xs text-muted-foreground mt-1">
-                {billingPeriod === "monthly"
-                  ? "Billed monthly"
-                  : `${pricing.symbol}${pricing.pro.yearly * 12}/year · billed annually`}
-              </p>
-            </div>
-
-            <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
-              {proFeatures.map((f) => (
-                <FeatureRow key={f.label} {...f} />
-              ))}
-            </div>
-
-            <div className="space-y-3">{renderProAction(billingPeriod)}</div>
+            <div className="space-y-3">{renderAction(billingPeriod)}</div>
           </div>
         </div>
 
@@ -257,7 +195,7 @@ export function PlanCards({
           >
             EUR
           </button>
-          {" · Excl. tax"}
+          {" · Excl. tax · Fair usage policy"}
         </p>
       </div>
     </TooltipProvider>

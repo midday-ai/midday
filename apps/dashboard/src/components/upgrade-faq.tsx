@@ -4,9 +4,9 @@ import { useState } from "react";
 
 const faqs = [
   {
-    question: "Can I switch plans later?",
+    question: "Can I switch between monthly and yearly?",
     answer:
-      "Yes. You can upgrade or downgrade at any time. Changes take effect on your next billing cycle.",
+      "Yes. You can switch between monthly and yearly billing at any time. Changes take effect on your next billing cycle.",
   },
   {
     question: "What happens if I cancel?",

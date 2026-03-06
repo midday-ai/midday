@@ -191,10 +191,7 @@ export function CancellationDialog({
 
   const pricing = getPlanPricing(checkoutCurrency === "EUR" ? "EU" : undefined);
 
-  const annualSavings =
-    plan === "pro"
-      ? (pricing.pro.monthly - pricing.pro.yearly) * 12
-      : (pricing.starter.monthly - pricing.starter.yearly) * 12;
+  const annualSavings = (pricing.starter.monthly - pricing.starter.yearly) * 12;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
