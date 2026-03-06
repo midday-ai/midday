@@ -4,7 +4,7 @@ import { Testimonials } from "@/components/testimonials";
 
 const title = "Customer Stories";
 const description =
-  "See how founders and small teams use Midday to manage their finances and run their businesses.";
+  "See how solo founders use Midday to manage their finances and run their businesses.";
 
 export const metadata: Metadata = {
   title,

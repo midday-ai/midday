@@ -49,6 +49,16 @@ const headerTestimonials: Testimonial[] = [
       "Company\nSmarch is a software development agency specializing in e-commerce, web applications, and custom backend systems.\n\nChallenge\nBefore Midday, I was manually creating PDF invoices, piecing together bank reports to understand how the company was doing, and collecting financial documents every time accounting needed something. It was scattered and tedious.\n\nImpact\nEverything lives in one place now. I set up invoice templates once, have all clients organized, get real analytics on company performance, and keep documents in a proper vault. What used to take hours of admin work is now streamlined and mostly automatic.\n\nFavorite features\nInvoice templates. They eliminate repetitive work when billing multiple clients.",
   },
   {
+    name: "Isabel Sá",
+    title: "",
+    company: "Character",
+    country: "Portugal",
+    content:
+      "I find myself having a better sense of runway and financials than before. The auto-reconciliation of payments and receipts is a game changer.",
+    fullContent:
+      "Company\nCharacter is a software design studio.\n\nChallenge\nGetting the big picture across banks and currencies. We have both Portuguese and Belgian bank accounts, and reconciling these two was always difficult. There was no easy way to see everything in one place.\n\nImpact\nA much better sense of runway and financials than before. Both bigger picture things like tax breakdowns, and smaller things like keeping an eye on expenses and removing unused subscriptions. The accounting team just logs in to Midday to grab what they need.\n\nFavorite features\nInbox and Transactions. The transactions tab was already a major upgrade from the previous workflow in Excel, but the auto-reconciliation of payments and receipts is a game changer. Drastically reduced time spent on it. We're also in the process of migrating invoicing to Midday to get the full network effect.",
+  },
+  {
     name: "Ciarán Harris",
     title: "",
     company: "CogniStream",

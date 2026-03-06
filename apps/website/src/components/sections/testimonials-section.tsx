@@ -466,7 +466,7 @@ export const defaultTestimonials: Testimonial[] = [
 export function TestimonialsSection({
   testimonials = defaultTestimonials,
   title = "Built alongside our users",
-  subtitle = "For founders and small teams who run their business every week, every feature earns its place in the workflow.",
+  subtitle = "Every feature is shaped by the people who use it every day.",
   showStars = true,
   customHeader,
 }: TestimonialsSectionProps) {
