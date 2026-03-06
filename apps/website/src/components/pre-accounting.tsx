@@ -87,8 +87,8 @@ export function PreAccounting() {
                 Pre-accounting, handled.
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Midday collects, matches, and prepares your financial data so
-                your books are always ready before they reach an accountant.
+                Midday collects, matches, and prepares your data so your books
+                are always ready before they reach an accountant.
               </p>
             </div>
 
@@ -172,8 +172,8 @@ export function PreAccounting() {
                 Pre-accounting, handled.
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-xl mx-auto font-sans text-center">
-                Midday collects, matches, and prepares your financial data so
-                your books are always ready before they reach an accountant.
+                Midday collects, matches, and prepares your data so your books
+                are always ready before they reach an accountant.
               </p>
             </div>
 

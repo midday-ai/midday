@@ -26,21 +26,7 @@ function FeatureRow({ label, tooltip }: PlanFeature) {
 
   const content = (
     <div className="flex items-center gap-2 h-7">
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill="none"
-        className="text-foreground shrink-0"
-      >
-        <path
-          d="M13.25 4.75L6 12L2.75 8.75"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <span className="text-foreground shrink-0 leading-none">•</span>
       {text}
     </div>
   );
@@ -60,10 +46,7 @@ function FeatureRow({ label, tooltip }: PlanFeature) {
 function IncludedSection() {
   return (
     <div className="mt-10">
-      <p className="font-sans text-sm text-muted-foreground text-center mb-6">
-        What's included
-      </p>
-      <div className="grid grid-cols-2 gap-x-8 gap-y-0 max-w-fit mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-0 max-w-fit mx-auto">
         {planFeatures.map((f) => (
           <FeatureRow key={f.label} {...f} />
         ))}
@@ -110,81 +93,82 @@ export function PlanCards({
   return (
     <TooltipProvider delayDuration={0}>
       <div className="w-full max-w-[560px] mx-auto">
-        <div className="flex justify-center mb-10">
-          <div
-            className="relative flex items-stretch bg-muted"
-            style={{ width: "fit-content" }}
-          >
-            <div className="flex items-stretch">
-              <button
-                type="button"
-                onClick={() => setBillingPeriod("monthly")}
-                className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
-                  billingPeriod === "monthly"
-                    ? "text-foreground bg-background border-border"
-                    : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
-                }`}
-                style={{
-                  WebkitTapHighlightColor: "transparent",
-                  marginBottom: billingPeriod === "monthly" ? "-1px" : "0px",
-                  position: "relative",
-                  zIndex: billingPeriod === "monthly" ? 10 : 1,
-                }}
-              >
-                <span>Monthly</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setBillingPeriod("yearly")}
-                className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
-                  billingPeriod === "yearly"
-                    ? "text-foreground bg-background border-border"
-                    : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
-                }`}
-                style={{
-                  WebkitTapHighlightColor: "transparent",
-                  marginBottom: billingPeriod === "yearly" ? "-1px" : "0px",
-                  position: "relative",
-                  zIndex: billingPeriod === "yearly" ? 10 : 1,
-                }}
-              >
-                <span>Yearly (Save 20%)</span>
-              </button>
+        <div className="border border-border p-6 sm:p-8 lg:p-10">
+          <div className="flex justify-center mb-10">
+            <div
+              className="relative flex items-stretch bg-muted"
+              style={{ width: "fit-content" }}
+            >
+              <div className="flex items-stretch">
+                <button
+                  type="button"
+                  onClick={() => setBillingPeriod("monthly")}
+                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
+                    billingPeriod === "monthly"
+                      ? "text-foreground bg-background border-border"
+                      : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
+                  }`}
+                  style={{
+                    WebkitTapHighlightColor: "transparent",
+                    marginBottom: billingPeriod === "monthly" ? "-1px" : "0px",
+                    position: "relative",
+                    zIndex: billingPeriod === "monthly" ? 10 : 1,
+                  }}
+                >
+                  <span>Monthly</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBillingPeriod("yearly")}
+                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
+                    billingPeriod === "yearly"
+                      ? "text-foreground bg-background border-border"
+                      : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
+                  }`}
+                  style={{
+                    WebkitTapHighlightColor: "transparent",
+                    marginBottom: billingPeriod === "yearly" ? "-1px" : "0px",
+                    position: "relative",
+                    zIndex: billingPeriod === "yearly" ? 10 : 1,
+                  }}
+                >
+                  <span>Yearly (Save 20%)</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="text-center mb-10">
-          <div className="flex items-baseline justify-center gap-3">
-            <span className="font-serif text-[80px] leading-none text-foreground font-light tracking-tight">
-              {pricing.symbol}
-              <NumberFlow
-                value={
-                  billingPeriod === "monthly"
-                    ? pricing.starter.monthly
-                    : pricing.starter.yearly
-                }
-                willChange
-              />
-            </span>
-            <span className="font-sans text-lg text-muted-foreground">
-              /month
-            </span>
+          <div className="text-center mb-10">
+            <div className="flex items-baseline justify-center gap-3">
+              <span className="font-sans text-[80px] leading-none text-foreground font-light tracking-tight">
+                {pricing.symbol}
+                <NumberFlow
+                  value={
+                    billingPeriod === "monthly"
+                      ? pricing.starter.monthly
+                      : pricing.starter.yearly
+                  }
+                  willChange
+                />
+              </span>
+              <span className="font-sans text-lg text-muted-foreground">
+                /month
+              </span>
+            </div>
+            <p className="font-sans text-sm text-muted-foreground mt-3">
+              {billingPeriod === "monthly"
+                ? "Billed monthly"
+                : `${pricing.symbol}${pricing.starter.yearly * 12}/year · billed annually`}
+            </p>
           </div>
-          <p className="font-sans text-sm text-muted-foreground mt-3">
-            {billingPeriod === "monthly"
-              ? "Billed monthly"
-              : `${pricing.symbol}${pricing.starter.yearly * 12}/year · billed annually`}
-          </p>
+
+          <div className="max-w-[280px] mx-auto">
+            {renderAction(billingPeriod)}
+          </div>
+
+          <IncludedSection />
         </div>
-
-        <div className="max-w-[280px] mx-auto">
-          {renderAction(billingPeriod)}
-        </div>
-
-        <IncludedSection />
-
-        <p className="font-sans text-xs text-muted-foreground/50 mt-8 text-center">
+        <p className="font-sans text-xs text-muted-foreground mt-8 text-center">
           {footnote && <>{footnote} · </>}
           {billingPeriod === "yearly" && <>30-day money-back guarantee · </>}
           <button
@@ -198,8 +182,8 @@ export function PlanCards({
             className={cn(
               "transition-colors",
               currency === "USD"
-                ? "text-foreground underline underline-offset-4"
-                : "text-muted-foreground/50 hover:text-muted-foreground cursor-pointer",
+                ? "text-muted-foreground underline underline-offset-4"
+                : "text-muted-foreground hover:text-foreground cursor-pointer",
             )}
           >
             USD
@@ -216,8 +200,8 @@ export function PlanCards({
             className={cn(
               "transition-colors",
               currency === "EUR"
-                ? "text-foreground underline underline-offset-4"
-                : "text-muted-foreground/50 hover:text-muted-foreground cursor-pointer",
+                ? "text-muted-foreground underline underline-offset-4"
+                : "text-muted-foreground hover:text-foreground cursor-pointer",
             )}
           >
             EUR

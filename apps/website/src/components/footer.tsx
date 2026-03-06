@@ -74,42 +74,6 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Compare Column */}
-            <div className="space-y-3 hidden md:block">
-              <h3 className="font-sans text-sm text-foreground mb-4">
-                Compare
-              </h3>
-              <div className="space-y-2.5">
-                {[
-                  {
-                    href: "/compare/quickbooks-alternative",
-                    label: "vs QuickBooks",
-                  },
-                  {
-                    href: "/compare/xero-alternative",
-                    label: "vs Xero",
-                  },
-                  {
-                    href: "/compare/freshbooks-alternative",
-                    label: "vs FreshBooks",
-                  },
-                  { href: "/compare/wave-alternative", label: "vs Wave" },
-                  { href: "/compare/bench-alternative", label: "vs Bench" },
-                  { href: "/compare/qonto-alternative", label: "vs Qonto" },
-                  { href: "/compare/pleo-alternative", label: "vs Pleo" },
-                  { href: "/compare", label: "View all" },
-                ].map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors block"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
             {/* Company Column */}
             <div className="space-y-3">
               <h3 className="font-sans text-sm text-foreground mb-4">

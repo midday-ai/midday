@@ -74,7 +74,7 @@ export function Invoicing() {
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
                 Create invoices, send them to customers, and track payments
-                while every update flows directly into your financial overview.
+                while every update flows directly into your overview.
               </p>
             </div>
 
@@ -112,7 +112,7 @@ export function Invoicing() {
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
                 Create invoices, send them to customers, and track payments
-                while every update flows directly into your financial overview.
+                while every update flows directly into your overview.
               </p>
             </div>
 
@@ -199,7 +199,7 @@ export function Invoicing() {
               <div className="flex items-center lg:order-2">
                 <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
                   <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
-                    Connected to your finances
+                    Connected to your business
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     Invoices stay linked to customers and revenue, with fast

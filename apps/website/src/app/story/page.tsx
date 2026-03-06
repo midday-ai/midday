@@ -64,8 +64,8 @@ export default function StoryPage() {
                   piece the story together yourself.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  For someone running a one-person company, that overhead adds
-                  up quickly. You are not lacking information. You are lacking a
+                  For someone running a company alone, that overhead adds up
+                  quickly. You are not lacking information. You are lacking a
                   system that keeps everything connected.
                 </p>
               </section>
@@ -82,7 +82,8 @@ export default function StoryPage() {
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
                   We did not want to build another finance tool. We wanted to
-                  build a system designed for one-person companies.
+                  build a system where everything stays connected without you
+                  having to hold it together.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
                   Midday keeps the moving parts of your business connected as
@@ -117,10 +118,9 @@ export default function StoryPage() {
                   What we are focused on
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  Midday is built for the new wave of one-person companies.
-                  Founders who run real businesses without building large teams
-                  and who want to stay on top of their company without spending
-                  their time managing admin.
+                  Midday is built for founders who run real businesses without
+                  building large teams and who want to stay on top of their
+                  company without spending their time managing admin.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
                   We focus on reducing manual and repetitive work, keeping
@@ -130,8 +130,8 @@ export default function StoryPage() {
                   build software that works quietly in the background.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  Our goal is simple. When you run a one-person company, you
-                  should not have to spend your time managing admin.
+                  Our goal is simple. When you run the whole company yourself,
+                  you should not have to spend your time managing admin.
                 </p>
                 <p className="text-muted-foreground leading-relaxed font-medium">
                   Your business should stay organized and explain itself as it

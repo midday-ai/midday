@@ -9,7 +9,7 @@ export function FeaturesGridSection() {
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center space-y-4 mb-10 sm:mb-12">
           <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-            Everything you need to run your business finances
+            Everything you need to run your business
           </h2>
           <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto px-4">
             Dashboards, insights, transactions, invoicing, time tracking, and
@@ -36,7 +36,7 @@ export function FeaturesGridSection() {
                   Assistant
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                  Financial answers
+                  Clear answers
                 </p>
               </div>
             </Link>

@@ -4,7 +4,7 @@ import { Inbox } from "@/components/inbox";
 
 const title = "Receipt Inbox";
 const description =
-  "Capture receipts and invoices automatically. Match documents to transactions, search your financial records, and stay organized. Built for small business owners.";
+  "Capture receipts and invoices automatically. Match documents to transactions, search your records, and stay organized. Built for small business owners.";
 
 export const metadata: Metadata = {
   title,

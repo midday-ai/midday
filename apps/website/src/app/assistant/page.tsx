@@ -4,7 +4,7 @@ import { Assistant } from "@/components/assistant";
 
 const title = "AI Assistant";
 const description =
-  "Your AI-powered financial assistant. Ask questions about your business and get clear, actionable answers based on your real financial data.";
+  "Your AI-powered business assistant. Ask questions about your business and get clear, actionable answers based on your real business data.";
 
 export const metadata: Metadata = {
   title,

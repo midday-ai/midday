@@ -330,7 +330,7 @@ export function Header({
                                 {
                                   href: "/assistant",
                                   title: "Assistant",
-                                  desc: "Ask questions and get clear financial answers",
+                                  desc: "Ask questions and get clear answers",
                                 },
                                 {
                                   href: "/insights",
@@ -645,7 +645,7 @@ export function Header({
                                 {
                                   href: "/mcp",
                                   title: "AI Integrations",
-                                  desc: "Connect AI tools to your financial data.",
+                                  desc: "Connect AI tools to your business data.",
                                   external: false,
                                 },
                               ].map((item, index) => (
@@ -799,7 +799,7 @@ export function Header({
                                 Mac app
                               </span>
                               <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                Your finances, always one click away.
+                                Your business, always one click away.
                               </span>
                             </div>
                           </Link>
