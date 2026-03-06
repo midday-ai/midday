@@ -64,9 +64,9 @@ const faqs: FAQItem[] = [
       "Yes. Midday uses industry-standard security practices to protect your data. You control what gets connected and shared at all times.",
   },
   {
-    question: "Can I change plans later?",
+    question: "Can I switch between monthly and yearly?",
     answer:
-      "Yes. You can upgrade or downgrade your plan at any time as your business grows or your needs change.",
+      "Yes. You can switch between monthly and yearly billing at any time. Save 20% with annual billing.",
   },
   {
     question: "Is there a free trial?",

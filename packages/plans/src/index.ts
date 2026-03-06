@@ -16,18 +16,6 @@ export const PLANS = {
       key: "starter",
       interval: "year",
     },
-    pro: {
-      id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
-      name: "Pro",
-      key: "pro",
-      interval: "month",
-    },
-    pro_yearly: {
-      id: "a1b1bef6-fd61-447c-84c5-33b602e1b854",
-      name: "Pro Yearly",
-      key: "pro",
-      interval: "year",
-    },
   },
   sandbox: {
     starter: {
@@ -42,29 +30,40 @@ export const PLANS = {
       key: "starter",
       interval: "year",
     },
-    pro: {
-      id: "dc9e75d2-c1ef-4265-9265-f599e54eb172",
-      name: "Pro",
-      key: "pro",
-      interval: "month",
-    },
-    pro_yearly: {
-      id: "439697ce-73ad-439f-8b73-c5bee854a811",
-      name: "Pro Yearly",
-      key: "pro",
-      interval: "year",
-    },
   },
 } as const;
 
-export type PlanKey = "starter" | "pro";
-export type PlanProductKey =
-  | "starter"
-  | "starter_yearly"
-  | "pro"
-  | "pro_yearly";
+export type PlanKey = "starter";
+export type PlanProductKey = "starter" | "starter_yearly";
 
 export type PlanEnvironment = "production" | "sandbox";
+
+const LEGACY_PRO_PRODUCTS = {
+  production: {
+    pro: {
+      id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
+      key: "pro" as const,
+      interval: "month" as const,
+    },
+    pro_yearly: {
+      id: "a1b1bef6-fd61-447c-84c5-33b602e1b854",
+      key: "pro" as const,
+      interval: "year" as const,
+    },
+  },
+  sandbox: {
+    pro: {
+      id: "dc9e75d2-c1ef-4265-9265-f599e54eb172",
+      key: "pro" as const,
+      interval: "month" as const,
+    },
+    pro_yearly: {
+      id: "439697ce-73ad-439f-8b73-c5bee854a811",
+      key: "pro" as const,
+      interval: "year" as const,
+    },
+  },
+};
 
 export const getPlans = () => {
   return PLANS[POLAR_ENVIRONMENT];
@@ -76,22 +75,31 @@ export function getPlanProductId(plan: PlanKey, yearly: boolean): string {
   return plans[productKey].id;
 }
 
-export function getPlanByProductId(productId: string): PlanKey {
+function findProductById(productId: string) {
   const plans = getPlans();
-  const plan = Object.values(plans).find((p) => p.id === productId);
+  const active = Object.values(plans).find((p) => p.id === productId);
+  if (active) return active;
+
+  const legacy = Object.values(LEGACY_PRO_PRODUCTS[POLAR_ENVIRONMENT]).find(
+    (p) => p.id === productId,
+  );
+  return legacy ?? null;
+}
+
+export function getPlanByProductId(productId: string): "starter" | "pro" {
+  const plan = findProductById(productId);
 
   if (!plan) {
     throw new Error("Plan not found");
   }
 
-  return plan.key as PlanKey;
+  return plan.key;
 }
 
 export function getPlanIntervalByProductId(
   productId: string,
 ): "month" | "year" {
-  const plans = getPlans();
-  const plan = Object.values(plans).find((p) => p.id === productId);
+  const plan = findProductById(productId);
 
   if (!plan) {
     throw new Error("Plan not found");
@@ -123,7 +131,6 @@ export type PlanLimits = {
 
 export type PlanPricing = {
   starter: { monthly: number; yearly: number };
-  pro: { monthly: number; yearly: number };
   currency: string;
   symbol: string;
 };
@@ -131,8 +138,7 @@ export type PlanPricing = {
 export function getPlanPricing(continent?: string | null): PlanPricing {
   const isEUR = continent === "EU";
   return {
-    starter: { monthly: 29, yearly: 23 },
-    pro: { monthly: 49, yearly: 39 },
+    starter: { monthly: 19, yearly: 15 },
     currency: isEUR ? "EUR" : "USD",
     symbol: isEUR ? "€" : "$",
   };
@@ -143,111 +149,80 @@ export type PlanFeature = {
   tooltip?: string;
 };
 
-export const starterFeatures: PlanFeature[] = [
+export const planFeatures: PlanFeature[] = [
   {
-    label: "Invoicing with recurring and online payments",
+    label: "Invoicing and payments",
     tooltip:
-      "Set up weekly to yearly recurring schedules. Accept online payments by card.",
+      "Recurring schedules, templates, customer portal, and online card payments.",
   },
   {
-    label: "Automatic bank sync and categorization",
-    tooltip: "Connect to 20,000+ banks across the US, Canada, UK, and Europe.",
+    label: "Transactions and bank sync",
+    tooltip:
+      "Connect to 20,000+ banks. Transactions categorized automatically.",
   },
   {
-    label: "Receipt capture via Gmail, Outlook, or upload",
+    label: "Inbox and receipt matching",
     tooltip:
-      "Also supports Slack, WhatsApp, and email forwarding. AI matches receipts to transactions.",
+      "Forward receipts from Gmail, Outlook, Slack, or WhatsApp. Matched to transactions automatically.",
   },
   {
-    label: "Financial reports, burn rate, and tax summaries",
-    tooltip:
-      "Includes profit & loss, runway, revenue forecast, balance sheet, cash flow, and more.",
+    label: "Accounting exports",
+    tooltip: "Export to Xero, QuickBooks, Fortnox, or CSV with one click.",
+  },
+  {
+    label: "Time tracking",
+    tooltip: "Track billable hours per project and turn them into invoices.",
   },
   {
     label: "AI assistant",
     tooltip:
-      "Ask questions about revenue, spending, runway, and invoices in plain language.",
+      "Ask questions about revenue, spending, and invoices in plain language.",
   },
   {
-    label: "Time tracking and project billing",
+    label: "Financial overview and reports",
     tooltip:
-      "Track billable hours per project, export to spreadsheet, and create invoices from tracked time.",
+      "Live dashboard with profit & loss, burn rate, runway, cash flow, and tax summaries.",
   },
   {
-    label: "Multi-currency support",
+    label: "Vault",
     tooltip:
-      "View all financials in one base currency, send invoices in any currency, and match cross-currency receipts.",
+      "Store and organize documents. Attach to transactions and invoices.",
   },
   {
-    label: "Export to Xero, QuickBooks, or Fortnox",
-    tooltip:
-      "Export categorized transactions and attachments to your accounting software. CSV export also available.",
-  },
-  { label: "3 banks · 15 invoices/mo · 10GB storage" },
-];
-
-export const proFeatures: PlanFeature[] = [
-  { label: "Everything in Starter" },
-  { label: "10 banks · 50 invoices/mo · 100GB storage" },
-  {
-    label: "Custom transaction categories",
-    tooltip:
-      "Create your own categories and rules to match how your business operates.",
+    label: "Apps and integrations",
+    tooltip: "Slack, Gmail, Outlook, Stripe, Google Drive, Dropbox, and more.",
   },
   {
-    label: "Invoice templates",
+    label: "Multi-currency",
     tooltip:
-      "Save and reuse invoice layouts for different clients or services.",
+      "Invoice in any currency. Converted to your base currency automatically.",
   },
   {
-    label: "Customer portal",
+    label: "API and MCP",
     tooltip:
-      "Let customers view and pay invoices through their own branded portal.",
+      "REST API, SDKs, and MCP server for AI agents and custom workflows.",
   },
-  {
-    label: "Advanced AI insights",
-    tooltip:
-      "Get alerts on unusual spending, cash flow trends, and automated suggestions based on your financial data.",
-  },
-  {
-    label: "Shareable report and document links",
-    tooltip:
-      "Generate view-only links with optional expiration for reports, receipts, and vault documents.",
-  },
-  {
-    label: "API access and integrations",
-    tooltip:
-      "Build custom integrations with the Midday API. SDKs available for all major languages.",
-  },
-  { label: "Priority support" },
 ];
 
 export function getPlanLimits(plan: string): PlanLimits {
   switch (plan) {
     case "starter":
-      return {
-        users: 2,
-        bankConnections: 3,
-        storage: 10 * 1024 * 1024 * 1024, // 10GB in bytes
-        inbox: 150,
-        invoices: 15,
-      };
     case "trial":
     case "pro":
       return {
         users: 10,
         bankConnections: 10,
-        storage: 100 * 1024 * 1024 * 1024, // 100GB in bytes
+        storage: 100 * 1024 * 1024 * 1024,
         inbox: 500,
         invoices: 50,
       };
     default:
       return {
-        users: 2,
-        bankConnections: 3,
-        storage: 10 * 1024 * 1024 * 1024, // 10GB in bytes
-        inbox: 150,
-        invoices: 15,
+        users: 1,
+        bankConnections: 1,
+        storage: 1 * 1024 * 1024 * 1024,
+        inbox: 50,
+        invoices: 5,
       };
   }
 }

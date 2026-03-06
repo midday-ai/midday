@@ -2,10 +2,8 @@
 
 import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
-import { cn } from "@midday/ui/cn";
 import { PlanCards } from "@midday/ui/plan-cards";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
@@ -19,7 +17,7 @@ export function Plans() {
   const [checkoutCurrency, setCheckoutCurrency] = useState<"USD" | "EUR">(
     "USD",
   );
-  const [isSubmitting, setIsSubmitting] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPollingForPlan, setIsPollingForPlan] = useState(false);
   const isPollingRef = useRef(false);
   const pollingStartedAtRef = useRef<number | null>(null);
@@ -48,7 +46,6 @@ export function Plans() {
       return 1500;
     },
   });
-  const { data, isLoading } = useQuery(trpc.team.availablePlans.queryOptions());
   const theme = useTheme().resolvedTheme === "dark" ? "dark" : "light";
 
   useEffect(() => {
@@ -78,7 +75,7 @@ export function Plans() {
       isPollingRef.current = false;
 
       if (isTimedOut && !planUpdated) {
-        setIsSubmitting(0);
+        setIsSubmitting(false);
       }
 
       revalidateAfterCheckout();
@@ -89,20 +86,20 @@ export function Plans() {
     trpc.billing.createCheckout.mutationOptions(),
   );
 
-  const handleCheckout = async (plan: "starter" | "pro", planType: string) => {
+  const handleCheckout = async (planType: string) => {
     try {
-      setIsSubmitting(plan === "starter" ? 1 : 2);
+      setIsSubmitting(true);
 
       track({
         event: LogEvents.CheckoutStarted.name,
         channel: LogEvents.CheckoutStarted.channel,
-        plan,
+        plan: "starter",
         planType,
         currency: checkoutCurrency,
       });
 
       const { url } = await createCheckoutMutation.mutateAsync({
-        plan,
+        plan: "starter",
         planType,
         embedOrigin: window.location.origin,
         currency: checkoutCurrency,
@@ -119,7 +116,7 @@ export function Plans() {
         track({
           event: LogEvents.CheckoutCompleted.name,
           channel: LogEvents.CheckoutCompleted.channel,
-          plan,
+          plan: "starter",
           planType,
           currency: checkoutCurrency,
         });
@@ -132,72 +129,31 @@ export function Plans() {
       checkout.addEventListener("close", () => {
         checkoutInstanceRef.current = null;
         if (!isPollingRef.current) {
-          setIsSubmitting(0);
+          setIsSubmitting(false);
         }
       });
 
       checkout.addEventListener("confirmed", () => {});
     } catch (error) {
       console.error("Failed to open checkout", error);
-      setIsSubmitting(0);
+      setIsSubmitting(false);
     }
   };
 
   return (
     <PlanCards
       onCurrencyChange={setCheckoutCurrency}
-      renderStarterAction={(billingPeriod) => (
-        <>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <SubmitButton
-                  variant="secondary"
-                  className={cn(
-                    "w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors",
-                    !isLoading &&
-                      !data?.starter &&
-                      "pointer-events-none opacity-50",
-                  )}
-                  isSubmitting={isSubmitting === 1}
-                  onClick={() => {
-                    if (!data?.starter || isLoading) {
-                      return;
-                    }
-                    handleCheckout(
-                      "starter",
-                      billingPeriod === "yearly" ? "starter_yearly" : "starter",
-                    );
-                  }}
-                  disabled={!isLoading && !data?.starter}
-                >
-                  Continue with Starter
-                </SubmitButton>
-              </div>
-            </TooltipTrigger>
-            {!isLoading && !data?.starter && (
-              <TooltipContent className="text-xs max-w-[300px]">
-                <p>
-                  This plan is not applicable since you have exceeded the limits
-                  for this subscription (users or bank connections).
-                </p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </>
-      )}
-      renderProAction={(billingPeriod) => (
+      renderAction={(billingPeriod) => (
         <SubmitButton
           className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors"
           onClick={() =>
             handleCheckout(
-              "pro",
-              billingPeriod === "yearly" ? "pro_yearly" : "pro",
+              billingPeriod === "yearly" ? "starter_yearly" : "starter",
             )
           }
-          isSubmitting={isSubmitting === 2}
+          isSubmitting={isSubmitting}
         >
-          Continue with Pro
+          Get started
         </SubmitButton>
       )}
     />
