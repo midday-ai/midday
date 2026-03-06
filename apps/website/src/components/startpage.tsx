@@ -74,9 +74,9 @@ const features = [
   {
     title: "Invoices get paid",
     subtitle:
-      "Customers can pay invoices online, with payments flowing straight into your finances.",
+      "Customers can pay invoices online, with payments tracked automatically.",
     mobileSubtitle:
-      "Customers can pay invoices online with payments flowing straight into your finances.",
+      "Customers can pay invoices online with payments tracked automatically.",
     illustration: "animation",
   },
   {
@@ -108,7 +108,7 @@ const videos = [
     id: "overview",
     title: "Overview",
     subtitle:
-      "See how Midday helps you run your business finances without manual work.",
+      "See how Midday helps you run your business without the admin.",
     url: "https://cdn.midday.ai/videos/login-video.mp4",
   },
   {
@@ -150,7 +150,7 @@ const videos = [
     id: "invoicing",
     title: "Invoicing",
     subtitle:
-      "Create invoices, send to customers, and track payments flowing into your financial overview.",
+      "Create invoices, send to customers, and track payments in one place.",
     url: "https://cdn.midday.ai/videos/login-video.mp4", // Replace with actual video URL
   },
   {
@@ -306,7 +306,7 @@ export function StartPage() {
           {/* Header content - centered on mobile, side-by-side on desktop */}
           <div className="flex-1 lg:flex-none flex flex-col justify-center md:justify-start md:pt-16 lg:pt-48 items-center space-y-8 lg:space-y-0 z-20 px-3 sm:px-4 lg:px-0 lg:max-w-[1400px] lg:mx-auto lg:w-full lg:mb-12 xl:mb-12 2xl:mb-12 3xl:mb-16">
             <div className="flex flex-col items-center w-full text-center space-y-6 lg:space-y-8">
-              <div className="space-y-5 lg:space-y-6 max-w-3xl mx-auto px-2 lg:px-0">
+              <div className="space-y-5 lg:space-y-6 max-w-3xl 3xl:max-w-5xl mx-auto px-2 lg:px-0">
                 <h1 className="font-serif text-3xl sm:text-3xl md:text-4xl lg:text-6xl xl:text-7xl 2xl:text-7xl 3xl:text-8xl leading-[1.1] tracking-tight text-foreground">
                   For the new wave of{" "}
                   <em className="not-italic text-muted-foreground/80">
@@ -317,7 +317,7 @@ export function StartPage() {
 
                 <p className="text-muted-foreground text-base lg:text-lg leading-relaxed font-sans max-w-xl mx-auto">
                   Midday takes care of admin, matches receipts automatically,
-                  gives you financial clarity and exports cleanly to your
+                  gives you clarity and exports cleanly to your
                   accountant.
                 </p>
               </div>

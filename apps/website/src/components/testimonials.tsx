@@ -172,8 +172,8 @@ export function Testimonials() {
               Customer Stories
             </h1>
             <p className="font-sans text-base text-muted-foreground leading-normal mb-8">
-              See how solo founders use Midday to manage their finances and run
-              their businesses.
+              See how solo founders use Midday to run their businesses with less
+              admin.
             </p>
           </div>
         </div>

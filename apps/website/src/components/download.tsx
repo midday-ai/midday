@@ -61,7 +61,7 @@ export function Download() {
                 Midday for Mac
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Quick access to your financial files in a native Mac experience.
+                Quick access to your business data in a native Mac experience.
               </p>
             </div>
 
@@ -125,7 +125,7 @@ export function Download() {
                 Midday for Mac
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-xl mx-auto font-sans text-center">
-                Quick access to your financial files in a native Mac experience.
+                Quick access to your business data in a native Mac experience.
               </p>
             </div>
 

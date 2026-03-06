@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { Insights } from "@/components/insights";
 
-const title = "Financial Insights";
+const title = "Business Insights";
 const description =
-  "Understand your business finances at a glance. Get weekly summaries, cash flow analysis, and clear explanations of revenue and spending trends.";
+  "Understand your business at a glance. Get weekly summaries, cash flow analysis, and clear explanations of revenue and spending trends.";
 
 export const metadata: Metadata = {
   title,
   description,
   keywords: [
-    "financial insights",
+    "business insights",
     "business analytics",
     "cash flow analysis",
     "revenue tracking",

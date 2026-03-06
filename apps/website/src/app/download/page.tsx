@@ -4,7 +4,7 @@ import { Download } from "@/components/download";
 
 const title = "Download";
 const description =
-  "Download Midday for Mac. Your finances, always one click away. Access your business data directly from your desktop.";
+  "Download Midday for Mac. Your business, always one click away. Access your business data directly from your desktop.";
 
 export const metadata: Metadata = {
   title,

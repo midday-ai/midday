@@ -5,7 +5,7 @@ import { DocsHomeHero } from "@/components/docs/docs-home-hero";
 
 const title = "Documentation";
 const description =
-  "Learn how to use Midday to run your business finances. Get answers about invoicing, banking, time tracking, reports, and more.";
+  "Learn how to use Midday to run your business. Get answers about invoicing, banking, time tracking, reports, and more.";
 
 export const metadata: Metadata = {
   title,

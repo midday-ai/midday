@@ -26,21 +26,7 @@ function FeatureRow({ label, tooltip }: PlanFeature) {
 
   const content = (
     <div className="flex items-center gap-2 h-7">
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill="none"
-        className="text-foreground shrink-0"
-      >
-        <path
-          d="M13.25 4.75L6 12L2.75 8.75"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <span className="text-foreground shrink-0 leading-none">•</span>
       {text}
     </div>
   );
@@ -60,10 +46,7 @@ function FeatureRow({ label, tooltip }: PlanFeature) {
 function IncludedSection() {
   return (
     <div className="mt-10">
-      <p className="font-sans text-sm text-muted-foreground text-center mb-6">
-        What's included
-      </p>
-      <div className="grid grid-cols-2 gap-x-8 gap-y-0 max-w-fit mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-0 max-w-fit mx-auto">
         {planFeatures.map((f) => (
           <FeatureRow key={f.label} {...f} />
         ))}
@@ -110,6 +93,7 @@ export function PlanCards({
   return (
     <TooltipProvider delayDuration={0}>
       <div className="w-full max-w-[560px] mx-auto">
+        <div className="border border-border p-6 sm:p-8 lg:p-10">
         <div className="flex justify-center mb-10">
           <div
             className="relative flex items-stretch bg-muted"
@@ -156,7 +140,7 @@ export function PlanCards({
 
         <div className="text-center mb-10">
           <div className="flex items-baseline justify-center gap-3">
-            <span className="font-serif text-[80px] leading-none text-foreground font-light tracking-tight">
+            <span className="font-sans text-[80px] leading-none text-foreground font-light tracking-tight">
               {pricing.symbol}
               <NumberFlow
                 value={
@@ -184,7 +168,8 @@ export function PlanCards({
 
         <IncludedSection />
 
-        <p className="font-sans text-xs text-muted-foreground/50 mt-8 text-center">
+        </div>
+        <p className="font-sans text-xs text-muted-foreground mt-8 text-center">
           {footnote && <>{footnote} · </>}
           {billingPeriod === "yearly" && <>30-day money-back guarantee · </>}
           <button
@@ -198,8 +183,8 @@ export function PlanCards({
             className={cn(
               "transition-colors",
               currency === "USD"
-                ? "text-foreground underline underline-offset-4"
-                : "text-muted-foreground/50 hover:text-muted-foreground cursor-pointer",
+                ? "text-muted-foreground underline underline-offset-4"
+                : "text-muted-foreground hover:text-foreground cursor-pointer",
             )}
           >
             USD
@@ -216,8 +201,8 @@ export function PlanCards({
             className={cn(
               "transition-colors",
               currency === "EUR"
-                ? "text-foreground underline underline-offset-4"
-                : "text-muted-foreground/50 hover:text-muted-foreground cursor-pointer",
+                ? "text-muted-foreground underline underline-offset-4"
+                : "text-muted-foreground hover:text-foreground cursor-pointer",
             )}
           >
             EUR
