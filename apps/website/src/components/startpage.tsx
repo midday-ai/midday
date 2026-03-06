@@ -316,7 +316,8 @@ export function StartPage() {
 
                 <p className="text-muted-foreground text-base lg:text-lg leading-relaxed font-sans max-w-xl mx-auto">
                   Midday takes care of admin, matches receipts automatically,
-                  gives you financial clarity and exports cleanly to your accountant.
+                  gives you financial clarity and exports cleanly to your
+                  accountant.
                 </p>
               </div>
 
