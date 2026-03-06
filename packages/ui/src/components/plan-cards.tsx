@@ -13,17 +13,35 @@ import {
 } from "./tooltip";
 
 function FeatureRow({ label, tooltip }: PlanFeature) {
+  const text = (
+    <span
+      className={cn(
+        "font-sans text-sm text-foreground font-normal",
+        tooltip && "border-b border-dashed border-[#878787]/30 cursor-help",
+      )}
+    >
+      {label}
+    </span>
+  );
+
   const content = (
-    <div className="flex items-start gap-2">
-      <span className="text-foreground leading-[1.5rem]">•</span>
-      <span
-        className={cn(
-          "font-sans text-sm text-foreground leading-relaxed",
-          tooltip && "border-b border-dashed border-[#878787]/30 cursor-help",
-        )}
+    <div className="flex items-center gap-2 h-7">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        className="text-foreground shrink-0"
       >
-        {label}
-      </span>
+        <path
+          d="M13.25 4.75L6 12L2.75 8.75"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {text}
     </div>
   );
 
@@ -36,6 +54,21 @@ function FeatureRow({ label, tooltip }: PlanFeature) {
         <p>{tooltip}</p>
       </TooltipContent>
     </Tooltip>
+  );
+}
+
+function IncludedSection() {
+  return (
+    <div className="mt-10">
+      <p className="font-sans text-sm text-muted-foreground text-center mb-6">
+        What's included
+      </p>
+      <div className="grid grid-cols-2 gap-x-8 gap-y-0 max-w-fit mx-auto">
+        {planFeatures.map((f) => (
+          <FeatureRow key={f.label} {...f} />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -76,8 +109,8 @@ export function PlanCards({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="w-full">
-        <div className="flex justify-center mb-6 sm:mb-6 lg:mb-12">
+      <div className="w-full max-w-[560px] mx-auto">
+        <div className="flex justify-center mb-10">
           <div
             className="relative flex items-stretch bg-muted"
             style={{ width: "fit-content" }}
@@ -121,43 +154,37 @@ export function PlanCards({
           </div>
         </div>
 
-        <div className="w-full max-w-[500px] mx-auto">
-          <div className="bg-background border border-border p-4 py-6 flex flex-col">
-            <div className="mb-4">
-              <div className="flex items-baseline gap-2">
-                <span className="font-sans text-2xl text-foreground">
-                  {pricing.symbol}
-                  <NumberFlow
-                    value={
-                      billingPeriod === "monthly"
-                        ? pricing.starter.monthly
-                        : pricing.starter.yearly
-                    }
-                    willChange
-                  />
-                </span>
-                <span className="font-sans text-sm text-muted-foreground">
-                  /month
-                </span>
-              </div>
-              <p className="font-sans text-xs text-muted-foreground mt-1">
-                {billingPeriod === "monthly"
-                  ? "Billed monthly"
-                  : `${pricing.symbol}${pricing.starter.yearly * 12}/year · billed annually`}
-              </p>
-            </div>
-
-            <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
-              {planFeatures.map((f) => (
-                <FeatureRow key={f.label} {...f} />
-              ))}
-            </div>
-
-            <div className="space-y-3">{renderAction(billingPeriod)}</div>
+        <div className="text-center mb-10">
+          <div className="flex items-baseline justify-center gap-3">
+            <span className="font-serif text-[80px] leading-none text-foreground font-light tracking-tight">
+              {pricing.symbol}
+              <NumberFlow
+                value={
+                  billingPeriod === "monthly"
+                    ? pricing.starter.monthly
+                    : pricing.starter.yearly
+                }
+                willChange
+              />
+            </span>
+            <span className="font-sans text-lg text-muted-foreground">
+              /month
+            </span>
           </div>
+          <p className="font-sans text-sm text-muted-foreground mt-3">
+            {billingPeriod === "monthly"
+              ? "Billed monthly"
+              : `${pricing.symbol}${pricing.starter.yearly * 12}/year · billed annually`}
+          </p>
         </div>
 
-        <p className="font-sans text-xs text-muted-foreground/50 mt-6 text-center">
+        <div className="max-w-[280px] mx-auto">
+          {renderAction(billingPeriod)}
+        </div>
+
+        <IncludedSection />
+
+        <p className="font-sans text-xs text-muted-foreground/50 mt-8 text-center">
           {footnote && <>{footnote} · </>}
           {billingPeriod === "yearly" && <>30-day money-back guarantee · </>}
           <button
@@ -195,7 +222,7 @@ export function PlanCards({
           >
             EUR
           </button>
-          {" · Excl. tax · Fair usage policy"}
+          {" · Excl. tax"}
         </p>
       </div>
     </TooltipProvider>

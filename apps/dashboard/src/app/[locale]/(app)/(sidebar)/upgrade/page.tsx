@@ -21,24 +21,19 @@ export default async function UpgradePage() {
   }
 
   const daysLeft = getTrialDaysLeft(team.createdAt);
-
-  const getDescription = () => {
-    if (daysLeft && daysLeft > 0) {
-      return `Your trial ends in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}.`;
-    }
-
-    return "Your trial has ended.";
-  };
+  const trialEnded = !daysLeft || daysLeft <= 0;
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:py-6 md:-ml-8">
       <div className="w-full max-w-[960px] p-8">
         <div className="mb-8 md:mt-8 text-center">
           <h1 className="font-serif text-2xl text-foreground mb-2">
-            Choose the plan that works for you
+            Continue with Midday
           </h1>
           <p className="font-sans text-base text-muted-foreground leading-normal">
-            {getDescription()}
+            {trialEnded
+              ? "Your trial has ended — subscribe to pick up where you left off."
+              : `Your trial ends in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}.`}
           </p>
         </div>
 

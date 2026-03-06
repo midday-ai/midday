@@ -49,11 +49,7 @@ export default async function Layout({
 
         <div className="md:ml-[70px] pb-4">
           <Header />
-          <TrialGuard
-            plan={user.team?.plan}
-            createdAt={user.team?.createdAt}
-            user={{ fullName: user.fullName }}
-          >
+          <TrialGuard plan={user.team?.plan} createdAt={user.team?.createdAt}>
             <div className="px-4 md:px-8">{children}</div>
           </TrialGuard>
         </div>

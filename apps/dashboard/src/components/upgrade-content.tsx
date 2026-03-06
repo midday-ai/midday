@@ -22,13 +22,7 @@ import { Plans } from "@/components/plans";
 import { UpgradeFAQ } from "@/components/upgrade-faq";
 import { useTRPC } from "@/trpc/client";
 
-type UpgradeContentProps = {
-  user: {
-    fullName: string | null;
-  };
-};
-
-export function UpgradeContent({ user }: UpgradeContentProps) {
+export function UpgradeContent() {
   const supabase = createClient();
   const trpc = useTRPC();
   const router = useRouter();
@@ -43,19 +37,15 @@ export function UpgradeContent({ user }: UpgradeContentProps) {
     }),
   );
 
-  const firstName = user.fullName ? user.fullName.split(" ").at(0) : null;
-
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:py-6 md:-ml-8">
       <div className="w-full max-w-[960px] p-8">
         <div className="mb-8 md:mt-8 text-center">
           <h1 className="font-serif text-2xl text-foreground mb-2">
-            {firstName
-              ? `${firstName}, your data is waiting for you`
-              : "Your data is waiting for you"}
+            Continue with Midday
           </h1>
           <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto">
-            Your trial has ended — pick a plan to continue.
+            Your trial has ended — subscribe to pick up where you left off.
           </p>
         </div>
 

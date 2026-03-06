@@ -198,6 +198,11 @@ export const planFeatures: PlanFeature[] = [
       "Invoice in any currency. Converted to your base currency automatically.",
   },
   {
+    label: "Customer management",
+    tooltip:
+      "Store customer details, track history, and reuse across invoices and projects.",
+  },
+  {
     label: "API and MCP",
     tooltip:
       "REST API, SDKs, and MCP server for AI agents and custom workflows.",

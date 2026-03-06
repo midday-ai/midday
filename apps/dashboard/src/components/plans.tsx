@@ -153,7 +153,7 @@ export function Plans() {
           }
           isSubmitting={isSubmitting}
         >
-          Get started
+          Upgrade
         </SubmitButton>
       )}
     />

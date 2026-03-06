@@ -7,18 +7,10 @@ import { UpgradeContent } from "./upgrade-content";
 type TrialGuardProps = {
   plan: string | null | undefined;
   createdAt: string | null | undefined;
-  user: {
-    fullName: string | null;
-  };
   children: React.ReactNode;
 };
 
-export function TrialGuard({
-  plan,
-  createdAt,
-  user,
-  children,
-}: TrialGuardProps) {
+export function TrialGuard({ plan, createdAt, children }: TrialGuardProps) {
   const pathname = usePathname();
 
   const showUpgradeContent = shouldShowUpgradeContent(
@@ -28,7 +20,7 @@ export function TrialGuard({
   );
 
   if (showUpgradeContent) {
-    return <UpgradeContent user={user} />;
+    return <UpgradeContent />;
   }
 
   return <>{children}</>;
