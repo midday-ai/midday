@@ -140,15 +140,13 @@ export function CancellationDialog({
 
   const handleSwitchToAnnual = useCallback(async () => {
     if (!plan || plan === "trial") return;
-    const planKey = plan as "starter" | "pro";
-    const planType = `${planKey}_yearly`;
 
     handleClose(false);
 
     try {
       const { url } = await createCheckoutMutation.mutateAsync({
-        plan: planKey,
-        planType,
+        plan: "starter",
+        planType: "starter_yearly",
         embedOrigin: window.location.origin,
         currency: checkoutCurrency,
       });
@@ -163,8 +161,8 @@ export function CancellationDialog({
         track({
           event: LogEvents.CheckoutCompleted.name,
           channel: LogEvents.CheckoutCompleted.channel,
-          plan: planKey,
-          planType,
+          plan: "starter",
+          planType: "starter_yearly",
         });
         queryClient.invalidateQueries({
           queryKey: trpc.user.me.queryKey(),
