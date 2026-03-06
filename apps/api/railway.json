@@ -20,9 +20,7 @@
     "staging": {
       "deploy": {
         "multiRegionConfig": {
-          "europe-west4-drams3a": { "numReplicas": 1 },
-          "us-east4-eqdc4a": { "numReplicas": 1 },
-          "us-west2": { "numReplicas": 1 }
+          "europe-west4-drams3a": { "numReplicas": 1 }
         }
       }
     }
