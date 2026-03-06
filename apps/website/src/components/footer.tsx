@@ -186,7 +186,7 @@ export function Footer() {
           {/* Right Column - Tagline & Compliance */}
           <div className="flex flex-col items-start lg:items-end gap-6 lg:gap-10">
             <p className="font-sans text-base sm:text-xl text-foreground text-left lg:text-right">
-              Business finances that explain themselves.
+              Run your company. Not the admin.
             </p>
 
             {/* Compliance Section */}

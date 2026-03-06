@@ -136,7 +136,7 @@ export function PlanCards({
                 Starter
               </h3>
               <p className="font-sans text-sm text-muted-foreground mb-3">
-                For founders running their business solo
+                Everything you need to get going
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="font-sans text-2xl text-foreground">
@@ -184,7 +184,7 @@ export function PlanCards({
             <div className="mb-4">
               <h3 className="font-sans text-base text-foreground mb-1">Pro</h3>
               <p className="font-sans text-sm text-muted-foreground mb-3">
-                For small teams that need more room to grow
+                More power as your business grows
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="font-sans text-2xl text-foreground">

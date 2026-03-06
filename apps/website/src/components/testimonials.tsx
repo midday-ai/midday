@@ -5,6 +5,16 @@ import type { Testimonial } from "./sections/testimonials-section";
 
 const allTestimonials: Testimonial[] = [
   {
+    name: "Isabel Sá",
+    title: "",
+    company: "Character",
+    country: "Portugal",
+    content:
+      "I find myself having a better sense of runway and financials than before. The auto-reconciliation of payments and receipts is a game changer.",
+    fullContent:
+      "Company\nCharacter is a software design studio.\n\nChallenge\nGetting the big picture across banks and currencies. We have both Portuguese and Belgian bank accounts, and reconciling these two was always difficult. There was no easy way to see everything in one place.\n\nImpact\nA much better sense of runway and financials than before. Both bigger picture things like tax breakdowns, and smaller things like keeping an eye on expenses and removing unused subscriptions. The accounting team just logs in to Midday to grab what they need.\n\nFavorite features\nInbox and Transactions. The transactions tab was already a major upgrade from the previous workflow in Excel, but the auto-reconciliation of payments and receipts is a game changer. Drastically reduced time spent on it. We're also in the process of migrating invoicing to Midday to get the full network effect.",
+  },
+  {
     name: "Ciarán Harris",
     title: "",
     company: "CogniStream",
@@ -162,8 +172,8 @@ export function Testimonials() {
               Customer Stories
             </h1>
             <p className="font-sans text-base text-muted-foreground leading-normal mb-8">
-              See how founders and small teams use Midday to manage their
-              finances and run their businesses.
+              See how solo founders use Midday to manage their finances and
+              run their businesses.
             </p>
           </div>
         </div>

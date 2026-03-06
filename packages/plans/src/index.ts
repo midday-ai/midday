@@ -189,7 +189,6 @@ export const starterFeatures: PlanFeature[] = [
 export const proFeatures: PlanFeature[] = [
   { label: "Everything in Starter" },
   { label: "10 banks · 50 invoices/mo · 100GB storage" },
-  { label: "Up to 10 team members" },
   {
     label: "Custom transaction categories",
     tooltip:
