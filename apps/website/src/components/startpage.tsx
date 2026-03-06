@@ -333,7 +333,7 @@ export function StartPage() {
                       track({
                         event: LogEvents.CTA.name,
                         channel: LogEvents.CTA.channel,
-                          label: "Start your trial",
+                        label: "Start your trial",
                         position: "hero",
                       })
                     }
