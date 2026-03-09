@@ -1214,13 +1214,19 @@ export async function matchTransaction(
       ),
     );
 
-  // Check if any related item is already matched
-  const alreadyMatched = relatedItems.find((item) => item.transactionId);
-  if (alreadyMatched) {
-    if (alreadyMatched.transactionId === transactionId) {
-      return fetchInboxWithTransaction(db, id, teamId);
-    }
+  // Check if any related item is matched to a *different* transaction
+  const conflicting = relatedItems.find(
+    (item) => item.transactionId && item.transactionId !== transactionId,
+  );
+  if (conflicting) {
     throw new Error("A related inbox item is already matched to a transaction");
+  }
+
+  // Filter out siblings already matched to the same transaction — only process unmatched items
+  const unmatchedItems = relatedItems.filter((item) => !item.transactionId);
+
+  if (unmatchedItems.length === 0) {
+    return fetchInboxWithTransaction(db, id, teamId);
   }
 
   const [targetTransaction] = await db
@@ -1235,10 +1241,10 @@ export async function matchTransaction(
     throw new Error("Transaction not found or belongs to another team");
   }
 
-  // Insert transaction attachments for all related items
+  // Insert transaction attachments for unmatched items only
   const attachmentIds = new Map<string, string>();
 
-  for (const item of relatedItems) {
+  for (const item of unmatchedItems) {
     const [attachmentData] = await db
       .insert(transactionAttachments)
       .values({
@@ -1292,8 +1298,8 @@ export async function matchTransaction(
       );
   }
 
-  // Update all related inbox items with attachment and transaction IDs
-  for (const item of relatedItems) {
+  // Update unmatched inbox items with attachment and transaction IDs
+  for (const item of unmatchedItems) {
     const attachmentId = attachmentIds.get(item.id);
     if (attachmentId) {
       await db
