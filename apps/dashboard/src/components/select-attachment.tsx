@@ -42,7 +42,7 @@ export function SelectAttachment({
   const { data: items, isLoading } = useQuery({
     ...trpc.search.attachments.queryOptions({
       q: debouncedValue.length > 0 ? debouncedValue : undefined,
-      transactionId: debouncedValue.length > 0 ? undefined : transactionId,
+      transactionId,
       limit: debouncedValue.length > 0 ? 30 : 3,
     }),
     enabled: Boolean(debouncedValue.length > 0 || transactionId), // Enable for search OR suggestions
@@ -106,9 +106,8 @@ export function SelectAttachment({
           secondaryText = parts.length > 0 ? parts.join(" • ") : undefined;
         }
 
-        const isSmartSuggestion = debouncedValue.length === 0 && transactionId;
         const showBestMatch =
-          isSmartSuggestion && index === 0 && items?.length > 1;
+          !!transactionId && index === 0 && items?.length > 1;
 
         return {
           id: item.id,

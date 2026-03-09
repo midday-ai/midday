@@ -715,14 +715,7 @@ export async function getInboxSearch(
     // PRIORITY 1: User is searching with query
     if (q && q.trim().length > 0) {
       const searchTerm = q.trim();
-      const searchQuery = buildSearchQuery(searchTerm); // Use FTS format
-
-      logger.info("SEARCH DEBUG:", {
-        searchTerm,
-        searchQuery,
-        teamId,
-        limit,
-      });
+      const searchQuery = buildSearchQuery(searchTerm);
 
       // Check if search term is a number (for amount searching)
       const numericSearch = Number.parseFloat(
@@ -733,7 +726,6 @@ export async function getInboxSearch(
         !Number.isNaN(numericSearch) && Number.isFinite(numericSearch);
 
       if (isNumericSearch) {
-        // Search by amount (exact match or close match within 10%)
         const tolerance = Math.max(1, Math.abs(numericSearch) * 0.1);
         whereConditions.push(
           sql`(
@@ -745,7 +737,6 @@ export async function getInboxSearch(
           )`,
         );
       } else {
-        // Text-only search using both FTS and ILIKE for better special character support
         whereConditions.push(
           sql`(
             to_tsquery('english', ${searchQuery}) @@ ${inbox.fts}
@@ -756,7 +747,43 @@ export async function getInboxSearch(
         );
       }
 
-      // For search, return results ordered by date (most recent first)
+      // Fetch transaction context for scoring when available
+      let txContext: {
+        name: string;
+        amount: number | null;
+        currency: string | null;
+        baseAmount: number | null;
+        baseCurrency: string | null;
+        date: string;
+        merchantName: string | null;
+        counterpartyName: string | null;
+      } | null = null;
+
+      if (transactionId) {
+        const [txData] = await db
+          .select({
+            name: transactions.name,
+            amount: transactions.amount,
+            currency: transactions.currency,
+            baseAmount: transactions.baseAmount,
+            baseCurrency: transactions.baseCurrency,
+            date: transactions.date,
+            merchantName: transactions.merchantName,
+            counterpartyName: transactions.counterpartyName,
+          })
+          .from(transactions)
+          .where(
+            and(
+              eq(transactions.id, transactionId),
+              eq(transactions.teamId, teamId),
+            ),
+          )
+          .limit(1);
+        txContext = txData ?? null;
+      }
+
+      const fetchLimit = txContext ? Math.max(limit * 3, 30) : limit;
+
       const searchResults = await db
         .select({
           id: inbox.id,
@@ -777,24 +804,65 @@ export async function getInboxSearch(
           taxAmount: inbox.taxAmount,
           taxRate: inbox.taxRate,
           taxType: inbox.taxType,
+          type: inbox.type,
         })
         .from(inbox)
         .where(and(...whereConditions))
-        .orderBy(desc(inbox.date), desc(inbox.createdAt)) // Most recent first
-        .limit(limit);
+        .orderBy(desc(inbox.date), desc(inbox.createdAt))
+        .limit(fetchLimit);
 
-      logger.info("SEARCH RESULTS:", {
-        searchTerm,
-        resultsCount: searchResults.length,
-        results: searchResults.slice(0, 3).map((r) => ({
-          id: r.id,
-          displayName: r.displayName,
-          amount: r.amount,
-          currency: r.currency,
-        })),
-      });
+      if (!txContext) {
+        return searchResults.slice(0, limit);
+      }
 
-      return searchResults;
+      // Score and re-rank using transaction context
+      return searchResults
+        .map((candidate) => {
+          const nameScore = calculateUnifiedNameScore(
+            candidate.displayName,
+            txContext.name,
+            txContext.merchantName || txContext.counterpartyName,
+          );
+          const amountScore = calculateUnifiedAmountScore(candidate, txContext);
+          const currencyScore = calculateUnifiedCurrencyScore(
+            candidate.currency || undefined,
+            txContext.currency || undefined,
+            candidate.baseCurrency || undefined,
+            txContext.baseCurrency || undefined,
+          );
+          const dateScore = candidate.date
+            ? calculateUnifiedDateScore(
+                candidate.date,
+                txContext.date,
+                candidate.type,
+              )
+            : 0;
+          const isExactAmount =
+            candidate.amount !== null &&
+            Math.abs(
+              Math.abs(candidate.amount || 0) - Math.abs(txContext.amount || 0),
+            ) < 0.01;
+          const isSameCurrency = candidate.currency === txContext.currency;
+          const confidence = scoreMatch({
+            nameScore,
+            amountScore,
+            dateScore,
+            currencyScore,
+            isSameCurrency,
+            isExactAmount,
+          });
+
+          return {
+            ...candidate,
+            nameScore,
+            amountScore,
+            currencyScore,
+            dateScore,
+            confidenceScore: confidence,
+          };
+        })
+        .sort((a, b) => b.confidenceScore - a.confidenceScore)
+        .slice(0, limit);
     }
 
     // PRIORITY 2: AI suggestions for transaction
