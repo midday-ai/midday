@@ -11,18 +11,7 @@ import {
 
 const logger = createLoggerWithContext("inbox");
 
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  inArray,
-  lt,
-  ne,
-  notInArray,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, asc, desc, eq, inArray, lt, ne, or, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import { separateBlocklistEntries } from "../utils/blocklist";
 import { buildSearchQuery } from "../utils/search-query";
@@ -726,14 +715,7 @@ export async function getInboxSearch(
     // PRIORITY 1: User is searching with query
     if (q && q.trim().length > 0) {
       const searchTerm = q.trim();
-      const searchQuery = buildSearchQuery(searchTerm); // Use FTS format
-
-      logger.info("SEARCH DEBUG:", {
-        searchTerm,
-        searchQuery,
-        teamId,
-        limit,
-      });
+      const searchQuery = buildSearchQuery(searchTerm);
 
       // Check if search term is a number (for amount searching)
       const numericSearch = Number.parseFloat(
@@ -744,7 +726,6 @@ export async function getInboxSearch(
         !Number.isNaN(numericSearch) && Number.isFinite(numericSearch);
 
       if (isNumericSearch) {
-        // Search by amount (exact match or close match within 10%)
         const tolerance = Math.max(1, Math.abs(numericSearch) * 0.1);
         whereConditions.push(
           sql`(
@@ -756,7 +737,6 @@ export async function getInboxSearch(
           )`,
         );
       } else {
-        // Text-only search using both FTS and ILIKE for better special character support
         whereConditions.push(
           sql`(
             to_tsquery('english', ${searchQuery}) @@ ${inbox.fts}
@@ -767,7 +747,43 @@ export async function getInboxSearch(
         );
       }
 
-      // For search, return results ordered by date (most recent first)
+      // Fetch transaction context for scoring when available
+      let txContext: {
+        name: string;
+        amount: number | null;
+        currency: string | null;
+        baseAmount: number | null;
+        baseCurrency: string | null;
+        date: string;
+        merchantName: string | null;
+        counterpartyName: string | null;
+      } | null = null;
+
+      if (transactionId) {
+        const [txData] = await db
+          .select({
+            name: transactions.name,
+            amount: transactions.amount,
+            currency: transactions.currency,
+            baseAmount: transactions.baseAmount,
+            baseCurrency: transactions.baseCurrency,
+            date: transactions.date,
+            merchantName: transactions.merchantName,
+            counterpartyName: transactions.counterpartyName,
+          })
+          .from(transactions)
+          .where(
+            and(
+              eq(transactions.id, transactionId),
+              eq(transactions.teamId, teamId),
+            ),
+          )
+          .limit(1);
+        txContext = txData ?? null;
+      }
+
+      const fetchLimit = txContext ? Math.max(limit * 3, 30) : limit;
+
       const searchResults = await db
         .select({
           id: inbox.id,
@@ -788,24 +804,65 @@ export async function getInboxSearch(
           taxAmount: inbox.taxAmount,
           taxRate: inbox.taxRate,
           taxType: inbox.taxType,
+          type: inbox.type,
         })
         .from(inbox)
         .where(and(...whereConditions))
-        .orderBy(desc(inbox.date), desc(inbox.createdAt)) // Most recent first
-        .limit(limit);
+        .orderBy(desc(inbox.date), desc(inbox.createdAt))
+        .limit(fetchLimit);
 
-      logger.info("SEARCH RESULTS:", {
-        searchTerm,
-        resultsCount: searchResults.length,
-        results: searchResults.slice(0, 3).map((r) => ({
-          id: r.id,
-          displayName: r.displayName,
-          amount: r.amount,
-          currency: r.currency,
-        })),
-      });
+      if (!txContext) {
+        return searchResults.slice(0, limit);
+      }
 
-      return searchResults;
+      // Score and re-rank using transaction context
+      return searchResults
+        .map((candidate) => {
+          const nameScore = calculateUnifiedNameScore(
+            candidate.displayName,
+            txContext.name,
+            txContext.merchantName || txContext.counterpartyName,
+          );
+          const amountScore = calculateUnifiedAmountScore(candidate, txContext);
+          const currencyScore = calculateUnifiedCurrencyScore(
+            candidate.currency || undefined,
+            txContext.currency || undefined,
+            candidate.baseCurrency || undefined,
+            txContext.baseCurrency || undefined,
+          );
+          const dateScore = candidate.date
+            ? calculateUnifiedDateScore(
+                candidate.date,
+                txContext.date,
+                candidate.type,
+              )
+            : 0;
+          const isExactAmount =
+            candidate.amount !== null &&
+            Math.abs(
+              Math.abs(candidate.amount || 0) - Math.abs(txContext.amount || 0),
+            ) < 0.01;
+          const isSameCurrency = candidate.currency === txContext.currency;
+          const confidence = scoreMatch({
+            nameScore,
+            amountScore,
+            dateScore,
+            currencyScore,
+            isSameCurrency,
+            isExactAmount,
+          });
+
+          return {
+            ...candidate,
+            nameScore,
+            amountScore,
+            currencyScore,
+            dateScore,
+            confidenceScore: confidence,
+          };
+        })
+        .sort((a, b) => b.confidenceScore - a.confidenceScore)
+        .slice(0, limit);
     }
 
     // PRIORITY 2: AI suggestions for transaction
@@ -1127,6 +1184,41 @@ export type MatchTransactionParams = {
   teamId: string;
 };
 
+export async function fetchInboxWithTransaction(
+  db: DatabaseOrTransaction,
+  inboxId: string,
+  teamId: string,
+) {
+  const [data] = await db
+    .select({
+      id: inbox.id,
+      fileName: inbox.fileName,
+      filePath: inbox.filePath,
+      displayName: inbox.displayName,
+      transactionId: inbox.transactionId,
+      amount: inbox.amount,
+      currency: inbox.currency,
+      contentType: inbox.contentType,
+      date: inbox.date,
+      status: inbox.status,
+      createdAt: inbox.createdAt,
+      website: inbox.website,
+      description: inbox.description,
+      transaction: {
+        id: transactions.id,
+        amount: transactions.amount,
+        currency: transactions.currency,
+        name: transactions.name,
+        date: transactions.date,
+      },
+    })
+    .from(inbox)
+    .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
+    .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
+    .limit(1);
+  return data ?? null;
+}
+
 export async function matchTransaction(
   db: DatabaseOrTransaction,
   params: MatchTransactionParams,
@@ -1154,8 +1246,11 @@ export async function matchTransaction(
 
   if (!result) return null;
 
-  // Check if inbox item is already matched
+  // Check if inbox item is already matched to the same transaction (idempotent)
   if (result.transactionId) {
+    if (result.transactionId === transactionId) {
+      return fetchInboxWithTransaction(db, id, teamId);
+    }
     throw new Error("Inbox item is already matched to a transaction");
   }
 
@@ -1187,10 +1282,19 @@ export async function matchTransaction(
       ),
     );
 
-  // Check if any related item is already matched
-  const alreadyMatched = relatedItems.find((item) => item.transactionId);
-  if (alreadyMatched) {
+  // Check if any related item is matched to a *different* transaction
+  const conflicting = relatedItems.find(
+    (item) => item.transactionId && item.transactionId !== transactionId,
+  );
+  if (conflicting) {
     throw new Error("A related inbox item is already matched to a transaction");
+  }
+
+  // Filter out siblings already matched to the same transaction — only process unmatched items
+  const unmatchedItems = relatedItems.filter((item) => !item.transactionId);
+
+  if (unmatchedItems.length === 0) {
+    return fetchInboxWithTransaction(db, id, teamId);
   }
 
   const [targetTransaction] = await db
@@ -1205,30 +1309,10 @@ export async function matchTransaction(
     throw new Error("Transaction not found or belongs to another team");
   }
 
-  // Check if the target transaction is already matched to another inbox item (not in this group)
-  const [existingMatch] = await db
-    .select({ id: inbox.id })
-    .from(inbox)
-    .where(
-      and(
-        eq(inbox.transactionId, transactionId),
-        eq(inbox.teamId, teamId),
-        notInArray(
-          inbox.id,
-          relatedItems.map((item) => item.id),
-        ),
-      ),
-    )
-    .limit(1);
-
-  if (existingMatch) {
-    throw new Error("Transaction is already matched to another inbox item");
-  }
-
-  // Insert transaction attachments for all related items
+  // Insert transaction attachments for unmatched items only
   const attachmentIds = new Map<string, string>();
 
-  for (const item of relatedItems) {
+  for (const item of unmatchedItems) {
     const [attachmentData] = await db
       .insert(transactionAttachments)
       .values({
@@ -1282,8 +1366,8 @@ export async function matchTransaction(
       );
   }
 
-  // Update all related inbox items with attachment and transaction IDs
-  for (const item of relatedItems) {
+  // Update unmatched inbox items with attachment and transaction IDs
+  for (const item of unmatchedItems) {
     const attachmentId = attachmentIds.get(item.id);
     if (attachmentId) {
       await db
@@ -1297,36 +1381,7 @@ export async function matchTransaction(
     }
   }
 
-  // Return updated inbox with transaction data
-  const [data] = await db
-    .select({
-      id: inbox.id,
-      fileName: inbox.fileName,
-      filePath: inbox.filePath,
-      displayName: inbox.displayName,
-      transactionId: inbox.transactionId,
-      amount: inbox.amount,
-      currency: inbox.currency,
-      contentType: inbox.contentType,
-      date: inbox.date,
-      status: inbox.status,
-      createdAt: inbox.createdAt,
-      website: inbox.website,
-      description: inbox.description,
-      transaction: {
-        id: transactions.id,
-        amount: transactions.amount,
-        currency: transactions.currency,
-        name: transactions.name,
-        date: transactions.date,
-      },
-    })
-    .from(inbox)
-    .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
-    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
-    .limit(1);
-
-  return data;
+  return fetchInboxWithTransaction(db, id, teamId);
 }
 
 export type UnmatchTransactionParams = {

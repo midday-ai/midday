@@ -3,7 +3,11 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { inbox, transactionMatchSuggestions } from "../schema";
 import { createActivity } from "./activities";
-import { matchTransaction, updateInbox } from "./inbox";
+import {
+  fetchInboxWithTransaction,
+  matchTransaction,
+  updateInbox,
+} from "./inbox";
 import {
   createMatchSuggestion,
   findMatches,
@@ -242,30 +246,14 @@ export async function confirmSuggestedMatch(
   const { teamId, suggestionId, inboxId, transactionId, userId } = params;
 
   return db.transaction(async (tx) => {
-    const [inboxItem] = await tx
-      .select({
-        transactionId: inbox.transactionId,
-      })
+    // Check if already matched (idempotent — skip activity + matchTransaction)
+    const [inboxState] = await tx
+      .select({ transactionId: inbox.transactionId })
       .from(inbox)
       .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
       .limit(1);
 
-    if (inboxItem?.transactionId) {
-      await tx
-        .update(transactionMatchSuggestions)
-        .set({
-          status: "confirmed",
-          userActionAt: new Date().toISOString(),
-          userId,
-        })
-        .where(
-          and(
-            eq(transactionMatchSuggestions.id, suggestionId),
-            eq(transactionMatchSuggestions.teamId, teamId),
-          ),
-        );
-      return null;
-    }
+    const alreadyMatched = inboxState?.transactionId === transactionId;
 
     const [suggestion] = await tx
       .update(transactionMatchSuggestions)
@@ -282,27 +270,55 @@ export async function confirmSuggestedMatch(
       )
       .returning();
 
-    const result = await matchTransaction(tx, {
-      id: inboxId,
-      transactionId,
-      teamId,
-    });
+    let result: Awaited<ReturnType<typeof matchTransaction>>;
 
-    await createActivity(tx, {
-      teamId,
-      userId: userId ?? undefined,
-      type: "inbox_match_confirmed",
-      source: "user",
-      priority: 7,
-      metadata: {
-        inboxId,
-        transactionId: result?.transactionId,
-        documentName: result?.displayName,
-        amount: result?.amount,
-        currency: result?.currency,
-        confidenceScore: Number(suggestion?.confidenceScore),
-      },
-    });
+    if (alreadyMatched) {
+      result = await fetchInboxWithTransaction(tx, inboxId, teamId);
+    } else {
+      result = await matchTransaction(tx, {
+        id: inboxId,
+        transactionId,
+        teamId,
+      });
+
+      await createActivity(tx, {
+        teamId,
+        userId: userId ?? undefined,
+        type: "inbox_match_confirmed",
+        source: "user",
+        priority: 7,
+        metadata: {
+          inboxId,
+          transactionId: result?.transactionId,
+          documentName: result?.displayName,
+          amount: result?.amount,
+          currency: result?.currency,
+          confidenceScore: Number(suggestion?.confidenceScore),
+        },
+      });
+    }
+
+    // Confirm pending suggestions for inbox items that were matched as part
+    // of this group — only where the inbox item now points to this transaction
+    await tx
+      .update(transactionMatchSuggestions)
+      .set({
+        status: "confirmed",
+        userActionAt: new Date().toISOString(),
+        userId,
+      })
+      .where(
+        and(
+          eq(transactionMatchSuggestions.transactionId, transactionId),
+          eq(transactionMatchSuggestions.teamId, teamId),
+          eq(transactionMatchSuggestions.status, "pending"),
+          sql`${transactionMatchSuggestions.inboxId} IN (
+            SELECT ${inbox.id} FROM ${inbox}
+            WHERE ${inbox.transactionId} = ${transactionId}
+              AND ${inbox.teamId} = ${teamId}
+          )`,
+        ),
+      );
 
     return result;
   });

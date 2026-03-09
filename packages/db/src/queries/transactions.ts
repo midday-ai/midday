@@ -1151,22 +1151,187 @@ export async function searchTransactionMatch(
   } = params;
 
   if (query) {
-    const results = await db.executeOnReplica(
-      sql`SELECT * FROM search_transactions_direct(
-        ${teamId},
-        ${query},
-        ${maxResults}
-      )`,
-    );
+    const searchTerm = query.trim();
+    if (!searchTerm) return [];
 
-    // Cast results to match the new type structure and filter if needed
-    const processedResults = results.map((result: any) => ({
-      ...result,
-      is_already_matched: false,
-      matched_attachment_filename: undefined,
-    }));
+    // Fetch inbox context for scoring when available
+    let inboxContext: {
+      displayName: string | null;
+      amount: number | null;
+      currency: string | null;
+      date: string | null;
+      baseAmount: number | null;
+      baseCurrency: string | null;
+    } | null = null;
 
-    return processedResults;
+    if (inboxId) {
+      const [item] = await db
+        .select({
+          displayName: inbox.displayName,
+          amount: inbox.amount,
+          currency: inbox.currency,
+          date: inbox.date,
+          baseAmount: inbox.baseAmount,
+          baseCurrency: inbox.baseCurrency,
+        })
+        .from(inbox)
+        .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
+        .limit(1);
+      inboxContext = item ?? null;
+    }
+
+    const numericValue = Number.parseFloat(searchTerm.replace(/[^\d.-]/g, ""));
+    const isNumeric =
+      !Number.isNaN(numericValue) && Number.isFinite(numericValue);
+
+    const searchQuery = buildSearchQuery(searchTerm);
+
+    const whereConditions: SQL[] = [
+      eq(transactions.teamId, teamId),
+      eq(transactions.status, "posted"),
+    ];
+
+    if (!includeAlreadyMatched) {
+      whereConditions.push(
+        sql`NOT EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)})`,
+      );
+    }
+
+    if (isNumeric) {
+      const tolerance = Math.max(1, Math.abs(numericValue) * 0.1);
+      whereConditions.push(
+        or(
+          sql`ABS(ABS(${transactions.amount}) - ${numericValue}) <= ${tolerance}`,
+          sql`ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ${numericValue}) <= ${tolerance}`,
+          sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
+          sql`${transactions.name} ILIKE '%' || ${searchTerm} || '%'`,
+          sql`${transactions.merchantName} ILIKE '%' || ${searchTerm} || '%'`,
+        )!,
+      );
+    } else {
+      whereConditions.push(
+        or(
+          sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
+          sql`${transactions.name} ILIKE '%' || ${searchTerm} || '%'`,
+          sql`${transactions.merchantName} ILIKE '%' || ${searchTerm} || '%'`,
+          sql`${transactions.description} ILIKE '%' || ${searchTerm} || '%'`,
+        )!,
+      );
+    }
+
+    // Fetch more candidates than needed so we can score and re-rank
+    const fetchLimit = inboxContext ? Math.max(maxResults * 3, 30) : maxResults;
+
+    const candidates = await db
+      .select({
+        transactionId: transactions.id,
+        name: transactions.name,
+        transactionAmount: transactions.amount,
+        transactionCurrency: transactions.currency,
+        transactionDate: transactions.date,
+        merchantName: transactions.merchantName,
+        baseAmount: transactions.baseAmount,
+        baseCurrency: transactions.baseCurrency,
+        isAlreadyMatched: sql<boolean>`
+            EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)})
+          `.as("is_already_matched"),
+        attachmentFilename: sql<string | null>`
+            (SELECT ${transactionAttachments.name} FROM ${transactionAttachments}
+             WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}
+             LIMIT 1)
+          `.as("attachment_filename"),
+      })
+      .from(transactions)
+      .where(and(...whereConditions))
+      .orderBy(desc(transactions.date))
+      .limit(fetchLimit);
+
+    if (!inboxContext) {
+      return candidates.slice(0, maxResults).map((r) => ({
+        transaction_id: r.transactionId,
+        name: r.name,
+        transaction_amount: r.transactionAmount,
+        transaction_currency: r.transactionCurrency,
+        transaction_date: r.transactionDate,
+        name_score: 0,
+        amount_score: 0,
+        currency_score: 0,
+        date_score: 0,
+        confidence_score: 0,
+        is_already_matched: r.isAlreadyMatched,
+        matched_attachment_filename: r.attachmentFilename ?? undefined,
+      }));
+    }
+
+    return candidates
+      .map((t) => {
+        const nameScore = calculateNameScore(
+          inboxContext.displayName,
+          t.name,
+          t.merchantName,
+        );
+        const amountScore = calculateAmountScore(
+          {
+            amount: inboxContext.amount,
+            currency: inboxContext.currency,
+            baseAmount: inboxContext.baseAmount,
+            baseCurrency: inboxContext.baseCurrency,
+          },
+          {
+            amount: t.transactionAmount,
+            currency: t.transactionCurrency,
+            baseAmount: t.baseAmount,
+            baseCurrency: t.baseCurrency,
+          },
+        );
+        const currencyScore = calculateCurrencyScore(
+          inboxContext.currency || undefined,
+          t.transactionCurrency || undefined,
+          inboxContext.baseCurrency || undefined,
+          t.baseCurrency || undefined,
+        );
+        const dateScore = inboxContext.date
+          ? calculateDateScore(inboxContext.date, t.transactionDate)
+          : 0;
+        const isExactAmount =
+          inboxContext.amount !== null &&
+          Math.abs(
+            Math.abs(inboxContext.amount || 0) -
+              Math.abs(t.transactionAmount || 0),
+          ) < 0.01;
+        const isSameCurrency = inboxContext.currency === t.transactionCurrency;
+        const confidence = scoreMatch({
+          nameScore,
+          amountScore,
+          dateScore,
+          currencyScore,
+          isSameCurrency,
+          isExactAmount,
+        });
+
+        return {
+          transaction_id: t.transactionId,
+          name: t.name,
+          transaction_amount: t.transactionAmount,
+          transaction_currency: t.transactionCurrency,
+          transaction_date: t.transactionDate,
+          name_score: Math.round(nameScore * 1000) / 1000,
+          amount_score: Math.round(amountScore * 1000) / 1000,
+          currency_score: Math.round(currencyScore * 1000) / 1000,
+          date_score: Math.round(dateScore * 1000) / 1000,
+          confidence_score: Math.round(confidence * 1000) / 1000,
+          is_already_matched: t.isAlreadyMatched,
+          matched_attachment_filename: t.attachmentFilename ?? undefined,
+        };
+      })
+      .sort((a, b) => {
+        if (a.confidence_score !== b.confidence_score)
+          return b.confidence_score - a.confidence_score;
+        if (a.is_already_matched !== b.is_already_matched)
+          return a.is_already_matched ? 1 : -1;
+        return 0;
+      })
+      .slice(0, maxResults);
   }
 
   if (inboxId) {
