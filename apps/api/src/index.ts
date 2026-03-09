@@ -162,9 +162,7 @@ app.get("/health/diagnose", async (c) => {
   try {
     const supaUrl = process.env.SUPABASE_URL;
     if (supaUrl) {
-      const res = await fetch(
-        `${supaUrl}/auth/v1/.well-known/jwks.json`,
-      );
+      const res = await fetch(`${supaUrl}/auth/v1/.well-known/jwks.json`);
       await res.json();
     }
     timings.supabaseJwksMs = +(performance.now() - supaStart).toFixed(2);
