@@ -11,18 +11,7 @@ import {
 
 const logger = createLoggerWithContext("inbox");
 
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  inArray,
-  lt,
-  ne,
-  notInArray,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, asc, desc, eq, inArray, lt, ne, or, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import { separateBlocklistEntries } from "../utils/blocklist";
 import { buildSearchQuery } from "../utils/search-query";
@@ -1154,8 +1143,38 @@ export async function matchTransaction(
 
   if (!result) return null;
 
-  // Check if inbox item is already matched
+  // Check if inbox item is already matched to the same transaction (idempotent)
   if (result.transactionId) {
+    if (result.transactionId === transactionId) {
+      const [existing] = await db
+        .select({
+          id: inbox.id,
+          fileName: inbox.fileName,
+          filePath: inbox.filePath,
+          displayName: inbox.displayName,
+          transactionId: inbox.transactionId,
+          amount: inbox.amount,
+          currency: inbox.currency,
+          contentType: inbox.contentType,
+          date: inbox.date,
+          status: inbox.status,
+          createdAt: inbox.createdAt,
+          website: inbox.website,
+          description: inbox.description,
+          transaction: {
+            id: transactions.id,
+            amount: transactions.amount,
+            currency: transactions.currency,
+            name: transactions.name,
+            date: transactions.date,
+          },
+        })
+        .from(inbox)
+        .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
+        .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
+        .limit(1);
+      return existing ?? null;
+    }
     throw new Error("Inbox item is already matched to a transaction");
   }
 
@@ -1190,6 +1209,36 @@ export async function matchTransaction(
   // Check if any related item is already matched
   const alreadyMatched = relatedItems.find((item) => item.transactionId);
   if (alreadyMatched) {
+    if (alreadyMatched.transactionId === transactionId) {
+      const [existing] = await db
+        .select({
+          id: inbox.id,
+          fileName: inbox.fileName,
+          filePath: inbox.filePath,
+          displayName: inbox.displayName,
+          transactionId: inbox.transactionId,
+          amount: inbox.amount,
+          currency: inbox.currency,
+          contentType: inbox.contentType,
+          date: inbox.date,
+          status: inbox.status,
+          createdAt: inbox.createdAt,
+          website: inbox.website,
+          description: inbox.description,
+          transaction: {
+            id: transactions.id,
+            amount: transactions.amount,
+            currency: transactions.currency,
+            name: transactions.name,
+            date: transactions.date,
+          },
+        })
+        .from(inbox)
+        .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
+        .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
+        .limit(1);
+      return existing ?? null;
+    }
     throw new Error("A related inbox item is already matched to a transaction");
   }
 
@@ -1203,26 +1252,6 @@ export async function matchTransaction(
 
   if (!targetTransaction) {
     throw new Error("Transaction not found or belongs to another team");
-  }
-
-  // Check if the target transaction is already matched to another inbox item (not in this group)
-  const [existingMatch] = await db
-    .select({ id: inbox.id })
-    .from(inbox)
-    .where(
-      and(
-        eq(inbox.transactionId, transactionId),
-        eq(inbox.teamId, teamId),
-        notInArray(
-          inbox.id,
-          relatedItems.map((item) => item.id),
-        ),
-      ),
-    )
-    .limit(1);
-
-  if (existingMatch) {
-    throw new Error("Transaction is already matched to another inbox item");
   }
 
   // Insert transaction attachments for all related items

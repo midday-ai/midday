@@ -242,31 +242,6 @@ export async function confirmSuggestedMatch(
   const { teamId, suggestionId, inboxId, transactionId, userId } = params;
 
   return db.transaction(async (tx) => {
-    const [inboxItem] = await tx
-      .select({
-        transactionId: inbox.transactionId,
-      })
-      .from(inbox)
-      .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
-      .limit(1);
-
-    if (inboxItem?.transactionId) {
-      await tx
-        .update(transactionMatchSuggestions)
-        .set({
-          status: "confirmed",
-          userActionAt: new Date().toISOString(),
-          userId,
-        })
-        .where(
-          and(
-            eq(transactionMatchSuggestions.id, suggestionId),
-            eq(transactionMatchSuggestions.teamId, teamId),
-          ),
-        );
-      return null;
-    }
-
     const [suggestion] = await tx
       .update(transactionMatchSuggestions)
       .set({
@@ -303,6 +278,52 @@ export async function confirmSuggestedMatch(
         confidenceScore: Number(suggestion?.confidenceScore),
       },
     });
+
+    // Also confirm and match any other pending suggestions for the same transaction
+    const siblingsSuggestions = await tx
+      .select({
+        id: transactionMatchSuggestions.id,
+        inboxId: transactionMatchSuggestions.inboxId,
+      })
+      .from(transactionMatchSuggestions)
+      .where(
+        and(
+          eq(transactionMatchSuggestions.transactionId, transactionId),
+          eq(transactionMatchSuggestions.teamId, teamId),
+          eq(transactionMatchSuggestions.status, "pending"),
+        ),
+      );
+
+    for (const sibling of siblingsSuggestions) {
+      const [siblingInbox] = await tx
+        .select({ transactionId: inbox.transactionId })
+        .from(inbox)
+        .where(and(eq(inbox.id, sibling.inboxId), eq(inbox.teamId, teamId)))
+        .limit(1);
+
+      // Skip if already matched to a different transaction
+      if (
+        siblingInbox?.transactionId &&
+        siblingInbox.transactionId !== transactionId
+      ) {
+        continue;
+      }
+
+      await tx
+        .update(transactionMatchSuggestions)
+        .set({
+          status: "confirmed",
+          userActionAt: new Date().toISOString(),
+          userId,
+        })
+        .where(eq(transactionMatchSuggestions.id, sibling.id));
+
+      await matchTransaction(tx, {
+        id: sibling.inboxId,
+        transactionId,
+        teamId,
+      });
+    }
 
     return result;
   });
