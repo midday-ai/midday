@@ -7,7 +7,7 @@ export async function updateSession(
 ) {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {
@@ -26,18 +26,20 @@ export async function updateSession(
     },
   );
 
-  if (supabase.auth) {
-    // @ts-expect-error - suppressGetSessionWarning is protected
-    supabase.auth.suppressGetSessionWarning = true;
-  }
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // Do not run code between createServerClient and getClaims().
+  // A simple mistake could make it very hard to debug issues with
+  // users being randomly logged out.
+  //
+  // getClaims() validates the JWT signature against the project's
+  // published JWKS and refreshes expired tokens. Never trust
+  // getSession() inside server code — it isn't guaranteed to
+  // revalidate the Auth token.
+  const { data, error } = await supabase.auth.getClaims();
+  const isAuthenticated = !!data && !error;
 
   return {
     response,
-    session,
+    isAuthenticated,
     supabase,
   };
 }

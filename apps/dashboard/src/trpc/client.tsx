@@ -5,10 +5,10 @@ import type { QueryClient } from "@tanstack/react-query";
 import { isServer, QueryClientProvider } from "@tanstack/react-query";
 import { createTRPCClient, httpLink, loggerLink } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import superjson from "superjson";
 import { Cookies } from "@/utils/constants";
-import { getAccessToken, initSessionCache } from "@/utils/session";
+import { getAccessToken } from "@/utils/session";
 import { makeQueryClient } from "./query-client";
 
 function getCookie(name: string): string | null {
@@ -40,10 +40,6 @@ export function TRPCReactProvider(
 ) {
   const queryClient = getQueryClient();
 
-  useEffect(() => {
-    initSessionCache();
-  }, []);
-
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
       links: [
@@ -53,9 +49,11 @@ export function TRPCReactProvider(
           async headers() {
             const accessToken = await getAccessToken();
 
-            const headers: Record<string, string> = {
-              Authorization: `Bearer ${accessToken}`,
-            };
+            const headers: Record<string, string> = {};
+
+            if (accessToken) {
+              headers.Authorization = `Bearer ${accessToken}`;
+            }
 
             const forcePrimary = getCookie(Cookies.ForcePrimary);
             if (forcePrimary === "true") {

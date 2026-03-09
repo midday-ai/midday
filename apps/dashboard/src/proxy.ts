@@ -10,8 +10,8 @@ const I18nMiddleware = createI18nMiddleware({
   urlMappingStrategy: "rewrite",
 });
 
-export async function middleware(request: NextRequest) {
-  const { response, session, supabase } = await updateSession(
+export async function proxy(request: NextRequest) {
+  const { response, isAuthenticated, supabase } = await updateSession(
     request,
     I18nMiddleware(request),
   );
@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   }`;
 
   if (
-    !session &&
+    !isAuthenticated &&
     newUrl.pathname !== "/login" &&
     !newUrl.pathname.includes("/i/") &&
     !newUrl.pathname.includes("/p/") &&
@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (session) {
+  if (isAuthenticated) {
     if (newUrl.pathname !== "/onboarding" && newUrl.pathname !== "/teams") {
       const inviteCodeMatch = newUrl.pathname.startsWith("/teams/invite/");
 

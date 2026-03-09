@@ -19,7 +19,7 @@
         "lib/**"
       ],
       "passThroughEnv": [
-        "SUPABASE_SERVICE_KEY",
+        "SUPABASE_SECRET_KEY",
         "RESEND_API_KEY",
         "RESEND_AUDIENCE_ID",
         "GOCARDLESS_SECRET_ID",

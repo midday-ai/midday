@@ -65,17 +65,16 @@ function startKeepalive(client: RedisClient): void {
       return;
     }
 
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     try {
       const start = performance.now();
-      await Promise.race([
-        client.send("PING", []),
-        new Promise<never>((_, reject) =>
-          setTimeout(
-            () => reject(new Error("keepalive PING timed out")),
-            KEEPALIVE_TIMEOUT_MS,
-          ),
-        ),
-      ]);
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(
+          () => reject(new Error("keepalive PING timed out")),
+          KEEPALIVE_TIMEOUT_MS,
+        );
+      });
+      await Promise.race([client.send("PING", []), timeoutPromise]);
       const elapsed = performance.now() - start;
       if (elapsed > 50) {
         logger.warn("Keepalive PING slow", {
@@ -88,6 +87,8 @@ function startKeepalive(client: RedisClient): void {
         error: err instanceof Error ? err.message : String(err),
         reconnectCount,
       });
+    } finally {
+      clearTimeout(timeoutId);
     }
   }, KEEPALIVE_INTERVAL_MS);
 
