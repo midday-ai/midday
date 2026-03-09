@@ -314,54 +314,42 @@ export async function getNetPosition(
 ) {
   const { teamId, currency: targetCurrency } = params;
 
-  // Get team's base currency if no target currency specified
-  let baseCurrency = targetCurrency;
-  if (!baseCurrency) {
-    const team = await db
-      .select({ baseCurrency: teams.baseCurrency })
-      .from(teams)
-      .where(eq(teams.id, teamId))
-      .limit(1);
+  const accountColumns = {
+    id: true,
+    name: true,
+    currency: true,
+    balance: true,
+    baseCurrency: true,
+    baseBalance: true,
+  } as const;
 
-    baseCurrency = team[0]?.baseCurrency || "USD";
-  }
+  const [teamResult, cashAccounts, creditAccounts] = await Promise.all([
+    targetCurrency
+      ? Promise.resolve([{ baseCurrency: targetCurrency }])
+      : db
+          .select({ baseCurrency: teams.baseCurrency })
+          .from(teams)
+          .where(eq(teams.id, teamId))
+          .limit(1),
+    db.query.bankAccounts.findMany({
+      where: and(
+        eq(bankAccounts.teamId, teamId),
+        eq(bankAccounts.enabled, true),
+        inArray(bankAccounts.type, [...CASH_ACCOUNT_TYPES]),
+      ),
+      columns: accountColumns,
+    }),
+    db.query.bankAccounts.findMany({
+      where: and(
+        eq(bankAccounts.teamId, teamId),
+        eq(bankAccounts.enabled, true),
+        eq(bankAccounts.type, CREDIT_ACCOUNT_TYPE),
+      ),
+      columns: accountColumns,
+    }),
+  ]);
 
-  // Get cash accounts (depository + other_asset like treasury)
-  // Uses shared CASH_ACCOUNT_TYPES constant for consistency
-  const cashAccounts = await db.query.bankAccounts.findMany({
-    where: and(
-      eq(bankAccounts.teamId, teamId),
-      eq(bankAccounts.enabled, true),
-      inArray(bankAccounts.type, [...CASH_ACCOUNT_TYPES]),
-    ),
-    columns: {
-      id: true,
-      name: true,
-      currency: true,
-      balance: true,
-      baseCurrency: true,
-      baseBalance: true,
-    },
-  });
-
-  // Get credit accounts (credit cards only - NOT loans)
-  // Loans are excluded by design - see JSDoc above for rationale
-  // For complete debt view including loans, use getBalanceSheet()
-  const creditAccounts = await db.query.bankAccounts.findMany({
-    where: and(
-      eq(bankAccounts.teamId, teamId),
-      eq(bankAccounts.enabled, true),
-      eq(bankAccounts.type, CREDIT_ACCOUNT_TYPE), // Only "credit", not "loan"
-    ),
-    columns: {
-      id: true,
-      name: true,
-      currency: true,
-      balance: true,
-      baseCurrency: true,
-      baseBalance: true,
-    },
-  });
+  const baseCurrency = teamResult[0]?.baseCurrency || "USD";
 
   // Calculate cash total
   let cashTotal = 0;

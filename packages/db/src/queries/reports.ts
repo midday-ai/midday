@@ -1273,30 +1273,28 @@ export async function getSpendingForPeriod(
     exactDates = false,
   } = params;
 
-  // Use existing getExpenses function for the specified period
-  const expensesData = await getExpenses(db, {
-    teamId,
-    from,
-    to,
-    currency: inputCurrency,
-    exactDates,
-  });
+  const [expensesData, spendingCategories] = await Promise.all([
+    getExpenses(db, {
+      teamId,
+      from,
+      to,
+      currency: inputCurrency,
+      exactDates,
+    }),
+    getSpending(db, {
+      teamId,
+      from,
+      to,
+      currency: inputCurrency,
+    }),
+  ]);
 
-  // Calculate total spending across all months in the period
   const totalSpending = expensesData.result.reduce(
     (sum, item) => sum + item.total,
     0,
   );
 
   const currency = expensesData.meta.currency || inputCurrency || "USD";
-
-  // Get top spending category for the specified period using existing getSpending function
-  const spendingCategories = await getSpending(db, {
-    teamId,
-    from,
-    to,
-    currency: inputCurrency,
-  });
 
   const topCategory = spendingCategories[0] || null;
 
@@ -2975,7 +2973,6 @@ export async function getRevenueForecast(
     recurringTransactionData,
     teamCollectionMetrics,
   ] = await Promise.all([
-    // Historical revenue data (for display and baseline calculation)
     getRevenue(db, {
       teamId,
       from,
@@ -2983,19 +2980,16 @@ export async function getRevenueForecast(
       currency: inputCurrency,
       revenueType,
     }),
-    // Outstanding invoices (unpaid revenue)
     getOutstandingInvoices(db, {
       teamId,
       currency: inputCurrency,
       status: ["unpaid", "overdue"],
     }),
-    // Billable hours this month
     getBillableHours(db, {
       teamId,
       date: new Date().toISOString(),
       view: "month",
     }),
-    // Scheduled invoices with issueDate in forecast period
     db
       .select({
         amount: invoices.amount,
@@ -3012,19 +3006,16 @@ export async function getRevenueForecast(
           lte(invoices.issueDate, forecastEndDate),
         ),
       ),
-    // Recurring invoices projected into forecast months
     getRecurringInvoiceProjection(db, {
       teamId,
       forecastMonths,
       currency: inputCurrency,
     }),
-    // Recurring transactions projected into forecast months
     getRecurringTransactionProjection(db, {
       teamId,
       forecastMonths,
       currency: inputCurrency,
     }),
-    // Team's actual collection metrics
     getTeamCollectionMetrics(db, teamId),
   ]);
 
@@ -3049,33 +3040,26 @@ export async function getRevenueForecast(
     );
   }
 
-  // Calculate expected collections using team's actual payment history
-  const expectedCollections = await calculateExpectedCollections(
-    db,
-    teamId,
-    teamCollectionMetrics,
-    inputCurrency,
-  );
-
-  // Calculate recurring transaction monthly average for baseline adjustment
+  // Calculate recurring transaction monthly average (sync, no DB call)
   let recurringTxMonthlyAvg = 0;
   for (const [, data] of recurringTransactionData) {
     recurringTxMonthlyAvg = data.amount; // All months have same projection
     break;
   }
 
-  // Calculate historical recurring invoice monthly average
-  // This is needed to avoid double-counting: payments from recurring invoices
-  // appear in historical revenue AND are projected separately
-  const recurringInvoiceMonthlyAvg = await getHistoricalRecurringInvoiceAverage(
-    db,
-    {
+  const [expectedCollections, recurringInvoiceMonthlyAvg] = await Promise.all([
+    calculateExpectedCollections(
+      db,
+      teamId,
+      teamCollectionMetrics,
+      inputCurrency,
+    ),
+    getHistoricalRecurringInvoiceAverage(db, {
       teamId,
       currency: inputCurrency,
-    },
-  );
+    }),
+  ]);
 
-  // Calculate non-recurring baseline (historical revenue minus ALL recurring sources)
   const nonRecurringBaseline = await calculateNonRecurringBaseline(db, {
     teamId,
     currency: inputCurrency,

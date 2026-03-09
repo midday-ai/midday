@@ -59,6 +59,7 @@ app.use(
       "Content-Type",
       "Cache-Control",
       "Cross-Origin-Resource-Policy",
+      "Server-Timing",
     ],
     maxAge: 86400,
   }),
@@ -82,6 +83,10 @@ if (process.env.DEBUG_PERF === "true") {
       requestId,
       cfRay,
     });
+    c.header(
+      "Server-Timing",
+      `total;dur=${elapsed.toFixed(1)},procedures;desc="${procedures.join(",")}"`,
+    );
   });
 }
 

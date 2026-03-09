@@ -871,24 +871,24 @@ export async function getInvoiceSummary(
     whereConditions.push(inArray(invoices.status, statuses));
   }
 
-  const [team] = await db
-    .select({ baseCurrency: teams.baseCurrency })
-    .from(teams)
-    .where(eq(teams.id, teamId))
-    .limit(1);
+  const [[team], currencyTotals] = await Promise.all([
+    db
+      .select({ baseCurrency: teams.baseCurrency })
+      .from(teams)
+      .where(eq(teams.id, teamId))
+      .limit(1),
+    db
+      .select({
+        currency: invoices.currency,
+        totalAmount: sql<string>`COALESCE(SUM(${invoices.amount}), 0)`,
+        invoiceCount: count(),
+      })
+      .from(invoices)
+      .where(and(...whereConditions))
+      .groupBy(invoices.currency),
+  ]);
 
   const baseCurrency = team?.baseCurrency || "USD";
-
-  // Aggregate in SQL — returns one row per currency instead of one row per invoice
-  const currencyTotals = await db
-    .select({
-      currency: invoices.currency,
-      totalAmount: sql<string>`COALESCE(SUM(${invoices.amount}), 0)`,
-      invoiceCount: count(),
-    })
-    .from(invoices)
-    .where(and(...whereConditions))
-    .groupBy(invoices.currency);
 
   if (currencyTotals.length === 0) {
     return {

@@ -546,26 +546,25 @@ export async function getCustomerInvoiceSummary(
 ) {
   const { customerId, teamId } = params;
 
-  // Get team's base currency first
-  const [team] = await db
-    .select({ baseCurrency: teams.baseCurrency })
-    .from(teams)
-    .where(eq(teams.id, teamId))
-    .limit(1);
+  const [[team], invoiceData] = await Promise.all([
+    db
+      .select({ baseCurrency: teams.baseCurrency })
+      .from(teams)
+      .where(eq(teams.id, teamId))
+      .limit(1),
+    db
+      .select({
+        amount: invoices.amount,
+        currency: invoices.currency,
+        status: invoices.status,
+      })
+      .from(invoices)
+      .where(
+        and(eq(invoices.customerId, customerId), eq(invoices.teamId, teamId)),
+      ),
+  ]);
 
   const baseCurrency = team?.baseCurrency || "USD";
-
-  // Get all invoices for this customer
-  const invoiceData = await db
-    .select({
-      amount: invoices.amount,
-      currency: invoices.currency,
-      status: invoices.status,
-    })
-    .from(invoices)
-    .where(
-      and(eq(invoices.customerId, customerId), eq(invoices.teamId, teamId)),
-    );
 
   if (invoiceData.length === 0) {
     return {

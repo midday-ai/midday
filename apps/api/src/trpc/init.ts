@@ -14,7 +14,7 @@ import superjson from "superjson";
 import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";
 import { withTeamPermission } from "./middleware/team-permission";
 
-export const DEBUG_PERF = process.env.DEBUG_PERF === "true";
+const DEBUG_PERF = process.env.DEBUG_PERF === "true";
 const perfLogger = createLoggerWithContext("perf:trpc");
 
 type TRPCContext = {
@@ -90,11 +90,14 @@ const withTimingMiddleware = t.middleware(async (opts) => {
   if (!DEBUG_PERF) return opts.next();
   const start = performance.now();
   const result = await opts.next();
+  const durationMs = +(performance.now() - start).toFixed(2);
+
   perfLogger.info("procedure", {
     path: opts.path,
     type: opts.type,
-    durationMs: +(performance.now() - start).toFixed(2),
+    durationMs,
   });
+
   return result;
 });
 

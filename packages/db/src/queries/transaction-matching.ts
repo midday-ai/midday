@@ -612,35 +612,40 @@ export async function findMatches(
   params: FindMatchesParams & { excludeTransactionIds?: Set<string> },
 ): Promise<MatchResult | null> {
   const { teamId, inboxId, excludeTransactionIds } = params;
-  const calibration = await getTeamCalibration(db, teamId);
+
+  const [calibration, [inboxItem]] = await Promise.all([
+    getTeamCalibration(db, teamId),
+    db
+      .select({
+        id: inbox.id,
+        displayName: inbox.displayName,
+        amount: inbox.amount,
+        currency: inbox.currency,
+        baseAmount: inbox.baseAmount,
+        baseCurrency: inbox.baseCurrency,
+        date: inbox.date,
+        type: inbox.type,
+        website: inbox.website,
+        invoiceNumber: inbox.invoiceNumber,
+      })
+      .from(inbox)
+      .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
+      .limit(1),
+  ]);
+
   const suggestedThreshold = Math.max(
     0.6,
     calibration.calibratedSuggestedThreshold,
   );
   const autoThreshold = calibration.calibratedAutoThreshold;
 
-  const [inboxItem] = await db
-    .select({
-      id: inbox.id,
-      displayName: inbox.displayName,
-      amount: inbox.amount,
-      currency: inbox.currency,
-      baseAmount: inbox.baseAmount,
-      baseCurrency: inbox.baseCurrency,
-      date: inbox.date,
-      type: inbox.type,
-      website: inbox.website,
-      invoiceNumber: inbox.invoiceNumber,
-    })
-    .from(inbox)
-    .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
-    .limit(1);
-
   if (!inboxItem?.date) return null;
 
   const normalizedInboxName = normalizeNameForLearning(inboxItem.displayName);
   const inboxAmount = Math.abs(inboxItem.amount || 0);
   const inboxBaseAmount = Math.abs(inboxItem.baseAmount || 0);
+
+  const teamPairHistoryPromise = fetchTeamPairHistory(db, teamId);
 
   const candidates = await db.transaction(async (tx) => {
     await tx.execute(sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`);
@@ -720,7 +725,7 @@ export async function findMatches(
       .limit(30);
   });
 
-  const teamPairHistory = await fetchTeamPairHistory(db, teamId);
+  const teamPairHistory = await teamPairHistoryPromise;
 
   const scoredCandidates: MatchResult[] = [];
   for (const candidate of candidates) {
@@ -845,31 +850,37 @@ export async function findInboxMatches(
   params: FindInboxMatchesParams & { excludeInboxIds?: Set<string> },
 ): Promise<InboxMatchResult | null> {
   const { teamId, transactionId, excludeInboxIds } = params;
-  const calibration = await getTeamCalibration(db, teamId);
+
+  const [calibration, [transactionItem]] = await Promise.all([
+    getTeamCalibration(db, teamId),
+    db
+      .select({
+        id: transactions.id,
+        name: transactions.name,
+        amount: transactions.amount,
+        currency: transactions.currency,
+        baseAmount: transactions.baseAmount,
+        baseCurrency: transactions.baseCurrency,
+        date: transactions.date,
+        merchantName: transactions.merchantName,
+        description: transactions.description,
+        counterpartyName: transactions.counterpartyName,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.id, transactionId),
+          eq(transactions.teamId, teamId),
+        ),
+      )
+      .limit(1),
+  ]);
+
   const suggestedThreshold = Math.max(
     0.6,
     calibration.calibratedSuggestedThreshold,
   );
   const autoThreshold = calibration.calibratedAutoThreshold;
-
-  const [transactionItem] = await db
-    .select({
-      id: transactions.id,
-      name: transactions.name,
-      amount: transactions.amount,
-      currency: transactions.currency,
-      baseAmount: transactions.baseAmount,
-      baseCurrency: transactions.baseCurrency,
-      date: transactions.date,
-      merchantName: transactions.merchantName,
-      description: transactions.description,
-      counterpartyName: transactions.counterpartyName,
-    })
-    .from(transactions)
-    .where(
-      and(eq(transactions.id, transactionId), eq(transactions.teamId, teamId)),
-    )
-    .limit(1);
 
   if (!transactionItem?.date) return null;
 
@@ -878,6 +889,8 @@ export async function findInboxMatches(
   );
   const transactionAmount = Math.abs(transactionItem.amount || 0);
   const transactionBaseAmount = Math.abs(transactionItem.baseAmount || 0);
+
+  const teamPairHistoryPromise = fetchTeamPairHistory(db, teamId);
 
   const candidates = await db.transaction(async (tx) => {
     await tx.execute(sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`);
@@ -930,7 +943,7 @@ export async function findInboxMatches(
       .limit(30);
   });
 
-  const teamPairHistory = await fetchTeamPairHistory(db, teamId);
+  const teamPairHistory = await teamPairHistoryPromise;
 
   const scoredCandidates: InboxMatchResult[] = [];
   for (const candidate of candidates) {

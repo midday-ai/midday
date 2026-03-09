@@ -1060,39 +1060,34 @@ export async function getOverdueInvoicesWithBehavior(
 ): Promise<OverdueInvoiceWithBehavior[]> {
   const { teamId, currency } = params;
 
-  // First, get overdue invoices
-  const overdueInvoices = await getOverdueInvoiceDetails(db, {
-    teamId,
-    currency,
-  });
+  const [overdueInvoices, paymentBehavior] = await Promise.all([
+    getOverdueInvoiceDetails(db, { teamId, currency }),
+    db
+      .select({
+        customerName: invoices.customerName,
+        avgDaysToPay: sql<number>`
+          AVG(
+            EXTRACT(DAY FROM (${invoices.paidAt}::timestamp - ${invoices.dueDate}::timestamp))
+          )::float
+        `,
+        invoiceCount: sql<number>`COUNT(*)::int`,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.teamId, teamId),
+          eq(invoices.status, "paid"),
+          isNotNull(invoices.paidAt),
+          isNotNull(invoices.dueDate),
+        ),
+      )
+      .groupBy(invoices.customerName)
+      .having(sql`COUNT(*) >= 2`),
+  ]);
 
   if (overdueInvoices.length === 0) {
     return [];
   }
-
-  // Get customer IDs from overdue invoices
-  const customerConditions = [
-    eq(invoices.teamId, teamId),
-    eq(invoices.status, "paid"),
-    isNotNull(invoices.paidAt),
-    isNotNull(invoices.dueDate),
-  ];
-
-  // Get payment behavior for all customers with paid invoices
-  const paymentBehavior = await db
-    .select({
-      customerName: invoices.customerName,
-      avgDaysToPay: sql<number>`
-        AVG(
-          EXTRACT(DAY FROM (${invoices.paidAt}::timestamp - ${invoices.dueDate}::timestamp))
-        )::float
-      `,
-      invoiceCount: sql<number>`COUNT(*)::int`,
-    })
-    .from(invoices)
-    .where(and(...customerConditions))
-    .groupBy(invoices.customerName)
-    .having(sql`COUNT(*) >= 2`); // Need at least 2 paid invoices for reliable pattern
 
   // Build a map of customer payment behavior
   const behaviorMap = new Map<string, { avgDays: number; count: number }>();
