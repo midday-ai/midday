@@ -52,11 +52,8 @@ export function SelectAttachment({
     onSelect(item);
   };
 
-  // Only create options if we have items and should show results
   const hasResults = items && items.length > 0;
-  // Only show results when actively searching or when combobox is open AND user has typed something
-  // Don't show suggestions when just focusing the input
-  const shouldShowResults = isOpen && Boolean(debouncedValue) && hasResults;
+  const shouldShowResults = isOpen && hasResults;
 
   const options = hasResults
     ? items.map((item, index) => {
@@ -190,7 +187,7 @@ export function SelectAttachment({
         ...opt,
         name: opt.name!,
       }))}
-      isLoading={isLoading && Boolean(debouncedValue)} // Only show loading when actively searching
+      isLoading={isLoading}
       classNameList="mt-2 max-h-[161px]"
       open={shouldShowResults} // Only open when we should show results
       onOpenChange={setIsOpen}
