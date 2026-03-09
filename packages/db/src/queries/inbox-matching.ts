@@ -279,6 +279,23 @@ export async function confirmSuggestedMatch(
       },
     });
 
+    // Confirm any remaining pending suggestions for the same transaction
+    // (e.g. grouped items that were matched as part of this confirm)
+    await tx
+      .update(transactionMatchSuggestions)
+      .set({
+        status: "confirmed",
+        userActionAt: new Date().toISOString(),
+        userId,
+      })
+      .where(
+        and(
+          eq(transactionMatchSuggestions.transactionId, transactionId),
+          eq(transactionMatchSuggestions.teamId, teamId),
+          eq(transactionMatchSuggestions.status, "pending"),
+        ),
+      );
+
     return result;
   });
 }
