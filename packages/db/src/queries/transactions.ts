@@ -1046,7 +1046,7 @@ export async function getSimilarTransactions(
 
   const candidates = await db.transaction(async (tx) => {
     await tx.execute(
-      sql`SET LOCAL pg_trgm.word_similarity_threshold = ${TRGM_CANDIDATE_THRESHOLD}`,
+      sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`,
     );
     return tx
       .select({
