@@ -28,6 +28,34 @@ function truncateSql(sql: string, max = 200): string {
 
 export function instrumentPool(pool: Pool, label: string): void {
   const origQuery = pool.query.bind(pool);
+  const origConnect = pool.connect.bind(pool);
+
+  // Track connection acquisition time
+  (pool as unknown as Record<string, unknown>).connect = (
+    ...args: unknown[]
+  ): unknown => {
+    const start = performance.now();
+    const result = (origConnect as (...a: unknown[]) => unknown)(...args);
+    if (result && typeof (result as any).then === "function") {
+      (result as Promise<unknown>).then(
+        () => {
+          const ms = performance.now() - start;
+          if (ms > SLOW_QUERY_MS) {
+            perfLogger.warn(`${label} pool acquire took ${ms.toFixed(0)}ms`, {
+              durationMs: +ms.toFixed(2),
+              pool: label,
+              event: "acquire",
+              total: pool.totalCount,
+              idle: pool.idleCount,
+              waiting: pool.waitingCount,
+            });
+          }
+        },
+        () => {},
+      );
+    }
+    return result;
+  };
 
   (pool as unknown as Record<string, unknown>).query = (
     ...args: unknown[]

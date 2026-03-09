@@ -120,22 +120,6 @@ app.openapi(
         return {
           ...invoiceWithoutToken,
           ...calculatedAmounts,
-          paymentDetails: invoice.paymentDetails
-            ? JSON.stringify(invoice.paymentDetails)
-            : null,
-          customerDetails: invoice.customerDetails
-            ? JSON.stringify(invoice.customerDetails)
-            : null,
-          fromDetails: invoice.fromDetails
-            ? JSON.stringify(invoice.fromDetails)
-            : null,
-          noteDetails: invoice.noteDetails
-            ? JSON.stringify(invoice.noteDetails)
-            : null,
-          topBlock: invoice.topBlock ? JSON.stringify(invoice.topBlock) : null,
-          bottomBlock: invoice.bottomBlock
-            ? JSON.stringify(invoice.bottomBlock)
-            : null,
           pdfUrl: token
             ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
             : null,

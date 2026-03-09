@@ -446,23 +446,22 @@ export async function getTrackerProjectById(
 
   const project = projectData[0];
 
-  // Get tags for the project
-  const projectTags = await db
-    .select({
-      id: trackerProjectTags.id,
-      tagId: trackerProjectTags.tagId,
-      tagName: tags.name,
-    })
-    .from(trackerProjectTags)
-    .leftJoin(tags, eq(trackerProjectTags.tagId, tags.id))
-    .where(eq(trackerProjectTags.trackerProjectId, id));
-
-  // Get assigned users for the project
-  const [assignedUsersResult] = await db.executeOnReplica(
-    sql`SELECT get_assigned_users_for_project(tracker_projects) as users
-        FROM tracker_projects
-        WHERE id = ${id} AND team_id = ${teamId}`,
-  );
+  const [projectTags, [assignedUsersResult]] = await Promise.all([
+    db
+      .select({
+        id: trackerProjectTags.id,
+        tagId: trackerProjectTags.tagId,
+        tagName: tags.name,
+      })
+      .from(trackerProjectTags)
+      .leftJoin(tags, eq(trackerProjectTags.tagId, tags.id))
+      .where(eq(trackerProjectTags.trackerProjectId, id)),
+    db.executeOnReplica(
+      sql`SELECT get_assigned_users_for_project(tracker_projects) as users
+          FROM tracker_projects
+          WHERE id = ${id} AND team_id = ${teamId}`,
+    ),
+  ]);
 
   // Handle the result - the SQL function returns an array of users
   const assignedUsers = (assignedUsersResult?.users as AssignedUser[]) || [];

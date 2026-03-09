@@ -25,6 +25,7 @@ import {
   getRates,
   PlaidApi,
   Provider,
+  ProviderError,
 } from "@midday/banking";
 import { getInstitutionById } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
@@ -222,6 +223,10 @@ export const bankingRouter = createTRPCRouter({
         });
         return { data };
       } catch (error) {
+        if (error instanceof ProviderError && error.code === "disconnected") {
+          return { data: { status: "disconnected" as const } };
+        }
+
         logger.error(
           "Failed to get connection status",
           getProviderErrorDetails(error),
@@ -330,9 +335,16 @@ export const bankingRouter = createTRPCRouter({
           "Failed to get account balance",
           getProviderErrorDetails(error),
         );
+
+        const providerCode =
+          error instanceof ProviderError ? error.code : "unknown";
+
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get account balance",
+          message: JSON.stringify({
+            message: "Failed to get account balance",
+            providerCode,
+          }),
         });
       }
     }),
@@ -355,9 +367,16 @@ export const bankingRouter = createTRPCRouter({
           "Failed to get provider transactions",
           getProviderErrorDetails(error),
         );
+
+        const providerCode =
+          error instanceof ProviderError ? error.code : "unknown";
+
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get provider transactions",
+          message: JSON.stringify({
+            message: "Failed to get provider transactions",
+            providerCode,
+          }),
         });
       }
     }),

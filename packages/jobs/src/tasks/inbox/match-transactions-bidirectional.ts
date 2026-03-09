@@ -184,7 +184,7 @@ export const matchTransactionsBidirectional = schemaTask({
     // PHASE 2: Reverse matching - Find transactions for pending inbox items
     const pendingInboxItems = await getPendingInboxForMatching(db, {
       teamId,
-      limit: 50,
+      limit: 20,
     });
 
     const matchedInboxIds = new Set(forwardMatches.values());

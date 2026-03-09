@@ -859,55 +859,60 @@ export async function getInboxSearch(
         const unifiedTransactionBaseAmount = Math.abs(
           transaction.baseAmount || 0,
         );
-        const unifiedCandidates = await db
-          .select({
-            id: inbox.id,
-            createdAt: inbox.createdAt,
-            fileName: inbox.fileName,
-            amount: inbox.amount,
-            currency: inbox.currency,
-            filePath: inbox.filePath,
-            contentType: inbox.contentType,
-            date: inbox.date,
-            displayName: inbox.displayName,
-            size: inbox.size,
-            description: inbox.description,
-            baseAmount: inbox.baseAmount,
-            baseCurrency: inbox.baseCurrency,
-            status: inbox.status,
-            type: inbox.type,
-            website: inbox.website,
-            taxAmount: inbox.taxAmount,
-            taxRate: inbox.taxRate,
-            taxType: inbox.taxType,
-          })
-          .from(inbox)
-          .where(
-            and(
-              ...whereConditions,
-              sql`${inbox.date} IS NOT NULL`,
-              sql`${inbox.date} BETWEEN (${sql.param(transaction.date)}::date - INTERVAL '123 days') 
-                  AND (${sql.param(transaction.date)}::date + INTERVAL '30 days')`,
-              or(
-                and(
-                  eq(inbox.currency, transaction.currency || ""),
-                  sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) < GREATEST(1, ${unifiedTransactionAmount} * 0.25)`,
-                ),
-                sql`word_similarity(${transaction.merchantName || transaction.name}, COALESCE(${inbox.displayName}, '')) > 0.3`,
-                and(
-                  eq(inbox.baseCurrency, transaction.baseCurrency || ""),
-                  sql`${inbox.baseCurrency} IS NOT NULL`,
-                  sql`ABS(ABS(COALESCE(${inbox.baseAmount}, 0)) - ${unifiedTransactionBaseAmount}) < GREATEST(50, ${unifiedTransactionBaseAmount} * 0.15)`,
+        const unifiedCandidates = await db.transaction(async (tx) => {
+          await tx.execute(
+            sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`,
+          );
+          return tx
+            .select({
+              id: inbox.id,
+              createdAt: inbox.createdAt,
+              fileName: inbox.fileName,
+              amount: inbox.amount,
+              currency: inbox.currency,
+              filePath: inbox.filePath,
+              contentType: inbox.contentType,
+              date: inbox.date,
+              displayName: inbox.displayName,
+              size: inbox.size,
+              description: inbox.description,
+              baseAmount: inbox.baseAmount,
+              baseCurrency: inbox.baseCurrency,
+              status: inbox.status,
+              type: inbox.type,
+              website: inbox.website,
+              taxAmount: inbox.taxAmount,
+              taxRate: inbox.taxRate,
+              taxType: inbox.taxType,
+            })
+            .from(inbox)
+            .where(
+              and(
+                ...whereConditions,
+                sql`${inbox.date} IS NOT NULL`,
+                sql`${inbox.date} BETWEEN (${sql.param(transaction.date)}::date - INTERVAL '123 days') 
+                    AND (${sql.param(transaction.date)}::date + INTERVAL '30 days')`,
+                or(
+                  and(
+                    eq(inbox.currency, transaction.currency || ""),
+                    sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) < GREATEST(1, ${unifiedTransactionAmount} * 0.25)`,
+                  ),
+                  sql`(${transaction.merchantName || transaction.name} %> ${inbox.displayName})`,
+                  and(
+                    eq(inbox.baseCurrency, transaction.baseCurrency || ""),
+                    sql`${inbox.baseCurrency} IS NOT NULL`,
+                    sql`ABS(ABS(COALESCE(${inbox.baseAmount}, 0)) - ${unifiedTransactionBaseAmount}) < GREATEST(50, ${unifiedTransactionBaseAmount} * 0.15)`,
+                  ),
                 ),
               ),
-            ),
-          )
-          .orderBy(
-            sql`word_similarity(${transaction.merchantName || transaction.name}, COALESCE(${inbox.displayName}, '')) DESC`,
-            sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) / GREATEST(1.0, ${unifiedTransactionAmount})`,
-            sql`ABS(${inbox.date} - ${sql.param(transaction.date)}::date)`,
-          )
-          .limit(Math.max(limit * 3, 30));
+            )
+            .orderBy(
+              sql`word_similarity(${transaction.merchantName || transaction.name}, COALESCE(${inbox.displayName}, '')) DESC`,
+              sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) / GREATEST(1.0, ${unifiedTransactionAmount})`,
+              sql`ABS(${inbox.date} - ${sql.param(transaction.date)}::date)`,
+            )
+            .limit(Math.max(limit * 3, 30));
+        });
 
         const unifiedScored = unifiedCandidates
           .map((candidate) => {
@@ -1933,44 +1938,43 @@ export type GetInboxStatsParams = {
 export async function getInboxStats(db: Database, params: GetInboxStatsParams) {
   const { teamId, from, to, currency } = params;
 
-  // Get counts for different statuses
-  const statusCounts = await db
-    .select({
-      status: inbox.status,
-      count: sql<number>`count(*)`,
-    })
-    .from(inbox)
-    .where(and(eq(inbox.teamId, teamId), ne(inbox.status, "deleted")))
-    .groupBy(inbox.status);
+  const [statusCounts, recentMatches, pendingSuggestions] = await Promise.all([
+    db
+      .select({
+        status: inbox.status,
+        count: sql<number>`count(*)`,
+      })
+      .from(inbox)
+      .where(and(eq(inbox.teamId, teamId), ne(inbox.status, "deleted")))
+      .groupBy(inbox.status),
 
-  // Get recent matches (done status items within the date range)
-  const recentMatches = await db
-    .select({
-      count: sql<number>`count(*)`,
-    })
-    .from(inbox)
-    .where(
-      and(
-        eq(inbox.teamId, teamId),
-        eq(inbox.status, "done"),
-        sql`${inbox.createdAt}::date >= ${from}::date`,
-        sql`${inbox.createdAt}::date <= ${to}::date`,
+    db
+      .select({
+        count: sql<number>`count(*)`,
+      })
+      .from(inbox)
+      .where(
+        and(
+          eq(inbox.teamId, teamId),
+          eq(inbox.status, "done"),
+          sql`${inbox.createdAt}::date >= ${from}::date`,
+          sql`${inbox.createdAt}::date <= ${to}::date`,
+        ),
       ),
-    );
 
-  // Get pending suggestions count
-  const pendingSuggestions = await db
-    .select({
-      count: sql<number>`count(*)`,
-    })
-    .from(transactionMatchSuggestions)
-    .innerJoin(inbox, eq(transactionMatchSuggestions.inboxId, inbox.id))
-    .where(
-      and(
-        eq(inbox.teamId, teamId),
-        eq(transactionMatchSuggestions.status, "pending"),
+    db
+      .select({
+        count: sql<number>`count(*)`,
+      })
+      .from(transactionMatchSuggestions)
+      .innerJoin(inbox, eq(transactionMatchSuggestions.inboxId, inbox.id))
+      .where(
+        and(
+          eq(inbox.teamId, teamId),
+          eq(transactionMatchSuggestions.status, "pending"),
+        ),
       ),
-    );
+  ]);
 
   // Process results
   const stats = {
