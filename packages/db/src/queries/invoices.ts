@@ -180,7 +180,9 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
     }
   }
 
-  // Start building the query
+  // Start building the query – excludes heavy JSONB blobs not needed for
+  // list views (paymentDetails, customerDetails, noteDetails, fromDetails,
+  // topBlock, bottomBlock). Use getInvoiceById for full data.
   const query = db
     .select({
       id: invoices.id,
@@ -190,8 +192,6 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       amount: invoices.amount,
       currency: invoices.currency,
       lineItems: invoices.lineItems,
-      paymentDetails: invoices.paymentDetails,
-      customerDetails: invoices.customerDetails,
       reminderSentAt: invoices.reminderSentAt,
       updatedAt: invoices.updatedAt,
       note: invoices.note,
@@ -203,18 +203,14 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       status: invoices.status,
       fileSize: invoices.fileSize,
       viewedAt: invoices.viewedAt,
-      fromDetails: invoices.fromDetails,
       issueDate: invoices.issueDate,
       sentAt: invoices.sentAt,
       template: invoices.template,
-      noteDetails: invoices.noteDetails,
       customerName: invoices.customerName,
       token: invoices.token,
       sentTo: invoices.sentTo,
       discount: invoices.discount,
       subtotal: invoices.subtotal,
-      topBlock: invoices.topBlock,
-      bottomBlock: invoices.bottomBlock,
       scheduledAt: invoices.scheduledAt,
       scheduledJobId: invoices.scheduledJobId,
       customer: {

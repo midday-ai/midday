@@ -430,10 +430,6 @@ export const transactions = pgTable(
       "btree",
       table.name.asc().nullsLast().op("text_ops"),
     ),
-    index("idx_transactions_name_trigram").using(
-      "gin",
-      table.name.asc().nullsLast().op("gin_trgm_ops"),
-    ),
     index("idx_transactions_merchant_name_trgm").using(
       "gin",
       table.merchantName.asc().nullsLast().op("gin_trgm_ops"),
