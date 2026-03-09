@@ -4,7 +4,7 @@ import "./instrument";
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { closeSharedRedisClient } from "@midday/cache/shared-redis";
-import { closeDb, db, getPoolStats } from "@midday/db/client";
+import { closeDb, getPoolStats } from "@midday/db/client";
 import {
   buildDependenciesResponse,
   buildReadinessResponse,
@@ -14,7 +14,7 @@ import { apiDependencies } from "@midday/health/probes";
 import { createLoggerWithContext, logger } from "@midday/logger";
 import { Scalar } from "@scalar/hono-api-reference";
 import * as Sentry from "@sentry/bun";
-import { sql } from "drizzle-orm";
+
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { routers } from "./rest/routers";
@@ -134,72 +134,6 @@ app.get("/health", (c) => {
   );
   c.header("X-Server-Timestamp", Date.now().toString());
   return c.json({ status: "ok" }, 200);
-});
-
-app.get("/health/diagnose", async (c) => {
-  const totalStart = performance.now();
-  const timings: Record<string, number> = {};
-
-  const region =
-    process.env.RAILWAY_REGION ||
-    process.env.RAILWAY_REPLICA_REGION ||
-    "unknown";
-
-  const poolStats = getPoolStats();
-
-  // 1. Acquire connection from existing pool + run SELECT 1
-  const poolStart = performance.now();
-  try {
-    await db.execute(sql`SELECT 1 as ok`);
-    timings.pooledQueryMs = +(performance.now() - poolStart).toFixed(2);
-  } catch {
-    timings.pooledQueryMs = +(performance.now() - poolStart).toFixed(2);
-    timings.pooledQueryError = -1;
-  }
-
-  // 2. Supabase HTTP endpoint (tests network to Supabase)
-  const supaStart = performance.now();
-  try {
-    const supaUrl = process.env.SUPABASE_URL;
-    if (supaUrl) {
-      const res = await fetch(`${supaUrl}/auth/v1/.well-known/jwks.json`);
-      await res.json();
-    }
-    timings.supabaseJwksMs = +(performance.now() - supaStart).toFixed(2);
-  } catch {
-    timings.supabaseJwksMs = +(performance.now() - supaStart).toFixed(2);
-    timings.supabaseJwksError = -1;
-  }
-
-  // 3. Internal networking (Railway private domain)
-  const privateDomain = process.env.RAILWAY_PRIVATE_DOMAIN;
-  if (privateDomain) {
-    const port = process.env.PORT || "8080";
-    const intStart = performance.now();
-    try {
-      const res = await fetch(`http://${privateDomain}:${port}/health`);
-      await res.json();
-      timings.internalNetworkMs = +(performance.now() - intStart).toFixed(2);
-    } catch {
-      timings.internalNetworkMs = +(performance.now() - intStart).toFixed(2);
-      timings.internalNetworkError = -1;
-    }
-  }
-
-  // 4. A real query: indexed count
-  const realStart = performance.now();
-  try {
-    await db.execute(
-      sql`SELECT count(*) FROM transactions WHERE team_id = '00000000-0000-0000-0000-000000000000'`,
-    );
-    timings.indexedCountMs = +(performance.now() - realStart).toFixed(2);
-  } catch {
-    timings.indexedCountMs = +(performance.now() - realStart).toFixed(2);
-  }
-
-  timings.totalMs = +(performance.now() - totalStart).toFixed(2);
-
-  return c.json({ region, pool: poolStats, timings }, 200);
 });
 
 app.get("/health/ready", async (c) => {
