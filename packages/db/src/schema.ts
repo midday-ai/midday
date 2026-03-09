@@ -305,9 +305,6 @@ export const documentTagEmbeddings = pgTable(
     model: text().notNull().default("gemini-embedding-001"),
   },
   (table) => [
-    index("document_tag_embeddings_idx")
-      .using("hnsw", table.embedding.asc().nullsLast().op("vector_cosine_ops"))
-      .with({ m: "16", ef_construction: "64" }),
     pgPolicy("Enable insert for authenticated users only", {
       as: "permissive",
       for: "insert",
@@ -332,11 +329,6 @@ export const transactionCategoryEmbeddings = pgTable(
       .notNull(),
   },
   (table) => [
-    // Vector similarity index for fast cosine similarity search
-    index("transaction_category_embeddings_vector_idx")
-      .using("hnsw", table.embedding.asc().nullsLast().op("vector_cosine_ops"))
-      .with({ m: "16", ef_construction: "64" }),
-    // System categories index for filtering
     index("transaction_category_embeddings_system_idx").using(
       "btree",
       table.system.asc().nullsLast().op("bool_ops"),
