@@ -144,11 +144,19 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
-      return acceptTeamInvite(db, {
+      const result = await acceptTeamInvite(db, {
         id: input.id,
         userId: session.user.id,
         userEmail: session.user.email,
       });
+
+      try {
+        await teamCache.invalidateForUser(session.user.id);
+      } catch {
+        // Non-fatal — cache will expire naturally
+      }
+
+      return result;
     }),
 
   declineInvite: protectedProcedure
