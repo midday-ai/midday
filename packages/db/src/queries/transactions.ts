@@ -585,9 +585,11 @@ export async function getTransactions(
           type: string;
           size: number;
         }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionAttachments.id}, 'filename', ${transactionAttachments.name}, 'path', ${transactionAttachments.path}, 'type', ${transactionAttachments.type}, 'size', ${transactionAttachments.size})) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
-        "attachments",
-      ),
+      >`COALESCE((
+        SELECT json_agg(jsonb_build_object('id', ta.id, 'filename', ta.name, 'path', ta.path, 'type', ta.type, 'size', ta.size))
+        FROM ${transactionAttachments} ta
+        WHERE ta.transaction_id = ${transactions.id} AND ta.team_id = ${teamId}
+      ), '[]'::json)`.as("attachments"),
       assigned: {
         id: users.id,
         fullName: users.fullName,
@@ -611,11 +613,12 @@ export async function getTransactions(
         name: bankConnections.name,
         logoUrl: bankConnections.logoUrl,
       },
-      tags: sql<
-        Array<{ id: string; name: string | null }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tags.id}, 'name', ${tags.name})) FILTER (WHERE ${tags.id} IS NOT NULL), '[]'::json)`.as(
-        "tags",
-      ),
+      tags: sql<Array<{ id: string; name: string | null }>>`COALESCE((
+        SELECT json_agg(jsonb_build_object('id', t.id, 'name', t.name))
+        FROM ${transactionTags} tt
+        INNER JOIN ${tags} t ON t.id = tt.tag_id
+        WHERE tt.transaction_id = ${transactions.id} AND tt.team_id = ${teamId}
+      ), '[]'::json)`.as("tags"),
     })
     .from(transactions)
     .leftJoin(
@@ -640,56 +643,7 @@ export async function getTransactions(
       bankConnections,
       eq(bankAccounts.bankConnectionId, bankConnections.id),
     )
-    .leftJoin(
-      transactionTags,
-      and(
-        eq(transactionTags.transactionId, transactions.id),
-        eq(transactionTags.teamId, teamId),
-      ),
-    )
-    .leftJoin(
-      tags,
-      and(eq(tags.id, transactionTags.tagId), eq(tags.teamId, teamId)),
-    )
-    .leftJoin(
-      transactionAttachments,
-      and(
-        eq(transactionAttachments.transactionId, transactions.id),
-        eq(transactionAttachments.teamId, teamId),
-      ),
-    )
-    .where(and(...finalWhereConditions))
-    .groupBy(
-      transactions.id,
-      transactions.date,
-      transactions.amount,
-      transactions.currency,
-      transactions.method,
-      transactions.status,
-      transactions.note,
-      transactions.manual,
-      transactions.internal,
-      transactions.recurring,
-      transactions.frequency,
-      transactions.name,
-      transactions.description,
-      transactions.createdAt,
-      users.id,
-      users.fullName,
-      users.email,
-      users.avatarUrl,
-      transactionCategories.id,
-      transactionCategories.name,
-      transactionCategories.color,
-      transactionCategories.slug,
-      transactionCategories.taxRate,
-      transactionCategories.taxType,
-      bankAccounts.id,
-      bankAccounts.name,
-      bankAccounts.currency,
-      bankConnections.id,
-      bankConnections.logoUrl,
-    );
+    .where(and(...finalWhereConditions));
 
   let query = queryBuilder.$dynamic();
 
@@ -864,11 +818,12 @@ export async function getTransactionById(
         name: bankConnections.name,
         logoUrl: bankConnections.logoUrl,
       },
-      tags: sql<
-        Array<{ id: string; name: string | null }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tags.id}, 'name', ${tags.name})) FILTER (WHERE ${tags.id} IS NOT NULL), '[]'::json)`.as(
-        "tags",
-      ),
+      tags: sql<Array<{ id: string; name: string | null }>>`COALESCE((
+        SELECT json_agg(jsonb_build_object('id', t.id, 'name', t.name))
+        FROM ${transactionTags} tt
+        INNER JOIN ${tags} t ON t.id = tt.tag_id
+        WHERE tt.transaction_id = ${transactions.id} AND tt.team_id = ${params.teamId}
+      ), '[]'::json)`.as("tags"),
       attachments: sql<
         Array<{
           id: string;
@@ -877,9 +832,11 @@ export async function getTransactionById(
           type: string;
           size: number;
         }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionAttachments.id}, 'filename', ${transactionAttachments.name}, 'path', ${transactionAttachments.path}, 'type', ${transactionAttachments.type}, 'size', ${transactionAttachments.size})) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
-        "attachments",
-      ),
+      >`COALESCE((
+        SELECT json_agg(jsonb_build_object('id', ta.id, 'filename', ta.name, 'path', ta.path, 'type', ta.type, 'size', ta.size))
+        FROM ${transactionAttachments} ta
+        WHERE ta.transaction_id = ${transactions.id} AND ta.team_id = ${params.teamId}
+      ), '[]'::json)`.as("attachments"),
     })
     .from(transactions)
     .leftJoin(
@@ -908,28 +865,6 @@ export async function getTransactionById(
       eq(bankAccounts.bankConnectionId, bankConnections.id),
     )
     .leftJoin(
-      // For transactionTags aggregation
-      transactionTags,
-      and(
-        eq(transactionTags.transactionId, transactions.id),
-        eq(transactionTags.teamId, params.teamId),
-      ),
-    )
-    .leftJoin(
-      // For transactionTags aggregation
-      tags,
-      and(eq(tags.id, transactionTags.tagId), eq(tags.teamId, params.teamId)),
-    )
-    .leftJoin(
-      // For attachments aggregation
-      transactionAttachments,
-      and(
-        eq(transactionAttachments.transactionId, transactions.id),
-        eq(transactionAttachments.teamId, params.teamId),
-      ),
-    )
-    .leftJoin(
-      // Get any pending suggestion
       transactionMatchSuggestions,
       and(
         eq(transactionMatchSuggestions.transactionId, transactions.id),
@@ -937,48 +872,12 @@ export async function getTransactionById(
         eq(transactionMatchSuggestions.status, "pending"),
       ),
     )
-    .leftJoin(
-      // For inbox details in suggestions
-      inbox,
-      eq(inbox.id, transactionMatchSuggestions.inboxId),
-    )
+    .leftJoin(inbox, eq(inbox.id, transactionMatchSuggestions.inboxId))
     .where(
       and(
         eq(transactions.id, params.id),
         eq(transactions.teamId, params.teamId),
       ),
-    )
-    .groupBy(
-      transactions.id,
-      users.id,
-      transactionCategories.id,
-      transactionCategories.name,
-      transactionCategories.color,
-      transactionCategories.slug,
-      transactionCategories.taxRate,
-      transactionCategories.taxType,
-      bankAccounts.id,
-      bankConnections.id,
-      transactions.date,
-      transactions.amount,
-      transactions.currency,
-      transactions.method,
-      transactions.status,
-      transactions.note,
-      transactions.manual,
-      transactions.internal,
-      transactions.recurring,
-      transactions.frequency,
-      transactions.name,
-      transactions.description,
-      transactions.createdAt,
-      transactionMatchSuggestions.id,
-      transactionMatchSuggestions.inboxId,
-      transactionMatchSuggestions.confidenceScore,
-      inbox.displayName,
-      inbox.amount,
-      inbox.currency,
-      inbox.filePath,
     )
     .limit(1);
 
@@ -1115,7 +1014,7 @@ export async function getSimilarTransactions(
   // Path A: exact merchant_name match (handles "AMZN MKTP US" ↔ "Amazon.com" via enrichment)
   // Path B: trigram similarity on name/merchant fields
   const candidateConditions: SQL[] = [
-    sql`word_similarity(${name}, COALESCE(${transactions.merchantName}, ${transactions.name})) > ${TRGM_CANDIDATE_THRESHOLD}`,
+    sql`(${name} %> ${transactions.name} OR ${name} %> ${transactions.merchantName})`,
   ];
 
   if (sourceMerchantName) {
@@ -1123,7 +1022,7 @@ export async function getSimilarTransactions(
       sql`LOWER(${transactions.merchantName}) = LOWER(${sourceMerchantName})`,
     );
     candidateConditions.push(
-      sql`word_similarity(${sourceMerchantName}, COALESCE(${transactions.merchantName}, ${transactions.name})) > ${TRGM_CANDIDATE_THRESHOLD}`,
+      sql`(${sourceMerchantName} %> ${transactions.name} OR ${sourceMerchantName} %> ${transactions.merchantName})`,
     );
   }
 
@@ -1145,26 +1044,31 @@ export async function getSimilarTransactions(
     );
   }
 
-  const candidates = await db
-    .select({
-      id: transactions.id,
-      amount: transactions.amount,
-      teamId: transactions.teamId,
-      name: transactions.name,
-      date: transactions.date,
-      categorySlug: transactions.categorySlug,
-      frequency: transactions.frequency,
-      merchantName: transactions.merchantName,
-    })
-    .from(transactions)
-    .where(and(...(whereConditions.filter(Boolean) as SQL[])))
-    .orderBy(
-      sql`GREATEST(
-        word_similarity(${name}, COALESCE(${transactions.merchantName}, ${transactions.name})),
-        word_similarity(${name}, ${transactions.name})
-      ) DESC`,
-    )
-    .limit(MAX_CANDIDATES);
+  const candidates = await db.transaction(async (tx) => {
+    await tx.execute(
+      sql`SET LOCAL pg_trgm.word_similarity_threshold = ${TRGM_CANDIDATE_THRESHOLD}`,
+    );
+    return tx
+      .select({
+        id: transactions.id,
+        amount: transactions.amount,
+        teamId: transactions.teamId,
+        name: transactions.name,
+        date: transactions.date,
+        categorySlug: transactions.categorySlug,
+        frequency: transactions.frequency,
+        merchantName: transactions.merchantName,
+      })
+      .from(transactions)
+      .where(and(...(whereConditions.filter(Boolean) as SQL[])))
+      .orderBy(
+        sql`GREATEST(
+          word_similarity(${name}, ${transactions.merchantName}),
+          word_similarity(${name}, ${transactions.name})
+        ) DESC`,
+      )
+      .limit(MAX_CANDIDATES);
+  });
 
   // Score each candidate using a cross-field comparison matrix
   const scored = candidates
@@ -1292,58 +1196,63 @@ export async function searchTransactionMatch(
       const inboxAmount = Math.abs(item.amount || 0);
       const inboxBaseAmount = Math.abs(item.baseAmount || 0);
 
-      const candidateTransactions = await db
-        .select({
-          transactionId: transactions.id,
-          name: transactions.name,
-          transactionAmount: transactions.amount,
-          transactionCurrency: transactions.currency,
-          transactionDate: transactions.date,
-          baseAmount: transactions.baseAmount,
-          baseCurrency: transactions.baseCurrency,
-          isAlreadyMatched: sql<boolean>`
-            (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')
-          `.as("is_already_matched"),
-          attachmentFilename: sql<string | null>`
-            (SELECT ${transactionAttachments.name} FROM ${transactionAttachments} 
-             WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)} 
-             LIMIT 1)
-          `.as("attachment_filename"),
-          merchantName: transactions.merchantName,
-        })
-        .from(transactions)
-        .where(
-          and(
-            eq(transactions.teamId, teamId),
-            eq(transactions.status, "posted"),
-            sql`${transactions.date} IS NOT NULL`,
-            sql`${transactions.date} BETWEEN ${item.date}::date - INTERVAL '90 days' AND ${item.date}::date + INTERVAL '30 days'`,
-            ...(includeAlreadyMatched
-              ? []
-              : [
-                  sql`NOT (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
-                ]),
-            or(
-              and(
-                eq(transactions.currency, item.currency ?? ""),
-                sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) < GREATEST(1, ${inboxAmount} * 0.25)`,
-              ),
-              sql`word_similarity(${item.displayName ?? ""}, COALESCE(${transactions.merchantName}, ${transactions.name})) > 0.3`,
-              and(
-                sql`${transactions.baseCurrency} IS NOT NULL`,
-                sql`${item.baseCurrency ?? ""} != ''`,
-                eq(transactions.baseCurrency, item.baseCurrency ?? ""),
-                sql`ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ${inboxBaseAmount}) < GREATEST(50, ${inboxBaseAmount} * 0.15)`,
+      const candidateTransactions = await db.transaction(async (tx) => {
+        await tx.execute(
+          sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`,
+        );
+        return tx
+          .select({
+            transactionId: transactions.id,
+            name: transactions.name,
+            transactionAmount: transactions.amount,
+            transactionCurrency: transactions.currency,
+            transactionDate: transactions.date,
+            baseAmount: transactions.baseAmount,
+            baseCurrency: transactions.baseCurrency,
+            isAlreadyMatched: sql<boolean>`
+              (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')
+            `.as("is_already_matched"),
+            attachmentFilename: sql<string | null>`
+              (SELECT ${transactionAttachments.name} FROM ${transactionAttachments} 
+               WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)} 
+               LIMIT 1)
+            `.as("attachment_filename"),
+            merchantName: transactions.merchantName,
+          })
+          .from(transactions)
+          .where(
+            and(
+              eq(transactions.teamId, teamId),
+              eq(transactions.status, "posted"),
+              sql`${transactions.date} IS NOT NULL`,
+              sql`${transactions.date} BETWEEN ${item.date}::date - INTERVAL '90 days' AND ${item.date}::date + INTERVAL '30 days'`,
+              ...(includeAlreadyMatched
+                ? []
+                : [
+                    sql`NOT (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
+                  ]),
+              or(
+                and(
+                  eq(transactions.currency, item.currency ?? ""),
+                  sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) < GREATEST(1, ${inboxAmount} * 0.25)`,
+                ),
+                sql`(${item.displayName ?? ""} %> ${transactions.name} OR ${item.displayName ?? ""} %> ${transactions.merchantName})`,
+                and(
+                  sql`${transactions.baseCurrency} IS NOT NULL`,
+                  sql`${item.baseCurrency ?? ""} != ''`,
+                  eq(transactions.baseCurrency, item.baseCurrency ?? ""),
+                  sql`ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ${inboxBaseAmount}) < GREATEST(50, ${inboxBaseAmount} * 0.15)`,
+                ),
               ),
             ),
-          ),
-        )
-        .orderBy(
-          sql`word_similarity(${item.displayName ?? ""}, COALESCE(${transactions.merchantName}, ${transactions.name})) DESC`,
-          sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) / GREATEST(1.0, ${inboxAmount})`,
-          sql`ABS(${transactions.date} - ${item.date}::date)`,
-        )
-        .limit(Math.max(maxResults * 3, 30));
+          )
+          .orderBy(
+            sql`GREATEST(word_similarity(${item.displayName ?? ""}, ${transactions.name}), word_similarity(${item.displayName ?? ""}, ${transactions.merchantName})) DESC`,
+            sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) / GREATEST(1.0, ${inboxAmount})`,
+            sql`ABS(${transactions.date} - ${item.date}::date)`,
+          )
+          .limit(Math.max(maxResults * 3, 30));
+      });
 
       const scoredResults = candidateTransactions
         .map((transaction) => {
@@ -1574,9 +1483,11 @@ export async function getTransactionsByIds(
           type: string | null;
           size: number | null;
         }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionAttachments.id}, 'name', ${transactionAttachments.name}, 'path', ${transactionAttachments.path}, 'type', ${transactionAttachments.type}, 'size', ${transactionAttachments.size})) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
-        "attachments",
-      ),
+      >`COALESCE((
+        SELECT json_agg(jsonb_build_object('id', ta.id, 'name', ta.name, 'path', ta.path, 'type', ta.type, 'size', ta.size))
+        FROM ${transactionAttachments} ta
+        WHERE ta.transaction_id = ${transactions.id} AND ta.team_id = ${teamId}
+      ), '[]'::json)`.as("attachments"),
       category: sql<{
         id: string;
         name: string | null;
@@ -1595,9 +1506,12 @@ export async function getTransactionsByIds(
       ),
       tags: sql<
         Array<{ id: string; tag: { id: string; name: string | null } }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionTags.id}, 'tag', jsonb_build_object('id', ${tags.id}, 'name', ${tags.name}))) FILTER (WHERE ${transactionTags.id} IS NOT NULL), '[]'::json)`.as(
-        "tags",
-      ),
+      >`COALESCE((
+        SELECT json_agg(jsonb_build_object('id', tt.id, 'tag', jsonb_build_object('id', t.id, 'name', t.name)))
+        FROM ${transactionTags} tt
+        INNER JOIN ${tags} t ON t.id = tt.tag_id
+        WHERE tt.transaction_id = ${transactions.id} AND tt.team_id = ${teamId}
+      ), '[]'::json)`.as("tags"),
     })
     .from(transactions)
     .leftJoin(
@@ -1614,36 +1528,7 @@ export async function getTransactionsByIds(
         eq(bankAccounts.teamId, teamId),
       ),
     )
-    .leftJoin(
-      transactionTags,
-      and(
-        eq(transactionTags.transactionId, transactions.id),
-        eq(transactionTags.teamId, teamId),
-      ),
-    )
-    .leftJoin(
-      tags,
-      and(eq(tags.id, transactionTags.tagId), eq(tags.teamId, teamId)),
-    )
-    .leftJoin(
-      transactionAttachments,
-      and(
-        eq(transactionAttachments.transactionId, transactions.id),
-        eq(transactionAttachments.teamId, teamId),
-      ),
-    )
-    .where(and(inArray(transactions.id, ids), eq(transactions.teamId, teamId)))
-    .groupBy(
-      transactions.id,
-      transactionCategories.id,
-      transactionCategories.name,
-      transactionCategories.description,
-      transactionCategories.taxRate,
-      transactionCategories.taxType,
-      transactionCategories.taxReportingCode,
-      bankAccounts.id,
-      bankAccounts.name,
-    );
+    .where(and(inArray(transactions.id, ids), eq(transactions.teamId, teamId)));
 
   return results;
 }

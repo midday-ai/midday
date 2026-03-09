@@ -859,55 +859,60 @@ export async function getInboxSearch(
         const unifiedTransactionBaseAmount = Math.abs(
           transaction.baseAmount || 0,
         );
-        const unifiedCandidates = await db
-          .select({
-            id: inbox.id,
-            createdAt: inbox.createdAt,
-            fileName: inbox.fileName,
-            amount: inbox.amount,
-            currency: inbox.currency,
-            filePath: inbox.filePath,
-            contentType: inbox.contentType,
-            date: inbox.date,
-            displayName: inbox.displayName,
-            size: inbox.size,
-            description: inbox.description,
-            baseAmount: inbox.baseAmount,
-            baseCurrency: inbox.baseCurrency,
-            status: inbox.status,
-            type: inbox.type,
-            website: inbox.website,
-            taxAmount: inbox.taxAmount,
-            taxRate: inbox.taxRate,
-            taxType: inbox.taxType,
-          })
-          .from(inbox)
-          .where(
-            and(
-              ...whereConditions,
-              sql`${inbox.date} IS NOT NULL`,
-              sql`${inbox.date} BETWEEN (${sql.param(transaction.date)}::date - INTERVAL '123 days') 
-                  AND (${sql.param(transaction.date)}::date + INTERVAL '30 days')`,
-              or(
-                and(
-                  eq(inbox.currency, transaction.currency || ""),
-                  sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) < GREATEST(1, ${unifiedTransactionAmount} * 0.25)`,
-                ),
-                sql`word_similarity(${transaction.merchantName || transaction.name}, COALESCE(${inbox.displayName}, '')) > 0.3`,
-                and(
-                  eq(inbox.baseCurrency, transaction.baseCurrency || ""),
-                  sql`${inbox.baseCurrency} IS NOT NULL`,
-                  sql`ABS(ABS(COALESCE(${inbox.baseAmount}, 0)) - ${unifiedTransactionBaseAmount}) < GREATEST(50, ${unifiedTransactionBaseAmount} * 0.15)`,
+        const unifiedCandidates = await db.transaction(async (tx) => {
+          await tx.execute(
+            sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`,
+          );
+          return tx
+            .select({
+              id: inbox.id,
+              createdAt: inbox.createdAt,
+              fileName: inbox.fileName,
+              amount: inbox.amount,
+              currency: inbox.currency,
+              filePath: inbox.filePath,
+              contentType: inbox.contentType,
+              date: inbox.date,
+              displayName: inbox.displayName,
+              size: inbox.size,
+              description: inbox.description,
+              baseAmount: inbox.baseAmount,
+              baseCurrency: inbox.baseCurrency,
+              status: inbox.status,
+              type: inbox.type,
+              website: inbox.website,
+              taxAmount: inbox.taxAmount,
+              taxRate: inbox.taxRate,
+              taxType: inbox.taxType,
+            })
+            .from(inbox)
+            .where(
+              and(
+                ...whereConditions,
+                sql`${inbox.date} IS NOT NULL`,
+                sql`${inbox.date} BETWEEN (${sql.param(transaction.date)}::date - INTERVAL '123 days') 
+                    AND (${sql.param(transaction.date)}::date + INTERVAL '30 days')`,
+                or(
+                  and(
+                    eq(inbox.currency, transaction.currency || ""),
+                    sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) < GREATEST(1, ${unifiedTransactionAmount} * 0.25)`,
+                  ),
+                  sql`(${transaction.merchantName || transaction.name} %> ${inbox.displayName})`,
+                  and(
+                    eq(inbox.baseCurrency, transaction.baseCurrency || ""),
+                    sql`${inbox.baseCurrency} IS NOT NULL`,
+                    sql`ABS(ABS(COALESCE(${inbox.baseAmount}, 0)) - ${unifiedTransactionBaseAmount}) < GREATEST(50, ${unifiedTransactionBaseAmount} * 0.15)`,
+                  ),
                 ),
               ),
-            ),
-          )
-          .orderBy(
-            sql`word_similarity(${transaction.merchantName || transaction.name}, COALESCE(${inbox.displayName}, '')) DESC`,
-            sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) / GREATEST(1.0, ${unifiedTransactionAmount})`,
-            sql`ABS(${inbox.date} - ${sql.param(transaction.date)}::date)`,
-          )
-          .limit(Math.max(limit * 3, 30));
+            )
+            .orderBy(
+              sql`word_similarity(${transaction.merchantName || transaction.name}, ${inbox.displayName}) DESC`,
+              sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) / GREATEST(1.0, ${unifiedTransactionAmount})`,
+              sql`ABS(${inbox.date} - ${sql.param(transaction.date)}::date)`,
+            )
+            .limit(Math.max(limit * 3, 30));
+        });
 
         const unifiedScored = unifiedCandidates
           .map((candidate) => {

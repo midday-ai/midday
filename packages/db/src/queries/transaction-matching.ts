@@ -642,77 +642,83 @@ export async function findMatches(
   const inboxAmount = Math.abs(inboxItem.amount || 0);
   const inboxBaseAmount = Math.abs(inboxItem.baseAmount || 0);
 
-  const candidates = await db
-    .select({
-      transactionId: transactions.id,
-      name: transactions.name,
-      amount: transactions.amount,
-      currency: transactions.currency,
-      baseAmount: transactions.baseAmount,
-      baseCurrency: transactions.baseCurrency,
-      date: transactions.date,
-      merchantName: transactions.merchantName,
-      description: transactions.description,
-      counterpartyName: transactions.counterpartyName,
-    })
-    .from(transactions)
-    .where(
-      and(
-        eq(transactions.teamId, teamId),
-        eq(transactions.status, "posted"),
-        sql`${transactions.date} IS NOT NULL`,
-        inboxItem.type === "invoice"
-          ? sql`${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '90 days' AND ${sql.param(inboxItem.date)}::date + INTERVAL '123 days'`
-          : sql`${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '90 days' AND ${sql.param(inboxItem.date)}::date + INTERVAL '30 days'`,
-        notExists(
-          db
-            .select({ id: transactionAttachments.id })
-            .from(transactionAttachments)
-            .where(
-              and(
-                eq(transactionAttachments.transactionId, transactions.id),
-                eq(transactionAttachments.teamId, teamId),
+  const candidates = await db.transaction(async (tx) => {
+    await tx.execute(sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`);
+    return tx
+      .select({
+        transactionId: transactions.id,
+        name: transactions.name,
+        amount: transactions.amount,
+        currency: transactions.currency,
+        baseAmount: transactions.baseAmount,
+        baseCurrency: transactions.baseCurrency,
+        date: transactions.date,
+        merchantName: transactions.merchantName,
+        description: transactions.description,
+        counterpartyName: transactions.counterpartyName,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.status, "posted"),
+          sql`${transactions.date} IS NOT NULL`,
+          inboxItem.type === "invoice"
+            ? sql`${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '90 days' AND ${sql.param(inboxItem.date)}::date + INTERVAL '123 days'`
+            : sql`${transactions.date} BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '90 days' AND ${sql.param(inboxItem.date)}::date + INTERVAL '30 days'`,
+          notExists(
+            tx
+              .select({ id: transactionAttachments.id })
+              .from(transactionAttachments)
+              .where(
+                and(
+                  eq(transactionAttachments.transactionId, transactions.id),
+                  eq(transactionAttachments.teamId, teamId),
+                ),
               ),
-            ),
-        ),
-        notExists(
-          db
-            .select({ id: transactionMatchSuggestions.id })
-            .from(transactionMatchSuggestions)
-            .where(
-              and(
-                eq(transactionMatchSuggestions.transactionId, transactions.id),
-                eq(transactionMatchSuggestions.teamId, teamId),
-                eq(transactionMatchSuggestions.status, "pending"),
+          ),
+          notExists(
+            tx
+              .select({ id: transactionMatchSuggestions.id })
+              .from(transactionMatchSuggestions)
+              .where(
+                and(
+                  eq(
+                    transactionMatchSuggestions.transactionId,
+                    transactions.id,
+                  ),
+                  eq(transactionMatchSuggestions.teamId, teamId),
+                  eq(transactionMatchSuggestions.status, "pending"),
+                ),
               ),
+          ),
+          or(
+            and(
+              eq(transactions.currency, inboxItem.currency || ""),
+              sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) < GREATEST(1, ${inboxAmount} * 0.25)`,
             ),
-        ),
-        or(
-          and(
-            eq(transactions.currency, inboxItem.currency || ""),
-            sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) < GREATEST(1, ${inboxAmount} * 0.25)`,
+            sql`(${inboxItem.displayName || ""} %> ${transactions.name} OR ${inboxItem.displayName || ""} %> ${transactions.merchantName})`,
+            and(
+              eq(transactions.baseCurrency, inboxItem.baseCurrency || ""),
+              sql`${transactions.baseCurrency} IS NOT NULL`,
+              sql`ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ${inboxBaseAmount}) < GREATEST(50, ${inboxBaseAmount} * 0.15)`,
+            ),
           ),
-          sql`word_similarity(${inboxItem.displayName || ""}, COALESCE(${transactions.merchantName}, ${transactions.name})) > 0.3`,
-          and(
-            eq(transactions.baseCurrency, inboxItem.baseCurrency || ""),
-            sql`${transactions.baseCurrency} IS NOT NULL`,
-            sql`ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ${inboxBaseAmount}) < GREATEST(50, ${inboxBaseAmount} * 0.15)`,
-          ),
+          excludeTransactionIds && excludeTransactionIds.size > 0
+            ? sql`${transactions.id} NOT IN (${sql.join(
+                [...excludeTransactionIds].map((id) => sql.param(id)),
+                sql`, `,
+              )})`
+            : undefined,
         ),
-        excludeTransactionIds && excludeTransactionIds.size > 0
-          ? sql`${transactions.id} NOT IN (${sql.join(
-              [...excludeTransactionIds].map((id) => sql.param(id)),
-              sql`, `,
-            )})`
-          : undefined,
-      ),
-    )
-    .orderBy(
-      sql`word_similarity(${inboxItem.displayName || ""}, COALESCE(${transactions.merchantName}, ${transactions.name})) DESC`,
-      sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) / GREATEST(1.0, ${inboxAmount})`,
-      sql`ABS(${transactions.date} - ${sql.param(inboxItem.date)}::date)`,
-    )
-    .limit(30);
+      )
+      .orderBy(
+        sql`GREATEST(word_similarity(${inboxItem.displayName || ""}, ${transactions.name}), word_similarity(${inboxItem.displayName || ""}, ${transactions.merchantName})) DESC`,
+        sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) / GREATEST(1.0, ${inboxAmount})`,
+        sql`ABS(${transactions.date} - ${sql.param(inboxItem.date)}::date)`,
+      )
+      .limit(30);
+  });
 
   const teamPairHistory = await fetchTeamPairHistory(db, teamId);
 
@@ -873,53 +879,56 @@ export async function findInboxMatches(
   const transactionAmount = Math.abs(transactionItem.amount || 0);
   const transactionBaseAmount = Math.abs(transactionItem.baseAmount || 0);
 
-  const candidates = await db
-    .select({
-      inboxId: inbox.id,
-      displayName: inbox.displayName,
-      amount: inbox.amount,
-      currency: inbox.currency,
-      baseAmount: inbox.baseAmount,
-      baseCurrency: inbox.baseCurrency,
-      date: inbox.date,
-      type: inbox.type,
-      website: inbox.website,
-      invoiceNumber: inbox.invoiceNumber,
-    })
-    .from(inbox)
-    .where(
-      and(
-        eq(inbox.teamId, teamId),
-        isNull(inbox.transactionId),
-        inArray(inbox.status, ["pending", "no_match"]),
-        sql`${inbox.date} IS NOT NULL`,
-        sql`${inbox.date} BETWEEN ${sql.param(transactionItem.date)}::date - (CASE WHEN ${inbox.type} = 'invoice' THEN INTERVAL '123 days' ELSE INTERVAL '90 days' END) AND ${sql.param(transactionItem.date)}::date + INTERVAL '30 days'`,
-        or(
-          and(
-            eq(inbox.currency, transactionItem.currency || ""),
-            sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${transactionAmount}) < GREATEST(1, ${transactionAmount} * 0.25)`,
+  const candidates = await db.transaction(async (tx) => {
+    await tx.execute(sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`);
+    return tx
+      .select({
+        inboxId: inbox.id,
+        displayName: inbox.displayName,
+        amount: inbox.amount,
+        currency: inbox.currency,
+        baseAmount: inbox.baseAmount,
+        baseCurrency: inbox.baseCurrency,
+        date: inbox.date,
+        type: inbox.type,
+        website: inbox.website,
+        invoiceNumber: inbox.invoiceNumber,
+      })
+      .from(inbox)
+      .where(
+        and(
+          eq(inbox.teamId, teamId),
+          isNull(inbox.transactionId),
+          inArray(inbox.status, ["pending", "no_match"]),
+          sql`${inbox.date} IS NOT NULL`,
+          sql`${inbox.date} BETWEEN ${sql.param(transactionItem.date)}::date - (CASE WHEN ${inbox.type} = 'invoice' THEN INTERVAL '123 days' ELSE INTERVAL '90 days' END) AND ${sql.param(transactionItem.date)}::date + INTERVAL '30 days'`,
+          or(
+            and(
+              eq(inbox.currency, transactionItem.currency || ""),
+              sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${transactionAmount}) < GREATEST(1, ${transactionAmount} * 0.25)`,
+            ),
+            sql`(${transactionItem.merchantName || transactionItem.name} %> ${inbox.displayName})`,
+            and(
+              eq(inbox.baseCurrency, transactionItem.baseCurrency || ""),
+              sql`${inbox.baseCurrency} IS NOT NULL`,
+              sql`ABS(ABS(COALESCE(${inbox.baseAmount}, 0)) - ${transactionBaseAmount}) < GREATEST(50, ${transactionBaseAmount} * 0.15)`,
+            ),
           ),
-          sql`word_similarity(${transactionItem.merchantName || transactionItem.name}, COALESCE(${inbox.displayName}, '')) > 0.3`,
-          and(
-            eq(inbox.baseCurrency, transactionItem.baseCurrency || ""),
-            sql`${inbox.baseCurrency} IS NOT NULL`,
-            sql`ABS(ABS(COALESCE(${inbox.baseAmount}, 0)) - ${transactionBaseAmount}) < GREATEST(50, ${transactionBaseAmount} * 0.15)`,
-          ),
+          excludeInboxIds && excludeInboxIds.size > 0
+            ? sql`${inbox.id} NOT IN (${sql.join(
+                [...excludeInboxIds].map((id) => sql.param(id)),
+                sql`, `,
+              )})`
+            : undefined,
         ),
-        excludeInboxIds && excludeInboxIds.size > 0
-          ? sql`${inbox.id} NOT IN (${sql.join(
-              [...excludeInboxIds].map((id) => sql.param(id)),
-              sql`, `,
-            )})`
-          : undefined,
-      ),
-    )
-    .orderBy(
-      sql`word_similarity(${transactionItem.merchantName || transactionItem.name}, COALESCE(${inbox.displayName}, '')) DESC`,
-      sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${transactionAmount}) / GREATEST(1.0, ${transactionAmount})`,
-      sql`ABS(${inbox.date} - ${sql.param(transactionItem.date)}::date)`,
-    )
-    .limit(30);
+      )
+      .orderBy(
+        sql`word_similarity(${transactionItem.merchantName || transactionItem.name}, ${inbox.displayName}) DESC`,
+        sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${transactionAmount}) / GREATEST(1.0, ${transactionAmount})`,
+        sql`ABS(${inbox.date} - ${sql.param(transactionItem.date)}::date)`,
+      )
+      .limit(30);
+  });
 
   const teamPairHistory = await fetchTeamPairHistory(db, teamId);
 
