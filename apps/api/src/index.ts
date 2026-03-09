@@ -4,7 +4,7 @@ import "./instrument";
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { closeSharedRedisClient } from "@midday/cache/shared-redis";
-import { closeDb, getPoolStats } from "@midday/db/client";
+import { closeDb, db, getPoolStats } from "@midday/db/client";
 import {
   buildDependenciesResponse,
   buildReadinessResponse,
@@ -14,6 +14,7 @@ import { apiDependencies } from "@midday/health/probes";
 import { createLoggerWithContext, logger } from "@midday/logger";
 import { Scalar } from "@scalar/hono-api-reference";
 import * as Sentry from "@sentry/bun";
+import { sql } from "drizzle-orm";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { routers } from "./rest/routers";
@@ -65,16 +66,25 @@ app.use(
   }),
 );
 
-if (process.env.DEBUG_PERF === "true") {
-  const perfLogger = createLoggerWithContext("perf:trpc");
+// Always emit Server-Timing so the browser Network tab shows server-side duration.
+// When DEBUG_PERF is on, also log structured details to stdout.
+const debugPerf = process.env.DEBUG_PERF === "true";
+const perfLoggerHono = debugPerf ? createLoggerWithContext("perf:trpc") : null;
 
-  app.use("/trpc/*", async (c, next) => {
-    const start = performance.now();
+app.use("/trpc/*", async (c, next) => {
+  const start = performance.now();
+  await next();
+  const elapsed = performance.now() - start;
+  const procedures = c.req.path.replace("/trpc/", "").split(",");
+
+  c.header(
+    "Server-Timing",
+    `total;dur=${elapsed.toFixed(1)},procedures;desc="${procedures.join(",")}"`,
+  );
+
+  if (perfLoggerHono) {
     const { requestId, cfRay } = getRequestTrace(c.req);
-    await next();
-    const elapsed = performance.now() - start;
-    const procedures = c.req.path.replace("/trpc/", "").split(",");
-    perfLogger.info("request", {
+    perfLoggerHono.info("request", {
       totalMs: +elapsed.toFixed(2),
       procedureCount: procedures.length,
       procedures,
@@ -83,12 +93,8 @@ if (process.env.DEBUG_PERF === "true") {
       requestId,
       cfRay,
     });
-    c.header(
-      "Server-Timing",
-      `total;dur=${elapsed.toFixed(1)},procedures;desc="${procedures.join(",")}"`,
-    );
-  });
-}
+  }
+});
 
 app.use(
   "/trpc/*",
@@ -130,46 +136,95 @@ app.get("/health", (c) => {
   return c.json({ status: "ok" }, 200);
 });
 
-app.get("/health/latency", async (c) => {
-  const privateDomain = process.env.RAILWAY_PRIVATE_DOMAIN;
-  const port = process.env.PORT || "8080";
+app.get("/health/diagnose", async (c) => {
+  const { Pool: DiagPool } = await import("pg");
+  const totalStart = performance.now();
+  const timings: Record<string, number> = {};
+
   const region =
     process.env.RAILWAY_REGION ||
     process.env.RAILWAY_REPLICA_REGION ||
     "unknown";
 
-  const results: Record<string, unknown> = { region };
+  // 1. Pool stats (no I/O)
+  const poolStats = getPoolStats();
 
-  if (privateDomain) {
-    const internalUrl = `http://${privateDomain}:${port}/health`;
-    const start = performance.now();
-    try {
-      const res = await fetch(internalUrl);
-      await res.json();
-      results.internalMs = +(performance.now() - start).toFixed(2);
-      results.internalUrl = internalUrl;
-    } catch (err) {
-      results.internalMs = +(performance.now() - start).toFixed(2);
-      results.internalError = String(err);
-    }
-  } else {
-    results.internalMs = null;
-    results.note = "No RAILWAY_PRIVATE_DOMAIN set";
-  }
-
-  const publicUrl = `https://${process.env.RAILWAY_PUBLIC_DOMAIN || process.env.RAILWAY_STATIC_URL}/health`;
-  const pubStart = performance.now();
+  // 2. Acquire connection from existing pool + run SELECT 1
+  const poolStart = performance.now();
   try {
-    const res = await fetch(publicUrl);
-    await res.json();
-    results.externalMs = +(performance.now() - pubStart).toFixed(2);
-    results.externalUrl = publicUrl;
-  } catch (err) {
-    results.externalMs = +(performance.now() - pubStart).toFixed(2);
-    results.externalError = String(err);
+    await db.execute(sql`SELECT 1 as ok`);
+    timings.pooledQueryMs = +(performance.now() - poolStart).toFixed(2);
+  } catch {
+    timings.pooledQueryMs = +(performance.now() - poolStart).toFixed(2);
+    timings.pooledQueryError = -1;
   }
 
-  return c.json(results, 200);
+  // 3. Fresh TCP connection to pooler (measures connect + auth + query)
+  const freshStart = performance.now();
+  try {
+    const freshPool = new DiagPool({
+      connectionString: process.env.DATABASE_PRIMARY_URL!,
+      max: 1,
+      connectionTimeoutMillis: 5000,
+      ssl:
+        process.env.NODE_ENV === "development"
+          ? false
+          : { rejectUnauthorized: false },
+    });
+    const client = await freshPool.connect();
+    timings.freshConnectMs = +(performance.now() - freshStart).toFixed(2);
+    const queryStart = performance.now();
+    await client.query("SELECT 1");
+    timings.freshQueryMs = +(performance.now() - queryStart).toFixed(2);
+    client.release();
+    await freshPool.end();
+  } catch {
+    timings.freshConnectMs = +(performance.now() - freshStart).toFixed(2);
+    timings.freshConnectError = -1;
+  }
+
+  // 4. Supabase REST API (tests HTTP path to Supabase)
+  const supaStart = performance.now();
+  try {
+    const res = await fetch(
+      `${process.env.SUPABASE_URL}/auth/v1/.well-known/jwks.json`,
+    );
+    await res.json();
+    timings.supabaseJwksMs = +(performance.now() - supaStart).toFixed(2);
+  } catch {
+    timings.supabaseJwksMs = +(performance.now() - supaStart).toFixed(2);
+    timings.supabaseJwksError = -1;
+  }
+
+  // 5. Internal networking (Railway private domain)
+  const privateDomain = process.env.RAILWAY_PRIVATE_DOMAIN;
+  if (privateDomain) {
+    const port = process.env.PORT || "8080";
+    const intStart = performance.now();
+    try {
+      const res = await fetch(`http://${privateDomain}:${port}/health`);
+      await res.json();
+      timings.internalNetworkMs = +(performance.now() - intStart).toFixed(2);
+    } catch {
+      timings.internalNetworkMs = +(performance.now() - intStart).toFixed(2);
+      timings.internalNetworkError = -1;
+    }
+  }
+
+  // 6. A real-ish query: count with index scan
+  const realStart = performance.now();
+  try {
+    await db.execute(
+      sql`SELECT count(*) FROM transactions WHERE team_id = '00000000-0000-0000-0000-000000000000'`,
+    );
+    timings.indexedCountMs = +(performance.now() - realStart).toFixed(2);
+  } catch {
+    timings.indexedCountMs = +(performance.now() - realStart).toFixed(2);
+  }
+
+  timings.totalMs = +(performance.now() - totalStart).toFixed(2);
+
+  return c.json({ region, pool: poolStats, timings }, 200);
 });
 
 app.get("/health/ready", async (c) => {
