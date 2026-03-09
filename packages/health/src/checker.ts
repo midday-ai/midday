@@ -21,16 +21,15 @@ const resultCache = new Map<
 async function runProbe(dep: Dependency): Promise<DependencyResult> {
   const start = performance.now();
 
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
   try {
-    const result = await Promise.race([
-      dep.probe(),
-      new Promise<never>((_, reject) =>
-        setTimeout(
-          () => reject(new Error(`Probe timed out after ${dep.timeoutMs}ms`)),
-          dep.timeoutMs,
-        ),
-      ),
-    ]);
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(
+        () => reject(new Error(`Probe timed out after ${dep.timeoutMs}ms`)),
+        dep.timeoutMs,
+      );
+    });
+    const result = await Promise.race([dep.probe(), timeoutPromise]);
 
     return {
       name: dep.name,
@@ -48,6 +47,8 @@ async function runProbe(dep: Dependency): Promise<DependencyResult> {
       lastChecked: new Date().toISOString(),
       error: error instanceof Error ? error.message : String(error),
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 

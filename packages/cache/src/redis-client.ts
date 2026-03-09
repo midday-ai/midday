@@ -7,19 +7,24 @@ const COMMAND_TIMEOUT_MS = 1_500;
 
 const SLOW_COMMAND_MS = 50;
 
-function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(
-        () =>
-          reject(
-            new Error(`Redis ${label} timed out after ${COMMAND_TIMEOUT_MS}ms`),
-          ),
-        COMMAND_TIMEOUT_MS,
-      ),
-    ),
-  ]);
+async function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(
+      () =>
+        reject(
+          new Error(`Redis ${label} timed out after ${COMMAND_TIMEOUT_MS}ms`),
+        ),
+      COMMAND_TIMEOUT_MS,
+    );
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export class RedisCache {

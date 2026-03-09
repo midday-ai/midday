@@ -42,16 +42,20 @@ export async function updateSession(
   try {
     const { data, error } = await Promise.race([
       supabase.auth.getClaims(),
-      new Promise<never>((_, reject) =>
+      new Promise<{ data: null; error: Error }>((resolve) =>
         setTimeout(
-          () => reject(new Error("session refresh timeout")),
+          () =>
+            resolve({
+              data: null,
+              error: new Error("session refresh timeout"),
+            }),
           SESSION_REFRESH_TIMEOUT_MS,
         ),
       ),
     ]);
     isAuthenticated = !!data && !error;
   } catch {
-    // Timeout or refresh failure → treat as unauthenticated.
+    // getClaims() itself threw → treat as unauthenticated.
     // The middleware caller will redirect to /login.
   }
 
