@@ -137,7 +137,6 @@ app.get("/health", (c) => {
 });
 
 app.get("/health/diagnose", async (c) => {
-  const { Pool: DiagPool } = await import("pg");
   const totalStart = performance.now();
   const timings: Record<string, number> = {};
 
@@ -146,10 +145,9 @@ app.get("/health/diagnose", async (c) => {
     process.env.RAILWAY_REPLICA_REGION ||
     "unknown";
 
-  // 1. Pool stats (no I/O)
   const poolStats = getPoolStats();
 
-  // 2. Acquire connection from existing pool + run SELECT 1
+  // 1. Acquire connection from existing pool + run SELECT 1
   const poolStart = performance.now();
   try {
     await db.execute(sql`SELECT 1 as ok`);
@@ -159,44 +157,23 @@ app.get("/health/diagnose", async (c) => {
     timings.pooledQueryError = -1;
   }
 
-  // 3. Fresh TCP connection to pooler (measures connect + auth + query)
-  const freshStart = performance.now();
-  try {
-    const freshPool = new DiagPool({
-      connectionString: process.env.DATABASE_PRIMARY_URL!,
-      max: 1,
-      connectionTimeoutMillis: 5000,
-      ssl:
-        process.env.NODE_ENV === "development"
-          ? false
-          : { rejectUnauthorized: false },
-    });
-    const client = await freshPool.connect();
-    timings.freshConnectMs = +(performance.now() - freshStart).toFixed(2);
-    const queryStart = performance.now();
-    await client.query("SELECT 1");
-    timings.freshQueryMs = +(performance.now() - queryStart).toFixed(2);
-    client.release();
-    await freshPool.end();
-  } catch {
-    timings.freshConnectMs = +(performance.now() - freshStart).toFixed(2);
-    timings.freshConnectError = -1;
-  }
-
-  // 4. Supabase REST API (tests HTTP path to Supabase)
+  // 2. Supabase HTTP endpoint (tests network to Supabase)
   const supaStart = performance.now();
   try {
-    const res = await fetch(
-      `${process.env.SUPABASE_URL}/auth/v1/.well-known/jwks.json`,
-    );
-    await res.json();
+    const supaUrl = process.env.SUPABASE_URL;
+    if (supaUrl) {
+      const res = await fetch(
+        `${supaUrl}/auth/v1/.well-known/jwks.json`,
+      );
+      await res.json();
+    }
     timings.supabaseJwksMs = +(performance.now() - supaStart).toFixed(2);
   } catch {
     timings.supabaseJwksMs = +(performance.now() - supaStart).toFixed(2);
     timings.supabaseJwksError = -1;
   }
 
-  // 5. Internal networking (Railway private domain)
+  // 3. Internal networking (Railway private domain)
   const privateDomain = process.env.RAILWAY_PRIVATE_DOMAIN;
   if (privateDomain) {
     const port = process.env.PORT || "8080";
@@ -211,7 +188,7 @@ app.get("/health/diagnose", async (c) => {
     }
   }
 
-  // 6. A real-ish query: count with index scan
+  // 4. A real query: indexed count
   const realStart = performance.now();
   try {
     await db.execute(
