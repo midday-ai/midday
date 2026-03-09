@@ -29,6 +29,6 @@ export async function handleTransactionSlackNotifications(
   await sendSlackTransactionNotifications({
     teamId,
     transactions: slackTransactions,
-    supabase,
+    supabase: supabase as any,
   });
 }

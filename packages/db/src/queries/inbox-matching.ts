@@ -242,6 +242,15 @@ export async function confirmSuggestedMatch(
   const { teamId, suggestionId, inboxId, transactionId, userId } = params;
 
   return db.transaction(async (tx) => {
+    // Check if already matched (idempotent — skip activity + matchTransaction)
+    const [inboxState] = await tx
+      .select({ transactionId: inbox.transactionId })
+      .from(inbox)
+      .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
+      .limit(1);
+
+    const alreadyMatched = inboxState?.transactionId === transactionId;
+
     const [suggestion] = await tx
       .update(transactionMatchSuggestions)
       .set({
@@ -257,27 +266,31 @@ export async function confirmSuggestedMatch(
       )
       .returning();
 
-    const result = await matchTransaction(tx, {
-      id: inboxId,
-      transactionId,
-      teamId,
-    });
+    let result: Awaited<ReturnType<typeof matchTransaction>> = null;
 
-    await createActivity(tx, {
-      teamId,
-      userId: userId ?? undefined,
-      type: "inbox_match_confirmed",
-      source: "user",
-      priority: 7,
-      metadata: {
-        inboxId,
-        transactionId: result?.transactionId,
-        documentName: result?.displayName,
-        amount: result?.amount,
-        currency: result?.currency,
-        confidenceScore: Number(suggestion?.confidenceScore),
-      },
-    });
+    if (!alreadyMatched) {
+      result = await matchTransaction(tx, {
+        id: inboxId,
+        transactionId,
+        teamId,
+      });
+
+      await createActivity(tx, {
+        teamId,
+        userId: userId ?? undefined,
+        type: "inbox_match_confirmed",
+        source: "user",
+        priority: 7,
+        metadata: {
+          inboxId,
+          transactionId: result?.transactionId,
+          documentName: result?.displayName,
+          amount: result?.amount,
+          currency: result?.currency,
+          confidenceScore: Number(suggestion?.confidenceScore),
+        },
+      });
+    }
 
     // Confirm pending suggestions for inbox items that were matched as part
     // of this group — only where the inbox item now points to this transaction

@@ -1116,6 +1116,41 @@ export type MatchTransactionParams = {
   teamId: string;
 };
 
+async function fetchInboxWithTransaction(
+  db: DatabaseOrTransaction,
+  inboxId: string,
+  teamId: string,
+) {
+  const [data] = await db
+    .select({
+      id: inbox.id,
+      fileName: inbox.fileName,
+      filePath: inbox.filePath,
+      displayName: inbox.displayName,
+      transactionId: inbox.transactionId,
+      amount: inbox.amount,
+      currency: inbox.currency,
+      contentType: inbox.contentType,
+      date: inbox.date,
+      status: inbox.status,
+      createdAt: inbox.createdAt,
+      website: inbox.website,
+      description: inbox.description,
+      transaction: {
+        id: transactions.id,
+        amount: transactions.amount,
+        currency: transactions.currency,
+        name: transactions.name,
+        date: transactions.date,
+      },
+    })
+    .from(inbox)
+    .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
+    .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
+    .limit(1);
+  return data ?? null;
+}
+
 export async function matchTransaction(
   db: DatabaseOrTransaction,
   params: MatchTransactionParams,
@@ -1146,34 +1181,7 @@ export async function matchTransaction(
   // Check if inbox item is already matched to the same transaction (idempotent)
   if (result.transactionId) {
     if (result.transactionId === transactionId) {
-      const [existing] = await db
-        .select({
-          id: inbox.id,
-          fileName: inbox.fileName,
-          filePath: inbox.filePath,
-          displayName: inbox.displayName,
-          transactionId: inbox.transactionId,
-          amount: inbox.amount,
-          currency: inbox.currency,
-          contentType: inbox.contentType,
-          date: inbox.date,
-          status: inbox.status,
-          createdAt: inbox.createdAt,
-          website: inbox.website,
-          description: inbox.description,
-          transaction: {
-            id: transactions.id,
-            amount: transactions.amount,
-            currency: transactions.currency,
-            name: transactions.name,
-            date: transactions.date,
-          },
-        })
-        .from(inbox)
-        .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
-        .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
-        .limit(1);
-      return existing ?? null;
+      return fetchInboxWithTransaction(db, id, teamId);
     }
     throw new Error("Inbox item is already matched to a transaction");
   }
@@ -1210,34 +1218,7 @@ export async function matchTransaction(
   const alreadyMatched = relatedItems.find((item) => item.transactionId);
   if (alreadyMatched) {
     if (alreadyMatched.transactionId === transactionId) {
-      const [existing] = await db
-        .select({
-          id: inbox.id,
-          fileName: inbox.fileName,
-          filePath: inbox.filePath,
-          displayName: inbox.displayName,
-          transactionId: inbox.transactionId,
-          amount: inbox.amount,
-          currency: inbox.currency,
-          contentType: inbox.contentType,
-          date: inbox.date,
-          status: inbox.status,
-          createdAt: inbox.createdAt,
-          website: inbox.website,
-          description: inbox.description,
-          transaction: {
-            id: transactions.id,
-            amount: transactions.amount,
-            currency: transactions.currency,
-            name: transactions.name,
-            date: transactions.date,
-          },
-        })
-        .from(inbox)
-        .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
-        .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
-        .limit(1);
-      return existing ?? null;
+      return fetchInboxWithTransaction(db, id, teamId);
     }
     throw new Error("A related inbox item is already matched to a transaction");
   }
@@ -1326,36 +1307,7 @@ export async function matchTransaction(
     }
   }
 
-  // Return updated inbox with transaction data
-  const [data] = await db
-    .select({
-      id: inbox.id,
-      fileName: inbox.fileName,
-      filePath: inbox.filePath,
-      displayName: inbox.displayName,
-      transactionId: inbox.transactionId,
-      amount: inbox.amount,
-      currency: inbox.currency,
-      contentType: inbox.contentType,
-      date: inbox.date,
-      status: inbox.status,
-      createdAt: inbox.createdAt,
-      website: inbox.website,
-      description: inbox.description,
-      transaction: {
-        id: transactions.id,
-        amount: transactions.amount,
-        currency: transactions.currency,
-        name: transactions.name,
-        date: transactions.date,
-      },
-    })
-    .from(inbox)
-    .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
-    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
-    .limit(1);
-
-  return data;
+  return fetchInboxWithTransaction(db, id, teamId);
 }
 
 export type UnmatchTransactionParams = {
