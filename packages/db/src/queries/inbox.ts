@@ -1116,7 +1116,7 @@ export type MatchTransactionParams = {
   teamId: string;
 };
 
-async function fetchInboxWithTransaction(
+export async function fetchInboxWithTransaction(
   db: DatabaseOrTransaction,
   inboxId: string,
   teamId: string,

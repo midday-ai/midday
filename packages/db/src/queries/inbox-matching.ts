@@ -3,7 +3,11 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { inbox, transactionMatchSuggestions } from "../schema";
 import { createActivity } from "./activities";
-import { matchTransaction, updateInbox } from "./inbox";
+import {
+  fetchInboxWithTransaction,
+  matchTransaction,
+  updateInbox,
+} from "./inbox";
 import {
   createMatchSuggestion,
   findMatches,
@@ -266,9 +270,11 @@ export async function confirmSuggestedMatch(
       )
       .returning();
 
-    let result: Awaited<ReturnType<typeof matchTransaction>> = null;
+    let result: Awaited<ReturnType<typeof matchTransaction>>;
 
-    if (!alreadyMatched) {
+    if (alreadyMatched) {
+      result = await fetchInboxWithTransaction(tx, inboxId, teamId);
+    } else {
       result = await matchTransaction(tx, {
         id: inboxId,
         transactionId,
