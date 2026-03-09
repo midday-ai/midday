@@ -64,6 +64,16 @@ export function SuggestedMatch() {
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.searchTransactionMatch.queryKey(),
         });
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+        if (suggestion?.transactionId) {
+          queryClient.invalidateQueries({
+            queryKey: trpc.transactions.getById.queryKey({
+              id: suggestion.transactionId,
+            }),
+          });
+        }
 
         showLearningToast();
       },
@@ -79,6 +89,16 @@ export function SuggestedMatch() {
         queryClient.invalidateQueries({
           queryKey: trpc.inbox.get.infiniteQueryKey(),
         });
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+        if (suggestion?.transactionId) {
+          queryClient.invalidateQueries({
+            queryKey: trpc.transactions.getById.queryKey({
+              id: suggestion.transactionId,
+            }),
+          });
+        }
 
         showLearningToast();
       },

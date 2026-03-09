@@ -242,6 +242,31 @@ export async function confirmSuggestedMatch(
   const { teamId, suggestionId, inboxId, transactionId, userId } = params;
 
   return db.transaction(async (tx) => {
+    const [inboxItem] = await tx
+      .select({
+        transactionId: inbox.transactionId,
+      })
+      .from(inbox)
+      .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
+      .limit(1);
+
+    if (inboxItem?.transactionId) {
+      await tx
+        .update(transactionMatchSuggestions)
+        .set({
+          status: "confirmed",
+          userActionAt: new Date().toISOString(),
+          userId,
+        })
+        .where(
+          and(
+            eq(transactionMatchSuggestions.id, suggestionId),
+            eq(transactionMatchSuggestions.teamId, teamId),
+          ),
+        );
+      return null;
+    }
+
     const [suggestion] = await tx
       .update(transactionMatchSuggestions)
       .set({

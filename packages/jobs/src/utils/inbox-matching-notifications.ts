@@ -23,10 +23,6 @@ export async function triggerMatchingNotification({
         suggestion: MatchResult;
       };
 }) {
-  if (process.env.MATCHING_NOTIFICATIONS_ENABLED !== "true") {
-    return;
-  }
-
   try {
     // Get inbox and transaction details
     const [inboxItem, transactionItem] = await Promise.all([

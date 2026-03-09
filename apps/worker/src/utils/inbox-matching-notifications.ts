@@ -27,10 +27,6 @@ export async function triggerMatchingNotification(params: {
 }): Promise<void> {
   const { db, teamId, inboxId, result } = params;
 
-  if (process.env.MATCHING_NOTIFICATIONS_ENABLED !== "true") {
-    return;
-  }
-
   // Only send notifications if there's a suggestion
   if (!hasSuggestion(result)) {
     return;
