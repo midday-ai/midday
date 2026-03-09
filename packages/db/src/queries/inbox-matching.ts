@@ -279,8 +279,8 @@ export async function confirmSuggestedMatch(
       },
     });
 
-    // Confirm any remaining pending suggestions for the same transaction
-    // (e.g. grouped items that were matched as part of this confirm)
+    // Confirm pending suggestions for inbox items that were matched as part
+    // of this group — only where the inbox item now points to this transaction
     await tx
       .update(transactionMatchSuggestions)
       .set({
@@ -293,6 +293,11 @@ export async function confirmSuggestedMatch(
           eq(transactionMatchSuggestions.transactionId, transactionId),
           eq(transactionMatchSuggestions.teamId, teamId),
           eq(transactionMatchSuggestions.status, "pending"),
+          sql`${transactionMatchSuggestions.inboxId} IN (
+            SELECT ${inbox.id} FROM ${inbox}
+            WHERE ${inbox.transactionId} = ${transactionId}
+              AND ${inbox.teamId} = ${teamId}
+          )`,
         ),
       );
 
