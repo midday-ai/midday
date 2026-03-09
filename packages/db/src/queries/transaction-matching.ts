@@ -923,7 +923,7 @@ export async function findInboxMatches(
         ),
       )
       .orderBy(
-        sql`word_similarity(${transactionItem.merchantName || transactionItem.name}, ${inbox.displayName}) DESC`,
+        sql`word_similarity(${transactionItem.merchantName || transactionItem.name}, COALESCE(${inbox.displayName}, '')) DESC`,
         sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${transactionAmount}) / GREATEST(1.0, ${transactionAmount})`,
         sql`ABS(${inbox.date} - ${sql.param(transactionItem.date)}::date)`,
       )
