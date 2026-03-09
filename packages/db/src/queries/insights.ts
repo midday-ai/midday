@@ -734,10 +734,29 @@ export async function getInsightsForUser(
 
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;
 
-  // Build base query with left join to get user status
+  // Select only the columns consumers need. Excludes heavy JSONB blobs
+  // (allMetrics, anomalies, expenseAnomalies, milestones, activity, predictions)
+  // that are not part of the list response schema. Use getInsightById for full data.
   const query = db
     .select({
-      insight: insights,
+      insight: {
+        id: insights.id,
+        teamId: insights.teamId,
+        periodType: insights.periodType,
+        periodStart: insights.periodStart,
+        periodEnd: insights.periodEnd,
+        periodYear: insights.periodYear,
+        periodNumber: insights.periodNumber,
+        status: insights.status,
+        title: insights.title,
+        currency: insights.currency,
+        selectedMetrics: insights.selectedMetrics,
+        content: insights.content,
+        audioPath: insights.audioPath,
+        generatedAt: insights.generatedAt,
+        createdAt: insights.createdAt,
+        updatedAt: insights.updatedAt,
+      },
       userStatus: {
         readAt: insightUserStatus.readAt,
         dismissedAt: insightUserStatus.dismissedAt,

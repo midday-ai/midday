@@ -970,7 +970,6 @@ export async function deleteTransactionsByInternalIds(
 }
 
 const MIN_SIMILARITY_THRESHOLD = 0.6;
-const TRGM_CANDIDATE_THRESHOLD = 0.3;
 const EXACT_MERCHANT_SCORE = 0.95;
 const MAX_CANDIDATES = 200;
 
@@ -1045,9 +1044,7 @@ export async function getSimilarTransactions(
   }
 
   const candidates = await db.transaction(async (tx) => {
-    await tx.execute(
-      sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`,
-    );
+    await tx.execute(sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`);
     return tx
       .select({
         id: transactions.id,

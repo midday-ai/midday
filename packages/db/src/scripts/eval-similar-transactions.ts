@@ -2,7 +2,6 @@ import { Pool } from "pg";
 import { calculateNameScore } from "../utils/transaction-matching";
 
 const MIN_SIMILARITY_THRESHOLD = 0.6;
-const TRGM_CANDIDATE_THRESHOLD = 0.3;
 const EXACT_MERCHANT_SCORE = 0.95;
 const MAX_CANDIDATES = 200;
 
@@ -122,7 +121,7 @@ async function findSimilarCandidates(
 
   const merchantCond = sourceMerchantName
     ? `OR LOWER(t.merchant_name) = LOWER($${merchantParamIdx})
-       OR word_similarity($${merchantParamIdx}, COALESCE(t.merchant_name, t.name)) > ${TRGM_CANDIDATE_THRESHOLD}`
+       OR ($${merchantParamIdx} %> t.name OR $${merchantParamIdx} %> t.merchant_name)`
     : "";
   const excludeCond = sourceId ? `AND t.id != $${excludeParamIdx}` : "";
   const categoryCond = categorySlug
@@ -148,7 +147,7 @@ async function findSimilarCandidates(
     FROM transactions t
     WHERE t.team_id = $1
       AND (
-        word_similarity($2, COALESCE(t.merchant_name, t.name)) > ${TRGM_CANDIDATE_THRESHOLD}
+        ($2 %> t.name OR $2 %> t.merchant_name)
         ${merchantCond}
       )
       ${excludeCond}
