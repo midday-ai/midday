@@ -76,13 +76,13 @@ const countryFiscalYearMapping: Record<string, number | null> = {
  */
 export function getDefaultFiscalYearStartMonth(
   countryCode: string | null | undefined,
-): number | null {
+): number {
   if (!countryCode) {
-    return null; // Default to trailing 12 months
+    return 1;
   }
 
   const normalizedCode = countryCode.toUpperCase();
-  return countryFiscalYearMapping[normalizedCode] ?? null;
+  return countryFiscalYearMapping[normalizedCode] ?? 1;
 }
 
 /**

@@ -62,8 +62,8 @@
     "protobufjs"
   ],
   "devDependencies": {
-    "@biomejs/biome": "2.4.4",
-    "turbo": "2.8.12",
+    "@biomejs/biome": "2.4.5",
+    "turbo": "2.8.13",
     "typescript": "^5.9.3"
   }
 }

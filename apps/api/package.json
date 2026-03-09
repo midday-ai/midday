@@ -15,7 +15,6 @@
   "dependencies": {
     "@ai-sdk-tools/agents": "^1.2.0",
     "@ai-sdk-tools/artifacts": "^1.2.0",
-    "@ai-sdk-tools/cache": "^1.2.0",
     "@ai-sdk-tools/memory": "^1.2.0",
     "@ai-sdk/anthropic": "2.0.62",
     "@ai-sdk/openai": "catalog:",
@@ -24,7 +23,6 @@
     "@hono/mcp": "^0.2.3",
     "@hono/trpc-server": "^0.4.2",
     "@hono/zod-openapi": "1.2.2",
-    "@hono/zod-validator": "^0.7.6",
     "@midday/accounting": "workspace:*",
     "@midday/app-store": "workspace:*",
     "@midday/banking": "workspace:*",
@@ -53,23 +51,19 @@
     "@sentry/bun": "catalog:",
     "@sindresorhus/slugify": "catalog:",
     "@trigger.dev/sdk": "catalog:",
-    "@trpc/server": "^11.10.0",
+    "@trpc/server": "^11.11.0",
     "ai": "catalog:",
-    "camelcase-keys": "catalog:",
     "date-fns": "catalog:",
     "hono": "catalog:",
     "hono-rate-limiter": "0.4.2",
     "jose": "catalog:",
     "nanoid": "catalog:",
     "parse-duration": "^2.1.4",
-    "pino": "catalog:",
     "resend": "catalog:",
-    "snakecase-keys": "^9.0.2",
     "stripe": "^20.1.0",
     "superjson": "^2.2.6",
     "uuid": "catalog:",
-    "zod": "catalog:",
-    "zod-openapi": "^5.4.5"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "latest"
