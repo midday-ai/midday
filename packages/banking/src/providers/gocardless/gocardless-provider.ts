@@ -8,6 +8,8 @@ import type {
   GetInstitutionsRequest,
   GetTransactionsRequest,
 } from "../../types";
+import { ProviderError } from "../../utils/error";
+import { logger } from "../../utils/logger";
 import { GoCardLessApi } from "./gocardless-api";
 import {
   transformAccount,
@@ -97,9 +99,21 @@ export class GoCardLessProvider implements Provider {
       throw Error("Missing params");
     }
 
-    const response = await this.#api.getRequestion(id);
+    try {
+      const response = await this.#api.getRequestion(id);
 
-    return transformConnectionStatus(response);
+      return transformConnectionStatus(response);
+    } catch (error) {
+      if (error instanceof ProviderError && error.code === "disconnected") {
+        return { status: "disconnected" as const };
+      }
+
+      logger.error("GoCardless connection status check failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      throw error;
+    }
   }
 
   async deleteConnection({ id }: DeleteConnectionRequest) {

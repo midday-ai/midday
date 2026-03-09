@@ -23,12 +23,7 @@ export async function createClient(options?: CreateClientOptions) {
       }
     : {};
 
-  if (auth) {
-    // @ts-expect-error - suppressGetSessionWarning is protected
-    auth.suppressGetSessionWarning = true;
-  }
-
-  return createServerClient<Database>(
+  const client = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     key,
     {
@@ -52,4 +47,12 @@ export async function createClient(options?: CreateClientOptions) {
       auth,
     },
   );
+
+  // The middleware validates and refreshes tokens via getClaims().
+  // Server components only call getSession() to read the access token
+  // from cookies — suppress the "use getUser() instead" warning.
+  // @ts-expect-error - suppressGetSessionWarning is a protected property
+  client.auth.suppressGetSessionWarning = true;
+
+  return client;
 }
