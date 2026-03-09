@@ -11,15 +11,10 @@ const I18nMiddleware = createI18nMiddleware({
 });
 
 export async function proxy(request: NextRequest) {
-  const startTime = performance.now();
   const { response, isAuthenticated, supabase } = await updateSession(
     request,
     I18nMiddleware(request),
   );
-
-  const endTime = performance.now();
-  const duration = endTime - startTime;
-  console.log(`updateSession took ${duration.toFixed(2)}ms`);
 
   const nextUrl = request.nextUrl;
 
