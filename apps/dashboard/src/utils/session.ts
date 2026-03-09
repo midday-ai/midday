@@ -11,6 +11,13 @@ import { createClient } from "@midday/supabase/client";
 // delivers the current session (internally one getSession() call), and
 // TOKEN_REFRESHED keeps the cached token up to date automatically.
 // This reduces lock contention from N-concurrent-requests to a single init call.
+//
+// A timeout guard prevents the dashboard from hanging forever if
+// INITIAL_SESSION never fires (e.g. navigator.locks deadlock in Chrome
+// when returning to a stale tab). After the timeout, requests proceed
+// with a null token → 401 → the QueryCache onError handler redirects to /login.
+
+const SESSION_INIT_TIMEOUT_MS = 5_000;
 
 let cachedAccessToken: string | null = null;
 let sessionReady: Promise<void> | null = null;
@@ -20,7 +27,7 @@ function ensureInitialized() {
 
   const supabase = createClient();
 
-  sessionReady = new Promise<void>((resolve) => {
+  const authReady = new Promise<void>((resolve) => {
     supabase.auth.onAuthStateChange((event, session) => {
       cachedAccessToken = session?.access_token ?? null;
 
@@ -29,6 +36,18 @@ function ensureInitialized() {
       }
     });
   });
+
+  const timeout = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      console.warn(
+        "[session] INITIAL_SESSION did not fire within timeout – " +
+          "likely navigator.locks contention. Proceeding with null token.",
+      );
+      resolve();
+    }, SESSION_INIT_TIMEOUT_MS);
+  });
+
+  sessionReady = Promise.race([authReady, timeout]);
 }
 
 export function initSessionCache() {

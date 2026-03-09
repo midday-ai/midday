@@ -53,9 +53,11 @@ export function TRPCReactProvider(
           async headers() {
             const accessToken = await getAccessToken();
 
-            const headers: Record<string, string> = {
-              Authorization: `Bearer ${accessToken}`,
-            };
+            const headers: Record<string, string> = {};
+
+            if (accessToken) {
+              headers.Authorization = `Bearer ${accessToken}`;
+            }
 
             const forcePrimary = getCookie(Cookies.ForcePrimary);
             if (forcePrimary === "true") {

@@ -12,8 +12,8 @@ export async function createClient(options?: CreateClientOptions) {
   const cookieStore = await cookies();
 
   const key = admin
-    ? process.env.SUPABASE_SERVICE_KEY!
-    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    ? process.env.SUPABASE_SECRET_KEY!
+    : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
   const auth = admin
     ? {

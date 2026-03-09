@@ -10,11 +10,16 @@ const I18nMiddleware = createI18nMiddleware({
   urlMappingStrategy: "rewrite",
 });
 
-export async function middleware(request: NextRequest) {
-  const { response, session, supabase } = await updateSession(
+export async function proxy(request: NextRequest) {
+  const startTime = performance.now();
+  const { response, isAuthenticated, supabase } = await updateSession(
     request,
     I18nMiddleware(request),
   );
+
+  const endTime = performance.now();
+  const duration = endTime - startTime;
+  console.log(`updateSession took ${duration.toFixed(2)}ms`);
 
   const nextUrl = request.nextUrl;
 
@@ -31,7 +36,7 @@ export async function middleware(request: NextRequest) {
   }`;
 
   if (
-    !session &&
+    !isAuthenticated &&
     newUrl.pathname !== "/login" &&
     !newUrl.pathname.includes("/i/") &&
     !newUrl.pathname.includes("/p/") &&
@@ -50,7 +55,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (session) {
+  if (isAuthenticated) {
     if (newUrl.pathname !== "/onboarding" && newUrl.pathname !== "/teams") {
       const inviteCodeMatch = newUrl.pathname.startsWith("/teams/invite/");
 

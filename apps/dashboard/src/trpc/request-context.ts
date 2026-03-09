@@ -14,9 +14,15 @@ export const getServerRequestContext = cache(async () => {
     headers(),
   ]);
 
+  // getSession() reads the JWT from cookies. The middleware has already
+  // validated and refreshed it via getClaims(), so this is safe.
   const {
-    data: { session },
+    data: { session: authSession },
   } = await supabase.auth.getSession();
+
+  const session = authSession
+    ? { access_token: authSession.access_token }
+    : null;
 
   return {
     session,

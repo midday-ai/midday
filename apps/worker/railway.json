@@ -11,7 +11,7 @@
     "deploymentOverlapSeconds": 30,
     "drainingSeconds": 15,
     "region": "europe-west4-drams3a",
-    "numReplicas": 3
+    "numReplicas": 2
   },
   "environments": {
     "staging": {

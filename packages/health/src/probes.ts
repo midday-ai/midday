@@ -56,8 +56,8 @@ export function supabaseProbe(): Dependency {
         process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
       if (!url) throw new Error("SUPABASE_URL not set");
       const apikey =
-        process.env.SUPABASE_SERVICE_KEY ||
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        process.env.SUPABASE_SECRET_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
       const headers: Record<string, string> = {};
       if (apikey) {
         headers.apikey = apikey;
