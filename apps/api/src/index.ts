@@ -120,7 +120,57 @@ app.use(
 app.get("/favicon.ico", (c) => c.body(null, 204));
 app.get("/robots.txt", (c) => c.body(null, 204));
 
-app.get("/health", (c) => c.json({ status: "ok" }, 200));
+app.get("/health", (c) => {
+  const start = performance.now();
+  c.header(
+    "Server-Timing",
+    `app;dur=${(performance.now() - start).toFixed(2)}`,
+  );
+  c.header("X-Server-Timestamp", Date.now().toString());
+  return c.json({ status: "ok" }, 200);
+});
+
+app.get("/health/latency", async (c) => {
+  const privateDomain = process.env.RAILWAY_PRIVATE_DOMAIN;
+  const port = process.env.PORT || "8080";
+  const region =
+    process.env.RAILWAY_REGION ||
+    process.env.RAILWAY_REPLICA_REGION ||
+    "unknown";
+
+  const results: Record<string, unknown> = { region };
+
+  if (privateDomain) {
+    const internalUrl = `http://${privateDomain}:${port}/health`;
+    const start = performance.now();
+    try {
+      const res = await fetch(internalUrl);
+      await res.json();
+      results.internalMs = +(performance.now() - start).toFixed(2);
+      results.internalUrl = internalUrl;
+    } catch (err) {
+      results.internalMs = +(performance.now() - start).toFixed(2);
+      results.internalError = String(err);
+    }
+  } else {
+    results.internalMs = null;
+    results.note = "No RAILWAY_PRIVATE_DOMAIN set";
+  }
+
+  const publicUrl = `https://${process.env.RAILWAY_PUBLIC_DOMAIN || process.env.RAILWAY_STATIC_URL}/health`;
+  const pubStart = performance.now();
+  try {
+    const res = await fetch(publicUrl);
+    await res.json();
+    results.externalMs = +(performance.now() - pubStart).toFixed(2);
+    results.externalUrl = publicUrl;
+  } catch (err) {
+    results.externalMs = +(performance.now() - pubStart).toFixed(2);
+    results.externalError = String(err);
+  }
+
+  return c.json(results, 200);
+});
 
 app.get("/health/ready", async (c) => {
   const results = await checkDependencies(apiDependencies(), 1);
