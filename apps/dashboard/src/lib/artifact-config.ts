@@ -8,7 +8,11 @@ export type ArtifactStage =
   | "chart_ready"
   | "metrics_ready"
   | "analysis_ready"
-  | "data_ready";
+  | "data_ready"
+  | "creating"
+  | "created"
+  | "updating"
+  | "updated";
 
 export type ArtifactType =
   | "burn-rate-canvas"
@@ -24,6 +28,7 @@ export type ArtifactType =
   | "profit-analysis-canvas"
   | "forecast-canvas"
   | "stress-test-canvas"
+  | "invoice-canvas"
   | "invoice-payment-canvas"
   | "health-report-canvas"
   | "breakdown-summary-canvas";
@@ -57,6 +62,8 @@ export const TOOL_TO_ARTIFACT_MAP: Record<string, ArtifactType> = {
   cashFlowForecast: "forecast-canvas",
   stressTest: "stress-test-canvas",
   getCashFlowStressTest: "stress-test-canvas",
+  createInvoice: "invoice-canvas",
+  updateInvoice: "invoice-canvas",
   getInvoicePaymentAnalysis: "invoice-payment-canvas",
   getMetricsBreakdown: "breakdown-summary-canvas",
 };
@@ -68,8 +75,12 @@ export const STAGE_TO_SECTION_MAP: Record<ArtifactStage, string | null> = {
   loading: "Chart",
   chart_ready: "Metrics",
   metrics_ready: "Summary",
-  analysis_ready: null, // Complete, no section in progress
+  analysis_ready: null,
   data_ready: "Summary",
+  creating: "Invoice",
+  created: null,
+  updating: "Invoice",
+  updated: null,
 };
 
 /**
@@ -81,6 +92,10 @@ const DEFAULT_STAGE_MESSAGES: Record<ArtifactStage, string> = {
   metrics_ready: "Metrics calculated, generating insights...",
   analysis_ready: "Analysis complete",
   data_ready: "Data ready, generating insights...",
+  creating: "Creating invoice draft...",
+  created: "Invoice draft created",
+  updating: "Updating invoice...",
+  updated: "Invoice updated",
 };
 
 /**
@@ -173,6 +188,12 @@ const CUSTOM_STAGE_MESSAGES: Partial<
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",
   },
+  "invoice-canvas": {
+    creating: "Creating invoice draft...",
+    created: "Invoice draft ready",
+    updating: "Updating invoice...",
+    updated: "Invoice updated",
+  },
 };
 
 /**
@@ -182,6 +203,7 @@ const DEFAULT_SECTION_MESSAGES: Record<string, string> = {
   Chart: "Loading chart data...",
   Metrics: "Calculating metrics...",
   Summary: "Generating analysis...",
+  Invoice: "Preparing invoice...",
 };
 
 /**

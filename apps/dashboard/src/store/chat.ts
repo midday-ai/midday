@@ -359,6 +359,14 @@ const COMMAND_SUGGESTIONS = [
     toolParams: { showCanvas: true },
     keywords: ["analyze", "expense", "trends", "patterns"],
   },
+  // Create Invoice
+  {
+    command: "/create",
+    title: "Create a new invoice",
+    toolName: "createInvoice",
+    toolParams: {},
+    keywords: ["create", "new", "invoice", "draft", "bill"],
+  },
 ];
 
 export interface CommandSuggestion {

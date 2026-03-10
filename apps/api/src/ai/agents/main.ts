@@ -35,7 +35,7 @@ operations: Account balances, documents, inbox
 reports: Detailed financial reports (revenue, profit, expenses, spending, burn rate, runway, P&L, cash flow, stress test, invoice payment analysis, growth rate, balance sheet, business health score, forecast, tax summary, metrics breakdown)
 analytics: Predictions, advanced analytics (excluding revenue forecast)
 transactions: Transaction history
-invoices: Invoice management
+invoices: Invoice management, creating invoices, editing invoices, updating invoices, drafting invoices
 customers: Customer management
 timeTracking: Time tracking
 </agent-capabilities>

@@ -156,6 +156,11 @@ export function SuggestedActions() {
       title: "Growth Rate",
       description: "Show me my growth rate analysis",
     },
+    "create-invoice": {
+      icon: Icons.Invoice,
+      title: "Create Invoice",
+      description: "Create a new invoice",
+    },
   };
 
   const suggestedActions = suggestedActionsData.actions;
