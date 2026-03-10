@@ -22,6 +22,7 @@ import {
   calculateNameScore as calculateUnifiedNameScore,
   scoreMatch,
 } from "../utils/transaction-matching";
+import { findInboxTopMatches } from "./transaction-matching";
 
 export type GetInboxParams = {
   teamId: string;
@@ -690,8 +691,9 @@ export async function deleteInboxMany(
 export type GetInboxSearchParams = {
   teamId: string;
   limit?: number;
-  q?: string; // Search query (text or amount)
-  transactionId?: string; // For AI suggestions
+  q?: string;
+  transactionId?: string;
+  minConfidence?: number;
 };
 
 export async function getInboxSearch(
@@ -699,7 +701,7 @@ export async function getInboxSearch(
   params: GetInboxSearchParams,
 ) {
   try {
-    const { teamId, q, transactionId, limit = 10 } = params;
+    const { teamId, q, transactionId, limit = 10, minConfidence } = params;
 
     const whereConditions: SQL[] = [
       eq(inbox.teamId, teamId),
@@ -867,163 +869,62 @@ export async function getInboxSearch(
 
     // PRIORITY 2: AI suggestions for transaction
     if (transactionId) {
-      // Get transaction details for context-aware matching
-      const transactionData = await db
+      const matches = await findInboxTopMatches(db, {
+        teamId,
+        transactionId,
+        limit,
+      });
+
+      if (matches.length === 0) return [];
+
+      const filtered = minConfidence
+        ? matches.filter((m) => m.confidenceScore >= minConfidence)
+        : matches;
+
+      if (filtered.length === 0) return [];
+
+      const matchedIds = filtered.map((m) => m.inboxId);
+      const fullItems = await db
         .select({
-          id: transactions.id,
-          name: transactions.name,
-          amount: transactions.amount,
-          currency: transactions.currency,
-          baseAmount: transactions.baseAmount,
-          baseCurrency: transactions.baseCurrency,
-          date: transactions.date,
-          merchantName: transactions.merchantName,
-          counterpartyName: transactions.counterpartyName,
-          description: transactions.description,
+          id: inbox.id,
+          createdAt: inbox.createdAt,
+          fileName: inbox.fileName,
+          amount: inbox.amount,
+          currency: inbox.currency,
+          filePath: inbox.filePath,
+          contentType: inbox.contentType,
+          date: inbox.date,
+          displayName: inbox.displayName,
+          size: inbox.size,
+          description: inbox.description,
+          status: inbox.status,
+          website: inbox.website,
+          baseAmount: inbox.baseAmount,
+          baseCurrency: inbox.baseCurrency,
+          taxAmount: inbox.taxAmount,
+          taxRate: inbox.taxRate,
+          taxType: inbox.taxType,
+          type: inbox.type,
         })
-        .from(transactions)
-        .where(
-          and(
-            eq(transactions.id, transactionId),
-            eq(transactions.teamId, teamId),
-          ),
-        )
-        .limit(1);
+        .from(inbox)
+        .where(inArray(inbox.id, matchedIds));
 
-      if (transactionData.length > 0) {
-        const transaction = transactionData[0]!;
+      const itemMap = new Map(fullItems.map((item) => [item.id, item]));
 
-        // Check if transaction already has attachments - if so, don't show suggestions
-        const [hasAttachments] = await db
-          .select({ count: sql`count(*)` })
-          .from(transactionAttachments)
-          .where(
-            and(
-              eq(transactionAttachments.transactionId, transactionId),
-              eq(transactionAttachments.teamId, teamId),
-            ),
-          );
-
-        const attachmentCount = hasAttachments?.count
-          ? Number(hasAttachments.count)
-          : 0;
-
-        if (attachmentCount > 0) {
-          return [];
-        }
-
-        const unifiedTransactionAmount = Math.abs(transaction.amount || 0);
-        const unifiedTransactionBaseAmount = Math.abs(
-          transaction.baseAmount || 0,
-        );
-        const unifiedCandidates = await db.transaction(async (tx) => {
-          await tx.execute(
-            sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`,
-          );
-          return tx
-            .select({
-              id: inbox.id,
-              createdAt: inbox.createdAt,
-              fileName: inbox.fileName,
-              amount: inbox.amount,
-              currency: inbox.currency,
-              filePath: inbox.filePath,
-              contentType: inbox.contentType,
-              date: inbox.date,
-              displayName: inbox.displayName,
-              size: inbox.size,
-              description: inbox.description,
-              baseAmount: inbox.baseAmount,
-              baseCurrency: inbox.baseCurrency,
-              status: inbox.status,
-              type: inbox.type,
-              website: inbox.website,
-              taxAmount: inbox.taxAmount,
-              taxRate: inbox.taxRate,
-              taxType: inbox.taxType,
-            })
-            .from(inbox)
-            .where(
-              and(
-                ...whereConditions,
-                sql`${inbox.date} IS NOT NULL`,
-                sql`${inbox.date} BETWEEN (${sql.param(transaction.date)}::date - INTERVAL '123 days') 
-                    AND (${sql.param(transaction.date)}::date + INTERVAL '30 days')`,
-                or(
-                  and(
-                    eq(inbox.currency, transaction.currency || ""),
-                    sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) < GREATEST(1, ${unifiedTransactionAmount} * 0.25)`,
-                  ),
-                  sql`(${transaction.merchantName || transaction.name} %> ${inbox.displayName})`,
-                  and(
-                    eq(inbox.baseCurrency, transaction.baseCurrency || ""),
-                    sql`${inbox.baseCurrency} IS NOT NULL`,
-                    sql`ABS(ABS(COALESCE(${inbox.baseAmount}, 0)) - ${unifiedTransactionBaseAmount}) < GREATEST(50, ${unifiedTransactionBaseAmount} * 0.15)`,
-                  ),
-                ),
-              ),
-            )
-            .orderBy(
-              sql`word_similarity(${transaction.merchantName || transaction.name}, COALESCE(${inbox.displayName}, '')) DESC`,
-              sql`ABS(ABS(COALESCE(${inbox.amount}, 0)) - ${unifiedTransactionAmount}) / GREATEST(1.0, ${unifiedTransactionAmount})`,
-              sql`ABS(${inbox.date} - ${sql.param(transaction.date)}::date)`,
-            )
-            .limit(Math.max(limit * 3, 30));
-        });
-
-        const unifiedScored = unifiedCandidates
-          .map((candidate) => {
-            const nameScore = calculateUnifiedNameScore(
-              candidate.displayName,
-              transaction.name,
-              transaction.merchantName || transaction.counterpartyName,
-            );
-            const amountScore = calculateUnifiedAmountScore(
-              candidate,
-              transaction,
-            );
-            const currencyScore = calculateUnifiedCurrencyScore(
-              candidate.currency || undefined,
-              transaction.currency || undefined,
-              candidate.baseCurrency || undefined,
-              transaction.baseCurrency || undefined,
-            );
-            const dateScore = calculateUnifiedDateScore(
-              candidate.date!,
-              transaction.date,
-              candidate.type,
-            );
-            const isExactAmount =
-              candidate.amount !== null &&
-              Math.abs(
-                Math.abs(candidate.amount || 0) -
-                  Math.abs(transaction.amount || 0),
-              ) < 0.01;
-            const isSameCurrency = candidate.currency === transaction.currency;
-            const confidence = scoreMatch({
-              nameScore,
-              amountScore,
-              dateScore,
-              currencyScore,
-              isSameCurrency,
-              isExactAmount,
-            });
-
-            return {
-              ...candidate,
-              nameScore,
-              amountScore,
-              currencyScore,
-              dateScore,
-              confidenceScore: confidence,
-            };
-          })
-          .filter((candidate) => candidate.confidenceScore >= 0.6)
-          .sort((a, b) => b.confidenceScore - a.confidenceScore)
-          .slice(0, limit);
-
-        return unifiedScored;
-      }
+      return filtered
+        .map((m) => {
+          const item = itemMap.get(m.inboxId);
+          if (!item) return null;
+          return {
+            ...item,
+            nameScore: m.nameScore ?? 0,
+            amountScore: m.amountScore,
+            currencyScore: m.currencyScore,
+            dateScore: m.dateScore,
+            confidenceScore: m.confidenceScore,
+          };
+        })
+        .filter(Boolean);
     }
 
     // PRIORITY 3: Recent unmatched items
