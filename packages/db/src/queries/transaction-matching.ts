@@ -607,11 +607,14 @@ function resolveMatchType(
   return "suggested";
 }
 
-export async function findMatches(
+export async function findTopMatches(
   db: Database,
-  params: FindMatchesParams & { excludeTransactionIds?: Set<string> },
-): Promise<MatchResult | null> {
-  const { teamId, inboxId, excludeTransactionIds } = params;
+  params: FindMatchesParams & {
+    excludeTransactionIds?: Set<string>;
+    limit?: number;
+  },
+): Promise<MatchResult[]> {
+  const { teamId, inboxId, excludeTransactionIds, limit = 1 } = params;
 
   const [calibration, [inboxItem]] = await Promise.all([
     getTeamCalibration(db, teamId),
@@ -639,7 +642,7 @@ export async function findMatches(
   );
   const autoThreshold = calibration.calibratedAutoThreshold;
 
-  if (!inboxItem?.date) return null;
+  if (!inboxItem?.date) return [];
 
   const normalizedInboxName = normalizeNameForLearning(inboxItem.displayName);
   const inboxAmount = Math.abs(inboxItem.amount || 0);
@@ -830,26 +833,37 @@ export async function findMatches(
     scoredCandidates.map((c) => c.transactionId),
   );
 
-  for (const candidate of scoredCandidates) {
-    if (dismissedTxIds.has(candidate.transactionId)) {
-      logger.info("Skipping dismissed match candidate, trying next", {
-        teamId,
-        inboxId,
-        transactionId: candidate.transactionId,
-      });
-      continue;
-    }
-    return candidate;
-  }
-
-  return null;
+  return scoredCandidates
+    .filter((c) => {
+      if (dismissedTxIds.has(c.transactionId)) {
+        logger.info("Skipping dismissed match candidate, trying next", {
+          teamId,
+          inboxId,
+          transactionId: c.transactionId,
+        });
+        return false;
+      }
+      return true;
+    })
+    .slice(0, limit);
 }
 
-export async function findInboxMatches(
+export async function findMatches(
   db: Database,
-  params: FindInboxMatchesParams & { excludeInboxIds?: Set<string> },
-): Promise<InboxMatchResult | null> {
-  const { teamId, transactionId, excludeInboxIds } = params;
+  params: FindMatchesParams & { excludeTransactionIds?: Set<string> },
+): Promise<MatchResult | null> {
+  const results = await findTopMatches(db, { ...params, limit: 1 });
+  return results[0] ?? null;
+}
+
+export async function findInboxTopMatches(
+  db: Database,
+  params: FindInboxMatchesParams & {
+    excludeInboxIds?: Set<string>;
+    limit?: number;
+  },
+): Promise<InboxMatchResult[]> {
+  const { teamId, transactionId, excludeInboxIds, limit = 1 } = params;
 
   const [calibration, [transactionItem]] = await Promise.all([
     getTeamCalibration(db, teamId),
@@ -882,7 +896,7 @@ export async function findInboxMatches(
   );
   const autoThreshold = calibration.calibratedAutoThreshold;
 
-  if (!transactionItem?.date) return null;
+  if (!transactionItem?.date) return [];
 
   const normalizedTransactionName = normalizeNameForLearning(
     transactionItem.merchantName || transactionItem.name,
@@ -1046,19 +1060,27 @@ export async function findInboxMatches(
     scoredCandidates.map((c) => c.inboxId),
   );
 
-  for (const candidate of scoredCandidates) {
-    if (dismissedInboxIds.has(candidate.inboxId)) {
-      logger.info("Skipping dismissed reverse match candidate, trying next", {
-        teamId,
-        transactionId,
-        inboxId: candidate.inboxId,
-      });
-      continue;
-    }
-    return candidate;
-  }
+  return scoredCandidates
+    .filter((c) => {
+      if (dismissedInboxIds.has(c.inboxId)) {
+        logger.info("Skipping dismissed reverse match candidate, trying next", {
+          teamId,
+          transactionId,
+          inboxId: c.inboxId,
+        });
+        return false;
+      }
+      return true;
+    })
+    .slice(0, limit);
+}
 
-  return null;
+export async function findInboxMatches(
+  db: Database,
+  params: FindInboxMatchesParams & { excludeInboxIds?: Set<string> },
+): Promise<InboxMatchResult | null> {
+  const results = await findInboxTopMatches(db, { ...params, limit: 1 });
+  return results[0] ?? null;
 }
 
 export async function createMatchSuggestion(
