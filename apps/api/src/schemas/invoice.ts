@@ -535,11 +535,11 @@ export const getInvoicesSchema = z.object({
     .nullable()
     .optional()
     .describe(
-      "Sort as [column, direction]. Columns: created_at, due_date, amount, status, customer. Direction: asc or desc.",
+      "Sort as [column, direction]. Columns: created_at, due_date, issue_date, amount, status, customer, invoice_number. Direction: asc or desc.",
     )
     .openapi({
       description:
-        "Sort as [column, direction]. Columns: created_at, due_date, amount, status, customer. Direction: asc or desc.",
+        "Sort as [column, direction]. Columns: created_at, due_date, issue_date, amount, status, customer, invoice_number. Direction: asc or desc.",
       param: { in: "query" },
       example: ["created_at", "desc"],
     }),

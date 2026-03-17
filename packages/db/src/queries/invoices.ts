@@ -271,6 +271,14 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       isAscending
         ? query.orderBy(asc(invoices.status))
         : query.orderBy(desc(invoices.status));
+    } else if (column === "invoice_number") {
+      isAscending
+        ? query.orderBy(asc(invoices.invoiceNumber))
+        : query.orderBy(desc(invoices.invoiceNumber));
+    } else if (column === "issue_date") {
+      isAscending
+        ? query.orderBy(asc(invoices.issueDate))
+        : query.orderBy(desc(invoices.issueDate));
     }
   } else {
     // Default sort by created_at descending
