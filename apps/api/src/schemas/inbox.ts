@@ -3,7 +3,13 @@ import { z } from "@hono/zod-openapi";
 export const getInboxSchema = z.object({
   cursor: z.string().nullable().optional(),
   order: z.string().nullable().optional(),
-  sort: z.string().nullable().optional(),
+  sort: z
+    .string()
+    .nullable()
+    .optional()
+    .describe(
+      "Sort field. Valid values: alphabetical, document_date. Defaults to created date.",
+    ),
   pageSize: z.coerce.number().min(1).max(100).optional(),
   q: z.string().nullable().optional(),
   status: z

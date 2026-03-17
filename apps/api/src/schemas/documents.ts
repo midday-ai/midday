@@ -13,9 +13,12 @@ export const getDocumentsSchema = z
       .min(2)
       .nullable()
       .optional()
+      .describe(
+        "Sort as [column, direction]. Currently documents are sorted by created date descending.",
+      )
       .openapi({
         description:
-          "Sorting order as a tuple: [field, direction]. Example: ['name', 'asc'].",
+          "Sort as [column, direction]. Currently documents are sorted by created date descending.",
         param: {
           in: "query",
         },

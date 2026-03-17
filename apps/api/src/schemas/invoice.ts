@@ -534,11 +534,14 @@ export const getInvoicesSchema = z.object({
     .min(2)
     .nullable()
     .optional()
+    .describe(
+      "Sort as [column, direction]. Columns: created_at, due_date, issue_date, amount, status, customer, invoice_number. Direction: asc or desc.",
+    )
     .openapi({
       description:
-        "Sorting order as a tuple: [field, direction]. Example: ['createdAt', 'desc'].",
+        "Sort as [column, direction]. Columns: created_at, due_date, issue_date, amount, status, customer, invoice_number. Direction: asc or desc.",
       param: { in: "query" },
-      example: ["createdAt", "desc"],
+      example: ["created_at", "desc"],
     }),
   pageSize: z.coerce
     .number()

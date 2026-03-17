@@ -7,6 +7,7 @@ export interface McpContext {
   teamId: string;
   userId: string;
   scopes: Scope[];
+  apiUrl: string;
 }
 
 export type RegisterTools = (server: McpServer, ctx: McpContext) => void;

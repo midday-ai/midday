@@ -21,9 +21,12 @@ export const getCustomersSchema = z
       .min(2)
       .nullable()
       .optional()
+      .describe(
+        "Sort as [column, direction]. Columns: name, created_at, contact, email, invoices, projects, tags, industry, country, total_revenue, outstanding, last_invoice. Direction: asc or desc.",
+      )
       .openapi({
         description:
-          "Sorting order as a tuple: [field, direction]. Example: ['name', 'asc'] or ['createdAt', 'desc']",
+          "Sort as [column, direction]. Columns: name, created_at, contact, email, invoices, projects, tags, industry, country, total_revenue, outstanding, last_invoice. Direction: asc or desc.",
         example: ["name", "asc"],
         param: {
           in: "query",
