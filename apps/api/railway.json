@@ -11,14 +11,18 @@
     "deploymentOverlapSeconds": 30,
     "drainingSeconds": 15,
     "multiRegionConfig": {
-      "europe-west4-drams3a": { "numReplicas": 3 }
+      "europe-west4-drams3a": { "numReplicas": 3 },
+      "us-east4-eqdc4a": { "numReplicas": 3 },
+      "us-west2": { "numReplicas": 3 }
     }
   },
   "environments": {
     "staging": {
       "deploy": {
         "multiRegionConfig": {
-          "europe-west4-drams3a": { "numReplicas": 1 }
+          "europe-west4-drams3a": { "numReplicas": 1 },
+          "us-east4-eqdc4a": { "numReplicas": 1 },
+          "us-west2": { "numReplicas": 1 }
         }
       }
     }
