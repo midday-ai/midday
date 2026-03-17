@@ -19,9 +19,12 @@ export const getTransactionsSchema = z.object({
     .min(2)
     .nullable()
     .optional()
+    .describe(
+      "Sort as [column, direction]. Columns: date, amount, name, status, attachment, assigned, bank_account, category, tags, counterparty. Direction: asc or desc.",
+    )
     .openapi({
       description:
-        "Sorting order as a tuple: [field, direction]. Example: ['date', 'desc'] or ['amount', 'asc']",
+        "Sort as [column, direction]. Columns: date, amount, name, status, attachment, assigned, bank_account, category, tags, counterparty. Direction: asc or desc.",
       example: ["date", "desc"],
       param: {
         in: "query",

@@ -99,10 +99,13 @@ export const getTrackerProjectsSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe(
+      "Sort as [column, direction]. Columns: name, created_at, time, amount, assigned, customer, tags. Direction: asc or desc.",
+    )
     .openapi({
       description:
-        "Sorting order as an array of field names. Prefix with '-' for descending order",
-      example: ["-createdAt", "name"],
+        "Sort as [column, direction]. Columns: name, created_at, time, amount, assigned, customer, tags. Direction: asc or desc.",
+      example: ["created_at", "desc"],
       param: {
         in: "query",
       },
