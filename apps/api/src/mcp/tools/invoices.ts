@@ -104,7 +104,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           download: z
             .boolean()
             .optional()
-            .default(true)
+            .default(false)
             .describe("Include the rendered PDF as a downloadable file"),
         },
         annotations: READ_ONLY_ANNOTATIONS,

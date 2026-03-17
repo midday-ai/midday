@@ -53,7 +53,7 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         download: z
           .boolean()
           .optional()
-          .default(true)
+          .default(false)
           .describe("Include the file content as a downloadable resource"),
       },
       annotations: READ_ONLY_ANNOTATIONS,
