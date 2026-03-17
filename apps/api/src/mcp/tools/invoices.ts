@@ -15,8 +15,10 @@ import {
   getNextInvoiceNumber,
   updateInvoice,
 } from "@midday/db/queries";
+import { PdfTemplate, renderToStream } from "@midday/invoice";
 import { z } from "zod";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { type McpContent, streamToResource } from "../utils";
 
 // Annotations for write operations
 const WRITE_ANNOTATIONS = {
@@ -35,7 +37,7 @@ const DESTRUCTIVE_ANNOTATIONS = {
 } as const;
 
 export const registerInvoiceTools: RegisterTools = (server, ctx) => {
-  const { db, teamId, userId } = ctx;
+  const { db, teamId, userId, apiUrl } = ctx;
 
   // Check scopes
   const hasReadScope = hasScope(ctx, "invoices.read");
@@ -73,8 +75,20 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           sort: params.sort ?? null,
         });
 
+        const data = result.data?.map((invoice) => ({
+          ...invoice,
+          pdfUrl: invoice.token
+            ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(invoice.token)}`
+            : null,
+        }));
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({ ...result, data }, null, 2),
+            },
+          ],
         };
       },
     );
@@ -83,13 +97,19 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       "invoices_get",
       {
         title: "Get Invoice",
-        description: "Get a specific invoice by its ID with full details",
+        description:
+          "Get a specific invoice by its ID with full details. Set download=true to include the PDF file content.",
         inputSchema: {
           id: getInvoiceByIdSchema.shape.id,
+          download: z
+            .boolean()
+            .optional()
+            .default(true)
+            .describe("Include the rendered PDF as a downloadable file"),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async ({ id }) => {
+      async ({ id, download: includePdf }) => {
         const result = await getInvoiceById(db, { id, teamId });
 
         if (!result) {
@@ -99,9 +119,34 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           };
         }
 
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+        const pdfUrl = result.token
+          ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(result.token)}`
+          : null;
+
+        const content: McpContent[] = [
+          {
+            type: "text",
+            text: JSON.stringify({ ...result, pdfUrl }, null, 2),
+          },
+        ];
+
+        if (includePdf) {
+          try {
+            const stream = await renderToStream(
+              await PdfTemplate(result, { isReceipt: false }),
+            );
+            const resource = await streamToResource(
+              stream,
+              pdfUrl ?? `invoice:${id}`,
+              "application/pdf",
+            );
+            content.push(resource);
+          } catch {
+            content.push({ type: "text", text: "Failed to generate PDF" });
+          }
+        }
+
+        return { content };
       },
     );
 
