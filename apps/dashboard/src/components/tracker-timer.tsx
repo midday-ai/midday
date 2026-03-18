@@ -274,13 +274,15 @@ export function TrackerTimer({
                 )}
               </button>
             </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              sideOffset={5}
-              className="text-xs px-2 py-1 text-[#878787]"
-            >
-              <p>{isThisProjectRunning ? "Stop timer" : "Start timer"}</p>
-            </TooltipContent>
+            {isThisProjectRunning && (
+              <TooltipContent
+                side="top"
+                sideOffset={5}
+                className="text-xs px-2 py-1 text-[#878787]"
+              >
+                <p>Stop timer</p>
+              </TooltipContent>
+            )}
           </Tooltip>
         </TooltipProvider>
       </div>
