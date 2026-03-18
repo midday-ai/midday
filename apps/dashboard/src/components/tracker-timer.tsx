@@ -10,7 +10,7 @@ import {
 import { useToast } from "@midday/ui/use-toast";
 import NumberFlow from "@number-flow/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useGlobalTimerStatus } from "@/hooks/use-global-timer-status";
 import { useTimerStore } from "@/store/timer";
 import { useTRPC } from "@/trpc/client";
@@ -39,12 +39,8 @@ export function TrackerTimer({
   const { isRunning: globalIsRunning, elapsedTime: globalElapsedTime } =
     useGlobalTimerStatus();
 
-  // Hold-to-stop state
-  const [isHolding, setIsHolding] = useState(false);
-  const [holdProgress, setHoldProgress] = useState(0);
-  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const holdProgressRef = useRef<NodeJS.Timeout | null>(null);
-  const holdInitialStateRef = useRef<boolean>(false); // Store initial isThisProjectRunning state when hold starts
+  // Prevents accidental restart if a stale refetch briefly flips isThisProjectRunning back to true
+  const justStoppedRef = useRef(false);
 
   // Get current timer status - reduced refetch frequency
   const { data: timerStatus } = useQuery({
@@ -197,58 +193,6 @@ export function TrackerTimer({
     }),
   );
 
-  // Hold-to-stop handlers
-  const startHolding = useCallback(() => {
-    // Capture the initial state to prevent issues if refetch occurs during hold
-    const initialIsRunning = isThisProjectRunning;
-    if (!initialIsRunning) return;
-
-    // Store the initial state for use throughout the hold operation
-    holdInitialStateRef.current = initialIsRunning;
-
-    setIsHolding(true);
-    setHoldProgress(0);
-
-    // Start progress animation
-    let progress = 0;
-    holdProgressRef.current = setInterval(() => {
-      progress += 100 / 15; // 15 steps over 1.5 seconds = 100ms intervals
-      setHoldProgress(Math.min(progress, 100));
-    }, 100);
-
-    // Execute stop after 1.5 seconds - use stored initial state
-    holdTimerRef.current = setTimeout(() => {
-      // Only stop if the initial state was running (prevent stop if state changed during hold)
-      if (holdInitialStateRef.current) {
-        stopTimerMutation.mutate({});
-      }
-      resetHold();
-    }, 1500);
-  }, [isThisProjectRunning, stopTimerMutation]);
-
-  const resetHold = useCallback(() => {
-    setIsHolding(false);
-    setHoldProgress(0);
-    holdInitialStateRef.current = false; // Reset initial state
-
-    if (holdTimerRef.current) {
-      clearTimeout(holdTimerRef.current);
-      holdTimerRef.current = null;
-    }
-
-    if (holdProgressRef.current) {
-      clearInterval(holdProgressRef.current);
-      holdProgressRef.current = null;
-    }
-  }, []);
-
-  // Cleanup hold timers on unmount
-  useEffect(() => {
-    return () => {
-      resetHold();
-    };
-  }, [resetHold]);
-
   const formatTime = useCallback((seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -263,28 +207,35 @@ export function TrackerTimer({
   }, []);
 
   const handleButtonClick = useCallback(() => {
-    if (!isThisProjectRunning) {
-      // Check if there's a different timer running
-      if (isDifferentTimerRunning) {
-        const currentProjectName =
-          timerStatus?.currentEntry?.trackerProject?.name || "Unknown Project";
-        toast({
-          title: "Timer already running",
-          description: `You have a timer running for "${currentProjectName}". Please stop it first before starting a new timer.`,
-        });
-        return;
-      }
-
-      // Start timer for this project
-      startTimerMutation.mutate({
-        projectId,
-      });
+    if (isThisProjectRunning) {
+      justStoppedRef.current = true;
+      stopTimerMutation.mutate({});
+      setTimeout(() => {
+        justStoppedRef.current = false;
+      }, 500);
+      return;
     }
-    // For stop, we only use hold-to-stop, so no immediate action
+
+    if (justStoppedRef.current) return;
+
+    if (isDifferentTimerRunning) {
+      const currentProjectName =
+        timerStatus?.currentEntry?.trackerProject?.name || "Unknown Project";
+      toast({
+        title: "Timer already running",
+        description: `You have a timer running for "${currentProjectName}". Please stop it first before starting a new timer.`,
+      });
+      return;
+    }
+
+    startTimerMutation.mutate({
+      projectId,
+    });
   }, [
     isThisProjectRunning,
     isDifferentTimerRunning,
     startTimerMutation,
+    stopTimerMutation,
     projectId,
     timerStatus?.currentEntry?.trackerProject?.name,
     toast,
@@ -315,30 +266,6 @@ export function TrackerTimer({
                   e.stopPropagation();
                   handleButtonClick();
                 }}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  if (isThisProjectRunning) {
-                    startHolding();
-                  }
-                }}
-                onMouseUp={(e) => {
-                  e.stopPropagation();
-                  resetHold();
-                }}
-                onMouseLeave={(e) => {
-                  e.stopPropagation();
-                  resetHold();
-                }}
-                onTouchStart={(e) => {
-                  e.stopPropagation();
-                  if (isThisProjectRunning) {
-                    startHolding();
-                  }
-                }}
-                onTouchEnd={(e) => {
-                  e.stopPropagation();
-                  resetHold();
-                }}
               >
                 {isThisProjectRunning ? (
                   <Icons.StopOutline size={18} />
@@ -347,50 +274,15 @@ export function TrackerTimer({
                 )}
               </button>
             </TooltipTrigger>
-            {isThisProjectRunning && (
-              <TooltipContent
-                side="top"
-                sideOffset={5}
-                className="text-xs px-2 py-1 text-[#878787]"
-              >
-                <p>Hold down to stop</p>
-              </TooltipContent>
-            )}
+            <TooltipContent
+              side="top"
+              sideOffset={5}
+              className="text-xs px-2 py-1 text-[#878787]"
+            >
+              <p>{isThisProjectRunning ? "Stop timer" : "Start timer"}</p>
+            </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-
-        {/* Circular Progress Bar */}
-        {isHolding && isThisProjectRunning && (
-          <svg
-            className="absolute inset-0 w-6 h-6 -rotate-90 pointer-events-none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              className="text-primary opacity-30"
-            />
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              className="text-primary"
-              style={{
-                strokeDasharray: "62.83", // 2 * π * 10
-                strokeDashoffset: 62.83 * (1 - holdProgress / 100),
-                transition: "stroke-dashoffset 100ms linear",
-              }}
-            />
-          </svg>
-        )}
       </div>
 
       <div className="cursor-pointer flex-1" onClick={onClick}>
