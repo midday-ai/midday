@@ -67,7 +67,7 @@ export const middayDifferentiators = [
 
 export const middayPricing: PricingTier[] = [
   {
-    name: "Midday",
+    name: "Starter",
     price: "$19",
     period: "/month",
     features: [
@@ -79,9 +79,23 @@ export const middayPricing: PricingTier[] = [
       "AI assistant",
       "Vault",
       "Accounting exports",
-      "Apps and integrations",
       "Multi-currency",
+      "3 banks · 15 invoices/mo · 10GB storage",
+    ],
+  },
+  {
+    name: "Pro",
+    price: "$49",
+    period: "/month",
+    features: [
+      "Everything in Starter",
+      "10 banks · 50 invoices/mo · 100GB storage",
+      "Custom transaction categories",
+      "Invoice templates",
+      "Customer portal",
+      "Advanced AI insights",
       "API and MCP",
+      "Priority support",
     ],
   },
 ];
