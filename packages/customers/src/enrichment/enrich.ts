@@ -25,7 +25,7 @@ const logger = createLoggerWithContext("Enrichment");
 // Create Google AI instance
 const google = createGoogleGenerativeAI();
 
-// Create Exa client
+// Create Exa client - one of the best web search APIs for AI
 const exa = new Exa(process.env.EXA_API_KEY);
 
 // Default timeout
