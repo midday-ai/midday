@@ -16,6 +16,18 @@ export const PLANS = {
       key: "starter",
       interval: "year",
     },
+    pro: {
+      id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
+      name: "Pro",
+      key: "pro",
+      interval: "month",
+    },
+    pro_yearly: {
+      id: "a1b1bef6-fd61-447c-84c5-33b602e1b854",
+      name: "Pro Yearly",
+      key: "pro",
+      interval: "year",
+    },
   },
   sandbox: {
     starter: {
@@ -30,40 +42,29 @@ export const PLANS = {
       key: "starter",
       interval: "year",
     },
-  },
-} as const;
-
-export type PlanKey = "starter";
-export type PlanProductKey = "starter" | "starter_yearly";
-
-export type PlanEnvironment = "production" | "sandbox";
-
-const LEGACY_PRO_PRODUCTS = {
-  production: {
-    pro: {
-      id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
-      key: "pro" as const,
-      interval: "month" as const,
-    },
-    pro_yearly: {
-      id: "a1b1bef6-fd61-447c-84c5-33b602e1b854",
-      key: "pro" as const,
-      interval: "year" as const,
-    },
-  },
-  sandbox: {
     pro: {
       id: "dc9e75d2-c1ef-4265-9265-f599e54eb172",
-      key: "pro" as const,
-      interval: "month" as const,
+      name: "Pro",
+      key: "pro",
+      interval: "month",
     },
     pro_yearly: {
       id: "439697ce-73ad-439f-8b73-c5bee854a811",
-      key: "pro" as const,
-      interval: "year" as const,
+      name: "Pro Yearly",
+      key: "pro",
+      interval: "year",
     },
   },
-};
+} as const;
+
+export type PlanKey = "starter" | "pro";
+export type PlanProductKey =
+  | "starter"
+  | "starter_yearly"
+  | "pro"
+  | "pro_yearly";
+
+export type PlanEnvironment = "production" | "sandbox";
 
 export const getPlans = () => {
   return PLANS[POLAR_ENVIRONMENT];
@@ -75,31 +76,22 @@ export function getPlanProductId(plan: PlanKey, yearly: boolean): string {
   return plans[productKey].id;
 }
 
-function findProductById(productId: string) {
+export function getPlanByProductId(productId: string): PlanKey {
   const plans = getPlans();
-  const active = Object.values(plans).find((p) => p.id === productId);
-  if (active) return active;
-
-  const legacy = Object.values(LEGACY_PRO_PRODUCTS[POLAR_ENVIRONMENT]).find(
-    (p) => p.id === productId,
-  );
-  return legacy ?? null;
-}
-
-export function getPlanByProductId(productId: string): "starter" | "pro" {
-  const plan = findProductById(productId);
+  const plan = Object.values(plans).find((p) => p.id === productId);
 
   if (!plan) {
     throw new Error("Plan not found");
   }
 
-  return plan.key;
+  return plan.key as PlanKey;
 }
 
 export function getPlanIntervalByProductId(
   productId: string,
 ): "month" | "year" {
-  const plan = findProductById(productId);
+  const plans = getPlans();
+  const plan = Object.values(plans).find((p) => p.id === productId);
 
   if (!plan) {
     throw new Error("Plan not found");
@@ -131,6 +123,7 @@ export type PlanLimits = {
 
 export type PlanPricing = {
   starter: { monthly: number; yearly: number };
+  pro: { monthly: number; yearly: number };
   currency: string;
   symbol: string;
 };
@@ -139,6 +132,7 @@ export function getPlanPricing(continent?: string | null): PlanPricing {
   const isEUR = continent === "EU";
   return {
     starter: { monthly: 19, yearly: 15 },
+    pro: { monthly: 49, yearly: 39 },
     currency: isEUR ? "EUR" : "USD",
     symbol: isEUR ? "€" : "$",
   };
@@ -149,7 +143,7 @@ export type PlanFeature = {
   tooltip?: string;
 };
 
-export const planFeatures: PlanFeature[] = [
+export const starterFeatures: PlanFeature[] = [
   {
     label: "Invoicing and payments",
     tooltip:
@@ -202,16 +196,58 @@ export const planFeatures: PlanFeature[] = [
     tooltip:
       "Store customer details, track history, and reuse across invoices and projects.",
   },
+  { label: "3 banks · 15 invoices/mo · 10GB storage" },
+];
+
+export const proFeatures: PlanFeature[] = [
+  { label: "Everything in Starter" },
+  { label: "10 banks · 50 invoices/mo · 100GB storage" },
+  {
+    label: "Custom transaction categories",
+    tooltip:
+      "Create your own categories and rules to match how your business operates.",
+  },
+  {
+    label: "Invoice templates",
+    tooltip:
+      "Save and reuse invoice layouts for different clients or services.",
+  },
+  {
+    label: "Customer portal",
+    tooltip:
+      "Let customers view and pay invoices through their own branded portal.",
+  },
+  {
+    label: "Advanced AI insights",
+    tooltip:
+      "Get alerts on unusual spending, cash flow trends, and automated suggestions based on your financial data.",
+  },
+  {
+    label: "Shareable report and document links",
+    tooltip:
+      "Generate view-only links with optional expiration for reports, receipts, and vault documents.",
+  },
   {
     label: "API and MCP",
     tooltip:
       "REST API, SDKs, and MCP server for AI agents and custom workflows.",
   },
+  { label: "Priority support" },
 ];
+
+/** @deprecated Use starterFeatures instead */
+export const planFeatures = starterFeatures;
 
 export function getPlanLimits(plan: string): PlanLimits {
   switch (plan) {
     case "starter":
+      return {
+        users: 2,
+        bankConnections: 3,
+        storage: 10 * 1024 * 1024 * 1024,
+        inbox: 150,
+        invoices: 15,
+      };
     case "trial":
     case "pro":
       return {

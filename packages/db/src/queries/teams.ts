@@ -525,6 +525,7 @@ export async function updateTeamMember(
 
 type GetAvailablePlansResult = {
   starter: boolean;
+  pro: boolean;
 };
 
 export async function getAvailablePlans(
@@ -533,6 +534,7 @@ export async function getAvailablePlans(
 ): Promise<GetAvailablePlansResult> {
   return {
     starter: true,
+    pro: true,
   };
 }
 

@@ -141,12 +141,14 @@ export function CancellationDialog({
   const handleSwitchToAnnual = useCallback(async () => {
     if (!plan || plan === "trial") return;
 
+    const yearlyPlanType = `${plan}_yearly`;
+
     handleClose(false);
 
     try {
       const { url } = await createCheckoutMutation.mutateAsync({
-        plan: "starter",
-        planType: "starter_yearly",
+        plan,
+        planType: yearlyPlanType,
         embedOrigin: window.location.origin,
         currency: checkoutCurrency,
       });
@@ -161,8 +163,8 @@ export function CancellationDialog({
         track({
           event: LogEvents.CheckoutCompleted.name,
           channel: LogEvents.CheckoutCompleted.channel,
-          plan: "starter",
-          planType: "starter_yearly",
+          plan,
+          planType: yearlyPlanType,
         });
         queryClient.invalidateQueries({
           queryKey: trpc.user.me.queryKey(),
@@ -189,7 +191,8 @@ export function CancellationDialog({
 
   const pricing = getPlanPricing(checkoutCurrency === "EUR" ? "EU" : undefined);
 
-  const annualSavings = (pricing.starter.monthly - pricing.starter.yearly) * 12;
+  const planPricing = plan === "pro" ? pricing.pro : pricing.starter;
+  const annualSavings = (planPricing.monthly - planPricing.yearly) * 12;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>

@@ -8,7 +8,7 @@ export const getBillingOrdersSchema = z.object({
 export type GetBillingOrdersSchema = z.infer<typeof getBillingOrdersSchema>;
 
 export const createCheckoutSchema = z.object({
-  plan: z.enum(["starter"]),
+  plan: z.enum(["starter", "pro"]),
   planType: z.string().optional(),
   embedOrigin: z.string(),
   currency: z.enum(["USD", "EUR"]).optional(),

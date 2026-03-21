@@ -86,20 +86,20 @@ export function Plans() {
     trpc.billing.createCheckout.mutationOptions(),
   );
 
-  const handleCheckout = async (planType: string) => {
+  const handleCheckout = async (plan: "starter" | "pro", planType: string) => {
     try {
       setIsSubmitting(true);
 
       track({
         event: LogEvents.CheckoutStarted.name,
         channel: LogEvents.CheckoutStarted.channel,
-        plan: "starter",
+        plan,
         planType,
         currency: checkoutCurrency,
       });
 
       const { url } = await createCheckoutMutation.mutateAsync({
-        plan: "starter",
+        plan,
         planType,
         embedOrigin: window.location.origin,
         currency: checkoutCurrency,
@@ -116,7 +116,7 @@ export function Plans() {
         track({
           event: LogEvents.CheckoutCompleted.name,
           channel: LogEvents.CheckoutCompleted.channel,
-          plan: "starter",
+          plan,
           planType,
           currency: checkoutCurrency,
         });
@@ -143,12 +143,27 @@ export function Plans() {
   return (
     <PlanCards
       onCurrencyChange={setCheckoutCurrency}
-      renderAction={(billingPeriod) => (
+      renderStarterAction={(billingPeriod) => (
+        <SubmitButton
+          className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
+          onClick={() =>
+            handleCheckout(
+              "starter",
+              billingPeriod === "yearly" ? "starter_yearly" : "starter",
+            )
+          }
+          isSubmitting={isSubmitting}
+        >
+          Upgrade
+        </SubmitButton>
+      )}
+      renderProAction={(billingPeriod) => (
         <SubmitButton
           className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors"
           onClick={() =>
             handleCheckout(
-              billingPeriod === "yearly" ? "starter_yearly" : "starter",
+              "pro",
+              billingPeriod === "yearly" ? "pro_yearly" : "pro",
             )
           }
           isSubmitting={isSubmitting}
