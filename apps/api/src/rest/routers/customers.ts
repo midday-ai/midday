@@ -85,7 +85,7 @@ app.openapi(
         },
       },
     },
-    middleware: [withRequiredScope("customers.read")],
+    middleware: [withRequiredScope("customers.write")],
   }),
   async (c) => {
     const db = c.get("db");

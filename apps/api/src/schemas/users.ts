@@ -139,7 +139,7 @@ export const userSchema = z.object({
         description: "Name of the team or organization",
         example: "Acme Corporation",
       }),
-      logoUrl: z.string().url().openapi({
+      logoUrl: z.string().url().nullable().openapi({
         description: "URL to the team's logo image",
         example: "https://cdn.midday.ai/logos/acme-corp.png",
       }),

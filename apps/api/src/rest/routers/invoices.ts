@@ -120,12 +120,14 @@ app.openapi(
         return {
           ...invoiceWithoutToken,
           ...calculatedAmounts,
-          pdfUrl: token
-            ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
-            : null,
-          previewUrl: token
-            ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
-            : null,
+          pdfUrl:
+            token && process.env.MIDDAY_DASHBOARD_URL
+              ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
+              : null,
+          previewUrl:
+            token && process.env.MIDDAY_DASHBOARD_URL
+              ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
+              : null,
         };
       }),
     };
@@ -295,12 +297,14 @@ app.openapi(
       bottomBlock: result.bottomBlock
         ? JSON.stringify(result.bottomBlock)
         : null,
-      pdfUrl: token
-        ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
-        : null,
-      previewUrl: token
-        ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
-        : null,
+      pdfUrl:
+        token && process.env.MIDDAY_DASHBOARD_URL
+          ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
+          : null,
+      previewUrl:
+        token && process.env.MIDDAY_DASHBOARD_URL
+          ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
+          : null,
     };
 
     return c.json(validateResponse(response, invoiceResponseSchema));
@@ -606,12 +610,14 @@ app.openapi(
       bottomBlock: result.bottomBlock
         ? JSON.stringify(result.bottomBlock)
         : null,
-      pdfUrl: token
-        ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
-        : null,
-      previewUrl: token
-        ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
-        : null,
+      pdfUrl:
+        token && process.env.MIDDAY_DASHBOARD_URL
+          ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
+          : null,
+      previewUrl:
+        token && process.env.MIDDAY_DASHBOARD_URL
+          ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
+          : null,
     };
 
     return c.json(validateResponse(response, draftInvoiceResponseSchema), 201);
@@ -657,18 +663,19 @@ app.openapi(
     const { id } = c.req.valid("param");
     const input = c.req.valid("json");
 
-    const result = await updateInvoice(db, {
+    await updateInvoice(db, {
       id,
       teamId,
       userId,
       ...input,
     });
 
+    const result = await getInvoiceById(db, { id, teamId });
+
     if (!result) {
       throw new HTTPException(404, { message: "Invoice not found" });
     }
 
-    // Add PDF download and preview URLs and serialize objects like tRPC does with superjson
     const { token, ...resultWithoutToken } = result;
     const response = {
       ...resultWithoutToken,
@@ -688,12 +695,14 @@ app.openapi(
       bottomBlock: result.bottomBlock
         ? JSON.stringify(result.bottomBlock)
         : null,
-      pdfUrl: token
-        ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
-        : null,
-      previewUrl: token
-        ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
-        : null,
+      pdfUrl:
+        token && process.env.MIDDAY_DASHBOARD_URL
+          ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
+          : null,
+      previewUrl:
+        token && process.env.MIDDAY_DASHBOARD_URL
+          ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
+          : null,
     };
 
     return c.json(validateResponse(response, updateInvoiceResponseSchema));
