@@ -1412,7 +1412,7 @@ export const competitors: Competitor[] = [
       },
       {
         title: "Cost",
-        midday: "From $23/mo",
+        midday: "From $19/mo",
         competitor: "$299+/month",
       },
     ],

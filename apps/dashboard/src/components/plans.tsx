@@ -86,7 +86,7 @@ export function Plans() {
     trpc.billing.createCheckout.mutationOptions(),
   );
 
-  const handleCheckout = async (plan: string, planType: string) => {
+  const handleCheckout = async (plan: "starter" | "pro", planType: string) => {
     try {
       setIsSubmitting(true);
 
