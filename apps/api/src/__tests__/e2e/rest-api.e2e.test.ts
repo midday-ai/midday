@@ -44,7 +44,9 @@ async function api<T = unknown>(
 
     if (res.status === 429 && attempt < maxRetries) {
       const retryAfter = res.headers.get("retry-after");
-      const waitMs = retryAfter ? Number(retryAfter) * 1000 : 2000 * (attempt + 1);
+      const waitMs = retryAfter
+        ? Number(retryAfter) * 1000
+        : 2000 * (attempt + 1);
       await sleep(waitMs);
       continue;
     }
@@ -52,7 +54,9 @@ async function api<T = unknown>(
     const data = (await res.json().catch(() => null)) as T;
     return { status: res.status, data };
   }
-  throw new Error(`Rate limited after ${maxRetries} retries: ${method} ${path}`);
+  throw new Error(
+    `Rate limited after ${maxRetries} retries: ${method} ${path}`,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -241,10 +245,7 @@ describe("Tracker Projects CRUD", () => {
     const id = createdIds[0];
     if (!id) return;
 
-    const { status, data } = await api<any>(
-      "GET",
-      `/tracker-projects/${id}`,
-    );
+    const { status, data } = await api<any>("GET", `/tracker-projects/${id}`);
 
     expect(status).toBe(200);
     expect(data.id).toBe(id);
@@ -341,17 +342,13 @@ describe("Tracker Entries CRUD", () => {
     if (!id || !projectId) return;
 
     const today = new Date().toISOString().split("T")[0]!;
-    const { status, data } = await api<any>(
-      "PATCH",
-      `/tracker-entries/${id}`,
-      {
-        projectId,
-        start: `${today}T10:00:00.000Z`,
-        stop: `${today}T11:00:00.000Z`,
-        dates: [today],
-        duration: 3600,
-      },
-    );
+    const { status, data } = await api<any>("PATCH", `/tracker-entries/${id}`, {
+      projectId,
+      start: `${today}T10:00:00.000Z`,
+      stop: `${today}T11:00:00.000Z`,
+      dates: [today],
+      duration: 3600,
+    });
 
     expect(status).toBe(200);
     const entries = data?.data ?? data;
@@ -380,10 +377,7 @@ describe("Tracker Entries CRUD", () => {
   });
 
   test("GET /tracker-entries/timer/current -> 200", async () => {
-    const { status } = await api<any>(
-      "GET",
-      "/tracker-entries/timer/current",
-    );
+    const { status } = await api<any>("GET", "/tracker-entries/timer/current");
 
     expect(status).toBe(200);
   });
@@ -430,11 +424,9 @@ describe("Tracker Entries Timer", () => {
   test("POST /tracker-entries/timer/stop -> 200 or 500 (discarded if <60s)", async () => {
     if (!timerEntryId) return;
 
-    const { status } = await api<any>(
-      "POST",
-      "/tracker-entries/timer/stop",
-      { entryId: timerEntryId },
-    );
+    const { status } = await api<any>("POST", "/tracker-entries/timer/stop", {
+      entryId: timerEntryId,
+    });
 
     // Server discards entries under 60s and the response shape mismatch causes 500.
     // In real usage the timer runs longer; here we verify the endpoint is reachable.
@@ -470,28 +462,24 @@ describe("Tracker Entries Bulk", () => {
     if (!bulkProjectId) return;
 
     const today = new Date().toISOString().split("T")[0]!;
-    const { status, data } = await api<any>(
-      "POST",
-      "/tracker-entries/bulk",
-      {
-        entries: [
-          {
-            projectId: bulkProjectId,
-            start: `${today}T08:00:00.000Z`,
-            stop: `${today}T09:00:00.000Z`,
-            dates: [today],
-            duration: 3600,
-          },
-          {
-            projectId: bulkProjectId,
-            start: `${today}T13:00:00.000Z`,
-            stop: `${today}T14:00:00.000Z`,
-            dates: [today],
-            duration: 3600,
-          },
-        ],
-      },
-    );
+    const { status, data } = await api<any>("POST", "/tracker-entries/bulk", {
+      entries: [
+        {
+          projectId: bulkProjectId,
+          start: `${today}T08:00:00.000Z`,
+          stop: `${today}T09:00:00.000Z`,
+          dates: [today],
+          duration: 3600,
+        },
+        {
+          projectId: bulkProjectId,
+          start: `${today}T13:00:00.000Z`,
+          stop: `${today}T14:00:00.000Z`,
+          dates: [today],
+          duration: 3600,
+        },
+      ],
+    });
 
     expect([200, 201]).toContain(status);
     const entries = data?.data ?? data;
@@ -587,10 +575,7 @@ describe("Teams", () => {
   test("GET /teams/:id/members -> 200", async () => {
     if (!teamId) return;
 
-    const { status, data } = await api<any>(
-      "GET",
-      `/teams/${teamId}/members`,
-    );
+    const { status, data } = await api<any>("GET", `/teams/${teamId}/members`);
 
     expect(status).toBe(200);
     expect(data).toHaveProperty("data");
@@ -751,14 +736,14 @@ describe("Transactions CRUD", () => {
     const { status, data } = await api<any>("POST", "/transactions/bulk", [
       {
         name: "E2E Bulk Txn 1",
-        amount: 10.00,
+        amount: 10.0,
         currency: "USD",
         date: new Date().toISOString(),
         bankAccountId,
       },
       {
         name: "E2E Bulk Txn 2",
-        amount: 20.00,
+        amount: 20.0,
         currency: "USD",
         date: new Date().toISOString(),
         bankAccountId,
@@ -830,10 +815,7 @@ describe("Documents", () => {
   test("GET /documents/:id -> 200", async () => {
     if (!firstDocId) return;
 
-    const { status, data } = await api<any>(
-      "GET",
-      `/documents/${firstDocId}`,
-    );
+    const { status, data } = await api<any>("GET", `/documents/${firstDocId}`);
 
     expect(status).toBe(200);
     expect(data.id).toBe(firstDocId);
@@ -883,10 +865,7 @@ describe("Inbox", () => {
   test("GET /inbox/:id -> 200", async () => {
     if (!firstInboxId) return;
 
-    const { status, data } = await api<any>(
-      "GET",
-      `/inbox/${firstInboxId}`,
-    );
+    const { status, data } = await api<any>("GET", `/inbox/${firstInboxId}`);
 
     expect(status).toBe(200);
     expect(data.id).toBe(firstInboxId);
@@ -979,10 +958,7 @@ describe("Invoices", () => {
   });
 
   test("GET /invoices/payment-status -> 200", async () => {
-    const { status, data } = await api<any>(
-      "GET",
-      "/invoices/payment-status",
-    );
+    const { status, data } = await api<any>("GET", "/invoices/payment-status");
 
     expect(status).toBe(200);
     expect(data).toBeDefined();
@@ -998,7 +974,9 @@ describe("Invoices", () => {
 
     const tiptapBlock = {
       type: "doc",
-      content: [{ type: "paragraph", content: [{ type: "text", text: "E2E test" }] }],
+      content: [
+        { type: "paragraph", content: [{ type: "text", text: "E2E test" }] },
+      ],
     };
 
     const { status, data } = await api<any>("POST", "/invoices", {
@@ -1024,11 +1002,9 @@ describe("Invoices", () => {
   test("PUT /invoices/:id -> 200 (update note)", async () => {
     if (!createdInvoiceId) return;
 
-    const { status } = await api<any>(
-      "PUT",
-      `/invoices/${createdInvoiceId}`,
-      { internalNote: "Updated by E2E test" },
-    );
+    const { status } = await api<any>("PUT", `/invoices/${createdInvoiceId}`, {
+      internalNote: "Updated by E2E test",
+    });
 
     expect(status).toBe(200);
   });
@@ -1036,11 +1012,9 @@ describe("Invoices", () => {
   test("PUT /invoices/:id -> 200 (cancel for deletion)", async () => {
     if (!createdInvoiceId) return;
 
-    const { status } = await api<any>(
-      "PUT",
-      `/invoices/${createdInvoiceId}`,
-      { status: "canceled" },
-    );
+    const { status } = await api<any>("PUT", `/invoices/${createdInvoiceId}`, {
+      status: "canceled",
+    });
 
     expect(status).toBe(200);
   });
@@ -1127,10 +1101,7 @@ describe("Reports", () => {
 // ---------------------------------------------------------------------------
 describe("Search", () => {
   test("GET /search -> 200", async () => {
-    const { status, data } = await api<any>(
-      "GET",
-      "/search?searchTerm=test",
-    );
+    const { status, data } = await api<any>("GET", "/search?searchTerm=test");
 
     expect(status).toBe(200);
     expect(data).toBeDefined();
@@ -1168,11 +1139,9 @@ describe("Notifications", () => {
 
     expect(status).toBe(200);
 
-    await api(
-      "PATCH",
-      `/notifications/${firstNotificationId}/status`,
-      { status: originalStatus },
-    );
+    await api("PATCH", `/notifications/${firstNotificationId}/status`, {
+      status: originalStatus,
+    });
   });
 
   test("POST /notifications/update-all-status -> 200 (update + restore)", async () => {
