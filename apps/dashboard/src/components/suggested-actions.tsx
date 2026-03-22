@@ -29,8 +29,6 @@ export function SuggestedActions() {
   );
 
   const handleToolCall = (params: {
-    toolName: string;
-    toolParams: Record<string, any>;
     text: string;
     actionId: string;
   }) => {
@@ -43,12 +41,6 @@ export function SuggestedActions() {
     sendMessage({
       role: "user",
       parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
     });
   };
 
@@ -171,7 +163,7 @@ export function SuggestedActions() {
           const Icon = config?.icon;
           const title = config?.title || action.id;
           const description =
-            config?.description || `Execute ${action.toolName}`;
+            config?.description || `Execute ${action.id}`;
           const isLast = index === suggestedActions.length - 1;
 
           return (
@@ -189,8 +181,6 @@ export function SuggestedActions() {
               )}
               onClick={() => {
                 handleToolCall({
-                  toolName: action.toolName,
-                  toolParams: action.toolParams,
                   text: description,
                   actionId: action.id,
                 });

@@ -1,23 +1,17 @@
 "use client";
 
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { FormatAmount } from "@/components/format-amount";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
-import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function RecurringExpensesWidget() {
   const trpc = useTRPC();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
-  const { from, to, period, currency } = useMetricsFilter();
+  const { from, to, currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
     ...trpc.widgets.getRecurringExpenses.queryOptions({
@@ -52,49 +46,11 @@ export function RecurringExpensesWidget() {
     return `${totalExpenses} recurring expenses`;
   };
 
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, any>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
-  const periodLabel = getPeriodLabel(period, from, to);
-
-  const handleViewRecurring = () => {
-    handleToolCall({
-      toolName: "getExpenses",
-      toolParams: {
-        from,
-        to,
-        currency: currency,
-        showCanvas: true,
-      },
-      text: `Show recurring expenses for ${periodLabel}`,
-    });
-  };
-
   return (
     <BaseWidget
       title="Recurring Expenses"
       icon={<Icons.Repeat className="size-4" />}
       description={getDescription()}
-      onClick={handleViewRecurring}
-      actions="View all recurring"
     >
       {recurringData && recurringData.summary.totalExpenses > 0 && (
         <div className="flex items-baseline w-full">

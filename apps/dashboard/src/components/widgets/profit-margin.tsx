@@ -1,7 +1,5 @@
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
@@ -11,9 +9,6 @@ import { WidgetSkeleton } from "./widget-skeleton";
 
 export function ProfitMarginWidget() {
   const trpc = useTRPC();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
   const { from, to, period, revenueType, currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
@@ -36,43 +31,8 @@ export function ProfitMarginWidget() {
     );
   }
 
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, any>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
   const periodLabel = getPeriodLabel(period, from, to);
   const revenueTypeLabel = revenueType === "gross" ? "Gross" : "Net";
-
-  const handleViewAnalysis = () => {
-    handleToolCall({
-      toolName: "getProfitAnalysis",
-      toolParams: {
-        from,
-        to,
-        currency,
-        revenueType,
-        showCanvas: true,
-      },
-      text: `Show ${revenueTypeLabel.toLowerCase()} profit margin analysis for ${periodLabel}`,
-    });
-  };
 
   const formatPercentage = (percentage: number) => {
     return `${percentage.toFixed(1)}%`;
@@ -89,8 +49,6 @@ export function ProfitMarginWidget() {
           </p>
         </div>
       }
-      actions="View margin analysis"
-      onClick={handleViewAnalysis}
     >
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-normal">

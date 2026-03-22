@@ -1,4 +1,4 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { format, startOfYear, subMonths, subYears } from "date-fns";
 
 type PeriodOption =
@@ -56,7 +56,6 @@ export interface ResolvedToolParams {
 }
 
 export interface ResolveToolParamsOptions {
-  toolName: string;
   appContext: AppContext;
   aiParams: {
     period?: string;
@@ -70,48 +69,16 @@ export interface ResolveToolParamsOptions {
 }
 
 /**
- * Resolve tool parameters with priority:
- * 1. Forced params (widget click)
- * 2. AI params (user override)
- * 3. Dashboard metricsFilter
- * 4. Fallback (1-year)
+ * Resolve tool parameters:
+ * 1. AI params (user override)
+ * 2. Fallback (1-year)
  */
 export function resolveToolParams(
   options: ResolveToolParamsOptions,
 ): ResolvedToolParams {
-  const { toolName, appContext, aiParams } = options;
-  const { forcedToolCall, metricsFilter, baseCurrency } = appContext;
+  const { appContext, aiParams } = options;
+  const { baseCurrency } = appContext;
 
-  // 1. FORCED PARAMS: Widget click → use exact params (bypasses AI)
-  if (forcedToolCall?.toolName === toolName && forcedToolCall.toolParams) {
-    const forced = forcedToolCall.toolParams;
-    return {
-      ...forced,
-      from:
-        (forced.from as string) ??
-        metricsFilter?.from ??
-        getPeriodDates("1-year").from,
-      to:
-        (forced.to as string) ??
-        metricsFilter?.to ??
-        getPeriodDates("1-year").to,
-      currency:
-        (forced.currency as string) ?? metricsFilter?.currency ?? baseCurrency,
-      revenueType:
-        (forced.revenueType as "gross" | "net") ??
-        metricsFilter?.revenueType ??
-        "net",
-    };
-  }
-
-  // 2. AI PARAMS + METRICS FILTER FALLBACK
-  // Priority: AI explicit > metricsFilter > hardcoded default
-
-  // Handle historical date range:
-  // - Some tools use 'period' for historical period (e.g., get-expenses)
-  // - Others use 'dateRange' for historical period and 'period' for aggregation (e.g., getCashFlow uses 'period' for "monthly"/"quarterly")
-  // Only consider values that are valid historical periods (e.g., "1-year", "6-months")
-  // Ignore aggregation values like "monthly", "quarterly", "yearly"
   const historicalPeriod = isValidPeriodOption(aiParams.dateRange)
     ? aiParams.dateRange
     : isValidPeriodOption(aiParams.period)
@@ -122,40 +89,26 @@ export function resolveToolParams(
   let to: string;
 
   if (historicalPeriod) {
-    // AI specified a valid historical period - convert to dates
     const dates = getPeriodDates(historicalPeriod);
     from = dates.from;
     to = dates.to;
   } else if (aiParams.from && aiParams.to) {
-    // AI specified explicit dates
     from = aiParams.from;
     to = aiParams.to;
-  } else if (metricsFilter?.from && metricsFilter?.to) {
-    // Use dashboard filter state as default
-    from = metricsFilter.from;
-    to = metricsFilter.to;
   } else {
-    // Fallback to 1-year
     const dates = getPeriodDates("1-year");
     from = dates.from;
     to = dates.to;
   }
 
-  // Currency: AI > metricsFilter > baseCurrency
   const currency =
     (aiParams.currency !== null && aiParams.currency !== undefined
       ? aiParams.currency
-      : undefined) ??
-    metricsFilter?.currency ??
-    baseCurrency;
+      : undefined) ?? baseCurrency;
 
-  // Revenue type: AI > metricsFilter > "net"
   const revenueType =
-    (aiParams.revenueType as "gross" | "net") ??
-    metricsFilter?.revenueType ??
-    "net";
+    (aiParams.revenueType as "gross" | "net") ?? "net";
 
-  // Return resolved params, passing through any other AI params
   return {
     ...aiParams,
     from,

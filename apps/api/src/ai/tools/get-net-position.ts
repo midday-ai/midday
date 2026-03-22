@@ -1,4 +1,4 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getNetPosition } from "@midday/db/queries";
@@ -23,9 +23,7 @@ export const getNetPositionTool = tool({
     const teamId = appContext.teamId as string;
 
     if (!teamId) {
-      yield {
-        text: "Unable to retrieve net position: Team ID not found in context.",
-      };
+      yield { text: "Unable to retrieve net position: Team ID not found." };
       return {
         cash: 0,
         creditDebt: 0,
@@ -49,32 +47,13 @@ export const getNetPositionTool = tool({
         currency || result.currency || appContext.baseCurrency || "USD";
       const locale = appContext.locale || "en-US";
 
-      const formattedCash = formatAmount({
-        amount: result.cash,
-        currency: targetCurrency,
-        locale,
-      });
-
-      const formattedCreditDebt = formatAmount({
-        amount: result.creditDebt,
-        currency: targetCurrency,
-        locale,
-      });
-
       const formattedNetPosition = formatAmount({
         amount: result.netPosition,
         currency: targetCurrency,
         locale,
       });
 
-      let responseText = `**Net Position:** ${formattedNetPosition}\n\n`;
-      responseText += "| Category | Amount |\n";
-      responseText += "|----------|--------|\n";
-      responseText += `| Cash (${result.cashAccountCount} accounts) | ${formattedCash} |\n`;
-      responseText += `| Credit Debt (${result.creditAccountCount} accounts) | -${formattedCreditDebt} |\n`;
-      responseText += `| **Net Position** | **${formattedNetPosition}** |\n`;
-
-      yield { text: responseText };
+      yield { text: `Net position: ${formattedNetPosition}` };
 
       return {
         cash: result.cash,

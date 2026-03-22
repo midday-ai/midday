@@ -14,8 +14,6 @@
     "./ai/types": "./src/ai/types.ts"
   },
   "dependencies": {
-    "@ai-sdk-tools/agents": "^1.2.0",
-    "@ai-sdk-tools/artifacts": "^1.2.0",
     "@ai-sdk-tools/memory": "^1.2.0",
     "@ai-sdk/anthropic": "2.0.62",
     "@ai-sdk/openai": "catalog:",
@@ -24,7 +22,9 @@
     "@hono/mcp": "^0.2.4",
     "@hono/trpc-server": "^0.4.2",
     "@hono/zod-openapi": "1.2.2",
+    "@json-render/core": "^0.14.1",
     "@midday/accounting": "workspace:*",
+    "@midday/generative-ui": "workspace:*",
     "@midday/app-store": "workspace:*",
     "@midday/banking": "workspace:*",
     "@midday/cache": "workspace:*",
@@ -63,6 +63,7 @@
     "resend": "catalog:",
     "stripe": "^20.1.0",
     "superjson": "^2.2.6",
+    "toolpick": "^0.2.0",
     "uuid": "catalog:",
     "zod": "catalog:"
   },

@@ -1,14 +1,21 @@
-import type {
-  ForcedToolCall,
-  MetricsFilter,
-} from "@api/ai/agents/config/shared";
-import { buildAppContext } from "@api/ai/agents/config/shared";
-import { mainAgent } from "@api/ai/agents/main";
+import { openai } from "@ai-sdk/openai";
+import { buildSystemPrompt } from "@api/ai/system-prompt";
+import { toolIndex } from "@api/ai/tool-index";
+import { allTools } from "@api/ai/tools";
 import { getUserContext } from "@api/ai/utils/get-user-context";
 import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
+import { pipeJsonRender } from "@json-render/core";
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { smoothStream } from "ai";
+import type { UIMessage } from "ai";
+import {
+  smoothStream,
+  streamText,
+  convertToModelMessages,
+  stepCountIs,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+} from "ai";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
@@ -22,14 +29,12 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
   }
 
   const {
-    message,
+    messages: uiMessages,
     id,
     timezone,
-    agentChoice,
-    toolChoice,
     country,
     city,
-    metricsFilter,
+    invoiceId,
   } = validationResult.data;
 
   const teamId = c.get("teamId");
@@ -46,37 +51,53 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
     timezone,
   });
 
-  // Extract forced tool params from message metadata (widget clicks)
-  // When a widget sends toolParams, use them directly (bypasses AI decisions)
-  let forcedToolCall: ForcedToolCall | undefined;
-  const metadata = (message as any)?.metadata;
-  if (metadata?.toolCall?.toolName && metadata?.toolCall?.toolParams) {
-    forcedToolCall = {
-      toolName: metadata.toolCall.toolName,
-      toolParams: metadata.toolCall.toolParams,
-    };
-  }
-
-  const appContext = buildAppContext(userContext, id, {
-    metricsFilter: metricsFilter as MetricsFilter | undefined,
-    forcedToolCall,
+  const systemPrompt = buildSystemPrompt({
+    companyName: userContext.teamName ?? "",
+    baseCurrency: userContext.baseCurrency ?? "USD",
+    locale: userContext.locale ?? "en-US",
+    currentDateTime: new Date().toISOString(),
+    timezone:
+      userContext.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
 
-  // Pass user preferences to main agent as context
-  // The main agent will use this information to make better routing decisions
-  return mainAgent.toUIMessageStream({
-    message,
-    strategy: "auto",
-    maxRounds: 5,
-    maxSteps: 20,
-    context: appContext,
-    agentChoice,
-    toolChoice,
-    experimental_transform: smoothStream({
-      chunking: "word",
-    }),
-    sendSources: true,
+  const appContext = {
+    userId: `${userId}:${teamId}`,
+    fullName: userContext.fullName ?? "",
+    companyName: userContext.teamName ?? "",
+    baseCurrency: userContext.baseCurrency ?? "USD",
+    locale: userContext.locale ?? "en-US",
+    currentDateTime: new Date().toISOString(),
+    timezone:
+      userContext.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    chatId: id,
+    teamId,
+    country: userContext.country ?? undefined,
+    city: userContext.city ?? undefined,
+    fiscalYearStartMonth: userContext.fiscalYearStartMonth ?? undefined,
+    hasBankAccounts: userContext.hasBankAccounts ?? false,
+    invoiceId: invoiceId ?? undefined,
+  };
+
+  const modelMessages = await convertToModelMessages(uiMessages as UIMessage[]);
+
+  const result = streamText({
+    model: openai("gpt-4o"),
+    tools: allTools,
+    prepareStep: toolIndex.prepareStep(),
+    system: systemPrompt,
+    messages: modelMessages,
+    stopWhen: stepCountIs(10),
+    experimental_transform: smoothStream({ chunking: "word" }),
+    experimental_context: appContext,
   });
+
+  const stream = createUIMessageStream({
+    execute: async ({ writer }) => {
+      writer.merge(pipeJsonRender(result.toUIMessageStream()));
+    },
+  });
+
+  return createUIMessageStreamResponse({ stream });
 });
 
 export { app as chatRouter };

@@ -1,11 +1,9 @@
 "use client";
 
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { FormatAmount } from "@/components/format-amount";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { BaseWidget } from "./base";
@@ -15,9 +13,6 @@ import { WidgetSkeleton } from "./widget-skeleton";
 export function CustomerLifetimeValueWidget() {
   const trpc = useTRPC();
   const _router = useRouter();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
   const { currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
@@ -36,38 +31,6 @@ export function CustomerLifetimeValueWidget() {
       />
     );
   }
-
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, any>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
-  const handleViewDetails = () => {
-    handleToolCall({
-      toolName: "getCustomers",
-      toolParams: {
-        sort: ["totalRevenue", "desc"],
-        pageSize: 10,
-      },
-      text: "Show customers",
-    });
-  };
 
   const result = data?.result;
   const summary = result?.summary;
@@ -123,13 +86,6 @@ export function CustomerLifetimeValueWidget() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleViewDetails}
-                className="text-xs text-[#878787] hover:text-foreground text-left transition-colors mt-1"
-              >
-                View all customers
-              </button>
             </>
           ) : (
             <div className="flex items-center min-h-[120px]">
@@ -140,8 +96,6 @@ export function CustomerLifetimeValueWidget() {
           )}
         </div>
       }
-      actions=""
-      onClick={handleViewDetails}
     >
       <div />
     </BaseWidget>

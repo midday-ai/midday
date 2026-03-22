@@ -1,4 +1,4 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { tz } from "@date-fns/tz";
 import { db } from "@midday/db/client";
 import { getTrackerProjects, upsertTrackerEntries } from "@midday/db/queries";

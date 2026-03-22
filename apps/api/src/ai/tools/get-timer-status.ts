@@ -1,4 +1,4 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { db } from "@midday/db/client";
 import { getTimerStatus } from "@midday/db/queries";
 import { getAppUrl } from "@midday/utils/envs";

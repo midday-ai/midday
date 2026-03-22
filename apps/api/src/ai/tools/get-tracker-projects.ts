@@ -1,7 +1,6 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { db } from "@midday/db/client";
 import { getTrackerProjects } from "@midday/db/queries";
-import { getAppUrl } from "@midday/utils/envs";
 import { formatAmount, formatDate } from "@midday/utils/format";
 import { tool } from "ai";
 import { formatDistance } from "date-fns";
@@ -62,13 +61,13 @@ export const getTrackerProjectsTool = tool({
 
       const result = await getTrackerProjects(db, params);
 
-      if (result.data.length === 0) {
-        yield { text: "No tracker projects found matching your criteria." };
-        return;
-      }
-
       const locale = appContext.locale ?? "en-US";
       const baseCurrency = appContext.baseCurrency ?? "USD";
+
+      if (result.data.length === 0) {
+        yield { text: "No tracker projects found matching your criteria." };
+        return { projects: [], total: 0, currency: baseCurrency };
+      }
 
       const formattedProjects = result.data.map((project) => {
         const formattedRate = project.rate
@@ -97,8 +96,11 @@ export const getTrackerProjectsTool = tool({
           status: project.status,
           customerName: project.customer?.name || "No customer",
           rate: formattedRate,
+          rawRate: project.rate ?? 0,
           totalDuration: formattedDuration,
+          durationSeconds: project.totalDuration ?? 0,
           totalAmount: formattedTotalAmount,
+          rawTotalAmount: project.totalAmount ?? 0,
           createdAt: formatDate(project.createdAt),
         };
       });
@@ -111,11 +113,6 @@ export const getTrackerProjectsTool = tool({
         (sum, p) => sum + (p.totalAmount ?? 0),
         0,
       );
-      const formattedTotalAmount = formatAmount({
-        amount: totalAmount,
-        currency: baseCurrency,
-        locale,
-      });
 
       const inProgressCount = result.data.filter(
         (p) => p.status === "in_progress",
@@ -124,22 +121,16 @@ export const getTrackerProjectsTool = tool({
         (p) => p.status === "completed",
       ).length;
 
-      const durationStart = new Date(0);
-      const durationEnd = new Date(totalDuration * 1000);
-      const formattedTotalDuration = formatDistance(
-        durationStart,
-        durationEnd,
-        { includeSeconds: false },
-      );
+      yield { text: `${result.data.length} projects found` };
 
-      const response = `| Name | Status | Customer | Rate | Duration | Total Amount | Created |\n|------|--------|----------|------|----------|--------------|----------|\n${formattedProjects.map((p) => `| ${p.name} | ${p.status} | ${p.customerName} | ${p.rate} | ${p.totalDuration} | ${p.totalAmount} | ${p.createdAt} |`).join("\n")}\n\n**${result.data.length} projects** | Total Duration: ${formattedTotalDuration} | Total Amount: ${formattedTotalAmount} | In Progress: ${inProgressCount} | Completed: ${completedCount}`;
-
-      yield {
-        text: response,
-        link: {
-          text: "View all projects",
-          url: `${getAppUrl()}/tracker`,
-        },
+      return {
+        projects: formattedProjects,
+        total: result.data.length,
+        totalDuration,
+        totalAmount,
+        inProgressCount,
+        completedCount,
+        currency: baseCurrency,
       };
     } catch (error) {
       yield {

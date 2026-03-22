@@ -1,6 +1,5 @@
 "use client";
 
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
@@ -12,7 +11,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -25,9 +23,6 @@ import { WidgetSkeleton } from "./widget-skeleton";
 export function ProfitAnalysisWidget() {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
   const { from, to, period, revenueType, currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
@@ -50,43 +45,8 @@ export function ProfitAnalysisWidget() {
     );
   }
 
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, any>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
   const periodLabel = getPeriodLabel(period, from, to);
   const revenueTypeLabel = revenueType === "gross" ? "Gross" : "Net";
-
-  const handleViewAnalysis = () => {
-    handleToolCall({
-      toolName: "getProfitAnalysis",
-      toolParams: {
-        from,
-        to,
-        currency,
-        revenueType,
-        showCanvas: true,
-      },
-      text: `Show ${revenueTypeLabel.toLowerCase()} profit & loss statement for ${periodLabel}`,
-    });
-  };
 
   const formatCurrency = (amount: number) => {
     return formatAmount({
@@ -118,8 +78,6 @@ export function ProfitAnalysisWidget() {
           </p>
         </div>
       }
-      actions="See detailed analysis"
-      onClick={handleViewAnalysis}
     >
       {chartData.length > 0 ? (
         <div className="w-full">

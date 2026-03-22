@@ -262,11 +262,11 @@ function InsightCardComponent({
 export function InsightsWidget() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
   const showLoading = useAudioPlayerStore((state) => state.showLoading);
   const setAudioUrl = useAudioPlayerStore((state) => state.setUrl);
+  const chatId = useChatId();
+  const { sendMessage } = useChatActions();
+  const { setChatId } = useChatInterface();
 
   // Refs for managing state without re-renders
   const audioFetchingRef = useRef(false);
@@ -415,15 +415,15 @@ export function InsightsWidget() {
 
   const handleCardClick = useCallback(
     (insight: InsightCard) => {
-      if (!chatId) return;
-
-      // Mark as read
       if (!markedAsReadRef.current.has(insight.id)) {
         markedAsReadRef.current.add(insight.id);
         markAsRead({ id: insight.id });
       }
 
+      if (!chatId) return;
+
       setChatId(chatId);
+
       sendMessage({
         role: "user",
         parts: [
@@ -432,19 +432,9 @@ export function InsightsWidget() {
             text: `Show me my ${insight.periodType} summary for ${insight.periodLabel}`,
           },
         ],
-        metadata: {
-          toolCall: {
-            toolName: "getInsights",
-            toolParams: {
-              periodType: insight.periodType,
-              periodNumber: insight.periodNumber,
-              year: insight.periodYear,
-            },
-          },
-        },
       });
     },
-    [chatId, setChatId, sendMessage, markAsRead],
+    [markAsRead, chatId, setChatId, sendMessage],
   );
 
   const handleDismissClick = useCallback(

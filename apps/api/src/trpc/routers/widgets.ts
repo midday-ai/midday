@@ -54,12 +54,6 @@ export const widgetsRouter = createTRPCRouter({
 
       return {
         result: runway,
-        toolCall: {
-          toolName: "getBurnRateAnalysis",
-          toolParams: {
-            currency: input.currency,
-          },
-        },
       };
     }),
 
@@ -273,14 +267,6 @@ export const widgetsRouter = createTRPCRouter({
 
       return {
         result: spending,
-        toolCall: {
-          toolName: "getSpendingAnalysis",
-          toolParams: {
-            from: input.from,
-            to: input.to,
-            currency: input.currency,
-          },
-        },
       };
     }),
 
@@ -393,12 +379,6 @@ export const widgetsRouter = createTRPCRouter({
 
       return {
         result,
-        toolCall: {
-          toolName: "getCustomerLifetimeValue",
-          toolParams: {
-            currency: input.currency,
-          },
-        },
       };
     }),
 

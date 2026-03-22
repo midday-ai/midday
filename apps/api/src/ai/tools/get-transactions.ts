@@ -1,8 +1,7 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getTransactions } from "@midday/db/queries";
-import { getAppUrl } from "@midday/utils/envs";
 import { formatAmount, formatDate } from "@midday/utils/format";
 import { tool } from "ai";
 import { z } from "zod";
@@ -152,13 +151,13 @@ export const getTransactionsTool = tool({
 
       const result = await getTransactions(db, params);
 
-      if (result.data.length === 0) {
-        yield { text: "No transactions found matching your criteria." };
-        return;
-      }
-
       const targetCurrency = currency ?? appContext.baseCurrency ?? "USD";
       const locale = appContext.locale ?? "en-US";
+
+      if (result.data.length === 0) {
+        yield { text: "No transactions found matching your criteria." };
+        return { transactions: [], total: 0, currency: targetCurrency };
+      }
 
       const formattedTransactions = result.data.map((transaction) => {
         const formattedAmount = formatAmount({
@@ -170,7 +169,8 @@ export const getTransactionsTool = tool({
         return {
           id: transaction.id,
           name: transaction.name,
-          amount: formattedAmount,
+          amount: transaction.amount,
+          formattedAmount,
           date: formatDate(transaction.date),
           category: transaction.category?.name || "Uncategorized",
         };
@@ -186,32 +186,16 @@ export const getTransactionsTool = tool({
           .reduce((sum, t) => sum + t.amount, 0),
       );
 
-      const formattedTotalAmount = formatAmount({
-        amount: totalAmount,
+      yield { text: `${result.data.length} transactions found` };
+
+      return {
+        transactions: formattedTransactions,
+        total: result.data.length,
+        totalAmount,
+        incomeAmount,
+        expenseAmount,
         currency: targetCurrency,
-        locale,
-      });
-
-      const formattedIncomeAmount = formatAmount({
-        amount: incomeAmount,
-        currency: targetCurrency,
-        locale,
-      });
-
-      const formattedExpenseAmount = formatAmount({
-        amount: expenseAmount,
-        currency: targetCurrency,
-        locale,
-      });
-
-      const response = `| Date | Name | Amount | Category |\n|------|------|--------|----------|\n${formattedTransactions.map((tx) => `| ${tx.date} | ${tx.name} | ${tx.amount} | ${tx.category} |`).join("\n")}\n\n**${result.data.length} transactions** | Net: ${formattedTotalAmount} | Income: ${formattedIncomeAmount} | Expenses: ${formattedExpenseAmount}`;
-
-      yield {
-        text: response,
-        link: {
-          text: "View all transactions",
-          url: `${getAppUrl()}/transactions`,
-        },
+        hasMore: result.meta.hasNextPage ?? false,
       };
     } catch (error) {
       yield {

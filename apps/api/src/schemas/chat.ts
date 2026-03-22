@@ -41,43 +41,13 @@ const messageSchema = z
     },
   });
 
-/**
- * Dashboard metrics filter schema - sent with every chat request
- * to provide context about the current dashboard view.
- */
-export const metricsFilterSchema = z
-  .object({
-    period: z.string().describe("Period option (e.g., '1-year', '6-months')"),
-    from: z.string().describe("Start date in yyyy-MM-dd format"),
-    to: z.string().describe("End date in yyyy-MM-dd format"),
-    currency: z.string().optional().describe("Currency code (e.g., 'USD')"),
-    revenueType: z
-      .enum(["gross", "net"])
-      .describe("Revenue type for calculations"),
-  })
-  .openapi({
-    description:
-      "Current dashboard metrics filter state - used as defaults for AI tools",
-    example: {
-      period: "1-year",
-      from: "2025-01-21",
-      to: "2026-01-21",
-      currency: "USD",
-      revenueType: "net",
-    },
-  });
-
 export const chatRequestSchema = z.object({
   id: z.string().openapi({
     description: "Chat ID",
     example: "chat_abc123",
   }),
-  message: messageSchema.openapi({
-    description: "The new message to send to the chat",
-    example: {
-      role: "user",
-      content: "Hello, can you help me with my finances?",
-    },
+  messages: z.array(messageSchema).openapi({
+    description: "The full conversation messages to send to the chat",
   }),
   country: z.string().optional().openapi({
     description: "User's country",
@@ -98,37 +68,11 @@ export const chatRequestSchema = z.object({
       description: "User's timezone",
       example: "America/New_York",
     }),
-  agentChoice: z.string().optional().openapi({
-    description: "Agent choice",
-    example: "general",
-  }),
-  toolChoice: z.string().optional().openapi({
-    description: "Tool choice",
-    example: "getBurnRate",
-  }),
-  metricsFilter: metricsFilterSchema.optional().openapi({
+  invoiceId: z.string().optional().openapi({
     description:
-      "Current dashboard metrics filter state - tools use this as default",
+      "ID of the invoice currently open in the canvas, if any. Passed so AI tools can modify the active draft.",
+    example: "inv_abc123",
   }),
-  files: z
-    .array(
-      z.object({
-        name: z.string(),
-        type: z.string(),
-        data: z.string(),
-      }),
-    )
-    .optional()
-    .openapi({
-      description: "Files to send to the chat",
-      example: [
-        {
-          name: "example.pdf",
-          type: "application/pdf",
-          data: "base64encodeddata",
-        },
-      ],
-    }),
 });
 
 // Use the same structure as messageSchema for consistency with UIMessage

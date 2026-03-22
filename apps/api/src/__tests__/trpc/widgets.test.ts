@@ -14,16 +14,12 @@ describe("tRPC: widgets.getRunway", () => {
     mocks.getRunway.mockImplementation(() => Promise.resolve(12));
   });
 
-  test("returns runway wrapped with tool metadata", async () => {
+  test("returns runway result", async () => {
     const caller = createCaller(createTestContext());
     const result = await caller.getRunway({});
 
     expect(result).toEqual({
       result: 12,
-      toolCall: {
-        toolName: "getBurnRateAnalysis",
-        toolParams: { currency: undefined },
-      },
     });
     expect(mocks.getRunway).toHaveBeenCalledWith(
       expect.anything(),
@@ -467,14 +463,6 @@ describe("tRPC: widgets.getMonthlySpending", () => {
         currency: "EUR",
         topCategory: { name: "Travel", amount: 400, percentage: 30 },
       },
-      toolCall: {
-        toolName: "getSpendingAnalysis",
-        toolParams: {
-          from: RANGE.from,
-          to: RANGE.to,
-          currency: undefined,
-        },
-      },
     });
     expect(mocks.getSpendingForPeriod).toHaveBeenCalledWith(
       expect.anything(),
@@ -668,15 +656,11 @@ describe("tRPC: widgets.getCustomerLifetimeValue", () => {
     );
   });
 
-  test("wraps CLV with tool metadata", async () => {
+  test("returns CLV result", async () => {
     const caller = createCaller(createTestContext());
     const result = await caller.getCustomerLifetimeValue({});
 
     expect(result.result.summary.averageCLV).toBe(1000);
-    expect(result.toolCall).toEqual({
-      toolName: "getCustomerLifetimeValue",
-      toolParams: { currency: undefined },
-    });
     expect(mocks.getCustomerLifetimeValue).toHaveBeenCalledWith(
       expect.anything(),
       { teamId: "test-team-id", currency: undefined },

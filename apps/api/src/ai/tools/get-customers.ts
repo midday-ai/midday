@@ -1,7 +1,6 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { db } from "@midday/db/client";
 import { getCustomers } from "@midday/db/queries";
-import { getAppUrl } from "@midday/utils/envs";
 import { formatDate } from "@midday/utils/format";
 import { tool } from "ai";
 import { z } from "zod";
@@ -50,7 +49,7 @@ export const getCustomersTool = tool({
 
       if (result.data.length === 0) {
         yield { text: "No customers found matching your criteria." };
-        return;
+        return { customers: [], total: 0 };
       }
 
       // Filter by tags if provided (since getCustomers doesn't support tags in params)
@@ -64,7 +63,7 @@ export const getCustomersTool = tool({
 
       if (filteredData.length === 0) {
         yield { text: "No customers found matching your criteria." };
-        return;
+        return { customers: [], total: 0 };
       }
 
       const formattedCustomers = filteredData.map((customer) => {
@@ -91,14 +90,13 @@ export const getCustomersTool = tool({
         0,
       );
 
-      const response = `| Name | Email | Contact | Invoices | Projects | Tags | Created |\n|------|-------|---------|----------|----------|------|----------|\n${formattedCustomers.map((cust) => `| ${cust.name} | ${cust.email} | ${cust.contact} | ${cust.invoiceCount} | ${cust.projectCount} | ${cust.tags} | ${cust.createdAt} |`).join("\n")}\n\n**${filteredData.length} customers** | Total Invoices: ${totalInvoices} | Total Projects: ${totalProjects}`;
+      yield { text: `${filteredData.length} customers found` };
 
-      yield {
-        text: response,
-        link: {
-          text: "View all customers",
-          url: `${getAppUrl()}/customers`,
-        },
+      return {
+        customers: formattedCustomers,
+        total: filteredData.length,
+        totalInvoices,
+        totalProjects,
       };
     } catch (error) {
       yield {

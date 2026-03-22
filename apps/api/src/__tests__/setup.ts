@@ -760,7 +760,7 @@ export const mocks = {
   // Banking (exchange rates — internalProcedure.rates)
   getRates: mock(() => Promise.resolve([])) as MockFn,
 
-  // Chats memory provider (mocked @api/ai/agents/config/shared)
+  // Chats memory provider (mocked @api/ai/memory)
   memoryGetChats: mock(() => Promise.resolve([])) as MockFn,
   memoryGetMessages: mock(() => Promise.resolve([])) as MockFn,
   memoryDeleteChat: mock(() => Promise.resolve({ success: true })) as MockFn,
@@ -1408,28 +1408,16 @@ mock.module("@midday/banking", () => ({
   },
 }));
 
-mock.module("@api/ai/agents/config/shared", () => ({
-  formatContextForLLM: mock(() => ""),
-  COMMON_AGENT_RULES: "",
-  buildAppContext: mock(
-    (context: { userId: string; teamId: string }, chatId: string) => ({
-      userId: `${context.userId}:${context.teamId}`,
-      fullName: "",
-      companyName: "",
-      baseCurrency: "USD",
-      locale: "en-US",
-      currentDateTime: new Date().toISOString(),
-      timezone: "UTC",
-      chatId,
-      teamId: context.teamId,
-    }),
-  ),
+mock.module("@api/ai/context", () => ({
+  AppContext: {},
+}));
+
+mock.module("@api/ai/memory", () => ({
   memoryProvider: {
     getChats: (...args: unknown[]) => mocks.memoryGetChats(...args),
     getMessages: (...args: unknown[]) => mocks.memoryGetMessages(...args),
     deleteChat: (...args: unknown[]) => mocks.memoryDeleteChat(...args),
   },
-  createAgent: mock(() => ({})),
 }));
 
 mock.module("@midday/cache/chat-feedback-cache", () => ({

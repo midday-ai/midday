@@ -1,7 +1,5 @@
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -14,9 +12,6 @@ import { WidgetSkeleton } from "./widget-skeleton";
 export function CashFlowWidget() {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
   const { from, to, period, currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
@@ -39,42 +34,7 @@ export function CashFlowWidget() {
     );
   }
 
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, any>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
   const periodLabel = getPeriodLabel(period, from, to);
-
-  const handleViewAnalysis = () => {
-    handleToolCall({
-      toolName: "getCashFlow",
-      toolParams: {
-        from,
-        to,
-        currency: currency,
-        period: "monthly",
-        showCanvas: true,
-      },
-      text: `Show cash flow for ${periodLabel}`,
-    });
-  };
 
   const formatCashFlow = (amount: number, currency: string) => {
     const sign = amount >= 0 ? "+" : "";
@@ -99,8 +59,6 @@ export function CashFlowWidget() {
           </p>
         </div>
       }
-      actions="View cash flow analysis"
-      onClick={handleViewAnalysis}
     >
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-normal">

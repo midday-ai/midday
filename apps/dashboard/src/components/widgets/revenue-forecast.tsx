@@ -1,25 +1,19 @@
 "use client";
 
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { FormatAmount } from "@/components/format-amount";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
-import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function RevenueForecastWidget() {
   const trpc = useTRPC();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
-  const { from, to, period, revenueType, currency } = useMetricsFilter();
+  const { from, to, revenueType, currency } = useMetricsFilter();
 
   const forecastMonths = 6;
 
@@ -43,44 +37,6 @@ export function RevenueForecastWidget() {
       />
     );
   }
-
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, any>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
-  const periodLabel = getPeriodLabel(period, from, to);
-
-  const handleViewDetails = () => {
-    handleToolCall({
-      toolName: "getForecast",
-      toolParams: {
-        from,
-        to,
-        currency,
-        revenueType,
-        forecastMonths,
-        showCanvas: true,
-      },
-      text: `Show revenue forecast for ${periodLabel} with ${forecastMonths} months forecast`,
-    });
-  };
 
   // Prepare data for simple trend line chart
   // Show last 6 months of actual + all forecast months for better context
@@ -153,8 +109,6 @@ export function RevenueForecastWidget() {
           )}
         </div>
       }
-      actions="View forecast details"
-      onClick={handleViewDetails}
     >
       <div />
     </BaseWidget>

@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { generateText, stepCountIs, tool } from "ai";
 import { z } from "zod";
 

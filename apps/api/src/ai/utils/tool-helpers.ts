@@ -1,4 +1,4 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 
 export function checkBankAccountsRequired(appContext: AppContext): {
   hasBankAccounts: boolean;

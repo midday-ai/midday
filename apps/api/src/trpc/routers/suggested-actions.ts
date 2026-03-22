@@ -7,139 +7,25 @@ import { suggestedActionsCache } from "@midday/cache/suggested-actions-cache";
 
 // Define the static suggested actions configuration
 const SUGGESTED_ACTIONS_CONFIG = [
-  {
-    id: "get-burn-rate-analysis",
-    toolName: "getBurnRate",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "latest-transactions",
-    toolName: "getTransactions",
-    toolParams: {
-      pageSize: 10,
-      sort: ["date", "desc"],
-    },
-  },
-  {
-    id: "expenses-breakdown",
-    toolName: "getExpensesBreakdown",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "balance-sheet",
-    toolName: "getBalanceSheet",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-spending",
-    toolName: "getSpending",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-runway",
-    toolName: "getRunway",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-cash-flow",
-    toolName: "getCashFlow",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-revenue-summary",
-    toolName: "getRevenueSummary",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-account-balances",
-    toolName: "getAccountBalances",
-    toolParams: {},
-  },
-  {
-    id: "get-invoices",
-    toolName: "getInvoices",
-    toolParams: {
-      pageSize: 10,
-      sort: ["createdAt", "desc"],
-    },
-  },
-  {
-    id: "get-customers",
-    toolName: "getCustomers",
-    toolParams: {
-      pageSize: 10,
-    },
-  },
-  {
-    id: "get-profit-analysis",
-    toolName: "getProfitAnalysis",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-invoice-payment-analysis",
-    toolName: "getInvoicePaymentAnalysis",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-tax-summary",
-    toolName: "getTaxSummary",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-business-health-score",
-    toolName: "getBusinessHealthScore",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-forecast",
-    toolName: "getForecast",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-cash-flow-stress-test",
-    toolName: "getCashFlowStressTest",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-expenses",
-    toolName: "getExpenses",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
-  {
-    id: "get-growth-rate",
-    toolName: "getGrowthRate",
-    toolParams: {
-      showCanvas: true,
-    },
-  },
+  { id: "get-burn-rate-analysis" },
+  { id: "latest-transactions" },
+  { id: "expenses-breakdown" },
+  { id: "balance-sheet" },
+  { id: "get-spending" },
+  { id: "get-runway" },
+  { id: "get-cash-flow" },
+  { id: "get-revenue-summary" },
+  { id: "get-account-balances" },
+  { id: "get-invoices" },
+  { id: "get-customers" },
+  { id: "get-profit-analysis" },
+  { id: "get-invoice-payment-analysis" },
+  { id: "get-tax-summary" },
+  { id: "get-business-health-score" },
+  { id: "get-forecast" },
+  { id: "get-cash-flow-stress-test" },
+  { id: "get-expenses" },
+  { id: "get-growth-rate" },
 ] as const;
 
 export const suggestedActionsRouter = createTRPCRouter({
@@ -158,8 +44,6 @@ export const suggestedActionsRouter = createTRPCRouter({
 
         return {
           id: action.id,
-          toolName: action.toolName,
-          toolParams: action.toolParams,
           usageCount: usage?.count || 0,
           lastUsed: usage?.lastUsed ? new Date(usage.lastUsed) : null,
         };

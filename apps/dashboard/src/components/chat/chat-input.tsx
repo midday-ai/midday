@@ -20,7 +20,6 @@ import {
   PromptInputTools,
 } from "@midday/ui/prompt-input";
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
-import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 import { AudioPlayer } from "@/components/chat/audio-player";
 import {
@@ -36,6 +35,7 @@ import { WebSearchButton } from "@/components/web-search-button";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useWindowScroll } from "@/hooks/use-window-scroll";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useChatStore } from "@/store/chat";
 
 export interface ChatInputMessage extends PromptInputMessage {
@@ -384,12 +384,6 @@ function ChatInputContent() {
                           parts: [
                             { type: "text", text: selectedCommand.title },
                           ],
-                          metadata: {
-                            toolCall: {
-                              toolName: selectedCommand.toolName,
-                              toolParams: selectedCommand.toolParams,
-                            },
-                          },
                         });
 
                         setInput("");
@@ -504,8 +498,8 @@ function ChatInputContent() {
 
 export function ChatInput() {
   const { isHome } = useChatInterface();
-  const [selectedType] = useQueryState("artifact-type", parseAsString);
-  const isCanvasVisible = !!selectedType;
+  const { canvas } = useInvoiceParams();
+  const isCanvasOpen = canvas === true;
 
   return (
     <motion.div
@@ -516,7 +510,7 @@ export function ChatInput() {
         "fixed bottom-6 z-[100]",
         !isHome && "transition-all duration-300 ease-in-out",
         "left-0 md:left-[70px] px-4 md:px-6",
-        isCanvasVisible ? "right-0 md:right-[603px]" : "right-0",
+        isCanvasOpen ? "right-0 md:right-[650px]" : "right-0",
         isHome && "chat-input-static",
       )}
     >

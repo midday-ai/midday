@@ -1,5 +1,4 @@
 import { usePathname } from "next/navigation";
-import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 
 // Helper to extract chat ID from pathname with /chat/ prefix
@@ -20,16 +19,13 @@ function extractChatId(pathname: string): string | null {
 
 export function useChatInterface() {
   const pathname = usePathname();
-  const [, setSelectedType] = useQueryState("artifact-type", parseAsString);
 
   // Initialize state immediately from pathname to avoid blink on refresh
   const [chatId, setChatIdState] = useState<string | null>(() =>
     extractChatId(pathname),
   );
 
-  // Clear artifact-type and reset title when navigating away from chat pages
   const handleNavigateAway = () => {
-    setSelectedType(null);
     document.title = "Overview | Midday";
   };
 
@@ -41,7 +37,7 @@ export function useChatInterface() {
     if (!id) {
       handleNavigateAway();
     }
-  }, [pathname, setSelectedType]);
+  }, [pathname]);
 
   // Listen to popstate events for browser back/forward
   useEffect(() => {
@@ -56,7 +52,7 @@ export function useChatInterface() {
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [setSelectedType]);
+  }, []);
 
   const isHome = !chatId;
   const isChatPage = Boolean(chatId);

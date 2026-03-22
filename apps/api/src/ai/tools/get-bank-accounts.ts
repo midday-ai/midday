@@ -1,8 +1,7 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getBankAccounts } from "@midday/db/queries";
-import { getAppUrl } from "@midday/utils/envs";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
 import { z } from "zod";
@@ -41,13 +40,13 @@ export const getBankAccountsTool = tool({
 
       const accounts = await getBankAccounts(db, params);
 
-      if (accounts.length === 0) {
-        yield { text: "No bank accounts found matching your criteria." };
-        return;
-      }
-
       const locale = appContext.locale ?? "en-US";
       const baseCurrency = appContext.baseCurrency ?? "USD";
+
+      if (accounts.length === 0) {
+        yield { text: "No bank accounts found matching your criteria." };
+        return { accounts: [], total: 0, currency: baseCurrency };
+      }
 
       const formattedAccounts = accounts.map((account) => {
         const formattedBalance = formatAmount({
@@ -62,6 +61,7 @@ export const getBankAccountsTool = tool({
           type: account.type || "depository",
           currency: account.currency || baseCurrency,
           balance: formattedBalance,
+          rawBalance: Number(account.balance) || 0,
           enabled: account.enabled ? "Enabled" : "Disabled",
           manual: account.manual ? "Manual" : "Connected",
         };
@@ -71,23 +71,19 @@ export const getBankAccountsTool = tool({
         (sum, acc) => sum + (Number(acc.balance) || 0),
         0,
       );
-      const formattedTotalBalance = formatAmount({
-        amount: totalBalance,
-        currency: baseCurrency,
-        locale,
-      });
 
       const enabledCount = accounts.filter((acc) => acc.enabled).length;
       const disabledCount = accounts.filter((acc) => !acc.enabled).length;
 
-      const response = `| Name | Type | Currency | Balance | Status | Source |\n|------|------|----------|---------|--------|--------|\n${formattedAccounts.map((acc) => `| ${acc.name} | ${acc.type} | ${acc.currency} | ${acc.balance} | ${acc.enabled} | ${acc.manual} |`).join("\n")}\n\n**${accounts.length} accounts** | Total Balance: ${formattedTotalBalance} | Enabled: ${enabledCount} | Disabled: ${disabledCount}`;
+      yield { text: `${accounts.length} bank accounts found` };
 
-      yield {
-        text: response,
-        link: {
-          text: "View all accounts",
-          url: `${getAppUrl()}/settings/accounts`,
-        },
+      return {
+        accounts: formattedAccounts,
+        total: accounts.length,
+        totalBalance,
+        enabledCount,
+        disabledCount,
+        currency: baseCurrency,
       };
     } catch (error) {
       yield {

@@ -1,7 +1,6 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { db } from "@midday/db/client";
 import { getDocuments } from "@midday/db/queries";
-import { getAppUrl } from "@midday/utils/envs";
 import { formatDate } from "@midday/utils/format";
 import { tool } from "ai";
 import { z } from "zod";
@@ -48,7 +47,7 @@ export const getDocumentsTool = tool({
 
       if (result.data.length === 0) {
         yield { text: "No documents found matching your criteria." };
-        return;
+        return { documents: [], total: 0 };
       }
 
       const formattedDocuments = result.data.map((document) => {
@@ -69,14 +68,11 @@ export const getDocumentsTool = tool({
         };
       });
 
-      const response = `| Name | Title | Date | Tags | Status |\n|------|-------|------|------|--------|\n${formattedDocuments.map((doc) => `| ${doc.name} | ${doc.title} | ${doc.date} | ${doc.tags} | ${doc.status} |`).join("\n")}\n\n**${result.data.length} documents**`;
+      yield { text: `${result.data.length} documents found` };
 
-      yield {
-        text: response,
-        link: {
-          text: "View all documents",
-          url: `${getAppUrl()}/vault`,
-        },
+      return {
+        documents: formattedDocuments,
+        total: result.data.length,
       };
     } catch (error) {
       yield {

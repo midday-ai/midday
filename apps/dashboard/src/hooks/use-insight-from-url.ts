@@ -70,16 +70,6 @@ export function useInsightFromUrl() {
           text: `Show me my ${insight.periodType} summary for ${getInsightPeriodLabel(insight.periodType, insight.periodYear, insight.periodNumber)}`,
         },
       ],
-      metadata: {
-        toolCall: {
-          toolName: "getInsights",
-          toolParams: {
-            periodType: insight.periodType,
-            periodNumber: insight.periodNumber,
-            year: insight.periodYear,
-          },
-        },
-      },
     });
 
     // Clean up the URL without reloading

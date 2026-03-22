@@ -23,18 +23,18 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck"
   },
-  "packageManager": "bun@1.3.10",
+  "packageManager": "bun@1.3.11",
   "catalog": {
-    "@ai-sdk/google": "^2.0.33",
-    "@ai-sdk/openai": "2.0.62",
-    "@ai-sdk/react": "2.0.82",
+    "@ai-sdk/google": "^3.0.52",
+    "@ai-sdk/openai": "^3.0.47",
+    "@ai-sdk/react": "^3.0.136",
     "@date-fns/tz": "^1.4.1",
     "@fast-csv/format": "5.0.5",
     "@react-pdf/renderer": "^4.3.1",
     "@sentry/bun": "^10.32.1",
     "@sindresorhus/slugify": "^3.0.0",
     "@trigger.dev/sdk": "4.1.1",
-    "ai": "5.0.87",
+    "ai": "^6.0.134",
     "bullmq": "^5.66.4",
     "camelcase-keys": "^10.0.1",
     "change-case": "^5.4.4",
@@ -62,8 +62,8 @@
     "protobufjs"
   ],
   "devDependencies": {
-    "@biomejs/biome": "2.4.5",
-    "turbo": "2.8.13",
+    "@biomejs/biome": "2.4.8",
+    "turbo": "2.8.20",
     "typescript": "^5.9.3"
   }
 }

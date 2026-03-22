@@ -1,0 +1,41 @@
+{
+  "name": "@midday/generative-ui",
+  "version": "1.0.0",
+  "main": "src/catalog.ts",
+  "private": true,
+  "sideEffects": false,
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "lint:fix": "biome format --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./catalog": "./src/catalog.ts",
+    "./registry": "./src/registry.tsx",
+    "./renderer": "./src/renderer.tsx",
+    "./charts/bar-chart": "./src/charts/bar-chart.tsx",
+    "./charts/line-chart": "./src/charts/line-chart.tsx",
+    "./charts/area-chart": "./src/charts/area-chart.tsx",
+    "./charts/donut-chart": "./src/charts/donut-chart.tsx",
+    "./components/chart-container": "./src/components/chart-container.tsx",
+    "./components/metric-grid": "./src/components/metric-grid.tsx",
+    "./components/section": "./src/components/section.tsx",
+    "./components/data-table": "./src/components/data-table.tsx",
+    "./components/balance-sheet": "./src/components/balance-sheet.tsx"
+  },
+  "dependencies": {
+    "@json-render/core": "0.14.1",
+    "@json-render/react": "0.14.1",
+    "@midday/ui": "workspace:*",
+    "@midday/utils": "workspace:*",
+    "recharts": "2.15.3",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  }
+}

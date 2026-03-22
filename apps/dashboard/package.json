@@ -14,7 +14,6 @@
     "test": "find src -name '*.test.ts' -o -name '*.spec.ts' | grep -q . && bun test --exit src || echo 'No tests yet'"
   },
   "dependencies": {
-    "@ai-sdk-tools/artifacts": "^1.2.0",
     "@ai-sdk-tools/store": "^1.2.0",
     "@ai-sdk/openai": "catalog:",
     "@ai-sdk/react": "catalog:",
@@ -24,7 +23,11 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.2.2",
+    "@json-render/core": "^0.14.1",
+    "@json-render/react": "^0.14.1",
+    "@json-render/zustand": "^0.14.1",
     "@midday/api": "workspace:*",
+    "@midday/generative-ui": "workspace:*",
     "@midday/app-store": "workspace:*",
     "@midday/desktop-client": "workspace:*",
     "@midday/documents": "workspace:*",
@@ -57,9 +60,7 @@
     "date-fns": "catalog:",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.34.0",
-    "html2canvas": "^1.4.1",
     "js.foresight": "^3.4.0",
-    "jspdf": "^3.0.4",
     "little-date": "^1.2.1",
     "lottie-react": "^2.4.1",
     "next": "16.1.6",
@@ -94,7 +95,6 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@types/file-saver": "^2.0.7",
-    "@types/html2canvas": "^1.0.0",
     "@types/node": "^24.10.1",
     "@types/papaparse": "^5.5.2",
     "@types/qrcode": "^1.5.6",

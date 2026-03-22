@@ -1,10 +1,5 @@
 import type { UIMessage } from "ai";
-import type { ArtifactType } from "./artifact-config";
-import { getArtifactTypeFromTool } from "./artifact-config";
 
-/**
- * Insight data from getInsights tool
- */
 export type InsightData = {
   id: string;
   periodLabel: string;
@@ -55,9 +50,6 @@ export type InsightData = {
   currency: string;
 };
 
-/**
- * Extract insight data from getInsights tool result
- */
 export function extractInsightData(
   parts: UIMessage["parts"],
 ): InsightData | null {
@@ -67,7 +59,6 @@ export function extractInsightData(
       const toolPart = part as {
         output?: { success?: boolean; insight?: InsightData };
       };
-      // The insight data is included in the yielded output
       if (toolPart.output?.insight) {
         return toolPart.output.insight;
       }
@@ -76,23 +67,6 @@ export function extractInsightData(
   return null;
 }
 
-/**
- * Check if getInsights tool is present (running or completed)
- * Used to hide loading indicators as soon as the tool starts
- */
-export function hasInsightToolRunning(parts: UIMessage["parts"]): boolean {
-  for (const part of parts) {
-    const type = part.type as string;
-    if (type === "tool-getInsights") {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Check if message parts indicate bank account is required
- */
 export function extractBankAccountRequired(parts: UIMessage["parts"]): boolean {
   for (const part of parts) {
     if ((part.type as string).startsWith("tool-")) {
@@ -105,31 +79,4 @@ export function extractBankAccountRequired(parts: UIMessage["parts"]): boolean {
     }
   }
   return false;
-}
-
-/**
- * Extract artifact type from message parts
- * Checks all tool calls in the message and returns the first artifact type found
- */
-export function extractArtifactTypeFromMessage(
-  parts: UIMessage["parts"],
-): ArtifactType | null {
-  for (const part of parts) {
-    const type = part.type as string;
-    if (type.startsWith("tool-")) {
-      const toolPart = part as Record<string, unknown>;
-
-      // Extract tool name from type (e.g., "tool-cashFlow" -> "cashFlow")
-      const toolName =
-        type === "dynamic-tool"
-          ? (toolPart.toolName as string)
-          : type.replace(/^tool-/, "");
-
-      const artifactType = getArtifactTypeFromTool(toolName);
-      if (artifactType) {
-        return artifactType;
-      }
-    }
-  }
-  return null;
 }

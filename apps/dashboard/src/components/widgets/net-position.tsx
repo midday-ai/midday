@@ -1,8 +1,6 @@
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { FormatAmount } from "@/components/format-amount";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { BaseWidget } from "./base";
@@ -11,9 +9,6 @@ import { WidgetSkeleton } from "./widget-skeleton";
 
 export function NetPositionWidget() {
   const trpc = useTRPC();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
   const { currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
@@ -38,34 +33,6 @@ export function NetPositionWidget() {
   const cash = netPositionData?.cash ?? 0;
   const creditDebt = netPositionData?.creditDebt ?? 0;
 
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, string>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
-  const handleViewNetPosition = () => {
-    handleToolCall({
-      toolName: "getNetPosition",
-      text: "Show my net position",
-    });
-  };
-
   const getDescription = () => {
     const cashCount = netPositionData?.cashAccountCount ?? 0;
     const creditCount = netPositionData?.creditAccountCount ?? 0;
@@ -83,8 +50,6 @@ export function NetPositionWidget() {
       title="Net Position"
       icon={<Icons.Accounts className="size-4" />}
       description={getDescription()}
-      onClick={handleViewNetPosition}
-      actions="View financial position"
     >
       {netPositionData && (
         <div className="flex flex-col gap-3">

@@ -1,34 +1,22 @@
 "use client";
 
-import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
-import { useDataPart } from "@ai-sdk-tools/store";
 import type { ChatStatus, ToolUIPart, UIMessage } from "ai";
 import { useMemo } from "react";
-import type { ArtifactStage, ArtifactType } from "@/lib/artifact-config";
-import { getSectionFromStage } from "@/lib/artifact-config";
 import {
   extractBankAccountRequired,
   extractInsightData,
-  hasInsightToolRunning,
 } from "@/lib/chat-utils";
-import type { AgentStatus } from "@/types/agents";
 
 interface ChatStatusResult {
-  agentStatus: AgentStatus | null;
   currentToolCall: string | null;
   hasTextContent: boolean;
   hasInsightData: boolean;
-  artifactStage: ArtifactStage | null;
-  artifactType: ArtifactType | null;
-  currentSection: string | null;
   bankAccountRequired: boolean;
 }
 
 /**
  * Hook to derive chat status indicators from messages and streaming state.
  *
- * This hook manages the logic for showing agent status and tool messages:
- * - Agent status: shown when routing or executing (before content starts)
  * - Tool message: shown when a tool is actively running
  * - Hidden: when text content is streaming or chat is ready
  */
@@ -36,37 +24,12 @@ export function useChatStatus(
   messages: UIMessage[],
   status: ChatStatus,
 ): ChatStatusResult {
-  const [agentStatusData] = useDataPart<AgentStatus>("agent-status");
-  const [{ current }] = useArtifacts({
-    exclude: ["chat-title", "suggestions"],
-  });
-
   const result = useMemo(() => {
-    // Extract artifact stage generically for any artifact type
-    let artifactStage: ArtifactStage | null = null;
-    let artifactType: ArtifactType | null = null;
-    let currentSection: string | null = null;
-
-    // Check if current artifact has a stage property
-    if (current?.type) {
-      artifactType = current.type as ArtifactType;
-      const stage = (current.payload as { stage?: ArtifactStage })?.stage;
-      if (stage) {
-        artifactStage = stage;
-        // Map stage to current section using generic mapping
-        currentSection = getSectionFromStage(stage);
-      }
-    }
-
     if (messages.length === 0) {
       return {
-        agentStatus: agentStatusData,
         currentToolCall: null,
         hasTextContent: false,
         hasInsightData: false,
-        artifactStage,
-        artifactType,
-        currentSection,
         bankAccountRequired: false,
       };
     }
@@ -74,13 +37,9 @@ export function useChatStatus(
     const lastMessage = messages[messages.length - 1];
     if (lastMessage?.role !== "assistant") {
       return {
-        agentStatus: agentStatusData,
         currentToolCall: null,
         hasTextContent: false,
         hasInsightData: false,
-        artifactStage,
-        artifactType,
-        currentSection,
         bankAccountRequired: false,
       };
     }
@@ -97,9 +56,6 @@ export function useChatStatus(
 
     // Check if we have insight data (should hide loading indicator when insight is rendering)
     const hasInsightData = extractInsightData(lastMessage.parts) !== null;
-
-    // Check if insight tool is running (hide agent status as soon as tool starts)
-    const isInsightToolActive = hasInsightToolRunning(lastMessage.parts);
 
     // Find active tool calls - check ALL tool-related parts
     const allParts = lastMessage.parts;
@@ -160,31 +116,16 @@ export function useChatStatus(
       _toolMetadata = null;
     }
 
-    // Hide agent status when content is available or tool is showing
-    const agentStatus =
-      status === "ready" ||
-      hasTextContent ||
-      hasInsightData ||
-      isInsightToolActive ||
-      currentToolCall ||
-      bankAccountRequired
-        ? null
-        : agentStatusData;
-
     // Hide tool call when bank account is required
     const finalToolCall = bankAccountRequired ? null : currentToolCall;
 
     return {
-      agentStatus,
       currentToolCall: finalToolCall,
       hasTextContent,
       hasInsightData,
-      artifactStage,
-      artifactType,
-      currentSection,
       bankAccountRequired,
     };
-  }, [messages, status, agentStatusData, current]);
+  }, [messages, status]);
 
   return result;
 }

@@ -1,7 +1,6 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { db } from "@midday/db/client";
 import { getTrackerRecordsByRange } from "@midday/db/queries";
-import { getAppUrl } from "@midday/utils/envs";
 import { formatDate } from "@midday/utils/format";
 import { tool } from "ai";
 import { formatDistance } from "date-fns";
@@ -45,7 +44,7 @@ export const getTrackerEntriesTool = tool({
 
       if (allEntries.length === 0) {
         yield { text: "No tracker entries found matching your criteria." };
-        return;
+        return { entries: [], total: 0, totalDuration: 0 };
       }
 
       const formattedEntries = allEntries.map((entry) => {
@@ -63,26 +62,18 @@ export const getTrackerEntriesTool = tool({
           date: formatDate(entry.date || ""),
           projectName,
           duration: formattedDuration,
+          durationSeconds: entry.duration ?? 0,
           description,
           assignedName,
         };
       });
 
-      const totalDuration = result.meta.totalDuration;
-      const start = new Date(0);
-      const end = new Date(totalDuration * 1000);
-      const formattedTotalDuration = formatDistance(start, end, {
-        includeSeconds: false,
-      });
+      yield { text: `${allEntries.length} time entries found` };
 
-      const response = `| Date | Project | Duration | Description | Assigned |\n|------|---------|----------|-------------|----------|\n${formattedEntries.map((e) => `| ${e.date} | ${e.projectName} | ${e.duration} | ${e.description} | ${e.assignedName} |`).join("\n")}\n\n**${allEntries.length} entries** | Total Duration: ${formattedTotalDuration}`;
-
-      yield {
-        text: response,
-        link: {
-          text: "View all time entries",
-          url: `${getAppUrl()}/tracker`,
-        },
+      return {
+        entries: formattedEntries,
+        total: allEntries.length,
+        totalDuration: result.meta.totalDuration,
       };
     } catch (error) {
       yield {

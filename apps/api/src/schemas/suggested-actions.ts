@@ -15,10 +15,6 @@ export const trackSuggestedActionUsageSchema = z.object({
 
 export const suggestedActionSchema = z.object({
   id: z.string().describe("Unique identifier for the action"),
-  toolName: z.string().describe("Name of the tool to call"),
-  toolParams: z
-    .record(z.string(), z.any())
-    .describe("Parameters for the tool call"),
   usageCount: z.number().describe("Number of times this action has been used"),
   lastUsed: z.date().nullable().describe("Last time this action was used"),
 });

@@ -6,7 +6,7 @@ interface BaseWidgetProps {
   title: string;
   description: React.ReactNode;
   onClick?: () => void;
-  actions: React.ReactNode;
+  actions?: React.ReactNode;
   icon: React.ReactNode;
   children?: React.ReactNode;
 }
@@ -33,7 +33,7 @@ export function BaseWidget({
     <div
       className={cn(
         "dark:bg-[#0c0c0c] border dark:border-[#1d1d1d] p-4 h-[210px] flex flex-col justify-between transition-all duration-300 dark:hover:bg-[#0f0f0f] dark:hover:border-[#222222] group",
-        !isCustomizing && "cursor-pointer",
+        !isCustomizing && onClick && "cursor-pointer",
       )}
       {...longPressHandlers}
     >
@@ -55,9 +55,11 @@ export function BaseWidget({
       <div>
         {children}
 
-        <span className="text-xs text-[#666666] group-hover:text-primary transition-colors duration-300">
-          {actions}
-        </span>
+        {actions && (
+          <span className="text-xs text-[#666666] group-hover:text-primary transition-colors duration-300">
+            {actions}
+          </span>
+        )}
       </div>
     </div>
   );

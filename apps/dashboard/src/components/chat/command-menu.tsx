@@ -53,12 +53,6 @@ export function CommandMenu() {
     sendMessage({
       role: "user",
       parts: [{ type: "text", text: command.title }],
-      metadata: {
-        toolCall: {
-          toolName: command.toolName,
-          toolParams: command.toolParams,
-        },
-      },
     });
 
     setInput("");

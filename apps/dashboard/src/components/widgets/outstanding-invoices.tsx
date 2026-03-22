@@ -1,8 +1,6 @@
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { FormatAmount } from "@/components/format-amount";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { BaseWidget } from "./base";
@@ -11,9 +9,6 @@ import { WidgetSkeleton } from "./widget-skeleton";
 
 export function OutstandingInvoicesWidget() {
   const trpc = useTRPC();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
   const { currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
@@ -34,38 +29,6 @@ export function OutstandingInvoicesWidget() {
       />
     );
   }
-
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, any>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
-  const handleViewInvoices = () => {
-    handleToolCall({
-      toolName: "getInvoices",
-      toolParams: {
-        statuses: ["unpaid", "overdue"],
-        pageSize: 20,
-      },
-      text: "Show outstanding invoices",
-    });
-  };
 
   return (
     <BaseWidget
@@ -93,8 +56,6 @@ export function OutstandingInvoicesWidget() {
           )}
         </div>
       }
-      actions="View all invoices"
-      onClick={handleViewInvoices}
     />
   );
 }

@@ -1,7 +1,6 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { db } from "@midday/db/client";
 import { getInvoices } from "@midday/db/queries";
-import { getAppUrl } from "@midday/utils/envs";
 import { formatAmount, formatDate } from "@midday/utils/format";
 import { tool } from "ai";
 import { z } from "zod";
@@ -61,13 +60,13 @@ export const getInvoicesTool = tool({
 
       const result = await getInvoices(db, params);
 
-      if (result.data.length === 0) {
-        yield { text: "No invoices found matching your criteria." };
-        return;
-      }
-
       const locale = appContext.locale ?? "en-US";
       const baseCurrency = appContext.baseCurrency ?? "USD";
+
+      if (result.data.length === 0) {
+        yield { text: "No invoices found matching your criteria." };
+        return { invoices: [], total: 0, currency: baseCurrency };
+      }
 
       const formattedInvoices = result.data.map((invoice) => {
         const formattedAmount = formatAmount({
@@ -81,7 +80,9 @@ export const getInvoicesTool = tool({
           invoiceNumber: invoice.invoiceNumber || "Draft",
           customerName:
             invoice.customerName || invoice.customer?.name || "No customer",
-          amount: formattedAmount,
+          amount: invoice.amount ?? 0,
+          formattedAmount,
+          rawAmount: invoice.amount ?? 0,
           status: invoice.status,
           dueDate: invoice.dueDate ? formatDate(invoice.dueDate) : "N/A",
           createdAt: formatDate(invoice.createdAt),
@@ -92,11 +93,6 @@ export const getInvoicesTool = tool({
         (sum, inv) => sum + (inv.amount ?? 0),
         0,
       );
-      const formattedTotalAmount = formatAmount({
-        amount: totalAmount,
-        currency: baseCurrency,
-        locale,
-      });
 
       const paidCount = result.data.filter(
         (inv) => inv.status === "paid",
@@ -108,14 +104,16 @@ export const getInvoicesTool = tool({
         (inv) => inv.status === "overdue",
       ).length;
 
-      const response = `| Invoice # | Customer | Amount | Status | Due Date | Created |\n|-----------|---------|--------|--------|----------|----------|\n${formattedInvoices.map((inv) => `| ${inv.invoiceNumber} | ${inv.customerName} | ${inv.amount} | ${inv.status} | ${inv.dueDate} | ${inv.createdAt} |`).join("\n")}\n\n**${result.data.length} invoices** | Total: ${formattedTotalAmount} | Paid: ${paidCount} | Unpaid: ${unpaidCount} | Overdue: ${overdueCount}`;
+      yield { text: `${result.data.length} invoices found` };
 
-      yield {
-        text: response,
-        link: {
-          text: "View all invoices",
-          url: `${getAppUrl()}/invoices`,
-        },
+      return {
+        invoices: formattedInvoices,
+        total: result.data.length,
+        totalAmount,
+        paidCount,
+        unpaidCount,
+        overdueCount,
+        currency: baseCurrency,
       };
     } catch (error) {
       yield {

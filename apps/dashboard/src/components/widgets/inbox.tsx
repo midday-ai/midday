@@ -1,9 +1,7 @@
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { endOfDay, startOfDay, subDays } from "date-fns";
 import { useRouter } from "next/navigation";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { BaseWidget } from "./base";
@@ -12,9 +10,6 @@ import { WidgetSkeleton } from "./widget-skeleton";
 export function InboxWidget() {
   const trpc = useTRPC();
   const _router = useRouter();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
   const { currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
@@ -37,37 +32,6 @@ export function InboxWidget() {
   }
 
   const stats = data?.result;
-
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, any>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
-  const handleViewInbox = () => {
-    handleToolCall({
-      toolName: "getInbox",
-      toolParams: {
-        pageSize: 20,
-      },
-      text: "Show inbox items",
-    });
-  };
 
   // Calculate key metrics for display
   const newItemsText = stats?.newItems === 1 ? "new item" : "new items";
@@ -124,8 +88,6 @@ export function InboxWidget() {
           <p className="text-sm text-[#666666]">{getStatusText()}</p>
         </div>
       }
-      actions="View inbox"
-      onClick={handleViewInbox}
     />
   );
 }

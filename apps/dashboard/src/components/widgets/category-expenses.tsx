@@ -1,14 +1,11 @@
 "use client";
 
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { formatCompactAmount } from "@/utils/format";
-import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
@@ -16,10 +13,7 @@ import { WidgetSkeleton } from "./widget-skeleton";
 export function CategoryExpensesWidget() {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
-  const { from, to, period, currency } = useMetricsFilter();
+  const { from, to } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
     ...trpc.widgets.getCategoryExpenses.queryOptions({
@@ -46,44 +40,6 @@ export function CategoryExpensesWidget() {
   const maxAmount = categories[0]?.amount || 0;
 
   const hasCategories = categoryData && categories.length > 0;
-
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, any>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
-  const periodLabel = getPeriodLabel(period, from, to);
-
-  const handleViewCategories = () => {
-    if (!hasCategories) return;
-
-    handleToolCall({
-      toolName: "getExpenses",
-      toolParams: {
-        from,
-        to,
-        currency: currency,
-        showCanvas: true,
-      },
-      text: `Show expense breakdown by category for ${periodLabel}`,
-    });
-  };
 
   return (
     <BaseWidget
@@ -131,8 +87,6 @@ export function CategoryExpensesWidget() {
         )
       }
       icon={<Icons.PieChart className="size-4" />}
-      onClick={hasCategories ? handleViewCategories : undefined}
-      actions={hasCategories ? "View transactions" : undefined}
     />
   );
 }

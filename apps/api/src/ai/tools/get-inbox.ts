@@ -1,7 +1,6 @@
-import type { AppContext } from "@api/ai/agents/config/shared";
+import type { AppContext } from "@api/ai/context";
 import { db } from "@midday/db/client";
 import { getInbox } from "@midday/db/queries";
-import { getAppUrl } from "@midday/utils/envs";
 import { formatAmount, formatDate } from "@midday/utils/format";
 import { tool } from "ai";
 import { z } from "zod";
@@ -67,13 +66,13 @@ export const getInboxTool = tool({
 
       const result = await getInbox(db, params);
 
-      if (result.data.length === 0) {
-        yield { text: "No inbox items found matching your criteria." };
-        return;
-      }
-
       const locale = appContext.locale ?? "en-US";
       const baseCurrency = appContext.baseCurrency ?? "USD";
+
+      if (result.data.length === 0) {
+        yield { text: "No inbox items found matching your criteria." };
+        return { items: [], total: 0, currency: baseCurrency };
+      }
 
       const formattedInboxItems = result.data.map((item) => {
         const formattedAmount = item.amount
@@ -88,6 +87,7 @@ export const getInboxTool = tool({
           id: item.id,
           displayName: item.displayName || item.fileName || "Untitled",
           amount: formattedAmount,
+          rawAmount: item.amount ?? 0,
           date: item.date ? formatDate(item.date) : "N/A",
           status: item.status,
           website: item.website || "N/A",
@@ -98,11 +98,6 @@ export const getInboxTool = tool({
         (sum, item) => sum + (item.amount ?? 0),
         0,
       );
-      const formattedTotalAmount = formatAmount({
-        amount: totalAmount,
-        currency: baseCurrency,
-        locale,
-      });
 
       const statusCounts = {
         new: result.data.filter((item) => item.status === "new").length,
@@ -110,14 +105,14 @@ export const getInboxTool = tool({
         pending: result.data.filter((item) => item.status === "pending").length,
       };
 
-      const response = `| Name | Amount | Date | Status | Website |\n|------|--------|------|--------|----------|\n${formattedInboxItems.map((item) => `| ${item.displayName} | ${item.amount} | ${item.date} | ${item.status} | ${item.website} |`).join("\n")}\n\n**${result.data.length} inbox items** | Total: ${formattedTotalAmount} | New: ${statusCounts.new} | Done: ${statusCounts.done} | Pending: ${statusCounts.pending}`;
+      yield { text: `${result.data.length} inbox items found` };
 
-      yield {
-        text: response,
-        link: {
-          text: "View all inbox items",
-          url: `${getAppUrl()}/inbox`,
-        },
+      return {
+        items: formattedInboxItems,
+        total: result.data.length,
+        totalAmount,
+        statusCounts,
+        currency: baseCurrency,
       };
     } catch (error) {
       yield {

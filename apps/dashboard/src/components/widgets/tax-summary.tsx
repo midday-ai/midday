@@ -1,11 +1,9 @@
 "use client";
 
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { getDefaultTaxType } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
 import { FormatAmount } from "@/components/format-amount";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
@@ -51,9 +49,6 @@ export function TaxSummaryWidget() {
   const t = useI18n();
   const { data: user } = useUserQuery();
   const { data: team } = useTeamQuery();
-  const { sendMessage } = useChatActions();
-  const chatId = useChatId();
-  const { setChatId } = useChatInterface();
   const { from, to, period, currency } = useMetricsFilter();
 
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
@@ -108,50 +103,11 @@ export function TaxSummaryWidget() {
     return `${t("tax_summary.credit_amount", { amount: netStr })} · ${periodLabel}`;
   };
 
-  const handleToolCall = (params: {
-    toolName: string;
-    toolParams?: Record<string, any>;
-    text: string;
-  }) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: params.text }],
-      metadata: {
-        toolCall: {
-          toolName: params.toolName,
-          toolParams: params.toolParams,
-        },
-      },
-    });
-  };
-
-  const handleViewTaxSummary = () => {
-    // Use dynamic terminology based on tax type (VAT/GST/Sales Tax/Tax)
-    const summaryText = taxTerms.title.toLowerCase();
-
-    handleToolCall({
-      toolName: "getTaxSummary",
-      toolParams: {
-        from,
-        to,
-        currency: currency,
-        showCanvas: true,
-      },
-      text: `Show ${summaryText} for ${periodLabel}`,
-    });
-  };
-
   return (
     <BaseWidget
       title={taxTerms.title}
       icon={<Icons.ReceiptLong className="size-4" />}
       description={getDescription()}
-      onClick={handleViewTaxSummary}
-      actions="See detailed analysis"
     >
       {hasActivity && taxData && (
         <div className="flex flex-col gap-4">

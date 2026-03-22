@@ -1,5 +1,4 @@
 import {
-  ArrowRight,
   BarChart3,
   Brain,
   Calculator,
@@ -229,6 +228,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: FileText,
     description: "Updating invoice",
   },
+  modifyInvoiceDraft: {
+    name: "Updating Invoice",
+    icon: FileText,
+    description: "Updating the open invoice",
+  },
   getInvoicePaymentAnalysis: {
     name: "Invoice Payment Analysis",
     icon: FileText,
@@ -365,12 +369,6 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     description: "Updating working memory",
   },
 
-  // Handoff tools
-  handoff_to_agent: {
-    name: "Routing",
-    icon: ArrowRight,
-    description: "Routing to specialist",
-  },
 };
 
 /**
@@ -388,10 +386,3 @@ export function getToolIcon(toolName: string): IconComponent | null {
   return config?.icon || null;
 }
 
-/**
- * Get tool display name by tool name
- */
-export function getToolDisplayName(toolName: string): string | null {
-  const config = getToolConfig(toolName);
-  return config?.name || null;
-}
