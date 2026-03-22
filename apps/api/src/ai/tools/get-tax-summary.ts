@@ -29,10 +29,7 @@ export const getTaxSummaryTool = tool({
   description:
     "Generate tax summary - tax liability, taxable income, and tax rates.",
   inputSchema: getTaxSummarySchema,
-  execute: async function* (
-    { period, from, to, currency },
-    executionOptions,
-  ) {
+  execute: async function* ({ period, from, to, currency }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
 
@@ -74,37 +71,41 @@ export const getTaxSummaryTool = tool({
       const prevFrom = format(prevFromDate, "yyyy-MM-dd");
       const prevTo = format(prevToDate, "yyyy-MM-dd");
 
-      const [paidTaxData, collectedTaxData, prevPaidTaxData, prevCollectedTaxData] =
-        await Promise.all([
-          getTaxSummary(db, {
-            teamId,
-            type: "paid",
-            from: finalFrom,
-            to: finalTo,
-            currency: targetCurrency,
-          }),
-          getTaxSummary(db, {
-            teamId,
-            type: "collected",
-            from: finalFrom,
-            to: finalTo,
-            currency: targetCurrency,
-          }),
-          getTaxSummary(db, {
-            teamId,
-            type: "paid",
-            from: prevFrom,
-            to: prevTo,
-            currency: targetCurrency,
-          }),
-          getTaxSummary(db, {
-            teamId,
-            type: "collected",
-            from: prevFrom,
-            to: prevTo,
-            currency: targetCurrency,
-          }),
-        ]);
+      const [
+        paidTaxData,
+        collectedTaxData,
+        prevPaidTaxData,
+        prevCollectedTaxData,
+      ] = await Promise.all([
+        getTaxSummary(db, {
+          teamId,
+          type: "paid",
+          from: finalFrom,
+          to: finalTo,
+          currency: targetCurrency,
+        }),
+        getTaxSummary(db, {
+          teamId,
+          type: "collected",
+          from: finalFrom,
+          to: finalTo,
+          currency: targetCurrency,
+        }),
+        getTaxSummary(db, {
+          teamId,
+          type: "paid",
+          from: prevFrom,
+          to: prevTo,
+          currency: targetCurrency,
+        }),
+        getTaxSummary(db, {
+          teamId,
+          type: "collected",
+          from: prevFrom,
+          to: prevTo,
+          currency: targetCurrency,
+        }),
+      ]);
 
       const currentPaidTax = paidTaxData.summary.totalTaxAmount;
       const currentCollectedTax = collectedTaxData.summary.totalTaxAmount;
@@ -139,7 +140,9 @@ export const getTaxSummaryTool = tool({
       });
       const netDirection = currentNetTax > 0 ? "owe" : "credit";
 
-      yield { text: `Net tax: ${formattedNetTax} (${netDirection}), rate: ${effectiveTaxRate.toFixed(1)}%` };
+      yield {
+        text: `Net tax: ${formattedNetTax} (${netDirection}), rate: ${effectiveTaxRate.toFixed(1)}%`,
+      };
 
       return {
         totalTaxPaid: currentPaidTax,

@@ -44,7 +44,9 @@ export const getMetricsBreakdownTool = tool({
     const teamId = appContext.teamId as string;
 
     if (!teamId) {
-      yield { text: "Unable to retrieve metrics breakdown: Team ID not found." };
+      yield {
+        text: "Unable to retrieve metrics breakdown: Team ID not found.",
+      };
       return {
         summary: { revenue: 0, expenses: 0, profit: 0, transactionCount: 0 },
         transactions: [],
@@ -128,13 +130,9 @@ export const getMetricsBreakdownTool = tool({
       const filteredTransactions = allTransactions.filter((tx) => {
         if (tx.internal) return false;
         if (tx.amount > 0) {
-          if (
-            !tx.categorySlug ||
-            !REVENUE_CATEGORIES.includes(tx.categorySlug)
-          )
+          if (!tx.categorySlug || !REVENUE_CATEGORIES.includes(tx.categorySlug))
             return false;
-          if (CONTRA_REVENUE_CATEGORIES.includes(tx.categorySlug))
-            return false;
+          if (CONTRA_REVENUE_CATEGORIES.includes(tx.categorySlug)) return false;
         }
         return true;
       });
@@ -148,9 +146,7 @@ export const getMetricsBreakdownTool = tool({
       );
 
       const totalExpenses = Math.abs(
-        transactionAmounts
-          .filter((a) => a < 0)
-          .reduce((sum, a) => sum + a, 0),
+        transactionAmounts.filter((a) => a < 0).reduce((sum, a) => sum + a, 0),
       );
       const totalRevenue = transactionAmounts
         .filter((a) => a > 0)
@@ -195,7 +191,9 @@ export const getMetricsBreakdownTool = tool({
         locale,
       });
 
-      yield { text: `Breakdown: ${formattedProfit} profit from ${transactionCount} transactions` };
+      yield {
+        text: `Breakdown: ${formattedProfit} profit from ${transactionCount} transactions`,
+      };
 
       return {
         summary: { revenue, expenses, profit, transactionCount },

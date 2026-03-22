@@ -26,10 +26,7 @@ export const getSpendingTool = tool({
   description:
     "Analyze spending patterns - totals, top transactions, category breakdown.",
   inputSchema: getSpendingSchema,
-  execute: async function* (
-    { period, from, to, currency },
-    executionOptions,
-  ) {
+  execute: async function* ({ period, from, to, currency }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
 

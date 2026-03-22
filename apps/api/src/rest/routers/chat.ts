@@ -5,16 +5,16 @@ import { allTools } from "@api/ai/tools";
 import { getUserContext } from "@api/ai/utils/get-user-context";
 import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
-import { pipeJsonRender } from "@json-render/core";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { pipeJsonRender } from "@json-render/core";
 import type { UIMessage } from "ai";
 import {
-  smoothStream,
-  streamText,
   convertToModelMessages,
-  stepCountIs,
   createUIMessageStream,
   createUIMessageStreamResponse,
+  smoothStream,
+  stepCountIs,
+  streamText,
 } from "ai";
 import { withRequiredScope } from "../middleware";
 

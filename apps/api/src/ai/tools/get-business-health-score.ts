@@ -20,15 +20,14 @@ export const getBusinessHealthScoreTool = tool({
   description:
     "Calculate business health score (0-100) - composite score based on revenue, expenses, cash flow, and profitability metrics.",
   inputSchema: getBusinessHealthScoreSchema,
-  execute: async function* (
-    { period, from, to, currency },
-    executionOptions,
-  ) {
+  execute: async function* ({ period, from, to, currency }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
 
     if (!teamId) {
-      yield { text: "Unable to retrieve business health score: Team ID not found." };
+      yield {
+        text: "Unable to retrieve business health score: Team ID not found.",
+      };
       return {
         overallScore: 0,
         currency: currency || appContext.baseCurrency || "USD",
@@ -193,7 +192,9 @@ export const getBusinessHealthScoreTool = tool({
               ? "Fair"
               : "Needs improvement";
 
-      yield { text: `Business health score: ${overallScore}/100 (${scoreDescription})` };
+      yield {
+        text: `Business health score: ${overallScore}/100 (${scoreDescription})`,
+      };
 
       return {
         overallScore,

@@ -153,7 +153,7 @@ export function CashFlowChart({
 
             <Tooltip
               content={({ active, payload, label }) => {
-                if (active && payload && payload.length) {
+                if (active && payload?.length) {
                   return (
                     <div className="p-2 text-[10px] font-sans border bg-white dark:bg-[#0c0c0c] border-gray-200 dark:border-[#1d1d1d] text-black dark:text-white">
                       <p className="mb-1 text-gray-500 dark:text-[#666666]">

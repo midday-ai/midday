@@ -22,10 +22,7 @@ export const getExpensesTool = tool({
   description:
     "Analyze expenses by category - totals grouped by category with trends.",
   inputSchema: getExpensesSchema,
-  execute: async function* (
-    { period, from, to, currency },
-    executionOptions,
-  ) {
+  execute: async function* ({ period, from, to, currency }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
 

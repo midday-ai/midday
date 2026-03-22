@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  useJsonRenderMessage,
   MessageSpecRenderer,
+  useJsonRenderMessage,
 } from "@midday/generative-ui/renderer";
 import { Message, MessageAvatar, MessageContent } from "@midday/ui/message";
 import { Response } from "@midday/ui/response";

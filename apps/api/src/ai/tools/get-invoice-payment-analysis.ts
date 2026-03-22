@@ -25,16 +25,15 @@ export const getInvoicePaymentAnalysisTool = tool({
   description:
     "Analyze invoice payment patterns - shows average days to pay, payment trends, overdue invoice summary, and payment score.",
   inputSchema: getInvoicePaymentAnalysisSchema,
-  execute: async function* (
-    { from, to, currency },
-    executionOptions,
-  ) {
+  execute: async function* ({ from, to, currency }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
     const targetCurrency = currency || appContext.baseCurrency || "USD";
 
     if (!teamId) {
-      yield { text: "Unable to retrieve invoice payment analysis: Team ID not found." };
+      yield {
+        text: "Unable to retrieve invoice payment analysis: Team ID not found.",
+      };
       return {
         averageDaysToPay: 0,
         paymentRate: 0,

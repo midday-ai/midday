@@ -77,7 +77,7 @@ const pieTooltipFormatter = (
   currency = "USD",
   locale?: string,
 ) => {
-  if (active && payload && payload.length) {
+  if (active && payload?.length) {
     const data = payload[0];
     const formattedValue =
       formatAmount({

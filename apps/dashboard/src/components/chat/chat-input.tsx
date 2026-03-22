@@ -33,9 +33,9 @@ import { RecordButton } from "@/components/chat/record-button";
 import { SuggestedActionsButton } from "@/components/suggested-actions-button";
 import { WebSearchButton } from "@/components/web-search-button";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useWindowScroll } from "@/hooks/use-window-scroll";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useChatStore } from "@/store/chat";
 
 export interface ChatInputMessage extends PromptInputMessage {

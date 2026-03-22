@@ -7,7 +7,9 @@ const barSeriesSchema = z.object({
   fill: z
     .enum(["primary", "secondary", "pattern"])
     .optional()
-    .describe("Bar fill style: primary (solid), secondary (muted), or pattern (diagonal lines)"),
+    .describe(
+      "Bar fill style: primary (solid), secondary (muted), or pattern (diagonal lines)",
+    ),
   yAxisId: z.string().optional(),
   name: z.string().optional().describe("Display name in tooltip"),
 });
@@ -218,7 +220,11 @@ export const catalog = defineCatalog(schema, {
         ],
         rows: [
           { date: "Mar 15", description: "Client payment", amount: "$5,200" },
-          { date: "Mar 12", description: "Software subscription", amount: "-$99" },
+          {
+            date: "Mar 12",
+            description: "Software subscription",
+            amount: "-$99",
+          },
         ],
       },
     },
@@ -226,7 +232,9 @@ export const catalog = defineCatalog(schema, {
       description:
         "Full balance sheet financial statement. Shows assets (current/non-current), liabilities (current/non-current), equity, totals, and financial ratios. Use when the getBalanceSheet tool returns data.",
       props: z.object({
-        asOf: z.string().describe("Date the balance sheet is as of (e.g. '2025-12-31')"),
+        asOf: z
+          .string()
+          .describe("Date the balance sheet is as of (e.g. '2025-12-31')"),
         currency: z.string(),
         locale: z.string().optional(),
         assets: z.object({

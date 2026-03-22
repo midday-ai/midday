@@ -10,10 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  commonChartConfig,
-  createCompactTickFormatter,
-} from "../chart-utils";
+import { commonChartConfig, createCompactTickFormatter } from "../chart-utils";
 import { ChartTooltip } from "./chart-tooltip";
 
 interface LineSeries {
@@ -107,7 +104,11 @@ export function GenericLineChart({
               stroke={line.color || "hsl(var(--primary))"}
               strokeWidth={line.strokeWidth ?? 2}
               strokeDasharray={line.dashed ? "5 5" : undefined}
-              dot={line.dot ? { fill: line.color || "hsl(var(--primary))", r: 3 } : false}
+              dot={
+                line.dot
+                  ? { fill: line.color || "hsl(var(--primary))", r: 3 }
+                  : false
+              }
               isAnimationActive={false}
               name={line.name}
             />

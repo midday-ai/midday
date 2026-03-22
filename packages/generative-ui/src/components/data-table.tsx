@@ -37,7 +37,7 @@ export function DataTable({ columns, rows }: DataTableProps) {
         <tbody>
           {rows.map((row, ri) => (
             <tr
-              key={ri}
+              key={ri.toString()}
               className="border-b border-[#e6e6e6] dark:border-[#1d1d1d]"
             >
               {columns.map((col) => (

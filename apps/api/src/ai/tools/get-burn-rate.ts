@@ -28,10 +28,7 @@ export const getBurnRateTool = tool({
   description:
     "Calculate monthly cash burn rate - spending per month with trends.",
   inputSchema: getBurnRateSchema,
-  execute: async function* (
-    { period, from, to, currency },
-    executionOptions,
-  ) {
+  execute: async function* ({ period, from, to, currency }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
 

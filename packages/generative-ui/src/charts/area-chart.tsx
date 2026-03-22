@@ -10,10 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  commonChartConfig,
-  createCompactTickFormatter,
-} from "../chart-utils";
+import { commonChartConfig, createCompactTickFormatter } from "../chart-utils";
 import { ChartTooltip } from "./chart-tooltip";
 
 interface AreaSeries {
@@ -98,11 +95,7 @@ export function GenericAreaChart({
                     height="8"
                     patternUnits="userSpaceOnUse"
                   >
-                    <rect
-                      width="8"
-                      height="8"
-                      fill="var(--chart-pattern-bg)"
-                    />
+                    <rect width="8" height="8" fill="var(--chart-pattern-bg)" />
                     <path
                       d="M0,0 L8,8 M-2,6 L6,16 M-4,4 L4,12"
                       stroke="var(--chart-pattern-stroke)"

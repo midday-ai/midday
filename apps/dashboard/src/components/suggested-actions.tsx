@@ -28,10 +28,7 @@ export function SuggestedActions() {
     trpc.suggestedActions.trackUsage.mutationOptions(),
   );
 
-  const handleToolCall = (params: {
-    text: string;
-    actionId: string;
-  }) => {
+  const handleToolCall = (params: { text: string; actionId: string }) => {
     if (!chatId) return;
 
     trackUsageMutation.mutate({ actionId: params.actionId });
@@ -162,8 +159,7 @@ export function SuggestedActions() {
           const config = uiConfig[action.id];
           const Icon = config?.icon;
           const title = config?.title || action.id;
-          const description =
-            config?.description || `Execute ${action.id}`;
+          const description = config?.description || `Execute ${action.id}`;
           const isLast = index === suggestedActions.length - 1;
 
           return (

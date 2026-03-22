@@ -85,7 +85,6 @@ export function CustomerLifetimeValueWidget() {
                   </span>
                 </div>
               </div>
-
             </>
           ) : (
             <div className="flex items-center min-h-[120px]">

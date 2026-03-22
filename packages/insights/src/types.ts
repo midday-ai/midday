@@ -4,6 +4,7 @@
 
 // Import and re-export InsightPredictions from schema (single source of truth)
 import type { InsightPredictions } from "@midday/db/schema";
+
 export type { InsightPredictions };
 
 export type PeriodType = "weekly" | "monthly" | "quarterly" | "yearly";

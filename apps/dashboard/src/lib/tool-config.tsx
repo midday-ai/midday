@@ -368,7 +368,6 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: Brain,
     description: "Updating working memory",
   },
-
 };
 
 /**
@@ -385,4 +384,3 @@ export function getToolIcon(toolName: string): IconComponent | null {
   const config = getToolConfig(toolName);
   return config?.icon || null;
 }
-

@@ -106,8 +106,7 @@ export function resolveToolParams(
       ? aiParams.currency
       : undefined) ?? baseCurrency;
 
-  const revenueType =
-    (aiParams.revenueType as "gross" | "net") ?? "net";
+  const revenueType = (aiParams.revenueType as "gross" | "net") ?? "net";
 
   return {
     ...aiParams,

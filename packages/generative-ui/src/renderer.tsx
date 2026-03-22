@@ -1,13 +1,13 @@
 "use client";
 
+import type { Spec } from "@json-render/react";
 import {
+  ActionProvider,
   Renderer as JsonRenderRenderer,
   StateProvider,
-  VisibilityProvider,
-  ActionProvider,
   useJsonRenderMessage,
+  VisibilityProvider,
 } from "@json-render/react";
-import type { Spec } from "@json-render/react";
 import type { UIMessage } from "ai";
 import { registry } from "./registry";
 

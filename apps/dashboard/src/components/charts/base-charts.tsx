@@ -93,7 +93,7 @@ export function StyledTooltip({
   label?: string;
   formatter?: (value: any, name: string) => [string, string];
 }) {
-  if (active && payload && payload.length) {
+  if (active && payload?.length) {
     return (
       <div
         className="p-2 text-[10px] font-sans border bg-white dark:bg-[#0c0c0c] border-gray-200 dark:border-[#1d1d1d] text-black dark:text-white"

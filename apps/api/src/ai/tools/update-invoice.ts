@@ -52,11 +52,8 @@ export const updateInvoiceTool = tool({
       }
 
       if (customerName && !invoiceNumber) {
-        const nameMatch = result.data.find(
-          (inv) =>
-            inv.customerName
-              ?.toLowerCase()
-              .includes(customerName.toLowerCase()),
+        const nameMatch = result.data.find((inv) =>
+          inv.customerName?.toLowerCase().includes(customerName.toLowerCase()),
         );
         if (nameMatch) invoice = nameMatch;
       }

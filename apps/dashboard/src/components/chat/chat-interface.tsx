@@ -5,21 +5,16 @@ import type { UIChatMessage } from "@midday/api/ai/types";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { Conversation, ConversationContent } from "@midday/ui/conversation";
-import { DefaultChatTransport, generateId } from "ai";
 import { useQueryClient } from "@tanstack/react-query";
+import { DefaultChatTransport, generateId } from "ai";
 import { useEffect, useMemo, useRef } from "react";
 import { Portal } from "@/components/portal";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useChatStatus } from "@/hooks/use-chat-status";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTRPC } from "@/trpc/client";
 import type { Geo } from "@/utils/geo";
-import {
-  ChatHeader,
-  ChatInput,
-  ChatMessages,
-  ChatStatusIndicators,
-} from "./";
+import { ChatHeader, ChatInput, ChatMessages, ChatStatusIndicators } from "./";
 import { InvoiceCanvasPanel } from "./invoice-canvas-panel";
 
 type Props = {

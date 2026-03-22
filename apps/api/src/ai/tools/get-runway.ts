@@ -22,10 +22,7 @@ export const getRunwayTool = tool({
   description:
     "Calculate cash runway - months the business can operate with current cash.",
   inputSchema: getRunwaySchema,
-  execute: async function* (
-    { period, from, to, currency },
-    executionOptions,
-  ) {
+  execute: async function* ({ period, from, to, currency }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
 
@@ -94,10 +91,7 @@ export const getRunwayTool = tool({
         Number.isFinite(averageBurnRate)
       ) {
         for (let i = 0; i <= 8; i++) {
-          const remainingCash = Math.max(
-            0,
-            cashBalance - averageBurnRate * i,
-          );
+          const remainingCash = Math.max(0, cashBalance - averageBurnRate * i);
           const projectedRunway =
             averageBurnRate > 0 ? remainingCash / averageBurnRate : 0;
 

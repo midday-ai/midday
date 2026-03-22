@@ -166,14 +166,14 @@ export function GenericBarChart({
               key={line.dataKey}
               type="monotone"
               dataKey={line.dataKey}
-              yAxisId={line.yAxisId || (dualYAxis ? dualYAxis.rightAxisId : "left")}
+              yAxisId={
+                line.yAxisId || (dualYAxis ? dualYAxis.rightAxisId : "left")
+              }
               stroke={line.color || "var(--chart-line-secondary)"}
               strokeWidth={line.strokeWidth ?? 2}
               strokeDasharray={line.dashed ? "5 5" : undefined}
               dot={
-                line.dot
-                  ? { fill: "var(--chart-line-secondary)", r: 3 }
-                  : false
+                line.dot ? { fill: "var(--chart-line-secondary)", r: 3 } : false
               }
               isAnimationActive={false}
               name={line.name}

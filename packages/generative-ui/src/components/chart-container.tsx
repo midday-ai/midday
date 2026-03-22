@@ -39,7 +39,7 @@ export function ChartContainer({
           <div className="flex gap-4 items-center">
             {legend.map((item, i) => (
               <div
-                key={`${item.label}-${i}`}
+                key={`${item.label}-${i.toString()}`}
                 className="flex gap-2 items-center"
               >
                 <div

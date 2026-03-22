@@ -20,10 +20,7 @@ export const getCashFlowStressTestTool = tool({
   description:
     "Perform cash flow stress testing - analyzes base case, worst case, and best case scenarios to assess financial resilience.",
   inputSchema: getCashFlowStressTestSchema,
-  execute: async function* (
-    { period, from, to, currency },
-    executionOptions,
-  ) {
+  execute: async function* ({ period, from, to, currency }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
 
@@ -92,8 +89,20 @@ export const getCashFlowStressTestTool = tool({
 
       const scenarios = [
         { name: "Base Case", revMult: 1.0, expMult: 1.0, revAdj: 0, expAdj: 0 },
-        { name: "Worst Case", revMult: 0.7, expMult: 1.2, revAdj: -30, expAdj: 20 },
-        { name: "Best Case", revMult: 1.2, expMult: 0.9, revAdj: 20, expAdj: -10 },
+        {
+          name: "Worst Case",
+          revMult: 0.7,
+          expMult: 1.2,
+          revAdj: -30,
+          expAdj: 20,
+        },
+        {
+          name: "Best Case",
+          revMult: 1.2,
+          expMult: 0.9,
+          revAdj: 20,
+          expAdj: -10,
+        },
       ];
 
       const scenarioResults = scenarios.map((s, index) => {
@@ -141,7 +150,9 @@ export const getCashFlowStressTestTool = tool({
       }
       stressTestScore = Math.round(stressTestScore);
 
-      yield { text: `Stress test score: ${stressTestScore}/100 (worst case: ${worstCaseRunway}mo)` };
+      yield {
+        text: `Stress test score: ${stressTestScore}/100 (worst case: ${worstCaseRunway}mo)`,
+      };
 
       return {
         baseCaseRunway,

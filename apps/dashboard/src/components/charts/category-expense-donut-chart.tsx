@@ -25,7 +25,7 @@ const donutTooltipFormatter = ({
   currency = "USD",
   locale,
 }: any) => {
-  if (active && payload && payload.length) {
+  if (active && payload?.length) {
     const data = payload[0].payload;
     return (
       <div className="border p-2 text-[10px] bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d] text-black dark:text-white shadow-sm">
