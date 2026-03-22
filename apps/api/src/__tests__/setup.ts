@@ -51,7 +51,7 @@ const createMockDb = () => ({
       findFirst: mock(() =>
         Promise.resolve({
           id: "test-user-id",
-          teamId: "test-team-id",
+          teamId: "test-team-id" as string | null,
           email: "test@example.com",
           usersOnTeams: [{ id: "membership-1", teamId: "test-team-id" }],
         }),
