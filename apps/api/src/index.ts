@@ -16,6 +16,7 @@ import { Scalar } from "@scalar/hono-api-reference";
 import * as Sentry from "@sentry/bun";
 
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 import { secureHeaders } from "hono/secure-headers";
 import { routers } from "./rest/routers";
 import type { Context } from "./rest/types";
@@ -219,6 +220,10 @@ if (poolStatsIntervalMs <= 0) {
 
 // Global error handler — captures unhandled route errors to Sentry
 app.onError((err, c) => {
+  if (err instanceof HTTPException) {
+    return err.getResponse();
+  }
+
   Sentry.captureException(err, {
     tags: { source: "hono", path: c.req.path, method: c.req.method },
   });

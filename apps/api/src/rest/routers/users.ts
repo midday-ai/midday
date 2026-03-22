@@ -82,12 +82,21 @@ app.openapi(
     const session = c.get("session");
     const body = c.req.valid("json");
 
-    const result = await updateUser(db, {
+    await updateUser(db, {
       id: session.user.id,
       ...body,
     });
 
-    return c.json(validateResponse(result, userSchema));
+    const result = await getUserById(db, session.user.id);
+
+    const response = result
+      ? {
+          ...result,
+          fileKey: result.teamId ? await generateFileKey(result.teamId) : null,
+        }
+      : null;
+
+    return c.json(validateResponse(response, userSchema));
   },
 );
 

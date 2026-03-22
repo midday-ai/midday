@@ -15,6 +15,7 @@ import {
   getCustomers,
   upsertCustomer,
 } from "@midday/db/queries";
+import { HTTPException } from "hono/http-exception";
 
 const app = new OpenAPIHono<Context>();
 
@@ -85,7 +86,7 @@ app.openapi(
         },
       },
     },
-    middleware: [withRequiredScope("customers.read")],
+    middleware: [withRequiredScope("customers.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -131,6 +132,10 @@ app.openapi(
     const id = c.req.valid("param").id;
 
     const result = await getCustomerById(db, { id, teamId });
+
+    if (!result) {
+      throw new HTTPException(404, { message: "Customer not found" });
+    }
 
     return c.json(validateResponse(result, customerResponseSchema));
   },

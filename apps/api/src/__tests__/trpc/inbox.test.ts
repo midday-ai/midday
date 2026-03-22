@@ -1,56 +1,24 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
+import { createCallerFactory } from "../../trpc/init";
+import { inboxRouter } from "../../trpc/routers/inbox";
 import {
   createInboxListResponse,
   createMinimalInboxResponse,
   createValidInboxResponse,
 } from "../factories/inbox";
 import { createTestContext } from "../helpers/test-context";
+import { mocks } from "../setup";
 
-// Create local mocks for inbox tests
-const mockGetInbox = mock(() => createInboxListResponse());
-const mockGetInboxById = mock(
-  () => null as ReturnType<typeof createValidInboxResponse> | null,
-);
-const mockUpdateInbox = mock(() => ({}));
-const mockDeleteInbox = mock(() => ({}));
-const mockDeleteInboxMany = mock(() => [] as Array<{ id: string }>);
-const mockGetInboxByStatus = mock(() => [] as any[]);
-
-// Mock the module
-mock.module("@midday/db/queries", () => ({
-  getInbox: mockGetInbox,
-  getInboxById: mockGetInboxById,
-  createInbox: mock(() => ({})),
-  updateInbox: mockUpdateInbox,
-  deleteInbox: mockDeleteInbox,
-  deleteInboxMany: mockDeleteInboxMany,
-  getInboxByStatus: mockGetInboxByStatus,
-  getInboxSearch: mock(() => []),
-  getInboxBlocklist: mock(() => []),
-  createInboxBlocklist: mock(() => ({})),
-  deleteInboxBlocklist: mock(() => ({})),
-  checkInboxAttachments: mock(() => []),
-  matchTransaction: mock(() => ({})),
-  unmatchTransaction: mock(() => ({})),
-  confirmSuggestedMatch: mock(() => ({})),
-  declineSuggestedMatch: mock(() => ({})),
-}));
-
-// Import after mocking
-const { createCallerFactory } = await import("../../trpc/init");
-const { inboxRouter } = await import("../../trpc/routers/inbox");
-
-// Create a test caller
 const createCaller = createCallerFactory(inboxRouter);
 
 describe("tRPC: inbox.get", () => {
   beforeEach(() => {
-    mockGetInbox.mockReset();
-    mockGetInbox.mockImplementation(() => createInboxListResponse());
+    mocks.getInbox.mockReset();
+    mocks.getInbox.mockImplementation(() => createInboxListResponse());
   });
 
   test("returns inbox list", async () => {
-    mockGetInbox.mockImplementation(() =>
+    mocks.getInbox.mockImplementation(() =>
       createInboxListResponse([createValidInboxResponse()]),
     );
 
@@ -62,7 +30,7 @@ describe("tRPC: inbox.get", () => {
   });
 
   test("handles minimal inbox data", async () => {
-    mockGetInbox.mockImplementation(() =>
+    mocks.getInbox.mockImplementation(() =>
       createInboxListResponse([createMinimalInboxResponse()]),
     );
 
@@ -73,7 +41,7 @@ describe("tRPC: inbox.get", () => {
   });
 
   test("handles empty list", async () => {
-    mockGetInbox.mockImplementation(() => createInboxListResponse([]));
+    mocks.getInbox.mockImplementation(() => createInboxListResponse([]));
 
     const caller = createCaller(createTestContext());
     const result = await caller.get({});
@@ -84,11 +52,11 @@ describe("tRPC: inbox.get", () => {
 
 describe("tRPC: inbox.getById", () => {
   beforeEach(() => {
-    mockGetInboxById.mockReset();
+    mocks.getInboxById.mockReset();
   });
 
   test("returns single inbox item", async () => {
-    mockGetInboxById.mockImplementation(() => createValidInboxResponse());
+    mocks.getInboxById.mockImplementation(() => createValidInboxResponse());
 
     const caller = createCaller(createTestContext());
     const result = await caller.getById({
@@ -99,7 +67,7 @@ describe("tRPC: inbox.getById", () => {
   });
 
   test("returns null for non-existent item", async () => {
-    mockGetInboxById.mockImplementation(() => null);
+    mocks.getInboxById.mockImplementation(() => null);
 
     const caller = createCaller(createTestContext());
     const result = await caller.getById({
@@ -112,15 +80,15 @@ describe("tRPC: inbox.getById", () => {
 
 describe("tRPC: inbox.update", () => {
   beforeEach(() => {
-    mockUpdateInbox.mockReset();
-    mockUpdateInbox.mockImplementation(() => createValidInboxResponse());
+    mocks.updateInbox.mockReset();
+    mocks.updateInbox.mockImplementation(() => createValidInboxResponse());
   });
 
   test("updates inbox item successfully", async () => {
     const caller = createCaller(createTestContext());
     const result = await caller.update({
       id: "a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
-      status: "done", // Use valid enum value
+      status: "done",
     });
 
     expect(result).toBeDefined();
@@ -129,24 +97,23 @@ describe("tRPC: inbox.update", () => {
 
 describe("tRPC: inbox.delete", () => {
   beforeEach(() => {
-    mockDeleteInbox.mockReset();
-    mockDeleteInbox.mockImplementation(() => ({
+    mocks.deleteInbox.mockReset();
+    mocks.deleteInbox.mockImplementation(() => ({
       id: "a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
     }));
   });
 
   test("deletes inbox item successfully", async () => {
     const caller = createCaller(createTestContext());
-    // inbox.delete returns void, so we just check it doesn't throw
     await caller.delete({ id: "a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d" });
-    expect(mockDeleteInbox).toHaveBeenCalled();
+    expect(mocks.deleteInbox).toHaveBeenCalled();
   });
 });
 
 describe("tRPC: inbox.getByStatus", () => {
   beforeEach(() => {
-    mockGetInboxByStatus.mockReset();
-    mockGetInboxByStatus.mockImplementation(() => [
+    mocks.getInboxByStatus.mockReset();
+    mocks.getInboxByStatus.mockImplementation(() => [
       { id: "item-1", displayName: "Test", status: "pending" },
     ]);
   });
@@ -156,5 +123,85 @@ describe("tRPC: inbox.getByStatus", () => {
     const result = await caller.getByStatus({ status: "pending" });
 
     expect(result).toHaveLength(1);
+  });
+});
+
+const INBOX_NEW_ID = "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4";
+
+describe("tRPC: inbox.create", () => {
+  beforeEach(() => {
+    mocks.createInbox.mockReset();
+    mocks.createInbox.mockImplementation(() =>
+      Promise.resolve({ id: INBOX_NEW_ID }),
+    );
+  });
+
+  test("creates inbox row from upload metadata", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.create({
+      filename: "invoice.pdf",
+      mimetype: "application/pdf",
+      size: 2048,
+      filePath: ["test-team-id", "inbox", "invoice.pdf"],
+    });
+
+    expect(result).toMatchObject({ id: INBOX_NEW_ID });
+    expect(mocks.createInbox).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        teamId: "test-team-id",
+        displayName: "invoice.pdf",
+        fileName: "invoice.pdf",
+        filePath: ["test-team-id", "inbox", "invoice.pdf"],
+        contentType: "application/pdf",
+        size: 2048,
+        status: "processing",
+      }),
+    );
+  });
+});
+
+describe("tRPC: inbox.deleteMany", () => {
+  beforeEach(() => {
+    mocks.deleteInboxMany.mockReset();
+    mocks.deleteInboxMany.mockImplementation(() =>
+      Promise.resolve([{ id: INBOX_NEW_ID, filePath: null }]),
+    );
+  });
+
+  test("deletes multiple inbox items by id", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.deleteMany([INBOX_NEW_ID]);
+
+    expect(result).toEqual([{ id: INBOX_NEW_ID, filePath: null }]);
+    expect(mocks.deleteInboxMany).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ids: [INBOX_NEW_ID],
+        teamId: "test-team-id",
+      }),
+    );
+  });
+});
+
+describe("tRPC: inbox.search", () => {
+  beforeEach(() => {
+    mocks.getInboxSearch.mockReset();
+    mocks.getInboxSearch.mockImplementation(() => Promise.resolve([]));
+  });
+
+  test("searches inbox with query string", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.search({ q: "test" });
+
+    expect(result).toEqual([]);
+    expect(mocks.getInboxSearch).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        teamId: "test-team-id",
+        q: "test",
+        limit: 10,
+      }),
+    );
   });
 });

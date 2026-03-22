@@ -37,6 +37,11 @@ export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePaylo
 
     const { user, ...invoice } = invoiceData;
 
+    if (!invoice.template) {
+      this.logger.error("Invoice has no template configured", { invoiceId });
+      throw new Error(`Invoice ${invoiceId} has no template configured`);
+    }
+
     this.logger.debug("Generating PDF", { invoiceId });
 
     // Generate PDF buffer

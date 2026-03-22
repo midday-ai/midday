@@ -155,3 +155,115 @@ describe("tRPC: bankAccounts.delete", () => {
     );
   });
 });
+
+const ACCOUNT_ID = "a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d";
+
+describe("tRPC: bankAccounts.getTransactionCount", () => {
+  beforeEach(() => {
+    mocks.getTransactionCountByBankAccountId.mockReset();
+    mocks.getTransactionCountByBankAccountId.mockImplementation(() =>
+      Promise.resolve(5),
+    );
+  });
+
+  test("returns transaction count for bank account", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.getTransactionCount({ id: ACCOUNT_ID });
+
+    expect(result).toEqual({ count: 5 });
+    expect(mocks.getTransactionCountByBankAccountId).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        bankAccountId: ACCOUNT_ID,
+        teamId: "test-team-id",
+      }),
+    );
+  });
+});
+
+describe("tRPC: bankAccounts.getDetails", () => {
+  beforeEach(() => {
+    mocks.getBankAccountDetails.mockReset();
+    mocks.getBankAccountDetails.mockImplementation(() =>
+      Promise.resolve({
+        id: ACCOUNT_ID,
+        iban: null,
+        accountNumber: null,
+        routingNumber: null,
+        wireRoutingNumber: null,
+        bic: null,
+        sortCode: null,
+      }),
+    );
+  });
+
+  test("returns decrypted account details", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.getDetails({ id: ACCOUNT_ID });
+
+    expect(result).toMatchObject({ id: ACCOUNT_ID });
+    expect(mocks.getBankAccountDetails).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        accountId: ACCOUNT_ID,
+        teamId: "test-team-id",
+      }),
+    );
+  });
+});
+
+describe("tRPC: bankAccounts.currencies", () => {
+  beforeEach(() => {
+    mocks.getBankAccountsCurrencies.mockReset();
+    mocks.getBankAccountsCurrencies.mockImplementation(() =>
+      Promise.resolve([{ currency: "USD" }, { currency: "EUR" }]),
+    );
+  });
+
+  test("returns distinct currencies for team accounts", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.currencies();
+
+    expect(result).toEqual([{ currency: "USD" }, { currency: "EUR" }]);
+    expect(mocks.getBankAccountsCurrencies).toHaveBeenCalledWith(
+      expect.anything(),
+      "test-team-id",
+    );
+  });
+});
+
+describe("tRPC: bankAccounts.balances", () => {
+  beforeEach(() => {
+    mocks.getBankAccountsBalances.mockReset();
+    mocks.getBankAccountsBalances.mockImplementation(() =>
+      Promise.resolve([
+        {
+          id: ACCOUNT_ID,
+          currency: "USD",
+          balance: 1000,
+          name: "Checking",
+          logo_url: "",
+        },
+      ]),
+    );
+  });
+
+  test("returns balances for team bank accounts", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.balances();
+
+    expect(result).toEqual([
+      {
+        id: ACCOUNT_ID,
+        currency: "USD",
+        balance: 1000,
+        name: "Checking",
+        logo_url: "",
+      },
+    ]);
+    expect(mocks.getBankAccountsBalances).toHaveBeenCalledWith(
+      expect.anything(),
+      "test-team-id",
+    );
+  });
+});

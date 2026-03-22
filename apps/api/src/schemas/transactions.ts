@@ -383,9 +383,10 @@ export const transactionResponseSchema = z
               example: "https://cdn.midday.ai/logos/chase-bank.png",
             }),
           })
+          .nullable()
           .openapi({
             description:
-              "Bank connection information associated with the account",
+              "Bank connection information associated with the account. Null for manual accounts.",
             example: {
               id: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
               name: "Chase Bank",
@@ -393,8 +394,10 @@ export const transactionResponseSchema = z
             },
           }),
       })
+      .nullable()
       .openapi({
-        description: "Bank account information associated with the transaction",
+        description:
+          "Bank account information associated with the transaction. Null when no account is linked.",
         example: {
           id: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
           name: "Company Credit Card",

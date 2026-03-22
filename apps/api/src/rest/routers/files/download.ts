@@ -271,6 +271,12 @@ downloadInvoiceApp.openapi(
       throw new HTTPException(404, { message: "Invoice not found" });
     }
 
+    if (!invoiceData.template) {
+      throw new HTTPException(422, {
+        message: "Invoice has no template configured",
+      });
+    }
+
     // For receipt, validate that invoice is paid
     if (isReceipt && invoiceData.status !== "paid") {
       throw new HTTPException(400, {

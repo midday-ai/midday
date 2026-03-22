@@ -20,6 +20,7 @@ import {
   updateInbox,
 } from "@midday/db/queries";
 import { signedUrl } from "@midday/supabase/storage";
+import { HTTPException } from "hono/http-exception";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
@@ -248,10 +249,12 @@ app.openapi(
     const teamId = c.get("teamId");
     const { id } = c.req.valid("param");
 
-    const result = await deleteInbox(db, {
-      id,
-      teamId,
-    });
+    let result: Awaited<ReturnType<typeof deleteInbox>>;
+    try {
+      result = await deleteInbox(db, { id, teamId });
+    } catch {
+      throw new HTTPException(404, { message: "Inbox item not found" });
+    }
 
     return c.json(validateResponse(result, deleteInboxResponseSchema));
   },

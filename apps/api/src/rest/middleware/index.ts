@@ -25,7 +25,7 @@ export const protectedMiddleware: MiddlewareHandler[] = [
   withAuth,
   rateLimiter({
     windowMs: 10 * 60 * 1000, // 10 minutes
-    limit: 100,
+    limit: Number(process.env.API_RATE_LIMIT) || 1000,
     keyGenerator: (c) => {
       return c.get("session")?.user?.id ?? "unknown";
     },

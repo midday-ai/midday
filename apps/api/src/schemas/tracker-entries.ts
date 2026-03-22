@@ -395,8 +395,31 @@ export const startTimerResponseSchema = z.object({
   data: timerResponseSchema,
 });
 
+const discardedTimerResponseSchema = z.object({
+  id: z.string().uuid(),
+  discarded: z.literal(true),
+  duration: z.number(),
+  project: z
+    .object({
+      id: z.string().uuid(),
+      name: z.string(),
+    })
+    .nullable()
+    .optional(),
+  trackerProject: z
+    .object({
+      id: z.string().uuid(),
+      name: z.string(),
+    })
+    .nullable()
+    .optional(),
+  start: z.string().nullable(),
+  stop: z.string().nullable(),
+  description: z.string().nullable(),
+});
+
 export const stopTimerResponseSchema = z.object({
-  data: timerResponseSchema,
+  data: z.union([timerResponseSchema, discardedTimerResponseSchema]),
 });
 
 export const getCurrentTimerResponseSchema = z.object({
