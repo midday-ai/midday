@@ -42,21 +42,24 @@ async function api<T = unknown>(
       body: body ? JSON.stringify(body) : undefined,
     });
 
-    if (res.status === 429 && attempt < maxRetries) {
-      const retryAfter = res.headers.get("retry-after");
-      const waitMs = retryAfter
-        ? Number(retryAfter) * 1000
-        : 2000 * (attempt + 1);
-      await sleep(waitMs);
-      continue;
+    if (res.status === 429) {
+      if (attempt < maxRetries) {
+        const retryAfter = res.headers.get("retry-after");
+        const waitMs = retryAfter
+          ? Number(retryAfter) * 1000
+          : 2000 * (attempt + 1);
+        await sleep(waitMs);
+        continue;
+      }
+      throw new Error(
+        `Rate limited after ${maxRetries} retries: ${method} ${path}`,
+      );
     }
 
     const data = (await res.json().catch(() => null)) as T;
     return { status: res.status, data };
   }
-  throw new Error(
-    `Rate limited after ${maxRetries} retries: ${method} ${path}`,
-  );
+  throw new Error(`No response after ${maxRetries} retries: ${method} ${path}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -421,16 +424,20 @@ describe("Tracker Entries Timer", () => {
     if (entry?.id) timerEntryId = entry.id;
   });
 
-  test("POST /tracker-entries/timer/stop -> 200 or 500 (discarded if <60s)", async () => {
+  test("POST /tracker-entries/timer/stop -> 200 (discarded if <60s)", async () => {
     if (!timerEntryId) return;
 
-    const { status } = await api<any>("POST", "/tracker-entries/timer/stop", {
-      entryId: timerEntryId,
-    });
+    const { status, data } = await api<any>(
+      "POST",
+      "/tracker-entries/timer/stop",
+      { entryId: timerEntryId },
+    );
 
-    // Server discards entries under 60s and the response shape mismatch causes 500.
-    // In real usage the timer runs longer; here we verify the endpoint is reachable.
-    expect([200, 201, 500]).toContain(status);
+    expect(status).toBe(200);
+
+    if (data?.data?.discarded) {
+      timerEntryId = null;
+    }
   });
 });
 
