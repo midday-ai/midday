@@ -805,7 +805,7 @@ export const mocks = {
     mockDb.query.users.findFirst.mockImplementationOnce(() =>
       Promise.resolve({
         id: "test-user-id",
-        teamId: "test-team-id",
+        teamId: null,
         email: "test@example.com",
         usersOnTeams: [],
       }),
