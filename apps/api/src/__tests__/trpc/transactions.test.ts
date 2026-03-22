@@ -389,3 +389,30 @@ describe("tRPC: transactions.moveToReview", () => {
     );
   });
 });
+
+describe("tRPC: transactions.export", () => {
+  beforeEach(() => {
+    mocks.triggerJob.mockReset();
+    mocks.triggerJob.mockImplementation(() => ({ id: "job-export-1" }));
+  });
+
+  test("triggers export job for transaction ids", async () => {
+    const caller = createCaller(createTestContext());
+    const id1 = "a1a2b3c4-5d6e-4f8a-9b0c-1d2e3f4a5b6c";
+    const id2 = "b2b3c4d5-6e7f-4a9b-8c1d-2e3f4a5b6c7d";
+    const result = await caller.export({
+      transactionIds: [id1, id2],
+    });
+
+    expect(result).toEqual({ id: "job-export-1" });
+    expect(mocks.triggerJob).toHaveBeenCalledWith(
+      "export-transactions",
+      expect.objectContaining({
+        teamId: "test-team-id",
+        userId: "test-user-id",
+        transactionIds: [id1, id2],
+      }),
+      "transactions",
+    );
+  });
+});

@@ -141,3 +141,164 @@ describe("tRPC: customers.delete", () => {
     );
   });
 });
+
+const CUSTOMER_ID = "a1b2c3d4-e5f6-4789-a012-345678901234";
+const PORTAL_ID = "d4e5f6a7-b8c9-4012-d345-678901234567";
+
+describe("tRPC: customers.upsert", () => {
+  beforeEach(() => {
+    mocks.upsertCustomer.mockReset();
+    mocks.upsertCustomer.mockImplementation(() =>
+      Promise.resolve({
+        id: CUSTOMER_ID,
+        name: "Customer",
+      }),
+    );
+  });
+
+  test("upserts customer and calls upsertCustomer", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.upsert({
+      name: "Customer",
+      email: "billing@example.com",
+    });
+
+    expect(result).toMatchObject({ id: CUSTOMER_ID, name: "Customer" });
+    expect(mocks.upsertCustomer).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        name: "Customer",
+        email: "billing@example.com",
+        teamId: "test-team-id",
+        userId: "test-user-id",
+      }),
+    );
+  });
+});
+
+describe("tRPC: customers.getInvoiceSummary", () => {
+  beforeEach(() => {
+    mocks.getCustomerInvoiceSummary.mockReset();
+    mocks.getCustomerInvoiceSummary.mockImplementation(() =>
+      Promise.resolve({ total: 0, paid: 0, overdue: 0 }),
+    );
+  });
+
+  test("returns invoice summary from getCustomerInvoiceSummary", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.getInvoiceSummary({ id: CUSTOMER_ID });
+
+    expect(result).toEqual({ total: 0, paid: 0, overdue: 0 });
+    expect(mocks.getCustomerInvoiceSummary).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        customerId: CUSTOMER_ID,
+        teamId: "test-team-id",
+      }),
+    );
+  });
+});
+
+describe("tRPC: customers.togglePortal", () => {
+  beforeEach(() => {
+    mocks.toggleCustomerPortal.mockReset();
+    mocks.toggleCustomerPortal.mockImplementation(() =>
+      Promise.resolve({
+        id: CUSTOMER_ID,
+        portalEnabled: true,
+        portalId: "portal_xyz",
+      }),
+    );
+  });
+
+  test("toggles portal and calls toggleCustomerPortal", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.togglePortal({
+      customerId: CUSTOMER_ID,
+      enabled: true,
+    });
+
+    expect(result).toMatchObject({
+      id: CUSTOMER_ID,
+      portalEnabled: true,
+    });
+    expect(mocks.toggleCustomerPortal).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        customerId: CUSTOMER_ID,
+        teamId: "test-team-id",
+        enabled: true,
+      }),
+    );
+  });
+});
+
+describe("tRPC: customers.getByPortalId", () => {
+  beforeEach(() => {
+    mocks.getCustomerByPortalId.mockReset();
+    mocks.getCustomerInvoiceSummary.mockReset();
+    mocks.getCustomerByPortalId.mockImplementation(() =>
+      Promise.resolve({
+        id: CUSTOMER_ID,
+        name: "Portal Customer",
+        teamId: "test-team-id",
+      }),
+    );
+    mocks.getCustomerInvoiceSummary.mockImplementation(() =>
+      Promise.resolve({ total: 0, paid: 0, overdue: 0 }),
+    );
+  });
+
+  test("returns customer and summary from getCustomerByPortalId", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.getByPortalId({ portalId: PORTAL_ID });
+
+    expect(result?.customer).toMatchObject({
+      id: CUSTOMER_ID,
+      name: "Portal Customer",
+    });
+    expect(mocks.getCustomerByPortalId).toHaveBeenCalledWith(
+      expect.anything(),
+      { portalId: PORTAL_ID },
+    );
+    expect(mocks.getCustomerInvoiceSummary).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        customerId: CUSTOMER_ID,
+        teamId: "test-team-id",
+      }),
+    );
+  });
+});
+
+describe("tRPC: customers.getPortalInvoices", () => {
+  beforeEach(() => {
+    mocks.getCustomerByPortalId.mockReset();
+    mocks.getCustomerPortalInvoices.mockReset();
+    mocks.getCustomerByPortalId.mockImplementation(() =>
+      Promise.resolve({
+        id: CUSTOMER_ID,
+        name: "Portal Customer",
+        teamId: "test-team-id",
+      }),
+    );
+    mocks.getCustomerPortalInvoices.mockImplementation(() =>
+      Promise.resolve({ data: [], nextCursor: null, hasMore: false }),
+    );
+  });
+
+  test("returns portal invoices from getCustomerPortalInvoices", async () => {
+    const caller = createCaller(createTestContext());
+    const result = await caller.getPortalInvoices({ portalId: PORTAL_ID });
+
+    expect(result.data).toEqual([]);
+    expect(result.meta).toEqual({ cursor: null });
+    expect(mocks.getCustomerPortalInvoices).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        customerId: CUSTOMER_ID,
+        teamId: "test-team-id",
+      }),
+    );
+  });
+});

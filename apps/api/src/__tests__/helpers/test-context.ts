@@ -20,6 +20,7 @@ export function createTestContext(options: TestContextOptions = {}): any {
       user: {
         id: userId,
         email: "test@example.com",
+        full_name: "Test User",
       },
     },
     supabase: {},
@@ -28,6 +29,7 @@ export function createTestContext(options: TestContextOptions = {}): any {
       country: "US",
       city: "San Francisco",
       region: "CA",
+      ip: "127.0.0.1",
     },
     teamId,
     forcePrimary: false,

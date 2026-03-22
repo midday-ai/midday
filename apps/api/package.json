@@ -6,7 +6,7 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "test": "find src -name '*.test.ts' -o -name '*.spec.ts' | grep -q . && bun test --exit src || echo 'No tests yet'",
+    "test": "bun test --exit --timeout 30000 src/__tests__/trpc/",
     "test:e2e": "bun test --exit --timeout 30000 src/__tests__/e2e/"
   },
   "exports": {
