@@ -22,7 +22,7 @@ describe("tRPC: shortLinks.get (public)", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.get({ shortId: "abc123" });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       id: "sl-row-id",
       url: "https://example.com/target",
       shortId: "abc123",

@@ -24,11 +24,13 @@ describe("tRPC: apps.get", () => {
 
   test("returns integrations when query returns rows", async () => {
     mocks.getApps.mockImplementation(() =>
-      Promise.resolve([{ appId: "slack", enabled: true }]),
+      Promise.resolve([{ app_id: "slack", settings: null, config: null }]),
     );
 
     const caller = createCaller(createTestContext());
 
-    expect(await caller.get()).toEqual([{ appId: "slack", enabled: true }]);
+    expect(await caller.get()).toEqual([
+      { app_id: "slack", settings: null, config: null },
+    ]);
   });
 });

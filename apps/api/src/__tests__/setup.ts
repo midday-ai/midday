@@ -79,8 +79,11 @@ const createMockDb = () => ({
 
 export const mockDb = createMockDb();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type MockFn = ReturnType<typeof mock<(...args: any[]) => any>>;
+export type MockFn = ReturnType<typeof mock<(...args: any[]) => any>>;
+
+export function asMock(fn: (...args: any[]) => any): MockFn {
+  return fn as MockFn;
+}
 
 // Create reusable mock functions that tests can access
 export const mocks = {

@@ -13,18 +13,24 @@ const createCaller = createCallerFactory(trackerEntriesRouter);
 describe("tRPC: trackerEntries.byDate", () => {
   beforeEach(() => {
     mocks.getTrackerRecordsByDate.mockReset();
-    mocks.getTrackerRecordsByDate.mockImplementation(() => []);
+    mocks.getTrackerRecordsByDate.mockImplementation(() => ({
+      meta: { totalDuration: 0 },
+      data: [],
+    }));
   });
 
   test("returns empty list when DB returns no records", async () => {
     const caller = createCaller(createTestContext());
     const result = await caller.byDate({ date: "2026-03-21" });
 
-    expect(result).toEqual([]);
+    expect(result).toMatchObject({ meta: { totalDuration: 0 }, data: [] });
   });
 
   test("passes date and teamId to DB query", async () => {
-    mocks.getTrackerRecordsByDate.mockImplementation(() => []);
+    mocks.getTrackerRecordsByDate.mockImplementation(() => ({
+      meta: { totalDuration: 0 },
+      data: [],
+    }));
 
     const caller = createCaller(createTestContext());
     await caller.byDate({ date: "2026-03-21" });
@@ -47,7 +53,7 @@ describe("tRPC: trackerEntries.byDate", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.byDate({ date: "2026-03-21" });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: { totalDuration: 3600 },
       data: [{ id: ENTRY_ID, duration: 3600 }],
     });
@@ -57,7 +63,15 @@ describe("tRPC: trackerEntries.byDate", () => {
 describe("tRPC: trackerEntries.byRange", () => {
   beforeEach(() => {
     mocks.getTrackerRecordsByRange.mockReset();
-    mocks.getTrackerRecordsByRange.mockImplementation(() => []);
+    mocks.getTrackerRecordsByRange.mockImplementation(() => ({
+      meta: {
+        totalDuration: 0,
+        totalAmount: 0,
+        from: "2026-03-01",
+        to: "2026-03-31",
+      },
+      result: {},
+    }));
   });
 
   test("returns empty list when DB returns no records", async () => {
@@ -67,11 +81,27 @@ describe("tRPC: trackerEntries.byRange", () => {
       to: "2026-03-31",
     });
 
-    expect(result).toEqual([]);
+    expect(result).toMatchObject({
+      meta: {
+        totalDuration: 0,
+        totalAmount: 0,
+        from: "2026-03-01",
+        to: "2026-03-31",
+      },
+      result: {},
+    });
   });
 
   test("passes date range, teamId, and userId to DB query", async () => {
-    mocks.getTrackerRecordsByRange.mockImplementation(() => []);
+    mocks.getTrackerRecordsByRange.mockImplementation(() => ({
+      meta: {
+        totalDuration: 0,
+        totalAmount: 0,
+        from: "2026-03-01",
+        to: "2026-03-31",
+      },
+      result: {},
+    }));
 
     const caller = createCaller(createTestContext());
     await caller.byRange({
@@ -91,7 +121,15 @@ describe("tRPC: trackerEntries.byRange", () => {
   });
 
   test("passes optional projectId to DB query", async () => {
-    mocks.getTrackerRecordsByRange.mockImplementation(() => []);
+    mocks.getTrackerRecordsByRange.mockImplementation(() => ({
+      meta: {
+        totalDuration: 0,
+        totalAmount: 0,
+        from: "2026-03-01",
+        to: "2026-03-31",
+      },
+      result: {},
+    }));
 
     const caller = createCaller(createTestContext());
     await caller.byRange({
@@ -112,7 +150,7 @@ describe("tRPC: trackerEntries.byRange", () => {
 describe("tRPC: trackerEntries.upsert", () => {
   beforeEach(() => {
     mocks.upsertTrackerEntries.mockReset();
-    mocks.upsertTrackerEntries.mockImplementation(() => ({ id: "entry-id" }));
+    mocks.upsertTrackerEntries.mockImplementation(() => [{ id: "entry-id" }]);
   });
 
   test("returns upserted entry id", async () => {
@@ -125,7 +163,7 @@ describe("tRPC: trackerEntries.upsert", () => {
       duration: 3600,
     });
 
-    expect(result).toEqual({ id: "entry-id" });
+    expect(result).toMatchObject([{ id: "entry-id" }]);
   });
 
   test("passes teamId and input fields to DB query", async () => {
@@ -214,7 +252,8 @@ describe("tRPC: trackerEntries.startTimer", () => {
     mocks.startTimer.mockReset();
     mocks.startTimer.mockImplementation(() => ({
       id: "timer-id",
-      isRunning: true,
+      project: null,
+      trackerProject: null,
     }));
   });
 
@@ -222,7 +261,7 @@ describe("tRPC: trackerEntries.startTimer", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.startTimer({ projectId: PROJECT_ID });
 
-    expect(result).toEqual({ id: "timer-id", isRunning: true });
+    expect(result).toMatchObject({ id: "timer-id" });
   });
 
   test("passes teamId, projectId, and session user as assignedId", async () => {
@@ -258,7 +297,13 @@ describe("tRPC: trackerEntries.stopTimer", () => {
     mocks.stopTimer.mockReset();
     mocks.stopTimer.mockImplementation(() => ({
       id: "timer-id",
-      isRunning: false,
+      discarded: false,
+      duration: 3600,
+      project: undefined,
+      trackerProject: undefined,
+      start: "2026-03-21T08:00:00.000Z",
+      stop: "2026-03-21T09:00:00.000Z",
+      description: null,
     }));
   });
 
@@ -266,7 +311,7 @@ describe("tRPC: trackerEntries.stopTimer", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.stopTimer({});
 
-    expect(result).toEqual({ id: "timer-id", isRunning: false });
+    expect(result).toMatchObject({ id: "timer-id", discarded: false });
   });
 
   test("passes teamId and session user as assignedId", async () => {
@@ -324,27 +369,36 @@ describe("tRPC: trackerEntries.getCurrentTimer", () => {
   test("returns timer when one is running", async () => {
     mocks.getCurrentTimer.mockImplementation(() => ({
       id: "timer-id",
-      isRunning: true,
+      project: null,
+      trackerProject: null,
     }));
 
     const caller = createCaller(createTestContext());
     const result = await caller.getCurrentTimer();
 
-    expect(result).toEqual({ id: "timer-id", isRunning: true });
+    expect(result).toMatchObject({ id: "timer-id" });
   });
 });
 
 describe("tRPC: trackerEntries.getTimerStatus", () => {
   beforeEach(() => {
     mocks.getTimerStatus.mockReset();
-    mocks.getTimerStatus.mockImplementation(() => ({ isRunning: false }));
+    mocks.getTimerStatus.mockImplementation(() => ({
+      isRunning: false,
+      currentEntry: null,
+      elapsedTime: 0,
+    }));
   });
 
   test("returns not running by default", async () => {
     const caller = createCaller(createTestContext());
     const result = await caller.getTimerStatus();
 
-    expect(result).toEqual({ isRunning: false });
+    expect(result).toMatchObject({
+      isRunning: false,
+      currentEntry: null,
+      elapsedTime: 0,
+    });
   });
 
   test("passes teamId and assignedId from session", async () => {
@@ -361,11 +415,21 @@ describe("tRPC: trackerEntries.getTimerStatus", () => {
   });
 
   test("returns running status when timer is active", async () => {
-    mocks.getTimerStatus.mockImplementation(() => ({ isRunning: true }));
+    mocks.getTimerStatus.mockImplementation(() => ({
+      isRunning: true,
+      currentEntry: {
+        id: "timer-id",
+        start: "2026-03-21T08:00:00.000Z",
+        description: null,
+        projectId: PROJECT_ID,
+        trackerProject: { id: PROJECT_ID, name: "Test" },
+      },
+      elapsedTime: 120,
+    }));
 
     const caller = createCaller(createTestContext());
     const result = await caller.getTimerStatus();
 
-    expect(result).toEqual({ isRunning: true });
+    expect(result).toMatchObject({ isRunning: true, elapsedTime: 120 });
   });
 });

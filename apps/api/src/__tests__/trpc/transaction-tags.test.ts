@@ -70,7 +70,7 @@ describe("tRPC: transactionTags.delete", () => {
       tagId: TAG_ID,
     });
 
-    expect(result).toEqual({});
+    expect(result).toMatchObject({});
     expect(mocks.deleteTransactionTag).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({

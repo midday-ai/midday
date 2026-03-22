@@ -391,8 +391,8 @@ describe("tRPC: invoice.paymentStatus", () => {
   beforeEach(() => {
     mocks.getPaymentStatus.mockReset();
     mocks.getPaymentStatus.mockImplementation(() => ({
-      paid: 2,
-      unpaid: 3,
+      score: 85,
+      paymentStatus: "good",
     }));
   });
 
@@ -400,7 +400,7 @@ describe("tRPC: invoice.paymentStatus", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.paymentStatus();
 
-    expect(result).toEqual({ paid: 2, unpaid: 3 });
+    expect(result).toEqual({ score: 85, paymentStatus: "good" });
     expect(mocks.getPaymentStatus).toHaveBeenCalledWith(
       expect.anything(),
       "test-team-id",
@@ -463,12 +463,22 @@ describe("tRPC: invoice.averageDaysToPayment", () => {
 describe("tRPC: invoice.averageInvoiceSize", () => {
   beforeEach(() => {
     mocks.getAverageInvoiceSize.mockReset();
-    mocks.getAverageInvoiceSize.mockImplementation(() => 2500);
+    mocks.getAverageInvoiceSize.mockImplementation(() =>
+      Promise.resolve([
+        {
+          currency: "USD",
+          averageAmount: 2500,
+          invoiceCount: 10,
+        },
+      ]),
+    );
   });
 
   test("returns average invoice size", async () => {
     const caller = createCaller(createTestContext());
-    expect(await caller.averageInvoiceSize()).toBe(2500);
+    expect(await caller.averageInvoiceSize()).toEqual([
+      { currency: "USD", averageAmount: 2500, invoiceCount: 10 },
+    ]);
     expect(mocks.getAverageInvoiceSize).toHaveBeenCalledWith(
       expect.anything(),
       { teamId: "test-team-id" },

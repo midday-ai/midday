@@ -3,7 +3,7 @@ import { getTeamMembersByTeamId, getTeamsByUserId } from "@midday/db/queries";
 import { createCallerFactory } from "../../trpc/init";
 import { teamRouter } from "../../trpc/routers/team";
 import { createTestContext } from "../helpers/test-context";
-import { mocks } from "../setup";
+import { asMock, mocks } from "../setup";
 
 const SAMPLE_UUID = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
 const OTHER_USER_ID = "7c9e6679-7425-40de-944b-e07fc1f90ae7";
@@ -112,8 +112,8 @@ describe("tRPC: team.update", () => {
 
 describe("tRPC: team.members", () => {
   beforeEach(() => {
-    getTeamMembersByTeamId.mockReset();
-    getTeamMembersByTeamId.mockImplementation(() =>
+    asMock(getTeamMembersByTeamId).mockReset();
+    asMock(getTeamMembersByTeamId).mockImplementation(() =>
       Promise.resolve([
         {
           id: "membership-1",
@@ -153,7 +153,9 @@ describe("tRPC: team.members", () => {
   });
 
   test("handles empty member list", async () => {
-    getTeamMembersByTeamId.mockImplementation(() => Promise.resolve([]));
+    asMock(getTeamMembersByTeamId).mockImplementation(() =>
+      Promise.resolve([]),
+    );
 
     const caller = createCaller(createTestContext());
     const result = await caller.members();
@@ -164,8 +166,8 @@ describe("tRPC: team.members", () => {
 
 describe("tRPC: team.list", () => {
   beforeEach(() => {
-    getTeamsByUserId.mockReset();
-    getTeamsByUserId.mockImplementation(() =>
+    asMock(getTeamsByUserId).mockReset();
+    asMock(getTeamsByUserId).mockImplementation(() =>
       Promise.resolve([
         {
           id: "service-team-id",
@@ -204,7 +206,7 @@ describe("tRPC: team.list", () => {
   });
 
   test("handles empty team list", async () => {
-    getTeamsByUserId.mockImplementation(() => Promise.resolve([]));
+    asMock(getTeamsByUserId).mockImplementation(() => Promise.resolve([]));
 
     const caller = createCaller(createTestContext());
     const result = await caller.list();
@@ -254,8 +256,8 @@ describe("tRPC: team.leave", () => {
     mocks.leaveTeam.mockImplementation(() =>
       Promise.resolve({ id: "left-membership" }),
     );
-    getTeamMembersByTeamId.mockReset();
-    getTeamMembersByTeamId.mockImplementation(() =>
+    asMock(getTeamMembersByTeamId).mockReset();
+    asMock(getTeamMembersByTeamId).mockImplementation(() =>
       Promise.resolve([
         {
           id: "m1",
@@ -579,14 +581,16 @@ describe("tRPC: team.deleteInvite", () => {
 describe("tRPC: team.availablePlans", () => {
   beforeEach(() => {
     mocks.getAvailablePlans.mockReset();
-    mocks.getAvailablePlans.mockImplementation(() => Promise.resolve([]));
+    mocks.getAvailablePlans.mockImplementation(() =>
+      Promise.resolve({ starter: true, pro: true }),
+    );
   });
 
   test("returns available plans from getAvailablePlans", async () => {
     const caller = createCaller(createTestContext());
     const result = await caller.availablePlans();
 
-    expect(result).toEqual([]);
+    expect(result).toEqual({ starter: true, pro: true });
     expect(mocks.getAvailablePlans).toHaveBeenCalledWith(
       expect.anything(),
       "test-team-id",

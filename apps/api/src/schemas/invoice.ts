@@ -1243,11 +1243,11 @@ export const invoiceResponseSchema = z
         "Invoice number as shown to the customer (auto-generated if not provided)",
       example: "INV-2024-001",
     }),
-    amount: z.number().openapi({
-      description: "Total amount of the invoice",
+    amount: z.number().nullable().openapi({
+      description: "Total amount of the invoice, or null if not yet calculated",
       example: 1500.75,
     }),
-    currency: z.string().openapi({
+    currency: z.string().nullable().openapi({
       description: "Currency code (ISO 4217) for the invoice amount",
       example: "USD",
     }),

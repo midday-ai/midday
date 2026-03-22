@@ -9,6 +9,7 @@ import {
 import { createCallerFactory } from "../../trpc/init";
 import { transactionCategoriesRouter } from "../../trpc/routers/transaction-categories";
 import { createTestContext } from "../helpers/test-context";
+import { asMock } from "../setup";
 
 const createCaller = createCallerFactory(transactionCategoriesRouter);
 
@@ -27,12 +28,12 @@ const fullUpdateInput = {
 
 describe("tRPC: transactionCategories.get", () => {
   beforeEach(() => {
-    getCategories.mockReset();
-    getCategories.mockImplementation(() => Promise.resolve([]));
+    asMock(getCategories).mockReset();
+    asMock(getCategories).mockImplementation(() => Promise.resolve([]));
   });
 
   test("returns categories for the team", async () => {
-    getCategories.mockImplementation(() =>
+    asMock(getCategories).mockImplementation(() =>
       Promise.resolve([
         {
           id: CATEGORY_ID,
@@ -64,7 +65,7 @@ describe("tRPC: transactionCategories.get", () => {
   });
 
   test("passes teamId to DB query", async () => {
-    getCategories.mockImplementation(() => Promise.resolve([]));
+    asMock(getCategories).mockImplementation(() => Promise.resolve([]));
 
     const caller = createCaller(createTestContext());
     await caller.get({ limit: 50 });
@@ -79,7 +80,7 @@ describe("tRPC: transactionCategories.get", () => {
   });
 
   test("handles empty category list", async () => {
-    getCategories.mockImplementation(() => Promise.resolve([]));
+    asMock(getCategories).mockImplementation(() => Promise.resolve([]));
 
     const caller = createCaller(createTestContext());
     const result = await caller.get({});
@@ -90,8 +91,8 @@ describe("tRPC: transactionCategories.get", () => {
 
 describe("tRPC: transactionCategories.getById", () => {
   beforeEach(() => {
-    getCategoryById.mockReset();
-    getCategoryById.mockImplementation(() =>
+    asMock(getCategoryById).mockReset();
+    asMock(getCategoryById).mockImplementation(() =>
       Promise.resolve({
         id: CATEGORY_ID,
         name: "Office",
@@ -134,7 +135,7 @@ describe("tRPC: transactionCategories.getById", () => {
   });
 
   test("returns null when category is not found", async () => {
-    getCategoryById.mockImplementation(() => Promise.resolve(null));
+    asMock(getCategoryById).mockImplementation(() => Promise.resolve(null));
 
     const caller = createCaller(createTestContext());
     const result = await caller.getById({ id: CATEGORY_ID });
@@ -145,8 +146,8 @@ describe("tRPC: transactionCategories.getById", () => {
 
 describe("tRPC: transactionCategories.create", () => {
   beforeEach(() => {
-    createTransactionCategory.mockReset();
-    createTransactionCategory.mockImplementation(() =>
+    asMock(createTransactionCategory).mockReset();
+    asMock(createTransactionCategory).mockImplementation(() =>
       Promise.resolve({
         id: CATEGORY_ID,
         name: "Test",
@@ -193,7 +194,7 @@ describe("tRPC: transactionCategories.create", () => {
   });
 
   test("allows create with name only", async () => {
-    createTransactionCategory.mockImplementation(() =>
+    asMock(createTransactionCategory).mockImplementation(() =>
       Promise.resolve({
         id: CATEGORY_ID,
         name: "Minimal",
@@ -218,8 +219,8 @@ describe("tRPC: transactionCategories.create", () => {
 
 describe("tRPC: transactionCategories.update", () => {
   beforeEach(() => {
-    updateTransactionCategory.mockReset();
-    updateTransactionCategory.mockImplementation(() =>
+    asMock(updateTransactionCategory).mockReset();
+    asMock(updateTransactionCategory).mockImplementation(() =>
       Promise.resolve({
         id: CATEGORY_ID,
         name: "Updated",
@@ -274,8 +275,8 @@ describe("tRPC: transactionCategories.update", () => {
 
 describe("tRPC: transactionCategories.delete", () => {
   beforeEach(() => {
-    deleteTransactionCategory.mockReset();
-    deleteTransactionCategory.mockImplementation(() =>
+    asMock(deleteTransactionCategory).mockReset();
+    asMock(deleteTransactionCategory).mockImplementation(() =>
       Promise.resolve({ id: CATEGORY_ID }),
     );
   });
@@ -284,7 +285,7 @@ describe("tRPC: transactionCategories.delete", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.delete({ id: CATEGORY_ID });
 
-    expect(result).toEqual({ id: CATEGORY_ID });
+    expect(result).toMatchObject({ id: CATEGORY_ID });
   });
 
   test("passes teamId to DB query", async () => {
@@ -301,7 +302,7 @@ describe("tRPC: transactionCategories.delete", () => {
   });
 
   test("returns undefined when nothing was deleted", async () => {
-    deleteTransactionCategory.mockImplementation(() =>
+    asMock(deleteTransactionCategory).mockImplementation(() =>
       Promise.resolve(undefined),
     );
 

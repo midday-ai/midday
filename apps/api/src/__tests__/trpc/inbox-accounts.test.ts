@@ -40,7 +40,7 @@ describe("tRPC: inboxAccounts.delete", () => {
   beforeEach(() => {
     mocks.deleteInboxAccount.mockReset();
     mocks.deleteInboxAccount.mockImplementation(() =>
-      Promise.resolve({ id: ACCOUNT_ID }),
+      Promise.resolve({ id: ACCOUNT_ID, scheduleId: null }),
     );
   });
 
@@ -48,7 +48,7 @@ describe("tRPC: inboxAccounts.delete", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.delete({ id: ACCOUNT_ID });
 
-    expect(result).toEqual({ id: ACCOUNT_ID });
+    expect(result).toEqual({ id: ACCOUNT_ID, scheduleId: null });
     expect(mocks.deleteInboxAccount).toHaveBeenCalledWith(expect.anything(), {
       id: ACCOUNT_ID,
       teamId: "test-team-id",

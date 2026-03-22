@@ -13,7 +13,14 @@ describe("tRPC: invoiceRecurring.list", () => {
   beforeEach(() => {
     mocks.getInvoiceRecurringList.mockReset();
     mocks.getInvoiceRecurringList.mockImplementation(() =>
-      Promise.resolve({ data: [], meta: {} }),
+      Promise.resolve({
+        data: [],
+        meta: {
+          cursor: null,
+          hasPreviousPage: false,
+          hasNextPage: false,
+        },
+      }),
     );
   });
 
@@ -21,7 +28,14 @@ describe("tRPC: invoiceRecurring.list", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.list({});
 
-    expect(result).toEqual({ data: [], meta: {} });
+    expect(result).toEqual({
+      data: [],
+      meta: {
+        cursor: null,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      },
+    });
     expect(mocks.getInvoiceRecurringList).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({

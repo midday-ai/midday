@@ -12,6 +12,7 @@ import {
 import { createAdminClient } from "@api/services/supabase";
 import { validateResponse } from "@api/utils/validate-response";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { HTTPException } from "hono/http-exception";
 
 const errorResponseSchema = z.object({
   error: z.string(),
@@ -248,6 +249,10 @@ app.openapi(
     const id = c.req.valid("param").id;
 
     const result = await deleteDocument(db, { teamId, id });
+
+    if (!result) {
+      throw new HTTPException(404, { message: "Document not found" });
+    }
 
     return c.json(validateResponse(result, deleteDocumentResponseSchema));
   },

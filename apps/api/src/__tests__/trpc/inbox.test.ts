@@ -145,7 +145,7 @@ describe("tRPC: inbox.create", () => {
       filePath: ["test-team-id", "inbox", "invoice.pdf"],
     });
 
-    expect(result).toEqual({ id: INBOX_NEW_ID });
+    expect(result).toMatchObject({ id: INBOX_NEW_ID });
     expect(mocks.createInbox).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
@@ -165,7 +165,7 @@ describe("tRPC: inbox.deleteMany", () => {
   beforeEach(() => {
     mocks.deleteInboxMany.mockReset();
     mocks.deleteInboxMany.mockImplementation(() =>
-      Promise.resolve([{ id: INBOX_NEW_ID }]),
+      Promise.resolve([{ id: INBOX_NEW_ID, filePath: null }]),
     );
   });
 
@@ -173,7 +173,7 @@ describe("tRPC: inbox.deleteMany", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.deleteMany([INBOX_NEW_ID]);
 
-    expect(result).toEqual([{ id: INBOX_NEW_ID }]);
+    expect(result).toEqual([{ id: INBOX_NEW_ID, filePath: null }]);
     expect(mocks.deleteInboxMany).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({

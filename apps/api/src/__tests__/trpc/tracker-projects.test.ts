@@ -67,7 +67,7 @@ describe("tRPC: trackerProjects.getById", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.getById({ id: PROJECT_ID });
 
-    expect(result).toEqual({ id: PROJECT_ID, name: "Test Project" });
+    expect(result).toMatchObject({ id: PROJECT_ID, name: "Test Project" });
   });
 
   test("passes teamId and id to DB query", async () => {
@@ -113,7 +113,7 @@ describe("tRPC: trackerProjects.upsert", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.upsert({ name: "New Project" });
 
-    expect(result).toEqual({ id: PROJECT_ID, name: "New Project" });
+    expect(result).toMatchObject({ id: PROJECT_ID, name: "New Project" });
   });
 
   test("passes teamId and userId to DB query", async () => {

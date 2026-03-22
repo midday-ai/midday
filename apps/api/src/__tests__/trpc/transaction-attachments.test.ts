@@ -59,7 +59,7 @@ describe("tRPC: transactionAttachments.createMany", () => {
       },
     ]);
 
-    expect(result).toEqual([{ id: "att-new-1" }]);
+    expect(result).toEqual([expect.objectContaining({ id: "att-new-1" })]);
     expect(mocks.createAttachments).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({

@@ -180,7 +180,13 @@ describe("tRPC: customers.getInvoiceSummary", () => {
   beforeEach(() => {
     mocks.getCustomerInvoiceSummary.mockReset();
     mocks.getCustomerInvoiceSummary.mockImplementation(() =>
-      Promise.resolve({ total: 0, paid: 0, overdue: 0 }),
+      Promise.resolve({
+        totalAmount: 0,
+        paidAmount: 0,
+        outstandingAmount: 0,
+        invoiceCount: 0,
+        currency: "USD",
+      }),
     );
   });
 
@@ -188,7 +194,13 @@ describe("tRPC: customers.getInvoiceSummary", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.getInvoiceSummary({ id: CUSTOMER_ID });
 
-    expect(result).toEqual({ total: 0, paid: 0, overdue: 0 });
+    expect(result).toEqual({
+      totalAmount: 0,
+      paidAmount: 0,
+      outstandingAmount: 0,
+      invoiceCount: 0,
+      currency: "USD",
+    });
     expect(mocks.getCustomerInvoiceSummary).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
@@ -245,7 +257,13 @@ describe("tRPC: customers.getByPortalId", () => {
       }),
     );
     mocks.getCustomerInvoiceSummary.mockImplementation(() =>
-      Promise.resolve({ total: 0, paid: 0, overdue: 0 }),
+      Promise.resolve({
+        totalAmount: 0,
+        paidAmount: 0,
+        outstandingAmount: 0,
+        invoiceCount: 0,
+        currency: "USD",
+      }),
     );
   });
 

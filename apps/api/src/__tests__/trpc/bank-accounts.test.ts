@@ -216,7 +216,7 @@ describe("tRPC: bankAccounts.currencies", () => {
   beforeEach(() => {
     mocks.getBankAccountsCurrencies.mockReset();
     mocks.getBankAccountsCurrencies.mockImplementation(() =>
-      Promise.resolve(["USD", "EUR"]),
+      Promise.resolve([{ currency: "USD" }, { currency: "EUR" }]),
     );
   });
 
@@ -224,7 +224,7 @@ describe("tRPC: bankAccounts.currencies", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.currencies();
 
-    expect(result).toEqual(["USD", "EUR"]);
+    expect(result).toEqual([{ currency: "USD" }, { currency: "EUR" }]);
     expect(mocks.getBankAccountsCurrencies).toHaveBeenCalledWith(
       expect.anything(),
       "test-team-id",
@@ -236,7 +236,15 @@ describe("tRPC: bankAccounts.balances", () => {
   beforeEach(() => {
     mocks.getBankAccountsBalances.mockReset();
     mocks.getBankAccountsBalances.mockImplementation(() =>
-      Promise.resolve([{ accountId: ACCOUNT_ID, balance: 1000 }]),
+      Promise.resolve([
+        {
+          id: ACCOUNT_ID,
+          currency: "USD",
+          balance: 1000,
+          name: "Checking",
+          logo_url: "",
+        },
+      ]),
     );
   });
 
@@ -244,7 +252,15 @@ describe("tRPC: bankAccounts.balances", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.balances();
 
-    expect(result).toEqual([{ accountId: ACCOUNT_ID, balance: 1000 }]);
+    expect(result).toEqual([
+      {
+        id: ACCOUNT_ID,
+        currency: "USD",
+        balance: 1000,
+        name: "Checking",
+        logo_url: "",
+      },
+    ]);
     expect(mocks.getBankAccountsBalances).toHaveBeenCalledWith(
       expect.anything(),
       "test-team-id",

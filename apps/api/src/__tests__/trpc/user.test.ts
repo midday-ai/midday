@@ -3,7 +3,7 @@ import { getUserInvites } from "@midday/db/queries";
 import { createCallerFactory } from "../../trpc/init";
 import { userRouter } from "../../trpc/routers/user";
 import { createTestContext } from "../helpers/test-context";
-import { mocks } from "../setup";
+import { asMock, mocks } from "../setup";
 
 if (!process.env.FILE_KEY_SECRET) {
   process.env.FILE_KEY_SECRET = "test-file-key-secret-for-trpc-user-tests";
@@ -108,12 +108,12 @@ describe("tRPC: user.update", () => {
 
 describe("tRPC: user.invites", () => {
   beforeEach(() => {
-    getUserInvites.mockReset();
-    getUserInvites.mockImplementation(() => Promise.resolve([]));
+    asMock(getUserInvites).mockReset();
+    asMock(getUserInvites).mockImplementation(() => Promise.resolve([]));
   });
 
   test("returns invite list", async () => {
-    getUserInvites.mockImplementation(() =>
+    asMock(getUserInvites).mockImplementation(() =>
       Promise.resolve([
         {
           id: "invite-1",
@@ -131,7 +131,7 @@ describe("tRPC: user.invites", () => {
   });
 
   test("queries invites with session email", async () => {
-    getUserInvites.mockImplementation(() => Promise.resolve([]));
+    asMock(getUserInvites).mockImplementation(() => Promise.resolve([]));
 
     const caller = createCaller(createTestContext());
     await caller.invites();

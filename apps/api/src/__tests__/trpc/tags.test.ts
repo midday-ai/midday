@@ -3,6 +3,7 @@ import { createTag, deleteTag, getTags, updateTag } from "@midday/db/queries";
 import { createCallerFactory } from "../../trpc/init";
 import { tagsRouter } from "../../trpc/routers/tags";
 import { createTestContext } from "../helpers/test-context";
+import { asMock } from "../setup";
 
 const createCaller = createCallerFactory(tagsRouter);
 
@@ -10,12 +11,12 @@ const TAG_ID = "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2";
 
 describe("tRPC: tags.get", () => {
   beforeEach(() => {
-    getTags.mockReset();
-    getTags.mockImplementation(() => Promise.resolve([]));
+    asMock(getTags).mockReset();
+    asMock(getTags).mockImplementation(() => Promise.resolve([]));
   });
 
   test("returns tags list", async () => {
-    getTags.mockImplementation(() => Promise.resolve([]));
+    asMock(getTags).mockImplementation(() => Promise.resolve([]));
 
     const caller = createCaller(createTestContext());
     const result = await caller.get();
@@ -24,7 +25,7 @@ describe("tRPC: tags.get", () => {
   });
 
   test("passes teamId to DB query", async () => {
-    getTags.mockImplementation(() => Promise.resolve([]));
+    asMock(getTags).mockImplementation(() => Promise.resolve([]));
 
     const caller = createCaller(createTestContext());
     await caller.get();
@@ -36,7 +37,7 @@ describe("tRPC: tags.get", () => {
   });
 
   test("handles empty list", async () => {
-    getTags.mockImplementation(() => Promise.resolve([]));
+    asMock(getTags).mockImplementation(() => Promise.resolve([]));
 
     const caller = createCaller(createTestContext());
     const result = await caller.get();
@@ -47,8 +48,8 @@ describe("tRPC: tags.get", () => {
 
 describe("tRPC: tags.create", () => {
   beforeEach(() => {
-    createTag.mockReset();
-    createTag.mockImplementation(() =>
+    asMock(createTag).mockReset();
+    asMock(createTag).mockImplementation(() =>
       Promise.resolve({ id: TAG_ID, name: "Test Tag" }),
     );
   });
@@ -74,7 +75,7 @@ describe("tRPC: tags.create", () => {
   });
 
   test("allows empty string name", async () => {
-    createTag.mockImplementation(() =>
+    asMock(createTag).mockImplementation(() =>
       Promise.resolve({ id: TAG_ID, name: "" }),
     );
 
@@ -87,8 +88,8 @@ describe("tRPC: tags.create", () => {
 
 describe("tRPC: tags.update", () => {
   beforeEach(() => {
-    updateTag.mockReset();
-    updateTag.mockImplementation(() =>
+    asMock(updateTag).mockReset();
+    asMock(updateTag).mockImplementation(() =>
       Promise.resolve({ id: TAG_ID, name: "Updated" }),
     );
   });
@@ -115,7 +116,7 @@ describe("tRPC: tags.update", () => {
   });
 
   test("allows empty string as new name", async () => {
-    updateTag.mockImplementation(() =>
+    asMock(updateTag).mockImplementation(() =>
       Promise.resolve({ id: TAG_ID, name: "" }),
     );
 
@@ -128,8 +129,8 @@ describe("tRPC: tags.update", () => {
 
 describe("tRPC: tags.delete", () => {
   beforeEach(() => {
-    deleteTag.mockReset();
-    deleteTag.mockImplementation(() =>
+    asMock(deleteTag).mockReset();
+    asMock(deleteTag).mockImplementation(() =>
       Promise.resolve({ id: TAG_ID, name: "Removed" }),
     );
   });
@@ -155,7 +156,7 @@ describe("tRPC: tags.delete", () => {
   });
 
   test("returns undefined when tag was not found", async () => {
-    deleteTag.mockImplementation(() => Promise.resolve(undefined));
+    asMock(deleteTag).mockImplementation(() => Promise.resolve(undefined));
 
     const caller = createCaller(createTestContext());
     const result = await caller.delete({ id: TAG_ID });

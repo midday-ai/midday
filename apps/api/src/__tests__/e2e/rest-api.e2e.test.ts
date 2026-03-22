@@ -838,7 +838,7 @@ describe("Documents", () => {
       "/documents/00000000-0000-0000-0000-000000000000",
     );
 
-    expect([200, 404, 500]).toContain(status);
+    expect([200, 404]).toContain(status);
   });
 });
 
@@ -905,7 +905,7 @@ describe("Inbox", () => {
       "/inbox/00000000-0000-0000-0000-000000000000",
     );
 
-    expect([200, 404, 500]).toContain(status);
+    expect([200, 404]).toContain(status);
   });
 });
 
@@ -1216,15 +1216,14 @@ describe("Insights", () => {
 describe("Auth & Error Handling", () => {
   test("Missing auth header -> 401", async () => {
     const res = await fetch(`${BASE_URL}/customers`);
-    // Some middleware may return 500 instead of 401 on missing auth
-    expect([401, 500]).toContain(res.status);
+    expect(res.status).toBe(401);
   });
 
   test("Invalid bearer token -> 401", async () => {
     const res = await fetch(`${BASE_URL}/customers`, {
       headers: { Authorization: "Bearer invalid_token_here" },
     });
-    expect([401, 500]).toContain(res.status);
+    expect(res.status).toBe(401);
   });
 
   test("GET nonexistent customer -> 404 or empty", async () => {
@@ -1232,14 +1231,13 @@ describe("Auth & Error Handling", () => {
       "GET",
       "/customers/00000000-0000-0000-0000-000000000000",
     );
-    expect([200, 404, 500]).toContain(status);
+    expect([200, 404]).toContain(status);
   });
 
   test("POST /customers with invalid body -> 400", async () => {
     const { status } = await api("POST", "/customers", {
       name: "",
     });
-    // Missing required email field
-    expect([400, 422, 500]).toContain(status);
+    expect([400, 422]).toContain(status);
   });
 });

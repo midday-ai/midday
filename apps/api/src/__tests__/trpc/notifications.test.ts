@@ -112,7 +112,7 @@ describe("tRPC: notifications.updateAllStatus", () => {
     const caller = createCaller(createTestContext());
 
     await expect(
-      caller.updateAllStatus({ status: "done" } as { status: "read" }),
+      caller.updateAllStatus({ status: "done" } as never),
     ).rejects.toThrow();
   });
 });

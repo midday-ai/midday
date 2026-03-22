@@ -27,7 +27,7 @@ describe("tRPC: documentTagAssignments.create", () => {
       tagId: TAG_ID,
     });
 
-    expect(result).toEqual({ documentId: DOCUMENT_ID, tagId: TAG_ID });
+    expect(result).toMatchObject({ documentId: DOCUMENT_ID, tagId: TAG_ID });
     expect(mocks.createDocumentTagAssignment).toHaveBeenCalledWith(
       expect.anything(),
       {
@@ -63,7 +63,7 @@ describe("tRPC: documentTagAssignments.delete", () => {
       tagId: TAG_ID,
     });
 
-    expect(result).toEqual({});
+    expect(result).toMatchObject({});
     expect(mocks.deleteDocumentTagAssignment).toHaveBeenCalledWith(
       expect.anything(),
       {

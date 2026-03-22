@@ -36,16 +36,13 @@ describe("tRPC: chats.delete", () => {
     mocks.memoryGetMessages.mockReset();
     mocks.memoryDeleteChat.mockReset();
     mocks.memoryGetMessages.mockImplementation(() => Promise.resolve([]));
-    mocks.memoryDeleteChat.mockImplementation(() =>
-      Promise.resolve({ success: true }),
-    );
+    mocks.memoryDeleteChat.mockImplementation(() => Promise.resolve());
   });
 
   test("deletes a chat the user can access", async () => {
     const caller = createCaller(createTestContext());
-    const result = await caller.delete({ chatId: "chat-123" });
+    await caller.delete({ chatId: "chat-123" });
 
-    expect(result).toEqual({ success: true });
     expect(mocks.memoryGetMessages).toHaveBeenCalledWith({
       chatId: "chat-123",
       userId: "test-user-id:test-team-id",

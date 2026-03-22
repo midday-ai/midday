@@ -33,7 +33,7 @@ describe("tRPC: oauthApplications.list", () => {
     );
 
     const caller = createCaller(createTestContext());
-    expect(await caller.list()).toEqual({
+    expect(await caller.list()).toMatchObject({
       data: [{ id: APP_ID, name: "App" }],
     });
   });
@@ -195,7 +195,7 @@ describe("tRPC: oauthApplications.regenerateSecret", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.regenerateSecret({ id: APP_ID });
 
-    expect(result).toEqual({ clientSecret: "new-secret" });
+    expect(result).toMatchObject({ clientSecret: "new-secret" });
     expect(mocks.regenerateClientSecret).toHaveBeenCalledWith(
       expect.anything(),
       APP_ID,

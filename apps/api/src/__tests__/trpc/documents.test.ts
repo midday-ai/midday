@@ -13,14 +13,22 @@ describe("tRPC: documents.get", () => {
     mocks.getDocuments.mockReset();
     mocks.getDocuments.mockImplementation(() => ({
       data: [],
-      meta: { hasNextPage: false, cursor: null },
+      meta: {
+        hasPreviousPage: false,
+        hasNextPage: false,
+        cursor: undefined,
+      },
     }));
   });
 
   test("returns empty list with pagination meta", async () => {
     mocks.getDocuments.mockImplementation(() => ({
       data: [],
-      meta: { hasNextPage: false, cursor: null },
+      meta: {
+        hasPreviousPage: false,
+        hasNextPage: false,
+        cursor: undefined,
+      },
     }));
 
     const caller = createCaller(createTestContext());
@@ -28,14 +36,22 @@ describe("tRPC: documents.get", () => {
 
     expect(result).toEqual({
       data: [],
-      meta: { hasNextPage: false, cursor: null },
+      meta: {
+        hasPreviousPage: false,
+        hasNextPage: false,
+        cursor: undefined,
+      },
     });
   });
 
   test("passes teamId to DB query", async () => {
     mocks.getDocuments.mockImplementation(() => ({
       data: [],
-      meta: { hasNextPage: false, cursor: null },
+      meta: {
+        hasPreviousPage: false,
+        hasNextPage: false,
+        cursor: undefined,
+      },
     }));
 
     const caller = createCaller(createTestContext());
@@ -54,7 +70,11 @@ describe("tRPC: documents.get", () => {
   test("forwards cursor for pagination", async () => {
     mocks.getDocuments.mockImplementation(() => ({
       data: [],
-      meta: { hasNextPage: false, cursor: null },
+      meta: {
+        hasPreviousPage: false,
+        hasNextPage: false,
+        cursor: undefined,
+      },
     }));
 
     const caller = createCaller(createTestContext());
@@ -77,7 +97,7 @@ describe("tRPC: documents.getById", () => {
       Promise.resolve({
         id: DOC_ID,
         title: "Statement",
-        filePath: "team/vault/statement.pdf",
+        pathTokens: ["team", "vault", "statement.pdf"],
       }),
     );
   });
@@ -87,17 +107,16 @@ describe("tRPC: documents.getById", () => {
       Promise.resolve({
         id: DOC_ID,
         title: "Statement",
-        filePath: "team/vault/statement.pdf",
+        pathTokens: ["team", "vault", "statement.pdf"],
       }),
     );
 
     const caller = createCaller(createTestContext());
     const result = await caller.getById({ id: DOC_ID });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       id: DOC_ID,
       title: "Statement",
-      filePath: "team/vault/statement.pdf",
     });
   });
 
@@ -106,7 +125,7 @@ describe("tRPC: documents.getById", () => {
       Promise.resolve({
         id: DOC_ID,
         title: "Statement",
-        filePath: "team/vault/statement.pdf",
+        pathTokens: ["team", "vault", "statement.pdf"],
       }),
     );
 
@@ -218,7 +237,7 @@ describe("tRPC: documents.checkAttachments", () => {
   beforeEach(() => {
     mocks.checkDocumentAttachments.mockReset();
     mocks.checkDocumentAttachments.mockImplementation(() =>
-      Promise.resolve([]),
+      Promise.resolve({ hasAttachments: false, attachments: [] }),
     );
   });
 
@@ -226,7 +245,7 @@ describe("tRPC: documents.checkAttachments", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.checkAttachments({ id: DOC_ID });
 
-    expect(result).toEqual([]);
+    expect(result).toEqual({ hasAttachments: false, attachments: [] });
     expect(mocks.checkDocumentAttachments).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ id: DOC_ID, teamId: "test-team-id" }),

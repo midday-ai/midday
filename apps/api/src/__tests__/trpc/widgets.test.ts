@@ -11,7 +11,7 @@ const RANGE = { from: "2026-01-01", to: "2026-03-31" } as const;
 describe("tRPC: widgets.getRunway", () => {
   beforeEach(() => {
     mocks.getRunway.mockReset();
-    mocks.getRunway.mockImplementation(() => Promise.resolve({ months: 12 }));
+    mocks.getRunway.mockImplementation(() => Promise.resolve(12));
   });
 
   test("returns runway wrapped with tool metadata", async () => {
@@ -19,7 +19,7 @@ describe("tRPC: widgets.getRunway", () => {
     const result = await caller.getRunway({});
 
     expect(result).toEqual({
-      result: { months: 12 },
+      result: 12,
       toolCall: {
         toolName: "getBurnRateAnalysis",
         toolParams: { currency: undefined },
@@ -120,7 +120,15 @@ describe("tRPC: widgets.getGrowthRate", () => {
           type: "revenue",
           revenueType: "net",
         },
-        meta: { k: "v" },
+        meta: {
+          type: "growth_rate",
+          period: "quarterly",
+          currency: "USD",
+          dateRange: {
+            current: { from: "2026-01-01", to: "2026-03-31" },
+            previous: { from: "2025-10-01", to: "2025-12-31" },
+          },
+        },
       }),
     );
   });
@@ -140,7 +148,15 @@ describe("tRPC: widgets.getGrowthRate", () => {
         revenueType: "net",
         period: "quarterly",
         trend: "positive",
-        meta: { k: "v" },
+        meta: {
+          type: "growth_rate",
+          period: "quarterly",
+          currency: "USD",
+          dateRange: {
+            current: { from: "2026-01-01", to: "2026-03-31" },
+            previous: { from: "2025-10-01", to: "2025-12-31" },
+          },
+        },
       },
     });
     expect(mocks.getGrowthRate).toHaveBeenCalledWith(
@@ -169,8 +185,21 @@ describe("tRPC: widgets.getProfitMargin", () => {
           trend: "positive",
           monthCount: 2,
         },
-        meta: { type: "profit_margin" },
-        result: [{ date: "2026-01-01", margin: 10 }],
+        meta: {
+          type: "profit_margin",
+          currency: "USD",
+          revenueType: "net",
+          period: { from: RANGE.from, to: RANGE.to },
+        },
+        result: [
+          {
+            date: "2026-01-01",
+            revenue: 500,
+            profit: 100,
+            margin: 10,
+            currency: "USD",
+          },
+        ],
       }),
     );
   });
@@ -181,9 +210,15 @@ describe("tRPC: widgets.getProfitMargin", () => {
 
     expect(result.result.totalRevenue).toBe(1000);
     expect(result.result.monthlyData).toEqual([
-      { date: "2026-01-01", margin: 10 },
+      {
+        date: "2026-01-01",
+        revenue: 500,
+        profit: 100,
+        margin: 10,
+        currency: "USD",
+      },
     ]);
-    expect(result.result.meta).toEqual({ type: "profit_margin" });
+    expect(result.result.meta).toMatchObject({ type: "profit_margin" });
     expect(mocks.getProfitMargin).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ teamId: "test-team-id", ...RANGE }),
@@ -201,7 +236,11 @@ describe("tRPC: widgets.getCashFlow", () => {
           currency: "USD",
           period: "monthly",
         },
-        meta: { type: "cash_flow" },
+        meta: {
+          type: "cash_flow",
+          currency: "USD",
+          period: { from: RANGE.from, to: RANGE.to },
+        },
       }),
     );
   });
@@ -215,7 +254,11 @@ describe("tRPC: widgets.getCashFlow", () => {
         netCashFlow: 500,
         currency: "USD",
         period: "monthly",
-        meta: { type: "cash_flow" },
+        meta: {
+          type: "cash_flow",
+          currency: "USD",
+          period: { from: RANGE.from, to: RANGE.to },
+        },
       },
     });
     expect(mocks.getCashFlow).toHaveBeenCalledWith(
@@ -240,7 +283,11 @@ describe("tRPC: widgets.getOutstandingInvoices", () => {
           currency: "USD",
           status: ["unpaid", "overdue"],
         },
-        meta: { type: "outstanding_invoices" },
+        meta: {
+          type: "outstanding_invoices",
+          currency: "USD",
+          status: ["unpaid", "overdue"],
+        },
       }),
     );
   });
@@ -250,7 +297,11 @@ describe("tRPC: widgets.getOutstandingInvoices", () => {
     const result = await caller.getOutstandingInvoices({});
 
     expect(result.result.count).toBe(2);
-    expect(result.result.meta).toEqual({ type: "outstanding_invoices" });
+    expect(result.result.meta).toMatchObject({
+      type: "outstanding_invoices",
+      currency: "USD",
+      status: ["unpaid", "overdue"],
+    });
     expect(mocks.getOutstandingInvoices).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({

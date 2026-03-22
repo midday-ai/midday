@@ -15,6 +15,7 @@ describe("tRPC: reports.revenue", () => {
       Promise.resolve({
         summary: { currency: "USD", currentTotal: 0, prevTotal: 0 },
         meta: { type: "revenue", currency: "USD" },
+        result: [],
       }),
     );
   });
@@ -23,7 +24,7 @@ describe("tRPC: reports.revenue", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.revenue(DATE_RANGE);
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       summary: { currency: "USD", currentTotal: 0, prevTotal: 0 },
       meta: { type: "revenue", currency: "USD" },
     });
@@ -87,16 +88,14 @@ describe("tRPC: reports.profit", () => {
 describe("tRPC: reports.burnRate", () => {
   beforeEach(() => {
     mocks.getBurnRate.mockReset();
-    mocks.getBurnRate.mockImplementation(() =>
-      Promise.resolve({ data: [], currency: "USD" }),
-    );
+    mocks.getBurnRate.mockImplementation(() => Promise.resolve([]));
   });
 
   test("returns burn rate for date range", async () => {
     const caller = createCaller(createTestContext());
     const result = await caller.burnRate(DATE_RANGE);
 
-    expect(result).toEqual({ data: [], currency: "USD" });
+    expect(result).toEqual([]);
     expect(mocks.getBurnRate).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
@@ -120,14 +119,14 @@ describe("tRPC: reports.burnRate", () => {
 describe("tRPC: reports.runway", () => {
   beforeEach(() => {
     mocks.getRunway.mockReset();
-    mocks.getRunway.mockImplementation(() => Promise.resolve({ months: 12 }));
+    mocks.getRunway.mockImplementation(() => Promise.resolve(12));
   });
 
   test("returns runway with empty input", async () => {
     const caller = createCaller(createTestContext());
     const result = await caller.runway({});
 
-    expect(result).toEqual({ months: 12 });
+    expect(result).toBe(12);
     expect(mocks.getRunway).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ teamId: "test-team-id" }),
@@ -149,7 +148,11 @@ describe("tRPC: reports.expense", () => {
   beforeEach(() => {
     mocks.getExpenses.mockReset();
     mocks.getExpenses.mockImplementation(() =>
-      Promise.resolve({ data: [], meta: {} }),
+      Promise.resolve({
+        summary: { averageExpense: 0, currency: "USD" },
+        meta: { type: "expense" as const, currency: "USD" },
+        result: [],
+      }),
     );
   });
 
@@ -157,7 +160,11 @@ describe("tRPC: reports.expense", () => {
     const caller = createCaller(createTestContext());
     const result = await caller.expense(DATE_RANGE);
 
-    expect(result).toEqual({ data: [], meta: {} });
+    expect(result).toMatchObject({
+      summary: { averageExpense: 0, currency: "USD" },
+      meta: { type: "expense", currency: "USD" },
+      result: [],
+    });
     expect(mocks.getExpenses).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
@@ -179,16 +186,14 @@ describe("tRPC: reports.expense", () => {
 describe("tRPC: reports.spending", () => {
   beforeEach(() => {
     mocks.getSpending.mockReset();
-    mocks.getSpending.mockImplementation(() =>
-      Promise.resolve({ data: [], meta: {} }),
-    );
+    mocks.getSpending.mockImplementation(() => Promise.resolve([]));
   });
 
   test("returns spending for date range", async () => {
     const caller = createCaller(createTestContext());
     const result = await caller.spending(DATE_RANGE);
 
-    expect(result).toEqual({ data: [], meta: {} });
+    expect(result).toEqual([]);
     expect(mocks.getSpending).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
