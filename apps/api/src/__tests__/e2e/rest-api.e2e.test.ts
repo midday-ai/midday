@@ -1145,6 +1145,10 @@ describe("Notifications", () => {
   });
 
   test("POST /notifications/update-all-status -> 200 (update + restore)", async () => {
+    const snapshot = await api<any>("GET", "/notifications");
+    const allNotifications: { id: string; status: string }[] =
+      snapshot.data?.data ?? [];
+
     const { status } = await api<any>(
       "POST",
       "/notifications/update-all-status",
@@ -1153,12 +1157,12 @@ describe("Notifications", () => {
 
     expect(status).toBe(200);
 
-    // Restore: mark all back to original. Since we can't know per-notification
-    // state, this is a best-effort restore by marking all as unread.
-    if (originalStatus && originalStatus !== "read") {
-      await api("POST", "/notifications/update-all-status", {
-        status: originalStatus,
-      });
+    for (const n of allNotifications) {
+      if (n.status !== "read") {
+        await api("PATCH", `/notifications/${n.id}/status`, {
+          status: n.status,
+        });
+      }
     }
   });
 });
