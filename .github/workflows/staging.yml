@@ -104,6 +104,43 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
 
   # ---------------------------------------------------------------------------
+  # E2E smoke tests — runs against staging API after deployment
+  # ---------------------------------------------------------------------------
+  e2e-api-staging:
+    name: E2E API tests (staging)
+    needs: [detect-changes, validate, deploy-api-staging]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.deploy-api-staging.result == 'success'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Wait for staging API to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf "${{ secrets.STAGING_API_URL }}/health" > /dev/null 2>&1; then
+              echo "API is healthy"
+              exit 0
+            fi
+            echo "Waiting for API... ($i/30)"
+            sleep 5
+          done
+          echo "API did not become healthy in time"
+          exit 1
+
+      - name: Run E2E tests against staging
+        env:
+          API_BASE_URL: ${{ secrets.STAGING_API_URL }}
+          MIDDAY_API_KEY: ${{ secrets.STAGING_API_KEY }}
+        run: bun test --exit --timeout 60000 src/__tests__/e2e/
+        working-directory: apps/api
+
+  # ---------------------------------------------------------------------------
   # Deploy Dashboard to Railway staging (waits for API when both change)
   # ---------------------------------------------------------------------------
   deploy-dashboard-staging:
