@@ -26,6 +26,7 @@ import {
   stopTimer,
   upsertTrackerEntries,
 } from "@midday/db/queries";
+import { HTTPException } from "hono/http-exception";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
@@ -273,6 +274,10 @@ app.openapi(
 
     const result = await deleteTrackerEntry(db, { teamId, id });
 
+    if (!result) {
+      throw new HTTPException(404, { message: "Tracker entry not found" });
+    }
+
     return c.json(validateResponse(result, deleteTrackerEntrySchema));
   },
 );
@@ -363,11 +368,16 @@ app.openapi(
     const session = c.get("session");
     const { assignedId, ...rest } = c.req.valid("json");
 
-    const result = await stopTimer(db, {
-      teamId,
-      assignedId: assignedId ?? session.user.id,
-      ...rest,
-    });
+    let result: Awaited<ReturnType<typeof stopTimer>>;
+    try {
+      result = await stopTimer(db, {
+        teamId,
+        assignedId: assignedId ?? session.user.id,
+        ...rest,
+      });
+    } catch {
+      throw new HTTPException(404, { message: "No running timer found" });
+    }
 
     return c.json(validateResponse({ data: result }, stopTimerResponseSchema));
   },

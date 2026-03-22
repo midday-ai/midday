@@ -82,6 +82,10 @@ export async function PdfTemplate(
 ) {
   const isReceipt = options?.isReceipt ?? false;
 
+  if (!template) {
+    throw new Error("Invoice template is required to render PDF");
+  }
+
   // Override title for receipt
   const title = isReceipt ? "Receipt" : template.title;
 
