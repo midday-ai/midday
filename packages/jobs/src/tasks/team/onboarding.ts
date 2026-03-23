@@ -108,11 +108,14 @@ export const onboardTeam = schemaTask({
         // with a null subscriptionStatus, which shouldSendEmail treats as truthy.
         const { data: freshTeam } = await supabase
           .from("teams")
-          .select("subscription_status")
+          .select("subscription_status, canceled_at")
           .eq("id", user.team_id)
           .single();
 
-        if (freshTeam?.subscription_status === "trialing") {
+        if (
+          freshTeam?.subscription_status === "trialing" &&
+          !freshTeam.canceled_at
+        ) {
           await resend.emails.send({
             from: "Pontus from Midday <pontus@midday.ai>",
             to: user.email,

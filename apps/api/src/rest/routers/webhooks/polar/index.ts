@@ -158,7 +158,9 @@ app.openapi(
             id: teamId,
             data: {
               email: event.data.customer.email ?? undefined,
+              plan: "trial",
               canceledAt: new Date().toISOString(),
+              subscriptionStatus: null,
             },
           });
 

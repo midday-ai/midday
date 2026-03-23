@@ -29,13 +29,26 @@ export const billingRouter = createTRPCRouter({
       const yearly = planType?.endsWith("_yearly") ?? false;
       const productId = getPlanProductId(plan, yearly);
 
+      // Resolve Polar customer so checkout skips the email identification step.
+      // Using customerId (Polar's ID) guarantees the email field is pre-filled and disabled.
+      let polarCustomer: { id: string };
+      try {
+        polarCustomer = await api.customers.getExternal({
+          externalId: team.id,
+        });
+      } catch {
+        polarCustomer = await api.customers.create({
+          externalId: team.id,
+          email: session.user.email ?? "",
+          name: team.name ?? undefined,
+        });
+      }
+
       // Create Polar checkout
       const checkout = await api.checkouts.create({
         products: [productId],
         allowDiscountCodes: false,
-        externalCustomerId: team.id,
-        customerEmail: session.user.email ?? undefined,
-        customerName: team.name ?? undefined,
+        customerId: polarCustomer.id,
         metadata: {
           teamId: team.id,
           companyName: team.name ?? "",
