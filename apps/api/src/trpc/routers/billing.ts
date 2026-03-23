@@ -13,6 +13,36 @@ import { z } from "zod";
 
 const logger = createLoggerWithContext("trpc:billing");
 
+async function resolvePolarCustomer(
+  db: Parameters<typeof getTeamById>[0],
+  teamId: string,
+): Promise<{ id: string }> {
+  try {
+    return await api.customers.getExternal({ externalId: teamId });
+  } catch {
+    // externalId may belong to a different team (same user, multiple teams).
+    // Fall back to the team's stored email which matches the Polar customer.
+    // team.email is set by the subscription webhook, so it's always available
+    // by the time billing management endpoints are called.
+    const team = await getTeamById(db, teamId);
+    if (!team?.email) {
+      logger.error("Cannot resolve Polar customer: team has no email", {
+        teamId,
+      });
+      throw new Error("Failed to resolve Polar customer");
+    }
+
+    logger.info("Resolving Polar customer by email fallback", { teamId });
+
+    const result = await api.customers.list({ email: team.email, limit: 1 });
+    if (!result.result.items.length) {
+      throw new Error("Failed to resolve Polar customer");
+    }
+
+    return result.result.items[0]!;
+  }
+}
+
 export const billingRouter = createTRPCRouter({
   createCheckout: protectedProcedure
     .input(createCheckoutSchema)
@@ -29,19 +59,34 @@ export const billingRouter = createTRPCRouter({
       const yearly = planType?.endsWith("_yearly") ?? false;
       const productId = getPlanProductId(plan, yearly);
 
-      // Resolve Polar customer so checkout skips the email identification step.
-      // Using customerId (Polar's ID) guarantees the email field is pre-filled and disabled.
+      // Resolve or create Polar customer so checkout skips email identification.
       let polarCustomer: { id: string };
       try {
         polarCustomer = await api.customers.getExternal({
           externalId: team.id,
         });
       } catch {
-        polarCustomer = await api.customers.create({
-          externalId: team.id,
-          email: session.user.email ?? "",
-          name: team.name ?? undefined,
-        });
+        try {
+          polarCustomer = await api.customers.create({
+            externalId: team.id,
+            email: session.user.email ?? "",
+            name: team.name ?? undefined,
+          });
+        } catch {
+          // Email already belongs to a Polar customer under a different
+          // externalId (e.g. the user created a previous team). Reuse
+          // that customer — the checkout metadata carries the correct teamId.
+          const existing = await api.customers.list({
+            email: session.user.email ?? "",
+            limit: 1,
+          });
+
+          if (!existing.result.items.length) {
+            throw new Error("Failed to resolve Polar customer");
+          }
+
+          polarCustomer = existing.result.items[0]!;
+        }
       }
 
       // Create Polar checkout
@@ -66,11 +111,9 @@ export const billingRouter = createTRPCRouter({
 
   orders: protectedProcedure
     .input(getBillingOrdersSchema)
-    .query(async ({ input, ctx: { teamId } }) => {
+    .query(async ({ input, ctx: { db, teamId } }) => {
       try {
-        const customer = await api.customers.getExternal({
-          externalId: teamId!,
-        });
+        const customer = await resolvePolarCustomer(db, teamId!);
 
         const ordersResult = await api.orders.list({
           customerId: customer.id,
@@ -129,8 +172,8 @@ export const billingRouter = createTRPCRouter({
           id: orderId,
         });
 
-        // Verify the order belongs to the team's customer
-        if (order.customer.externalId !== teamId) {
+        // Verify the order belongs to this team
+        if (order.metadata?.teamId !== teamId) {
           throw new Error("Order not found or not authorized");
         }
 
@@ -180,8 +223,8 @@ export const billingRouter = createTRPCRouter({
           id: orderId,
         });
 
-        // Verify the order belongs to the team's customer
-        if (order.customer.externalId !== teamId) {
+        // Verify the order belongs to this team
+        if (order.metadata?.teamId !== teamId) {
           throw new Error("Order not found or not authorized");
         }
 
@@ -218,17 +261,19 @@ export const billingRouter = createTRPCRouter({
     }),
 
   getActiveSubscription: protectedProcedure.query(
-    async ({ ctx: { teamId } }) => {
+    async ({ ctx: { db, teamId } }) => {
       try {
+        const customer = await resolvePolarCustomer(db, teamId!);
         const subscriptions = await api.subscriptions.list({
-          externalCustomerId: teamId!,
+          customerId: customer.id,
         });
 
         const active = subscriptions.result.items.find(
           (s) =>
-            s.status === "active" ||
-            s.status === "past_due" ||
-            s.status === "trialing",
+            s.metadata?.teamId === teamId &&
+            (s.status === "active" ||
+              s.status === "past_due" ||
+              s.status === "trialing"),
         );
 
         if (!active) {
@@ -244,9 +289,10 @@ export const billingRouter = createTRPCRouter({
     },
   ),
 
-  getPortalUrl: protectedProcedure.mutation(async ({ ctx: { teamId } }) => {
+  getPortalUrl: protectedProcedure.mutation(async ({ ctx: { db, teamId } }) => {
+    const customer = await resolvePolarCustomer(db, teamId!);
     const result = await api.customerSessions.create({
-      externalCustomerId: teamId!,
+      customerId: customer.id,
     });
 
     return { url: result.customerPortalUrl };
@@ -255,11 +301,16 @@ export const billingRouter = createTRPCRouter({
   cancelSubscription: protectedProcedure
     .input(cancelSubscriptionSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
+      const customer = await resolvePolarCustomer(db, teamId!);
       const subscriptions = await api.subscriptions.list({
-        externalCustomerId: teamId!,
+        customerId: customer.id,
       });
 
-      const activeSubscription = subscriptions.result.items.find(
+      const teamSubs = subscriptions.result.items.filter(
+        (s) => s.metadata?.teamId === teamId,
+      );
+
+      const activeSubscription = teamSubs.find(
         (s) =>
           s.status === "active" ||
           s.status === "past_due" ||
@@ -267,7 +318,7 @@ export const billingRouter = createTRPCRouter({
       );
 
       if (!activeSubscription) {
-        const alreadyCanceled = subscriptions.result.items.some(
+        const alreadyCanceled = teamSubs.some(
           (s) => s.status === "canceled" || s.cancelAtPeriodEnd,
         );
 
@@ -316,12 +367,14 @@ export const billingRouter = createTRPCRouter({
 
   reactivateSubscription: protectedProcedure.mutation(
     async ({ ctx: { db, teamId } }) => {
+      const customer = await resolvePolarCustomer(db, teamId!);
       const subscriptions = await api.subscriptions.list({
-        externalCustomerId: teamId!,
+        customerId: customer.id,
       });
 
       const subscription = subscriptions.result.items.find(
         (s) =>
+          s.metadata?.teamId === teamId &&
           (s.status === "active" ||
             s.status === "past_due" ||
             s.status === "trialing") &&
