@@ -17,11 +17,7 @@ const POLLING_TIMEOUT_MS = 30_000;
 
 type PlanOption = "starter" | "pro";
 
-type Props = {
-  onComplete: () => void;
-};
-
-export function StartTrialStep({ onComplete }: Props) {
+export function StartTrialStep() {
   const [selectedPlan, setSelectedPlan] = useState<PlanOption>("pro");
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "yearly",
@@ -91,8 +87,13 @@ export function StartTrialStep({ onComplete }: Props) {
       pollingStartedAtRef.current = null;
       setIsPollingForPlan(false);
       isPollingRef.current = false;
+
+      track({
+        event: LogEvents.OnboardingCompleted.name,
+        channel: LogEvents.OnboardingCompleted.channel,
+      });
+
       revalidateAfterCheckout();
-      onComplete();
       return;
     }
 
@@ -116,7 +117,7 @@ export function StartTrialStep({ onComplete }: Props) {
     }, remaining);
 
     return () => clearTimeout(timer);
-  }, [isPollingForPlan, user?.team?.plan, onComplete]);
+  }, [isPollingForPlan, user?.team?.plan]);
 
   const createCheckoutMutation = useMutation(
     trpc.billing.createCheckout.mutationOptions(),

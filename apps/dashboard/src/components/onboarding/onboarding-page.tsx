@@ -289,14 +289,7 @@ export function OnboardingPage({
       {
         key: "start-trial",
         animation: <DashboardImageAnimation />,
-        content: (
-          <StartTrialStep
-            onComplete={() => {
-              trackEvent(LogEvents.OnboardingCompleted);
-              router.push("/");
-            }}
-          />
-        ),
+        content: <StartTrialStep />,
         overlay: true,
         navigation: "none",
         canGoBack: true,
@@ -313,8 +306,6 @@ export function OnboardingPage({
       handleLoadingChange,
       handleBankSyncStarted,
       nextStep,
-      trackEvent,
-      router,
     ],
   );
 
