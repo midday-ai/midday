@@ -52,6 +52,7 @@ export const getTeamById = async (db: Database, id: string) => {
       inboxId: teams.inboxId,
       plan: teams.plan,
       subscriptionStatus: teams.subscriptionStatus,
+      canceledAt: teams.canceledAt,
       baseCurrency: teams.baseCurrency,
       countryCode: teams.countryCode,
       fiscalYearStartMonth: teams.fiscalYearStartMonth,

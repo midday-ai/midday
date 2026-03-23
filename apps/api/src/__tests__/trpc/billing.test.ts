@@ -19,7 +19,7 @@ describe("tRPC: billing.getActiveSubscription", () => {
 
     expect(await caller.getActiveSubscription()).toBeNull();
     expect(mocks.polarSubscriptionsList).toHaveBeenCalledWith(
-      expect.objectContaining({ externalCustomerId: "test-team-id" }),
+      expect.objectContaining({ customerId: "polar-customer-id" }),
     );
   });
 
@@ -52,6 +52,7 @@ describe("tRPC: billing.cancelSubscription", () => {
               status: "active",
               cancelAtPeriodEnd: false,
               productId: "prod_test",
+              metadata: { teamId: "test-team-id" },
             },
           ],
         },

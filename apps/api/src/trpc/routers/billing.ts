@@ -59,6 +59,20 @@ export const billingRouter = createTRPCRouter({
       const yearly = planType?.endsWith("_yearly") ?? false;
       const productId = getPlanProductId(plan, yearly);
 
+      if (trial) {
+        const trialEligible =
+          team.plan === "trial" &&
+          team.subscriptionStatus == null &&
+          team.canceledAt == null;
+
+        if (!trialEligible) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Team is not eligible for a trial",
+          });
+        }
+      }
+
       // Resolve or create Polar customer so checkout skips email identification.
       let polarCustomer: { id: string };
       try {
