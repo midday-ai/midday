@@ -167,7 +167,7 @@ export function StartTrialStep({ onComplete }: Props) {
       key: "starter" as const,
       name: "Starter",
       description:
-        "For solo operators managing one business with basic insights and manual exports.",
+        "One business. Bank sync, invoicing, receipt matching, and exports to your accountant.",
       monthlyPrice: pricing.starter.monthly,
       yearlyPrice: pricing.starter.yearly,
     },
@@ -175,7 +175,7 @@ export function StartTrialStep({ onComplete }: Props) {
       key: "pro" as const,
       name: "Pro",
       description:
-        "For teams that need multiple users, ERP connections, e-invoicing, and deeper insights.",
+        "Multiple users, deeper insights, custom categories, customer portal, and API access.",
       monthlyPrice: pricing.pro.monthly,
       yearlyPrice: pricing.pro.yearly,
       badge: "Most Popular",
@@ -191,7 +191,7 @@ export function StartTrialStep({ onComplete }: Props) {
           transition={{ duration: 0.4, delay: 0.1 }}
           className="text-lg lg:text-xl font-serif"
         >
-          Choose your plan
+          You're all set — pick a plan
         </motion.h1>
 
         <motion.p
@@ -200,8 +200,8 @@ export function StartTrialStep({ onComplete }: Props) {
           transition={{ duration: 0.4, delay: 0.2 }}
           className="text-sm text-muted-foreground leading-relaxed"
         >
-          Select the plan that fits your business and start your 14-day free
-          trial. You won't be charged until it ends and you can{" "}
+          Try Midday free for 14 days. You won't be charged until your trial
+          ends and you can{" "}
           <span className="underline underline-offset-4">cancel anytime</span>.
         </motion.p>
       </div>

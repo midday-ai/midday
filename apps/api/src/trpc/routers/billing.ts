@@ -212,7 +212,10 @@ export const billingRouter = createTRPCRouter({
         });
 
         const active = subscriptions.result.items.find(
-          (s) => s.status === "active" || s.status === "past_due",
+          (s) =>
+            s.status === "active" ||
+            s.status === "past_due" ||
+            s.status === "trialing",
         );
 
         if (!active) {
@@ -244,7 +247,10 @@ export const billingRouter = createTRPCRouter({
       });
 
       const activeSubscription = subscriptions.result.items.find(
-        (s) => s.status === "active" || s.status === "past_due",
+        (s) =>
+          s.status === "active" ||
+          s.status === "past_due" ||
+          s.status === "trialing",
       );
 
       if (!activeSubscription) {
@@ -303,7 +309,9 @@ export const billingRouter = createTRPCRouter({
 
       const subscription = subscriptions.result.items.find(
         (s) =>
-          (s.status === "active" || s.status === "past_due") &&
+          (s.status === "active" ||
+            s.status === "past_due" ||
+            s.status === "trialing") &&
           s.cancelAtPeriodEnd,
       );
 

@@ -103,8 +103,16 @@ export const onboardTeam = schemaTask({
           await wait.until({ date: reminderDate });
         }
 
-        // Re-check that user is still trialing before sending
-        if (await shouldSendEmail(user.team_id)) {
+        // Re-check subscription_status directly — shouldSendEmail is too
+        // permissive here because a canceled trial resets plan to "trial"
+        // with a null subscriptionStatus, which shouldSendEmail treats as truthy.
+        const { data: freshTeam } = await supabase
+          .from("teams")
+          .select("subscription_status")
+          .eq("id", user.team_id)
+          .single();
+
+        if (freshTeam?.subscription_status === "trialing") {
           await resend.emails.send({
             from: "Pontus from Midday <pontus@midday.ai>",
             to: user.email,
