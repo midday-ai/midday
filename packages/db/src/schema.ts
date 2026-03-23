@@ -180,6 +180,7 @@ export const plansEnum = pgEnum("plans", ["trial", "starter", "pro"]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "active",
   "past_due",
+  "trialing",
 ]);
 export const reportTypesEnum = pgEnum("reportTypes", [
   "profit",

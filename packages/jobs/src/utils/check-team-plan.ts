@@ -5,18 +5,17 @@ export async function shouldSendEmail(teamId: string) {
 
   const { data, error } = await supabase
     .from("teams")
-    .select("id")
+    .select("id, plan, subscription_status")
     .eq("id", teamId)
-    .eq("plan", "trial")
     .single();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  if (data) {
-    return true;
+  if (!data) {
+    return false;
   }
 
-  return false;
+  return data.plan === "trial" || data.subscription_status === "trialing";
 }

@@ -1284,8 +1284,10 @@ mock.module("@api/utils/polar", () => ({
       ),
     },
     customers: {
-      getExternal: mock(() =>
-        Promise.reject(new Error("polar not configured")),
+      getExternal: mock(() => Promise.resolve({ id: "polar-customer-id" })),
+      create: mock(() => Promise.resolve({ id: "polar-customer-id" })),
+      list: mock(() =>
+        Promise.resolve({ result: { items: [{ id: "polar-customer-id" }] } }),
       ),
     },
     orders: {

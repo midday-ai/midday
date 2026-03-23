@@ -92,6 +92,34 @@ app.openapi(
 
     try {
       switch (event.type) {
+        case "subscription.created": {
+          const teamId = event.data.metadata?.teamId as string | undefined;
+
+          if (!teamId) {
+            logger.warn("Subscription created event missing teamId metadata");
+            break;
+          }
+
+          if (event.data.status === "trialing") {
+            await updateTeamById(db, {
+              id: teamId,
+              data: {
+                email: event.data.customer.email ?? undefined,
+                plan: getPlanByProductId(event.data.productId),
+                subscriptionStatus: "trialing",
+                canceledAt: null,
+              },
+            });
+
+            logger.info("Team trial subscription created", {
+              teamId,
+              plan: getPlanByProductId(event.data.productId),
+            });
+          }
+
+          break;
+        }
+
         case "subscription.active": {
           const teamId = event.data.metadata?.teamId as string | undefined;
 
@@ -130,7 +158,9 @@ app.openapi(
             id: teamId,
             data: {
               email: event.data.customer.email ?? undefined,
+              plan: "trial",
               canceledAt: new Date().toISOString(),
+              subscriptionStatus: null,
             },
           });
 

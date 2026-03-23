@@ -2,13 +2,12 @@ import { onboardTeamSchema } from "@jobs/schema";
 import { shouldSendEmail } from "@jobs/utils/check-team-plan";
 import { resend } from "@jobs/utils/resend";
 import { TrialActivationEmail } from "@midday/email/emails/trial-activation";
-import { TrialDeactivatedEmail } from "@midday/email/emails/trial-deactivated";
-import { TrialEndedEmail } from "@midday/email/emails/trial-ended";
 import { TrialExpiringEmail } from "@midday/email/emails/trial-expiring";
 import { WelcomeEmail } from "@midday/email/emails/welcome";
 import { render } from "@midday/email/render";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask, wait } from "@trigger.dev/sdk";
+import { subDays } from "date-fns";
 
 export const onboardTeam = schemaTask({
   id: "onboard-team",
@@ -78,52 +77,56 @@ export const onboardTeam = schemaTask({
       }
     }
 
-    // Day 13: Trial expiring reminder
-    await wait.for({ days: 10 });
+    // Trial expiring reminder — must arrive BEFORE Polar charges.
+    // Wait until day 10 from registration to check for trialing subscription,
+    // then schedule the reminder based on when the team was created
+    // (trial starts at checkout during onboarding, usually within hours of registration).
+    // We send the reminder at day 12 from registration to ensure it arrives
+    // before the 14-day Polar trial expires.
+    await wait.for({ days: 7 });
 
     if (await shouldSendEmail(user.team_id)) {
-      await resend.emails.send({
-        from: "Pontus from Midday <pontus@midday.ai>",
-        to: user.email,
-        subject: "Your bank sync and invoicing stop tomorrow",
-        html: await render(
-          TrialExpiringEmail({
-            fullName: user.full_name,
-          }),
-        ),
-      });
-    }
+      const { data: team } = await supabase
+        .from("teams")
+        .select("subscription_status, created_at")
+        .eq("id", user.team_id)
+        .single();
 
-    // Day 14: Trial ended
-    await wait.for({ days: 1 });
+      if (team?.subscription_status === "trialing") {
+        // Wait until 1 day before the trial likely ends (13 days from team creation)
+        const trialEnd = new Date(team.created_at);
+        trialEnd.setDate(trialEnd.getDate() + 14);
+        const reminderDate = subDays(trialEnd, 1);
+        const now = new Date();
 
-    if (await shouldSendEmail(user.team_id)) {
-      await resend.emails.send({
-        from: "Pontus from Midday <pontus@midday.ai>",
-        to: user.email,
-        subject: "Your Midday trial has ended",
-        html: await render(TrialEndedEmail({ fullName: user.full_name })),
-      });
-    }
+        if (reminderDate > now) {
+          await wait.until({ date: reminderDate });
+        }
 
-    // Day 17: Bank sync deactivation warning (only if they have bank connections)
-    await wait.for({ days: 3 });
+        // Re-check subscription_status directly — shouldSendEmail is too
+        // permissive here because a canceled trial resets plan to "trial"
+        // with a null subscriptionStatus, which shouldSendEmail treats as truthy.
+        const { data: freshTeam } = await supabase
+          .from("teams")
+          .select("subscription_status, canceled_at")
+          .eq("id", user.team_id)
+          .single();
 
-    if (await shouldSendEmail(user.team_id)) {
-      const { count: bankCount } = await supabase
-        .from("bank_connections")
-        .select("id", { count: "exact", head: true })
-        .eq("team_id", user.team_id);
-
-      if (bankCount && bankCount > 0) {
-        await resend.emails.send({
-          from: "Pontus from Midday <pontus@midday.ai>",
-          to: user.email,
-          subject: "Your bank sync will be paused soon",
-          html: await render(
-            TrialDeactivatedEmail({ fullName: user.full_name }),
-          ),
-        });
+        if (
+          freshTeam?.subscription_status === "trialing" &&
+          !freshTeam.canceled_at
+        ) {
+          await resend.emails.send({
+            from: "Pontus from Midday <pontus@midday.ai>",
+            to: user.email,
+            subject: "Your trial ends tomorrow — billing starts automatically",
+            html: await render(
+              TrialExpiringEmail({
+                fullName: user.full_name,
+              }),
+            ),
+          });
+        }
       }
     }
   },
