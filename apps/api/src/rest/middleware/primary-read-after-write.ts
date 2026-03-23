@@ -21,20 +21,16 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
     ? "mutation"
     : "query";
 
-  let teamId: string | null = null;
+  // Use the teamId already set by withAuth (from API key, OAuth token, or JWT).
+  // Only fall back to the user's active team if auth didn't set one.
+  let teamId: string | null = c.get("teamId") || null;
 
-  // For OAuth sessions, use the token's team, not the user's current team
-  if (session?.oauth) {
-    teamId = session.teamId || null;
-  }
-  // For non-OAuth sessions, get user's current team
-  else if (session?.user?.id) {
+  if (!teamId && session?.user?.id) {
     const cacheKey = `user:${session.user.id}:team`;
     teamId = (await teamPermissionsCache.get(cacheKey)) || null;
 
-    if (!teamId && session.user.id) {
+    if (!teamId) {
       try {
-        // Get user's current team
         const userTeamId = await getUserTeamId(db, session.user.id);
 
         if (userTeamId) {
