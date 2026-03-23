@@ -17,7 +17,5 @@ export async function shouldSendEmail(teamId: string) {
     return false;
   }
 
-  return (
-    data.plan === "trial" || data.subscription_status === "trialing"
-  );
+  return data.plan === "trial" || data.subscription_status === "trialing";
 }

@@ -96,9 +96,7 @@ app.openapi(
           const teamId = event.data.metadata?.teamId as string | undefined;
 
           if (!teamId) {
-            logger.warn(
-              "Subscription created event missing teamId metadata",
-            );
+            logger.warn("Subscription created event missing teamId metadata");
             break;
           }
 

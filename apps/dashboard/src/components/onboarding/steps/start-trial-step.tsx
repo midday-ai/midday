@@ -3,12 +3,12 @@
 import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { getPlanPricing } from "@midday/plans";
-import { SubmitButton } from "@midday/ui/submit-button";
 import { cn } from "@midday/ui/cn";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { revalidateAfterCheckout } from "@/actions/revalidate-action";
 import { useTRPC } from "@/trpc/client";
@@ -113,9 +113,7 @@ export function StartTrialStep({ onComplete }: Props) {
       setIsSubmitting(true);
 
       const planType =
-        billingPeriod === "yearly"
-          ? `${selectedPlan}_yearly`
-          : selectedPlan;
+        billingPeriod === "yearly" ? `${selectedPlan}_yearly` : selectedPlan;
 
       track({
         event: LogEvents.CheckoutStarted.name,
@@ -202,8 +200,8 @@ export function StartTrialStep({ onComplete }: Props) {
           transition={{ duration: 0.4, delay: 0.2 }}
           className="text-sm text-muted-foreground leading-relaxed"
         >
-          Select the plan that fits your business and start your 14-day
-          free trial. You won't be charged until it ends and you can{" "}
+          Select the plan that fits your business and start your 14-day free
+          trial. You won't be charged until it ends and you can{" "}
           <span className="underline underline-offset-4">cancel anytime</span>.
         </motion.p>
       </div>
@@ -281,7 +279,8 @@ export function StartTrialStep({ onComplete }: Props) {
                   </p>
                   <div className="flex items-baseline gap-1.5 mt-2">
                     <span className="text-xl font-medium text-foreground">
-                      {pricing.symbol}{price}
+                      {pricing.symbol}
+                      {price}
                     </span>
                     <span className="text-xs text-muted-foreground">/mo</span>
                   </div>
