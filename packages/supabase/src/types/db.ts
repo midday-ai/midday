@@ -72,13 +72,6 @@ export type Database = {
             foreignKeyName: "accounting_sync_records_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "accounting_sync_records_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -132,13 +125,6 @@ export type Database = {
           user_id?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: "activities_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
           {
             foreignKeyName: "activities_team_id_fkey";
             columns: ["team_id"];
@@ -197,13 +183,6 @@ export type Database = {
             foreignKeyName: "api_keys_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "api_keys_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -251,13 +230,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "users";
             referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "integrations_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
           },
           {
             foreignKeyName: "integrations_team_id_fkey";
@@ -372,13 +344,6 @@ export type Database = {
             foreignKeyName: "public_bank_accounts_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "public_bank_accounts_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -441,13 +406,6 @@ export type Database = {
             foreignKeyName: "bank_connections_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "bank_connections_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -491,13 +449,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "chats";
             referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "chat_feedback_team_id_teams_id_fk";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
           },
           {
             foreignKeyName: "chat_feedback_team_id_teams_id_fk";
@@ -552,13 +503,6 @@ export type Database = {
             foreignKeyName: "chat_messages_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "chat_messages_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -600,13 +544,6 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: "chats_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
           {
             foreignKeyName: "chats_team_id_fkey";
             columns: ["team_id"];
@@ -664,13 +601,6 @@ export type Database = {
             foreignKeyName: "customer_tags_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "customer_tags_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -709,15 +639,18 @@ export type Database = {
           industry: string | null;
           instagram_url: string | null;
           is_archived: boolean | null;
+          legal_form: string | null;
           linkedin_url: string | null;
           logo_url: string | null;
           name: string;
           note: string | null;
+          peppol_id: string | null;
           phone: string | null;
           portal_enabled: boolean | null;
           portal_id: string | null;
           preferred_currency: string | null;
           primary_language: string | null;
+          registration_number: string | null;
           source: string | null;
           state: string | null;
           status: string | null;
@@ -762,15 +695,18 @@ export type Database = {
           industry?: string | null;
           instagram_url?: string | null;
           is_archived?: boolean | null;
+          legal_form?: string | null;
           linkedin_url?: string | null;
           logo_url?: string | null;
           name: string;
           note?: string | null;
+          peppol_id?: string | null;
           phone?: string | null;
           portal_enabled?: boolean | null;
           portal_id?: string | null;
           preferred_currency?: string | null;
           primary_language?: string | null;
+          registration_number?: string | null;
           source?: string | null;
           state?: string | null;
           status?: string | null;
@@ -815,15 +751,18 @@ export type Database = {
           industry?: string | null;
           instagram_url?: string | null;
           is_archived?: boolean | null;
+          legal_form?: string | null;
           linkedin_url?: string | null;
           logo_url?: string | null;
           name?: string;
           note?: string | null;
+          peppol_id?: string | null;
           phone?: string | null;
           portal_enabled?: boolean | null;
           portal_id?: string | null;
           preferred_currency?: string | null;
           primary_language?: string | null;
+          registration_number?: string | null;
           source?: string | null;
           state?: string | null;
           status?: string | null;
@@ -837,13 +776,6 @@ export type Database = {
           zip?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: "customers_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
           {
             foreignKeyName: "customers_team_id_fkey";
             columns: ["team_id"];
@@ -883,13 +815,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "document_tags";
             referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "document_tag_assignments_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
           },
           {
             foreignKeyName: "document_tag_assignments_team_id_fkey";
@@ -944,13 +869,6 @@ export type Database = {
           team_id?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: "document_tags_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
           {
             foreignKeyName: "document_tags_team_id_fkey";
             columns: ["team_id"];
@@ -1048,11 +966,54 @@ export type Database = {
             foreignKeyName: "storage_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
           },
+        ];
+      };
+      e_invoice_registrations: {
+        Row: {
+          created_at: string;
+          faults: Json | null;
+          id: string;
+          peppol_id: string | null;
+          peppol_scheme: string | null;
+          provider: string;
+          registration_url: string | null;
+          silo_entry_id: string | null;
+          status: string;
+          team_id: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          faults?: Json | null;
+          id?: string;
+          peppol_id?: string | null;
+          peppol_scheme?: string | null;
+          provider: string;
+          registration_url?: string | null;
+          silo_entry_id?: string | null;
+          status?: string;
+          team_id: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          faults?: Json | null;
+          id?: string;
+          peppol_id?: string | null;
+          peppol_scheme?: string | null;
+          provider?: string;
+          registration_url?: string | null;
+          silo_entry_id?: string | null;
+          status?: string;
+          team_id?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
           {
-            foreignKeyName: "storage_team_id_fkey";
+            foreignKeyName: "e_invoice_registrations_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
             referencedRelation: "teams";
@@ -1208,13 +1169,6 @@ export type Database = {
             foreignKeyName: "public_inbox_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "public_inbox_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -1284,13 +1238,6 @@ export type Database = {
             foreignKeyName: "inbox_accounts_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "inbox_accounts_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -1321,65 +1268,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "inbox_blocklist_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "inbox_blocklist_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "teams";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      inbox_embeddings: {
-        Row: {
-          created_at: string;
-          embedding: string | null;
-          id: string;
-          inbox_id: string;
-          model: string;
-          source_text: string;
-          team_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          embedding?: string | null;
-          id?: string;
-          inbox_id: string;
-          model?: string;
-          source_text: string;
-          team_id: string;
-        };
-        Update: {
-          created_at?: string;
-          embedding?: string | null;
-          id?: string;
-          inbox_id?: string;
-          model?: string;
-          source_text?: string;
-          team_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "inbox_embeddings_inbox_id_fkey";
-            columns: ["inbox_id"];
-            isOneToOne: true;
-            referencedRelation: "inbox";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "inbox_embeddings_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "inbox_embeddings_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
             referencedRelation: "teams";
@@ -1447,6 +1335,7 @@ export type Database = {
           period_start: string;
           period_type: Database["public"]["Enums"]["insight_period_type"];
           period_year: number;
+          predictions: Json | null;
           selected_metrics: Json | null;
           status: Database["public"]["Enums"]["insight_status"];
           team_id: string;
@@ -1470,6 +1359,7 @@ export type Database = {
           period_start: string;
           period_type: Database["public"]["Enums"]["insight_period_type"];
           period_year: number;
+          predictions?: Json | null;
           selected_metrics?: Json | null;
           status?: Database["public"]["Enums"]["insight_status"];
           team_id: string;
@@ -1493,6 +1383,7 @@ export type Database = {
           period_start?: string;
           period_type?: Database["public"]["Enums"]["insight_period_type"];
           period_year?: number;
+          predictions?: Json | null;
           selected_metrics?: Json | null;
           status?: Database["public"]["Enums"]["insight_status"];
           team_id?: string;
@@ -1504,17 +1395,55 @@ export type Database = {
             foreignKeyName: "insights_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "insights_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
         ];
+      };
+      institutions: {
+        Row: {
+          available_history: number | null;
+          countries: string[];
+          created_at: string;
+          id: string;
+          logo: string | null;
+          maximum_consent_validity: number | null;
+          name: string;
+          popularity: number;
+          provider: Database["public"]["Enums"]["bank_providers"];
+          status: Database["public"]["Enums"]["institution_status"];
+          type: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          available_history?: number | null;
+          countries: string[];
+          created_at?: string;
+          id: string;
+          logo?: string | null;
+          maximum_consent_validity?: number | null;
+          name: string;
+          popularity?: number;
+          provider: Database["public"]["Enums"]["bank_providers"];
+          status?: Database["public"]["Enums"]["institution_status"];
+          type?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          available_history?: number | null;
+          countries?: string[];
+          created_at?: string;
+          id?: string;
+          logo?: string | null;
+          maximum_consent_validity?: number | null;
+          name?: string;
+          popularity?: number;
+          provider?: Database["public"]["Enums"]["bank_providers"];
+          status?: Database["public"]["Enums"]["institution_status"];
+          type?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       invoice_comments: {
         Row: {
@@ -1590,13 +1519,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "users";
             referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "invoice_products_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
           },
           {
             foreignKeyName: "invoice_products_team_id_fkey";
@@ -1734,13 +1656,6 @@ export type Database = {
             foreignKeyName: "invoice_recurring_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "invoice_recurring_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -1770,6 +1685,12 @@ export type Database = {
           description_label: string | null;
           discount_label: string | null;
           due_date_label: string | null;
+          e_invoice_enabled: boolean | null;
+          e_invoice_notify_email: boolean | null;
+          email_body: string | null;
+          email_button_text: string | null;
+          email_heading: string | null;
+          email_subject: string | null;
           from_details: Json | null;
           from_label: string | null;
           id: string;
@@ -1816,6 +1737,12 @@ export type Database = {
           description_label?: string | null;
           discount_label?: string | null;
           due_date_label?: string | null;
+          e_invoice_enabled?: boolean | null;
+          e_invoice_notify_email?: boolean | null;
+          email_body?: string | null;
+          email_button_text?: string | null;
+          email_heading?: string | null;
+          email_subject?: string | null;
           from_details?: Json | null;
           from_label?: string | null;
           id?: string;
@@ -1862,6 +1789,12 @@ export type Database = {
           description_label?: string | null;
           discount_label?: string | null;
           due_date_label?: string | null;
+          e_invoice_enabled?: boolean | null;
+          e_invoice_notify_email?: boolean | null;
+          email_body?: string | null;
+          email_button_text?: string | null;
+          email_heading?: string | null;
+          email_subject?: string | null;
           from_details?: Json | null;
           from_label?: string | null;
           id?: string;
@@ -1904,13 +1837,6 @@ export type Database = {
             foreignKeyName: "invoice_settings_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "invoice_settings_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -1928,6 +1854,14 @@ export type Database = {
           customer_name: string | null;
           discount: number | null;
           due_date: string | null;
+          e_invoice_error: string | null;
+          e_invoice_failed_step: number | null;
+          e_invoice_faults: Json | null;
+          e_invoice_id: string | null;
+          e_invoice_job_id: string | null;
+          e_invoice_sent_at: string | null;
+          e_invoice_silo_entry_id: string | null;
+          e_invoice_status: string | null;
           file_path: string[] | null;
           file_size: number | null;
           from_details: Json | null;
@@ -1975,6 +1909,14 @@ export type Database = {
           customer_name?: string | null;
           discount?: number | null;
           due_date?: string | null;
+          e_invoice_error?: string | null;
+          e_invoice_failed_step?: number | null;
+          e_invoice_faults?: Json | null;
+          e_invoice_id?: string | null;
+          e_invoice_job_id?: string | null;
+          e_invoice_sent_at?: string | null;
+          e_invoice_silo_entry_id?: string | null;
+          e_invoice_status?: string | null;
           file_path?: string[] | null;
           file_size?: number | null;
           from_details?: Json | null;
@@ -2022,6 +1964,14 @@ export type Database = {
           customer_name?: string | null;
           discount?: number | null;
           due_date?: string | null;
+          e_invoice_error?: string | null;
+          e_invoice_failed_step?: number | null;
+          e_invoice_faults?: Json | null;
+          e_invoice_id?: string | null;
+          e_invoice_job_id?: string | null;
+          e_invoice_sent_at?: string | null;
+          e_invoice_silo_entry_id?: string | null;
+          e_invoice_status?: string | null;
           file_path?: string[] | null;
           file_size?: number | null;
           from_details?: Json | null;
@@ -2084,13 +2034,6 @@ export type Database = {
             foreignKeyName: "invoices_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "invoices_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -2135,13 +2078,6 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: "notification_settings_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
           {
             foreignKeyName: "notification_settings_team_id_fkey";
             columns: ["team_id"];
@@ -2211,13 +2147,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "oauth_applications";
             referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "oauth_access_tokens_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
           },
           {
             foreignKeyName: "oauth_access_tokens_team_id_fkey";
@@ -2317,13 +2246,6 @@ export type Database = {
             foreignKeyName: "oauth_applications_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "oauth_applications_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -2379,13 +2301,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "oauth_applications";
             referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "oauth_authorization_codes_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
           },
           {
             foreignKeyName: "oauth_authorization_codes_team_id_fkey";
@@ -2455,13 +2370,6 @@ export type Database = {
             foreignKeyName: "reports_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "reports_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -2512,13 +2420,6 @@ export type Database = {
             foreignKeyName: "short_links_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "short_links_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -2555,13 +2456,6 @@ export type Database = {
             foreignKeyName: "tags_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "tags_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -2569,73 +2463,115 @@ export type Database = {
       };
       teams: {
         Row: {
+          address_line_1: string | null;
+          address_line_2: string | null;
           base_currency: string | null;
           canceled_at: string | null;
+          city: string | null;
+          company_type: string | null;
           country_code: string | null;
           created_at: string;
+          ddd_connection_key: string | null;
           document_classification: boolean | null;
+          e_invoice_api_key: string | null;
+          e_invoice_workflow_id: string | null;
           email: string | null;
           export_settings: Json | null;
           fiscal_year_start_month: number | null;
           flags: string[] | null;
+          heard_about: string | null;
           id: string;
           inbox_email: string | null;
           inbox_forwarding: boolean | null;
           inbox_id: string | null;
           logo_url: string | null;
           name: string | null;
+          peppol_id: string | null;
           plan: Database["public"]["Enums"]["plans"];
+          registration_number: string | null;
+          state: string | null;
           stripe_account_id: string | null;
           stripe_connect_status: string | null;
           subscription_status:
             | Database["public"]["Enums"]["subscription_status"]
             | null;
+          tax_id: string | null;
+          vat_number: string | null;
+          zip: string | null;
         };
         Insert: {
+          address_line_1?: string | null;
+          address_line_2?: string | null;
           base_currency?: string | null;
           canceled_at?: string | null;
+          city?: string | null;
+          company_type?: string | null;
           country_code?: string | null;
           created_at?: string;
+          ddd_connection_key?: string | null;
           document_classification?: boolean | null;
+          e_invoice_api_key?: string | null;
+          e_invoice_workflow_id?: string | null;
           email?: string | null;
           export_settings?: Json | null;
           fiscal_year_start_month?: number | null;
           flags?: string[] | null;
+          heard_about?: string | null;
           id?: string;
           inbox_email?: string | null;
           inbox_forwarding?: boolean | null;
           inbox_id?: string | null;
           logo_url?: string | null;
           name?: string | null;
+          peppol_id?: string | null;
           plan?: Database["public"]["Enums"]["plans"];
+          registration_number?: string | null;
+          state?: string | null;
           stripe_account_id?: string | null;
           stripe_connect_status?: string | null;
           subscription_status?:
             | Database["public"]["Enums"]["subscription_status"]
             | null;
+          tax_id?: string | null;
+          vat_number?: string | null;
+          zip?: string | null;
         };
         Update: {
+          address_line_1?: string | null;
+          address_line_2?: string | null;
           base_currency?: string | null;
           canceled_at?: string | null;
+          city?: string | null;
+          company_type?: string | null;
           country_code?: string | null;
           created_at?: string;
+          ddd_connection_key?: string | null;
           document_classification?: boolean | null;
+          e_invoice_api_key?: string | null;
+          e_invoice_workflow_id?: string | null;
           email?: string | null;
           export_settings?: Json | null;
           fiscal_year_start_month?: number | null;
           flags?: string[] | null;
+          heard_about?: string | null;
           id?: string;
           inbox_email?: string | null;
           inbox_forwarding?: boolean | null;
           inbox_id?: string | null;
           logo_url?: string | null;
           name?: string | null;
+          peppol_id?: string | null;
           plan?: Database["public"]["Enums"]["plans"];
+          registration_number?: string | null;
+          state?: string | null;
           stripe_account_id?: string | null;
           stripe_connect_status?: string | null;
           subscription_status?:
             | Database["public"]["Enums"]["subscription_status"]
             | null;
+          tax_id?: string | null;
+          vat_number?: string | null;
+          zip?: string | null;
         };
         Relationships: [];
       };
@@ -2709,13 +2645,6 @@ export type Database = {
             foreignKeyName: "tracker_entries_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "tracker_entries_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -2757,13 +2686,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "tracker_projects";
             referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "tracker_project_tags_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
           },
           {
             foreignKeyName: "tracker_project_tags_team_id_fkey";
@@ -2837,13 +2759,6 @@ export type Database = {
             foreignKeyName: "tracker_projects_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "tracker_projects_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -2896,13 +2811,6 @@ export type Database = {
             foreignKeyName: "tracker_reports_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "tracker_reports_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -2940,13 +2848,6 @@ export type Database = {
           type?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: "public_transaction_attachments_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
           {
             foreignKeyName: "public_transaction_attachments_team_id_fkey";
             columns: ["team_id"];
@@ -3024,13 +2925,6 @@ export type Database = {
             foreignKeyName: "transaction_categories_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "transaction_categories_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -3062,58 +2956,6 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
-      };
-      transaction_embeddings: {
-        Row: {
-          created_at: string;
-          embedding: string | null;
-          id: string;
-          model: string;
-          source_text: string;
-          team_id: string;
-          transaction_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          embedding?: string | null;
-          id?: string;
-          model?: string;
-          source_text: string;
-          team_id: string;
-          transaction_id: string;
-        };
-        Update: {
-          created_at?: string;
-          embedding?: string | null;
-          id?: string;
-          model?: string;
-          source_text?: string;
-          team_id?: string;
-          transaction_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "transaction_embeddings_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "transaction_embeddings_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "teams";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "transaction_embeddings_transaction_id_fkey";
-            columns: ["transaction_id"];
-            isOneToOne: true;
-            referencedRelation: "transactions";
-            referencedColumns: ["id"];
-          },
-        ];
       };
       transaction_enrichments: {
         Row: {
@@ -3152,13 +2994,6 @@ export type Database = {
             foreignKeyName: "transaction_enrichments_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "transaction_enrichments_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -3171,7 +3006,6 @@ export type Database = {
           created_at: string;
           currency_score: number | null;
           date_score: number | null;
-          embedding_score: number | null;
           id: string;
           inbox_id: string;
           match_details: Json | null;
@@ -3190,7 +3024,6 @@ export type Database = {
           created_at?: string;
           currency_score?: number | null;
           date_score?: number | null;
-          embedding_score?: number | null;
           id?: string;
           inbox_id: string;
           match_details?: Json | null;
@@ -3209,7 +3042,6 @@ export type Database = {
           created_at?: string;
           currency_score?: number | null;
           date_score?: number | null;
-          embedding_score?: number | null;
           id?: string;
           inbox_id?: string;
           match_details?: Json | null;
@@ -3229,13 +3061,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "inbox";
             referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "transaction_match_suggestions_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
           },
           {
             foreignKeyName: "transaction_match_suggestions_team_id_fkey";
@@ -3289,13 +3114,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "tags";
             referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "transaction_tags_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
           },
           {
             foreignKeyName: "transaction_tags_team_id_fkey";
@@ -3438,13 +3256,6 @@ export type Database = {
             foreignKeyName: "public_transactions_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "public_transactions_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -3493,13 +3304,6 @@ export type Database = {
           team_id?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: "public_user_invites_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
           {
             foreignKeyName: "public_user_invites_team_id_fkey";
             columns: ["team_id"];
@@ -3564,13 +3368,6 @@ export type Database = {
             foreignKeyName: "users_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "users_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -3603,13 +3400,6 @@ export type Database = {
             foreignKeyName: "users_on_team_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
-            referencedRelation: "team_limits_metrics";
-            referencedColumns: ["team_id"];
-          },
-          {
-            foreignKeyName: "users_on_team_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -3624,17 +3414,7 @@ export type Database = {
       };
     };
     Views: {
-      team_limits_metrics: {
-        Row: {
-          inbox_created_this_month: number | null;
-          invoices_created_this_month: number | null;
-          number_of_bank_connections: number | null;
-          number_of_users: number | null;
-          team_id: string | null;
-          total_document_size: number | null;
-        };
-        Relationships: [];
-      };
+      [_ in never]: never;
     };
     Functions: {
       amount_text: {
@@ -4173,17 +3953,6 @@ export type Database = {
           name: string;
         }[];
       };
-      get_team_limits_metrics: {
-        Args: { input_team_id: string };
-        Returns: {
-          inbox_created_this_month: number;
-          invoices_created_this_month: number;
-          number_of_bank_connections: number;
-          number_of_users: number;
-          team_id: string;
-          total_document_size: number;
-        }[];
-      };
       get_total_balance: {
         Args: { currency: string; team_id: string };
         Returns: number;
@@ -4462,7 +4231,13 @@ export type Database = {
         | "recurring_series_completed"
         | "recurring_series_paused"
         | "recurring_invoice_upcoming"
-        | "insight_ready";
+        | "insight_ready"
+        | "e_invoice_sent"
+        | "e_invoice_registration_processing"
+        | "e_invoice_registration_complete"
+        | "e_invoice_registration_error"
+        | "e_invoice_error"
+        | "e_invoice_received";
       approval_status: "draft" | "pending" | "approved" | "rejected";
       bank_providers:
         | "gocardless"
@@ -4489,10 +4264,12 @@ export type Database = {
         | "done"
         | "analyzing"
         | "suggested_match"
-        | "no_match";
-      inbox_type: "invoice" | "expense";
+        | "no_match"
+        | "other";
+      inbox_type: "invoice" | "expense" | "other";
       insight_period_type: "weekly" | "monthly" | "quarterly" | "yearly";
       insight_status: "pending" | "generating" | "completed" | "failed";
+      institution_status: "active" | "removed";
       invoice_delivery_type: "create" | "create_and_send" | "scheduled";
       invoice_recurring_end_type: "never" | "on_date" | "after_count";
       invoice_recurring_frequency:
@@ -4525,7 +4302,7 @@ export type Database = {
         | "revenue_forecast"
         | "runway"
         | "category_expenses";
-      subscription_status: "active" | "past_due";
+      subscription_status: "active" | "past_due" | "trialing";
       teamRoles: "owner" | "member";
       trackerStatus: "in_progress" | "completed";
       transaction_frequency:
@@ -4750,6 +4527,12 @@ export const Constants = {
         "recurring_series_paused",
         "recurring_invoice_upcoming",
         "insight_ready",
+        "e_invoice_sent",
+        "e_invoice_registration_processing",
+        "e_invoice_registration_complete",
+        "e_invoice_registration_error",
+        "e_invoice_error",
+        "e_invoice_received",
       ],
       approval_status: ["draft", "pending", "approved", "rejected"],
       bank_providers: [
@@ -4780,10 +4563,12 @@ export const Constants = {
         "analyzing",
         "suggested_match",
         "no_match",
+        "other",
       ],
-      inbox_type: ["invoice", "expense"],
+      inbox_type: ["invoice", "expense", "other"],
       insight_period_type: ["weekly", "monthly", "quarterly", "yearly"],
       insight_status: ["pending", "generating", "completed", "failed"],
+      institution_status: ["active", "removed"],
       invoice_delivery_type: ["create", "create_and_send", "scheduled"],
       invoice_recurring_end_type: ["never", "on_date", "after_count"],
       invoice_recurring_frequency: [
@@ -4819,7 +4604,7 @@ export const Constants = {
         "runway",
         "category_expenses",
       ],
-      subscription_status: ["active", "past_due"],
+      subscription_status: ["active", "past_due", "trialing"],
       teamRoles: ["owner", "member"],
       trackerStatus: ["in_progress", "completed"],
       transaction_frequency: [

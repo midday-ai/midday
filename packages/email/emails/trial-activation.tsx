@@ -22,7 +22,7 @@ interface Props {
 
 export const TrialActivationEmail = ({ fullName = "" }: Props) => {
   const firstName = fullName ? fullName.split(" ").at(0) : "";
-  const text = `${firstName ? `Hi ${firstName}, ` : ""}Connect your bank account to get the most out of your Midday trial.`;
+  const text = `${firstName ? `Hi ${firstName}, ` : ""}Connect your bank account to get the most out of Midday.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -45,7 +45,7 @@ export const TrialActivationEmail = ({ fullName = "" }: Props) => {
             className={`font-serif text-[21px] font-normal text-center p-0 my-[30px] mx-0 ${themeClasses.heading}`}
             style={{ color: lightStyles.text.color }}
           >
-            Get the most out of your trial
+            Get the most out of Midday
           </Heading>
 
           <br />

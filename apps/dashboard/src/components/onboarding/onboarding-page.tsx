@@ -34,7 +34,7 @@ type StepConfig = {
   animation: ReactNode;
   content: ReactNode;
   overlay?: boolean;
-  navigation: "none" | "submit" | "skip" | "next" | "finish";
+  navigation: "none" | "submit" | "skip" | "next";
   canGoBack?: boolean;
   trackEvent?: { name: string; channel: string };
 };
@@ -137,7 +137,6 @@ const NAV_LABELS: Record<StepConfig["navigation"], string | null> = {
   submit: null,
   skip: "Skip",
   next: "Next",
-  finish: null,
 };
 
 export function OnboardingPage({
@@ -149,7 +148,6 @@ export function OnboardingPage({
   const [hasTeam, setHasTeam] = useState(!!user.teamId);
   const [hasFullName, setHasFullName] = useState(!!user.fullName);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isFinishing, setIsFinishing] = useState(false);
   const [bankSync, setBankSync] = useState<BankSyncState>(null);
   const [inboxSync, setInboxSync] = useState<InboxSyncState>(null);
   const [syncVisible, setSyncVisible] = useState(false);
@@ -287,18 +285,20 @@ export function OnboardingPage({
         canGoBack: true,
         trackEvent: LogEvents.OnboardingStepCompleted,
       },
-      // Step 6
+      // Step 6 — Plan selection + Polar checkout with CC-required trial
       {
         key: "start-trial",
         animation: <DashboardImageAnimation />,
         content: (
           <StartTrialStep
-            hasBankConnected={!!bankSync}
-            hasInboxConnected={!!inboxSync}
+            onComplete={() => {
+              trackEvent(LogEvents.OnboardingCompleted);
+              router.push("/");
+            }}
           />
         ),
         overlay: true,
-        navigation: "finish",
+        navigation: "none",
         canGoBack: true,
       },
     ],
@@ -313,8 +313,8 @@ export function OnboardingPage({
       handleLoadingChange,
       handleBankSyncStarted,
       nextStep,
-      bankSync,
-      inboxSync,
+      trackEvent,
+      router,
     ],
   );
 
@@ -322,10 +322,10 @@ export function OnboardingPage({
 
   // Prefetch the dashboard route as soon as the user reaches the final step
   useEffect(() => {
-    if (currentStep?.navigation === "finish") {
+    if (currentStep?.key === "start-trial") {
       router.prefetch("/");
     }
-  }, [currentStep?.navigation, router]);
+  }, [currentStep?.key, router]);
 
   if (!currentStep) return null;
 
@@ -448,20 +448,6 @@ export function OnboardingPage({
                           ? "Skip for now"
                           : navLabel}
                       </button>
-                    )}
-                    {currentStep.navigation === "finish" && (
-                      <SubmitButton
-                        isSubmitting={isFinishing}
-                        onClick={async () => {
-                          setIsFinishing(true);
-                          trackEvent(LogEvents.OnboardingCompleted);
-                          router.push("/");
-                          await new Promise((r) => setTimeout(r, 5000));
-                        }}
-                        className="px-4 py-2 bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors border border-primary"
-                      >
-                        Get started
-                      </SubmitButton>
                     )}
                   </div>
                 </div>
