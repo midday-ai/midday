@@ -84,24 +84,38 @@ export function StartTrialStep({ onComplete }: Props) {
   useEffect(() => {
     if (!isPollingForPlan) return;
 
-    const isTimedOut =
-      pollingStartedAtRef.current &&
-      Date.now() - pollingStartedAtRef.current > POLLING_TIMEOUT_MS;
     const plan = user?.team?.plan;
     const planUpdated = plan != null && plan !== "trial";
 
-    if (planUpdated || isTimedOut) {
+    if (planUpdated) {
       pollingStartedAtRef.current = null;
       setIsPollingForPlan(false);
       isPollingRef.current = false;
-
-      if (isTimedOut && !planUpdated) {
-        setIsSubmitting(false);
-      } else {
-        revalidateAfterCheckout();
-        onComplete();
-      }
+      revalidateAfterCheckout();
+      onComplete();
+      return;
     }
+
+    const remaining = pollingStartedAtRef.current
+      ? POLLING_TIMEOUT_MS - (Date.now() - pollingStartedAtRef.current)
+      : POLLING_TIMEOUT_MS;
+
+    if (remaining <= 0) {
+      pollingStartedAtRef.current = null;
+      setIsPollingForPlan(false);
+      isPollingRef.current = false;
+      setIsSubmitting(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      pollingStartedAtRef.current = null;
+      setIsPollingForPlan(false);
+      isPollingRef.current = false;
+      setIsSubmitting(false);
+    }, remaining);
+
+    return () => clearTimeout(timer);
   }, [isPollingForPlan, user?.team?.plan, onComplete]);
 
   const createCheckoutMutation = useMutation(
