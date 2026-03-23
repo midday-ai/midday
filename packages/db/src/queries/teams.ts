@@ -759,6 +759,25 @@ export async function isTeamStillCanceled(db: Database, teamId: string) {
   return !!result;
 }
 
+export async function getTeamsWithBankConnections(db: Database) {
+  const fourteenDaysAgo = subDays(new Date(), 14).toISOString();
+
+  return db
+    .selectDistinct({ id: teams.id })
+    .from(teams)
+    .innerJoin(bankConnections, eq(bankConnections.teamId, teams.id))
+    .where(
+      or(
+        inArray(teams.plan, ["pro", "starter"]),
+        and(
+          eq(teams.plan, "trial"),
+          isNull(teams.canceledAt),
+          gte(teams.createdAt, fourteenDaysAgo),
+        ),
+      ),
+    );
+}
+
 export async function hasTeamData(db: Database, teamId: string) {
   const [result] = await db
     .select({
