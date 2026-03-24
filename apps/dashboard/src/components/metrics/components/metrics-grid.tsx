@@ -98,7 +98,13 @@ export function MetricsGrid({
                 <div className={hasFeed ? "lg:col-span-2" : undefined}>
                   {renderChart(firstChart, 0)}
                 </div>
-                {hasFeed ? renderChart(feedId, 1) : rest[0] ? renderChart(rest[0], 1) : <div />}
+                {hasFeed ? (
+                  renderChart(feedId, 1)
+                ) : rest[0] ? (
+                  renderChart(rest[0], 1)
+                ) : (
+                  <div />
+                )}
               </div>,
             );
 
@@ -123,7 +129,9 @@ export function MetricsGrid({
           }
 
           if (isCustomizing) {
-            return <SortableContext items={orderedCharts}>{rows}</SortableContext>;
+            return (
+              <SortableContext items={orderedCharts}>{rows}</SortableContext>
+            );
           }
 
           return rows;

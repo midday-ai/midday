@@ -56,6 +56,7 @@ export const invoicePaidNotificationSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
   paidAt: z.string().optional(),
 });
 
@@ -65,6 +66,7 @@ export const invoiceOverdueNotificationSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
 });
 
 export const invoiceSentNotificationSchema = z.object({
@@ -73,6 +75,7 @@ export const invoiceSentNotificationSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
 });
 
 export const invoiceCancelledNotificationSchema = z.object({
@@ -81,6 +84,7 @@ export const invoiceCancelledNotificationSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
 });
 
 export const invoiceScheduledNotificationSchema = z.object({
@@ -90,6 +94,7 @@ export const invoiceScheduledNotificationSchema = z.object({
   invoiceNumber: z.string(),
   scheduledAt: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
 });
 
 export const invoiceReminderSentNotificationSchema = z.object({
@@ -98,6 +103,7 @@ export const invoiceReminderSentNotificationSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
 });
 
 export const invoiceRefundedNotificationSchema = z.object({
@@ -106,6 +112,7 @@ export const invoiceRefundedNotificationSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
   refundedAt: z.string().optional(),
 });
 
@@ -115,6 +122,7 @@ export const invoiceRecurringGeneratedNotificationSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
   recurringId: z.string().uuid().optional(),
   recurringSequence: z.number().optional(),
   recurringTotalCount: z.number().optional(),
@@ -126,6 +134,7 @@ export const recurringSeriesCompletedNotificationSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
   recurringId: z.string().uuid(),
   totalGenerated: z.number(),
 });
@@ -135,6 +144,7 @@ export const recurringSeriesPausedNotificationSchema = z.object({
   type: z.literal("recurring_series_paused"),
   recurringId: z.string().uuid(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
 });
 
 // ============================================

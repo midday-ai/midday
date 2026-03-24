@@ -1,9 +1,6 @@
 import { Icons } from "@midday/ui/icons";
 
-export function getActivityIcon(
-  activityType: string,
-  className = "size-4",
-) {
+export function getActivityIcon(activityType: string, className = "size-4") {
   switch (activityType) {
     case "transactions_created":
       return <Icons.SyncAlt className={className} />;

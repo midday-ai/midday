@@ -37,7 +37,6 @@ export const inboxNew: NotificationHandler<InboxNewInput> = {
       return {
         ...existing,
         totalCount: (existing.totalCount ?? 0) + (incoming.totalCount ?? 0),
-        // Prefer newer values for source, type, provider
         source: incoming.source ?? existing.source,
         type: incoming.type ?? existing.type,
         provider: incoming.provider ?? existing.provider,

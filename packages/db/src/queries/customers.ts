@@ -817,3 +817,17 @@ export async function getCustomerPortalInvoices(
     hasMore: data.length === pageSize,
   };
 }
+
+export async function getCustomerWebsiteByInvoiceId(
+  db: Database,
+  invoiceId: string,
+): Promise<string | null> {
+  const [result] = await db
+    .select({ website: customers.website })
+    .from(invoices)
+    .innerJoin(customers, eq(invoices.customerId, customers.id))
+    .where(eq(invoices.id, invoiceId))
+    .limit(1);
+
+  return result?.website ?? null;
+}

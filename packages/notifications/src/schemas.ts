@@ -76,6 +76,7 @@ export const invoiceSchema = z.object({
 export const transactionsCreatedSchema = z.object({
   users: z.array(userSchema),
   transactions: z.array(transactionSchema),
+  bankLogoUrl: z.string().optional(),
 });
 
 export const transactionsExportedSchema = z.object({
@@ -170,6 +171,7 @@ export const invoicePaidSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
   paidAt: z.string().optional(),
   source: z.enum(["user", "system"]).default("system"),
 });
@@ -179,6 +181,7 @@ export const invoiceOverdueSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string(),
+  customerWebsite: z.string().optional(),
   source: z.enum(["user", "system"]).default("system"),
 });
 
@@ -188,6 +191,7 @@ export const invoiceScheduledSchema = z.object({
   invoiceNumber: z.string(),
   scheduledAt: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
 });
 
 export const invoiceSentSchema = z.object({
@@ -196,6 +200,7 @@ export const invoiceSentSchema = z.object({
   token: z.string(),
   invoiceNumber: z.string(),
   customerName: z.string(),
+  customerWebsite: z.string().optional(),
   customerEmail: z.string().email().optional(),
   // Gmail structured data fields
   amount: z.number().optional(),
@@ -221,6 +226,7 @@ export const invoiceReminderSentSchema = z.object({
   token: z.string(),
   invoiceNumber: z.string(),
   customerName: z.string(),
+  customerWebsite: z.string().optional(),
   customerEmail: z.string().email().optional(),
   // Gmail structured data fields
   amount: z.number().optional(),
@@ -233,6 +239,7 @@ export const invoiceCancelledSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
 });
 
 export const invoiceCreatedSchema = z.object({
@@ -240,6 +247,7 @@ export const invoiceCreatedSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
   amount: z.number().optional(),
   currency: z.string().optional(),
 });
@@ -249,6 +257,7 @@ export const invoiceRefundedSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
   refundedAt: z.string().optional(),
 });
 
@@ -257,6 +266,7 @@ export const recurringSeriesCompletedSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
   recurringId: z.string().uuid(),
   totalGenerated: z.number(),
 });
@@ -264,9 +274,10 @@ export const recurringSeriesCompletedSchema = z.object({
 export const recurringSeriesStartedSchema = z.object({
   users: z.array(userSchema),
   recurringId: z.string().uuid(),
-  invoiceId: z.string().uuid().optional(), // First invoice ID if linked
+  invoiceId: z.string().uuid().optional(),
   invoiceNumber: z.string().optional(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
   frequency: z.string(),
   endType: z.enum(["never", "on_date", "after_count"]),
   endDate: z.string().optional(),
@@ -277,6 +288,7 @@ export const recurringSeriesPausedSchema = z.object({
   users: z.array(userSchema),
   recurringId: z.string().uuid(),
   customerName: z.string().optional(),
+  customerWebsite: z.string().optional(),
   reason: z.enum(["manual", "auto_failure"]).default("manual"),
   failureCount: z.number().optional(),
 });

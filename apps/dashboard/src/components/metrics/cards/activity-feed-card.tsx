@@ -1,12 +1,16 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Spinner } from "@midday/ui/spinner";
+import { formatAmount } from "@midday/utils/format";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BankLogo } from "@/components/bank-logo";
 import { getNotificationDescription } from "@/components/notification-center/notification-descriptions";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
@@ -19,6 +23,7 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { getActivityIcon } from "@/utils/activity-utils";
+import { getWebsiteLogo } from "@/utils/logos";
 
 // ---------------------------------------------------------------------------
 // Grouping — merge consecutive same-type activity records
@@ -129,6 +134,100 @@ function getGroupSummary(
 }
 
 // ---------------------------------------------------------------------------
+// Contextual activity icon — provider/bank/customer logos with generic fallback
+// ---------------------------------------------------------------------------
+
+const INBOX_PROVIDER_ICONS: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
+  gmail: Icons.Gmail,
+  outlook: Icons.Outlook,
+  slack: Icons.Slack,
+  whatsapp: Icons.WhatsApp,
+};
+
+function ActivityIcon({ activity }: { activity: Activity }) {
+  const metadata = getMetadata(activity);
+
+  if (activity.type === "inbox_new") {
+    const provider = (metadata.provider as string) ?? "";
+    const type = (metadata.type as string) ?? "";
+
+    const Icon = INBOX_PROVIDER_ICONS[provider] ?? INBOX_PROVIDER_ICONS[type];
+
+    if (Icon) {
+      return (
+        <div className="h-[30px] w-[30px] flex items-center justify-center rounded-full bg-background border border-border">
+          <Icon className="size-3.5" />
+        </div>
+      );
+    }
+  }
+
+  if (activity.type === "transactions_created") {
+    const bankLogoUrl = metadata.bankLogoUrl as string | undefined;
+    if (bankLogoUrl) {
+      return <BankLogo src={bankLogoUrl} alt="Bank" size={30} />;
+    }
+  }
+
+  if (
+    activity.type.startsWith("invoice_") ||
+    activity.type === "draft_invoice_created" ||
+    activity.type.startsWith("recurring_")
+  ) {
+    const website = metadata.customerWebsite as string | undefined;
+    if (website) {
+      const logoUrl = getWebsiteLogo(website);
+      return (
+        <Avatar
+          style={{ width: 30, height: 30 }}
+          className="border border-border"
+        >
+          <AvatarImage
+            src={logoUrl}
+            alt={String(metadata.customerName ?? "Customer")}
+            className="object-contain bg-white"
+          />
+          <AvatarFallback className="text-[10px]">
+            {getActivityIcon(activity.type, "size-3.5")}
+          </AvatarFallback>
+        </Avatar>
+      );
+    }
+  }
+
+  if (activity.type === "customer_created") {
+    const website = metadata.website as string | undefined;
+    if (website) {
+      const logoUrl = getWebsiteLogo(website);
+      return (
+        <Avatar
+          style={{ width: 30, height: 30 }}
+          className="border border-border"
+        >
+          <AvatarImage
+            src={logoUrl}
+            alt={String(metadata.customerName ?? "Customer")}
+            className="object-contain bg-white"
+          />
+          <AvatarFallback className="text-[10px]">
+            {getActivityIcon(activity.type, "size-3.5")}
+          </AvatarFallback>
+        </Avatar>
+      );
+    }
+  }
+
+  return (
+    <div className="h-[30px] w-[30px] flex items-center justify-center rounded-full bg-background border border-border">
+      {getActivityIcon(activity.type, "size-3.5")}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Card shell
 // ---------------------------------------------------------------------------
 
@@ -204,7 +303,18 @@ export function ActivityFeedCard() {
   );
 }
 
-const SKELETON_WIDTHS = ["70%", "90%", "60%", "80%", "55%", "75%", "85%", "65%", "50%", "70%"];
+const SKELETON_WIDTHS = [
+  "70%",
+  "90%",
+  "60%",
+  "80%",
+  "55%",
+  "75%",
+  "85%",
+  "65%",
+  "50%",
+  "70%",
+];
 
 function ActivityTimelineSkeleton() {
   return (
@@ -215,7 +325,10 @@ function ActivityTimelineSkeleton() {
             <Skeleton className="h-[30px] w-[30px] rounded-full" />
           </div>
           <div className="flex-1 min-w-0 pb-4 pt-1">
-            <Skeleton className="h-3 mb-2" style={{ width: SKELETON_WIDTHS[i] }} />
+            <Skeleton
+              className="h-3 mb-2"
+              style={{ width: SKELETON_WIDTHS[i] }}
+            />
             <Skeleton className="h-2.5 w-10" />
           </div>
         </div>
@@ -290,17 +403,11 @@ function GroupedTimelineItem({
     <div>
       <div className="relative flex items-start gap-3">
         <div className="relative z-10 mt-0.5 shrink-0">
-          <div className="h-[30px] w-[30px] flex items-center justify-center rounded-full bg-background border border-border">
-            {getActivityIcon(group.type, "size-3.5")}
-          </div>
+          <ActivityIcon activity={latest} />
         </div>
 
         <div className="flex-1 min-w-0 pb-2 pt-0.5">
-          <button
-            type="button"
-            onClick={onToggle}
-            className="w-full text-left"
-          >
+          <button type="button" onClick={onToggle} className="w-full text-left">
             <p className="text-[13px] text-primary">
               <span>{label}</span>
               {showBadge && (
@@ -336,7 +443,71 @@ function GroupedTimelineItem({
 // Shared hooks
 // ---------------------------------------------------------------------------
 
+function canNavigate(activity: Activity): boolean {
+  const metadata = getMetadata(activity);
+  const recordId = metadata.recordId as string | undefined;
+
+  switch (activity.type) {
+    case "invoice_paid":
+    case "invoice_overdue":
+    case "invoice_created":
+    case "invoice_sent":
+    case "invoice_scheduled":
+    case "invoice_reminder_sent":
+    case "invoice_cancelled":
+    case "invoice_refunded":
+    case "invoice_duplicated":
+    case "draft_invoice_created":
+      return !!recordId;
+
+    case "transactions_created":
+      return !!(recordId || metadata.dateRange);
+
+    case "transactions_enriched":
+    case "transactions_categorized":
+    case "transactions_assigned":
+    case "transactions_exported":
+    case "transaction_attachment_created":
+    case "transaction_category_created":
+      return !!recordId;
+
+    case "inbox_new":
+      return true;
+
+    case "inbox_needs_review":
+    case "inbox_auto_matched":
+    case "inbox_cross_currency_matched":
+    case "inbox_match_confirmed":
+      return !!metadata.inboxId;
+
+    case "recurring_series_started":
+    case "recurring_series_completed":
+      return !!(metadata.invoiceId || recordId);
+
+    case "recurring_series_paused":
+    case "recurring_invoice_upcoming":
+      return !!recordId;
+
+    case "customer_created":
+      return !!recordId;
+
+    case "tracker_entry_created":
+      return !!metadata.projectId;
+
+    case "tracker_project_created":
+      return !!(metadata.projectId || recordId);
+
+    case "document_uploaded":
+    case "document_processed":
+      return !!recordId;
+
+    default:
+      return false;
+  }
+}
+
 function useActivityNavigate(activity: Activity) {
+  const router = useRouter();
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setInboxParams } = useInboxParams();
@@ -365,6 +536,15 @@ function useActivityNavigate(activity: Activity) {
           break;
 
         case "transactions_created":
+          if (recordId) {
+            setTransactionParams({ transactionId: recordId });
+          } else if (metadata.dateRange) {
+            router.push(
+              `/transactions?start=${metadata.dateRange.from}&end=${metadata.dateRange.to}`,
+            );
+          }
+          break;
+
         case "transactions_enriched":
         case "transactions_categorized":
         case "transactions_assigned":
@@ -375,12 +555,16 @@ function useActivityNavigate(activity: Activity) {
           break;
 
         case "inbox_new":
+          router.push("/inbox");
+          break;
+
         case "inbox_needs_review":
         case "inbox_auto_matched":
         case "inbox_cross_currency_matched":
         case "inbox_match_confirmed":
           if (metadata.inboxId)
             setInboxParams({ inboxId: metadata.inboxId, type: "details" });
+          else router.push("/inbox");
           break;
 
         case "recurring_series_started":
@@ -430,6 +614,7 @@ function useActivityNavigate(activity: Activity) {
     activity.type,
     recordId,
     metadata,
+    router,
     setInvoiceParams,
     setTransactionParams,
     setInboxParams,
@@ -454,15 +639,61 @@ function useActivityDescription(activity: Activity) {
 // Individual item renderers
 // ---------------------------------------------------------------------------
 
+function useChildDescription(activity: Activity): string {
+  const t = useI18n();
+  const { data: user } = useUserQuery();
+  const metadata = getMetadata(activity);
+
+  if (activity.type === "inbox_new") {
+    const count = metadata.totalCount || 1;
+    const type = metadata.type;
+    const provider = metadata.provider ?? "";
+    if (count === 1) {
+      if (type === "sync")
+        return `Synced from ${provider || "connected account"}`;
+      if (type === "email") return "Received via email";
+      if (type === "slack") return "Received from Slack";
+      if (type === "upload") return "Uploaded";
+      return "New document";
+    }
+    if (type === "sync")
+      return `${count} synced from ${provider || "connected account"}`;
+    if (type === "email") return `${count} received via email`;
+    if (type === "slack") return `${count} from Slack`;
+    if (type === "upload") return `${count} uploaded`;
+    return `${count} documents`;
+  }
+
+  if (activity.type === "transactions_created") {
+    const count = metadata.count || 1;
+    const transaction = metadata.transaction;
+
+    if (count === 1 && transaction) {
+      const formattedAmount =
+        formatAmount({
+          currency: transaction.currency,
+          amount: transaction.amount,
+          locale: user?.locale || "en-US",
+        }) || `${transaction.amount} ${transaction.currency}`;
+      return `${transaction.name} ${formattedAmount}`;
+    }
+    return `${count} transactions`;
+  }
+
+  return getNotificationDescription(activity.type, metadata, user, t);
+}
+
 function ChildTimelineItem({ activity }: { activity: Activity }) {
-  const description = useActivityDescription(activity);
+  const description = useChildDescription(activity);
   const navigate = useActivityNavigate(activity);
+  const clickable = canNavigate(activity);
 
   return (
-    <button
-      type="button"
-      onClick={navigate}
-      className="w-full text-left pb-2"
+    <div
+      role={clickable ? "button" : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onClick={clickable ? navigate : undefined}
+      className={`w-full text-left pb-2 ${clickable ? "cursor-pointer" : "cursor-default"}`}
     >
       <p className="text-[12px] text-primary/70">{description}</p>
       <time className="text-[11px] text-muted-foreground tabular-nums">
@@ -470,31 +701,35 @@ function ChildTimelineItem({ activity }: { activity: Activity }) {
           addSuffix: false,
         })}
       </time>
-    </button>
+    </div>
   );
 }
 
 function TimelineItem({ activity }: { activity: Activity }) {
   const description = useActivityDescription(activity);
   const navigate = useActivityNavigate(activity);
+  const clickable = canNavigate(activity);
 
   return (
     <div className="relative flex items-start gap-3">
       <div className="relative z-10 mt-0.5 shrink-0">
-        <div className="h-[30px] w-[30px] flex items-center justify-center rounded-full bg-background border border-border">
-          {getActivityIcon(activity.type, "size-3.5")}
-        </div>
+        <ActivityIcon activity={activity} />
       </div>
 
       <div className="flex-1 min-w-0 pb-4 pt-0.5">
-        <button type="button" onClick={navigate} className="w-full text-left">
+        <div
+          role={clickable ? "button" : undefined}
+          tabIndex={clickable ? 0 : undefined}
+          onClick={clickable ? navigate : undefined}
+          className={`w-full text-left ${clickable ? "cursor-pointer" : "cursor-default"}`}
+        >
           <p className="text-[13px] text-primary">{description}</p>
           <time className="text-[11px] text-muted-foreground tabular-nums">
             {formatDistanceToNow(new Date(activity.createdAt), {
               addSuffix: false,
             })}
           </time>
-        </button>
+        </div>
       </div>
     </div>
   );
