@@ -503,10 +503,6 @@ async function seedInvoices(db: Database): Promise<void> {
 }
 
 async function seedRecurringInvoices(db: Database): Promise<void> {
-  const nextMonth = new Date();
-  nextMonth.setMonth(nextMonth.getMonth() + 1);
-  nextMonth.setDate(1);
-
   await db.insert(invoiceRecurring).values([
     {
       id: REC_INV_MONTHLY,
@@ -519,7 +515,7 @@ async function seedRecurringInvoices(db: Database): Promise<void> {
       timezone: "UTC",
       amount: 3000,
       currency: "USD",
-      nextScheduledAt: nextMonth.toISOString(),
+      nextScheduledAt: "2024-07-01T00:00:00.000Z",
       invoicesGenerated: 3,
     },
   ]);

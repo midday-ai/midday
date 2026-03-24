@@ -2139,12 +2139,17 @@ type RecurringTransactionProjection = Map<
 
 async function getRecurringTransactionProjection(
   db: Database,
-  params: { teamId: string; forecastMonths: number; currency?: string },
+  params: {
+    teamId: string;
+    forecastMonths: number;
+    currency?: string;
+    referenceDate?: Date;
+  },
 ): Promise<RecurringTransactionProjection> {
-  const { teamId, forecastMonths, currency } = params;
+  const { teamId, forecastMonths, currency, referenceDate } = params;
+  const anchor = referenceDate ? new UTCDate(referenceDate) : new UTCDate();
 
-  // Get recurring income transactions from the last 6 months to establish patterns
-  const sixMonthsAgo = format(subMonths(new UTCDate(), 6), "yyyy-MM-dd");
+  const sixMonthsAgo = format(subMonths(anchor, 6), "yyyy-MM-dd");
 
   const conditions = [
     eq(transactions.teamId, teamId),
@@ -2249,13 +2254,10 @@ async function getRecurringTransactionProjection(
     }
   }
 
-  // Project into forecast months
   const projection: RecurringTransactionProjection = new Map();
-  // Use UTCDate for consistency with getRevenueForecast lookups
-  const currentDate = new UTCDate();
 
   for (let i = 1; i <= forecastMonths; i++) {
-    const monthKey = format(addMonths(currentDate, i), "yyyy-MM");
+    const monthKey = format(addMonths(anchor, i), "yyyy-MM");
     let monthTotal = 0;
     let count = 0;
 
@@ -2840,11 +2842,13 @@ export async function getRevenueForecast(
       teamId,
       forecastMonths,
       currency: effectiveCurrency,
+      referenceDate: currentDate,
     }),
     getRecurringTransactionProjection(db, {
       teamId,
       forecastMonths,
       currency: effectiveCurrency,
+      referenceDate: currentDate,
     }),
     getTeamCollectionMetrics(db, teamId),
   ]);
