@@ -171,7 +171,7 @@ export const getBusinessHealthScoreTool = tool({
       // Based on: expense ratio, expense growth, and control
       const currentExpenses =
         expensesData.length > 0
-          ? expensesData.reduce((sum, item) => sum + item.value, 0)
+          ? expensesData.reduce((sum, item) => sum + item.total, 0)
           : 0;
       const expenseRatio =
         currentRevenue > 0 ? (currentExpenses / currentRevenue) * 100 : 100;
@@ -241,7 +241,7 @@ export const getBusinessHealthScoreTool = tool({
         last12Months.map((m) => [m.date, m.current.value]),
       );
       const expensesMap = new Map(
-        last12MonthsExpenses.map((m) => [m.date, m.value]),
+        last12MonthsExpenses.map((m) => [m.date, m.total]),
       );
       const cashFlowMap = new Map(
         last12MonthsCashFlow.map((m) => [m.date, m.netCashFlow]),

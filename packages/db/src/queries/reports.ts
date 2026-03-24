@@ -38,6 +38,7 @@ import {
 } from "../errors";
 import {
   bankAccounts,
+  exchangeRates,
   inbox,
   invoices,
   reports,
@@ -51,8 +52,9 @@ import { getExchangeRatesBatch } from "./exhange-rates";
 import { getRecurringInvoiceProjection } from "./invoice-recurring";
 import { getBillableHours } from "./tracker-entries";
 
-function getPercentageIncrease(a: number, b: number) {
-  return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
+function getPercentageChange(previous: number, current: number): number {
+  if (previous === 0) return 0;
+  return Math.round(Math.abs(((current - previous) / previous) * 100));
 }
 
 // Simple in-memory cache for team currencies (clears on server restart)
@@ -137,6 +139,32 @@ async function getTargetCurrency(
   return currency;
 }
 
+/**
+ * Safe currency-aware amount resolution for a transaction.
+ *
+ * Returns a SQL CASE expression that picks the correct amount column:
+ *   1. baseAmount — when baseCurrency matches target (proper converted amount)
+ *   2. amount    — when the transaction's own currency matches target (no conversion needed)
+ *   3. NULL      — when neither matches (unconverted foreign currency)
+ *
+ * NULL is intentional: SUM/AVG skip NULLs, and NULL < 0 / NULL > 0 evaluate to
+ * false, so unconverted transactions are safely excluded from every aggregate
+ * and filter that uses this expression.
+ */
+function resolvedAmount(targetCurrency: string) {
+  return sql`CASE
+    WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
+    WHEN ${transactions.currency} = ${sql`${targetCurrency}`} THEN ${transactions.amount}
+    ELSE ${transactions.amount} * (
+      SELECT ${exchangeRates.rate} FROM ${exchangeRates}
+      WHERE ${exchangeRates.base} = ${transactions.currency}
+        AND ${exchangeRates.target} = ${sql`${targetCurrency}`}
+      ORDER BY ${exchangeRates.updatedAt} DESC NULLS LAST
+      LIMIT 1
+    )
+  END`;
+}
+
 export type GetReportsParams = {
   teamId: string;
   from: string;
@@ -206,26 +234,16 @@ async function getProfitImpl(db: Database, params: GetReportsParams) {
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
 
-  if (inputCurrency && targetCurrency) {
-    expenseConditions.push(
-      sql`(CASE 
-        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-        ELSE ${transactions.amount}
-      END < 0)`,
-    );
-  } else {
-    expenseConditions.push(lt(transactions.baseAmount, 0));
-  }
-
-  if (inputCurrency && targetCurrency) {
+  if (targetCurrency) {
+    expenseConditions.push(sql`(${resolvedAmount(targetCurrency)} < 0)`);
     expenseConditions.push(
       or(
         eq(transactions.currency, targetCurrency),
         eq(transactions.baseCurrency, targetCurrency),
       )!,
     );
-  } else if (targetCurrency) {
-    expenseConditions.push(eq(transactions.baseCurrency, targetCurrency));
+  } else {
+    expenseConditions.push(lt(transactions.baseAmount, 0));
   }
 
   // Build COGS and operating expense conditions
@@ -249,13 +267,9 @@ async function getProfitImpl(db: Database, params: GetReportsParams) {
     );
   }
 
-  const amountExpr =
-    inputCurrency && targetCurrency
-      ? sql`CASE
-            WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-            ELSE ${transactions.amount}
-          END`
-      : sql`COALESCE(${transactions.baseAmount}, 0)`;
+  const amountExpr = targetCurrency
+    ? resolvedAmount(targetCurrency)
+    : sql`COALESCE(${transactions.baseAmount}, 0)`;
 
   // Parallel step 3: COGS and operating expenses are independent
   const [cogsData, operatingExpensesData] = await Promise.all([
@@ -379,10 +393,6 @@ async function getRevenueImpl(db: Database, params: GetReportsParams) {
   const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
 
   // Step 3: Build the main query conditions
-  // Note: When no inputCurrency is provided, we use baseAmount directly in WHERE clause.
-  // This is intentional - transactions without baseAmount set are excluded as they haven't
-  // been converted to the team's base currency yet. When inputCurrency is provided,
-  // we handle NULL baseAmount gracefully by using the original amount field.
   const conditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
@@ -392,19 +402,15 @@ async function getRevenueImpl(db: Database, params: GetReportsParams) {
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
 
-  // Amount condition: handle NULL baseAmount gracefully when inputCurrency is provided
-  if (inputCurrency && targetCurrency) {
-    // When inputCurrency is provided, use CASE to handle NULL baseAmount
-    // If baseCurrency matches targetCurrency and baseAmount is not NULL, use baseAmount
-    // Otherwise, use the original amount field
+  if (targetCurrency) {
+    conditions.push(sql`(${resolvedAmount(targetCurrency)} > 0)`);
     conditions.push(
-      sql`(CASE 
-        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-        ELSE ${transactions.amount}
-      END > 0)`,
+      or(
+        eq(transactions.currency, targetCurrency),
+        eq(transactions.baseCurrency, targetCurrency),
+      )!,
     );
   } else {
-    // When no inputCurrency, exclude transactions without baseAmount
     conditions.push(gt(transactions.baseAmount, 0));
   }
 
@@ -413,71 +419,28 @@ async function getRevenueImpl(db: Database, params: GetReportsParams) {
     not(inArray(transactions.categorySlug, CONTRA_REVENUE_CATEGORIES)),
   );
 
-  // Add currency conditions
-  // When inputCurrency is provided, we want to show transactions in that currency
-  // This includes transactions where either:
-  // 1. The original currency matches, OR
-  // 2. The baseCurrency matches (for converted transactions)
-  if (inputCurrency && targetCurrency) {
-    // Filter by either currency OR baseCurrency matching the target
-    // This ensures we include USD transactions that have been converted to GBP
-    conditions.push(
-      or(
-        eq(transactions.currency, targetCurrency),
-        eq(transactions.baseCurrency, targetCurrency),
-      )!,
-    );
-  } else if (targetCurrency) {
-    conditions.push(eq(transactions.baseCurrency, targetCurrency));
-  }
-
-  // Step 3: Execute the aggregated query with gross/net calculation
-  // Note: We use LEFT JOIN to get taxRate from categories, but we don't filter by excluded
-  // since revenue categories should always be included
   const tc = transactionCategories;
 
-  // When inputCurrency is provided, we filter to include transactions where either
-  // currency OR baseCurrency matches. For calculation:
-  // - If baseCurrency matches targetCurrency, use baseAmount (converted amount)
-  // - Otherwise, use amount (original currency amount)
-  // When inputCurrency is not provided, always use baseAmount
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
       value:
         revenueType === "net"
-          ? inputCurrency && targetCurrency
+          ? targetCurrency
             ? sql<number>`COALESCE(SUM(
-                -- Use baseAmount when baseCurrency matches target AND baseAmount is not NULL, otherwise use amount
-                -- ROUND to 2 decimal places for financial precision
-                CASE 
-                  WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN
-                    ROUND(${transactions.baseAmount} - (
-                      ${transactions.baseAmount} * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
-                      (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
-                    ), 2)
-                  ELSE
-                    ROUND(${transactions.amount} - (
-                      ${transactions.amount} * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
-                      (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
-                    ), 2)
-                END
+                ROUND(${resolvedAmount(targetCurrency)} - (
+                  ${resolvedAmount(targetCurrency)} * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
+                  (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
+                ), 2)
               ), 0)`
             : sql<number>`COALESCE(SUM(
-                -- ROUND to 2 decimal places for financial precision
                 ROUND(COALESCE(${transactions.baseAmount}, 0) - (
                   COALESCE(${transactions.baseAmount}, 0) * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
                   (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
                 ), 2)
               ), 0)`
-          : inputCurrency && targetCurrency
-            ? sql<number>`COALESCE(SUM(
-                -- Use baseAmount when baseCurrency matches target AND baseAmount is not NULL, otherwise use amount
-                CASE 
-                  WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                  ELSE ${transactions.amount}
-                END
-              ), 0)`
+          : targetCurrency
+            ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
             : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
     })
     .from(transactions)
@@ -590,7 +553,7 @@ export async function getReports(db: Database, params: GetReportsParams) {
         date: record.date,
         percentage: {
           value: Number(
-            getPercentageIncrease(Math.abs(prevValue), Math.abs(recordValue)) ||
+            getPercentageChange(Math.abs(prevValue), Math.abs(recordValue)) ||
               0,
           ),
           status: recordValue > prevValue ? "positive" : "negative",
@@ -642,41 +605,29 @@ export async function getBurnRate(db: Database, params: GetBurnRateParams) {
     ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
-    lt(
-      inputCurrency
-        ? sql`CASE 
-        WHEN ${transactions.currency} = ${targetCurrency} THEN ${transactions.amount}
-        ELSE COALESCE(${transactions.baseAmount}, 0)
-      END`
-        : sql`COALESCE(${transactions.baseAmount}, 0)`,
-      0,
-    ),
   ];
 
-  // Add currency conditions
-  if (inputCurrency && targetCurrency) {
+  if (targetCurrency) {
+    conditions.push(sql`(${resolvedAmount(targetCurrency)} < 0)`);
     conditions.push(
       or(
         eq(transactions.currency, targetCurrency),
         eq(transactions.baseCurrency, targetCurrency),
       )!,
     );
-  } else if (targetCurrency) {
-    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+  } else {
+    conditions.push(lt(sql`COALESCE(${transactions.baseAmount}, 0)`, 0));
   }
 
   // Step 4: Execute the aggregated query
+  const expenseAmtExpr = targetCurrency
+    ? resolvedAmount(targetCurrency)
+    : sql`COALESCE(${transactions.baseAmount}, 0)`;
+
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      totalAmount: inputCurrency
-        ? sql<number>`COALESCE(ABS(SUM(
-            CASE
-              WHEN ${transactions.currency} = ${targetCurrency} THEN ${transactions.amount}
-              ELSE COALESCE(${transactions.baseAmount}, 0)
-            END
-          )), 0)`
-        : sql<number>`COALESCE(ABS(SUM(COALESCE(${transactions.baseAmount}, 0))), 0)`,
+      totalAmount: sql<number>`COALESCE(ABS(SUM(${expenseAmtExpr})), 0)`,
     })
     .from(transactions)
     .leftJoin(
@@ -776,70 +727,38 @@ export async function getExpenses(db: Database, params: GetExpensesParams) {
   // This includes transactions where either:
   // 1. The original currency matches, OR
   // 2. The baseCurrency matches (for converted transactions)
-  if (inputCurrency && targetCurrency) {
+  if (targetCurrency) {
     conditions.push(
       or(
         eq(transactions.currency, targetCurrency),
         eq(transactions.baseCurrency, targetCurrency),
       )!,
     );
-    // Amount condition: use baseAmount when baseCurrency matches AND baseAmount is not NULL, otherwise use amount
-    // This ensures we don't exclude transactions where baseAmount is NULL
-    conditions.push(
-      sql`(CASE 
-        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-        ELSE ${transactions.amount}
-      END < 0)`,
-    );
-  } else if (targetCurrency) {
-    // When no inputCurrency, exclude transactions without baseAmount
-    // This ensures we only show transactions that have been converted to the team's base currency
-    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+    conditions.push(sql`(${resolvedAmount(targetCurrency)} < 0)`);
+  } else {
     conditions.push(lt(transactions.baseAmount, 0));
   }
 
   // Step 4: Execute the aggregated query
+  const amtExpr = targetCurrency
+    ? resolvedAmount(targetCurrency)
+    : sql`COALESCE(${transactions.baseAmount}, 0)`;
+
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      value:
-        inputCurrency && targetCurrency
-          ? sql<number>`COALESCE(SUM(
-            CASE
-              WHEN (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(
-                CASE
-                  WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                  ELSE ${transactions.amount}
-                END
-              )
-              ELSE 0
-            END
-          ), 0)`
-          : sql<number>`COALESCE(SUM(
-            CASE
-              WHEN (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(COALESCE(${transactions.baseAmount}, 0))
-              ELSE 0
-            END
-          ), 0)`,
-      recurringValue:
-        inputCurrency && targetCurrency
-          ? sql<number>`COALESCE(SUM(
-            CASE
-              WHEN ${transactions.recurring} = true THEN ABS(
-                CASE
-                  WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                  ELSE ${transactions.amount}
-                END
-              )
-              ELSE 0
-            END
-          ), 0)`
-          : sql<number>`COALESCE(SUM(
-            CASE
-              WHEN ${transactions.recurring} = true THEN ABS(COALESCE(${transactions.baseAmount}, 0))
-              ELSE 0
-            END
-          ), 0)`,
+      value: sql<number>`COALESCE(SUM(
+        CASE
+          WHEN (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(${amtExpr})
+          ELSE 0
+        END
+      ), 0)`,
+      recurringValue: sql<number>`COALESCE(SUM(
+        CASE
+          WHEN ${transactions.recurring} = true THEN ABS(${amtExpr})
+          ELSE 0
+        END
+      ), 0)`,
     })
     .from(transactions)
     .leftJoin(
@@ -958,6 +877,10 @@ export async function getSpending(
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
 
   // Step 2: Calculate total spending amount for percentage calculations
+  const spendAmtExpr = targetCurrency
+    ? resolvedAmount(targetCurrency)
+    : sql`COALESCE(${transactions.baseAmount}, 0)`;
+
   const totalAmountConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
@@ -966,30 +889,21 @@ export async function getSpending(
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
 
-  // Amount condition: handle NULL baseAmount gracefully
-  if (inputCurrency && targetCurrency) {
+  if (targetCurrency) {
     totalAmountConditions.push(
-      sql`(CASE 
-        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-        ELSE ${transactions.amount}
-      END < 0)`,
+      or(
+        eq(transactions.currency, targetCurrency),
+        eq(transactions.baseCurrency, targetCurrency),
+      )!,
     );
-  } else if (targetCurrency) {
-    // When no inputCurrency, exclude transactions without baseAmount
-    totalAmountConditions.push(eq(transactions.baseCurrency, targetCurrency));
+    totalAmountConditions.push(sql`(${spendAmtExpr} < 0)`);
+  } else {
     totalAmountConditions.push(lt(transactions.baseAmount, 0));
   }
 
   const totalAmountResult = await db
     .select({
-      total: sql<number>`SUM(${
-        inputCurrency && targetCurrency
-          ? sql`CASE
-              WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-              ELSE ${transactions.amount}
-            END`
-          : sql`COALESCE(${transactions.baseAmount}, 0)`
-      })`,
+      total: sql<number>`SUM(${spendAmtExpr})`,
     })
     .from(transactions)
     .leftJoin(
@@ -1012,44 +926,34 @@ export async function getSpending(
 
   const totalAmount = Math.abs(totalAmountResult[0]?.total || 0);
 
-  // Step 3: Get all spending data in a single aggregated query (MAJOR PERF WIN)
+  // Step 3: Get all spending data in a single aggregated query
   const spendingConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
     ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
-    isNotNull(transactions.categorySlug), // Only categorized transactions
+    isNotNull(transactions.categorySlug),
   ];
 
-  // Amount condition: handle NULL baseAmount gracefully
-  if (inputCurrency && targetCurrency) {
+  if (targetCurrency) {
     spendingConditions.push(
-      sql`(CASE 
-        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-        ELSE ${transactions.amount}
-      END < 0)`,
+      or(
+        eq(transactions.currency, targetCurrency),
+        eq(transactions.baseCurrency, targetCurrency),
+      )!,
     );
-  } else if (targetCurrency) {
-    // When no inputCurrency, exclude transactions without baseAmount
-    spendingConditions.push(eq(transactions.baseCurrency, targetCurrency));
+    spendingConditions.push(sql`(${spendAmtExpr} < 0)`);
+  } else {
     spendingConditions.push(lt(transactions.baseAmount, 0));
   }
 
-  // Single query replaces N queries (where N = number of categories)
   const categorySpending = await db
     .select({
       name: transactionCategories.name,
       slug: transactionCategories.slug,
       color: transactionCategories.color,
-      amount: sql<number>`ABS(SUM(${
-        inputCurrency && targetCurrency
-          ? sql`CASE
-              WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-              ELSE ${transactions.amount}
-            END`
-          : sql`COALESCE(${transactions.baseAmount}, 0)`
-      }))`,
+      amount: sql<number>`ABS(SUM(${spendAmtExpr}))`,
     })
     .from(transactions)
     .innerJoin(
@@ -1073,16 +977,7 @@ export async function getSpending(
       transactionCategories.slug,
       transactionCategories.color,
     )
-    .having(
-      sql`SUM(${
-        inputCurrency && targetCurrency
-          ? sql`CASE
-              WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-              ELSE ${transactions.amount}
-            END`
-          : sql`COALESCE(${transactions.baseAmount}, 0)`
-      }) < 0`,
-    )
+    .having(sql`SUM(${spendAmtExpr}) < 0`)
     .then((results) =>
       results.map((item) => {
         const percentage =
@@ -1110,17 +1005,15 @@ export async function getSpending(
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
 
-  // Amount condition: handle NULL baseAmount gracefully
-  if (inputCurrency && targetCurrency) {
+  if (targetCurrency) {
     uncategorizedConditions.push(
-      sql`(CASE 
-        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-        ELSE ${transactions.amount}
-      END < 0)`,
+      or(
+        eq(transactions.currency, targetCurrency),
+        eq(transactions.baseCurrency, targetCurrency),
+      )!,
     );
-  } else if (targetCurrency) {
-    // When no inputCurrency, exclude transactions without baseAmount
-    uncategorizedConditions.push(eq(transactions.baseCurrency, targetCurrency));
+    uncategorizedConditions.push(sql`(${spendAmtExpr} < 0)`);
+  } else {
     uncategorizedConditions.push(lt(transactions.baseAmount, 0));
   }
 
@@ -1137,14 +1030,7 @@ export async function getSpending(
 
   const uncategorizedResult = await db
     .select({
-      amount: sql<number>`SUM(${
-        inputCurrency && targetCurrency
-          ? sql`CASE
-              WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-              ELSE ${transactions.amount}
-            END`
-          : sql`COALESCE(${transactions.baseAmount}, 0)`
-      })`,
+      amount: sql<number>`SUM(${spendAmtExpr})`,
     })
     .from(transactions)
     .where(and(...uncategorizedConditions));
@@ -1223,7 +1109,8 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
       .select({
         totalBalance: sql<number>`SUM(CASE
           WHEN ${bankAccounts.currency} = ${targetCurrency} THEN COALESCE(${bankAccounts.balance}, 0)
-          ELSE COALESCE(${bankAccounts.baseBalance}, 0)
+          WHEN ${bankAccounts.baseCurrency} = ${targetCurrency} THEN COALESCE(${bankAccounts.baseBalance}, 0)
+          ELSE 0
         END)`,
       })
       .from(bankAccounts)
@@ -1304,9 +1191,7 @@ export async function getSpendingForPeriod(
     topCategory: topCategory
       ? {
           name: topCategory.name,
-          amount:
-            Math.round(((totalSpending * topCategory.percentage) / 100) * 100) /
-            100,
+          amount: topCategory.amount,
           percentage: topCategory.percentage,
         }
       : null,
@@ -1337,112 +1222,95 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
   const fromDate = startOfMonth(new UTCDate(parseISO(from))).toISOString();
   const toDate = endOfMonth(new UTCDate(parseISO(to))).toISOString();
 
-  // Build the base query with conditions
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  const amtExpr = targetCurrency
+    ? resolvedAmount(targetCurrency)
+    : sql`COALESCE(${transactions.baseAmount}, ${transactions.amount})`;
+
+  const tc = transactionCategories;
+
   const conditions = [
-    sql`t.team_id = ${teamId}`,
-    sql`t.internal = false`,
-    sql`t.status != 'excluded'`,
-    sql`t.date >= ${fromDate}`,
-    sql`t.date <= ${toDate}`,
+    eq(transactions.teamId, teamId),
+    eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
+    gte(transactions.date, fromDate),
+    lte(transactions.date, toDate),
   ];
 
-  // Add amount condition based on type (paid < 0, collected > 0)
-  // Use base_amount when base_currency matches inputCurrency AND base_amount is not NULL
-  // Otherwise fall back to amount (handles NULL baseAmount gracefully)
-  if (inputCurrency) {
+  if (targetCurrency) {
     if (type === "paid") {
-      conditions.push(
-        sql`(CASE 
-          WHEN t.base_currency = ${inputCurrency} AND t.base_amount IS NOT NULL THEN t.base_amount
-          ELSE t.amount
-        END < 0)`,
-      );
+      conditions.push(sql`(${amtExpr} < 0)`);
     } else {
-      conditions.push(
-        sql`(CASE 
-          WHEN t.base_currency = ${inputCurrency} AND t.base_amount IS NOT NULL THEN t.base_amount
-          ELSE t.amount
-        END > 0)`,
-      );
+      conditions.push(sql`(${amtExpr} > 0)`);
     }
+    conditions.push(
+      or(
+        eq(transactions.currency, targetCurrency),
+        eq(transactions.baseCurrency, targetCurrency),
+      )!,
+    );
   } else {
     if (type === "paid") {
-      conditions.push(sql`t.amount < 0`);
+      conditions.push(lt(transactions.amount, 0));
     } else {
-      conditions.push(sql`t.amount > 0`);
+      conditions.push(gt(transactions.amount, 0));
     }
   }
 
-  // Add optional filters
   if (categorySlug) {
-    conditions.push(sql`tc.slug = ${categorySlug}`);
+    conditions.push(eq(tc.slug, categorySlug));
   }
 
   if (taxType) {
-    conditions.push(sql`(COALESCE(t.vat_type, tc.vat_type) = ${taxType})`);
-  }
-
-  if (inputCurrency) {
-    // Include transactions where either currency OR baseCurrency matches
     conditions.push(
-      sql`(t.currency = ${inputCurrency} OR t.base_currency = ${inputCurrency})`,
+      sql`(COALESCE(${transactions.taxType}, ${tc.taxType}) = ${taxType})`,
     );
   }
 
-  // Add condition to only include transactions with tax rates or tax amounts
   conditions.push(
-    sql`(t.tax_rate IS NOT NULL OR t.tax_amount IS NOT NULL OR tc.tax_rate IS NOT NULL)`,
+    or(
+      isNotNull(transactions.taxRate),
+      isNotNull(transactions.taxAmount),
+      isNotNull(tc.taxRate),
+    )!,
   );
 
-  // Exclude transactions in excluded categories
-  conditions.push(sql`(tc.excluded IS NULL OR tc.excluded = false)`);
+  conditions.push(or(isNull(tc.excluded), eq(tc.excluded, false))!);
 
-  const whereClause = sql.join(conditions, sql` AND `);
+  const taxRateExpr = sql`COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0)`;
 
-  // Build amount expression: use base_amount when base_currency matches inputCurrency AND base_amount is not NULL
-  // Otherwise fall back to amount (handles NULL baseAmount gracefully)
-  const amountExpr = inputCurrency
-    ? sql`CASE 
-        WHEN t.base_currency = ${inputCurrency} AND t.base_amount IS NOT NULL THEN t.base_amount
-        ELSE t.amount
-      END`
-    : sql`t.amount`;
+  const rawData = await db
+    .select({
+      category_slug: sql<string>`COALESCE(${tc.slug}, 'uncategorized')`,
+      category_name: sql<string>`COALESCE(${tc.name}, 'Uncategorized')`,
+      total_tax_amount: sql<string>`ROUND(ABS(SUM(${amtExpr} * ${taxRateExpr} / (100 + ${taxRateExpr}))), 2)::text`,
+      total_transaction_amount: sql<string>`ROUND(ABS(SUM(${amtExpr})), 2)::text`,
+      transaction_count: sql<number>`COUNT(${transactions.id})`,
+      avg_tax_rate: sql<string>`ROUND(AVG(COALESCE(${transactions.taxRate}, ${tc.taxRate})), 2)::text`,
+      tax_type: sql<string>`COALESCE(${transactions.taxType}, ${tc.taxType})`,
+      earliest_date: sql<string>`MIN(${transactions.date})`,
+      latest_date: sql<string>`MAX(${transactions.date})`,
+    })
+    .from(transactions)
+    .leftJoin(
+      tc,
+      and(
+        eq(transactions.categorySlug, tc.slug),
+        eq(transactions.teamId, tc.teamId),
+      ),
+    )
+    .where(and(...conditions))
+    .groupBy(
+      sql`COALESCE(${tc.slug}, 'uncategorized')`,
+      sql`COALESCE(${tc.name}, 'Uncategorized')`,
+      sql`COALESCE(${transactions.taxType}, ${tc.taxType})`,
+    )
+    .orderBy(
+      sql`ROUND(ABS(SUM(${amtExpr} * ${taxRateExpr} / (100 + ${taxRateExpr}))), 2) DESC`,
+    );
 
-  const query = sql`
-    SELECT 
-      COALESCE(tc.slug, 'uncategorized') as category_slug,
-      COALESCE(tc.name, 'Uncategorized') as category_name,
-      ROUND(ABS(SUM(${amountExpr} * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))), 2)::text as total_tax_amount,
-      ROUND(ABS(SUM(${amountExpr})), 2)::text as total_transaction_amount,
-      COUNT(t.id) as transaction_count,
-      ROUND(AVG(COALESCE(t.tax_rate, tc.tax_rate)), 2)::text as avg_tax_rate,
-      COALESCE(t.tax_type, tc.tax_type) as tax_type,
-      t.currency,
-      MIN(t.date) as earliest_date,
-      MAX(t.date) as latest_date
-    FROM transactions t
-    LEFT JOIN transaction_categories tc ON t.category_slug = tc.slug AND t.team_id = tc.team_id
-    WHERE ${whereClause}
-    GROUP BY 
-      COALESCE(tc.slug, 'uncategorized'),
-      COALESCE(tc.name, 'Uncategorized'),
-      COALESCE(t.tax_type, tc.tax_type),
-      t.currency
-    ORDER BY ROUND(ABS(SUM(${amountExpr} * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))), 2) DESC
-  `;
-
-  const rawData = (await db.executeOnReplica(query)) as unknown as Array<{
-    category_slug: string;
-    category_name: string;
-    total_tax_amount: string;
-    total_transaction_amount: string;
-    transaction_count: number;
-    avg_tax_rate: string;
-    tax_type: string;
-    currency: string;
-    earliest_date: string;
-    latest_date: string;
-  }>;
+  const effectiveCurrency = targetCurrency || "USD";
 
   const processedData = rawData?.map((item) => ({
     category_slug: item.category_slug,
@@ -1452,7 +1320,7 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
     transaction_count: Number(item.transaction_count),
     avg_tax_rate: Number.parseFloat(item.avg_tax_rate || "0"),
     tax_type: item.tax_type,
-    currency: item.currency,
+    currency: effectiveCurrency,
     earliest_date: item.earliest_date,
     latest_date: item.latest_date,
   }));
@@ -1482,12 +1350,12 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
       totalTransactions,
       categoryCount: processedData?.length ?? 0,
       type,
-      currency: processedData?.at(0)?.currency ?? inputCurrency,
+      currency: effectiveCurrency,
     },
     meta: {
       type: "tax",
       taxType: type,
-      currency: processedData?.at(0)?.currency ?? inputCurrency,
+      currency: effectiveCurrency,
       period: {
         from,
         to,
@@ -1577,10 +1445,11 @@ export async function getGrowthRate(db: Database, params: GetGrowthRateParams) {
     0,
   );
 
-  // Calculate growth rate
+  // Calculate growth rate (handle negative previous for profit)
   let growthRate = 0;
-  if (previousTotal > 0) {
-    growthRate = ((currentTotal - previousTotal) / previousTotal) * 100;
+  if (previousTotal !== 0) {
+    growthRate =
+      ((currentTotal - previousTotal) / Math.abs(previousTotal)) * 100;
   }
 
   // For quarterly period, use the full period comparison instead of just recent months
@@ -1598,9 +1467,9 @@ export async function getGrowthRate(db: Database, params: GetGrowthRateParams) {
       .slice(-recentMonths)
       .reduce((sum, item) => sum + Number.parseFloat(item.value), 0);
 
-    if (recentPrevious > 0) {
+    if (recentPrevious !== 0) {
       periodGrowthRate =
-        ((recentCurrent - recentPrevious) / recentPrevious) * 100;
+        ((recentCurrent - recentPrevious) / Math.abs(recentPrevious)) * 100;
     }
   }
 
@@ -1833,20 +1702,13 @@ export async function getCashFlow(db: Database, params: GetCashFlowParams) {
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
 
-  // Add currency conditions
-  // When inputCurrency is provided, we want to show transactions in that currency
-  // This includes transactions where either:
-  // 1. The original currency matches, OR
-  // 2. The baseCurrency matches (for converted transactions)
-  if (inputCurrency && targetCurrency) {
+  if (targetCurrency) {
     baseConditions.push(
       or(
         eq(transactions.currency, targetCurrency),
         eq(transactions.baseCurrency, targetCurrency),
       )!,
     );
-  } else if (targetCurrency) {
-    baseConditions.push(eq(transactions.baseCurrency, targetCurrency));
   }
 
   // Category exclusion condition
@@ -1856,47 +1718,19 @@ export async function getCashFlow(db: Database, params: GetCashFlowParams) {
     eq(transactionCategories.excluded, false),
   )!;
 
-  // Get monthly income (positive amounts) and expenses (negative amounts)
+  const cfAmtExpr = targetCurrency
+    ? resolvedAmount(targetCurrency)
+    : sql`COALESCE(${transactions.baseAmount}, 0)`;
+
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      income:
-        inputCurrency && targetCurrency
-          ? sql<number>`COALESCE(SUM(
-            CASE WHEN 
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END > 0 
-            THEN 
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END 
-            ELSE 0 END
-          ), 0)`
-          : sql<number>`COALESCE(SUM(
-            CASE WHEN COALESCE(${transactions.baseAmount}, 0) > 0 THEN COALESCE(${transactions.baseAmount}, 0) ELSE 0 END
-          ), 0)`,
-      expenses:
-        inputCurrency && targetCurrency
-          ? sql<number>`COALESCE(SUM(
-            CASE WHEN 
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END < 0 
-            THEN ABS(
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END
-            ) 
-            ELSE 0 END
-          ), 0)`
-          : sql<number>`COALESCE(SUM(
-            CASE WHEN COALESCE(${transactions.baseAmount}, 0) < 0 THEN ABS(COALESCE(${transactions.baseAmount}, 0)) ELSE 0 END
-          ), 0)`,
+      income: sql<number>`COALESCE(SUM(
+        CASE WHEN ${cfAmtExpr} > 0 THEN ${cfAmtExpr} ELSE 0 END
+      ), 0)`,
+      expenses: sql<number>`COALESCE(SUM(
+        CASE WHEN ${cfAmtExpr} < 0 THEN ABS(${cfAmtExpr}) ELSE 0 END
+      ), 0)`,
     })
     .from(transactions)
     .leftJoin(
@@ -1973,7 +1807,7 @@ export async function getCashFlow(db: Database, params: GetCashFlowParams) {
 export type GetOutstandingInvoicesParams = {
   teamId: string;
   currency?: string;
-  status?: ("unpaid" | "overdue")[];
+  status?: ("unpaid" | "overdue" | "draft" | "scheduled")[];
 };
 
 export type GetOverdueInvoicesAlertParams = {
@@ -1989,6 +1823,19 @@ export async function getOverdueInvoicesAlert(
 
   // Get target currency
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+  const effectiveCurrency = targetCurrency || "USD";
+
+  // Convert invoice amounts to target currency
+  const resolvedInvoiceAmount = sql`CASE
+    WHEN ${invoices.currency} = ${effectiveCurrency} THEN ${invoices.amount}
+    ELSE ${invoices.amount} * (
+      SELECT ${exchangeRates.rate} FROM ${exchangeRates}
+      WHERE ${exchangeRates.base} = ${invoices.currency}
+        AND ${exchangeRates.target} = ${effectiveCurrency}
+      ORDER BY ${exchangeRates.updatedAt} DESC NULLS LAST
+      LIMIT 1
+    )
+  END`;
 
   // Build query conditions for overdue invoices only
   const conditions = [
@@ -1996,57 +1843,29 @@ export async function getOverdueInvoicesAlert(
     eq(invoices.status, "overdue"),
   ];
 
-  // Add currency filter if specified
   if (inputCurrency && targetCurrency) {
     conditions.push(eq(invoices.currency, targetCurrency));
+  } else {
+    conditions.push(sql`(${resolvedInvoiceAmount} IS NOT NULL)`);
   }
 
-  // Get overdue invoices details
   const result = await db
     .select({
       count: sql<number>`COUNT(*)`,
-      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)`,
+      totalAmount: sql<number>`COALESCE(SUM(${resolvedInvoiceAmount}), 0)`,
       oldestDueDate: sql<string>`MIN(${invoices.dueDate})`,
-      currency: invoices.currency,
     })
     .from(invoices)
-    .where(and(...conditions))
-    .groupBy(invoices.currency);
+    .where(and(...conditions));
 
-  // Calculate totals
-  let totalCount = 0;
-  let totalAmount = 0;
-  let oldestDueDate: string | null = null;
-  let mainCurrency = targetCurrency || "USD";
-
-  if (result.length > 0) {
-    if (inputCurrency && targetCurrency) {
-      // Single currency result
-      const singleResult = result[0];
-      totalCount = Number(singleResult?.count || 0);
-      totalAmount = Number(singleResult?.totalAmount || 0);
-      oldestDueDate = singleResult?.oldestDueDate || null;
-      mainCurrency = singleResult?.currency || targetCurrency;
-    } else {
-      // Multiple currencies - sum counts
-      totalCount = result.reduce(
-        (sum, item) => sum + Number(item.count || 0),
-        0,
-      );
-
-      // Use the first currency's total as primary
-      const primaryResult =
-        result.find((r) => r.currency === targetCurrency) || result[0];
-      totalAmount = Number(primaryResult?.totalAmount || 0);
-      oldestDueDate = primaryResult?.oldestDueDate || null;
-      mainCurrency = primaryResult?.currency || targetCurrency || "USD";
-    }
-  }
+  const totalCount = Number(result[0]?.count || 0);
+  const totalAmount = Number(result[0]?.totalAmount || 0);
+  const oldestDueDate = result[0]?.oldestDueDate || null;
 
   // Calculate days overdue from oldest invoice
   let daysOverdue = 0;
   if (oldestDueDate) {
-    const now = new Date();
+    const now = new UTCDate();
     const dueDate = parseISO(oldestDueDate);
     daysOverdue = Math.floor(
       (now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
@@ -2057,13 +1876,13 @@ export async function getOverdueInvoicesAlert(
     summary: {
       count: totalCount,
       totalAmount: Number(totalAmount.toFixed(2)),
-      currency: mainCurrency,
+      currency: effectiveCurrency,
       oldestDueDate,
       daysOverdue,
     },
     meta: {
       type: "overdue_invoices_alert",
-      currency: mainCurrency,
+      currency: effectiveCurrency,
     },
   };
 }
@@ -2080,6 +1899,19 @@ export async function getOutstandingInvoices(
 
   // Get target currency
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+  const effectiveCurrency = targetCurrency || "USD";
+
+  // Convert invoice amounts to target currency
+  const resolvedInvoiceAmount = sql`CASE
+    WHEN ${invoices.currency} = ${effectiveCurrency} THEN ${invoices.amount}
+    ELSE ${invoices.amount} * (
+      SELECT ${exchangeRates.rate} FROM ${exchangeRates}
+      WHERE ${exchangeRates.base} = ${invoices.currency}
+        AND ${exchangeRates.target} = ${effectiveCurrency}
+      ORDER BY ${exchangeRates.updatedAt} DESC NULLS LAST
+      LIMIT 1
+    )
+  END`;
 
   // Build query conditions
   const conditions = [
@@ -2087,60 +1919,33 @@ export async function getOutstandingInvoices(
     inArray(invoices.status, status),
   ];
 
-  // Add currency filter if specified
   if (inputCurrency && targetCurrency) {
     conditions.push(eq(invoices.currency, targetCurrency));
+  } else {
+    conditions.push(sql`(${resolvedInvoiceAmount} IS NOT NULL)`);
   }
 
-  // Get outstanding invoices summary
   const result = await db
     .select({
       count: sql<number>`COUNT(*)`,
-      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)`,
-      currency: invoices.currency,
+      totalAmount: sql<number>`COALESCE(SUM(${resolvedInvoiceAmount}), 0)`,
     })
     .from(invoices)
-    .where(and(...conditions))
-    .groupBy(invoices.currency);
+    .where(and(...conditions));
 
-  // Calculate totals across all currencies (if no currency filter)
-  let totalCount = 0;
-  let totalAmount = 0;
-  let mainCurrency = targetCurrency || "USD";
-
-  if (result.length > 0) {
-    if (inputCurrency && targetCurrency) {
-      // Single currency result
-      const singleResult = result[0];
-      totalCount = Number(singleResult?.count || 0);
-      totalAmount = Number(singleResult?.totalAmount || 0);
-      mainCurrency = singleResult?.currency || targetCurrency;
-    } else {
-      // Multiple currencies - sum counts and use base currency amounts
-      totalCount = result.reduce(
-        (sum, item) => sum + Number(item.count || 0),
-        0,
-      );
-
-      // For multiple currencies, we'd need to convert to base currency
-      // For now, let's use the first currency's total as primary
-      const primaryResult =
-        result.find((r) => r.currency === targetCurrency) || result[0];
-      totalAmount = Number(primaryResult?.totalAmount || 0);
-      mainCurrency = primaryResult?.currency || targetCurrency || "USD";
-    }
-  }
+  const totalCount = Number(result[0]?.count || 0);
+  const totalAmount = Number(result[0]?.totalAmount || 0);
 
   return {
     summary: {
       count: totalCount,
       totalAmount: Number(totalAmount.toFixed(2)),
-      currency: mainCurrency,
+      currency: effectiveCurrency,
       status,
     },
     meta: {
       type: "outstanding_invoices",
-      currency: mainCurrency,
+      currency: effectiveCurrency,
       status,
     },
   };
@@ -2179,21 +1984,22 @@ export async function getRecurringExpenses(
     ne(transactions.status, "excluded"),
   ];
 
-  // Amount condition: handle NULL baseAmount gracefully
-  if (inputCurrency && targetCurrency) {
+  const recAmtExpr = targetCurrency
+    ? resolvedAmount(targetCurrency)
+    : sql`COALESCE(${transactions.baseAmount}, 0)`;
+
+  if (targetCurrency) {
     conditions.push(
-      sql`(CASE 
-        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-        ELSE ${transactions.amount}
-      END < 0)`,
+      or(
+        eq(transactions.currency, targetCurrency),
+        eq(transactions.baseCurrency, targetCurrency),
+      )!,
     );
-  } else if (targetCurrency) {
-    // When no inputCurrency, exclude transactions without baseAmount
-    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+    conditions.push(sql`(${recAmtExpr} < 0)`);
+  } else {
     conditions.push(lt(transactions.baseAmount, 0));
   }
 
-  // Filter by date range if provided
   if (from) {
     conditions.push(gte(transactions.date, from));
   }
@@ -2201,21 +2007,13 @@ export async function getRecurringExpenses(
     conditions.push(lte(transactions.date, to));
   }
 
-  // Get all recurring expenses grouped by name and frequency
   const recurringExpenses = await db
     .select({
       name: transactions.name,
       frequency: transactions.frequency,
       categoryName: transactionCategories.name,
       categorySlug: transactionCategories.slug,
-      amount: sql<number>`AVG(ABS(${
-        inputCurrency && targetCurrency
-          ? sql`CASE
-              WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-              ELSE ${transactions.amount}
-            END`
-          : sql`COALESCE(${transactions.baseAmount}, 0)`
-      }))`,
+      amount: sql<number>`AVG(ABS(${recAmtExpr}))`,
       count: sql<number>`COUNT(*)::int`,
       lastDate: sql<string>`MAX(${transactions.date})`,
     })
@@ -2243,19 +2041,9 @@ export async function getRecurringExpenses(
       transactionCategories.name,
       transactionCategories.slug,
     )
-    .orderBy(
-      sql`AVG(ABS(${
-        inputCurrency && targetCurrency
-          ? sql`CASE
-              WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-              ELSE ${transactions.amount}
-            END`
-          : sql`COALESCE(${transactions.baseAmount}, 0)`
-      })) DESC`,
-    )
-    .limit(10);
+    .orderBy(sql`AVG(ABS(${recAmtExpr})) DESC`);
 
-  // Calculate totals by frequency
+  // Calculate totals by frequency (from ALL recurring expenses, not just top N)
   const frequencyTotals = {
     weekly: 0,
     monthly: 0,
@@ -2302,19 +2090,21 @@ export async function getRecurringExpenses(
     ? inputCurrency || targetCurrency || "USD"
     : targetCurrency || "USD";
 
-  // Format expenses for return
-  const expenses: RecurringExpenseItem[] = recurringExpenses.map((exp) => ({
-    name: exp.name,
-    amount: Number(Number(exp.amount).toFixed(2)),
-    frequency: (exp.frequency || "irregular") as
-      | "weekly"
-      | "monthly"
-      | "annually"
-      | "irregular",
-    categoryName: exp.categoryName,
-    categorySlug: exp.categorySlug,
-    lastDate: exp.lastDate,
-  }));
+  // Return only the top 10 expenses for display
+  const expenses: RecurringExpenseItem[] = recurringExpenses
+    .slice(0, 10)
+    .map((exp) => ({
+      name: exp.name,
+      amount: Number(Number(exp.amount).toFixed(2)),
+      frequency: (exp.frequency || "irregular") as
+        | "weekly"
+        | "monthly"
+        | "annually"
+        | "irregular",
+      categoryName: exp.categoryName,
+      categorySlug: exp.categorySlug,
+      lastDate: exp.lastDate,
+    }));
 
   return {
     summary: {
@@ -2351,12 +2141,17 @@ type RecurringTransactionProjection = Map<
 
 async function getRecurringTransactionProjection(
   db: Database,
-  params: { teamId: string; forecastMonths: number; currency?: string },
+  params: {
+    teamId: string;
+    forecastMonths: number;
+    currency?: string;
+    referenceDate?: Date;
+  },
 ): Promise<RecurringTransactionProjection> {
-  const { teamId, forecastMonths, currency } = params;
+  const { teamId, forecastMonths, currency, referenceDate } = params;
+  const anchor = referenceDate ? new UTCDate(referenceDate) : new UTCDate();
 
-  // Get recurring income transactions from the last 6 months to establish patterns
-  const sixMonthsAgo = format(subMonths(new Date(), 6), "yyyy-MM-dd");
+  const sixMonthsAgo = format(subMonths(anchor, 6), "yyyy-MM-dd");
 
   const conditions = [
     eq(transactions.teamId, teamId),
@@ -2383,6 +2178,7 @@ async function getRecurringTransactionProjection(
     .select({
       name: transactions.name,
       amount: transactions.amount,
+      currency: transactions.currency,
       baseAmount: transactions.baseAmount,
       baseCurrency: transactions.baseCurrency,
       frequency: transactions.frequency,
@@ -2399,8 +2195,6 @@ async function getRecurringTransactionProjection(
     .where(
       and(
         ...conditions,
-        // Category exclusion: match pattern from other reports
-        // Allow uncategorized, or categories where excluded is NULL or false
         or(
           isNull(transactions.categorySlug),
           isNull(transactionCategories.excluded),
@@ -2409,8 +2203,29 @@ async function getRecurringTransactionProjection(
       ),
     );
 
-  // Group by name to get unique recurring sources (use most recent amount)
-  // For multi-currency support: use baseAmount if available and matches target currency
+  // Batch-fetch all exchange rates needed for currency conversion
+  const currencyPairs: Array<{ base: string; target: string }> = [];
+  if (currency) {
+    const seenPairs = new Set<string>();
+    for (const tx of recurringIncome) {
+      if (
+        tx.currency &&
+        tx.currency !== currency &&
+        tx.baseCurrency !== currency
+      ) {
+        const key = `${tx.currency}:${currency}`;
+        if (!seenPairs.has(key)) {
+          seenPairs.add(key);
+          currencyPairs.push({ base: tx.currency, target: currency });
+        }
+      }
+    }
+  }
+  const exchangeRateMap =
+    currencyPairs.length > 0
+      ? await getExchangeRatesBatch(db, { pairs: currencyPairs })
+      : new Map<string, number>();
+
   const recurringByName = new Map<
     string,
     { amount: number; frequency: string | null; lastDate: string }
@@ -2419,28 +2234,32 @@ async function getRecurringTransactionProjection(
   for (const tx of recurringIncome) {
     const existing = recurringByName.get(tx.name);
     if (!existing || tx.date > existing.lastDate) {
-      // Use baseAmount when available (converted to team's base currency)
-      // This ensures multi-currency accounts are properly included
-      const effectiveAmount =
-        currency && tx.baseCurrency === currency && tx.baseAmount !== null
-          ? tx.baseAmount
-          : tx.amount;
+      let effectiveAmount: number | null = null;
+      if (currency && tx.baseCurrency === currency && tx.baseAmount !== null) {
+        effectiveAmount = tx.baseAmount;
+      } else if (currency && tx.currency === currency) {
+        effectiveAmount = tx.amount;
+      } else if (currency && tx.currency) {
+        const rate = exchangeRateMap.get(`${tx.currency}:${currency}`);
+        effectiveAmount = rate !== undefined ? tx.amount * rate : null;
+      } else {
+        effectiveAmount = tx.amount;
+      }
 
-      recurringByName.set(tx.name, {
-        amount: effectiveAmount,
-        frequency: tx.frequency,
-        lastDate: tx.date,
-      });
+      if (effectiveAmount !== null) {
+        recurringByName.set(tx.name, {
+          amount: effectiveAmount,
+          frequency: tx.frequency,
+          lastDate: tx.date,
+        });
+      }
     }
   }
 
-  // Project into forecast months
   const projection: RecurringTransactionProjection = new Map();
-  // Use UTCDate for consistency with getRevenueForecast lookups
-  const currentDate = new UTCDate();
 
   for (let i = 1; i <= forecastMonths; i++) {
-    const monthKey = format(addMonths(currentDate, i), "yyyy-MM");
+    const monthKey = format(addMonths(anchor, i), "yyyy-MM");
     let monthTotal = 0;
     let count = 0;
 
@@ -2604,7 +2423,7 @@ async function calculateExpectedCollections(
     };
   }
 
-  const now = new Date();
+  const now = new UTCDate();
   // Team factor adjusts probability based on their actual payment history
   const teamFactor = teamMetrics.onTimeRate / 0.7; // Normalize around 70% baseline
 
@@ -2712,7 +2531,7 @@ async function getHistoricalRecurringInvoiceAverage(
   const { teamId, currency } = params;
 
   // Look at last 6 months of paid invoices linked to recurring templates
-  const sixMonthsAgo = format(subMonths(new Date(), 6), "yyyy-MM-dd");
+  const sixMonthsAgo = format(subMonths(new UTCDate(), 6), "yyyy-MM-dd");
 
   const conditions = [
     eq(invoices.teamId, teamId),
@@ -2783,8 +2602,8 @@ async function calculateNonRecurringBaseline(
   } = params;
 
   // Get last 6 months of revenue
-  const sixMonthsAgo = format(subMonths(new Date(), 6), "yyyy-MM-dd");
-  const today = format(new Date(), "yyyy-MM-dd");
+  const sixMonthsAgo = format(subMonths(new UTCDate(), 6), "yyyy-MM-dd");
+  const today = format(new UTCDate(), "yyyy-MM-dd");
 
   const historicalRevenue = await getRevenue(db, {
     teamId,
@@ -2944,6 +2763,10 @@ export async function getRevenueForecast(
     revenueType = "net",
   } = params;
 
+  // Resolve target currency once — used for all sub-queries to prevent mixing
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+  const effectiveCurrency = targetCurrency || "USD";
+
   // Calculate forecast date range
   const currentDate = new UTCDate(parseISO(to));
   const forecastStartDate = format(
@@ -2962,6 +2785,18 @@ export async function getRevenueForecast(
     ),
     "yyyy-MM-dd",
   );
+
+  // Convert scheduled invoice amounts to target currency
+  const resolvedScheduledAmount = sql`CASE
+    WHEN ${invoices.currency} = ${effectiveCurrency} THEN ${invoices.amount}
+    ELSE ${invoices.amount} * (
+      SELECT ${exchangeRates.rate} FROM ${exchangeRates}
+      WHERE ${exchangeRates.base} = ${invoices.currency}
+        AND ${exchangeRates.target} = ${effectiveCurrency}
+      ORDER BY ${exchangeRates.updatedAt} DESC NULLS LAST
+      LIMIT 1
+    )
+  END`;
 
   // Fetch ALL data sources in parallel for the bottom-up forecast
   const [
@@ -2987,14 +2822,13 @@ export async function getRevenueForecast(
     }),
     getBillableHours(db, {
       teamId,
-      date: new Date().toISOString(),
+      date: new UTCDate().toISOString(),
       view: "month",
     }),
     db
       .select({
-        amount: invoices.amount,
+        amount: resolvedScheduledAmount,
         issueDate: invoices.issueDate,
-        currency: invoices.currency,
       })
       .from(invoices)
       .where(
@@ -3009,12 +2843,14 @@ export async function getRevenueForecast(
     getRecurringInvoiceProjection(db, {
       teamId,
       forecastMonths,
-      currency: inputCurrency,
+      currency: effectiveCurrency,
+      referenceDate: currentDate,
     }),
     getRecurringTransactionProjection(db, {
       teamId,
       forecastMonths,
-      currency: inputCurrency,
+      currency: effectiveCurrency,
+      referenceDate: currentDate,
     }),
     getTeamCollectionMetrics(db, teamId),
   ]);
@@ -3052,17 +2888,17 @@ export async function getRevenueForecast(
       db,
       teamId,
       teamCollectionMetrics,
-      inputCurrency,
+      effectiveCurrency,
     ),
     getHistoricalRecurringInvoiceAverage(db, {
       teamId,
-      currency: inputCurrency,
+      currency: effectiveCurrency,
     }),
   ]);
 
   const nonRecurringBaseline = await calculateNonRecurringBaseline(db, {
     teamId,
-    currency: inputCurrency,
+    currency: effectiveCurrency,
     recurringTxMonthlyAvg,
     recurringInvoiceMonthlyAvg,
   });
@@ -3411,15 +3247,9 @@ export async function getBalanceSheet(
       .select({
         categorySlug: transactions.categorySlug,
         categoryName: transactionCategories.name,
-        amount:
-          inputCurrency && targetCurrency
-            ? sql<number>`COALESCE(SUM(
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END
-            ), 0)`
-            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+        amount: targetCurrency
+          ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
       })
       .from(transactions)
       .leftJoin(
@@ -3446,132 +3276,23 @@ export async function getBalanceSheet(
             isNull(transactionCategories.excluded),
             eq(transactionCategories.excluded, false),
           )!,
-          inputCurrency && targetCurrency
+          targetCurrency
             ? or(
                 eq(transactions.currency, targetCurrency),
                 eq(transactions.baseCurrency, targetCurrency),
               )!
-            : targetCurrency
-              ? and(
-                  eq(transactions.baseCurrency, targetCurrency),
-                  isNotNull(transactions.baseAmount),
-                )
-              : sql`true`,
+            : sql`true`,
         ),
       )
       .groupBy(transactions.categorySlug, transactionCategories.name),
-
-    // 4. Liability transactions (loans, deferred revenue)
-    db
-      .select({
-        categorySlug: transactions.categorySlug,
-        categoryName: transactionCategories.name,
-        amount:
-          inputCurrency && targetCurrency
-            ? sql<number>`COALESCE(SUM(
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END
-            ), 0)`
-            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
-      })
-      .from(transactions)
-      .leftJoin(
-        transactionCategories,
-        and(
-          eq(transactionCategories.slug, transactions.categorySlug),
-          eq(transactionCategories.teamId, teamId),
-        ),
-      )
-      .where(
-        and(
-          eq(transactions.teamId, teamId),
-          eq(transactions.internal, false),
-          ne(transactions.status, "excluded"),
-          lte(transactions.date, asOfDateStr),
-          inArray(transactions.categorySlug, [
-            "loan-proceeds",
-            "loan-principal-repayment",
-            "deferred-revenue",
-            "leases",
-          ]),
-          or(
-            isNull(transactionCategories.excluded),
-            eq(transactionCategories.excluded, false),
-          )!,
-          inputCurrency && targetCurrency
-            ? or(
-                eq(transactions.currency, targetCurrency),
-                eq(transactions.baseCurrency, targetCurrency),
-              )!
-            : targetCurrency
-              ? and(
-                  eq(transactions.baseCurrency, targetCurrency),
-                  isNotNull(transactions.baseAmount),
-                )
-              : sql`true`,
-        ),
-      )
-      .groupBy(transactions.categorySlug, transactionCategories.name),
-
-    // 4b. Loan proceeds transactions with dates for short-term vs long-term classification
-    db
-      .select({
-        amount:
-          inputCurrency && targetCurrency
-            ? sql<number>`ABS(
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END
-            )`
-            : sql<number>`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount}))`,
-        date: sql<string>`${transactions.date}::text`,
-      })
-      .from(transactions)
-      .leftJoin(
-        transactionCategories,
-        and(
-          eq(transactionCategories.slug, transactions.categorySlug),
-          eq(transactionCategories.teamId, teamId),
-        ),
-      )
-      .where(
-        and(
-          eq(transactions.teamId, teamId),
-          eq(transactions.internal, false),
-          ne(transactions.status, "excluded"),
-          lte(transactions.date, asOfDateStr),
-          eq(transactions.categorySlug, "loan-proceeds"),
-          or(
-            isNull(transactionCategories.excluded),
-            eq(transactionCategories.excluded, false),
-          )!,
-          inputCurrency && targetCurrency
-            ? or(
-                eq(transactions.currency, targetCurrency),
-                eq(transactions.baseCurrency, targetCurrency),
-              )!
-            : targetCurrency
-              ? eq(transactions.baseCurrency, targetCurrency)
-              : sql`true`,
-        ),
-      ),
 
     // 3b. Fixed asset transactions with dates for depreciation calculation
     db
       .select({
         categorySlug: transactions.categorySlug,
-        amount:
-          inputCurrency && targetCurrency
-            ? sql<number>`ABS(
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END
-            )`
-            : sql<number>`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount}))`,
+        amount: targetCurrency
+          ? sql<number>`ABS(${resolvedAmount(targetCurrency)})`
+          : sql<number>`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount}))`,
         date: sql<string>`${transactions.date}::text`,
       })
       .from(transactions)
@@ -3597,14 +3318,91 @@ export async function getBalanceSheet(
             isNull(transactionCategories.excluded),
             eq(transactionCategories.excluded, false),
           )!,
-          inputCurrency && targetCurrency
+          targetCurrency
             ? or(
                 eq(transactions.currency, targetCurrency),
                 eq(transactions.baseCurrency, targetCurrency),
               )!
-            : targetCurrency
-              ? eq(transactions.baseCurrency, targetCurrency)
-              : sql`true`,
+            : sql`true`,
+        ),
+      ),
+
+    // 4. Liability transactions (loans, deferred revenue)
+    db
+      .select({
+        categorySlug: transactions.categorySlug,
+        categoryName: transactionCategories.name,
+        amount: targetCurrency
+          ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.internal, false),
+          ne(transactions.status, "excluded"),
+          lte(transactions.date, asOfDateStr),
+          inArray(transactions.categorySlug, [
+            "loan-proceeds",
+            "loan-principal-repayment",
+            "deferred-revenue",
+            "leases",
+          ]),
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+          targetCurrency
+            ? or(
+                eq(transactions.currency, targetCurrency),
+                eq(transactions.baseCurrency, targetCurrency),
+              )!
+            : sql`true`,
+        ),
+      )
+      .groupBy(transactions.categorySlug, transactionCategories.name),
+
+    // 4b. Loan proceeds transactions with dates for short-term vs long-term classification
+    db
+      .select({
+        amount: targetCurrency
+          ? sql<number>`ABS(${resolvedAmount(targetCurrency)})`
+          : sql<number>`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount}))`,
+        date: sql<string>`${transactions.date}::text`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.internal, false),
+          ne(transactions.status, "excluded"),
+          lte(transactions.date, asOfDateStr),
+          eq(transactions.categorySlug, "loan-proceeds"),
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+          targetCurrency
+            ? or(
+                eq(transactions.currency, targetCurrency),
+                eq(transactions.baseCurrency, targetCurrency),
+              )!
+            : sql`true`,
         ),
       ),
 
@@ -3613,15 +3411,9 @@ export async function getBalanceSheet(
       .select({
         categorySlug: transactions.categorySlug,
         categoryName: transactionCategories.name,
-        amount:
-          inputCurrency && targetCurrency
-            ? sql<number>`COALESCE(SUM(
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END
-            ), 0)`
-            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+        amount: targetCurrency
+          ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
       })
       .from(transactions)
       .leftJoin(
@@ -3645,17 +3437,12 @@ export async function getBalanceSheet(
             isNull(transactionCategories.excluded),
             eq(transactionCategories.excluded, false),
           )!,
-          inputCurrency && targetCurrency
+          targetCurrency
             ? or(
                 eq(transactions.currency, targetCurrency),
                 eq(transactions.baseCurrency, targetCurrency),
               )!
-            : targetCurrency
-              ? and(
-                  eq(transactions.baseCurrency, targetCurrency),
-                  isNotNull(transactions.baseAmount),
-                )
-              : sql`true`,
+            : sql`true`,
         ),
       )
       .groupBy(transactions.categorySlug, transactionCategories.name),
@@ -3663,15 +3450,9 @@ export async function getBalanceSheet(
     // 6. All revenue transactions (for retained earnings)
     db
       .select({
-        amount:
-          inputCurrency && targetCurrency
-            ? sql<number>`COALESCE(SUM(
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END
-            ), 0)`
-            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+        amount: targetCurrency
+          ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
       })
       .from(transactions)
       .leftJoin(
@@ -3689,26 +3470,20 @@ export async function getBalanceSheet(
           lte(transactions.date, asOfDateStr),
           inArray(transactions.categorySlug, REVENUE_CATEGORIES),
           not(inArray(transactions.categorySlug, CONTRA_REVENUE_CATEGORIES)),
-          // Amount condition: handle NULL baseAmount gracefully when inputCurrency is provided
-          inputCurrency && targetCurrency
-            ? sql`(CASE 
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END > 0)`
+          targetCurrency
+            ? sql`(${resolvedAmount(targetCurrency)} > 0)`
             : gt(transactions.baseAmount, 0),
           // Category exclusion check: allow if category doesn't exist (NULL) or is not excluded
           or(
             isNull(transactionCategories.excluded),
             eq(transactionCategories.excluded, false),
           )!,
-          inputCurrency && targetCurrency
+          targetCurrency
             ? or(
                 eq(transactions.currency, targetCurrency),
                 eq(transactions.baseCurrency, targetCurrency),
               )!
-            : targetCurrency
-              ? eq(transactions.baseCurrency, targetCurrency)
-              : sql`true`,
+            : sql`true`,
         ),
       ),
 
@@ -3716,15 +3491,9 @@ export async function getBalanceSheet(
     // Exclude asset purchases (capital expenditures) - they don't reduce retained earnings
     db
       .select({
-        amount:
-          inputCurrency && targetCurrency
-            ? sql<number>`COALESCE(SUM(ABS(
-              CASE
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END
-            )), 0)`
-            : sql<number>`COALESCE(SUM(ABS(COALESCE(${transactions.baseAmount}, 0))), 0)`,
+        amount: targetCurrency
+          ? sql<number>`COALESCE(SUM(ABS(${resolvedAmount(targetCurrency)})), 0)`
+          : sql<number>`COALESCE(SUM(ABS(COALESCE(${transactions.baseAmount}, 0))), 0)`,
       })
       .from(transactions)
       .leftJoin(
@@ -3740,12 +3509,8 @@ export async function getBalanceSheet(
           eq(transactions.internal, false),
           ne(transactions.status, "excluded"),
           lte(transactions.date, asOfDateStr),
-          // Amount condition: handle NULL baseAmount gracefully when inputCurrency is provided
-          inputCurrency && targetCurrency
-            ? sql`(CASE 
-                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
-                ELSE ${transactions.amount}
-              END < 0)`
+          targetCurrency
+            ? sql`(${resolvedAmount(targetCurrency)} < 0)`
             : lt(transactions.baseAmount, 0),
           // Exclude asset categories - these are capital expenditures, not operating expenses
           or(
@@ -3756,14 +3521,12 @@ export async function getBalanceSheet(
             isNull(transactionCategories.excluded),
             eq(transactionCategories.excluded, false),
           )!,
-          inputCurrency && targetCurrency
+          targetCurrency
             ? or(
                 eq(transactions.currency, targetCurrency),
                 eq(transactions.baseCurrency, targetCurrency),
               )!
-            : targetCurrency
-              ? eq(transactions.baseCurrency, targetCurrency)
-              : sql`true`,
+            : sql`true`,
         ),
       ),
 
@@ -4156,21 +3919,21 @@ export async function getBalanceSheet(
   }
 
   // Apply repayments proportionally to short-term and long-term debt
-  // If we have both types, repayments reduce proportionally
+  // loanRepayments is negative (outflow), take ABS before subtracting
+  const absRepayments = Math.abs(loanRepayments);
   const totalLoanProceeds = loanProceeds || 1; // Avoid division by zero
   const shortTermProportion =
     totalLoanProceeds > 0 ? shortTermLoanAmount / totalLoanProceeds : 0;
   const longTermProportion =
     totalLoanProceeds > 0 ? longTermLoanAmount / totalLoanProceeds : 0;
 
-  // Apply repayments proportionally
   const shortTermAfterRepayments = Math.max(
     0,
-    shortTermLoanAmount - loanRepayments * shortTermProportion,
+    shortTermLoanAmount - absRepayments * shortTermProportion,
   );
   const longTermAfterRepayments = Math.max(
     0,
-    longTermLoanAmount - loanRepayments * longTermProportion,
+    longTermLoanAmount - absRepayments * longTermProportion,
   );
 
   // Add loan account balances to long-term (conservative - account balances without transaction history)
@@ -4281,7 +4044,8 @@ export async function getBalanceSheet(
       nonCurrent: {
         fixedAssets: Math.round(fixedAssets * 100) / 100,
         fixedAssetsName: assetNameMap.get("fixed-assets"),
-        accumulatedDepreciation: 0,
+        accumulatedDepreciation:
+          Math.round(accumulatedDepreciation * 100) / 100,
         softwareTechnology: Math.round(softwareTechnology * 100) / 100,
         softwareTechnologyName: assetNameMap.get("software"),
         longTermInvestments: 0,

@@ -57,15 +57,36 @@ jobs:
     name: Validate
     runs-on: blacksmith-16vcpu-ubuntu-2404
     timeout-minutes: 20
+    services:
+      postgres-test:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: midday_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
     env:
       NODE_OPTIONS: "--max-old-space-size=8192"
       TURBO_SCM_BASE: ${{ github.event.before }}
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5433/midday_test
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 50
 
       - uses: ./.github/actions/setup
+
+      - name: Setup test database schema
+        run: |
+          PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d midday_test -f src/test/helpers/setup-test-db.sql
+          bunx drizzle-kit push --config=drizzle.config.test.ts --force
+        working-directory: packages/db
 
       - name: Lint
         run: bunx turbo lint --affected

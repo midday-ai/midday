@@ -1106,6 +1106,8 @@ export type GetRecurringInvoiceProjectionParams = {
   teamId: string;
   forecastMonths: number;
   currency?: string;
+  /** Anchor date for the forecast window. Defaults to now. */
+  referenceDate?: Date;
 };
 
 export type RecurringInvoiceProjectionResult = Map<
@@ -1117,7 +1119,8 @@ export async function getRecurringInvoiceProjection(
   db: Database,
   params: GetRecurringInvoiceProjectionParams,
 ): Promise<RecurringInvoiceProjectionResult> {
-  const { teamId, forecastMonths, currency } = params;
+  const { teamId, forecastMonths, currency, referenceDate } = params;
+  const anchor = referenceDate ? new UTCDate(referenceDate) : new UTCDate();
 
   // Build query conditions
   const conditions = [
@@ -1157,7 +1160,7 @@ export async function getRecurringInvoiceProjection(
   // Use endOfMonth to match getRevenueForecast in reports.ts, which covers through
   // the last day of each forecast month. Without this, invoices scheduled for
   // later in the last forecast month would be incorrectly excluded.
-  const forecastEndDate = endOfMonth(addMonths(new UTCDate(), forecastMonths));
+  const forecastEndDate = endOfMonth(addMonths(anchor, forecastMonths));
 
   for (const recurring of activeRecurring) {
     // Skip if no next scheduled date or no amount

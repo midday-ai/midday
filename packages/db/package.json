@@ -14,6 +14,8 @@
     "test:golden": "bun test src/test/transaction-matching.golden.test.ts",
     "test:all-matching": "bun test src/test/transaction-matching*.test.ts",
     "test:reports": "bun test src/test/reports.test.ts",
+    "test:e2e": "bun test src/test/calculations-e2e.test.ts --exit --timeout 30000",
+    "test:e2e:setup": "PGPASSWORD=postgres psql -h ${TEST_DB_HOST:-localhost} -p ${TEST_DB_PORT:-5433} -U postgres -d midday_test -f src/test/helpers/setup-test-db.sql && bunx drizzle-kit push --config=drizzle.config.test.ts --force",
     "test:watch": "bun test --watch",
     "validate-golden": "bun run src/test/validate-golden-dataset.ts",
     "typecheck": "tsc --noEmit"
