@@ -3,9 +3,9 @@
 import { Button } from "@midday/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { updateMetricsSettingsAction } from "@/actions/update-metrics-settings-action";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
@@ -21,7 +21,11 @@ import { MetricsGrid } from "./components/metrics-grid";
 import { SortableChartCard } from "./components/sortable-chart-card";
 import { type ChartId, DEFAULT_CHART_ORDER } from "./utils/chart-types";
 
-export function MetricsView() {
+interface MetricsViewProps {
+  initialChartOrder?: ChartId[];
+}
+
+export function MetricsView({ initialChartOrder }: MetricsViewProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { data: connections } = useQuery(
@@ -29,10 +33,14 @@ export function MetricsView() {
   );
   const { from, to, currency, revenueType } = useMetricsFilter();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
-  const [chartOrder, setChartOrder] = useLocalStorage<ChartId[]>(
-    "metrics-chart-order",
-    DEFAULT_CHART_ORDER,
+  const [chartOrder, setChartOrder] = useState<ChartId[]>(
+    initialChartOrder ?? DEFAULT_CHART_ORDER,
   );
+
+  const handleChartOrderChange = useCallback((newOrder: ChartId[]) => {
+    setChartOrder(newOrder);
+    updateMetricsSettingsAction(newOrder);
+  }, []);
   const gridRef = useRef<HTMLDivElement>(null!);
 
   const locale = user?.locale ?? undefined;
@@ -145,7 +153,7 @@ export function MetricsView() {
       <MetricsGrid
         orderedCharts={orderedCharts}
         isCustomizing={isCustomizing}
-        onChartOrderChange={setChartOrder}
+        onChartOrderChange={handleChartOrderChange}
         renderChart={renderChart}
         getWiggleClass={getWiggleClass}
       />

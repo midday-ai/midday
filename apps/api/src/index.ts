@@ -155,7 +155,7 @@ app.doc("/openapi", {
     version: "0.0.1",
     title: "Midday API",
     description:
-      "Midday is a platform for Invoicing, Time tracking, File reconciliation, Storage, Financial Overview & your own Assistant.",
+      "Midday is a platform for Invoicing, Time tracking, File reconciliation, Storage & Financial Overview.",
     contact: {
       name: "Midday Support",
       email: "engineer@midday.ai",

@@ -1,5 +1,6 @@
 import {
   createReportSchema,
+  getAccountBalancesSchema,
   getBurnRateSchema,
   getChartDataByLinkIdSchema,
   getExpensesSchema,
@@ -24,6 +25,7 @@ import {
 import {
   createReport,
   getBurnRate,
+  getCashBalance,
   getChartDataByLinkId,
   getExpenses,
   getReportByLinkId,
@@ -129,6 +131,19 @@ export const reportsRouter = createTRPCRouter({
         currency: input.currency,
         revenueType: input.revenueType,
       });
+    }),
+
+  getAccountBalances: protectedProcedure
+    .input(getAccountBalancesSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      const accountBalances = await getCashBalance(db, {
+        teamId: teamId!,
+        currency: input.currency,
+      });
+
+      return {
+        result: accountBalances,
+      };
     }),
 
   create: protectedProcedure

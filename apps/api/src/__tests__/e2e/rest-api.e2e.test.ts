@@ -1175,53 +1175,6 @@ describe("Notifications", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Insights (list + by ID + latest)
-// ---------------------------------------------------------------------------
-describe("Insights", () => {
-  let firstInsightId: string | null = null;
-
-  test("GET /insights -> 200", async () => {
-    const { status, data } = await api<any>("GET", "/insights");
-
-    expect(status).toBe(200);
-    expect(data).toHaveProperty("data");
-    expect(Array.isArray(data.data)).toBe(true);
-    if (data.data.length > 0) {
-      firstInsightId = data.data[0].id;
-    }
-  });
-
-  test("GET /insights/:id -> 200", async () => {
-    if (!firstInsightId) return;
-
-    const { status, data } = await api<any>(
-      "GET",
-      `/insights/${firstInsightId}`,
-    );
-
-    expect(status).toBe(200);
-    expect(data.id).toBe(firstInsightId);
-  });
-
-  test("GET /insights/:id/audio-url -> 200 or 404", async () => {
-    if (!firstInsightId) return;
-
-    const { status } = await api<any>(
-      "GET",
-      `/insights/${firstInsightId}/audio-url`,
-    );
-
-    expect([200, 404]).toContain(status);
-  });
-
-  test("GET /insights/latest -> 200 or 404", async () => {
-    const { status } = await api<any>("GET", "/insights/latest");
-
-    expect([200, 404]).toContain(status);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Auth / error handling
 // ---------------------------------------------------------------------------
 describe("Auth & Error Handling", () => {

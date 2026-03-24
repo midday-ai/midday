@@ -10,9 +10,7 @@ import { RunwayChart } from "@/components/charts/runway-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useUserQuery } from "@/hooks/use-user";
-import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
-import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RunwayCardProps {
@@ -24,13 +22,11 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
-  const setInput = useChatStore((state) => state.setInput);
-  const [isSelecting, setIsSelecting] = useState(false);
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
     threshold: 500,
-    disabled: isCustomizing || isSelecting,
+    disabled: isCustomizing,
   });
   const [displayRunway, setDisplayRunway] = useState<number>(0);
   const displayRunwayRef = useRef<number>(0);
@@ -55,7 +51,7 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
 
   // Fetch cash balance for runway chart
   const { data: cashBalanceData } = useQuery(
-    trpc.widgets.getAccountBalances.queryOptions({
+    trpc.reports.getAccountBalances.queryOptions({
       currency: currency,
     }),
   );
@@ -214,16 +210,6 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
             currency={currency}
             locale={locale}
             displayMode="months"
-            enableSelection={true}
-            onSelectionStateChange={setIsSelecting}
-            onSelectionComplete={(startDate, endDate, chartType) => {
-              const message = generateChartSelectionMessage(
-                startDate,
-                endDate,
-                chartType,
-              );
-              setInput(message);
-            }}
           />
         )}
       </div>

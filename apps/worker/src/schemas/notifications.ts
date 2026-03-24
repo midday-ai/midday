@@ -12,22 +12,6 @@ const baseFields = {
 };
 
 // ============================================
-// Insight Notifications
-// ============================================
-
-export const insightReadyNotificationSchema = z.object({
-  ...baseFields,
-  type: z.literal("insight_ready"),
-  insightId: z.string(),
-  periodType: z.enum(["weekly", "monthly", "quarterly", "yearly"]),
-  periodLabel: z.string(),
-  periodNumber: z.number(),
-  periodYear: z.number(),
-  title: z.string().optional(),
-  audioUrl: z.string().optional(),
-});
-
-// ============================================
 // Inbox Notifications
 // ============================================
 
@@ -172,8 +156,6 @@ export const transactionsExportedNotificationSchema = z.object({
 // ============================================
 
 export const notificationPayloadSchema = z.discriminatedUnion("type", [
-  // Insights
-  insightReadyNotificationSchema,
   // Inbox
   inboxNewNotificationSchema,
   // Documents
@@ -197,9 +179,6 @@ export const notificationPayloadSchema = z.discriminatedUnion("type", [
 export type NotificationPayload = z.infer<typeof notificationPayloadSchema>;
 
 // Individual type exports for type narrowing
-export type InsightReadyNotification = z.infer<
-  typeof insightReadyNotificationSchema
->;
 export type InboxNewNotification = z.infer<typeof inboxNewNotificationSchema>;
 export type DocumentUploadedNotification = z.infer<
   typeof documentUploadedNotificationSchema

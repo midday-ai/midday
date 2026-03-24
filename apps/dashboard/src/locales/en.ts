@@ -41,13 +41,6 @@ export default {
     this_year: "This year",
     last_year: "Last year",
   },
-  widget_period: {
-    fiscal_ytd: "Fiscal YTD",
-    fiscal_year: "Fiscal Year",
-    current_quarter: "Current Quarter",
-    trailing_12: "Last 12 Months",
-    current_month: "Current Month",
-  },
   transactions_period: {
     all: "All",
     income: "Income",
@@ -94,7 +87,6 @@ export default {
       transactions: "Transactions",
       invoices: "Invoices",
       inbox: "Inbox",
-      insights: "Insights",
     },
     transactions_created: {
       name: "New Transactions",
@@ -293,24 +285,11 @@ export default {
       high_confidence_names:
         '"{documentName}" looks like it matches "{transactionName}" across currencies — click to review',
     },
-    insight_ready: {
-      name: "Weekly Insights",
-      description: "Get notified when your weekly business insights are ready",
-      title: "Your weekly insights are ready",
-      with_period: "Your {periodLabel} insights are ready",
-    },
     default: {
       title: "New activity detected",
     },
     archive_button: "Archive notification",
     time_ago: "{time} ago",
-  },
-  widgets: {
-    insights: "Assistant",
-    inbox: "Inbox",
-    spending: "Spending",
-    transactions: "Transactions",
-    tracker: "Tracker",
   },
   account_type: {
     depository: "Depository",
@@ -562,7 +541,6 @@ export default {
     year_to_date: "Year-to-date ({year})",
     remit_amount: "{amount} to remit",
     credit_amount: "{amount} credit",
-    open_assistant: "Open taxes assistant",
   },
   overdue_invoices: {
     title: "Overdue Invoices",

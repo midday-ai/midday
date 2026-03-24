@@ -19,7 +19,6 @@ import {
 } from "./base-charts";
 import type { BaseChartProps } from "./chart-utils";
 import { createYAxisTickFormatter, useChartMargin } from "./chart-utils";
-import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
 interface ExpenseData {
   month: string;
@@ -40,17 +39,6 @@ interface ExpensesChartProps extends BaseChartProps {
   showLegend?: boolean;
   currency?: string;
   locale?: string;
-  enableSelection?: boolean;
-  onSelectionChange?: (
-    startDate: string | null,
-    endDate: string | null,
-  ) => void;
-  onSelectionComplete?: (
-    startDate: string,
-    endDate: string,
-    chartType: string,
-  ) => void;
-  onSelectionStateChange?: (isSelecting: boolean) => void;
 }
 
 // Custom formatter for expenses tooltip
@@ -107,10 +95,6 @@ export function ExpensesChart({
   showLegend = true,
   currency = "USD",
   locale,
-  enableSelection = false,
-  onSelectionChange,
-  onSelectionComplete,
-  onSelectionStateChange,
 }: ExpensesChartProps) {
   const tickFormatter = createYAxisTickFormatter(currency, locale);
   const maxValues = data.map((d) => ({ maxValue: d.amount }));
@@ -195,24 +179,5 @@ export function ExpensesChart({
     </div>
   );
 
-  // Pie charts don't support selection
-  if (chartType === "pie") {
-    return chartContent;
-  }
-
-  return (
-    <SelectableChartWrapper
-      data={data}
-      dateKey="month"
-      enableSelection={enableSelection}
-      onSelectionChange={onSelectionChange}
-      onSelectionComplete={(startDate, endDate) => {
-        onSelectionComplete?.(startDate, endDate, "expenses");
-      }}
-      onSelectionStateChange={onSelectionStateChange}
-      chartType="expenses"
-    >
-      {chartContent}
-    </SelectableChartWrapper>
-  );
+  return chartContent;
 }

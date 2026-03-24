@@ -7,8 +7,7 @@
     "start": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "generate-insight": "bun run scripts/generate-test-insight.ts"
+    "lint:fix": "biome check --write ."
   },
   "dependencies": {
     "@ai-sdk/openai": "catalog:",
@@ -23,7 +22,7 @@
     "@midday/email": "workspace:*",
     "@midday/health": "workspace:*",
     "@midday/import": "workspace:*",
-    "@midday/insights": "workspace:*",
+
     "@midday/invoice": "workspace:*",
     "@midday/job-client": "workspace:*",
     "@midday/jobs": "workspace:*",

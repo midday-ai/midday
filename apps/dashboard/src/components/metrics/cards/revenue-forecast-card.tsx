@@ -3,15 +3,13 @@
 import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { AnimatedNumber } from "@/components/animated-number";
 import { formatChartMonth } from "@/components/charts/chart-utils";
 import { RevenueForecastChart } from "@/components/charts/revenue-forecast-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
-import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
-import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RevenueForecastCardProps {
@@ -33,13 +31,11 @@ export function RevenueForecastCard({
 }: RevenueForecastCardProps) {
   const trpc = useTRPC();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
-  const setInput = useChatStore((state) => state.setInput);
-  const [isSelecting, setIsSelecting] = useState(false);
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
     threshold: 500,
-    disabled: isCustomizing || isSelecting,
+    disabled: isCustomizing,
   });
 
   const { data: revenueForecastData } = useQuery(
@@ -176,16 +172,6 @@ export function RevenueForecastCard({
           currency={currency}
           locale={locale}
           forecastStartIndex={forecastStartIndex}
-          enableSelection={true}
-          onSelectionStateChange={setIsSelecting}
-          onSelectionComplete={(startDate, endDate, chartType) => {
-            const message = generateChartSelectionMessage(
-              startDate,
-              endDate,
-              chartType,
-            );
-            setInput(message);
-          }}
         />
       </div>
     </div>

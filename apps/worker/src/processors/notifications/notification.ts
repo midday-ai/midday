@@ -15,7 +15,6 @@ import { BaseProcessor } from "../base";
  * Uses Zod discriminated union for type-safe payload handling.
  *
  * Notification types handled here:
- * - insight_ready: Weekly/monthly AI insights are ready
  * - inbox_new: New items in inbox from email/sync/slack/upload
  * - document_uploaded: Document uploaded to vault
  * - document_processed: Document processed and classified
@@ -53,33 +52,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
 
     // TypeScript automatically narrows the type based on the discriminant
     switch (payload.type) {
-      // ========================================
-      // Insight Notifications
-      // ========================================
-      case "insight_ready": {
-        await notifications.create(
-          "insight_ready",
-          payload.teamId,
-          {
-            insightId: payload.insightId,
-            periodType: payload.periodType,
-            periodLabel: payload.periodLabel,
-            periodNumber: payload.periodNumber,
-            periodYear: payload.periodYear,
-            title: payload.title,
-            audioUrl: payload.audioUrl,
-          },
-          { sendEmail: true },
-        );
-
-        this.logger.info("Insight ready notification sent", {
-          insightId: payload.insightId,
-          teamId: payload.teamId,
-          periodLabel: payload.periodLabel,
-        });
-        break;
-      }
-
       // ========================================
       // Inbox Notifications
       // ========================================

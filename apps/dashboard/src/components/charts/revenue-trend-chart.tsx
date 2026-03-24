@@ -16,7 +16,6 @@ import {
   createCompactTickFormatter,
   useChartMargin,
 } from "./chart-utils";
-import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
 interface RevenueTrendData {
   month: string;
@@ -31,16 +30,6 @@ interface RevenueTrendChartProps {
   showLegend?: boolean;
   currency?: string;
   locale?: string;
-  enableSelection?: boolean;
-  onSelectionChange?: (
-    startDate: string | null,
-    endDate: string | null,
-  ) => void;
-  onSelectionComplete?: (
-    startDate: string,
-    endDate: string,
-    chartType: string,
-  ) => void;
 }
 
 // Custom tooltip component
@@ -96,9 +85,6 @@ export function RevenueTrendChart({
   height = 320,
   currency = "USD",
   locale,
-  enableSelection = false,
-  onSelectionChange,
-  onSelectionComplete,
 }: RevenueTrendChartProps) {
   // Use the compact tick formatter
   const tickFormatter = createCompactTickFormatter();
@@ -172,18 +158,5 @@ export function RevenueTrendChart({
     </div>
   );
 
-  return (
-    <SelectableChartWrapper
-      data={data}
-      dateKey="month"
-      enableSelection={enableSelection}
-      onSelectionChange={onSelectionChange}
-      onSelectionComplete={(startDate, endDate) => {
-        onSelectionComplete?.(startDate, endDate, "revenue-trend");
-      }}
-      chartType="revenue-trend"
-    >
-      {chartContent}
-    </SelectableChartWrapper>
-  );
+  return chartContent;
 }

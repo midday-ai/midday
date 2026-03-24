@@ -10,16 +10,11 @@
     "test:e2e": "bun test --exit --timeout 30000 src/__tests__/e2e/"
   },
   "exports": {
-    "./trpc/routers/_app": "./src/trpc/routers/_app.ts",
-    "./ai/types": "./src/ai/types.ts"
+    "./trpc/routers/_app": "./src/trpc/routers/_app.ts"
   },
   "dependencies": {
-    "@ai-sdk-tools/agents": "^1.2.0",
-    "@ai-sdk-tools/artifacts": "^1.2.0",
-    "@ai-sdk-tools/memory": "^1.2.0",
     "@ai-sdk/anthropic": "2.0.62",
     "@ai-sdk/openai": "catalog:",
-    "@ai-sdk/react": "catalog:",
     "@date-fns/tz": "catalog:",
     "@hono/mcp": "^0.2.4",
     "@hono/trpc-server": "^0.4.2",
@@ -36,7 +31,7 @@
     "@midday/health": "workspace:*",
     "@midday/import": "workspace:*",
     "@midday/inbox": "workspace:*",
-    "@midday/insights": "workspace:*",
+
     "@midday/invoice": "workspace:*",
     "@midday/job-client": "workspace:*",
     "@midday/jobs": "workspace:*",

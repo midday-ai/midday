@@ -14,10 +14,7 @@
     "test": "find src -name '*.test.ts' -o -name '*.spec.ts' | grep -q . && bun test --exit src || echo 'No tests yet'"
   },
   "dependencies": {
-    "@ai-sdk-tools/artifacts": "^1.2.0",
-    "@ai-sdk-tools/store": "^1.2.0",
     "@ai-sdk/openai": "catalog:",
-    "@ai-sdk/react": "catalog:",
     "@date-fns/tz": "catalog:",
     "@date-fns/utc": "^2.1.1",
     "@dnd-kit/core": "^6.3.1",
@@ -58,7 +55,6 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^12.34.0",
     "html2canvas": "^1.4.1",
-    "js.foresight": "^3.4.0",
     "jspdf": "^3.0.4",
     "little-date": "^1.2.1",
     "lottie-react": "^2.4.1",

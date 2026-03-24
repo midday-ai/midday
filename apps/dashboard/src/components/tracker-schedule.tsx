@@ -499,7 +499,7 @@ const useTrackerData = (selectedDate: string | null) => {
           queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.widgets.getBillableHours.queryKey(),
+          queryKey: trpc.trackerEntries.getBillableHours.queryKey(),
         });
         refetch();
       },
@@ -516,7 +516,7 @@ const useTrackerData = (selectedDate: string | null) => {
           queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.widgets.getBillableHours.queryKey(),
+          queryKey: trpc.trackerEntries.getBillableHours.queryKey(),
         });
         refetch();
 

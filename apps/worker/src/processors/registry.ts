@@ -8,7 +8,7 @@ import { accountingProcessors } from "./accounting";
 import { customerProcessors } from "./customers";
 import { documentProcessors } from "./documents";
 import { inboxProcessors } from "./inbox";
-import { insightsProcessors } from "./insights";
+
 import { institutionsProcessors } from "./institutions";
 import { invoiceProcessors } from "./invoices";
 import { notificationProcessors } from "./notifications";
@@ -67,11 +67,6 @@ for (const [jobName, processor] of Object.entries(customerProcessors)) {
 
 // Register team processors
 for (const [jobName, processor] of Object.entries(teamProcessors)) {
-  processors.set(jobName, processor);
-}
-
-// Register insights processors
-for (const [jobName, processor] of Object.entries(insightsProcessors)) {
   processors.set(jobName, processor);
 }
 

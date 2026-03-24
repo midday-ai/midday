@@ -23,7 +23,6 @@ import {
   createYAxisTickFormatter,
   useChartMargin,
 } from "./chart-utils";
-import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
 interface RunwayData {
   month: string;
@@ -40,17 +39,6 @@ interface RunwayChartProps extends BaseChartProps {
   currency?: string;
   locale?: string;
   displayMode?: "currency" | "months";
-  enableSelection?: boolean;
-  onSelectionChange?: (
-    startDate: string | null,
-    endDate: string | null,
-  ) => void;
-  onSelectionComplete?: (
-    startDate: string,
-    endDate: string,
-    chartType: string,
-  ) => void;
-  onSelectionStateChange?: (isSelecting: boolean) => void;
 }
 
 // Custom formatter for runway tooltip
@@ -97,10 +85,6 @@ export function RunwayChart({
   currency = "USD",
   locale,
   displayMode = "months",
-  enableSelection = false,
-  onSelectionChange,
-  onSelectionComplete,
-  onSelectionStateChange,
 }: RunwayChartProps) {
   const isMonthsMode = displayMode === "months";
   const tickFormatter = isMonthsMode
@@ -265,19 +249,5 @@ export function RunwayChart({
     </div>
   );
 
-  return (
-    <SelectableChartWrapper
-      data={data}
-      dateKey="month"
-      enableSelection={enableSelection}
-      onSelectionChange={onSelectionChange}
-      onSelectionComplete={(startDate, endDate) => {
-        onSelectionComplete?.(startDate, endDate, "runway");
-      }}
-      onSelectionStateChange={onSelectionStateChange}
-      chartType="runway"
-    >
-      {chartContent}
-    </SelectableChartWrapper>
-  );
+  return chartContent;
 }
