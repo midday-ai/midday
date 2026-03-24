@@ -54,8 +54,6 @@
     "date-fns": "catalog:",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.34.0",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.4",
     "little-date": "^1.2.1",
     "lottie-react": "^2.4.1",
     "next": "16.1.6",
@@ -90,7 +88,6 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@types/file-saver": "^2.0.7",
-    "@types/html2canvas": "^1.0.0",
     "@types/node": "^24.10.1",
     "@types/papaparse": "^5.5.2",
     "@types/qrcode": "^1.5.6",

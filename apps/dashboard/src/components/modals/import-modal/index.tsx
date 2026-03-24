@@ -224,7 +224,7 @@ export function ImportModal() {
 
   useEffect(() => {
     if (status === "completed") {
-      // Invalidate all transaction-related queries (transactions, reports, widgets)
+      // Invalidate all transaction-related queries (transactions, reports)
       invalidateTransactionQueries();
 
       // Also invalidate bank-related queries

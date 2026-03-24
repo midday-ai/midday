@@ -118,7 +118,7 @@ export function TransactionCreateForm() {
   const createTransactionMutation = useMutation(
     trpc.transactions.create.mutationOptions({
       onSuccess: () => {
-        // Invalidate reports and widgets since a new transaction affects analytics
+        // Invalidate reports since a new transaction affects analytics
         invalidateTransactionQueries();
 
         setParams(null);

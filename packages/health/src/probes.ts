@@ -334,25 +334,6 @@ export function googleAiProbe(): Dependency {
   };
 }
 
-/** ElevenLabs: API reachability */
-export function elevenLabsProbe(): Dependency {
-  return {
-    name: "elevenlabs",
-    tier: 4,
-    cacheTtlMs: 300_000,
-    timeoutMs: 5_000,
-    probe: async () => {
-      const key = process.env.ELEVENLABS_API_KEY;
-      if (!key) return false;
-      const res = await fetch("https://api.elevenlabs.io/v1/models", {
-        headers: { "xi-api-key": key },
-        signal: AbortSignal.timeout(5_000),
-      });
-      return res.ok;
-    },
-  };
-}
-
 /** Exa: API reachability */
 export function exaProbe(): Dependency {
   return {
@@ -472,7 +453,6 @@ export function workerDependencies(): Dependency[] {
     // Tier 4 — Optional
     googleAiProbe(),
     mistralProbe(),
-    elevenLabsProbe(),
     exaProbe(),
   ];
 }

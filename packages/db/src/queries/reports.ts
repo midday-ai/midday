@@ -172,7 +172,7 @@ export type GetReportsParams = {
   currency?: string;
   type?: "revenue" | "profit";
   revenueType?: "gross" | "net";
-  /** When true, use exact dates instead of expanding to month boundaries. Useful for weekly insights. */
+  /** When true, use exact dates instead of expanding to month boundaries. */
   exactDates?: boolean;
 };
 
@@ -198,7 +198,7 @@ async function getProfitImpl(db: Database, params: GetReportsParams) {
     exactDates = false,
   } = params;
 
-  // When exactDates is true, use the exact dates provided (for weekly insights)
+  // When exactDates is true, use the exact dates provided
   // Otherwise, expand to month boundaries (for monthly reports)
   const fromDate = exactDates
     ? new UTCDate(parseISO(from))
@@ -377,7 +377,7 @@ async function getRevenueImpl(db: Database, params: GetReportsParams) {
     exactDates = false,
   } = params;
 
-  // When exactDates is true, use the exact dates provided (for weekly insights)
+  // When exactDates is true, use the exact dates provided
   // Otherwise, expand to month boundaries (for monthly reports)
   const fromDate = exactDates
     ? new UTCDate(parseISO(from))
@@ -678,7 +678,7 @@ export type GetExpensesParams = {
   from: string;
   to: string;
   currency?: string;
-  /** When true, use exact dates instead of expanding to month boundaries. Useful for weekly insights. */
+  /** When true, use exact dates instead of expanding to month boundaries. */
   exactDates?: boolean;
 };
 
@@ -698,7 +698,7 @@ export async function getExpenses(db: Database, params: GetExpensesParams) {
     exactDates = false,
   } = params;
 
-  // When exactDates is true, use the exact dates provided (for weekly insights)
+  // When exactDates is true, use the exact dates provided
   // Otherwise, expand to month boundaries (for monthly reports)
   const fromDate = exactDates
     ? new UTCDate(parseISO(from))
@@ -1144,7 +1144,7 @@ export type GetSpendingForPeriodParams = {
   from: string;
   to: string;
   currency?: string;
-  /** When true, use exact dates instead of expanding to month boundaries. Useful for weekly insights. */
+  /** When true, use exact dates instead of expanding to month boundaries. */
   exactDates?: boolean;
 };
 
@@ -1667,7 +1667,7 @@ export type GetCashFlowParams = {
   to: string;
   currency?: string;
   period?: "monthly" | "quarterly";
-  /** When true, use exact dates instead of expanding to month boundaries. Useful for weekly insights. */
+  /** When true, use exact dates instead of expanding to month boundaries. */
   exactDates?: boolean;
 };
 
@@ -1681,7 +1681,7 @@ export async function getCashFlow(db: Database, params: GetCashFlowParams) {
     exactDates = false,
   } = params;
 
-  // When exactDates is true, use the exact dates provided (for weekly insights)
+  // When exactDates is true, use the exact dates provided
   // Otherwise, expand to month boundaries (for monthly reports)
   const fromDate = exactDates
     ? new UTCDate(parseISO(from))

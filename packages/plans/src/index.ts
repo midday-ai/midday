@@ -168,9 +168,9 @@ export const starterFeatures: PlanFeature[] = [
     tooltip: "Track billable hours per project and turn them into invoices.",
   },
   {
-    label: "AI assistant",
+    label: "Financial metrics",
     tooltip:
-      "Ask questions about revenue, spending, and invoices in plain language.",
+      "Track revenue, burn rate, profit, expenses, and runway with customizable dashboards.",
   },
   {
     label: "Financial overview and reports",
@@ -218,9 +218,9 @@ export const proFeatures: PlanFeature[] = [
       "Let customers view and pay invoices through their own branded portal.",
   },
   {
-    label: "Advanced AI insights",
+    label: "Advanced metrics",
     tooltip:
-      "Get alerts on unusual spending, cash flow trends, and automated suggestions based on your financial data.",
+      "Revenue forecasting, category breakdowns, and detailed financial analysis across your business.",
   },
   {
     label: "Shareable report and document links",
