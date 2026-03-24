@@ -1,6 +1,6 @@
 import type { Database } from "@midday/db/client";
 import { shouldSendNotification } from "@midday/db/queries";
-
+import InsightsWeeklyEmail from "@midday/email/emails/insights-weekly";
 import InvoiceEmail from "@midday/email/emails/invoice";
 import InvoiceOverdueEmail from "@midday/email/emails/invoice-overdue";
 import InvoicePaidEmail from "@midday/email/emails/invoice-paid";
@@ -168,6 +168,7 @@ export class EmailService {
       transactions: TransactionsEmail,
       "transactions-exported": TransactionsExportedEmail,
       "upcoming-invoices": UpcomingInvoicesEmail,
+      "insights-weekly": InsightsWeeklyEmail,
     };
 
     const template = templates[templateName as keyof typeof templates];

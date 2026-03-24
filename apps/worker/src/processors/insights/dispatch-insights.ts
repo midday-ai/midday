@@ -63,6 +63,17 @@ const TARGET_LOCAL_HOUR = 7;
 export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPayload> {
   async process(job: Job<DispatchInsightsPayload>): Promise<ProcessResult> {
     const { periodType } = job.data;
+
+    if (process.env.INSIGHTS_ENABLED !== "true") {
+      this.logger.info(
+        "Insights generation disabled (INSIGHTS_ENABLED != true)",
+        {
+          periodType,
+        },
+      );
+      return emptyResult();
+    }
+
     const db = getDb();
 
     this.logger.info("Starting insights dispatcher", {
@@ -70,7 +81,6 @@ export class DispatchInsightsProcessor extends BaseProcessor<DispatchInsightsPay
       currentUtcHour: new Date().getUTCHours(),
     });
 
-    // Check which teams are enabled for insights (env var override for testing)
     const enabledTeamIds = getEnabledTeamIds();
 
     // Empty array = no teams enabled (safe default for staging)
