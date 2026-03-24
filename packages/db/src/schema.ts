@@ -2591,7 +2591,7 @@ export const usersOnTeam = pgTable(
 export const transactionCategories = pgTable(
   "transaction_categories",
   {
-    id: uuid().defaultRandom().notNull(),
+    id: uuid().defaultRandom().notNull().unique(),
     name: text().notNull(),
     teamId: uuid("team_id").notNull(),
     color: text(),
