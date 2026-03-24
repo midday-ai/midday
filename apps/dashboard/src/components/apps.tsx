@@ -171,9 +171,16 @@ export function Apps() {
   // Filter apps
   const filteredApps = allApps
     .filter((app) => !isInstalledPage || app.installed)
-    .filter(
-      (app) => !search || app.name.toLowerCase().includes(search.toLowerCase()),
-    );
+    .filter((app) => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return (
+        app.name.toLowerCase().includes(q) ||
+        app.id.toLowerCase().includes(q) ||
+        (typeof app.category === "string" &&
+          app.category.toLowerCase().includes(q))
+      );
+    });
 
   return (
     <>

@@ -84,7 +84,7 @@ export function CategoryExpenseDonutChart({
           className="absolute inset-0 dark:hidden"
           style={{
             backgroundImage:
-              "radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px)",
+              "radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px)",
             backgroundSize: "12px 12px",
           }}
         />
