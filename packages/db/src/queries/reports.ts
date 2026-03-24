@@ -48,13 +48,13 @@ import {
 } from "../schema";
 import { dedupeByDb } from "../utils/dedupe";
 import { getCashBalance } from "./bank-accounts";
-import { getExchangeRate, getExchangeRatesBatch } from "./exhange-rates";
+import { getExchangeRatesBatch } from "./exhange-rates";
 import { getRecurringInvoiceProjection } from "./invoice-recurring";
 import { getBillableHours } from "./tracker-entries";
 
-function getPercentageChange(previous: number, current: number) {
+function getPercentageChange(previous: number, current: number): number {
   if (previous === 0) return 0;
-  return Math.abs(((current - previous) / previous) * 100).toFixed();
+  return Math.round(Math.abs(((current - previous) / previous) * 100));
 }
 
 // Simple in-memory cache for team currencies (clears on server restart)
@@ -2193,6 +2193,29 @@ async function getRecurringTransactionProjection(
       ),
     );
 
+  // Batch-fetch all exchange rates needed for currency conversion
+  const currencyPairs: Array<{ base: string; target: string }> = [];
+  if (currency) {
+    const seenPairs = new Set<string>();
+    for (const tx of recurringIncome) {
+      if (
+        tx.currency &&
+        tx.currency !== currency &&
+        tx.baseCurrency !== currency
+      ) {
+        const key = `${tx.currency}:${currency}`;
+        if (!seenPairs.has(key)) {
+          seenPairs.add(key);
+          currencyPairs.push({ base: tx.currency, target: currency });
+        }
+      }
+    }
+  }
+  const exchangeRateMap =
+    currencyPairs.length > 0
+      ? await getExchangeRatesBatch(db, { pairs: currencyPairs })
+      : new Map<string, number>();
+
   const recurringByName = new Map<
     string,
     { amount: number; frequency: string | null; lastDate: string }
@@ -2207,11 +2230,8 @@ async function getRecurringTransactionProjection(
       } else if (currency && tx.currency === currency) {
         effectiveAmount = tx.amount;
       } else if (currency && tx.currency) {
-        const rateResult = await getExchangeRate(db, {
-          base: tx.currency,
-          target: currency,
-        });
-        effectiveAmount = rateResult ? tx.amount * rateResult.rate : null;
+        const rate = exchangeRateMap.get(`${tx.currency}:${currency}`);
+        effectiveAmount = rate !== undefined ? tx.amount * rate : null;
       } else {
         effectiveAmount = tx.amount;
       }

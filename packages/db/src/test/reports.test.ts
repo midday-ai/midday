@@ -13,11 +13,6 @@ import {
 } from "../queries/reports";
 import { inbox, invoices, transactionCategories } from "../schema";
 
-// Mock getCashBalance function
-const _mockGetCombinedAccountBalance = async () => {
-  return { balance: 0, currency: "GBP" };
-};
-
 // In-memory data storage for mock
 type MockTransaction = {
   id: string;
@@ -439,10 +434,11 @@ function createMockDatabase(mockData: {
                               (a, b) => b.amount - a.amount,
                             );
 
-                            return {
+                            const promise = Promise.resolve(result);
+                            return Object.assign(promise, {
                               limit: (limit: number) =>
                                 Promise.resolve(result.slice(0, limit)),
-                            };
+                            });
                           },
                         };
                       }

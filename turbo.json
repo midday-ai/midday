@@ -64,7 +64,8 @@
       "cache": false
     },
     "test": {
-      "cache": false
+      "cache": false,
+      "env": ["TEST_DATABASE_URL"]
     },
     "dev": {
       "inputs": ["$TURBO_DEFAULT$", ".env"],
