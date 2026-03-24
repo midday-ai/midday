@@ -10,6 +10,7 @@ import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { ActivityFeedCard } from "./cards/activity-feed-card";
 import { BurnRateCard } from "./cards/burn-rate-card";
 import { CategoryExpensesCard } from "./cards/category-expenses-card";
 import { ExpensesCard } from "./cards/expenses-card";
@@ -100,6 +101,8 @@ export function MetricsView({ initialChartOrder }: MetricsViewProps) {
           return <RunwayCard {...commonProps} />;
         case "category-expenses":
           return <CategoryExpensesCard {...commonProps} />;
+        case "activity-feed":
+          return <ActivityFeedCard />;
         default:
           return null;
       }
@@ -119,7 +122,7 @@ export function MetricsView({ initialChartOrder }: MetricsViewProps) {
       );
     }
 
-    if (showConnectOverlay) {
+    if (showConnectOverlay && chartId !== "activity-feed") {
       return (
         <div
           key={chartId}

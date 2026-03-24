@@ -6,7 +6,8 @@ export type ChartId =
   | "profit"
   | "revenue-forecast"
   | "runway"
-  | "category-expenses";
+  | "category-expenses"
+  | "activity-feed";
 
 // Report types for database storage
 export type ReportType =
@@ -22,6 +23,7 @@ export type ReportType =
 // Default chart order matching current layout
 export const DEFAULT_CHART_ORDER: ChartId[] = [
   "monthly-revenue",
+  "activity-feed",
   "burn-rate",
   "expenses",
   "profit",
@@ -30,8 +32,11 @@ export const DEFAULT_CHART_ORDER: ChartId[] = [
   "category-expenses",
 ];
 
+// Chart IDs that map to shareable report types
+export type ReportChartId = Exclude<ChartId, "activity-feed">;
+
 // Mapping from ChartId to ReportType
-const chartToReportMap: Record<ChartId, ReportType> = {
+const chartToReportMap: Record<ReportChartId, ReportType> = {
   "monthly-revenue": "monthly_revenue",
   "burn-rate": "burn_rate",
   expenses: "expense",
@@ -65,7 +70,7 @@ const chartDisplayNames: Record<ReportType, string> = {
   category_expenses: "Expenses by Category",
 };
 
-export function chartTypeToReportType(chartId: ChartId): ReportType {
+export function chartTypeToReportType(chartId: ReportChartId): ReportType {
   return chartToReportMap[chartId];
 }
 

@@ -76,69 +76,58 @@ export function MetricsGrid({
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-8 pb-20" ref={gridRef}>
-        {isCustomizing ? (
-          <SortableContext items={orderedCharts}>
-            {orderedCharts.map((chartId, index) => {
-              if (index === 0) {
-                // First chart: full-width
-                return (
-                  <div key={chartId} className="w-full">
-                    {renderChart(chartId, index)}
-                  </div>
-                );
-              }
-              if ((index - 1) % 2 === 0) {
-                // Start of a pair (index 1, 3, 5, etc.): create two-column row
-                const nextChartId = orderedCharts[index + 1];
-                return (
-                  <div
-                    key={`row-${chartId}`}
-                    className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-                  >
-                    {renderChart(chartId, index)}
-                    {nextChartId ? (
-                      renderChart(nextChartId, index + 1)
-                    ) : (
-                      <div /> // Empty placeholder if odd number of charts
-                    )}
-                  </div>
-                );
-              }
-              // Second chart in pair: already rendered above
-              return null;
-            })}
-          </SortableContext>
-        ) : (
-          orderedCharts.map((chartId, index) => {
-            if (index === 0) {
-              // First chart: full-width
-              return (
-                <div key={chartId} className="w-full">
-                  {renderChart(chartId, index)}
+        {(() => {
+          const feedId: ChartId = "activity-feed";
+          const charts = orderedCharts.filter((id) => id !== feedId);
+          const hasFeed = orderedCharts.includes(feedId);
+          const firstChart = charts[0];
+          const rest = charts.slice(1);
+
+          const rows: React.ReactNode[] = [];
+
+          if (firstChart) {
+            rows.push(
+              <div
+                key="row-first"
+                className={
+                  hasFeed
+                    ? "grid grid-cols-1 lg:grid-cols-3 gap-6"
+                    : "grid grid-cols-1 lg:grid-cols-2 gap-6"
+                }
+              >
+                <div className={hasFeed ? "lg:col-span-2" : undefined}>
+                  {renderChart(firstChart, 0)}
                 </div>
-              );
+                {hasFeed ? renderChart(feedId, 1) : rest[0] ? renderChart(rest[0], 1) : <div />}
+              </div>,
+            );
+
+            if (!hasFeed && rest[0]) {
+              rest.shift();
             }
-            if ((index - 1) % 2 === 0) {
-              // Start of a pair (index 1, 3, 5, etc.): create two-column row
-              const nextChartId = orderedCharts[index + 1];
-              return (
-                <div
-                  key={`row-${chartId}`}
-                  className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-                >
-                  {renderChart(chartId, index)}
-                  {nextChartId ? (
-                    renderChart(nextChartId, index + 1)
-                  ) : (
-                    <div /> // Empty placeholder if odd number of charts
-                  )}
-                </div>
-              );
-            }
-            // Second chart in pair: already rendered above
-            return null;
-          })
-        )}
+          }
+
+          for (let i = 0; i < rest.length; i += 2) {
+            const left = rest[i]!;
+            const right = rest[i + 1];
+            const idx = hasFeed ? i + 2 : i + 2;
+            rows.push(
+              <div
+                key={`row-${left}`}
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+              >
+                {renderChart(left, idx)}
+                {right ? renderChart(right, idx + 1) : <div />}
+              </div>,
+            );
+          }
+
+          if (isCustomizing) {
+            return <SortableContext items={orderedCharts}>{rows}</SortableContext>;
+          }
+
+          return rows;
+        })()}
 
         {/* Drag Overlay */}
         <DragOverlay>
