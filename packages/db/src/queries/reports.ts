@@ -1448,7 +1448,8 @@ export async function getGrowthRate(db: Database, params: GetGrowthRateParams) {
   // Calculate growth rate (handle negative previous for profit)
   let growthRate = 0;
   if (previousTotal !== 0) {
-    growthRate = ((currentTotal - previousTotal) / Math.abs(previousTotal)) * 100;
+    growthRate =
+      ((currentTotal - previousTotal) / Math.abs(previousTotal)) * 100;
   }
 
   // For quarterly period, use the full period comparison instead of just recent months
@@ -3216,10 +3217,9 @@ export async function getBalanceSheet(
       .select({
         categorySlug: transactions.categorySlug,
         categoryName: transactionCategories.name,
-        amount:
-          targetCurrency
-            ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
-            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+        amount: targetCurrency
+          ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
       })
       .from(transactions)
       .leftJoin(
@@ -3260,10 +3260,9 @@ export async function getBalanceSheet(
     db
       .select({
         categorySlug: transactions.categorySlug,
-        amount:
-          targetCurrency
-            ? sql<number>`ABS(${resolvedAmount(targetCurrency)})`
-            : sql<number>`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount}))`,
+        amount: targetCurrency
+          ? sql<number>`ABS(${resolvedAmount(targetCurrency)})`
+          : sql<number>`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount}))`,
         date: sql<string>`${transactions.date}::text`,
       })
       .from(transactions)
@@ -3303,10 +3302,9 @@ export async function getBalanceSheet(
       .select({
         categorySlug: transactions.categorySlug,
         categoryName: transactionCategories.name,
-        amount:
-          targetCurrency
-            ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
-            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+        amount: targetCurrency
+          ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
       })
       .from(transactions)
       .leftJoin(
@@ -3345,10 +3343,9 @@ export async function getBalanceSheet(
     // 4b. Loan proceeds transactions with dates for short-term vs long-term classification
     db
       .select({
-        amount:
-          targetCurrency
-            ? sql<number>`ABS(${resolvedAmount(targetCurrency)})`
-            : sql<number>`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount}))`,
+        amount: targetCurrency
+          ? sql<number>`ABS(${resolvedAmount(targetCurrency)})`
+          : sql<number>`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount}))`,
         date: sql<string>`${transactions.date}::text`,
       })
       .from(transactions)
@@ -3384,10 +3381,9 @@ export async function getBalanceSheet(
       .select({
         categorySlug: transactions.categorySlug,
         categoryName: transactionCategories.name,
-        amount:
-          targetCurrency
-            ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
-            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+        amount: targetCurrency
+          ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
       })
       .from(transactions)
       .leftJoin(
@@ -3424,10 +3420,9 @@ export async function getBalanceSheet(
     // 6. All revenue transactions (for retained earnings)
     db
       .select({
-        amount:
-          targetCurrency
-            ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
-            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+        amount: targetCurrency
+          ? sql<number>`COALESCE(SUM(${resolvedAmount(targetCurrency)}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
       })
       .from(transactions)
       .leftJoin(
@@ -3466,10 +3461,9 @@ export async function getBalanceSheet(
     // Exclude asset purchases (capital expenditures) - they don't reduce retained earnings
     db
       .select({
-        amount:
-          targetCurrency
-            ? sql<number>`COALESCE(SUM(ABS(${resolvedAmount(targetCurrency)})), 0)`
-            : sql<number>`COALESCE(SUM(ABS(COALESCE(${transactions.baseAmount}, 0))), 0)`,
+        amount: targetCurrency
+          ? sql<number>`COALESCE(SUM(ABS(${resolvedAmount(targetCurrency)})), 0)`
+          : sql<number>`COALESCE(SUM(ABS(COALESCE(${transactions.baseAmount}, 0))), 0)`,
       })
       .from(transactions)
       .leftJoin(

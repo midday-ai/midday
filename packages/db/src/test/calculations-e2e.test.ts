@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import type { Database } from "../client";
 import {
   getBalanceSheet,
   getBurnRate,
@@ -18,14 +19,13 @@ import {
   getSpendingForPeriod,
   getTaxSummary,
 } from "../queries/reports";
-import type { Database } from "../client";
+import { seedAll, TEAM_EUR_ID, TEAM_USD_ID } from "./helpers/seed";
 import {
-  getTestDatabase,
   cleanDatabase,
   closeDatabase,
+  getTestDatabase,
   isTestDatabaseAvailable,
 } from "./helpers/test-database";
-import { seedAll, TEAM_USD_ID, TEAM_EUR_ID } from "./helpers/seed";
 
 const SKIP = !isTestDatabaseAvailable();
 
@@ -1277,7 +1277,9 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
         currency: "USD",
       });
 
-      const rent = result.expenses.find((e) => e.name === "Office Rent January");
+      const rent = result.expenses.find(
+        (e) => e.name === "Office Rent January",
+      );
       expect(rent).toBeDefined();
       expect(rent!.frequency).toBe("monthly");
       expect(rent!.amount).toBe(4000);
@@ -1656,7 +1658,7 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
       // E5: -500 software (tx taxRate=NULL, cat taxRate=20) → tax = ROUND(500*20/120,2) = 83.33
       // E6: -300 marketing (tx taxRate=NULL, cat taxRate=10) → tax = ROUND(300*10/110,2) = 27.27
       // Total: 110.60
-      expect(result.summary.totalTaxAmount).toBeCloseTo(110.60, 0);
+      expect(result.summary.totalTaxAmount).toBeCloseTo(110.6, 0);
     });
   });
 
@@ -2000,9 +2002,13 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
 
       // Software has 36-month useful life. E2 is Jan 2024, E5 is Mar 2024, RW2 is Nov 2025.
       // All are 4+ months old → depreciation > 0
-      expect(result.assets.nonCurrent.accumulatedDepreciation).toBeGreaterThan(0);
+      expect(result.assets.nonCurrent.accumulatedDepreciation).toBeGreaterThan(
+        0,
+      );
       // Depreciation can't exceed total software asset value (1700)
-      expect(result.assets.nonCurrent.accumulatedDepreciation).toBeLessThanOrEqual(1700);
+      expect(
+        result.assets.nonCurrent.accumulatedDepreciation,
+      ).toBeLessThanOrEqual(1700);
     });
 
     test("asOf date filters transactions", async () => {

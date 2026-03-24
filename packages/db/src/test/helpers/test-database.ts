@@ -1,9 +1,9 @@
+import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import type { Database } from "../../client";
 import { withReplicas } from "../../replicas";
 import * as schema from "../../schema";
-import { sql } from "drizzle-orm";
-import type { Database } from "../../client";
 
 const TEST_DATABASE_URL =
   process.env.TEST_DATABASE_URL ||
