@@ -19,6 +19,9 @@ export default async function Page() {
     redirect("/login");
   }
 
+  const teams = await queryClient.fetchQuery(trpc.team.list.queryOptions());
+  const hasOtherTeams = (teams?.length ?? 0) > 1;
+
   const currency = getCurrency();
   const countryCode = getCountryCode();
 
@@ -27,6 +30,7 @@ export default async function Page() {
       <OnboardingPage
         defaultCurrencyPromise={currency}
         defaultCountryCodePromise={countryCode}
+        hasOtherTeams={hasOtherTeams}
         user={{
           id: user.id,
           fullName: user.fullName,

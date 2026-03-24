@@ -9,6 +9,7 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 import type { ReactNode } from "react";
@@ -94,6 +95,7 @@ function GradientOverlay() {
 type Props = {
   defaultCurrencyPromise: Promise<string>;
   defaultCountryCodePromise: Promise<string>;
+  hasOtherTeams: boolean;
   user: {
     id: string;
     fullName: string | null;
@@ -142,6 +144,7 @@ const NAV_LABELS: Record<StepConfig["navigation"], string | null> = {
 export function OnboardingPage({
   defaultCurrencyPromise,
   defaultCountryCodePromise,
+  hasOtherTeams,
   user,
 }: Props) {
   const router = useRouter();
@@ -331,8 +334,18 @@ export function OnboardingPage({
     <div className="h-screen overflow-hidden flex relative">
       <nav className="fixed top-0 left-0 right-0 z-50 w-full pointer-events-none">
         <div className="relative py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center justify-between">
-          <div className="w-6 h-6">
-            <Icons.LogoSmall className="w-full h-full text-foreground" />
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6">
+              <Icons.LogoSmall className="w-full h-full text-foreground" />
+            </div>
+            {hasOtherTeams && (
+              <Link
+                href="/teams"
+                className="pointer-events-auto text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Select team
+              </Link>
+            )}
           </div>
           <div className="pointer-events-auto">
             <OnboardingUserMenu />
