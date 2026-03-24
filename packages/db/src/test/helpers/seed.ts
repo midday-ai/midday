@@ -33,6 +33,13 @@ const CAT_IDS = {
   marketing: "10000000-0000-0000-0000-000000000013",
   creditCardPayment: "10000000-0000-0000-0000-000000000014",
   internalTransfer: "10000000-0000-0000-0000-000000000015",
+  inventory: "10000000-0000-0000-0000-000000000016",
+  prepaidExpenses: "10000000-0000-0000-0000-000000000017",
+  loanProceeds: "10000000-0000-0000-0000-000000000018",
+  deferredRevenue: "10000000-0000-0000-0000-000000000019",
+  capitalInvestment: "10000000-0000-0000-0000-000000000020",
+  ownerDraws: "10000000-0000-0000-0000-000000000021",
+  cleaning: "10000000-0000-0000-0000-000000000022",
 };
 
 // Category IDs (team-eur)
@@ -57,6 +64,8 @@ export const INV_UNPAID_2 = "50000000-0000-0000-0000-000000000002";
 export const INV_OVERDUE_1 = "50000000-0000-0000-0000-000000000003";
 export const INV_OVERDUE_2 = "50000000-0000-0000-0000-000000000004";
 export const INV_PAID = "50000000-0000-0000-0000-000000000005";
+export const INV_DRAFT = "50000000-0000-0000-0000-000000000006";
+export const INV_SCHEDULED = "50000000-0000-0000-0000-000000000007";
 
 export async function seedAll(db: Database): Promise<void> {
   await seedUsers(db);
@@ -235,6 +244,62 @@ async function seedCategories(db: Database): Promise<void> {
       system: true,
       excluded: true,
     },
+    {
+      id: CAT_IDS.inventory,
+      teamId: TEAM_USD_ID,
+      slug: "inventory",
+      name: "Inventory",
+      system: true,
+      excluded: false,
+    },
+    {
+      id: CAT_IDS.prepaidExpenses,
+      teamId: TEAM_USD_ID,
+      slug: "prepaid-expenses",
+      name: "Prepaid Expenses",
+      system: true,
+      excluded: false,
+    },
+    {
+      id: CAT_IDS.loanProceeds,
+      teamId: TEAM_USD_ID,
+      slug: "loan-proceeds",
+      name: "Loan Proceeds",
+      system: true,
+      excluded: false,
+    },
+    {
+      id: CAT_IDS.deferredRevenue,
+      teamId: TEAM_USD_ID,
+      slug: "deferred-revenue",
+      name: "Deferred Revenue",
+      system: true,
+      excluded: false,
+    },
+    {
+      id: CAT_IDS.capitalInvestment,
+      teamId: TEAM_USD_ID,
+      slug: "capital-investment",
+      name: "Capital Investment",
+      system: true,
+      excluded: false,
+    },
+    {
+      id: CAT_IDS.ownerDraws,
+      teamId: TEAM_USD_ID,
+      slug: "owner-draws",
+      name: "Owner Draws",
+      system: true,
+      excluded: false,
+    },
+    {
+      id: CAT_IDS.cleaning,
+      teamId: TEAM_USD_ID,
+      slug: "cleaning",
+      name: "Cleaning Services",
+      system: true,
+      excluded: false,
+    },
   ]);
 
   // Team EUR categories (for isolation testing)
@@ -331,10 +396,10 @@ async function seedBankAccounts(db: Database): Promise<void> {
 
 async function seedExchangeRates(db: Database): Promise<void> {
   await db.insert(exchangeRates).values([
-    { base: "EUR", target: "USD", rate: "1.10" },
-    { base: "GBP", target: "USD", rate: "1.27" },
-    { base: "USD", target: "EUR", rate: "0.91" },
-    { base: "GBP", target: "EUR", rate: "1.15" },
+    { base: "EUR", target: "USD", rate: 1.1 },
+    { base: "GBP", target: "USD", rate: 1.27 },
+    { base: "USD", target: "EUR", rate: 0.91 },
+    { base: "GBP", target: "EUR", rate: 1.15 },
   ]);
 }
 
@@ -384,6 +449,24 @@ async function seedInvoices(db: Database): Promise<void> {
       currency: "USD",
       dueDate: "2024-01-01",
       invoiceNumber: "INV-005",
+    },
+    {
+      id: INV_DRAFT,
+      teamId: TEAM_USD_ID,
+      status: "draft",
+      amount: 750,
+      currency: "USD",
+      dueDate: "2024-05-01",
+      invoiceNumber: "INV-006",
+    },
+    {
+      id: INV_SCHEDULED,
+      teamId: TEAM_USD_ID,
+      status: "scheduled",
+      amount: 1200,
+      currency: "USD",
+      dueDate: "2024-05-15",
+      invoiceNumber: "INV-007",
     },
   ]);
 }
@@ -1238,6 +1321,160 @@ async function seedTransactions(db: Database): Promise<void> {
       baseAmount: 3200,
       baseCurrency: "USD",
       taxRate: 10,
+      recurring: false,
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // RECURRING EXPENSES — Weekly and Annually (frequency conversion tests)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // WEEKLY recurring: $50/week cleaning service
+    {
+      id: "a0000000-0000-0000-0000-000000f10001",
+      date: "2024-07-05",
+      name: "Weekly Cleaning Service",
+      method: "other",
+      amount: -50,
+      currency: "USD",
+      teamId: TEAM_USD_ID,
+      internalId: "RWEEK1",
+      status: "posted",
+      internal: false,
+      categorySlug: "cleaning",
+      baseAmount: -50,
+      baseCurrency: "USD",
+      recurring: true,
+      frequency: "weekly",
+    },
+
+    // ANNUALLY recurring: $1200/year insurance
+    {
+      id: "a0000000-0000-0000-0000-000000f10002",
+      date: "2024-07-15",
+      name: "Annual Insurance Premium",
+      method: "other",
+      amount: -1200,
+      currency: "USD",
+      teamId: TEAM_USD_ID,
+      internalId: "RANN1",
+      status: "posted",
+      internal: false,
+      categorySlug: "office-supplies",
+      baseAmount: -1200,
+      baseCurrency: "USD",
+      recurring: true,
+      frequency: "annually",
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // BALANCE SHEET — Transactions for inventory, prepaid, loans, equity
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // Inventory purchase: $3000
+    {
+      id: "a0000000-0000-0000-0000-000000f20001",
+      date: "2024-07-01",
+      name: "Inventory Purchase",
+      method: "other",
+      amount: -3000,
+      currency: "USD",
+      teamId: TEAM_USD_ID,
+      internalId: "BS-INV1",
+      status: "posted",
+      internal: false,
+      categorySlug: "inventory",
+      baseAmount: -3000,
+      baseCurrency: "USD",
+      recurring: false,
+    },
+
+    // Prepaid expense: $2400 (12-month lease prepaid)
+    {
+      id: "a0000000-0000-0000-0000-000000f20002",
+      date: "2024-07-10",
+      name: "Prepaid Office Lease",
+      method: "other",
+      amount: -2400,
+      currency: "USD",
+      teamId: TEAM_USD_ID,
+      internalId: "BS-PRE1",
+      status: "posted",
+      internal: false,
+      categorySlug: "prepaid-expenses",
+      baseAmount: -2400,
+      baseCurrency: "USD",
+      recurring: false,
+    },
+
+    // Loan received: $10000 (positive amount = cash inflow)
+    {
+      id: "a0000000-0000-0000-0000-000000f20003",
+      date: "2024-07-20",
+      name: "Business Loan Received",
+      method: "other",
+      amount: 10000,
+      currency: "USD",
+      teamId: TEAM_USD_ID,
+      internalId: "BS-LOAN1",
+      status: "posted",
+      internal: false,
+      categorySlug: "loan-proceeds",
+      baseAmount: 10000,
+      baseCurrency: "USD",
+      recurring: false,
+    },
+
+    // Deferred revenue: $5000 (customer prepayment for future service)
+    {
+      id: "a0000000-0000-0000-0000-000000f20004",
+      date: "2024-08-15",
+      name: "Customer Prepayment",
+      method: "other",
+      amount: 5000,
+      currency: "USD",
+      teamId: TEAM_USD_ID,
+      internalId: "BS-DEF1",
+      status: "posted",
+      internal: false,
+      categorySlug: "deferred-revenue",
+      baseAmount: 5000,
+      baseCurrency: "USD",
+      recurring: false,
+    },
+
+    // Capital investment: $20000 (owner investment)
+    {
+      id: "a0000000-0000-0000-0000-000000f20005",
+      date: "2024-07-05",
+      name: "Owner Capital Investment",
+      method: "other",
+      amount: 20000,
+      currency: "USD",
+      teamId: TEAM_USD_ID,
+      internalId: "BS-CAP1",
+      status: "posted",
+      internal: false,
+      categorySlug: "capital-investment",
+      baseAmount: 20000,
+      baseCurrency: "USD",
+      recurring: false,
+    },
+
+    // Owner draw: $3000
+    {
+      id: "a0000000-0000-0000-0000-000000f20006",
+      date: "2024-08-01",
+      name: "Owner Draw",
+      method: "other",
+      amount: -3000,
+      currency: "USD",
+      teamId: TEAM_USD_ID,
+      internalId: "BS-DRAW1",
+      status: "posted",
+      internal: false,
+      categorySlug: "owner-draws",
+      baseAmount: -3000,
+      baseCurrency: "USD",
       recurring: false,
     },
 
