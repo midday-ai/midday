@@ -5,6 +5,7 @@ import { spendingArtifact } from "@api/ai/artifacts/spending";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { resolveToolParams } from "@api/ai/utils/period-dates";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
+import { UTCDate } from "@date-fns/utc";
 import { db } from "@midday/db/client";
 import {
   getSpending,
@@ -152,8 +153,8 @@ export const getSpendingTool = tool({
         monthsDiff > 0 ? totalSpending / monthsDiff : totalSpending;
 
       // Get current month spending
-      const currentMonthStart = startOfMonth(new Date());
-      const currentMonthEnd = endOfMonth(new Date());
+      const currentMonthStart = startOfMonth(new UTCDate());
+      const currentMonthEnd = endOfMonth(new UTCDate());
       const currentMonthSummary = await getSpendingForPeriod(db, {
         teamId,
         from: currentMonthStart.toISOString(),
