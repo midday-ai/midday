@@ -3,8 +3,11 @@ import {
   bankAccounts,
   bankConnections,
   exchangeRates,
+  invoiceRecurring,
   invoices,
   teams,
+  trackerEntries,
+  trackerProjects,
   transactionCategories,
   transactions,
   users,
@@ -46,6 +49,8 @@ const CAT_IDS = {
 const CAT_EUR_IDS = {
   revenue: "20000000-0000-0000-0000-000000000001",
   officeSupplies: "20000000-0000-0000-0000-000000000002",
+  rent: "20000000-0000-0000-0000-000000000003",
+  software: "20000000-0000-0000-0000-000000000004",
 };
 
 // User ID
@@ -57,6 +62,14 @@ export const BANK_USD_CHECKING_ID = "40000000-0000-0000-0000-000000000001";
 export const BANK_USD_SAVINGS_ID = "40000000-0000-0000-0000-000000000002";
 export const BANK_EUR_ACCOUNT_ID = "40000000-0000-0000-0000-000000000003";
 export const BANK_CREDIT_CARD_ID = "40000000-0000-0000-0000-000000000004";
+
+// Recurring invoice IDs
+export const REC_INV_MONTHLY = "60000000-0000-0000-0000-000000000001";
+
+// Tracker IDs
+export const TRACKER_PROJECT_ID = "70000000-0000-0000-0000-000000000001";
+export const TRACKER_ENTRY_1 = "70000000-0000-0000-0000-000000000011";
+export const TRACKER_ENTRY_2 = "70000000-0000-0000-0000-000000000012";
 
 // Invoice IDs
 export const INV_UNPAID_1 = "50000000-0000-0000-0000-000000000001";
@@ -74,6 +87,8 @@ export async function seedAll(db: Database): Promise<void> {
   await seedBankAccounts(db);
   await seedExchangeRates(db);
   await seedInvoices(db);
+  await seedRecurringInvoices(db);
+  await seedTrackerData(db);
   await seedTransactions(db);
 }
 
@@ -320,6 +335,22 @@ async function seedCategories(db: Database): Promise<void> {
       system: true,
       excluded: false,
     },
+    {
+      id: CAT_EUR_IDS.rent,
+      teamId: TEAM_EUR_ID,
+      slug: "rent",
+      name: "Rent",
+      system: true,
+      excluded: false,
+    },
+    {
+      id: CAT_EUR_IDS.software,
+      teamId: TEAM_EUR_ID,
+      slug: "software",
+      name: "Software",
+      system: true,
+      excluded: false,
+    },
   ]);
 }
 
@@ -467,6 +498,69 @@ async function seedInvoices(db: Database): Promise<void> {
       currency: "USD",
       dueDate: "2024-05-15",
       invoiceNumber: "INV-007",
+    },
+  ]);
+}
+
+async function seedRecurringInvoices(db: Database): Promise<void> {
+  const nextMonth = new Date();
+  nextMonth.setMonth(nextMonth.getMonth() + 1);
+  nextMonth.setDate(1);
+
+  await db.insert(invoiceRecurring).values([
+    {
+      id: REC_INV_MONTHLY,
+      teamId: TEAM_USD_ID,
+      userId: TEST_USER_ID,
+      frequency: "monthly_date",
+      frequencyDay: 1,
+      endType: "never",
+      status: "active",
+      timezone: "UTC",
+      amount: 3000,
+      currency: "USD",
+      nextScheduledAt: nextMonth.toISOString(),
+      invoicesGenerated: 3,
+    },
+  ]);
+}
+
+async function seedTrackerData(db: Database): Promise<void> {
+  await db.insert(trackerProjects).values([
+    {
+      id: TRACKER_PROJECT_ID,
+      teamId: TEAM_USD_ID,
+      name: "Billable Client Work",
+      rate: 150,
+      currency: "USD",
+      billable: true,
+      status: "in_progress",
+    },
+  ]);
+
+  const today = new Date().toISOString().split("T")[0]!;
+  await db.insert(trackerEntries).values([
+    {
+      id: TRACKER_ENTRY_1,
+      teamId: TEAM_USD_ID,
+      projectId: TRACKER_PROJECT_ID,
+      assignedId: TEST_USER_ID,
+      duration: 7200,
+      date: today,
+      start: `${today}T09:00:00Z`,
+      stop: `${today}T11:00:00Z`,
+      description: "Client consulting session",
+    },
+    {
+      id: TRACKER_ENTRY_2,
+      teamId: TEAM_USD_ID,
+      projectId: TRACKER_PROJECT_ID,
+      assignedId: TEST_USER_ID,
+      duration: 10800,
+      date: today,
+      start: `${today}T13:00:00Z`,
+      stop: `${today}T16:00:00Z`,
+      description: "Development work",
     },
   ]);
 }
@@ -1510,6 +1604,61 @@ async function seedTransactions(db: Database): Promise<void> {
       status: "posted",
       internal: false,
       categorySlug: "office-supplies",
+      baseAmount: -2000,
+      baseCurrency: "EUR",
+      recurring: false,
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // TEAM EUR — February 2024: Loss-making month (expenses > revenue)
+    // Revenue: 1000  |  Expenses: -5000  →  Profit = -4000
+    // ═══════════════════════════════════════════════════════════════════════
+
+    {
+      id: "a0000000-0000-0000-0000-000000001003",
+      date: "2024-02-10",
+      name: "EUR Small Invoice",
+      method: "payment",
+      amount: 1000,
+      currency: "EUR",
+      teamId: TEAM_EUR_ID,
+      internalId: "TE3",
+      status: "posted",
+      internal: false,
+      categorySlug: "revenue",
+      baseAmount: 1000,
+      baseCurrency: "EUR",
+      recurring: false,
+    },
+    {
+      id: "a0000000-0000-0000-0000-000000001004",
+      date: "2024-02-05",
+      name: "EUR Office Rent",
+      method: "transfer",
+      amount: -3000,
+      currency: "EUR",
+      teamId: TEAM_EUR_ID,
+      internalId: "TE4",
+      status: "posted",
+      internal: false,
+      categorySlug: "rent",
+      baseAmount: -3000,
+      baseCurrency: "EUR",
+      recurring: true,
+      frequency: "monthly",
+    },
+    {
+      id: "a0000000-0000-0000-0000-000000001005",
+      date: "2024-02-15",
+      name: "EUR Software License",
+      method: "card_purchase",
+      amount: -2000,
+      currency: "EUR",
+      teamId: TEAM_EUR_ID,
+      internalId: "TE5",
+      status: "posted",
+      internal: false,
+      categorySlug: "software",
       baseAmount: -2000,
       baseCurrency: "EUR",
       recurring: false,

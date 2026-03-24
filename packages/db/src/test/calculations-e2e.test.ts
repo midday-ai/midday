@@ -1,9 +1,11 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import type { Database } from "../client";
 import {
+  createReport,
   getBalanceSheet,
   getBurnRate,
   getCashFlow,
+  getChartDataByLinkId,
   getExpenses,
   getGrowthRate,
   getOutstandingInvoices,
@@ -11,6 +13,7 @@ import {
   getProfit,
   getProfitMargin,
   getRecurringExpenses,
+  getReportByLinkId,
   getReports,
   getRevenue,
   getRevenueForecast,
@@ -19,7 +22,12 @@ import {
   getSpendingForPeriod,
   getTaxSummary,
 } from "../queries/reports";
-import { seedAll, TEAM_EUR_ID, TEAM_USD_ID } from "./helpers/seed";
+import {
+  seedAll,
+  TEAM_EUR_ID,
+  TEAM_USD_ID,
+  TEST_USER_ID,
+} from "./helpers/seed";
 import {
   cleanDatabase,
   closeDatabase,
@@ -2640,6 +2648,342 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
         r.date.startsWith("2024-01"),
       );
       expect(spendingTotal).toBeCloseTo(expenseJan!.total, 0);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Revenue Forecast — Recurring invoices produce non-zero projection
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("Revenue Forecast — Recurring Invoice Projection", () => {
+    test("forecast includes non-zero recurringInvoices from seeded invoice_recurring", async () => {
+      const result = await getRevenueForecast(db, {
+        teamId: TEAM_USD_ID,
+        from: "2024-01-01",
+        to: "2024-06-30",
+        forecastMonths: 3,
+        currency: "USD",
+      });
+
+      expect(result.forecast).toBeArray();
+      expect(result.forecast.length).toBe(3);
+
+      const hasRecurring = result.forecast.some(
+        (m: any) => m.breakdown?.recurringInvoices > 0,
+      );
+      expect(hasRecurring).toBe(true);
+
+      const month1 = result.forecast[0] as any;
+      expect(month1.breakdown.recurringInvoices).toBe(3000);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Revenue Forecast — Billable hours produce non-zero projection
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("Revenue Forecast — Billable Hours", () => {
+    test("forecast month 1 includes billableHours from seeded tracker data", async () => {
+      const result = await getRevenueForecast(db, {
+        teamId: TEAM_USD_ID,
+        from: "2024-01-01",
+        to: "2024-06-30",
+        forecastMonths: 3,
+        currency: "USD",
+      });
+
+      const month1 = result.forecast[0] as any;
+      expect(month1.breakdown.billableHours).toBeGreaterThan(0);
+    });
+
+    test("forecast month 2+ does not include billableHours", async () => {
+      const result = await getRevenueForecast(db, {
+        teamId: TEAM_USD_ID,
+        from: "2024-01-01",
+        to: "2024-06-30",
+        forecastMonths: 3,
+        currency: "USD",
+      });
+
+      const month2 = result.forecast[1] as any;
+      expect(month2.breakdown.billableHours).toBe(0);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TEAM EUR — Base Currency EUR (no explicit currency param)
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("TEAM_EUR — Base Currency EUR", () => {
+    test("getRevenue returns EUR revenue without explicit currency", async () => {
+      const result = await getRevenue(db, {
+        teamId: TEAM_EUR_ID,
+        from: "2024-01-01",
+        to: "2024-02-28",
+      });
+
+      expect(result).toBeArray();
+      const jan = result.find((r) => r.date.startsWith("2024-01"));
+      expect(jan).toBeDefined();
+      expect(Number(jan!.value)).toBe(10000);
+
+      const feb = result.find((r) => r.date.startsWith("2024-02"));
+      expect(feb).toBeDefined();
+      expect(Number(feb!.value)).toBe(1000);
+    });
+
+    test("getExpenses returns EUR expenses without explicit currency", async () => {
+      const result = await getExpenses(db, {
+        teamId: TEAM_EUR_ID,
+        from: "2024-01-01",
+        to: "2024-02-28",
+      });
+
+      expect(result.result).toBeArray();
+      const jan = result.result.find((r) => r.date.startsWith("2024-01"));
+      expect(jan).toBeDefined();
+      expect(jan!.total).toBe(2000);
+
+      const feb = result.result.find((r) => r.date.startsWith("2024-02"));
+      expect(feb).toBeDefined();
+      expect(feb!.total).toBe(5000);
+    });
+
+    test("getProfit returns correct EUR profit without explicit currency", async () => {
+      const result = await getProfit(db, {
+        teamId: TEAM_EUR_ID,
+        from: "2024-01-01",
+        to: "2024-02-28",
+      });
+
+      expect(result).toBeArray();
+      const jan = result.find((r) => r.date.startsWith("2024-01"));
+      expect(jan).toBeDefined();
+      expect(Number(jan!.value)).toBe(8000);
+    });
+
+    test("getCashFlow returns correct EUR cash flow without explicit currency", async () => {
+      const result = await getCashFlow(db, {
+        teamId: TEAM_EUR_ID,
+        from: "2024-01-01",
+        to: "2024-02-28",
+      });
+
+      expect(result.monthlyData).toBeArray();
+      const jan = result.monthlyData.find((r) => r.date.startsWith("2024-01"));
+      expect(jan).toBeDefined();
+      expect(jan!.income).toBe(10000);
+      expect(jan!.expenses).toBe(2000);
+    });
+
+    test("getSpending returns EUR spending without explicit currency", async () => {
+      const result = await getSpending(db, {
+        teamId: TEAM_EUR_ID,
+        from: "2024-01-01",
+        to: "2024-02-28",
+      });
+
+      expect(result).toBeArray();
+      expect(result.length).toBeGreaterThan(0);
+      const totalSpending = result.reduce((s, c) => s + c.amount, 0);
+      expect(totalSpending).toBeGreaterThan(0);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Negative Profit / Loss Scenario (TEAM_EUR February)
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("Negative Profit — Loss Scenario", () => {
+    test("getProfit returns negative value when expenses exceed revenue", async () => {
+      const result = await getProfit(db, {
+        teamId: TEAM_EUR_ID,
+        from: "2024-02-01",
+        to: "2024-02-28",
+      });
+
+      const feb = result.find((r) => r.date.startsWith("2024-02"));
+      expect(feb).toBeDefined();
+      expect(Number(feb!.value)).toBeLessThan(0);
+      expect(Number(feb!.value)).toBe(-4000);
+    });
+
+    test("getProfitMargin returns negative percentage for loss month", async () => {
+      const result = await getProfitMargin(db, {
+        teamId: TEAM_EUR_ID,
+        from: "2024-02-01",
+        to: "2024-02-28",
+      });
+
+      expect(result.summary.profitMargin).toBeLessThan(0);
+    });
+
+    test("getGrowthRate handles positive-to-negative profit transition", async () => {
+      const result = await getGrowthRate(db, {
+        teamId: TEAM_EUR_ID,
+        from: "2024-01-01",
+        to: "2024-02-28",
+        type: "profit",
+      });
+
+      expect(result).toBeDefined();
+      expect(result.summary.growthRate).toBeDefined();
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Cross-Validation — Multi-month spending vs expenses
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("Cross-Validation — Extended", () => {
+    test("spending total matches expenses total for Q1", async () => {
+      const [spending, expenses] = await Promise.all([
+        getSpending(db, {
+          teamId: TEAM_USD_ID,
+          from: "2024-01-01",
+          to: "2024-03-31",
+          currency: "USD",
+        }),
+        getExpenses(db, {
+          teamId: TEAM_USD_ID,
+          from: "2024-01-01",
+          to: "2024-03-31",
+          currency: "USD",
+        }),
+      ]);
+
+      const spendingTotal = spending.reduce((s, c) => s + c.amount, 0);
+      const expenseTotal = expenses.result.reduce((s, r) => s + r.total, 0);
+      expect(spendingTotal).toBeCloseTo(expenseTotal, 0);
+    });
+
+    test("revenue(gross) - tax extracted = revenue(net)", async () => {
+      const [gross, net] = await Promise.all([
+        getRevenue(db, {
+          teamId: TEAM_USD_ID,
+          from: "2024-01-01",
+          to: "2024-01-31",
+          currency: "USD",
+          revenueType: "gross",
+        }),
+        getRevenue(db, {
+          teamId: TEAM_USD_ID,
+          from: "2024-01-01",
+          to: "2024-01-31",
+          currency: "USD",
+          revenueType: "net",
+        }),
+      ]);
+
+      const grossTotal = gross.reduce(
+        (s, r) => s + Number.parseFloat(r.value),
+        0,
+      );
+      const netTotal = net.reduce((s, r) => s + Number.parseFloat(r.value), 0);
+      expect(grossTotal).toBeGreaterThan(netTotal);
+    });
+
+    test("cash flow net = income - expenses for each month", async () => {
+      const result = await getCashFlow(db, {
+        teamId: TEAM_USD_ID,
+        from: "2024-01-01",
+        to: "2024-06-30",
+        currency: "USD",
+      });
+
+      for (const month of result.monthlyData) {
+        expect(month.netCashFlow).toBeCloseTo(month.income - month.expenses, 1);
+      }
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Report CRUD — createReport, getReportByLinkId, getChartDataByLinkId
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("Report CRUD", () => {
+    test("createReport returns a report with linkId", async () => {
+      const report = await createReport(db, {
+        type: "revenue",
+        from: "2024-01-01",
+        to: "2024-03-31",
+        currency: "USD",
+        teamId: TEAM_USD_ID,
+        createdBy: TEST_USER_ID,
+      });
+
+      expect(report).toBeDefined();
+      expect(report!.id).toBeDefined();
+      expect(report!.linkId).toBeDefined();
+      expect(report!.linkId!.length).toBe(21);
+      expect(report!.type).toBe("revenue");
+    });
+
+    test("getReportByLinkId retrieves a created report", async () => {
+      const created = await createReport(db, {
+        type: "profit",
+        from: "2024-01-01",
+        to: "2024-06-30",
+        currency: "USD",
+        teamId: TEAM_USD_ID,
+        createdBy: TEST_USER_ID,
+      });
+
+      const fetched = await getReportByLinkId(db, created!.linkId!);
+
+      expect(fetched).toBeDefined();
+      expect(fetched!.id).toBe(created!.id);
+      expect(fetched!.type).toBe("profit");
+      expect(fetched!.teamName).toBe("Test Co USD");
+    });
+
+    test("getChartDataByLinkId returns chart data for revenue report", async () => {
+      const created = await createReport(db, {
+        type: "revenue",
+        from: "2024-01-01",
+        to: "2024-03-31",
+        currency: "USD",
+        teamId: TEAM_USD_ID,
+        createdBy: TEST_USER_ID,
+      });
+
+      const chartData = await getChartDataByLinkId(db, created!.linkId!);
+
+      expect(chartData).toBeDefined();
+      expect(chartData.type).toBe("revenue");
+      expect(chartData.data).toBeDefined();
+    });
+
+    test("getChartDataByLinkId returns chart data for expense report", async () => {
+      const created = await createReport(db, {
+        type: "expense",
+        from: "2024-01-01",
+        to: "2024-03-31",
+        currency: "USD",
+        teamId: TEAM_USD_ID,
+        createdBy: TEST_USER_ID,
+      });
+
+      const chartData = await getChartDataByLinkId(db, created!.linkId!);
+
+      expect(chartData).toBeDefined();
+      expect(chartData.type).toBe("expense");
+    });
+
+    test("getChartDataByLinkId throws for expired report", async () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 1);
+
+      const created = await createReport(db, {
+        type: "revenue",
+        from: "2024-01-01",
+        to: "2024-03-31",
+        currency: "USD",
+        teamId: TEAM_USD_ID,
+        createdBy: TEST_USER_ID,
+        expireAt: pastDate.toISOString(),
+      });
+
+      expect(getChartDataByLinkId(db, created!.linkId!)).rejects.toThrow();
+    });
+
+    test("getReportByLinkId returns undefined for non-existent link", async () => {
+      const result = await getReportByLinkId(db, "nonexistent-link-id-xxx");
+      expect(result).toBeUndefined();
     });
   });
 });

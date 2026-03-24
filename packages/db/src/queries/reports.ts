@@ -159,6 +159,7 @@ function resolvedAmount(targetCurrency: string) {
       SELECT ${exchangeRates.rate} FROM ${exchangeRates}
       WHERE ${exchangeRates.base} = ${transactions.currency}
         AND ${exchangeRates.target} = ${sql`${targetCurrency}`}
+      ORDER BY ${exchangeRates.updatedAt} DESC NULLS LAST
       LIMIT 1
     )
   END`;
@@ -1228,7 +1229,7 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
     ? sql`CASE
         WHEN t.base_currency = ${targetCurrency} AND t.base_amount IS NOT NULL THEN t.base_amount
         WHEN t.currency = ${targetCurrency} THEN t.amount
-        ELSE t.amount * (SELECT er.rate FROM exchange_rates er WHERE er.base = t.currency AND er.target = ${targetCurrency} LIMIT 1)
+        ELSE t.amount * (SELECT er.rate FROM exchange_rates er WHERE er.base = t.currency AND er.target = ${targetCurrency} ORDER BY er.updated_at DESC NULLS LAST LIMIT 1)
       END`
     : sql`COALESCE(t.base_amount, t.amount)`;
 
@@ -1832,6 +1833,7 @@ export async function getOverdueInvoicesAlert(
       SELECT ${exchangeRates.rate} FROM ${exchangeRates}
       WHERE ${exchangeRates.base} = ${invoices.currency}
         AND ${exchangeRates.target} = ${effectiveCurrency}
+      ORDER BY ${exchangeRates.updatedAt} DESC NULLS LAST
       LIMIT 1
     )
   END`;
@@ -1905,6 +1907,7 @@ export async function getOutstandingInvoices(
       SELECT ${exchangeRates.rate} FROM ${exchangeRates}
       WHERE ${exchangeRates.base} = ${invoices.currency}
         AND ${exchangeRates.target} = ${effectiveCurrency}
+      ORDER BY ${exchangeRates.updatedAt} DESC NULLS LAST
       LIMIT 1
     )
   END`;
@@ -2786,6 +2789,7 @@ export async function getRevenueForecast(
       SELECT ${exchangeRates.rate} FROM ${exchangeRates}
       WHERE ${exchangeRates.base} = ${invoices.currency}
         AND ${exchangeRates.target} = ${effectiveCurrency}
+      ORDER BY ${exchangeRates.updatedAt} DESC NULLS LAST
       LIMIT 1
     )
   END`;
