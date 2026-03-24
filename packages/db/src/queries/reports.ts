@@ -1295,7 +1295,10 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
     .from(transactions)
     .leftJoin(
       tc,
-      and(eq(transactions.categorySlug, tc.slug), eq(transactions.teamId, tc.teamId)),
+      and(
+        eq(transactions.categorySlug, tc.slug),
+        eq(transactions.teamId, tc.teamId),
+      ),
     )
     .where(and(...conditions))
     .groupBy(
