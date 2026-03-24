@@ -13,7 +13,6 @@ export const recurringSeriesPaused: NotificationHandler = {
     metadata: {
       recordId: data.recurringId,
       customerName: data.customerName,
-      customerWebsite: data.customerWebsite,
       reason: data.reason,
       failureCount: data.failureCount,
       userName: user.full_name,

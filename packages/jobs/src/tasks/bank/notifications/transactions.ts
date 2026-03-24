@@ -23,9 +23,7 @@ export const transactionNotifications = schemaTask({
         .update({ notified: true })
         .eq("team_id", teamId)
         .eq("notified", false)
-        .select(
-          "id, date, amount, name, currency, category, status, bank_account_id",
-        )
+        .select("id, date, amount, name, currency, category, status")
         .order("date", { ascending: false })
         .throwOnError();
 
@@ -34,27 +32,8 @@ export const transactionNotifications = schemaTask({
       });
 
       if (sortedTransactions && sortedTransactions.length > 0) {
-        // Resolve bank logo URL from the first transaction's bank account -> bank connection
-        let bankLogoUrl: string | undefined;
-        const bankAccountId = sortedTransactions[0]?.bank_account_id;
-        if (bankAccountId) {
-          const { data: accountData } = await supabase
-            .from("bank_accounts")
-            .select("bank_connection_id")
-            .eq("id", bankAccountId)
-            .single();
-
-          if (accountData?.bank_connection_id) {
-            const { data: connectionData } = await supabase
-              .from("bank_connections")
-              .select("logo_url")
-              .eq("id", accountData.bank_connection_id)
-              .single();
-
-            bankLogoUrl = connectionData?.logo_url ?? undefined;
-          }
-        }
-
+        // Create notification - ProviderNotificationService will handle provider-specific
+        // notifications (e.g., Slack) based on app settings
         await notifications.create(
           "transactions_created",
           teamId,
@@ -66,7 +45,6 @@ export const transactionNotifications = schemaTask({
               name: transaction.name,
               currency: transaction.currency,
             })),
-            bankLogoUrl,
           },
           {
             sendEmail: true,

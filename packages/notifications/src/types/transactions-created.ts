@@ -22,7 +22,6 @@ export const transactionsCreated: NotificationHandler = {
           from: lastTransaction?.date,
           to: firstTransaction?.date,
         },
-        ...(data.bankLogoUrl && { bankLogoUrl: data.bankLogoUrl }),
         // For single transactions, store the transaction details for richer notifications
         ...(data.transactions.length === 1 &&
           firstTransaction && {

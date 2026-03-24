@@ -3,7 +3,7 @@ import type { Queue } from "bullmq";
 import { accountingQueue } from "../queues/accounting";
 import { documentsQueue } from "../queues/documents";
 import { inboxProviderQueue, inboxQueue } from "../queues/inbox";
-
+import { insightsQueue } from "../queues/insights";
 import { institutionsQueue } from "../queues/institutions";
 import { invoicesQueue } from "../queues/invoices";
 import { notificationsQueue } from "../queues/notifications";
@@ -33,7 +33,8 @@ function getQueueByName(queueName: string): Queue {
       return accountingQueue;
     case "invoices":
       return invoicesQueue;
-
+    case "insights":
+      return insightsQueue;
     case "notifications":
       return notificationsQueue;
     case "institutions":

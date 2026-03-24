@@ -20,7 +20,7 @@ import { inboxAutoMatched } from "./types/inbox-auto-matched";
 import { inboxCrossCurrencyMatched } from "./types/inbox-cross-currency-matched";
 import { inboxNeedsReview } from "./types/inbox-needs-review";
 import { inboxNew } from "./types/inbox-new";
-
+import { insightReady } from "./types/insight-ready";
 import { invoiceCancelled } from "./types/invoice-cancelled";
 import { invoiceCreated } from "./types/invoice-created";
 import { invoiceOverdue } from "./types/invoice-overdue";
@@ -61,6 +61,7 @@ const handlers = {
   recurring_series_started: recurringSeriesStarted,
   recurring_series_paused: recurringSeriesPaused,
   recurring_invoice_upcoming: recurringInvoiceUpcoming,
+  insight_ready: insightReady,
 } as const;
 
 export class Notifications {

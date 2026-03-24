@@ -35,6 +35,7 @@ export const createActivitySchema = z.object({
     "recurring_series_started",
     "recurring_series_paused",
     "recurring_invoice_upcoming",
+    "insight_ready",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
@@ -76,7 +77,6 @@ export const invoiceSchema = z.object({
 export const transactionsCreatedSchema = z.object({
   users: z.array(userSchema),
   transactions: z.array(transactionSchema),
-  bankLogoUrl: z.string().optional(),
 });
 
 export const transactionsExportedSchema = z.object({
@@ -171,7 +171,6 @@ export const invoicePaidSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
-  customerWebsite: z.string().optional(),
   paidAt: z.string().optional(),
   source: z.enum(["user", "system"]).default("system"),
 });
@@ -181,7 +180,6 @@ export const invoiceOverdueSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string(),
-  customerWebsite: z.string().optional(),
   source: z.enum(["user", "system"]).default("system"),
 });
 
@@ -191,7 +189,6 @@ export const invoiceScheduledSchema = z.object({
   invoiceNumber: z.string(),
   scheduledAt: z.string(),
   customerName: z.string().optional(),
-  customerWebsite: z.string().optional(),
 });
 
 export const invoiceSentSchema = z.object({
@@ -200,7 +197,6 @@ export const invoiceSentSchema = z.object({
   token: z.string(),
   invoiceNumber: z.string(),
   customerName: z.string(),
-  customerWebsite: z.string().optional(),
   customerEmail: z.string().email().optional(),
   // Gmail structured data fields
   amount: z.number().optional(),
@@ -226,7 +222,6 @@ export const invoiceReminderSentSchema = z.object({
   token: z.string(),
   invoiceNumber: z.string(),
   customerName: z.string(),
-  customerWebsite: z.string().optional(),
   customerEmail: z.string().email().optional(),
   // Gmail structured data fields
   amount: z.number().optional(),
@@ -239,7 +234,6 @@ export const invoiceCancelledSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
-  customerWebsite: z.string().optional(),
 });
 
 export const invoiceCreatedSchema = z.object({
@@ -247,7 +241,6 @@ export const invoiceCreatedSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
-  customerWebsite: z.string().optional(),
   amount: z.number().optional(),
   currency: z.string().optional(),
 });
@@ -257,7 +250,6 @@ export const invoiceRefundedSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
-  customerWebsite: z.string().optional(),
   refundedAt: z.string().optional(),
 });
 
@@ -266,7 +258,6 @@ export const recurringSeriesCompletedSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
-  customerWebsite: z.string().optional(),
   recurringId: z.string().uuid(),
   totalGenerated: z.number(),
 });
@@ -274,10 +265,9 @@ export const recurringSeriesCompletedSchema = z.object({
 export const recurringSeriesStartedSchema = z.object({
   users: z.array(userSchema),
   recurringId: z.string().uuid(),
-  invoiceId: z.string().uuid().optional(),
+  invoiceId: z.string().uuid().optional(), // First invoice ID if linked
   invoiceNumber: z.string().optional(),
   customerName: z.string().optional(),
-  customerWebsite: z.string().optional(),
   frequency: z.string(),
   endType: z.enum(["never", "on_date", "after_count"]),
   endDate: z.string().optional(),
@@ -288,7 +278,6 @@ export const recurringSeriesPausedSchema = z.object({
   users: z.array(userSchema),
   recurringId: z.string().uuid(),
   customerName: z.string().optional(),
-  customerWebsite: z.string().optional(),
   reason: z.enum(["manual", "auto_failure"]).default("manual"),
   failureCount: z.number().optional(),
 });
@@ -319,6 +308,17 @@ export const transactionsAssignedSchema = z.object({
   users: z.array(userSchema),
   assignedUserId: z.string(),
   transactionIds: z.array(z.string()),
+});
+
+export const insightReadySchema = z.object({
+  users: z.array(userSchema),
+  insightId: z.string(),
+  periodType: z.enum(["weekly", "monthly", "quarterly", "yearly"]),
+  periodLabel: z.string(),
+  periodNumber: z.number(),
+  periodYear: z.number(),
+  title: z.string().optional(),
+  audioUrl: z.string().optional(),
 });
 
 export type UserData = z.infer<typeof userSchema>;
@@ -371,6 +371,8 @@ export type TransactionsCategorizedInput = z.infer<
 export type TransactionsAssignedInput = z.infer<
   typeof transactionsAssignedSchema
 >;
+export type InsightReadyInput = z.infer<typeof insightReadySchema>;
+
 // Notification types map - all available notification types with their data structures
 export type NotificationTypes = {
   transactions_created: TransactionsCreatedInput;
@@ -395,4 +397,5 @@ export type NotificationTypes = {
   recurring_series_started: RecurringSeriesStartedInput;
   recurring_series_paused: RecurringSeriesPausedInput;
   recurring_invoice_upcoming: RecurringInvoiceUpcomingInput;
+  insight_ready: InsightReadyInput;
 };

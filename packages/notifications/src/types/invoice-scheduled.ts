@@ -14,7 +14,6 @@ export const invoiceScheduled: NotificationHandler = {
       recordId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
-      customerWebsite: data.customerWebsite,
       scheduledAt: data.scheduledAt,
     },
   }),

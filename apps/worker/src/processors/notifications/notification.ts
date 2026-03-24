@@ -1,4 +1,3 @@
-import { getCustomerWebsiteByInvoiceId } from "@midday/db/queries";
 import { Notifications } from "@midday/notifications";
 import type { Job } from "bullmq";
 import {
@@ -16,6 +15,7 @@ import { BaseProcessor } from "../base";
  * Uses Zod discriminated union for type-safe payload handling.
  *
  * Notification types handled here:
+ * - insight_ready: Weekly/monthly AI insights are ready
  * - inbox_new: New items in inbox from email/sync/slack/upload
  * - document_uploaded: Document uploaded to vault
  * - document_processed: Document processed and classified
@@ -53,6 +53,33 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
 
     // TypeScript automatically narrows the type based on the discriminant
     switch (payload.type) {
+      // ========================================
+      // Insight Notifications
+      // ========================================
+      case "insight_ready": {
+        await notifications.create(
+          "insight_ready",
+          payload.teamId,
+          {
+            insightId: payload.insightId,
+            periodType: payload.periodType,
+            periodLabel: payload.periodLabel,
+            periodNumber: payload.periodNumber,
+            periodYear: payload.periodYear,
+            title: payload.title,
+            audioUrl: payload.audioUrl,
+          },
+          { sendEmail: true },
+        );
+
+        this.logger.info("Insight ready notification sent", {
+          insightId: payload.insightId,
+          teamId: payload.teamId,
+          periodLabel: payload.periodLabel,
+        });
+        break;
+      }
+
       // ========================================
       // Inbox Notifications
       // ========================================
@@ -137,11 +164,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
       // Invoice Notifications
       // ========================================
       case "invoice_paid": {
-        const customerWebsite =
-          payload.customerWebsite ??
-          (await getCustomerWebsiteByInvoiceId(db, payload.invoiceId)) ??
-          undefined;
-
         await notifications.create(
           "invoice_paid",
           payload.teamId,
@@ -149,7 +171,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
             invoiceId: payload.invoiceId,
             invoiceNumber: payload.invoiceNumber,
             customerName: payload.customerName,
-            customerWebsite,
             paidAt: payload.paidAt,
             source: "system",
           },
@@ -173,11 +194,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
       }
 
       case "invoice_overdue": {
-        const customerWebsite =
-          payload.customerWebsite ??
-          (await getCustomerWebsiteByInvoiceId(db, payload.invoiceId)) ??
-          undefined;
-
         await notifications.create(
           "invoice_overdue",
           payload.teamId,
@@ -185,7 +201,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
             invoiceId: payload.invoiceId,
             invoiceNumber: payload.invoiceNumber,
             customerName: payload.customerName || "Unknown",
-            customerWebsite,
             source: "system",
           },
           { sendEmail: true },
@@ -222,11 +237,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
       }
 
       case "invoice_cancelled": {
-        const customerWebsite =
-          payload.customerWebsite ??
-          (await getCustomerWebsiteByInvoiceId(db, payload.invoiceId)) ??
-          undefined;
-
         await notifications.create(
           "invoice_cancelled",
           payload.teamId,
@@ -234,7 +244,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
             invoiceId: payload.invoiceId,
             invoiceNumber: payload.invoiceNumber,
             customerName: payload.customerName,
-            customerWebsite,
           },
           { sendEmail: false },
         );
@@ -248,11 +257,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
       }
 
       case "invoice_scheduled": {
-        const customerWebsite =
-          payload.customerWebsite ??
-          (await getCustomerWebsiteByInvoiceId(db, payload.invoiceId)) ??
-          undefined;
-
         await notifications.create(
           "invoice_scheduled",
           payload.teamId,
@@ -261,7 +265,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
             invoiceNumber: payload.invoiceNumber,
             scheduledAt: payload.scheduledAt,
             customerName: payload.customerName,
-            customerWebsite,
           },
           { sendEmail: false },
         );
@@ -292,11 +295,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
       }
 
       case "invoice_refunded": {
-        const customerWebsite =
-          payload.customerWebsite ??
-          (await getCustomerWebsiteByInvoiceId(db, payload.invoiceId)) ??
-          undefined;
-
         await notifications.create(
           "invoice_refunded",
           payload.teamId,
@@ -304,7 +302,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
             invoiceId: payload.invoiceId,
             invoiceNumber: payload.invoiceNumber,
             customerName: payload.customerName,
-            customerWebsite,
             refundedAt: payload.refundedAt,
           },
           { sendEmail: false },
@@ -319,11 +316,8 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
       }
 
       case "invoice_recurring_generated": {
-        const customerWebsite =
-          payload.customerWebsite ??
-          (await getCustomerWebsiteByInvoiceId(db, payload.invoiceId)) ??
-          undefined;
-
+        // Create in-app notification for recurring invoice generation
+        // Note: The email is sent via the generate-invoice task, so we only do in-app here
         await notifications.create(
           "invoice_created",
           payload.teamId,
@@ -331,7 +325,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
             invoiceId: payload.invoiceId,
             invoiceNumber: payload.invoiceNumber,
             customerName: payload.customerName,
-            customerWebsite,
           },
           { sendEmail: false },
         );
@@ -347,11 +340,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
       }
 
       case "recurring_series_completed": {
-        const customerWebsite =
-          payload.customerWebsite ??
-          (await getCustomerWebsiteByInvoiceId(db, payload.invoiceId)) ??
-          undefined;
-
         await notifications.create(
           "recurring_series_completed",
           payload.teamId,
@@ -359,7 +347,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
             invoiceId: payload.invoiceId,
             invoiceNumber: payload.invoiceNumber,
             customerName: payload.customerName,
-            customerWebsite,
             recurringId: payload.recurringId,
             totalGenerated: payload.totalGenerated,
           },
@@ -383,7 +370,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
           {
             recurringId: payload.recurringId,
             customerName: payload.customerName,
-            customerWebsite: payload.customerWebsite,
             reason: "auto_failure",
             failureCount: 3,
           },

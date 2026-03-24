@@ -42,6 +42,7 @@ const notificationsWorkerOptions: WorkerOptions = {
 /**
  * Notifications queue configuration
  * Unified queue for all notification types:
+ * - insight_ready
  * - inbox_new
  * - document_uploaded, document_processed
  * - invoice_paid, invoice_overdue, invoice_sent, etc.
