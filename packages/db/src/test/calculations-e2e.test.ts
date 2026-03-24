@@ -722,8 +722,7 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
   // ─────────────────────────────────────────────────────────────────────────
   // TAX SUMMARY
   //
-  // Uses raw SQL via executeOnReplica.
-  // Tax rate resolves: COALESCE(t.tax_rate, tc.tax_rate, 0)
+  // Tax rate resolves: COALESCE(transactions.taxRate, tc.taxRate, 0)
   // Tax amount = ABS(amount * tax / (100 + tax))
   // ─────────────────────────────────────────────────────────────────────────
 

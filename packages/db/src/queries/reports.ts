@@ -1222,94 +1222,90 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
   const fromDate = startOfMonth(new UTCDate(parseISO(from))).toISOString();
   const toDate = endOfMonth(new UTCDate(parseISO(to))).toISOString();
 
-  // Always resolve to a single target currency to avoid mixing
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
 
-  const resolvedAmtSql = targetCurrency
-    ? sql`CASE
-        WHEN t.base_currency = ${targetCurrency} AND t.base_amount IS NOT NULL THEN t.base_amount
-        WHEN t.currency = ${targetCurrency} THEN t.amount
-        ELSE t.amount * (SELECT er.rate FROM exchange_rates er WHERE er.base = t.currency AND er.target = ${targetCurrency} ORDER BY er.updated_at DESC NULLS LAST LIMIT 1)
-      END`
-    : sql`COALESCE(t.base_amount, t.amount)`;
+  const amtExpr = targetCurrency
+    ? resolvedAmount(targetCurrency)
+    : sql`COALESCE(${transactions.baseAmount}, ${transactions.amount})`;
 
-  // Build the base query with conditions
+  const tc = transactionCategories;
+
   const conditions = [
-    sql`t.team_id = ${teamId}`,
-    sql`t.internal = false`,
-    sql`t.status != 'excluded'`,
-    sql`t.date >= ${fromDate}`,
-    sql`t.date <= ${toDate}`,
+    eq(transactions.teamId, teamId),
+    eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
+    gte(transactions.date, fromDate),
+    lte(transactions.date, toDate),
   ];
 
   if (targetCurrency) {
     if (type === "paid") {
-      conditions.push(sql`(${resolvedAmtSql} < 0)`);
+      conditions.push(sql`(${amtExpr} < 0)`);
     } else {
-      conditions.push(sql`(${resolvedAmtSql} > 0)`);
+      conditions.push(sql`(${amtExpr} > 0)`);
     }
     conditions.push(
-      sql`(t.currency = ${targetCurrency} OR t.base_currency = ${targetCurrency})`,
+      or(
+        eq(transactions.currency, targetCurrency),
+        eq(transactions.baseCurrency, targetCurrency),
+      )!,
     );
   } else {
     if (type === "paid") {
-      conditions.push(sql`t.amount < 0`);
+      conditions.push(lt(transactions.amount, 0));
     } else {
-      conditions.push(sql`t.amount > 0`);
+      conditions.push(gt(transactions.amount, 0));
     }
   }
 
-  // Add optional filters
   if (categorySlug) {
-    conditions.push(sql`tc.slug = ${categorySlug}`);
+    conditions.push(eq(tc.slug, categorySlug));
   }
 
   if (taxType) {
-    conditions.push(sql`(COALESCE(t.tax_type, tc.tax_type) = ${taxType})`);
+    conditions.push(
+      sql`(COALESCE(${transactions.taxType}, ${tc.taxType}) = ${taxType})`,
+    );
   }
 
-  // Add condition to only include transactions with tax rates or tax amounts
   conditions.push(
-    sql`(t.tax_rate IS NOT NULL OR t.tax_amount IS NOT NULL OR tc.tax_rate IS NOT NULL)`,
+    or(
+      isNotNull(transactions.taxRate),
+      isNotNull(transactions.taxAmount),
+      isNotNull(tc.taxRate),
+    )!,
   );
 
-  // Exclude transactions in excluded categories
-  conditions.push(sql`(tc.excluded IS NULL OR tc.excluded = false)`);
+  conditions.push(or(isNull(tc.excluded), eq(tc.excluded, false))!);
 
-  const whereClause = sql.join(conditions, sql` AND `);
+  const taxRateExpr = sql`COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0)`;
 
-  const query = sql`
-    SELECT 
-      COALESCE(tc.slug, 'uncategorized') as category_slug,
-      COALESCE(tc.name, 'Uncategorized') as category_name,
-      ROUND(ABS(SUM(${resolvedAmtSql} * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))), 2)::text as total_tax_amount,
-      ROUND(ABS(SUM(${resolvedAmtSql})), 2)::text as total_transaction_amount,
-      COUNT(t.id) as transaction_count,
-      ROUND(AVG(COALESCE(t.tax_rate, tc.tax_rate)), 2)::text as avg_tax_rate,
-      COALESCE(t.tax_type, tc.tax_type) as tax_type,
-      MIN(t.date) as earliest_date,
-      MAX(t.date) as latest_date
-    FROM transactions t
-    LEFT JOIN transaction_categories tc ON t.category_slug = tc.slug AND t.team_id = tc.team_id
-    WHERE ${whereClause}
-    GROUP BY 
-      COALESCE(tc.slug, 'uncategorized'),
-      COALESCE(tc.name, 'Uncategorized'),
-      COALESCE(t.tax_type, tc.tax_type)
-    ORDER BY ROUND(ABS(SUM(${resolvedAmtSql} * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))), 2) DESC
-  `;
-
-  const rawData = (await db.executeOnReplica(query)) as unknown as Array<{
-    category_slug: string;
-    category_name: string;
-    total_tax_amount: string;
-    total_transaction_amount: string;
-    transaction_count: number;
-    avg_tax_rate: string;
-    tax_type: string;
-    earliest_date: string;
-    latest_date: string;
-  }>;
+  const rawData = await db
+    .select({
+      category_slug: sql<string>`COALESCE(${tc.slug}, 'uncategorized')`,
+      category_name: sql<string>`COALESCE(${tc.name}, 'Uncategorized')`,
+      total_tax_amount: sql<string>`ROUND(ABS(SUM(${amtExpr} * ${taxRateExpr} / (100 + ${taxRateExpr}))), 2)::text`,
+      total_transaction_amount: sql<string>`ROUND(ABS(SUM(${amtExpr})), 2)::text`,
+      transaction_count: sql<number>`COUNT(${transactions.id})`,
+      avg_tax_rate: sql<string>`ROUND(AVG(COALESCE(${transactions.taxRate}, ${tc.taxRate})), 2)::text`,
+      tax_type: sql<string>`COALESCE(${transactions.taxType}, ${tc.taxType})`,
+      earliest_date: sql<string>`MIN(${transactions.date})`,
+      latest_date: sql<string>`MAX(${transactions.date})`,
+    })
+    .from(transactions)
+    .leftJoin(
+      tc,
+      and(eq(transactions.categorySlug, tc.slug), eq(transactions.teamId, tc.teamId)),
+    )
+    .where(and(...conditions))
+    .groupBy(
+      sql`COALESCE(${tc.slug}, 'uncategorized')`,
+      sql`COALESCE(${tc.name}, 'Uncategorized')`,
+      sql`COALESCE(${transactions.taxType}, ${tc.taxType})`,
+    )
+    .orderBy(
+      sql`ROUND(ABS(SUM(${amtExpr} * ${taxRateExpr} / (100 + ${taxRateExpr}))), 2) DESC`,
+    );
 
   const effectiveCurrency = targetCurrency || "USD";
 
@@ -1846,6 +1842,8 @@ export async function getOverdueInvoicesAlert(
 
   if (inputCurrency && targetCurrency) {
     conditions.push(eq(invoices.currency, targetCurrency));
+  } else {
+    conditions.push(sql`(${resolvedInvoiceAmount} IS NOT NULL)`);
   }
 
   const result = await db
@@ -1918,9 +1916,10 @@ export async function getOutstandingInvoices(
     inArray(invoices.status, status),
   ];
 
-  // When explicit currency is requested, only include invoices in that currency
   if (inputCurrency && targetCurrency) {
     conditions.push(eq(invoices.currency, targetCurrency));
+  } else {
+    conditions.push(sql`(${resolvedInvoiceAmount} IS NOT NULL)`);
   }
 
   const result = await db
