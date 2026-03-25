@@ -16,13 +16,15 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
     return;
   }
 
+  const { sort: _sort, ...documentsListFields } = getDocumentsSchema.shape;
+
   server.registerTool(
     "documents_list",
     {
       title: "List Documents",
       description:
         "List documents and files stored in the vault. Supports free-text search and tag filtering. Returns paginated results (default 25) with document name, type, size, and creation date.",
-      inputSchema: getDocumentsSchema.shape,
+      inputSchema: documentsListFields,
       outputSchema: {
         data: z.array(z.record(z.string(), z.any())),
         hasMore: z.boolean(),
@@ -40,7 +42,7 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,
       };
     },
@@ -82,7 +84,7 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
       const content: McpContent[] = [
         {
           type: "text",
-          text: JSON.stringify({ ...result, fileUrl }, null, 2),
+          text: JSON.stringify({ ...result, fileUrl }),
         },
       ];
 

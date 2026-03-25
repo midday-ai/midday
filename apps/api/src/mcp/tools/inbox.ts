@@ -21,7 +21,7 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
     {
       title: "List Inbox Items",
       description:
-        "List inbox items (uploaded receipts, invoices, and documents pending processing). Filter by status to find pending, processing, or matched items. Returns paginated results (default 25) with file name, status, and matched transaction.",
+        "List inbox items (uploaded receipts, invoices, and documents pending processing). Filter by status (pending, done, suggested_match, no_match, other). Returns paginated results (default 25) with file name, status, and matched transaction.",
       inputSchema: getInboxSchema.shape,
       outputSchema: {
         data: z.array(z.record(z.string(), z.any())),
@@ -42,7 +42,7 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,
       };
     },
@@ -87,7 +87,7 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
       const content: McpContent[] = [
         {
           type: "text",
-          text: JSON.stringify({ ...result, fileUrl }, null, 2),
+          text: JSON.stringify({ ...result, fileUrl }),
         },
       ];
 

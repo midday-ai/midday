@@ -522,6 +522,7 @@ export const getInvoicesSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe("Pagination cursor from previous response")
     .openapi({
       description:
         "A cursor for pagination, representing the last item from the previous page.",
@@ -548,6 +549,7 @@ export const getInvoicesSchema = z.object({
     .min(1)
     .max(100)
     .optional()
+    .describe("Number of invoices per page (1-100)")
     .openapi({
       description: "Number of invoices to return per page (1-100).",
       param: { in: "query" },
@@ -557,6 +559,7 @@ export const getInvoicesSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe("Search query to filter invoices by text")
     .openapi({
       description: "Search query string to filter invoices by text.",
       param: { in: "query" },
@@ -566,6 +569,7 @@ export const getInvoicesSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe("Start date (inclusive) in ISO 8601 format")
     .openapi({
       description:
         "Start date (inclusive) for filtering invoices, in ISO 8601 format.",
@@ -576,6 +580,7 @@ export const getInvoicesSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe("End date (inclusive) in ISO 8601 format")
     .openapi({
       description:
         "End date (inclusive) for filtering invoices, in ISO 8601 format.",
@@ -586,6 +591,9 @@ export const getInvoicesSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe(
+      "Filter by invoice status: draft, unpaid, paid, overdue, canceled, scheduled",
+    )
     .openapi({
       description:
         "List of invoice statuses to filter by (e.g., 'paid', 'unpaid', 'overdue').",
@@ -596,6 +604,7 @@ export const getInvoicesSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe("Filter by customer IDs")
     .openapi({
       description: "List of customer IDs to filter invoices.",
       param: { in: "query" },
@@ -605,6 +614,7 @@ export const getInvoicesSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe("Filter by specific invoice IDs")
     .openapi({
       description: "List of invoice IDs to filter by.",
       param: { in: "query" },
@@ -614,6 +624,7 @@ export const getInvoicesSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe("Filter by recurring series IDs")
     .openapi({
       description:
         "List of recurring series IDs to filter invoices by (shows all invoices from these series).",
@@ -624,6 +635,7 @@ export const getInvoicesSchema = z.object({
     .boolean()
     .nullable()
     .optional()
+    .describe("true = only recurring invoices, false = only non-recurring")
     .openapi({
       description:
         "Filter by recurring status. true = only recurring invoices, false = only non-recurring invoices.",
@@ -652,6 +664,9 @@ export const invoiceSummarySchema = z
         z.enum(["draft", "overdue", "paid", "unpaid", "canceled", "scheduled"]),
       )
       .optional()
+      .describe(
+        "Filter summary to specific statuses: draft, overdue, paid, unpaid, canceled, scheduled",
+      )
       .openapi({
         description: "Filter summary by invoice statuses",
         example: ["draft", "unpaid"],

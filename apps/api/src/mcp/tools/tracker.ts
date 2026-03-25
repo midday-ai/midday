@@ -54,13 +54,34 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
   // ==========================================
 
   if (hasProjectReadScope) {
+    const { sort: _sort, ...trackerProjectsListFields } =
+      getTrackerProjectsSchema.shape;
+
     server.registerTool(
       "tracker_projects_list",
       {
         title: "List Tracker Projects",
         description:
-          "List time tracking projects with filtering by status (active/completed), customer, date range, tags, and search. Returns paginated results (default 25) with project name, billable rate, estimate, total tracked hours, and customer.",
-        inputSchema: getTrackerProjectsSchema.shape,
+          "List time tracking projects with filtering by status (in_progress/completed), customer, date range, tags, and search. Returns paginated results (default 25) with project name, billable rate, estimate, total tracked hours, and customer.",
+        inputSchema: {
+          ...trackerProjectsListFields,
+          sortBy: z
+            .enum([
+              "name",
+              "created_at",
+              "time",
+              "amount",
+              "assigned",
+              "customer",
+              "tags",
+            ])
+            .optional()
+            .describe("Column to sort by"),
+          sortDirection: z
+            .enum(["asc", "desc"])
+            .optional()
+            .describe("Sort direction"),
+        },
         outputSchema: {
           data: z.array(z.record(z.string(), z.any())),
           hasMore: z.boolean(),
@@ -69,6 +90,11 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: READ_ONLY_ANNOTATIONS,
       },
       async (params) => {
+        const sort =
+          params.sortBy && params.sortDirection
+            ? [params.sortBy, params.sortDirection]
+            : null;
+
         const result = await getTrackerProjects(db, {
           teamId,
           cursor: params.cursor ?? null,
@@ -78,12 +104,12 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           customers: params.customers ?? null,
           start: params.start ?? null,
           end: params.end ?? null,
-          sort: params.sort ?? null,
+          sort,
           tags: params.tags ?? null,
         });
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
           structuredContent: result,
         };
       },
@@ -114,7 +140,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         }
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
           structuredContent: { data: result },
         };
       },
@@ -155,7 +181,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           });
 
           return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(result) }],
           };
         } catch (error) {
           return {
@@ -225,7 +251,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         });
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       },
     );
@@ -279,7 +305,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "List Tracker Entries",
         description:
-          "List time tracking entries within a date range. Optionally filter by project ID. Returns entries with start/stop times, duration, description, project, and assigned user. Both from and to dates are required (YYYY-MM-DD).",
+          "List time tracking entries within a date range. Optionally filter by project ID. Returns entries grouped by date with start/stop times, duration, description, project, and assigned user. Both from and to dates are required (YYYY-MM-DD). Large ranges are automatically truncated — use narrower date ranges for complete data.",
         inputSchema: {
           from: z.string().describe("Start date (YYYY-MM-DD) — required"),
           to: z.string().describe("End date (YYYY-MM-DD) — required"),
@@ -290,7 +316,8 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             .describe("Filter by project ID"),
         },
         outputSchema: {
-          data: z.array(z.record(z.string(), z.any())),
+          meta: z.record(z.string(), z.any()),
+          result: z.record(z.string(), z.any()),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -302,9 +329,43 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           projectId: params.projectId,
         });
 
+        const maxEntries = 500;
+        const dates = Object.keys(result.result).sort().reverse();
+        let entryCount = 0;
+        const truncated: Record<string, unknown[]> = {};
+
+        for (const date of dates) {
+          const entries = result.result[date] as unknown[];
+          if (entryCount + entries.length <= maxEntries) {
+            truncated[date] = entries;
+            entryCount += entries.length;
+          } else {
+            const remaining = maxEntries - entryCount;
+            if (remaining > 0) {
+              truncated[date] = entries.slice(0, remaining);
+              entryCount += remaining;
+            }
+            break;
+          }
+        }
+
+        const wasTruncated =
+          entryCount < Object.values(result.result).flat().length;
+        const response = {
+          meta: {
+            ...result.meta,
+            ...(wasTruncated && {
+              truncated: true,
+              returnedEntries: entryCount,
+              hint: "Use a narrower date range for complete data",
+            }),
+          },
+          result: truncated,
+        };
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(response) }],
+          structuredContent: response,
         };
       },
     );
@@ -335,7 +396,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         });
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
           structuredContent: { data: result },
         };
       },
@@ -348,7 +409,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "Create Tracker Entry",
         description:
-          "Create a manual time tracking entry. Requires a project ID, at least one date, start/stop times (HH:MM format), and duration in seconds. Optionally assign to a team member.",
+          "Create a manual time tracking entry. Requires a project ID, at least one date (YYYY-MM-DD), start/stop times (ISO 8601 datetime), and duration in seconds. Optionally assign to a team member.",
         inputSchema: {
           projectId: upsertTrackerEntriesSchema.shape.projectId,
           dates: upsertTrackerEntriesSchema.shape.dates,
@@ -374,7 +435,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           });
 
           return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(result) }],
           };
         } catch (error) {
           return {
@@ -452,7 +513,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         });
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       },
     );
@@ -520,7 +581,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           });
 
           return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(result) }],
           };
         } catch (error) {
           return {
@@ -562,7 +623,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           });
 
           return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(result) }],
           };
         } catch (error) {
           return {

@@ -11,7 +11,7 @@ export function validateClientCredentials(
   application: OAuthApplication | null | undefined,
   clientSecret: string,
 ): boolean {
-  if (!application || !application.active) {
+  if (!application?.active) {
     return false;
   }
 

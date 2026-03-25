@@ -32,7 +32,7 @@ export const registerTeamTools: RegisterTools = (server, ctx) => {
       }
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
     },
@@ -54,7 +54,7 @@ export const registerTeamTools: RegisterTools = (server, ctx) => {
       const result = await getTeamMembers(db, teamId);
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
     },

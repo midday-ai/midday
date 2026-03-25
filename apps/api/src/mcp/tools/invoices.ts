@@ -37,13 +37,33 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
   }
 
   if (hasReadScope) {
+    const { sort: _sort, ...invoicesListFields } = getInvoicesSchema.shape;
+
     server.registerTool(
       "invoices_list",
       {
         title: "List Invoices",
         description:
-          "List invoices with filtering by status (draft, sent, paid, overdue, canceled, unpaid), customer, date range, and free-text search. Returns paginated results (default 25) with invoice number, amount, customer name, status, and PDF download URL.",
-        inputSchema: getInvoicesSchema.shape,
+          "List invoices with filtering by status (draft, unpaid, paid, overdue, canceled, scheduled), customer, date range, and free-text search. Returns paginated results (default 25) with invoice number, amount, customer name, status, and PDF download URL.",
+        inputSchema: {
+          ...invoicesListFields,
+          sortBy: z
+            .enum([
+              "created_at",
+              "due_date",
+              "issue_date",
+              "amount",
+              "status",
+              "customer",
+              "invoice_number",
+            ])
+            .optional()
+            .describe("Column to sort by"),
+          sortDirection: z
+            .enum(["asc", "desc"])
+            .optional()
+            .describe("Sort direction"),
+        },
         outputSchema: {
           data: z.array(z.record(z.string(), z.any())),
           hasMore: z.boolean(),
@@ -52,6 +72,11 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         annotations: READ_ONLY_ANNOTATIONS,
       },
       async (params) => {
+        const sort =
+          params.sortBy && params.sortDirection
+            ? [params.sortBy, params.sortDirection]
+            : null;
+
         const result = await getInvoices(db, {
           teamId,
           cursor: params.cursor ?? null,
@@ -61,7 +86,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           end: params.end ?? null,
           statuses: params.statuses ?? null,
           customers: params.customers ?? null,
-          sort: params.sort ?? null,
+          sort,
         });
 
         const data = result.data?.map((invoice) => ({
@@ -74,7 +99,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         const response = { ...result, data };
 
         return {
-          content: [{ type: "text", text: JSON.stringify(response, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(response) }],
           structuredContent: response,
         };
       },
@@ -113,7 +138,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         const content: McpContent[] = [
           {
             type: "text",
-            text: JSON.stringify({ ...result, pdfUrl }, null, 2),
+            text: JSON.stringify({ ...result, pdfUrl }),
           },
         ];
 
@@ -145,7 +170,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "Invoice Summary",
         description:
-          "Get aggregate invoice statistics: total count and amounts grouped by status (draft, sent, paid, overdue, canceled, unpaid). Optionally filter to specific statuses.",
+          "Get aggregate invoice statistics: total count and amounts grouped by status (draft, unpaid, paid, overdue, canceled, scheduled). Optionally filter to specific statuses.",
         inputSchema: invoiceSummarySchema.shape,
         outputSchema: {
           data: z.record(z.string(), z.any()),
@@ -159,7 +184,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         });
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
           structuredContent: { data: result },
         };
       },
@@ -221,7 +246,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         }
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       },
     );
@@ -276,7 +301,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         }
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       },
     );
@@ -370,7 +395,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           });
 
           return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(result) }],
           };
         } catch (error) {
           return {
@@ -438,7 +463,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         }
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       },
     );

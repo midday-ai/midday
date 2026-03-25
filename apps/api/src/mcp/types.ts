@@ -9,6 +9,10 @@ export interface McpContext {
   scopes: Scope[];
   apiUrl: string;
   timezone: string | null;
+  locale: string | null;
+  countryCode: string | null;
+  dateFormat: string | null;
+  timeFormat: number | null;
 }
 
 export type RegisterTools = (server: McpServer, ctx: McpContext) => void;

@@ -15,7 +15,7 @@ export const registerSearchTools: RegisterTools = (server, ctx) => {
     {
       title: "Global Search",
       description:
-        "Full-text search across all data types: transactions, invoices, customers, documents, inbox items, and more. Results are ranked by relevance. This is the fastest way to find something when you don't know which domain it belongs to. Returns up to 50 results (configurable via limit).",
+        "Full-text search across all data types: transactions, invoices, customers, documents, inbox items, and more. Results are ranked by relevance. This is the fastest way to find something when you don't know which domain it belongs to. Returns up to 30 results by default (configurable via limit, max 1000).",
       inputSchema: globalSearchSchema.shape,
       outputSchema: {
         data: z.array(z.record(z.string(), z.any())),
@@ -33,7 +33,7 @@ export const registerSearchTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
     },

@@ -116,7 +116,7 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
           const result = await getTransactions(db, {
             teamId,
             cursor: null,
-            pageSize: 50,
+            pageSize: 10,
             q: null,
             start: null,
             end: null,
@@ -175,7 +175,7 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
           const result = await getInvoices(db, {
             teamId,
             cursor: null,
-            pageSize: 50,
+            pageSize: 10,
             q: null,
             start: null,
             end: null,
@@ -225,7 +225,7 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
           const result = await getCustomers(db, {
             teamId,
             cursor: null,
-            pageSize: 50,
+            pageSize: 10,
             q: null,
             sort: null,
           });

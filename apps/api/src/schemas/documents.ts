@@ -2,11 +2,16 @@ import { z } from "@hono/zod-openapi";
 
 export const getDocumentsSchema = z
   .object({
-    cursor: z.string().nullable().optional().openapi({
-      description:
-        "A cursor for pagination. Pass the value returned from the previous response to get the next page.",
-      example: "20",
-    }),
+    cursor: z
+      .string()
+      .nullable()
+      .optional()
+      .describe("Pagination cursor from previous response")
+      .openapi({
+        description:
+          "A cursor for pagination. Pass the value returned from the previous response to get the next page.",
+        example: "20",
+      }),
     sort: z
       .array(z.string().min(1))
       .max(2)
@@ -23,18 +28,30 @@ export const getDocumentsSchema = z
           in: "query",
         },
       }),
-    pageSize: z.coerce.number().min(1).max(100).optional().openapi({
-      description: "Number of documents to return per page.",
-      example: 20,
-    }),
-    q: z.string().nullable().optional().openapi({
-      description: "Search query string to filter documents by text.",
-      example: "invoice",
-    }),
+    pageSize: z.coerce
+      .number()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe("Number of documents per page (1-100)")
+      .openapi({
+        description: "Number of documents to return per page.",
+        example: 20,
+      }),
+    q: z
+      .string()
+      .nullable()
+      .optional()
+      .describe("Search query to filter documents")
+      .openapi({
+        description: "Search query string to filter documents by text.",
+        example: "invoice",
+      }),
     tags: z
       .array(z.string())
       .nullable()
       .optional()
+      .describe("Filter by tag IDs")
       .openapi({
         description: "Array of tag IDs to filter documents by tags.",
         example: ["tag1", "tag2"],

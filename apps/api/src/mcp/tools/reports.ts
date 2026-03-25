@@ -64,7 +64,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,
       };
     },
@@ -91,7 +91,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,
       };
     },
@@ -118,7 +118,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
     },
@@ -143,7 +143,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { months: result },
       };
     },
@@ -168,7 +168,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,
       };
     },
@@ -195,7 +195,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
     },
@@ -227,7 +227,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       const data = Array.isArray(result) ? result : [result];
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data },
       };
     },
@@ -257,7 +257,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
     },
@@ -285,7 +285,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
     },
@@ -313,7 +313,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
     },
@@ -342,7 +342,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       const data = Array.isArray(result) ? result : [result];
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data },
       };
     },
@@ -375,7 +375,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,
       };
     },
@@ -401,7 +401,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       });
 
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
     },

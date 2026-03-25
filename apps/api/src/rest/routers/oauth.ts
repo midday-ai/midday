@@ -193,7 +193,7 @@ app.openapi(
 
     // Validate client_id
     const application = await getOAuthApplicationByClientId(db, client_id);
-    if (!application || !application.active) {
+    if (!application?.active) {
       throw new HTTPException(400, {
         message: "Invalid client_id",
       });
@@ -325,7 +325,7 @@ app.openapi(
 
     // Validate client_id
     const application = await getOAuthApplicationByClientId(db, client_id);
-    if (!application || !application.active) {
+    if (!application?.active) {
       throw new HTTPException(400, {
         message: "Invalid client_id",
       });
@@ -495,7 +495,7 @@ app.openapi(
 
     // Validate client credentials
     const application = await getOAuthApplicationByClientId(db, client_id);
-    if (!application || !application.active) {
+    if (!application?.active) {
       throw new HTTPException(400, {
         message: "Invalid client credentials",
       });
@@ -701,7 +701,7 @@ app.openapi(
 
     // Validate client credentials
     const application = await getOAuthApplicationByClientId(db, client_id);
-    if (!application || !application.active) {
+    if (!application?.active) {
       throw new HTTPException(400, {
         message: "Invalid client credentials",
       });

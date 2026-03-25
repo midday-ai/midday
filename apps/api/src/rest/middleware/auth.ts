@@ -53,7 +53,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 
     c.set("session", session);
     c.set("teamId", session.teamId);
-    // Grant all scopes for authenticated users via Supabase
+    c.set("user", user);
     c.set("scopes", expandScopes(["apis.all"]));
 
     await next();
@@ -64,7 +64,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   if (token.startsWith("mid_access_token_")) {
     const tokenData = await validateAccessToken(db, token);
 
-    if (!tokenData || !tokenData.user) {
+    if (!tokenData?.user) {
       throw new HTTPException(401, {
         message: "Invalid or expired access token",
       });
@@ -142,6 +142,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 
   c.set("session", session);
   c.set("teamId", session.teamId);
+  c.set("user", user);
   c.set("scopes", expandScopes(apiKey.scopes ?? []));
 
   // Update last used at

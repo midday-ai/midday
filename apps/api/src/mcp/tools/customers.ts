@@ -30,13 +30,38 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
   }
 
   if (hasReadScope) {
+    const { sort: _sort, ...customersListFields } = getCustomersSchema.shape;
+
     server.registerTool(
       "customers_list",
       {
         title: "List Customers",
         description:
           "List customers with optional free-text search and sorting. Returns paginated results (default 25) with name, email, contact info, and address. Use cursor from the response to fetch the next page.",
-        inputSchema: getCustomersSchema.shape,
+        inputSchema: {
+          ...customersListFields,
+          sortBy: z
+            .enum([
+              "name",
+              "created_at",
+              "contact",
+              "email",
+              "invoices",
+              "projects",
+              "tags",
+              "industry",
+              "country",
+              "total_revenue",
+              "outstanding",
+              "last_invoice",
+            ])
+            .optional()
+            .describe("Column to sort by"),
+          sortDirection: z
+            .enum(["asc", "desc"])
+            .optional()
+            .describe("Sort direction"),
+        },
         outputSchema: {
           data: z.array(z.record(z.string(), z.any())),
           hasMore: z.boolean(),
@@ -45,16 +70,21 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
         annotations: READ_ONLY_ANNOTATIONS,
       },
       async (params) => {
+        const sort =
+          params.sortBy && params.sortDirection
+            ? [params.sortBy, params.sortDirection]
+            : null;
+
         const result = await getCustomers(db, {
           teamId,
           cursor: params.cursor ?? null,
           pageSize: params.pageSize ?? 25,
           q: params.q ?? null,
-          sort: params.sort ?? null,
+          sort,
         });
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
           structuredContent: result,
         };
       },
@@ -85,7 +115,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
         }
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
           structuredContent: { data: result },
         };
       },
@@ -142,7 +172,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           });
 
           return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(result) }],
           };
         } catch (error) {
           return {
@@ -223,7 +253,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
         });
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: JSON.stringify(result) }],
         };
       },
     );
