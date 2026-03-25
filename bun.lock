@@ -222,6 +222,7 @@
         "@midday/email": "workspace:*",
         "@midday/health": "workspace:*",
         "@midday/import": "workspace:*",
+        "@midday/insights": "workspace:*",
         "@midday/invoice": "workspace:*",
         "@midday/job-client": "workspace:*",
         "@midday/jobs": "workspace:*",
