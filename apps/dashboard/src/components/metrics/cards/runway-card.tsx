@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { RunwayChart } from "@/components/charts/runway-chart";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RunwayCardProps {
@@ -186,16 +186,16 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
       </div>
       <div className="h-80">
         {!hasNoData ? (
-          <RunwayChart
-            data={runwayChartData}
-            height={320}
-            currency={currency}
-            locale={locale}
-            displayMode="months"
-          />
-        ) : isAnyPending ? (
-          <ChartLoadingOverlay />
-        ) : (
+          <ChartFadeIn>
+            <RunwayChart
+              data={runwayChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+              displayMode="months"
+            />
+          </ChartFadeIn>
+        ) : isAnyPending ? null : (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
             No balance data available.
           </div>

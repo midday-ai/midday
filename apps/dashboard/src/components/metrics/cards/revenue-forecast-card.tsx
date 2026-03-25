@@ -7,7 +7,7 @@ import { AnimatedNumber } from "@/components/animated-number";
 import { formatChartMonth } from "@/components/charts/chart-utils";
 import { RevenueForecastChart } from "@/components/charts/revenue-forecast-chart";
 import { useTRPC } from "@/trpc/client";
-import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RevenueForecastCardProps {
@@ -150,16 +150,16 @@ export function RevenueForecastCard({
       </div>
       <div className="h-80">
         {revenueForecastChartData.length > 0 ? (
-          <RevenueForecastChart
-            data={revenueForecastChartData}
-            height={320}
-            currency={currency}
-            locale={locale}
-            forecastStartIndex={forecastStartIndex}
-          />
-        ) : (
-          <ChartLoadingOverlay />
-        )}
+          <ChartFadeIn>
+            <RevenueForecastChart
+              data={revenueForecastChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+              forecastStartIndex={forecastStartIndex}
+            />
+          </ChartFadeIn>
+        ) : null}
       </div>
     </div>
   );

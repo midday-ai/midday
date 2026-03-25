@@ -7,7 +7,7 @@ import { AnimatedNumber } from "@/components/animated-number";
 import { formatChartMonth } from "@/components/charts/chart-utils";
 import { ProfitChart } from "@/components/charts/profit-chart";
 import { useTRPC } from "@/trpc/client";
-import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface ProfitCardProps {
@@ -94,15 +94,15 @@ export function ProfitCard({
       </div>
       <div className="h-80">
         {profitChartData.length > 0 ? (
-          <ProfitChart
-            data={profitChartData}
-            height={320}
-            currency={currency}
-            locale={locale}
-          />
-        ) : (
-          <ChartLoadingOverlay />
-        )}
+          <ChartFadeIn>
+            <ProfitChart
+              data={profitChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+            />
+          </ChartFadeIn>
+        ) : null}
       </div>
     </div>
   );

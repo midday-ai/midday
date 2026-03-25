@@ -9,7 +9,7 @@ import {
 } from "@/components/charts/category-expense-donut-chart";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
-import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface CategoryExpensesCardProps {
@@ -111,15 +111,15 @@ export function CategoryExpensesCard({
       </div>
       <div className="h-80">
         {categoryDonutChartData.length > 0 ? (
-          <CategoryExpenseDonutChart
-            data={categoryDonutChartData}
-            height={320}
-            currency={currency}
-            locale={locale}
-          />
-        ) : isPending ? (
-          <ChartLoadingOverlay />
-        ) : (
+          <ChartFadeIn>
+            <CategoryExpenseDonutChart
+              data={categoryDonutChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+            />
+          </ChartFadeIn>
+        ) : isPending ? null : (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
             No expense data available.
           </div>

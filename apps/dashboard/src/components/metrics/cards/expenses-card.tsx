@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatedNumber } from "@/components/animated-number";
 import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import { useTRPC } from "@/trpc/client";
-import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface ExpensesCardProps {
@@ -73,10 +73,10 @@ export function ExpensesCard({
       </div>
       <div className="h-80">
         {hasExpenseData ? (
-          <StackedBarChart data={expenseData} height={320} />
-        ) : isPending ? (
-          <ChartLoadingOverlay />
-        ) : (
+          <ChartFadeIn>
+            <StackedBarChart data={expenseData} height={320} />
+          </ChartFadeIn>
+        ) : isPending ? null : (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
             No expense data available.
           </div>

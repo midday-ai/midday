@@ -63,6 +63,12 @@ export function createMcpServer(ctx: McpContext): McpServer {
       description:
         "Financial operating system for small businesses — transactions, invoices, time tracking, and reports",
       websiteUrl: "https://midday.ai",
+      icons: [
+        {
+          src: "https://midday.ai/images/midday-icon.svg",
+          mimeType: "image/svg+xml",
+        },
+      ],
     },
     {
       instructions: getServerInstructions(ctx.timezone),

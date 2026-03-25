@@ -6,7 +6,7 @@ import { AnimatedNumber } from "@/components/animated-number";
 import { BurnRateChart } from "@/components/charts/burn-rate-chart";
 import { formatChartMonth } from "@/components/charts/chart-utils";
 import { useTRPC } from "@/trpc/client";
-import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface BurnRateCardProps {
@@ -98,15 +98,15 @@ export function BurnRateCard({
       </div>
       <div className="h-80">
         {burnRateChartData.length > 0 ? (
-          <BurnRateChart
-            data={burnRateChartData}
-            height={320}
-            currency={currency}
-            locale={locale}
-          />
-        ) : (
-          <ChartLoadingOverlay />
-        )}
+          <ChartFadeIn>
+            <BurnRateChart
+              data={burnRateChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+            />
+          </ChartFadeIn>
+        ) : null}
       </div>
     </div>
   );

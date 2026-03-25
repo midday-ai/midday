@@ -6,7 +6,7 @@ import { AnimatedNumber } from "@/components/animated-number";
 import { formatChartMonth } from "@/components/charts/chart-utils";
 import { MonthlyRevenueChart } from "@/components/charts/monthly-revenue-chart";
 import { useTRPC } from "@/trpc/client";
-import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface MonthlyRevenueCardProps {
@@ -108,15 +108,15 @@ export function MonthlyRevenueCard({
       </div>
       <div className="h-80">
         {monthlyRevenueChartData.length > 0 ? (
-          <MonthlyRevenueChart
-            data={monthlyRevenueChartData}
-            height={320}
-            currency={currency}
-            locale={locale}
-          />
-        ) : (
-          <ChartLoadingOverlay />
-        )}
+          <ChartFadeIn>
+            <MonthlyRevenueChart
+              data={monthlyRevenueChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+            />
+          </ChartFadeIn>
+        ) : null}
       </div>
     </div>
   );

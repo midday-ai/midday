@@ -8,7 +8,7 @@ import {
   grayShades,
 } from "@/components/charts/cash-balance-donut-chart";
 import { useTRPC } from "@/trpc/client";
-import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 
 interface CashBalanceCardProps {
   currency?: string;
@@ -79,15 +79,15 @@ export function CashBalanceCard({ currency, locale }: CashBalanceCardProps) {
       </div>
       <div className="h-80">
         {donutData.length > 0 ? (
-          <CashBalanceDonutChart
-            data={donutData}
-            height={320}
-            currency={baseCurrency}
-            locale={locale}
-          />
-        ) : isPending ? (
-          <ChartLoadingOverlay />
-        ) : (
+          <ChartFadeIn>
+            <CashBalanceDonutChart
+              data={donutData}
+              height={320}
+              currency={baseCurrency}
+              locale={locale}
+            />
+          </ChartFadeIn>
+        ) : isPending ? null : (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
             No accounts connected
           </div>
