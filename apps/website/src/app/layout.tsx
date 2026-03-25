@@ -38,11 +38,11 @@ export const metadata: Metadata = {
     template: "%s | Midday",
   },
   description:
-    "Invoicing, reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
+    "Invoicing, automatic reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
   openGraph: {
     title: "Midday — The business stack for modern founders",
     description:
-      "Invoicing, reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
+      "Invoicing, automatic reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
     url: baseUrl,
     siteName: "Midday",
     locale: "en_US",
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
   twitter: {
     title: "Midday — The business stack for modern founders",
     description:
-      "Invoicing, reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
+      "Invoicing, automatic reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
@@ -109,7 +109,7 @@ const jsonLd = {
     "https://linkedin.com/company/midday-ai",
   ],
   description:
-    "Invoicing, reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
+    "Invoicing, automatic reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
 };
 
 export default function Layout({ children }: { children: ReactElement }) {
