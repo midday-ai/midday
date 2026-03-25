@@ -27,12 +27,18 @@ import {
   getSpending,
   getTaxSummary,
 } from "@midday/db/queries";
+import { z } from "zod";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+
+const periodResultSchema = {
+  summary: z.record(z.string(), z.any()),
+  meta: z.record(z.string(), z.any()),
+  result: z.array(z.record(z.string(), z.any())),
+};
 
 export const registerReportTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
 
-  // Require reports.read scope
   if (!hasScope(ctx, "reports.read")) {
     return;
   }
@@ -42,8 +48,9 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Revenue Report",
       description:
-        "Get revenue reports for a date range. Returns total revenue with comparisons to previous period.",
+        "Get revenue for a date range with period-over-period comparison. Returns summary (currentTotal, prevTotal, currency), meta, and a monthly result array with current/previous values and percentage change.",
       inputSchema: getRevenueSchema.shape,
+      outputSchema: periodResultSchema,
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -58,6 +65,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: result,
       };
     },
   );
@@ -67,8 +75,9 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Profit Report",
       description:
-        "Get profit reports for a date range. Returns profit with revenue minus expenses.",
+        "Get profit (revenue minus expenses) for a date range with period-over-period comparison. Returns summary (currentTotal, prevTotal, currency), meta, and a monthly result array.",
       inputSchema: getProfitSchema.shape,
+      outputSchema: periodResultSchema,
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -83,6 +92,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: result,
       };
     },
   );
@@ -92,8 +102,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Burn Rate Report",
       description:
-        "Get burn rate (monthly spending) for a date range. Useful for understanding cash outflow.",
+        "Get monthly burn rate (total spending) for a date range. Returns an array of { date, value, currency } objects showing cash outflow per month.",
       inputSchema: getBurnRateSchema.shape,
+      outputSchema: {
+        data: z.array(z.record(z.string(), z.any())),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -106,6 +119,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data: result },
       };
     },
   );
@@ -115,8 +129,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Runway Report",
       description:
-        "Get runway estimate (months of cash remaining based on burn rate). Critical for financial planning.",
+        "Get estimated months of cash remaining based on current burn rate and available balance. Returns a single number representing months of runway.",
       inputSchema: getRunwaySchema.shape,
+      outputSchema: {
+        months: z.number(),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -127,6 +144,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { months: result },
       };
     },
   );
@@ -136,8 +154,9 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Expenses Report",
       description:
-        "Get expense reports for a date range. Returns expenses with recurring vs one-time breakdown.",
+        "Get expense totals for a date range with recurring vs one-time breakdown. Returns summary (averageExpense, currency), meta, and monthly result array with value, recurring, and total fields.",
       inputSchema: getExpensesSchema.shape,
+      outputSchema: periodResultSchema,
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -150,6 +169,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: result,
       };
     },
   );
@@ -159,8 +179,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Spending by Category",
       description:
-        "Get spending breakdown by category for a date range. Shows where money is being spent.",
+        "Get spending breakdown by category for a date range. Returns an array of categories with name, slug, amount, currency, color, and percentage of total.",
       inputSchema: getSpendingSchema.shape,
+      outputSchema: {
+        data: z.array(z.record(z.string(), z.any())),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -173,6 +196,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data: result },
       };
     },
   );
@@ -182,8 +206,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Tax Summary Report",
       description:
-        "Get tax summary for a date range. Shows total tax paid or collected, grouped by category and tax type.",
+        "Get tax summary for a date range. Shows total tax paid or collected, grouped by category and tax type. Filter by type (paid/collected), category slug, or specific tax type.",
       inputSchema: getTaxSummarySchema.shape,
+      outputSchema: {
+        data: z.array(z.record(z.string(), z.any())),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -197,8 +224,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         taxType: params.taxType,
       });
 
+      const data = Array.isArray(result) ? result : [result];
+
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data },
       };
     },
   );
@@ -208,8 +238,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Growth Rate Report",
       description:
-        "Get revenue or profit growth rate comparing current period to previous period. Supports monthly, quarterly, or yearly comparisons.",
+        "Get revenue or profit growth rate comparing current period to previous period. Supports monthly, quarterly, or yearly comparison periods. Returns growth percentage and trend direction.",
       inputSchema: getGrowthRateSchema.shape,
+      outputSchema: {
+        data: z.record(z.string(), z.any()),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -225,6 +258,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data: result },
       };
     },
   );
@@ -234,8 +268,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Profit Margin Report",
       description:
-        "Get profit margin analysis for a date range. Shows profit as percentage of revenue with monthly breakdown and trend.",
+        "Get profit margin analysis for a date range. Returns profit as a percentage of revenue with monthly breakdown, overall margin, and trend direction.",
       inputSchema: getProfitMarginSchema.shape,
+      outputSchema: {
+        data: z.record(z.string(), z.any()),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -249,6 +286,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data: result },
       };
     },
   );
@@ -258,8 +296,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Cash Flow Report",
       description:
-        "Get cash flow analysis showing income vs expenses over time. Includes monthly breakdown and net cash flow.",
+        "Get cash flow analysis showing income vs expenses over time. Returns monthly or quarterly breakdown with income, expenses, and net cash flow per period.",
       inputSchema: getCashFlowSchema.shape,
+      outputSchema: {
+        data: z.record(z.string(), z.any()),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -273,6 +314,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data: result },
       };
     },
   );
@@ -282,8 +324,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Recurring Expenses Report",
       description:
-        "Get list of recurring expenses with frequency breakdown (weekly, monthly, annually). Shows top recurring costs.",
+        "Get detected recurring expenses with frequency analysis (weekly, monthly, annually). Returns a list of recurring costs with merchant name, amount, frequency, and next expected date.",
       inputSchema: getRecurringExpensesSchema.shape,
+      outputSchema: {
+        data: z.array(z.record(z.string(), z.any())),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -294,8 +339,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         currency: params.currency,
       });
 
+      const data = Array.isArray(result) ? result : [result];
+
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data },
       };
     },
   );
@@ -305,8 +353,15 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Revenue Forecast Report",
       description:
-        "Get revenue forecast based on historical data, outstanding invoices, billable hours, and scheduled invoices. Projects future revenue.",
+        "Get revenue forecast based on historical data, outstanding invoices, billable hours, and scheduled invoices. Returns summary with projections, historical data, forecast with confidence bounds and source breakdown, and combined timeline.",
       inputSchema: getRevenueForecastSchema.shape,
+      outputSchema: {
+        summary: z.record(z.string(), z.any()),
+        historical: z.array(z.record(z.string(), z.any())),
+        forecast: z.array(z.record(z.string(), z.any())),
+        combined: z.array(z.record(z.string(), z.any())),
+        meta: z.record(z.string(), z.any()),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -321,6 +376,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: result,
       };
     },
   );
@@ -330,8 +386,11 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     {
       title: "Balance Sheet Report",
       description:
-        "Get balance sheet showing assets, liabilities, and equity. Provides a snapshot of financial position as of a specific date.",
+        "Get balance sheet snapshot showing assets, liabilities, and equity as of a specific date. Defaults to today if no date is provided.",
       inputSchema: getBalanceSheetSchema.shape,
+      outputSchema: {
+        data: z.record(z.string(), z.any()),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -343,6 +402,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data: result },
       };
     },
   );

@@ -17,6 +17,7 @@ export * from "./inbox-accounts";
 export * from "./inbox-blocklist";
 export * from "./inbox-matching";
 export * from "./insights";
+
 export * from "./institutions";
 export * from "./invoice-products";
 export * from "./invoice-recurring";

@@ -13,6 +13,7 @@ export const Cookies = {
 export const LocalStorageKeys = {
   MatchLearningToastSeen: "match-learning-toast-seen",
   MetricsFilter: "metrics-filter-preferences",
+  McpBannerDismissed: "mcp-banner-dismissed",
 };
 
 export const SUPPORT_EMAIL = "support@midday.ai";

@@ -34,7 +34,7 @@ export function useUpdateTransactionCategory(
           queryKey: trpc.transactions.getById.queryKey(),
         });
 
-        // If category changed, invalidate reports and widgets
+        // If category changed, invalidate reports
         if ("categorySlug" in variables) {
           invalidateTransactionQueries();
         }
@@ -55,7 +55,7 @@ export function useUpdateTransactionCategory(
           queryKey: trpc.transactions.getById.queryKey(),
         });
 
-        // If category changed, invalidate reports and widgets
+        // If category changed, invalidate reports
         if ("categorySlug" in variables) {
           invalidateTransactionQueries();
         }

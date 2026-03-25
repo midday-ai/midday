@@ -1,6 +1,8 @@
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import {
+  dcrRequestSchema,
+  dcrResponseSchema,
   oauthApplicationInfoSchema,
   oauthAuthorizationDecisionSchema,
   oauthAuthorizationRequestSchema,
@@ -19,6 +21,7 @@ import type { Database } from "@midday/db/client";
 import {
   createAuthorizationCode,
   exchangeAuthorizationCode,
+  findOrCreateDCRApplication,
   getOAuthApplicationByClientId,
   getTeamsByUserId,
   hasUserEverAuthorizedApp,
@@ -48,6 +51,108 @@ app.use(
     statusCode: 429,
     message: "Rate limit exceeded",
   }),
+);
+
+// Dynamic Client Registration (RFC 7591)
+app.use(
+  "/register",
+  rateLimiter({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    limit: 10, // per IP
+    keyGenerator: (c) =>
+      c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown",
+    statusCode: 429,
+    message: "Registration rate limit exceeded",
+  }),
+);
+
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/register",
+    summary: "Dynamic Client Registration",
+    operationId: "postOAuthRegister",
+    description:
+      "Register an OAuth client dynamically (RFC 7591). Used by MCP clients like ChatGPT and Claude.",
+    tags: ["OAuth"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: dcrRequestSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      201: {
+        description: "Client registered successfully",
+        content: {
+          "application/json": {
+            schema: dcrResponseSchema,
+          },
+        },
+      },
+      200: {
+        description: "Existing client returned (deduplicated)",
+        content: {
+          "application/json": {
+            schema: dcrResponseSchema,
+          },
+        },
+      },
+      400: {
+        description: "Invalid request",
+        content: {
+          "application/json": {
+            schema: oauthErrorResponseSchema,
+          },
+        },
+      },
+    },
+  }),
+  async (c) => {
+    const db = c.get("db") as Database;
+    const body = c.req.valid("json");
+
+    if (!body.redirect_uris || body.redirect_uris.length === 0) {
+      throw new HTTPException(400, {
+        message: "At least one redirect_uri is required",
+      });
+    }
+
+    for (const uri of body.redirect_uris) {
+      if (!uri.startsWith("https://") && !uri.startsWith("http://localhost")) {
+        throw new HTTPException(400, {
+          message: `redirect_uri must use HTTPS: ${uri}`,
+        });
+      }
+    }
+
+    const result = await findOrCreateDCRApplication(db, {
+      clientName: body.client_name,
+      redirectUris: body.redirect_uris,
+      scope: body.scope,
+      logoUri: body.logo_uri,
+      clientUri: body.client_uri,
+      grantTypes: body.grant_types,
+      tokenEndpointAuthMethod: body.token_endpoint_auth_method,
+    });
+
+    const response = {
+      client_id: result.clientId as string,
+      client_name: result.name as string,
+      redirect_uris: result.redirectUris as string[],
+      grant_types: body.grant_types || ["authorization_code", "refresh_token"],
+      token_endpoint_auth_method: body.token_endpoint_auth_method || "none",
+      response_types: body.response_types || ["code"],
+    };
+
+    if (result.created) {
+      return c.json(response, 201);
+    }
+    return c.json(response, 200);
+  },
 );
 
 app.openapi(
@@ -108,16 +213,18 @@ app.openapi(
       });
     }
 
-    // Validate scopes
+    // Validate scopes — for DCR apps (empty scopes), allow any valid scope
     const requestedScopes = scope.split(" ").filter(Boolean);
-    const invalidScopes = requestedScopes.filter(
-      (s) => !application.scopes.includes(s),
-    );
+    if (application.scopes.length > 0) {
+      const invalidScopes = requestedScopes.filter(
+        (s) => !application.scopes.includes(s),
+      );
 
-    if (invalidScopes.length > 0) {
-      throw new HTTPException(400, {
-        message: `Invalid scopes: ${invalidScopes.join(", ")}`,
-      });
+      if (invalidScopes.length > 0) {
+        throw new HTTPException(400, {
+          message: `Invalid scopes: ${invalidScopes.join(", ")}`,
+        });
+      }
     }
 
     // Return application info for consent screen

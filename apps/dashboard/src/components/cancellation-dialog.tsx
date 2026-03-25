@@ -409,11 +409,11 @@ function StepTwo({
               <span className="text-[#878787] shrink-0">-</span>
               <span>
                 <span className="text-foreground font-medium">
-                  Weekly insights
+                  Financial metrics
                 </span>{" "}
                 <span className="text-[#878787]">
-                  — AI-powered summaries of your spending and revenue, delivered
-                  every Monday
+                  — track revenue, burn rate, profit, expenses and runway at a
+                  glance
                 </span>
               </span>
             </li>

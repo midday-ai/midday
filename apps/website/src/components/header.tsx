@@ -328,14 +328,9 @@ export function Header({
                             <div>
                               {[
                                 {
-                                  href: "/assistant",
-                                  title: "Assistant",
-                                  desc: "Ask questions and get clear answers",
-                                },
-                                {
-                                  href: "/insights",
-                                  title: "Insights",
-                                  desc: "See what's changing",
+                                  href: "/invoicing",
+                                  title: "Invoicing",
+                                  desc: "Get paid faster",
                                 },
                                 {
                                   href: "/transactions",
@@ -346,6 +341,11 @@ export function Header({
                                   href: "/inbox",
                                   title: "Inbox",
                                   desc: "Receipts handled automatically",
+                                },
+                                {
+                                  href: "/time-tracking",
+                                  title: "Time tracking",
+                                  desc: "See where time goes",
                                 },
                               ].map((item, index) => (
                                 <div
@@ -374,16 +374,6 @@ export function Header({
                             <div>
                               {[
                                 {
-                                  href: "/time-tracking",
-                                  title: "Time tracking",
-                                  desc: "See where time goes",
-                                },
-                                {
-                                  href: "/invoicing",
-                                  title: "Invoicing",
-                                  desc: "Get paid faster",
-                                },
-                                {
                                   href: "/customers",
                                   title: "Customers",
                                   desc: "Know your customers",
@@ -392,6 +382,16 @@ export function Header({
                                   href: "/file-storage",
                                   title: "Files",
                                   desc: "Everything in one place",
+                                },
+                                {
+                                  href: "/pre-accounting",
+                                  title: "Exports",
+                                  desc: "Accounting ready",
+                                },
+                                {
+                                  href: "/mcp",
+                                  title: "AI integrations",
+                                  desc: "Connect your AI tools",
                                 },
                               ].map((item, index) => (
                                 <div
@@ -905,94 +905,29 @@ export function Header({
                     <div className="h-px w-full border-t border-border my-2" />
                     <div className="overflow-hidden opacity-0 animate-mobile-slide">
                       <div className="flex flex-col space-y-4 pt-2">
-                        <Link
-                          href="/assistant"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Assistant
-                        </Link>
-                        <Link
-                          href="/insights"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Insights
-                        </Link>
-                        <Link
-                          href="/transactions"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Transactions
-                        </Link>
-                        <Link
-                          href="/inbox"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Inbox
-                        </Link>
-                        <Link
-                          href="/time-tracking"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Time tracking
-                        </Link>
-                        <Link
-                          href="/invoicing"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Invoicing
-                        </Link>
-                        <Link
-                          href="/customers"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Customers
-                        </Link>
-                        <Link
-                          href="/file-storage"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            setIsMobileFeaturesOpen(false);
-                          }}
-                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
-                          Files
-                        </Link>
+                        {[
+                          { href: "/invoicing", label: "Invoicing" },
+                          { href: "/transactions", label: "Transactions" },
+                          { href: "/inbox", label: "Inbox" },
+                          { href: "/time-tracking", label: "Time tracking" },
+                          { href: "/customers", label: "Customers" },
+                          { href: "/file-storage", label: "Files" },
+                          { href: "/pre-accounting", label: "Exports" },
+                          { href: "/mcp", label: "AI integrations" },
+                        ].map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              setIsMobileFeaturesOpen(false);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: "transparent" }}
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
                       </div>
                     </div>
                   </>

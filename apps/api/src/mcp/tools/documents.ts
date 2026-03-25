@@ -21,8 +21,13 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
     {
       title: "List Documents",
       description:
-        "List documents and files stored in the vault with filtering",
+        "List documents and files stored in the vault. Supports free-text search and tag filtering. Returns paginated results (default 25) with document name, type, size, and creation date.",
       inputSchema: getDocumentsSchema.shape,
+      outputSchema: {
+        data: z.array(z.record(z.string(), z.any())),
+        hasMore: z.boolean(),
+        cursor: z.string().nullable().optional(),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -36,6 +41,7 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: result,
       };
     },
   );
@@ -45,7 +51,7 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
     {
       title: "Get Document",
       description:
-        "Get a specific document by its ID. Set download=true to include the file content.",
+        "Get a single document by ID with metadata and a signed download URL (valid for 1 hour). Set download=true to include the actual file content as a binary resource.",
       inputSchema: {
         id: z.string().uuid().describe("Document ID"),
         download: z
@@ -89,7 +95,10 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
           );
           if (resource) content.push(resource);
         } catch {
-          content.push({ type: "text", text: "Failed to download file" });
+          content.push({
+            type: "text",
+            text: "Failed to download file from storage",
+          });
         }
       }
 

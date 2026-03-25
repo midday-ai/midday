@@ -1,16 +1,12 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { AnimatedNumber } from "@/components/animated-number";
 import { formatChartMonth } from "@/components/charts/chart-utils";
 import { MonthlyRevenueChart } from "@/components/charts/monthly-revenue-chart";
-import { useLongPress } from "@/hooks/use-long-press";
-import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
-import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
-import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface MonthlyRevenueCardProps {
@@ -18,8 +14,6 @@ interface MonthlyRevenueCardProps {
   to: string;
   currency?: string;
   locale?: string;
-  isCustomizing: boolean;
-  wiggleClass?: string;
   revenueType: "net" | "gross";
 }
 
@@ -31,15 +25,6 @@ export function MonthlyRevenueCard({
   revenueType = "net",
 }: MonthlyRevenueCardProps) {
   const trpc = useTRPC();
-  const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
-  const setInput = useChatStore((state) => state.setInput);
-  const [isSelecting, setIsSelecting] = useState(false);
-
-  const longPressHandlers = useLongPress({
-    onLongPress: () => setIsCustomizing(true),
-    threshold: 500,
-    disabled: isCustomizing || isSelecting,
-  });
 
   const { data: revenueData } = useQuery(
     trpc.reports.revenue.queryOptions({
@@ -75,13 +60,7 @@ export function MonthlyRevenueCard({
   }, [revenueData]);
 
   return (
-    <div
-      className={cn(
-        "border bg-background border-border p-6 flex flex-col h-full relative group",
-        !isCustomizing && "cursor-pointer",
-      )}
-      {...longPressHandlers}
-    >
+    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">Revenue</h3>
@@ -128,22 +107,16 @@ export function MonthlyRevenueCard({
         </div>
       </div>
       <div className="h-80">
-        <MonthlyRevenueChart
-          data={monthlyRevenueChartData}
-          height={320}
-          currency={currency}
-          locale={locale}
-          enableSelection={true}
-          onSelectionStateChange={setIsSelecting}
-          onSelectionComplete={(startDate, endDate, chartType) => {
-            const message = generateChartSelectionMessage(
-              startDate,
-              endDate,
-              chartType,
-            );
-            setInput(message);
-          }}
-        />
+        {monthlyRevenueChartData.length > 0 ? (
+          <ChartFadeIn>
+            <MonthlyRevenueChart
+              data={monthlyRevenueChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+            />
+          </ChartFadeIn>
+        ) : null}
       </div>
     </div>
   );

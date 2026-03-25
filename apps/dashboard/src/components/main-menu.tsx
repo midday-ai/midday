@@ -5,7 +5,6 @@ import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useChatInterface } from "@/hooks/use-chat-interface";
 
 const icons = {
   "/": () => <Icons.Overview size={20} />,
@@ -275,7 +274,6 @@ type Props = {
 
 export function MainMenu({ onSelect, isExpanded = false }: Props) {
   const pathname = usePathname();
-  const { isChatPage } = useChatInterface();
   const part = pathname?.split("/")[1];
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
@@ -289,14 +287,9 @@ export function MainMenu({ onSelect, isExpanded = false }: Props) {
       <nav className="w-full">
         <div className="flex flex-col gap-2">
           {items.map((item) => {
-            // Check if current path matches item path or is a child of it
-            // Chat pages (/chat/*) should highlight Overview
             const isActive =
               (pathname === "/" && item.path === "/") ||
-              (item.path === "/" && isChatPage) ||
-              (pathname !== "/" &&
-                !isChatPage &&
-                item.path.startsWith(`/${part}`));
+              (pathname !== "/" && item.path.startsWith(`/${part}`));
 
             return (
               <Item

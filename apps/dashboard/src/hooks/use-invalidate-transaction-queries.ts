@@ -42,35 +42,6 @@ export function useInvalidateTransactionQueries() {
       queryKey: trpc.reports.revenueForecast.queryKey(),
     });
 
-    // Invalidate widgets queries
-    queryClient.invalidateQueries({
-      queryKey: trpc.widgets.getRevenueSummary.queryKey(),
-    });
-
-    queryClient.invalidateQueries({
-      queryKey: trpc.widgets.getProfitMargin.queryKey(),
-    });
-
-    queryClient.invalidateQueries({
-      queryKey: trpc.widgets.getCategoryExpenses.queryKey(),
-    });
-
-    queryClient.invalidateQueries({
-      queryKey: trpc.widgets.getTaxSummary.queryKey(),
-    });
-
-    queryClient.invalidateQueries({
-      queryKey: trpc.widgets.getCashFlow.queryKey(),
-    });
-
-    queryClient.invalidateQueries({
-      queryKey: trpc.widgets.getMonthlySpending.queryKey(),
-    });
-
-    queryClient.invalidateQueries({
-      queryKey: trpc.widgets.getRecurringExpenses.queryKey(),
-    });
-
     // Invalidate global search
     queryClient.invalidateQueries({
       queryKey: trpc.search.global.queryKey(),

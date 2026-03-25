@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
 import { OAuthConsentScreen } from "@/components/oauth/oauth-consent-screen";
@@ -36,10 +37,28 @@ export default async function Page(props: Props) {
     );
   }
 
+  const queryClient = getQueryClient();
+
+  // Check if user is logged in; redirect to login with return path if not.
+  // This is critical for the MCP OAuth flow where ChatGPT/Claude redirect
+  // the user's browser here before they've authenticated with Midday.
+  const user = await queryClient
+    .fetchQuery(trpc.user.me.queryOptions())
+    .catch(() => null);
+
+  if (!user) {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(searchParams)) {
+      if (value != null) {
+        params.set(key, String(value));
+      }
+    }
+    const returnPath = `/oauth/authorize?${params.toString()}`;
+    redirect(`/login?return_to=${encodeURIComponent(returnPath)}`);
+  }
+
   // Validate OAuth application and parameters
   try {
-    const queryClient = getQueryClient();
-
     // Validate the OAuth application info first
     await queryClient.fetchQuery(
       trpc.oauthApplications.getApplicationInfo.queryOptions({
@@ -52,7 +71,6 @@ export default async function Page(props: Props) {
 
     // If validation passes, prefetch additional data for hydration
     await Promise.all([
-      queryClient.prefetchQuery(trpc.user.me.queryOptions()),
       queryClient.prefetchQuery(
         trpc.oauthApplications.getApplicationInfo.queryOptions({
           clientId: client_id!,

@@ -47,7 +47,7 @@ export function CompanyFiscalYear() {
             <CardTitle>Fiscal year</CardTitle>
             <CardDescription>
               Set when your fiscal year begins. This determines the default date
-              ranges for all reports and widgets throughout the application.
+              ranges for all reports throughout the application.
             </CardDescription>
           </CardHeader>
 

@@ -23,10 +23,11 @@ import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { AlertTriangle, Check, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useOAuthParams } from "@/hooks/use-oauth-params";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
+import { getKnownClient } from "@/utils/known-oauth-clients";
 import { getScopeDescription } from "@/utils/scopes";
 
 export function OAuthConsentScreen() {
@@ -59,6 +60,11 @@ export function OAuthConsentScreen() {
       scope: scope!,
       state: state || undefined,
     }),
+  );
+
+  const knownClient = useMemo(
+    () => (applicationInfo ? getKnownClient(applicationInfo.name) : null),
+    [applicationInfo?.name],
   );
 
   const { data: teams } = useSuspenseQuery(trpc.team.list.queryOptions());
@@ -166,6 +172,8 @@ export function OAuthConsentScreen() {
                   height={40}
                   className="object-contain"
                 />
+              ) : knownClient?.icon ? (
+                knownClient.icon
               ) : (
                 <div className="w-8 h-8 bg-muted rounded-full" />
               )}
@@ -184,21 +192,20 @@ export function OAuthConsentScreen() {
           <CardDescription className="text-sm text-muted-foreground text-center">
             <span className="flex items-center justify-center gap-1 text-[#878787] text-sm mb-8">
               Built by{" "}
-              {applicationInfo.website ? (
-                <a
-                  href={applicationInfo.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 underline"
-                >
-                  {applicationInfo.developerName ||
-                    new URL(applicationInfo.website).hostname}
-                </a>
-              ) : (
-                <span className="underline">
-                  {applicationInfo.developerName || "Unknown"}
-                </span>
-              )}
+              <a
+                href={
+                  applicationInfo.website ||
+                  knownClient?.website ||
+                  "https://midday.ai"
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 underline"
+              >
+                {applicationInfo.developerName ||
+                  knownClient?.developerName ||
+                  "Midday"}
+              </a>
             </span>
           </CardDescription>
         </CardHeader>

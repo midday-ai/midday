@@ -8,14 +8,28 @@ export interface McpContext {
   userId: string;
   scopes: Scope[];
   apiUrl: string;
+  timezone: string | null;
 }
 
 export type RegisterTools = (server: McpServer, ctx: McpContext) => void;
 
-// Common tool annotations for read-only tools
 export const READ_ONLY_ANNOTATIONS = {
   readOnlyHint: true,
   destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+} as const;
+
+export const WRITE_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: false,
+} as const;
+
+export const DESTRUCTIVE_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: true,
   idempotentHint: true,
   openWorldHint: false,
 } as const;

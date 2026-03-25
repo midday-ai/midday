@@ -5,17 +5,20 @@ import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 export const registerTagTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
 
-  // Require tags.read scope
   if (!hasScope(ctx, "tags.read")) {
     return;
   }
+
   server.registerTool(
     "tags_list",
     {
       title: "List Tags",
       description:
-        "List all tags used for organizing transactions and documents.",
+        "List all tags used for organizing transactions, projects, and documents. Returns tag ID, name, and color. Use these tag IDs when filtering other list tools.",
       inputSchema: {},
+      outputSchema: {
+        data: z.array(z.record(z.string(), z.any())),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async () => {
@@ -23,6 +26,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data: result },
       };
     },
   );
@@ -31,9 +35,12 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
     "tags_get",
     {
       title: "Get Tag",
-      description: "Get a specific tag by its ID.",
+      description: "Get a single tag by ID with its name and color.",
       inputSchema: {
         id: z.string().uuid().describe("Tag ID"),
+      },
+      outputSchema: {
+        data: z.record(z.string(), z.any()),
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
@@ -49,6 +56,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data: result },
       };
     },
   );

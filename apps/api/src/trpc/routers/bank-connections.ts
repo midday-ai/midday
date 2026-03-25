@@ -6,7 +6,7 @@ import {
   reconnectBankConnectionSchema,
 } from "@api/schemas/bank-connections";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { chatCache } from "@midday/cache/chat-cache";
+
 import {
   addProviderAccounts,
   createBankConnection,
@@ -47,12 +47,6 @@ export const bankConnectionsRouter = createTRPCRouter({
         });
       }
 
-      try {
-        await chatCache.invalidateTeamContext(teamId!);
-      } catch {
-        // Non-fatal — cache will expire naturally
-      }
-
       const event = await tasks.trigger("initial-bank-setup", {
         connectionId: data.id,
         teamId: teamId!,
@@ -91,12 +85,6 @@ export const bankConnectionsRouter = createTRPCRouter({
         userId: session.user.id,
         accounts: input.accounts,
       });
-
-      try {
-        await chatCache.invalidateTeamContext(teamId!);
-      } catch {
-        // Non-fatal
-      }
 
       return result;
     }),

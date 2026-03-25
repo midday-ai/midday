@@ -652,20 +652,6 @@ export const mocks = {
     }),
   ) as MockFn,
 
-  widgetPreferencesGet: mock(() =>
-    Promise.resolve({
-      primaryWidgets: ["runway", "cash-flow"],
-      availableWidgets: ["vault"],
-    }),
-  ) as MockFn,
-  widgetPreferencesUpdatePrimaryWidgets: mock(
-    (_teamId: string, _userId: string, primaryWidgets: string[]) =>
-      Promise.resolve({
-        primaryWidgets,
-        availableWidgets: ["vault"],
-      }),
-  ) as MockFn,
-
   // Polar (billing)
   polarSubscriptionsList: mock(() =>
     Promise.resolve({ result: { items: [] as unknown[] } }),
@@ -710,40 +696,6 @@ export const mocks = {
     ]),
   ) as MockFn,
 
-  // Insights
-  getInsightsForUser: mock(() =>
-    Promise.resolve({
-      data: [],
-      meta: {
-        cursor: null,
-        hasPreviousPage: false,
-        hasNextPage: false,
-      },
-    }),
-  ) as MockFn,
-  getLatestInsight: mock(() => Promise.resolve(null)) as MockFn,
-  getInsightById: mock(() => Promise.resolve(null)) as MockFn,
-  markInsightAsRead: mock(() =>
-    Promise.resolve({ readAt: new Date("2024-01-01T00:00:00.000Z") }),
-  ) as MockFn,
-  getInsightByPeriod: mock(() =>
-    Promise.resolve({
-      id: "c4d7e8f9-a0b1-4223-b534-667788990abb",
-      title: "Weekly insight",
-      teamId: "test-team-id",
-      periodType: "weekly",
-      periodYear: 2026,
-      periodNumber: 12,
-    }),
-  ) as MockFn,
-  dismissInsight: mock(() =>
-    Promise.resolve({
-      insightId: "c4d7e8f9-a0b1-4223-b534-667788990abb",
-      userId: "test-user-id",
-      dismissedAt: new Date("2026-03-21T12:00:00.000Z"),
-    }),
-  ) as MockFn,
-
   // Apps
   getApps: mock(() => Promise.resolve([])) as MockFn,
 
@@ -759,19 +711,6 @@ export const mocks = {
 
   // Banking (exchange rates — internalProcedure.rates)
   getRates: mock(() => Promise.resolve([])) as MockFn,
-
-  // Chats memory provider (mocked @api/ai/agents/config/shared)
-  memoryGetChats: mock(() => Promise.resolve([])) as MockFn,
-  memoryGetMessages: mock(() => Promise.resolve([])) as MockFn,
-  memoryDeleteChat: mock(() => Promise.resolve({ success: true })) as MockFn,
-
-  // Chat feedback cache
-  chatFeedbackSet: mock(() => Promise.resolve()) as MockFn,
-  chatFeedbackDelete: mock(() => Promise.resolve()) as MockFn,
-
-  // Suggested actions cache
-  suggestedActionsGetAllUsage: mock(() => Promise.resolve({})) as MockFn,
-  suggestedActionsIncrementUsage: mock(() => Promise.resolve()) as MockFn,
 
   // Transaction attachments / tags
   deleteAttachment: mock(() =>
@@ -1073,14 +1012,6 @@ const dbQueriesMock = new Proxy(
     upsertNotificationSetting: mocks.upsertNotificationSetting,
     bulkUpdateNotificationSettings: mocks.bulkUpdateNotificationSettings,
 
-    // Insights
-    getInsightsForUser: mocks.getInsightsForUser,
-    getLatestInsight: mocks.getLatestInsight,
-    getInsightById: mocks.getInsightById,
-    markInsightAsRead: mocks.markInsightAsRead,
-    getInsightByPeriod: mocks.getInsightByPeriod,
-    dismissInsight: mocks.dismissInsight,
-
     // Apps
     getApps: mocks.getApps,
     getAppByAppId: createDefaultMock(),
@@ -1097,9 +1028,6 @@ const dbQueriesMock = new Proxy(
     deleteAttachment: mocks.deleteAttachment,
     createTransactionTag: mocks.createTransactionTag,
     deleteTransactionTag: mocks.deleteTransactionTag,
-
-    // Insights (additional exports used by router; must exist for Bun import resolution)
-    updateInsight: createDefaultMock(),
 
     // Apps (mutations on router)
     disconnectApp: createDefaultMock(),
@@ -1118,7 +1046,6 @@ const dbQueriesMock = new Proxy(
     hasUserEverAuthorizedApp: createDefaultMock(),
     updateOAuthApplicationstatus: createDefaultMock(),
 
-    // widgetsRouter query imports
     getBillableHours: mocks.getBillableHours,
     getCashBalance: mocks.getCashBalance,
     getCashFlow: mocks.getCashFlow,
@@ -1342,17 +1269,6 @@ mock.module("@midday/cache/team-cache", () => ({
   },
 }));
 
-mock.module("@midday/cache/chat-cache", () => ({
-  chatCache: {
-    getUserContext: mock(async () => undefined),
-    setUserContext: mock(async () => {}),
-    invalidateUserContext: mock(async () => {}),
-    getTeamContext: mock(async () => undefined),
-    setTeamContext: mock(async () => {}),
-    invalidateTeamContext: mock(async () => {}),
-  },
-}));
-
 mock.module("@midday/banking", () => ({
   getRates: mocks.getRates,
   getProviderErrorDetails: mock((error: unknown) => ({
@@ -1407,98 +1323,5 @@ mock.module("@midday/banking", () => ({
     getTransactions = mock(() =>
       Promise.reject(new Error("Provider not mocked")),
     );
-  },
-}));
-
-mock.module("@api/ai/agents/config/shared", () => ({
-  formatContextForLLM: mock(() => ""),
-  COMMON_AGENT_RULES: "",
-  buildAppContext: mock(
-    (context: { userId: string; teamId: string }, chatId: string) => ({
-      userId: `${context.userId}:${context.teamId}`,
-      fullName: "",
-      companyName: "",
-      baseCurrency: "USD",
-      locale: "en-US",
-      currentDateTime: new Date().toISOString(),
-      timezone: "UTC",
-      chatId,
-      teamId: context.teamId,
-    }),
-  ),
-  memoryProvider: {
-    getChats: (...args: unknown[]) => mocks.memoryGetChats(...args),
-    getMessages: (...args: unknown[]) => mocks.memoryGetMessages(...args),
-    deleteChat: (...args: unknown[]) => mocks.memoryDeleteChat(...args),
-  },
-  createAgent: mock(() => ({})),
-}));
-
-mock.module("@midday/cache/chat-feedback-cache", () => ({
-  chatFeedbackCache: {
-    set: (
-      chatId: string,
-      messageId: string,
-      userId: string,
-      feedback: unknown,
-    ) => mocks.chatFeedbackSet(chatId, messageId, userId, feedback),
-    delete: (chatId: string, messageId: string, userId: string) =>
-      mocks.chatFeedbackDelete(chatId, messageId, userId),
-  },
-}));
-
-mock.module("@midday/cache/suggested-actions-cache", () => ({
-  suggestedActionsCache: {
-    getUsage: mock(() => Promise.resolve(undefined)),
-    getAllUsage: (teamId: string, userId: string) =>
-      mocks.suggestedActionsGetAllUsage(teamId, userId),
-    incrementUsage: (teamId: string, userId: string, actionId: string) =>
-      mocks.suggestedActionsIncrementUsage(teamId, userId, actionId),
-    clearUsage: mock(() => Promise.resolve()),
-    clearAllUsage: mock(() => Promise.resolve()),
-  },
-}));
-
-/** Mirrors `packages/cache/src/widget-preferences-cache.ts` for schema imports. */
-const TEST_WIDGET_TYPES = [
-  "runway",
-  "cash-flow",
-  "account-balances",
-  "profit-analysis",
-  "revenue-forecast",
-  "revenue-summary",
-  "growth-rate",
-  "net-position",
-  "customer-lifetime-value",
-  "top-customer",
-  "outstanding-invoices",
-  "overdue-invoices-alert",
-  "invoice-payment-score",
-  "monthly-spending",
-  "recurring-expenses",
-  "category-expenses",
-  "profit-margin",
-  "time-tracker",
-  "billable-hours",
-  "inbox",
-  "vault",
-  "tax-summary",
-] as const;
-
-mock.module("@midday/cache/widget-preferences-cache", () => ({
-  WIDGET_TYPES: TEST_WIDGET_TYPES,
-  widgetPreferencesCache: {
-    getWidgetPreferences: (teamId: string, userId: string) =>
-      mocks.widgetPreferencesGet(teamId, userId),
-    updatePrimaryWidgets: (
-      teamId: string,
-      userId: string,
-      primaryWidgets: string[],
-    ) =>
-      mocks.widgetPreferencesUpdatePrimaryWidgets(
-        teamId,
-        userId,
-        primaryWidgets,
-      ),
   },
 }));

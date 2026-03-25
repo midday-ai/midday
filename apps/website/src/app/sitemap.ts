@@ -13,7 +13,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     "",
     "/about",
-    "/assistant",
     "/bank-coverage",
     "/compare",
     "/customers",
@@ -21,7 +20,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/download",
     "/file-storage",
     "/inbox",
-    "/insights",
     "/integrations",
     "/invoicing",
     "/mcp",
@@ -43,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/support",
     "/terms",
     "/time-tracking",
+    "/testimonials",
     "/transactions",
     "/updates",
   ].map((route) => ({

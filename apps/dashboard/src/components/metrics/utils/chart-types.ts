@@ -6,9 +6,18 @@ export type ChartId =
   | "profit"
   | "revenue-forecast"
   | "runway"
-  | "category-expenses";
+  | "category-expenses"
+  | "cash-balance";
 
-// Report types for database storage
+// Column span options: 4 = 1/3, 6 = 1/2, 8 = 2/3, 12 = full width (12-column grid)
+export type ColSpan = 4 | 6 | 8 | 12;
+
+export interface ChartLayoutItem {
+  id: ChartId;
+  colSpan: ColSpan;
+}
+
+// Report types for database storage (only applies to shareable chart-based widgets)
 export type ReportType =
   | "profit"
   | "revenue"
@@ -19,19 +28,33 @@ export type ReportType =
   | "runway"
   | "category_expenses";
 
-// Default chart order matching current layout
+// All widgets in default order
 export const DEFAULT_CHART_ORDER: ChartId[] = [
   "monthly-revenue",
   "burn-rate",
   "expenses",
   "profit",
+  "category-expenses",
   "revenue-forecast",
   "runway",
-  "category-expenses",
+  "cash-balance",
 ];
 
-// Mapping from ChartId to ReportType
-const chartToReportMap: Record<ChartId, ReportType> = {
+export const DEFAULT_CHART_LAYOUT: ChartLayoutItem[] = [
+  { id: "monthly-revenue", colSpan: 12 },
+  { id: "burn-rate", colSpan: 6 },
+  { id: "expenses", colSpan: 6 },
+  { id: "profit", colSpan: 12 },
+  { id: "category-expenses", colSpan: 6 },
+  { id: "revenue-forecast", colSpan: 6 },
+  { id: "runway", colSpan: 6 },
+  { id: "cash-balance", colSpan: 6 },
+];
+
+export const VALID_COL_SPANS: ColSpan[] = [4, 6, 8, 12];
+
+// Mapping from ChartId to ReportType (only for shareable chart widgets)
+const chartToReportMap: Partial<Record<ChartId, ReportType>> = {
   "monthly-revenue": "monthly_revenue",
   "burn-rate": "burn_rate",
   expenses: "expense",
@@ -65,7 +88,9 @@ const chartDisplayNames: Record<ReportType, string> = {
   category_expenses: "Expenses by Category",
 };
 
-export function chartTypeToReportType(chartId: ChartId): ReportType {
+export function chartTypeToReportType(
+  chartId: ChartId,
+): ReportType | undefined {
   return chartToReportMap[chartId];
 }
 

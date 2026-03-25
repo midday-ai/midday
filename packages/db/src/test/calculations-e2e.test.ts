@@ -1529,7 +1529,7 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // exactDates=true — used by weekly insights
+  // exactDates=true — use exact date boundaries
   // ─────────────────────────────────────────────────────────────────────────
 
   describe("exactDates Mode", () => {

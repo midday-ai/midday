@@ -1,5 +1,11 @@
 import { z } from "@hono/zod-openapi";
 
+export const getBillableHoursSchema = z.object({
+  date: z.string(),
+  view: z.enum(["week", "month"]),
+  weekStartsOnMonday: z.boolean().optional().default(false),
+});
+
 export const getTrackerRecordsByDateSchema = z.object({
   date: z.string().openapi({
     description: "Date for which to fetch tracker records in YYYY-MM-DD format",

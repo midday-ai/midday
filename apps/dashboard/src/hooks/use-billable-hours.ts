@@ -33,7 +33,7 @@ export function useBillableHours(params: UseBillableHoursParams) {
       : formatISO(date, { representation: "date" });
 
   return useQuery({
-    ...trpc.widgets.getBillableHours.queryOptions({
+    ...trpc.trackerEntries.getBillableHours.queryOptions({
       date: dateString,
       view,
       weekStartsOnMonday,

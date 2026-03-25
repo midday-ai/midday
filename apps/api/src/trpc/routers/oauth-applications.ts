@@ -61,14 +61,16 @@ export const oauthApplicationsRouter = createTRPCRouter({
         throw new Error("Invalid redirect_uri");
       }
 
-      // Validate scopes
+      // Validate scopes — for DCR apps (empty scopes), allow any valid scope
       const requestedScopes = scope.split(" ").filter(Boolean);
-      const invalidScopes = requestedScopes.filter(
-        (s) => !application.scopes.includes(s),
-      );
+      if (application.scopes.length > 0) {
+        const invalidScopes = requestedScopes.filter(
+          (s) => !application.scopes.includes(s),
+        );
 
-      if (invalidScopes.length > 0) {
-        throw new Error(`Invalid scopes: ${invalidScopes.join(", ")}`);
+        if (invalidScopes.length > 0) {
+          throw new Error(`Invalid scopes: ${invalidScopes.join(", ")}`);
+        }
       }
 
       // Return application info for consent screen
@@ -110,13 +112,15 @@ export const oauthApplicationsRouter = createTRPCRouter({
         throw new Error("Invalid client_id");
       }
 
-      // Validate scopes against application's registered scopes (prevent privilege escalation)
-      const invalidScopes = scopes.filter(
-        (scope) => !application.scopes.includes(scope),
-      );
+      // Validate scopes — for DCR apps (empty scopes), allow any valid scope
+      if (application.scopes.length > 0) {
+        const invalidScopes = scopes.filter(
+          (scope) => !application.scopes.includes(scope),
+        );
 
-      if (invalidScopes.length > 0) {
-        throw new Error(`Invalid scopes: ${invalidScopes.join(", ")}`);
+        if (invalidScopes.length > 0) {
+          throw new Error(`Invalid scopes: ${invalidScopes.join(", ")}`);
+        }
       }
 
       const redirectUrl = new URL(redirectUri);

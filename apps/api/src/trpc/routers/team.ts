@@ -13,7 +13,7 @@ import {
 } from "@api/schemas/team";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import type { InviteTeamMembersPayload } from "@jobs/schema";
-import { chatCache } from "@midday/cache/chat-cache";
+
 import { teamCache } from "@midday/cache/team-cache";
 import {
   acceptTeamInvite,
@@ -204,12 +204,8 @@ export const teamRouter = createTRPCRouter({
 
       try {
         await Promise.all([
-          chatCache.invalidateTeamContext(input.teamId),
           ...data.memberUserIds.map((userId) =>
-            Promise.all([
-              teamCache.invalidateForUser(userId, input.teamId),
-              chatCache.invalidateUserContext(userId, input.teamId),
-            ]),
+            Promise.all([teamCache.invalidateForUser(userId, input.teamId)]),
           ),
         ]);
       } catch {

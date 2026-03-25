@@ -760,6 +760,15 @@ export const getRecurringExpensesSchema = z
   })
   .openapi("GetRecurringExpensesSchema");
 
+export const getAccountBalancesSchema = z
+  .object({
+    currency: z.string().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+  })
+  .openapi("GetAccountBalancesSchema");
+
 export const getBalanceSheetSchema = z
   .object({
     asOf: z.string().optional().openapi({

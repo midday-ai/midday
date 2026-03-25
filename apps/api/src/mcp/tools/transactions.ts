@@ -3,22 +3,28 @@ import {
   getTransactionsSchema,
 } from "@api/schemas/transactions";
 import { getTransactionById, getTransactions } from "@midday/db/queries";
+import { z } from "zod";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 
 export const registerTransactionTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
 
-  // Require transactions.read scope
   if (!hasScope(ctx, "transactions.read")) {
     return;
   }
+
   server.registerTool(
     "transactions_list",
     {
       title: "List Transactions",
       description:
-        "List financial transactions with filtering, pagination, and sorting. Use this to search for transactions by date, amount, category, status, and more.",
+        "List bank transactions with filtering by date range, amount, category, status, account, tags, and free-text search. Returns paginated results (default 25 per page). Use cursor from the response to fetch the next page. For quick lookups across all data types, prefer search_global instead.",
       inputSchema: getTransactionsSchema.shape,
+      outputSchema: {
+        data: z.array(z.record(z.string(), z.any())),
+        hasMore: z.boolean(),
+        cursor: z.string().nullable().optional(),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -45,6 +51,7 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: result,
       };
     },
   );
@@ -53,9 +60,13 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
     "transactions_get",
     {
       title: "Get Transaction",
-      description: "Get a specific transaction by its ID",
+      description:
+        "Get a single transaction by ID. Returns full details including amount, currency, category, merchant name, date, attachments, notes, and bank account info.",
       inputSchema: {
         id: getTransactionByIdSchema.shape.id,
+      },
+      outputSchema: {
+        data: z.record(z.string(), z.any()),
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
@@ -71,6 +82,7 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data: result },
       };
     },
   );

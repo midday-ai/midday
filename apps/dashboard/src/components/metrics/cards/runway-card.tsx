@@ -1,18 +1,14 @@
 "use client";
 
 import { UTCDate } from "@date-fns/utc";
-import { cn } from "@midday/ui/cn";
 import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { RunwayChart } from "@/components/charts/runway-chart";
-import { useLongPress } from "@/hooks/use-long-press";
-import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useUserQuery } from "@/hooks/use-user";
-import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
-import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RunwayCardProps {
@@ -23,15 +19,6 @@ interface RunwayCardProps {
 export function RunwayCard({ currency, locale }: RunwayCardProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
-  const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
-  const setInput = useChatStore((state) => state.setInput);
-  const [isSelecting, setIsSelecting] = useState(false);
-
-  const longPressHandlers = useLongPress({
-    onLongPress: () => setIsCustomizing(true),
-    threshold: 500,
-    disabled: isCustomizing || isSelecting,
-  });
   const [displayRunway, setDisplayRunway] = useState<number>(0);
   const displayRunwayRef = useRef<number>(0);
   const hasInitializedRef = useRef<boolean>(false);
@@ -47,27 +34,27 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
     };
   }, []);
 
-  const { data: runwayData } = useQuery(
+  const { data: runwayData, isPending: isRunwayPending } = useQuery(
     trpc.reports.runway.queryOptions({
       currency: currency,
     }),
   );
 
-  // Fetch cash balance for runway chart
-  const { data: cashBalanceData } = useQuery(
-    trpc.widgets.getAccountBalances.queryOptions({
+  const { data: cashBalanceData, isPending: isBalancePending } = useQuery(
+    trpc.reports.getAccountBalances.queryOptions({
       currency: currency,
     }),
   );
 
-  // Fetch burn rate data for chart projections (same 6-month window as runway)
-  const { data: burnRateData } = useQuery(
+  const { data: burnRateData, isPending: isBurnRatePending } = useQuery(
     trpc.reports.burnRate.queryOptions({
       from: burnRateWindow.from,
       to: burnRateWindow.to,
       currency: currency,
     }),
   );
+
+  const isAnyPending = isRunwayPending || isBalancePending || isBurnRatePending;
 
   // Transform runway data - need to calculate monthly projections
   const runwayChartData = useMemo<
@@ -167,13 +154,7 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
   const hasNoData = runwayChartData.length === 0;
 
   return (
-    <div
-      className={cn(
-        "border bg-background border-border p-6 flex flex-col h-full relative group",
-        !isCustomizing && "cursor-pointer",
-      )}
-      {...longPressHandlers}
-    >
+    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">Runway</h3>
@@ -189,6 +170,7 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
         <p className="text-3xl font-normal">
           <NumberFlow
             value={displayRunway}
+            animated={hasInitializedRef.current}
             format={{
               minimumFractionDigits: 1,
               maximumFractionDigits: 1,
@@ -203,28 +185,20 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
         </p>
       </div>
       <div className="h-80">
-        {hasNoData ? (
+        {!hasNoData ? (
+          <ChartFadeIn>
+            <RunwayChart
+              data={runwayChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+              displayMode="months"
+            />
+          </ChartFadeIn>
+        ) : isAnyPending ? null : (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
             No balance data available.
           </div>
-        ) : (
-          <RunwayChart
-            data={runwayChartData}
-            height={320}
-            currency={currency}
-            locale={locale}
-            displayMode="months"
-            enableSelection={true}
-            onSelectionStateChange={setIsSelecting}
-            onSelectionComplete={(startDate, endDate, chartType) => {
-              const message = generateChartSelectionMessage(
-                startDate,
-                endDate,
-                chartType,
-              );
-              setInput(message);
-            }}
-          />
         )}
       </div>
     </div>

@@ -45,11 +45,43 @@ function CodeBlock({ code }: { code: string }) {
   );
 }
 
-type Tab = "code" | "desktop";
+function CopyableUrl({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="flex items-center gap-2 w-full bg-[#fafafa] dark:bg-[#0c0c0c] border border-border px-4 py-3 text-left group hover:border-foreground/30 transition-colors"
+    >
+      <span className="font-mono text-sm flex-1 truncate">{url}</span>
+      {copied ? (
+        <Icons.Check size={14} className="text-foreground flex-shrink-0" />
+      ) : (
+        <Icons.Copy
+          size={14}
+          className="text-muted-foreground group-hover:text-foreground flex-shrink-0 transition-colors"
+        />
+      )}
+    </button>
+  );
+}
+
+type Tab = "connect" | "code" | "advanced";
 
 export function MCPClaude() {
   const [apiKey, setApiKey] = useState("");
-  const [activeTab, setActiveTab] = useState<Tab>("code");
+  const [activeTab, setActiveTab] = useState<Tab>("connect");
 
   const cliCommand = useMemo(() => {
     const key = apiKey || "YOUR_API_KEY";
@@ -84,11 +116,9 @@ export function MCPClaude() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
       <div className="bg-background">
         <div className="pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 px-4 sm:px-6">
           <div className="max-w-2xl mx-auto">
-            {/* Back Link */}
             <Link
               href="/mcp"
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 font-sans text-sm"
@@ -97,7 +127,6 @@ export function MCPClaude() {
               All clients
             </Link>
 
-            {/* Logo and Title */}
             <div className="flex items-center gap-4 mb-6">
               <div className="w-14 h-14 [&>img]:w-full [&>img]:h-full">
                 <ClaudeMcpLogo />
@@ -112,50 +141,34 @@ export function MCPClaude() {
               </div>
             </div>
 
-            {/* Description */}
             <div className="space-y-4 mb-8">
               <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                 Conversations with real numbers
               </h2>
               <p className="font-sans text-base text-muted-foreground leading-relaxed">
-                Claude can pull live data from your Midday account to answer
-                questions accurately. Works with both Claude Code and Claude
-                Desktop.
+                Connect Midday to Claude and get AI-powered financial insights
+                grounded in your real business data. Authentication is handled
+                automatically via OAuth.
               </p>
-            </div>
-
-            {/* API Key Input */}
-            <div className="space-y-4 mb-8">
-              <div className="space-y-2">
-                <label
-                  htmlFor="api-key"
-                  className="font-sans text-sm text-foreground"
-                >
-                  Your API key
-                </label>
-                <Input
-                  id="api-key"
-                  type="password"
-                  placeholder="mid_..."
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="font-mono text-sm"
-                />
-                <p className="font-sans text-xs text-muted-foreground">
-                  Don't have an API key?{" "}
-                  <Link
-                    href="https://app.midday.ai/settings/developer"
-                    className="underline hover:text-foreground"
-                  >
-                    Create one in Settings → Developer
-                  </Link>
-                </p>
-              </div>
             </div>
 
             {/* Tabs */}
             <div className="mb-6">
               <div className="flex border-b border-border">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("connect")}
+                  className={`px-4 py-2 text-sm font-sans transition-colors relative ${
+                    activeTab === "connect"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Connect
+                  {activeTab === "connect" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[1px]" />
+                  )}
+                </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab("code")}
@@ -172,94 +185,177 @@ export function MCPClaude() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab("desktop")}
+                  onClick={() => setActiveTab("advanced")}
                   className={`px-4 py-2 text-sm font-sans transition-colors relative ${
-                    activeTab === "desktop"
+                    activeTab === "advanced"
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Claude Desktop
-                  {activeTab === "desktop" && (
+                  Advanced
+                  {activeTab === "advanced" && (
                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[1px]" />
                   )}
                 </button>
               </div>
             </div>
 
-            {/* Tab Content */}
+            {/* Connect Tab */}
+            {activeTab === "connect" && (
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <p className="font-sans text-sm text-muted-foreground">
+                    Copy this URL and add it as a connector in Claude:
+                  </p>
+                  <CopyableUrl url="https://api.midday.ai/mcp" />
+                </div>
+
+                <div className="mt-12 space-y-4">
+                  <h3 className="font-sans text-sm font-medium text-foreground">
+                    Setup steps
+                  </h3>
+                  <ol className="space-y-3">
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                        1
+                      </span>
+                      <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                        Go to{" "}
+                        <span className="font-medium text-foreground">
+                          Settings → Connectors
+                        </span>{" "}
+                        in Claude and click{" "}
+                        <span className="font-medium text-foreground">
+                          Add custom connector
+                        </span>
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                        2
+                      </span>
+                      <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                        Paste the URL above as the server URL
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                        3
+                      </span>
+                      <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                        When you use the tools, you'll be prompted to sign in to
+                        Midday and select a team
+                      </span>
+                    </li>
+                  </ol>
+                </div>
+              </div>
+            )}
+
+            {/* Claude Code Tab */}
             {activeTab === "code" && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <p className="font-sans text-sm text-muted-foreground">
-                  Run this command in your terminal:
+                  Add the Midday MCP server to Claude Code. OAuth authentication
+                  will be handled automatically in your browser:
                 </p>
-                <CodeBlock code={cliCommand} />
+                <CodeBlock code="claude mcp add --transport http midday https://api.midday.ai/mcp" />
+
+                <div className="mt-12 space-y-4">
+                  <h3 className="font-sans text-sm font-medium text-foreground">
+                    Setup steps
+                  </h3>
+                  <ol className="space-y-3">
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                        1
+                      </span>
+                      <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                        Run the command above in your terminal
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                        2
+                      </span>
+                      <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                        When prompted, sign in to Midday in your browser and
+                        select a team
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                        3
+                      </span>
+                      <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                        Use @midday in Claude Code to access your data
+                      </span>
+                    </li>
+                  </ol>
+                </div>
               </div>
             )}
 
-            {activeTab === "desktop" && (
-              <div className="space-y-4">
+            {/* Advanced Tab */}
+            {activeTab === "advanced" && (
+              <div className="space-y-6">
                 <p className="font-sans text-sm text-muted-foreground">
-                  Add to your Claude Desktop config file:
+                  For manual setup using an API key instead of OAuth:
                 </p>
-                <CodeBlock code={desktopConfig} />
-                <p className="font-sans text-xs text-muted-foreground">
-                  Requires{" "}
-                  <a
-                    href="https://www.npmjs.com/package/mcp-remote"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline hover:text-foreground"
+
+                <div className="space-y-2">
+                  <label
+                    htmlFor="api-key"
+                    className="font-sans text-sm text-foreground"
                   >
-                    mcp-remote
-                  </a>{" "}
-                  (installed automatically via npx)
-                </p>
-              </div>
-            )}
-
-            {/* Steps */}
-            <div className="mt-12 space-y-4">
-              <h3 className="font-sans text-sm font-medium text-foreground">
-                Setup steps
-              </h3>
-              <ol className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
-                    1
-                  </span>
-                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    Get an API key from{" "}
+                    Your API key
+                  </label>
+                  <Input
+                    id="api-key"
+                    type="password"
+                    placeholder="mid_..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="font-mono text-sm"
+                  />
+                  <p className="font-sans text-xs text-muted-foreground">
+                    Don't have an API key?{" "}
                     <Link
                       href="https://app.midday.ai/settings/developer"
                       className="underline hover:text-foreground"
                     >
-                      Settings → Developer
+                      Create one in Settings → Developer
                     </Link>
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
-                    2
-                  </span>
-                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    {activeTab === "code"
-                      ? "Run the command above in your terminal"
-                      : "Add the config to your Claude Desktop settings"}
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
-                    3
-                  </span>
-                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    {activeTab === "code"
-                      ? "Use @midday in Claude Code to access your data"
-                      : "Restart Claude Desktop and use Midday tools"}
-                  </span>
-                </li>
-              </ol>
-            </div>
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="font-sans text-sm text-muted-foreground">
+                    Claude Code with API key:
+                  </p>
+                  <CodeBlock code={cliCommand} />
+                </div>
+
+                <div className="space-y-2">
+                  <p className="font-sans text-sm text-muted-foreground">
+                    Claude Desktop config:
+                  </p>
+                  <CodeBlock code={desktopConfig} />
+                  <p className="font-sans text-xs text-muted-foreground">
+                    Requires{" "}
+                    <a
+                      href="https://www.npmjs.com/package/mcp-remote"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-foreground"
+                    >
+                      mcp-remote
+                    </a>{" "}
+                    (installed automatically via npx)
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

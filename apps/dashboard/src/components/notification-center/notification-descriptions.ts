@@ -1,6 +1,6 @@
 import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import { formatAmount } from "@midday/utils/format";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import type { useI18n } from "@/locales/client";
 
 type UseI18nReturn = ReturnType<typeof useI18n>;
@@ -28,7 +28,6 @@ const handleTransactionsCreated: NotificationDescriptionHandler = (
   const count = metadata?.count || metadata?.transactionCount || 1;
   const transaction = metadata?.transaction;
 
-  // For single transactions, show rich details
   if (count === 1 && transaction) {
     const formattedAmount =
       formatAmount({
@@ -37,17 +36,12 @@ const handleTransactionsCreated: NotificationDescriptionHandler = (
         locale: user?.locale || "en-US",
       }) || `${transaction.amount} ${transaction.currency}`;
 
-    const userDateFormat = user?.dateFormat || "dd/MM/yyyy";
-    const formattedDate = format(parseISO(transaction.date), userDateFormat);
-
     return t("notifications.transactions_created.single_transaction", {
       name: transaction.name,
       amount: formattedAmount,
-      date: formattedDate,
     });
   }
 
-  // For multiple transactions, use count-based messages
   if (count <= 5) {
     return t("notifications.transactions_created.title", { count });
   }
@@ -57,14 +51,12 @@ const handleTransactionsCreated: NotificationDescriptionHandler = (
 const handleInboxNew: NotificationDescriptionHandler = (metadata, _user, t) => {
   const count = metadata?.totalCount || 1;
   const type = metadata?.type;
-  const provider = metadata?.provider ?? "";
 
   switch (type) {
     case "email":
       return t("notifications.inbox_new.type.email", { count });
     case "sync":
-      // @ts-expect-error
-      return t("notifications.inbox_new.type.sync", { count, provider });
+      return t("notifications.inbox_new.type.sync", { count });
     case "slack":
       return t("notifications.inbox_new.type.slack", { count });
     case "upload":
@@ -113,6 +105,12 @@ const handleInvoicePaid: NotificationDescriptionHandler = (
         });
   }
 
+  if (invoiceNumber && customerName) {
+    return t("notifications.invoice_paid.automatic_with_customer", {
+      invoiceNumber,
+      customerName,
+    });
+  }
   return invoiceNumber
     ? t("notifications.invoice_paid.automatic", { invoiceNumber })
     : t("notifications.invoice_paid.title");
@@ -124,6 +122,14 @@ const handleInvoiceOverdue: NotificationDescriptionHandler = (
   t,
 ) => {
   const invoiceNumber = metadata?.invoiceNumber;
+  const customerName = metadata?.customerName;
+
+  if (invoiceNumber && customerName) {
+    return t("notifications.invoice_overdue.with_number_and_customer", {
+      invoiceNumber,
+      customerName,
+    });
+  }
   return invoiceNumber
     ? t("notifications.invoice_overdue.with_number", { invoiceNumber })
     : t("notifications.invoice_overdue.title");
@@ -220,12 +226,9 @@ const handleInvoiceCancelled: NotificationDescriptionHandler = (
       customerName,
     });
   }
-  if (invoiceNumber) {
-    return t("notifications.invoice_cancelled.without_customer", {
-      invoiceNumber,
-    });
-  }
-  return t("notifications.invoice_cancelled.title");
+  return invoiceNumber
+    ? t("notifications.invoice_cancelled.without_customer", { invoiceNumber })
+    : t("notifications.invoice_cancelled.title");
 };
 
 const handleInvoiceCreated: NotificationDescriptionHandler = (
@@ -283,12 +286,9 @@ const handleInvoiceRefunded: NotificationDescriptionHandler = (
       customerName,
     });
   }
-  if (invoiceNumber) {
-    return t("notifications.invoice_refunded.without_customer", {
-      invoiceNumber,
-    });
-  }
-  return t("notifications.invoice_refunded.title");
+  return invoiceNumber
+    ? t("notifications.invoice_refunded.without_customer", { invoiceNumber })
+    : t("notifications.invoice_refunded.title");
 };
 
 const handleRecurringSeriesStarted: NotificationDescriptionHandler = (
@@ -613,25 +613,6 @@ const handleInboxNeedsReview: NotificationDescriptionHandler = (
   return t("notifications.inbox_needs_review.title");
 };
 
-const handleInsightReady: NotificationDescriptionHandler = (
-  metadata,
-  _user,
-  t,
-) => {
-  const periodLabel = metadata?.periodLabel;
-  const title = metadata?.title;
-
-  if (title) {
-    return title;
-  }
-
-  if (periodLabel) {
-    return t("notifications.insight_ready.with_period", { periodLabel });
-  }
-
-  return t("notifications.insight_ready.title");
-};
-
 const handleInboxCrossCurrencyMatched: NotificationDescriptionHandler = (
   metadata,
   user,
@@ -720,7 +701,6 @@ const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   inbox_auto_matched: handleInboxAutoMatched,
   inbox_needs_review: handleInboxNeedsReview,
   inbox_cross_currency_matched: handleInboxCrossCurrencyMatched,
-  insight_ready: handleInsightReady,
   invoice_paid: handleInvoicePaid,
   invoice_overdue: handleInvoiceOverdue,
   invoice_scheduled: handleInvoiceScheduled,

@@ -13,11 +13,11 @@ import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://app.midday.ai"),
-  title: "Midday | Your AI-Powered Business Assistant",
+  title: "Midday | Run your business smarter",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
   twitter: {
-    title: "Midday | Your AI-Powered Business Assistant",
+    title: "Midday | Run your business smarter",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
     images: [
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Midday | Your AI-Powered Business Assistant",
+    title: "Midday | Run your business smarter",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
     url: "https://app.midday.ai",

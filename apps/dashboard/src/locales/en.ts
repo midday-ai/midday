@@ -41,13 +41,6 @@ export default {
     this_year: "This year",
     last_year: "Last year",
   },
-  widget_period: {
-    fiscal_ytd: "Fiscal YTD",
-    fiscal_year: "Fiscal Year",
-    current_quarter: "Current Quarter",
-    trailing_12: "Last 12 Months",
-    current_month: "Current Month",
-  },
   transactions_period: {
     all: "All",
     income: "Income",
@@ -94,35 +87,35 @@ export default {
       transactions: "Transactions",
       invoices: "Invoices",
       inbox: "Inbox",
-      insights: "Insights",
     },
     transactions_created: {
       name: "New Transactions",
       description: "Get notified when new transactions are imported",
-      "title#one": "New transaction from {name} {amount} on {date}",
-      "title#other": "{count} new transactions added",
+      "title#one": "{name} {amount}",
+      "title#other": "{count} new transactions",
       "title_many#other": "{count} transactions imported",
-      single_transaction: "New transaction from {name} {amount} on {date}",
+      single_transaction: "{name} {amount}",
     },
     invoice_paid: {
       name: "Paid",
       description: "Get notified when invoices are paid",
-      title: "Invoice payment received",
+      title: "Invoice paid",
       subtitle: "Your invoice has been paid",
       manual_with_date:
-        "Invoice {invoiceNumber} from {customerName} marked as paid on {date}",
-      manual_with_date_no_customer:
-        "Invoice {invoiceNumber} marked as paid on {date}",
-      manual: "Invoice {invoiceNumber} from {customerName} marked as paid",
-      manual_no_customer: "Invoice {invoiceNumber} marked as paid",
-      automatic: "Payment received for invoice {invoiceNumber}",
+        "{invoiceNumber} marked paid on {date} — {customerName}",
+      manual_with_date_no_customer: "{invoiceNumber} marked paid on {date}",
+      manual: "{invoiceNumber} marked paid — {customerName}",
+      manual_no_customer: "{invoiceNumber} marked paid",
+      automatic: "{invoiceNumber} paid",
+      automatic_with_customer: "{invoiceNumber} paid — {customerName}",
     },
     invoice_overdue: {
       name: "Overdue",
       description: "Get notified when invoices become overdue",
-      title: "Invoice is overdue",
+      title: "Invoice overdue",
       subtitle: "Payment is past due date",
-      with_number: "Invoice {invoiceNumber} is now overdue",
+      with_number: "{invoiceNumber} overdue",
+      with_number_and_customer: "{invoiceNumber} overdue — {customerName}",
     },
     invoice_scheduled: {
       name: "Scheduled",
@@ -130,27 +123,25 @@ export default {
       title: "Invoice scheduled",
       subtitle: "Invoice has been scheduled for automatic delivery",
       with_customer:
-        "Invoice {invoiceNumber} scheduled to be sent to {customerName} on {date} at {time}",
-      without_customer:
-        "Invoice {invoiceNumber} scheduled for {date} at {time}",
-      simple: "Invoice {invoiceNumber} has been scheduled",
+        "{invoiceNumber} scheduled for {customerName} on {date} at {time}",
+      without_customer: "{invoiceNumber} scheduled for {date} at {time}",
+      simple: "{invoiceNumber} scheduled",
     },
     invoice_sent: {
       name: "Sent",
       description: "Get notified when invoices are successfully sent",
       title: "Invoice sent",
       subtitle: "Invoice has been delivered to customer",
-      with_customer: "Invoice {invoiceNumber} sent to {customerName}",
-      without_customer: "Invoice {invoiceNumber} has been sent",
+      with_customer: "{invoiceNumber} sent to {customerName}",
+      without_customer: "{invoiceNumber} sent",
     },
     invoice_reminder_sent: {
       name: "Reminder Sent",
       description: "Get notified when invoice reminders are sent",
-      title: "Invoice reminder sent",
+      title: "Reminder sent",
       subtitle: "Payment reminder has been sent to customer",
-      with_customer:
-        "Payment reminder sent to {customerName} for invoice {invoiceNumber}",
-      without_customer: "Payment reminder sent for invoice {invoiceNumber}",
+      with_customer: "{invoiceNumber} reminder sent to {customerName}",
+      without_customer: "{invoiceNumber} reminder sent",
     },
 
     invoice_cancelled: {
@@ -158,9 +149,8 @@ export default {
       description: "Get notified when invoices are cancelled",
       title: "Invoice cancelled",
       subtitle: "Invoice has been cancelled",
-      with_customer:
-        "Invoice {invoiceNumber} for {customerName} has been cancelled",
-      without_customer: "Invoice {invoiceNumber} has been cancelled",
+      with_customer: "{invoiceNumber} cancelled — {customerName}",
+      without_customer: "{invoiceNumber} cancelled",
     },
     invoice_created: {
       name: "Created",
@@ -168,149 +158,122 @@ export default {
       title: "Invoice created",
       subtitle: "A new invoice has been created",
       with_customer_and_amount:
-        "Invoice {invoiceNumber} created for {customerName} - {amount}",
-      with_customer: "Invoice {invoiceNumber} created for {customerName}",
-      without_customer: "Invoice {invoiceNumber} has been created",
+        "{invoiceNumber} created for {customerName} — {amount}",
+      with_customer: "{invoiceNumber} created for {customerName}",
+      without_customer: "{invoiceNumber} created",
     },
     invoice_refunded: {
       name: "Refunded",
       description: "Get notified when invoice payments are refunded",
       title: "Invoice refunded",
       subtitle: "Invoice payment has been refunded",
-      with_customer:
-        "Invoice {invoiceNumber} for {customerName} has been refunded",
-      without_customer: "Invoice {invoiceNumber} has been refunded",
+      with_customer: "{invoiceNumber} refunded — {customerName}",
+      without_customer: "{invoiceNumber} refunded",
     },
     recurring_series_started: {
       name: "Recurring Series Started",
       description: "Get notified when a new recurring invoice series begins",
-      title: "Recurring invoice series started",
+      title: "Recurring series started",
       with_customer_and_count:
-        "Started {frequency} recurring series for {customerName} ({count} invoices)",
-      with_customer: "Started {frequency} recurring series for {customerName}",
-      with_frequency: "Started {frequency} recurring invoice series",
+        "{frequency} recurring series started for {customerName} ({count} invoices)",
+      with_customer: "{frequency} recurring series started for {customerName}",
+      with_frequency: "{frequency} recurring series started",
     },
     recurring_series_completed: {
       name: "Recurring Series Completed",
       description: "Get notified when a recurring invoice series finishes",
-      title: "Recurring invoice series completed",
+      title: "Recurring series completed",
       with_customer_and_count:
-        "Recurring series for {customerName} completed ({count} invoices generated)",
-      with_count:
-        "Recurring invoice series completed ({count} invoices generated)",
+        "Recurring series completed for {customerName} ({count} invoices)",
+      with_count: "Recurring series completed ({count} invoices)",
     },
     recurring_series_paused: {
       name: "Recurring Series Paused",
       description: "Get notified when a recurring invoice series is paused",
-      title: "Recurring invoice series paused",
-      with_customer: "Recurring series for {customerName} has been paused",
+      title: "Recurring series paused",
+      with_customer: "Recurring series paused for {customerName}",
       auto_failure_with_customer:
-        "Recurring series for {customerName} paused after {failureCount} failed attempts",
-      auto_failure:
-        "Recurring series paused after {failureCount} failed attempts",
+        "Recurring series paused for {customerName} ({failureCount} failures)",
+      auto_failure: "Recurring series paused ({failureCount} failures)",
     },
     recurring_invoice_upcoming: {
       name: "Upcoming Recurring Invoice",
       description:
         "Get notified 24 hours before a recurring invoice is generated",
-      title: "Upcoming invoice generation",
-      batch: "You have {count} invoice(s) scheduled for tomorrow",
+      title: "Upcoming invoice",
+      batch: "{count} invoices scheduled for tomorrow",
       single_with_details:
-        "A {amount} invoice for {customerName} is scheduled for tomorrow",
-      single_with_customer:
-        "An invoice for {customerName} is scheduled for tomorrow",
+        "{amount} invoice for {customerName} scheduled tomorrow",
+      single_with_customer: "Invoice for {customerName} scheduled tomorrow",
     },
     inbox_new: {
       name: "New Inbox Items",
       description: "Get notified when new items arrive in your inbox",
-      "type.email#one": "New document received via team inbox email",
-      "type.email#other": "{count} new documents received via team inbox email",
-      "type.sync#one": "New document synced from your {provider} account",
-      "type.sync#other":
-        "{count} new documents synced from your {provider} account",
-      "type.slack#one": "New document shared via Slack",
-      "type.slack#other": "{count} new documents shared via Slack",
-      "type.upload#one": "New document uploaded to your inbox",
-      "type.upload#other": "{count} new documents uploaded to your inbox",
-      // Fallback titles (shouldn't be used with new implementation)
-      "title#one": "We found a new document in your inbox",
-      "title#other": "We found {count} new documents in your inbox",
-      "upload_title#one": "A new document was uploaded to your inbox",
-      "upload_title#other": "{count} new documents were uploaded to your inbox",
+      "type.email#one": "New document received",
+      "type.email#other": "{count} documents received",
+      "type.sync#one": "New document synced",
+      "type.sync#other": "{count} documents synced",
+      "type.slack#one": "New document from Slack",
+      "type.slack#other": "{count} documents from Slack",
+      "type.upload#one": "New document uploaded",
+      "type.upload#other": "{count} documents uploaded",
+      "title#one": "New document in inbox",
+      "title#other": "{count} new documents in inbox",
+      "upload_title#one": "New document uploaded",
+      "upload_title#other": "{count} documents uploaded",
     },
     inbox_auto_matched: {
       name: "Auto-matched",
       description:
         "Get notified when documents are automatically matched with transactions",
-      title: "Document automatically matched",
-      with_details:
-        '"{documentName}" ({amount}) was matched with "{transactionName}"',
-      with_names: '"{documentName}" was matched with "{transactionName}"',
+      title: "Document matched",
+      with_details: "{documentName} ({amount}) matched {transactionName}",
+      with_names: "{documentName} matched {transactionName}",
       cross_currency_details:
-        '"{documentName}" ({documentAmount}) was matched with "{transactionName}" ({transactionAmount}) across currencies',
+        "{documentName} ({documentAmount}) matched {transactionName} ({transactionAmount})",
     },
     inbox_high_confidence: {
       name: "High Confidence Match",
       description:
         "Get notified when high-confidence matches are found that likely need confirmation",
       title: "Likely match found",
-      with_details:
-        '"{documentName}" ({amount}) looks like it matches "{transactionName}" — click to review',
-      with_names:
-        '"{documentName}" looks like it matches "{transactionName}" — click to review',
+      with_details: "{documentName} ({amount}) matched {transactionName}",
+      with_names: "{documentName} matched {transactionName}",
       cross_currency_details:
-        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) across currencies — click to review',
+        "{documentName} ({documentAmount}) matched {transactionName} ({transactionAmount})",
     },
     inbox_needs_review: {
       name: "Needs Review",
       description:
         "Get notified when potential matches are found that need your review",
-      title: "Possible match found",
-      with_details:
-        '"{documentName}" ({amount}) might match "{transactionName}" — click to review',
-      with_names:
-        '"{documentName}" might match "{transactionName}" — click to review',
+      title: "Possible match",
+      with_details: "{documentName} ({amount}) may match {transactionName}",
+      with_names: "{documentName} may match {transactionName}",
       high_confidence_details:
-        '"{documentName}" ({amount}) looks like it matches "{transactionName}" — click to review',
-      high_confidence_names:
-        '"{documentName}" looks like it matches "{transactionName}" — click to review',
+        "{documentName} ({amount}) matched {transactionName}",
+      high_confidence_names: "{documentName} matched {transactionName}",
       cross_currency_high_confidence:
-        '"{documentName}" ({documentAmount}) looks like it matches "{transactionName}" ({transactionAmount}) across currencies — click to review',
+        "{documentName} ({documentAmount}) matched {transactionName} ({transactionAmount})",
       cross_currency_suggested:
-        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) across currencies — click to review',
+        "{documentName} ({documentAmount}) may match {transactionName} ({transactionAmount})",
     },
     inbox_cross_currency_matched: {
       name: "Cross-currency Match",
       description:
         "Get notified when documents are matched with transactions in different currencies",
-      title: "Cross-currency match found",
+      title: "Cross-currency match",
       with_details:
-        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) across currencies — click to review',
-      with_names:
-        '"{documentName}" might match "{transactionName}" across currencies — click to review',
+        "{documentName} ({documentAmount}) may match {transactionName} ({transactionAmount})",
+      with_names: "{documentName} may match {transactionName}",
       high_confidence_details:
-        '"{documentName}" ({documentAmount}) looks like it matches "{transactionName}" ({transactionAmount}) across currencies — click to review',
-      high_confidence_names:
-        '"{documentName}" looks like it matches "{transactionName}" across currencies — click to review',
-    },
-    insight_ready: {
-      name: "Weekly Insights",
-      description: "Get notified when your weekly business insights are ready",
-      title: "Your weekly insights are ready",
-      with_period: "Your {periodLabel} insights are ready",
+        "{documentName} ({documentAmount}) matched {transactionName} ({transactionAmount})",
+      high_confidence_names: "{documentName} matched {transactionName}",
     },
     default: {
       title: "New activity detected",
     },
     archive_button: "Archive notification",
     time_ago: "{time} ago",
-  },
-  widgets: {
-    insights: "Assistant",
-    inbox: "Inbox",
-    spending: "Spending",
-    transactions: "Transactions",
-    tracker: "Tracker",
   },
   account_type: {
     depository: "Depository",
@@ -562,7 +525,6 @@ export default {
     year_to_date: "Year-to-date ({year})",
     remit_amount: "{amount} to remit",
     credit_amount: "{amount} credit",
-    open_assistant: "Open taxes assistant",
   },
   overdue_invoices: {
     title: "Overdue Invoices",

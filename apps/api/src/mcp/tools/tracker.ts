@@ -24,34 +24,22 @@ import {
   upsertTrackerProject,
 } from "@midday/db/queries";
 import { z } from "zod";
-import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
-
-// Annotations for write operations
-const WRITE_ANNOTATIONS = {
-  readOnlyHint: false,
-  destructiveHint: false,
-  idempotentHint: false,
-  openWorldHint: false,
-} as const;
-
-// Annotations for destructive operations
-const DESTRUCTIVE_ANNOTATIONS = {
-  readOnlyHint: false,
-  destructiveHint: true,
-  idempotentHint: true,
-  openWorldHint: false,
-} as const;
+import {
+  DESTRUCTIVE_ANNOTATIONS,
+  hasScope,
+  READ_ONLY_ANNOTATIONS,
+  type RegisterTools,
+  WRITE_ANNOTATIONS,
+} from "../types";
 
 export const registerTrackerTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
 
-  // Check scopes
   const hasProjectReadScope = hasScope(ctx, "tracker-projects.read");
   const hasProjectWriteScope = hasScope(ctx, "tracker-projects.write");
   const hasEntryReadScope = hasScope(ctx, "tracker-entries.read");
   const hasEntryWriteScope = hasScope(ctx, "tracker-entries.write");
 
-  // Skip if user has no tracker scopes
   if (
     !hasProjectReadScope &&
     !hasProjectWriteScope &&
@@ -65,15 +53,19 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
   // TRACKER PROJECT TOOLS
   // ==========================================
 
-  // List projects (read scope)
   if (hasProjectReadScope) {
     server.registerTool(
       "tracker_projects_list",
       {
         title: "List Tracker Projects",
         description:
-          "List time tracking projects with filtering by status, customer, and date range",
+          "List time tracking projects with filtering by status (active/completed), customer, date range, tags, and search. Returns paginated results (default 25) with project name, billable rate, estimate, total tracked hours, and customer.",
         inputSchema: getTrackerProjectsSchema.shape,
+        outputSchema: {
+          data: z.array(z.record(z.string(), z.any())),
+          hasMore: z.boolean(),
+          cursor: z.string().nullable().optional(),
+        },
         annotations: READ_ONLY_ANNOTATIONS,
       },
       async (params) => {
@@ -92,6 +84,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          structuredContent: result,
         };
       },
     );
@@ -100,9 +93,13 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       "tracker_projects_get",
       {
         title: "Get Tracker Project",
-        description: "Get a specific tracker project by its ID",
+        description:
+          "Get full details of a time tracking project by ID, including name, description, billable rate, currency, estimate, status, assigned customer, tags, and total tracked time.",
         inputSchema: {
           id: getTrackerProjectByIdSchema.shape.id,
+        },
+        outputSchema: {
+          data: z.record(z.string(), z.any()),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -118,19 +115,19 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          structuredContent: { data: result },
         };
       },
     );
   }
 
-  // Create/Update project (write scope)
   if (hasProjectWriteScope) {
     server.registerTool(
       "tracker_projects_create",
       {
         title: "Create Tracker Project",
         description:
-          "Create a new time tracking project. Specify name, optional description, rate, currency, estimate, and customer.",
+          "Create a new time tracking project. Name is required. Optionally set billable rate, currency, hour estimate, customer link, and tags. Returns the created project.",
         inputSchema: {
           name: upsertTrackerProjectSchema.shape.name,
           description: upsertTrackerProjectSchema.shape.description,
@@ -144,21 +141,36 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const result = await upsertTrackerProject(db, {
-          teamId,
-          name: params.name,
-          description: params.description,
-          estimate: params.estimate,
-          billable: params.billable,
-          rate: params.rate,
-          currency: params.currency,
-          customerId: params.customerId,
-          tags: params.tags,
-        });
+        try {
+          const result = await upsertTrackerProject(db, {
+            teamId,
+            name: params.name,
+            description: params.description,
+            estimate: params.estimate,
+            billable: params.billable,
+            rate: params.rate,
+            currency: params.currency,
+            customerId: params.customerId,
+            tags: params.tags,
+          });
 
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to create project",
+              },
+            ],
+            isError: true,
+          };
+        }
       },
     );
 
@@ -167,7 +179,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "Update Tracker Project",
         description:
-          "Update an existing time tracking project. Provide the project ID and the fields to update.",
+          "Update an existing time tracking project. Provide the project ID and only the fields to change. Unspecified fields keep their current values.",
         inputSchema: {
           id: z.string().uuid().describe("The ID of the project to update"),
           name: upsertTrackerProjectSchema.shape.name.optional(),
@@ -182,7 +194,6 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        // First check if project exists
         const existing = await getTrackerProjectById(db, {
           id: params.id,
           teamId,
@@ -195,7 +206,6 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           };
         }
 
-        // Map existing tags from { id, name } to { id, value } format for upsert
         const existingTags = existing.tags?.map((tag) => ({
           id: tag.id,
           value: tag.name ?? "",
@@ -225,7 +235,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "Delete Tracker Project",
         description:
-          "Delete a tracker project by its ID. This will also delete all associated time entries.",
+          "Permanently delete a tracker project and all its associated time entries. This action cannot be undone.",
         inputSchema: {
           id: deleteTrackerProjectSchema.shape.id,
         },
@@ -263,22 +273,24 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
   // TRACKER ENTRY TOOLS
   // ==========================================
 
-  // List entries (read scope)
   if (hasEntryReadScope) {
     server.registerTool(
       "tracker_entries_list",
       {
         title: "List Tracker Entries",
         description:
-          "List time tracking entries with filtering by project and date range",
+          "List time tracking entries within a date range. Optionally filter by project ID. Returns entries with start/stop times, duration, description, project, and assigned user. Both from and to dates are required (YYYY-MM-DD).",
         inputSchema: {
-          from: z.string().describe("Start date (YYYY-MM-DD) - required"),
-          to: z.string().describe("End date (YYYY-MM-DD) - required"),
+          from: z.string().describe("Start date (YYYY-MM-DD) — required"),
+          to: z.string().describe("End date (YYYY-MM-DD) — required"),
           projectId: z
             .string()
             .uuid()
             .optional()
             .describe("Filter by project ID"),
+        },
+        outputSchema: {
+          data: z.array(z.record(z.string(), z.any())),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -292,6 +304,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          structuredContent: { data: result },
         };
       },
     );
@@ -301,7 +314,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "Get Timer Status",
         description:
-          "Get the current timer status including whether a timer is running and elapsed time",
+          "Check if a timer is currently running and get elapsed time. Optionally filter by a specific user's timer using assignedId.",
         inputSchema: {
           assignedId: z
             .string()
@@ -309,6 +322,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             .optional()
             .nullable()
             .describe("User ID to check timer for (optional)"),
+        },
+        outputSchema: {
+          data: z.record(z.string(), z.any()),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -320,19 +336,19 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          structuredContent: { data: result },
         };
       },
     );
   }
 
-  // Create/Update/Delete entries (write scope)
   if (hasEntryWriteScope) {
     server.registerTool(
       "tracker_entries_create",
       {
         title: "Create Tracker Entry",
         description:
-          "Create a new time tracking entry. Specify project, dates, start/stop times, and duration.",
+          "Create a manual time tracking entry. Requires a project ID, at least one date, start/stop times (HH:MM format), and duration in seconds. Optionally assign to a team member.",
         inputSchema: {
           projectId: upsertTrackerEntriesSchema.shape.projectId,
           dates: upsertTrackerEntriesSchema.shape.dates,
@@ -345,20 +361,35 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const result = await upsertTrackerEntries(db, {
-          teamId,
-          projectId: params.projectId,
-          dates: params.dates,
-          start: params.start,
-          stop: params.stop,
-          duration: params.duration,
-          description: params.description,
-          assignedId: params.assignedId,
-        });
+        try {
+          const result = await upsertTrackerEntries(db, {
+            teamId,
+            projectId: params.projectId,
+            dates: params.dates,
+            start: params.start,
+            stop: params.stop,
+            duration: params.duration,
+            description: params.description,
+            assignedId: params.assignedId,
+          });
 
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to create tracker entry",
+              },
+            ],
+            isError: true,
+          };
+        }
       },
     );
 
@@ -367,7 +398,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "Update Tracker Entry",
         description:
-          "Update an existing time tracking entry. Provide the entry ID and only the fields you want to update.",
+          "Update an existing time entry. Provide the entry ID and only the fields to change. Unspecified fields keep their current values.",
         inputSchema: {
           id: z.string().uuid().describe("The ID of the entry to update"),
           projectId: upsertTrackerEntriesSchema.shape.projectId.optional(),
@@ -380,7 +411,6 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        // Fetch the existing entry
         const existing = await getTrackerEntryById(db, {
           id: params.id,
           teamId,
@@ -393,7 +423,6 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           };
         }
 
-        // Validate that we have required fields from either params or existing
         const projectId = params.projectId ?? existing.projectId;
         const start = params.start ?? existing.start;
         const stop = params.stop ?? existing.stop;
@@ -432,7 +461,8 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       "tracker_entries_delete",
       {
         title: "Delete Tracker Entry",
-        description: "Delete a time tracking entry by its ID",
+        description:
+          "Permanently delete a time tracking entry by its ID. This action cannot be undone.",
         inputSchema: {
           id: deleteTrackerEntrySchema.shape.id,
         },
@@ -465,13 +495,12 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       },
     );
 
-    // Timer tools
     server.registerTool(
       "tracker_timer_start",
       {
         title: "Start Timer",
         description:
-          "Start a new timer for a project. Any currently running timer will be stopped automatically.",
+          "Start a live timer for a project. Any currently running timer for the same user is stopped automatically. Returns the new entry being timed.",
         inputSchema: {
           projectId: startTimerSchema.shape.projectId,
           description: startTimerSchema.shape.description,
@@ -481,17 +510,32 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const result = await startTimer(db, {
-          teamId,
-          projectId: params.projectId,
-          description: params.description,
-          assignedId: params.assignedId,
-          start: params.start,
-        });
+        try {
+          const result = await startTimer(db, {
+            teamId,
+            projectId: params.projectId,
+            description: params.description,
+            assignedId: params.assignedId,
+            start: params.start,
+          });
 
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to start timer",
+              },
+            ],
+            isError: true,
+          };
+        }
       },
     );
 
@@ -500,7 +544,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "Stop Timer",
         description:
-          "Stop the current running timer. Optionally specify a specific entry ID to stop.",
+          "Stop the currently running timer. Optionally specify an entry ID to stop a specific timer. Returns the completed time entry with final duration.",
         inputSchema: {
           entryId: stopTimerSchema.shape.entryId,
           assignedId: stopTimerSchema.shape.assignedId,

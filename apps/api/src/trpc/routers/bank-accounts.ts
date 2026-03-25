@@ -7,7 +7,7 @@ import {
   updateBankAccountSchema,
 } from "@api/schemas/bank-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { chatCache } from "@midday/cache/chat-cache";
+
 import {
   createBankAccount,
   deleteBankAccount,
@@ -83,12 +83,6 @@ export const bankAccountsRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      try {
-        await chatCache.invalidateTeamContext(teamId!);
-      } catch {
-        // Non-fatal — cache will expire naturally
-      }
-
       return result;
     }),
 
@@ -111,12 +105,6 @@ export const bankAccountsRouter = createTRPCRouter({
         userId: session.user.id,
         manual: input.manual,
       });
-
-      try {
-        await chatCache.invalidateTeamContext(teamId!);
-      } catch {
-        // Non-fatal — cache will expire naturally
-      }
 
       return result;
     }),

@@ -30,14 +30,14 @@ export function Footer() {
               </h3>
               <div className="space-y-2.5">
                 {[
-                  { href: "/assistant", label: "Assistant" },
-                  { href: "/insights", label: "Insights" },
+                  { href: "/invoicing", label: "Invoicing" },
                   { href: "/transactions", label: "Transactions" },
                   { href: "/inbox", label: "Inbox" },
                   { href: "/time-tracking", label: "Time tracking" },
-                  { href: "/invoicing", label: "Invoicing" },
                   { href: "/customers", label: "Customers" },
                   { href: "/file-storage", label: "Files" },
+                  { href: "/pre-accounting", label: "Exports" },
+                  { href: "/mcp", label: "AI integrations" },
                 ].map((item) => (
                   <Link
                     key={item.href}

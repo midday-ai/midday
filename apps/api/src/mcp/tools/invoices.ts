@@ -17,40 +17,24 @@ import {
 } from "@midday/db/queries";
 import { PdfTemplate, renderToStream } from "@midday/invoice";
 import { z } from "zod";
-import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import {
+  DESTRUCTIVE_ANNOTATIONS,
+  hasScope,
+  READ_ONLY_ANNOTATIONS,
+  type RegisterTools,
+  WRITE_ANNOTATIONS,
+} from "../types";
 import { type McpContent, streamToResource } from "../utils";
-
-// Annotations for write operations
-const WRITE_ANNOTATIONS = {
-  readOnlyHint: false,
-  destructiveHint: false,
-  idempotentHint: false,
-  openWorldHint: false,
-} as const;
-
-// Annotations for destructive operations
-const DESTRUCTIVE_ANNOTATIONS = {
-  readOnlyHint: false,
-  destructiveHint: true,
-  idempotentHint: true,
-  openWorldHint: false,
-} as const;
 
 export const registerInvoiceTools: RegisterTools = (server, ctx) => {
   const { db, teamId, userId, apiUrl } = ctx;
 
-  // Check scopes
   const hasReadScope = hasScope(ctx, "invoices.read");
   const hasWriteScope = hasScope(ctx, "invoices.write");
 
-  // Skip if user has no invoice scopes
   if (!hasReadScope && !hasWriteScope) {
     return;
   }
-
-  // ==========================================
-  // READ TOOLS
-  // ==========================================
 
   if (hasReadScope) {
     server.registerTool(
@@ -58,8 +42,13 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "List Invoices",
         description:
-          "List invoices with filtering by status, customer, date range, and search. Use this to find invoices.",
+          "List invoices with filtering by status (draft, sent, paid, overdue, canceled, unpaid), customer, date range, and free-text search. Returns paginated results (default 25) with invoice number, amount, customer name, status, and PDF download URL.",
         inputSchema: getInvoicesSchema.shape,
+        outputSchema: {
+          data: z.array(z.record(z.string(), z.any())),
+          hasMore: z.boolean(),
+          cursor: z.string().nullable().optional(),
+        },
         annotations: READ_ONLY_ANNOTATIONS,
       },
       async (params) => {
@@ -82,13 +71,11 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             : null,
         }));
 
+        const response = { ...result, data };
+
         return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({ ...result, data }, null, 2),
-            },
-          ],
+          content: [{ type: "text", text: JSON.stringify(response, null, 2) }],
+          structuredContent: response,
         };
       },
     );
@@ -98,7 +85,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "Get Invoice",
         description:
-          "Get a specific invoice by its ID with full details. Set download=true to include the PDF file content.",
+          "Get full invoice details by ID including line items, customer info, amounts, tax, due date, status, and payment history. Set download=true to include the rendered PDF as a binary resource.",
         inputSchema: {
           id: getInvoiceByIdSchema.shape.id,
           download: z
@@ -142,7 +129,10 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             );
             content.push(resource);
           } catch {
-            content.push({ type: "text", text: "Failed to generate PDF" });
+            content.push({
+              type: "text",
+              text: "Failed to generate PDF",
+            });
           }
         }
 
@@ -155,8 +145,11 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "Invoice Summary",
         description:
-          "Get a summary of invoices including total amounts and counts by status",
+          "Get aggregate invoice statistics: total count and amounts grouped by status (draft, sent, paid, overdue, canceled, unpaid). Optionally filter to specific statuses.",
         inputSchema: invoiceSummarySchema.shape,
+        outputSchema: {
+          data: z.record(z.string(), z.any()),
+        },
         annotations: READ_ONLY_ANNOTATIONS,
       },
       async (params) => {
@@ -167,14 +160,11 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          structuredContent: { data: result },
         };
       },
     );
   }
-
-  // ==========================================
-  // WRITE TOOLS
-  // ==========================================
 
   if (hasWriteScope) {
     server.registerTool(
@@ -182,7 +172,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "Update Invoice",
         description:
-          "Update an invoice status (paid, canceled, unpaid) or add an internal note. Can also record payment date.",
+          "Update an invoice's status (paid, canceled, unpaid), payment date, or internal note. Use invoices_mark_paid for a simpler paid-marking flow.",
         inputSchema: {
           id: updateInvoiceSchema.shape.id,
           status: z
@@ -206,7 +196,6 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        // Check if invoice exists
         const existing = await getInvoiceById(db, { id: params.id, teamId });
 
         if (!existing) {
@@ -242,7 +231,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "Mark Invoice as Paid",
         description:
-          "Mark an invoice as paid. Automatically records the current time as payment date if not specified.",
+          "Mark an invoice as paid. Automatically records the current time as payment date if not specified. Fails if the invoice is already paid.",
         inputSchema: {
           id: z.string().uuid().describe("The ID of the invoice to mark paid"),
           paidAt: z
@@ -297,14 +286,13 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "Delete Invoice",
         description:
-          "Delete an invoice. Only draft or canceled invoices can be deleted.",
+          "Permanently delete an invoice. Only invoices with status draft or canceled can be deleted. Active or paid invoices must be canceled first.",
         inputSchema: {
           id: deleteInvoiceSchema.shape.id,
         },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
-        // Check invoice exists and status
         const existing = await getInvoiceById(db, { id, teamId });
 
         if (!existing) {
@@ -355,14 +343,13 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "Duplicate Invoice",
         description:
-          "Create a copy of an existing invoice with a new invoice number and current date.",
+          "Create a copy of an existing invoice with a new invoice number and today's date. The duplicate starts in draft status.",
         inputSchema: {
           id: duplicateInvoiceSchema.shape.id,
         },
         annotations: WRITE_ANNOTATIONS,
       },
       async ({ id }) => {
-        // Check invoice exists
         const existing = await getInvoiceById(db, { id, teamId });
 
         if (!existing) {
@@ -373,7 +360,6 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         }
 
         try {
-          // Get next invoice number
           const invoiceNumber = await getNextInvoiceNumber(db, teamId);
 
           const result = await duplicateInvoice(db, {
@@ -408,7 +394,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "Cancel Invoice",
         description:
-          "Cancel an invoice. This marks the invoice as canceled and it can then be deleted if needed.",
+          "Cancel an invoice. Cannot cancel an invoice that is already paid. After cancellation the invoice can be deleted if needed.",
         inputSchema: {
           id: z.string().uuid().describe("The ID of the invoice to cancel"),
         },

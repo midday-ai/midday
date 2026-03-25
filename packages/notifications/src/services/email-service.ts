@@ -161,7 +161,6 @@ export class EmailService {
 
   #getTemplate(templateName: string) {
     const templates = {
-      "insights-weekly": InsightsWeeklyEmail,
       "invoice-overdue": InvoiceOverdueEmail,
       "invoice-paid": InvoicePaidEmail,
       invoice: InvoiceEmail,
@@ -169,6 +168,7 @@ export class EmailService {
       transactions: TransactionsEmail,
       "transactions-exported": TransactionsExportedEmail,
       "upcoming-invoices": UpcomingInvoicesEmail,
+      "insights-weekly": InsightsWeeklyEmail,
     };
 
     const template = templates[templateName as keyof typeof templates];

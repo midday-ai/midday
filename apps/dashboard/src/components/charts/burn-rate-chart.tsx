@@ -16,7 +16,6 @@ import {
   createCompactTickFormatter,
   useChartMargin,
 } from "./chart-utils";
-import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
 interface BurnRateData {
   month: string;
@@ -32,17 +31,6 @@ interface BurnRateChartProps {
   showLegend?: boolean;
   currency?: string;
   locale?: string;
-  enableSelection?: boolean;
-  onSelectionChange?: (
-    startDate: string | null,
-    endDate: string | null,
-  ) => void;
-  onSelectionComplete?: (
-    startDate: string,
-    endDate: string,
-    chartType: string,
-  ) => void;
-  onSelectionStateChange?: (isSelecting: boolean) => void;
 }
 
 // Custom tooltip component
@@ -90,10 +78,6 @@ export function BurnRateChart({
   height = 320,
   currency = "USD",
   locale,
-  enableSelection = false,
-  onSelectionChange,
-  onSelectionComplete,
-  onSelectionStateChange,
 }: BurnRateChartProps) {
   // Use the compact tick formatter
   const tickFormatter = createCompactTickFormatter();
@@ -195,19 +179,5 @@ export function BurnRateChart({
     </div>
   );
 
-  return (
-    <SelectableChartWrapper
-      data={data}
-      dateKey="month"
-      enableSelection={enableSelection}
-      onSelectionChange={onSelectionChange}
-      onSelectionComplete={(startDate, endDate) => {
-        onSelectionComplete?.(startDate, endDate, "burn-rate");
-      }}
-      onSelectionStateChange={onSelectionStateChange}
-      chartType="burn-rate"
-    >
-      {chartContent}
-    </SelectableChartWrapper>
-  );
+  return chartContent;
 }

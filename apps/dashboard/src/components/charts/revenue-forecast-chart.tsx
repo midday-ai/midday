@@ -20,7 +20,6 @@ import {
   createCompactTickFormatter,
   useChartMargin,
 } from "./chart-utils";
-import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
 // Breakdown of revenue sources for the bottom-up forecast
 interface ForecastBreakdown {
@@ -49,17 +48,6 @@ interface RevenueForecastChartProps extends Omit<BaseChartProps, "data"> {
   currency?: string;
   locale?: string;
   forecastStartIndex?: number;
-  enableSelection?: boolean;
-  onSelectionChange?: (
-    startDate: string | null,
-    endDate: string | null,
-  ) => void;
-  onSelectionComplete?: (
-    startDate: string,
-    endDate: string,
-    chartType: string,
-  ) => void;
-  onSelectionStateChange?: (isSelecting: boolean) => void;
 }
 
 // Custom tooltip component with breakdown support
@@ -206,10 +194,6 @@ export function RevenueForecastChart({
   currency = "USD",
   locale,
   forecastStartIndex,
-  enableSelection = false,
-  onSelectionChange,
-  onSelectionComplete,
-  onSelectionStateChange,
 }: RevenueForecastChartProps) {
   // Normalize data - create a range array for confidence band
   const normalizedData = useMemo(() => {
@@ -441,19 +425,5 @@ export function RevenueForecastChart({
     </div>
   );
 
-  return (
-    <SelectableChartWrapper
-      data={normalizedData}
-      dateKey="month"
-      enableSelection={enableSelection}
-      onSelectionChange={onSelectionChange}
-      onSelectionComplete={(startDate, endDate) => {
-        onSelectionComplete?.(startDate, endDate, "revenue-forecast");
-      }}
-      onSelectionStateChange={onSelectionStateChange}
-      chartType="revenue-forecast"
-    >
-      {chartContent}
-    </SelectableChartWrapper>
-  );
+  return chartContent;
 }

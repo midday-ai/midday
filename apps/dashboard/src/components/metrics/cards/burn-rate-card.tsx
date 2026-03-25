@@ -1,16 +1,12 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { AnimatedNumber } from "@/components/animated-number";
 import { BurnRateChart } from "@/components/charts/burn-rate-chart";
 import { formatChartMonth } from "@/components/charts/chart-utils";
-import { useLongPress } from "@/hooks/use-long-press";
-import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
-import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
-import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface BurnRateCardProps {
@@ -18,8 +14,6 @@ interface BurnRateCardProps {
   to: string;
   currency?: string;
   locale?: string;
-  isCustomizing: boolean;
-  wiggleClass?: string;
 }
 
 export function BurnRateCard({
@@ -27,20 +21,8 @@ export function BurnRateCard({
   to,
   currency,
   locale,
-  isCustomizing,
-  wiggleClass,
 }: BurnRateCardProps) {
   const trpc = useTRPC();
-  const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
-    useMetricsCustomize();
-  const setInput = useChatStore((state) => state.setInput);
-  const [isSelecting, setIsSelecting] = useState(false);
-
-  const longPressHandlers = useLongPress({
-    onLongPress: () => setIsCustomizing(true),
-    threshold: 500,
-    disabled: metricsIsCustomizing || isSelecting,
-  });
 
   const { data: burnRateData } = useQuery(
     trpc.reports.burnRate.queryOptions({
@@ -75,13 +57,7 @@ export function BurnRateCard({
   }, [burnRateData]);
 
   return (
-    <div
-      className={cn(
-        "border bg-background border-border p-6 flex flex-col h-full relative group",
-        !metricsIsCustomizing && "cursor-pointer",
-      )}
-      {...longPressHandlers}
-    >
+    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">
@@ -121,22 +97,16 @@ export function BurnRateCard({
         </div>
       </div>
       <div className="h-80">
-        <BurnRateChart
-          data={burnRateChartData}
-          height={320}
-          currency={currency}
-          locale={locale}
-          enableSelection={true}
-          onSelectionStateChange={setIsSelecting}
-          onSelectionComplete={(startDate, endDate, chartType) => {
-            const message = generateChartSelectionMessage(
-              startDate,
-              endDate,
-              chartType,
-            );
-            setInput(message);
-          }}
-        />
+        {burnRateChartData.length > 0 ? (
+          <ChartFadeIn>
+            <BurnRateChart
+              data={burnRateChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+            />
+          </ChartFadeIn>
+        ) : null}
       </div>
     </div>
   );

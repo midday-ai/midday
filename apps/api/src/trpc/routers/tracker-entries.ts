@@ -1,5 +1,6 @@
 import {
   deleteTrackerEntrySchema,
+  getBillableHoursSchema,
   getCurrentTimerSchema,
   getTrackerRecordsByDateSchema,
   getTrackerRecordsByRangeSchema,
@@ -10,6 +11,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   deleteTrackerEntry,
+  getBillableHours,
   getCurrentTimer,
   getTimerStatus,
   getTrackerRecordsByDate,
@@ -20,6 +22,17 @@ import {
 } from "@midday/db/queries";
 
 export const trackerEntriesRouter = createTRPCRouter({
+  getBillableHours: protectedProcedure
+    .input(getBillableHoursSchema)
+    .query(async ({ ctx: { db, teamId, session }, input }) => {
+      return getBillableHours(db, {
+        teamId: teamId!,
+        date: input.date,
+        view: input.view,
+        weekStartsOnMonday: input.weekStartsOnMonday,
+      });
+    }),
+
   byDate: protectedProcedure
     .input(getTrackerRecordsByDateSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {

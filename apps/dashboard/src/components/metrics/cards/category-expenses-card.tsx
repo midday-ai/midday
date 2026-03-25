@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useMemo } from "react";
@@ -8,10 +7,9 @@ import {
   CategoryExpenseDonutChart,
   grayShades,
 } from "@/components/charts/category-expense-donut-chart";
-import { useLongPress } from "@/hooks/use-long-press";
-import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
+import { ChartFadeIn } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface CategoryExpensesCardProps {
@@ -19,8 +17,6 @@ interface CategoryExpensesCardProps {
   to: string;
   currency?: string;
   locale?: string;
-  isCustomizing: boolean;
-  wiggleClass?: string;
 }
 
 export function CategoryExpensesCard({
@@ -28,20 +24,11 @@ export function CategoryExpensesCard({
   to,
   currency,
   locale,
-  isCustomizing,
 }: CategoryExpensesCardProps) {
   const trpc = useTRPC();
-  const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
-    useMetricsCustomize();
-
-  const longPressHandlers = useLongPress({
-    onLongPress: () => setIsCustomizing(true),
-    threshold: 500,
-    disabled: metricsIsCustomizing,
-  });
 
   // Get spending data for categories
-  const { data: spendingData } = useQuery(
+  const { data: spendingData, isPending } = useQuery(
     trpc.reports.spending.queryOptions({
       from,
       to,
@@ -80,13 +67,7 @@ export function CategoryExpensesCard({
   }, [from, to]);
 
   return (
-    <div
-      className={cn(
-        "border bg-background border-border p-6 flex flex-col h-full relative group",
-        !metricsIsCustomizing && "cursor-pointer",
-      )}
-      {...longPressHandlers}
-    >
+    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">
@@ -130,13 +111,15 @@ export function CategoryExpensesCard({
       </div>
       <div className="h-80">
         {categoryDonutChartData.length > 0 ? (
-          <CategoryExpenseDonutChart
-            data={categoryDonutChartData}
-            height={320}
-            currency={currency}
-            locale={locale}
-          />
-        ) : (
+          <ChartFadeIn>
+            <CategoryExpenseDonutChart
+              data={categoryDonutChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+            />
+          </ChartFadeIn>
+        ) : isPending ? null : (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
             No expense data available.
           </div>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { MCP } from "@/components/mcp";
 
-const title = "AI Integrations via MCP";
+const title = "AI Integrations via MCP — Claude, ChatGPT, Cursor & More";
 const description =
   "Connect AI tools to your business data via Model Context Protocol (MCP). Use Cursor, Claude, ChatGPT, Raycast, or Zapier to query finances and automate workflows.";
 

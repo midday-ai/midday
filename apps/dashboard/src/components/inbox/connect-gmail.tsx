@@ -26,7 +26,7 @@ export function ConnectGmail({ redirectPath }: Props) {
 
   return (
     <SubmitButton
-      className="px-4 font-medium h-[40px]"
+      className="px-4 font-medium h-[40px] w-full"
       variant="outline"
       onClick={() =>
         connectMutation.mutate({ provider: "gmail", redirectPath })

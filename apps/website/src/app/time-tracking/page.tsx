@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { TimeTracking } from "@/components/time-tracking";
 
-const title = "Time Tracking";
+const title = "Time Tracking for Freelancers & Consultants";
 const description =
   "Track billable hours with ease. Get monthly breakdowns, link time to projects and customers, and generate invoices. Built for consultants and small business owners.";
 

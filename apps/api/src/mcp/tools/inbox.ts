@@ -21,8 +21,13 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
     {
       title: "List Inbox Items",
       description:
-        "List inbox items (uploaded receipts, invoices, documents). Filter by status to find pending or matched items.",
+        "List inbox items (uploaded receipts, invoices, and documents pending processing). Filter by status to find pending, processing, or matched items. Returns paginated results (default 25) with file name, status, and matched transaction.",
       inputSchema: getInboxSchema.shape,
+      outputSchema: {
+        data: z.array(z.record(z.string(), z.any())),
+        hasMore: z.boolean(),
+        cursor: z.string().nullable().optional(),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -38,6 +43,7 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: result,
       };
     },
   );
@@ -47,7 +53,7 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
     {
       title: "Get Inbox Item",
       description:
-        "Get a specific inbox item by ID with full details including matched transaction. Set download=true to include the file content.",
+        "Get a single inbox item by ID with full details including matched transaction, extracted data, and a signed download URL. Set download=true to include the file content as a binary resource.",
       inputSchema: {
         id: getInboxByIdSchema.shape.id,
         download: z
@@ -94,7 +100,10 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
           );
           if (resource) content.push(resource);
         } catch {
-          content.push({ type: "text", text: "Failed to download file" });
+          content.push({
+            type: "text",
+            text: "Failed to download file from storage",
+          });
         }
       }
 

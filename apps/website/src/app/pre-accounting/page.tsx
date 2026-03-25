@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { PreAccounting } from "@/components/pre-accounting";
 
-const title = "Pre-Accounting";
+const title = "Automated Pre-Accounting & Bookkeeping";
 const description =
   "Automated bookkeeping that collects transactions, matches receipts, and prepares accountant-ready records. Save hours on manual data entry every month.";
 

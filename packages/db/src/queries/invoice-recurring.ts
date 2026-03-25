@@ -961,7 +961,7 @@ export async function getUpcomingDueRecurring(
 
 /**
  * Get upcoming recurring invoices for a specific team before a given date
- * Used by insights to show upcoming recurring invoices for a team
+ * Get upcoming recurring invoices for a team before a given date
  *
  * @param db - Database instance
  * @param params.teamId - Team ID to filter by

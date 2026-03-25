@@ -37,13 +37,13 @@ export const ThemeSwitch = () => {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="h-[32px]" />;
+    return <div className="h-[24px]" />;
   }
 
   return (
     <div className="flex items-center relative">
       <Select value={theme} onValueChange={(value: Theme) => setTheme(value)}>
-        <SelectTrigger className="w-full pl-6 pr-3 py-1.5 bg-transparent outline-none capitalize h-[32px] text-xs">
+        <SelectTrigger className="w-full pl-6 pr-3 py-0.5 bg-transparent outline-none capitalize h-[24px] text-xs border-0 shadow-none">
           <SelectValue>
             {theme
               ? theme.charAt(0).toUpperCase() + theme.slice(1)

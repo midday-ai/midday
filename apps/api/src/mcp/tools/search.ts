@@ -1,21 +1,25 @@
 import { globalSearchSchema } from "@api/schemas/search";
 import { globalSearchQuery } from "@midday/db/queries";
+import { z } from "zod";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 
 export const registerSearchTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
 
-  // Require search.read scope
   if (!hasScope(ctx, "search.read")) {
     return;
   }
+
   server.registerTool(
     "search_global",
     {
       title: "Global Search",
       description:
-        "Search across all data: invoices, transactions, customers, documents, and more. Returns ranked results by relevance.",
+        "Full-text search across all data types: transactions, invoices, customers, documents, inbox items, and more. Results are ranked by relevance. This is the fastest way to find something when you don't know which domain it belongs to. Returns up to 50 results (configurable via limit).",
       inputSchema: globalSearchSchema.shape,
+      outputSchema: {
+        data: z.array(z.record(z.string(), z.any())),
+      },
       annotations: READ_ONLY_ANNOTATIONS,
     },
     async (params) => {
@@ -30,6 +34,7 @@ export const registerSearchTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        structuredContent: { data: result },
       };
     },
   );
