@@ -4,6 +4,7 @@ import { withDatabase } from "@api/rest/middleware/db";
 import { withClientIp } from "@api/rest/middleware/ip";
 import { withPrimaryReadAfterWrite } from "@api/rest/middleware/primary-read-after-write";
 import type { Context } from "@api/rest/types";
+import { getGeoContext } from "@api/utils/geo";
 import type { Scope } from "@api/utils/scopes";
 import { StreamableHTTPTransport } from "@hono/mcp";
 import { OpenAPIHono } from "@hono/zod-openapi";
@@ -67,8 +68,16 @@ app.all("/", async (c) => {
   const session = c.get("session");
   const userId = session.user.id;
   const scopes = (c.get("scopes") as Scope[] | undefined) ?? [];
+  const { timezone } = getGeoContext(c.req);
 
-  const server = createMcpServer({ db, teamId, userId, scopes, apiUrl });
+  const server = createMcpServer({
+    db,
+    teamId,
+    userId,
+    scopes,
+    apiUrl,
+    timezone,
+  });
 
   await server.connect(transport);
 

@@ -1,7 +1,28 @@
+import { CATEGORIES } from "@midday/categories";
+import { completable } from "@modelcontextprotocol/sdk/server/completable.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
+function getCategorySlugs(): string[] {
+  const slugs: string[] = [];
+  for (const cat of CATEGORIES) {
+    slugs.push(cat.slug);
+    if ("children" in cat && Array.isArray(cat.children)) {
+      for (const child of cat.children) {
+        slugs.push(child.slug);
+      }
+    }
+  }
+  return slugs;
+}
+
 export function registerPrompts(server: McpServer): void {
+  const categorySlugs = getCategorySlugs();
+
+  // ==========================================
+  // ANALYSIS PROMPTS
+  // ==========================================
+
   server.registerPrompt(
     "financial_health_check",
     {
@@ -9,10 +30,16 @@ export function registerPrompts(server: McpServer): void {
       description:
         "Comprehensive analysis of the team's financial health including revenue, expenses, burn rate, and runway",
       argsSchema: {
-        period: z
-          .enum(["month", "quarter", "year"])
-          .optional()
-          .describe("Time period to analyze (default: quarter)"),
+        period: completable(
+          z
+            .enum(["month", "quarter", "year"])
+            .optional()
+            .describe("Time period to analyze (default: quarter)"),
+          (value) =>
+            (["month", "quarter", "year"] as const).filter((p) =>
+              p.startsWith(value ?? ""),
+            ),
+        ),
       },
     },
     async (args) => {
@@ -34,7 +61,7 @@ export function registerPrompts(server: McpServer): void {
 
 1. First, get the team info using team_get to understand the base currency
 2. Get revenue data using reports_revenue
-3. Get profit data using reports_profit  
+3. Get profit data using reports_profit
 4. Get burn rate using reports_burn_rate
 5. Get runway using reports_runway
 6. Get spending breakdown using reports_spending
@@ -94,10 +121,15 @@ Then create a follow-up action plan:
       description:
         "Deep dive into expenses to identify cost-saving opportunities",
       argsSchema: {
-        category: z
-          .string()
-          .optional()
-          .describe("Specific category to analyze (optional)"),
+        category: completable(
+          z
+            .string()
+            .optional()
+            .describe(
+              "Specific category slug to analyze (optional — leave empty for all categories)",
+            ),
+          (value) => categorySlugs.filter((s) => s.startsWith(value ?? "")),
+        ),
       },
     },
     async (args) => {
@@ -155,6 +187,188 @@ Provide analysis including:
 - Payment behavior patterns
 - Customers with outstanding balances
 - Opportunities for upselling or follow-up`,
+            },
+          },
+        ],
+      };
+    },
+  );
+
+  // ==========================================
+  // WORKFLOW PROMPTS
+  // ==========================================
+
+  server.registerPrompt(
+    "cash_flow_forecast",
+    {
+      title: "Cash Flow Forecast",
+      description:
+        "Project future cash position using historical cash flow, revenue forecast, and burn rate data",
+      argsSchema: {
+        months: completable(
+          z
+            .enum(["3", "6", "12"])
+            .optional()
+            .describe("Number of months to forecast (default: 6)"),
+          (value) =>
+            (["3", "6", "12"] as const).filter((m) =>
+              m.startsWith(value ?? ""),
+            ),
+        ),
+      },
+    },
+    async (args) => {
+      const months = args.months || "6";
+
+      return {
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: `Please create a ${months}-month cash flow forecast:
+
+1. Use team_get to get the base currency
+2. Use reports_cash_flow to get historical income vs expenses
+3. Use reports_revenue_forecast with forecastMonths=${months} for projected revenue
+4. Use reports_burn_rate for spending trend
+5. Use reports_runway for current runway estimate
+6. Use bank_accounts_list to get current cash position
+
+Then provide:
+- Current cash position across all accounts
+- Projected monthly cash inflows and outflows
+- Expected cash balance at end of each month
+- Key risks (e.g., large expected expenses, seasonal dips)
+- Recommended actions if cash flow looks tight
+
+Present as a month-by-month table with a summary.`,
+            },
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerPrompt(
+    "monthly_close_checklist",
+    {
+      title: "Monthly Close Checklist",
+      description:
+        "Guide month-end close: check unreconciled transactions, outstanding invoices, missing receipts, and expense categorization",
+    },
+    async () => {
+      return {
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: `Please help me complete the month-end close process:
+
+1. Use transactions_list with status "pending" or "unreviewed" to find unreconciled transactions
+2. Use invoices_list with status "sent" or "overdue" to find outstanding invoices
+3. Use inbox_list with status "pending" to find unprocessed receipts
+4. Use transactions_list with no category to find uncategorized expenses
+5. Use reports_revenue and reports_expenses for the current month to get totals
+
+Then create a checklist:
+- [ ] Unreconciled transactions — list count and total amount
+- [ ] Uncategorized transactions — list count with suggestions
+- [ ] Outstanding invoices — list with amounts and days overdue
+- [ ] Unprocessed inbox items — count and recommended action
+- [ ] Revenue summary for the month
+- [ ] Expense summary for the month
+- [ ] Any anomalies or items needing attention
+
+Format as an actionable checklist with specific items to resolve.`,
+            },
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerPrompt(
+    "tax_preparation",
+    {
+      title: "Tax Preparation",
+      description:
+        "Assemble tax-relevant data: tax summary, deductible expenses, invoice totals by quarter, and missing documentation",
+      argsSchema: {
+        year: z
+          .string()
+          .optional()
+          .describe(
+            "Tax year to prepare for (default: current year, e.g. 2025)",
+          ),
+      },
+    },
+    async (args) => {
+      const year = args.year || new Date().getFullYear().toString();
+
+      return {
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: `Please help me prepare tax data for ${year}:
+
+1. Use team_get to get the base currency and locale
+2. Use reports_tax_summary with from="${year}-01-01" and to="${year}-12-31" for tax paid
+3. Use reports_tax_summary with type "collected" for tax collected
+4. Use reports_revenue with from="${year}-01-01" to="${year}-12-31" for annual revenue
+5. Use reports_expenses for annual expenses
+6. Use reports_spending for category breakdown (to identify deductible expenses)
+7. Use invoices_summary for invoice totals
+8. Use reports_recurring_expenses to identify regular deductible costs
+
+Then provide:
+- Total revenue for the year
+- Total expenses (with deductible vs non-deductible breakdown)
+- Tax paid and tax collected summaries
+- Quarterly revenue and expense breakdown
+- List of potentially deductible expense categories with amounts
+- Missing documentation or receipts that should be gathered
+- Key tax-relevant items to discuss with an accountant`,
+            },
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerPrompt(
+    "project_profitability",
+    {
+      title: "Project Profitability",
+      description:
+        "Analyze time tracking vs revenue per project to determine which projects are most profitable",
+    },
+    async () => {
+      return {
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: `Please analyze project profitability:
+
+1. Use tracker_projects_list to get all projects with their billable rates and estimates
+2. Use tracker_entries_list with a wide date range to get time entries per project
+3. Use customers_list and invoices_list to match projects to invoice revenue
+4. Use team_members to understand resource allocation
+
+Then provide:
+- Per-project breakdown: total hours tracked, billable rate, estimated revenue, actual invoiced revenue
+- Effective hourly rate per project (invoiced amount / hours worked)
+- Projects exceeding their hour estimates
+- Projects with tracked time but no invoiced revenue
+- Most and least profitable projects ranked
+- Recommendations for improving project profitability (rate adjustments, scope management, etc.)
+
+Present as a table with key metrics per project.`,
             },
           },
         ],

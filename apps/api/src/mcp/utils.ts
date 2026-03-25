@@ -1,5 +1,43 @@
 import { createAdminClient } from "@api/services/supabase";
+import { TZDate } from "@date-fns/tz";
 import { download, signedUrl } from "@midday/supabase/storage";
+import {
+  format,
+  getQuarter,
+  startOfMonth,
+  startOfQuarter,
+  startOfYear,
+} from "date-fns";
+
+export interface DateContext {
+  date: string;
+  year: number;
+  quarter: number;
+  monthStart: string;
+  quarterStart: string;
+  yearStart: string;
+  timezone: string;
+}
+
+/**
+ * Resolve the current date in the user's timezone (falls back to UTC)
+ * and return pre-computed date strings for common ranges.
+ */
+export function getDateContext(timezone: string | null): DateContext {
+  const tz = timezone ?? "UTC";
+  const now = new TZDate(new Date(), tz);
+  const fmt = "yyyy-MM-dd";
+
+  return {
+    date: format(now, fmt),
+    year: now.getFullYear(),
+    quarter: getQuarter(now),
+    monthStart: format(startOfMonth(now), fmt),
+    quarterStart: format(startOfQuarter(now), fmt),
+    yearStart: format(startOfYear(now), fmt),
+    timezone: tz,
+  };
+}
 
 export type TextContent = { type: "text"; text: string };
 export type ResourceContent = {

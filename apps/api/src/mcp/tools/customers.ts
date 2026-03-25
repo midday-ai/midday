@@ -11,39 +11,23 @@ import {
   upsertCustomer,
 } from "@midday/db/queries";
 import { z } from "zod";
-import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
-
-// Annotations for write operations
-const WRITE_ANNOTATIONS = {
-  readOnlyHint: false,
-  destructiveHint: false,
-  idempotentHint: false,
-  openWorldHint: false,
-} as const;
-
-// Annotations for destructive operations
-const DESTRUCTIVE_ANNOTATIONS = {
-  readOnlyHint: false,
-  destructiveHint: true,
-  idempotentHint: true,
-  openWorldHint: false,
-} as const;
+import {
+  DESTRUCTIVE_ANNOTATIONS,
+  hasScope,
+  READ_ONLY_ANNOTATIONS,
+  type RegisterTools,
+  WRITE_ANNOTATIONS,
+} from "../types";
 
 export const registerCustomerTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
 
-  // Check scopes
   const hasReadScope = hasScope(ctx, "customers.read");
   const hasWriteScope = hasScope(ctx, "customers.write");
 
-  // Skip if user has no customer scopes
   if (!hasReadScope && !hasWriteScope) {
     return;
   }
-
-  // ==========================================
-  // READ TOOLS
-  // ==========================================
 
   if (hasReadScope) {
     server.registerTool(
@@ -51,8 +35,13 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
       {
         title: "List Customers",
         description:
-          "List customers with filtering and search. Use this to find customer information.",
+          "List customers with optional free-text search and sorting. Returns paginated results (default 25) with name, email, contact info, and address. Use cursor from the response to fetch the next page.",
         inputSchema: getCustomersSchema.shape,
+        outputSchema: {
+          data: z.array(z.record(z.string(), z.any())),
+          hasMore: z.boolean(),
+          cursor: z.string().nullable().optional(),
+        },
         annotations: READ_ONLY_ANNOTATIONS,
       },
       async (params) => {
@@ -66,6 +55,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
 
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          structuredContent: result,
         };
       },
     );
@@ -74,9 +64,13 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
       "customers_get",
       {
         title: "Get Customer",
-        description: "Get a specific customer by their ID with full details",
+        description:
+          "Get full customer details by ID including name, email, billing email, phone, website, contact person, full address, VAT number, tags, and notes.",
         inputSchema: {
           id: getCustomerByIdSchema.shape.id,
+        },
+        outputSchema: {
+          data: z.record(z.string(), z.any()),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -92,14 +86,11 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
 
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          structuredContent: { data: result },
         };
       },
     );
   }
-
-  // ==========================================
-  // WRITE TOOLS
-  // ==========================================
 
   if (hasWriteScope) {
     server.registerTool(
@@ -107,7 +98,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
       {
         title: "Create Customer",
         description:
-          "Create a new customer with name, email, and optional address/contact details.",
+          "Create a new customer. Name is required; all other fields (email, phone, address, VAT, etc.) are optional. Returns the created customer object.",
         inputSchema: {
           name: upsertCustomerSchema.shape.name,
           email: upsertCustomerSchema.shape.email,
@@ -129,29 +120,44 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const result = await upsertCustomer(db, {
-          teamId,
-          name: params.name,
-          email: params.email,
-          billingEmail: params.billingEmail,
-          phone: params.phone,
-          website: params.website,
-          contact: params.contact,
-          country: params.country,
-          countryCode: params.countryCode,
-          addressLine1: params.addressLine1,
-          addressLine2: params.addressLine2,
-          city: params.city,
-          state: params.state,
-          zip: params.zip,
-          vatNumber: params.vatNumber,
-          note: params.note,
-          tags: params.tags,
-        });
+        try {
+          const result = await upsertCustomer(db, {
+            teamId,
+            name: params.name,
+            email: params.email,
+            billingEmail: params.billingEmail,
+            phone: params.phone,
+            website: params.website,
+            contact: params.contact,
+            country: params.country,
+            countryCode: params.countryCode,
+            addressLine1: params.addressLine1,
+            addressLine2: params.addressLine2,
+            city: params.city,
+            state: params.state,
+            zip: params.zip,
+            vatNumber: params.vatNumber,
+            note: params.note,
+            tags: params.tags,
+          });
 
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to create customer",
+              },
+            ],
+            isError: true,
+          };
+        }
       },
     );
 
@@ -160,7 +166,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
       {
         title: "Update Customer",
         description:
-          "Update an existing customer. Provide the customer ID and fields to update.",
+          "Update an existing customer. Provide the customer ID and only the fields you want to change. Unspecified fields keep their current values.",
         inputSchema: {
           id: z.string().uuid().describe("The ID of the customer to update"),
           name: upsertCustomerSchema.shape.name.optional(),
@@ -183,7 +189,6 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        // First check if customer exists
         const existing = await getCustomerById(db, {
           id: params.id,
           teamId,
@@ -228,7 +233,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
       {
         title: "Delete Customer",
         description:
-          "Delete a customer by their ID. This will fail if the customer has associated invoices or projects.",
+          "Permanently delete a customer by ID. Will fail if the customer has associated invoices or projects — remove those first.",
         inputSchema: {
           id: deleteCustomerSchema.shape.id,
         },

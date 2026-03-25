@@ -1,12 +1,41 @@
 import { CATEGORIES } from "@midday/categories";
-import { getTags, getTeamById } from "@midday/db/queries";
+import {
+  getCustomerById,
+  getCustomers,
+  getInvoiceById,
+  getInvoices,
+  getTags,
+  getTeamById,
+  getTransactionById,
+  getTransactions,
+} from "@midday/db/queries";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { hasScope, type McpContext } from "./types";
+
+const REPORT_TYPES = [
+  "revenue",
+  "profit",
+  "burn_rate",
+  "runway",
+  "expenses",
+  "spending",
+  "tax_summary",
+  "growth_rate",
+  "profit_margin",
+  "cash_flow",
+  "recurring_expenses",
+  "revenue_forecast",
+  "balance_sheet",
+];
 
 export function registerResources(server: McpServer, ctx: McpContext): void {
   const { db, teamId } = ctx;
 
-  // Team info requires teams.read scope
+  // ==========================================
+  // STATIC RESOURCES
+  // ==========================================
+
   if (hasScope(ctx, "teams.read")) {
     server.registerResource(
       "team",
@@ -31,7 +60,6 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
     );
   }
 
-  // Categories are static data, available to all authenticated users
   server.registerResource(
     "categories",
     "midday://categories",
@@ -53,7 +81,6 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
     },
   );
 
-  // Tags require tags.read scope
   if (hasScope(ctx, "tags.read")) {
     server.registerResource(
       "tags",
@@ -70,6 +97,217 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
               uri: "midday://tags",
               mimeType: "application/json",
               text: JSON.stringify(tags, null, 2),
+            },
+          ],
+        };
+      },
+    );
+  }
+
+  // ==========================================
+  // RESOURCE TEMPLATES
+  // ==========================================
+
+  if (hasScope(ctx, "transactions.read")) {
+    server.registerResource(
+      "transaction",
+      new ResourceTemplate("midday://transactions/{transactionId}", {
+        list: async () => {
+          const result = await getTransactions(db, {
+            teamId,
+            cursor: null,
+            pageSize: 50,
+            q: null,
+            start: null,
+            end: null,
+            categories: null,
+            statuses: null,
+            type: null,
+            accounts: null,
+            sort: null,
+            tags: null,
+            assignees: null,
+            recurring: null,
+            attachments: null,
+            amountRange: null,
+            amount: null,
+            manual: null,
+          });
+          return {
+            resources: (result.data ?? []).map((t) => ({
+              uri: `midday://transactions/${t.id}`,
+              name: t.name ?? `Transaction ${t.id}`,
+              mimeType: "application/json" as const,
+            })),
+          };
+        },
+      }),
+      {
+        description:
+          "A single bank transaction by ID with full details including amount, category, merchant, and attachments",
+        mimeType: "application/json",
+      },
+      async (uri, { transactionId }) => {
+        const result = await getTransactionById(db, {
+          id: transactionId as string,
+          teamId,
+        });
+        return {
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: "application/json",
+              text: result
+                ? JSON.stringify(result, null, 2)
+                : JSON.stringify({ error: "Transaction not found" }),
+            },
+          ],
+        };
+      },
+    );
+  }
+
+  if (hasScope(ctx, "invoices.read")) {
+    server.registerResource(
+      "invoice",
+      new ResourceTemplate("midday://invoices/{invoiceId}", {
+        list: async () => {
+          const result = await getInvoices(db, {
+            teamId,
+            cursor: null,
+            pageSize: 50,
+            q: null,
+            start: null,
+            end: null,
+            statuses: null,
+            customers: null,
+            sort: null,
+          });
+          return {
+            resources: (result.data ?? []).map((inv) => ({
+              uri: `midday://invoices/${inv.id}`,
+              name: inv.invoiceNumber ?? `Invoice ${inv.id}`,
+              mimeType: "application/json" as const,
+            })),
+          };
+        },
+      }),
+      {
+        description:
+          "A single invoice by ID with line items, customer info, amounts, tax, and payment status",
+        mimeType: "application/json",
+      },
+      async (uri, { invoiceId }) => {
+        const result = await getInvoiceById(db, {
+          id: invoiceId as string,
+          teamId,
+        });
+        return {
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: "application/json",
+              text: result
+                ? JSON.stringify(result, null, 2)
+                : JSON.stringify({ error: "Invoice not found" }),
+            },
+          ],
+        };
+      },
+    );
+  }
+
+  if (hasScope(ctx, "customers.read")) {
+    server.registerResource(
+      "customer",
+      new ResourceTemplate("midday://customers/{customerId}", {
+        list: async () => {
+          const result = await getCustomers(db, {
+            teamId,
+            cursor: null,
+            pageSize: 50,
+            q: null,
+            sort: null,
+          });
+          return {
+            resources: (result.data ?? []).map((c) => ({
+              uri: `midday://customers/${c.id}`,
+              name: c.name ?? `Customer ${c.id}`,
+              mimeType: "application/json" as const,
+            })),
+          };
+        },
+      }),
+      {
+        description:
+          "A single customer by ID with contact details, address, and billing info",
+        mimeType: "application/json",
+      },
+      async (uri, { customerId }) => {
+        const result = await getCustomerById(db, {
+          id: customerId as string,
+          teamId,
+        });
+        return {
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: "application/json",
+              text: result
+                ? JSON.stringify(result, null, 2)
+                : JSON.stringify({ error: "Customer not found" }),
+            },
+          ],
+        };
+      },
+    );
+  }
+
+  if (hasScope(ctx, "reports.read")) {
+    server.registerResource(
+      "report-type",
+      new ResourceTemplate("midday://reports/{reportType}", {
+        list: async () => ({
+          resources: REPORT_TYPES.map((type) => ({
+            uri: `midday://reports/${type}`,
+            name: type
+              .split("_")
+              .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(" "),
+            mimeType: "application/json" as const,
+          })),
+        }),
+        complete: {
+          reportType: async (value) =>
+            REPORT_TYPES.filter((t) => t.startsWith(value)),
+        },
+      }),
+      {
+        description:
+          "Description and available parameters for a specific report type. Use this to discover what reports are available and their input requirements.",
+        mimeType: "application/json",
+      },
+      async (uri, { reportType }) => {
+        const type = reportType as string;
+        const isValid = REPORT_TYPES.includes(type);
+
+        const reportInfo = isValid
+          ? {
+              type,
+              toolName: `reports_${type}`,
+              description: `Use the reports_${type} tool to run this report with date range and currency parameters.`,
+            }
+          : {
+              error: `Unknown report type: ${type}`,
+              availableTypes: REPORT_TYPES,
+            };
+
+        return {
+          contents: [
+            {
+              uri: uri.href,
+              mimeType: "application/json",
+              text: JSON.stringify(reportInfo, null, 2),
             },
           ],
         };
