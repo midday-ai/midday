@@ -17,7 +17,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": false,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/ui/*", "./src/*"]
     }
