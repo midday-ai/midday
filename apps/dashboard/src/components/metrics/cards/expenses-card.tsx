@@ -1,12 +1,9 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatedNumber } from "@/components/animated-number";
 import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
-import { useLongPress } from "@/hooks/use-long-press";
-import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useTRPC } from "@/trpc/client";
 import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
@@ -16,7 +13,6 @@ interface ExpensesCardProps {
   to: string;
   currency?: string;
   locale?: string;
-  isCustomizing: boolean;
 }
 
 export function ExpensesCard({
@@ -26,14 +22,6 @@ export function ExpensesCard({
   locale,
 }: ExpensesCardProps) {
   const trpc = useTRPC();
-  const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
-    useMetricsCustomize();
-
-  const longPressHandlers = useLongPress({
-    onLongPress: () => setIsCustomizing(true),
-    threshold: 500,
-    disabled: metricsIsCustomizing,
-  });
 
   const { data: expenseData, isPending } = useQuery(
     trpc.reports.expense.queryOptions({
@@ -47,13 +35,7 @@ export function ExpensesCard({
   const hasExpenseData = (expenseData?.result?.length ?? 0) > 0;
 
   return (
-    <div
-      className={cn(
-        "border bg-background border-border p-6 flex flex-col h-full relative group",
-        !metricsIsCustomizing && "cursor-pointer",
-      )}
-      {...longPressHandlers}
-    >
+    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">

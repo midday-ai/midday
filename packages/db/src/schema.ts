@@ -2854,10 +2854,10 @@ export const oauthApplications = pgTable(
     screenshots: text("screenshots").array().default(sql`'{}'::text[]`),
     redirectUris: text("redirect_uris").array().notNull(),
     clientId: text("client_id").notNull().unique(),
-    clientSecret: text("client_secret").notNull(),
+    clientSecret: text("client_secret"),
     scopes: text("scopes").array().notNull().default(sql`'{}'::text[]`),
-    teamId: uuid("team_id").notNull(),
-    createdBy: uuid("created_by").notNull(),
+    teamId: uuid("team_id"),
+    createdBy: uuid("created_by"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .notNull()
       .defaultNow(),

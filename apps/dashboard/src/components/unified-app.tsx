@@ -11,25 +11,22 @@ import {
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
-import {
-  Carousel,
-  type CarouselApi,
-  CarouselContent,
-  CarouselItem,
-} from "@midday/ui/carousel";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import Image from "next/image";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAppOAuth } from "@/hooks/use-app-oauth";
 import { useTRPC } from "@/trpc/client";
 import { getScopeDescription } from "@/utils/scopes";
 import { AppSettings } from "./app-settings";
 import { MemoizedReactMarkdown } from "./markdown";
+import {
+  ChatGPTSetupInstructions,
+  ClaudeSetupInstructions,
+} from "./mcp-setup-instructions";
 
 // OAuth app configuration
 const oauthAppConfig: Record<
@@ -53,61 +50,39 @@ interface UnifiedAppProps {
   userEmail?: string;
 }
 
-function CarouselWithDots({
-  images,
-  appName,
-}: {
-  images: string[];
-  appName: string;
-}) {
-  const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setCurrent(api.selectedScrollSnap());
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
-
+function AppHeroBanner({ app }: { app: UnifiedApp }) {
   return (
-    <div className="relative">
-      <Carousel className="w-full max-w-[465px]" setApi={setApi}>
-        <CarouselContent>
-          {images.map((image: string, index: number) => (
-            <CarouselItem key={`${appName}-${image}-${index.toString()}`}>
-              <Image
-                src={image}
-                alt={`${appName} screenshot ${index + 1}`}
-                width={465}
-                height={290}
-                quality={100}
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+    <div
+      className="relative w-full flex items-center justify-center overflow-hidden bg-[#fafafa] dark:bg-[#0c0c0c]"
+      style={{ height: 200 }}
+    >
+      <div
+        className="absolute inset-0 dark:hidden"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, #e0e0e0 1px, transparent 1px)",
+          backgroundSize: "10px 10px",
+        }}
+      />
+      <div
+        className="absolute inset-0 hidden dark:block"
+        style={{
+          backgroundImage: "radial-gradient(circle, #333 1px, transparent 1px)",
+          backgroundSize: "10px 10px",
+        }}
+      />
 
-      {/* Pagination dots */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-        {images.map((image, index) => (
-          <button
-            key={`dot-${image}-${index.toString()}`}
-            type="button"
-            className={`w-2 h-2 rounded-full transition-all ${
-              index === current
-                ? "bg-white shadow-lg"
-                : "bg-white/50 hover:bg-white/75"
-            }`}
-            onClick={() => api?.scrollTo(index)}
-            aria-label={`Go to screenshot ${index + 1}`}
-          />
-        ))}
+      <div className="relative z-10 app-hero-icon">
+        {app.type === "official" && app.logo && typeof app.logo !== "string" ? (
+          <app.logo />
+        ) : (
+          <img src={app.logo as string} alt={app.name} />
+        )}
+        <style>
+          {
+            ".app-hero-icon img, .app-hero-icon svg { width: 64px !important; height: 64px !important; }"
+          }
+        </style>
       </div>
     </div>
   );
@@ -280,6 +255,8 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     }
   };
 
+  const isMcpApp = app.id.endsWith("-mcp");
+
   return (
     <Card key={app.id} className="w-full flex flex-col">
       <Sheet open={params.app === app.id} onOpenChange={() => setParams(null)}>
@@ -332,107 +309,85 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
             Details
           </Button>
 
-          {app.installUrl ? (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleOnInitialize}
-              disabled={!app.active}
-            >
-              {app.id === "midday-desktop" ? "Download" : "Install"}
-            </Button>
-          ) : app.installed ? (
-            <SubmitButton
-              variant="outline"
-              className="w-full"
-              onClick={handleDisconnect}
-              isSubmitting={isDisconnecting}
-            >
-              Disconnect
-            </SubmitButton>
-          ) : (
-            <SubmitButton
-              variant="outline"
-              className="w-full"
-              onClick={handleOnInitialize}
-              disabled={!app.active}
-              isSubmitting={isInstalling}
-            >
-              Install
-            </SubmitButton>
-          )}
+          {!isMcpApp &&
+            (app.installUrl ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleOnInitialize}
+                disabled={!app.active}
+              >
+                {app.id === "midday-desktop" ? "Download" : "Install"}
+              </Button>
+            ) : app.installed ? (
+              <SubmitButton
+                variant="outline"
+                className="w-full"
+                onClick={handleDisconnect}
+                isSubmitting={isDisconnecting}
+              >
+                Disconnect
+              </SubmitButton>
+            ) : (
+              <SubmitButton
+                variant="outline"
+                className="w-full"
+                onClick={handleOnInitialize}
+                disabled={!app.active}
+                isSubmitting={isInstalling}
+              >
+                Install
+              </SubmitButton>
+            ))}
         </div>
 
         <SheetContent>
           <SheetHeader>
-            {app.images.length > 0 && (
-              <div className="mb-4">
-                {app.images.length === 1 ? (
-                  <Image
-                    src={app.images[0] as string}
-                    alt={app.name}
-                    width={465}
-                    height={290}
-                    quality={100}
-                  />
-                ) : (
-                  <CarouselWithDots images={app.images} appName={app.name} />
-                )}
-              </div>
-            )}
+            <div className="mb-4">
+              <AppHeroBanner app={app} />
+            </div>
 
             <div className="flex items-center justify-between border-b border-border pb-2">
-              <div className="flex items-center space-x-2">
-                {app.type === "official" &&
-                app.logo &&
-                typeof app.logo !== "string" ? (
-                  <app.logo />
-                ) : (
-                  <img
-                    src={app.logo as string}
-                    alt={app.name}
-                    className="w-8 h-8 rounded"
-                  />
-                )}
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h3 className="text-lg leading-none">{app.name}</h3>
-                    {app.installed && (
-                      <div className="bg-green-600 text-[9px] dark:bg-green-300 rounded-full size-1" />
-                    )}
-                  </div>
-
-                  <span className="text-xs text-[#878787]">
-                    {app.category} •{" "}
-                    {app.type === "external"
-                      ? `By ${app.developerName}`
-                      : "By Midday"}
-                  </span>
-                </div>
-              </div>
-
               <div>
-                {app.installed ? (
-                  <SubmitButton
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleDisconnect}
-                    isSubmitting={isDisconnecting}
-                  >
-                    Disconnect
-                  </SubmitButton>
-                ) : (
-                  <SubmitButton
-                    variant="outline"
-                    className="w-full border-primary"
-                    onClick={handleOnInitialize}
-                    disabled={!app.active}
-                    isSubmitting={isInstalling}
-                  >
-                    {app.id === "midday-desktop" ? "Download" : "Install"}
-                  </SubmitButton>
-                )}
+                <div className="flex items-center space-x-2">
+                  <h3 className="text-lg leading-none">{app.name}</h3>
+                  {app.installed && (
+                    <div className="bg-green-600 text-[9px] dark:bg-green-300 rounded-full size-1" />
+                  )}
+                </div>
+
+                <span className="text-xs text-[#878787]">
+                  {app.category} •{" "}
+                  {app.type === "external"
+                    ? `By ${app.developerName}`
+                    : "By Midday"}
+                </span>
               </div>
+
+              {!isMcpApp && (
+                <div>
+                  {app.installed ? (
+                    <SubmitButton
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleDisconnect}
+                      isSubmitting={isDisconnecting}
+                    >
+                      Disconnect
+                    </SubmitButton>
+                  ) : (
+                    <SubmitButton
+                      variant="outline"
+                      className="w-full border-primary"
+                      onClick={handleOnInitialize}
+                      disabled={!app.active}
+                      isSubmitting={isInstalling}
+                    >
+                      {app.id === "midday-desktop" ? "Download" : "Install"}
+                    </SubmitButton>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="mt-4">
@@ -447,10 +402,18 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                 >
                   <AccordionItem value="description" className="border-none">
                     <AccordionTrigger>How it works</AccordionTrigger>
-                    <AccordionContent className="text-[#878787] text-sm prose prose-sm prose-invert prose-p:text-[#878787] prose-p:my-3 [&_strong]:text-primary [&_strong]:font-normal max-w-none">
-                      <MemoizedReactMarkdown>
-                        {app.description || app.overview || ""}
-                      </MemoizedReactMarkdown>
+                    <AccordionContent className="text-[#878787] text-sm">
+                      {app.id === "chatgpt-mcp" ? (
+                        <ChatGPTSetupInstructions />
+                      ) : app.id === "claude-mcp" ? (
+                        <ClaudeSetupInstructions />
+                      ) : (
+                        <div className="prose prose-sm prose-invert prose-p:text-[#878787] prose-p:my-3 [&_strong]:text-primary [&_strong]:font-normal max-w-none">
+                          <MemoizedReactMarkdown>
+                            {app.description || app.overview || ""}
+                          </MemoizedReactMarkdown>
+                        </div>
+                      )}
                     </AccordionContent>
                   </AccordionItem>
 

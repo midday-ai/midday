@@ -19,23 +19,25 @@ export const oauthAuthorizationRequestSchema = z.object({
     description: "Space-separated list of requested scopes",
     example: "transactions.read invoices.read",
   }),
-  // SECURITY: Enhanced state parameter validation for CSRF protection
   state: z
     .string()
-    .min(32, "State parameter must be at least 32 characters for security")
-    .max(512, "State parameter must not exceed 512 characters")
-    .regex(
-      /^[A-Za-z0-9_.-]+$/,
-      "State parameter must contain only alphanumeric characters, underscores, dots, and hyphens",
-    )
+    .min(1, "State parameter is required")
+    .max(1024, "State parameter must not exceed 1024 characters")
     .openapi({
-      description:
-        "State parameter for CSRF protection (min 32 chars, alphanumeric + _.-)",
-      example: "abc123xyz789_secure-random-state-value-with-sufficient-entropy",
+      description: "Opaque state parameter for CSRF protection",
+      example: "abc123xyz789_secure-random-state-value",
     }),
   code_challenge: z.string().optional().openapi({
-    description: "Code challenge for PKCE",
+    description: "Code challenge for PKCE (S256)",
     example: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+  }),
+  code_challenge_method: z.literal("S256").optional().openapi({
+    description: "Code challenge method, must be S256",
+    example: "S256",
+  }),
+  resource: z.string().url().optional().openapi({
+    description: "Resource parameter per RFC 9728 — identifies the MCP server",
+    example: "https://api.midday.ai",
   }),
 });
 
@@ -169,21 +171,10 @@ export const oauthErrorResponseSchema = z.object({
     description: "URI to a human-readable error page",
     example: "https://docs.midday.ai/errors/invalid_request",
   }),
-  // SECURITY: Enhanced state parameter validation (optional for error responses)
-  state: z
-    .string()
-    .min(32, "State parameter must be at least 32 characters for security")
-    .max(512, "State parameter must not exceed 512 characters")
-    .regex(
-      /^[A-Za-z0-9_.-]+$/,
-      "State parameter must contain only alphanumeric characters, underscores, dots, and hyphens",
-    )
-    .optional()
-    .openapi({
-      description:
-        "State parameter from the original request (min 32 chars, alphanumeric + _.-)",
-      example: "abc123xyz789_secure-random-state-value-with-sufficient-entropy",
-    }),
+  state: z.string().max(1024).optional().openapi({
+    description: "Opaque state parameter from the original request",
+    example: "abc123xyz789_secure-random-state-value",
+  }),
 });
 
 // OAuth Authorization Decision Schema (for consent flow)
@@ -204,19 +195,14 @@ export const oauthAuthorizationDecisionSchema = z.object({
     description: "Redirect URI for OAuth callback",
     example: "https://myapp.com/callback",
   }),
-  // SECURITY: Enhanced state parameter validation for CSRF protection
   state: z
     .string()
-    .min(32, "State parameter must be at least 32 characters for security")
-    .max(512, "State parameter must not exceed 512 characters")
-    .regex(
-      /^[A-Za-z0-9_.-]+$/,
-      "State parameter must contain only alphanumeric characters, underscores, dots, and hyphens",
-    )
+    .min(1, "State parameter is required")
+    .max(1024, "State parameter must not exceed 1024 characters")
+    .optional()
     .openapi({
-      description:
-        "State parameter for CSRF protection (min 32 chars, alphanumeric + _.-)",
-      example: "abc123xyz789_secure-random-state-value-with-sufficient-entropy",
+      description: "Opaque state parameter for CSRF protection",
+      example: "abc123xyz789_secure-random-state-value",
     }),
   code_challenge: z.string().optional().openapi({
     description: "Code challenge for PKCE (S256 method assumed)",
@@ -282,23 +268,87 @@ export const oauthApplicationInfoSchema = z.object({
     description: "Redirect URI",
     example: "https://myapp.com/callback",
   }),
-  // SECURITY: Enhanced state parameter validation (optional for consent screen)
-  state: z
-    .string()
-    .min(32, "State parameter must be at least 32 characters for security")
-    .max(512, "State parameter must not exceed 512 characters")
-    .regex(
-      /^[A-Za-z0-9_.-]+$/,
-      "State parameter must contain only alphanumeric characters, underscores, dots, and hyphens",
-    )
-    .optional()
-    .openapi({
-      description: "State parameter (min 32 chars, alphanumeric + _.-)",
-      example: "abc123xyz789_secure-random-state-value-with-sufficient-entropy",
-    }),
+  state: z.string().max(1024).optional().openapi({
+    description: "Opaque state parameter",
+    example: "abc123xyz789_secure-random-state-value",
+  }),
   status: z.enum(["draft", "pending", "approved", "rejected"]).openapi({
     description: "Application verification status",
     example: "approved",
+  }),
+});
+
+// Dynamic Client Registration (RFC 7591) Request Schema
+export const dcrRequestSchema = z.object({
+  client_name: z.string().min(1).max(256).openapi({
+    description: "Human-readable name of the client",
+    example: "ChatGPT",
+  }),
+  redirect_uris: z
+    .array(z.string().url())
+    .min(1)
+    .openapi({
+      description: "Array of redirect URIs",
+      example: ["https://chatgpt.com/connector/oauth/callback"],
+    }),
+  grant_types: z
+    .array(z.string())
+    .optional()
+    .default(["authorization_code", "refresh_token"])
+    .openapi({
+      description: "Requested grant types",
+      example: ["authorization_code", "refresh_token"],
+    }),
+  token_endpoint_auth_method: z.string().optional().default("none").openapi({
+    description: "Token endpoint authentication method",
+    example: "none",
+  }),
+  scope: z.string().optional().openapi({
+    description: "Space-separated requested scopes",
+    example: "transactions.read invoices.read",
+  }),
+  logo_uri: z.string().url().optional().openapi({
+    description: "URL of the client logo",
+    example: "https://example.com/logo.png",
+  }),
+  client_uri: z.string().url().optional().openapi({
+    description: "URL of the client homepage",
+    example: "https://example.com",
+  }),
+  response_types: z
+    .array(z.string())
+    .optional()
+    .openapi({
+      description: "Requested response types",
+      example: ["code"],
+    }),
+});
+
+// Dynamic Client Registration Response Schema
+export const dcrResponseSchema = z.object({
+  client_id: z.string().openapi({
+    description: "Assigned client ID",
+    example: "mid_client_abcdef123456789",
+  }),
+  client_name: z.string().openapi({
+    description: "Human-readable name of the client",
+    example: "ChatGPT",
+  }),
+  redirect_uris: z.array(z.string().url()).openapi({
+    description: "Registered redirect URIs",
+    example: ["https://chatgpt.com/connector/oauth/callback"],
+  }),
+  grant_types: z.array(z.string()).openapi({
+    description: "Granted grant types",
+    example: ["authorization_code", "refresh_token"],
+  }),
+  token_endpoint_auth_method: z.string().openapi({
+    description: "Token endpoint authentication method",
+    example: "none",
+  }),
+  response_types: z.array(z.string()).openapi({
+    description: "Supported response types",
+    example: ["code"],
   }),
 });
 

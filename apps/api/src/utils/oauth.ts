@@ -4,7 +4,7 @@ import { hash } from "@midday/encryption";
 export type OAuthApplication = {
   id: string;
   active: boolean | null;
-  clientSecret: string;
+  clientSecret: string | null;
 };
 
 export function validateClientCredentials(
@@ -12,6 +12,10 @@ export function validateClientCredentials(
   clientSecret: string,
 ): boolean {
   if (!application || !application.active) {
+    return false;
+  }
+
+  if (!application.clientSecret) {
     return false;
   }
 

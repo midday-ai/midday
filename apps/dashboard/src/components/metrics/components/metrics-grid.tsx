@@ -34,21 +34,19 @@ function arrayMove<T>(arr: T[], from: number, to: number): T[] {
 function DroppableCell({
   id,
   colSpan,
-  disabled,
   children,
 }: {
   id: string;
   colSpan: ColSpan;
-  disabled: boolean;
   children: React.ReactNode;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id, disabled });
+  const { setNodeRef, isOver } = useDroppable({ id });
 
   return (
     <div
       ref={setNodeRef}
       className={`${COL_SPAN_CLASS[colSpan]} rounded transition-shadow duration-150 ${
-        isOver && !disabled ? "ring-2 ring-primary/40 ring-inset" : ""
+        isOver ? "ring-2 ring-primary/40 ring-inset" : ""
       }`}
     >
       {children}
@@ -58,14 +56,12 @@ function DroppableCell({
 
 interface MetricsGridProps {
   layout: ChartLayoutItem[];
-  isCustomizing: boolean;
   onLayoutChange: (newLayout: ChartLayoutItem[]) => void;
   renderChart: (chartId: ChartId, index: number) => React.ReactNode;
 }
 
 export function MetricsGrid({
   layout,
-  isCustomizing,
   onLayoutChange,
   renderChart,
 }: MetricsGridProps) {
@@ -123,16 +119,11 @@ export function MetricsGrid({
         data-metrics-grid
       >
         {layout.map((item, index) => {
-          const isDeferred = !isCustomizing && index >= 3;
+          const isDeferred = index >= 3;
           const content = renderChart(item.id, index);
 
           return (
-            <DroppableCell
-              key={item.id}
-              id={item.id}
-              colSpan={item.colSpan}
-              disabled={!isCustomizing}
-            >
+            <DroppableCell key={item.id} id={item.id} colSpan={item.colSpan}>
               {isDeferred ? (
                 <LazyChart index={index - 3}>{content}</LazyChart>
               ) : (

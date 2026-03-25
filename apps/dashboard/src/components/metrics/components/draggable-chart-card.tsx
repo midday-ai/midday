@@ -1,6 +1,7 @@
 "use client";
 
 import { useDraggable } from "@dnd-kit/core";
+import { Icons } from "@midday/ui/icons";
 import { useCallback, useRef } from "react";
 import type { ColSpan } from "../utils/chart-types";
 
@@ -23,18 +24,15 @@ type ResizeSide = "left" | "right";
 export function DraggableChartCard({
   id,
   children,
-  customizeMode,
   onResize,
 }: {
   id: string;
   children: React.ReactNode;
-  customizeMode: boolean;
   onResize: (colSpan: ColSpan) => void;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id,
-    disabled: !customizeMode,
   });
 
   const startResize = useCallback(
@@ -92,29 +90,32 @@ export function DraggableChartCard({
   return (
     <div
       ref={composedRef}
-      className={`relative transition-opacity duration-150 ${
-        customizeMode ? "cursor-grab active:cursor-grabbing" : ""
-      } ${isDragging ? "opacity-30" : ""}`}
-      {...(customizeMode ? { ...attributes, ...listeners } : {})}
+      className={`relative transition-opacity duration-150 ${isDragging ? "opacity-30" : ""}`}
     >
       {children}
 
-      {customizeMode && (
-        <>
-          <div
-            className="absolute inset-y-0 left-0 w-4 z-20 cursor-col-resize group/resize-l"
-            onPointerDown={(e) => startResize(e, "left")}
-          >
-            <div className="absolute top-1/2 -translate-y-1/2 left-0.5 w-1 h-8 rounded-full bg-border opacity-0 group-hover/resize-l:opacity-100 transition-opacity" />
-          </div>
-          <div
-            className="absolute inset-y-0 right-0 w-4 z-20 cursor-col-resize group/resize-r"
-            onPointerDown={(e) => startResize(e, "right")}
-          >
-            <div className="absolute top-1/2 -translate-y-1/2 right-0.5 w-1 h-8 rounded-full bg-border opacity-0 group-hover/resize-r:opacity-100 transition-opacity" />
-          </div>
-        </>
-      )}
+      {/* Drag handle — visible on hover, top-right next to share button */}
+      <div
+        className="absolute top-6 right-14 z-20 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <Icons.DragIndicator size={14} className="text-muted-foreground" />
+      </div>
+
+      {/* Resize handles — visible on hover near edges */}
+      <div
+        className="absolute inset-y-0 left-0 w-4 z-20 cursor-col-resize group/resize-l"
+        onPointerDown={(e) => startResize(e, "left")}
+      >
+        <div className="absolute top-1/2 -translate-y-1/2 left-0.5 w-1 h-8 rounded-full bg-border opacity-0 group-hover/resize-l:opacity-100 transition-opacity" />
+      </div>
+      <div
+        className="absolute inset-y-0 right-0 w-4 z-20 cursor-col-resize group/resize-r"
+        onPointerDown={(e) => startResize(e, "right")}
+      >
+        <div className="absolute top-1/2 -translate-y-1/2 right-0.5 w-1 h-8 rounded-full bg-border opacity-0 group-hover/resize-r:opacity-100 transition-opacity" />
+      </div>
     </div>
   );
 }

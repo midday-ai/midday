@@ -19,6 +19,7 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { secureHeaders } from "hono/secure-headers";
 import { routers } from "./rest/routers";
+import { wellKnownRouter } from "./rest/routers/well-known";
 import type { Context } from "./rest/types";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
@@ -126,6 +127,8 @@ app.use(
 
 app.get("/favicon.ico", (c) => c.body(null, 204));
 app.get("/robots.txt", (c) => c.body(null, 204));
+
+app.route("/.well-known", wellKnownRouter);
 
 app.get("/health", (c) => {
   const start = performance.now();

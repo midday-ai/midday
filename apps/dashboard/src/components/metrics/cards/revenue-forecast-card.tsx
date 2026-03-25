@@ -1,14 +1,11 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useMemo } from "react";
 import { AnimatedNumber } from "@/components/animated-number";
 import { formatChartMonth } from "@/components/charts/chart-utils";
 import { RevenueForecastChart } from "@/components/charts/revenue-forecast-chart";
-import { useLongPress } from "@/hooks/use-long-press";
-import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useTRPC } from "@/trpc/client";
 import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
@@ -18,7 +15,6 @@ interface RevenueForecastCardProps {
   to: string;
   currency?: string;
   locale?: string;
-  isCustomizing: boolean;
   revenueType?: "net" | "gross";
 }
 
@@ -30,13 +26,6 @@ export function RevenueForecastCard({
   revenueType = "net",
 }: RevenueForecastCardProps) {
   const trpc = useTRPC();
-  const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
-
-  const longPressHandlers = useLongPress({
-    onLongPress: () => setIsCustomizing(true),
-    threshold: 500,
-    disabled: isCustomizing,
-  });
 
   const { data: revenueForecastData } = useQuery(
     trpc.reports.revenueForecast.queryOptions({
@@ -111,13 +100,7 @@ export function RevenueForecastCard({
   }, [from, to]);
 
   return (
-    <div
-      className={cn(
-        "border bg-background border-border p-6 flex flex-col h-full relative group",
-        !isCustomizing && "cursor-pointer",
-      )}
-      {...longPressHandlers}
-    >
+    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">

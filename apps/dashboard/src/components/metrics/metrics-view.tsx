@@ -4,9 +4,7 @@ import { Button } from "@midday/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useOnClickOutside } from "usehooks-ts";
 import { updateMetricsSettingsAction } from "@/actions/update-metrics-settings-action";
-import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -115,7 +113,6 @@ export function MetricsView({ initialLayout }: MetricsViewProps) {
     trpc.bankConnections.get.queryOptions(),
   );
   const { from, to, currency, revenueType } = useMetricsFilter();
-  const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
   const [layout, setLayout] = useState<ChartLayoutItem[]>(
     initialLayout ?? DEFAULT_CHART_LAYOUT,
   );
@@ -159,15 +156,6 @@ export function MetricsView({ initialLayout }: MetricsViewProps) {
     ];
   }, [layout]);
 
-  useOnClickOutside(gridRef, (event) => {
-    if (isCustomizing) {
-      const target = event.target as Element;
-      if (!target.closest("[data-no-close]")) {
-        setIsCustomizing(false);
-      }
-    }
-  });
-
   const [_, setStep] = useQueryState("step");
   const hasConnections = connections && connections.length > 0;
   const showConnectOverlay = connections !== undefined && !hasConnections;
@@ -178,7 +166,7 @@ export function MetricsView({ initialLayout }: MetricsViewProps) {
       to,
       currency,
       locale,
-      isCustomizing,
+      isCustomizing: false,
       revenueType,
     };
 
@@ -207,7 +195,6 @@ export function MetricsView({ initialLayout }: MetricsViewProps) {
       <DraggableChartCard
         key={chartId}
         id={chartId}
-        customizeMode={isCustomizing}
         onResize={(newColSpan) => handleResizeChart(chartId, newColSpan)}
       >
         {showConnectOverlay ? (
@@ -242,7 +229,6 @@ export function MetricsView({ initialLayout }: MetricsViewProps) {
     <div className="flex flex-col gap-6" ref={gridRef}>
       <MetricsGrid
         layout={normalizedLayout}
-        isCustomizing={isCustomizing}
         onLayoutChange={handleLayoutChange}
         renderChart={renderChart}
       />

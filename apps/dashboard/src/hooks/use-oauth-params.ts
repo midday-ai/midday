@@ -8,6 +8,8 @@ export const oauthParamsSchema = {
   scope: parseAsString,
   state: parseAsString,
   code_challenge: parseAsString,
+  code_challenge_method: parseAsString,
+  resource: parseAsString,
 };
 
 export function useOAuthParams() {

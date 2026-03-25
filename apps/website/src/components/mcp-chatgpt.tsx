@@ -45,13 +45,45 @@ function CodeBlock({ code }: { code: string }) {
   );
 }
 
-type Tab = "developer" | "sdk";
+function CopyableUrl({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="flex items-center gap-2 w-full bg-[#fafafa] dark:bg-[#0c0c0c] border border-border px-4 py-3 text-left group hover:border-foreground/30 transition-colors"
+    >
+      <span className="font-mono text-sm flex-1 truncate">{url}</span>
+      {copied ? (
+        <Icons.Check size={14} className="text-foreground flex-shrink-0" />
+      ) : (
+        <Icons.Copy
+          size={14}
+          className="text-muted-foreground group-hover:text-foreground flex-shrink-0 transition-colors"
+        />
+      )}
+    </button>
+  );
+}
+
+type Tab = "connect" | "advanced";
 
 export function MCPChatGPT() {
   const [apiKey, setApiKey] = useState("");
-  const [activeTab, setActiveTab] = useState<Tab>("developer");
+  const [activeTab, setActiveTab] = useState<Tab>("connect");
 
-  const developerConfig = useMemo(() => {
+  const advancedConfig = useMemo(() => {
     const key = apiKey || "YOUR_API_KEY";
     return JSON.stringify(
       {
@@ -113,15 +145,11 @@ console.log(result);
 await client.close();`;
   }, [apiKey]);
 
-  const installCode = "npm install @modelcontextprotocol/sdk";
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
       <div className="bg-background">
         <div className="pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 px-4 sm:px-6">
           <div className="max-w-2xl mx-auto">
-            {/* Back Link */}
             <Link
               href="/mcp"
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 font-sans text-sm"
@@ -130,7 +158,6 @@ await client.close();`;
               All clients
             </Link>
 
-            {/* Logo and Title */}
             <div className="flex items-center gap-4 mb-6">
               <div className="w-14 h-14 [&>img]:w-full [&>img]:h-full">
                 <ChatGPTMcpLogo />
@@ -145,60 +172,15 @@ await client.close();`;
               </div>
             </div>
 
-            {/* Description */}
             <div className="space-y-4 mb-8">
               <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                 Financial data in ChatGPT
               </h2>
               <p className="font-sans text-base text-muted-foreground leading-relaxed">
-                ChatGPT supports MCP servers in developer mode. Connect Midday
-                to query your transactions, invoices, and reports directly in
-                ChatGPT conversations.
+                Connect Midday to ChatGPT and query your transactions, invoices,
+                and reports directly in conversations. Authentication is handled
+                automatically via OAuth.
               </p>
-            </div>
-
-            {/* Requirements */}
-            <div className="bg-secondary border border-border p-4 mb-8">
-              <p className="font-sans text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">
-                  Requirements:
-                </span>{" "}
-                ChatGPT Pro, Plus, Business, Enterprise, or Education account.
-                Enable developer mode in{" "}
-                <span className="font-medium">
-                  Settings → Apps → Advanced settings
-                </span>
-                .
-              </p>
-            </div>
-
-            {/* API Key Input */}
-            <div className="space-y-4 mb-8">
-              <div className="space-y-2">
-                <label
-                  htmlFor="api-key"
-                  className="font-sans text-sm text-foreground"
-                >
-                  Your API key
-                </label>
-                <Input
-                  id="api-key"
-                  type="password"
-                  placeholder="mid_..."
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="font-mono text-sm"
-                />
-                <p className="font-sans text-xs text-muted-foreground">
-                  Don't have an API key?{" "}
-                  <Link
-                    href="https://app.midday.ai/settings/developer"
-                    className="underline hover:text-foreground"
-                  >
-                    Create one in Settings → Developer
-                  </Link>
-                </p>
-              </div>
             </div>
 
             {/* Tabs */}
@@ -206,112 +188,165 @@ await client.close();`;
               <div className="flex border-b border-border">
                 <button
                   type="button"
-                  onClick={() => setActiveTab("developer")}
+                  onClick={() => setActiveTab("connect")}
                   className={`px-4 py-2 text-sm font-sans transition-colors relative ${
-                    activeTab === "developer"
+                    activeTab === "connect"
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Developer Mode
-                  {activeTab === "developer" && (
+                  Connect
+                  {activeTab === "connect" && (
                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[1px]" />
                   )}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab("sdk")}
+                  onClick={() => setActiveTab("advanced")}
                   className={`px-4 py-2 text-sm font-sans transition-colors relative ${
-                    activeTab === "sdk"
+                    activeTab === "advanced"
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  SDK
-                  {activeTab === "sdk" && (
+                  Advanced
+                  {activeTab === "advanced" && (
                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[1px]" />
                   )}
                 </button>
               </div>
             </div>
 
-            {/* Tab Content */}
-            {activeTab === "developer" && (
-              <div className="space-y-4">
-                <p className="font-sans text-sm text-muted-foreground">
-                  Create an MCP app in ChatGPT with this configuration:
-                </p>
-                <CodeBlock code={developerConfig} />
-                <p className="font-sans text-xs text-muted-foreground">
-                  Uses{" "}
-                  <a
-                    href="https://www.npmjs.com/package/mcp-remote"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline hover:text-foreground"
-                  >
-                    mcp-remote
-                  </a>{" "}
-                  to bridge bearer token authentication (installed automatically
-                  via npx).
-                </p>
-              </div>
-            )}
+            {/* Connect Tab */}
+            {activeTab === "connect" && (
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <p className="font-sans text-sm text-muted-foreground">
+                    Copy this URL and add it as an app in ChatGPT:
+                  </p>
+                  <CopyableUrl url="https://api.midday.ai/mcp" />
+                </div>
 
-            {activeTab === "sdk" && (
-              <div className="space-y-4">
-                <p className="font-sans text-sm text-muted-foreground">
-                  Build custom integrations with the MCP SDK:
-                </p>
-                <CodeBlock code={installCode} />
-                <div className="mt-4">
-                  <CodeBlock code={sdkCode} />
+                <div className="mt-12 space-y-4">
+                  <h3 className="font-sans text-sm font-medium text-foreground">
+                    Setup steps
+                  </h3>
+                  <ol className="space-y-3">
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                        1
+                      </span>
+                      <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                        Go to{" "}
+                        <span className="font-medium text-foreground">
+                          Settings → Apps
+                        </span>{" "}
+                        in ChatGPT and click{" "}
+                        <span className="font-medium text-foreground">
+                          Create
+                        </span>
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                        2
+                      </span>
+                      <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                        Paste the URL above as the connector URL
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                        3
+                      </span>
+                      <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                        When you use the tool, you'll be prompted to sign in to
+                        Midday and select a team
+                      </span>
+                    </li>
+                  </ol>
+                </div>
+
+                <div className="bg-secondary border border-border p-4 mt-6">
+                  <p className="font-sans text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">
+                      Requirements:
+                    </span>{" "}
+                    ChatGPT Pro, Plus, Business, Enterprise, or Education
+                    account. Enable developer mode in{" "}
+                    <span className="font-medium">
+                      Settings → Apps → Advanced settings
+                    </span>
+                    .
+                  </p>
                 </div>
               </div>
             )}
 
-            {/* Steps */}
-            <div className="mt-12 space-y-4">
-              <h3 className="font-sans text-sm font-medium text-foreground">
-                Setup steps
-              </h3>
-              <ol className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
-                    1
-                  </span>
-                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    Get an API key from{" "}
+            {/* Advanced Tab */}
+            {activeTab === "advanced" && (
+              <div className="space-y-6">
+                <p className="font-sans text-sm text-muted-foreground">
+                  For programmatic access using an API key instead of OAuth:
+                </p>
+
+                <div className="space-y-2">
+                  <label
+                    htmlFor="api-key"
+                    className="font-sans text-sm text-foreground"
+                  >
+                    Your API key
+                  </label>
+                  <Input
+                    id="api-key"
+                    type="password"
+                    placeholder="mid_..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="font-mono text-sm"
+                  />
+                  <p className="font-sans text-xs text-muted-foreground">
+                    Don't have an API key?{" "}
                     <Link
                       href="https://app.midday.ai/settings/developer"
                       className="underline hover:text-foreground"
                     >
-                      Settings → Developer
+                      Create one in Settings → Developer
                     </Link>
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
-                    2
-                  </span>
-                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    {activeTab === "developer"
-                      ? "Enable developer mode in Settings → Apps → Advanced settings"
-                      : "Install the MCP SDK with npm"}
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
-                    3
-                  </span>
-                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    {activeTab === "developer"
-                      ? "Create a new MCP app with the config above"
-                      : "Use the code example to connect and call tools"}
-                  </span>
-                </li>
-              </ol>
-            </div>
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="font-sans text-sm text-muted-foreground">
+                    Developer mode config:
+                  </p>
+                  <CodeBlock code={advancedConfig} />
+                  <p className="font-sans text-xs text-muted-foreground">
+                    Uses{" "}
+                    <a
+                      href="https://www.npmjs.com/package/mcp-remote"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-foreground"
+                    >
+                      mcp-remote
+                    </a>{" "}
+                    to bridge bearer token authentication (installed
+                    automatically via npx).
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="font-sans text-sm text-muted-foreground">
+                    SDK usage:
+                  </p>
+                  <CodeBlock code="npm install @modelcontextprotocol/sdk" />
+                  <div className="mt-4">
+                    <CodeBlock code={sdkCode} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,14 +1,11 @@
 "use client";
 
 import { UTCDate } from "@date-fns/utc";
-import { cn } from "@midday/ui/cn";
 import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { RunwayChart } from "@/components/charts/runway-chart";
-import { useLongPress } from "@/hooks/use-long-press";
-import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
@@ -22,13 +19,6 @@ interface RunwayCardProps {
 export function RunwayCard({ currency, locale }: RunwayCardProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
-  const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
-
-  const longPressHandlers = useLongPress({
-    onLongPress: () => setIsCustomizing(true),
-    threshold: 500,
-    disabled: isCustomizing,
-  });
   const [displayRunway, setDisplayRunway] = useState<number>(0);
   const displayRunwayRef = useRef<number>(0);
   const hasInitializedRef = useRef<boolean>(false);
@@ -164,13 +154,7 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
   const hasNoData = runwayChartData.length === 0;
 
   return (
-    <div
-      className={cn(
-        "border bg-background border-border p-6 flex flex-col h-full relative group",
-        !isCustomizing && "cursor-pointer",
-      )}
-      {...longPressHandlers}
-    >
+    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">Runway</h3>

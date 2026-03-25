@@ -41,8 +41,8 @@ export type OAuthApplication = {
   redirectUris: string[];
   clientId: string;
   scopes: string[];
-  teamId: string;
-  createdBy: string;
+  teamId: string | null;
+  createdBy: string | null;
   createdAt: string;
   updatedAt: string;
   isPublic: boolean;
@@ -409,6 +409,93 @@ export async function deleteOAuthApplication(
     });
 
   return result;
+}
+
+// Find or create a DCR (Dynamic Client Registration) application.
+// Deduplicates by matching client_name + sorted redirect_uris.
+export type CreateDCRApplicationParams = {
+  clientName: string;
+  redirectUris: string[];
+  scope?: string;
+  logoUri?: string;
+  clientUri?: string;
+  grantTypes?: string[];
+  tokenEndpointAuthMethod?: string;
+};
+
+export async function findOrCreateDCRApplication(
+  db: Database,
+  params: CreateDCRApplicationParams,
+) {
+  const sortedUris = [...params.redirectUris].sort();
+  const dedupeKey = `${params.clientName}::${sortedUris.join(",")}`;
+  const dedupeHash = hash(dedupeKey);
+
+  const [existing] = await db
+    .select({
+      id: oauthApplications.id,
+      name: oauthApplications.name,
+      clientId: oauthApplications.clientId,
+      redirectUris: oauthApplications.redirectUris,
+      scopes: oauthApplications.scopes,
+      isPublic: oauthApplications.isPublic,
+      active: oauthApplications.active,
+    })
+    .from(oauthApplications)
+    .where(
+      and(
+        eq(oauthApplications.slug, `dcr-${dedupeHash.slice(0, 32)}`),
+        eq(oauthApplications.active, true),
+      ),
+    )
+    .limit(1);
+
+  if (existing) {
+    return {
+      ...existing,
+      created: false,
+    };
+  }
+
+  const clientId = `mid_client_${nanoid(24)}`;
+  const slug = `dcr-${dedupeHash.slice(0, 32)}`;
+
+  const requestedScopes = params.scope
+    ? params.scope.split(" ").filter(Boolean)
+    : [];
+
+  const [result] = await db
+    .insert(oauthApplications)
+    .values({
+      name: params.clientName,
+      slug,
+      description: `DCR client: ${params.clientName}`,
+      website: params.clientUri || null,
+      logoUrl: params.logoUri || null,
+      redirectUris: params.redirectUris,
+      clientId,
+      clientSecret: null,
+      scopes: requestedScopes,
+      teamId: null,
+      createdBy: null,
+      isPublic: true,
+      active: true,
+      status: "approved",
+    })
+    .returning({
+      id: oauthApplications.id,
+      name: oauthApplications.name,
+      clientId: oauthApplications.clientId,
+      redirectUris: oauthApplications.redirectUris,
+      scopes: oauthApplications.scopes,
+      isPublic: oauthApplications.isPublic,
+      active: oauthApplications.active,
+    });
+
+  return {
+    ...result,
+    created: true,
+  };
 }
 
 // Regenerate client secret

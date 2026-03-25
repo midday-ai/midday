@@ -27,13 +27,14 @@ import { webhookRouter } from "./webhooks";
 
 const routers = new OpenAPIHono();
 
-// Mount public routes first
+// Mount public routes first (these handle their own auth or are fully public)
 routers.route("/oauth", oauthRouter);
 routers.route("/webhook", webhookRouter);
 routers.route("/files", filesRouter);
 routers.route("/apps", appsRouter);
 routers.route("/invoice-payments", invoicePaymentsRouter);
 routers.route("/desktop", desktopRouter);
+routers.route("/mcp", mcpRouter);
 
 // Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);
@@ -54,7 +55,5 @@ routers.route("/search", searchRouter);
 routers.route("/reports", reportsRouter);
 routers.route("/tracker-projects", trackerProjectsRouter);
 routers.route("/tracker-entries", trackerEntriesRouter);
-
-routers.route("/mcp", mcpRouter);
 
 export { routers };
