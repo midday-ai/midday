@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@openpanel/nextjs": "^1.1.3"
+    "@openpanel/nextjs": "^1.4.0"
   },
   "devDependencies": {
     "typescript": "catalog:"

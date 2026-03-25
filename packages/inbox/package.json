@@ -22,7 +22,7 @@
     "@midday/encryption": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",
-    "googleapis": "^168.0.0",
+    "googleapis": "^171.4.0",
     "zod": "catalog:"
   }
 }

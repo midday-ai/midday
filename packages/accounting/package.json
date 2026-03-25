@@ -20,7 +20,7 @@
     "@midday/encryption": "workspace:*",
     "@midday/logger": "workspace:*",
     "intuit-oauth": "^4.2.2",
-    "xero-node": "^13.3.0",
+    "xero-node": "^14.0.0",
     "zod": "catalog:"
   },
   "devDependencies": {

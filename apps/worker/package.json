@@ -12,7 +12,7 @@
   "dependencies": {
     "@ai-sdk/openai": "catalog:",
     "@fast-csv/format": "catalog:",
-    "@hono/node-server": "^1.19.9",
+    "@hono/node-server": "^1.19.11",
     "@midday/accounting": "workspace:*",
     "@midday/app-store": "workspace:*",
     "@midday/banking": "workspace:*",
@@ -50,6 +50,6 @@
     "@types/bun": "latest",
     "@types/heic-convert": "1.2.3",
     "@types/papaparse": "^5.5.2",
-    "@types/react": "^19.2.13"
+    "@types/react": "^19.2.14"
   }
 }

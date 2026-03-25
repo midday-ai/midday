@@ -3,7 +3,6 @@
  */
 
 export { buildActionsPrompt } from "./actions";
-export { buildAudioPrompt } from "./audio";
 export {
   extractFacts,
   getHeadlineFact,

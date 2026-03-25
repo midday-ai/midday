@@ -8,8 +8,7 @@
     "./types": "./src/types.ts",
     "./metrics": "./src/metrics/index.ts",
     "./content": "./src/content/index.ts",
-    "./period": "./src/period/index.ts",
-    "./audio": "./src/audio/index.ts"
+    "./period": "./src/period/index.ts"
   },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
@@ -21,20 +20,17 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "catalog:",
-    "@elevenlabs/elevenlabs-js": "^2.30.0",
     "@midday/db": "workspace:*",
     "@midday/logger": "workspace:*",
-    "@supabase/supabase-js": "^2.97.0",
     "ai": "catalog:",
     "date-fns": "catalog:",
-    "jose": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.3.1",
     "evalite": "^0.19.0",
     "typescript": "catalog:",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.1"
   }
 }

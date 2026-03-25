@@ -23,13 +23,13 @@
     "@midday/supabase": "workspace:*",
     "@midday/trpc": "workspace:*",
     "@sindresorhus/slugify": "catalog:",
-    "@zip.js/zip.js": "^2.8.10",
+    "@zip.js/zip.js": "^2.8.23",
     "ai": "catalog:",
     "camelcase-keys": "catalog:",
     "heic-convert": "catalog:",
     "node-xlsx": "catalog:",
     "sharp": "catalog:",
-    "trigger.dev": "4.1.2",
+    "trigger.dev": "4.4.3",
     "zod": "catalog:"
   },
   "devDependencies": {

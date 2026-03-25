@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.5.0",
     "typescript": "catalog:"
   },
   "exports": {

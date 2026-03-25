@@ -7,7 +7,7 @@
  * - Few-shot examples with input/output
  * - Direct, specific instructions
  *
- * Uses shared data layer for consistency with audio prompt.
+ * Uses shared data layer for consistency across prompts.
  */
 import {
   BANNED_WORDS,
@@ -148,7 +148,7 @@ ONLY output the summary text itself.
 function buildDataSection(slots: InsightSlots): string {
   const lines: string[] = [];
 
-  // Extract shared facts for consistency with audio prompt
+  // Extract shared facts for consistency across prompts
   const facts = extractFacts(slots);
 
   // CRITICAL: Low runway warning at the very top - overrides tone
@@ -176,7 +176,7 @@ function buildDataSection(slots: InsightSlots): string {
   );
   lines.push("");
 
-  // Headline fact - same as audio will use
+  // Headline fact
   const headline = getHeadlineFact(facts);
   lines.push(`headline: ${headline}`);
   lines.push("");
@@ -210,7 +210,7 @@ function buildDataSection(slots: InsightSlots): string {
     }
   }
 
-  // Core financials - using shared descriptions for consistency with audio
+  // Core financials
   lines.push(`profit: ${getProfitDescription(facts)} (${slots.profit})`);
   lines.push(`revenue: ${getRevenueDescription(facts)} (${slots.revenue})`);
   lines.push(`expenses: ${slots.expenses}`);
