@@ -187,7 +187,7 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
     }
 
     const data = updatedDocs[0];
-    if (!data || !data.id) {
+    if (!data?.id) {
       throw new Error(
         `Document update returned invalid data for path ${fileName}`,
       );

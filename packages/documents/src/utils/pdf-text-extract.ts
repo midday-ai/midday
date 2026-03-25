@@ -34,7 +34,7 @@ export async function extractTextFromPdf(
     // Extract text from all pages using unpdf's extractText function
     const { text } = await extractText(pdf, { mergePages: true });
 
-    if (!text || !text.trim()) {
+    if (!text?.trim()) {
       return null;
     }
 

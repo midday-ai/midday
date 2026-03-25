@@ -44,7 +44,7 @@ export const usePendingUploadsStore = create<PendingUploadsState>()(
     markComplete: (id, isMatch) =>
       set((state) => {
         const item = state.pendingIds[id];
-        if (!item || !item.pending) {
+        if (!item?.pending) {
           return state;
         }
         return {

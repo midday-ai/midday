@@ -130,6 +130,30 @@
   list-style-position: inside;
 }
 
+pre::-webkit-scrollbar {
+  display: none;
+}
+
+pre {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overflow: auto;
+}
+
+pre code {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+pre span,
+pre div,
+pre code span,
+pre code div,
+.sh__line {
+  background: transparent;
+  background-color: transparent;
+}
+
 .updates p code span {
   font-family: var(--font-geist-mono);
   color: #eb5757;
@@ -176,30 +200,6 @@
 .app-description ul,
 .app-description ol {
   padding-bottom: 1em;
-}
-
-pre::-webkit-scrollbar {
-  display: none;
-}
-
-pre {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  overflow: auto;
-}
-
-pre code {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.sh__line,
-pre code span,
-pre code div,
-pre span,
-pre div {
-  background: transparent;
-  background-color: transparent;
 }
 
 /* Respect user's motion preferences for accessibility and performance */

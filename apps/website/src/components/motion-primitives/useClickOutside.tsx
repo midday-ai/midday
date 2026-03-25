@@ -6,7 +6,7 @@ function useClickOutside<T extends HTMLElement>(
 ): void {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      if (!ref || !ref.current || ref.current.contains(event.target as Node)) {
+      if (!ref?.current || ref.current.contains(event.target as Node)) {
         return;
       }
 

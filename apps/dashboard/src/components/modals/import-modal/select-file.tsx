@@ -51,7 +51,7 @@ export function SelectFile() {
             return;
           }
 
-          if (!meta || !meta.fields || meta.fields.length <= 1) {
+          if (!meta?.fields || meta.fields.length <= 1) {
             setError("Failed to retrieve CSV column data.");
             setFileColumns(null);
             setFirstRows(null);

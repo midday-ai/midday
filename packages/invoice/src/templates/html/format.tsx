@@ -1,7 +1,7 @@
 import type { EditorDoc } from "../../types";
 
 export function formatEditorContent(doc?: EditorDoc): React.ReactNode | null {
-  if (!doc || !doc.content) {
+  if (!doc?.content) {
     return null;
   }
 
