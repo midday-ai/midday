@@ -276,9 +276,9 @@ export function StartPage() {
                 </h1>
 
                 <p className="text-muted-foreground text-base lg:text-lg leading-relaxed font-sans max-w-xl mx-auto">
-                  Send invoices, automatic reconciliation, track billable
-                  hours, get financial insights, and export clean books to
-                  your accountant.
+                  Send invoices, automatic reconciliation, track billable hours,
+                  get financial insights, and export clean books to your
+                  accountant.
                 </p>
               </div>
 
