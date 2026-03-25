@@ -251,5 +251,5 @@ if (require.main === module) {
   main();
 }
 
-export { getEligibleTeamIds };
 export type { EligibleTeam };
+export { getEligibleTeamIds };
