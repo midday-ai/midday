@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { Customers } from "@/components/customers";
 
-const title = "Customer Management";
+const title = "Customer Management & Revenue Tracking";
 const description =
   "Know your customers better. Track customer performance, payment history, and outstanding invoices all in one place.";
 
