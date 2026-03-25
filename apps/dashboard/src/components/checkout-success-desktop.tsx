@@ -2,8 +2,8 @@
 
 import { getDesktopSchemeUrl } from "@midday/desktop-client/platform";
 import Image from "next/image";
-import appIcon from "public/appicon.png";
 import { useEffect, useRef } from "react";
+import appIcon from "../../public/appicon.png";
 
 interface CheckoutSuccessDesktopProps {
   redirectPath: string;
