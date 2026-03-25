@@ -1,8 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { AnimatedNumber } from "@/components/animated-number";
-import { BankLogo } from "@/components/bank-logo";
+import {
+  CashBalanceDonutChart,
+  grayShades,
+} from "@/components/charts/cash-balance-donut-chart";
 import { useTRPC } from "@/trpc/client";
 import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
 
@@ -22,6 +26,25 @@ export function CashBalanceCard({ currency, locale }: CashBalanceCardProps) {
   const baseCurrency = data?.result?.currency ?? currency ?? "USD";
   const breakdown = data?.result?.accountBreakdown ?? [];
 
+  const donutData = useMemo(() => {
+    if (breakdown.length === 0) return [];
+
+    const total = breakdown.reduce(
+      (sum, a) => sum + Math.abs(a.convertedBalance),
+      0,
+    );
+
+    return breakdown
+      .filter((a) => a.convertedBalance > 0)
+      .sort((a, b) => b.convertedBalance - a.convertedBalance)
+      .slice(0, 7)
+      .map((account) => ({
+        name: account.name,
+        amount: account.convertedBalance,
+        percentage: total > 0 ? (account.convertedBalance / total) * 100 : 0,
+      }));
+  }, [breakdown]);
+
   return (
     <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
@@ -36,38 +59,36 @@ export function CashBalanceCard({ currency, locale }: CashBalanceCardProps) {
             maximumFractionDigits={0}
           />
         </p>
-      </div>
-
-      <div className="h-80 flex flex-col">
-        {isPending && !data ? (
-          <div className="flex-1 flex items-center justify-center">
-            <ChartLoadingOverlay />
-          </div>
-        ) : breakdown.length > 0 ? (
-          <div className="flex flex-col gap-3 mt-auto">
-            {breakdown.map((account) => (
-              <div key={account.id} className="flex items-center gap-3 text-sm">
-                <BankLogo
-                  src={account.logoUrl ?? null}
-                  alt={account.name}
-                  size={22}
+        {donutData.length > 0 && (
+          <div className="flex gap-4 items-center mt-2 flex-wrap">
+            {donutData.slice(0, 3).map((item, idx) => (
+              <div key={item.name} className="flex gap-2 items-center">
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{
+                    backgroundColor: grayShades[idx % grayShades.length],
+                  }}
                 />
-                <span className="text-muted-foreground truncate flex-1">
-                  {account.name}
-                </span>
-                <span className="tabular-nums shrink-0">
-                  <AnimatedNumber
-                    value={account.convertedBalance}
-                    currency={baseCurrency}
-                    locale={locale}
-                    maximumFractionDigits={0}
-                  />
+                <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+                  {item.name}
                 </span>
               </div>
             ))}
           </div>
+        )}
+      </div>
+      <div className="h-80">
+        {donutData.length > 0 ? (
+          <CashBalanceDonutChart
+            data={donutData}
+            height={320}
+            currency={baseCurrency}
+            locale={locale}
+          />
+        ) : isPending ? (
+          <ChartLoadingOverlay />
         ) : (
-          <div className="flex-1 flex items-end text-sm text-muted-foreground">
+          <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
             No accounts connected
           </div>
         )}

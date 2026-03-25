@@ -34,9 +34,9 @@ export const DEFAULT_CHART_ORDER: ChartId[] = [
   "burn-rate",
   "expenses",
   "profit",
+  "category-expenses",
   "revenue-forecast",
   "runway",
-  "category-expenses",
   "cash-balance",
 ];
 
@@ -45,9 +45,9 @@ export const DEFAULT_CHART_LAYOUT: ChartLayoutItem[] = [
   { id: "burn-rate", colSpan: 6 },
   { id: "expenses", colSpan: 6 },
   { id: "profit", colSpan: 12 },
+  { id: "category-expenses", colSpan: 6 },
   { id: "revenue-forecast", colSpan: 6 },
   { id: "runway", colSpan: 6 },
-  { id: "category-expenses", colSpan: 6 },
   { id: "cash-balance", colSpan: 6 },
 ];
 
