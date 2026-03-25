@@ -27,7 +27,7 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
         "List documents and files stored in the vault. Supports free-text search and tag filtering. Returns paginated results (default 25) with document name, type, size, and creation date.",
       inputSchema: documentsListFields,
       outputSchema: {
-        meta: z.object({
+        meta: z.looseObject({
           cursor: z.string().nullable().optional(),
           hasNextPage: z.boolean(),
           hasPreviousPage: z.boolean(),
@@ -45,14 +45,18 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
         tags: params.tags ?? null,
       });
 
-      const clean = {
-        ...result,
+      const response = {
+        meta: {
+          cursor: result.meta.cursor ?? null,
+          hasNextPage: result.meta.hasNextPage,
+          hasPreviousPage: result.meta.hasPreviousPage,
+        },
         data: sanitizeArray(mcpDocumentSchema, result.data ?? []),
       };
 
       return {
-        content: [{ type: "text", text: JSON.stringify(clean) }],
-        structuredContent: clean,
+        content: [{ type: "text", text: JSON.stringify(response) }],
+        structuredContent: response,
       };
     },
   );

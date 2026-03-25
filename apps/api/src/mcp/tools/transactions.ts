@@ -94,7 +94,7 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
             .describe("Maximum absolute amount to include"),
         },
         outputSchema: {
-          meta: z.object({
+          meta: z.looseObject({
             cursor: z.string().nullable().optional(),
             hasNextPage: z.boolean(),
             hasPreviousPage: z.boolean(),
@@ -140,14 +140,20 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           fulfilled: params.fulfilled ?? undefined,
         });
 
-        const clean = {
-          ...result,
-          data: sanitizeArray(mcpTransactionSchema, result.data ?? []),
+        const data = sanitizeArray(mcpTransactionSchema, result.data ?? []);
+
+        const response = {
+          meta: {
+            cursor: result.meta.cursor ?? null,
+            hasNextPage: result.meta.hasNextPage,
+            hasPreviousPage: result.meta.hasPreviousPage,
+          },
+          data,
         };
 
         return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
-          structuredContent: clean,
+          content: [{ type: "text", text: JSON.stringify(response) }],
+          structuredContent: response,
         };
       },
     );

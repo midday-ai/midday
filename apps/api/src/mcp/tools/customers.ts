@@ -69,7 +69,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
             .describe("Sort direction"),
         },
         outputSchema: {
-          meta: z.object({
+          meta: z.looseObject({
             cursor: z.string().nullable().optional(),
             hasNextPage: z.boolean(),
             hasPreviousPage: z.boolean(),
@@ -92,14 +92,18 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           sort,
         });
 
-        const clean = {
-          ...result,
+        const response = {
+          meta: {
+            cursor: result.meta.cursor ?? null,
+            hasNextPage: result.meta.hasNextPage,
+            hasPreviousPage: result.meta.hasPreviousPage,
+          },
           data: sanitizeArray(mcpCustomerListItemSchema, result.data ?? []),
         };
 
         return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
-          structuredContent: clean,
+          content: [{ type: "text", text: JSON.stringify(response) }],
+          structuredContent: response,
         };
       },
     );

@@ -71,7 +71,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             .describe("Sort direction"),
         },
         outputSchema: {
-          meta: z.object({
+          meta: z.looseObject({
             cursor: z.string().nullable().optional(),
             hasNextPage: z.boolean(),
             hasPreviousPage: z.boolean(),
@@ -108,7 +108,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           })),
         );
 
-        const response = { ...result, data };
+        const response = {
+          meta: {
+            cursor: result.meta.cursor ?? null,
+            hasNextPage: result.meta.hasNextPage,
+            hasPreviousPage: result.meta.hasPreviousPage,
+          },
+          data,
+        };
 
         return {
           content: [{ type: "text", text: JSON.stringify(response) }],

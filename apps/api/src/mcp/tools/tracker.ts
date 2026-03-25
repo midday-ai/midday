@@ -89,7 +89,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             .describe("Sort direction"),
         },
         outputSchema: {
-          meta: z.object({
+          meta: z.looseObject({
             cursor: z.string().nullable().optional(),
             hasNextPage: z.boolean(),
             hasPreviousPage: z.boolean(),
@@ -117,14 +117,18 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           tags: params.tags ?? null,
         });
 
-        const clean = {
-          ...result,
+        const response = {
+          meta: {
+            cursor: result.meta.cursor ?? null,
+            hasNextPage: result.meta.hasNextPage,
+            hasPreviousPage: result.meta.hasPreviousPage,
+          },
           data: sanitizeArray(mcpTrackerProjectSchema, result.data ?? []),
         };
 
         return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
-          structuredContent: clean,
+          content: [{ type: "text", text: JSON.stringify(response) }],
+          structuredContent: response,
         };
       },
     );
@@ -332,7 +336,12 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             .describe("Filter by project ID"),
         },
         outputSchema: {
-          meta: z.record(z.string(), z.any()),
+          meta: z.looseObject({
+            totalDuration: z.number(),
+            totalAmount: z.number(),
+            from: z.string(),
+            to: z.string(),
+          }),
           result: z.record(z.string(), z.any()),
         },
         annotations: READ_ONLY_ANNOTATIONS,

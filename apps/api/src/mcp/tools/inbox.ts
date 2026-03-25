@@ -30,7 +30,7 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         "List inbox items (uploaded receipts, invoices, and documents pending processing). Filter by status (pending, done, suggested_match, no_match, other). Returns paginated results (default 25) with file name, status, and matched transaction.",
       inputSchema: getInboxSchema.shape,
       outputSchema: {
-        meta: z.object({
+        meta: z.looseObject({
           cursor: z.string().nullable().optional(),
           hasNextPage: z.boolean(),
           hasPreviousPage: z.boolean(),
@@ -50,14 +50,18 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         status: params.status ?? null,
       });
 
-      const clean = {
-        ...result,
+      const response = {
+        meta: {
+          cursor: result.meta.cursor ?? null,
+          hasNextPage: result.meta.hasNextPage,
+          hasPreviousPage: result.meta.hasPreviousPage,
+        },
         data: sanitizeArray(mcpInboxItemSchema, result.data ?? []),
       };
 
       return {
-        content: [{ type: "text", text: JSON.stringify(clean) }],
-        structuredContent: clean,
+        content: [{ type: "text", text: JSON.stringify(response) }],
+        structuredContent: response,
       };
     },
   );
