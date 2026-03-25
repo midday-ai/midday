@@ -12,7 +12,6 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "baseUrl": ".",
     "paths": {
       "@api/*": ["../../apps/api/src/*"],
       "@jobs/*": ["../../packages/jobs/src/*"]

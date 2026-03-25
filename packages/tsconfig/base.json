@@ -14,7 +14,7 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2022",
-    "baseUrl": ".",
+    "types": ["node", "bun"],
     "typeRoots": [
       "./node_modules/@types",
       "../../node_modules/@types",

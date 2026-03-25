@@ -30,10 +30,15 @@ export default async function Page(props: Props) {
   const weeklyCalendar = (await cookies()).get(Cookies.WeeklyCalendar);
 
   prefetch(
-    trpc.trackerProjects.get.infiniteQueryOptions({
-      ...filter,
-      sort,
-    }),
+    trpc.trackerProjects.get.infiniteQueryOptions(
+      {
+        ...filter,
+        sort,
+      },
+      {
+        getNextPageParam: ({ meta }) => meta?.cursor,
+      },
+    ),
   );
 
   return (

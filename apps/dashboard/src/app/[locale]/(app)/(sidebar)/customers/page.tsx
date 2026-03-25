@@ -37,10 +37,15 @@ export default async function Page(props: Props) {
 
   // Prefetch customer analytics
   batchPrefetch([
-    trpc.customers.get.infiniteQueryOptions({
-      ...filter,
-      sort,
-    }),
+    trpc.customers.get.infiniteQueryOptions(
+      {
+        ...filter,
+        sort,
+      },
+      {
+        getNextPageParam: ({ meta }) => meta?.cursor,
+      },
+    ),
     trpc.invoice.mostActiveClient.queryOptions(),
     trpc.invoice.inactiveClientsCount.queryOptions(),
     trpc.invoice.topRevenueClient.queryOptions(),

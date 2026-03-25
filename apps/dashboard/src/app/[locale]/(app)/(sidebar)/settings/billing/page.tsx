@@ -15,9 +15,14 @@ export default async function Billing() {
   const team = user?.team;
 
   prefetch(
-    trpc.billing.orders.infiniteQueryOptions({
-      pageSize: 15,
-    }),
+    trpc.billing.orders.infiniteQueryOptions(
+      {
+        pageSize: 15,
+      },
+      {
+        getNextPageParam: ({ meta }) => meta?.cursor,
+      },
+    ),
   );
 
   return (

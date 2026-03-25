@@ -16,9 +16,8 @@
     "noUnusedParameters": false,
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "baseUrl": ".",
     "paths": {
-      "@jobs/*": ["src/*"],
+      "@jobs/*": ["./src/*"],
       "@api/*": ["../../apps/api/src/*"]
     },
     "types": ["bun-types"]

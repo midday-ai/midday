@@ -31,12 +31,17 @@ export default async function Page(props: Props) {
   const [data, accounts] = await Promise.all([
     queryClient
       .fetchInfiniteQuery(
-        trpc.inbox.get.infiniteQueryOptions({
-          order: params.order,
-          sort: params.sort,
-          ...filter,
-          tab: filter.tab ?? "all",
-        }),
+        trpc.inbox.get.infiniteQueryOptions(
+          {
+            order: params.order,
+            sort: params.sort,
+            ...filter,
+            tab: filter.tab ?? "all",
+          },
+          {
+            getNextPageParam: ({ meta }) => meta?.cursor,
+          },
+        ),
       )
       .catch(() => null),
     queryClient

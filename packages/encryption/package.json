@@ -12,5 +12,8 @@
   },
   "dependencies": {
     "jose": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "latest"
   }
 }
