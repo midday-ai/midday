@@ -42,6 +42,17 @@ export default async function Layout({
     redirect("/onboarding");
   }
 
+  // New teams created after this date must complete onboarding (incl. plan
+  // selection) before accessing the dashboard. Existing teams are unaffected.
+  const ONBOARDING_ENFORCEMENT_DATE = "2026-03-24T00:00:00.000Z";
+  if (
+    user.team?.plan === "trial" &&
+    user.team?.createdAt &&
+    new Date(user.team.createdAt) >= new Date(ONBOARDING_ENFORCEMENT_DATE)
+  ) {
+    redirect("/onboarding?s=start-trial");
+  }
+
   return (
     <HydrateClient>
       <div className="relative">

@@ -1,11 +1,10 @@
-import { UTCDate } from "@date-fns/utc";
 import {
   CATEGORIES,
   getTaxRateForCategory,
   getTaxTypeForCountry,
 } from "@midday/categories";
 import { createLoggerWithContext } from "@midday/logger";
-import { addDays, differenceInDays, subDays } from "date-fns";
+import { subDays } from "date-fns";
 import {
   and,
   eq,
@@ -245,43 +244,6 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
   // Use transaction to ensure atomicity and prevent race conditions
   const teamId = await db.transaction(async (tx) => {
     try {
-      const TRIAL_PERIOD_DAYS = 14;
-
-      const existingTeams = await tx
-        .select({
-          id: teams.id,
-          name: teams.name,
-          plan: teams.plan,
-          createdAt: teams.createdAt,
-          canceledAt: teams.canceledAt,
-        })
-        .from(usersOnTeam)
-        .innerJoin(teams, eq(teams.id, usersOnTeam.teamId))
-        .where(eq(usersOnTeam.userId, params.userId));
-
-      const today = new UTCDate();
-      const activeTeamCount = existingTeams.filter((t) => {
-        if (t.plan === "starter" || t.plan === "pro") return true;
-        if (t.plan === "trial" && !t.canceledAt && t.createdAt) {
-          const trialEnd = addDays(new UTCDate(t.createdAt), TRIAL_PERIOD_DAYS);
-          return differenceInDays(trialEnd, today) > 0;
-        }
-        return false;
-      }).length;
-
-      logger.info(`User existing teams count: ${existingTeams.length}`, {
-        existingTeams: existingTeams.map((t) => ({
-          id: t.id,
-          name: t.name,
-          plan: t.plan,
-        })),
-        activeTeamCount,
-      });
-
-      if (existingTeams.length > 0 && activeTeamCount < existingTeams.length) {
-        throw new Error("PAID_PLAN_REQUIRED");
-      }
-
       // Create the team
       logger.info("Creating team record");
       const [newTeam] = await tx
