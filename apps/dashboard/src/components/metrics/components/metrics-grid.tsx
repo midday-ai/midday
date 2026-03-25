@@ -9,41 +9,79 @@ import {
   KeyboardSensor,
   PointerSensor,
   type UniqueIdentifier,
+  useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable";
 import { useRef, useState } from "react";
-import type { ChartId } from "../utils/chart-types";
+import type { ChartId, ChartLayoutItem, ColSpan } from "../utils/chart-types";
+import { LazyChart } from "./lazy-chart";
+
+const COL_SPAN_CLASS: Record<ColSpan, string> = {
+  4: "col-span-12 md:col-span-6 lg:col-span-4",
+  6: "col-span-12 md:col-span-6",
+  8: "col-span-12 md:col-span-8",
+  12: "col-span-12",
+};
+
+function arrayMove<T>(arr: T[], from: number, to: number): T[] {
+  const result = [...arr];
+  const [item] = result.splice(from, 1);
+  result.splice(to, 0, item!);
+  return result;
+}
+
+function DroppableCell({
+  id,
+  colSpan,
+  disabled,
+  children,
+}: {
+  id: string;
+  colSpan: ColSpan;
+  disabled: boolean;
+  children: React.ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id, disabled });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${COL_SPAN_CLASS[colSpan]} rounded transition-shadow duration-150 ${
+        isOver && !disabled ? "ring-2 ring-primary/40 ring-inset" : ""
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
 
 interface MetricsGridProps {
-  orderedCharts: ChartId[];
+  layout: ChartLayoutItem[];
   isCustomizing: boolean;
-  onChartOrderChange: (newOrder: ChartId[]) => void;
+  onLayoutChange: (newLayout: ChartLayoutItem[]) => void;
   renderChart: (chartId: ChartId, index: number) => React.ReactNode;
-  getWiggleClass: (index: number) => string;
 }
 
 export function MetricsGrid({
-  orderedCharts,
+  layout,
   isCustomizing,
-  onChartOrderChange,
+  onLayoutChange,
   renderChart,
-  getWiggleClass,
 }: MetricsGridProps) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const gridRef = useRef<HTMLDivElement>(null!);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
     }),
+    useSensor(KeyboardSensor),
   );
+
+  const chartIds = layout.map((item) => item.id);
 
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id);
@@ -52,21 +90,25 @@ export function MetricsGrid({
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
-    if (!over) {
+    if (!over || active.id === over.id) {
       setActiveId(null);
       return;
     }
 
-    const activeIndex = orderedCharts.indexOf(active.id as ChartId);
-    const overIndex = orderedCharts.indexOf(over.id as ChartId);
+    const activeIndex = chartIds.indexOf(active.id as ChartId);
+    const overIndex = chartIds.indexOf(over.id as ChartId);
 
-    if (activeIndex !== overIndex) {
-      const newOrder = arrayMove(orderedCharts, activeIndex, overIndex);
-      onChartOrderChange(newOrder);
+    if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+      const newLayout = arrayMove(layout, activeIndex, overIndex);
+      onLayoutChange(newLayout);
     }
 
     setActiveId(null);
   }
+
+  const activeItem = activeId
+    ? layout.find((item) => item.id === activeId)
+    : null;
 
   return (
     <DndContext
@@ -75,76 +117,45 @@ export function MetricsGrid({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-8 pb-20" ref={gridRef}>
-        {isCustomizing ? (
-          <SortableContext items={orderedCharts}>
-            {orderedCharts.map((chartId, index) => {
-              if (index === 0) {
-                // First chart: full-width
-                return (
-                  <div key={chartId} className="w-full">
-                    {renderChart(chartId, index)}
-                  </div>
-                );
-              }
-              if ((index - 1) % 2 === 0) {
-                // Start of a pair (index 1, 3, 5, etc.): create two-column row
-                const nextChartId = orderedCharts[index + 1];
-                return (
-                  <div
-                    key={`row-${chartId}`}
-                    className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-                  >
-                    {renderChart(chartId, index)}
-                    {nextChartId ? (
-                      renderChart(nextChartId, index + 1)
-                    ) : (
-                      <div /> // Empty placeholder if odd number of charts
-                    )}
-                  </div>
-                );
-              }
-              // Second chart in pair: already rendered above
-              return null;
-            })}
-          </SortableContext>
-        ) : (
-          orderedCharts.map((chartId, index) => {
-            if (index === 0) {
-              // First chart: full-width
-              return (
-                <div key={chartId} className="w-full">
-                  {renderChart(chartId, index)}
-                </div>
-              );
-            }
-            if ((index - 1) % 2 === 0) {
-              // Start of a pair (index 1, 3, 5, etc.): create two-column row
-              const nextChartId = orderedCharts[index + 1];
-              return (
-                <div
-                  key={`row-${chartId}`}
-                  className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-                >
-                  {renderChart(chartId, index)}
-                  {nextChartId ? (
-                    renderChart(nextChartId, index + 1)
-                  ) : (
-                    <div /> // Empty placeholder if odd number of charts
-                  )}
-                </div>
-              );
-            }
-            // Second chart in pair: already rendered above
-            return null;
-          })
-        )}
+      <div
+        className="grid grid-cols-12 gap-6 pb-20"
+        ref={gridRef}
+        data-metrics-grid
+      >
+        {layout.map((item, index) => {
+          const isDeferred = !isCustomizing && index >= 3;
+          const content = renderChart(item.id, index);
 
-        {/* Drag Overlay */}
-        <DragOverlay>
-          {activeId ? (
-            <div className="shadow-[0_4px_12px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] bg-background cursor-grabbing opacity-90 transform-gpu will-change-transform border border-border p-6 rounded">
-              {renderChart(activeId as ChartId, 0)}
+          return (
+            <DroppableCell
+              key={item.id}
+              id={item.id}
+              colSpan={item.colSpan}
+              disabled={!isCustomizing}
+            >
+              {isDeferred ? (
+                <LazyChart index={index - 3}>{content}</LazyChart>
+              ) : (
+                content
+              )}
+            </DroppableCell>
+          );
+        })}
+
+        <DragOverlay dropAnimation={null}>
+          {activeItem ? (
+            <div
+              className="pointer-events-none rounded shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]"
+              style={{
+                width: gridRef.current
+                  ? (gridRef.current.getBoundingClientRect().width *
+                      activeItem.colSpan) /
+                      12 -
+                    (activeItem.colSpan < 12 ? 12 : 0)
+                  : undefined,
+              }}
+            >
+              {renderChart(activeItem.id, 0)}
             </div>
           ) : null}
         </DragOverlay>

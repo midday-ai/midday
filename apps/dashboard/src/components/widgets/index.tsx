@@ -2,24 +2,24 @@
 
 import { use } from "react";
 import { MetricsView } from "../metrics/metrics-view";
-import type { ChartId } from "../metrics/utils/chart-types";
-import { DEFAULT_CHART_ORDER } from "../metrics/utils/chart-types";
+import type { ChartLayoutItem } from "../metrics/utils/chart-types";
+import { DEFAULT_CHART_LAYOUT } from "../metrics/utils/chart-types";
 import { WidgetsHeader } from "./header";
 import { McpBanner } from "./mcp-banner";
 
 interface OverviewViewProps {
-  chartOrderPromise?: Promise<ChartId[]>;
+  chartLayoutPromise?: Promise<ChartLayoutItem[]>;
 }
 
-export function OverviewView({ chartOrderPromise }: OverviewViewProps) {
-  const initialChartOrder = chartOrderPromise
-    ? use(chartOrderPromise)
-    : DEFAULT_CHART_ORDER;
+export function OverviewView({ chartLayoutPromise }: OverviewViewProps) {
+  const initialLayout = chartLayoutPromise
+    ? use(chartLayoutPromise)
+    : DEFAULT_CHART_LAYOUT;
 
   return (
     <div className="flex flex-col mt-6">
       <WidgetsHeader />
-      <MetricsView initialChartOrder={initialChartOrder} />
+      <MetricsView initialLayout={initialLayout} />
       <McpBanner />
     </div>
   );

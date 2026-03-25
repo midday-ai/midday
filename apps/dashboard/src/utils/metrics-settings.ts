@@ -1,54 +1,120 @@
 import { cookies } from "next/headers";
 import {
   type ChartId,
+  type ChartLayoutItem,
+  type ColSpan,
+  DEFAULT_CHART_LAYOUT,
   DEFAULT_CHART_ORDER,
+  VALID_COL_SPANS,
 } from "@/components/metrics/utils/chart-types";
 
 export const METRICS_SETTINGS_COOKIE = "metrics-settings";
 
 export interface MetricsSettings {
-  chartOrder: ChartId[];
+  layout?: ChartLayoutItem[];
+  chartOrder?: ChartId[];
+}
+
+function isValidColSpan(value: unknown): value is ColSpan {
+  return VALID_COL_SPANS.includes(value as ColSpan);
 }
 
 /**
- * Parse a raw cookie value into a validated chart order.
+ * Convert a legacy ChartId[] order into ChartLayoutItem[] using default spans.
+ */
+function chartOrderToLayout(order: ChartId[]): ChartLayoutItem[] {
+  const defaultSpans = new Map(
+    DEFAULT_CHART_LAYOUT.map((item) => [item.id, item.colSpan]),
+  );
+  return order.map((id) => ({
+    id,
+    colSpan: defaultSpans.get(id) ?? 6,
+  }));
+}
+
+/**
+ * Parse a raw cookie value into a validated layout.
+ * Supports both new `{ layout }` and legacy `{ chartOrder }` formats.
  * Unknown IDs are dropped; missing default charts are appended.
  */
-export function parseMetricsChartOrder(raw: string | undefined): ChartId[] {
-  if (!raw) return DEFAULT_CHART_ORDER;
+export function parseMetricsLayout(raw: string | undefined): ChartLayoutItem[] {
+  if (!raw) return DEFAULT_CHART_LAYOUT;
 
   try {
     const parsed: MetricsSettings = JSON.parse(raw);
-    if (!Array.isArray(parsed.chartOrder)) return DEFAULT_CHART_ORDER;
 
-    const validIds = new Set<ChartId>(DEFAULT_CHART_ORDER);
-    const seen = new Set<ChartId>();
-
-    const order: ChartId[] = [];
-    for (const id of parsed.chartOrder) {
-      if (validIds.has(id as ChartId) && !seen.has(id as ChartId)) {
-        order.push(id as ChartId);
-        seen.add(id as ChartId);
-      }
+    // New format: { layout: ChartLayoutItem[] }
+    if (Array.isArray(parsed.layout)) {
+      return validateLayout(parsed.layout);
     }
 
-    for (const id of DEFAULT_CHART_ORDER) {
-      if (!seen.has(id)) {
-        order.push(id);
+    // Legacy format: { chartOrder: ChartId[] }
+    if (Array.isArray(parsed.chartOrder)) {
+      const validIds = new Set<ChartId>(DEFAULT_CHART_ORDER);
+      const seen = new Set<ChartId>();
+      const order: ChartId[] = [];
+
+      for (const id of parsed.chartOrder) {
+        if (validIds.has(id as ChartId) && !seen.has(id as ChartId)) {
+          order.push(id as ChartId);
+          seen.add(id as ChartId);
+        }
       }
+
+      for (const id of DEFAULT_CHART_ORDER) {
+        if (!seen.has(id)) order.push(id);
+      }
+
+      return chartOrderToLayout(order);
     }
 
-    return order;
+    return DEFAULT_CHART_LAYOUT;
   } catch {
-    return DEFAULT_CHART_ORDER;
+    return DEFAULT_CHART_LAYOUT;
   }
 }
 
+function validateLayout(items: unknown[]): ChartLayoutItem[] {
+  const validIds = new Set<ChartId>(DEFAULT_CHART_ORDER);
+  const seen = new Set<ChartId>();
+  const layout: ChartLayoutItem[] = [];
+
+  for (const item of items) {
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      "id" in item &&
+      "colSpan" in item
+    ) {
+      const { id, colSpan } = item as { id: string; colSpan: unknown };
+      if (
+        validIds.has(id as ChartId) &&
+        !seen.has(id as ChartId) &&
+        isValidColSpan(colSpan)
+      ) {
+        layout.push({ id: id as ChartId, colSpan });
+        seen.add(id as ChartId);
+      }
+    }
+  }
+
+  const defaultSpans = new Map(
+    DEFAULT_CHART_LAYOUT.map((item) => [item.id, item.colSpan]),
+  );
+  for (const id of DEFAULT_CHART_ORDER) {
+    if (!seen.has(id)) {
+      layout.push({ id, colSpan: defaultSpans.get(id) ?? 6 });
+    }
+  }
+
+  return layout;
+}
+
 /**
- * Server-side reader: get chart order from the metrics-settings cookie.
+ * Server-side reader: get chart layout from the metrics-settings cookie.
  */
-export async function getInitialMetricsSettings(): Promise<ChartId[]> {
+export async function getInitialMetricsSettings(): Promise<ChartLayoutItem[]> {
   const cookieStore = await cookies();
   const raw = cookieStore.get(METRICS_SETTINGS_COOKIE)?.value;
-  return parseMetricsChartOrder(raw);
+  return parseMetricsLayout(raw);
 }

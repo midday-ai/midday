@@ -10,6 +10,7 @@ import { RevenueForecastChart } from "@/components/charts/revenue-forecast-chart
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useTRPC } from "@/trpc/client";
+import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RevenueForecastCardProps {
@@ -18,7 +19,6 @@ interface RevenueForecastCardProps {
   currency?: string;
   locale?: string;
   isCustomizing: boolean;
-  wiggleClass?: string;
   revenueType?: "net" | "gross";
 }
 
@@ -166,13 +166,17 @@ export function RevenueForecastCard({
         </div>
       </div>
       <div className="h-80">
-        <RevenueForecastChart
-          data={revenueForecastChartData}
-          height={320}
-          currency={currency}
-          locale={locale}
-          forecastStartIndex={forecastStartIndex}
-        />
+        {revenueForecastChartData.length > 0 ? (
+          <RevenueForecastChart
+            data={revenueForecastChartData}
+            height={320}
+            currency={currency}
+            locale={locale}
+            forecastStartIndex={forecastStartIndex}
+          />
+        ) : (
+          <ChartLoadingOverlay />
+        )}
       </div>
     </div>
   );

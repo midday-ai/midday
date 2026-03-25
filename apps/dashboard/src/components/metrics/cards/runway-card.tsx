@@ -11,6 +11,7 @@ import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RunwayCardProps {
@@ -43,27 +44,27 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
     };
   }, []);
 
-  const { data: runwayData } = useQuery(
+  const { data: runwayData, isPending: isRunwayPending } = useQuery(
     trpc.reports.runway.queryOptions({
       currency: currency,
     }),
   );
 
-  // Fetch cash balance for runway chart
-  const { data: cashBalanceData } = useQuery(
+  const { data: cashBalanceData, isPending: isBalancePending } = useQuery(
     trpc.reports.getAccountBalances.queryOptions({
       currency: currency,
     }),
   );
 
-  // Fetch burn rate data for chart projections (same 6-month window as runway)
-  const { data: burnRateData } = useQuery(
+  const { data: burnRateData, isPending: isBurnRatePending } = useQuery(
     trpc.reports.burnRate.queryOptions({
       from: burnRateWindow.from,
       to: burnRateWindow.to,
       currency: currency,
     }),
   );
+
+  const isAnyPending = isRunwayPending || isBalancePending || isBurnRatePending;
 
   // Transform runway data - need to calculate monthly projections
   const runwayChartData = useMemo<
@@ -185,6 +186,7 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
         <p className="text-3xl font-normal">
           <NumberFlow
             value={displayRunway}
+            animated={hasInitializedRef.current}
             format={{
               minimumFractionDigits: 1,
               maximumFractionDigits: 1,
@@ -199,11 +201,7 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
         </p>
       </div>
       <div className="h-80">
-        {hasNoData ? (
-          <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
-            No balance data available.
-          </div>
-        ) : (
+        {!hasNoData ? (
           <RunwayChart
             data={runwayChartData}
             height={320}
@@ -211,6 +209,12 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
             locale={locale}
             displayMode="months"
           />
+        ) : isAnyPending ? (
+          <ChartLoadingOverlay />
+        ) : (
+          <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
+            No balance data available.
+          </div>
         )}
       </div>
     </div>

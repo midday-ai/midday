@@ -68,18 +68,18 @@ export function StackedBarChart({
 }) {
   const tickFormatter = createCompactTickFormatter();
 
-  const totalMonths = data.result.length;
+  const results = data?.result ?? [];
+  const totalMonths = results.length;
 
-  const formattedData = data.result.map((item) => ({
+  const formattedData = results.map((item) => ({
     ...item,
     value: item.value,
     recurring: item.recurring,
     total: item.total,
-    meta: data.meta,
+    meta: data?.meta,
     date: formatChartMonth(item.date, totalMonths),
   }));
 
-  // Calculate margin using the utility hook
   const { marginLeft } = useChartMargin(formattedData, "total", tickFormatter);
 
   const chartContent = (

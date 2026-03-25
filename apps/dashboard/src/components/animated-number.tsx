@@ -2,6 +2,7 @@
 
 import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { useTRPC } from "@/trpc/client";
 
 type Props = {
@@ -20,12 +21,17 @@ export function AnimatedNumber({
   locale,
 }: Props) {
   const trpc = useTRPC();
-  // Use regular useQuery instead of useSuspenseQuery to allow it to fail gracefully
-  // This is needed for public pages where user data isn't available
+  const hasReceivedValue = useRef(false);
+
+  useEffect(() => {
+    if (value !== 0) {
+      hasReceivedValue.current = true;
+    }
+  }, [value]);
+
   const { data: user } = useQuery({
     ...trpc.user.me.queryOptions(),
     retry: false,
-    // Don't throw errors - just return undefined if user isn't available
     throwOnError: false,
   });
   const localeToUse = locale || user?.locale;
@@ -33,6 +39,7 @@ export function AnimatedNumber({
   return (
     <NumberFlow
       value={value}
+      animated={hasReceivedValue.current}
       format={{
         style: "currency",
         currency: currency ?? "USD",

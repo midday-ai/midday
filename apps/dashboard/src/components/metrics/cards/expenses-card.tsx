@@ -8,6 +8,7 @@ import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useTRPC } from "@/trpc/client";
+import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface ExpensesCardProps {
@@ -16,7 +17,6 @@ interface ExpensesCardProps {
   currency?: string;
   locale?: string;
   isCustomizing: boolean;
-  wiggleClass?: string;
 }
 
 export function ExpensesCard({
@@ -24,8 +24,6 @@ export function ExpensesCard({
   to,
   currency,
   locale,
-  isCustomizing,
-  wiggleClass,
 }: ExpensesCardProps) {
   const trpc = useTRPC();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
@@ -37,7 +35,7 @@ export function ExpensesCard({
     disabled: metricsIsCustomizing,
   });
 
-  const { data: expenseData } = useQuery(
+  const { data: expenseData, isPending } = useQuery(
     trpc.reports.expense.queryOptions({
       from,
       to,
@@ -46,6 +44,7 @@ export function ExpensesCard({
   );
 
   const averageExpense = expenseData?.summary?.averageExpense ?? 0;
+  const hasExpenseData = (expenseData?.result?.length ?? 0) > 0;
 
   return (
     <div
@@ -91,8 +90,10 @@ export function ExpensesCard({
         </div>
       </div>
       <div className="h-80">
-        {expenseData?.result && expenseData.result.length > 0 ? (
+        {hasExpenseData ? (
           <StackedBarChart data={expenseData} height={320} />
+        ) : isPending ? (
+          <ChartLoadingOverlay />
         ) : (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
             No expense data available.

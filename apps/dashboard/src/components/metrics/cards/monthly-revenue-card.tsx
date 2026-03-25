@@ -9,6 +9,7 @@ import { MonthlyRevenueChart } from "@/components/charts/monthly-revenue-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useTRPC } from "@/trpc/client";
+import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface MonthlyRevenueCardProps {
@@ -17,7 +18,6 @@ interface MonthlyRevenueCardProps {
   currency?: string;
   locale?: string;
   isCustomizing: boolean;
-  wiggleClass?: string;
   revenueType: "net" | "gross";
 }
 
@@ -124,12 +124,16 @@ export function MonthlyRevenueCard({
         </div>
       </div>
       <div className="h-80">
-        <MonthlyRevenueChart
-          data={monthlyRevenueChartData}
-          height={320}
-          currency={currency}
-          locale={locale}
-        />
+        {monthlyRevenueChartData.length > 0 ? (
+          <MonthlyRevenueChart
+            data={monthlyRevenueChartData}
+            height={320}
+            currency={currency}
+            locale={locale}
+          />
+        ) : (
+          <ChartLoadingOverlay />
+        )}
       </div>
     </div>
   );

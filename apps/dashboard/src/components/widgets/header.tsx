@@ -56,7 +56,7 @@ export function WidgetsHeader() {
         </h1>
         <p className="text-[#666666] text-[14px]">
           {isCustomizing
-            ? "drag and drop to arrange your perfect dashboard."
+            ? "drag to reorder, drag edges to resize."
             : "here's a quick look at how things are going."}
         </p>
       </div>

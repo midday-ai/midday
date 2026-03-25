@@ -12,6 +12,7 @@ import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
+import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface CategoryExpensesCardProps {
@@ -20,7 +21,6 @@ interface CategoryExpensesCardProps {
   currency?: string;
   locale?: string;
   isCustomizing: boolean;
-  wiggleClass?: string;
 }
 
 export function CategoryExpensesCard({
@@ -41,7 +41,7 @@ export function CategoryExpensesCard({
   });
 
   // Get spending data for categories
-  const { data: spendingData } = useQuery(
+  const { data: spendingData, isPending } = useQuery(
     trpc.reports.spending.queryOptions({
       from,
       to,
@@ -136,6 +136,8 @@ export function CategoryExpensesCard({
             currency={currency}
             locale={locale}
           />
+        ) : isPending ? (
+          <ChartLoadingOverlay />
         ) : (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
             No expense data available.

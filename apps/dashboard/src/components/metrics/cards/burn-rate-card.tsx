@@ -9,6 +9,7 @@ import { formatChartMonth } from "@/components/charts/chart-utils";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useTRPC } from "@/trpc/client";
+import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface BurnRateCardProps {
@@ -17,7 +18,6 @@ interface BurnRateCardProps {
   currency?: string;
   locale?: string;
   isCustomizing: boolean;
-  wiggleClass?: string;
 }
 
 export function BurnRateCard({
@@ -25,8 +25,6 @@ export function BurnRateCard({
   to,
   currency,
   locale,
-  isCustomizing,
-  wiggleClass,
 }: BurnRateCardProps) {
   const trpc = useTRPC();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
@@ -117,12 +115,16 @@ export function BurnRateCard({
         </div>
       </div>
       <div className="h-80">
-        <BurnRateChart
-          data={burnRateChartData}
-          height={320}
-          currency={currency}
-          locale={locale}
-        />
+        {burnRateChartData.length > 0 ? (
+          <BurnRateChart
+            data={burnRateChartData}
+            height={320}
+            currency={currency}
+            locale={locale}
+          />
+        ) : (
+          <ChartLoadingOverlay />
+        )}
       </div>
     </div>
   );

@@ -3,13 +3,12 @@
 import {
   ChatGPTMcpLogo,
   ClaudeMcpLogo,
-  CopilotMcpLogo,
-  CursorMcpLogo,
   PerplexityMcpLogo,
 } from "@midday/app-store/logos";
 import { Icons } from "@midday/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { LocalStorageKeys } from "@/utils/constants";
 
@@ -18,10 +17,15 @@ export function McpBanner() {
     LocalStorageKeys.McpBannerDismissed,
     false,
   );
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <AnimatePresence>
-      {!dismissed && (
+      {mounted && !dismissed && (
         <motion.div
           initial={{ opacity: 0, y: 40, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -65,20 +69,20 @@ export function McpBanner() {
                     backgroundSize: "12px 12px",
                   }}
                 />
-                <div className="relative w-[160px] h-[44px]">
+                <div className="flex items-center justify-center gap-3 w-full">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.7, duration: 0.3 }}
-                    className="absolute left-0 top-[4px] size-[36px] overflow-hidden z-[1]"
+                    className="size-9 overflow-hidden rounded-lg border border-border"
                   >
-                    <PerplexityMcpLogo />
+                    <ChatGPTMcpLogo />
                   </motion.div>
                   <motion.div
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.8, duration: 0.3 }}
-                    className="absolute left-[26px] top-[2px] size-[40px] overflow-hidden z-[2]"
+                    className="size-9 overflow-hidden rounded-lg border border-border"
                   >
                     <ClaudeMcpLogo />
                   </motion.div>
@@ -86,25 +90,9 @@ export function McpBanner() {
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.9, duration: 0.3 }}
-                    className="absolute left-[56px] top-0 size-[44px] overflow-hidden z-[5]"
+                    className="size-9 overflow-hidden rounded-lg border border-border"
                   >
-                    <CursorMcpLogo />
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1.0, duration: 0.3 }}
-                    className="absolute left-[90px] top-[2px] size-[40px] overflow-hidden z-[4]"
-                  >
-                    <ChatGPTMcpLogo />
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1.1, duration: 0.3 }}
-                    className="absolute left-[120px] top-[4px] size-[36px] overflow-hidden z-[3]"
-                  >
-                    <CopilotMcpLogo />
+                    <PerplexityMcpLogo />
                   </motion.div>
                 </div>
               </div>
@@ -114,7 +102,7 @@ export function McpBanner() {
                   Midday works with your AI tools
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  Connect Claude, Cursor, ChatGPT and more to your financial
+                  Connect ChatGPT, Claude, Perplexity and more to your financial
                   data via MCP.
                 </p>
               </div>

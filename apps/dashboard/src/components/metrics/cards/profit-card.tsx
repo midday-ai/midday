@@ -10,6 +10,7 @@ import { ProfitChart } from "@/components/charts/profit-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useTRPC } from "@/trpc/client";
+import { ChartLoadingOverlay } from "../components/chart-loading-overlay";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface ProfitCardProps {
@@ -18,7 +19,6 @@ interface ProfitCardProps {
   currency?: string;
   locale?: string;
   isCustomizing: boolean;
-  wiggleClass?: string;
   revenueType?: "net" | "gross";
 }
 
@@ -27,8 +27,6 @@ export function ProfitCard({
   to,
   currency,
   locale,
-  isCustomizing,
-  wiggleClass,
   revenueType = "net",
 }: ProfitCardProps) {
   const trpc = useTRPC();
@@ -113,12 +111,16 @@ export function ProfitCard({
         <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
       </div>
       <div className="h-80">
-        <ProfitChart
-          data={profitChartData}
-          height={320}
-          currency={currency}
-          locale={locale}
-        />
+        {profitChartData.length > 0 ? (
+          <ProfitChart
+            data={profitChartData}
+            height={320}
+            currency={currency}
+            locale={locale}
+          />
+        ) : (
+          <ChartLoadingOverlay />
+        )}
       </div>
     </div>
   );

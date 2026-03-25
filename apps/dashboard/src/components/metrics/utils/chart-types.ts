@@ -8,6 +8,14 @@ export type ChartId =
   | "runway"
   | "category-expenses";
 
+// Column span options: 4 = 1/3, 6 = 1/2, 8 = 2/3, 12 = full width (12-column grid)
+export type ColSpan = 4 | 6 | 8 | 12;
+
+export interface ChartLayoutItem {
+  id: ChartId;
+  colSpan: ColSpan;
+}
+
 // Report types for database storage
 export type ReportType =
   | "profit"
@@ -29,6 +37,18 @@ export const DEFAULT_CHART_ORDER: ChartId[] = [
   "runway",
   "category-expenses",
 ];
+
+export const DEFAULT_CHART_LAYOUT: ChartLayoutItem[] = [
+  { id: "monthly-revenue", colSpan: 12 },
+  { id: "burn-rate", colSpan: 6 },
+  { id: "expenses", colSpan: 6 },
+  { id: "profit", colSpan: 6 },
+  { id: "revenue-forecast", colSpan: 6 },
+  { id: "runway", colSpan: 6 },
+  { id: "category-expenses", colSpan: 6 },
+];
+
+export const VALID_COL_SPANS: ColSpan[] = [4, 6, 8, 12];
 
 // Mapping from ChartId to ReportType
 const chartToReportMap: Record<ChartId, ReportType> = {

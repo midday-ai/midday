@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Overview() {
-  return <OverviewView chartOrderPromise={getInitialMetricsSettings()} />;
+  return <OverviewView chartLayoutPromise={getInitialMetricsSettings()} />;
 }

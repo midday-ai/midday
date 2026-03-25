@@ -97,19 +97,6 @@ export function RunwayChart({
     tickFormatter,
   );
 
-  // Guard against empty data
-  if (safeData.length === 0) {
-    return (
-      <div
-        className={`w-full h-full flex items-center justify-center ${className}`}
-      >
-        <div className="text-xs text-muted-foreground -mt-12">
-          No runway data available
-        </div>
-      </div>
-    );
-  }
-
   const chartContent = (
     <div className={`w-full ${className}`}>
       {/* Legend */}
