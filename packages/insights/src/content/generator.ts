@@ -28,7 +28,6 @@ import type {
 import { getFallbackContent } from "./prompts";
 import {
   buildActionsPrompt,
-  buildAudioPrompt,
   buildStoryPrompt,
   buildSummaryPrompt,
   buildTitlePrompt,
@@ -154,12 +153,11 @@ export class ContentGenerator {
         isFirstInsight: slots.isFirstInsight,
       });
 
-      // 2. Generate title, summary, actions, and audio script in parallel
-      const [title, summary, actions, audioScript] = await Promise.all([
+      // 2. Generate title, summary, and actions in parallel
+      const [title, summary, actions] = await Promise.all([
         this.generateTitle(slots),
         this.generateSummary(slots),
         this.generateActions(slots),
-        this.generateAudioScript(slots),
       ]);
 
       // 3. Generate story
@@ -170,10 +168,9 @@ export class ContentGenerator {
         model: this.model,
         durationMs: duration,
         actionsCount: actions.length,
-        hasAudioScript: !!audioScript,
       });
 
-      return { title, summary, story, actions, audioScript };
+      return { title, summary, story, actions };
     } catch (error) {
       const duration = Date.now() - startTime;
       logger.error("Failed to generate AI content", {
@@ -238,29 +235,6 @@ export class ContentGenerator {
 
     // Strip quotes and clean up
     return text.trim().replace(/^["']|["']$/g, "");
-  }
-
-  /**
-   * Generate TTS-optimized audio script
-   * Natural spoken content designed for ElevenLabs
-   */
-  private async generateAudioScript(
-    slots: ReturnType<typeof computeSlots>,
-  ): Promise<string> {
-    const prompt = buildAudioPrompt(slots);
-
-    const { text } = await generateText({
-      model: openai(this.model),
-      temperature: 0.5, // Slightly higher for natural conversational tone
-      prompt,
-    });
-
-    // Clean up any accidental formatting
-    return text
-      .trim()
-      .replace(/^["']|["']$/g, "")
-      .replace(/\n+/g, " ")
-      .replace(/\s+/g, " ");
   }
 
   /**

@@ -39,10 +39,15 @@ export default async function Page(props: Props) {
   const initialSettings = await getInitialTableSettings("invoices");
 
   batchPrefetch([
-    trpc.invoice.get.infiniteQueryOptions({
-      ...filter,
-      sort,
-    }),
+    trpc.invoice.get.infiniteQueryOptions(
+      {
+        ...filter,
+        sort,
+      },
+      {
+        getNextPageParam: ({ meta }) => meta?.cursor,
+      },
+    ),
     trpc.invoice.invoiceSummary.queryOptions({
       statuses: ["draft", "scheduled", "unpaid"],
     }),

@@ -191,5 +191,5 @@ if (require.main === module) {
   main();
 }
 
-export { registerBankSchedulers };
 export type { SchedulerResult };
+export { registerBankSchedulers };

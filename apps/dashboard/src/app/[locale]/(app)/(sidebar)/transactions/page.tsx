@@ -57,8 +57,12 @@ export default async function Transactions(props: Props) {
   // Prefetch all data needed for instant experience
   batchPrefetch([
     // Transaction data for both tabs
-    trpc.transactions.get.infiniteQueryOptions(allTabFilter),
-    trpc.transactions.get.infiniteQueryOptions(reviewTabFilter),
+    trpc.transactions.get.infiniteQueryOptions(allTabFilter, {
+      getNextPageParam: ({ meta }) => meta?.cursor,
+    }),
+    trpc.transactions.get.infiniteQueryOptions(reviewTabFilter, {
+      getNextPageParam: ({ meta }) => meta?.cursor,
+    }),
     trpc.transactions.getReviewCount.queryOptions(),
     // Shared data used by table rows (assign user, tags)
     trpc.team.members.queryOptions(),

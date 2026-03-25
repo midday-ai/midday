@@ -78,9 +78,14 @@ export default async function Page(props: Props) {
 
   // Prefetch invoices
   await queryClient.fetchInfiniteQuery(
-    trpc.customers.getPortalInvoices.infiniteQueryOptions({
-      portalId: params.portalId,
-    }),
+    trpc.customers.getPortalInvoices.infiniteQueryOptions(
+      {
+        portalId: params.portalId,
+      },
+      {
+        getNextPageParam: ({ meta }) => meta?.cursor,
+      },
+    ),
   );
 
   return (

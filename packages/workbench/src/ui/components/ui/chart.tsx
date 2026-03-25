@@ -164,7 +164,7 @@ export {
   Legend,
   ResponsiveContainer,
   Tooltip,
+  useChart,
   XAxis,
   YAxis,
-  useChart,
 };

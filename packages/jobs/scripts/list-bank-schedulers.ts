@@ -127,5 +127,5 @@ if (require.main === module) {
   main();
 }
 
-export { listBankSchedulers };
 export type { SchedulerInfo };
+export { listBankSchedulers };

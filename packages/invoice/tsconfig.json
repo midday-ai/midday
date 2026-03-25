@@ -7,7 +7,6 @@
     "moduleResolution": "NodeNext",
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@api/*": ["../../apps/api/src/*"]

@@ -167,5 +167,5 @@ if (require.main === module) {
   main();
 }
 
-export { deleteBankSchedulers, getBankSchedulers };
 export type { SchedulerInfo };
+export { deleteBankSchedulers, getBankSchedulers };

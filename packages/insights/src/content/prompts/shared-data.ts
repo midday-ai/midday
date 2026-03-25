@@ -1,7 +1,7 @@
 /**
  * Shared data extraction for all insight prompts
  *
- * This ensures consistency between summary, title, story, and audio.
+ * This ensures consistency between summary, title, and story.
  * All prompts use the same facts, just formatted differently.
  */
 
@@ -412,39 +412,6 @@ export function getToneGuidanceFromFacts(facts: InsightFacts): string {
 }
 
 /**
- * Format a number for natural speech
- */
-export function formatNumberForSpeech(value: number): string {
-  const rounded = Math.round(value);
-
-  if (rounded < 1000) {
-    return rounded.toString();
-  }
-
-  if (rounded < 10000) {
-    const thousands = Math.floor(rounded / 1000);
-    const hundreds = Math.round((rounded % 1000) / 100) * 100;
-    if (hundreds > 0) {
-      return `${thousands} thousand ${hundreds}`;
-    }
-    return `${thousands} thousand`;
-  }
-
-  if (rounded < 100000) {
-    const thousands = Math.round(rounded / 1000);
-    return `${thousands} thousand`;
-  }
-
-  if (rounded < 1000000) {
-    const hundreds = Math.round(rounded / 1000);
-    return `${hundreds} thousand`;
-  }
-
-  const millions = (rounded / 1000000).toFixed(1);
-  return `${millions} million`;
-}
-
-/**
  * Get profit description for prompts (written format)
  */
 export function getProfitDescription(facts: InsightFacts): string {
@@ -461,37 +428,11 @@ export function getProfitDescription(facts: InsightFacts): string {
 }
 
 /**
- * Get profit description for audio (spoken format)
- */
-export function getProfitDescriptionSpoken(facts: InsightFacts): string {
-  switch (facts.profitStatus.type) {
-    case "profit":
-      return `${formatNumberForSpeech(facts.profitStatus.rawAmount)} ${facts.currencyWord} profit`;
-    case "loss":
-      return `${formatNumberForSpeech(facts.profitStatus.rawAmount)} ${facts.currencyWord} loss`;
-    case "break-even":
-      return "break-even, no profit or loss";
-    case "no-activity":
-      return "no financial activity";
-  }
-}
-
-/**
  * Get revenue description for prompts (written format)
  */
 export function getRevenueDescription(facts: InsightFacts): string {
   if (facts.revenueStatus.type === "revenue") {
     return `${facts.revenueStatus.amount} revenue`;
-  }
-  return "no revenue";
-}
-
-/**
- * Get revenue description for audio (spoken format)
- */
-export function getRevenueDescriptionSpoken(facts: InsightFacts): string {
-  if (facts.revenueStatus.type === "revenue") {
-    return `${formatNumberForSpeech(facts.revenueStatus.rawAmount)} ${facts.currencyWord} in revenue`;
   }
   return "no revenue";
 }

@@ -80,6 +80,10 @@
     "lint": {
       "dependsOn": ["^topo"]
     },
+    "lint:fix": {
+      "dependsOn": ["^topo"],
+      "cache": false
+    },
     "typecheck": {
       "outputs": []
     }

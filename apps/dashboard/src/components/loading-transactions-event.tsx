@@ -8,6 +8,8 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useInitialConnectionStatus } from "@/hooks/use-initial-connection-status";
+import setupAnimationOnDarkUi from "../../public/assets/setup-animation.json";
+import setupAnimationOnLightUi from "../../public/assets/setup-animation-dark.json";
 
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
@@ -104,8 +106,8 @@ export function LoadingTransactionsEvent({
         className="mb-6"
         animationData={
           resolvedTheme === "dark"
-            ? require("public/assets/setup-animation.json")
-            : require("public/assets/setup-animation-dark.json")
+            ? setupAnimationOnDarkUi
+            : setupAnimationOnLightUi
         }
         loop={true}
         style={{ width: 50, height: 50 }}

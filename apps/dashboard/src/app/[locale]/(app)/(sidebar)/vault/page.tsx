@@ -27,10 +27,15 @@ export default async function Page(props: Props) {
   const initialSettings = await getInitialTableSettings("vault");
 
   prefetch(
-    trpc.documents.get.infiniteQueryOptions({
-      ...filter,
-      pageSize: 24,
-    }),
+    trpc.documents.get.infiniteQueryOptions(
+      {
+        ...filter,
+        pageSize: 24,
+      },
+      {
+        getNextPageParam: ({ meta }) => meta?.cursor,
+      },
+    ),
   );
 
   return (

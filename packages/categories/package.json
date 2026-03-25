@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.5.0",
     "typescript": "catalog:"
   }
 }
