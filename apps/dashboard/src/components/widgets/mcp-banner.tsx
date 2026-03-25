@@ -8,6 +8,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { LocalStorageKeys } from "@/utils/constants";
@@ -18,6 +19,9 @@ export function McpBanner() {
     false,
   );
   const [mounted, setMounted] = useState(false);
+  const [, setParams] = useQueryStates({
+    "mcp-app": parseAsString,
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -51,61 +55,74 @@ export function McpBanner() {
               <Icons.Close size={14} />
             </button>
 
-            <Link href="/apps?q=mcp" className="block">
-              <div className="relative h-[100px] flex items-center justify-center border-b border-border">
-                <div
-                  className="absolute inset-0 dark:hidden"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px)",
-                    backgroundSize: "12px 12px",
-                  }}
-                />
-                <div
-                  className="absolute inset-0 hidden dark:block"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
-                    backgroundSize: "12px 12px",
-                  }}
-                />
-                <div className="flex items-center justify-center gap-3 w-full">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.7, duration: 0.3 }}
-                    className="size-9 overflow-hidden rounded-lg border border-border"
+            <div className="relative h-[100px] flex items-center justify-center border-b border-border">
+              <div
+                className="absolute inset-0 dark:hidden pointer-events-none"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px)",
+                  backgroundSize: "12px 12px",
+                }}
+              />
+              <div
+                className="absolute inset-0 hidden dark:block pointer-events-none"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
+                  backgroundSize: "12px 12px",
+                }}
+              />
+              <div className="relative z-10 flex items-center justify-center gap-3 w-full">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7, duration: 0.3 }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setParams({ "mcp-app": "chatgpt-mcp" })}
+                    className="block size-9 overflow-hidden rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                   >
                     <ChatGPTMcpLogo />
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.8, duration: 0.3 }}
-                    className="size-9 overflow-hidden rounded-lg border border-border"
+                  </button>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.8, duration: 0.3 }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setParams({ "mcp-app": "claude-mcp" })}
+                    className="block size-9 overflow-hidden rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                   >
                     <ClaudeMcpLogo />
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.9, duration: 0.3 }}
-                    className="size-9 overflow-hidden rounded-lg border border-border"
+                  </button>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.9, duration: 0.3 }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setParams({ "mcp-app": "perplexity-mcp" })}
+                    className="block size-9 overflow-hidden rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                   >
                     <PerplexityMcpLogo />
-                  </motion.div>
-                </div>
+                  </button>
+                </motion.div>
               </div>
+            </div>
 
-              <div className="p-4">
-                <h3 className="text-sm font-medium mb-1">
-                  Midday works with your AI tools
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Connect ChatGPT, Claude, Perplexity and more to your financial
-                  data via MCP.
-                </p>
-              </div>
+            <Link href="/apps?q=mcp" className="block p-4">
+              <h3 className="text-sm font-medium mb-1">
+                Midday works with your AI tools
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Connect ChatGPT, Claude, Perplexity and more to your financial
+                data via MCP.
+              </p>
             </Link>
           </div>
         </motion.div>

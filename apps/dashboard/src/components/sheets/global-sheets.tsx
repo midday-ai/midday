@@ -4,6 +4,7 @@ import { ConnectTransactionsModal } from "@/components/modals/connect-transactio
 import { ImportModal } from "@/components/modals/import-modal";
 import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
 import { SearchModal } from "@/components/search/search-modal";
+import { AppDetailSheet } from "@/components/sheets/app-detail-sheet";
 import { CategoryCreateSheet } from "@/components/sheets/category-create-sheet";
 import { CategoryEditSheet } from "@/components/sheets/category-edit-sheet";
 import { CustomerCreateSheet } from "@/components/sheets/customer-create-sheet";
@@ -57,6 +58,8 @@ export function GlobalSheets() {
       <InvoiceDetailsSheet />
       <InvoiceSheet />
       <EditRecurringSheet />
+
+      <AppDetailSheet />
     </>
   );
 }

@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  ChatGPTMcpLogo,
+  ClaudeMcpLogo,
+  CursorMcpLogo,
+  MiddayDesktopLogo,
+} from "@midday/app-store/logos";
+import { isDesktopApp } from "@midday/desktop-client/platform";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import {
   DropdownMenu,
@@ -75,7 +82,56 @@ export function UserMenu({ onlySignOut }: Props) {
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
-            <div className="flex flex-row justify-between items-center p-2">
+
+            <DropdownMenuGroup>
+              <Link href="/apps">
+                <DropdownMenuItem className="text-xs flex items-center justify-between">
+                  <span>Apps</span>
+                  <div
+                    className="flex items-center -space-x-1.5 mr-1 animate-in fade-in duration-500"
+                    style={{
+                      animationDelay: "100ms",
+                      animationFillMode: "backwards",
+                    }}
+                  >
+                    {[ChatGPTMcpLogo, ClaudeMcpLogo, CursorMcpLogo].map(
+                      (Logo, i) => (
+                        <div
+                          key={i}
+                          className="size-4 rounded-full overflow-hidden border-2 border-background user-menu-mcp-icon"
+                        >
+                          <Logo />
+                        </div>
+                      ),
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              </Link>
+
+              {!isDesktopApp() && (
+                <Link
+                  href="https://midday.ai/api/download"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <DropdownMenuItem className="text-xs flex items-center justify-between">
+                    <span>Download Mac app</span>
+                    <div
+                      className="size-4 rounded overflow-hidden user-menu-mcp-icon mr-1 animate-in fade-in duration-500"
+                      style={{
+                        animationDelay: "150ms",
+                        animationFillMode: "backwards",
+                      }}
+                    >
+                      <MiddayDesktopLogo />
+                    </div>
+                  </DropdownMenuItem>
+                </Link>
+              )}
+            </DropdownMenuGroup>
+
+            <DropdownMenuSeparator />
+            <div className="flex flex-row justify-between items-center px-2 py-1.5">
               <p className="text-xs">Theme</p>
               <ThemeSwitch />
             </div>
@@ -85,6 +141,11 @@ export function UserMenu({ onlySignOut }: Props) {
 
         <SignOut />
       </DropdownMenuContent>
+      <style>
+        {
+          ".user-menu-mcp-icon img, .user-menu-mcp-icon svg { width: 100% !important; height: 100% !important; }"
+        }
+      </style>
     </DropdownMenu>
   );
 }

@@ -1,5 +1,16 @@
 "use client";
 
+import {
+  ChatGPTMcpLogo,
+  ClaudeMcpLogo,
+  CopilotMcpLogo,
+  CursorMcpLogo,
+  MakeMcpLogo,
+  N8nMcpLogo,
+  PerplexityMcpLogo,
+  RaycastMcpLogo,
+  ZapierMcpLogo,
+} from "@midday/app-store/logos";
 import { LogEvents } from "@midday/events/events";
 import { BulkReconciliationAnimation } from "@midday/ui/animations/bulk-reconciliation";
 import { ReceiptAttachmentAnimation } from "@midday/ui/animations/receipt-attachment";
@@ -13,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 import type { ReactNode } from "react";
 import { use, useCallback, useEffect, useMemo, useState } from "react";
+import { AppDetailSheet } from "@/components/sheets/app-detail-sheet";
 import { useOnboardingStep } from "@/hooks/use-onboarding-step";
 import { useOnboardingTracking } from "@/hooks/use-onboarding-tracking";
 import { useTRPC } from "@/trpc/client";
@@ -24,6 +36,7 @@ import {
 import { OnboardingUserMenu } from "./onboarding-user-menu";
 import { ConnectBankStep } from "./steps/connect-bank-step";
 import { ConnectInboxStep } from "./steps/connect-inbox-step";
+import { ConnectMcpStep } from "./steps/connect-mcp-step";
 import { CreateTeamStep } from "./steps/create-team-step";
 import { ReconciliationStep } from "./steps/reconciliation-step";
 import { SetNameStep } from "./steps/set-name-step";
@@ -67,6 +80,92 @@ function DashboardImageAnimation() {
         priority
       />
     </motion.div>
+  );
+}
+
+function McpAnimation() {
+  const allLogos: {
+    Logo: React.ComponentType<Record<string, unknown>>;
+    size: number;
+    opacity: number;
+  }[] = [
+    { Logo: ChatGPTMcpLogo, size: 68, opacity: 1 },
+    { Logo: ZapierMcpLogo, size: 48, opacity: 0.5 },
+    { Logo: CursorMcpLogo, size: 56, opacity: 1 },
+    { Logo: MakeMcpLogo, size: 48, opacity: 0.5 },
+    { Logo: ClaudeMcpLogo, size: 68, opacity: 1 },
+    { Logo: N8nMcpLogo, size: 48, opacity: 0.5 },
+    { Logo: PerplexityMcpLogo, size: 56, opacity: 1 },
+    { Logo: RaycastMcpLogo, size: 48, opacity: 0.5 },
+    { Logo: CopilotMcpLogo, size: 56, opacity: 1 },
+  ];
+
+  const count = allLogos.length;
+  const radius = 140;
+  const icons = allLogos.map(({ Logo, size, opacity }, i) => {
+    const angle = -90 + (i * 360) / count;
+    const rad = (angle * Math.PI) / 180;
+    return {
+      Logo,
+      x: Math.cos(rad) * radius,
+      y: Math.sin(rad) * radius,
+      rotate: (i % 2 === 0 ? 1 : -1) * (3 + (i % 4)),
+      size,
+      delay: 0.15 + i * 0.06,
+      opacity,
+    };
+  });
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      <div
+        className="absolute inset-0 dark:hidden"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px)",
+          backgroundSize: "12px 12px",
+        }}
+      />
+      <div
+        className="absolute inset-0 hidden dark:block"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)",
+          backgroundSize: "12px 12px",
+        }}
+      />
+      <div className="relative z-10" style={{ width: 400, height: 400 }}>
+        {icons.map(({ Logo, x, y, rotate, size, delay, opacity }, i) => (
+          <motion.div
+            key={`mcp-icon-${i.toString()}`}
+            initial={{ opacity: 0, scale: 0, rotate: rotate * 2 }}
+            animate={{ opacity: opacity ?? 1, scale: 1, rotate }}
+            transition={{
+              type: "spring",
+              damping: 18,
+              stiffness: 180,
+              delay,
+            }}
+            className="absolute mcp-onboarding-icon overflow-hidden rounded-xl border border-border bg-background shadow-sm"
+            style={{
+              width: size,
+              height: size,
+              left: "50%",
+              top: "50%",
+              marginLeft: x - size / 2,
+              marginTop: y - size / 2,
+            }}
+          >
+            <Logo />
+          </motion.div>
+        ))}
+        <style>
+          {
+            ".mcp-onboarding-icon img, .mcp-onboarding-icon svg { width: 100% !important; height: 100% !important; }"
+          }
+        </style>
+      </div>
+    </div>
   );
 }
 
@@ -285,7 +384,16 @@ export function OnboardingPage({
         canGoBack: true,
         trackEvent: LogEvents.OnboardingStepCompleted,
       },
-      // Step 6 — Plan selection + Polar checkout with CC-required trial
+      // Step 6 — Connect AI tools via MCP
+      {
+        key: "connect-mcp",
+        animation: <McpAnimation />,
+        content: <ConnectMcpStep />,
+        navigation: "next",
+        canGoBack: true,
+        trackEvent: LogEvents.OnboardingStepCompleted,
+      },
+      // Step 7 — Plan selection + Polar checkout with CC-required trial
       {
         key: "start-trial",
         animation: <DashboardImageAnimation />,
@@ -329,6 +437,7 @@ export function OnboardingPage({
 
   return (
     <div className="h-screen overflow-hidden flex relative">
+      <AppDetailSheet />
       <nav className="fixed top-0 left-0 right-0 z-50 w-full pointer-events-none">
         <div className="relative py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center justify-between">
           <div className="w-6 h-6">

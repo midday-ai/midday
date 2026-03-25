@@ -9,6 +9,7 @@ const STEP_KEYS = [
   "connect-bank",
   "connect-inbox",
   "reconciliation",
+  "connect-mcp",
   "start-trial",
 ] as const;
 

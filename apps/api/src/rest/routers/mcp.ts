@@ -52,9 +52,8 @@ app.use(
   rateLimiter({
     windowMs: 10 * 60 * 1000,
     limit: Number(process.env.API_RATE_LIMIT) || 1000,
-    keyGenerator: (c) => {
-      return c.get("session")?.user?.id ?? "unknown";
-    },
+    keyGenerator: (c) =>
+      c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown",
     statusCode: 429,
     message: "Rate limit exceeded",
   }),
