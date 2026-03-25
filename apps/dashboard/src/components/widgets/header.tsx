@@ -1,6 +1,9 @@
 "use client";
 
 import { TZDate } from "@date-fns/tz";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
+import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MetricsFilter } from "@/components/metrics/components/metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
@@ -21,7 +24,15 @@ function getTimeBasedGreeting(timezone?: string): string {
   return "Evening";
 }
 
-export function WidgetsHeader() {
+interface WidgetsHeaderProps {
+  isEditing: boolean;
+  onToggleEditing: () => void;
+}
+
+export function WidgetsHeader({
+  isEditing,
+  onToggleEditing,
+}: WidgetsHeaderProps) {
   const { data: user } = useUserQuery();
   const [greeting, setGreeting] = useState(() =>
     getTimeBasedGreeting(user?.timezone ?? undefined),
@@ -56,6 +67,20 @@ export function WidgetsHeader() {
       </div>
 
       <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          className="gap-2 px-2"
+          onClick={onToggleEditing}
+        >
+          {isEditing ? (
+            <Check size={16} className="text-[#666]" />
+          ) : (
+            <Icons.DashboardCustomize size={16} className="text-[#666]" />
+          )}
+          <span className="hidden sm:inline">
+            {isEditing ? "Done" : "Customize"}
+          </span>
+        </Button>
         <MetricsFilter />
       </div>
     </div>

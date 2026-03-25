@@ -40,7 +40,7 @@ export function McpBanner() {
             stiffness: 300,
             delay: 0.5,
           }}
-          className="fixed bottom-4 right-6 z-50"
+          className="fixed bottom-2.5 right-4 z-50"
         >
           <div className="group relative border border-border bg-background shadow-lg w-[300px] overflow-hidden">
             <button

@@ -58,24 +58,27 @@ interface MetricsGridProps {
   layout: ChartLayoutItem[];
   onLayoutChange: (newLayout: ChartLayoutItem[]) => void;
   renderChart: (chartId: ChartId, index: number) => React.ReactNode;
+  isEditing?: boolean;
 }
 
 export function MetricsGrid({
   layout,
   onLayoutChange,
   renderChart,
+  isEditing = false,
 }: MetricsGridProps) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const gridRef = useRef<HTMLDivElement>(null!);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor),
-  );
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8,
+    },
+  });
+  const keyboardSensor = useSensor(KeyboardSensor);
+  const activeSensors = useSensors(pointerSensor, keyboardSensor);
+  const noSensors = useSensors();
+  const sensors = isEditing ? activeSensors : noSensors;
 
   const chartIds = layout.map((item) => item.id);
 

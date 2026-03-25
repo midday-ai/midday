@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { MetricsView } from "../metrics/metrics-view";
 import type { ChartLayoutItem } from "../metrics/utils/chart-types";
 import { DEFAULT_CHART_LAYOUT } from "../metrics/utils/chart-types";
@@ -16,10 +16,15 @@ export function OverviewView({ chartLayoutPromise }: OverviewViewProps) {
     ? use(chartLayoutPromise)
     : DEFAULT_CHART_LAYOUT;
 
+  const [isEditing, setIsEditing] = useState(false);
+
   return (
     <div className="flex flex-col mt-6">
-      <WidgetsHeader />
-      <MetricsView initialLayout={initialLayout} />
+      <WidgetsHeader
+        isEditing={isEditing}
+        onToggleEditing={() => setIsEditing((prev) => !prev)}
+      />
+      <MetricsView initialLayout={initialLayout} isEditing={isEditing} />
       <McpBanner />
     </div>
   );

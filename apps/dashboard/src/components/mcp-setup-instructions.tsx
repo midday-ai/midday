@@ -91,7 +91,7 @@ export function ChatGPTSetupInstructions() {
 
       <div className="space-y-2">
         <p className="text-xs text-[#878787]">
-          Copy this URL and add it as an app in ChatGPT:
+          Copy this URL and add it as a connector in ChatGPT:
         </p>
         <CopyableUrl url="https://api.midday.ai/mcp" />
       </div>
@@ -101,7 +101,9 @@ export function ChatGPTSetupInstructions() {
         <ol className="space-y-2.5">
           <SetupStep number={1}>
             In ChatGPT, go to{" "}
-            <span className="font-medium text-primary">Settings → Apps</span>{" "}
+            <span className="font-medium text-primary">
+              Settings → Connectors
+            </span>{" "}
             and click <span className="font-medium text-primary">Create</span>
           </SetupStep>
           <SetupStep number={2}>
@@ -118,7 +120,7 @@ export function ChatGPTSetupInstructions() {
         <p className="text-[11px] text-[#878787]">
           <span className="font-medium text-primary">Requirements:</span>{" "}
           ChatGPT Pro, Plus, Business, Enterprise, or Education account. Enable
-          developer mode in Settings → Apps → Advanced settings.
+          developer mode in Settings → Apps & Connectors → Advanced settings.
         </p>
       </div>
     </div>

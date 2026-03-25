@@ -154,7 +154,7 @@ await client.close();`;
               href="/mcp"
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 font-sans text-sm"
             >
-              <Icons.ChevronLeft size={16} />
+              <Icons.ArrowBack size={16} />
               All clients
             </Link>
 
@@ -222,7 +222,7 @@ await client.close();`;
               <div className="space-y-6">
                 <div className="space-y-3">
                   <p className="font-sans text-sm text-muted-foreground">
-                    Copy this URL and add it as an app in ChatGPT:
+                    Copy this URL and add it as a connector in ChatGPT:
                   </p>
                   <CopyableUrl url="https://api.midday.ai/mcp" />
                 </div>
@@ -239,7 +239,7 @@ await client.close();`;
                       <span className="font-sans text-sm text-muted-foreground pt-0.5">
                         Go to{" "}
                         <span className="font-medium text-foreground">
-                          Settings → Apps
+                          Settings → Connectors
                         </span>{" "}
                         in ChatGPT and click{" "}
                         <span className="font-medium text-foreground">
@@ -275,7 +275,7 @@ await client.close();`;
                     ChatGPT Pro, Plus, Business, Enterprise, or Education
                     account. Enable developer mode in{" "}
                     <span className="font-medium">
-                      Settings → Apps → Advanced settings
+                      Settings → Apps & Connectors → Advanced settings
                     </span>
                     .
                   </p>

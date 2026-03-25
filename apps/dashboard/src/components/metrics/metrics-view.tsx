@@ -9,6 +9,7 @@ import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { BurnRateCard } from "./cards/burn-rate-card";
+import { CashBalanceCard } from "./cards/cash-balance-card";
 import { CategoryExpensesCard } from "./cards/category-expenses-card";
 import { ExpensesCard } from "./cards/expenses-card";
 import { MonthlyRevenueCard } from "./cards/monthly-revenue-card";
@@ -104,9 +105,13 @@ function normalizeRows(
 
 interface MetricsViewProps {
   initialLayout?: ChartLayoutItem[];
+  isEditing?: boolean;
 }
 
-export function MetricsView({ initialLayout }: MetricsViewProps) {
+export function MetricsView({
+  initialLayout,
+  isEditing = false,
+}: MetricsViewProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { data: connections } = useQuery(
@@ -186,6 +191,8 @@ export function MetricsView({ initialLayout }: MetricsViewProps) {
           return <RunwayCard {...commonProps} />;
         case "category-expenses":
           return <CategoryExpensesCard {...commonProps} />;
+        case "cash-balance":
+          return <CashBalanceCard currency={currency} locale={locale} />;
         default:
           return null;
       }
@@ -195,6 +202,7 @@ export function MetricsView({ initialLayout }: MetricsViewProps) {
       <DraggableChartCard
         key={chartId}
         id={chartId}
+        isEditing={isEditing}
         onResize={(newColSpan) => handleResizeChart(chartId, newColSpan)}
       >
         {showConnectOverlay ? (
@@ -231,6 +239,7 @@ export function MetricsView({ initialLayout }: MetricsViewProps) {
         layout={normalizedLayout}
         onLayoutChange={handleLayoutChange}
         renderChart={renderChart}
+        isEditing={isEditing}
       />
     </div>
   );

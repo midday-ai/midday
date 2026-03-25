@@ -35,7 +35,7 @@ function chartOrderToLayout(order: ChartId[]): ChartLayoutItem[] {
 /**
  * Parse a raw cookie value into a validated layout.
  * Supports both new `{ layout }` and legacy `{ chartOrder }` formats.
- * Unknown IDs are dropped; missing default charts are appended.
+ * Unknown IDs are dropped; missing charts are appended with default spans.
  */
 export function parseMetricsLayout(raw: string | undefined): ChartLayoutItem[] {
   if (!raw) return DEFAULT_CHART_LAYOUT;
@@ -98,6 +98,7 @@ function validateLayout(items: unknown[]): ChartLayoutItem[] {
     }
   }
 
+  // Append any missing widgets at the end with default spans
   const defaultSpans = new Map(
     DEFAULT_CHART_LAYOUT.map((item) => [item.id, item.colSpan]),
   );
