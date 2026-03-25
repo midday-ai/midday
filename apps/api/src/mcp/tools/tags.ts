@@ -11,6 +11,7 @@ import {
   updateTag,
 } from "@midday/db/queries";
 import { z } from "zod";
+import { mcpTagResponseSchema, sanitize, sanitizeArray } from "../schemas";
 import {
   DESTRUCTIVE_ANNOTATIONS,
   hasScope,
@@ -45,9 +46,11 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
       async () => {
         const result = await getTags(db, { teamId });
 
+        const clean = sanitizeArray(mcpTagResponseSchema, result ?? []);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -75,9 +78,11 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpTagResponseSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -102,9 +107,11 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpTagResponseSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -125,9 +132,11 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
             teamId,
           });
 
+          const clean = sanitize(mcpTagResponseSchema, result);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
-            structuredContent: { data: result },
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -166,9 +175,11 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpTagResponseSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );

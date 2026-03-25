@@ -1,5 +1,11 @@
 import { getTeamById, getTeamMembers } from "@midday/db/queries";
 import { z } from "zod";
+import {
+  mcpTeamMemberSchema,
+  mcpTeamSchema,
+  sanitize,
+  sanitizeArray,
+} from "../schemas";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 
 export const registerTeamTools: RegisterTools = (server, ctx) => {
@@ -31,9 +37,11 @@ export const registerTeamTools: RegisterTools = (server, ctx) => {
         };
       }
 
+      const clean = sanitize(mcpTeamSchema, result);
+
       return {
-        content: [{ type: "text", text: JSON.stringify(result) }],
-        structuredContent: { data: result },
+        content: [{ type: "text", text: JSON.stringify(clean) }],
+        structuredContent: { data: clean },
       };
     },
   );
@@ -53,9 +61,11 @@ export const registerTeamTools: RegisterTools = (server, ctx) => {
     async () => {
       const result = await getTeamMembers(db, teamId);
 
+      const clean = sanitizeArray(mcpTeamMemberSchema, result ?? []);
+
       return {
-        content: [{ type: "text", text: JSON.stringify(result) }],
-        structuredContent: { data: result },
+        content: [{ type: "text", text: JSON.stringify(clean) }],
+        structuredContent: { data: clean },
       };
     },
   );

@@ -70,6 +70,19 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
       });
     }
 
+    let user = await userCache.get(tokenData.user.id);
+
+    if (!user) {
+      user = await getUserById(db, tokenData.user.id);
+      if (user) {
+        await userCache.set(tokenData.user.id, user);
+      }
+    }
+
+    if (!user) {
+      throw new HTTPException(401, { message: "User not found" });
+    }
+
     const session = {
       teamId: tokenData.teamId,
       user: {
@@ -86,6 +99,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 
     c.set("session", session);
     c.set("teamId", session.teamId);
+    c.set("user", user);
     c.set("scopes", expandScopes(tokenData.scopes ?? []));
 
     await next();

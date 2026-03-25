@@ -18,6 +18,12 @@ import {
 } from "@midday/db/queries";
 import { z } from "zod";
 import {
+  mcpTransactionDetailSchema,
+  mcpTransactionSchema,
+  sanitize,
+  sanitizeArray,
+} from "../schemas";
+import {
   DESTRUCTIVE_ANNOTATIONS,
   hasScope,
   READ_ONLY_ANNOTATIONS,
@@ -88,9 +94,12 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
             .describe("Maximum absolute amount to include"),
         },
         outputSchema: {
+          meta: z.object({
+            cursor: z.string().nullable().optional(),
+            hasNextPage: z.boolean(),
+            hasPreviousPage: z.boolean(),
+          }),
           data: z.array(z.record(z.string(), z.any())),
-          hasMore: z.boolean(),
-          cursor: z.string().nullable().optional(),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -101,8 +110,11 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
             : null;
 
         const amountRange =
-          params.amountMin != null && params.amountMax != null
-            ? [params.amountMin, params.amountMax]
+          params.amountMin != null || params.amountMax != null
+            ? [
+                params.amountMin ?? 0,
+                params.amountMax ?? Number.MAX_SAFE_INTEGER,
+              ]
             : null;
 
         const result = await getTransactions(db, {
@@ -128,9 +140,14 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           fulfilled: params.fulfilled ?? undefined,
         });
 
+        const clean = {
+          ...result,
+          data: sanitizeArray(mcpTransactionSchema, result.data ?? []),
+        };
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: result,
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: clean,
         };
       },
     );
@@ -159,9 +176,11 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpTransactionDetailSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -187,9 +206,11 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpTransactionSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -211,9 +232,11 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           items.map((item) => ({ ...item, teamId })),
         );
 
+        const clean = sanitizeArray(mcpTransactionSchema, result ?? []);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -243,9 +266,11 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpTransactionSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -266,9 +291,11 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           userId,
         });
 
+        const clean = sanitizeArray(mcpTransactionSchema, result ?? []);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -297,9 +324,11 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpTransactionSchema, result[0]);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result[0]) }],
-          structuredContent: { data: result[0] },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -316,9 +345,11 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
       async ({ ids }) => {
         const result = await deleteTransactions(db, { teamId, ids });
 
+        const clean = sanitizeArray(mcpTransactionSchema, result ?? []);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );

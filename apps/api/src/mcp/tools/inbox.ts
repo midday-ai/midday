@@ -1,6 +1,12 @@
 import { getInboxByIdSchema, getInboxSchema } from "@api/schemas/inbox";
 import { getInbox, getInboxById } from "@midday/db/queries";
 import { z } from "zod";
+import {
+  mcpInboxDetailSchema,
+  mcpInboxItemSchema,
+  sanitize,
+  sanitizeArray,
+} from "../schemas";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 import {
   downloadVaultFile,
@@ -24,9 +30,12 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         "List inbox items (uploaded receipts, invoices, and documents pending processing). Filter by status (pending, done, suggested_match, no_match, other). Returns paginated results (default 25) with file name, status, and matched transaction.",
       inputSchema: getInboxSchema.shape,
       outputSchema: {
+        meta: z.object({
+          cursor: z.string().nullable().optional(),
+          hasNextPage: z.boolean(),
+          hasPreviousPage: z.boolean(),
+        }),
         data: z.array(z.record(z.string(), z.any())),
-        hasMore: z.boolean(),
-        cursor: z.string().nullable().optional(),
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
@@ -41,9 +50,14 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         status: params.status ?? null,
       });
 
+      const clean = {
+        ...result,
+        data: sanitizeArray(mcpInboxItemSchema, result.data ?? []),
+      };
+
       return {
-        content: [{ type: "text", text: JSON.stringify(result) }],
-        structuredContent: result,
+        content: [{ type: "text", text: JSON.stringify(clean) }],
+        structuredContent: clean,
       };
     },
   );
@@ -84,10 +98,12 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
 
       const fileUrl = storagePath ? await getVaultSignedUrl(storagePath) : null;
 
+      const clean = sanitize(mcpInboxDetailSchema, { ...result, fileUrl });
+
       const content: McpContent[] = [
         {
           type: "text",
-          text: JSON.stringify({ ...result, fileUrl }),
+          text: JSON.stringify(clean),
         },
       ];
 

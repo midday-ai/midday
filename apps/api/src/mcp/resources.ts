@@ -11,6 +11,15 @@ import {
 } from "@midday/db/queries";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import {
+  mcpCustomerDetailSchema,
+  mcpInvoiceDetailSchema,
+  mcpTagResponseSchema,
+  mcpTeamSchema,
+  mcpTransactionDetailSchema,
+  sanitize,
+  sanitizeArray,
+} from "./schemas";
 import { hasScope, type McpContext } from "./types";
 
 const REPORT_TYPES = [
@@ -47,12 +56,14 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
       },
       async () => {
         const team = await getTeamById(db, teamId);
+        const clean = team ? sanitize(mcpTeamSchema, team) : team;
+
         return {
           contents: [
             {
               uri: "midday://team/info",
               mimeType: "application/json",
-              text: JSON.stringify(team, null, 2),
+              text: JSON.stringify(clean),
             },
           ],
         };
@@ -74,7 +85,7 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
           {
             uri: "midday://categories",
             mimeType: "application/json",
-            text: JSON.stringify(CATEGORIES, null, 2),
+            text: JSON.stringify(CATEGORIES),
           },
         ],
       };
@@ -91,12 +102,14 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
       },
       async () => {
         const tags = await getTags(db, { teamId });
+        const clean = sanitizeArray(mcpTagResponseSchema, tags ?? []);
+
         return {
           contents: [
             {
               uri: "midday://tags",
               mimeType: "application/json",
-              text: JSON.stringify(tags, null, 2),
+              text: JSON.stringify(clean),
             },
           ],
         };
@@ -133,6 +146,7 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
             amount: null,
             manual: null,
           });
+
           return {
             resources: (result.data ?? []).map((t) => ({
               uri: `midday://transactions/${t.id}`,
@@ -152,13 +166,18 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
           id: transactionId as string,
           teamId,
         });
+
+        const clean = result
+          ? sanitize(mcpTransactionDetailSchema, result)
+          : null;
+
         return {
           contents: [
             {
               uri: uri.href,
               mimeType: "application/json",
-              text: result
-                ? JSON.stringify(result, null, 2)
+              text: clean
+                ? JSON.stringify(clean)
                 : JSON.stringify({ error: "Transaction not found" }),
             },
           ],
@@ -183,6 +202,7 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
             customers: null,
             sort: null,
           });
+
           return {
             resources: (result.data ?? []).map((inv) => ({
               uri: `midday://invoices/${inv.id}`,
@@ -202,13 +222,16 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
           id: invoiceId as string,
           teamId,
         });
+
+        const clean = result ? sanitize(mcpInvoiceDetailSchema, result) : null;
+
         return {
           contents: [
             {
               uri: uri.href,
               mimeType: "application/json",
-              text: result
-                ? JSON.stringify(result, null, 2)
+              text: clean
+                ? JSON.stringify(clean)
                 : JSON.stringify({ error: "Invoice not found" }),
             },
           ],
@@ -229,6 +252,7 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
             q: null,
             sort: null,
           });
+
           return {
             resources: (result.data ?? []).map((c) => ({
               uri: `midday://customers/${c.id}`,
@@ -248,13 +272,16 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
           id: customerId as string,
           teamId,
         });
+
+        const clean = result ? sanitize(mcpCustomerDetailSchema, result) : null;
+
         return {
           contents: [
             {
               uri: uri.href,
               mimeType: "application/json",
-              text: result
-                ? JSON.stringify(result, null, 2)
+              text: clean
+                ? JSON.stringify(clean)
                 : JSON.stringify({ error: "Customer not found" }),
             },
           ],
@@ -307,7 +334,7 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
             {
               uri: uri.href,
               mimeType: "application/json",
-              text: JSON.stringify(reportInfo, null, 2),
+              text: JSON.stringify(reportInfo),
             },
           ],
         };

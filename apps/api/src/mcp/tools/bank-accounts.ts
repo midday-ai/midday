@@ -1,6 +1,7 @@
 import { getBankAccountsSchema } from "@api/schemas/bank-accounts";
 import { getBankAccounts } from "@midday/db/queries";
 import { z } from "zod";
+import { mcpBankAccountSchema, sanitizeArray } from "../schemas";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 
 export const registerBankAccountTools: RegisterTools = (server, ctx) => {
@@ -29,9 +30,11 @@ export const registerBankAccountTools: RegisterTools = (server, ctx) => {
         manual: params.manual,
       });
 
+      const clean = sanitizeArray(mcpBankAccountSchema, result ?? []);
+
       return {
-        content: [{ type: "text", text: JSON.stringify(result) }],
-        structuredContent: { data: result },
+        content: [{ type: "text", text: JSON.stringify(clean) }],
+        structuredContent: { data: clean },
       };
     },
   );

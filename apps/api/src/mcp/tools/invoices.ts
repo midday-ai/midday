@@ -18,6 +18,12 @@ import {
 import { PdfTemplate, renderToStream } from "@midday/invoice";
 import { z } from "zod";
 import {
+  mcpInvoiceDetailSchema,
+  mcpInvoiceListItemSchema,
+  sanitize,
+  sanitizeArray,
+} from "../schemas";
+import {
   DESTRUCTIVE_ANNOTATIONS,
   hasScope,
   READ_ONLY_ANNOTATIONS,
@@ -65,9 +71,12 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             .describe("Sort direction"),
         },
         outputSchema: {
+          meta: z.object({
+            cursor: z.string().nullable().optional(),
+            hasNextPage: z.boolean(),
+            hasPreviousPage: z.boolean(),
+          }),
           data: z.array(z.record(z.string(), z.any())),
-          hasMore: z.boolean(),
-          cursor: z.string().nullable().optional(),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -89,12 +98,15 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           sort,
         });
 
-        const data = result.data?.map((invoice) => ({
-          ...invoice,
-          pdfUrl: invoice.token
-            ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(invoice.token)}`
-            : null,
-        }));
+        const data = sanitizeArray(
+          mcpInvoiceListItemSchema,
+          (result.data ?? []).map((invoice) => ({
+            ...invoice,
+            pdfUrl: invoice.token
+              ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(invoice.token)}`
+              : null,
+          })),
+        );
 
         const response = { ...result, data };
 
@@ -135,10 +147,15 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(result.token)}`
           : null;
 
+        const clean = sanitize(mcpInvoiceDetailSchema, {
+          ...result,
+          pdfUrl,
+        });
+
         const content: McpContent[] = [
           {
             type: "text",
-            text: JSON.stringify({ ...result, pdfUrl }),
+            text: JSON.stringify(clean),
           },
         ];
 
@@ -245,8 +262,10 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpInvoiceDetailSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
+          content: [{ type: "text", text: JSON.stringify(clean) }],
         };
       },
     );
@@ -300,8 +319,10 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpInvoiceDetailSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
+          content: [{ type: "text", text: JSON.stringify(clean) }],
         };
       },
     );
@@ -352,11 +373,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           content: [
             {
               type: "text",
-              text: JSON.stringify(
-                { success: true, deletedId: result.id },
-                null,
-                2,
-              ),
+              text: JSON.stringify({ success: true, deletedId: result.id }),
             },
           ],
         };
@@ -394,8 +411,10 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             invoiceNumber,
           });
 
+          const clean = sanitize(mcpInvoiceDetailSchema, result);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
           };
         } catch (error) {
           return {
@@ -462,8 +481,10 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpInvoiceDetailSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
+          content: [{ type: "text", text: JSON.stringify(clean) }],
         };
       },
     );

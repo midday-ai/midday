@@ -25,6 +25,12 @@ import {
 } from "@midday/db/queries";
 import { z } from "zod";
 import {
+  mcpTrackerEntrySchema,
+  mcpTrackerProjectSchema,
+  sanitize,
+  sanitizeArray,
+} from "../schemas";
+import {
   DESTRUCTIVE_ANNOTATIONS,
   hasScope,
   READ_ONLY_ANNOTATIONS,
@@ -83,9 +89,12 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             .describe("Sort direction"),
         },
         outputSchema: {
+          meta: z.object({
+            cursor: z.string().nullable().optional(),
+            hasNextPage: z.boolean(),
+            hasPreviousPage: z.boolean(),
+          }),
           data: z.array(z.record(z.string(), z.any())),
-          hasMore: z.boolean(),
-          cursor: z.string().nullable().optional(),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -108,9 +117,14 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           tags: params.tags ?? null,
         });
 
+        const clean = {
+          ...result,
+          data: sanitizeArray(mcpTrackerProjectSchema, result.data ?? []),
+        };
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: result,
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: clean,
         };
       },
     );
@@ -139,9 +153,11 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpTrackerProjectSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -180,8 +196,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             tags: params.tags,
           });
 
+          const clean = sanitize(mcpTrackerProjectSchema, result);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
           };
         } catch (error) {
           return {
@@ -250,8 +268,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           tags: params.tags ?? existingTags,
         });
 
+        const clean = sanitize(mcpTrackerProjectSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
+          content: [{ type: "text", text: JSON.stringify(clean) }],
         };
       },
     );
@@ -283,11 +303,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           content: [
             {
               type: "text",
-              text: JSON.stringify(
-                { success: true, deletedId: result.id },
-                null,
-                2,
-              ),
+              text: JSON.stringify({ success: true, deletedId: result.id }),
             },
           ],
         };
@@ -351,6 +367,12 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
         const wasTruncated =
           entryCount < Object.values(result.result).flat().length;
+
+        const sanitizedResult: Record<string, unknown[]> = {};
+        for (const [date, entries] of Object.entries(truncated)) {
+          sanitizedResult[date] = sanitizeArray(mcpTrackerEntrySchema, entries);
+        }
+
         const response = {
           meta: {
             ...result.meta,
@@ -360,7 +382,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
               hint: "Use a narrower date range for complete data",
             }),
           },
-          result: truncated,
+          result: sanitizedResult,
         };
 
         return {
@@ -395,9 +417,11 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           assignedId: params.assignedId,
         });
 
+        const clean = sanitize(mcpTrackerEntrySchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -434,8 +458,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             assignedId: params.assignedId,
           });
 
+          const clean = sanitizeArray(mcpTrackerEntrySchema, result ?? []);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
           };
         } catch (error) {
           return {
@@ -512,8 +538,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           assignedId: params.assignedId ?? existing.assignedId,
         });
 
+        const clean = sanitizeArray(mcpTrackerEntrySchema, result ?? []);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
+          content: [{ type: "text", text: JSON.stringify(clean) }],
         };
       },
     );
@@ -545,11 +573,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           content: [
             {
               type: "text",
-              text: JSON.stringify(
-                { success: true, deletedId: result.id },
-                null,
-                2,
-              ),
+              text: JSON.stringify({ success: true, deletedId: result.id }),
             },
           ],
         };
@@ -580,8 +604,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             start: params.start,
           });
 
+          const clean = sanitize(mcpTrackerEntrySchema, result);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
           };
         } catch (error) {
           return {
@@ -622,8 +648,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             stop: params.stop,
           });
 
+          const clean = sanitize(mcpTrackerEntrySchema, result);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
           };
         } catch (error) {
           return {

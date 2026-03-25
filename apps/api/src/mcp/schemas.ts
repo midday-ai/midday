@@ -1,0 +1,400 @@
+import { z } from "zod";
+
+// ============================================================
+// Shared sub-schemas (reused across entities)
+// ============================================================
+
+const mcpTagSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+});
+
+const mcpAssignedUserSchema = z.object({
+  id: z.string(),
+  fullName: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
+});
+
+const mcpConnectionSchema = z.object({
+  name: z.string(),
+  logoUrl: z.string().nullable(),
+});
+
+const mcpAccountSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  currency: z.string(),
+  connection: mcpConnectionSchema.nullable(),
+});
+
+const mcpAttachmentSchema = z.object({
+  id: z.string(),
+  filename: z.string().nullable(),
+  type: z.string(),
+  size: z.number(),
+});
+
+const mcpCategorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  color: z.string(),
+  slug: z.string(),
+});
+
+// ============================================================
+// Transaction schemas
+// ============================================================
+
+export const mcpTransactionSchema = z.object({
+  id: z.string(),
+  date: z.string(),
+  name: z.string(),
+  description: z.string().nullable().optional(),
+  amount: z.number(),
+  currency: z.string(),
+  baseAmount: z.number().nullable().optional(),
+  baseCurrency: z.string().nullable().optional(),
+  method: z.string().nullable().optional(),
+  status: z.string(),
+  note: z.string().nullable().optional(),
+  manual: z.boolean().nullable().optional(),
+  internal: z.boolean().nullable().optional(),
+  recurring: z.boolean().nullable().optional(),
+  counterpartyName: z.string().nullable().optional(),
+  frequency: z.string().nullable().optional(),
+  isFulfilled: z.boolean().optional(),
+  taxRate: z.number().nullable().optional(),
+  taxType: z.string().nullable().optional(),
+  taxAmount: z.number().nullable().optional(),
+  assigned: mcpAssignedUserSchema.nullable().optional(),
+  category: mcpCategorySchema.nullable().optional(),
+  account: mcpAccountSchema.nullable().optional(),
+  tags: z.array(mcpTagSchema).nullable().optional(),
+  attachments: z.array(mcpAttachmentSchema).nullable().optional(),
+});
+
+export const mcpTransactionDetailSchema = mcpTransactionSchema.extend({
+  hasPendingSuggestion: z.boolean().optional(),
+  suggestion: z
+    .object({
+      suggestionId: z.string(),
+      documentName: z.string().nullable(),
+      documentAmount: z.number().nullable(),
+      documentCurrency: z.string().nullable(),
+      confidenceScore: z.number().nullable(),
+    })
+    .nullable()
+    .optional(),
+});
+
+// ============================================================
+// Invoice schemas
+// ============================================================
+
+const mcpInvoiceCustomerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  website: z.string().nullable().optional(),
+  email: z.string().optional(),
+});
+
+const mcpInvoiceRecurringSchema = z.object({
+  id: z.string(),
+  status: z.string(),
+  frequency: z.string(),
+  frequencyInterval: z.number().nullable().optional(),
+});
+
+export const mcpInvoiceListItemSchema = z.object({
+  id: z.string(),
+  invoiceNumber: z.string().nullable().optional(),
+  amount: z.number().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  status: z.string(),
+  dueDate: z.string().nullable().optional(),
+  issueDate: z.string().nullable().optional(),
+  paidAt: z.string().nullable().optional(),
+  sentAt: z.string().nullable().optional(),
+  scheduledAt: z.string().nullable().optional(),
+  customerName: z.string().nullable().optional(),
+  sentTo: z.string().nullable().optional(),
+  discount: z.number().nullable().optional(),
+  subtotal: z.number().nullable().optional(),
+  vat: z.number().nullable().optional(),
+  tax: z.number().nullable().optional(),
+  note: z.string().nullable().optional(),
+  lineItems: z.any().nullable().optional(),
+  recurringSequence: z.number().nullable().optional(),
+  pdfUrl: z.string().nullable().optional(),
+  customer: mcpInvoiceCustomerSchema.nullable().optional(),
+  recurring: mcpInvoiceRecurringSchema.nullable().optional(),
+});
+
+export const mcpInvoiceDetailSchema = mcpInvoiceListItemSchema.extend({
+  paymentDetails: z.any().nullable().optional(),
+  customerDetails: z.any().nullable().optional(),
+  fromDetails: z.any().nullable().optional(),
+  noteDetails: z.any().nullable().optional(),
+  topBlock: z.any().nullable().optional(),
+  bottomBlock: z.any().nullable().optional(),
+  template: z.any().nullable().optional(),
+  refundedAt: z.string().nullable().optional(),
+});
+
+// ============================================================
+// Customer schemas
+// ============================================================
+
+export const mcpCustomerListItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string().optional(),
+  phone: z.string().nullable().optional(),
+  website: z.string().nullable().optional(),
+  country: z.string().nullable().optional(),
+  countryCode: z.string().nullable().optional(),
+  status: z.string().nullable().optional(),
+  isArchived: z.boolean().nullable().optional(),
+  logoUrl: z.string().nullable().optional(),
+  industry: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
+  invoiceCount: z.number().optional(),
+  projectCount: z.number().optional(),
+  totalRevenue: z.number().optional(),
+  outstandingAmount: z.number().optional(),
+  lastInvoiceDate: z.string().nullable().optional(),
+  invoiceCurrency: z.string().nullable().optional(),
+  tags: z.array(mcpTagSchema).optional(),
+});
+
+export const mcpCustomerDetailSchema = mcpCustomerListItemSchema.extend({
+  billingEmail: z.string().nullable().optional(),
+  addressLine1: z.string().nullable().optional(),
+  addressLine2: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  state: z.string().nullable().optional(),
+  zip: z.string().nullable().optional(),
+  vatNumber: z.string().nullable().optional(),
+  contact: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  preferredCurrency: z.string().nullable().optional(),
+  defaultPaymentTerms: z.number().nullable().optional(),
+});
+
+// ============================================================
+// Bank account schema
+// ============================================================
+
+export const mcpBankAccountSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  currency: z.string().nullable().optional(),
+  type: z.string().nullable().optional(),
+  subtype: z.string().nullable().optional(),
+  enabled: z.boolean().optional(),
+  manual: z.boolean().nullable().optional(),
+  balance: z.number().nullable().optional(),
+  baseCurrency: z.string().nullable().optional(),
+  baseBalance: z.number().nullable().optional(),
+  availableBalance: z.number().nullable().optional(),
+  creditLimit: z.number().nullable().optional(),
+  connection: mcpConnectionSchema.nullable().optional(),
+});
+
+// ============================================================
+// Tracker schemas
+// ============================================================
+
+const mcpTrackerCustomerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  website: z.string().nullable().optional(),
+});
+
+export const mcpTrackerProjectSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  status: z.string().nullable().optional(),
+  estimate: z.number().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  rate: z.number().nullable().optional(),
+  billable: z.boolean().nullable().optional(),
+  totalDuration: z.number().nullable().optional(),
+  totalAmount: z.number().nullable().optional(),
+  customer: mcpTrackerCustomerSchema.nullable().optional(),
+  tags: z.array(mcpTagSchema).nullable().optional(),
+  users: z.array(mcpAssignedUserSchema).nullable().optional(),
+});
+
+export const mcpTrackerEntrySchema = z.object({
+  id: z.string(),
+  date: z.string().nullable().optional(),
+  start: z.string().nullable().optional(),
+  stop: z.string().nullable().optional(),
+  duration: z.number().nullable().optional(),
+  description: z.string().nullable().optional(),
+  rate: z.number().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  billed: z.boolean().nullable().optional(),
+  project: z
+    .object({ id: z.string(), name: z.string().nullable() })
+    .nullable()
+    .optional(),
+  user: mcpAssignedUserSchema.nullable().optional(),
+});
+
+// ============================================================
+// Document schema
+// ============================================================
+
+export const mcpDocumentSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable().optional(),
+  title: z.string().nullable().optional(),
+  summary: z.string().nullable().optional(),
+  date: z.string().nullable().optional(),
+  metadata: z.any().nullable().optional(),
+  pathTokens: z.array(z.string()).nullable().optional(),
+  processingStatus: z.string().nullable().optional(),
+  tags: z.array(mcpTagSchema).nullable().optional(),
+  fileUrl: z.string().nullable().optional(),
+});
+
+// ============================================================
+// Inbox schemas
+// ============================================================
+
+export const mcpInboxItemSchema = z.object({
+  id: z.string(),
+  fileName: z.string().nullable().optional(),
+  displayName: z.string().nullable().optional(),
+  amount: z.number().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  contentType: z.string().nullable().optional(),
+  date: z.string().nullable().optional(),
+  status: z.string().nullable().optional(),
+  type: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  website: z.string().nullable().optional(),
+  senderEmail: z.string().nullable().optional(),
+  taxAmount: z.number().nullable().optional(),
+  taxRate: z.number().nullable().optional(),
+  taxType: z.string().nullable().optional(),
+  relatedCount: z.number().nullable().optional(),
+  inboxAccount: z
+    .object({ provider: z.string().nullable() })
+    .nullable()
+    .optional(),
+  transaction: z
+    .object({
+      id: z.string(),
+      name: z.string().nullable(),
+      amount: z.number().nullable(),
+      currency: z.string().nullable(),
+      date: z.string().nullable(),
+    })
+    .nullable()
+    .optional(),
+});
+
+export const mcpInboxDetailSchema = mcpInboxItemSchema.extend({
+  groupedInboxId: z.string().nullable().optional(),
+  meta: z.any().nullable().optional(),
+  suggestion: z.any().nullable().optional(),
+  relatedItems: z.array(mcpInboxItemSchema).nullable().optional(),
+  fileUrl: z.string().nullable().optional(),
+});
+
+// ============================================================
+// Tag schema
+// ============================================================
+
+export const mcpTagResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+// ============================================================
+// Team schemas
+// ============================================================
+
+export const mcpTeamSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable().optional(),
+  logoUrl: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+  plan: z.string().nullable().optional(),
+  baseCurrency: z.string().nullable().optional(),
+  countryCode: z.string().nullable().optional(),
+  fiscalYearStartMonth: z.number().nullable().optional(),
+});
+
+export const mcpTeamMemberSchema = z.object({
+  id: z.string(),
+  role: z.string().nullable().optional(),
+  user: z
+    .object({
+      id: z.string(),
+      fullName: z.string().nullable(),
+      avatarUrl: z.string().nullable(),
+      email: z.string().nullable(),
+    })
+    .nullable()
+    .optional(),
+});
+
+// ============================================================
+// Utility: safe parse with fallback
+// ============================================================
+
+const SENSITIVE_KEYS = new Set([
+  "accessToken",
+  "enrollmentId",
+  "token",
+  "paymentIntentId",
+  "scheduledJobId",
+  "filePath",
+  "documentPath",
+  "internalNote",
+  "fts",
+  "teamId",
+  "accountNumber",
+  "routingNumber",
+  "wireRoutingNumber",
+  "sortCode",
+  "iban",
+  "bic",
+  "accountReference",
+]);
+
+function stripSensitive(obj: unknown): unknown {
+  if (obj === null || obj === undefined || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) return obj.map(stripSensitive);
+  const clean: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    if (!SENSITIVE_KEYS.has(key)) {
+      clean[key] =
+        typeof value === "object" && value !== null
+          ? stripSensitive(value)
+          : value;
+    }
+  }
+  return clean;
+}
+
+export function sanitize<T extends z.ZodTypeAny>(
+  schema: T,
+  data: unknown,
+): z.output<T> {
+  const result = schema.safeParse(data);
+  if (result.success) return result.data;
+  return stripSensitive(data) as z.output<T>;
+}
+
+export function sanitizeArray<T extends z.ZodTypeAny>(
+  schema: T,
+  data: unknown[],
+): z.output<T>[] {
+  return data.map((item) => sanitize(schema, item));
+}

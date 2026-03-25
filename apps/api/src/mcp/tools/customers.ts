@@ -12,6 +12,12 @@ import {
 } from "@midday/db/queries";
 import { z } from "zod";
 import {
+  mcpCustomerDetailSchema,
+  mcpCustomerListItemSchema,
+  sanitize,
+  sanitizeArray,
+} from "../schemas";
+import {
   DESTRUCTIVE_ANNOTATIONS,
   hasScope,
   READ_ONLY_ANNOTATIONS,
@@ -63,9 +69,12 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
             .describe("Sort direction"),
         },
         outputSchema: {
+          meta: z.object({
+            cursor: z.string().nullable().optional(),
+            hasNextPage: z.boolean(),
+            hasPreviousPage: z.boolean(),
+          }),
           data: z.array(z.record(z.string(), z.any())),
-          hasMore: z.boolean(),
-          cursor: z.string().nullable().optional(),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -83,9 +92,14 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           sort,
         });
 
+        const clean = {
+          ...result,
+          data: sanitizeArray(mcpCustomerListItemSchema, result.data ?? []),
+        };
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: result,
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: clean,
         };
       },
     );
@@ -114,9 +128,11 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpCustomerDetailSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text", text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       },
     );
@@ -171,8 +187,10 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
             tags: params.tags,
           });
 
+          const clean = sanitize(mcpCustomerDetailSchema, result);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result) }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
           };
         } catch (error) {
           return {
@@ -252,8 +270,10 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           tags: params.tags ?? existing.tags,
         });
 
+        const clean = sanitize(mcpCustomerDetailSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
+          content: [{ type: "text", text: JSON.stringify(clean) }],
         };
       },
     );
@@ -277,11 +297,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
             content: [
               {
                 type: "text",
-                text: JSON.stringify(
-                  { success: true, deleted: result },
-                  null,
-                  2,
-                ),
+                text: JSON.stringify({ success: true, deleted: result }),
               },
             ],
           };
