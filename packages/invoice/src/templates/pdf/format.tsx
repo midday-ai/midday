@@ -13,7 +13,7 @@ type PDFTextStyle = Style & {
 };
 
 export function formatEditorContent(doc?: EditorDoc) {
-  if (!doc || !doc.content) {
+  if (!doc?.content) {
     return null;
   }
 

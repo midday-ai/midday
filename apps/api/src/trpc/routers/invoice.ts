@@ -648,7 +648,7 @@ export const invoiceRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      if (!invoice || !invoice.scheduledJobId) {
+      if (!invoice?.scheduledJobId) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Scheduled invoice not found",

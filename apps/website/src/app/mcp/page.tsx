@@ -4,7 +4,7 @@ import { MCP } from "@/components/mcp";
 
 const title = "AI Integrations via MCP — Claude, ChatGPT, Cursor & More";
 const description =
-  "Connect AI tools to your business data via Model Context Protocol (MCP). Use Cursor, Claude, ChatGPT, Raycast, or Zapier to query finances and automate workflows.";
+  "Run your business from any AI tool via Model Context Protocol (MCP). Create invoices, export to your accountant, track time, and manage transactions from Cursor, Claude, ChatGPT, Raycast, or Zapier.";
 
 export const metadata: Metadata = {
   title,

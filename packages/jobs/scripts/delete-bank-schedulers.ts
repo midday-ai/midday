@@ -26,7 +26,7 @@ async function getBankSchedulers(): Promise<SchedulerInfo[]> {
       perPage: 200,
     });
 
-    if (!schedulesPage || !schedulesPage.data) {
+    if (!schedulesPage?.data) {
       break;
     }
 

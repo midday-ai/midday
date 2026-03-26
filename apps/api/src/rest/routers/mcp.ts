@@ -8,11 +8,23 @@ import { getGeoContext } from "@api/utils/geo";
 import type { Scope } from "@api/utils/scopes";
 import { StreamableHTTPTransport } from "@hono/mcp";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { getUserById } from "@midday/db/queries";
+import * as Sentry from "@sentry/bun";
 import { rateLimiter } from "hono-rate-limiter";
 
 const app = new OpenAPIHono<Context>();
 
 const apiUrl = process.env.MIDDAY_API_URL || "https://api.midday.ai";
+
+const mcpRateLimitEnv = process.env.MCP_API_RATE_LIMIT;
+const parsedMcpLimit =
+  mcpRateLimitEnv !== undefined && mcpRateLimitEnv !== ""
+    ? Number(mcpRateLimitEnv)
+    : NaN;
+const mcpRateLimit =
+  Number.isFinite(parsedMcpLimit) && parsedMcpLimit > 0
+    ? parsedMcpLimit
+    : Number(process.env.API_RATE_LIMIT) || 1000;
 
 const REQUIRED_ACCEPT = "application/json, text/event-stream";
 
@@ -52,7 +64,7 @@ app.use(
   "/*",
   rateLimiter({
     windowMs: 10 * 60 * 1000,
-    limit: Number(process.env.API_RATE_LIMIT) || 1000,
+    limit: mcpRateLimit,
     keyGenerator: (c) =>
       c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown",
     statusCode: 429,
@@ -62,21 +74,32 @@ app.use(
 );
 
 app.all("/", async (c) => {
+  if (process.env.SENTRY_DSN) {
+    Sentry.setTag("mcp", "true");
+    Sentry.setTag("api.route", "mcp");
+  }
+
   const transport = new StreamableHTTPTransport();
   const db = c.get("db");
   const teamId = c.get("teamId");
   const session = c.get("session");
-  const userId = session.user.id;
   const scopes = (c.get("scopes") as Scope[] | undefined) ?? [];
-  const { timezone } = getGeoContext(c.req);
+  const geo = getGeoContext(c.req);
+
+  const user = c.get("user") ?? (await getUserById(db, session.user.id));
 
   const server = createMcpServer({
     db,
     teamId,
-    userId,
+    userId: user?.id ?? session.user.id,
+    userEmail: user?.email ?? session.user.email ?? null,
     scopes,
     apiUrl,
-    timezone,
+    timezone: user?.timezone || geo.timezone,
+    locale: user?.locale || geo.locale,
+    countryCode: geo.country,
+    dateFormat: user?.dateFormat ?? null,
+    timeFormat: user?.timeFormat ?? null,
   });
 
   await server.connect(transport);

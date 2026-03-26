@@ -53,7 +53,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 
     c.set("session", session);
     c.set("teamId", session.teamId);
-    // Grant all scopes for authenticated users via Supabase
+    c.set("user", user);
     c.set("scopes", expandScopes(["apis.all"]));
 
     await next();
@@ -64,10 +64,23 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   if (token.startsWith("mid_access_token_")) {
     const tokenData = await validateAccessToken(db, token);
 
-    if (!tokenData || !tokenData.user) {
+    if (!tokenData?.user) {
       throw new HTTPException(401, {
         message: "Invalid or expired access token",
       });
+    }
+
+    let user = await userCache.get(tokenData.user.id);
+
+    if (!user) {
+      user = await getUserById(db, tokenData.user.id);
+      if (user) {
+        await userCache.set(tokenData.user.id, user);
+      }
+    }
+
+    if (!user) {
+      throw new HTTPException(401, { message: "User not found" });
     }
 
     const session = {
@@ -86,6 +99,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 
     c.set("session", session);
     c.set("teamId", session.teamId);
+    c.set("user", user);
     c.set("scopes", expandScopes(tokenData.scopes ?? []));
 
     await next();
@@ -142,6 +156,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 
   c.set("session", session);
   c.set("teamId", session.teamId);
+  c.set("user", user);
   c.set("scopes", expandScopes(apiKey.scopes ?? []));
 
   // Update last used at

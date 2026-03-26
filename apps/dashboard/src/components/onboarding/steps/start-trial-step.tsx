@@ -269,16 +269,16 @@ export function StartTrialStep() {
                 type="button"
                 onClick={() => setSelectedPlan(plan.key)}
                 className={cn(
-                  "w-full text-left p-4 border transition-colors relative",
+                  "w-full text-left px-3.5 py-3 border transition-colors relative",
                   isSelected
                     ? "border-primary bg-background"
                     : "border-border bg-background hover:border-primary/50",
                 )}
               >
                 {plan.badge && (
-                  <div className="absolute top-0 right-4 -translate-y-1/2">
-                    <div className="bg-background border border-primary px-2 py-0.5 rounded-full">
-                      <span className="text-xs text-foreground">
+                  <div className="absolute top-0 right-3.5 -translate-y-1/2">
+                    <div className="bg-background border border-primary px-2 rounded-full flex items-center h-5">
+                      <span className="text-[10px] leading-none text-foreground">
                         {plan.badge}
                       </span>
                     </div>
@@ -292,8 +292,8 @@ export function StartTrialStep() {
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {plan.description}
                   </p>
-                  <div className="flex items-baseline gap-1.5 mt-2">
-                    <span className="text-xl font-medium text-foreground">
+                  <div className="flex items-baseline gap-1 mt-1.5">
+                    <span className="text-lg font-medium text-foreground">
                       {pricing.symbol}
                       {price}
                     </span>

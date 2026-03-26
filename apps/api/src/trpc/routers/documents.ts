@@ -72,7 +72,7 @@ export const documentsRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      if (!document || !document.pathTokens) {
+      if (!document?.pathTokens) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Document not found",

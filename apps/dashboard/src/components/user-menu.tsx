@@ -4,6 +4,7 @@ import {
   ChatGPTMcpLogo,
   ClaudeMcpLogo,
   CursorMcpLogo,
+  GeminiMcpLogo,
   MiddayDesktopLogo,
 } from "@midday/app-store/logos";
 import { isDesktopApp } from "@midday/desktop-client/platform";
@@ -94,16 +95,19 @@ export function UserMenu({ onlySignOut }: Props) {
                       animationFillMode: "backwards",
                     }}
                   >
-                    {[ChatGPTMcpLogo, ClaudeMcpLogo, CursorMcpLogo].map(
-                      (Logo, i) => (
-                        <div
-                          key={i}
-                          className="size-4 rounded-full overflow-hidden border-2 border-background user-menu-mcp-icon"
-                        >
-                          <Logo />
-                        </div>
-                      ),
-                    )}
+                    {[
+                      ChatGPTMcpLogo,
+                      ClaudeMcpLogo,
+                      GeminiMcpLogo,
+                      CursorMcpLogo,
+                    ].map((Logo, i) => (
+                      <div
+                        key={i}
+                        className="size-4 rounded-full overflow-hidden border-2 border-background user-menu-mcp-icon"
+                      >
+                        <Logo />
+                      </div>
+                    ))}
                   </div>
                 </DropdownMenuItem>
               </Link>

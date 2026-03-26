@@ -25,12 +25,19 @@ import {
 } from "@midday/db/queries";
 import { z } from "zod";
 import {
+  mcpTrackerEntrySchema,
+  mcpTrackerProjectSchema,
+  sanitize,
+  sanitizeArray,
+} from "../schemas";
+import {
   DESTRUCTIVE_ANNOTATIONS,
   hasScope,
   READ_ONLY_ANNOTATIONS,
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
+import { truncateListResponse, withErrorHandling } from "../utils";
 
 export const registerTrackerTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
@@ -54,21 +61,49 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
   // ==========================================
 
   if (hasProjectReadScope) {
+    const { sort: _sort, ...trackerProjectsListFields } =
+      getTrackerProjectsSchema.shape;
+
     server.registerTool(
       "tracker_projects_list",
       {
         title: "List Tracker Projects",
         description:
-          "List time tracking projects with filtering by status (active/completed), customer, date range, tags, and search. Returns paginated results (default 25) with project name, billable rate, estimate, total tracked hours, and customer.",
-        inputSchema: getTrackerProjectsSchema.shape,
+          "List time tracking projects with filtering by status (in_progress/completed), customer, date range, tags, and search. Returns paginated results (default 25) with project name, billable rate, estimate, total tracked hours, and customer.",
+        inputSchema: {
+          ...trackerProjectsListFields,
+          sortBy: z
+            .enum([
+              "name",
+              "created_at",
+              "time",
+              "amount",
+              "assigned",
+              "customer",
+              "tags",
+            ])
+            .optional()
+            .describe("Column to sort by"),
+          sortDirection: z
+            .enum(["asc", "desc"])
+            .optional()
+            .describe("Sort direction"),
+        },
         outputSchema: {
+          meta: z.looseObject({
+            cursor: z.string().nullable().optional(),
+            hasNextPage: z.boolean(),
+            hasPreviousPage: z.boolean(),
+          }),
           data: z.array(z.record(z.string(), z.any())),
-          hasMore: z.boolean(),
-          cursor: z.string().nullable().optional(),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
+        const sort = params.sortBy
+          ? [params.sortBy, params.sortDirection ?? "desc"]
+          : null;
+
         const result = await getTrackerProjects(db, {
           teamId,
           cursor: params.cursor ?? null,
@@ -78,15 +113,26 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           customers: params.customers ?? null,
           start: params.start ?? null,
           end: params.end ?? null,
-          sort: params.sort ?? null,
+          sort,
           tags: params.tags ?? null,
         });
 
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-          structuredContent: result,
+        const response = {
+          meta: {
+            cursor: result.meta.cursor ?? null,
+            hasNextPage: result.meta.hasNextPage,
+            hasPreviousPage: result.meta.hasPreviousPage,
+          },
+          data: sanitizeArray(mcpTrackerProjectSchema, result.data ?? []),
         };
-      },
+
+        const { text, structuredContent } = truncateListResponse(response);
+
+        return {
+          content: [{ type: "text" as const, text }],
+          structuredContent,
+        };
+      }, "Failed to list tracker projects"),
     );
 
     server.registerTool(
@@ -103,21 +149,23 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async ({ id }) => {
+      withErrorHandling(async ({ id }) => {
         const result = await getTrackerProjectById(db, { id, teamId });
 
         if (!result) {
           return {
-            content: [{ type: "text", text: "Project not found" }],
+            content: [{ type: "text" as const, text: "Project not found" }],
             isError: true,
           };
         }
 
+        const clean = sanitize(mcpTrackerProjectSchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-          structuredContent: { data: result },
+          content: [{ type: "text" as const, text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
-      },
+      }, "Failed to get tracker project"),
     );
   }
 
@@ -154,8 +202,11 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             tags: params.tags,
           });
 
+          const clean = sanitize(mcpTrackerProjectSchema, result);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -194,39 +245,57 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const existing = await getTrackerProjectById(db, {
-          id: params.id,
-          teamId,
-        });
+        try {
+          const existing = await getTrackerProjectById(db, {
+            id: params.id,
+            teamId,
+          });
 
-        if (!existing) {
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Project not found" }],
+              isError: true,
+            };
+          }
+
+          const existingTags = existing.tags?.map((tag) => ({
+            id: tag.id,
+            value: tag.name ?? "",
+          }));
+
+          const result = await upsertTrackerProject(db, {
+            id: params.id,
+            teamId,
+            name: params.name ?? existing.name ?? "",
+            description: params.description ?? existing.description,
+            estimate: params.estimate ?? existing.estimate,
+            billable: params.billable ?? existing.billable,
+            rate: params.rate ?? existing.rate,
+            currency: params.currency ?? existing.currency,
+            customerId: params.customerId ?? existing.customerId,
+            tags: params.tags ?? existingTags,
+          });
+
+          const clean = sanitize(mcpTrackerProjectSchema, result);
+
           return {
-            content: [{ type: "text", text: "Project not found" }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to update project",
+              },
+            ],
             isError: true,
           };
         }
-
-        const existingTags = existing.tags?.map((tag) => ({
-          id: tag.id,
-          value: tag.name ?? "",
-        }));
-
-        const result = await upsertTrackerProject(db, {
-          id: params.id,
-          teamId,
-          name: params.name ?? existing.name ?? "",
-          description: params.description ?? existing.description,
-          estimate: params.estimate ?? existing.estimate,
-          billable: params.billable ?? existing.billable,
-          rate: params.rate ?? existing.rate,
-          currency: params.currency ?? existing.currency,
-          customerId: params.customerId ?? existing.customerId,
-          tags: params.tags ?? existingTags,
-        });
-
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
       },
     );
 
@@ -242,29 +311,44 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
-        const result = await deleteTrackerProject(db, { id, teamId });
+        try {
+          const result = await deleteTrackerProject(db, { id, teamId });
 
-        if (!result) {
+          if (!result) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "Project not found or already deleted",
+                },
+              ],
+              isError: true,
+            };
+          }
+
           return {
             content: [
-              { type: "text", text: "Project not found or already deleted" },
+              {
+                type: "text",
+                text: JSON.stringify({ success: true, deletedId: result.id }),
+              },
+            ],
+            structuredContent: { success: true, deletedId: result.id },
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to delete project",
+              },
             ],
             isError: true,
           };
         }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(
-                { success: true, deletedId: result.id },
-                null,
-                2,
-              ),
-            },
-          ],
-        };
       },
     );
   }
@@ -279,7 +363,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "List Tracker Entries",
         description:
-          "List time tracking entries within a date range. Optionally filter by project ID. Returns entries with start/stop times, duration, description, project, and assigned user. Both from and to dates are required (YYYY-MM-DD).",
+          "List time tracking entries within a date range. Optionally filter by project ID. Returns entries grouped by date with start/stop times, duration, description, project, and assigned user. Both from and to dates are required (YYYY-MM-DD). Large ranges are automatically truncated — use narrower date ranges for complete data.",
         inputSchema: {
           from: z.string().describe("Start date (YYYY-MM-DD) — required"),
           to: z.string().describe("End date (YYYY-MM-DD) — required"),
@@ -290,11 +374,17 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             .describe("Filter by project ID"),
         },
         outputSchema: {
-          data: z.array(z.record(z.string(), z.any())),
+          meta: z.looseObject({
+            totalDuration: z.number(),
+            totalAmount: z.number(),
+            from: z.string(),
+            to: z.string(),
+          }),
+          result: z.record(z.string(), z.any()),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const result = await getTrackerRecordsByRange(db, {
           teamId,
           from: params.from,
@@ -302,11 +392,51 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           projectId: params.projectId,
         });
 
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-          structuredContent: { data: result },
+        const maxEntries = 500;
+        const dates = Object.keys(result.result).sort().reverse();
+        let entryCount = 0;
+        const truncated: Record<string, unknown[]> = {};
+
+        for (const date of dates) {
+          const entries = result.result[date] as unknown[];
+          if (entryCount + entries.length <= maxEntries) {
+            truncated[date] = entries;
+            entryCount += entries.length;
+          } else {
+            const remaining = maxEntries - entryCount;
+            if (remaining > 0) {
+              truncated[date] = entries.slice(0, remaining);
+              entryCount += remaining;
+            }
+            break;
+          }
+        }
+
+        const wasTruncated =
+          entryCount < Object.values(result.result).flat().length;
+
+        const sanitizedResult: Record<string, unknown[]> = {};
+        for (const [date, entries] of Object.entries(truncated)) {
+          sanitizedResult[date] = sanitizeArray(mcpTrackerEntrySchema, entries);
+        }
+
+        const response = {
+          meta: {
+            ...result.meta,
+            ...(wasTruncated && {
+              truncated: true,
+              returnedEntries: entryCount,
+              hint: "Use a narrower date range for complete data",
+            }),
+          },
+          result: sanitizedResult,
         };
-      },
+
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify(response) }],
+          structuredContent: response,
+        };
+      }, "Failed to list tracker entries"),
     );
 
     server.registerTool(
@@ -328,17 +458,19 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const result = await getTimerStatus(db, {
           teamId,
           assignedId: params.assignedId,
         });
 
+        const clean = sanitize(mcpTrackerEntrySchema, result);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-          structuredContent: { data: result },
+          content: [{ type: "text" as const, text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
-      },
+      }, "Failed to get timer status"),
     );
   }
 
@@ -348,7 +480,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "Create Tracker Entry",
         description:
-          "Create a manual time tracking entry. Requires a project ID, at least one date, start/stop times (HH:MM format), and duration in seconds. Optionally assign to a team member.",
+          "Create a manual time tracking entry. Requires a project ID, at least one date (YYYY-MM-DD), start/stop times (ISO 8601 datetime), and duration in seconds. Optionally assign to a team member.",
         inputSchema: {
           projectId: upsertTrackerEntriesSchema.shape.projectId,
           dates: upsertTrackerEntriesSchema.shape.dates,
@@ -373,8 +505,11 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             assignedId: params.assignedId,
           });
 
+          const clean = sanitizeArray(mcpTrackerEntrySchema, result ?? []);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -411,49 +546,67 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const existing = await getTrackerEntryById(db, {
-          id: params.id,
-          teamId,
-        });
+        try {
+          const existing = await getTrackerEntryById(db, {
+            id: params.id,
+            teamId,
+          });
 
-        if (!existing) {
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Entry not found" }],
+              isError: true,
+            };
+          }
+
+          const projectId = params.projectId ?? existing.projectId;
+          const start = params.start ?? existing.start;
+          const stop = params.stop ?? existing.stop;
+
+          if (!projectId || !start || !stop) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "Entry is missing required fields (projectId, start, or stop). Please provide them.",
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          const result = await upsertTrackerEntries(db, {
+            id: params.id,
+            teamId,
+            projectId,
+            dates: existing.date ? [existing.date] : [],
+            start,
+            stop,
+            duration: params.duration ?? existing.duration ?? 0,
+            description: params.description ?? existing.description,
+            assignedId: params.assignedId ?? existing.assignedId,
+          });
+
+          const clean = sanitizeArray(mcpTrackerEntrySchema, result ?? []);
+
           return {
-            content: [{ type: "text", text: "Entry not found" }],
-            isError: true,
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
-        }
-
-        const projectId = params.projectId ?? existing.projectId;
-        const start = params.start ?? existing.start;
-        const stop = params.stop ?? existing.stop;
-
-        if (!projectId || !start || !stop) {
+        } catch (error) {
           return {
             content: [
               {
                 type: "text",
-                text: "Entry is missing required fields (projectId, start, or stop). Please provide them.",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to update tracker entry",
               },
             ],
             isError: true,
           };
         }
-
-        const result = await upsertTrackerEntries(db, {
-          id: params.id,
-          teamId,
-          projectId,
-          dates: existing.date ? [existing.date] : [],
-          start,
-          stop,
-          duration: params.duration ?? existing.duration ?? 0,
-          description: params.description ?? existing.description,
-          assignedId: params.assignedId ?? existing.assignedId,
-        });
-
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
       },
     );
 
@@ -469,29 +622,44 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
-        const result = await deleteTrackerEntry(db, { id, teamId });
+        try {
+          const result = await deleteTrackerEntry(db, { id, teamId });
 
-        if (!result) {
+          if (!result) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "Entry not found or already deleted",
+                },
+              ],
+              isError: true,
+            };
+          }
+
           return {
             content: [
-              { type: "text", text: "Entry not found or already deleted" },
+              {
+                type: "text",
+                text: JSON.stringify({ success: true, deletedId: result.id }),
+              },
+            ],
+            structuredContent: { success: true, deletedId: result.id },
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to delete tracker entry",
+              },
             ],
             isError: true,
           };
         }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(
-                { success: true, deletedId: result.id },
-                null,
-                2,
-              ),
-            },
-          ],
-        };
       },
     );
 
@@ -519,8 +687,11 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             start: params.start,
           });
 
+          const clean = sanitize(mcpTrackerEntrySchema, result);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -561,8 +732,11 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             stop: params.stop,
           });
 
+          const clean = sanitize(mcpTrackerEntrySchema, result);
+
           return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {

@@ -5,6 +5,9 @@ export const getTransactionsSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe(
+      "Cursor for pagination, representing the last item from the previous page",
+    )
     .openapi({
       description:
         "Cursor for pagination, representing the last item from the previous page",
@@ -35,6 +38,7 @@ export const getTransactionsSchema = z.object({
     .min(1)
     .max(10000)
     .optional()
+    .describe("Number of transactions to return per page (1-10000)")
     .openapi({
       description: "Number of transactions to return per page (1-10000)",
       example: 50,
@@ -47,6 +51,9 @@ export const getTransactionsSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe(
+      "Search query to filter transactions by name, description, or other text fields",
+    )
     .openapi({
       description:
         "Search query string to filter transactions by name, description, or other text fields",
@@ -59,6 +66,7 @@ export const getTransactionsSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe("Array of category slugs to filter by")
     .openapi({
       description:
         "Array of category slugs to filter transactions by specific categories",
@@ -71,6 +79,7 @@ export const getTransactionsSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe("Array of tag IDs to filter by")
     .openapi({
       description: "Array of tag IDs to filter transactions by specific tags",
       example: ["tag-1", "tag-2"],
@@ -82,6 +91,7 @@ export const getTransactionsSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe("Start date (inclusive) in ISO 8601 format")
     .openapi({
       description:
         "Start date (inclusive) for filtering transactions in ISO 8601 format",
@@ -94,6 +104,7 @@ export const getTransactionsSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe("End date (inclusive) in ISO 8601 format")
     .openapi({
       description:
         "End date (inclusive) for filtering transactions in ISO 8601 format",
@@ -106,6 +117,7 @@ export const getTransactionsSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe("Array of bank account IDs to filter by")
     .openapi({
       description:
         "Array of bank account IDs to filter transactions by specific accounts",
@@ -118,6 +130,7 @@ export const getTransactionsSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe("Array of user IDs to filter by assigned team members")
     .openapi({
       description: "Array of user IDs to filter transactions by assigned users",
       example: ["user-1", "user-2"],
@@ -139,6 +152,9 @@ export const getTransactionsSchema = z.object({
     )
     .nullable()
     .optional()
+    .describe(
+      "UI list filter statuses: blank (no receipt), receipt_match (receipt attached), in_review (needs review), export_error, exported, excluded, archived. These differ from workflow statuses used in transaction updates.",
+    )
     .openapi({
       description:
         "Array of transaction list status filters. Supported UI filters: 'blank', 'receipt_match', 'in_review', 'export_error', 'exported', 'excluded', 'archived'",
@@ -151,6 +167,9 @@ export const getTransactionsSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe(
+      "Filter by recurring frequency: weekly, monthly, annually, irregular",
+    )
     .openapi({
       description:
         "Array of recurring frequency values to filter by. Available frequencies: 'weekly', 'monthly', 'annually', 'irregular'",
@@ -163,6 +182,9 @@ export const getTransactionsSchema = z.object({
     .enum(["include", "exclude"])
     .nullable()
     .optional()
+    .describe(
+      "Filter by attachment presence: include (with attachments) or exclude (without)",
+    )
     .openapi({
       description:
         "Filter transactions based on attachment presence. 'include' returns only transactions with attachments, 'exclude' returns only transactions without attachments",
@@ -175,6 +197,7 @@ export const getTransactionsSchema = z.object({
     .array(z.coerce.number())
     .nullable()
     .optional()
+    .describe("Amount range as [min, max] to filter by monetary value")
     .openapi({
       description:
         "Amount range as [min, max] to filter transactions by monetary value",
@@ -187,6 +210,9 @@ export const getTransactionsSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe(
+      'Array of exact amounts as strings to match (e.g. ["150.75", "299.99"])',
+    )
     .openapi({
       description:
         "Array of specific amounts (as strings) to filter transactions by exact values",
@@ -199,6 +225,9 @@ export const getTransactionsSchema = z.object({
     .enum(["income", "expense"])
     .nullable()
     .optional()
+    .describe(
+      "Filter by type: income (money received) or expense (money spent)",
+    )
     .openapi({
       description:
         "Filter by transaction type. 'income' for money received, 'expense' for money spent",
@@ -595,45 +624,85 @@ export const updateTransactionSchema = z.object({
     ])
     .nullable()
     .optional()
+    .describe(
+      "Workflow status for the transaction. These differ from the list filter statuses.",
+    )
     .openapi({
       description: "Status of the transaction.",
     }),
-  internal: z.boolean().optional().openapi({
-    description: "Whether the transaction is internal.",
-  }),
-  recurring: z.boolean().optional().openapi({
-    description: "Whether the transaction is recurring.",
-  }),
+  internal: z
+    .boolean()
+    .optional()
+    .describe("Whether the transaction is between own accounts")
+    .openapi({
+      description: "Whether the transaction is internal.",
+    }),
+  recurring: z
+    .boolean()
+    .optional()
+    .describe("Whether the transaction recurs on a schedule")
+    .openapi({
+      description: "Whether the transaction is recurring.",
+    }),
   frequency: z
     .enum(["weekly", "monthly", "annually", "irregular"])
     .nullable()
     .optional()
+    .describe("Recurring frequency if recurring is true")
     .openapi({
       description: "Recurring frequency of the transaction.",
     }),
-  note: z.string().nullable().optional().openapi({
-    description: "Note for the transaction.",
-  }),
-  assignedId: z.string().nullable().optional().openapi({
-    description: "Assigned user ID for the transaction.",
-  }),
-  taxRate: z.number().nullable().optional().openapi({
-    description:
-      "Tax rate as a percentage (e.g., 25 for 25% VAT). Only set when tax is calculated from a percentage.",
-  }),
-  taxAmount: z.number().nullable().optional().openapi({
-    description:
-      "Tax amount in the transaction currency. Always set when tax is present.",
-  }),
+  note: z
+    .string()
+    .nullable()
+    .optional()
+    .describe("Free-text note or memo")
+    .openapi({
+      description: "Note for the transaction.",
+    }),
+  assignedId: z
+    .string()
+    .nullable()
+    .optional()
+    .describe("Team member user ID to assign this transaction to")
+    .openapi({
+      description: "Assigned user ID for the transaction.",
+    }),
+  taxRate: z
+    .number()
+    .nullable()
+    .optional()
+    .describe("Tax rate as a percentage (e.g. 25 for 25% VAT)")
+    .openapi({
+      description:
+        "Tax rate as a percentage (e.g., 25 for 25% VAT). Only set when tax is calculated from a percentage.",
+    }),
+  taxAmount: z
+    .number()
+    .nullable()
+    .optional()
+    .describe("Tax amount in the transaction currency")
+    .openapi({
+      description:
+        "Tax amount in the transaction currency. Always set when tax is present.",
+    }),
 });
 
 export const updateTransactionsSchema = z.object({
-  ids: z.array(z.string()).openapi({
-    description: "Array of transaction IDs to update.",
-  }),
-  categorySlug: z.string().nullable().optional().openapi({
-    description: "Category slug for the transactions.",
-  }),
+  ids: z
+    .array(z.string())
+    .describe("Array of transaction IDs to update")
+    .openapi({
+      description: "Array of transaction IDs to update.",
+    }),
+  categorySlug: z
+    .string()
+    .nullable()
+    .optional()
+    .describe("Category slug to assign")
+    .openapi({
+      description: "Category slug for the transactions.",
+    }),
   status: z
     .enum([
       "pending",
@@ -645,6 +714,9 @@ export const updateTransactionsSchema = z.object({
     ])
     .nullable()
     .optional()
+    .describe(
+      "Workflow status to set. These differ from the list filter statuses.",
+    )
     .openapi({
       description: "Status to set for the transactions.",
     }),
@@ -752,33 +824,54 @@ export const searchTransactionMatchSchema = z.object({
 });
 
 export const createTransactionSchema = z.object({
-  name: z.string().openapi({
+  name: z.string().describe("Transaction name or description").openapi({
     description: "Name of the transaction.",
   }),
-  amount: z.number().openapi({
-    description: "Amount of the transaction.",
-  }),
-  currency: z.string().openapi({
-    description: "Currency of the transaction.",
-  }),
-  date: z.string().openapi({
+  amount: z
+    .number()
+    .describe("Transaction amount (positive for income, negative for expense)")
+    .openapi({
+      description: "Amount of the transaction.",
+    }),
+  currency: z
+    .string()
+    .describe("Currency code (ISO 4217, e.g. USD, EUR)")
+    .openapi({
+      description: "Currency of the transaction.",
+    }),
+  date: z.string().describe("Transaction date (ISO 8601)").openapi({
     description: "Date of the transaction (ISO 8601).",
   }),
-  bankAccountId: z.string().openapi({
-    description: "Bank account ID associated with the transaction.",
-  }),
-  assignedId: z.string().optional().openapi({
-    description: "Assigned user ID for the transaction.",
-  }),
-  categorySlug: z.string().optional().openapi({
-    description: "Category slug for the transaction.",
-  }),
-  note: z.string().optional().openapi({
+  bankAccountId: z
+    .string()
+    .describe("Bank account ID to associate with")
+    .openapi({
+      description: "Bank account ID associated with the transaction.",
+    }),
+  assignedId: z
+    .string()
+    .optional()
+    .describe("Team member user ID to assign to")
+    .openapi({
+      description: "Assigned user ID for the transaction.",
+    }),
+  categorySlug: z
+    .string()
+    .optional()
+    .describe("Category slug to assign")
+    .openapi({
+      description: "Category slug for the transaction.",
+    }),
+  note: z.string().optional().describe("Free-text note or memo").openapi({
     description: "Note for the transaction.",
   }),
-  internal: z.boolean().optional().openapi({
-    description: "Whether the transaction is internal.",
-  }),
+  internal: z
+    .boolean()
+    .optional()
+    .describe("Whether this is between own accounts")
+    .openapi({
+      description: "Whether the transaction is internal.",
+    }),
   attachments: z
     .array(
       z.object({

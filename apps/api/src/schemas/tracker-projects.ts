@@ -5,6 +5,7 @@ export const getTrackerProjectsSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe("Pagination cursor from previous response")
     .openapi({
       description:
         "Cursor for pagination, representing the last item from the previous page",
@@ -18,6 +19,7 @@ export const getTrackerProjectsSchema = z.object({
     .min(1)
     .max(100)
     .optional()
+    .describe("Number of projects per page (1-100)")
     .openapi({
       description: "Number of projects to return per page (1-100)",
       example: 20,
@@ -29,6 +31,7 @@ export const getTrackerProjectsSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe("Search query to filter projects by name or description")
     .openapi({
       description:
         "Search query string to filter projects by name or description",
@@ -41,6 +44,7 @@ export const getTrackerProjectsSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe("Start date (YYYY-MM-DD) for filtering by creation date")
     .openapi({
       description:
         "Start date for filtering projects by creation date in YYYY-MM-DD format",
@@ -53,6 +57,7 @@ export const getTrackerProjectsSchema = z.object({
     .string()
     .nullable()
     .optional()
+    .describe("End date (YYYY-MM-DD) for filtering by creation date")
     .openapi({
       description:
         "End date for filtering projects by creation date in YYYY-MM-DD format",
@@ -65,6 +70,7 @@ export const getTrackerProjectsSchema = z.object({
     .enum(["in_progress", "completed"])
     .nullable()
     .optional()
+    .describe("Filter by project status: in_progress or completed")
     .openapi({
       description: "Filter projects by status",
       example: "in_progress",
@@ -76,6 +82,7 @@ export const getTrackerProjectsSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe("Filter by customer IDs")
     .openapi({
       description:
         "Array of customer IDs to filter projects by specific customers",
@@ -88,6 +95,7 @@ export const getTrackerProjectsSchema = z.object({
     .array(z.string())
     .nullable()
     .optional()
+    .describe("Filter by tag IDs")
     .openapi({
       description: "Array of tag IDs to filter projects by specific tags",
       example: ["tag-1", "tag-2"],
@@ -114,45 +122,87 @@ export const getTrackerProjectsSchema = z.object({
 
 export const upsertTrackerProjectSchema = z
   .object({
-    id: z.string().uuid().optional().openapi({
-      description:
-        "Unique identifier for the project. Required for updates, omit for new projects",
-      example: "b7e6c8e2-1f2a-4c3b-9e2d-1a2b3c4d5e6f",
-    }),
-    name: z.string().min(1).openapi({
+    id: z
+      .string()
+      .uuid()
+      .optional()
+      .describe("Project ID — required for updates, omit for new projects")
+      .openapi({
+        description:
+          "Unique identifier for the project. Required for updates, omit for new projects",
+        example: "b7e6c8e2-1f2a-4c3b-9e2d-1a2b3c4d5e6f",
+      }),
+    name: z.string().min(1).describe("Project name").openapi({
       description: "Name of the project",
       example: "Website Redesign",
     }),
-    description: z.string().nullable().optional().openapi({
-      description: "Detailed description of the project",
-      example:
-        "Complete redesign of the company website with modern UI/UX and improved performance",
-    }),
-    estimate: z.number().nullable().optional().openapi({
-      description: "Estimated total hours required to complete the project",
-      example: 120,
-    }),
-    billable: z.boolean().nullable().optional().default(false).openapi({
-      description: "Whether the project is billable to the customer",
-      example: true,
-    }),
-    rate: z.number().min(1).nullable().optional().openapi({
-      description: "Hourly rate for the project in the specified currency",
-      example: 75.0,
-    }),
-    currency: z.string().nullable().optional().openapi({
-      description: "Currency code for the project rate in ISO 4217 format",
-      example: "USD",
-    }),
-    status: z.enum(["in_progress", "completed"]).optional().openapi({
-      description: "Current status of the project",
-      example: "in_progress",
-    }),
-    customerId: z.string().uuid().nullable().optional().openapi({
-      description:
-        "Unique identifier of the customer associated with this project",
-      example: "a1b2c3d4-e5f6-7890-abcd-1234567890ef",
-    }),
+    description: z
+      .string()
+      .nullable()
+      .optional()
+      .describe("Project description")
+      .openapi({
+        description: "Detailed description of the project",
+        example:
+          "Complete redesign of the company website with modern UI/UX and improved performance",
+      }),
+    estimate: z
+      .number()
+      .nullable()
+      .optional()
+      .describe("Estimated total hours for the project")
+      .openapi({
+        description: "Estimated total hours required to complete the project",
+        example: 120,
+      }),
+    billable: z
+      .boolean()
+      .nullable()
+      .optional()
+      .default(false)
+      .describe("Whether the project is billable")
+      .openapi({
+        description: "Whether the project is billable to the customer",
+        example: true,
+      }),
+    rate: z
+      .number()
+      .min(1)
+      .nullable()
+      .optional()
+      .describe("Hourly billing rate")
+      .openapi({
+        description: "Hourly rate for the project in the specified currency",
+        example: 75.0,
+      }),
+    currency: z
+      .string()
+      .nullable()
+      .optional()
+      .describe("Currency code (ISO 4217) for the rate")
+      .openapi({
+        description: "Currency code for the project rate in ISO 4217 format",
+        example: "USD",
+      }),
+    status: z
+      .enum(["in_progress", "completed"])
+      .optional()
+      .describe("Project status")
+      .openapi({
+        description: "Current status of the project",
+        example: "in_progress",
+      }),
+    customerId: z
+      .string()
+      .uuid()
+      .nullable()
+      .optional()
+      .describe("Customer ID to associate with this project")
+      .openapi({
+        description:
+          "Unique identifier of the customer associated with this project",
+        example: "a1b2c3d4-e5f6-7890-abcd-1234567890ef",
+      }),
     tags: z
       .array(
         z.object({

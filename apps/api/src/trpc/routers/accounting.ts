@@ -39,7 +39,7 @@ export const accountingRouter = createTRPCRouter({
       // Verify provider is connected
       const app = await getAppByAppId(db, { appId: providerId, teamId });
 
-      if (!app || !app.config) {
+      if (!app?.config) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `${providerId} is not connected. Please connect it first.`,
@@ -132,7 +132,7 @@ export const accountingRouter = createTRPCRouter({
 
       const app = await getAppByAppId(db, { appId: providerId, teamId });
 
-      if (!app || !app.config) {
+      if (!app?.config) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `${providerId} is not connected`,

@@ -52,7 +52,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
 
       // Validate client_id
       const application = await getOAuthApplicationByClientId(db, clientId);
-      if (!application || !application.active) {
+      if (!application?.active) {
         throw new Error("Invalid client_id");
       }
 
@@ -108,7 +108,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
 
       // Validate client_id first (needed for both allow and deny)
       const application = await getOAuthApplicationByClientId(db, clientId);
-      if (!application || !application.active) {
+      if (!application?.active) {
         throw new Error("Invalid client_id");
       }
 

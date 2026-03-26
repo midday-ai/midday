@@ -266,10 +266,10 @@ Present as a month-by-month table with a summary.`,
               type: "text",
               text: `Please help me complete the month-end close process:
 
-1. Use transactions_list with status "pending" or "unreviewed" to find unreconciled transactions
-2. Use invoices_list with status "sent" or "overdue" to find outstanding invoices
+1. Use transactions_list with statuses such as "in_review", "blank", or "receipt_match" (list filter statuses) to find transactions still in the review pipeline
+2. Use invoices_list with status "unpaid" or "overdue" to find outstanding invoices
 3. Use inbox_list with status "pending" to find unprocessed receipts
-4. Use transactions_list with no category to find uncategorized expenses
+4. Use transactions_list for the month's expenses and identify rows missing a category in the results
 5. Use reports_revenue and reports_expenses for the current month to get totals
 
 Then create a checklist:
@@ -317,7 +317,7 @@ Format as an actionable checklist with specific items to resolve.`,
 
 1. Use team_get to get the base currency and locale
 2. Use reports_tax_summary with from="${year}-01-01" and to="${year}-12-31" for tax paid
-3. Use reports_tax_summary with type "collected" for tax collected
+3. Use reports_tax_summary with type "collected" and the same date range for tax collected
 4. Use reports_revenue with from="${year}-01-01" to="${year}-12-31" for annual revenue
 5. Use reports_expenses for annual expenses
 6. Use reports_spending for category breakdown (to identify deductible expenses)

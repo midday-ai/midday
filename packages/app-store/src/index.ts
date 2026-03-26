@@ -1,14 +1,17 @@
 import chatgptMcpApp from "./chatgpt-mcp/config";
 import claudeMcpApp from "./claude-mcp/config";
+import clineMcpApp from "./cline-mcp/config";
 import copilotMcpApp from "./copilot-mcp/config";
 import cursorMcpApp from "./cursor-mcp/config";
 import deelApp from "./deel/config";
 import dropboxApp from "./dropbox/config";
 import eInvoiceApp from "./e-invoice/config";
 import fortnoxApp from "./fortnox/config-client";
+import geminiMcpApp from "./gemini-mcp/config";
 import gmailApp from "./gmail/config-client";
 import googleDriveApp from "./google-drive/config";
 import makeMcpApp from "./make-mcp/config";
+import manusMcpApp from "./manus-mcp/config";
 import middayDesktopApp from "./midday-desktop/config";
 import n8nMcpApp from "./n8n-mcp/config";
 import opencodeMcpApp from "./opencode-mcp/config";
@@ -23,8 +26,10 @@ import slackApp from "./slack/config-client";
 import stripeApp from "./stripe/config";
 import stripePaymentsApp from "./stripe-payments/config-client";
 import whatsappApp from "./whatsapp/config-client";
+import windsurfMcpApp from "./windsurf-mcp/config";
 import xeroApp from "./xero/config-client";
 import zapierMcpApp from "./zapier-mcp/config";
+import zedMcpApp from "./zed-mcp/config";
 
 export const apps = [
   gmailApp,
@@ -48,9 +53,14 @@ export const apps = [
   perplexityMcpApp,
   raycastMcpApp,
   chatgptMcpApp,
+  geminiMcpApp,
   opencodeMcpApp,
   zapierMcpApp,
   copilotMcpApp,
   n8nMcpApp,
   makeMcpApp,
+  windsurfMcpApp,
+  clineMcpApp,
+  zedMcpApp,
+  manusMcpApp,
 ];

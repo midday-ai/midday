@@ -36,7 +36,7 @@ export class UpdateAccountBaseCurrencyProcessor extends BaseProcessor<UpdateAcco
       target: baseCurrency,
     });
 
-    if (!exchangeRate || !exchangeRate.rate) {
+    if (!exchangeRate?.rate) {
       this.logger.info("No exchange rate found", {
         currency,
         baseCurrency,

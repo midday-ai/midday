@@ -46,26 +46,40 @@ export const getTrackerRecordsByRangeSchema = z.object({
 });
 
 export const upsertTrackerEntriesSchema = z.object({
-  id: z.string().uuid().optional().openapi({
-    description:
-      "Unique identifier for the tracker entry. Required for updates, omit for new entries",
-    example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
-  }),
-  start: z.string().datetime().openapi({
-    description: "Start time of the tracker entry in ISO 8601 format",
-    example: "2024-04-15T09:00:00.000Z",
-  }),
-  stop: z.string().datetime().openapi({
-    description: "Stop time of the tracker entry in ISO 8601 format",
-    example: "2024-04-15T17:00:00.000Z",
-  }),
+  id: z
+    .string()
+    .uuid()
+    .optional()
+    .describe("Entry ID — required for updates, omit for new entries")
+    .openapi({
+      description:
+        "Unique identifier for the tracker entry. Required for updates, omit for new entries",
+      example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
+    }),
+  start: z
+    .string()
+    .datetime()
+    .describe("Start time (ISO 8601 datetime)")
+    .openapi({
+      description: "Start time of the tracker entry in ISO 8601 format",
+      example: "2024-04-15T09:00:00.000Z",
+    }),
+  stop: z
+    .string()
+    .datetime()
+    .describe("Stop time (ISO 8601 datetime)")
+    .openapi({
+      description: "Stop time of the tracker entry in ISO 8601 format",
+      example: "2024-04-15T17:00:00.000Z",
+    }),
   dates: z
     .array(
-      z.string().openapi({
+      z.string().describe("Date in YYYY-MM-DD format").openapi({
         description: "Date in YYYY-MM-DD format",
         example: "2024-04-15",
       }),
     )
+    .describe("Dates to create entries for (YYYY-MM-DD)")
     .openapi({
       description: "Array of dates for which to create tracker entries",
       example: ["2024-04-15", "2024-04-16"],
@@ -75,21 +89,27 @@ export const upsertTrackerEntriesSchema = z.object({
     .uuid({ message: "assignedId must be a valid UUID or null" })
     .nullable()
     .optional()
+    .describe("Team member user ID to assign to (defaults to current user)")
     .openapi({
       description:
         "Unique identifier of the user assigned to this tracker entry. If not provided, will use the authenticated user",
       example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     }),
-  projectId: z.string().openapi({
+  projectId: z.string().describe("Project ID to track time against").openapi({
     description:
       "Unique identifier of the project associated with this tracker entry",
     example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
   }),
-  description: z.string().optional().nullable().openapi({
-    description: "Optional description or notes for the tracker entry",
-    example: "Worked on implementing user authentication feature",
-  }),
-  duration: z.number().openapi({
+  description: z
+    .string()
+    .optional()
+    .nullable()
+    .describe("Description or notes for the entry")
+    .openapi({
+      description: "Optional description or notes for the tracker entry",
+      example: "Worked on implementing user authentication feature",
+    }),
+  duration: z.number().describe("Duration in seconds").openapi({
     description: "Duration of the tracker entry in seconds",
     example: 28800,
   }),
@@ -301,29 +321,44 @@ export const createTrackerEntriesResponseSchema = z
   });
 
 export const startTimerSchema = z.object({
-  projectId: z.string().uuid().openapi({
-    description: "Unique identifier of the project to track time for",
-    example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
-  }),
+  projectId: z
+    .string()
+    .uuid()
+    .describe("Project ID to track time for")
+    .openapi({
+      description: "Unique identifier of the project to track time for",
+      example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
+    }),
   assignedId: z
     .string()
     .uuid({ message: "assignedId must be a valid UUID or null" })
     .optional()
     .nullable()
+    .describe("User ID to assign the timer to (defaults to current user)")
     .openapi({
       description:
         "Unique identifier of the user to assign the timer to. If not provided, will use the authenticated user",
       example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     }),
-  description: z.string().optional().nullable().openapi({
-    description: "Optional description for the timer session",
-    example: "Working on implementing timer feature",
-  }),
-  start: z.string().datetime().optional().openapi({
-    description:
-      "Start time in ISO 8601 format. If not provided, will use current time",
-    example: "2024-04-15T09:00:00.000Z",
-  }),
+  description: z
+    .string()
+    .optional()
+    .nullable()
+    .describe("Description for the timer session")
+    .openapi({
+      description: "Optional description for the timer session",
+      example: "Working on implementing timer feature",
+    }),
+  start: z
+    .string()
+    .datetime()
+    .optional()
+    .describe("Start time (ISO 8601). Defaults to now.")
+    .openapi({
+      description:
+        "Start time in ISO 8601 format. If not provided, will use current time",
+      example: "2024-04-15T09:00:00.000Z",
+    }),
   continueFromEntry: z.string().uuid().optional().openapi({
     description: "Continue from a specific paused entry ID",
     example: "c4d5e6f7-2a3b-4c5d-8e9f-3a4b5c6d7e8f",
@@ -331,21 +366,37 @@ export const startTimerSchema = z.object({
 });
 
 export const stopTimerSchema = z.object({
-  entryId: z.string().uuid().optional().openapi({
-    description:
-      "Unique identifier of the specific timer entry to stop. If not provided, will stop the current running timer for the user",
-    example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
-  }),
-  assignedId: z.string().uuid().optional().nullable().openapi({
-    description:
-      "Unique identifier of the user whose timer should be stopped. If not provided, will use the authenticated user",
-    example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  }),
-  stop: z.string().datetime().optional().openapi({
-    description:
-      "Stop time in ISO 8601 format. If not provided, will use current time",
-    example: "2024-04-15T17:00:00.000Z",
-  }),
+  entryId: z
+    .string()
+    .uuid()
+    .optional()
+    .describe("Entry ID to stop (defaults to current running timer)")
+    .openapi({
+      description:
+        "Unique identifier of the specific timer entry to stop. If not provided, will stop the current running timer for the user",
+      example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
+    }),
+  assignedId: z
+    .string()
+    .uuid()
+    .optional()
+    .nullable()
+    .describe("User ID whose timer to stop (defaults to current user)")
+    .openapi({
+      description:
+        "Unique identifier of the user whose timer should be stopped. If not provided, will use the authenticated user",
+      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    }),
+  stop: z
+    .string()
+    .datetime()
+    .optional()
+    .describe("Stop time (ISO 8601). Defaults to now.")
+    .openapi({
+      description:
+        "Stop time in ISO 8601 format. If not provided, will use current time",
+      example: "2024-04-15T17:00:00.000Z",
+    }),
 });
 
 export const getCurrentTimerSchema = z.object({

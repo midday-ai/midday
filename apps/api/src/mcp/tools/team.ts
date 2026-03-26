@@ -1,6 +1,13 @@
 import { getTeamById, getTeamMembers } from "@midday/db/queries";
 import { z } from "zod";
+import {
+  mcpTeamMemberSchema,
+  mcpTeamSchema,
+  sanitize,
+  sanitizeArray,
+} from "../schemas";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { withErrorHandling } from "../utils";
 
 export const registerTeamTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
@@ -21,7 +28,7 @@ export const registerTeamTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async () => {
+    withErrorHandling(async () => {
       const result = await getTeamById(db, teamId);
 
       if (!result) {
@@ -31,11 +38,13 @@ export const registerTeamTools: RegisterTools = (server, ctx) => {
         };
       }
 
+      const clean = sanitize(mcpTeamSchema, result);
+
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        structuredContent: { data: result },
+        content: [{ type: "text", text: JSON.stringify(clean) }],
+        structuredContent: { data: clean },
       };
-    },
+    }, "Failed to get team info"),
   );
 
   server.registerTool(
@@ -50,13 +59,15 @@ export const registerTeamTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async () => {
+    withErrorHandling(async () => {
       const result = await getTeamMembers(db, teamId);
 
+      const clean = sanitizeArray(mcpTeamMemberSchema, result ?? []);
+
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        structuredContent: { data: result },
+        content: [{ type: "text", text: JSON.stringify(clean) }],
+        structuredContent: { data: clean },
       };
-    },
+    }, "Failed to list team members"),
   );
 };

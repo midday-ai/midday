@@ -529,11 +529,7 @@ export class QueueManager {
 
             // Process completed jobs
             for (const job of completedJobs) {
-              if (
-                !job ||
-                !job.finishedOn ||
-                job.finishedOn < twentyFourHoursAgo
-              )
+              if (!job?.finishedOn || job.finishedOn < twentyFourHoursAgo)
                 continue;
 
               const bucketIndex = Math.floor(
@@ -578,11 +574,7 @@ export class QueueManager {
 
             // Process failed jobs
             for (const job of failedJobs) {
-              if (
-                !job ||
-                !job.finishedOn ||
-                job.finishedOn < twentyFourHoursAgo
-              )
+              if (!job?.finishedOn || job.finishedOn < twentyFourHoursAgo)
                 continue;
 
               const bucketIndex = Math.floor(
@@ -807,7 +799,7 @@ export class QueueManager {
       for (const { completedJobs, failedJobs } of queueResults) {
         // Process completed jobs
         for (const job of completedJobs) {
-          if (!job || !job.finishedOn || job.finishedOn < startTime) continue;
+          if (!job?.finishedOn || job.finishedOn < startTime) continue;
 
           const bucketIndex = Math.floor(
             (job.finishedOn - startTime) / bucketSize,
@@ -819,7 +811,7 @@ export class QueueManager {
 
         // Process failed jobs
         for (const job of failedJobs) {
-          if (!job || !job.finishedOn || job.finishedOn < startTime) continue;
+          if (!job?.finishedOn || job.finishedOn < startTime) continue;
 
           const bucketIndex = Math.floor(
             (job.finishedOn - startTime) / bucketSize,
@@ -2070,7 +2062,7 @@ export class QueueManager {
         }
 
         for (const job of jobs) {
-          if (!job || !job.id) continue;
+          if (!job?.id) continue;
 
           const jobKey = `${queueName}:${job.id}`;
           if (seenJobIds.has(jobKey)) continue;

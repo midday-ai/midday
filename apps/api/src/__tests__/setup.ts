@@ -113,7 +113,12 @@ export const mocks = {
   createInvoice: mock(() => ({})) as MockFn,
   updateInvoice: mock(() => ({})) as MockFn,
   deleteInvoice: mock(() => ({})) as MockFn,
-  draftInvoice: mock(() => ({})) as MockFn,
+  draftInvoice: mock(() => ({
+    id: "d1e2f3a4-b5c6-7890-abcd-ef1234567890",
+    invoiceNumber: "INV-0001",
+    status: "draft",
+    token: "test-token",
+  })) as MockFn,
   duplicateInvoice: mock(() => ({})) as MockFn,
   getInvoiceNumber: mock(() => "INV-001") as MockFn,
   getNextInvoiceNumber: mock(() => "INV-002") as MockFn,
@@ -915,10 +920,25 @@ const dbQueriesMock = new Proxy(
     updateTeamMember: mocks.updateTeamMember,
 
     // Tags
-    getTags: createDefaultMock(),
-    createTag: createDefaultMock(),
-    updateTag: createDefaultMock(),
-    deleteTag: createDefaultMock(),
+    getTags: mock(() => Promise.resolve([])) as MockFn,
+    createTag: mock(() =>
+      Promise.resolve({
+        id: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
+        name: "Tag",
+      }),
+    ) as MockFn,
+    updateTag: mock(() =>
+      Promise.resolve({
+        id: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
+        name: "Updated",
+      }),
+    ) as MockFn,
+    deleteTag: mock(() =>
+      Promise.resolve({
+        id: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
+        name: "Deleted",
+      }),
+    ) as MockFn,
 
     // Users (additional query exports used by routers)
     getUserInvites: createDefaultMock(),
@@ -1091,6 +1111,9 @@ mock.module("@midday/cache/api-key-cache", () => ({
 mock.module("@midday/supabase/storage", () => ({
   signedUrl: mocks.signedUrl,
   remove: mock(() => Promise.resolve({ error: null })),
+  download: mock(() =>
+    Promise.resolve({ data: null, error: new Error("not used in tests") }),
+  ),
 }));
 
 // Mock @midday/job-client
@@ -1176,6 +1199,17 @@ mock.module("@midday/invoice/token", () => ({
 
 mock.module("@midday/invoice", () => ({
   DEFAULT_TEMPLATE: {},
+  PdfTemplate: mock(async () => ({})),
+  renderToStream: mock(() =>
+    Promise.resolve(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array([0x25, 0x50, 0x44, 0x46]));
+          controller.close();
+        },
+      }),
+    ),
+  ),
 }));
 
 // Mock @api/services/supabase
@@ -1267,6 +1301,18 @@ mock.module("@midday/cache/team-cache", () => ({
     set: mock(async () => {}),
     invalidateForUser: mock(async () => {}),
   },
+}));
+
+mock.module("@midday/accounting", () => ({
+  getAccountingProvider: mock(() => ({
+    getAccounts: mock(() => Promise.resolve([])),
+  })),
+  getOrgId: mock((config: any) => config?.tenantId ?? "org-1"),
+  getOrgName: mock((config: any) => config?.tenantName ?? null),
+  AccountingProviderConfigSchema: {
+    parse: mock((v: any) => v),
+  },
+  parseProviderConfig: mock((v: any) => v),
 }));
 
 mock.module("@midday/banking", () => ({

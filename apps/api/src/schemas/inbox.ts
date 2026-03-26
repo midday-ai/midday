@@ -1,8 +1,16 @@
 import { z } from "@hono/zod-openapi";
 
 export const getInboxSchema = z.object({
-  cursor: z.string().nullable().optional(),
-  order: z.string().nullable().optional(),
+  cursor: z
+    .string()
+    .nullable()
+    .optional()
+    .describe("Pagination cursor from previous response"),
+  order: z
+    .string()
+    .nullable()
+    .optional()
+    .describe("Sort direction: asc or desc"),
   sort: z
     .string()
     .nullable()
@@ -10,13 +18,29 @@ export const getInboxSchema = z.object({
     .describe(
       "Sort field. Valid values: alphabetical, document_date. Defaults to created date.",
     ),
-  pageSize: z.coerce.number().min(1).max(100).optional(),
-  q: z.string().nullable().optional(),
+  pageSize: z.coerce
+    .number()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe("Number of items per page (1-100)"),
+  q: z
+    .string()
+    .nullable()
+    .optional()
+    .describe("Search query to filter inbox items"),
   status: z
     .enum(["done", "pending", "suggested_match", "no_match", "other"])
     .nullable()
-    .optional(),
-  tab: z.enum(["all", "other"]).nullable().optional(),
+    .optional()
+    .describe(
+      "Filter by processing status: done (processed), pending (awaiting action), suggested_match (auto-matched), no_match (unmatched), other",
+    ),
+  tab: z
+    .enum(["all", "other"])
+    .nullable()
+    .optional()
+    .describe("Tab filter: all or other"),
 });
 
 export const inboxItemResponseSchema = z

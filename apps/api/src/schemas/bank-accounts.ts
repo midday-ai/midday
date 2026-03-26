@@ -5,6 +5,9 @@ export const getBankAccountsSchema = z
     enabled: z
       .boolean()
       .optional()
+      .describe(
+        "Filter by enabled status (true = active accounts, false = disabled)",
+      )
       .openapi({
         description: "Whether the bank account is enabled.",
         param: {
@@ -14,6 +17,9 @@ export const getBankAccountsSchema = z
     manual: z
       .boolean()
       .optional()
+      .describe(
+        "Filter by manual status (true = manually created, false = bank-synced)",
+      )
       .openapi({
         description: "Whether the bank account is a manual account.",
         param: {

@@ -281,7 +281,7 @@ export async function checkDocumentAttachments(
     )
     .limit(1);
 
-  if (!document[0] || !document[0].pathTokens) {
+  if (!document[0]?.pathTokens) {
     return { hasAttachments: false, attachments: [] };
   }
 

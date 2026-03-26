@@ -121,7 +121,7 @@ export abstract class AccountingProcessorBase<
     // Get the app configuration for this provider
     const app = await getAppByAppId(db, { appId: providerId, teamId });
 
-    if (!app || !app.config) {
+    if (!app?.config) {
       throw new Error(`${providerId} is not connected for this team`);
     }
 

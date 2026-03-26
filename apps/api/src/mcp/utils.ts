@@ -39,6 +39,106 @@ export function getDateContext(timezone: string | null): DateContext {
   };
 }
 
+export const DASHBOARD_URL =
+  process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
+
+export const MCP_TEXT_LIMIT = 25_000;
+
+interface PaginatedResponse<T> {
+  [key: string]: unknown;
+  meta: {
+    cursor?: string | null;
+    hasNextPage: boolean;
+    [key: string]: unknown;
+  };
+  data: T[];
+}
+
+/**
+ * Shrink a paginated list response until its JSON serialization fits
+ * within MCP_TEXT_LIMIT.  Drops items from the end and appends a
+ * truncation hint so the agent knows to paginate.
+ */
+export function truncateListResponse<T>(response: PaginatedResponse<T>): {
+  text: string;
+  structuredContent: PaginatedResponse<T>;
+} {
+  let text = JSON.stringify(response);
+
+  if (text.length <= MCP_TEXT_LIMIT) {
+    return { text, structuredContent: response };
+  }
+
+  const data = [...response.data];
+  while (data.length > 1 && text.length > MCP_TEXT_LIMIT) {
+    data.pop();
+    text = JSON.stringify({
+      ...response,
+      meta: {
+        ...response.meta,
+        hasNextPage: true,
+        truncated: true,
+        returnedItems: data.length,
+      },
+      data,
+    });
+  }
+
+  const result: PaginatedResponse<T> = {
+    ...response,
+    meta: {
+      ...response.meta,
+      hasNextPage: true,
+      truncated: true,
+      returnedItems: data.length,
+      hint: "Response truncated to fit context limits. Use cursor or narrow your filters to see more results.",
+    },
+    data: [...data],
+  };
+  text = JSON.stringify(result);
+
+  return { text, structuredContent: result };
+}
+
+/**
+ * Convert plain text into TipTap EditorDoc JSON structure.
+ * Each line becomes a paragraph node; empty lines produce empty paragraphs.
+ */
+export function textToEditorDoc(text: string) {
+  return {
+    type: "doc" as const,
+    content: text.split("\n").map((line) => ({
+      type: "paragraph" as const,
+      content: line ? [{ type: "text" as const, text: line }] : [],
+    })),
+  };
+}
+
+/**
+ * Wrap a tool handler with try/catch to return graceful `isError` responses
+ * instead of propagating unhandled exceptions through the transport.
+ */
+export function withErrorHandling<Args extends unknown[], R>(
+  handler: (...args: Args) => Promise<R>,
+  fallbackMessage: string,
+): (...args: Args) => Promise<R> {
+  return (async (...args: Args) => {
+    try {
+      return await handler(...args);
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: error instanceof Error ? error.message : fallbackMessage,
+          },
+        ],
+        isError: true,
+      } as R;
+    }
+  }) as (...args: Args) => Promise<R>;
+}
+
 export type TextContent = { type: "text"; text: string };
 export type ResourceContent = {
   type: "resource";

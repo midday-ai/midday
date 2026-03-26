@@ -2,103 +2,169 @@ import { z } from "@hono/zod-openapi";
 
 export const getRevenueSchema = z
   .object({
-    from: z.string().openapi({
-      description: "Start date (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().openapi({
-      description: "End date (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
-    revenueType: z.enum(["gross", "net"]).optional().default("net").openapi({
-      description: "Type of revenue calculation",
-      example: "net",
-    }),
+    from: z
+      .string()
+      .describe("Start date (ISO 8601 format, e.g. 2024-01-01)")
+      .openapi({
+        description: "Start date (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .describe("End date (ISO 8601 format, e.g. 2024-12-31)")
+      .openapi({
+        description: "End date (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
+    revenueType: z
+      .enum(["gross", "net"])
+      .optional()
+      .default("net")
+      .describe(
+        "Revenue calculation type: gross (before expenses) or net (after expenses)",
+      )
+      .openapi({
+        description: "Type of revenue calculation",
+        example: "net",
+      }),
   })
   .openapi("GetRevenueSchema");
 
 export const getProfitSchema = z
   .object({
-    from: z.string().openapi({
-      description: "Start date (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().openapi({
-      description: "End date (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
-    revenueType: z.enum(["gross", "net"]).optional().default("net").openapi({
-      description: "Type of revenue calculation",
-      example: "net",
-    }),
+    from: z
+      .string()
+      .describe("Start date (ISO 8601 format, e.g. 2024-01-01)")
+      .openapi({
+        description: "Start date (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .describe("End date (ISO 8601 format, e.g. 2024-12-31)")
+      .openapi({
+        description: "End date (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
+    revenueType: z
+      .enum(["gross", "net"])
+      .optional()
+      .default("net")
+      .describe("Revenue calculation type: gross or net")
+      .openapi({
+        description: "Type of revenue calculation",
+        example: "net",
+      }),
   })
   .openapi("GetProfitSchema");
 
 export const getBurnRateSchema = z
   .object({
-    from: z.string().openapi({
-      description: "Start date (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().openapi({
-      description: "End date (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
+    from: z
+      .string()
+      .describe("Start date (ISO 8601 format, e.g. 2024-01-01)")
+      .openapi({
+        description: "Start date (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .describe("End date (ISO 8601 format, e.g. 2024-12-31)")
+      .openapi({
+        description: "End date (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
   })
   .openapi("GetBurnRateSchema");
 
 export const getRunwaySchema = z
   .object({
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
   })
   .openapi("GetRunwaySchema");
 
 export const getExpensesSchema = z
   .object({
-    from: z.string().openapi({
-      description: "Start date (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().openapi({
-      description: "End date (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
+    from: z
+      .string()
+      .describe("Start date (ISO 8601 format, e.g. 2024-01-01)")
+      .openapi({
+        description: "Start date (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .describe("End date (ISO 8601 format, e.g. 2024-12-31)")
+      .openapi({
+        description: "End date (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
   })
   .openapi("GetExpensesSchema");
 
 export const getSpendingSchema = z
   .object({
-    from: z.string().openapi({
-      description: "Start date (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().openapi({
-      description: "End date (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
+    from: z
+      .string()
+      .describe("Start date (ISO 8601 format, e.g. 2024-01-01)")
+      .openapi({
+        description: "Start date (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .describe("End date (ISO 8601 format, e.g. 2024-12-31)")
+      .openapi({
+        description: "End date (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
   })
   .openapi("GetSpendingSchema");
 
@@ -390,55 +456,102 @@ export const getSpendingResponseSchema = z
 
 export const getTaxSummarySchema = z
   .object({
-    from: z.string().openapi({
-      description: "Start date (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().openapi({
-      description: "End date (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
-    type: z.enum(["paid", "collected"]).openapi({
-      description: "Type of tax",
-      example: "paid",
-    }),
-    categorySlug: z.string().optional().openapi({
-      description: "Category slug",
-      example: "taxes",
-    }),
-    taxType: z.string().optional().openapi({
-      description: "Tax type",
-      example: "vat",
-    }),
+    from: z
+      .string()
+      .describe("Start date (ISO 8601 format, e.g. 2024-01-01)")
+      .openapi({
+        description: "Start date (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .describe("End date (ISO 8601 format, e.g. 2024-12-31)")
+      .openapi({
+        description: "End date (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
+    type: z
+      .enum(["paid", "collected"])
+      .describe(
+        "Tax direction: paid (tax you paid) or collected (tax collected from customers)",
+      )
+      .openapi({
+        description: "Type of tax",
+        example: "paid",
+      }),
+    categorySlug: z
+      .string()
+      .optional()
+      .describe("Filter by expense category slug (e.g. taxes, software)")
+      .openapi({
+        description: "Category slug",
+        example: "taxes",
+      }),
+    taxType: z
+      .string()
+      .optional()
+      .describe("Filter by specific tax type (e.g. vat, sales_tax)")
+      .openapi({
+        description: "Tax type",
+        example: "vat",
+      }),
   })
   .openapi("GetTaxSummarySchema");
 
 export const getRevenueForecastSchema = z
   .object({
-    from: z.string().openapi({
-      description: "Start date for historical data (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().openapi({
-      description: "End date for historical data (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    forecastMonths: z.number().min(1).max(24).default(6).openapi({
-      description: "Number of months to forecast into the future",
-      example: 6,
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
-    revenueType: z.enum(["gross", "net"]).default("net").openapi({
-      description: "Type of revenue calculation",
-      example: "net",
-    }),
+    from: z
+      .string()
+      .describe(
+        "Start date for historical data (ISO 8601 format, e.g. 2024-01-01)",
+      )
+      .openapi({
+        description: "Start date for historical data (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .describe(
+        "End date for historical data (ISO 8601 format, e.g. 2024-12-31)",
+      )
+      .openapi({
+        description: "End date for historical data (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    forecastMonths: z
+      .number()
+      .min(1)
+      .max(24)
+      .default(6)
+      .describe("Number of months to forecast (1-24, default 6)")
+      .openapi({
+        description: "Number of months to forecast into the future",
+        example: 6,
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
+    revenueType: z
+      .enum(["gross", "net"])
+      .default("net")
+      .describe("Revenue calculation type: gross or net")
+      .openapi({
+        description: "Type of revenue calculation",
+        example: "net",
+      }),
   })
   .openapi("GetRevenueForecastSchema");
 
@@ -666,30 +779,51 @@ export const getChartDataByLinkIdSchema = z
 
 export const getGrowthRateSchema = z
   .object({
-    from: z.string().openapi({
-      description: "Start date (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().openapi({
-      description: "End date (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
-    type: z.enum(["revenue", "profit"]).optional().default("revenue").openapi({
-      description: "Type of growth to calculate",
-      example: "revenue",
-    }),
-    revenueType: z.enum(["gross", "net"]).optional().default("net").openapi({
-      description: "Type of revenue calculation",
-      example: "net",
-    }),
+    from: z
+      .string()
+      .describe("Start date (ISO 8601 format, e.g. 2024-01-01)")
+      .openapi({
+        description: "Start date (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .describe("End date (ISO 8601 format, e.g. 2024-12-31)")
+      .openapi({
+        description: "End date (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
+    type: z
+      .enum(["revenue", "profit"])
+      .optional()
+      .default("revenue")
+      .describe("Metric to calculate growth for: revenue or profit")
+      .openapi({
+        description: "Type of growth to calculate",
+        example: "revenue",
+      }),
+    revenueType: z
+      .enum(["gross", "net"])
+      .optional()
+      .default("net")
+      .describe("Revenue calculation type: gross or net")
+      .openapi({
+        description: "Type of revenue calculation",
+        example: "net",
+      }),
     period: z
       .enum(["monthly", "quarterly", "yearly"])
       .optional()
       .default("quarterly")
+      .describe("Comparison period: monthly, quarterly, or yearly")
       .openapi({
         description: "Period for growth comparison",
         example: "quarterly",
@@ -699,43 +833,71 @@ export const getGrowthRateSchema = z
 
 export const getProfitMarginSchema = z
   .object({
-    from: z.string().openapi({
-      description: "Start date (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().openapi({
-      description: "End date (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
-    revenueType: z.enum(["gross", "net"]).optional().default("net").openapi({
-      description: "Type of revenue calculation (gross or net profit margin)",
-      example: "net",
-    }),
+    from: z
+      .string()
+      .describe("Start date (ISO 8601 format, e.g. 2024-01-01)")
+      .openapi({
+        description: "Start date (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .describe("End date (ISO 8601 format, e.g. 2024-12-31)")
+      .openapi({
+        description: "End date (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
+    revenueType: z
+      .enum(["gross", "net"])
+      .optional()
+      .default("net")
+      .describe(
+        "Margin type: gross (revenue minus COGS) or net (after all expenses)",
+      )
+      .openapi({
+        description: "Type of revenue calculation (gross or net profit margin)",
+        example: "net",
+      }),
   })
   .openapi("GetProfitMarginSchema");
 
 export const getCashFlowSchema = z
   .object({
-    from: z.string().openapi({
-      description: "Start date (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().openapi({
-      description: "End date (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
+    from: z
+      .string()
+      .describe("Start date (ISO 8601 format, e.g. 2024-01-01)")
+      .openapi({
+        description: "Start date (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .describe("End date (ISO 8601 format, e.g. 2024-12-31)")
+      .openapi({
+        description: "End date (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
     period: z
       .enum(["monthly", "quarterly"])
       .optional()
       .default("monthly")
+      .describe("Aggregation period: monthly or quarterly")
       .openapi({
         description: "Aggregation period for cash flow data",
         example: "monthly",
@@ -745,18 +907,30 @@ export const getCashFlowSchema = z
 
 export const getRecurringExpensesSchema = z
   .object({
-    from: z.string().optional().openapi({
-      description: "Start date filter (ISO 8601 format)",
-      example: "2023-01-01",
-    }),
-    to: z.string().optional().openapi({
-      description: "End date filter (ISO 8601 format)",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
+    from: z
+      .string()
+      .optional()
+      .describe("Start date filter (ISO 8601 format, e.g. 2024-01-01)")
+      .openapi({
+        description: "Start date filter (ISO 8601 format)",
+        example: "2023-01-01",
+      }),
+    to: z
+      .string()
+      .optional()
+      .describe("End date filter (ISO 8601 format, e.g. 2024-12-31)")
+      .openapi({
+        description: "End date filter (ISO 8601 format)",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
   })
   .openapi("GetRecurringExpensesSchema");
 
@@ -771,14 +945,24 @@ export const getAccountBalancesSchema = z
 
 export const getBalanceSheetSchema = z
   .object({
-    asOf: z.string().optional().openapi({
-      description:
-        "Balance sheet as of date (ISO 8601 format), defaults to today",
-      example: "2023-12-31",
-    }),
-    currency: z.string().optional().openapi({
-      description: "Currency code (ISO 4217)",
-      example: "USD",
-    }),
+    asOf: z
+      .string()
+      .optional()
+      .describe(
+        "Balance sheet as-of date (ISO 8601 format, e.g. 2024-12-31). Defaults to today.",
+      )
+      .openapi({
+        description:
+          "Balance sheet as of date (ISO 8601 format), defaults to today",
+        example: "2023-12-31",
+      }),
+    currency: z
+      .string()
+      .optional()
+      .describe("Currency code (ISO 4217, e.g. USD, EUR, SEK)")
+      .openapi({
+        description: "Currency code (ISO 4217)",
+        example: "USD",
+      }),
   })
   .openapi("GetBalanceSheetSchema");

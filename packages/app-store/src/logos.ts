@@ -2,15 +2,18 @@
 
 export { Logo as ChatGPTMcpLogo } from "./chatgpt-mcp/assets/logo";
 export { Logo as ClaudeMcpLogo } from "./claude-mcp/assets/logo";
+export { Logo as ClineMcpLogo } from "./cline-mcp/assets/logo";
 export { Logo as CopilotMcpLogo } from "./copilot-mcp/assets/logo";
 export { Logo as CursorMcpLogo } from "./cursor-mcp/assets/logo";
 export { Logo as DeelLogo } from "./deel/assets/logo";
 export { Logo as DropboxLogo } from "./dropbox/assets/logo";
 export { Logo as EInvoiceLogo } from "./e-invoice/assets/logo";
 export { Logo as FortnoxLogo } from "./fortnox/assets/logo";
+export { Logo as GeminiMcpLogo } from "./gemini-mcp/assets/logo";
 export { Logo as GmailLogo } from "./gmail/assets/logo";
 export { Logo as GoogleDriveLogo } from "./google-drive/assets/logo";
 export { Logo as MakeMcpLogo } from "./make-mcp/assets/logo";
+export { Logo as ManusMcpLogo } from "./manus-mcp/assets/logo";
 export { Logo as MiddayDesktopLogo } from "./midday-desktop/assets/logo";
 export { Logo as N8nMcpLogo } from "./n8n-mcp/assets/logo";
 export { Logo as OpenCodeMcpLogo } from "./opencode-mcp/assets/logo";
@@ -24,5 +27,7 @@ export { Logo as SlackLogo } from "./slack/assets/logo";
 export { Logo as StripeLogo } from "./stripe/assets/logo";
 export { Logo as StripePaymentsLogo } from "./stripe-payments/assets/logo";
 export { Logo as WhatsAppLogo } from "./whatsapp/assets/logo";
+export { Logo as WindsurfMcpLogo } from "./windsurf-mcp/assets/logo";
 export { Logo as XeroLogo } from "./xero/assets/logo";
 export { Logo as ZapierMcpLogo } from "./zapier-mcp/assets/logo";
+export { Logo as ZedMcpLogo } from "./zed-mcp/assets/logo";
