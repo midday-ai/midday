@@ -59,6 +59,31 @@ import {
   withErrorHandling,
 } from "../utils";
 
+async function embedLogoAsDataUrl(
+  invoice: Record<string, any>,
+): Promise<Record<string, any>> {
+  const logoUrl = invoice.template?.logoUrl;
+  if (!logoUrl || typeof logoUrl !== "string") return invoice;
+  if (logoUrl.startsWith("data:")) return invoice;
+
+  try {
+    const res = await fetch(logoUrl);
+    if (!res.ok) return invoice;
+    const contentType = res.headers.get("content-type") || "image/png";
+    const buffer = await res.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString("base64");
+    return {
+      ...invoice,
+      template: {
+        ...invoice.template,
+        logoUrl: `data:${contentType};base64,${base64}`,
+      },
+    };
+  } catch {
+    return invoice;
+  }
+}
+
 export const registerInvoiceTools: RegisterTools = (server, ctx) => {
   const { db, teamId, userId, apiUrl } = ctx;
 
@@ -222,7 +247,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           }
         }
 
-        return { content, structuredContent: { invoice: clean } };
+        const invoiceForUI = await embedLogoAsDataUrl(clean);
+        return { content, structuredContent: { invoice: invoiceForUI } };
       }, "Failed to get invoice"),
     );
 
@@ -1063,6 +1089,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
                 ? "saved as draft — use invoices_send to send, or open the previewUrl to review"
                 : "created";
 
+          const invoiceForUI = await embedLogoAsDataUrl(clean);
+
           const response = {
             message: `Invoice ${invoiceNumber} ${action}. Total: ${total} ${mergedTemplate.currency}`,
             invoice: clean,
@@ -1070,7 +1098,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
-            structuredContent: response,
+            structuredContent: { ...response, invoice: invoiceForUI },
           };
         } catch (error) {
           return {
@@ -1297,6 +1325,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             previewUrl,
           });
 
+          const invoiceForUI = await embedLogoAsDataUrl(clean);
+
           const response = {
             message: `Draft invoice ${existing.invoiceNumber} updated. Total: ${total} ${templateCurrency}`,
             invoice: clean,
@@ -1304,7 +1334,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
-            structuredContent: response,
+            structuredContent: { ...response, invoice: invoiceForUI },
           };
         } catch (error) {
           return {

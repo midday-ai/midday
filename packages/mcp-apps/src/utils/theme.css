@@ -76,4 +76,11 @@ body {
 
 #root {
   padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#root > * {
+  width: 100%;
 }
