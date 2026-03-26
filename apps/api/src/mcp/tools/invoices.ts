@@ -59,19 +59,26 @@ import {
   withErrorHandling,
 } from "../utils";
 
+function isAllowedLogoUrl(url: string): boolean {
+  return url.startsWith("https://service.midday.ai/");
+}
+
 async function embedLogoAsDataUrl(
   invoice: Record<string, any>,
 ): Promise<Record<string, any>> {
   const logoUrl = invoice.template?.logoUrl;
   if (!logoUrl || typeof logoUrl !== "string") return invoice;
   if (logoUrl.startsWith("data:")) return invoice;
+  if (!isAllowedLogoUrl(logoUrl)) return invoice;
 
   try {
     const res = await fetch(logoUrl);
     if (!res.ok) return invoice;
+
     const contentType = res.headers.get("content-type") || "image/png";
     const buffer = await res.arrayBuffer();
     const base64 = Buffer.from(buffer).toString("base64");
+
     return {
       ...invoice,
       template: {
