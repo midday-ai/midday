@@ -50,7 +50,7 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
       {
         title: "List Documents",
         description:
-          "List documents and files stored in the vault. Supports free-text search and tag filtering. Returns paginated results (default 25) with document name, type, size, and creation date.",
+          "List documents and files stored in the vault. Supports free-text search and filtering by document tag IDs (from document_tags_list, not tags_list). Returns paginated results (default 25) with document name, type, size, and creation date.",
         inputSchema: documentsListFields,
         outputSchema: {
           meta: z.looseObject({

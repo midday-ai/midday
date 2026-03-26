@@ -37,7 +37,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
       {
         title: "List Tags",
         description:
-          "List all tags used for organizing transactions, projects, and documents. Returns tag ID and name. Use these tag IDs when filtering other list tools.",
+          "List all transaction/project tags. Returns tag ID and name. Use these tag IDs for the tags filter in transactions_list and tracker_projects_list. For document tags, use document_tags_list instead.",
         inputSchema: {},
         outputSchema: {
           data: z.array(z.record(z.string(), z.any())),

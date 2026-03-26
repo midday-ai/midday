@@ -1,0 +1,76 @@
+@import url("https://fonts.googleapis.com/css2?family=Hedvig+Letters+Sans&family=Hedvig+Letters+Serif&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: "Hedvig Letters Sans", system-ui, -apple-system, sans-serif;
+    --font-serif: "Hedvig Letters Serif", Georgia, serif;
+    --font-mono: "Hedvig Letters Sans", system-ui, -apple-system, sans-serif;
+
+    --background: 0, 0%, 100%;
+    --foreground: 0, 0%, 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 98%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0, 0%, 38%;
+    --accent: 0 0% 97%;
+    --accent-foreground: 0 0% 7%;
+    --border: 0 0% 90%;
+
+    --chart-grid-stroke: #e6e6e6;
+    --chart-axis-text: #707070;
+    --chart-bar-fill: #000;
+    --chart-bar-fill-secondary: #a0a0a0;
+    --chart-line-secondary: #707070;
+    --chart-pattern-bg: #f7f7f7;
+    --chart-pattern-stroke: #999;
+
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --background: 0, 0%, 5%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 98%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 7%;
+    --muted: 0 0% 11%;
+    --muted-foreground: 0, 0%, 38%;
+    --accent: 0 0% 11%;
+    --accent-foreground: 0 0% 98%;
+    --border: 0 0% 11%;
+
+    --chart-grid-stroke: #1d1d1d;
+    --chart-axis-text: #666;
+    --chart-bar-fill: #fff;
+    --chart-bar-fill-secondary: #606060;
+    --chart-line-secondary: #888;
+    --chart-pattern-bg: #1a1a1a;
+    --chart-pattern-stroke: #555;
+
+    color-scheme: dark;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans text-xs leading-normal antialiased;
+    white-space: pre-line;
+  }
+
+  #root {
+    @apply p-4 flex flex-col items-center;
+  }
+
+  #root > * {
+    @apply w-full;
+  }
+}

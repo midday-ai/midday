@@ -33,6 +33,7 @@
     "@midday/inbox": "workspace:*",
 
     "@midday/invoice": "workspace:*",
+    "@midday/mcp-apps": "workspace:*",
     "@midday/job-client": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/location": "workspace:*",
@@ -41,6 +42,7 @@
     "@midday/plans": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",
+    "@modelcontextprotocol/ext-apps": "^1.3.1",
     "@modelcontextprotocol/sdk": "^1.28.0",
     "@polar-sh/sdk": "^0.46.6",
     "@scalar/hono-api-reference": "^0.10.5",

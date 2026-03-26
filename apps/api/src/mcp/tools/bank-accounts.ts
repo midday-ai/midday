@@ -32,7 +32,7 @@ export const registerBankAccountTools: RegisterTools = (server, ctx) => {
     {
       title: "List Bank Accounts",
       description:
-        "List all connected bank accounts for the team. Returns account name, type, balance, currency, institution, and connection status. Filter by enabled/manual to narrow results.",
+        "List all connected bank accounts for the team. Returns account name, type, balance, currency, and connection info (institution name and logo). Filter by enabled/manual to narrow results.",
       inputSchema: getBankAccountsSchema.shape,
       outputSchema: {
         data: z.array(z.record(z.string(), z.any())),

@@ -33,6 +33,7 @@ import { DEFAULT_TEMPLATE, PdfTemplate, renderToStream } from "@midday/invoice";
 import { calculateTotal } from "@midday/invoice/calculate";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import { triggerJob } from "@midday/job-client";
+import { registerAppTool } from "@modelcontextprotocol/ext-apps/server";
 import { addDays } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -57,6 +58,40 @@ import {
   truncateListResponse,
   withErrorHandling,
 } from "../utils";
+
+function isAllowedLogoUrl(url: string): boolean {
+  return url.startsWith("https://service.midday.ai/");
+}
+
+async function embedLogoAsDataUrl(
+  invoice: Record<string, any>,
+): Promise<Record<string, any>> {
+  const logoUrl = invoice.template?.logoUrl;
+  if (!logoUrl || typeof logoUrl !== "string") return invoice;
+  if (logoUrl.startsWith("data:")) return invoice;
+  if (!isAllowedLogoUrl(logoUrl)) return invoice;
+
+  try {
+    const res = await fetch(logoUrl, {
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!res.ok) return invoice;
+
+    const contentType = res.headers.get("content-type") || "image/png";
+    const buffer = await res.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString("base64");
+
+    return {
+      ...invoice,
+      template: {
+        ...invoice.template,
+        logoUrl: `data:${contentType};base64,${base64}`,
+      },
+    };
+  } catch {
+    return invoice;
+  }
+}
 
 export const registerInvoiceTools: RegisterTools = (server, ctx) => {
   const { db, teamId, userId, apiUrl } = ctx;
@@ -154,7 +189,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       }, "Failed to list invoices"),
     );
 
-    server.registerTool(
+    registerAppTool(
+      server,
       "invoices_get",
       {
         title: "Get Invoice",
@@ -169,6 +205,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             .describe("Include the rendered PDF as a downloadable file"),
         },
         annotations: READ_ONLY_ANNOTATIONS,
+        _meta: { ui: { resourceUri: "ui://midday/invoice-preview" } },
       },
       withErrorHandling(async ({ id, download: includePdf }) => {
         const result = await getInvoiceById(db, { id, teamId });
@@ -219,7 +256,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           }
         }
 
-        return { content };
+        const invoiceForUI = await embedLogoAsDataUrl(clean);
+        return { content, structuredContent: { invoice: invoiceForUI } };
       }, "Failed to get invoice"),
     );
 
@@ -823,12 +861,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       },
     );
 
-    server.registerTool(
+    registerAppTool(
+      server,
       "invoices_create",
       {
         title: "Create Invoice",
         description:
-          "Create a new invoice for a customer. Automatically uses the team's saved invoice template (logo, labels, payment details, tax settings). Line items are required. Invoices are created as drafts by default — use invoices_send to send after review. Set deliveryType to 'create' to finalize without sending, or 'create_and_send' to finalize and email immediately. The invoice number, amounts, and customer details are auto-populated.",
+          "Create a new invoice for a customer. Uses the team's saved invoice template by default (logo, labels, payment details, tax settings), but VAT, tax, and discount settings can be overridden per-invoice. Line items are required. Invoices are created as drafts by default — use invoices_send to send after review. Set deliveryType to 'create' to finalize without sending, or 'create_and_send' to finalize and email immediately.",
+        _meta: { ui: { resourceUri: "ui://midday/invoice-preview" } },
         inputSchema: {
           customerId: z
             .string()
@@ -847,6 +887,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
                   .string()
                   .optional()
                   .describe("Unit label (e.g. 'hours', 'units')"),
+                taxRate: z
+                  .number()
+                  .min(0)
+                  .max(100)
+                  .optional()
+                  .describe(
+                    "Per-line tax rate percentage (used when includeLineItemTax is true)",
+                  ),
               }),
             )
             .min(1)
@@ -884,6 +932,46 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             .min(0)
             .optional()
             .describe("Discount amount to subtract from total"),
+          includeVat: z
+            .boolean()
+            .optional()
+            .describe(
+              "Enable VAT on this invoice. Automatically enabled when vatRate > 0. Set to false to remove VAT.",
+            ),
+          vatRate: z
+            .number()
+            .min(0)
+            .max(100)
+            .optional()
+            .describe(
+              "VAT rate percentage, e.g. 25 for 25% VAT. Setting this automatically enables VAT.",
+            ),
+          includeTax: z
+            .boolean()
+            .optional()
+            .describe(
+              "Enable invoice-level tax. Automatically enabled when taxRate > 0. Set to false to remove tax.",
+            ),
+          taxRate: z
+            .number()
+            .min(0)
+            .max(100)
+            .optional()
+            .describe(
+              "Tax rate percentage, e.g. 10 for 10% tax. Setting this automatically enables tax.",
+            ),
+          includeDiscount: z
+            .boolean()
+            .optional()
+            .describe(
+              "Show the discount row on the invoice (overrides template setting)",
+            ),
+          includeLineItemTax: z
+            .boolean()
+            .optional()
+            .describe(
+              "Use per-line-item tax rates instead of a single invoice-level tax rate",
+            ),
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -917,11 +1005,44 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             ...(params.currency
               ? { currency: params.currency.toUpperCase() }
               : {}),
+            ...(params.includeVat !== undefined
+              ? { includeVat: params.includeVat }
+              : {}),
+            ...(params.vatRate !== undefined
+              ? { vatRate: params.vatRate }
+              : {}),
+            ...(params.includeTax !== undefined
+              ? { includeTax: params.includeTax }
+              : {}),
+            ...(params.taxRate !== undefined
+              ? { taxRate: params.taxRate }
+              : {}),
+            ...(params.includeDiscount !== undefined
+              ? { includeDiscount: params.includeDiscount }
+              : {}),
+            ...(params.includeLineItemTax !== undefined
+              ? { includeLineItemTax: params.includeLineItemTax }
+              : {}),
             deliveryType:
               !params.deliveryType || params.deliveryType === "draft"
                 ? ("create" as const)
                 : params.deliveryType,
           };
+
+          if (
+            params.vatRate !== undefined &&
+            params.vatRate > 0 &&
+            params.includeVat === undefined
+          ) {
+            mergedTemplate.includeVat = true;
+          }
+          if (
+            params.taxRate !== undefined &&
+            params.taxRate > 0 &&
+            params.includeTax === undefined
+          ) {
+            mergedTemplate.includeTax = true;
+          }
 
           let invoiceNumber: string;
           if (params.invoiceNumber) {
@@ -966,6 +1087,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             discount: params.discount ?? 0,
             includeVat: mergedTemplate.includeVat ?? false,
             includeTax: mergedTemplate.includeTax ?? false,
+            includeLineItemTax: mergedTemplate.includeLineItemTax ?? false,
           });
 
           const invoiceId = uuidv4();
@@ -997,6 +1119,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
               quantity: item.quantity,
               price: item.price,
               unit: item.unit ?? null,
+              taxRate: item.taxRate ?? null,
             })),
             subtotal: subTotal,
             amount: total,
@@ -1058,6 +1181,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
                 ? "saved as draft — use invoices_send to send, or open the previewUrl to review"
                 : "created";
 
+          const invoiceForUI = await embedLogoAsDataUrl(clean);
+
           const response = {
             message: `Invoice ${invoiceNumber} ${action}. Total: ${total} ${mergedTemplate.currency}`,
             invoice: clean,
@@ -1065,7 +1190,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
-            structuredContent: response,
+            structuredContent: { ...response, invoice: invoiceForUI },
           };
         } catch (error) {
           return {
@@ -1084,12 +1209,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       },
     );
 
-    server.registerTool(
+    registerAppTool(
+      server,
       "invoices_update_draft",
       {
         title: "Update Draft Invoice",
         description:
-          "Edit a draft invoice's content: line items, customer, dates, note, or discount. Only works on invoices in draft status. Amounts are automatically recalculated when line items or discount change.",
+          "Edit a draft invoice's content: line items, customer, dates, note, discount, and tax/VAT settings. Only works on invoices in draft status. Amounts are automatically recalculated when line items, discount, or tax settings change.",
+        _meta: { ui: { resourceUri: "ui://midday/invoice-preview" } },
         inputSchema: {
           id: z.string().uuid().describe("ID of the draft invoice to update"),
           customerId: z
@@ -1106,6 +1233,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
                 quantity: z.number().min(0).describe("Quantity"),
                 price: z.number().describe("Unit price"),
                 unit: z.string().optional().describe("Unit label"),
+                taxRate: z
+                  .number()
+                  .min(0)
+                  .max(100)
+                  .optional()
+                  .describe(
+                    "Per-line tax rate percentage (used when includeLineItemTax is true)",
+                  ),
               }),
             )
             .min(1)
@@ -1127,6 +1262,44 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             .describe("Plain text note for the invoice footer"),
           discount: z.number().min(0).optional().describe("Discount amount"),
           currency: z.string().optional().describe("Currency code override"),
+          includeVat: z
+            .boolean()
+            .optional()
+            .describe(
+              "Enable VAT on this invoice. Automatically enabled when vatRate > 0. Set to false to remove VAT.",
+            ),
+          vatRate: z
+            .number()
+            .min(0)
+            .max(100)
+            .optional()
+            .describe(
+              "VAT rate percentage, e.g. 25 for 25% VAT. Setting this automatically enables VAT.",
+            ),
+          includeTax: z
+            .boolean()
+            .optional()
+            .describe(
+              "Enable invoice-level tax. Automatically enabled when taxRate > 0. Set to false to remove tax.",
+            ),
+          taxRate: z
+            .number()
+            .min(0)
+            .max(100)
+            .optional()
+            .describe(
+              "Tax rate percentage, e.g. 10 for 10% tax. Setting this automatically enables tax.",
+            ),
+          includeDiscount: z
+            .boolean()
+            .optional()
+            .describe("Show the discount row on the invoice"),
+          includeLineItemTax: z
+            .boolean()
+            .optional()
+            .describe(
+              "Use per-line-item tax rates instead of a single invoice-level tax rate",
+            ),
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -1197,7 +1370,40 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           const updatedTemplate = {
             ...existingTemplate,
             ...(params.currency ? { currency: templateCurrency } : {}),
+            ...(params.includeVat !== undefined
+              ? { includeVat: params.includeVat }
+              : {}),
+            ...(params.vatRate !== undefined
+              ? { vatRate: params.vatRate }
+              : {}),
+            ...(params.includeTax !== undefined
+              ? { includeTax: params.includeTax }
+              : {}),
+            ...(params.taxRate !== undefined
+              ? { taxRate: params.taxRate }
+              : {}),
+            ...(params.includeDiscount !== undefined
+              ? { includeDiscount: params.includeDiscount }
+              : {}),
+            ...(params.includeLineItemTax !== undefined
+              ? { includeLineItemTax: params.includeLineItemTax }
+              : {}),
           };
+
+          if (
+            params.vatRate !== undefined &&
+            params.vatRate > 0 &&
+            params.includeVat === undefined
+          ) {
+            updatedTemplate.includeVat = true;
+          }
+          if (
+            params.taxRate !== undefined &&
+            params.taxRate > 0 &&
+            params.includeTax === undefined
+          ) {
+            updatedTemplate.includeTax = true;
+          }
 
           const existingLineItems = (existing.lineItems ?? []).map(
             (item: any) => ({
@@ -1205,6 +1411,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
               quantity: item.quantity ?? 0,
               price: item.price ?? 0,
               unit: item.unit ?? null,
+              taxRate: item.taxRate ?? null,
             }),
           );
 
@@ -1214,6 +1421,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
                 quantity: item.quantity,
                 price: item.price,
                 unit: item.unit ?? null,
+                taxRate: item.taxRate ?? null,
               }))
             : existingLineItems;
 
@@ -1221,11 +1429,13 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           const { subTotal, total, vat, tax } = calculateTotal({
             lineItems,
-            taxRate: (existingTemplate.taxRate as number) ?? 0,
-            vatRate: (existingTemplate.vatRate as number) ?? 0,
+            taxRate: (updatedTemplate.taxRate as number) ?? 0,
+            vatRate: (updatedTemplate.vatRate as number) ?? 0,
             discount,
-            includeVat: (existingTemplate.includeVat as boolean) ?? false,
-            includeTax: (existingTemplate.includeTax as boolean) ?? false,
+            includeVat: (updatedTemplate.includeVat as boolean) ?? false,
+            includeTax: (updatedTemplate.includeTax as boolean) ?? false,
+            includeLineItemTax:
+              (updatedTemplate.includeLineItemTax as boolean) ?? false,
           });
 
           const noteDetails =
@@ -1290,6 +1500,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             previewUrl,
           });
 
+          const invoiceForUI = await embedLogoAsDataUrl(clean);
+
           const response = {
             message: `Draft invoice ${existing.invoiceNumber} updated. Total: ${total} ${templateCurrency}`,
             invoice: clean,
@@ -1297,7 +1509,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
-            structuredContent: response,
+            structuredContent: { ...response, invoice: invoiceForUI },
           };
         } catch (error) {
           return {
@@ -1418,12 +1630,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       },
     );
 
-    server.registerTool(
+    registerAppTool(
+      server,
       "invoices_create_from_tracker",
       {
         title: "Create Invoice from Time Tracker",
         description:
-          "Create an invoice from tracked time entries on a project. Specify the project and date range to include. Line items are auto-generated from time entries using the project's billable rate. The invoice is created as a draft.",
+          "Create an invoice from tracked time entries on a project. Specify the project and date range to include. Line items are auto-generated from time entries using the project's billable rate. The invoice is created as a draft. VAT, tax, and discount settings can be overridden per-invoice.",
+        _meta: { ui: { resourceUri: "ui://midday/invoice-preview" } },
         inputSchema: {
           projectId: z
             .string()
@@ -1435,6 +1649,71 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           dateTo: z
             .string()
             .describe("End date for time entries to include (YYYY-MM-DD)"),
+          currency: z
+            .string()
+            .optional()
+            .describe(
+              "Currency code override (defaults to the project's currency)",
+            ),
+          issueDate: z
+            .string()
+            .optional()
+            .describe("Issue date in ISO 8601 format (defaults to today)"),
+          dueDate: z
+            .string()
+            .optional()
+            .describe(
+              "Due date in ISO 8601 format (defaults to issue date + payment terms from template)",
+            ),
+          note: z
+            .string()
+            .optional()
+            .describe("Plain text note to display on the invoice footer"),
+          discount: z
+            .number()
+            .min(0)
+            .optional()
+            .describe("Discount amount to subtract from total"),
+          includeVat: z
+            .boolean()
+            .optional()
+            .describe(
+              "Enable VAT on this invoice. Automatically enabled when vatRate > 0. Set to false to remove VAT.",
+            ),
+          vatRate: z
+            .number()
+            .min(0)
+            .max(100)
+            .optional()
+            .describe(
+              "VAT rate percentage, e.g. 25 for 25% VAT. Setting this automatically enables VAT.",
+            ),
+          includeTax: z
+            .boolean()
+            .optional()
+            .describe(
+              "Enable invoice-level tax. Automatically enabled when taxRate > 0. Set to false to remove tax.",
+            ),
+          taxRate: z
+            .number()
+            .min(0)
+            .max(100)
+            .optional()
+            .describe(
+              "Tax rate percentage, e.g. 10 for 10% tax. Setting this automatically enables tax.",
+            ),
+          includeDiscount: z
+            .boolean()
+            .optional()
+            .describe(
+              "Show the discount row on the invoice (overrides template setting)",
+            ),
+          includeLineItemTax: z
+            .boolean()
+            .optional()
+            .describe(
+              "Use per-line-item tax rates instead of a single invoice-level tax rate",
+            ),
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -1500,7 +1779,9 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           }
 
           const rate = project.rate ?? 0;
-          const currency = project.currency ?? "USD";
+          const projectCurrency = project.currency ?? "USD";
+          const currency =
+            params.currency?.toUpperCase() ?? projectCurrency.toUpperCase();
 
           const totalDuration = allEntries.reduce(
             (sum: number, e: any) => sum + (e.duration ?? 0),
@@ -1525,29 +1806,67 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             ...Object.fromEntries(
               Object.entries(savedTemplate ?? {}).filter(([_, v]) => v != null),
             ),
-            currency: currency.toUpperCase(),
+            currency,
+            ...(params.includeVat !== undefined
+              ? { includeVat: params.includeVat }
+              : {}),
+            ...(params.vatRate !== undefined
+              ? { vatRate: params.vatRate }
+              : {}),
+            ...(params.includeTax !== undefined
+              ? { includeTax: params.includeTax }
+              : {}),
+            ...(params.taxRate !== undefined
+              ? { taxRate: params.taxRate }
+              : {}),
+            ...(params.includeDiscount !== undefined
+              ? { includeDiscount: params.includeDiscount }
+              : {}),
+            ...(params.includeLineItemTax !== undefined
+              ? { includeLineItemTax: params.includeLineItemTax }
+              : {}),
             deliveryType: "create" as const,
           };
 
+          if (
+            params.vatRate !== undefined &&
+            params.vatRate > 0 &&
+            params.includeVat === undefined
+          ) {
+            mergedTemplate.includeVat = true;
+          }
+          if (
+            params.taxRate !== undefined &&
+            params.taxRate > 0 &&
+            params.includeTax === undefined
+          ) {
+            mergedTemplate.includeTax = true;
+          }
+
           const invoiceNumber = await getNextInvoiceNumber(db, teamId);
-          const issueDateStr = new Date().toISOString();
-          const dueDateStr = addDays(
-            new Date(issueDateStr),
-            paymentTermsDays,
-          ).toISOString();
+          const issueDateStr = params.issueDate ?? new Date().toISOString();
+          const dueDateStr =
+            params.dueDate ??
+            addDays(new Date(issueDateStr), paymentTermsDays).toISOString();
 
           const customerDetails = transformCustomerToContent(customer);
-          const noteDetails = savedTemplate?.noteDetails
-            ? JSON.stringify(savedTemplate.noteDetails)
-            : null;
+          const noteDetails =
+            params.note !== undefined
+              ? JSON.stringify(textToEditorDoc(params.note))
+              : savedTemplate?.noteDetails
+                ? JSON.stringify(savedTemplate.noteDetails)
+                : null;
+
+          const discount = params.discount ?? 0;
 
           const { subTotal, total, vat, tax } = calculateTotal({
             lineItems,
             taxRate: mergedTemplate.taxRate ?? 0,
             vatRate: mergedTemplate.vatRate ?? 0,
-            discount: 0,
+            discount,
             includeVat: mergedTemplate.includeVat ?? false,
             includeTax: mergedTemplate.includeTax ?? false,
+            includeLineItemTax: mergedTemplate.includeLineItemTax ?? false,
           });
 
           const invoiceId = uuidv4();
@@ -1584,7 +1903,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             amount: total,
             vat,
             tax,
-            discount: null,
+            discount: discount || null,
           });
 
           if (!result) {
@@ -1611,6 +1930,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             previewUrl,
           });
 
+          const invoiceForUI = await embedLogoAsDataUrl(clean);
+
           const response = {
             message: `Invoice ${invoiceNumber} created from ${totalHours}h tracked on "${project.name}". Total: ${total} ${currency}`,
             invoice: clean,
@@ -1618,7 +1939,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
-            structuredContent: response,
+            structuredContent: { ...response, invoice: invoiceForUI },
           };
         } catch (error) {
           return {

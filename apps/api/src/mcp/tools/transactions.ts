@@ -60,7 +60,7 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
       {
         title: "List Transactions",
         description:
-          "List bank transactions with filtering by date range, amount, category, status, account, tags, and free-text search. Returns paginated results (default 25 per page). Use cursor from the response to fetch the next page. For quick lookups across all data types, prefer search_global instead.",
+          "List bank transactions with filtering by date range, amount, category, status, account, tags, and free-text search. Returns paginated results (default 25 per page). Use cursor from the response to fetch the next page. Filter fields: categories expects slugs (from categories_list), tags expects tag IDs (from tags_list), accounts expects bank account IDs, assignees expects user IDs (from team_members). For quick lookups across all data types, prefer search_global instead.",
         inputSchema: {
           ...transactionsListFields,
           pageSize: z.coerce

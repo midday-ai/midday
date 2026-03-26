@@ -66,7 +66,7 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
       {
         title: "List Recurring Invoices",
         description:
-          "List recurring invoice schedules with pagination. Filter by status (active, paused, completed, cancelled) or customer. Returns schedule details, frequency, and next scheduled date.",
+          "List recurring invoice schedules with pagination. Filter by status (active, paused, completed, canceled) or customer. Returns schedule details, frequency, and next scheduled date.",
         inputSchema: {
           cursor: z.string().optional().describe("Pagination cursor"),
           pageSize: z.coerce

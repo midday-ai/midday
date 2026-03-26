@@ -1,0 +1,86 @@
+@import url("https://fonts.googleapis.com/css2?family=Hedvig+Letters+Sans&family=Hedvig+Letters+Serif&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --font-sans: "Hedvig Letters Sans", system-ui, -apple-system, sans-serif;
+  --font-serif: "Hedvig Letters Serif", Georgia, serif;
+  --font-mono: "Hedvig Letters Sans", system-ui, -apple-system, sans-serif;
+
+  --foreground: 0 0% 0%;
+  --background: 0 0% 100%;
+  --border: 0 0% 90%;
+  --primary: 0 0% 0%;
+
+  --chart-grid-stroke: #e6e6e6;
+  --chart-axis-text: #707070;
+  --chart-bar-fill: #000;
+  --chart-bar-fill-secondary: #a0a0a0;
+  --chart-line-secondary: #707070;
+  --chart-pattern-bg: #f7f7f7;
+  --chart-pattern-stroke: #999;
+
+  --bg-primary: #fff;
+  --bg-card: #fff;
+  --bg-subtle: #f7f7f7;
+  --border-color: #e6e6e6;
+  --text-primary: #000;
+  --text-muted: #707070;
+
+  color-scheme: light;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}
+
+[data-theme="dark"] {
+  --foreground: 0 0% 100%;
+  --background: 0 0% 5%;
+  --border: 0 0% 11%;
+  --primary: 0 0% 100%;
+
+  --chart-grid-stroke: #1d1d1d;
+  --chart-axis-text: #666;
+  --chart-bar-fill: #fff;
+  --chart-bar-fill-secondary: #606060;
+  --chart-line-secondary: #888;
+  --chart-pattern-bg: #1a1a1a;
+  --chart-pattern-stroke: #555;
+
+  --bg-primary: #0c0c0c;
+  --bg-card: #0c0c0c;
+  --bg-subtle: #131313;
+  --border-color: #1d1d1d;
+  --text-primary: #fff;
+  --text-muted: #666;
+
+  color-scheme: dark;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  white-space: pre-line;
+}
+
+#root {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#root > * {
+  width: 100%;
+}

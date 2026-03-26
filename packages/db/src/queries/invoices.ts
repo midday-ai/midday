@@ -723,6 +723,7 @@ type DraftInvoiceLineItemParams = {
   price?: number;
   vat?: number | null;
   tax?: number | null;
+  taxRate?: number | null;
 };
 
 type DraftInvoiceTemplateParams = {
