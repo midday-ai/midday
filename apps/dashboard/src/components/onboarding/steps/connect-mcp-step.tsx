@@ -3,15 +3,10 @@
 import {
   ChatGPTMcpLogo,
   ClaudeMcpLogo,
-  ClineMcpLogo,
   CopilotMcpLogo,
   CursorMcpLogo,
-  GeminiMcpLogo,
   ManusMcpLogo,
   PerplexityMcpLogo,
-  RaycastMcpLogo,
-  WindsurfMcpLogo,
-  ZedMcpLogo,
 } from "@midday/app-store/logos";
 import {
   Accordion,
@@ -33,13 +28,8 @@ const primaryClients: { id: string; name: string; Logo: ComponentType }[] = [
 
 const moreClients: { id: string; name: string; Logo: ComponentType }[] = [
   { id: "cursor-mcp", name: "Cursor", Logo: CursorMcpLogo },
-  { id: "gemini-mcp", name: "Gemini", Logo: GeminiMcpLogo },
-  { id: "windsurf-mcp", name: "Windsurf", Logo: WindsurfMcpLogo },
-  { id: "cline-mcp", name: "Cline", Logo: ClineMcpLogo },
-  { id: "zed-mcp", name: "Zed", Logo: ZedMcpLogo },
   { id: "perplexity-mcp", name: "Perplexity", Logo: PerplexityMcpLogo },
   { id: "copilot-mcp", name: "Copilot", Logo: CopilotMcpLogo },
-  { id: "raycast-mcp", name: "Raycast", Logo: RaycastMcpLogo },
   { id: "manus-mcp", name: "Manus", Logo: ManusMcpLogo },
 ];
 
@@ -92,7 +82,7 @@ export function ConnectMcpStep() {
         transition={{ duration: 0.4, delay: 0.1 }}
         className="text-lg lg:text-xl font-serif"
       >
-        Work from anywhere
+        Your finances, where you already work
       </motion.h1>
 
       <motion.p
@@ -101,8 +91,8 @@ export function ConnectMcpStep() {
         transition={{ duration: 0.4, delay: 0.2 }}
         className="text-sm text-muted-foreground leading-relaxed"
       >
-        Connect your AI assistant to ask questions, track spending, and manage
-        your finances without switching apps.
+        Connect your AI assistant to handle invoices, expenses, and reports —
+        right from the tools you already use.
       </motion.p>
 
       <motion.ul
@@ -112,9 +102,10 @@ export function ConnectMcpStep() {
         transition={{ duration: 0.35, delay: 0.3 }}
       >
         {[
-          "Manage invoices and track payments from any AI assistant",
-          "Ask about spending, revenue, and cash flow in plain English",
-          "Takes 30 seconds to set up, no technical skills needed",
+          "Send invoices and track payments without leaving your workflow",
+          "Ask about profit, burn rate, or revenue in plain English",
+          "Categorize transactions and export to your accounting software",
+          "Works with the AI tools you already use every day",
         ].map((feature, index) => (
           <motion.li
             key={feature}

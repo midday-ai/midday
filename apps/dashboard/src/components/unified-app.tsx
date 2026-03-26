@@ -347,12 +347,12 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
         </div>
 
         <SheetContent>
-          <SheetHeader>
-            <div className="mb-4">
+          <SheetHeader className="h-full overflow-hidden">
+            <div className="mb-4 shrink-0">
               <AppHeroBanner app={app} />
             </div>
 
-            <div className="flex items-center justify-between border-b border-border pb-2">
+            <div className="flex items-center justify-between border-b border-border pb-2 shrink-0">
               <div>
                 <div className="flex items-center space-x-2">
                   <h3 className="text-lg leading-none">{app.name}</h3>
@@ -395,8 +395,8 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
               )}
             </div>
 
-            <div className="mt-4">
-              <ScrollArea className="h-[calc(100vh-530px)] pt-2" hideScrollbar>
+            <div className="mt-4 flex-1 min-h-0 flex flex-col">
+              <ScrollArea className="flex-1 h-0" hideScrollbar>
                 <Accordion
                   type="multiple"
                   defaultValue={[
@@ -504,7 +504,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                 </Accordion>
               </ScrollArea>
 
-              <div className="absolute bottom-4 pt-8 border-t border-border">
+              <div className="shrink-0 pt-4 border-t border-border">
                 <p className="text-[10px] text-[#878787]">
                   All apps on the Midday App Store are open-source and
                   peer-reviewed. Midday Labs AB maintains high standards but

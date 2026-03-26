@@ -5,10 +5,13 @@ import {
   ClaudeMcpLogo,
   CopilotMcpLogo,
   CursorMcpLogo,
+  GeminiMcpLogo,
   MakeMcpLogo,
+  ManusMcpLogo,
   N8nMcpLogo,
   PerplexityMcpLogo,
   RaycastMcpLogo,
+  WindsurfMcpLogo,
   ZapierMcpLogo,
 } from "@midday/app-store/logos";
 import { LogEvents } from "@midday/events/events";
@@ -88,22 +91,24 @@ function McpAnimation() {
   const allLogos: {
     Logo: React.ComponentType<Record<string, unknown>>;
     size: number;
-    opacity: number;
   }[] = [
-    { Logo: ChatGPTMcpLogo, size: 68, opacity: 1 },
-    { Logo: ZapierMcpLogo, size: 48, opacity: 0.5 },
-    { Logo: CursorMcpLogo, size: 56, opacity: 1 },
-    { Logo: MakeMcpLogo, size: 48, opacity: 0.5 },
-    { Logo: ClaudeMcpLogo, size: 68, opacity: 1 },
-    { Logo: N8nMcpLogo, size: 48, opacity: 0.5 },
-    { Logo: PerplexityMcpLogo, size: 56, opacity: 1 },
-    { Logo: RaycastMcpLogo, size: 48, opacity: 0.5 },
-    { Logo: CopilotMcpLogo, size: 56, opacity: 1 },
+    { Logo: ChatGPTMcpLogo, size: 68 },
+    { Logo: ZapierMcpLogo, size: 48 },
+    { Logo: CursorMcpLogo, size: 56 },
+    { Logo: MakeMcpLogo, size: 48 },
+    { Logo: ClaudeMcpLogo, size: 68 },
+    { Logo: N8nMcpLogo, size: 48 },
+    { Logo: WindsurfMcpLogo, size: 56 },
+    { Logo: RaycastMcpLogo, size: 48 },
+    { Logo: PerplexityMcpLogo, size: 56 },
+    { Logo: ManusMcpLogo, size: 48 },
+    { Logo: CopilotMcpLogo, size: 56 },
+    { Logo: GeminiMcpLogo, size: 48 },
   ];
 
   const count = allLogos.length;
-  const radius = 140;
-  const icons = allLogos.map(({ Logo, size, opacity }, i) => {
+  const radius = 155;
+  const icons = allLogos.map(({ Logo, size }, i) => {
     const angle = -90 + (i * 360) / count;
     const rad = (angle * Math.PI) / 180;
     return {
@@ -113,7 +118,6 @@ function McpAnimation() {
       rotate: (i % 2 === 0 ? 1 : -1) * (3 + (i % 4)),
       size,
       delay: 0.15 + i * 0.06,
-      opacity,
     };
   });
 
@@ -136,11 +140,11 @@ function McpAnimation() {
         }}
       />
       <div className="relative z-10" style={{ width: 400, height: 400 }}>
-        {icons.map(({ Logo, x, y, rotate, size, delay, opacity }, i) => (
+        {icons.map(({ Logo, x, y, rotate, size, delay }, i) => (
           <motion.div
             key={`mcp-icon-${i.toString()}`}
             initial={{ opacity: 0, scale: 0, rotate: rotate * 2 }}
-            animate={{ opacity: opacity ?? 1, scale: 1, rotate }}
+            animate={{ opacity: 1, scale: 1, rotate }}
             transition={{
               type: "spring",
               damping: 18,
