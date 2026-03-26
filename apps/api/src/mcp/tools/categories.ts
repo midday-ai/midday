@@ -38,7 +38,7 @@ export const registerCategoryTools: RegisterTools = (server, ctx) => {
       {
         title: "List Transaction Categories",
         description:
-          "List all transaction categories as a tree with parent categories and their children. Includes system default categories and custom categories. Use category IDs when categorizing transactions.",
+          "List all transaction categories as a tree with parent categories and their children. Includes system default categories and custom categories. Use category slugs (not IDs) when filtering or categorizing transactions.",
         inputSchema: {
           limit: z.coerce
             .number()

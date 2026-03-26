@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { registerMcpApps } from "./apps";
 import { registerPrompts } from "./prompts";
 import { registerResources } from "./resources";
 import {
@@ -123,6 +124,8 @@ export function createMcpServer(ctx: McpContext): McpServer {
   registerInboxTools(server, ctx);
   registerTagTools(server, ctx);
   registerTeamTools(server, ctx);
+
+  registerMcpApps(server);
 
   return server;
 }

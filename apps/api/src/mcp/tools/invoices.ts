@@ -33,6 +33,7 @@ import { DEFAULT_TEMPLATE, PdfTemplate, renderToStream } from "@midday/invoice";
 import { calculateTotal } from "@midday/invoice/calculate";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import { triggerJob } from "@midday/job-client";
+import { registerAppTool } from "@modelcontextprotocol/ext-apps/server";
 import { addDays } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -154,7 +155,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       }, "Failed to list invoices"),
     );
 
-    server.registerTool(
+    registerAppTool(
+      server,
       "invoices_get",
       {
         title: "Get Invoice",
@@ -169,6 +171,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             .describe("Include the rendered PDF as a downloadable file"),
         },
         annotations: READ_ONLY_ANNOTATIONS,
+        _meta: { ui: { resourceUri: "ui://midday/invoice-preview" } },
       },
       withErrorHandling(async ({ id, download: includePdf }) => {
         const result = await getInvoiceById(db, { id, teamId });
@@ -823,12 +826,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       },
     );
 
-    server.registerTool(
+    registerAppTool(
+      server,
       "invoices_create",
       {
         title: "Create Invoice",
         description:
           "Create a new invoice for a customer. Automatically uses the team's saved invoice template (logo, labels, payment details, tax settings). Line items are required. Invoices are created as drafts by default — use invoices_send to send after review. Set deliveryType to 'create' to finalize without sending, or 'create_and_send' to finalize and email immediately. The invoice number, amounts, and customer details are auto-populated.",
+        _meta: { ui: { resourceUri: "ui://midday/invoice-preview" } },
         inputSchema: {
           customerId: z
             .string()
@@ -1084,12 +1089,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       },
     );
 
-    server.registerTool(
+    registerAppTool(
+      server,
       "invoices_update_draft",
       {
         title: "Update Draft Invoice",
         description:
           "Edit a draft invoice's content: line items, customer, dates, note, or discount. Only works on invoices in draft status. Amounts are automatically recalculated when line items or discount change.",
+        _meta: { ui: { resourceUri: "ui://midday/invoice-preview" } },
         inputSchema: {
           id: z.string().uuid().describe("ID of the draft invoice to update"),
           customerId: z

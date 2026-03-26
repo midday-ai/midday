@@ -23,6 +23,9 @@ RUN bun install
 # Copy full source
 COPY --from=builder /app/out/full/ .
 
+# Build the mcp-apps package (produces self-contained HTML files)
+RUN cd packages/mcp-apps && bun run build
+
 # Runner stage - clean image
 FROM oven/bun:1.3.10 AS runner
 WORKDIR /app

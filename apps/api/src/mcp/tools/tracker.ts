@@ -69,7 +69,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "List Tracker Projects",
         description:
-          "List time tracking projects with filtering by status (in_progress/completed), customer, date range, tags, and search. Returns paginated results (default 25) with project name, billable rate, estimate, total tracked hours, and customer.",
+          "List time tracking projects with filtering by status (in_progress/completed), customer, date range, tags (tag IDs from tags_list), and search. Returns paginated results (default 25) with project name, billable rate, estimate, total tracked hours, and customer.",
         inputSchema: {
           ...trackerProjectsListFields,
           sortBy: z

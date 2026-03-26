@@ -1,0 +1,35 @@
+{
+  "name": "@midday/mcp-apps",
+  "version": "1.0.0",
+  "private": true,
+  "sideEffects": false,
+  "scripts": {
+    "dev": "vite",
+    "build": "rm -rf dist && INPUT=time-series-chart vite build && INPUT=spending-chart vite build && INPUT=balance-sheet vite build && INPUT=invoice-preview vite build",
+    "clean": "rm -rf .turbo node_modules dist",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@date-fns/tz": "^1.4.1",
+    "@modelcontextprotocol/ext-apps": "^1.3.1",
+    "date-fns": "^4.1.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.6.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3",
+    "vite-plugin-singlefile": "^2.3.2"
+  }
+}

@@ -405,9 +405,8 @@ export const mcpDocumentTagSchema = z.object({
 export const mcpSearchResultSchema = z.object({
   id: z.string(),
   type: z.string(),
-  name: z.string().nullable().optional(),
-  rank: z.number().nullable().optional(),
-  headline: z.string().nullable().optional(),
+  title: z.string().nullable().optional(),
+  relevance: z.number().nullable().optional(),
 });
 
 // ============================================================
