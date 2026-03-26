@@ -26,6 +26,11 @@ import { MemoizedReactMarkdown } from "./markdown";
 import {
   ChatGPTSetupInstructions,
   ClaudeSetupInstructions,
+  ClineSetupInstructions,
+  GeminiSetupInstructions,
+  ManusSetupInstructions,
+  WindsurfSetupInstructions,
+  ZedSetupInstructions,
 } from "./mcp-setup-instructions";
 
 // OAuth app configuration
@@ -407,6 +412,16 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                         <ChatGPTSetupInstructions />
                       ) : app.id === "claude-mcp" ? (
                         <ClaudeSetupInstructions />
+                      ) : app.id === "gemini-mcp" ? (
+                        <GeminiSetupInstructions />
+                      ) : app.id === "windsurf-mcp" ? (
+                        <WindsurfSetupInstructions />
+                      ) : app.id === "cline-mcp" ? (
+                        <ClineSetupInstructions />
+                      ) : app.id === "zed-mcp" ? (
+                        <ZedSetupInstructions />
+                      ) : app.id === "manus-mcp" ? (
+                        <ManusSetupInstructions />
                       ) : (
                         <div className="prose prose-sm prose-invert prose-p:text-[#878787] prose-p:my-3 [&_strong]:text-primary [&_strong]:font-normal max-w-none">
                           <MemoizedReactMarkdown>

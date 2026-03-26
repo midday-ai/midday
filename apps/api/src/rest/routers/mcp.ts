@@ -85,6 +85,7 @@ app.all("/", async (c) => {
   const session = c.get("session");
   const scopes = (c.get("scopes") as Scope[] | undefined) ?? [];
   const geo = getGeoContext(c.req);
+
   const user = c.get("user") ?? (await getUserById(db, session.user.id));
 
   const server = createMcpServer({
@@ -96,7 +97,7 @@ app.all("/", async (c) => {
     apiUrl,
     timezone: user?.timezone || geo.timezone,
     locale: user?.locale || geo.locale,
-    countryCode: user?.team?.countryCode || geo.country,
+    countryCode: geo.country,
     dateFormat: user?.dateFormat ?? null,
     timeFormat: user?.timeFormat ?? null,
   });

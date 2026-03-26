@@ -12,6 +12,7 @@ import {
   createTransaction,
   createTransactions,
   deleteTransactions,
+  getAccountingSyncStatus,
   getAppByAppId,
   getApps,
   getTransactionById,
@@ -34,7 +35,7 @@ import {
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
-import { truncateListResponse } from "../utils";
+import { truncateListResponse, withErrorHandling } from "../utils";
 
 export const registerTransactionTools: RegisterTools = (server, ctx) => {
   const { db, teamId, userId, userEmail } = ctx;
@@ -108,7 +109,7 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const sort = params.sortBy
           ? [params.sortBy, params.sortDirection ?? "desc"]
           : null;
@@ -158,10 +159,10 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         const { text, structuredContent } = truncateListResponse(response);
 
         return {
-          content: [{ type: "text", text }],
+          content: [{ type: "text" as const, text }],
           structuredContent,
         };
-      },
+      }, "Failed to list transactions"),
     );
 
     server.registerTool(
@@ -178,12 +179,12 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async ({ id }) => {
+      withErrorHandling(async ({ id }) => {
         const result = await getTransactionById(db, { id, teamId });
 
         if (!result) {
           return {
-            content: [{ type: "text", text: "Transaction not found" }],
+            content: [{ type: "text" as const, text: "Transaction not found" }],
             isError: true,
           };
         }
@@ -191,10 +192,10 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         const clean = sanitize(mcpTransactionDetailSchema, result);
 
         return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
+          content: [{ type: "text" as const, text: JSON.stringify(clean) }],
           structuredContent: { data: clean },
         };
-      },
+      }, "Failed to get transaction"),
     );
   }
 
@@ -664,9 +665,7 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         }
       },
     );
-  }
 
-  if (hasReadScope) {
     server.registerTool(
       "export_job_status",
       {
@@ -767,6 +766,40 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           };
         }
       },
+    );
+  }
+
+  if (hasReadScope) {
+    server.registerTool(
+      "accounting_sync_status",
+      {
+        title: "Accounting Sync Status",
+        description:
+          "Check the sync status of transactions with connected accounting software. Filter by specific transaction IDs or by provider (xero, quickbooks, fortnox). Returns sync records showing which transactions have been exported and their status.",
+        inputSchema: {
+          transactionIds: z
+            .array(z.string().uuid())
+            .optional()
+            .describe("Filter by specific transaction IDs"),
+          provider: z
+            .enum(["xero", "quickbooks", "fortnox"])
+            .optional()
+            .describe("Filter by accounting provider"),
+        },
+        annotations: READ_ONLY_ANNOTATIONS,
+      },
+      withErrorHandling(async (params) => {
+        const result = await getAccountingSyncStatus(db, {
+          teamId,
+          transactionIds: params.transactionIds,
+          provider: params.provider,
+        });
+
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify(result) }],
+          structuredContent: { data: result ?? [] },
+        };
+      }, "Failed to get accounting sync status"),
     );
   }
 };

@@ -3,6 +3,7 @@
 import {
   ChatGPTMcpLogo,
   ClaudeMcpLogo,
+  ManusMcpLogo,
   PerplexityMcpLogo,
 } from "@midday/app-store/logos";
 import { Icons } from "@midday/ui/icons";
@@ -106,6 +107,19 @@ export function McpBanner() {
                 >
                   <button
                     type="button"
+                    onClick={() => setParams({ "mcp-app": "manus-mcp" })}
+                    className="block size-9 overflow-hidden rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
+                  >
+                    <ManusMcpLogo />
+                  </button>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.0, duration: 0.3 }}
+                >
+                  <button
+                    type="button"
                     onClick={() => setParams({ "mcp-app": "perplexity-mcp" })}
                     className="block size-9 overflow-hidden rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                   >
@@ -120,8 +134,8 @@ export function McpBanner() {
                 Midday works with your AI tools
               </h3>
               <p className="text-xs text-muted-foreground">
-                Connect ChatGPT, Claude, Perplexity and more to your financial
-                data via MCP.
+                Connect ChatGPT, Claude, Manus and more to your financial data
+                via MCP.
               </p>
             </Link>
           </div>

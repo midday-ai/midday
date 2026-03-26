@@ -10,13 +10,23 @@ import {
   deleteInvoice,
   draftInvoice,
   duplicateInvoice,
+  getAverageDaysToPayment,
+  getAverageInvoiceSize,
   getCustomerById,
+  getInactiveClientsCount,
   getInvoiceById,
   getInvoiceSummary,
   getInvoices,
   getInvoiceTemplate,
+  getMostActiveClient,
+  getNewCustomersCount,
   getNextInvoiceNumber,
+  getPaymentStatus,
+  getTopRevenueClient,
+  getTrackerProjectById,
+  getTrackerRecordsByRange,
   isInvoiceNumberUsed,
+  searchInvoiceNumber,
   updateInvoice,
 } from "@midday/db/queries";
 import { DEFAULT_TEMPLATE, PdfTemplate, renderToStream } from "@midday/invoice";
@@ -45,6 +55,7 @@ import {
   streamToResource,
   textToEditorDoc,
   truncateListResponse,
+  withErrorHandling,
 } from "../utils";
 
 export const registerInvoiceTools: RegisterTools = (server, ctx) => {
@@ -95,7 +106,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const sort = params.sortBy
           ? [params.sortBy, params.sortDirection ?? "desc"]
           : null;
@@ -137,10 +148,10 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         const { text, structuredContent } = truncateListResponse(response);
 
         return {
-          content: [{ type: "text", text }],
+          content: [{ type: "text" as const, text }],
           structuredContent,
         };
-      },
+      }, "Failed to list invoices"),
     );
 
     server.registerTool(
@@ -159,12 +170,12 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async ({ id, download: includePdf }) => {
+      withErrorHandling(async ({ id, download: includePdf }) => {
         const result = await getInvoiceById(db, { id, teamId });
 
         if (!result) {
           return {
-            content: [{ type: "text", text: "Invoice not found" }],
+            content: [{ type: "text" as const, text: "Invoice not found" }],
             isError: true,
           };
         }
@@ -184,7 +195,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
         const content: McpContent[] = [
           {
-            type: "text",
+            type: "text" as const,
             text: JSON.stringify(clean),
           },
         ];
@@ -202,14 +213,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             content.push(resource);
           } catch {
             content.push({
-              type: "text",
+              type: "text" as const,
               text: "Failed to generate PDF",
             });
           }
         }
 
         return { content };
-      },
+      }, "Failed to get invoice"),
     );
 
     server.registerTool(
@@ -224,17 +235,120 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const result = await getInvoiceSummary(db, {
           teamId,
           statuses: params.statuses,
         });
 
         return {
-          content: [{ type: "text", text: JSON.stringify(result) }],
+          content: [{ type: "text" as const, text: JSON.stringify(result) }],
           structuredContent: { data: result },
         };
+      }, "Failed to get invoice summary"),
+    );
+
+    server.registerTool(
+      "invoices_search_number",
+      {
+        title: "Search Invoice Number",
+        description:
+          "Search for an invoice by its invoice number. Returns the matching invoice number if found. Useful for checking if a specific invoice number exists.",
+        inputSchema: {
+          query: z.string().describe("Invoice number to search for"),
+        },
+        outputSchema: {
+          data: z.record(z.string(), z.any()).nullable(),
+        },
+        annotations: READ_ONLY_ANNOTATIONS,
       },
+      withErrorHandling(async ({ query }) => {
+        const result = await searchInvoiceNumber(db, { teamId, query });
+
+        if (!result) {
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: "No matching invoice number found",
+              },
+            ],
+            structuredContent: { data: null },
+          };
+        }
+
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify(result) }],
+          structuredContent: { data: result },
+        };
+      }, "Failed to search invoice number"),
+    );
+
+    server.registerTool(
+      "invoices_payment_status",
+      {
+        title: "Invoice Payment Status Score",
+        description:
+          "Get the team's overall invoice payment health score and status. Returns a score (0-100) and a descriptive payment status indicating how well clients are paying.",
+        inputSchema: {},
+        outputSchema: {
+          data: z.record(z.string(), z.any()),
+        },
+        annotations: READ_ONLY_ANNOTATIONS,
+      },
+      withErrorHandling(async () => {
+        const result = await getPaymentStatus(db, teamId);
+
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify(result) }],
+          structuredContent: { data: result },
+        };
+      }, "Failed to get payment status"),
+    );
+
+    server.registerTool(
+      "invoices_analytics",
+      {
+        title: "Invoice Analytics",
+        description:
+          "Get comprehensive invoice analytics: average days to payment, average invoice size by currency, most active client, top revenue client, inactive clients count, and new customers count. Provides a holistic view of invoicing health.",
+        inputSchema: {},
+        outputSchema: {
+          data: z.record(z.string(), z.any()),
+        },
+        annotations: READ_ONLY_ANNOTATIONS,
+      },
+      withErrorHandling(async () => {
+        const [
+          avgDaysToPayment,
+          avgInvoiceSize,
+          mostActiveClient,
+          topRevenueClient,
+          inactiveClientsCount,
+          newCustomersCount,
+        ] = await Promise.all([
+          getAverageDaysToPayment(db, { teamId }),
+          getAverageInvoiceSize(db, { teamId }),
+          getMostActiveClient(db, { teamId }),
+          getTopRevenueClient(db, { teamId }),
+          getInactiveClientsCount(db, { teamId }),
+          getNewCustomersCount(db, { teamId }),
+        ]);
+
+        const analytics = {
+          averageDaysToPayment: avgDaysToPayment,
+          averageInvoiceSize: avgInvoiceSize,
+          mostActiveClient,
+          topRevenueClient,
+          inactiveClientsCount,
+          newCustomersCount,
+        };
+
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify(analytics) }],
+          structuredContent: { data: analytics },
+        };
+      }, "Failed to get invoice analytics"),
     );
   }
 
@@ -308,6 +422,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -395,6 +510,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -463,6 +579,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
                 text: JSON.stringify({ success: true, deletedId: result.id }),
               },
             ],
+            structuredContent: { success: true, deletedId: result.id },
           };
         } catch (error) {
           return {
@@ -523,6 +640,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -602,6 +720,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -676,18 +795,16 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             ? `${DASHBOARD_URL}/i/${existing.token}`
             : null;
 
+          const response = {
+            message: `Payment reminder sent for invoice ${existing.invoiceNumber}${existing.sentTo ? ` to ${existing.sentTo}` : ""}`,
+            invoiceId: id,
+            reminderSentAt: now,
+            previewUrl,
+          };
+
           return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  message: `Payment reminder sent for invoice ${existing.invoiceNumber}${existing.sentTo ? ` to ${existing.sentTo}` : ""}`,
-                  invoiceId: id,
-                  reminderSentAt: now,
-                  previewUrl,
-                }),
-              },
-            ],
+            content: [{ type: "text", text: JSON.stringify(response) }],
+            structuredContent: response,
           };
         } catch (error) {
           return {
@@ -935,16 +1052,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
                 ? "saved as draft — use invoices_send to send, or open the previewUrl to review"
                 : "created";
 
+          const response = {
+            message: `Invoice ${invoiceNumber} ${action}. Total: ${total} ${mergedTemplate.currency}`,
+            invoice: clean,
+          };
+
           return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  message: `Invoice ${invoiceNumber} ${action}. Total: ${total} ${mergedTemplate.currency}`,
-                  invoice: clean,
-                }),
-              },
-            ],
+            content: [{ type: "text", text: JSON.stringify(response) }],
+            structuredContent: response,
           };
         } catch (error) {
           return {
@@ -1169,16 +1284,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             previewUrl,
           });
 
+          const response = {
+            message: `Draft invoice ${existing.invoiceNumber} updated. Total: ${total} ${templateCurrency}`,
+            invoice: clean,
+          };
+
           return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  message: `Draft invoice ${existing.invoiceNumber} updated. Total: ${total} ${templateCurrency}`,
-                  invoice: clean,
-                }),
-              },
-            ],
+            content: [{ type: "text", text: JSON.stringify(response) }],
+            structuredContent: response,
           };
         } catch (error) {
           return {
@@ -1271,18 +1384,16 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             ? `${DASHBOARD_URL}/i/${existing.token}`
             : null;
 
+          const response = {
+            message: `Invoice ${existing.invoiceNumber} is being sent to ${recipientEmail}`,
+            invoiceId: id,
+            sentTo: recipientEmail,
+            previewUrl,
+          };
+
           return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  message: `Invoice ${existing.invoiceNumber} is being sent to ${recipientEmail}`,
-                  invoiceId: id,
-                  sentTo: recipientEmail,
-                  previewUrl,
-                }),
-              },
-            ],
+            content: [{ type: "text", text: JSON.stringify(response) }],
+            structuredContent: response,
           };
         } catch (error) {
           return {
@@ -1293,6 +1404,221 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
                   error instanceof Error
                     ? error.message
                     : "Failed to send invoice",
+              },
+            ],
+            isError: true,
+          };
+        }
+      },
+    );
+
+    server.registerTool(
+      "invoices_create_from_tracker",
+      {
+        title: "Create Invoice from Time Tracker",
+        description:
+          "Create an invoice from tracked time entries on a project. Specify the project and date range to include. Line items are auto-generated from time entries using the project's billable rate. The invoice is created as a draft.",
+        inputSchema: {
+          projectId: z
+            .string()
+            .uuid()
+            .describe("Tracker project ID to invoice"),
+          dateFrom: z
+            .string()
+            .describe("Start date for time entries to include (YYYY-MM-DD)"),
+          dateTo: z
+            .string()
+            .describe("End date for time entries to include (YYYY-MM-DD)"),
+        },
+        annotations: WRITE_ANNOTATIONS,
+      },
+      async (params) => {
+        try {
+          const project = await getTrackerProjectById(db, {
+            id: params.projectId,
+            teamId,
+          });
+
+          if (!project) {
+            return {
+              content: [{ type: "text", text: "Tracker project not found" }],
+              isError: true,
+            };
+          }
+
+          if (!project.customerId) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "Project has no customer assigned. Assign a customer to the project first.",
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          const customer = await getCustomerById(db, {
+            id: project.customerId,
+            teamId,
+          });
+
+          if (!customer) {
+            return {
+              content: [
+                { type: "text", text: "Customer not found for this project" },
+              ],
+              isError: true,
+            };
+          }
+
+          const trackerData = await getTrackerRecordsByRange(db, {
+            teamId,
+            from: params.dateFrom,
+            to: params.dateTo,
+            projectId: params.projectId,
+          });
+
+          const allEntries = Object.values(trackerData.result).flat() as any[];
+
+          if (allEntries.length === 0) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `No time entries found for project "${project.name}" between ${params.dateFrom} and ${params.dateTo}`,
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          const rate = project.rate ?? 0;
+          const currency = project.currency ?? "USD";
+
+          const totalDuration = allEntries.reduce(
+            (sum: number, e: any) => sum + (e.duration ?? 0),
+            0,
+          );
+          const totalHours = Math.round((totalDuration / 3600) * 100) / 100;
+
+          const lineItems = [
+            {
+              name: `${project.name} — ${params.dateFrom} to ${params.dateTo} (${totalHours}h)`,
+              quantity: totalHours,
+              price: rate,
+              unit: "hours",
+            },
+          ];
+
+          const savedTemplate = await getInvoiceTemplate(db, teamId);
+          const paymentTermsDays = savedTemplate?.paymentTermsDays ?? 30;
+
+          const mergedTemplate = {
+            ...DEFAULT_TEMPLATE,
+            ...Object.fromEntries(
+              Object.entries(savedTemplate ?? {}).filter(([_, v]) => v != null),
+            ),
+            currency: currency.toUpperCase(),
+            deliveryType: "create" as const,
+          };
+
+          const invoiceNumber = await getNextInvoiceNumber(db, teamId);
+          const issueDateStr = new Date().toISOString();
+          const dueDateStr = addDays(
+            new Date(issueDateStr),
+            paymentTermsDays,
+          ).toISOString();
+
+          const customerDetails = transformCustomerToContent(customer);
+          const noteDetails =
+            (savedTemplate?.noteDetails as string | null) ?? null;
+
+          const { subTotal, total, vat, tax } = calculateTotal({
+            lineItems,
+            taxRate: mergedTemplate.taxRate ?? 0,
+            vatRate: mergedTemplate.vatRate ?? 0,
+            discount: 0,
+            includeVat: mergedTemplate.includeVat ?? false,
+            includeTax: mergedTemplate.includeTax ?? false,
+          });
+
+          const invoiceId = uuidv4();
+
+          const result = await draftInvoice(db, {
+            id: invoiceId,
+            teamId,
+            userId,
+            invoiceNumber,
+            issueDate: issueDateStr,
+            dueDate: dueDateStr,
+            templateId: savedTemplate?.id ?? null,
+            template: mergedTemplate,
+            customerId: customer.id,
+            customerName: customer.name,
+            customerDetails: customerDetails
+              ? JSON.stringify(customerDetails)
+              : null,
+            fromDetails: (savedTemplate?.fromDetails as string | null) ?? null,
+            paymentDetails:
+              (savedTemplate?.paymentDetails as string | null) ?? null,
+            noteDetails,
+            logoUrl: mergedTemplate.logoUrl,
+            lineItems: lineItems.map((item) => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+              unit: item.unit ?? null,
+            })),
+            subtotal: subTotal,
+            amount: total,
+            vat,
+            tax,
+            discount: null,
+          });
+
+          if (!result) {
+            return {
+              content: [
+                { type: "text", text: "Failed to create invoice from tracker" },
+              ],
+              isError: true,
+            };
+          }
+
+          const fresh = await getInvoiceById(db, { id: result.id, teamId });
+
+          const pdfUrl = fresh?.token
+            ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(fresh.token)}`
+            : null;
+          const previewUrl = fresh?.token
+            ? `${DASHBOARD_URL}/i/${fresh.token}`
+            : null;
+
+          const clean = sanitize(mcpInvoiceDetailSchema, {
+            ...(fresh ?? result),
+            pdfUrl,
+            previewUrl,
+          });
+
+          const response = {
+            message: `Invoice ${invoiceNumber} created from ${totalHours}h tracked on "${project.name}". Total: ${total} ${currency}`,
+            invoice: clean,
+          };
+
+          return {
+            content: [{ type: "text", text: JSON.stringify(response) }],
+            structuredContent: response,
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to create invoice from tracker",
               },
             ],
             isError: true,

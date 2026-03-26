@@ -308,6 +308,109 @@ export const mcpInboxDetailSchema = mcpInboxItemSchema.extend({
 });
 
 // ============================================================
+// Transaction category schema
+// ============================================================
+
+export const mcpCategoryDetailSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  color: z.string().nullable().optional(),
+  slug: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  system: z.boolean().nullable().optional(),
+  taxRate: z.number().nullable().optional(),
+  taxType: z.string().nullable().optional(),
+  taxReportingCode: z.string().nullable().optional(),
+  parentId: z.string().nullable().optional(),
+  children: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        color: z.string().nullable().optional(),
+        slug: z.string().nullable().optional(),
+      }),
+    )
+    .nullable()
+    .optional(),
+});
+
+// ============================================================
+// Invoice product schema
+// ============================================================
+
+export const mcpInvoiceProductSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullable().optional(),
+  price: z.number().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  unit: z.string().nullable().optional(),
+  taxRate: z.number().nullable().optional(),
+  isActive: z.boolean().optional(),
+  usageCount: z.number().optional(),
+  lastUsedAt: z.string().nullable().optional(),
+  createdAt: z.string().nullable().optional(),
+});
+
+// ============================================================
+// Bank account details schema (sensitive — only expose safe fields)
+// ============================================================
+
+export const mcpBankAccountDetailsSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable().optional(),
+  iban: z.string().nullable().optional(),
+  accountNumber: z.string().nullable().optional(),
+  bic: z.string().nullable().optional(),
+  routingNumber: z.string().nullable().optional(),
+  sortCode: z.string().nullable().optional(),
+});
+
+// ============================================================
+// Bank account balance schema
+// ============================================================
+
+export const mcpBankAccountBalanceSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  currency: z.string().nullable().optional(),
+  balance: z.number().nullable().optional(),
+  baseCurrency: z.string().nullable().optional(),
+  baseBalance: z.number().nullable().optional(),
+});
+
+// ============================================================
+// Bank account currency schema
+// ============================================================
+
+export const mcpBankAccountCurrencySchema = z.object({
+  currency: z.string(),
+});
+
+// ============================================================
+// Document tag schema
+// ============================================================
+
+export const mcpDocumentTagSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string().nullable().optional(),
+});
+
+// ============================================================
+// Search result schema
+// ============================================================
+
+export const mcpSearchResultSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  name: z.string().nullable().optional(),
+  rank: z.number().nullable().optional(),
+  headline: z.string().nullable().optional(),
+});
+
+// ============================================================
 // Tag schema
 // ============================================================
 
@@ -346,42 +449,48 @@ export const mcpTeamMemberSchema = z.object({
 });
 
 // ============================================================
-// Utility: safe parse with fallback
+// Utility: safe parse with allowlist fallback
 // ============================================================
 
-const SENSITIVE_KEYS = new Set([
-  "accessToken",
-  "enrollmentId",
-  "token",
-  "paymentIntentId",
-  "scheduledJobId",
-  "filePath",
-  "documentPath",
-  "internalNote",
-  "fts",
-  "teamId",
-  "accountNumber",
-  "routingNumber",
-  "wireRoutingNumber",
-  "sortCode",
-  "iban",
-  "bic",
-  "accountReference",
-]);
+/**
+ * Recursively keep only the keys declared in a Zod schema.
+ * Wrapper types (optional, nullable, default) are unwrapped to reach
+ * the underlying ZodObject/ZodArray. Leaf types pass through as-is.
+ *
+ * The `as any` casts on `.unwrap()`, `.element`, and `.shape` work
+ * around Zod v4's split core/$ZodType vs classic/ZodType hierarchy;
+ * the values are correct at runtime.
+ */
+function pickKnownKeys(schema: z.ZodTypeAny, data: unknown): unknown {
+  if (data == null) return data;
 
-function stripSensitive(obj: unknown): unknown {
-  if (obj === null || obj === undefined || typeof obj !== "object") return obj;
-  if (Array.isArray(obj)) return obj.map(stripSensitive);
-  const clean: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-    if (!SENSITIVE_KEYS.has(key)) {
-      clean[key] =
-        typeof value === "object" && value !== null
-          ? stripSensitive(value)
-          : value;
-    }
+  if (
+    schema instanceof z.ZodOptional ||
+    schema instanceof z.ZodNullable ||
+    schema instanceof z.ZodDefault
+  ) {
+    return pickKnownKeys((schema as any).unwrap(), data);
   }
-  return clean;
+
+  if (schema instanceof z.ZodArray && Array.isArray(data)) {
+    return data.map((item) => pickKnownKeys((schema as any).element, item));
+  }
+
+  if (
+    schema instanceof z.ZodObject &&
+    typeof data === "object" &&
+    !Array.isArray(data)
+  ) {
+    const shape = (schema as any).shape as Record<string, z.ZodTypeAny>;
+    const src = data as Record<string, unknown>;
+    const out: Record<string, unknown> = {};
+    for (const key of Object.keys(shape)) {
+      if (key in src) out[key] = pickKnownKeys(shape[key]!, src[key]);
+    }
+    return out;
+  }
+
+  return data;
 }
 
 export function sanitize<T extends z.ZodTypeAny>(
@@ -390,7 +499,7 @@ export function sanitize<T extends z.ZodTypeAny>(
 ): z.output<T> {
   const result = schema.safeParse(data);
   if (result.success) return result.data;
-  return stripSensitive(data) as z.output<T>;
+  return pickKnownKeys(schema, data) as z.output<T>;
 }
 
 export function sanitizeArray<T extends z.ZodTypeAny>(

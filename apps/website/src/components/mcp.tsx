@@ -3,14 +3,19 @@
 import {
   ChatGPTMcpLogo,
   ClaudeMcpLogo,
+  ClineMcpLogo,
   CopilotMcpLogo,
   CursorMcpLogo,
+  GeminiMcpLogo,
   MakeMcpLogo,
+  ManusMcpLogo,
   N8nMcpLogo,
   OpenCodeMcpLogo,
   PerplexityMcpLogo,
   RaycastMcpLogo,
+  WindsurfMcpLogo,
   ZapierMcpLogo,
+  ZedMcpLogo,
 } from "@midday/app-store/logos";
 import { Button } from "@midday/ui/button";
 import Image from "next/image";
@@ -49,6 +54,30 @@ const clients = [
     href: "/mcp/chatgpt",
   },
   {
+    id: "gemini",
+    name: "Gemini",
+    description: "Financial data from your terminal",
+    href: "/mcp/gemini",
+  },
+  {
+    id: "windsurf",
+    name: "Windsurf",
+    description: "Financial data in your AI IDE",
+    href: "/mcp/windsurf",
+  },
+  {
+    id: "cline",
+    name: "Cline",
+    description: "Financial data in VS Code",
+    href: "/mcp/cline",
+  },
+  {
+    id: "zed",
+    name: "Zed",
+    description: "Financial data in the fastest editor",
+    href: "/mcp/zed",
+  },
+  {
     id: "opencode",
     name: "OpenCode",
     description: "Track time for clients from your terminal",
@@ -77,6 +106,12 @@ const clients = [
     name: "Make",
     description: "Visual automations with 1,500+ apps",
     href: "/mcp/make",
+  },
+  {
+    id: "manus",
+    name: "Manus",
+    description: "Automate workflows with AI agents",
+    href: "/mcp/manus",
   },
 ];
 
@@ -121,11 +156,16 @@ function ClientLogo({
     perplexity: PerplexityMcpLogo,
     raycast: RaycastMcpLogo,
     chatgpt: ChatGPTMcpLogo,
+    gemini: GeminiMcpLogo,
+    windsurf: WindsurfMcpLogo,
+    cline: ClineMcpLogo,
+    zed: ZedMcpLogo,
     opencode: OpenCodeMcpLogo,
     zapier: ZapierMcpLogo,
     copilot: CopilotMcpLogo,
     n8n: N8nMcpLogo,
     make: MakeMcpLogo,
+    manus: ManusMcpLogo,
   };
 
   const Logo = logos[id];
@@ -202,9 +242,9 @@ export function MCP() {
                 Midday, everywhere
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Connect Claude, ChatGPT, Perplexity, Cursor, and more to your
-                Midday account. Create invoices, export transactions, track
-                time, and run your business from any AI tool.
+                Connect Claude, ChatGPT, Gemini, Cursor, Windsurf, Zed, and more
+                to your Midday account. Create invoices, export transactions,
+                track time, and run your business from any AI tool.
               </p>
             </div>
 
@@ -243,9 +283,9 @@ export function MCP() {
                 Midday, everywhere
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Connect Claude, ChatGPT, Perplexity, Cursor, and more to your
-                Midday account. Create invoices, export transactions, track
-                time, and run your business from any AI tool.
+                Connect Claude, ChatGPT, Gemini, Cursor, Windsurf, Zed, and more
+                to your Midday account. Create invoices, export transactions,
+                track time, and run your business from any AI tool.
               </p>
             </div>
 

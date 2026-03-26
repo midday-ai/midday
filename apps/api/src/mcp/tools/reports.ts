@@ -29,6 +29,7 @@ import {
 } from "@midday/db/queries";
 import { z } from "zod";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { withErrorHandling } from "../utils";
 
 const periodResultSchema = {
   summary: z.record(z.string(), z.any()),
@@ -53,7 +54,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       outputSchema: periodResultSchema,
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getReports(db, {
         teamId,
         from: params.from,
@@ -67,7 +68,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,
       };
-    },
+    }, "Failed to get revenue report"),
   );
 
   server.registerTool(
@@ -80,7 +81,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       outputSchema: periodResultSchema,
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getReports(db, {
         teamId,
         from: params.from,
@@ -94,7 +95,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,
       };
-    },
+    }, "Failed to get profit report"),
   );
 
   server.registerTool(
@@ -109,7 +110,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getBurnRate(db, {
         teamId,
         from: params.from,
@@ -121,7 +122,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
-    },
+    }, "Failed to get burn rate report"),
   );
 
   server.registerTool(
@@ -136,7 +137,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getRunway(db, {
         teamId,
         currency: params.currency,
@@ -146,7 +147,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { months: result },
       };
-    },
+    }, "Failed to get runway report"),
   );
 
   server.registerTool(
@@ -159,7 +160,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       outputSchema: periodResultSchema,
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getExpenses(db, {
         teamId,
         from: params.from,
@@ -171,7 +172,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,
       };
-    },
+    }, "Failed to get expenses report"),
   );
 
   server.registerTool(
@@ -186,7 +187,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getSpending(db, {
         teamId,
         from: params.from,
@@ -198,7 +199,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
-    },
+    }, "Failed to get spending report"),
   );
 
   server.registerTool(
@@ -213,7 +214,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getTaxSummary(db, {
         teamId,
         from: params.from,
@@ -230,7 +231,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data },
       };
-    },
+    }, "Failed to get tax summary"),
   );
 
   server.registerTool(
@@ -245,7 +246,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getGrowthRate(db, {
         teamId,
         from: params.from,
@@ -260,7 +261,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
-    },
+    }, "Failed to get growth rate report"),
   );
 
   server.registerTool(
@@ -275,7 +276,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getProfitMargin(db, {
         teamId,
         from: params.from,
@@ -288,7 +289,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
-    },
+    }, "Failed to get profit margin report"),
   );
 
   server.registerTool(
@@ -303,7 +304,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getCashFlow(db, {
         teamId,
         from: params.from,
@@ -316,7 +317,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
-    },
+    }, "Failed to get cash flow report"),
   );
 
   server.registerTool(
@@ -331,7 +332,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getRecurringExpenses(db, {
         teamId,
         from: params.from,
@@ -345,7 +346,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data },
       };
-    },
+    }, "Failed to get recurring expenses"),
   );
 
   server.registerTool(
@@ -364,7 +365,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getRevenueForecast(db, {
         teamId,
         from: params.from,
@@ -378,7 +379,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: result,
       };
-    },
+    }, "Failed to get revenue forecast"),
   );
 
   server.registerTool(
@@ -393,7 +394,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await getBalanceSheet(db, {
         teamId,
         asOf: params.asOf,
@@ -404,6 +405,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         content: [{ type: "text", text: JSON.stringify(result) }],
         structuredContent: { data: result },
       };
-    },
+    }, "Failed to get balance sheet"),
   );
 };

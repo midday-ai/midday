@@ -37,7 +37,7 @@ import {
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
-import { truncateListResponse } from "../utils";
+import { truncateListResponse, withErrorHandling } from "../utils";
 
 export const registerTrackerTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
@@ -99,7 +99,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const sort = params.sortBy
           ? [params.sortBy, params.sortDirection ?? "desc"]
           : null;
@@ -129,10 +129,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         const { text, structuredContent } = truncateListResponse(response);
 
         return {
-          content: [{ type: "text", text }],
+          content: [{ type: "text" as const, text }],
           structuredContent,
         };
-      },
+      }, "Failed to list tracker projects"),
     );
 
     server.registerTool(
@@ -149,12 +149,12 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async ({ id }) => {
+      withErrorHandling(async ({ id }) => {
         const result = await getTrackerProjectById(db, { id, teamId });
 
         if (!result) {
           return {
-            content: [{ type: "text", text: "Project not found" }],
+            content: [{ type: "text" as const, text: "Project not found" }],
             isError: true,
           };
         }
@@ -162,10 +162,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         const clean = sanitize(mcpTrackerProjectSchema, result);
 
         return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
+          content: [{ type: "text" as const, text: JSON.stringify(clean) }],
           structuredContent: { data: clean },
         };
-      },
+      }, "Failed to get tracker project"),
     );
   }
 
@@ -206,6 +206,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -279,6 +280,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -331,6 +333,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
                 text: JSON.stringify({ success: true, deletedId: result.id }),
               },
             ],
+            structuredContent: { success: true, deletedId: result.id },
           };
         } catch (error) {
           return {
@@ -381,7 +384,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const result = await getTrackerRecordsByRange(db, {
           teamId,
           from: params.from,
@@ -430,10 +433,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         };
 
         return {
-          content: [{ type: "text", text: JSON.stringify(response) }],
+          content: [{ type: "text" as const, text: JSON.stringify(response) }],
           structuredContent: response,
         };
-      },
+      }, "Failed to list tracker entries"),
     );
 
     server.registerTool(
@@ -455,7 +458,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const result = await getTimerStatus(db, {
           teamId,
           assignedId: params.assignedId,
@@ -464,10 +467,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         const clean = sanitize(mcpTrackerEntrySchema, result);
 
         return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
+          content: [{ type: "text" as const, text: JSON.stringify(clean) }],
           structuredContent: { data: clean },
         };
-      },
+      }, "Failed to get timer status"),
     );
   }
 
@@ -506,6 +509,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -587,6 +591,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -639,6 +644,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
                 text: JSON.stringify({ success: true, deletedId: result.id }),
               },
             ],
+            structuredContent: { success: true, deletedId: result.id },
           };
         } catch (error) {
           return {
@@ -685,6 +691,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -729,6 +736,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {

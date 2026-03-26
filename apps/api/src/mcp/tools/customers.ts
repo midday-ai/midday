@@ -24,7 +24,7 @@ import {
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
-import { truncateListResponse } from "../utils";
+import { truncateListResponse, withErrorHandling } from "../utils";
 
 export const registerCustomerTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
@@ -79,7 +79,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const sort = params.sortBy
           ? [params.sortBy, params.sortDirection ?? "desc"]
           : null;
@@ -107,7 +107,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           content: [{ type: "text", text }],
           structuredContent,
         };
-      },
+      }, "Failed to list customers"),
     );
 
     server.registerTool(
@@ -124,7 +124,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async ({ id }) => {
+      withErrorHandling(async ({ id }) => {
         const result = await getCustomerById(db, { id, teamId });
 
         if (!result) {
@@ -140,7 +140,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           content: [{ type: "text", text: JSON.stringify(clean) }],
           structuredContent: { data: clean },
         };
-      },
+      }, "Failed to get customer"),
     );
   }
 
@@ -197,6 +197,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -281,6 +282,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -321,6 +323,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
                 text: JSON.stringify({ success: true, deleted: result }),
               },
             ],
+            structuredContent: { success: true, deleted: result },
           };
         } catch (error) {
           return {

@@ -3,9 +3,12 @@ import { registerPrompts } from "./prompts";
 import { registerResources } from "./resources";
 import {
   registerBankAccountTools,
+  registerCategoryTools,
   registerCustomerTools,
   registerDocumentTools,
   registerInboxTools,
+  registerInvoiceProductTools,
+  registerInvoiceRecurringTools,
   registerInvoiceTools,
   registerReportTools,
   registerSearchTools,
@@ -56,6 +59,9 @@ Tools are namespaced by domain — use the prefix to discover related tools:
 - documents_* — File vault for receipts and documents
 - inbox_* — Incoming receipts and documents pending processing
 - bank_accounts_* — Connected bank account information
+- categories_* — Transaction categories (create, update, delete custom categories)
+- invoice_products_* — Reusable line item product catalog
+- invoice_recurring_* — Recurring invoice schedules
 - tags_* — Reusable labels for organizing records
 - team_* — Team metadata and member information
 - search_global — Full-text search across all data types
@@ -104,7 +110,10 @@ export function createMcpServer(ctx: McpContext): McpServer {
 
   // Register tools by domain
   registerTransactionTools(server, ctx);
+  registerCategoryTools(server, ctx);
   registerInvoiceTools(server, ctx);
+  registerInvoiceProductTools(server, ctx);
+  registerInvoiceRecurringTools(server, ctx);
   registerCustomerTools(server, ctx);
   registerBankAccountTools(server, ctx);
   registerDocumentTools(server, ctx);

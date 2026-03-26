@@ -1,7 +1,9 @@
 import { globalSearchSchema } from "@api/schemas/search";
 import { globalSearchQuery } from "@midday/db/queries";
 import { z } from "zod";
+import { mcpSearchResultSchema, sanitizeArray } from "../schemas";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { withErrorHandling } from "../utils";
 
 export const registerSearchTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
@@ -22,7 +24,7 @@ export const registerSearchTools: RegisterTools = (server, ctx) => {
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
-    async (params) => {
+    withErrorHandling(async (params) => {
       const result = await globalSearchQuery(db, {
         teamId,
         searchTerm: params.searchTerm,
@@ -32,10 +34,12 @@ export const registerSearchTools: RegisterTools = (server, ctx) => {
         relevanceThreshold: params.relevanceThreshold,
       });
 
+      const clean = sanitizeArray(mcpSearchResultSchema, result ?? []);
+
       return {
-        content: [{ type: "text", text: JSON.stringify(result) }],
-        structuredContent: { data: result },
+        content: [{ type: "text", text: JSON.stringify(clean) }],
+        structuredContent: { data: clean },
       };
-    },
+    }, "Failed to perform search"),
   );
 };

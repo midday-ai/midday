@@ -3,10 +3,15 @@
 import {
   ChatGPTMcpLogo,
   ClaudeMcpLogo,
+  ClineMcpLogo,
   CopilotMcpLogo,
   CursorMcpLogo,
+  GeminiMcpLogo,
+  ManusMcpLogo,
   PerplexityMcpLogo,
   RaycastMcpLogo,
+  WindsurfMcpLogo,
+  ZedMcpLogo,
 } from "@midday/app-store/logos";
 import {
   Accordion,
@@ -28,9 +33,14 @@ const primaryClients: { id: string; name: string; Logo: ComponentType }[] = [
 
 const moreClients: { id: string; name: string; Logo: ComponentType }[] = [
   { id: "cursor-mcp", name: "Cursor", Logo: CursorMcpLogo },
+  { id: "gemini-mcp", name: "Gemini", Logo: GeminiMcpLogo },
+  { id: "windsurf-mcp", name: "Windsurf", Logo: WindsurfMcpLogo },
+  { id: "cline-mcp", name: "Cline", Logo: ClineMcpLogo },
+  { id: "zed-mcp", name: "Zed", Logo: ZedMcpLogo },
   { id: "perplexity-mcp", name: "Perplexity", Logo: PerplexityMcpLogo },
   { id: "copilot-mcp", name: "Copilot", Logo: CopilotMcpLogo },
   { id: "raycast-mcp", name: "Raycast", Logo: RaycastMcpLogo },
+  { id: "manus-mcp", name: "Manus", Logo: ManusMcpLogo },
 ];
 
 function McpConnectButton({

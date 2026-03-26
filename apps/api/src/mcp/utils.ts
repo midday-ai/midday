@@ -72,22 +72,32 @@ export function truncateListResponse<T>(response: PaginatedResponse<T>): {
   const data = [...response.data];
   while (data.length > 1 && text.length > MCP_TEXT_LIMIT) {
     data.pop();
-    const truncated: PaginatedResponse<T> = {
+    text = JSON.stringify({
       ...response,
       meta: {
         ...response.meta,
         hasNextPage: true,
         truncated: true,
         returnedItems: data.length,
-        hint: "Response truncated to fit context limits. Use cursor or narrow your filters to see more results.",
       },
       data,
-    };
-    text = JSON.stringify(truncated);
-    response = truncated;
+    });
   }
 
-  return { text, structuredContent: response };
+  const result: PaginatedResponse<T> = {
+    ...response,
+    meta: {
+      ...response.meta,
+      hasNextPage: true,
+      truncated: true,
+      returnedItems: data.length,
+      hint: "Response truncated to fit context limits. Use cursor or narrow your filters to see more results.",
+    },
+    data: [...data],
+  };
+  text = JSON.stringify(result);
+
+  return { text, structuredContent: result };
 }
 
 /**
@@ -102,6 +112,31 @@ export function textToEditorDoc(text: string) {
       content: line ? [{ type: "text" as const, text: line }] : [],
     })),
   };
+}
+
+/**
+ * Wrap a tool handler with try/catch to return graceful `isError` responses
+ * instead of propagating unhandled exceptions through the transport.
+ */
+export function withErrorHandling<Args extends unknown[], R>(
+  handler: (...args: Args) => Promise<R>,
+  fallbackMessage: string,
+): (...args: Args) => Promise<R> {
+  return (async (...args: Args) => {
+    try {
+      return await handler(...args);
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: error instanceof Error ? error.message : fallbackMessage,
+          },
+        ],
+        isError: true,
+      } as R;
+    }
+  }) as (...args: Args) => Promise<R>;
 }
 
 export type TextContent = { type: "text"; text: string };

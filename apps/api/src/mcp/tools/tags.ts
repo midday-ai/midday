@@ -19,6 +19,7 @@ import {
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
+import { withErrorHandling } from "../utils";
 
 export const registerTagTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
@@ -43,7 +44,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async () => {
+      withErrorHandling(async () => {
         const result = await getTags(db, { teamId });
 
         const clean = sanitizeArray(mcpTagResponseSchema, result ?? []);
@@ -52,7 +53,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
           content: [{ type: "text", text: JSON.stringify(clean) }],
           structuredContent: { data: clean },
         };
-      },
+      }, "Failed to list tags"),
     );
 
     server.registerTool(
@@ -68,7 +69,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async ({ id }) => {
+      withErrorHandling(async ({ id }) => {
         const result = await getTagById(db, { id, teamId });
 
         if (!result) {
@@ -84,7 +85,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
           content: [{ type: "text", text: JSON.stringify(clean) }],
           structuredContent: { data: clean },
         };
-      },
+      }, "Failed to get tag"),
     );
   }
 
@@ -178,7 +179,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
         inputSchema: deleteTagSchema.shape,
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const result = await deleteTag(db, { id: params.id, teamId });
 
         if (!result) {
@@ -196,7 +197,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
           content: [{ type: "text", text: JSON.stringify(clean) }],
           structuredContent: { data: clean },
         };
-      },
+      }, "Failed to delete tag"),
     );
   }
 };

@@ -3,15 +3,18 @@
 import {
   ChatGPTMcpLogo,
   ClaudeMcpLogo,
+  ClineMcpLogo,
   CopilotMcpLogo,
   CursorMcpLogo,
   DeelLogo,
   DropboxLogo,
   EInvoiceLogo,
   FortnoxLogo,
+  GeminiMcpLogo,
   GmailLogo,
   GoogleDriveLogo,
   MakeMcpLogo,
+  ManusMcpLogo,
   MiddayDesktopLogo,
   N8nMcpLogo,
   OpenCodeMcpLogo,
@@ -25,8 +28,10 @@ import {
   StripeLogo,
   StripePaymentsLogo,
   WhatsAppLogo,
+  WindsurfMcpLogo,
   XeroLogo,
   ZapierMcpLogo,
+  ZedMcpLogo,
 } from "@midday/app-store/logos";
 import { cn } from "@midday/ui/cn";
 
@@ -52,11 +57,16 @@ const logoMap: Record<string, React.ComponentType> = {
   "perplexity-mcp": PerplexityMcpLogo,
   "raycast-mcp": RaycastMcpLogo,
   "chatgpt-mcp": ChatGPTMcpLogo,
+  "gemini-mcp": GeminiMcpLogo,
   "opencode-mcp": OpenCodeMcpLogo,
   "zapier-mcp": ZapierMcpLogo,
   "copilot-mcp": CopilotMcpLogo,
   "n8n-mcp": N8nMcpLogo,
   "make-mcp": MakeMcpLogo,
+  "windsurf-mcp": WindsurfMcpLogo,
+  "cline-mcp": ClineMcpLogo,
+  "zed-mcp": ZedMcpLogo,
+  "manus-mcp": ManusMcpLogo,
 };
 
 interface AppLogoProps {
