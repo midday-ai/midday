@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 import {
   Area,
   CartesianGrid,
@@ -56,8 +56,6 @@ interface AreaChartProps {
   referenceLine?: ReferenceLineConfig;
 }
 
-let areaIdCounter = 0;
-
 export function GenericAreaChart({
   data,
   xAxisKey,
@@ -70,7 +68,7 @@ export function GenericAreaChart({
   referenceLine,
 }: AreaChartProps) {
   const tickFormatter = createCompactTickFormatter();
-  const uniqueId = `mcp-area-${++areaIdCounter}`;
+  const uniqueId = `mcp-area-${useId()}`;
 
   const chartData = useMemo(() => {
     if (!confidenceBand) return data;
