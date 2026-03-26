@@ -69,74 +69,66 @@ export function Summary({
         }).format(amount)
       : String(amount);
 
-  const ROW: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "4px 0",
-  };
-
-  const LABEL: React.CSSProperties = {
-    fontSize: 11,
-    color: "#878787",
-    fontFamily: "var(--font-mono)",
-  };
-
-  const VALUE: React.CSSProperties = {
-    fontSize: 11,
-    color: "#878787",
-    textAlign: "right",
-  };
-
   return (
-    <div style={{ width: 320, display: "flex", flexDirection: "column" }}>
-      <div style={ROW}>
-        <span style={LABEL}>{subtotalLabel}</span>
-        <span style={VALUE}>{fmt(subTotal)}</span>
+    <div className="w-[320px] flex flex-col">
+      <div className="flex justify-between items-center py-1">
+        <span className="text-[11px] text-[#878787] font-mono">
+          {subtotalLabel}
+        </span>
+        <span className="text-[11px] text-[#878787] text-right">
+          {fmt(subTotal)}
+        </span>
       </div>
 
       {includeDiscount && (
-        <div style={ROW}>
-          <span style={LABEL}>{discountLabel}</span>
-          <span style={VALUE}>{fmt(discount ?? 0)}</span>
+        <div className="flex justify-between items-center py-1">
+          <span className="text-[11px] text-[#878787] font-mono">
+            {discountLabel}
+          </span>
+          <span className="text-[11px] text-[#878787] text-right">
+            {fmt(discount ?? 0)}
+          </span>
         </div>
       )}
 
       {includeVat && (
-        <div style={ROW}>
-          <span style={LABEL}>
+        <div className="flex justify-between items-center py-1">
+          <span className="text-[11px] text-[#878787] font-mono">
             {vatLabel} ({vatRate}%)
           </span>
-          <span style={VALUE}>{fmt(totalVAT, 2)}</span>
+          <span className="text-[11px] text-[#878787] text-right">
+            {fmt(totalVAT, 2)}
+          </span>
         </div>
       )}
 
       {includeTax && !includeLineItemTax && (
-        <div style={ROW}>
-          <span style={LABEL}>
+        <div className="flex justify-between items-center py-1">
+          <span className="text-[11px] text-[#878787] font-mono">
             {taxLabel} ({taxRate}%)
           </span>
-          <span style={VALUE}>{fmt(totalTax, 2)}</span>
+          <span className="text-[11px] text-[#878787] text-right">
+            {fmt(totalTax, 2)}
+          </span>
         </div>
       )}
 
       {includeLineItemTax && totalTax > 0 && (
-        <div style={ROW}>
-          <span style={LABEL}>{taxLabel}</span>
-          <span style={VALUE}>{fmt(totalTax, 2)}</span>
+        <div className="flex justify-between items-center py-1">
+          <span className="text-[11px] text-[#878787] font-mono">
+            {taxLabel}
+          </span>
+          <span className="text-[11px] text-[#878787] text-right">
+            {fmt(totalTax, 2)}
+          </span>
         </div>
       )}
 
-      <div
-        style={{
-          ...ROW,
-          padding: "16px 0",
-          marginTop: 8,
-          borderTop: "1px solid var(--border-color, #e5e5e5)",
-        }}
-      >
-        <span style={LABEL}>{totalLabel}</span>
-        <span style={{ fontSize: 21, textAlign: "right" }}>
+      <div className="flex justify-between items-center py-4 mt-2 border-t border-border">
+        <span className="text-[11px] text-[#878787] font-mono">
+          {totalLabel}
+        </span>
+        <span className="text-xl text-right">
           {fmt(
             total,
             includeTax || includeVat || includeLineItemTax

@@ -12,46 +12,22 @@ interface MetricGridProps {
 
 export function MetricGrid({ items, columns = 2 }: MetricGridProps) {
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div className="mb-6">
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${columns}, 1fr)`,
-          gap: 12,
-        }}
+        className="grid gap-3"
+        style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
       >
         {items.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              border: "1px solid var(--border-color)",
-              padding: 12,
-              background: "var(--bg-card)",
-            }}
-          >
+          <div key={item.id} className="border border-border p-3 bg-card">
             <div>
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "var(--text-muted)",
-                  marginBottom: 4,
-                }}
-              >
+              <div className="text-xs text-muted-foreground mb-1">
                 {item.title}
               </div>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 400,
-                  fontFamily: "var(--font-sans)",
-                  color: "var(--text-primary)",
-                  marginBottom: 4,
-                }}
-              >
+              <div className="text-lg font-normal font-sans text-foreground mb-1">
                 {item.value}
               </div>
               {item.subtitle && (
-                <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+                <div className="text-[10px] text-muted-foreground">
                   {item.subtitle}
                 </div>
               )}

@@ -1,16 +1,6 @@
 import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
 
-const LABEL_STYLE: React.CSSProperties = {
-  fontSize: 11,
-  color: "#878787",
-};
-
-const VALUE_STYLE: React.CSSProperties = {
-  fontSize: 11,
-  flexShrink: 0,
-};
-
 type Props = {
   template: Record<string, any>;
   invoiceNumber: string | null;
@@ -24,47 +14,30 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
   const dateFormat = template.dateFormat || "dd/MM/yyyy";
 
   return (
-    <div style={{ marginBottom: 8 }}>
-      <h2
-        style={{
-          fontSize: 21,
-          fontFamily: "var(--font-serif)",
-          marginBottom: 4,
-          marginTop: 0,
-          minWidth: 100,
-          width: "100%",
-          overflow: "hidden",
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-          wordBreak: "normal",
-          overflowWrap: "break-word",
-          hyphens: "auto",
-          fontWeight: "normal",
-        }}
-      >
+    <div className="mb-2">
+      <h2 className="text-xl font-serif mb-1 mt-0 min-w-[100px] w-full overflow-hidden [-webkit-line-clamp:2] [-webkit-box-orient:vertical] [display:-webkit-box] break-normal [overflow-wrap:break-word] [hyphens:auto] font-normal">
         {template.title}
       </h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-          <span style={LABEL_STYLE}>
+      <div className="flex flex-col gap-0.5">
+        <div className="flex gap-1 items-center">
+          <span className="text-[11px] text-[#878787]">
             {template.invoiceNoLabel ? `${template.invoiceNoLabel}:` : ""}
           </span>
-          <span style={VALUE_STYLE}>{invoiceNumber}</span>
+          <span className="text-[11px] shrink-0">{invoiceNumber}</span>
         </div>
-        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-          <span style={LABEL_STYLE}>
+        <div className="flex gap-1 items-center">
+          <span className="text-[11px] text-[#878787]">
             {template.issueDateLabel ? `${template.issueDateLabel}:` : ""}
           </span>
-          <span style={VALUE_STYLE}>
+          <span className="text-[11px] shrink-0">
             {issueDate ? format(new TZDate(issueDate, "UTC"), dateFormat) : ""}
           </span>
         </div>
-        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-          <span style={LABEL_STYLE}>
+        <div className="flex gap-1 items-center">
+          <span className="text-[11px] text-[#878787]">
             {template.dueDateLabel ? `${template.dueDateLabel}:` : ""}
           </span>
-          <span style={VALUE_STYLE}>
+          <span className="text-[11px] shrink-0">
             {dueDate ? format(new TZDate(dueDate, "UTC"), dateFormat) : ""}
           </span>
         </div>

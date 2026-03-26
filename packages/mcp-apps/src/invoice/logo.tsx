@@ -11,11 +11,11 @@ export function Logo({ logo, customerName }: Props) {
   if (failed) return null;
 
   return (
-    <div style={{ maxWidth: 300 }}>
+    <div className="max-w-[300px]">
       <img
         src={logo}
         alt={customerName}
-        style={{ height: 80, objectFit: "contain" }}
+        className="h-[80px] object-contain"
         onError={() => setFailed(true)}
       />
     </div>

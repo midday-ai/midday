@@ -32,19 +32,12 @@ export function ChartTooltip({
 
   return (
     <div
-      style={{
-        border: "1px solid var(--border-color)",
-        padding: "6px 8px",
-        fontSize: 10,
-        background: "var(--bg-card)",
-        color: "var(--text-primary)",
-        fontFamily: commonChartConfig.fontFamily,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-      }}
+      className="border border-border px-2 py-1.5 text-[10px] bg-card text-foreground shadow-sm"
+      style={{ fontFamily: commonChartConfig.fontFamily }}
     >
-      <p style={{ marginBottom: 4, color: "var(--text-muted)" }}>{label}</p>
+      <p className="mb-1 text-muted-foreground">{label}</p>
       {payload.map((entry) => (
-        <p key={entry.dataKey} style={{ color: "var(--text-primary)" }}>
+        <p key={entry.dataKey} className="text-foreground">
           {entry.name || entry.dataKey}: {fmt(entry.value)}
         </p>
       ))}

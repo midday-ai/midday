@@ -1,18 +1,6 @@
-export function cn(
-  ...args: (string | false | null | undefined | Record<string, boolean>)[]
-): string {
-  const classes: string[] = [];
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-  for (const arg of args) {
-    if (!arg) continue;
-    if (typeof arg === "string") {
-      classes.push(arg);
-    } else {
-      for (const [key, val] of Object.entries(arg)) {
-        if (val) classes.push(key);
-      }
-    }
-  }
-
-  return classes.join(" ");
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }

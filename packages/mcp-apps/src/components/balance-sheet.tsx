@@ -29,10 +29,6 @@ export interface BalanceSheetProps {
   };
 }
 
-const cellStyle = { padding: "8px 16px", fontSize: 12 };
-const headerBg = "var(--bg-subtle)";
-const borderStyle = "1px solid var(--border-color)";
-
 function RowItem({
   label,
   amount,
@@ -50,13 +46,9 @@ function RowItem({
     locale,
   });
   return (
-    <div
-      style={{ ...cellStyle, display: "flex", justifyContent: "space-between" }}
-    >
-      <div style={{ paddingLeft: 16, color: "var(--text-muted)" }}>{label}</div>
-      <div
-        style={{ fontFamily: "var(--font-mono)", color: "var(--text-primary)" }}
-      >
+    <div className="px-4 py-2 text-xs flex justify-between">
+      <div className="pl-4 text-muted-foreground">{label}</div>
+      <div className="font-mono text-foreground">
         {amount < 0 ? `(${formatted})` : formatted}
       </div>
     </div>
@@ -80,20 +72,9 @@ function SubtotalRow({
     locale,
   });
   return (
-    <div
-      style={{
-        ...cellStyle,
-        display: "flex",
-        justifyContent: "space-between",
-        borderTop: borderStyle,
-        background: headerBg,
-        fontWeight: 500,
-      }}
-    >
-      <div style={{ color: "var(--text-primary)" }}>{label}</div>
-      <div
-        style={{ fontFamily: "var(--font-mono)", color: "var(--text-primary)" }}
-      >
+    <div className="px-4 py-2 text-xs flex justify-between border-t border-border bg-accent font-medium">
+      <div className="text-foreground">{label}</div>
+      <div className="font-mono text-foreground">
         {amount < 0 ? `(${formatted})` : formatted}
       </div>
     </div>
@@ -117,20 +98,9 @@ function TotalRow({
     locale,
   });
   return (
-    <div
-      style={{
-        padding: "12px 16px",
-        display: "flex",
-        justifyContent: "space-between",
-        background: headerBg,
-        fontWeight: 500,
-        fontSize: 14,
-      }}
-    >
-      <div style={{ color: "var(--text-primary)" }}>{label}</div>
-      <div
-        style={{ fontFamily: "var(--font-mono)", color: "var(--text-primary)" }}
-      >
+    <div className="px-4 py-3 flex justify-between bg-accent font-medium text-sm">
+      <div className="text-foreground">{label}</div>
+      <div className="font-mono text-foreground">
         {amount < 0 ? `(${formatted})` : formatted}
       </div>
     </div>
@@ -139,14 +109,7 @@ function TotalRow({
 
 function SectionHeader({ label }: { label: string }) {
   return (
-    <div
-      style={{
-        ...cellStyle,
-        background: headerBg,
-        fontWeight: 500,
-        color: "var(--text-primary)",
-      }}
-    >
+    <div className="px-4 py-2 text-xs bg-accent font-medium text-foreground">
       {label}
     </div>
   );
@@ -200,67 +163,29 @@ export function BalanceSheet({
   const totalEquity = sumItems(equity.items);
   const fmt = (amount: number) =>
     formatAmount({ amount: Math.abs(amount), currency, locale });
-  const sectionBorder = { borderBottom: borderStyle };
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 12,
-        }}
-      >
-        <h4
-          style={{
-            fontSize: 16,
-            fontWeight: 500,
-            color: "var(--text-primary)",
-            margin: 0,
-          }}
-        >
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-base font-medium text-foreground m-0">
           Balance Sheet
         </h4>
-        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
-          As of {asOf}
-        </div>
+        <div className="text-xs text-muted-foreground">As of {asOf}</div>
       </div>
 
-      <div
-        style={{
-          border: borderStyle,
-          background: "var(--bg-card)",
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ display: "flex", ...sectionBorder }}>
-          <div
-            style={{
-              width: "50%",
-              ...cellStyle,
-              fontWeight: 500,
-              color: "var(--text-muted)",
-              fontSize: 12,
-            }}
-          >
+      <div className="border border-border bg-card overflow-hidden">
+        {/* Assets header */}
+        <div className="flex border-b border-border">
+          <div className="w-1/2 px-4 py-2 text-xs font-medium text-muted-foreground">
             ASSETS
           </div>
-          <div
-            style={{
-              width: "50%",
-              ...cellStyle,
-              fontWeight: 500,
-              color: "var(--text-muted)",
-              textAlign: "right",
-              fontSize: 12,
-            }}
-          >
+          <div className="w-1/2 px-4 py-2 text-xs font-medium text-muted-foreground text-right">
             Amount
           </div>
         </div>
 
-        <div style={sectionBorder}>
+        {/* Current Assets */}
+        <div className="border-b border-border">
           <SectionHeader label="Current Assets" />
           {assets.current
             .filter((i) => i.amount !== 0)
@@ -281,7 +206,8 @@ export function BalanceSheet({
           />
         </div>
 
-        <div style={sectionBorder}>
+        {/* Non-Current Assets */}
+        <div className="border-b border-border">
           <SectionHeader label="Non-Current Assets" />
           {assets.nonCurrent
             .filter((i) => i.amount !== 0)
@@ -302,7 +228,8 @@ export function BalanceSheet({
           />
         </div>
 
-        <div style={sectionBorder}>
+        {/* Total Assets */}
+        <div className="border-b border-border">
           <TotalRow
             label="Total Assets"
             amount={totalAssets}
@@ -311,33 +238,18 @@ export function BalanceSheet({
           />
         </div>
 
-        <div style={{ display: "flex", ...sectionBorder }}>
-          <div
-            style={{
-              width: "50%",
-              ...cellStyle,
-              fontWeight: 500,
-              color: "var(--text-muted)",
-              fontSize: 12,
-            }}
-          >
+        {/* Liabilities & Equity header */}
+        <div className="flex border-b border-border">
+          <div className="w-1/2 px-4 py-2 text-xs font-medium text-muted-foreground">
             LIABILITIES & EQUITY
           </div>
-          <div
-            style={{
-              width: "50%",
-              ...cellStyle,
-              fontWeight: 500,
-              color: "var(--text-muted)",
-              textAlign: "right",
-              fontSize: 12,
-            }}
-          >
+          <div className="w-1/2 px-4 py-2 text-xs font-medium text-muted-foreground text-right">
             Amount
           </div>
         </div>
 
-        <div style={sectionBorder}>
+        {/* Current Liabilities */}
+        <div className="border-b border-border">
           <SectionHeader label="Current Liabilities" />
           {liabilities.current
             .filter((i) => i.amount !== 0)
@@ -358,7 +270,8 @@ export function BalanceSheet({
           />
         </div>
 
-        <div style={sectionBorder}>
+        {/* Non-Current Liabilities */}
+        <div className="border-b border-border">
           <SectionHeader label="Non-Current Liabilities" />
           {liabilities.nonCurrent
             .filter((i) => i.amount !== 0)
@@ -379,7 +292,8 @@ export function BalanceSheet({
           />
         </div>
 
-        <div style={sectionBorder}>
+        {/* Total Liabilities */}
+        <div className="border-b border-border">
           <TotalRow
             label="Total Liabilities"
             amount={totalLiabilities}
@@ -388,7 +302,8 @@ export function BalanceSheet({
           />
         </div>
 
-        <div style={sectionBorder}>
+        {/* Equity */}
+        <div className="border-b border-border">
           <SectionHeader label="Equity" />
           {equity.items
             .filter((i) => i.amount !== 0)
@@ -409,6 +324,7 @@ export function BalanceSheet({
           />
         </div>
 
+        {/* Total Liabilities & Equity */}
         <TotalRow
           label="Total Liabilities & Equity"
           amount={totalLiabilities + totalEquity}
@@ -418,42 +334,16 @@ export function BalanceSheet({
       </div>
 
       {ratios && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 12,
-            marginTop: 24,
-          }}
-        >
+        <div className="grid grid-cols-2 gap-3 mt-6">
           {ratios.currentRatio != null && (
-            <div
-              style={{
-                border: borderStyle,
-                padding: 12,
-                background: "var(--bg-card)",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  marginBottom: 4,
-                  color: "var(--text-muted)",
-                }}
-              >
+            <div className="border border-border p-3 bg-card">
+              <div className="text-xs mb-1 text-muted-foreground">
                 Current Ratio
               </div>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--text-primary)",
-                  marginBottom: 4,
-                }}
-              >
+              <div className="text-lg font-mono text-foreground mb-1">
                 {ratios.currentRatio.toFixed(2)}:1
               </div>
-              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+              <div className="text-[10px] text-muted-foreground">
                 {getRatioSubtitle(
                   "currentRatio",
                   ratios.currentRatio,
@@ -464,33 +354,14 @@ export function BalanceSheet({
             </div>
           )}
           {ratios.debtToEquity != null && (
-            <div
-              style={{
-                border: borderStyle,
-                padding: 12,
-                background: "var(--bg-card)",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  marginBottom: 4,
-                  color: "var(--text-muted)",
-                }}
-              >
+            <div className="border border-border p-3 bg-card">
+              <div className="text-xs mb-1 text-muted-foreground">
                 Debt-to-Equity
               </div>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--text-primary)",
-                  marginBottom: 4,
-                }}
-              >
+              <div className="text-lg font-mono text-foreground mb-1">
                 {ratios.debtToEquity.toFixed(2)}:1
               </div>
-              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+              <div className="text-[10px] text-muted-foreground">
                 {getRatioSubtitle(
                   "debtToEquity",
                   ratios.debtToEquity,
@@ -500,65 +371,27 @@ export function BalanceSheet({
             </div>
           )}
           {ratios.workingCapital != null && (
-            <div
-              style={{
-                border: borderStyle,
-                padding: 12,
-                background: "var(--bg-card)",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  marginBottom: 4,
-                  color: "var(--text-muted)",
-                }}
-              >
+            <div className="border border-border p-3 bg-card">
+              <div className="text-xs mb-1 text-muted-foreground">
                 Working Capital
               </div>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--text-primary)",
-                  marginBottom: 4,
-                }}
-              >
+              <div className="text-lg font-mono text-foreground mb-1">
                 {fmt(ratios.workingCapital)}
               </div>
-              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+              <div className="text-[10px] text-muted-foreground">
                 Current assets - current liabilities
               </div>
             </div>
           )}
           {ratios.equityRatio != null && (
-            <div
-              style={{
-                border: borderStyle,
-                padding: 12,
-                background: "var(--bg-card)",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  marginBottom: 4,
-                  color: "var(--text-muted)",
-                }}
-              >
+            <div className="border border-border p-3 bg-card">
+              <div className="text-xs mb-1 text-muted-foreground">
                 Equity Ratio
               </div>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--text-primary)",
-                  marginBottom: 4,
-                }}
-              >
+              <div className="text-lg font-mono text-foreground mb-1">
                 {ratios.equityRatio.toFixed(1)}%
               </div>
-              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+              <div className="text-[10px] text-muted-foreground">
                 {getRatioSubtitle("equityRatio", ratios.equityRatio)}
               </div>
             </div>

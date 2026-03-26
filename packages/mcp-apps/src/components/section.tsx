@@ -5,28 +5,13 @@ interface SectionProps {
 
 export function Section({ title, content }: SectionProps) {
   return (
-    <div style={{ marginTop: 32, marginBottom: 16 }}>
+    <div className="mt-8 mb-4">
       {title && (
-        <h3
-          style={{
-            fontSize: 12,
-            lineHeight: "normal",
-            marginBottom: 12,
-            color: "var(--text-muted)",
-            fontWeight: 400,
-          }}
-        >
+        <h3 className="text-xs leading-normal mb-3 text-muted-foreground font-normal">
           {title}
         </h3>
       )}
-      <div
-        style={{
-          fontSize: 12,
-          lineHeight: "17px",
-          fontFamily: "var(--font-sans)",
-          color: "var(--text-primary)",
-        }}
-      >
+      <div className="text-xs leading-[17px] font-sans text-foreground">
         {content}
       </div>
     </div>

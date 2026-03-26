@@ -10,7 +10,7 @@ import { MetricGrid } from "../components/metric-grid";
 import { Section } from "../components/section";
 import { detectReportType } from "../utils/detect-report-type";
 import { formatAmount } from "../utils/format-amount";
-import "../utils/theme.css";
+import "../globals.css";
 
 interface PeriodResult {
   summary: Record<string, any>;
@@ -472,40 +472,17 @@ function RecurringExpensesReport({ data }: { data: RecurringExpensesResult }) {
   return (
     <>
       <MetricGrid items={metrics} columns={1} />
-      <div style={{ marginTop: 16 }}>
-        <table
-          style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}
-        >
+      <div className="mt-4">
+        <table className="w-full text-xs border-collapse">
           <thead>
-            <tr style={{ borderBottom: "1px solid var(--border-color)" }}>
-              <th
-                style={{
-                  padding: "8px 12px",
-                  textAlign: "left",
-                  fontWeight: 400,
-                  color: "var(--text-muted)",
-                }}
-              >
+            <tr className="border-b border-border">
+              <th className="px-3 py-2 text-left font-normal text-muted-foreground">
                 Merchant
               </th>
-              <th
-                style={{
-                  padding: "8px 12px",
-                  textAlign: "right",
-                  fontWeight: 400,
-                  color: "var(--text-muted)",
-                }}
-              >
+              <th className="px-3 py-2 text-right font-normal text-muted-foreground">
                 Amount
               </th>
-              <th
-                style={{
-                  padding: "8px 12px",
-                  textAlign: "left",
-                  fontWeight: 400,
-                  color: "var(--text-muted)",
-                }}
-              >
+              <th className="px-3 py-2 text-left font-normal text-muted-foreground">
                 Frequency
               </th>
             </tr>
@@ -514,24 +491,15 @@ function RecurringExpensesReport({ data }: { data: RecurringExpensesResult }) {
             {items.map((item) => (
               <tr
                 key={`${item.name || item.merchant}-${item.amount}`}
-                style={{ borderBottom: "1px solid var(--border-color)" }}
+                className="border-b border-border"
               >
-                <td
-                  style={{ padding: "8px 12px", color: "var(--text-primary)" }}
-                >
+                <td className="px-3 py-2 text-foreground">
                   {item.name || item.merchant}
                 </td>
-                <td
-                  style={{
-                    padding: "8px 12px",
-                    textAlign: "right",
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--text-primary)",
-                  }}
-                >
+                <td className="px-3 py-2 text-right font-mono text-foreground">
                   {fmt(item.amount, currency)}
                 </td>
-                <td style={{ padding: "8px 12px", color: "var(--text-muted)" }}>
+                <td className="px-3 py-2 text-muted-foreground">
                   {item.frequency}
                 </td>
               </tr>
@@ -560,40 +528,17 @@ function TaxSummaryReport({ data }: { data: TaxSummaryResult }) {
   return (
     <>
       <MetricGrid items={metrics} columns={1} />
-      <div style={{ marginTop: 16 }}>
-        <table
-          style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}
-        >
+      <div className="mt-4">
+        <table className="w-full text-xs border-collapse">
           <thead>
-            <tr style={{ borderBottom: "1px solid var(--border-color)" }}>
-              <th
-                style={{
-                  padding: "8px 12px",
-                  textAlign: "left",
-                  fontWeight: 400,
-                  color: "var(--text-muted)",
-                }}
-              >
+            <tr className="border-b border-border">
+              <th className="px-3 py-2 text-left font-normal text-muted-foreground">
                 Category
               </th>
-              <th
-                style={{
-                  padding: "8px 12px",
-                  textAlign: "left",
-                  fontWeight: 400,
-                  color: "var(--text-muted)",
-                }}
-              >
+              <th className="px-3 py-2 text-left font-normal text-muted-foreground">
                 Type
               </th>
-              <th
-                style={{
-                  padding: "8px 12px",
-                  textAlign: "right",
-                  fontWeight: 400,
-                  color: "var(--text-muted)",
-                }}
-              >
+              <th className="px-3 py-2 text-right font-normal text-muted-foreground">
                 Amount
               </th>
             </tr>
@@ -602,24 +547,15 @@ function TaxSummaryReport({ data }: { data: TaxSummaryResult }) {
             {items.map((item) => (
               <tr
                 key={`${item.category || item.name}-${item.taxType || item.type}`}
-                style={{ borderBottom: "1px solid var(--border-color)" }}
+                className="border-b border-border"
               >
-                <td
-                  style={{ padding: "8px 12px", color: "var(--text-primary)" }}
-                >
+                <td className="px-3 py-2 text-foreground">
                   {item.category || item.name}
                 </td>
-                <td style={{ padding: "8px 12px", color: "var(--text-muted)" }}>
+                <td className="px-3 py-2 text-muted-foreground">
                   {item.taxType || item.type}
                 </td>
-                <td
-                  style={{
-                    padding: "8px 12px",
-                    textAlign: "right",
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--text-primary)",
-                  }}
-                >
+                <td className="px-3 py-2 text-right font-mono text-foreground">
                   {fmt(item.amount ?? item.total ?? 0, currency)}
                 </td>
               </tr>
@@ -658,13 +594,9 @@ function TimeSeriesChartApp() {
   }, [app]);
 
   if (error)
-    return (
-      <div style={{ color: "red", padding: 16 }}>Error: {error.message}</div>
-    );
+    return <div className="text-red-500 p-4">Error: {error.message}</div>;
   if (!app || !toolResult)
-    return (
-      <div style={{ padding: 16, color: "var(--text-muted)" }}>Loading...</div>
-    );
+    return <div className="p-4 text-muted-foreground">Loading...</div>;
 
   const data = (toolResult.structuredContent ?? toolResult) as Record<
     string,

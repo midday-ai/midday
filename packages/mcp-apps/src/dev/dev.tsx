@@ -9,7 +9,7 @@ import { DataTable } from "../components/data-table";
 import { MetricGrid } from "../components/metric-grid";
 import { InvoiceTemplate } from "../invoice";
 import { formatAmount } from "../utils/format-amount";
-import "../utils/theme.css";
+import "../globals.css";
 import {
   balanceSheetData,
   burnRateData,

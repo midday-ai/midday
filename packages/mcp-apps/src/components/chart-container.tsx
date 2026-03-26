@@ -28,42 +28,20 @@ export function ChartContainer({
   children,
 }: ChartContainerProps) {
   return (
-    <div style={{ marginBottom: 24 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 16,
-        }}
-      >
-        <h4
-          style={{
-            fontSize: 18,
-            fontWeight: 400,
-            fontFamily: "var(--font-serif)",
-            color: "var(--text-primary)",
-            margin: 0,
-          }}
-        >
+    <div className="mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="text-lg font-normal font-serif text-foreground m-0">
           {title}
         </h4>
         {legend && (
-          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+          <div className="flex gap-4 items-center">
             {legend.map((item) => (
-              <div
-                key={item.label}
-                style={{ display: "flex", gap: 8, alignItems: "center" }}
-              >
+              <div key={item.label} className="flex gap-2 items-center">
                 <div
-                  style={{
-                    width: 8,
-                    height: 8,
-                    background: getLegendBackground(item.type),
-                    borderRadius: 0,
-                  }}
+                  className="w-2 h-2"
+                  style={{ background: getLegendBackground(item.type) }}
                 />
-                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                <span className="text-xs text-muted-foreground">
                   {item.label}
                 </span>
               </div>

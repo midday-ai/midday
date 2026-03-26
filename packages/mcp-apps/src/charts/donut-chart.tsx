@@ -38,24 +38,15 @@ function DonutTooltip({
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
-    <div
-      style={{
-        border: "1px solid var(--border-color)",
-        padding: "6px 8px",
-        fontSize: 10,
-        background: "var(--bg-card)",
-        color: "var(--text-primary)",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-      }}
-    >
-      <p style={{ marginBottom: 4, color: "var(--text-muted)" }}>{d.name}</p>
-      <p style={{ color: "var(--text-primary)" }}>
+    <div className="border border-border px-2 py-1.5 text-[10px] bg-card text-foreground shadow-sm">
+      <p className="mb-1 text-muted-foreground">{d.name}</p>
+      <p className="text-foreground">
         {currency
           ? (formatAmount({ amount: d.value, currency, locale }) ?? d.value)
           : d.value.toLocaleString(locale)}
       </p>
       {d.percentage != null && (
-        <p style={{ color: "var(--text-muted)" }}>{d.percentage.toFixed(1)}%</p>
+        <p className="text-muted-foreground">{d.percentage.toFixed(1)}%</p>
       )}
     </div>
   );
@@ -74,13 +65,12 @@ export function GenericDonutChart({
 
   return (
     <div
+      className="relative"
       style={{
         height,
-        position: "relative",
         backgroundImage:
           "radial-gradient(circle, var(--chart-axis-text) 1px, transparent 1px)",
         backgroundSize: "12px 12px",
-        opacity: 1,
       }}
     >
       <ResponsiveContainer width="100%" height="100%" debounce={1}>

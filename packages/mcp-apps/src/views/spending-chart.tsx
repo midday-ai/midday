@@ -7,7 +7,7 @@ import { GenericDonutChart } from "../charts/donut-chart";
 import { DataTable } from "../components/data-table";
 import { MetricGrid } from "../components/metric-grid";
 import { formatAmount } from "../utils/format-amount";
-import "../utils/theme.css";
+import "../globals.css";
 
 interface SpendingCategory {
   name: string;
@@ -53,13 +53,9 @@ function SpendingChartApp() {
   }, [app]);
 
   if (error)
-    return (
-      <div style={{ color: "red", padding: 16 }}>Error: {error.message}</div>
-    );
+    return <div className="text-red-500 p-4">Error: {error.message}</div>;
   if (!app || !toolResult)
-    return (
-      <div style={{ padding: 16, color: "var(--text-muted)" }}>Loading...</div>
-    );
+    return <div className="p-4 text-muted-foreground">Loading...</div>;
 
   const structured = (toolResult.structuredContent ?? toolResult) as Record<
     string,
@@ -94,15 +90,15 @@ function SpendingChartApp() {
         ]}
         columns={1}
       />
-      <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-        <div style={{ flex: "1 1 300px", minWidth: 280 }}>
+      <div className="flex gap-6 flex-wrap">
+        <div className="flex-[1_1_300px] min-w-[280px]">
           <GenericDonutChart
             data={donutData}
             height={280}
             currency={currency}
           />
         </div>
-        <div style={{ flex: "1 1 300px", minWidth: 280, marginTop: 16 }}>
+        <div className="flex-[1_1_300px] min-w-[280px] mt-4">
           <DataTable
             columns={[
               { header: "Category", accessorKey: "name" },

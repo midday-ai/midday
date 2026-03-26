@@ -289,7 +289,7 @@ export const invoiceData = {
     discount: 0,
     template: {
       title: "Invoice",
-      logoUrl: null,
+      logoUrl: "https://midday.ai/email/logo.png",
       customerLabel: "To",
       fromLabel: "From",
       invoiceNoLabel: "Invoice No",

@@ -7,7 +7,7 @@ import {
   BalanceSheet,
   type BalanceSheetProps,
 } from "../components/balance-sheet";
-import "../utils/theme.css";
+import "../globals.css";
 
 function BalanceSheetApp() {
   const [toolResult, setToolResult] = useState<CallToolResult | null>(null);
@@ -36,13 +36,9 @@ function BalanceSheetApp() {
   }, [app]);
 
   if (error)
-    return (
-      <div style={{ color: "red", padding: 16 }}>Error: {error.message}</div>
-    );
+    return <div className="text-red-500 p-4">Error: {error.message}</div>;
   if (!app || !toolResult)
-    return (
-      <div style={{ padding: 16, color: "var(--text-muted)" }}>Loading...</div>
-    );
+    return <div className="p-4 text-muted-foreground">Loading...</div>;
 
   const structured = (toolResult.structuredContent ?? toolResult) as Record<
     string,

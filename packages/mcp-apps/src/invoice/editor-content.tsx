@@ -46,7 +46,7 @@ function formatEditorContent(doc?: EditorDoc): React.ReactNode | null {
         const nk = nodeKey(node, ni);
         if (node.type === "paragraph") {
           return (
-            <p key={nk} style={{ margin: 0, minHeight: "1em" }}>
+            <p key={nk} className="m-0 min-h-[1em]">
               {node.content?.map((inline, ii) => {
                 const ik = inlineKey(inline, nk, ii);
 
@@ -111,7 +111,5 @@ type Props = {
 
 export function EditorContent({ content }: Props) {
   if (!content) return null;
-  return (
-    <div style={{ lineHeight: "16px" }}>{formatEditorContent(content)}</div>
-  );
+  return <div className="leading-[16px]">{formatEditorContent(content)}</div>;
 }

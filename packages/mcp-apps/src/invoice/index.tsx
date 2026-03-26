@@ -54,34 +54,12 @@ export function InvoiceTemplate({ data }: Props) {
 
   return (
     <div
-      style={{
-        width: "100%",
-        maxWidth: width,
-        background: "var(--bg-primary, #fff)",
-        border: "1px solid var(--border-color, #e5e5e5)",
-        overflow: "auto",
-        color: "var(--text-primary, #0a0a0a)",
-        fontFamily: "var(--font-sans)",
-        WebkitFontSmoothing: "antialiased",
-        whiteSpace: "pre-line",
-      }}
+      className="w-full mx-auto bg-background border border-border overflow-auto text-foreground font-sans antialiased whitespace-pre-line"
+      style={{ maxWidth: width }}
     >
-      <div
-        style={{
-          padding: 32,
-          display: "flex",
-          flexDirection: "column",
-          minHeight: height - 5,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-          }}
-        >
-          <div style={{ flex: 1, minWidth: 0, marginRight: 20 }}>
+      <div className="p-8 flex flex-col" style={{ minHeight: height - 5 }}>
+        <div className="flex justify-between items-start">
+          <div className="flex-1 min-w-0 mr-5">
             <Meta
               template={template}
               invoiceNumber={data.invoiceNumber}
@@ -90,7 +68,7 @@ export function InvoiceTemplate({ data }: Props) {
             />
           </div>
           {template.logoUrl && (
-            <div style={{ flexShrink: 0 }}>
+            <div className="shrink-0">
               <Logo
                 logo={template.logoUrl}
                 customerName={data.customerName || ""}
@@ -99,37 +77,15 @@ export function InvoiceTemplate({ data }: Props) {
           )}
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 24,
-            marginTop: 24,
-            marginBottom: 16,
-          }}
-        >
+        <div className="grid grid-cols-2 gap-6 mt-6 mb-4">
           <div>
-            <p
-              style={{
-                fontSize: 11,
-                color: "#878787",
-                marginBottom: 8,
-                marginTop: 0,
-              }}
-            >
+            <p className="text-[11px] text-[#878787] mb-2 mt-0">
               {template.fromLabel}
             </p>
             <EditorContent content={data.fromDetails} />
           </div>
           <div>
-            <p
-              style={{
-                fontSize: 11,
-                color: "#878787",
-                marginBottom: 8,
-                marginTop: 0,
-              }}
-            >
+            <p className="text-[11px] text-[#878787] mb-2 mt-0">
               {template.customerLabel}
             </p>
             <EditorContent content={data.customerDetails} />
@@ -152,14 +108,7 @@ export function InvoiceTemplate({ data }: Props) {
           lineItemTaxLabel={template.lineItemTaxLabel}
         />
 
-        <div
-          style={{
-            marginTop: 40,
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: 32,
-          }}
-        >
+        <div className="mt-10 flex justify-end mb-8">
           <Summary
             includeVat={template.includeVat}
             includeTax={template.includeTax}
@@ -180,40 +129,17 @@ export function InvoiceTemplate({ data }: Props) {
           />
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 32,
-            marginTop: "auto",
-          }}
-        >
-          <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}
-          >
+        <div className="flex flex-col gap-8 mt-auto">
+          <div className="grid grid-cols-2 gap-6">
             <div>
-              <p
-                style={{
-                  fontSize: 11,
-                  color: "#878787",
-                  marginBottom: 8,
-                  marginTop: 0,
-                }}
-              >
+              <p className="text-[11px] text-[#878787] mb-2 mt-0">
                 {template.paymentLabel}
               </p>
               <EditorContent content={data.paymentDetails} />
             </div>
             {data.noteDetails && (
               <div>
-                <p
-                  style={{
-                    fontSize: 11,
-                    color: "#878787",
-                    marginBottom: 8,
-                    marginTop: 0,
-                  }}
-                >
+                <p className="text-[11px] text-[#878787] mb-2 mt-0">
                   {template.noteLabel}
                 </p>
                 <EditorContent content={data.noteDetails} />

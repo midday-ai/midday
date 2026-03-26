@@ -1,3 +1,5 @@
+import { cn } from "../utils/cn";
+
 interface Column {
   header: string;
   accessorKey: string;
@@ -11,21 +13,19 @@ interface DataTableProps {
 
 export function DataTable({ columns, rows }: DataTableProps) {
   return (
-    <div style={{ marginBottom: 24, overflowX: "auto" }}>
-      <table
-        style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}
-      >
+    <div className="mb-6 overflow-x-auto">
+      <table className="w-full text-xs border-collapse">
         <thead>
-          <tr style={{ borderBottom: "1px solid var(--border-color)" }}>
+          <tr className="border-b border-border">
             {columns.map((col) => (
               <th
                 key={col.accessorKey}
-                style={{
-                  padding: "8px 12px",
-                  fontWeight: 400,
-                  color: "var(--text-muted)",
-                  textAlign: col.align || "left",
-                }}
+                className={cn(
+                  "px-3 py-2 font-normal text-muted-foreground",
+                  col.align === "right" && "text-right",
+                  col.align === "center" && "text-center",
+                  (!col.align || col.align === "left") && "text-left",
+                )}
               >
                 {col.header}
               </th>
@@ -36,16 +36,17 @@ export function DataTable({ columns, rows }: DataTableProps) {
           {rows.map((row) => (
             <tr
               key={columns.map((c) => row[c.accessorKey]).join("-")}
-              style={{ borderBottom: "1px solid var(--border-color)" }}
+              className="border-b border-border"
             >
               {columns.map((col) => (
                 <td
                   key={col.accessorKey}
-                  style={{
-                    padding: "8px 12px",
-                    color: "var(--text-primary)",
-                    textAlign: col.align || "left",
-                  }}
+                  className={cn(
+                    "px-3 py-2 text-foreground",
+                    col.align === "right" && "text-right",
+                    col.align === "center" && "text-center",
+                    (!col.align || col.align === "left") && "text-left",
+                  )}
                 >
                   {String(row[col.accessorKey] ?? "")}
                 </td>

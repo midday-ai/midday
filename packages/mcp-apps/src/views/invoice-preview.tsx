@@ -4,7 +4,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { InvoiceTemplate } from "../invoice";
-import "../utils/theme.css";
+import "../globals.css";
 
 function extractInvoiceData(
   result: CallToolResult,
@@ -42,26 +42,15 @@ function InvoicePreviewApp() {
   }, [app]);
 
   if (error)
-    return (
-      <div style={{ color: "red", padding: 16 }}>Error: {error.message}</div>
-    );
+    return <div className="text-red-500 p-4">Error: {error.message}</div>;
   if (!app || !toolResult)
-    return (
-      <div style={{ padding: 16, color: "var(--text-muted)" }}>Loading...</div>
-    );
+    return <div className="p-4 text-muted-foreground">Loading...</div>;
 
   const data = extractInvoiceData(toolResult);
 
   if (!data) {
     return (
-      <div
-        style={{
-          padding: 32,
-          textAlign: "center",
-          color: "var(--text-muted)",
-          fontSize: 12,
-        }}
-      >
+      <div className="p-8 text-center text-muted-foreground text-xs">
         No invoice data available
       </div>
     );

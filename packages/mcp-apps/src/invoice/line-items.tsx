@@ -14,7 +14,7 @@ function isValidJSON(str: string): boolean {
 function Description({ content }: { content: string }) {
   const value = isValidJSON(content) ? JSON.parse(content) : null;
   if (!value) {
-    return <div style={{ lineHeight: "16px", fontSize: 11 }}>{content}</div>;
+    return <div className="leading-[16px] text-[11px]">{content}</div>;
   }
   return <EditorContent content={value} />;
 }
@@ -39,11 +39,6 @@ type Props = {
   includeUnits?: boolean;
   includeLineItemTax?: boolean;
   lineItemTaxLabel?: string;
-};
-
-const HEADER_STYLE: React.CSSProperties = {
-  fontSize: 11,
-  color: "#878787",
 };
 
 export function LineItems({
@@ -71,25 +66,20 @@ export function LineItems({
       : String(amount);
 
   return (
-    <div style={{ marginTop: 20, fontFamily: "var(--font-mono)" }}>
+    <div className="mt-5 font-mono">
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: columns,
-          gap: 16,
-          alignItems: "end",
-          marginBottom: 8,
-          paddingBottom: 4,
-          borderBottom: "1px solid var(--border-color, #e5e5e5)",
-        }}
+        className="grid gap-4 items-end mb-2 pb-1 border-b border-border"
+        style={{ gridTemplateColumns: columns }}
       >
-        <div style={HEADER_STYLE}>{descriptionLabel}</div>
-        <div style={HEADER_STYLE}>{quantityLabel}</div>
-        <div style={HEADER_STYLE}>{priceLabel}</div>
+        <div className="text-[11px] text-[#878787]">{descriptionLabel}</div>
+        <div className="text-[11px] text-[#878787]">{quantityLabel}</div>
+        <div className="text-[11px] text-[#878787]">{priceLabel}</div>
         {includeLineItemTax && (
-          <div style={HEADER_STYLE}>{lineItemTaxLabel}</div>
+          <div className="text-[11px] text-[#878787]">{lineItemTaxLabel}</div>
         )}
-        <div style={{ ...HEADER_STYLE, textAlign: "right" }}>{totalLabel}</div>
+        <div className="text-[11px] text-[#878787] text-right">
+          {totalLabel}
+        </div>
       </div>
 
       {lineItems.map((item, index) => {
@@ -106,28 +96,20 @@ export function LineItems({
         return (
           <div
             key={`li-${item.name}-${index.toString()}`}
-            style={{
-              display: "grid",
-              gridTemplateColumns: columns,
-              gap: 16,
-              alignItems: "start",
-              marginBottom: 4,
-              padding: "4px 0",
-            }}
+            className="grid gap-4 items-start mb-1 py-1"
+            style={{ gridTemplateColumns: columns }}
           >
             <div>
               <Description content={item.name} />
             </div>
-            <div style={{ fontSize: 11 }}>{item.quantity ?? 0}</div>
-            <div style={{ fontSize: 11 }}>{priceDisplay}</div>
+            <div className="text-[11px]">{item.quantity ?? 0}</div>
+            <div className="text-[11px]">{priceDisplay}</div>
             {includeLineItemTax && (
-              <div style={{ fontSize: 11 }}>
+              <div className="text-[11px]">
                 {item.taxRate != null ? `${item.taxRate}%` : "0%"}
               </div>
             )}
-            <div style={{ fontSize: 11, textAlign: "right" }}>
-              {fmt(itemTotal)}
-            </div>
+            <div className="text-[11px] text-right">{fmt(itemTotal)}</div>
           </div>
         );
       })}
