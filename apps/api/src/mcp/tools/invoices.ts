@@ -72,7 +72,9 @@ async function embedLogoAsDataUrl(
   if (!isAllowedLogoUrl(logoUrl)) return invoice;
 
   try {
-    const res = await fetch(logoUrl);
+    const res = await fetch(logoUrl, {
+      signal: AbortSignal.timeout(5_000),
+    });
     if (!res.ok) return invoice;
 
     const contentType = res.headers.get("content-type") || "image/png";
