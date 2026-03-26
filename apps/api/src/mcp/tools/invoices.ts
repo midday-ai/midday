@@ -952,9 +952,12 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             addDays(new Date(issueDateStr), paymentTermsDays).toISOString();
 
           const customerDetails = transformCustomerToContent(customer);
-          const noteDetails = params.note
-            ? JSON.stringify(textToEditorDoc(params.note))
-            : ((savedTemplate?.noteDetails as string | null) ?? null);
+          const noteDetails =
+            params.note !== undefined
+              ? JSON.stringify(textToEditorDoc(params.note))
+              : savedTemplate?.noteDetails
+                ? JSON.stringify(savedTemplate.noteDetails)
+                : null;
 
           const { subTotal, total, vat, tax } = calculateTotal({
             lineItems: params.lineItems,
@@ -981,9 +984,12 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             customerDetails: customerDetails
               ? JSON.stringify(customerDetails)
               : null,
-            fromDetails: (savedTemplate?.fromDetails as string | null) ?? null,
-            paymentDetails:
-              (savedTemplate?.paymentDetails as string | null) ?? null,
+            fromDetails: savedTemplate?.fromDetails
+              ? JSON.stringify(savedTemplate.fromDetails)
+              : null,
+            paymentDetails: savedTemplate?.paymentDetails
+              ? JSON.stringify(savedTemplate.paymentDetails)
+              : null,
             noteDetails,
             logoUrl: mergedTemplate.logoUrl,
             lineItems: params.lineItems.map((item) => ({
@@ -1531,8 +1537,9 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           ).toISOString();
 
           const customerDetails = transformCustomerToContent(customer);
-          const noteDetails =
-            (savedTemplate?.noteDetails as string | null) ?? null;
+          const noteDetails = savedTemplate?.noteDetails
+            ? JSON.stringify(savedTemplate.noteDetails)
+            : null;
 
           const { subTotal, total, vat, tax } = calculateTotal({
             lineItems,
@@ -1559,9 +1566,12 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             customerDetails: customerDetails
               ? JSON.stringify(customerDetails)
               : null,
-            fromDetails: (savedTemplate?.fromDetails as string | null) ?? null,
-            paymentDetails:
-              (savedTemplate?.paymentDetails as string | null) ?? null,
+            fromDetails: savedTemplate?.fromDetails
+              ? JSON.stringify(savedTemplate.fromDetails)
+              : null,
+            paymentDetails: savedTemplate?.paymentDetails
+              ? JSON.stringify(savedTemplate.paymentDetails)
+              : null,
             noteDetails,
             logoUrl: mergedTemplate.logoUrl,
             lineItems: lineItems.map((item) => ({
