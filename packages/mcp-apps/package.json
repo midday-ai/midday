@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "rm -rf dist && INPUT=time-series-chart vite build && INPUT=spending-chart vite build && INPUT=balance-sheet vite build && INPUT=invoice-preview vite build",
+    "test": "bun test --exit --timeout 10000",
     "clean": "rm -rf .turbo node_modules dist",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
