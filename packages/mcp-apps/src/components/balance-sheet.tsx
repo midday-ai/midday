@@ -161,8 +161,14 @@ export function BalanceSheet({
   const totalNonCurrentLiabilities = sumItems(liabilities.nonCurrent);
   const totalLiabilities = totalCurrentLiabilities + totalNonCurrentLiabilities;
   const totalEquity = sumItems(equity.items);
-  const fmt = (amount: number) =>
-    formatAmount({ amount: Math.abs(amount), currency, locale });
+  const fmt = (amount: number) => {
+    const formatted = formatAmount({
+      amount: Math.abs(amount),
+      currency,
+      locale,
+    });
+    return amount < 0 ? `(${formatted})` : formatted;
+  };
 
   return (
     <div>

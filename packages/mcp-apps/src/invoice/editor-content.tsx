@@ -52,37 +52,20 @@ function formatEditorContent(doc?: EditorDoc): React.ReactNode | null {
 
                 if (inline.type === "text") {
                   const style: React.CSSProperties = { fontSize: 11 };
-                  let href: string | undefined;
 
                   if (inline.marks) {
                     for (const mark of inline.marks) {
                       if (mark.type === "bold") style.fontWeight = 600;
                       else if (mark.type === "italic")
                         style.fontStyle = "italic";
-                      else if (mark.type === "link") {
-                        href = mark.attrs?.href;
+                      else if (mark.type === "link")
                         style.textDecoration = "underline";
-                      } else if (mark.type === "strike")
+                      else if (mark.type === "strike")
                         style.textDecoration = "line-through";
                     }
                   }
 
                   const content = inline.text || "";
-                  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(content);
-
-                  if (href || isEmail) {
-                    const linkHref =
-                      href || (isEmail ? `mailto:${content}` : content);
-                    return (
-                      <a
-                        key={ik}
-                        href={linkHref}
-                        style={{ ...style, textDecoration: "underline" }}
-                      >
-                        {content}
-                      </a>
-                    );
-                  }
 
                   return (
                     <span key={ik} style={style}>

@@ -1,5 +1,3 @@
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import type { App as McpApp } from "@modelcontextprotocol/ext-apps";
 import { useApp } from "@modelcontextprotocol/ext-apps/react";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
@@ -16,30 +14,6 @@ function extractInvoiceData(
     | Record<string, any>
     | undefined;
   return structured?.invoice ?? structured?.data ?? structured ?? null;
-}
-
-function InvoiceActions({ data }: { data: Record<string, any> }) {
-  const { previewUrl, pdfUrl } = data;
-  if (!previewUrl && !pdfUrl) return null;
-
-  return (
-    <div className="flex justify-end gap-2 mt-4">
-      {previewUrl && (
-        <Button variant="outline" size="icon" asChild>
-          <a href={previewUrl} target="_blank" rel="noopener noreferrer">
-            <Icons.ExternalLink className="size-3" />
-          </a>
-        </Button>
-      )}
-      {pdfUrl && (
-        <Button variant="outline" size="icon" asChild>
-          <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
-            <Icons.ArrowDownward className="size-3" />
-          </a>
-        </Button>
-      )}
-    </div>
-  );
 }
 
 function InvoicePreviewApp() {
@@ -86,7 +60,6 @@ function InvoicePreviewApp() {
   return (
     <AppShell>
       <InvoiceTemplate data={data} />
-      <InvoiceActions data={data} />
     </AppShell>
   );
 }
