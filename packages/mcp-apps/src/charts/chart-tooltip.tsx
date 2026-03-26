@@ -1,5 +1,5 @@
+import { formatAmount } from "@midday/utils/format";
 import { commonChartConfig } from "../utils/chart-config";
-import { formatAmount } from "../utils/format-amount";
 
 interface ChartTooltipProps {
   active?: boolean;

@@ -9,6 +9,8 @@ const VIEWS = [
   "spending-chart.html",
   "balance-sheet.html",
   "invoice-preview.html",
+  "recurring-expenses.html",
+  "tax-summary.html",
 ];
 
 describe("build output", () => {

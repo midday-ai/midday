@@ -6,9 +6,7 @@ import {
   forecastData,
   growthRateData,
   profitMarginData,
-  recurringExpensesData,
   revenueData,
-  taxSummaryData,
 } from "../dev/mock-data";
 import { detectReportType } from "./detect-report-type";
 
@@ -31,14 +29,6 @@ describe("detectReportType", () => {
 
   test("detects burn_rate report", () => {
     expect(detectReportType(burnRateData)).toBe("burn_rate");
-  });
-
-  test("detects recurring_expenses report", () => {
-    expect(detectReportType(recurringExpensesData)).toBe("recurring_expenses");
-  });
-
-  test("detects tax_summary report", () => {
-    expect(detectReportType(taxSummaryData)).toBe("tax_summary");
   });
 
   test("detects period report (revenue)", () => {

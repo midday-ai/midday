@@ -1,4 +1,4 @@
-import { formatAmount } from "../utils/format-amount";
+import { formatAmount } from "@midday/utils/format";
 
 interface BalanceSheetLineItem {
   label: string;

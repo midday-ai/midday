@@ -4,20 +4,10 @@ import { useApp } from "@modelcontextprotocol/ext-apps/react";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { GenericDonutChart } from "../charts/donut-chart";
 import { AppShell } from "../components/app-shell";
 import { DataTable } from "../components/data-table";
 import { MetricGrid } from "../components/metric-grid";
 import "../globals.css";
-
-interface SpendingCategory {
-  name: string;
-  slug?: string;
-  amount: number;
-  currency: string;
-  color?: string;
-  percentage: number;
-}
 
 function fmt(amount: number, currency?: string): string {
   if (!currency) return amount.toLocaleString();
@@ -27,11 +17,11 @@ function fmt(amount: number, currency?: string): string {
   );
 }
 
-function SpendingChartApp() {
+function RecurringExpensesApp() {
   const [toolResult, setToolResult] = useState<CallToolResult | null>(null);
 
   const { app, error } = useApp({
-    appInfo: { name: "Midday Spending", version: "1.0.0" },
+    appInfo: { name: "Midday Recurring Expenses", version: "1.0.0" },
     capabilities: {},
     onAppCreated: (app: McpApp) => {
       app.ontoolresult = async (result: CallToolResult) => {
@@ -62,20 +52,14 @@ function SpendingChartApp() {
     string,
     any
   >;
-  const categories: SpendingCategory[] = structured?.data ?? [];
-  const currency = categories[0]?.currency;
-  const totalSpending = categories.reduce((s, c) => s + c.amount, 0);
+  const items: Record<string, any>[] = structured?.data ?? [];
+  const currency = items[0]?.currency;
+  const total = items.reduce((s, i) => s + (i.amount ?? 0), 0);
 
-  const donutData = categories.map((c) => ({
-    name: c.name,
-    value: c.amount,
-    percentage: c.percentage,
-  }));
-
-  const tableRows = categories.map((c) => ({
-    name: c.name,
-    amount: fmt(c.amount, currency),
-    percentage: `${c.percentage.toFixed(1)}%`,
+  const tableRows = items.map((item) => ({
+    merchant: item.name || item.merchant,
+    amount: fmt(item.amount, currency),
+    frequency: item.frequency,
   }));
 
   return (
@@ -84,31 +68,22 @@ function SpendingChartApp() {
         items={[
           {
             id: "total",
-            title: "Total Spending",
-            value: fmt(totalSpending, currency),
-            subtitle: `${categories.length} categories`,
+            title: "Total Recurring",
+            value: fmt(total, currency),
+            subtitle: `${items.length} recurring expenses`,
           },
         ]}
         columns={1}
       />
-      <div className="flex gap-6 flex-wrap">
-        <div className="flex-[1_1_300px] min-w-[280px]">
-          <GenericDonutChart
-            data={donutData}
-            height={280}
-            currency={currency}
-          />
-        </div>
-        <div className="flex-[1_1_300px] min-w-[280px] mt-4">
-          <DataTable
-            columns={[
-              { header: "Category", accessorKey: "name" },
-              { header: "Amount", accessorKey: "amount", align: "right" },
-              { header: "%", accessorKey: "percentage", align: "right" },
-            ]}
-            rows={tableRows}
-          />
-        </div>
+      <div className="mt-4">
+        <DataTable
+          columns={[
+            { header: "Merchant", accessorKey: "merchant" },
+            { header: "Amount", accessorKey: "amount", align: "right" },
+            { header: "Frequency", accessorKey: "frequency" },
+          ]}
+          rows={tableRows}
+        />
       </div>
     </AppShell>
   );
@@ -116,6 +91,6 @@ function SpendingChartApp() {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <SpendingChartApp />
+    <RecurringExpensesApp />
   </StrictMode>,
 );

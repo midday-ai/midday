@@ -3,6 +3,7 @@ import { useApp } from "@modelcontextprotocol/ext-apps/react";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { AppShell } from "../components/app-shell";
 import {
   BalanceSheet,
   type BalanceSheetProps,
@@ -64,7 +65,11 @@ function BalanceSheetApp() {
     ratios: bs.ratios,
   };
 
-  return <BalanceSheet {...props} />;
+  return (
+    <AppShell>
+      <BalanceSheet {...props} />
+    </AppShell>
+  );
 }
 
 createRoot(document.getElementById("root")!).render(

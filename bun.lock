@@ -566,6 +566,8 @@
       "dependencies": {
         "@date-fns/tz": "^1.4.1",
         "@midday/invoice": "workspace:*",
+        "@midday/ui": "workspace:*",
+        "@midday/utils": "workspace:*",
         "@modelcontextprotocol/ext-apps": "^1.3.1",
         "clsx": "^2.1.1",
         "date-fns": "^4.1.0",

@@ -40,7 +40,7 @@ import {
 import { truncateListResponse, withErrorHandling } from "../utils";
 
 export const registerTrackerTools: RegisterTools = (server, ctx) => {
-  const { db, teamId } = ctx;
+  const { db, teamId, userId } = ctx;
 
   const hasProjectReadScope = hasScope(ctx, "tracker-projects.read");
   const hasProjectWriteScope = hasScope(ctx, "tracker-projects.write");
@@ -192,6 +192,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         try {
           const result = await upsertTrackerProject(db, {
             teamId,
+            userId,
             name: params.name,
             description: params.description,
             estimate: params.estimate,
@@ -266,6 +267,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           const result = await upsertTrackerProject(db, {
             id: params.id,
             teamId,
+            userId,
             name: params.name ?? existing.name ?? "",
             description: params.description ?? existing.description,
             estimate: params.estimate ?? existing.estimate,
@@ -502,7 +504,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             stop: params.stop,
             duration: params.duration,
             description: params.description,
-            assignedId: params.assignedId,
+            assignedId: params.assignedId ?? userId,
           });
 
           const clean = sanitizeArray(mcpTrackerEntrySchema, result ?? []);
@@ -683,7 +685,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             teamId,
             projectId: params.projectId,
             description: params.description,
-            assignedId: params.assignedId,
+            assignedId: params.assignedId ?? userId,
             start: params.start,
           });
 
@@ -728,7 +730,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           const result = await stopTimer(db, {
             teamId,
             entryId: params.entryId,
-            assignedId: params.assignedId,
+            assignedId: params.assignedId ?? userId,
             stop: params.stop,
           });
 

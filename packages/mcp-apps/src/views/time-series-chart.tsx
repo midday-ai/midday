@@ -1,3 +1,4 @@
+import { formatAmount } from "@midday/utils/format";
 import type { App as McpApp } from "@modelcontextprotocol/ext-apps";
 import { useApp } from "@modelcontextprotocol/ext-apps/react";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
@@ -5,11 +6,11 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { GenericAreaChart } from "../charts/area-chart";
 import { GenericBarChart } from "../charts/bar-chart";
+import { AppShell } from "../components/app-shell";
 import { ChartContainer } from "../components/chart-container";
 import { MetricGrid } from "../components/metric-grid";
 import { Section } from "../components/section";
 import { detectReportType } from "../utils/detect-report-type";
-import { formatAmount } from "../utils/format-amount";
 import "../globals.css";
 
 interface PeriodResult {
@@ -40,14 +41,6 @@ interface ForecastResult {
   forecast: Record<string, any>[];
   combined: Record<string, any>[];
   meta: Record<string, any>;
-}
-
-interface RecurringExpensesResult {
-  data: Array<Record<string, any>>;
-}
-
-interface TaxSummaryResult {
-  data: Array<Record<string, any>>;
 }
 
 function fmt(amount: number, currency?: string, locale?: string): string {
@@ -455,118 +448,6 @@ function ForecastReport({ data }: { data: ForecastResult }) {
   );
 }
 
-function RecurringExpensesReport({ data }: { data: RecurringExpensesResult }) {
-  const items = data.data;
-  const currency = items?.[0]?.currency;
-
-  const total = items.reduce((s, i) => s + (i.amount ?? 0), 0);
-  const metrics = [
-    {
-      id: "total",
-      title: "Total Recurring",
-      value: fmt(total, currency),
-      subtitle: `${items.length} recurring expenses`,
-    },
-  ];
-
-  return (
-    <>
-      <MetricGrid items={metrics} columns={1} />
-      <div className="mt-4">
-        <table className="w-full text-xs border-collapse">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="px-3 py-2 text-left font-normal text-muted-foreground">
-                Merchant
-              </th>
-              <th className="px-3 py-2 text-right font-normal text-muted-foreground">
-                Amount
-              </th>
-              <th className="px-3 py-2 text-left font-normal text-muted-foreground">
-                Frequency
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr
-                key={`${item.name || item.merchant}-${item.amount}`}
-                className="border-b border-border"
-              >
-                <td className="px-3 py-2 text-foreground">
-                  {item.name || item.merchant}
-                </td>
-                <td className="px-3 py-2 text-right font-mono text-foreground">
-                  {fmt(item.amount, currency)}
-                </td>
-                <td className="px-3 py-2 text-muted-foreground">
-                  {item.frequency}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
-}
-
-function TaxSummaryReport({ data }: { data: TaxSummaryResult }) {
-  const items = data.data;
-  const currency = items?.[0]?.currency;
-
-  const total = items.reduce((s, i) => s + (i.amount ?? i.total ?? 0), 0);
-  const metrics = [
-    {
-      id: "total",
-      title: "Total Tax",
-      value: fmt(total, currency),
-      subtitle: `${items.length} tax entries`,
-    },
-  ];
-
-  return (
-    <>
-      <MetricGrid items={metrics} columns={1} />
-      <div className="mt-4">
-        <table className="w-full text-xs border-collapse">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="px-3 py-2 text-left font-normal text-muted-foreground">
-                Category
-              </th>
-              <th className="px-3 py-2 text-left font-normal text-muted-foreground">
-                Type
-              </th>
-              <th className="px-3 py-2 text-right font-normal text-muted-foreground">
-                Amount
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr
-                key={`${item.category || item.name}-${item.taxType || item.type}`}
-                className="border-b border-border"
-              >
-                <td className="px-3 py-2 text-foreground">
-                  {item.category || item.name}
-                </td>
-                <td className="px-3 py-2 text-muted-foreground">
-                  {item.taxType || item.type}
-                </td>
-                <td className="px-3 py-2 text-right font-mono text-foreground">
-                  {fmt(item.amount ?? item.total ?? 0, currency)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
-}
-
 function TimeSeriesChartApp() {
   const [toolResult, setToolResult] = useState<CallToolResult | null>(null);
 
@@ -604,28 +485,31 @@ function TimeSeriesChartApp() {
   >;
   const reportType = detectReportType(data);
 
-  switch (reportType) {
-    case "period":
-      return <PeriodReport data={data as PeriodResult} />;
-    case "burn_rate":
-      return <BurnRateReport data={data as BurnRateResult} />;
-    case "cash_flow":
-      return <CashFlowReport data={data as CashFlowResult} />;
-    case "growth_rate":
-      return <GrowthRateReport data={data as GrowthRateResult} />;
-    case "profit_margin":
-      return <ProfitMarginReport data={data as ProfitMarginResult} />;
-    case "forecast":
-      return <ForecastReport data={data as ForecastResult} />;
-    case "recurring_expenses":
-      return <RecurringExpensesReport data={data as RecurringExpensesResult} />;
-    case "tax_summary":
-      return <TaxSummaryReport data={data as TaxSummaryResult} />;
-    default:
-      return (
-        <Section title="Report Data" content={JSON.stringify(data, null, 2)} />
-      );
-  }
+  const content = (() => {
+    switch (reportType) {
+      case "period":
+        return <PeriodReport data={data as PeriodResult} />;
+      case "burn_rate":
+        return <BurnRateReport data={data as BurnRateResult} />;
+      case "cash_flow":
+        return <CashFlowReport data={data as CashFlowResult} />;
+      case "growth_rate":
+        return <GrowthRateReport data={data as GrowthRateResult} />;
+      case "profit_margin":
+        return <ProfitMarginReport data={data as ProfitMarginResult} />;
+      case "forecast":
+        return <ForecastReport data={data as ForecastResult} />;
+      default:
+        return (
+          <Section
+            title="Report Data"
+            content={JSON.stringify(data, null, 2)}
+          />
+        );
+    }
+  })();
+
+  return <AppShell>{content}</AppShell>;
 }
 
 createRoot(document.getElementById("root")!).render(

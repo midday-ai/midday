@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { formatAmount } from "./format-amount";
+import { formatAmount } from "@midday/utils/format";
 
 describe("formatAmount", () => {
   test("formats USD with default locale", () => {

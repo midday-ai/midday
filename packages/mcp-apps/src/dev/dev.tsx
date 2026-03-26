@@ -1,3 +1,4 @@
+import { formatAmount } from "@midday/utils/format";
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { GenericAreaChart } from "../charts/area-chart";
@@ -8,7 +9,6 @@ import { ChartContainer } from "../components/chart-container";
 import { DataTable } from "../components/data-table";
 import { MetricGrid } from "../components/metric-grid";
 import { InvoiceTemplate } from "../invoice";
-import { formatAmount } from "../utils/format-amount";
 import "../globals.css";
 import {
   balanceSheetData,

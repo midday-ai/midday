@@ -225,7 +225,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         data: z.array(z.record(z.string(), z.any())),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/time-series-chart" } },
+      _meta: { ui: { resourceUri: "ui://midday/tax-summary" } },
     },
     withErrorHandling(async (params) => {
       const result = await getTaxSummary(db, {
@@ -351,7 +351,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         data: z.array(z.record(z.string(), z.any())),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/time-series-chart" } },
+      _meta: { ui: { resourceUri: "ui://midday/recurring-expenses" } },
     },
     withErrorHandling(async (params) => {
       const result = await getRecurringExpenses(db, {

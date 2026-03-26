@@ -54,7 +54,7 @@ export function InvoiceTemplate({ data }: Props) {
 
   return (
     <div
-      className="w-full mx-auto bg-background border border-border overflow-auto text-foreground font-sans antialiased whitespace-pre-line"
+      className="w-full mx-auto bg-[#fcfcfc] dark:bg-[#0f0f0f] border border-border overflow-auto text-foreground font-sans antialiased whitespace-pre-line"
       style={{ maxWidth: width }}
     >
       <div className="p-8 flex flex-col" style={{ minHeight: height - 5 }}>

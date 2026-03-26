@@ -1,5 +1,5 @@
+import { formatAmount } from "@midday/utils/format";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { formatAmount } from "../utils/format-amount";
 
 interface DonutDataItem {
   name: string;
