@@ -565,6 +565,7 @@
       "version": "1.0.0",
       "dependencies": {
         "@date-fns/tz": "^1.4.1",
+        "@midday/invoice": "workspace:*",
         "@modelcontextprotocol/ext-apps": "^1.3.1",
         "date-fns": "^4.1.0",
         "react": "19.2.4",

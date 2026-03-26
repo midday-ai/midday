@@ -1,4 +1,4 @@
-import { calculateTotal } from "./calculate";
+import { calculateTotal } from "@midday/invoice/calculate";
 
 type LineItem = {
   price?: number;

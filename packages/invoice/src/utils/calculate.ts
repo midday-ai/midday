@@ -52,8 +52,7 @@ export function calculateTotal({
     tax = (subTotal * safeTaxRate) / 100;
   }
 
-  // Calculate Total: Subtotal + VAT + Tax - Discount
-  const total = subTotal + (includeVat ? totalVAT : 0) + tax - safeDiscount;
+  const total = subTotal + totalVAT + tax - safeDiscount;
 
   return {
     subTotal,
