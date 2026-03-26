@@ -1795,6 +1795,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
               quantity: totalHours,
               price: rate,
               unit: "hours",
+              taxRate: undefined as number | undefined,
             },
           ];
 
@@ -1898,6 +1899,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
               quantity: item.quantity,
               price: item.price,
               unit: item.unit ?? null,
+              taxRate: item.taxRate ?? null,
             })),
             subtotal: subTotal,
             amount: total,
