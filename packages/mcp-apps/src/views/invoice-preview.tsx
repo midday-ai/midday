@@ -5,6 +5,7 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { AppShell } from "../components/app-shell";
 import { InvoiceTemplate } from "../invoice";
+import { InvoiceSkeleton } from "../invoice/skeleton";
 import "../globals.css";
 
 function extractInvoiceData(
@@ -45,7 +46,11 @@ function InvoicePreviewApp() {
   if (error)
     return <div className="text-red-500 p-4">Error: {error.message}</div>;
   if (!app || !toolResult)
-    return <div className="p-4 text-muted-foreground">Loading...</div>;
+    return (
+      <AppShell>
+        <InvoiceSkeleton />
+      </AppShell>
+    );
 
   const data = extractInvoiceData(toolResult);
 

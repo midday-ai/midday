@@ -1630,12 +1630,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       },
     );
 
-    server.registerTool(
+    registerAppTool(
+      server,
       "invoices_create_from_tracker",
       {
         title: "Create Invoice from Time Tracker",
         description:
           "Create an invoice from tracked time entries on a project. Specify the project and date range to include. Line items are auto-generated from time entries using the project's billable rate. The invoice is created as a draft. VAT, tax, and discount settings can be overridden per-invoice.",
+        _meta: { ui: { resourceUri: "ui://midday/invoice-preview" } },
         inputSchema: {
           projectId: z
             .string()
@@ -1928,6 +1930,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             previewUrl,
           });
 
+          const invoiceForUI = await embedLogoAsDataUrl(clean);
+
           const response = {
             message: `Invoice ${invoiceNumber} created from ${totalHours}h tracked on "${project.name}". Total: ${total} ${currency}`,
             invoice: clean,
@@ -1935,7 +1939,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
 
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
-            structuredContent: response,
+            structuredContent: { ...response, invoice: invoiceForUI },
           };
         } catch (error) {
           return {
