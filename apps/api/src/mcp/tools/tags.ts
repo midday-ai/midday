@@ -98,21 +98,36 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const result = await createTag(db, { teamId, ...params });
+        try {
+          const result = await createTag(db, { teamId, ...params });
 
-        if (!result) {
+          if (!result) {
+            return {
+              content: [{ type: "text", text: "Failed to create tag" }],
+              isError: true,
+            };
+          }
+
+          const clean = sanitize(mcpTagResponseSchema, result);
+
           return {
-            content: [{ type: "text", text: "Failed to create tag" }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+            structuredContent: { data: clean },
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to create tag",
+              },
+            ],
             isError: true,
           };
         }
-
-        const clean = sanitize(mcpTagResponseSchema, result);
-
-        return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
-          structuredContent: { data: clean },
-        };
       },
     );
 

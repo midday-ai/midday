@@ -8,6 +8,7 @@ import {
   getMimeType,
   getVaultSignedUrl,
   type McpContent,
+  truncateListResponse,
 } from "../utils";
 
 export const registerDocumentTools: RegisterTools = (server, ctx) => {
@@ -54,9 +55,11 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
         data: sanitizeArray(mcpDocumentSchema, result.data ?? []),
       };
 
+      const { text, structuredContent } = truncateListResponse(response);
+
       return {
-        content: [{ type: "text", text: JSON.stringify(response) }],
-        structuredContent: response,
+        content: [{ type: "text", text }],
+        structuredContent,
       };
     },
   );

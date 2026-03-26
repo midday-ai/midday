@@ -6,6 +6,7 @@ export interface McpContext {
   db: Database;
   teamId: string;
   userId: string;
+  userEmail: string | null;
   scopes: Scope[];
   apiUrl: string;
   timezone: string | null;

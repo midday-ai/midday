@@ -126,6 +126,7 @@ export const mcpInvoiceListItemSchema = z.object({
   lineItems: z.any().nullable().optional(),
   recurringSequence: z.number().nullable().optional(),
   pdfUrl: z.string().nullable().optional(),
+  previewUrl: z.string().nullable().optional(),
   customer: mcpInvoiceCustomerSchema.nullable().optional(),
   recurring: mcpInvoiceRecurringSchema.nullable().optional(),
 });

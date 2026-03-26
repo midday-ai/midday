@@ -21,6 +21,7 @@ import {
   sanitizeArray,
 } from "./schemas";
 import { hasScope, type McpContext } from "./types";
+import { DASHBOARD_URL } from "./utils";
 
 const REPORT_TYPES = [
   "revenue",
@@ -223,7 +224,13 @@ export function registerResources(server: McpServer, ctx: McpContext): void {
           teamId,
         });
 
-        const clean = result ? sanitize(mcpInvoiceDetailSchema, result) : null;
+        const previewUrl = result?.token
+          ? `${DASHBOARD_URL}/i/${result.token}`
+          : null;
+
+        const clean = result
+          ? sanitize(mcpInvoiceDetailSchema, { ...result, previewUrl })
+          : null;
 
         return {
           contents: [

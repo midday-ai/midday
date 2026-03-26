@@ -8,14 +8,23 @@ import {
 } from "@api/schemas/invoice";
 import {
   deleteInvoice,
+  draftInvoice,
   duplicateInvoice,
+  getCustomerById,
   getInvoiceById,
   getInvoiceSummary,
   getInvoices,
+  getInvoiceTemplate,
   getNextInvoiceNumber,
+  isInvoiceNumberUsed,
   updateInvoice,
 } from "@midday/db/queries";
-import { PdfTemplate, renderToStream } from "@midday/invoice";
+import { DEFAULT_TEMPLATE, PdfTemplate, renderToStream } from "@midday/invoice";
+import { calculateTotal } from "@midday/invoice/calculate";
+import { transformCustomerToContent } from "@midday/invoice/utils";
+import { triggerJob } from "@midday/job-client";
+import { addDays } from "date-fns";
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import {
   mcpInvoiceDetailSchema,
@@ -30,7 +39,13 @@ import {
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
-import { type McpContent, streamToResource } from "../utils";
+import {
+  DASHBOARD_URL,
+  type McpContent,
+  streamToResource,
+  textToEditorDoc,
+  truncateListResponse,
+} from "../utils";
 
 export const registerInvoiceTools: RegisterTools = (server, ctx) => {
   const { db, teamId, userId, apiUrl } = ctx;
@@ -81,10 +96,9 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         annotations: READ_ONLY_ANNOTATIONS,
       },
       async (params) => {
-        const sort =
-          params.sortBy && params.sortDirection
-            ? [params.sortBy, params.sortDirection]
-            : null;
+        const sort = params.sortBy
+          ? [params.sortBy, params.sortDirection ?? "desc"]
+          : null;
 
         const result = await getInvoices(db, {
           teamId,
@@ -105,6 +119,9 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             pdfUrl: invoice.token
               ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(invoice.token)}`
               : null,
+            previewUrl: invoice.token
+              ? `${DASHBOARD_URL}/i/${invoice.token}`
+              : null,
           })),
         );
 
@@ -117,9 +134,11 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           data,
         };
 
+        const { text, structuredContent } = truncateListResponse(response);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(response) }],
-          structuredContent: response,
+          content: [{ type: "text", text }],
+          structuredContent,
         };
       },
     );
@@ -153,10 +172,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         const pdfUrl = result.token
           ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(result.token)}`
           : null;
+        const previewUrl = result.token
+          ? `${DASHBOARD_URL}/i/${result.token}`
+          : null;
 
         const clean = sanitize(mcpInvoiceDetailSchema, {
           ...result,
           pdfUrl,
+          previewUrl,
         });
 
         const content: McpContent[] = [
@@ -245,35 +268,61 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const existing = await getInvoiceById(db, { id: params.id, teamId });
+        try {
+          const existing = await getInvoiceById(db, {
+            id: params.id,
+            teamId,
+          });
 
-        if (!existing) {
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Invoice not found" }],
+              isError: true,
+            };
+          }
+
+          const result = await updateInvoice(db, {
+            id: params.id,
+            teamId,
+            userId,
+            status: params.status,
+            paidAt: params.paidAt,
+            internalNote: params.internalNote,
+          });
+
+          if (!result) {
+            return {
+              content: [{ type: "text", text: "Failed to update invoice" }],
+              isError: true,
+            };
+          }
+
+          const previewUrl = existing.token
+            ? `${DASHBOARD_URL}/i/${existing.token}`
+            : null;
+
+          const clean = sanitize(mcpInvoiceDetailSchema, {
+            ...result,
+            previewUrl,
+          });
+
           return {
-            content: [{ type: "text", text: "Invoice not found" }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to update invoice",
+              },
+            ],
             isError: true,
           };
         }
-
-        const result = await updateInvoice(db, {
-          id: params.id,
-          teamId,
-          status: params.status,
-          paidAt: params.paidAt,
-          internalNote: params.internalNote,
-        });
-
-        if (!result) {
-          return {
-            content: [{ type: "text", text: "Failed to update invoice" }],
-            isError: true,
-          };
-        }
-
-        const clean = sanitize(mcpInvoiceDetailSchema, result);
-
-        return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
-        };
       },
     );
 
@@ -296,41 +345,71 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const existing = await getInvoiceById(db, { id: params.id, teamId });
+        try {
+          const existing = await getInvoiceById(db, {
+            id: params.id,
+            teamId,
+          });
 
-        if (!existing) {
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Invoice not found" }],
+              isError: true,
+            };
+          }
+
+          if (existing.status === "paid") {
+            return {
+              content: [
+                { type: "text", text: "Invoice is already marked paid" },
+              ],
+              isError: true,
+            };
+          }
+
+          const result = await updateInvoice(db, {
+            id: params.id,
+            teamId,
+            userId,
+            status: "paid",
+            paidAt: params.paidAt ?? new Date().toISOString(),
+          });
+
+          if (!result) {
+            return {
+              content: [
+                { type: "text", text: "Failed to mark invoice as paid" },
+              ],
+              isError: true,
+            };
+          }
+
+          const previewUrl = existing.token
+            ? `${DASHBOARD_URL}/i/${existing.token}`
+            : null;
+
+          const clean = sanitize(mcpInvoiceDetailSchema, {
+            ...result,
+            previewUrl,
+          });
+
           return {
-            content: [{ type: "text", text: "Invoice not found" }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to mark invoice as paid",
+              },
+            ],
             isError: true,
           };
         }
-
-        if (existing.status === "paid") {
-          return {
-            content: [{ type: "text", text: "Invoice is already marked paid" }],
-            isError: true,
-          };
-        }
-
-        const result = await updateInvoice(db, {
-          id: params.id,
-          teamId,
-          status: "paid",
-          paidAt: params.paidAt ?? new Date().toISOString(),
-        });
-
-        if (!result) {
-          return {
-            content: [{ type: "text", text: "Failed to mark invoice as paid" }],
-            isError: true,
-          };
-        }
-
-        const clean = sanitize(mcpInvoiceDetailSchema, result);
-
-        return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
-        };
       },
     );
 
@@ -346,44 +425,59 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
-        const existing = await getInvoiceById(db, { id, teamId });
+        try {
+          const existing = await getInvoiceById(db, { id, teamId });
 
-        if (!existing) {
-          return {
-            content: [{ type: "text", text: "Invoice not found" }],
-            isError: true,
-          };
-        }
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Invoice not found" }],
+              isError: true,
+            };
+          }
 
-        if (existing.status !== "draft" && existing.status !== "canceled") {
+          if (existing.status !== "draft" && existing.status !== "canceled") {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Cannot delete invoice with status "${existing.status}". Only draft or canceled invoices can be deleted.`,
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          const result = await deleteInvoice(db, { id, teamId });
+
+          if (!result) {
+            return {
+              content: [{ type: "text", text: "Failed to delete invoice" }],
+              isError: true,
+            };
+          }
+
           return {
             content: [
               {
                 type: "text",
-                text: `Cannot delete invoice with status "${existing.status}". Only draft or canceled invoices can be deleted.`,
+                text: JSON.stringify({ success: true, deletedId: result.id }),
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to delete invoice",
               },
             ],
             isError: true,
           };
         }
-
-        const result = await deleteInvoice(db, { id, teamId });
-
-        if (!result) {
-          return {
-            content: [{ type: "text", text: "Failed to delete invoice" }],
-            isError: true,
-          };
-        }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({ success: true, deletedId: result.id }),
-            },
-          ],
-        };
       },
     );
 
@@ -399,16 +493,16 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async ({ id }) => {
-        const existing = await getInvoiceById(db, { id, teamId });
-
-        if (!existing) {
-          return {
-            content: [{ type: "text", text: "Invoice not found" }],
-            isError: true,
-          };
-        }
-
         try {
+          const existing = await getInvoiceById(db, { id, teamId });
+
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Invoice not found" }],
+              isError: true,
+            };
+          }
+
           const invoiceNumber = await getNextInvoiceNumber(db, teamId);
 
           const result = await duplicateInvoice(db, {
@@ -418,7 +512,14 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             invoiceNumber,
           });
 
-          const clean = sanitize(mcpInvoiceDetailSchema, result);
+          const previewUrl = result?.token
+            ? `${DASHBOARD_URL}/i/${result.token}`
+            : null;
+
+          const clean = sanitize(mcpInvoiceDetailSchema, {
+            ...result,
+            previewUrl,
+          });
 
           return {
             content: [{ type: "text", text: JSON.stringify(clean) }],
@@ -452,47 +553,751 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async ({ id }) => {
-        const existing = await getInvoiceById(db, { id, teamId });
+        try {
+          const existing = await getInvoiceById(db, { id, teamId });
 
-        if (!existing) {
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Invoice not found" }],
+              isError: true,
+            };
+          }
+
+          if (existing.status === "canceled") {
+            return {
+              content: [{ type: "text", text: "Invoice is already canceled" }],
+              isError: true,
+            };
+          }
+
+          if (existing.status === "paid") {
+            return {
+              content: [{ type: "text", text: "Cannot cancel a paid invoice" }],
+              isError: true,
+            };
+          }
+
+          const result = await updateInvoice(db, {
+            id,
+            teamId,
+            userId,
+            status: "canceled",
+          });
+
+          if (!result) {
+            return {
+              content: [{ type: "text", text: "Failed to cancel invoice" }],
+              isError: true,
+            };
+          }
+
+          const previewUrl = existing.token
+            ? `${DASHBOARD_URL}/i/${existing.token}`
+            : null;
+
+          const clean = sanitize(mcpInvoiceDetailSchema, {
+            ...result,
+            previewUrl,
+          });
+
           return {
-            content: [{ type: "text", text: "Invoice not found" }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to cancel invoice",
+              },
+            ],
             isError: true,
           };
         }
+      },
+    );
 
-        if (existing.status === "canceled") {
+    server.registerTool(
+      "invoices_remind",
+      {
+        title: "Send Invoice Reminder",
+        description:
+          "Send a payment reminder email for an unpaid or overdue invoice. Records the reminder timestamp on the invoice. Cannot remind for draft, paid, or canceled invoices.",
+        inputSchema: {
+          id: z
+            .string()
+            .uuid()
+            .describe("ID of the invoice to send a reminder for"),
+        },
+        annotations: WRITE_ANNOTATIONS,
+      },
+      async ({ id }) => {
+        try {
+          const existing = await getInvoiceById(db, { id, teamId });
+
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Invoice not found" }],
+              isError: true,
+            };
+          }
+
+          if (existing.status !== "unpaid" && existing.status !== "overdue") {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Cannot send a reminder for invoice with status "${existing.status}". Only unpaid or overdue invoices can receive reminders.`,
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          const now = new Date().toISOString();
+
+          await triggerJob(
+            "send-invoice-reminder",
+            { invoiceId: id },
+            "invoices",
+          );
+
+          await updateInvoice(db, {
+            id,
+            teamId,
+            userId,
+            reminderSentAt: now,
+          });
+
+          const previewUrl = existing.token
+            ? `${DASHBOARD_URL}/i/${existing.token}`
+            : null;
+
           return {
-            content: [{ type: "text", text: "Invoice is already canceled" }],
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({
+                  message: `Payment reminder sent for invoice ${existing.invoiceNumber}${existing.sentTo ? ` to ${existing.sentTo}` : ""}`,
+                  invoiceId: id,
+                  reminderSentAt: now,
+                  previewUrl,
+                }),
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to send invoice reminder",
+              },
+            ],
             isError: true,
           };
         }
+      },
+    );
 
-        if (existing.status === "paid") {
+    server.registerTool(
+      "invoices_create",
+      {
+        title: "Create Invoice",
+        description:
+          "Create a new invoice for a customer. Automatically uses the team's saved invoice template (logo, labels, payment details, tax settings). Line items are required. Invoices are created as drafts by default — use invoices_send to send after review. Set deliveryType to 'create' to finalize without sending, or 'create_and_send' to finalize and email immediately. The invoice number, amounts, and customer details are auto-populated.",
+        inputSchema: {
+          customerId: z
+            .string()
+            .uuid()
+            .describe("ID of the customer to invoice"),
+          lineItems: z
+            .array(
+              z.object({
+                name: z.string().describe("Line item description"),
+                quantity: z
+                  .number()
+                  .min(0)
+                  .describe("Quantity (e.g. hours, units)"),
+                price: z.number().describe("Unit price"),
+                unit: z
+                  .string()
+                  .optional()
+                  .describe("Unit label (e.g. 'hours', 'units')"),
+              }),
+            )
+            .min(1)
+            .describe("Invoice line items"),
+          deliveryType: z
+            .enum(["draft", "create", "create_and_send"])
+            .optional()
+            .describe(
+              "How to process the invoice: 'draft' (default) saves as draft for preview/editing (use invoices_send to send later), 'create' finalizes without sending, 'create_and_send' finalizes and emails to the customer",
+            ),
+          dueDate: z
+            .string()
+            .optional()
+            .describe(
+              "Due date in ISO 8601 format (defaults to issue date + payment terms from template)",
+            ),
+          issueDate: z
+            .string()
+            .optional()
+            .describe("Issue date in ISO 8601 format (defaults to today)"),
+          invoiceNumber: z
+            .string()
+            .optional()
+            .describe("Custom invoice number (auto-generated if omitted)"),
+          currency: z
+            .string()
+            .optional()
+            .describe("Currency code override (defaults to template currency)"),
+          note: z
+            .string()
+            .optional()
+            .describe("Plain text note to display on the invoice footer"),
+          discount: z
+            .number()
+            .min(0)
+            .optional()
+            .describe("Discount amount to subtract from total"),
+        },
+        annotations: WRITE_ANNOTATIONS,
+      },
+      async (params) => {
+        try {
+          const customer = await getCustomerById(db, {
+            id: params.customerId,
+            teamId,
+          });
+
+          if (!customer) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Customer not found (id: ${params.customerId}). Use customers_list to find valid customer IDs.`,
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          const savedTemplate = await getInvoiceTemplate(db, teamId);
+          const paymentTermsDays = savedTemplate?.paymentTermsDays ?? 30;
+
+          const mergedTemplate = {
+            ...DEFAULT_TEMPLATE,
+            ...Object.fromEntries(
+              Object.entries(savedTemplate ?? {}).filter(([_, v]) => v != null),
+            ),
+            ...(params.currency
+              ? { currency: params.currency.toUpperCase() }
+              : {}),
+            deliveryType:
+              !params.deliveryType || params.deliveryType === "draft"
+                ? ("create" as const)
+                : params.deliveryType,
+          };
+
+          let invoiceNumber: string;
+          if (params.invoiceNumber) {
+            const isUsed = await isInvoiceNumberUsed(
+              db,
+              teamId,
+              params.invoiceNumber,
+            );
+            if (isUsed) {
+              return {
+                content: [
+                  {
+                    type: "text",
+                    text: `Invoice number '${params.invoiceNumber}' is already used. Omit the invoiceNumber parameter to auto-generate one.`,
+                  },
+                ],
+                isError: true,
+              };
+            }
+            invoiceNumber = params.invoiceNumber;
+          } else {
+            invoiceNumber = await getNextInvoiceNumber(db, teamId);
+          }
+
+          const issueDateStr = params.issueDate ?? new Date().toISOString();
+          const dueDateStr =
+            params.dueDate ??
+            addDays(new Date(issueDateStr), paymentTermsDays).toISOString();
+
+          const customerDetails = transformCustomerToContent(customer);
+          const noteDetails = params.note
+            ? JSON.stringify(textToEditorDoc(params.note))
+            : ((savedTemplate?.noteDetails as string | null) ?? null);
+
+          const { subTotal, total, vat, tax } = calculateTotal({
+            lineItems: params.lineItems,
+            taxRate: mergedTemplate.taxRate ?? 0,
+            vatRate: mergedTemplate.vatRate ?? 0,
+            discount: params.discount ?? 0,
+            includeVat: mergedTemplate.includeVat ?? false,
+            includeTax: mergedTemplate.includeTax ?? false,
+          });
+
+          const invoiceId = uuidv4();
+
+          const result = await draftInvoice(db, {
+            id: invoiceId,
+            teamId,
+            userId,
+            invoiceNumber,
+            issueDate: issueDateStr,
+            dueDate: dueDateStr,
+            templateId: savedTemplate?.id ?? null,
+            template: mergedTemplate,
+            customerId: params.customerId,
+            customerName: customer.name,
+            customerDetails: customerDetails
+              ? JSON.stringify(customerDetails)
+              : null,
+            fromDetails: (savedTemplate?.fromDetails as string | null) ?? null,
+            paymentDetails:
+              (savedTemplate?.paymentDetails as string | null) ?? null,
+            noteDetails,
+            logoUrl: mergedTemplate.logoUrl,
+            lineItems: params.lineItems.map((item) => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+              unit: item.unit ?? null,
+            })),
+            subtotal: subTotal,
+            amount: total,
+            vat,
+            tax,
+            discount: params.discount ?? null,
+          });
+
+          if (!result) {
+            return {
+              content: [{ type: "text", text: "Failed to create invoice" }],
+              isError: true,
+            };
+          }
+
+          const delivery = params.deliveryType ?? "draft";
+
+          if (delivery !== "draft") {
+            await updateInvoice(db, {
+              id: result.id,
+              status: "unpaid",
+              teamId,
+              userId,
+              sentTo:
+                delivery === "create_and_send"
+                  ? (customer.email ?? null)
+                  : null,
+            });
+
+            await triggerJob(
+              "generate-invoice",
+              { invoiceId: result.id, deliveryType: delivery },
+              "invoices",
+            );
+          }
+
+          const fresh = await getInvoiceById(db, {
+            id: result.id,
+            teamId,
+          });
+
+          const pdfUrl = fresh?.token
+            ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(fresh.token)}`
+            : null;
+          const previewUrl = fresh?.token
+            ? `${DASHBOARD_URL}/i/${fresh.token}`
+            : null;
+
+          const clean = sanitize(mcpInvoiceDetailSchema, {
+            ...(fresh ?? result),
+            pdfUrl,
+            previewUrl,
+          });
+
+          const action =
+            delivery === "create_and_send"
+              ? `created and will be sent to ${customer.email ?? "customer"}`
+              : delivery === "draft"
+                ? "saved as draft — use invoices_send to send, or open the previewUrl to review"
+                : "created";
+
           return {
-            content: [{ type: "text", text: "Cannot cancel a paid invoice" }],
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({
+                  message: `Invoice ${invoiceNumber} ${action}. Total: ${total} ${mergedTemplate.currency}`,
+                  invoice: clean,
+                }),
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to create invoice",
+              },
+            ],
             isError: true,
           };
         }
+      },
+    );
 
-        const result = await updateInvoice(db, {
-          id,
-          teamId,
-          status: "canceled",
-        });
+    server.registerTool(
+      "invoices_update_draft",
+      {
+        title: "Update Draft Invoice",
+        description:
+          "Edit a draft invoice's content: line items, customer, dates, note, or discount. Only works on invoices in draft status. Amounts are automatically recalculated when line items or discount change.",
+        inputSchema: {
+          id: z.string().uuid().describe("ID of the draft invoice to update"),
+          customerId: z
+            .string()
+            .uuid()
+            .optional()
+            .describe(
+              "Change the customer (updates customer details on the invoice)",
+            ),
+          lineItems: z
+            .array(
+              z.object({
+                name: z.string().describe("Line item description"),
+                quantity: z.number().min(0).describe("Quantity"),
+                price: z.number().describe("Unit price"),
+                unit: z.string().optional().describe("Unit label"),
+              }),
+            )
+            .min(1)
+            .optional()
+            .describe(
+              "Replacement line items (replaces all existing line items)",
+            ),
+          dueDate: z
+            .string()
+            .optional()
+            .describe("New due date in ISO 8601 format"),
+          issueDate: z
+            .string()
+            .optional()
+            .describe("New issue date in ISO 8601 format"),
+          note: z
+            .string()
+            .optional()
+            .describe("Plain text note for the invoice footer"),
+          discount: z.number().min(0).optional().describe("Discount amount"),
+          currency: z.string().optional().describe("Currency code override"),
+        },
+        annotations: WRITE_ANNOTATIONS,
+      },
+      async (params) => {
+        try {
+          const existing = await getInvoiceById(db, {
+            id: params.id,
+            teamId,
+          });
 
-        if (!result) {
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Invoice not found" }],
+              isError: true,
+            };
+          }
+
+          if (existing.status !== "draft") {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Cannot edit invoice with status "${existing.status}". Only draft invoices can be edited. Use invoices_duplicate to create an editable copy.`,
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          const existingTemplate =
+            (existing.template as Record<string, unknown>) ?? {};
+
+          let customerDetails = existing.customerDetails
+            ? JSON.stringify(existing.customerDetails)
+            : null;
+          let customerName = existing.customerName;
+          let customerId = existing.customerId;
+
+          if (params.customerId && params.customerId !== existing.customerId) {
+            const customer = await getCustomerById(db, {
+              id: params.customerId,
+              teamId,
+            });
+
+            if (!customer) {
+              return {
+                content: [
+                  {
+                    type: "text",
+                    text: `Customer not found (id: ${params.customerId}).`,
+                  },
+                ],
+                isError: true,
+              };
+            }
+
+            const content = transformCustomerToContent(customer);
+            customerDetails = content ? JSON.stringify(content) : null;
+            customerName = customer.name;
+            customerId = customer.id;
+          }
+
+          const templateCurrency =
+            params.currency?.toUpperCase() ??
+            (existingTemplate.currency as string) ??
+            "USD";
+
+          const updatedTemplate = {
+            ...existingTemplate,
+            ...(params.currency ? { currency: templateCurrency } : {}),
+          };
+
+          const existingLineItems = (existing.lineItems ?? []).map(
+            (item: any) => ({
+              name: item.name ?? "",
+              quantity: item.quantity ?? 0,
+              price: item.price ?? 0,
+              unit: item.unit ?? null,
+            }),
+          );
+
+          const lineItems = params.lineItems
+            ? params.lineItems.map((item) => ({
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price,
+                unit: item.unit ?? null,
+              }))
+            : existingLineItems;
+
+          const discount = params.discount ?? existing.discount ?? 0;
+
+          const { subTotal, total, vat, tax } = calculateTotal({
+            lineItems,
+            taxRate: (existingTemplate.taxRate as number) ?? 0,
+            vatRate: (existingTemplate.vatRate as number) ?? 0,
+            discount,
+            includeVat: (existingTemplate.includeVat as boolean) ?? false,
+            includeTax: (existingTemplate.includeTax as boolean) ?? false,
+          });
+
+          const noteDetails =
+            params.note !== undefined
+              ? JSON.stringify(textToEditorDoc(params.note))
+              : existing.noteDetails
+                ? JSON.stringify(existing.noteDetails)
+                : null;
+
+          const result = await draftInvoice(db, {
+            id: params.id,
+            teamId,
+            userId,
+            invoiceNumber: existing.invoiceNumber!,
+            issueDate: params.issueDate ?? existing.issueDate!,
+            dueDate: params.dueDate ?? existing.dueDate!,
+            templateId: existing.templateId ?? null,
+            template: updatedTemplate as any,
+            customerId,
+            customerName,
+            customerDetails,
+            fromDetails: existing.fromDetails
+              ? JSON.stringify(existing.fromDetails)
+              : null,
+            paymentDetails: existing.paymentDetails
+              ? JSON.stringify(existing.paymentDetails)
+              : null,
+            noteDetails,
+            logoUrl: (existingTemplate.logoUrl as string) ?? null,
+            lineItems,
+            subtotal: subTotal,
+            amount: total,
+            vat,
+            tax,
+            discount,
+          });
+
+          if (!result) {
+            return {
+              content: [
+                { type: "text", text: "Failed to update draft invoice" },
+              ],
+              isError: true,
+            };
+          }
+
+          const fresh = await getInvoiceById(db, {
+            id: params.id,
+            teamId,
+          });
+
+          const pdfUrl = fresh?.token
+            ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(fresh.token)}`
+            : null;
+          const previewUrl = fresh?.token
+            ? `${DASHBOARD_URL}/i/${fresh.token}`
+            : null;
+
+          const clean = sanitize(mcpInvoiceDetailSchema, {
+            ...(fresh ?? result),
+            pdfUrl,
+            previewUrl,
+          });
+
           return {
-            content: [{ type: "text", text: "Failed to cancel invoice" }],
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({
+                  message: `Draft invoice ${existing.invoiceNumber} updated. Total: ${total} ${templateCurrency}`,
+                  invoice: clean,
+                }),
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to update draft invoice",
+              },
+            ],
             isError: true,
           };
         }
+      },
+    );
 
-        const clean = sanitize(mcpInvoiceDetailSchema, result);
+    server.registerTool(
+      "invoices_send",
+      {
+        title: "Send Invoice",
+        description:
+          "Send a draft invoice to the customer via email. Generates the PDF and emails it. Only works on invoices in draft status — use invoices_create with deliveryType 'draft' first, then invoices_send to send after review.",
+        inputSchema: {
+          id: z.string().uuid().describe("ID of the draft invoice to send"),
+          sentTo: z
+            .string()
+            .email()
+            .optional()
+            .describe(
+              "Override recipient email address (defaults to customer's email on file)",
+            ),
+        },
+        annotations: WRITE_ANNOTATIONS,
+      },
+      async ({ id, sentTo }) => {
+        try {
+          const existing = await getInvoiceById(db, { id, teamId });
 
-        return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
-        };
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Invoice not found" }],
+              isError: true,
+            };
+          }
+
+          if (existing.status !== "draft") {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Cannot send invoice with status "${existing.status}". Only draft invoices can be sent. Use invoices_create with deliveryType 'create_and_send' for new invoices.`,
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          const recipientEmail =
+            sentTo ?? existing.sentTo ?? existing.customer?.email ?? null;
+
+          if (!recipientEmail) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "No recipient email address found. The customer has no email on file. Provide a sentTo email address, or update the customer's email first.",
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          await updateInvoice(db, {
+            id,
+            teamId,
+            userId,
+            status: "unpaid",
+            sentTo: recipientEmail,
+          });
+
+          await triggerJob(
+            "generate-invoice",
+            { invoiceId: id, deliveryType: "create_and_send" },
+            "invoices",
+          );
+
+          const previewUrl = existing.token
+            ? `${DASHBOARD_URL}/i/${existing.token}`
+            : null;
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({
+                  message: `Invoice ${existing.invoiceNumber} is being sent to ${recipientEmail}`,
+                  invoiceId: id,
+                  sentTo: recipientEmail,
+                  previewUrl,
+                }),
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to send invoice",
+              },
+            ],
+            isError: true,
+          };
+        }
       },
     );
   }

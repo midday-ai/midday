@@ -1,15 +1,15 @@
 ---
 title: Assistant and MCP Integration
-description: Use the Midday assistant in your own tools via MCP.
+description: Manage your entire business from AI tools via MCP — transactions, invoices, time tracking, exports, and more.
 section: assistant
 order: 2
 ---
 
-The Midday assistant is available through the Model Context Protocol (MCP), letting you query your financial data from AI tools like Claude Desktop, Cursor, ChatGPT, and Raycast.
+The Midday MCP server gives AI tools like Claude, Cursor, ChatGPT, and Raycast full access to your business data — not just reading, but creating invoices, managing transactions, tracking time, and exporting to your accountant.
 
 ## What is MCP?
 
-Model Context Protocol (MCP) is an open standard for connecting AI assistants to external data sources. Instead of copying and pasting data, MCP lets AI tools query your Midday data directly and securely.
+Model Context Protocol (MCP) is an open standard for connecting AI assistants to external data sources. Instead of copying and pasting data, MCP lets AI tools work with your Midday account directly and securely.
 
 ## Supported tools
 
@@ -28,7 +28,8 @@ Midday MCP works with:
 1. Go to [Settings → Developer](https://app.midday.ai/settings/developer)
 2. Click **Create API key**
 3. Give it a descriptive name (e.g., "Claude Desktop")
-4. Copy the key immediately (you won't see it again)
+4. Select the scopes you need (read-only by default, enable write scopes for full capabilities)
+5. Copy the key immediately (you won't see it again)
 
 ### Step 2: Configure your client
 
@@ -71,8 +72,8 @@ After saving, restart Claude Desktop. You should see Midday in your available to
 
 Ask Claude something like:
 - "What was my revenue last month?"
-- "Show me unpaid invoices"
-- "What's my current runway?"
+- "Create an invoice for Acme Corp"
+- "Export Q1 transactions to my accountant"
 
 ---
 
@@ -154,72 +155,138 @@ Trigger Raycast and use Midday commands to query your financial data.
 
 ## Available tools
 
-The MCP integration provides access to all your Midday data:
+The MCP server exposes 80+ tools covering your entire business workflow.
 
 ### Transactions
 
 | Tool | Description |
 |------|-------------|
-| `transactions_list` | List transactions with filters (date, category, amount) |
-| `transactions_get` | Get details of a specific transaction |
+| `transactions_list` | List transactions with filters (date, category, amount, status, tags) |
+| `transactions_get` | Get full details of a specific transaction |
+| `transactions_create` | Create a manual transaction |
+| `transactions_create_bulk` | Create up to 100 manual transactions at once |
+| `transactions_update` | Update a transaction (category, status, note, tags, tax) |
+| `transactions_update_bulk` | Bulk update multiple transactions |
+| `transactions_delete` | Delete a manual transaction |
+| `transactions_delete_bulk` | Delete up to 1,000 manual transactions |
 
 **Example queries**:
 - "Show transactions from last month"
 - "What did I spend on software this quarter?"
-- "Find transactions over $1,000"
+- "Categorize all my Stripe transactions as income"
+- "Tag these transactions as tax-deductible"
+
+### Export & Accounting
+
+| Tool | Description |
+|------|-------------|
+| `transactions_export` | Export transactions as a ZIP (CSV/XLSX + receipts), optionally email to accountant |
+| `transactions_export_to_accounting` | Push transactions to Xero, QuickBooks, or Fortnox |
+| `export_job_status` | Poll the progress of an export job |
+| `accounting_connections` | List connected accounting providers |
+
+**Example queries**:
+- "Export my January transactions to my accountant at lisa@accounting.com"
+- "Push last month's expenses to QuickBooks"
+- "Which accounting software do I have connected?"
+- "Download all Q1 transactions as CSV"
 
 ### Invoices
 
 | Tool | Description |
 |------|-------------|
 | `invoices_list` | List invoices with filters (status, customer, date) |
-| `invoices_get` | Get full details of an invoice |
-| `invoices_summary` | Get invoice totals by status |
+| `invoices_get` | Get full invoice details with line items and payment history |
+| `invoices_summary` | Get totals by status (draft, unpaid, paid, overdue) |
+| `invoices_create` | Create a new invoice (saved as draft by default) |
+| `invoices_update_draft` | Edit a draft invoice's line items, customer, dates, or discount |
+| `invoices_send` | Send a draft invoice to the customer via email |
+| `invoices_remind` | Send a payment reminder for an unpaid/overdue invoice |
+| `invoices_update` | Update invoice status or internal note |
+| `invoices_mark_paid` | Mark an invoice as paid |
+| `invoices_cancel` | Cancel an invoice |
+| `invoices_duplicate` | Duplicate an existing invoice with a new number |
+| `invoices_delete` | Permanently delete an invoice |
 
 **Example queries**:
-- "Show unpaid invoices"
+- "Create an invoice for Acme Corp for 10 hours of consulting at $150/hr"
+- "Send the draft invoice to Acme Corp"
+- "Remind Beta Inc about their overdue invoice"
+- "Mark invoice INV-0042 as paid"
 - "What invoices are overdue?"
-- "Total outstanding amount"
 
 ### Customers
 
 | Tool | Description |
 |------|-------------|
-| `customers_list` | List all customers |
-| `customers_get` | Get customer details |
+| `customers_list` | List customers with search and sorting |
+| `customers_get` | Get full customer details (contact, address, VAT, tags) |
+| `customers_create` | Create a new customer |
+| `customers_update` | Update customer information |
+| `customers_delete` | Delete a customer |
 
 **Example queries**:
 - "List all my customers"
-- "Show details for Acme Corp"
+- "Add a new customer: Acme Corp, acme@example.com"
+- "Update Acme Corp's billing address"
 
 ### Time tracking
 
 | Tool | Description |
 |------|-------------|
-| `tracker_projects_list` | List time tracking projects |
-| `tracker_projects_get` | Get project details |
-| `tracker_entries_list` | List time entries |
+| `tracker_projects_list` | List time tracking projects with filters |
+| `tracker_projects_get` | Get project details with total tracked time |
+| `tracker_projects_create` | Create a new project |
+| `tracker_projects_update` | Update project settings (rate, status, estimate) |
+| `tracker_projects_delete` | Delete a project and its entries |
+| `tracker_entries_list` | List time entries for a date range |
+| `tracker_entries_create` | Log a time entry |
+| `tracker_entries_update` | Update a time entry |
+| `tracker_entries_delete` | Delete a time entry |
+| `tracker_timer_start` | Start a live timer |
+| `tracker_timer_stop` | Stop the running timer |
+| `tracker_timer_status` | Check if a timer is running |
 
 **Example queries**:
 - "How many hours did I track this week?"
-- "Show time by project this month"
+- "Start a timer on Project X"
+- "Log 2 hours for the client meeting yesterday"
 - "What's unbilled for Project X?"
 
-### Reports
+### Reports & Analytics
 
 | Tool | Description |
 |------|-------------|
-| `reports_revenue` | Get revenue for a period |
-| `reports_profit` | Get profit for a period |
-| `reports_burn_rate` | Get monthly burn rate |
-| `reports_runway` | Get runway estimate |
-| `reports_expenses` | Get expense breakdown |
-| `reports_spending` | Get spending by category |
+| `reports_revenue` | Revenue for a period with comparison |
+| `reports_profit` | Profit (revenue minus expenses) |
+| `reports_burn_rate` | Monthly burn rate |
+| `reports_runway` | Estimated months of cash remaining |
+| `reports_expenses` | Expense totals with recurring breakdown |
+| `reports_spending` | Spending by category |
+| `reports_tax_summary` | Tax summary for a date range |
+| `reports_growth_rate` | Revenue or profit growth rate |
+| `reports_profit_margin` | Profit margin analysis |
+| `reports_cash_flow` | Cash flow (income vs expenses over time) |
+| `reports_recurring_expenses` | Detected recurring expenses |
+| `reports_revenue_forecast` | Revenue forecast based on historical data |
+| `reports_balance_sheet` | Balance sheet snapshot (assets, liabilities, equity) |
 
 **Example queries**:
 - "What's my revenue this quarter?"
 - "Calculate my runway"
-- "Show spending by category"
+- "Show spending by category for last month"
+- "What's my growth rate compared to last quarter?"
+- "Give me a balance sheet as of today"
+
+### Tags
+
+| Tool | Description |
+|------|-------------|
+| `tags_list` | List all tags |
+| `tags_get` | Get a tag by ID |
+| `tags_create` | Create a new tag |
+| `tags_update` | Rename a tag |
+| `tags_delete` | Delete a tag |
 
 ### Bank accounts
 
@@ -231,36 +298,22 @@ The MCP integration provides access to all your Midday data:
 - "What's my current cash balance?"
 - "Show all connected accounts"
 
-### Documents
+### Documents & Inbox
 
 | Tool | Description |
 |------|-------------|
 | `documents_list` | List documents in the vault |
-| `documents_get` | Get document details |
+| `documents_get` | Get document details with download URL |
+| `inbox_list` | List inbox items (receipts, invoices pending processing) |
+| `inbox_get` | Get inbox item details with matched transaction |
 
-### Inbox
-
-| Tool | Description |
-|------|-------------|
-| `inbox_list` | List inbox items |
-| `inbox_get` | Get inbox item details |
-
-### Search
+### Search & Team
 
 | Tool | Description |
 |------|-------------|
-| `search_global` | Search across all data |
-
-**Example queries**:
-- "Search for Amazon"
-- "Find anything related to Stripe"
-
-### Team
-
-| Tool | Description |
-|------|-------------|
-| `team_get` | Get team information |
-| `team_members` | List team members |
+| `search_global` | Search across all data types |
+| `team_get` | Get team info (name, currency, locale, timezone) |
+| `team_members` | List team members with roles |
 
 ---
 
@@ -277,26 +330,42 @@ The MCP integration provides access to all your Midday data:
 > - Revenue this month: $12,400
 > - Profit margin: 31%
 
-### Invoice management
+### Create and send an invoice
 
-> **You**: Do I have any overdue invoices?
+> **You**: Create an invoice for Acme Corp for website redesign - 40 hours at $125/hr
 >
-> **Assistant**: You have 2 overdue invoices:
-> 1. INV-0042 to Acme Corp - $3,500 (15 days overdue)
-> 2. INV-0039 to Beta Inc - $1,200 (8 days overdue)
+> **Assistant**: I've created draft invoice INV-0051 for Acme Corp:
+> - Website Redesign: 40 × $125.00 = $5,000.00
+> - Total: $5,000.00
 >
-> Total overdue: $4,700
+> Would you like me to send it?
+>
+> **You**: Yes, send it
+>
+> **Assistant**: Invoice INV-0051 has been sent to billing@acmecorp.com.
 
-### Expense analysis
+### Export to accountant
 
-> **You**: What are my top expenses this quarter?
+> **You**: Export my January transactions to my accountant at lisa@accounting.com
 >
-> **Assistant**: Your top expense categories this quarter:
-> 1. Salary: $24,000
-> 2. Software: $3,200
-> 3. Marketing: $2,800
-> 4. Rent: $2,400
-> 5. Professional Services: $1,500
+> **Assistant**: I've started the export of 142 transactions from January. Your accountant at lisa@accounting.com will receive a download link with the CSV, XLSX, and receipt attachments once it's ready.
+
+### Push to accounting software
+
+> **You**: Push last month's expenses to QuickBooks
+>
+> **Assistant**: You have QuickBooks connected (Acme Corp LLC). I'll export 87 expense transactions from last month. The sync is in progress — transactions and their receipts are being pushed to QuickBooks now.
+
+### Time tracking
+
+> **You**: How many hours did I work on the mobile app this week?
+>
+> **Assistant**: You tracked 18.5 hours on "Mobile App Redesign" this week:
+> - Monday: 4h (UI design)
+> - Tuesday: 3.5h (API integration)
+> - Wednesday: 5h (Testing)
+> - Thursday: 3h (Bug fixes)
+> - Friday: 3h (Documentation)
 
 ---
 
@@ -304,9 +373,9 @@ The MCP integration provides access to all your Midday data:
 
 ### API key permissions
 
-- API keys have **read-only access** by default
-- Cannot create, modify, or delete data
-- Cannot access sensitive credentials or payment information
+- API keys have **configurable scopes** — choose exactly what each key can access
+- Read scopes allow querying data; write scopes allow creating, modifying, and exporting
+- Keys never expose sensitive credentials, passwords, or payment card details
 
 ### Managing keys
 
@@ -319,6 +388,7 @@ The MCP integration provides access to all your Midday data:
 
 - Create separate keys for different tools
 - Use descriptive names for keys
+- Only grant the scopes each tool actually needs
 - Revoke unused keys
 - Don't share keys publicly
 
@@ -329,7 +399,7 @@ The MCP integration provides access to all your Midday data:
 ### "Tool not found" errors
 
 - Ensure you've restarted your client after configuration
-- Check that the API key is valid
+- Check that the API key is valid and has the required scopes
 - Verify the configuration syntax
 
 ### No data returned
@@ -337,6 +407,11 @@ The MCP integration provides access to all your Midday data:
 - Check your API key has access to the team
 - Verify transactions/invoices exist for the queried period
 - Try a broader query
+
+### Write operations failing
+
+- Ensure your API key has the appropriate write scopes enabled
+- Check that required fields are provided (e.g., customer ID for invoices)
 
 ### Connection issues
 
@@ -349,9 +424,10 @@ The MCP integration provides access to all your Midday data:
 ## Tips for best results
 
 1. **Be specific**: "Revenue last month" works better than "How am I doing?"
-2. **Include dates**: "Expenses in Q4 2024" helps narrow results
+2. **Include dates**: "Expenses in Q1 2025" helps narrow results
 3. **Use follow-ups**: The assistant remembers context in a conversation
-4. **Try different phrasings**: If one query doesn't work, rephrase it
+4. **Combine actions**: "Create an invoice for Acme Corp and send it" works in one go
+5. **Ask about connections first**: "What accounting software do I have connected?" before exporting
 
 [Learn about the in-app assistant →](/docs/using-assistant)
 [API reference →](/docs/api-reference)

@@ -24,6 +24,7 @@ import {
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
+import { truncateListResponse } from "../utils";
 
 export const registerCustomerTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
@@ -79,10 +80,9 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
         annotations: READ_ONLY_ANNOTATIONS,
       },
       async (params) => {
-        const sort =
-          params.sortBy && params.sortDirection
-            ? [params.sortBy, params.sortDirection]
-            : null;
+        const sort = params.sortBy
+          ? [params.sortBy, params.sortDirection ?? "desc"]
+          : null;
 
         const result = await getCustomers(db, {
           teamId,
@@ -101,9 +101,11 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           data: sanitizeArray(mcpCustomerListItemSchema, result.data ?? []),
         };
 
+        const { text, structuredContent } = truncateListResponse(response);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(response) }],
-          structuredContent: response,
+          content: [{ type: "text", text }],
+          structuredContent,
         };
       },
     );
@@ -241,44 +243,59 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const existing = await getCustomerById(db, {
-          id: params.id,
-          teamId,
-        });
+        try {
+          const existing = await getCustomerById(db, {
+            id: params.id,
+            teamId,
+          });
 
-        if (!existing) {
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Customer not found" }],
+              isError: true,
+            };
+          }
+
+          const result = await upsertCustomer(db, {
+            id: params.id,
+            teamId,
+            name: params.name ?? existing.name,
+            email: params.email ?? existing.email,
+            billingEmail: params.billingEmail ?? existing.billingEmail,
+            phone: params.phone ?? existing.phone,
+            website: params.website ?? existing.website,
+            contact: params.contact ?? existing.contact,
+            country: params.country ?? existing.country,
+            countryCode: params.countryCode ?? existing.countryCode,
+            addressLine1: params.addressLine1 ?? existing.addressLine1,
+            addressLine2: params.addressLine2 ?? existing.addressLine2,
+            city: params.city ?? existing.city,
+            state: params.state ?? existing.state,
+            zip: params.zip ?? existing.zip,
+            vatNumber: params.vatNumber ?? existing.vatNumber,
+            note: params.note ?? existing.note,
+            tags: params.tags ?? existing.tags,
+          });
+
+          const clean = sanitize(mcpCustomerDetailSchema, result);
+
           return {
-            content: [{ type: "text", text: "Customer not found" }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to update customer",
+              },
+            ],
             isError: true,
           };
         }
-
-        const result = await upsertCustomer(db, {
-          id: params.id,
-          teamId,
-          name: params.name ?? existing.name,
-          email: params.email ?? existing.email,
-          billingEmail: params.billingEmail ?? existing.billingEmail,
-          phone: params.phone ?? existing.phone,
-          website: params.website ?? existing.website,
-          contact: params.contact ?? existing.contact,
-          country: params.country ?? existing.country,
-          countryCode: params.countryCode ?? existing.countryCode,
-          addressLine1: params.addressLine1 ?? existing.addressLine1,
-          addressLine2: params.addressLine2 ?? existing.addressLine2,
-          city: params.city ?? existing.city,
-          state: params.state ?? existing.state,
-          zip: params.zip ?? existing.zip,
-          vatNumber: params.vatNumber ?? existing.vatNumber,
-          note: params.note ?? existing.note,
-          tags: params.tags ?? existing.tags,
-        });
-
-        const clean = sanitize(mcpCustomerDetailSchema, result);
-
-        return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
-        };
       },
     );
 

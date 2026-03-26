@@ -91,6 +91,7 @@ app.all("/", async (c) => {
     db,
     teamId,
     userId: user?.id ?? session.user.id,
+    userEmail: user?.email ?? session.user.email ?? null,
     scopes,
     apiUrl,
     timezone: user?.timezone || geo.timezone,

@@ -11,6 +11,7 @@ describe("MCP server", () => {
       db: {} as McpContext["db"],
       teamId: "test-team-id",
       userId: "test-user-id",
+      userEmail: "test@example.com",
       scopes: [
         "transactions.read",
         "transactions.write",
@@ -42,7 +43,54 @@ describe("MCP server", () => {
 
     expect(names).toContain("transactions_list");
     expect(names).toContain("transactions_create");
+    expect(names).toContain("transactions_export");
+    expect(names).toContain("transactions_export_to_accounting");
+    expect(names).toContain("export_job_status");
+    expect(names).toContain("accounting_connections");
     expect(names).toContain("tags_create");
+  });
+
+  test("createMcpServer registers invoice write tools when scopes include invoices.write", () => {
+    const server = createMcpServer({
+      db: {} as McpContext["db"],
+      teamId: "test-team-id",
+      userId: "test-user-id",
+      userEmail: "test@example.com",
+      scopes: [
+        "invoices.read",
+        "invoices.write",
+        "transactions.read",
+        "tags.read",
+        "reports.read",
+        "search.read",
+        "teams.read",
+        "customers.read",
+        "bank-accounts.read",
+        "documents.read",
+        "inbox.read",
+        "tracker-projects.read",
+        "tracker-entries.read",
+      ],
+      apiUrl: "https://api.midday.ai",
+      timezone: "UTC",
+      locale: "en",
+      countryCode: "US",
+      dateFormat: null,
+      timeFormat: 24,
+    });
+
+    const names = Object.keys(
+      (server as unknown as { _registeredTools: Record<string, unknown> })
+        ._registeredTools,
+    );
+
+    expect(names).toContain("invoices_list");
+    expect(names).toContain("invoices_create");
+    expect(names).toContain("invoices_update_draft");
+    expect(names).toContain("invoices_send");
+    expect(names).toContain("invoices_remind");
+    expect(names).toContain("invoices_cancel");
+    expect(names).toContain("invoices_mark_paid");
   });
 
   test("mcp router returns 401 when Authorization is missing", async () => {

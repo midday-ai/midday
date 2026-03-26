@@ -170,7 +170,7 @@ const appExtensions: Record<
       "Financial context in your editor",
       "Query transactions while coding",
       "One-click install via deeplink",
-      "27 tools for financial data",
+      "80+ tools for your entire business",
     ],
     installUrl: "https://midday.ai/mcp/cursor",
   },

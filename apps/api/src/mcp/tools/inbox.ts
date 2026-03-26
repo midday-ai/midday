@@ -13,6 +13,7 @@ import {
   getMimeType,
   getVaultSignedUrl,
   type McpContent,
+  truncateListResponse,
 } from "../utils";
 
 export const registerInboxTools: RegisterTools = (server, ctx) => {
@@ -59,9 +60,11 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         data: sanitizeArray(mcpInboxItemSchema, result.data ?? []),
       };
 
+      const { text, structuredContent } = truncateListResponse(response);
+
       return {
-        content: [{ type: "text", text: JSON.stringify(response) }],
-        structuredContent: response,
+        content: [{ type: "text", text }],
+        structuredContent,
       };
     },
   );

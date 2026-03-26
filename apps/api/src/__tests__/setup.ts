@@ -113,7 +113,12 @@ export const mocks = {
   createInvoice: mock(() => ({})) as MockFn,
   updateInvoice: mock(() => ({})) as MockFn,
   deleteInvoice: mock(() => ({})) as MockFn,
-  draftInvoice: mock(() => ({})) as MockFn,
+  draftInvoice: mock(() => ({
+    id: "d1e2f3a4-b5c6-7890-abcd-ef1234567890",
+    invoiceNumber: "INV-0001",
+    status: "draft",
+    token: "test-token",
+  })) as MockFn,
   duplicateInvoice: mock(() => ({})) as MockFn,
   getInvoiceNumber: mock(() => "INV-001") as MockFn,
   getNextInvoiceNumber: mock(() => "INV-002") as MockFn,
@@ -1296,6 +1301,18 @@ mock.module("@midday/cache/team-cache", () => ({
     set: mock(async () => {}),
     invalidateForUser: mock(async () => {}),
   },
+}));
+
+mock.module("@midday/accounting", () => ({
+  getAccountingProvider: mock(() => ({
+    getAccounts: mock(() => Promise.resolve([])),
+  })),
+  getOrgId: mock((config: any) => config?.tenantId ?? "org-1"),
+  getOrgName: mock((config: any) => config?.tenantName ?? null),
+  AccountingProviderConfigSchema: {
+    parse: mock((v: any) => v),
+  },
+  parseProviderConfig: mock((v: any) => v),
 }));
 
 mock.module("@midday/banking", () => ({

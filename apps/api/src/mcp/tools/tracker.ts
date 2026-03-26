@@ -37,6 +37,7 @@ import {
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
+import { truncateListResponse } from "../utils";
 
 export const registerTrackerTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
@@ -99,10 +100,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: READ_ONLY_ANNOTATIONS,
       },
       async (params) => {
-        const sort =
-          params.sortBy && params.sortDirection
-            ? [params.sortBy, params.sortDirection]
-            : null;
+        const sort = params.sortBy
+          ? [params.sortBy, params.sortDirection ?? "desc"]
+          : null;
 
         const result = await getTrackerProjects(db, {
           teamId,
@@ -126,9 +126,11 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           data: sanitizeArray(mcpTrackerProjectSchema, result.data ?? []),
         };
 
+        const { text, structuredContent } = truncateListResponse(response);
+
         return {
-          content: [{ type: "text", text: JSON.stringify(response) }],
-          structuredContent: response,
+          content: [{ type: "text", text }],
+          structuredContent,
         };
       },
     );
@@ -242,41 +244,56 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const existing = await getTrackerProjectById(db, {
-          id: params.id,
-          teamId,
-        });
+        try {
+          const existing = await getTrackerProjectById(db, {
+            id: params.id,
+            teamId,
+          });
 
-        if (!existing) {
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Project not found" }],
+              isError: true,
+            };
+          }
+
+          const existingTags = existing.tags?.map((tag) => ({
+            id: tag.id,
+            value: tag.name ?? "",
+          }));
+
+          const result = await upsertTrackerProject(db, {
+            id: params.id,
+            teamId,
+            name: params.name ?? existing.name ?? "",
+            description: params.description ?? existing.description,
+            estimate: params.estimate ?? existing.estimate,
+            billable: params.billable ?? existing.billable,
+            rate: params.rate ?? existing.rate,
+            currency: params.currency ?? existing.currency,
+            customerId: params.customerId ?? existing.customerId,
+            tags: params.tags ?? existingTags,
+          });
+
+          const clean = sanitize(mcpTrackerProjectSchema, result);
+
           return {
-            content: [{ type: "text", text: "Project not found" }],
+            content: [{ type: "text", text: JSON.stringify(clean) }],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to update project",
+              },
+            ],
             isError: true,
           };
         }
-
-        const existingTags = existing.tags?.map((tag) => ({
-          id: tag.id,
-          value: tag.name ?? "",
-        }));
-
-        const result = await upsertTrackerProject(db, {
-          id: params.id,
-          teamId,
-          name: params.name ?? existing.name ?? "",
-          description: params.description ?? existing.description,
-          estimate: params.estimate ?? existing.estimate,
-          billable: params.billable ?? existing.billable,
-          rate: params.rate ?? existing.rate,
-          currency: params.currency ?? existing.currency,
-          customerId: params.customerId ?? existing.customerId,
-          tags: params.tags ?? existingTags,
-        });
-
-        const clean = sanitize(mcpTrackerProjectSchema, result);
-
-        return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
-        };
       },
     );
 
@@ -292,25 +309,43 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
-        const result = await deleteTrackerProject(db, { id, teamId });
+        try {
+          const result = await deleteTrackerProject(db, { id, teamId });
 
-        if (!result) {
+          if (!result) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "Project not found or already deleted",
+                },
+              ],
+              isError: true,
+            };
+          }
+
           return {
             content: [
-              { type: "text", text: "Project not found or already deleted" },
+              {
+                type: "text",
+                text: JSON.stringify({ success: true, deletedId: result.id }),
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to delete project",
+              },
             ],
             isError: true,
           };
         }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({ success: true, deletedId: result.id }),
-            },
-          ],
-        };
       },
     );
   }
@@ -507,51 +542,66 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        const existing = await getTrackerEntryById(db, {
-          id: params.id,
-          teamId,
-        });
+        try {
+          const existing = await getTrackerEntryById(db, {
+            id: params.id,
+            teamId,
+          });
 
-        if (!existing) {
+          if (!existing) {
+            return {
+              content: [{ type: "text", text: "Entry not found" }],
+              isError: true,
+            };
+          }
+
+          const projectId = params.projectId ?? existing.projectId;
+          const start = params.start ?? existing.start;
+          const stop = params.stop ?? existing.stop;
+
+          if (!projectId || !start || !stop) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "Entry is missing required fields (projectId, start, or stop). Please provide them.",
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          const result = await upsertTrackerEntries(db, {
+            id: params.id,
+            teamId,
+            projectId,
+            dates: existing.date ? [existing.date] : [],
+            start,
+            stop,
+            duration: params.duration ?? existing.duration ?? 0,
+            description: params.description ?? existing.description,
+            assignedId: params.assignedId ?? existing.assignedId,
+          });
+
+          const clean = sanitizeArray(mcpTrackerEntrySchema, result ?? []);
+
           return {
-            content: [{ type: "text", text: "Entry not found" }],
-            isError: true,
+            content: [{ type: "text", text: JSON.stringify(clean) }],
           };
-        }
-
-        const projectId = params.projectId ?? existing.projectId;
-        const start = params.start ?? existing.start;
-        const stop = params.stop ?? existing.stop;
-
-        if (!projectId || !start || !stop) {
+        } catch (error) {
           return {
             content: [
               {
                 type: "text",
-                text: "Entry is missing required fields (projectId, start, or stop). Please provide them.",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to update tracker entry",
               },
             ],
             isError: true,
           };
         }
-
-        const result = await upsertTrackerEntries(db, {
-          id: params.id,
-          teamId,
-          projectId,
-          dates: existing.date ? [existing.date] : [],
-          start,
-          stop,
-          duration: params.duration ?? existing.duration ?? 0,
-          description: params.description ?? existing.description,
-          assignedId: params.assignedId ?? existing.assignedId,
-        });
-
-        const clean = sanitizeArray(mcpTrackerEntrySchema, result ?? []);
-
-        return {
-          content: [{ type: "text", text: JSON.stringify(clean) }],
-        };
       },
     );
 
@@ -567,25 +617,43 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
-        const result = await deleteTrackerEntry(db, { id, teamId });
+        try {
+          const result = await deleteTrackerEntry(db, { id, teamId });
 
-        if (!result) {
+          if (!result) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "Entry not found or already deleted",
+                },
+              ],
+              isError: true,
+            };
+          }
+
           return {
             content: [
-              { type: "text", text: "Entry not found or already deleted" },
+              {
+                type: "text",
+                text: JSON.stringify({ success: true, deletedId: result.id }),
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to delete tracker entry",
+              },
             ],
             isError: true,
           };
         }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({ success: true, deletedId: result.id }),
-            },
-          ],
-        };
       },
     );
 
