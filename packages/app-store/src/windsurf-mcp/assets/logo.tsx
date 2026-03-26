@@ -8,13 +8,7 @@ export const Logo = ({ id = "windsurf" }: { id?: string }) => {
       className="w-9 h-9"
     >
       <defs>
-        <linearGradient
-          id={`${id}-grad`}
-          x1="0%"
-          y1="0%"
-          x2="100%"
-          y2="100%"
-        >
+        <linearGradient id={`${id}-grad`} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#0EA5E9" />
           <stop offset="100%" stopColor="#06B6D4" />
         </linearGradient>

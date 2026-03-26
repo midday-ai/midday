@@ -6,8 +6,7 @@ export default {
   category: "ai-automation",
   active: true,
   logo: Logo,
-  short_description:
-    "Connect Manus to your Midday financial data via MCP.",
+  short_description: "Connect Manus to your Midday financial data via MCP.",
   description: `Connect Manus to your Midday account using the Model Context Protocol (MCP).
 
 **What you can do:**
