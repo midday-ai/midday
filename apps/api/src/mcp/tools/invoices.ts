@@ -222,7 +222,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           }
         }
 
-        return { content };
+        return { content, structuredContent: { invoice: clean } };
       }, "Failed to get invoice"),
     );
 
