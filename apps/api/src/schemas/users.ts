@@ -121,6 +121,7 @@ export const userSchema = z.object({
         "MMSlashddSlashyyyy",
         "yyyyDashMMDashdd",
         "ddDotMMDotyyyy",
+        "null",
       ],
     }),
   fileKey: z.string().nullable().openapi({

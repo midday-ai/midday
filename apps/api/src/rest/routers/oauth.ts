@@ -7,9 +7,8 @@ import {
   oauthAuthorizationDecisionSchema,
   oauthAuthorizationRequestSchema,
   oauthErrorResponseSchema,
-  oauthRefreshTokenRequestSchema,
   oauthRevokeTokenRequestSchema,
-  oauthTokenRequestSchema,
+  oauthTokenEndpointRequestSchema,
   oauthTokenResponseSchema,
 } from "@api/schemas/oauth-flow";
 import { resend } from "@api/services/resend";
@@ -126,6 +125,7 @@ app.openapi(
       const isLocalhost = uri.startsWith("http://localhost");
       const isNativeScheme =
         /^[a-z][a-z0-9+.-]*:\/\//i.test(uri) && !uri.startsWith("http://");
+
       if (!isHttps && !isLocalhost && !isNativeScheme) {
         throw new HTTPException(400, {
           message: `redirect_uri must use HTTPS or a native app scheme: ${uri}`,
@@ -442,16 +442,10 @@ app.openapi(
       body: {
         content: {
           "application/json": {
-            schema: z.union([
-              oauthTokenRequestSchema,
-              oauthRefreshTokenRequestSchema,
-            ]),
+            schema: oauthTokenEndpointRequestSchema,
           },
           "application/x-www-form-urlencoded": {
-            schema: z.union([
-              oauthTokenRequestSchema,
-              oauthRefreshTokenRequestSchema,
-            ]),
+            schema: oauthTokenEndpointRequestSchema,
           },
         },
       },

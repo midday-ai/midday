@@ -152,7 +152,7 @@ app.get("/health/dependencies", async (c) => {
   return c.json(response, response.status === "ok" ? 200 : 503);
 });
 
-app.doc("/openapi", {
+const openAPIConfig = {
   openapi: "3.1.0",
   info: {
     version: "0.0.1",
@@ -180,15 +180,121 @@ app.doc("/openapi", {
       oauth2: [],
     },
     { token: [] },
-  ],
+  ] as Record<string, string[]>[],
+  "x-speakeasy-retries": {
+    strategy: "backoff",
+    backoff: {
+      initialInterval: 500,
+      maxInterval: 60000,
+      maxElapsedTime: 300000,
+      exponent: 1.5,
+    },
+    statusCodes: ["5XX"],
+    retryConnectionErrors: true,
+  },
+};
+
+app.get("/openapi", (c) => {
+  const spec = app.getOpenAPI31Document(openAPIConfig);
+
+  // Ensure every operation has at least one error response for SDK generation
+  const defaultErrorResponse = {
+    description: "An error occurred",
+    content: {
+      "application/json": {
+        schema: {
+          $ref: "#/components/schemas/ErrorResponse",
+        },
+      },
+    },
+  };
+
+  for (const methods of Object.values(spec.paths ?? {})) {
+    for (const [method, operation] of Object.entries(methods as object)) {
+      if (
+        method === "parameters" ||
+        typeof operation !== "object" ||
+        !operation
+      )
+        continue;
+      const op = operation as { responses?: Record<string, unknown> };
+      if (!op.responses) continue;
+      const hasError = Object.keys(op.responses).some(
+        (code) => code >= "400" || code === "default",
+      );
+      if (!hasError) {
+        op.responses.default = defaultErrorResponse;
+      }
+    }
+  }
+
+  if (!spec.components) spec.components = {};
+  if (!spec.components.schemas) spec.components.schemas = {};
+  (spec.components.schemas as Record<string, unknown>).ErrorResponse = {
+    type: "object",
+    properties: {
+      error: {
+        type: "string",
+        description: "Error message",
+        example: "Internal Server Error",
+      },
+      code: {
+        type: "integer",
+        description: "HTTP status code",
+        example: 500,
+      },
+    },
+    required: ["error"],
+  };
+
+  return c.json(spec);
 });
 
-// Register security scheme
+// Register security schemes
 app.openAPIRegistry.registerComponent("securitySchemes", "token", {
   type: "http",
   scheme: "bearer",
   description: "Default authentication mechanism",
   "x-speakeasy-example": "MIDDAY_API_KEY",
+});
+
+app.openAPIRegistry.registerComponent("securitySchemes", "oauth2", {
+  type: "oauth2",
+  description: "OAuth 2.0 Authorization Code flow",
+  flows: {
+    authorizationCode: {
+      authorizationUrl: "https://api.midday.ai/oauth/authorize",
+      tokenUrl: "https://api.midday.ai/oauth/token",
+      scopes: {
+        "bank-accounts.read": "Read bank accounts",
+        "bank-accounts.write": "Write bank accounts",
+        "customers.read": "Read customers",
+        "customers.write": "Write customers",
+        "documents.read": "Read documents",
+        "documents.write": "Write documents",
+        "inbox.read": "Read inbox",
+        "inbox.write": "Write inbox",
+        "invoices.read": "Read invoices",
+        "invoices.write": "Write invoices",
+        "reports.read": "Read reports",
+        "search.read": "Read search",
+        "tags.read": "Read tags",
+        "tags.write": "Write tags",
+        "teams.read": "Read teams",
+        "teams.write": "Write teams",
+        "tracker-entries.read": "Read tracker entries",
+        "tracker-entries.write": "Write tracker entries",
+        "tracker-projects.read": "Read tracker projects",
+        "tracker-projects.write": "Write tracker projects",
+        "transactions.read": "Read transactions",
+        "transactions.write": "Write transactions",
+        "users.read": "Read users",
+        "users.write": "Write users",
+        "notifications.read": "Read notifications",
+        "notifications.write": "Write notifications",
+      },
+    },
+  },
 });
 
 app.get(

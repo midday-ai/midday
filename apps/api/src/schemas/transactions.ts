@@ -1,5 +1,22 @@
 import { z } from "@hono/zod-openapi";
 
+const createTransactionAttachmentSchema = z
+  .object({
+    path: z.array(z.string()).openapi({
+      description: "Path(s) of the attachment file(s).",
+    }),
+    name: z.string().openapi({
+      description: "Name of the attachment file.",
+    }),
+    size: z.number().openapi({
+      description: "Size of the attachment file in bytes.",
+    }),
+    type: z.string().openapi({
+      description: "MIME type of the attachment file.",
+    }),
+  })
+  .openapi("CreateTransactionAttachment");
+
 export const getTransactionsSchema = z.object({
   cursor: z
     .string()
@@ -872,27 +889,9 @@ export const createTransactionSchema = z.object({
     .openapi({
       description: "Whether the transaction is internal.",
     }),
-  attachments: z
-    .array(
-      z.object({
-        path: z.array(z.string()).openapi({
-          description: "Path(s) of the attachment file(s).",
-        }),
-        name: z.string().openapi({
-          description: "Name of the attachment file.",
-        }),
-        size: z.number().openapi({
-          description: "Size of the attachment file in bytes.",
-        }),
-        type: z.string().openapi({
-          description: "MIME type of the attachment file.",
-        }),
-      }),
-    )
-    .optional()
-    .openapi({
-      description: "Array of attachments for the transaction.",
-    }),
+  attachments: z.array(createTransactionAttachmentSchema).optional().openapi({
+    description: "Array of attachments for the transaction.",
+  }),
 });
 
 export const createTransactionsSchema = z

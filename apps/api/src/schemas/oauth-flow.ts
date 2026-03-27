@@ -109,6 +109,11 @@ export const oauthRefreshTokenRequestSchema = z.object({
   }),
 });
 
+// OAuth Token Endpoint Request Schema (union of authorization code + refresh token)
+export const oauthTokenEndpointRequestSchema = z
+  .union([oauthTokenRequestSchema, oauthRefreshTokenRequestSchema])
+  .openapi("OAuthTokenEndpointRequest");
+
 // OAuth Token Response Schema
 export const oauthTokenResponseSchema = z.object({
   access_token: z.string().openapi({
@@ -158,24 +163,26 @@ export const oauthRevokeTokenRequestSchema = z.object({
 });
 
 // OAuth Error Response Schema
-export const oauthErrorResponseSchema = z.object({
-  error: z.string().openapi({
-    description: "Error code",
-    example: "invalid_request",
-  }),
-  error_description: z.string().optional().openapi({
-    description: "Human-readable error description",
-    example: "The request is missing a required parameter",
-  }),
-  error_uri: z.string().url().optional().openapi({
-    description: "URI to a human-readable error page",
-    example: "https://docs.midday.ai/errors/invalid_request",
-  }),
-  state: z.string().max(1024).optional().openapi({
-    description: "Opaque state parameter from the original request",
-    example: "abc123xyz789_secure-random-state-value",
-  }),
-});
+export const oauthErrorResponseSchema = z
+  .object({
+    error: z.string().openapi({
+      description: "Error code",
+      example: "invalid_request",
+    }),
+    error_description: z.string().optional().openapi({
+      description: "Human-readable error description",
+      example: "The request is missing a required parameter",
+    }),
+    error_uri: z.string().url().optional().openapi({
+      description: "URI to a human-readable error page",
+      example: "https://docs.midday.ai/errors/invalid_request",
+    }),
+    state: z.string().max(1024).optional().openapi({
+      description: "Opaque state parameter from the original request",
+      example: "abc123xyz789_secure-random-state-value",
+    }),
+  })
+  .openapi("OAuthErrorResponse");
 
 // OAuth Authorization Decision Schema (for consent flow)
 export const oauthAuthorizationDecisionSchema = z.object({
