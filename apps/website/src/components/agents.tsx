@@ -10,30 +10,68 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const DOT_COLOR = "hsl(225, 60%, 55%)";
 
 function InfraDiagram() {
-  const d = (text: string) => (
-    <span style={{ color: DOT_COLOR }}>{text}</span>
-  );
+  const d = (text: string) => <span style={{ color: DOT_COLOR }}>{text}</span>;
   return (
     <>
-{"                                                  ┌──────────────────┐\n"}
-{"                                                  │      Agents      │\n"}
-{"                                                  └────────┬─────────┘\n"}
-{"                                                           │\n"}
-{"                                                    MCP / CLI / API\n"}
-{"                                                           │\n"}
-{" ┌─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────┐\n"}
-{" │"}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"│\n"}
-{" │"}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"  Midday  "}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"│\n"}
-{" │"}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"│\n"}
-{" │"}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"  The backbone for your business  "}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"│\n"}
-{" │"}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"│\n"}
-{" └──────┬────────────────┬───────────────┬───────────────┬──────────────┬──────────────┬─────────────┬───────────────┘\n"}
-{"        │                │               │               │              │              │             │\n"}
-{"        ▼                ▼               ▼               ▼              ▼              ▼             ▼\n"}
-{"\n"}
-{"   ┌──────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐\n"}
-{"   │ Invoices │  │ Transactions │  │ Tracker  │  │  Customers   │  │ Reports  │  │ Banking  │  │ Exports  │\n"}
-{"   └──────────┘  └──────────────┘  └──────────┘  └──────────────┘  └──────────┘  └──────────┘  └──────────┘"}
+      {
+        "                                                  ┌──────────────────┐\n"
+      }
+      {
+        "                                                  │      Agents      │\n"
+      }
+      {
+        "                                                  └────────┬─────────┘\n"
+      }
+      {"                                                           │\n"}
+      {"                                                    MCP / CLI / API\n"}
+      {"                                                           │\n"}
+      {
+        " ┌─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────┐\n"
+      }
+      {" │"}
+      {d(
+        "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",
+      )}
+      {"│\n"}
+      {" │"}
+      {d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}
+      {"  Midday  "}
+      {d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}
+      {"│\n"}
+      {" │"}
+      {d(
+        "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",
+      )}
+      {"│\n"}
+      {" │"}
+      {d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}
+      {"  The backbone for your business  "}
+      {d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}
+      {"│\n"}
+      {" │"}
+      {d(
+        "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",
+      )}
+      {"│\n"}
+      {
+        " └──────┬────────────────┬───────────────┬───────────────┬──────────────┬──────────────┬─────────────┬───────────────┘\n"
+      }
+      {
+        "        │                │               │               │              │              │             │\n"
+      }
+      {
+        "        ▼                ▼               ▼               ▼              ▼              ▼             ▼\n"
+      }
+      {"\n"}
+      {
+        "   ┌──────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐\n"
+      }
+      {
+        "   │ Invoices │  │ Transactions │  │ Tracker  │  │  Customers   │  │ Reports  │  │ Banking  │  │ Exports  │\n"
+      }
+      {
+        "   └──────────┘  └──────────────┘  └──────────┘  └──────────────┘  └──────────┘  └──────────┘  └──────────┘"
+      }
     </>
   );
 }
@@ -491,7 +529,12 @@ function Terminal({ pixelFontClass }: { pixelFontClass?: string }) {
         >
           <div>{prompt}npx @midday-ai/cli@latest</div>
 
-          <div className={cn("text-7xl sm:text-8xl text-foreground mt-3", pixelFontClass)}>
+          <div
+            className={cn(
+              "text-7xl sm:text-8xl text-foreground mt-3",
+              pixelFontClass,
+            )}
+          >
             {brandTyped}
             {brandTyped.length < brandText.length && (
               <span className={cursorOn ? "opacity-100" : "opacity-0"}>▊</span>
@@ -683,7 +726,10 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button asChild className="h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,50%,92%)]">
+            <Button
+              asChild
+              className="h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,50%,92%)]"
+            >
               <Link href="https://app.midday.ai">Start automating</Link>
             </Button>
             <Button
@@ -758,7 +804,9 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
             <div className="p-4 space-y-4">
               <h2 className="text-sm">CLI</h2>
               <ul className="text-[hsl(225,60%,75%)] space-y-2">
-                <li className="text-sm">◇ Invoices, transactions, customers, and time tracking</li>
+                <li className="text-sm">
+                  ◇ Invoices, transactions, customers, and time tracking
+                </li>
                 <li className="text-sm">◇ Structured output for agents</li>
                 <li className="text-sm">◇ OAuth login via browser</li>
                 <li className="text-sm">◇ Workspace switching</li>
@@ -772,9 +820,13 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
               <h2 className="text-sm">MCP</h2>
               <ul className="text-[hsl(225,60%,75%)] space-y-2">
                 <li className="text-sm">◇ 80+ tools for business operations</li>
-                <li className="text-sm">◇ Works with Cursor, Claude, Raycast, and more</li>
+                <li className="text-sm">
+                  ◇ Works with Cursor, Claude, Raycast, and more
+                </li>
                 <li className="text-sm">◇ Granular read/write permissions</li>
-                <li className="text-sm">◇ Real-time data from your workspace</li>
+                <li className="text-sm">
+                  ◇ Real-time data from your workspace
+                </li>
                 <li className="text-sm">◇ Same API surface as the CLI</li>
               </ul>
             </div>
@@ -795,7 +847,10 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
         </div>
 
         <div className="flex justify-center mt-12">
-          <Button asChild className="h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,50%,92%)]">
+          <Button
+            asChild
+            className="h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,50%,92%)]"
+          >
             <Link href="https://app.midday.ai">Start automating</Link>
           </Button>
         </div>
@@ -837,7 +892,10 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
               needs.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button asChild className="h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,50%,92%)]">
+              <Button
+                asChild
+                className="h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,50%,92%)]"
+              >
                 <Link href="https://app.midday.ai">Start automating</Link>
               </Button>
               <Button
