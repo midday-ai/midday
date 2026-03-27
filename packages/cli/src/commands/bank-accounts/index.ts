@@ -10,10 +10,10 @@ interface BankAccount {
   id: string;
   name: string;
   currency?: string;
-  balance?: number;
-  type?: string;
-  institution_name?: string;
+  balance?: number | null;
+  type?: string | null;
   enabled?: boolean;
+  manual?: boolean;
 }
 
 export function createBankAccountsCommand(): Command {
@@ -53,17 +53,17 @@ Examples:
         } else {
           const rows = accounts.map((a) => [
             a.name,
-            a.institution_name || null,
             a.currency || null,
             a.balance != null
               ? formatAmount(a.balance, a.currency || "USD")
               : null,
             a.type || null,
+            a.enabled ? "yes" : "no",
           ]);
 
           printTable({
             title: `Bank Accounts (${accounts.length})`,
-            head: ["Name", "Institution", "Currency", "Balance", "Type"],
+            head: ["Name", "Currency", "Balance", "Type", "Enabled"],
             rows,
           });
         }
@@ -157,7 +157,6 @@ Examples:
         } else {
           printDetail(account.name, [
             ["ID", account.id],
-            ["Institution", account.institution_name],
             ["Type", account.type],
             ["Currency", account.currency],
             [
@@ -166,6 +165,7 @@ Examples:
                 ? formatAmount(account.balance, account.currency || "USD")
                 : null,
             ],
+            ["Enabled", account.enabled ? "yes" : "no"],
           ]);
         }
       } catch (error) {

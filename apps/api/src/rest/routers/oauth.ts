@@ -477,7 +477,16 @@ app.openapi(
     if (contentType.includes("application/x-www-form-urlencoded")) {
       body = await c.req.parseBody();
     } else {
-      body = c.req.valid("json");
+      body = await c.req.json();
+    }
+
+    const parsed = oauthTokenEndpointRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new HTTPException(400, {
+        message: parsed.error.issues
+          .map((i) => `${i.path.join(".")}: ${i.message}`)
+          .join("; "),
+      });
     }
 
     const {
@@ -648,6 +657,11 @@ app.openapi(
       message: "Grant type not supported",
     });
   },
+  (result, c) => {
+    if (!result.success) {
+      return undefined;
+    }
+  },
 );
 
 // OAuth Token Revocation Endpoint
@@ -692,7 +706,7 @@ app.openapi(
     if (contentType.includes("application/x-www-form-urlencoded")) {
       body = await c.req.parseBody();
     } else {
-      body = c.req.valid("json");
+      body = await c.req.json();
     }
 
     const { token, client_id, client_secret } = body;
@@ -728,6 +742,11 @@ app.openapi(
     });
 
     return c.json({ success: true });
+  },
+  (result, c) => {
+    if (!result.success) {
+      return undefined;
+    }
   },
 );
 

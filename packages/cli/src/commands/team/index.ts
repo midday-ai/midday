@@ -9,15 +9,15 @@ import { handleError } from "../../utils/errors.js";
 interface Team {
   id: string;
   name: string;
-  logo_url?: string;
-  created_at?: string;
+  logoUrl?: string;
+  createdAt?: string;
   plan?: string;
 }
 
 interface Member {
   id: string;
   email: string;
-  full_name?: string;
+  fullName?: string;
   role?: string;
 }
 
@@ -55,7 +55,7 @@ Examples:
           printDetail(team.name, [
             ["ID", team.id],
             ["Plan", team.plan],
-            ["Created", team.created_at],
+            ["Created", team.createdAt],
           ]);
         }
       } catch (error) {
@@ -94,7 +94,7 @@ Examples:
           printJsonList(members);
         } else {
           const rows = members.map((m) => [
-            m.full_name || null,
+            m.fullName || null,
             m.email,
             m.role || null,
           ]);

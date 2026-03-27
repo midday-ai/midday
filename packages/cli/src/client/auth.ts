@@ -1,13 +1,14 @@
 import * as crypto from "node:crypto";
 import * as http from "node:http";
 import chalk from "chalk";
+import escapeHtml from "escape-html";
 import open from "open";
 import {
   clearCredentials,
   getCredentials,
   saveCredentials,
 } from "../config/store.js";
-import { getApiUrl } from "../utils/env.js";
+import { getApiUrl, getDashboardUrl } from "../utils/env.js";
 
 const CLIENT_NAME = "Midday CLI";
 const SCOPES = [
@@ -77,7 +78,7 @@ async function registerClient(
   return { clientId: data.client_id };
 }
 
-function startCallbackServer(): Promise<{
+function startCallbackServer(expectedState: string): Promise<{
   port: number;
   codePromise: Promise<{ code: string; close: () => void }>;
 }> {
@@ -102,11 +103,19 @@ function startCallbackServer(): Promise<{
 
       const code = url.searchParams.get("code");
       const error = url.searchParams.get("error");
+      const returnedState = url.searchParams.get("state");
 
       if (error) {
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end(errorPage(error));
         rejectCode(new Error(`OAuth error: ${error}`));
+        return;
+      }
+
+      if (!returnedState || returnedState !== expectedState) {
+        res.writeHead(400, { "Content-Type": "text/html" });
+        res.end(errorPage("Invalid state parameter — possible CSRF attack"));
+        rejectCode(new Error("OAuth state mismatch — callback rejected"));
         return;
       }
 
@@ -119,7 +128,13 @@ function startCallbackServer(): Promise<{
 
       res.writeHead(200, { "Content-Type": "text/html" });
       res.end(successPage());
-      resolveCode({ code, close: () => server.close() });
+      resolveCode({
+        code,
+        close: () => {
+          clearTimeout(timeout);
+          server.close();
+        },
+      });
     });
 
     server.listen(0, "127.0.0.1", () => {
@@ -133,7 +148,7 @@ function startCallbackServer(): Promise<{
 
     server.on("error", rejectServer);
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       server.close();
       rejectCode(new Error("OAuth login timed out after 120 seconds"));
     }, 120_000);
@@ -149,8 +164,8 @@ async function exchangeCode(
 ): Promise<TokenResponse> {
   const response = await fetch(`${apiUrl}/oauth/token`, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       grant_type: "authorization_code",
       code,
       redirect_uri: redirectUri,
@@ -171,9 +186,10 @@ export async function loginWithBrowser(
   opts: { noBrowser?: boolean } = {},
 ): Promise<void> {
   const apiUrl = getApiUrl();
-  const dashboardUrl = apiUrl.replace("api.", "app.");
+  const dashboardUrl = getDashboardUrl();
 
-  const { port, codePromise } = await startCallbackServer();
+  const state = crypto.randomBytes(16).toString("hex");
+  const { port, codePromise } = await startCallbackServer(state);
 
   const redirectUri = `http://localhost:${port}/callback`;
 
@@ -181,7 +197,6 @@ export async function loginWithBrowser(
 
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = await generateCodeChallenge(codeVerifier);
-  const state = crypto.randomBytes(16).toString("hex");
 
   const authUrl = new URL(`${dashboardUrl}/oauth/authorize`);
   authUrl.searchParams.set("client_id", clientId);
@@ -303,8 +318,9 @@ function successPage(): string {
 }
 
 function errorPage(error: string): string {
+  const safeError = escapeHtml(error);
   return `<!DOCTYPE html><html><head><title>Midday CLI</title>
 <style>body{font-family:system-ui;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#0a0a0a;color:#fafafa}
 .container{text-align:center}h1{font-size:24px;font-weight:500;color:#f87171}p{color:#888;margin-top:8px}</style>
-</head><body><div class="container"><h1>Authentication Failed</h1><p>${error}</p><p>Please try again in your terminal.</p></div></body></html>`;
+</head><body><div class="container"><h1>Authentication Failed</h1><p>${safeError}</p><p>Please try again in your terminal.</p></div></body></html>`;
 }

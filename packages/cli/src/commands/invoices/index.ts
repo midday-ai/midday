@@ -9,18 +9,23 @@ import { handleError } from "../../utils/errors.js";
 
 interface Invoice {
   id: string;
-  invoice_number?: string;
+  invoiceNumber?: string;
   status?: string;
-  customer_name?: string;
-  amount?: number;
-  currency?: string;
-  due_date?: string;
-  issue_date?: string;
+  customerName?: string;
+  customer?: { id: string; name: string; email?: string | null } | null;
+  amount?: number | null;
+  currency?: string | null;
+  dueDate?: string;
+  issueDate?: string;
 }
 
 interface ListResponse {
   data: Invoice[];
-  meta?: { count?: number; cursor?: string; hasMore?: boolean };
+  meta?: {
+    cursor?: string | null;
+    hasNextPage?: boolean;
+    hasPreviousPage?: boolean;
+  };
 }
 
 export function createInvoicesCommand(): Command {
@@ -61,11 +66,11 @@ Examples:
               "/invoices",
               {
                 cursor: opts.cursor,
-                page_size: opts.pageSize,
-                status: opts.status,
-                search: opts.search,
-                start_date: opts.from,
-                end_date: opts.to,
+                pageSize: opts.pageSize,
+                statuses: opts.status ? [opts.status] : undefined,
+                q: opts.search,
+                start: opts.from,
+                end: opts.to,
               },
               { apiUrl: globals.apiUrl, debug: globals.debug },
             ),
@@ -76,29 +81,29 @@ Examples:
 
         if (format === "json") {
           printJsonList(invoices, {
-            hasMore: data.meta?.hasMore ?? false,
-            cursor: data.meta?.cursor,
-            total: data.meta?.count,
+            hasMore: data.meta?.hasNextPage ?? false,
+            cursor: data.meta?.cursor ?? undefined,
             pageSize: Number(opts.pageSize),
           });
         } else {
           const rows = invoices.map((inv) => [
-            inv.invoice_number || null,
-            inv.customer_name || null,
+            inv.invoiceNumber || null,
+            inv.customer?.name || inv.customerName || null,
             inv.amount != null
               ? formatAmount(inv.amount, inv.currency || "USD")
               : null,
             inv.status || null,
-            inv.due_date || null,
+            inv.dueDate ? inv.dueDate.split("T")[0] : null,
           ]);
 
           printTable({
-            title: `Invoices${data.meta?.count ? ` (${data.meta.count} total)` : ""}`,
+            title: "Invoices",
             head: ["Number", "Customer", "Amount", "Status", "Due Date"],
             rows,
-            pageInfo: data.meta?.cursor
-              ? `Next page: midday invoices list --cursor ${data.meta.cursor}`
-              : undefined,
+            pageInfo:
+              data.meta?.hasNextPage && data.meta?.cursor
+                ? `Next page: midday invoices list --cursor ${data.meta.cursor}`
+                : undefined,
           });
         }
       } catch (error) {
@@ -135,10 +140,10 @@ Examples:
         if (format === "json") {
           printJson(inv);
         } else {
-          printDetail(`Invoice ${inv.invoice_number || id}`, [
+          printDetail(`Invoice ${inv.invoiceNumber || id}`, [
             ["ID", inv.id],
-            ["Number", inv.invoice_number],
-            ["Customer", inv.customer_name],
+            ["Number", inv.invoiceNumber],
+            ["Customer", inv.customer?.name || inv.customerName],
             [
               "Amount",
               inv.amount != null
@@ -146,8 +151,8 @@ Examples:
                 : null,
             ],
             ["Status", inv.status],
-            ["Issue Date", inv.issue_date],
-            ["Due Date", inv.due_date],
+            ["Issue Date", inv.issueDate?.split("T")[0]],
+            ["Due Date", inv.dueDate?.split("T")[0]],
           ]);
         }
       } catch (error) {
@@ -187,13 +192,12 @@ Examples:
           body = JSON.parse(Buffer.concat(chunks).toString("utf-8"));
         } else {
           body = {
-            customer_id: opts.customer,
-            invoice_number: opts.number,
-            due_date: opts.dueDate,
-            issue_date:
-              opts.issueDate || new Date().toISOString().split("T")[0],
+            customerId: opts.customer,
+            invoiceNumber: opts.number,
+            dueDate: opts.dueDate,
+            issueDate: opts.issueDate || new Date().toISOString().split("T")[0],
             currency: opts.currency,
-            note_details: opts.note,
+            noteDetails: opts.note,
           };
         }
 
@@ -211,10 +215,12 @@ Examples:
           printJson(inv);
         } else {
           console.log(
-            `\n  ${chalk.green("✓")} Created invoice ${chalk.bold(inv.invoice_number || inv.id)}`,
+            `\n  ${chalk.green("✓")} Created invoice ${chalk.bold(inv.invoiceNumber || inv.id)}`,
           );
-          if (inv.customer_name)
-            console.log(`  ${chalk.dim("Customer:")} ${inv.customer_name}`);
+          if (inv.customer?.name || inv.customerName)
+            console.log(
+              `  ${chalk.dim("Customer:")} ${inv.customer?.name || inv.customerName}`,
+            );
           console.log();
         }
       } catch (error) {
@@ -305,8 +311,8 @@ Examples:
         } else {
           body = {};
           if (opts.status) body.status = opts.status;
-          if (opts.dueDate) body.due_date = opts.dueDate;
-          if (opts.note) body.note_details = opts.note;
+          if (opts.dueDate) body.dueDate = opts.dueDate;
+          if (opts.note) body.internalNote = opts.note;
         }
 
         const inv = await withSpinner(

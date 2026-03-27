@@ -13,14 +13,20 @@ interface Transaction {
   name: string;
   amount: number;
   currency: string;
-  category_slug?: string;
+  category?: { id: string; name: string; slug: string } | null;
   status?: string;
-  bank_account_id?: string;
+  note?: string | null;
+  counterpartyName?: string | null;
+  account?: { id: string; name: string; currency: string } | null;
 }
 
 interface ListResponse {
   data: Transaction[];
-  meta?: { count?: number; cursor?: string; hasMore?: boolean };
+  meta?: {
+    cursor?: string | null;
+    hasNextPage?: boolean;
+    hasPreviousPage?: boolean;
+  };
 }
 
 export function createTransactionsCommand(): Command {
@@ -61,13 +67,13 @@ Examples:
               "/transactions",
               {
                 cursor: opts.cursor,
-                page_size: opts.pageSize,
-                search: opts.search,
-                category_slug: opts.category,
-                bank_account_id: opts.account,
-                start_date: opts.from,
-                end_date: opts.to,
-                status: opts.status,
+                pageSize: opts.pageSize,
+                q: opts.search,
+                categories: opts.category ? [opts.category] : undefined,
+                accounts: opts.account ? [opts.account] : undefined,
+                start: opts.from,
+                end: opts.to,
+                statuses: opts.status ? [opts.status] : undefined,
               },
               { apiUrl: globals.apiUrl, debug: globals.debug },
             ),
@@ -78,27 +84,27 @@ Examples:
 
         if (format === "json") {
           printJsonList(txns, {
-            hasMore: data.meta?.hasMore ?? false,
-            cursor: data.meta?.cursor,
-            total: data.meta?.count,
+            hasMore: data.meta?.hasNextPage ?? false,
+            cursor: data.meta?.cursor ?? undefined,
             pageSize: Number(opts.pageSize),
           });
         } else {
           const rows = txns.map((t) => [
-            t.date,
+            t.date?.split("T")[0] ?? null,
             t.name,
             formatAmount(t.amount, t.currency),
-            t.category_slug || null,
+            t.category?.name || null,
             t.status || null,
           ]);
 
           printTable({
-            title: `Transactions${data.meta?.count ? ` (${data.meta.count} total)` : ""}`,
+            title: "Transactions",
             head: ["Date", "Description", "Amount", "Category", "Status"],
             rows,
-            pageInfo: data.meta?.cursor
-              ? `Next page: midday transactions list --cursor ${data.meta.cursor}`
-              : undefined,
+            pageInfo:
+              data.meta?.hasNextPage && data.meta?.cursor
+                ? `Next page: midday transactions list --cursor ${data.meta.cursor}`
+                : undefined,
           });
         }
       } catch (error) {
@@ -136,12 +142,14 @@ Examples:
           printJson(txn);
         } else {
           printDetail(`Transaction ${id}`, [
-            ["Date", txn.date],
+            ["Date", txn.date?.split("T")[0]],
             ["Description", txn.name],
             ["Amount", formatAmount(txn.amount, txn.currency)],
             ["Currency", txn.currency],
-            ["Category", txn.category_slug],
+            ["Category", txn.category?.name],
             ["Status", txn.status],
+            ["Account", txn.account?.name],
+            ["Note", txn.note],
           ]);
         }
       } catch (error) {
@@ -185,9 +193,9 @@ Examples:
             name: opts.name,
             amount: Number(opts.amount),
             currency: opts.currency,
-            bank_account_id: opts.account,
+            bankAccountId: opts.account,
             date: opts.date || new Date().toISOString().split("T")[0],
-            category_slug: opts.category,
+            categorySlug: opts.category,
           };
         }
 
@@ -249,7 +257,7 @@ Examples:
         } else {
           body = {};
           if (opts.name) body.name = opts.name;
-          if (opts.category) body.category_slug = opts.category;
+          if (opts.category) body.categorySlug = opts.category;
           if (opts.status) body.status = opts.status;
         }
 

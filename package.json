@@ -66,8 +66,5 @@
     "@biomejs/biome": "2.4.9",
     "turbo": "2.8.20",
     "typescript": "^6.0.2"
-  },
-  "dependencies": {
-    "geist": "^1.7.0"
   }
 }

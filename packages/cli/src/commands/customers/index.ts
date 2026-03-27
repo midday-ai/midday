@@ -10,15 +10,23 @@ import { handleError } from "../../utils/errors.js";
 interface Customer {
   id: string;
   name: string;
-  email?: string;
-  phone?: string;
-  website?: string;
-  contact?: string;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  contact?: string | null;
+  country?: string | null;
+  invoiceCount?: number;
+  totalRevenue?: number;
+  invoiceCurrency?: string | null;
 }
 
 interface ListResponse {
   data: Customer[];
-  meta?: { count?: number; cursor?: string; hasMore?: boolean };
+  meta?: {
+    cursor?: string | null;
+    hasNextPage?: boolean;
+    hasPreviousPage?: boolean;
+  };
 }
 
 export function createCustomersCommand(): Command {
@@ -50,8 +58,8 @@ Examples:
               "/customers",
               {
                 cursor: opts.cursor,
-                page_size: opts.pageSize,
-                search: opts.search,
+                pageSize: opts.pageSize,
+                q: opts.search,
               },
               { apiUrl: globals.apiUrl, debug: globals.debug },
             ),
@@ -62,9 +70,8 @@ Examples:
 
         if (format === "json") {
           printJsonList(customers, {
-            hasMore: data.meta?.hasMore ?? false,
-            cursor: data.meta?.cursor,
-            total: data.meta?.count,
+            hasMore: data.meta?.hasNextPage ?? false,
+            cursor: data.meta?.cursor ?? undefined,
             pageSize: Number(opts.pageSize),
           });
         } else {
@@ -76,9 +83,13 @@ Examples:
           ]);
 
           printTable({
-            title: `Customers${data.meta?.count ? ` (${data.meta.count} total)` : ""}`,
+            title: "Customers",
             head: ["Name", "Email", "Contact", "Phone"],
             rows,
+            pageInfo:
+              data.meta?.hasNextPage && data.meta?.cursor
+                ? `Next page: midday customers list --cursor ${data.meta.cursor}`
+                : undefined,
           });
         }
       } catch (error) {
@@ -121,6 +132,7 @@ Examples:
             ["Contact", customer.contact],
             ["Phone", customer.phone],
             ["Website", customer.website],
+            ["Country", customer.country],
           ]);
         }
       } catch (error) {

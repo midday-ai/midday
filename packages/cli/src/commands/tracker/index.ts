@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { Command } from "commander";
-import { del, get, post, put } from "../../client/api.js";
+import { get, post } from "../../client/api.js";
 import { type GlobalFlags, resolveFormat } from "../../output/formatter.js";
 import { printJson, printJsonList } from "../../output/json.js";
 import { printDetail, printTable } from "../../output/table.js";
@@ -11,27 +11,36 @@ interface Project {
   id: string;
   name: string;
   status?: string;
-  rate?: number;
+  estimate?: number | null;
   currency?: string;
-  total_duration?: number;
-  description?: string;
+  totalDuration?: number;
+  totalAmount?: number;
+  description?: string | null;
+  customer?: { id: string; name: string } | null;
 }
 
 interface Entry {
   id: string;
-  project_id?: string;
-  project_name?: string;
-  description?: string;
+  description?: string | null;
   start: string;
-  stop?: string;
-  duration?: number;
+  stop?: string | null;
+  duration?: number | null;
   date?: string;
+  project?: { id: string; name: string } | null;
 }
 
-interface TimerStatus {
-  running: boolean;
-  entry?: Entry;
-  elapsed?: number;
+interface TimerStatusResponse {
+  data: {
+    isRunning: boolean;
+    currentEntry?: {
+      id: string;
+      start: string;
+      description?: string | null;
+      projectId?: string | null;
+      trackerProject?: { id: string; name: string } | null;
+    } | null;
+    elapsedTime?: number;
+  };
 }
 
 export function createTrackerCommand(): Command {
@@ -76,13 +85,13 @@ Examples:
           const rows = items.map((p) => [
             p.name,
             p.status || null,
-            p.rate != null ? `${p.rate}/${p.currency || "USD"}` : null,
-            p.total_duration != null ? formatDuration(p.total_duration) : null,
+            p.customer?.name || null,
+            p.totalDuration != null ? formatDuration(p.totalDuration) : null,
           ]);
 
           printTable({
             title: `Projects (${items.length})`,
-            head: ["Name", "Status", "Rate", "Total Time"],
+            head: ["Name", "Status", "Customer", "Total Time"],
             rows,
           });
         }
@@ -149,7 +158,6 @@ Examples:
       }
     });
 
-  // Timer commands at tracker level
   cmd
     .command("start")
     .description("Start the timer")
@@ -168,25 +176,29 @@ Examples:
 
       try {
         const body: Record<string, unknown> = {};
-        if (opts.project) body.project_id = opts.project;
+        if (opts.project) body.projectId = opts.project;
         if (opts.description) body.description = opts.description;
 
-        const entry = await withSpinner(
+        const result = await withSpinner(
           "Starting timer...",
           () =>
-            post<Entry>("/tracker-entries/start", body, {
+            post<{ data: Entry }>("/tracker-entries/start", body, {
               apiUrl: globals.apiUrl,
               debug: globals.debug,
             }),
           globals.quiet,
         );
 
+        const entry = result.data || result;
+
         if (format === "json") {
           printJson(entry);
         } else {
           console.log(`\n  ${chalk.green("✓")} Timer started`);
-          if (entry.project_name)
-            console.log(`  ${chalk.dim("Project:")} ${entry.project_name}`);
+          if ((entry as any).project?.name)
+            console.log(
+              `  ${chalk.dim("Project:")} ${(entry as any).project.name}`,
+            );
           if (entry.description)
             console.log(`  ${chalk.dim("Task:")} ${entry.description}`);
           console.log();
@@ -210,15 +222,17 @@ Examples:
       const format = resolveFormat(globals);
 
       try {
-        const entry = await withSpinner(
+        const result = await withSpinner(
           "Stopping timer...",
           () =>
-            post<Entry>("/tracker-entries/stop", undefined, {
+            post<{ data: Entry }>("/tracker-entries/stop", undefined, {
               apiUrl: globals.apiUrl,
               debug: globals.debug,
             }),
           globals.quiet,
         );
+
+        const entry = result.data || result;
 
         if (format === "json") {
           printJson(entry);
@@ -253,21 +267,26 @@ Examples:
         const status = await withSpinner(
           "Checking timer...",
           () =>
-            get<TimerStatus>("/tracker-entries/status", undefined, {
+            get<TimerStatusResponse>("/tracker-entries/status", undefined, {
               apiUrl: globals.apiUrl,
               debug: globals.debug,
             }),
           globals.quiet,
         );
 
+        const timer = status.data;
+
         if (format === "json") {
-          printJson(status);
-        } else if (status.running && status.entry) {
+          printJson(timer);
+        } else if (timer?.isRunning && timer.currentEntry) {
           printDetail("Timer Running", [
-            ["Project", status.entry.project_name],
-            ["Description", status.entry.description],
-            ["Started", status.entry.start],
-            ["Elapsed", status.elapsed ? formatDuration(status.elapsed) : null],
+            ["Project", timer.currentEntry.trackerProject?.name],
+            ["Description", timer.currentEntry.description],
+            ["Started", timer.currentEntry.start],
+            [
+              "Elapsed",
+              timer.elapsedTime ? formatDuration(timer.elapsedTime) : null,
+            ],
           ]);
         } else {
           console.log(

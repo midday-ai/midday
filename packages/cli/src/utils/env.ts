@@ -38,3 +38,14 @@ export function shouldShowUI(flags: {
 export function getApiUrl(): string {
   return process.env["MIDDAY_API_URL"] || "https://api.midday.ai";
 }
+
+export function getDashboardUrl(): string {
+  if (process.env["MIDDAY_DASHBOARD_URL"]) {
+    return process.env["MIDDAY_DASHBOARD_URL"];
+  }
+  const apiUrl = getApiUrl();
+  if (apiUrl.includes("localhost") || apiUrl.includes("127.0.0.1")) {
+    return "http://localhost:3000";
+  }
+  return apiUrl.replace("api.", "app.");
+}

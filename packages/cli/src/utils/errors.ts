@@ -27,8 +27,8 @@ export class APIError extends CLIError {
   public readonly status: number;
   public readonly code: string;
 
-  constructor(status: number, code: string, message: string) {
-    super(message, { exitCode: 1 });
+  constructor(status: number, code: string, message: string, hint?: string) {
+    super(message, { exitCode: 1, hint });
     this.status = status;
     this.code = code;
   }

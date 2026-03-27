@@ -9,11 +9,21 @@ import { handleError } from "../../utils/errors.js";
 
 interface Document {
   id: string;
-  name: string;
-  size?: number;
-  content_type?: string;
-  created_at?: string;
-  tag?: string;
+  title?: string | null;
+  pathTokens?: string[];
+  metadata?: { size?: number | null; mimetype?: string | null } | null;
+  processingStatus?: string;
+  summary?: string | null;
+  date?: string | null;
+}
+
+interface ListResponse {
+  data: Document[];
+  meta?: {
+    cursor?: string | null;
+    hasNextPage?: boolean;
+    hasPreviousPage?: boolean;
+  };
 }
 
 export function createDocumentsCommand(): Command {
@@ -26,13 +36,12 @@ export function createDocumentsCommand(): Command {
     .description("List documents")
     .option("--cursor <cursor>", "Pagination cursor")
     .option("--page-size <n>", "Results per page", "25")
-    .option("--tag <tag>", "Filter by tag")
     .addHelpText(
       "after",
       `
 Examples:
   midday documents list
-  midday documents list --tag receipts --json`,
+  midday documents list --json`,
     )
     .action(async (opts) => {
       const globals = cmd.parent?.opts() as GlobalFlags;
@@ -42,15 +51,11 @@ Examples:
         const data = await withSpinner(
           "Fetching documents...",
           () =>
-            get<{
-              data: Document[];
-              meta?: { cursor?: string; hasMore?: boolean; count?: number };
-            }>(
+            get<ListResponse>(
               "/documents",
               {
                 cursor: opts.cursor,
-                page_size: opts.pageSize,
-                tag: opts.tag,
+                pageSize: opts.pageSize,
               },
               { apiUrl: globals.apiUrl, debug: globals.debug },
             ),
@@ -61,24 +66,26 @@ Examples:
 
         if (format === "json") {
           printJsonList(docs, {
-            hasMore: data.meta?.hasMore ?? false,
-            cursor: data.meta?.cursor,
-            total: data.meta?.count,
+            hasMore: data.meta?.hasNextPage ?? false,
+            cursor: data.meta?.cursor ?? undefined,
             pageSize: Number(opts.pageSize),
           });
         } else {
           const rows = docs.map((d) => [
-            d.name,
-            d.content_type || null,
-            d.size ? formatSize(d.size) : null,
-            d.tag || null,
-            d.created_at || null,
+            d.title || d.pathTokens?.at(-1) || null,
+            d.metadata?.mimetype || null,
+            d.metadata?.size ? formatSize(d.metadata.size) : null,
+            d.date || null,
           ]);
 
           printTable({
-            title: `Documents${data.meta?.count ? ` (${data.meta.count} total)` : ""}`,
-            head: ["Name", "Type", "Size", "Tag", "Created"],
+            title: "Documents",
+            head: ["Title", "Type", "Size", "Date"],
             rows,
+            pageInfo:
+              data.meta?.hasNextPage && data.meta?.cursor
+                ? `Next page: midday documents list --cursor ${data.meta.cursor}`
+                : undefined,
           });
         }
       } catch (error) {
@@ -114,12 +121,13 @@ Examples:
         if (format === "json") {
           printJson(doc);
         } else {
-          printDetail(doc.name, [
+          printDetail(doc.title || doc.pathTokens?.at(-1) || id, [
             ["ID", doc.id],
-            ["Type", doc.content_type],
-            ["Size", doc.size ? formatSize(doc.size) : null],
-            ["Tag", doc.tag],
-            ["Created", doc.created_at],
+            ["Type", doc.metadata?.mimetype],
+            ["Size", doc.metadata?.size ? formatSize(doc.metadata.size) : null],
+            ["Status", doc.processingStatus],
+            ["Date", doc.date],
+            ["Summary", doc.summary],
           ]);
         }
       } catch (error) {

@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { Command } from "commander";
-import { del, get, post, put } from "../../client/api.js";
+import { del, get, post } from "../../client/api.js";
 import { type GlobalFlags, resolveFormat } from "../../output/formatter.js";
 import { printJson, printJsonList } from "../../output/json.js";
 import { printDetail, printTable } from "../../output/table.js";
@@ -9,13 +9,31 @@ import { handleError } from "../../utils/errors.js";
 
 interface InboxItem {
   id: string;
-  display_name?: string;
-  amount?: number;
-  currency?: string;
-  date?: string;
-  status?: string;
-  content_type?: string;
-  transaction_id?: string;
+  displayName?: string | null;
+  fileName?: string | null;
+  amount?: number | null;
+  currency?: string | null;
+  date?: string | null;
+  status?: string | null;
+  contentType?: string | null;
+  description?: string | null;
+  website?: string | null;
+  transaction?: {
+    id: string;
+    amount?: number;
+    currency?: string;
+    name?: string;
+    date?: string;
+  } | null;
+}
+
+interface ListResponse {
+  data: InboxItem[];
+  meta?: {
+    cursor?: string | null;
+    hasNextPage?: boolean;
+    hasPreviousPage?: boolean;
+  };
 }
 
 export function createInboxCommand(): Command {
@@ -44,14 +62,11 @@ Examples:
         const data = await withSpinner(
           "Fetching inbox...",
           () =>
-            get<{
-              data: InboxItem[];
-              meta?: { cursor?: string; hasMore?: boolean; count?: number };
-            }>(
+            get<ListResponse>(
               "/inbox",
               {
                 cursor: opts.cursor,
-                page_size: opts.pageSize,
+                pageSize: opts.pageSize,
                 status: opts.status,
               },
               { apiUrl: globals.apiUrl, debug: globals.debug },
@@ -63,28 +78,29 @@ Examples:
 
         if (format === "json") {
           printJsonList(items, {
-            hasMore: data.meta?.hasMore ?? false,
-            cursor: data.meta?.cursor,
-            total: data.meta?.count,
+            hasMore: data.meta?.hasNextPage ?? false,
+            cursor: data.meta?.cursor ?? undefined,
             pageSize: Number(opts.pageSize),
           });
         } else {
           const rows = items.map((item) => [
-            item.display_name || null,
+            item.displayName || item.fileName || null,
             item.amount != null
               ? formatAmount(item.amount, item.currency || "USD")
               : null,
-            item.date || null,
+            item.date?.split("T")[0] || null,
             item.status || null,
-            item.transaction_id
-              ? chalk.green("matched")
-              : chalk.dim("unmatched"),
+            item.transaction ? chalk.green("matched") : chalk.dim("unmatched"),
           ]);
 
           printTable({
-            title: `Inbox${data.meta?.count ? ` (${data.meta.count} total)` : ""}`,
+            title: "Inbox",
             head: ["Name", "Amount", "Date", "Status", "Match"],
             rows,
+            pageInfo:
+              data.meta?.hasNextPage && data.meta?.cursor
+                ? `Next page: midday inbox list --cursor ${data.meta.cursor}`
+                : undefined,
           });
         }
       } catch (error) {
@@ -120,7 +136,7 @@ Examples:
         if (format === "json") {
           printJson(item);
         } else {
-          printDetail(item.display_name || id, [
+          printDetail(item.displayName || item.fileName || id, [
             ["ID", item.id],
             [
               "Amount",
@@ -128,10 +144,15 @@ Examples:
                 ? formatAmount(item.amount, item.currency || "USD")
                 : null,
             ],
-            ["Date", item.date],
+            ["Date", item.date?.split("T")[0]],
             ["Status", item.status],
-            ["Type", item.content_type],
-            ["Transaction", item.transaction_id || "unmatched"],
+            ["Type", item.contentType],
+            [
+              "Transaction",
+              item.transaction
+                ? `${item.transaction.id} (${item.transaction.name})`
+                : "unmatched",
+            ],
           ]);
         }
       } catch (error) {
@@ -160,7 +181,7 @@ Examples:
           () =>
             post(
               `/inbox/${inboxId}/match`,
-              { transaction_id: opts.transaction },
+              { transactionId: opts.transaction },
               { apiUrl: globals.apiUrl, debug: globals.debug },
             ),
           globals.quiet,
@@ -169,8 +190,8 @@ Examples:
         if (format === "json") {
           printJson({
             matched: true,
-            inbox_id: inboxId,
-            transaction_id: opts.transaction,
+            inboxId,
+            transactionId: opts.transaction,
           });
         } else {
           console.log(
