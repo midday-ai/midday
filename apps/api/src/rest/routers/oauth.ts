@@ -18,6 +18,7 @@ import { validateResponse } from "@api/utils/validate-response";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import type { Database } from "@midday/db/client";
 import {
+  associateDCRApplicationWithTeam,
   createAuthorizationCode,
   exchangeAuthorizationCode,
   findOrCreateDCRApplication,
@@ -380,6 +381,24 @@ app.openapi(
       throw new HTTPException(500, {
         message: "Failed to create authorization code",
       });
+    }
+
+    // If this is a DCR app without a team owner, associate it with the authorizing user's team
+    if (!application.teamId) {
+      try {
+        await associateDCRApplicationWithTeam(
+          db,
+          application.id,
+          teamId,
+          session.user.id,
+        );
+      } catch (error) {
+        logger.error("Failed to associate DCR app with team", {
+          error: error instanceof Error ? error.message : String(error),
+          applicationId: application.id,
+          teamId,
+        });
+      }
     }
 
     // Send app installation email only if this is the first time authorizing this app

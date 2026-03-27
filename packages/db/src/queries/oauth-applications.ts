@@ -498,6 +498,30 @@ export async function findOrCreateDCRApplication(
   };
 }
 
+// Associate a DCR app (teamId is null) with a team on first authorization
+export async function associateDCRApplicationWithTeam(
+  db: Database,
+  applicationId: string,
+  teamId: string,
+  userId: string,
+) {
+  const [result] = await db
+    .update(oauthApplications)
+    .set({
+      teamId,
+      createdBy: userId,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(oauthApplications.id, applicationId))
+    .returning({
+      id: oauthApplications.id,
+      teamId: oauthApplications.teamId,
+      createdBy: oauthApplications.createdBy,
+    });
+
+  return result;
+}
+
 // Regenerate client secret
 export async function regenerateClientSecret(
   db: Database,
