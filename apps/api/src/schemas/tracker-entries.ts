@@ -454,7 +454,10 @@ export const startTimerResponseSchema = z.object({
 
 const discardedTimerResponseSchema = z.object({
   id: z.string().uuid(),
-  discarded: z.literal(true),
+  discarded: z.boolean().openapi({
+    description: "Always true for discarded timer entries (duration < 60s)",
+    example: true,
+  }),
   duration: z.number(),
   project: z
     .object({

@@ -14,6 +14,7 @@ app.openapi(
     summary: "Search",
     operationId: "search",
     "x-speakeasy-name-override": "search",
+    "x-speakeasy-pagination": false,
     description:
       "Search across all data, invoices, documents, customers, transactions, and more.",
     tags: ["Search"],
