@@ -18,6 +18,7 @@
     "build:dashboard": "turbo build --filter=@midday/dashboard",
     "dev:website": "turbo dev --filter=@midday/website ",
     "dev:desktop": "turbo dev --filter=@midday/desktop",
+    "cli": "bun run apps/cli/bin/midday.ts",
     "jobs:dashboard": "turbo jobs --filter=@midday/jobs",
     "format": "biome format --write .",
     "lint": "turbo lint",

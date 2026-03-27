@@ -1,0 +1,28 @@
+{
+  "name": "@midday/cli",
+  "version": "0.1.0",
+  "description": "Midday CLI — run your business from the command line",
+  "type": "module",
+  "bin": {
+    "midday": "./dist/bin/midday.js"
+  },
+  "scripts": {
+    "dev": "bun run bin/midday.ts",
+    "build": "tsup",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "cli-table3": "^0.6.5",
+    "commander": "^13.1.0",
+    "open": "^10.1.0",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "tsup": "^8.4.0"
+  }
+}
