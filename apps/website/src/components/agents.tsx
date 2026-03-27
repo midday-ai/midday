@@ -743,6 +743,36 @@ const features = [
       "Revenue, burn rate, runway. Your agent has the numbers. Ask for a report and get structured data back.",
   },
   {
+    title: "Chase overdue payments",
+    description:
+      "Agents check for overdue invoices and send reminders on a schedule. Escalate automatically at 7, 30, and 60 days.",
+  },
+  {
+    title: "Categorize spending",
+    description:
+      "New transactions get categorized instantly based on vendor history. No manual tagging, no rules to maintain.",
+  },
+  {
+    title: "Match receipts",
+    description:
+      "Receipts land in your inbox and get matched to the right transaction automatically. Zero manual reconciliation.",
+  },
+  {
+    title: "Close the books",
+    description:
+      "End-of-month on autopilot. Categorize remaining transactions, match receipts, flag discrepancies, generate reports.",
+  },
+  {
+    title: "Monitor cash flow",
+    description:
+      "Get alerted when your balance drops below a threshold or when runway shrinks. No surprises.",
+  },
+  {
+    title: "Sync to your stack",
+    description:
+      "Export transactions to QuickBooks, Xero, or your ERP on a schedule. Always in sync, never behind.",
+  },
+  {
     title: "Works with any MCP client",
     description:
       "Cursor, Claude, Windsurf, Raycast, or your own agent. Same 80+ tools, same API surface, any client.",
