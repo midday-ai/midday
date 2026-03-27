@@ -540,7 +540,7 @@ function Terminal({ pixelFontClass }: { pixelFontClass?: string }) {
               <span className={cursorOn ? "opacity-100" : "opacity-0"}>▊</span>
             )}
           </div>
-          <div className="text-foreground text-[10px] tracking-widest mt-1.5 mb-5">
+          <div className="text-[hsl(225,60%,75%)] text-[10px] tracking-widest mt-1.5 mb-5">
             v0.1.0 · agent@acme.corp · Midday Labs AB
           </div>
 
@@ -710,10 +710,10 @@ const possibilities = [
 export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
   return (
     <div className="font-mono relative mt-16">
-      <div className="max-w-screen-xl mx-auto px-4 py-12 md:py-28 flex flex-col lg:flex-row gap-12 justify-between items-center">
+      <div className="max-w-screen-xl mx-auto pt-16 pb-12 md:py-28 flex flex-col lg:flex-row gap-12 justify-between items-center">
         <div className="lg:max-w-[590px] space-y-8 w-full">
           <div>
-            <h1 className="text-4xl md:text-4xl lg:text-5xl leading-[1] tracking-tight text-pretty font-sans">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl leading-[1] tracking-tight text-pretty font-sans">
               Let agents run your business.
             </h1>
             <p className="text-[hsl(225,60%,75%)] text-base leading-normal mt-4 md:mt-8">
@@ -749,7 +749,7 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
         <Terminal pixelFontClass={pixelFontClass} />
       </div>
 
-      <div className="space-y-16 max-w-screen-lg mx-auto px-4">
+      <div className="space-y-16 max-w-screen-lg mx-auto">
         <div className="mt-12">
           <h3 className="font-sans text-2xl text-foreground">Features</h3>
 
@@ -885,7 +885,7 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
         </div>
       </div>
 
-      <div className="max-w-screen-lg mx-auto px-4 mt-16 mb-24">
+      <div className="max-w-screen-lg mx-auto mt-16 mb-24">
         <div className="bg-background border border-border p-8 lg:p-12 text-center relative before:absolute before:inset-0 before:bg-[repeating-linear-gradient(-60deg,hsla(var(--border),0.4),hsla(var(--border),0.4)_1px,transparent_1px,transparent_6px)] before:pointer-events-none">
           <div className="relative z-10">
             <h2 className="font-sans text-2xl sm:text-3xl text-foreground mb-4">
