@@ -1,245 +1,53 @@
 "use client";
 
+import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const MIDDAY_ASCII = [
-  "  ███╗   ███╗██╗██████╗ ██████╗  █████╗ ██╗   ██╗",
-  "  ████╗ ████║██║██╔══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝",
-  "  ██╔████╔██║██║██║  ██║██║  ██║███████║ ╚████╔╝ ",
-  "  ██║╚██╔╝██║██║██║  ██║██║  ██║██╔══██║  ╚██╔╝  ",
-  "  ██║ ╚═╝ ██║██║██████╔╝██████╔╝██║  ██║   ██║   ",
-  "  ╚═╝     ╚═╝╚═╝╚═════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ",
-].join("\n");
+const DOT_COLOR = "hsl(225, 60%, 55%)";
 
-const INFRA_DIAGRAM = `
-                                                  ┌──────────────────┐
-                                                  │      Agents      │
-                                                  └────────┬─────────┘
-                                                           │
-                                                    MCP / CLI / API
-                                                           │
- ┌─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────┐
- │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
- │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ Midday ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
- │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
- │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ The backbone for your business ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
- │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
- └──────┬────────────────┬───────────────┬───────────────┬──────────────┬──────────────┬─────────────┬───────────────┘
-        │                │               │               │              │              │             │
-        ▼                ▼               ▼               ▼              ▼              ▼             ▼
-
-   ┌──────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
-   │ Invoices │  │ Transactions │  │ Tracker  │  │  Customers   │  │ Reports  │  │ Banking  │  │ Exports  │
-   └──────────┘  └──────────────┘  └──────────┘  └──────────────┘  └──────────┘  └──────────┘  └──────────┘
-`;
-
-const matrixWords = [
-  "Invoices",
-  "Transactions",
-  "Dashboard",
-  "Settings",
-  "Customers",
-  "Products",
-  "Reports",
-  "Analytics",
-  "Exports",
-  "Documents",
-  "Inbox",
-  "Teams",
-  "Tracking",
-  "Accounts",
-  "Categories",
-  "Tags",
-  "OAuth",
-  "CLI",
-  "MCP",
-  "API",
-  "Notifications",
-  "Search",
-  "Help",
-  "Payments",
-];
-
-function scrambleWord(word: string): string {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+{}[]|;:,.<>?";
-  return word
-    .split("")
-    .map((char) =>
-      Math.random() > 0.5
-        ? chars[Math.floor(Math.random() * chars.length)]
-        : char,
-    )
-    .join("");
-}
-
-function getRandomWord() {
-  return matrixWords[Math.floor(Math.random() * matrixWords.length)];
-}
-
-type WordState = {
-  word: string;
-  scrambledWord: string;
-  isScrambling: boolean;
-};
-
-const MatrixWord: React.FC<WordState> = React.memo(
-  ({ word, scrambledWord, isScrambling }) => {
-    return (
-      <span className="p-1 transition-colors duration-300 ease-in-out text-[#242424]">
-        {isScrambling ? scrambledWord : word}
-      </span>
-    );
-  },
-);
-
-MatrixWord.displayName = "MatrixWord";
-
-function MatrixTextWall() {
-  const [matrix, setMatrix] = useState<WordState[][]>([]);
-
-  useEffect(() => {
-    setMatrix(
-      Array.from({ length: 20 }, () =>
-        Array.from({ length: 20 }, () => {
-          const word = getRandomWord();
-          return {
-            word,
-            scrambledWord: scrambleWord(word),
-            isScrambling: false,
-          };
-        }),
-      ),
-    );
-  }, []);
-
-  const updateMatrix = useCallback(() => {
-    setMatrix((prevMatrix) =>
-      prevMatrix.map((row) =>
-        row.map((cell) => {
-          if (Math.random() < 0.01) {
-            const newWord = getRandomWord();
-            return {
-              word: newWord,
-              scrambledWord: scrambleWord(newWord),
-              isScrambling: true,
-            };
-          }
-          if (cell.isScrambling) {
-            return {
-              ...cell,
-              scrambledWord: scrambleWord(cell.word),
-              isScrambling: Math.random() > 0.2,
-            };
-          }
-          return cell;
-        }),
-      ),
-    );
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(updateMatrix, 100);
-    return () => clearInterval(interval);
-  }, [updateMatrix]);
-
-  return (
-    <div className="absolute inset-0 overflow-hidden select-none -z-[1] opacity-40">
-      <div className="text-[0.4rem] sm:text-[0.5rem] md:text-xs lg:text-sm absolute inset-0 flex flex-col justify-between">
-        {matrix.map((row, i) => (
-          <div key={i.toString()} className="flex whitespace-nowrap">
-            {row.map((cell, j) => (
-              <MatrixWord key={j.toString()} {...cell} />
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
+function InfraDiagram() {
+  const d = (text: string) => (
+    <span style={{ color: DOT_COLOR }}>{text}</span>
   );
-}
-
-function GrainOverlay() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [url, setUrl] = useState("");
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const size = 256;
-    canvas.width = size;
-    canvas.height = size;
-    const imageData = ctx.createImageData(size, size);
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      const v = Math.random() * 255;
-      imageData.data[i] = v;
-      imageData.data[i + 1] = v;
-      imageData.data[i + 2] = v;
-      imageData.data[i + 3] = 15;
-    }
-    ctx.putImageData(imageData, 0, 0);
-    setUrl(canvas.toDataURL("image/png"));
-  }, []);
-
   return (
     <>
-      <canvas ref={canvasRef} className="hidden" />
-      {url && (
-        <div
-          className="pointer-events-none fixed inset-0 z-[60]"
-          aria-hidden="true"
-          style={{
-            backgroundImage: `url(${url})`,
-            backgroundRepeat: "repeat",
-          }}
-        />
-      )}
+{"                                                  ┌──────────────────┐\n"}
+{"                                                  │      Agents      │\n"}
+{"                                                  └────────┬─────────┘\n"}
+{"                                                           │\n"}
+{"                                                    MCP / CLI / API\n"}
+{"                                                           │\n"}
+{" ┌─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────┐\n"}
+{" │"}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"│\n"}
+{" │"}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"  Midday  "}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"│\n"}
+{" │"}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"│\n"}
+{" │"}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"  The backbone for your business  "}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"│\n"}
+{" │"}{d("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")}{"│\n"}
+{" └──────┬────────────────┬───────────────┬───────────────┬──────────────┬──────────────┬─────────────┬───────────────┘\n"}
+{"        │                │               │               │              │              │             │\n"}
+{"        ▼                ▼               ▼               ▼              ▼              ▼             ▼\n"}
+{"\n"}
+{"   ┌──────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐\n"}
+{"   │ Invoices │  │ Transactions │  │ Tracker  │  │  Customers   │  │ Reports  │  │ Banking  │  │ Exports  │\n"}
+{"   └──────────┘  └──────────────┘  └──────────┘  └──────────────┘  └──────────┘  └──────────┘  └──────────┘"}
     </>
   );
 }
 
-function DottedSeparator() {
+function SectionDivider() {
   return (
-    <div
-      className="h-[45px] w-full"
-      style={{
-        backgroundImage:
-          "radial-gradient(circle at 2px 2px, rgba(255,255,255,0.3) 1px, transparent 0)",
-        backgroundSize: "2.5px 2.5px",
-      }}
-    />
-  );
-}
-
-function OutlinedButton({
-  children,
-  variant = "default",
-}: {
-  children: React.ReactNode;
-  variant?: "default" | "secondary";
-}) {
-  return (
-    <div className="relative inline-block">
+    <div className="w-full py-1">
       <div
-        className={cn(
-          "absolute left-[5px] top-[5px] h-full w-full border",
-          variant === "secondary" ? "border-border" : "border-primary",
-        )}
+        className="h-4 w-full border-y border-border"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(-60deg, hsla(var(--border), 0.4), hsla(var(--border), 0.4) 1px, transparent 1px, transparent 6px)",
+        }}
       />
-      <div
-        className={cn(
-          "relative font-mono text-sm px-4 py-2 transition-all hover:translate-x-0.5 hover:translate-y-0.5 border",
-          variant === "secondary"
-            ? "bg-background text-foreground border-border"
-            : "bg-primary text-primary-foreground border-primary",
-        )}
-      >
-        {children}
-      </div>
     </div>
   );
 }
@@ -257,7 +65,11 @@ function CopyInstall() {
     <button
       type="button"
       onClick={copyCommand}
-      className="flex border border-dashed border-muted-foreground p-2 px-4 text-sm w-full relative cursor-pointer"
+      className="flex border border-border p-2 px-4 text-sm w-full relative cursor-pointer hover:bg-[hsl(225,70%,28%)] transition-colors"
+      style={{
+        backgroundImage:
+          "repeating-linear-gradient(-60deg, hsla(var(--border), 0.4), hsla(var(--border), 0.4) 1px, transparent 1px, transparent 6px)",
+      }}
     >
       <span className="text-foreground truncate">
         $ npx @midday-ai/cli@latest
@@ -497,14 +309,16 @@ const SCENARIOS: Scenario[] = [
   },
 ];
 
-function Terminal() {
+function Terminal({ pixelFontClass }: { pixelFontClass?: string }) {
   const [activeTab, setActiveTab] = useState(0);
   const [phase, setPhase] = useState<Phase>("typing-1");
   const [typed1, setTyped1] = useState("");
   const [typed2, setTyped2] = useState("");
   const [frame, setFrame] = useState(0);
   const [cursorOn, setCursorOn] = useState(true);
+  const [brandTyped, setBrandTyped] = useState("");
   const termRef = useRef<HTMLDivElement>(null);
+  const brandText = "midday";
 
   const scenario = SCENARIOS[activeTab] as Scenario;
 
@@ -527,6 +341,19 @@ function Terminal() {
 
   useEffect(() => {
     const id = setInterval(() => setCursorOn((v) => !v), 530);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    let i = 0;
+    const id = setInterval(() => {
+      if (i <= brandText.length) {
+        setBrandTyped(brandText.slice(0, i));
+        i++;
+      } else {
+        clearInterval(id);
+      }
+    }, 120);
     return () => clearInterval(id);
   }, []);
 
@@ -628,11 +455,11 @@ function Terminal() {
   return (
     <div className="max-w-3xl w-full font-mono">
       <div className="overflow-hidden border border-border">
-        <div className="select-none flex items-center h-7 px-3 border-b border-border bg-background/80">
+        <div className="select-none flex items-center h-7 px-3 border-b border-border bg-[hsl(225,70%,26%)]">
           <div className="flex gap-[5px]">
-            <span className="block w-2 h-2 rounded-full bg-foreground/20" />
-            <span className="block w-2 h-2 rounded-full bg-foreground/20" />
-            <span className="block w-2 h-2 rounded-full bg-foreground/20" />
+            <span className="block w-2 h-2 rounded-full bg-[hsl(225,50%,40%)]" />
+            <span className="block w-2 h-2 rounded-full bg-[hsl(225,50%,40%)]" />
+            <span className="block w-2 h-2 rounded-full bg-[hsl(225,50%,40%)]" />
           </div>
           <span className="flex-1 text-center text-[10px] tracking-wide text-foreground -ml-10">
             midday — zsh
@@ -649,7 +476,7 @@ function Terminal() {
                 "relative flex-1 px-4 py-1.5 text-[11px] tracking-wide transition-colors border-b",
                 i === activeTab
                   ? "bg-background text-foreground border-b-transparent"
-                  : "text-foreground/60 hover:text-foreground border-b-border",
+                  : "text-[hsl(225,60%,75%)] hover:text-foreground border-b-border",
                 i > 0 && "border-l border-l-border",
               )}
             >
@@ -664,15 +491,12 @@ function Terminal() {
         >
           <div>{prompt}npx @midday-ai/cli@latest</div>
 
-          <pre
-            className="text-[8px] sm:text-[10px] leading-none text-foreground mt-3 whitespace-pre overflow-x-auto"
-            style={{
-              fontFamily:
-                "SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace",
-            }}
-          >
-            {MIDDAY_ASCII}
-          </pre>
+          <div className={cn("text-7xl sm:text-8xl text-foreground mt-3", pixelFontClass)}>
+            {brandTyped}
+            {brandTyped.length < brandText.length && (
+              <span className={cursorOn ? "opacity-100" : "opacity-0"}>▊</span>
+            )}
+          </div>
           <div className="text-foreground text-[10px] tracking-widest mt-1.5 mb-5">
             v0.1.0 · agent@acme.corp · Midday Labs AB
           </div>
@@ -843,18 +667,12 @@ const possibilities = [
 export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
   return (
     <div className="font-mono relative mt-16">
-      <GrainOverlay />
       <div className="max-w-screen-xl mx-auto px-4 py-12 md:py-28 flex flex-col lg:flex-row gap-12 justify-between items-center">
         <div className="lg:max-w-[590px] space-y-8 w-full">
-          <h1
-            className={cn(
-              "text-6xl md:text-8xl !leading-[1.05] text-pretty",
-              pixelFontClass,
-            )}
-          >
+          <h1 className="text-4xl md:text-4xl lg:text-5xl leading-[1] tracking-tight text-pretty font-sans">
             Let agents run your business.
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-[hsl(225,60%,75%)] text-base leading-normal">
             One CLI. 80+ tools. Your agent can send invoices, reconcile
             transactions, track time, pull reports. Anything you do in Midday,
             it can do too.
@@ -864,27 +682,28 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
             <CopyInstall />
           </div>
 
-          <div className="flex items-center gap-8">
-            <Link href="https://app.midday.ai">
-              <OutlinedButton>Start automating</OutlinedButton>
-            </Link>
-            <Link
-              href="https://github.com/midday-ai/midday/tree/main/packages/cli"
-              className="hidden md:block"
+          <div className="flex items-center gap-4">
+            <Button asChild className="h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,50%,92%)]">
+              <Link href="https://app.midday.ai">Start automating</Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="hidden md:inline-flex h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,70%,28%)] hover:!text-foreground"
             >
-              <OutlinedButton variant="secondary">
+              <Link href="https://github.com/midday-ai/midday/tree/main/packages/cli">
                 Read documentation
-              </OutlinedButton>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
 
-        <Terminal />
+        <Terminal pixelFontClass={pixelFontClass} />
       </div>
 
       <div className="space-y-16 max-w-screen-lg mx-auto px-4">
         <div className="mt-12">
-          <h3>Features</h3>
+          <h3 className="font-sans text-2xl text-foreground">Features</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-4">
             {features.map((feature) => (
@@ -895,7 +714,7 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
                 <div className="p-4">
                   <div className="space-y-4">
                     <h3 className="text-sm">{feature.title}</h3>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-[hsl(225,60%,75%)] text-sm">
                       {feature.description}
                     </p>
                   </div>
@@ -905,10 +724,10 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
           </div>
         </div>
 
-        <DottedSeparator />
+        <SectionDivider />
 
         <div>
-          <h3>Possibilities</h3>
+          <h3 className="font-sans text-2xl text-foreground">Possibilities</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-4">
             {possibilities.map((item) => (
@@ -918,11 +737,11 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
               >
                 <div className="p-4">
                   <div className="space-y-3">
-                    <span className="text-xs text-muted-foreground/60 uppercase tracking-widest">
+                    <span className="text-xs text-[hsl(225,50%,60%)] uppercase tracking-widest">
                       {item.agent}
                     </span>
                     <h3 className="text-sm">{item.title}</h3>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-[hsl(225,60%,75%)] text-sm">
                       {item.description}
                     </p>
                   </div>
@@ -932,146 +751,104 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
           </div>
         </div>
 
-        <DottedSeparator />
+        <SectionDivider />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-12">
-          <div>
-            <h2 className="text-sm mb-4">CLI</h2>
-            <ul className="text-muted-foreground">
-              <li className="text-sm">
-                <span className="text-lg">◇</span> Invoices, transactions,
-                customers, and time tracking
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> Structured output for agents
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> OAuth login via browser
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> Workspace switching
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> Human-readable tables
-              </li>
-            </ul>
+        <div className="grid grid-cols-1 md:grid-cols-3 mt-4">
+          <div className="border border-border p-1 -mt-[1px] -ml-[1px]">
+            <div className="p-4 space-y-4">
+              <h2 className="text-sm">CLI</h2>
+              <ul className="text-[hsl(225,60%,75%)] space-y-2">
+                <li className="text-sm">◇ Invoices, transactions, customers, and time tracking</li>
+                <li className="text-sm">◇ Structured output for agents</li>
+                <li className="text-sm">◇ OAuth login via browser</li>
+                <li className="text-sm">◇ Workspace switching</li>
+                <li className="text-sm">◇ Human-readable tables</li>
+              </ul>
+            </div>
           </div>
 
-          <div>
-            <h2 className="text-sm mb-4">MCP</h2>
-            <ul className="text-muted-foreground">
-              <li className="text-sm">
-                <span className="text-lg">◇</span> 80+ tools for business
-                operations
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> Works with Cursor, Claude,
-                Raycast, and more
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> Granular read/write
-                permissions
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> Real-time data from your
-                workspace
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> Same API surface as the CLI
-              </li>
-            </ul>
+          <div className="border border-border p-1 -mt-[1px] -ml-[1px]">
+            <div className="p-4 space-y-4">
+              <h2 className="text-sm">MCP</h2>
+              <ul className="text-[hsl(225,60%,75%)] space-y-2">
+                <li className="text-sm">◇ 80+ tools for business operations</li>
+                <li className="text-sm">◇ Works with Cursor, Claude, Raycast, and more</li>
+                <li className="text-sm">◇ Granular read/write permissions</li>
+                <li className="text-sm">◇ Real-time data from your workspace</li>
+                <li className="text-sm">◇ Same API surface as the CLI</li>
+              </ul>
+            </div>
           </div>
 
-          <div>
-            <h2 className="text-sm mb-4">Developer experience</h2>
-            <ul className="text-muted-foreground">
-              <li className="text-sm">
-                <span className="text-lg">◇</span> Single npx command to start
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> No configuration files
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> TypeScript and Go SDKs
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> REST API access
-              </li>
-              <li className="text-sm">
-                <span className="text-lg">◇</span> Open-source
-              </li>
-            </ul>
+          <div className="border border-border p-1 -mt-[1px] -ml-[1px]">
+            <div className="p-4 space-y-4">
+              <h2 className="text-sm">Developer experience</h2>
+              <ul className="text-[hsl(225,60%,75%)] space-y-2">
+                <li className="text-sm">◇ Single npx command to start</li>
+                <li className="text-sm">◇ No configuration files</li>
+                <li className="text-sm">◇ TypeScript and Go SDKs</li>
+                <li className="text-sm">◇ REST API access</li>
+                <li className="text-sm">◇ Open-source</li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <Link href="https://app.midday.ai">
-          <OutlinedButton>Start automating</OutlinedButton>
-        </Link>
+        <div className="flex justify-center mt-12">
+          <Button asChild className="h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,50%,92%)]">
+            <Link href="https://app.midday.ai">Start automating</Link>
+          </Button>
+        </div>
 
-        <DottedSeparator />
+        <SectionDivider />
 
         <div className="text-center">
-          <h2
-            className={cn(
-              "text-3xl md:text-5xl !leading-[1.1]",
-              pixelFontClass,
-            )}
-          >
+          <h2 className="font-sans text-2xl sm:text-3xl text-foreground">
             Infrastructure
           </h2>
-          <p className="text-muted-foreground text-sm mt-4 max-w-md mx-auto">
+          <p className="text-[hsl(225,60%,75%)] text-base leading-normal mt-4 max-w-md mx-auto">
             Midday is the backbone. Agents connect via MCP, CLI, or API. Every
             operation syncs back to your dashboard.
           </p>
 
-          <div className="flex flex-col items-center justify-center p-4 mt-6">
+          <div className="hidden md:flex flex-col items-center justify-center mt-2">
             <pre
-              className="p-4 text-sm leading-5 scale-[0.38] sm:scale-[0.55] md:scale-[0.8] transform-gpu"
+              className="p-4 text-sm leading-5 md:scale-[0.8] transform-gpu"
               style={{
                 fontFamily: "monospace",
                 whiteSpace: "pre",
                 textAlign: "left",
               }}
             >
-              {INFRA_DIAGRAM}
+              <InfraDiagram />
             </pre>
           </div>
         </div>
       </div>
 
       <div className="max-w-screen-lg mx-auto px-4 mt-16 mb-24">
-        <div className="relative">
-          <div className="absolute left-1/2 -translate-x-1/2 bg-background -top-[10px] px-4 sm:px-8 uppercase text-center z-10 text-sm">
-            Get started
-          </div>
-
-          <div className="border border-border p-1 bg-background overflow-hidden">
-            <div className="border border-border px-4 sm:px-32 py-12 sm:py-24 flex flex-col sm:flex-row gap-4 bg-background overflow-hidden relative">
-              <div className="space-y-4 z-10">
-                <h4 className="font-serif text-[16px]">
-                  Let agents run your business.
-                </h4>
-                <p className="text-muted-foreground text-sm block pb-4">
-                  One CLI. One MCP server. Every business operation your agent
-                  needs. Invoices, transactions, time tracking, and more.
-                </p>
-
-                <div className="flex items-center gap-8 text-center sm:text-left">
-                  <Link href="https://app.midday.ai">
-                    <OutlinedButton>Start automating</OutlinedButton>
-                  </Link>
-                  <Link
-                    href="https://github.com/midday-ai/midday/tree/main/packages/cli"
-                    className="hidden md:block"
-                  >
-                    <OutlinedButton variant="secondary">
-                      Read documentation
-                    </OutlinedButton>
-                  </Link>
-                </div>
-              </div>
-
-              <MatrixTextWall />
+        <div className="bg-background border border-border p-8 lg:p-12 text-center relative before:absolute before:inset-0 before:bg-[repeating-linear-gradient(-60deg,hsla(var(--border),0.4),hsla(var(--border),0.4)_1px,transparent_1px,transparent_6px)] before:pointer-events-none">
+          <div className="relative z-10">
+            <h2 className="font-sans text-2xl sm:text-3xl text-foreground mb-4">
+              Get started
+            </h2>
+            <p className="font-sans text-base text-[hsl(225,60%,75%)] mb-6 max-w-lg mx-auto">
+              One CLI. One MCP server. Every business operation your agent
+              needs.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button asChild className="h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,50%,92%)]">
+                <Link href="https://app.midday.ai">Start automating</Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="h-11 px-6 text-sm font-mono border-primary bg-background hover:!bg-[hsl(225,70%,45%)] hover:!text-foreground"
+              >
+                <Link href="https://github.com/midday-ai/midday/tree/main/packages/cli">
+                  Read documentation
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
