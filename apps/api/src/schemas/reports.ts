@@ -361,7 +361,7 @@ export const getBurnRateResponseSchema = z
           example: "SEK",
         }),
       })
-      .openapi("GetBurnRateResponseSchema"),
+      .openapi("BurnRateItem"),
   )
   .openapi("GetBurnRateResponseSchema");
 

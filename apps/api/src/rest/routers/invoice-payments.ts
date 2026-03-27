@@ -360,6 +360,7 @@ app.openapi(
     tags: ["Invoice Payments"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: createPaymentIntentSchema,

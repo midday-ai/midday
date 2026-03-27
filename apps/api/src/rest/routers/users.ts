@@ -58,6 +58,7 @@ app.openapi(
     tags: ["Users"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: updateUserSchema,

@@ -79,6 +79,7 @@ app.openapi(
           }),
       }),
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: z.object({
@@ -134,6 +135,7 @@ app.openapi(
     tags: ["Notifications"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: updateAllNotificationsStatusSchema,

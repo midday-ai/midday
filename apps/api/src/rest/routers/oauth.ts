@@ -76,6 +76,7 @@ app.openapi(
     tags: ["OAuth"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: dcrRequestSchema,
@@ -262,6 +263,7 @@ app.openapi(
     tags: ["OAuth"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: oauthAuthorizationDecisionSchema,
@@ -440,6 +442,7 @@ app.openapi(
     tags: ["OAuth"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: oauthTokenEndpointRequestSchema,
@@ -661,6 +664,7 @@ app.openapi(
     tags: ["OAuth"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: oauthRevokeTokenRequestSchema,

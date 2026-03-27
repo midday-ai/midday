@@ -238,6 +238,7 @@ app.openapi(
     tags: ["Transactions"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: createTransactionSchema,
@@ -276,6 +277,7 @@ app.openapi(
     tags: ["Transactions"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: updateTransactionsSchema,
@@ -329,6 +331,7 @@ app.openapi(
     request: {
       params: getTransactionByIdSchema.pick({ id: true }),
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: updateTransactionSchema.omit({ id: true }),
@@ -377,6 +380,7 @@ app.openapi(
     tags: ["Transactions"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: createTransactionsSchema,
@@ -421,6 +425,7 @@ app.openapi(
     tags: ["Transactions"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: deleteTransactionsSchema,

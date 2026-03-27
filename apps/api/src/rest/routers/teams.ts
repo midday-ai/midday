@@ -110,6 +110,7 @@ app.openapi(
     request: {
       params: getTeamByIdSchema,
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: updateTeamByIdSchema,

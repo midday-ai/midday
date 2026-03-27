@@ -116,6 +116,7 @@ app.openapi(
     tags: ["Bank Accounts"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: createBankAccountSchema,
@@ -163,6 +164,7 @@ app.openapi(
     request: {
       params: deleteBankAccountSchema,
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: updateBankAccountSchema,

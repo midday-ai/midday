@@ -86,6 +86,7 @@ app.openapi(
     tags: ["Webhooks"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: z.any(), // Schema validated manually using inboxWebhookPostSchema

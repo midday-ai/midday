@@ -69,6 +69,7 @@ app.openapi(
     tags: ["Customers"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: upsertCustomerSchema,
@@ -153,6 +154,7 @@ app.openapi(
     request: {
       params: getCustomerByIdSchema,
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: upsertCustomerSchema,

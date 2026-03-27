@@ -141,6 +141,8 @@ app.openapi(
     method: "get",
     path: "/payment-status",
     summary: "Payment status",
+    operationId: "getInvoicePaymentStatus",
+    "x-speakeasy-name-override": "paymentStatus",
     description: "Get payment status for the authenticated team.",
     tags: ["Invoices"],
     responses: {
@@ -323,6 +325,7 @@ app.openapi(
     tags: ["Invoices"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: draftInvoiceRequestSchema,
@@ -637,6 +640,7 @@ app.openapi(
     request: {
       params: getInvoiceByIdSchema.pick({ id: true }),
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: updateInvoiceRequestSchema,

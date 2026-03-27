@@ -103,6 +103,7 @@ app.openapi(
     tags: ["Tags"],
     request: {
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: createTagSchema,
@@ -145,6 +146,7 @@ app.openapi(
     request: {
       params: updateTagSchema.pick({ id: true }),
       body: {
+        required: true,
         content: {
           "application/json": {
             schema: updateTagSchema.pick({ name: true }),
