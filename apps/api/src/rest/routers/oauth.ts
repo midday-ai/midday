@@ -122,9 +122,13 @@ app.openapi(
     }
 
     for (const uri of body.redirect_uris) {
-      if (!uri.startsWith("https://") && !uri.startsWith("http://localhost")) {
+      const isHttps = uri.startsWith("https://");
+      const isLocalhost = uri.startsWith("http://localhost");
+      const isNativeScheme =
+        /^[a-z][a-z0-9+.-]*:\/\//i.test(uri) && !uri.startsWith("http://");
+      if (!isHttps && !isLocalhost && !isNativeScheme) {
         throw new HTTPException(400, {
-          message: `redirect_uri must use HTTPS: ${uri}`,
+          message: `redirect_uri must use HTTPS or a native app scheme: ${uri}`,
         });
       }
     }
