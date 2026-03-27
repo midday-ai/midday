@@ -90,7 +90,6 @@ function SectionDivider() {
   );
 }
 
-
 function CopyInstall() {
   const [copied, setCopied] = useState(false);
 
@@ -718,10 +717,10 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
               Let agents run your business.
             </h1>
             <p className="text-[hsl(225,60%,75%)] text-base leading-normal mt-4 md:mt-8">
-            One CLI. 80+ tools. Your agent can send invoices, reconcile
-            transactions, track time, pull reports. Anything you do in Midday,
-            it can do too.
-          </p>
+              One CLI. 80+ tools. Your agent can send invoices, reconcile
+              transactions, track time, pull reports. Anything you do in Midday,
+              it can do too.
+            </p>
           </div>
 
           <div className="lg:max-w-[480px]">
@@ -803,54 +802,50 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
         <SectionDivider />
 
         <div className="grid grid-cols-1 md:grid-cols-3 mt-4">
-            <div className="border border-border p-1 -mt-[1px] -ml-[1px]">
-              <div className="p-4 space-y-4">
-                <h2 className="text-sm">CLI</h2>
-                <ul className="text-[hsl(225,60%,75%)] space-y-2">
-                  <li className="text-sm">
-                    ◇ Invoices, transactions, customers, and time tracking
-                  </li>
-                  <li className="text-sm">◇ Structured output for agents</li>
-                  <li className="text-sm">◇ OAuth login via browser</li>
-                  <li className="text-sm">◇ Workspace switching</li>
-                  <li className="text-sm">◇ Human-readable tables</li>
-                </ul>
-              </div>
+          <div className="border border-border p-1 -mt-[1px] -ml-[1px]">
+            <div className="p-4 space-y-4">
+              <h2 className="text-sm">CLI</h2>
+              <ul className="text-[hsl(225,60%,75%)] space-y-2">
+                <li className="text-sm">
+                  ◇ Invoices, transactions, customers, and time tracking
+                </li>
+                <li className="text-sm">◇ Structured output for agents</li>
+                <li className="text-sm">◇ OAuth login via browser</li>
+                <li className="text-sm">◇ Workspace switching</li>
+                <li className="text-sm">◇ Human-readable tables</li>
+              </ul>
             </div>
+          </div>
 
-            <div className="border border-border p-1 -mt-[1px] -ml-[1px]">
-              <div className="p-4 space-y-4">
-                <h2 className="text-sm">MCP</h2>
-                <ul className="text-[hsl(225,60%,75%)] space-y-2">
-                  <li className="text-sm">
-                    ◇ 80+ tools for business operations
-                  </li>
-                  <li className="text-sm">
-                    ◇ Works with Cursor, Claude, Raycast, and more
-                  </li>
-                  <li className="text-sm">
-                    ◇ Granular read/write permissions
-                  </li>
-                  <li className="text-sm">
-                    ◇ Real-time data from your workspace
-                  </li>
-                  <li className="text-sm">◇ Same API surface as the CLI</li>
-                </ul>
-              </div>
+          <div className="border border-border p-1 -mt-[1px] -ml-[1px]">
+            <div className="p-4 space-y-4">
+              <h2 className="text-sm">MCP</h2>
+              <ul className="text-[hsl(225,60%,75%)] space-y-2">
+                <li className="text-sm">◇ 80+ tools for business operations</li>
+                <li className="text-sm">
+                  ◇ Works with Cursor, Claude, Raycast, and more
+                </li>
+                <li className="text-sm">◇ Granular read/write permissions</li>
+                <li className="text-sm">
+                  ◇ Real-time data from your workspace
+                </li>
+                <li className="text-sm">◇ Same API surface as the CLI</li>
+              </ul>
             </div>
+          </div>
 
-            <div className="border border-border p-1 -mt-[1px] -ml-[1px]">
-              <div className="p-4 space-y-4">
-                <h2 className="text-sm">Developer experience</h2>
-                <ul className="text-[hsl(225,60%,75%)] space-y-2">
-                  <li className="text-sm">◇ Single npx command to start</li>
-                  <li className="text-sm">◇ No configuration files</li>
-                  <li className="text-sm">◇ TypeScript and Go SDKs</li>
-                  <li className="text-sm">◇ REST API access</li>
-                  <li className="text-sm">◇ Open-source</li>
-                </ul>
-              </div>
+          <div className="border border-border p-1 -mt-[1px] -ml-[1px]">
+            <div className="p-4 space-y-4">
+              <h2 className="text-sm">Developer experience</h2>
+              <ul className="text-[hsl(225,60%,75%)] space-y-2">
+                <li className="text-sm">◇ Single npx command to start</li>
+                <li className="text-sm">◇ No configuration files</li>
+                <li className="text-sm">◇ TypeScript and Go SDKs</li>
+                <li className="text-sm">◇ REST API access</li>
+                <li className="text-sm">◇ Open-source</li>
+              </ul>
             </div>
+          </div>
         </div>
 
         <div className="flex justify-center mt-12">
