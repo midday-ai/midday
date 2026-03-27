@@ -1,11 +1,15 @@
 import { GeistPixelLine } from "geist/font/pixel";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { Agents } from "@/components/agents";
 
 const title = "Agents — Let agents run your business";
 const description =
   "Midday CLI and MCP server let AI agents create invoices, reconcile transactions, track time, and manage your finances from any tool.";
+
+export const viewport: Viewport = {
+  themeColor: "hsl(225, 70%, 22%)",
+};
 
 export const metadata: Metadata = {
   title,
