@@ -180,7 +180,7 @@ const openAPIConfig = {
       oauth2: [],
     },
     { token: [] },
-  ],
+  ] as Record<string, string[]>[],
   "x-speakeasy-retries": {
     strategy: "backoff",
     backoff: {
