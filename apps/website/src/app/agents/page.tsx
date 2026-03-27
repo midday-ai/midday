@@ -41,14 +41,14 @@ export default function Page() {
         dangerouslySetInnerHTML={{
           __html: `
             :root, .dark {
-              --background: 225, 84%, 38% !important;
+              --background: 225, 70%, 22% !important;
               --foreground: 0, 0%, 100% !important;
-              --muted-foreground: 0, 0%, 85% !important;
-              --border: 225, 70%, 55% !important;
+              --muted-foreground: 225, 60%, 75% !important;
+              --border: 225, 50%, 35% !important;
               --primary: 0, 0%, 100% !important;
-              --primary-foreground: 225, 84%, 38% !important;
-              --muted: 225, 70%, 33% !important;
-              --secondary: 225, 84%, 38% !important;
+              --primary-foreground: 225, 70%, 22% !important;
+              --muted: 225, 60%, 18% !important;
+              --secondary: 225, 70%, 22% !important;
               --secondary-foreground: 0, 0%, 100% !important;
             }
           `,
