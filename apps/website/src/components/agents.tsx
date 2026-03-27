@@ -707,13 +707,38 @@ const possibilities = [
   },
 ];
 
+const THEME_COLOR = "hsl(225, 70%, 22%)";
+
 export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
+  useEffect(() => {
+    const existing = document.querySelector('meta[name="theme-color"]');
+    const prev = existing?.getAttribute("content") || "";
+    if (existing) {
+      existing.setAttribute("content", THEME_COLOR);
+    } else {
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      meta.content = THEME_COLOR;
+      document.head.appendChild(meta);
+    }
+    return () => {
+      const tag = document.querySelector('meta[name="theme-color"]');
+      if (tag) {
+        if (prev) {
+          tag.setAttribute("content", prev);
+        } else {
+          tag.remove();
+        }
+      }
+    };
+  }, []);
+
   return (
     <div className="font-mono relative mt-16">
       <div className="max-w-screen-xl mx-auto pt-16 pb-12 md:py-28 flex flex-col lg:flex-row gap-12 justify-between items-center">
         <div className="lg:max-w-[590px] space-y-8 w-full">
           <div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl leading-[1] tracking-tight text-pretty font-sans">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl leading-[1.1] tracking-tight font-sans">
               Let agents run your business.
             </h1>
             <p className="text-[hsl(225,60%,75%)] text-base leading-normal mt-4 md:mt-8">
