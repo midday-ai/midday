@@ -14,35 +14,26 @@ const MIDDAY_ASCII = [
   "  ╚═╝     ╚═╝╚═╝╚═════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ",
 ].join("\n");
 
-const PIPELINE_DIAGRAM = `
-                                  ┌───────────────┐
-                                  │    Agents     │
-                                  └───────────────┘
-                                          │
-                                          ▼
-             ┌─────────────────────────────────────────────────────────┐
-             │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
-             │░░░░░░░░░░░░░░░░░░░░░ Midday Engine ░░░░░░░░░░░░░░░░░░░░░│
-             │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
-             └─────────────────────────────────────────────────────────┘
-                                          │
-                                          ▼
-                                          │
-            ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┼ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-           │                              │                              │
-           ▼                              ▼                              ▼
- ╔═══════════════════╗          ╔═══════════════════╗          ╔═══════════════════╗
- ║                   ║          ║                   ║          ║                   ║
- ║     Invoices      ║          ║   Transactions    ║          ║   Time Tracking   ║
- ║                   ║          ║                   ║          ║                   ║
- ╚═══════════════════╝          ╚═══════════════════╝          ╚═══════════════════╝
-           │                              │                              │
-           └──────────────────────────────┼──────────────────────────────┘
-                                          ▼
-                              ┌─────────────────────┐
-                              │      Completed      │
-                              │      (Synced)       │
-                              └─────────────────────┘
+const INFRA_DIAGRAM = `
+                                                  ┌──────────────────┐
+                                                  │      Agents      │
+                                                  └────────┬─────────┘
+                                                           │
+                                                    MCP / CLI / API
+                                                           │
+ ┌─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────┐
+ │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
+ │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ Midday ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
+ │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
+ │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ The backbone for your business ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
+ │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
+ └──────┬────────────────┬───────────────┬───────────────┬──────────────┬──────────────┬─────────────┬───────────────┘
+        │                │               │               │              │              │             │
+        ▼                ▼               ▼               ▼              ▼              ▼             ▼
+
+   ┌──────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+   │ Invoices │  │ Transactions │  │ Tracker  │  │  Customers   │  │ Reports  │  │ Banking  │  │ Exports  │
+   └──────────┘  └──────────────┘  └──────────┘  └──────────────┘  └──────────┘  └──────────┘  └──────────┘
 `;
 
 const matrixWords = [
@@ -257,29 +248,25 @@ function CopyInstall() {
   const [copied, setCopied] = useState(false);
 
   const copyCommand = () => {
-    navigator.clipboard.writeText("npx @midday/cli");
+    navigator.clipboard.writeText("npx @midday/cli@latest");
     setCopied(true);
     setTimeout(() => setCopied(false), 1000);
   };
 
   return (
-    <div className="flex border border-dashed border-muted-foreground p-2 px-4 text-sm w-full relative">
-      <button
-        type="button"
-        onClick={copyCommand}
-        className="flex items-center space-x-2 overflow-hidden"
-      >
-        <span className="text-foreground truncate">$ npx @midday/cli</span>
-      </button>
+    <button
+      type="button"
+      onClick={copyCommand}
+      className="flex border border-dashed border-muted-foreground p-2 px-4 text-sm w-full relative cursor-pointer"
+    >
+      <span className="text-foreground truncate">$ npx @midday/cli@latest</span>
 
       <div className="flex items-center space-x-2 ml-auto">
-        <button type="button" onClick={copyCommand}>
-          {copied ? (
-            <Icons.Check size={14} className="text-foreground" />
-          ) : (
-            <Icons.Copy size={14} className="text-muted-foreground" />
-          )}
-        </button>
+        {copied ? (
+          <Icons.Check size={14} className="text-foreground" />
+        ) : (
+          <Icons.Copy size={14} className="text-foreground" />
+        )}
       </div>
 
       {copied && (
@@ -287,7 +274,7 @@ function CopyInstall() {
           Copied
         </div>
       )}
-    </div>
+    </button>
   );
 }
 
@@ -325,198 +312,186 @@ type Scenario = {
 
 const SCENARIOS: Scenario[] = [
   {
-    label: "Invoices",
-    cmd1: "midday invoices list --status unpaid",
-    cmd2: "midday invoices send inv_0042",
-    spin1: "Fetching invoices...",
+    label: "Bill from time",
+    cmd1: 'midday invoices create --from-tracker "Website Redesign" --period 2026-03',
+    cmd2: "midday invoices send inv_0048",
+    spin1: "Creating invoice from time entries...",
     spin2: "Sending invoice...",
     done2: "Sending invoice...",
     result1: (
       <div className="relative mt-3 border-[0.5px] border-primary text-foreground text-[12px]">
-        <span className="absolute -top-[10px] left-3 bg-background px-1.5 text-[11px] tracking-wide text-muted-foreground">
-          Invoices [3]
+        <span className="absolute -top-[10px] left-3 bg-background px-1.5 text-[11px] tracking-wide text-foreground">
+          INV-0048 created from tracker
         </span>
         <table className="w-full mt-2 mb-1">
           <thead>
             <tr className="text-left border-b-[0.5px] border-primary">
-              <th className="font-normal pl-3 pr-2 pb-1 text-muted-foreground">
-                INV#
+              <th className="font-normal pl-3 pr-2 pb-1 text-foreground">
+                ENTRY
               </th>
-              <th className="font-normal pr-2 pb-1 text-muted-foreground">
-                CUSTOMER
+              <th className="font-normal pr-2 pb-1 text-right text-foreground">
+                HOURS
               </th>
-              <th className="font-normal pr-2 pb-1 text-right text-muted-foreground">
-                AMOUNT
+              <th className="font-normal pr-2 pb-1 text-right text-foreground">
+                RATE
               </th>
-              <th className="font-normal pr-2 pb-1 text-muted-foreground">
-                STATUS
-              </th>
-              <th className="font-normal pr-3 pb-1 text-muted-foreground">
-                DUE
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="pl-3 pr-2 py-[3px]">INV-0042</td>
-              <td className="pr-2 py-[3px]">Acme Corp</td>
-              <td className="pr-2 py-[3px] text-right">$4,800.00</td>
-              <td className="pr-2 py-[3px]">UNPAID</td>
-              <td className="pr-3 py-[3px]">Apr 27</td>
-            </tr>
-            <tr>
-              <td className="pl-3 pr-2 py-[3px]">INV-0039</td>
-              <td className="pr-2 py-[3px]">Vercel Inc</td>
-              <td className="pr-2 py-[3px] text-right">$12,500.00</td>
-              <td className="pr-2 py-[3px]">UNPAID</td>
-              <td className="pr-3 py-[3px]">Apr 15</td>
-            </tr>
-            <tr>
-              <td className="pl-3 pr-2 py-[3px]">INV-0036</td>
-              <td className="pr-2 py-[3px]">Linear</td>
-              <td className="pr-2 py-[3px] text-right">$2,200.00</td>
-              <td className="pr-2 py-[3px]">UNPAID</td>
-              <td className="pr-3 py-[3px]">Apr 10</td>
-            </tr>
-          </tbody>
-        </table>
-        <div className="px-3 pb-2 text-[11px] text-muted-foreground">
-          Page 1 of 1
-        </div>
-      </div>
-    ),
-    result2Line: "  Sent invoice INV-0042",
-  },
-  {
-    label: "Transactions",
-    cmd1: "midday transactions list --status pending",
-    cmd2: "midday transactions update txn_8801 --category software",
-    spin1: "Fetching transactions...",
-    spin2: "Updating transaction...",
-    done2: "Updating transaction...",
-    result1: (
-      <div className="relative mt-3 border-[0.5px] border-primary text-foreground text-[12px]">
-        <span className="absolute -top-[10px] left-3 bg-background px-1.5 text-[11px] tracking-wide text-muted-foreground">
-          Transactions [4]
-        </span>
-        <table className="w-full mt-2 mb-1">
-          <thead>
-            <tr className="text-left border-b-[0.5px] border-primary">
-              <th className="font-normal pl-3 pr-2 pb-1 text-muted-foreground">
-                DATE
-              </th>
-              <th className="font-normal pr-2 pb-1 text-muted-foreground">
-                DESCRIPTION
-              </th>
-              <th className="font-normal pr-2 pb-1 text-right text-muted-foreground">
-                AMOUNT
-              </th>
-              <th className="font-normal pr-2 pb-1 text-muted-foreground">
-                CATEGORY
-              </th>
-              <th className="font-normal pr-3 pb-1 text-muted-foreground">
-                STATUS
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="pl-3 pr-2 py-[3px]">Mar 25</td>
-              <td className="pr-2 py-[3px]">GitHub Inc</td>
-              <td className="pr-2 py-[3px] text-right">-$44.00</td>
-              <td className="pr-2 py-[3px]">—</td>
-              <td className="pr-3 py-[3px]">PENDING</td>
-            </tr>
-            <tr>
-              <td className="pl-3 pr-2 py-[3px]">Mar 24</td>
-              <td className="pr-2 py-[3px]">Vercel Inc</td>
-              <td className="pr-2 py-[3px] text-right">-$20.00</td>
-              <td className="pr-2 py-[3px]">—</td>
-              <td className="pr-3 py-[3px]">PENDING</td>
-            </tr>
-            <tr>
-              <td className="pl-3 pr-2 py-[3px]">Mar 23</td>
-              <td className="pr-2 py-[3px]">Figma</td>
-              <td className="pr-2 py-[3px] text-right">-$15.00</td>
-              <td className="pr-2 py-[3px]">—</td>
-              <td className="pr-3 py-[3px]">PENDING</td>
-            </tr>
-            <tr>
-              <td className="pl-3 pr-2 py-[3px]">Mar 22</td>
-              <td className="pr-2 py-[3px]">Linear</td>
-              <td className="pr-2 py-[3px] text-right">-$8.00</td>
-              <td className="pr-2 py-[3px]">—</td>
-              <td className="pr-3 py-[3px]">PENDING</td>
-            </tr>
-          </tbody>
-        </table>
-        <div className="px-3 pb-2 text-[11px] text-muted-foreground">
-          Page 1 of 1
-        </div>
-      </div>
-    ),
-    result2Line: "  Updated txn_8801 — category: software",
-  },
-  {
-    label: "Tracker",
-    cmd1: 'midday tracker start --project "Website Redesign"',
-    cmd2: "midday tracker stop",
-    spin1: "Starting timer...",
-    spin2: "Stopping timer...",
-    done2: "Stopping timer...",
-    result1: (
-      <div className="mt-2 text-muted-foreground text-[12px] space-y-0.5">
-        <div> Timer started</div>
-        <div> Project: Website Redesign</div>
-        <div> Started: Mar 27, 2026 09:15 AM</div>
-      </div>
-    ),
-    result2Line: "  Stopped — 2h 34m tracked to Website Redesign",
-  },
-  {
-    label: "Reports",
-    cmd1: "midday reports profit --from 2026-01",
-    cmd2: "midday reports burn-rate",
-    spin1: "Generating report...",
-    spin2: "Calculating burn rate...",
-    done2: "Calculating burn rate...",
-    result1: (
-      <div className="relative mt-3 border-[0.5px] border-primary text-foreground text-[12px]">
-        <span className="absolute -top-[10px] left-3 bg-background px-1.5 text-[11px] tracking-wide text-muted-foreground">
-          Profit Report
-        </span>
-        <table className="w-full mt-2 mb-1">
-          <thead>
-            <tr className="text-left border-b-[0.5px] border-primary">
-              <th className="font-normal pl-3 pr-2 pb-1 text-muted-foreground">
-                METRIC
-              </th>
-              <th className="font-normal pr-3 pb-1 text-right text-muted-foreground">
+              <th className="font-normal pr-3 pb-1 text-right text-foreground">
                 AMOUNT
               </th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td className="pl-3 pr-2 py-[3px]">Revenue</td>
-              <td className="pr-3 py-[3px] text-right">$84,200.00</td>
+              <td className="pl-3 pr-2 py-[3px]">Design system</td>
+              <td className="pr-2 py-[3px] text-right">24h</td>
+              <td className="pr-2 py-[3px] text-right">$150</td>
+              <td className="pr-3 py-[3px] text-right">$3,600.00</td>
             </tr>
             <tr>
-              <td className="pl-3 pr-2 py-[3px]">Expenses</td>
-              <td className="pr-3 py-[3px] text-right">-$31,450.00</td>
+              <td className="pl-3 pr-2 py-[3px]">Frontend build</td>
+              <td className="pr-2 py-[3px] text-right">38h</td>
+              <td className="pr-2 py-[3px] text-right">$150</td>
+              <td className="pr-3 py-[3px] text-right">$5,700.00</td>
+            </tr>
+            <tr>
+              <td className="pl-3 pr-2 py-[3px]">Code review</td>
+              <td className="pr-2 py-[3px] text-right">8h</td>
+              <td className="pr-2 py-[3px] text-right">$150</td>
+              <td className="pr-3 py-[3px] text-right">$1,200.00</td>
             </tr>
             <tr className="border-t-[0.5px] border-primary">
-              <td className="pl-3 pr-2 py-[3px]">Profit</td>
-              <td className="pr-3 py-[3px] text-right">$52,750.00</td>
+              <td className="pl-3 pr-2 py-[3px]">Total</td>
+              <td className="pr-2 py-[3px] text-right">70h</td>
+              <td className="pr-2 py-[3px]" />
+              <td className="pr-3 py-[3px] text-right">$10,500.00</td>
             </tr>
           </tbody>
         </table>
-        <div className="px-3 pb-2 text-[11px] text-muted-foreground">
-          Jan 2026 — Mar 2026
+        <div className="px-3 pb-2 text-[11px] text-foreground">
+          Customer: Acme Corp
         </div>
       </div>
     ),
-    result2Line: "  Burn rate: $10,483/mo — runway: 18 months",
+    result2Line: "  Sent INV-0048 to billing@acme.corp",
+  },
+  {
+    label: "Reconcile",
+    cmd1: "midday inbox list --unmatched",
+    cmd2: "midday inbox match --all --auto",
+    spin1: "Fetching unmatched items...",
+    spin2: "Matching 3 receipts to transactions...",
+    done2: "Matching 3 receipts to transactions...",
+    result1: (
+      <div className="relative mt-3 border-[0.5px] border-primary text-foreground text-[12px]">
+        <span className="absolute -top-[10px] left-3 bg-background px-1.5 text-[11px] tracking-wide text-foreground">
+          Unmatched [3]
+        </span>
+        <table className="w-full mt-2 mb-1">
+          <thead>
+            <tr className="text-left border-b-[0.5px] border-primary">
+              <th className="font-normal pl-3 pr-2 pb-1 text-foreground">ID</th>
+              <th className="font-normal pr-2 pb-1 text-foreground">FILE</th>
+              <th className="font-normal pr-2 pb-1 text-right text-foreground">
+                AMOUNT
+              </th>
+              <th className="font-normal pr-3 pb-1 text-foreground">
+                SUGGESTED
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="pl-3 pr-2 py-[3px]">inb_0091</td>
+              <td className="pr-2 py-[3px]">aws-march.pdf</td>
+              <td className="pr-2 py-[3px] text-right">$2,340.00</td>
+              <td className="pr-3 py-[3px]">txn_7720</td>
+            </tr>
+            <tr>
+              <td className="pl-3 pr-2 py-[3px]">inb_0089</td>
+              <td className="pr-2 py-[3px]">figma-receipt.pdf</td>
+              <td className="pr-2 py-[3px] text-right">$45.00</td>
+              <td className="pr-3 py-[3px]">txn_7718</td>
+            </tr>
+            <tr>
+              <td className="pl-3 pr-2 py-[3px]">inb_0087</td>
+              <td className="pr-2 py-[3px]">vercel-inv.pdf</td>
+              <td className="pr-2 py-[3px] text-right">$20.00</td>
+              <td className="pr-3 py-[3px]">txn_7715</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    ),
+    result2Line: "  Matched 3/3 receipts. All transactions reconciled.",
+  },
+  {
+    label: "Export",
+    cmd1: "midday transactions export --to quickbooks --period 2026-Q1",
+    cmd2: "midday export status job_4401",
+    spin1: "Exporting 142 transactions to QuickBooks...",
+    spin2: "Checking export status...",
+    done2: "Checking export status...",
+    result1: (
+      <div className="mt-2 text-foreground text-[12px] space-y-0.5">
+        <div> Export started</div>
+        <div> Provider: QuickBooks</div>
+        <div> Period: Jan 1 - Mar 31, 2026</div>
+        <div> Transactions: 142</div>
+        <div> Job ID: job_4401</div>
+      </div>
+    ),
+    result2Line: "  Export complete. 142 transactions synced to QuickBooks.",
+  },
+  {
+    label: "Forecast",
+    cmd1: "midday reports revenue-forecast",
+    cmd2: "midday reports cash-flow --period 2026-Q2",
+    spin1: "Generating revenue forecast...",
+    spin2: "Calculating cash flow...",
+    done2: "Calculating cash flow...",
+    result1: (
+      <div className="relative mt-3 border-[0.5px] border-primary text-foreground text-[12px]">
+        <span className="absolute -top-[10px] left-3 bg-background px-1.5 text-[11px] tracking-wide text-foreground">
+          Revenue Forecast
+        </span>
+        <table className="w-full mt-2 mb-1">
+          <thead>
+            <tr className="text-left border-b-[0.5px] border-primary">
+              <th className="font-normal pl-3 pr-2 pb-1 text-foreground">
+                MONTH
+              </th>
+              <th className="font-normal pr-2 pb-1 text-right text-foreground">
+                PROJECTED
+              </th>
+              <th className="font-normal pr-3 pb-1 text-right text-foreground">
+                RECURRING
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="pl-3 pr-2 py-[3px]">Apr 2026</td>
+              <td className="pr-2 py-[3px] text-right">$28,400.00</td>
+              <td className="pr-3 py-[3px] text-right">$19,500.00</td>
+            </tr>
+            <tr>
+              <td className="pl-3 pr-2 py-[3px]">May 2026</td>
+              <td className="pr-2 py-[3px] text-right">$31,200.00</td>
+              <td className="pr-3 py-[3px] text-right">$19,500.00</td>
+            </tr>
+            <tr>
+              <td className="pl-3 pr-2 py-[3px]">Jun 2026</td>
+              <td className="pr-2 py-[3px] text-right">$29,800.00</td>
+              <td className="pr-3 py-[3px] text-right">$19,500.00</td>
+            </tr>
+          </tbody>
+        </table>
+        <div className="px-3 pb-2 text-[11px] text-foreground">
+          Growth rate: +8.2% MoM
+        </div>
+      </div>
+    ),
+    result2Line: "  Q2 net cash flow: +$47,200.00",
   },
 ];
 
@@ -615,12 +590,13 @@ function Terminal() {
   }, [phase]);
 
   useEffect(() => {
-    if (phase !== "done" || !autoCycle) return;
+    if (phase !== "done") return;
     const t = setTimeout(() => {
+      setAutoCycle(true);
       setActiveTab((prev) => (prev + 1) % SCENARIOS.length);
     }, 2000);
     return () => clearTimeout(t);
-  }, [phase, autoCycle]);
+  }, [phase]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -640,17 +616,15 @@ function Terminal() {
     />
   );
 
-  const prompt = <span className="text-muted-foreground/60">~ $ </span>;
+  const prompt = <span className="text-foreground">~ $ </span>;
 
   const spin = (text: string) => (
-    <div className="text-muted-foreground">
+    <div className="text-foreground">
       {ORA_FRAMES[frame]} {text}
     </div>
   );
 
-  const done = (text: string) => (
-    <div className="text-muted-foreground">{text}</div>
-  );
+  const done = (text: string) => <div className="text-foreground">{text}</div>;
 
   return (
     <div className="max-w-3xl w-full font-mono">
@@ -661,7 +635,7 @@ function Terminal() {
             <span className="block w-2 h-2 rounded-full bg-foreground/20" />
             <span className="block w-2 h-2 rounded-full bg-foreground/20" />
           </div>
-          <span className="flex-1 text-center text-[10px] tracking-wide text-muted-foreground/40 -ml-10">
+          <span className="flex-1 text-center text-[10px] tracking-wide text-foreground -ml-10">
             midday — zsh
           </span>
         </div>
@@ -676,7 +650,7 @@ function Terminal() {
                 "relative flex-1 px-4 py-1.5 text-[11px] tracking-wide transition-colors border-b",
                 i === activeTab
                   ? "bg-background text-foreground border-b-transparent"
-                  : "text-muted-foreground/60 hover:text-muted-foreground border-b-border",
+                  : "text-foreground/60 hover:text-foreground border-b-border",
                 i > 0 && "border-l border-l-border",
               )}
             >
@@ -689,10 +663,10 @@ function Terminal() {
           ref={termRef}
           className="overflow-y-auto h-[380px] md:h-[460px] scroll-smooth p-5 bg-background text-[13px] leading-[1.7] text-foreground"
         >
-          <div>{prompt}npx @midday/cli</div>
+          <div>{prompt}npx @midday/cli@latest</div>
 
           <pre
-            className="text-[8px] sm:text-[10px] leading-none text-foreground/20 mt-3 whitespace-pre overflow-x-auto"
+            className="text-[8px] sm:text-[10px] leading-none text-foreground mt-3 whitespace-pre overflow-x-auto"
             style={{
               fontFamily:
                 "SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace",
@@ -700,7 +674,7 @@ function Terminal() {
           >
             {MIDDAY_ASCII}
           </pre>
-          <div className="text-muted-foreground/40 text-[10px] tracking-widest mt-1.5 mb-5">
+          <div className="text-foreground text-[10px] tracking-widest mt-1.5 mb-5">
             v0.1.0 · agent@acme.corp · Midday Labs AB
           </div>
 
@@ -766,7 +740,7 @@ const features = [
   {
     title: "Pull reports on demand",
     description:
-      "Revenue, burn rate, runway — your agent has the numbers. Ask for a report and get structured data back.",
+      "Revenue, burn rate, runway. Your agent has the numbers. Ask for a report and get structured data back.",
   },
   {
     title: "Works with any MCP client",
@@ -777,6 +751,63 @@ const features = [
     title: "Zero setup",
     description:
       "One npx command. OAuth via browser. No API keys, no config files. Your agent is operational in seconds.",
+  },
+];
+
+const possibilities = [
+  {
+    agent: "Claude",
+    title: "Ask about your runway",
+    description:
+      "Ask Claude how much runway you have and get a structured financial breakdown with trends. No spreadsheets, no dashboards.",
+  },
+  {
+    agent: "Cursor",
+    title: "Bill clients while you code",
+    description:
+      "Cursor tracks your time per project as you work. At the end of the week, it drafts and sends invoices automatically.",
+  },
+  {
+    agent: "OpenClaw",
+    title: "A 24/7 finance assistant",
+    description:
+      "OpenClaw monitors overdue invoices overnight, sends reminders, categorizes transactions, and briefs you every morning.",
+  },
+  {
+    agent: "Zapier",
+    title: "Weekly P&L on autopilot",
+    description:
+      "Every Monday, Zapier pulls your profit and loss report and drops it in Slack. No one has to ask.",
+  },
+  {
+    agent: "Your agent",
+    title: "Build a custom workflow",
+    description:
+      "Use the REST API or TypeScript SDK to build exactly the agent you need. Pull transactions, create invoices, push to your ERP. Your logic, your rules.",
+  },
+  {
+    agent: "Any MCP client",
+    title: "One protocol, every tool",
+    description:
+      "Any app that speaks MCP gets instant access to 80+ Midday tools. No custom integration code, no API wrangling.",
+  },
+  {
+    agent: "Raycast",
+    title: "Invoice in a keystroke",
+    description:
+      "Hit a shortcut, type a customer name and amount. The invoice is created and sent before you finish your coffee.",
+  },
+  {
+    agent: "Manus",
+    title: "Reconcile while you sleep",
+    description:
+      "Manus matches transactions to invoices, flags anomalies, and categorizes everything. Ready for review when you wake up.",
+  },
+  {
+    agent: "Custom scripts",
+    title: "Automate with a cron job",
+    description:
+      "A 20-line script that runs nightly: fetch uncategorized transactions, classify them with your own rules, push updates back. No UI needed.",
   },
 ];
 
@@ -796,7 +827,7 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
           </h1>
           <p className="text-muted-foreground text-sm">
             One CLI. 80+ tools. Your agent can send invoices, reconcile
-            transactions, track time, pull reports — anything you do in Midday,
+            transactions, track time, pull reports. Anything you do in Midday,
             it can do too.
           </p>
 
@@ -808,7 +839,10 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
             <Link href="https://app.midday.ai">
               <OutlinedButton>Start automating</OutlinedButton>
             </Link>
-            <Link href="/docs" className="hidden md:block">
+            <Link
+              href="https://github.com/midday-ai/midday/tree/main/packages/cli"
+              className="hidden md:block"
+            >
               <OutlinedButton variant="secondary">
                 Read documentation
               </OutlinedButton>
@@ -826,7 +860,7 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-4">
             {features.map((feature) => (
               <div
-                className="border border-border p-1 -mt-[1px]"
+                className="border border-border p-1 -mt-[1px] -ml-[1px]"
                 key={feature.title}
               >
                 <div className="p-4">
@@ -844,10 +878,37 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
 
         <DottedSeparator />
 
-        <div className="flex flex-col space-y-12 pb-12">
+        <div>
+          <h3>Possibilities</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-4">
+            {possibilities.map((item) => (
+              <div
+                className="border border-border p-1 -mt-[1px] -ml-[1px]"
+                key={item.title}
+              >
+                <div className="p-4">
+                  <div className="space-y-3">
+                    <span className="text-xs text-muted-foreground/60 uppercase tracking-widest">
+                      {item.agent}
+                    </span>
+                    <h3 className="text-sm">{item.title}</h3>
+                    <p className="text-muted-foreground text-sm">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <DottedSeparator />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-12">
           <div>
             <h2 className="text-sm mb-4">CLI</h2>
-            <ul className="text-muted-foreground mt-4">
+            <ul className="text-muted-foreground">
               <li className="text-sm">
                 <span className="text-lg">◇</span> Invoices, transactions,
                 customers, and time tracking
@@ -869,7 +930,7 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
 
           <div>
             <h2 className="text-sm mb-4">MCP</h2>
-            <ul className="text-muted-foreground mt-4">
+            <ul className="text-muted-foreground">
               <li className="text-sm">
                 <span className="text-lg">◇</span> 80+ tools for business
                 operations
@@ -894,7 +955,7 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
 
           <div>
             <h2 className="text-sm mb-4">Developer experience</h2>
-            <ul className="text-muted-foreground mt-4">
+            <ul className="text-muted-foreground">
               <li className="text-sm">
                 <span className="text-lg">◇</span> Single npx command to start
               </li>
@@ -920,23 +981,30 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
 
         <DottedSeparator />
 
-        <div>
-          <h2 className="text-sm mb-4">Pipeline</h2>
-          <p className="text-muted-foreground text-sm">
-            From CLI command or MCP tool call to synced dashboard — every
-            operation flows through the same engine.
+        <div className="text-center">
+          <h2
+            className={cn(
+              "text-3xl md:text-5xl !leading-[1.1]",
+              pixelFontClass,
+            )}
+          >
+            Infrastructure
+          </h2>
+          <p className="text-muted-foreground text-sm mt-4 max-w-md mx-auto">
+            Midday is the backbone. Agents connect via MCP, CLI, or API. Every
+            operation syncs back to your dashboard.
           </p>
 
-          <div className="flex flex-col items-center justify-center p-4 mt-10 h-[400px] sm:h-[500px] md:h-[650px]">
+          <div className="flex flex-col items-center justify-center p-4 mt-6">
             <pre
-              className="p-4 text-sm leading-5 scale-[0.5] sm:scale-[0.65] md:scale-90 transform-gpu"
+              className="p-4 text-sm leading-5 scale-[0.38] sm:scale-[0.55] md:scale-[0.8] transform-gpu"
               style={{
                 fontFamily: "monospace",
                 whiteSpace: "pre",
                 textAlign: "left",
               }}
             >
-              {PIPELINE_DIAGRAM}
+              {INFRA_DIAGRAM}
             </pre>
           </div>
         </div>
@@ -956,14 +1024,17 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
                 </h4>
                 <p className="text-muted-foreground text-sm block pb-4">
                   One CLI. One MCP server. Every business operation your agent
-                  needs — invoices, transactions, time tracking, and more.
+                  needs. Invoices, transactions, time tracking, and more.
                 </p>
 
                 <div className="flex items-center gap-8 text-center sm:text-left">
                   <Link href="https://app.midday.ai">
                     <OutlinedButton>Start automating</OutlinedButton>
                   </Link>
-                  <Link href="/docs" className="hidden md:block">
+                  <Link
+                    href="https://github.com/midday-ai/midday/tree/main/packages/cli"
+                    className="hidden md:block"
+                  >
                     <OutlinedButton variant="secondary">
                       Read documentation
                     </OutlinedButton>

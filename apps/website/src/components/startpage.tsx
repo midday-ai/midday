@@ -6,6 +6,7 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 // Dynamic imports for animations (5,500+ lines - loaded after hero)
@@ -267,6 +268,14 @@ export function StartPage() {
           <div className="flex-1 lg:flex-none flex flex-col justify-center md:justify-start md:pt-16 lg:pt-48 items-center space-y-8 lg:space-y-0 z-20 px-3 sm:px-4 lg:px-0 lg:max-w-[1400px] lg:mx-auto lg:w-full lg:mb-12 xl:mb-12 2xl:mb-12 3xl:mb-16">
             <div className="flex flex-col items-center w-full text-center space-y-6 lg:space-y-8">
               <div className="space-y-5 lg:space-y-6 max-w-3xl 3xl:max-w-5xl mx-auto px-2 lg:px-0">
+                <Link
+                  href="/agents"
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border text-xs font-sans text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+                >
+                  Let agents run your business
+                  <span aria-hidden="true">&rarr;</span>
+                </Link>
+
                 <h1 className="font-serif text-3xl sm:text-3xl md:text-4xl lg:text-6xl xl:text-7xl 2xl:text-7xl 3xl:text-8xl leading-[1.1] tracking-tight text-foreground">
                   The business stack for{" "}
                   <em className="not-italic text-muted-foreground/80">
