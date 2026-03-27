@@ -192,7 +192,7 @@ const openAPIConfig = {
     statusCodes: ["5XX"],
     retryConnectionErrors: true,
   },
-} as const;
+};
 
 app.get("/openapi", (c) => {
   const spec = app.getOpenAPI31Document(openAPIConfig);
