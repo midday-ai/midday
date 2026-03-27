@@ -1,9 +1,9 @@
 import { hash } from "@midday/encryption";
 import slugify from "@sindresorhus/slugify";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import type { Database } from "../client";
-import { oauthApplications, users } from "../schema";
+import { oauthAccessTokens, oauthApplications, users } from "../schema";
 
 async function generateUniqueSlug(db: Database, name: string): Promise<string> {
   const baseSlug = slugify(name, { lowercase: true });
@@ -150,10 +150,15 @@ export async function createOAuthApplication(
   };
 }
 
-// Get OAuth applications for a team
+// Get OAuth applications for a team (owned by the team or authorized for the team)
 export async function getOAuthApplicationsByTeam(db: Database, teamId: string) {
+  const authorizedAppIds = db
+    .selectDistinct({ applicationId: oauthAccessTokens.applicationId })
+    .from(oauthAccessTokens)
+    .where(eq(oauthAccessTokens.teamId, teamId));
+
   return db
-    .select({
+    .selectDistinct({
       id: oauthApplications.id,
       name: oauthApplications.name,
       slug: oauthApplications.slug,
@@ -182,7 +187,12 @@ export async function getOAuthApplicationsByTeam(db: Database, teamId: string) {
     })
     .from(oauthApplications)
     .leftJoin(users, eq(oauthApplications.createdBy, users.id))
-    .where(eq(oauthApplications.teamId, teamId))
+    .where(
+      or(
+        eq(oauthApplications.teamId, teamId),
+        inArray(oauthApplications.id, authorizedAppIds),
+      ),
+    )
     .orderBy(desc(oauthApplications.createdAt));
 }
 
@@ -496,30 +506,6 @@ export async function findOrCreateDCRApplication(
     ...result,
     created: true,
   };
-}
-
-// Associate a DCR app (teamId is null) with a team on first authorization
-export async function associateDCRApplicationWithTeam(
-  db: Database,
-  applicationId: string,
-  teamId: string,
-  userId: string,
-) {
-  const [result] = await db
-    .update(oauthApplications)
-    .set({
-      teamId,
-      createdBy: userId,
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(oauthApplications.id, applicationId))
-    .returning({
-      id: oauthApplications.id,
-      teamId: oauthApplications.teamId,
-      createdBy: oauthApplications.createdBy,
-    });
-
-  return result;
 }
 
 // Regenerate client secret
