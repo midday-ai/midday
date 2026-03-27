@@ -438,21 +438,8 @@ app.openapi(
     summary: "OAuth Token Exchange",
     operationId: "postOAuthToken",
     description:
-      "Exchange authorization code for access token or refresh an access token",
+      "Exchange authorization code for access token or refresh an access token. Accepts application/json or application/x-www-form-urlencoded.",
     tags: ["OAuth"],
-    request: {
-      body: {
-        required: true,
-        content: {
-          "application/json": {
-            schema: oauthTokenEndpointRequestSchema,
-          },
-          "application/x-www-form-urlencoded": {
-            schema: oauthTokenEndpointRequestSchema,
-          },
-        },
-      },
-    },
     responses: {
       200: {
         description: "Token exchange successful",
@@ -646,11 +633,6 @@ app.openapi(
       message: "Grant type not supported",
     });
   },
-  (result, c) => {
-    if (!result.success) {
-      return undefined;
-    }
-  },
 );
 
 // OAuth Token Revocation Endpoint
@@ -660,21 +642,9 @@ app.openapi(
     path: "/revoke",
     summary: "OAuth Token Revocation",
     operationId: "postOAuthRevoke",
-    description: "Revoke an access token or refresh token",
+    description:
+      "Revoke an access token or refresh token. Accepts application/json or application/x-www-form-urlencoded.",
     tags: ["OAuth"],
-    request: {
-      body: {
-        required: true,
-        content: {
-          "application/json": {
-            schema: oauthRevokeTokenRequestSchema,
-          },
-          "application/x-www-form-urlencoded": {
-            schema: oauthRevokeTokenRequestSchema,
-          },
-        },
-      },
-    },
     responses: {
       200: {
         description: "Token revocation successful",
@@ -744,11 +714,6 @@ app.openapi(
     });
 
     return c.json({ success: true });
-  },
-  (result, c) => {
-    if (!result.success) {
-      return undefined;
-    }
   },
 );
 
