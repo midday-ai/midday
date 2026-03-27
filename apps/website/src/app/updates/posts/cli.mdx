@@ -1,0 +1,66 @@
+---
+title: "Let Agents Run Your Business"
+publishedAt: "2026-03-27"
+summary: "Introducing the Midday CLI and agent infrastructure. One command gives AI agents access to invoices, transactions, time tracking, reconciliation, exports, and more."
+tag: "Updates"
+---
+
+We just shipped the Midday CLI. One command — `npx @midday-ai/cli@latest` — and any AI agent can send invoices, reconcile receipts, export to QuickBooks, track time, and pull financial reports. No API keys, no config files. OAuth via your browser and you're in.
+
+<br />
+
+### Why a CLI?
+
+MCP opened the door for AI tools to talk to Midday. The CLI takes it further. It gives agents a structured, token-efficient interface to every operation Midday supports. Where MCP shines for conversational tools like Claude and ChatGPT, the CLI is built for agents that need to execute — scripts, cron jobs, CI pipelines, or tools like OpenClaw that run autonomously around the clock.
+
+<br />
+
+Together, MCP and CLI cover the full spectrum: from a developer asking Cursor about their burn rate to an autonomous agent reconciling 200 receipts overnight.
+
+<br />
+
+### What agents can do
+
+The CLI and MCP server share the same API surface. Here's what's available:
+
+- **Bill from tracked time** — Create invoices directly from time entries. An agent tracks hours per project, then generates and sends the invoice at the end of the week.
+- **Auto-reconcile receipts** — Match inbox documents to transactions automatically. One command: `midday inbox match --all --auto`.
+- **Export to accounting software** — Push transactions to QuickBooks, Xero, or Fortnox. No manual data entry.
+- **Revenue forecasting** — Pull projected revenue, recurring income, cash flow, and growth rate.
+- **Full invoice lifecycle** — Create, send, remind, mark as paid. Recurring invoices run on schedule.
+- **Bulk operations** — Create, update, or delete transactions in batch.
+
+<br />
+
+### Works with everything
+
+The same 80+ tools are available to every client:
+
+- **[Cursor](/mcp/cursor)** — Track billable hours while you code, then invoice clients without leaving the editor.
+- **[Claude](/mcp/claude)** — Ask about runway, profit margins, or overdue invoices and get structured answers.
+- **[OpenClaw](https://openclaw.ai)** — Run a 24/7 finance assistant that monitors, categorizes, and briefs you every morning.
+- **[Zapier](/mcp/zapier)** — Automate weekly P&L reports to Slack, alert on overdue invoices, sync data across 7,000+ apps.
+- **[Raycast](/mcp/raycast)** — Create and send invoices with a keyboard shortcut.
+- **Custom agents** — Use the REST API or TypeScript SDK to build exactly the workflow you need.
+
+<br />
+
+### Your business, programmable
+
+Midday is now infrastructure. Agents connect via MCP, CLI, or REST API. Every operation syncs back to your dashboard. Whether it's Claude answering a question about cash flow or a cron job categorizing transactions at 3 AM, the data stays consistent and the dashboard stays up to date.
+
+<br />
+
+### Get started
+
+1. Run `npx @midday-ai/cli@latest` in your terminal
+2. Authenticate via your browser
+3. Start running commands or connect your MCP client
+
+<br />
+
+The CLI is [open-source on GitHub](https://github.com/midday-ai/midday/tree/main/packages/cli). We'd love your feedback — reach out anytime.
+
+<br />
+
+[Explore the agents page →](/agents)

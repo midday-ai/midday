@@ -1,0 +1,51 @@
+{
+  "name": "@midday-ai/cli",
+  "version": "0.1.2",
+  "description": "Midday CLI — let agents run your business",
+  "type": "module",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/midday-ai/midday.git",
+    "directory": "packages/cli"
+  },
+  "keywords": [
+    "midday",
+    "cli",
+    "agents",
+    "mcp",
+    "invoices",
+    "finance",
+    "automation"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "midday": "dist/bin/midday.js"
+  },
+  "scripts": {
+    "dev": "bun run bin/midday.ts",
+    "build": "tsup",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "cli-table3": "^0.6.5",
+    "escape-html": "^1.0.3",
+    "commander": "^14.0.3",
+    "open": "^11.0.0",
+    "ora": "^9.3.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/escape-html": "^1.0.4",
+    "tsup": "^8.5.1"
+  }
+}

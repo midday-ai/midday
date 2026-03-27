@@ -115,6 +115,7 @@ export function Footer() {
               <div className="space-y-2.5">
                 {[
                   { href: "/docs", label: "Documentation", external: false },
+                  { href: "/agents", label: "Agents", external: false },
                   {
                     href: "https://api.midday.ai",
                     label: "API",

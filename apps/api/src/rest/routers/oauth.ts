@@ -480,19 +480,20 @@ app.openapi(
     if (contentType.includes("application/x-www-form-urlencoded")) {
       body = await c.req.parseBody();
     } else {
-      body = c.req.valid("json");
+      body = await c.req.json();
     }
 
-    const {
-      grant_type,
-      code,
-      redirect_uri,
-      client_id,
-      client_secret,
-      code_verifier,
-      refresh_token,
-      scope,
-    } = body;
+    const parsed = oauthTokenEndpointRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new HTTPException(400, {
+        message: parsed.error.issues
+          .map((i) => `${i.path.join(".")}: ${i.message}`)
+          .join("; "),
+      });
+    }
+
+    const data = parsed.data;
+    const { client_id, client_secret } = data;
 
     // Validate client credentials
     const application = await getOAuthApplicationByClientId(db, client_id);
@@ -511,20 +512,18 @@ app.openapi(
       }
     } else {
       // For confidential clients, validate client_secret
-      if (!validateClientCredentials(application, client_secret)) {
+      if (
+        !client_secret ||
+        !validateClientCredentials(application, client_secret)
+      ) {
         throw new HTTPException(400, {
           message: "Invalid client credentials",
         });
       }
     }
 
-    if (grant_type === "authorization_code") {
-      if (!code || !redirect_uri) {
-        throw new HTTPException(400, {
-          message:
-            "Missing required parameters: code and redirect_uri are required",
-        });
-      }
+    if (data.grant_type === "authorization_code") {
+      const { code, redirect_uri, code_verifier } = data;
 
       try {
         // Exchange authorization code for access token
@@ -587,12 +586,8 @@ app.openapi(
       }
     }
 
-    if (grant_type === "refresh_token") {
-      if (!refresh_token) {
-        throw new HTTPException(400, {
-          message: "Missing refresh_token",
-        });
-      }
+    if (data.grant_type === "refresh_token") {
+      const { refresh_token, scope } = data;
 
       try {
         // Parse requested scopes
@@ -651,6 +646,11 @@ app.openapi(
       message: "Grant type not supported",
     });
   },
+  (result, c) => {
+    if (!result.success) {
+      return undefined;
+    }
+  },
 );
 
 // OAuth Token Revocation Endpoint
@@ -696,10 +696,19 @@ app.openapi(
     if (contentType.includes("application/x-www-form-urlencoded")) {
       body = await c.req.parseBody();
     } else {
-      body = c.req.valid("json");
+      body = await c.req.json();
     }
 
-    const { token, client_id, client_secret } = body;
+    const parsed = oauthRevokeTokenRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new HTTPException(400, {
+        message: parsed.error.issues
+          .map((i) => `${i.path.join(".")}: ${i.message}`)
+          .join("; "),
+      });
+    }
+
+    const { token, client_id, client_secret } = parsed.data;
 
     // Validate client credentials
     const application = await getOAuthApplicationByClientId(db, client_id);
@@ -718,7 +727,10 @@ app.openapi(
       }
     } else {
       // For confidential clients, validate client_secret
-      if (!validateClientCredentials(application, client_secret)) {
+      if (
+        !client_secret ||
+        !validateClientCredentials(application, client_secret)
+      ) {
         throw new HTTPException(400, {
           message: "Invalid client credentials",
         });
@@ -732,6 +744,11 @@ app.openapi(
     });
 
     return c.json({ success: true });
+  },
+  (result, c) => {
+    if (!result.success) {
+      return undefined;
+    }
   },
 );
 
