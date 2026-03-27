@@ -90,7 +90,7 @@ const FEATURE_ROUTES = [
 ];
 
 // App pages to prefetch on hover
-const APP_ROUTES = ["/integrations", "/download", "/docs", "/mcp"];
+const APP_ROUTES = ["/integrations", "/download", "/docs", "/agents", "/mcp"];
 
 export function Header({
   transparent = false,
@@ -643,6 +643,12 @@ export function Header({
                                   external: false,
                                 },
                                 {
+                                  href: "/agents",
+                                  title: "Agents",
+                                  desc: "Agent-native CLI and MCP workflows.",
+                                  external: false,
+                                },
+                                {
                                   href: "/mcp",
                                   title: "AI Integrations",
                                   desc: "Connect AI tools to your business data.",
@@ -1040,6 +1046,17 @@ export function Header({
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Documentation
+                        </Link>
+                        <Link
+                          href="/agents"
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            setIsMobileAppsOpen(false);
+                          }}
+                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Agents
                         </Link>
                         <Link
                           href="/mcp"
