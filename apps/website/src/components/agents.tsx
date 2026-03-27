@@ -502,7 +502,6 @@ function Terminal() {
   const [typed2, setTyped2] = useState("");
   const [frame, setFrame] = useState(0);
   const [cursorOn, setCursorOn] = useState(true);
-  const [autoCycle, setAutoCycle] = useState(true);
   const termRef = useRef<HTMLDivElement>(null);
 
   const scenario = SCENARIOS[activeTab] as Scenario;
@@ -519,7 +518,6 @@ function Terminal() {
   }, [activeTab, resetAnimation]);
 
   const handleTabClick = (idx: number) => {
-    setAutoCycle(false);
     setActiveTab(idx);
   };
 
@@ -592,7 +590,6 @@ function Terminal() {
   useEffect(() => {
     if (phase !== "done") return;
     const t = setTimeout(() => {
-      setAutoCycle(true);
       setActiveTab((prev) => (prev + 1) % SCENARIOS.length);
     }, 2000);
     return () => clearTimeout(t);
@@ -843,7 +840,7 @@ const possibilities = [
 
 export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
   return (
-    <div className="font-mono relative">
+    <div className="font-mono relative mt-16">
       <GrainOverlay />
       <div className="max-w-screen-xl mx-auto px-4 py-12 md:py-28 flex flex-col lg:flex-row gap-12 justify-between items-center">
         <div className="lg:max-w-[590px] space-y-8 w-full">
