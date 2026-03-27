@@ -848,7 +848,7 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
           </div>
         </div>
 
-        <div className="flex justify-center mt-12">
+        <div className="hidden md:flex justify-center mt-12">
           <Button
             asChild
             className="h-11 px-6 text-sm font-mono hover:!bg-[hsl(225,50%,92%)]"
@@ -857,9 +857,11 @@ export function Agents({ pixelFontClass }: { pixelFontClass?: string }) {
           </Button>
         </div>
 
-        <SectionDivider />
+        <div className="hidden md:block">
+          <SectionDivider />
+        </div>
 
-        <div className="text-center">
+        <div className="hidden md:block text-center">
           <h2 className="font-sans text-2xl sm:text-3xl text-foreground">
             Infrastructure
           </h2>
