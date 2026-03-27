@@ -489,16 +489,8 @@ app.openapi(
       });
     }
 
-    const {
-      grant_type,
-      code,
-      redirect_uri,
-      client_id,
-      client_secret,
-      code_verifier,
-      refresh_token,
-      scope,
-    } = body;
+    const data = parsed.data;
+    const { client_id, client_secret } = data;
 
     // Validate client credentials
     const application = await getOAuthApplicationByClientId(db, client_id);
@@ -517,20 +509,18 @@ app.openapi(
       }
     } else {
       // For confidential clients, validate client_secret
-      if (!validateClientCredentials(application, client_secret)) {
+      if (
+        !client_secret ||
+        !validateClientCredentials(application, client_secret)
+      ) {
         throw new HTTPException(400, {
           message: "Invalid client credentials",
         });
       }
     }
 
-    if (grant_type === "authorization_code") {
-      if (!code || !redirect_uri) {
-        throw new HTTPException(400, {
-          message:
-            "Missing required parameters: code and redirect_uri are required",
-        });
-      }
+    if (data.grant_type === "authorization_code") {
+      const { code, redirect_uri, code_verifier } = data;
 
       try {
         // Exchange authorization code for access token
@@ -593,12 +583,8 @@ app.openapi(
       }
     }
 
-    if (grant_type === "refresh_token") {
-      if (!refresh_token) {
-        throw new HTTPException(400, {
-          message: "Missing refresh_token",
-        });
-      }
+    if (data.grant_type === "refresh_token") {
+      const { refresh_token, scope } = data;
 
       try {
         // Parse requested scopes

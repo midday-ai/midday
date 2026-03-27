@@ -1,17 +1,17 @@
-# @midday/cli
+# @midday-ai/cli
 
 Run your business from the command line. The Midday CLI gives you full access to transactions, invoices, time tracking, reports, and more — designed for humans and AI agents alike.
 
 ## Install
 
 ```bash
-npx @midday/cli@latest
+npx @midday-ai/cli@latest
 ```
 
 Or install globally:
 
 ```bash
-npm install -g @midday/cli
+npm install -g @midday-ai/cli
 ```
 
 ## Authentication

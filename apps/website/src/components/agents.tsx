@@ -248,7 +248,7 @@ function CopyInstall() {
   const [copied, setCopied] = useState(false);
 
   const copyCommand = () => {
-    navigator.clipboard.writeText("npx @midday/cli@latest");
+    navigator.clipboard.writeText("npx @midday-ai/cli@latest");
     setCopied(true);
     setTimeout(() => setCopied(false), 1000);
   };
@@ -259,7 +259,9 @@ function CopyInstall() {
       onClick={copyCommand}
       className="flex border border-dashed border-muted-foreground p-2 px-4 text-sm w-full relative cursor-pointer"
     >
-      <span className="text-foreground truncate">$ npx @midday/cli@latest</span>
+      <span className="text-foreground truncate">
+        $ npx @midday-ai/cli@latest
+      </span>
 
       <div className="flex items-center space-x-2 ml-auto">
         {copied ? (
@@ -660,7 +662,7 @@ function Terminal() {
           ref={termRef}
           className="overflow-y-auto h-[380px] md:h-[460px] scroll-smooth p-5 bg-background text-[13px] leading-[1.7] text-foreground"
         >
-          <div>{prompt}npx @midday/cli@latest</div>
+          <div>{prompt}npx @midday-ai/cli@latest</div>
 
           <pre
             className="text-[8px] sm:text-[10px] leading-none text-foreground mt-3 whitespace-pre overflow-x-auto"

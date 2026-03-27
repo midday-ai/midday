@@ -1,10 +1,31 @@
 {
-  "name": "@midday/cli",
-  "version": "0.1.0",
+  "name": "@midday-ai/cli",
+  "version": "0.1.1",
   "description": "Midday CLI — let agents run your business",
   "type": "module",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/midday-ai/midday.git",
+    "directory": "packages/cli"
+  },
+  "keywords": [
+    "midday",
+    "cli",
+    "agents",
+    "mcp",
+    "invoices",
+    "finance",
+    "automation"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
   "bin": {
-    "midday": "./dist/bin/midday.js"
+    "midday": "dist/bin/midday.js"
   },
   "scripts": {
     "dev": "bun run bin/midday.ts",
