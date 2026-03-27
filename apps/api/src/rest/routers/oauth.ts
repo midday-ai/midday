@@ -695,7 +695,16 @@ app.openapi(
       body = await c.req.json();
     }
 
-    const { token, client_id, client_secret } = body;
+    const parsed = oauthRevokeTokenRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new HTTPException(400, {
+        message: parsed.error.issues
+          .map((i) => `${i.path.join(".")}: ${i.message}`)
+          .join("; "),
+      });
+    }
+
+    const { token, client_id, client_secret } = parsed.data;
 
     // Validate client credentials
     const application = await getOAuthApplicationByClientId(db, client_id);
@@ -714,7 +723,10 @@ app.openapi(
       }
     } else {
       // For confidential clients, validate client_secret
-      if (!validateClientCredentials(application, client_secret)) {
+      if (
+        !client_secret ||
+        !validateClientCredentials(application, client_secret)
+      ) {
         throw new HTTPException(400, {
           message: "Invalid client credentials",
         });
