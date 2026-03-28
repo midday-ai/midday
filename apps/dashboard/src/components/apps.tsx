@@ -131,9 +131,11 @@ export function Apps() {
     };
   });
 
-  // Transform external apps (only approved ones)
+  // Transform external apps (only approved, manually created ones — exclude DCR apps)
   const approvedExternalApps =
-    externalAppsData?.data?.filter((app) => app.status === "approved") || [];
+    externalAppsData?.data?.filter(
+      (app) => app.status === "approved" && !app.slug?.startsWith("dcr-"),
+    ) || [];
   const transformedExternalApps: UnifiedApp[] = approvedExternalApps.map(
     (app) => ({
       id: app.id,
