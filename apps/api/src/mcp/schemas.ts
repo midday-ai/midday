@@ -336,6 +336,59 @@ export const mcpCategoryDetailSchema = z.object({
 });
 
 // ============================================================
+// Invoice template schema
+// ============================================================
+
+export const mcpInvoiceTemplateSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  isDefault: z.boolean().nullable().optional(),
+  title: z.string().nullable().optional(),
+  customerLabel: z.string().nullable().optional(),
+  fromLabel: z.string().nullable().optional(),
+  invoiceNoLabel: z.string().nullable().optional(),
+  issueDateLabel: z.string().nullable().optional(),
+  dueDateLabel: z.string().nullable().optional(),
+  descriptionLabel: z.string().nullable().optional(),
+  priceLabel: z.string().nullable().optional(),
+  quantityLabel: z.string().nullable().optional(),
+  totalLabel: z.string().nullable().optional(),
+  totalSummaryLabel: z.string().nullable().optional(),
+  vatLabel: z.string().nullable().optional(),
+  subtotalLabel: z.string().nullable().optional(),
+  taxLabel: z.string().nullable().optional(),
+  discountLabel: z.string().nullable().optional(),
+  paymentLabel: z.string().nullable().optional(),
+  noteLabel: z.string().nullable().optional(),
+  lineItemTaxLabel: z.string().nullable().optional(),
+  logoUrl: z.string().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  dateFormat: z.string().nullable().optional(),
+  size: z.string().nullable().optional(),
+  includeVat: z.boolean().nullable().optional(),
+  includeTax: z.boolean().nullable().optional(),
+  includeDiscount: z.boolean().nullable().optional(),
+  includeDecimals: z.boolean().nullable().optional(),
+  includeUnits: z.boolean().nullable().optional(),
+  includeQr: z.boolean().nullable().optional(),
+  includeLineItemTax: z.boolean().nullable().optional(),
+  includePdf: z.boolean().nullable().optional(),
+  sendCopy: z.boolean().nullable().optional(),
+  taxRate: z.number().nullable().optional(),
+  vatRate: z.number().nullable().optional(),
+  deliveryType: z.string().nullable().optional(),
+  paymentEnabled: z.boolean().nullable().optional(),
+  paymentTermsDays: z.number().nullable().optional(),
+  emailSubject: z.string().nullable().optional(),
+  emailHeading: z.string().nullable().optional(),
+  emailBody: z.string().nullable().optional(),
+  emailButtonText: z.string().nullable().optional(),
+  fromDetails: z.any().nullable().optional(),
+  paymentDetails: z.any().nullable().optional(),
+  noteDetails: z.any().nullable().optional(),
+});
+
+// ============================================================
 // Invoice product schema
 // ============================================================
 

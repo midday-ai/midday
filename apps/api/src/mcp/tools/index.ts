@@ -5,6 +5,7 @@ export { registerDocumentTools } from "./documents";
 export { registerInboxTools } from "./inbox";
 export { registerInvoiceProductTools } from "./invoice-products";
 export { registerInvoiceRecurringTools } from "./invoice-recurring";
+export { registerInvoiceTemplateTools } from "./invoice-templates";
 export { registerInvoiceTools } from "./invoices";
 export { registerReportTools } from "./reports";
 export { registerSearchTools } from "./search";
