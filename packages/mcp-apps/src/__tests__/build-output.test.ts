@@ -4,14 +4,7 @@ import { join } from "node:path";
 
 const DIST_DIR = join(import.meta.dir, "..", "..", "dist", "src", "views");
 
-const VIEWS = [
-  "time-series-chart.html",
-  "spending-chart.html",
-  "balance-sheet.html",
-  "invoice-preview.html",
-  "recurring-expenses.html",
-  "tax-summary.html",
-];
+const VIEWS = ["invoice-preview.html"];
 
 describe("build output", () => {
   for (const file of VIEWS) {

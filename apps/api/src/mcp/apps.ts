@@ -8,12 +8,7 @@ import {
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const views: Record<string, string> = {
-  "ui://midday/time-series-chart": "time-series-chart.html",
-  "ui://midday/spending-chart": "spending-chart.html",
-  "ui://midday/balance-sheet": "balance-sheet.html",
   "ui://midday/invoice-preview": "invoice-preview.html",
-  "ui://midday/recurring-expenses": "recurring-expenses.html",
-  "ui://midday/tax-summary": "tax-summary.html",
 };
 
 function resolveDist(): string | null {
