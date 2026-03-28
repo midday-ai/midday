@@ -423,7 +423,7 @@ export type CreateDCRApplicationParams = {
   tokenEndpointAuthMethod?: string;
 };
 
-export async function findOrCreateDCRApplication(
+export async function createDCRApplication(
   db: Database,
   params: CreateDCRApplicationParams,
 ) {
@@ -464,10 +464,7 @@ export async function findOrCreateDCRApplication(
       active: oauthApplications.active,
     });
 
-  return {
-    ...result,
-    created: true,
-  };
+  return result;
 }
 
 // Claim an unclaimed DCR app for a team at authorization time

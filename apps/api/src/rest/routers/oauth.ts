@@ -21,7 +21,7 @@ import {
   claimDCRApplication,
   createAuthorizationCode,
   exchangeAuthorizationCode,
-  findOrCreateDCRApplication,
+  createDCRApplication,
   getOAuthApplicationByClientId,
   getTeamsByUserId,
   hasUserEverAuthorizedApp,
@@ -94,14 +94,6 @@ app.openapi(
           },
         },
       },
-      200: {
-        description: "Existing client returned (deduplicated)",
-        content: {
-          "application/json": {
-            schema: dcrResponseSchema,
-          },
-        },
-      },
       400: {
         description: "Invalid request",
         content: {
@@ -135,7 +127,7 @@ app.openapi(
       }
     }
 
-    const result = await findOrCreateDCRApplication(db, {
+    const result = await createDCRApplication(db, {
       clientName: body.client_name,
       redirectUris: body.redirect_uris,
       scope: body.scope,
@@ -154,10 +146,7 @@ app.openapi(
       response_types: body.response_types || ["code"],
     };
 
-    if (result.created) {
-      return c.json(response, 201);
-    }
-    return c.json(response, 200);
+    return c.json(response, 201);
   },
 );
 
