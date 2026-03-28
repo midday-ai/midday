@@ -27,7 +27,6 @@ import {
   getSpending,
   getTaxSummary,
 } from "@midday/db/queries";
-import { registerAppTool } from "@modelcontextprotocol/ext-apps/server";
 import { z } from "zod";
 import { hasScope, READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
 import { withErrorHandling } from "../utils";
@@ -45,8 +44,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     return;
   }
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_revenue",
     {
       title: "Revenue Report",
@@ -55,7 +53,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       inputSchema: getRevenueSchema.shape,
       outputSchema: periodResultSchema,
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/time-series-chart" } },
     },
     withErrorHandling(async (params) => {
       const result = await getReports(db, {
@@ -74,8 +71,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get revenue report"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_profit",
     {
       title: "Profit Report",
@@ -84,7 +80,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       inputSchema: getProfitSchema.shape,
       outputSchema: periodResultSchema,
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/time-series-chart" } },
     },
     withErrorHandling(async (params) => {
       const result = await getReports(db, {
@@ -103,8 +98,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get profit report"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_burn_rate",
     {
       title: "Burn Rate Report",
@@ -115,7 +109,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         data: z.array(z.record(z.string(), z.any())),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/time-series-chart" } },
     },
     withErrorHandling(async (params) => {
       const result = await getBurnRate(db, {
@@ -157,8 +150,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get runway report"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_expenses",
     {
       title: "Expenses Report",
@@ -167,7 +159,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
       inputSchema: getExpensesSchema.shape,
       outputSchema: periodResultSchema,
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/time-series-chart" } },
     },
     withErrorHandling(async (params) => {
       const result = await getExpenses(db, {
@@ -184,8 +175,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get expenses report"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_spending",
     {
       title: "Spending by Category",
@@ -196,7 +186,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         data: z.array(z.record(z.string(), z.any())),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/spending-chart" } },
     },
     withErrorHandling(async (params) => {
       const result = await getSpending(db, {
@@ -213,8 +202,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get spending report"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_tax_summary",
     {
       title: "Tax Summary Report",
@@ -225,7 +213,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         data: z.array(z.record(z.string(), z.any())),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/tax-summary" } },
     },
     withErrorHandling(async (params) => {
       const result = await getTaxSummary(db, {
@@ -247,8 +234,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get tax summary"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_growth_rate",
     {
       title: "Growth Rate Report",
@@ -259,7 +245,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         data: z.record(z.string(), z.any()),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/time-series-chart" } },
     },
     withErrorHandling(async (params) => {
       const result = await getGrowthRate(db, {
@@ -279,8 +264,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get growth rate report"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_profit_margin",
     {
       title: "Profit Margin Report",
@@ -291,7 +275,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         data: z.record(z.string(), z.any()),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/time-series-chart" } },
     },
     withErrorHandling(async (params) => {
       const result = await getProfitMargin(db, {
@@ -309,8 +292,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get profit margin report"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_cash_flow",
     {
       title: "Cash Flow Report",
@@ -321,7 +303,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         data: z.record(z.string(), z.any()),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/time-series-chart" } },
     },
     withErrorHandling(async (params) => {
       const result = await getCashFlow(db, {
@@ -339,8 +320,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get cash flow report"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_recurring_expenses",
     {
       title: "Recurring Expenses Report",
@@ -351,7 +331,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         data: z.array(z.record(z.string(), z.any())),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/recurring-expenses" } },
     },
     withErrorHandling(async (params) => {
       const result = await getRecurringExpenses(db, {
@@ -370,8 +349,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get recurring expenses"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_revenue_forecast",
     {
       title: "Revenue Forecast Report",
@@ -386,7 +364,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         meta: z.record(z.string(), z.any()),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/time-series-chart" } },
     },
     withErrorHandling(async (params) => {
       const result = await getRevenueForecast(db, {
@@ -405,8 +382,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
     }, "Failed to get revenue forecast"),
   );
 
-  registerAppTool(
-    server,
+  server.registerTool(
     "reports_balance_sheet",
     {
       title: "Balance Sheet Report",
@@ -417,7 +393,6 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
         data: z.record(z.string(), z.any()),
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      _meta: { ui: { resourceUri: "ui://midday/balance-sheet" } },
     },
     withErrorHandling(async (params) => {
       const result = await getBalanceSheet(db, {

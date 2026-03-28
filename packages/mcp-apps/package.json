@@ -5,7 +5,7 @@
   "sideEffects": false,
   "scripts": {
     "dev": "vite",
-    "build": "rm -rf dist && INPUT=time-series-chart vite build && INPUT=spending-chart vite build && INPUT=balance-sheet vite build && INPUT=invoice-preview vite build && INPUT=recurring-expenses vite build && INPUT=tax-summary vite build",
+    "build": "rm -rf dist && INPUT=invoice-preview vite build",
     "test": "bun test --exit --timeout 10000",
     "clean": "rm -rf .turbo node_modules dist",
     "lint": "biome check .",
@@ -22,12 +22,9 @@
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
     "@modelcontextprotocol/ext-apps": "^1.3.1",
-    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "recharts": "^3.6.0",
-    "tailwind-merge": "^3.5.0"
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.28.0",

@@ -15,7 +15,7 @@ export default defineConfig(({ command }) => {
 
   if (!INPUT) {
     throw new Error(
-      "INPUT environment variable is required (e.g. INPUT=time-series-chart)",
+      "INPUT environment variable is required (e.g. INPUT=invoice-preview)",
     );
   }
 
