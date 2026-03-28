@@ -464,6 +464,10 @@ export async function createDCRApplication(
       active: oauthApplications.active,
     });
 
+  if (!result) {
+    throw new Error("Failed to create DCR application");
+  }
+
   return result;
 }
 

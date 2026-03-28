@@ -20,8 +20,8 @@ import type { Database } from "@midday/db/client";
 import {
   claimDCRApplication,
   createAuthorizationCode,
-  exchangeAuthorizationCode,
   createDCRApplication,
+  exchangeAuthorizationCode,
   getOAuthApplicationByClientId,
   getTeamsByUserId,
   hasUserEverAuthorizedApp,
@@ -136,6 +136,12 @@ app.openapi(
       grantTypes: body.grant_types,
       tokenEndpointAuthMethod: body.token_endpoint_auth_method,
     });
+
+    if (!result) {
+      throw new HTTPException(500, {
+        message: "Failed to register client",
+      });
+    }
 
     const response = {
       client_id: result.clientId as string,
