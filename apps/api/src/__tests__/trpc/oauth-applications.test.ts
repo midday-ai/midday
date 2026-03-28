@@ -204,6 +204,115 @@ describe("tRPC: oauthApplications.regenerateSecret", () => {
   });
 });
 
+describe("tRPC: oauthApplications — cross-team isolation", () => {
+  beforeEach(() => {
+    mocks.getOAuthApplicationById.mockReset();
+    mocks.updateOAuthApplication.mockReset();
+    mocks.deleteOAuthApplication.mockReset();
+    mocks.regenerateClientSecret.mockReset();
+  });
+
+  test("get passes session teamId and rejects when DB returns null (strict ownership)", async () => {
+    mocks.getOAuthApplicationById.mockImplementation(() =>
+      Promise.resolve(null),
+    );
+
+    const caller = createCaller(createTestContext());
+    await expect(caller.get({ id: APP_ID })).rejects.toThrow(
+      "OAuth application not found",
+    );
+    expect(mocks.getOAuthApplicationById).toHaveBeenCalledWith(
+      expect.anything(),
+      APP_ID,
+      "test-team-id",
+    );
+  });
+
+  test("update passes session teamId and rejects when DB returns undefined (strict ownership)", async () => {
+    mocks.updateOAuthApplication.mockImplementation(() =>
+      Promise.resolve(undefined),
+    );
+
+    const caller = createCaller(createTestContext());
+    await expect(
+      caller.update({ id: APP_ID, name: "Hijacked" }),
+    ).rejects.toThrow("OAuth application not found");
+    expect(mocks.updateOAuthApplication).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ id: APP_ID, teamId: "test-team-id" }),
+    );
+  });
+
+  test("delete passes session teamId and rejects when DB returns undefined (strict ownership)", async () => {
+    mocks.deleteOAuthApplication.mockImplementation(() =>
+      Promise.resolve(undefined),
+    );
+
+    const caller = createCaller(createTestContext());
+    await expect(caller.delete({ id: APP_ID })).rejects.toThrow(
+      "OAuth application not found",
+    );
+    expect(mocks.deleteOAuthApplication).toHaveBeenCalledWith(
+      expect.anything(),
+      { id: APP_ID, teamId: "test-team-id" },
+    );
+  });
+
+  test("regenerateSecret passes session teamId and rejects when DB returns null (strict ownership)", async () => {
+    mocks.regenerateClientSecret.mockImplementation(() =>
+      Promise.resolve(null),
+    );
+
+    const caller = createCaller(createTestContext());
+    await expect(caller.regenerateSecret({ id: APP_ID })).rejects.toThrow(
+      "OAuth application not found",
+    );
+    expect(mocks.regenerateClientSecret).toHaveBeenCalledWith(
+      expect.anything(),
+      APP_ID,
+      "test-team-id",
+    );
+  });
+
+  test("delete calls deleteOAuthApplication directly with strict teamId (no branching)", async () => {
+    mocks.deleteOAuthApplication.mockImplementation(() =>
+      Promise.resolve({ id: APP_ID, name: "Test" }),
+    );
+
+    const caller = createCaller(createTestContext());
+    await caller.delete({ id: APP_ID });
+
+    expect(mocks.deleteOAuthApplication).toHaveBeenCalledTimes(1);
+    expect(mocks.deleteOAuthApplication).toHaveBeenCalledWith(
+      expect.anything(),
+      { id: APP_ID, teamId: "test-team-id" },
+    );
+  });
+
+  test("create always uses session teamId from middleware", async () => {
+    mocks.createOAuthApplication.mockReset();
+    mocks.createOAuthApplication.mockImplementation(() =>
+      Promise.resolve({
+        id: APP_ID,
+        name: "App",
+        clientId: "mid_client_x",
+        clientSecret: "secret",
+      }),
+    );
+
+    const caller = createCaller(createTestContext());
+    await caller.create({
+      name: "App",
+      redirectUris: ["https://example.com/cb"],
+    });
+
+    expect(mocks.createOAuthApplication).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ teamId: "test-team-id" }),
+    );
+  });
+});
+
 describe("tRPC: oauthApplications.authorized", () => {
   beforeEach(() => {
     mocks.getUserAuthorizedApplications.mockReset();

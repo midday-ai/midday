@@ -1,9 +1,9 @@
 import { hash } from "@midday/encryption";
 import slugify from "@sindresorhus/slugify";
-import { and, desc, eq, inArray, or } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import type { Database } from "../client";
-import { oauthAccessTokens, oauthApplications, users } from "../schema";
+import { oauthApplications, users } from "../schema";
 
 async function generateUniqueSlug(db: Database, name: string): Promise<string> {
   const baseSlug = slugify(name, { lowercase: true });
@@ -150,15 +150,10 @@ export async function createOAuthApplication(
   };
 }
 
-// Get OAuth applications for a team (owned by the team or authorized for the team)
+// Get OAuth applications owned by a team (for marketplace/apps page)
 export async function getOAuthApplicationsByTeam(db: Database, teamId: string) {
-  const authorizedAppIds = db
-    .selectDistinct({ applicationId: oauthAccessTokens.applicationId })
-    .from(oauthAccessTokens)
-    .where(eq(oauthAccessTokens.teamId, teamId));
-
   return db
-    .selectDistinct({
+    .select({
       id: oauthApplications.id,
       name: oauthApplications.name,
       slug: oauthApplications.slug,
@@ -187,12 +182,7 @@ export async function getOAuthApplicationsByTeam(db: Database, teamId: string) {
     })
     .from(oauthApplications)
     .leftJoin(users, eq(oauthApplications.createdBy, users.id))
-    .where(
-      or(
-        eq(oauthApplications.teamId, teamId),
-        inArray(oauthApplications.id, authorizedAppIds),
-      ),
-    )
+    .where(eq(oauthApplications.teamId, teamId))
     .orderBy(desc(oauthApplications.createdAt));
 }
 
@@ -401,7 +391,7 @@ export async function updateOAuthApplicationstatus(
   return result;
 }
 
-// Delete OAuth application
+// Delete OAuth application (only team-owned apps can be fully deleted)
 export async function deleteOAuthApplication(
   db: Database,
   params: DeleteOAuthApplicationParams,
@@ -421,8 +411,8 @@ export async function deleteOAuthApplication(
   return result;
 }
 
-// Find or create a DCR (Dynamic Client Registration) application.
-// Deduplicates by matching client_name + sorted redirect_uris.
+// Create a DCR (Dynamic Client Registration) application.
+// Always creates a fresh app — claimed for a team at authorization time.
 export type CreateDCRApplicationParams = {
   clientName: string;
   redirectUris: string[];
@@ -433,42 +423,14 @@ export type CreateDCRApplicationParams = {
   tokenEndpointAuthMethod?: string;
 };
 
-export async function findOrCreateDCRApplication(
+export async function createDCRApplication(
   db: Database,
   params: CreateDCRApplicationParams,
 ) {
-  const sortedUris = [...params.redirectUris].sort();
-  const dedupeKey = `${params.clientName}::${sortedUris.join(",")}`;
-  const dedupeHash = hash(dedupeKey);
-
-  const [existing] = await db
-    .select({
-      id: oauthApplications.id,
-      name: oauthApplications.name,
-      clientId: oauthApplications.clientId,
-      redirectUris: oauthApplications.redirectUris,
-      scopes: oauthApplications.scopes,
-      isPublic: oauthApplications.isPublic,
-      active: oauthApplications.active,
-    })
-    .from(oauthApplications)
-    .where(
-      and(
-        eq(oauthApplications.slug, `dcr-${dedupeHash.slice(0, 32)}`),
-        eq(oauthApplications.active, true),
-      ),
-    )
-    .limit(1);
-
-  if (existing) {
-    return {
-      ...existing,
-      created: false,
-    };
-  }
+  const baseDcrSlug = `dcr-${params.clientName}`;
 
   const clientId = `mid_client_${nanoid(24)}`;
-  const slug = `dcr-${dedupeHash.slice(0, 32)}`;
+  const slug = await generateUniqueSlug(db, baseDcrSlug);
 
   const requestedScopes = params.scope
     ? params.scope.split(" ").filter(Boolean)
@@ -502,10 +464,36 @@ export async function findOrCreateDCRApplication(
       active: oauthApplications.active,
     });
 
-  return {
-    ...result,
-    created: true,
-  };
+  if (!result) {
+    throw new Error("Failed to create DCR application");
+  }
+
+  return result;
+}
+
+// Claim an unclaimed DCR app for a team at authorization time
+export async function claimDCRApplication(
+  db: Database,
+  applicationId: string,
+  teamId: string,
+  userId: string,
+) {
+  const [result] = await db
+    .update(oauthApplications)
+    .set({
+      teamId,
+      createdBy: userId,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(
+      and(
+        eq(oauthApplications.id, applicationId),
+        isNull(oauthApplications.teamId),
+      ),
+    )
+    .returning({ id: oauthApplications.id });
+
+  return result;
 }
 
 // Regenerate client secret
@@ -520,7 +508,7 @@ export async function regenerateClientSecret(
   const [result] = await db
     .update(oauthApplications)
     .set({
-      clientSecret: clientSecretHash, // Store hashed secret
+      clientSecret: clientSecretHash,
       updatedAt: new Date().toISOString(),
     })
     .where(

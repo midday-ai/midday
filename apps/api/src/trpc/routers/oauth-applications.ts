@@ -12,6 +12,7 @@ import { revokeUserApplicationAccessSchema } from "@api/schemas/oauth-flow";
 import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  claimDCRApplication,
   createAuthorizationCode,
   createOAuthApplication,
   deleteOAuthApplication,
@@ -151,6 +152,11 @@ export const oauthApplicationsRouter = createTRPCRouter({
       // Enforce PKCE for public clients
       if (application.isPublic && !codeChallenge) {
         throw new Error("PKCE is required for public clients");
+      }
+
+      // Claim unclaimed DCR app for this team before issuing any auth codes
+      if (!application.teamId) {
+        await claimDCRApplication(db, application.id, teamId, session.user.id);
       }
 
       // Create authorization code

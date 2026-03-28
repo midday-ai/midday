@@ -191,14 +191,11 @@ export function OAuthApplicationForm({ data }: Props) {
           queryKey: trpc.oauthApplications.list.queryKey(),
         });
 
-        // Also invalidate the individual get query for consistency
         queryClient.invalidateQueries({
           queryKey: trpc.oauthApplications.get.queryKey(),
         });
 
-        // Close the sheet first
         setParams(null);
-        // Then open the modal with the secret
         if (result.clientSecret && result.name) {
           setSecret(result.clientSecret, result.name);
         }
