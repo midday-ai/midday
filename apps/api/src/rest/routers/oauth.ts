@@ -367,6 +367,11 @@ app.openapi(
       return c.json({ redirect_url: redirectUrl.toString() });
     }
 
+    // Claim unclaimed DCR app for this team before issuing any auth codes
+    if (!application.teamId) {
+      await claimDCRApplication(db, application.id, teamId, session.user.id);
+    }
+
     // Create authorization code
     const authCode = await createAuthorizationCode(db, {
       applicationId: application.id,
@@ -381,11 +386,6 @@ app.openapi(
       throw new HTTPException(500, {
         message: "Failed to create authorization code",
       });
-    }
-
-    // Claim unclaimed DCR app for this team
-    if (!application.teamId) {
-      await claimDCRApplication(db, application.id, teamId, session.user.id);
     }
 
     // Send app installation email only if this is the first time authorizing this app
