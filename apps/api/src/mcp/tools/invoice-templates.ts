@@ -12,7 +12,12 @@ import {
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
-import { DASHBOARD_URL, textToEditorDoc, truncateListResponse } from "../utils";
+import {
+  DASHBOARD_URL,
+  textToEditorDoc,
+  truncateListResponse,
+  withErrorHandling,
+} from "../utils";
 
 export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
@@ -34,7 +39,7 @@ export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
         inputSchema: {},
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async () => {
+      withErrorHandling(async () => {
         const templates = await getInvoiceTemplates(db, teamId);
 
         const clean = sanitizeArray(mcpInvoiceTemplateSchema, templates);
@@ -50,7 +55,7 @@ export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
           content: [{ type: "text" as const, text }],
           structuredContent,
         };
-      },
+      }, "Failed to list invoice templates"),
     );
 
     server.registerTool(
@@ -70,7 +75,7 @@ export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
-      async (params) => {
+      withErrorHandling(async (params) => {
         const template = params.id
           ? await getInvoiceTemplateById(db, { id: params.id, teamId })
           : await getInvoiceTemplate(db, teamId);
@@ -99,7 +104,7 @@ export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
         return {
           content: [{ type: "text" as const, text: JSON.stringify(response) }],
         };
-      },
+      }, "Failed to get invoice template"),
     );
   }
 
