@@ -1061,6 +1061,7 @@ const dbQueriesMock = new Proxy(
     reconnectBankConnection: createDefaultMock(),
 
     // OAuth applications router (additional @midday/db/queries named imports)
+    claimDCRApplication: createDefaultMock(),
     createAuthorizationCode: createDefaultMock(),
     getOAuthApplicationByClientId: createDefaultMock(),
     hasUserEverAuthorizedApp: createDefaultMock(),

@@ -18,6 +18,7 @@ import { validateResponse } from "@api/utils/validate-response";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import type { Database } from "@midday/db/client";
 import {
+  claimDCRApplication,
   createAuthorizationCode,
   exchangeAuthorizationCode,
   findOrCreateDCRApplication,
@@ -380,6 +381,11 @@ app.openapi(
       throw new HTTPException(500, {
         message: "Failed to create authorization code",
       });
+    }
+
+    // Claim unclaimed DCR app for this team
+    if (!application.teamId) {
+      await claimDCRApplication(db, application.id, teamId, session.user.id);
     }
 
     // Send app installation email only if this is the first time authorizing this app

@@ -12,6 +12,7 @@ import { revokeUserApplicationAccessSchema } from "@api/schemas/oauth-flow";
 import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  claimDCRApplication,
   createAuthorizationCode,
   createOAuthApplication,
   deleteOAuthApplication,
@@ -165,6 +166,11 @@ export const oauthApplicationsRouter = createTRPCRouter({
 
       if (!authCode) {
         throw new Error("Failed to create authorization code");
+      }
+
+      // Claim unclaimed DCR app for this team
+      if (!application.teamId) {
+        await claimDCRApplication(db, application.id, teamId, session.user.id);
       }
 
       // Send app installation email only if this is the first time authorizing this app
