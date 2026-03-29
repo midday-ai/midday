@@ -1,16 +1,13 @@
 import { openai } from "@ai-sdk/openai";
 import { buildSystemPrompt } from "@api/chat/prompt";
 import {
+  buildPrepareStep,
   type ChatMCPClient,
   createExecutionClient,
   ensureToolIndex,
   getToolDefinitions,
 } from "@api/chat/tools";
-import {
-  decodeDataUrl,
-  extractLastUserText,
-  generateChatTitle,
-} from "@api/chat/utils";
+import { decodeDataUrl, writeChatTitle } from "@api/chat/utils";
 import type { McpContext } from "@api/mcp/types";
 import type { Context } from "@api/rest/types";
 import { getGeoContext } from "@api/utils/geo";
@@ -65,7 +62,7 @@ app.post("/", async (c) => {
       countryCode: user?.team?.countryCode ?? geo.country,
     });
 
-    const toolIndex = await ensureToolIndex(mcpCtx);
+    await ensureToolIndex(mcpCtx);
 
     const mcpClientPromise = createExecutionClient(mcpCtx);
 
@@ -80,11 +77,12 @@ app.post("/", async (c) => {
     mcpClient = resolvedClient;
 
     const mcpTools = mcpClient.toolsFromDefinitions(getToolDefinitions());
-    const firstUserText = extractLastUserText(uiMessages);
     const client = mcpClient;
 
     const stream = createUIMessageStream({
       execute: ({ writer }) => {
+        const titlePromise = writeChatTitle(writer, uiMessages);
+
         const result = streamText({
           model: openai("gpt-4o"),
           system: systemPrompt,
@@ -100,26 +98,16 @@ app.post("/", async (c) => {
               },
             }),
           },
-          prepareStep: toolIndex.prepareStep({ maxTools: 10 }),
+          prepareStep: buildPrepareStep({
+            maxTools: 10,
+            alwaysActive: ["web_search"],
+          }),
           stopWhen: stepCountIs(8),
           experimental_download: async (options) =>
             options.map(({ url }) => decodeDataUrl(url)),
           onFinish: async () => {
-            try {
-              if (firstUserText) {
-                const title = await generateChatTitle(firstUserText);
-
-                if (title) {
-                  writer.write({
-                    type: "data-title",
-                    id: "chat-title",
-                    data: { title },
-                  });
-                }
-              }
-            } finally {
-              await client.close();
-            }
+            await titlePromise;
+            await client.close();
           },
         });
 

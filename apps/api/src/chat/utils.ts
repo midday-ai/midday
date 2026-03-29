@@ -1,31 +1,22 @@
 import { openai } from "@ai-sdk/openai";
-import { generateText, Output } from "ai";
+import { generateText, Output, type UIMessageStreamWriter } from "ai";
 import { z } from "zod";
 
-/**
- * Extract the text of the last user message from a UI message array.
- * Handles both the `parts`-based and legacy `content`-string formats.
- */
-export function extractLastUserText(
-  uiMessages: {
-    role: string;
-    parts?: { type: string; text?: string }[];
-    content?: string;
-  }[],
-): string | undefined {
-  return uiMessages
-    .filter((m) => m.role === "user")
-    .map((m) =>
-      Array.isArray(m.parts)
-        ? m.parts
-            .filter((p) => p.type === "text")
-            .map((p) => p.text ?? "")
-            .join("")
-        : typeof m.content === "string"
-          ? m.content
-          : "",
-    )
-    .at(-1);
+type UIMessage = {
+  role: string;
+  parts?: { type: string; text?: string }[];
+  content?: string;
+};
+
+function userMessageText(m: UIMessage): string {
+  return Array.isArray(m.parts)
+    ? m.parts
+        .filter((p) => p.type === "text")
+        .map((p) => p.text ?? "")
+        .join("")
+    : typeof m.content === "string"
+      ? m.content
+      : "";
 }
 
 /**
@@ -68,4 +59,33 @@ export async function generateChatTitle(
   });
 
   return result?.title ?? null;
+}
+
+/**
+ * Generate and stream a title on the first turn only.
+ * Skips silently for follow-up turns or on failure.
+ */
+export async function writeChatTitle(
+  writer: UIMessageStreamWriter,
+  uiMessages: UIMessage[],
+): Promise<void> {
+  const userMessages = uiMessages.filter((m) => m.role === "user");
+  if (userMessages.length !== 1) return;
+
+  const text = userMessageText(userMessages[0]!);
+  if (!text.trim()) return;
+
+  try {
+    const title = await generateChatTitle(text);
+
+    if (title) {
+      writer.write({
+        type: "data-title",
+        id: "chat-title",
+        data: { title },
+      });
+    }
+  } catch {
+    // Title is non-critical — don't break the stream
+  }
 }

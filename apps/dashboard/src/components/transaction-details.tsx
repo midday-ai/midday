@@ -232,7 +232,52 @@ export function TransactionDetails() {
   );
 
   if (isLoading || !data) {
-    return null;
+    return (
+      <div className="h-[calc(100vh-80px)] scrollbar-hide overflow-auto pb-12">
+        <div className="flex justify-between mb-8">
+          <div className="flex-1 flex-col">
+            <div className="flex items-center justify-between">
+              <div className="flex space-x-2 items-center">
+                <Skeleton className="size-5 rounded-full" />
+                <Skeleton className="w-[100px] h-[14px]" />
+              </div>
+              <Skeleton className="w-[80px] h-[14px]" />
+            </div>
+
+            <div className="mt-6 mb-3">
+              <Skeleton className="w-[35%] h-[22px]" />
+            </div>
+
+            <div className="flex flex-col w-full space-y-1">
+              <Skeleton className="w-[50%] h-[36px]" />
+              <Skeleton className="w-[60px] h-[12px]" />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-6 mb-2">
+          <div>
+            <Skeleton className="w-[60px] h-[14px] mb-2" />
+            <Skeleton className="w-full h-[36px]" />
+          </div>
+          <div>
+            <Skeleton className="w-[50px] h-[14px] mb-2" />
+            <Skeleton className="w-full h-[36px]" />
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <Skeleton className="w-[40px] h-[14px] mb-2" />
+          <Skeleton className="w-full h-[36px]" />
+        </div>
+
+        <div className="mt-8 space-y-4">
+          <Skeleton className="w-full h-[20px]" />
+          <Skeleton className="w-full h-[20px]" />
+          <Skeleton className="w-full h-[20px]" />
+        </div>
+      </div>
+    );
   }
 
   const defaultValue = ["attachment"];

@@ -24,15 +24,19 @@ export function OverviewView() {
   return (
     <ChatProvider>
       {view === "chat" && (
-        <div className="mt-2">
-          <div className="flex items-center justify-between">
-            <Button variant="outline" size="icon" onClick={goBack}>
-              <Icons.ArrowBack className="size-4" />
-            </Button>
-            <ChatTitle />
-            <NewChatButton variant="outline" />
-          </div>
-          <ChatView onClose={goBack} />
+        <div>
+          <ChatView
+            onClose={goBack}
+            header={
+              <>
+                <Button variant="outline" size="icon" onClick={goBack}>
+                  <Icons.ArrowBack className="size-4" />
+                </Button>
+                <ChatTitle />
+                <NewChatButton variant="outline" />
+              </>
+            }
+          />
         </div>
       )}
 

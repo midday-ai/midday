@@ -3,6 +3,7 @@ import { createMCPClient } from "@ai-sdk/mcp";
 import { createMcpServer } from "@api/mcp/server";
 import type { McpContext } from "@api/mcp/types";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import type { PrepareStepFunction, Tool } from "ai";
 import type { ToolIndex } from "toolpick";
 import { createToolIndex } from "toolpick";
 
@@ -54,6 +55,39 @@ export function getToolDefinitions(): ToolDefinitions {
     );
   }
   return cachedDefinitions;
+}
+
+/**
+ * Build a prepareStep function that delegates to the cached tool index
+ * but guarantees `alwaysActive` tool names are always exposed to the model.
+ *
+ * Toolpick's own `alwaysActive` option filters names against the index,
+ * which excludes built-in provider tools like `web_search`. This wrapper
+ * appends them after selection so they're never dropped.
+ */
+export function buildPrepareStep<T extends Record<string, Tool>>(options: {
+  maxTools: number;
+  alwaysActive?: string[];
+}): PrepareStepFunction<T> {
+  if (!cachedIndex) {
+    throw new Error("Tool index not bootstrapped — call ensureToolIndex first");
+  }
+
+  const base = cachedIndex.prepareStep({ maxTools: options.maxTools });
+  const always = options.alwaysActive ?? [];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- toolpick returns PrepareStepFunction<any>; the generic boundary is contained here
+  return (async (stepOptions: any) => {
+    const step = await base(stepOptions);
+    if (step?.activeTools && always.length > 0) {
+      for (const name of always) {
+        if (!step.activeTools.includes(name)) {
+          step.activeTools.push(name);
+        }
+      }
+    }
+    return step;
+  }) as PrepareStepFunction<T>;
 }
 
 export async function createExecutionClient(ctx: McpContext) {

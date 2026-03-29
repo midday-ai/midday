@@ -24,16 +24,50 @@ const MCP_CLIENTS = [
   { id: "manus-mcp", name: "Manus", Logo: ManusMcpLogo },
 ] as const;
 
-const SUGGESTED_ACTIONS = [
-  "Show latest transactions",
-  "Show where we're spending the most this month",
-  "Show revenue performance",
-  "Show expense breakdown by category",
-  "Show profit margins",
-  "Show cash runway",
-  "Show weekly trends and insights",
-  "Find untagged transactions from last month",
-];
+const SUGGESTION_POOL: Record<string, string[]> = {
+  insights: [
+    "What's my burn rate and runway?",
+    "Show profit margins this quarter",
+    "Compare revenue this month vs last month",
+    "Show my cash flow summary",
+    "What's my growth rate this year?",
+  ],
+  transactions: [
+    "Find large transactions this month",
+    "Show recurring expenses I could cut",
+    "Categorize my uncategorized transactions",
+    "Show latest transactions",
+    "Find duplicate transactions",
+  ],
+  invoicing: [
+    "Show unpaid invoices",
+    "Which invoices are overdue?",
+    "Show invoice analytics this quarter",
+    "Create an invoice for...",
+  ],
+  tracking: [
+    "How many hours did I log this week?",
+    "Show unbilled time by project",
+    "Start a timer for...",
+    "What projects have the most tracked time?",
+  ],
+  web: [
+    "Can I afford a new MacBook Pro?",
+    "What's the VAT rate in my country?",
+    "How does my revenue compare to industry benchmarks?",
+    "What are current exchange rates for my currencies?",
+  ],
+  operations: [
+    "Show unmatched inbox items",
+    "Which customers owe the most?",
+    "Who on my team has unreviewed transactions?",
+    "Show expense breakdown by category",
+  ],
+};
+
+function pickSuggestions(): string[] {
+  return Object.values(SUGGESTION_POOL).flat();
+}
 
 const ACCEPTED_TYPES = "image/*,application/pdf";
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -101,6 +135,7 @@ export function ChatInput({
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [suggestions] = useState(pickSuggestions);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mcpOpen, setMcpOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -220,14 +255,14 @@ export function ChatInput({
       {showSuggestions && (
         <div
           ref={menuRef}
-          className="absolute bottom-full left-0 right-0 mb-1 bg-[rgba(247,247,247,0.95)] dark:bg-[rgba(19,19,19,0.95)] backdrop-blur-lg max-h-48 overflow-y-auto z-30"
+          className="absolute top-full left-0 right-0 mt-1 bg-[rgba(247,247,247,0.96)] dark:bg-[rgba(19,19,19,0.98)] backdrop-blur-lg max-h-[220px] overflow-y-auto z-30"
         >
           <div className="p-1">
-            {SUGGESTED_ACTIONS.map((action) => (
+            {suggestions.map((action) => (
               <button
                 key={action}
                 type="button"
-                className="w-full text-left px-2.5 py-1.5 text-xs text-[#666] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className="w-full text-left px-2.5 py-2.5 text-xs text-[#666] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleSuggestionClick(action)}
               >
@@ -309,25 +344,25 @@ export function ChatInput({
               </button>
             </PopoverTrigger>
             <PopoverContent
-              side="top"
+              side="bottom"
               align="start"
               sideOffset={12}
-              className="w-[220px] p-1.5 bg-[rgba(247,247,247,0.95)] dark:bg-[rgba(19,19,19,0.95)] backdrop-blur-lg border-border shadow-sm"
+              className="w-[180px] p-1 bg-[rgba(247,247,247,0.96)] dark:bg-[rgba(19,19,19,0.98)] backdrop-blur-lg border-border shadow-sm"
             >
-              <p className="px-2.5 py-1.5 text-xs text-[#878787]">
+              <p className="px-2 py-1 text-[10px] text-[#878787]">
                 Use Midday in
               </p>
               {MCP_CLIENTS.map(({ id, name, Logo }) => (
                 <button
                   key={id}
                   type="button"
-                  className="flex items-center gap-2.5 w-full px-2.5 py-2 text-sm text-[#666] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 text-xs text-[#666] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                   onClick={() => {
                     setMcpOpen(false);
                     setParams({ "mcp-app": id });
                   }}
                 >
-                  <span className="size-5 overflow-hidden rounded-sm flex-shrink-0 [&_img]:!w-full [&_img]:!h-full [&_svg]:!w-full [&_svg]:!h-full">
+                  <span className="size-4 overflow-hidden rounded-sm flex-shrink-0 [&_img]:!w-full [&_img]:!h-full [&_svg]:!w-full [&_svg]:!h-full">
                     <Logo />
                   </span>
                   <span>{name}</span>

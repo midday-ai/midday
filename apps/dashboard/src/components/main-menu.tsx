@@ -288,7 +288,7 @@ export function MainMenu({ onSelect, isExpanded = false }: Props) {
   }, [isExpanded]);
 
   return (
-    <div className="mt-6 w-full">
+    <div className="mt-4 w-full">
       <nav className="w-full">
         <div className="flex flex-col gap-2">
           {items.map((item) => {

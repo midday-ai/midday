@@ -17,7 +17,7 @@ function WidgetCard({ label, href, value, detail }: WidgetCardProps) {
   return (
     <Link
       href={href}
-      className="flex flex-col justify-between border border-border bg-background p-5 hover:border-primary/30 transition-colors min-h-[110px]"
+      className="h-full border p-5 flex flex-col justify-between transition-all duration-300 bg-white border-[#e6e6e6] hover:bg-[#f7f7f7] hover:border-[#d0d0d0] dark:bg-[#0c0c0c] dark:border-[#1d1d1d] dark:hover:bg-[#0f0f0f] dark:hover:border-[#222222] cursor-pointer group min-h-[110px]"
     >
       <span className="text-xs text-muted-foreground">{label}</span>
       <div className="mt-3">

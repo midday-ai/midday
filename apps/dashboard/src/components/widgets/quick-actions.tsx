@@ -38,33 +38,42 @@ export function QuickActions() {
         <button
           key={label}
           type="button"
-          className="flex items-center gap-1.5 border border-border px-3 py-1.5 text-xs text-muted-foreground/60 hover:text-foreground hover:border-primary/30 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 border bg-white border-[#e6e6e6] hover:bg-[#f7f7f7] hover:border-[#d0d0d0] dark:border-[#1d1d1d] dark:bg-[#0c0c0c] dark:hover:bg-[#0f0f0f] dark:hover:border-[#222222] px-3 py-1.5 text-xs text-muted-foreground/60 hover:text-foreground transition-all duration-300 cursor-pointer group"
           onClick={() => openSheet(params)}
         >
-          <Icon size={13} className="text-muted-foreground/40" />
+          <Icon
+            size={13}
+            className="text-muted-foreground/40 group-hover:text-foreground transition-colors duration-300"
+          />
           <span>{label}</span>
         </button>
       ))}
 
       <button
         type="button"
-        className="flex items-center gap-1.5 border border-border px-3 py-1.5 text-xs text-muted-foreground/60 hover:text-foreground hover:border-primary/30 transition-colors cursor-pointer"
+        className="flex items-center gap-1.5 border bg-white border-[#e6e6e6] hover:bg-[#f7f7f7] hover:border-[#d0d0d0] dark:border-[#1d1d1d] dark:bg-[#0c0c0c] dark:hover:bg-[#0f0f0f] dark:hover:border-[#222222] px-3 py-1.5 text-xs text-muted-foreground/60 hover:text-foreground transition-all duration-300 cursor-pointer group"
         onClick={() =>
           openSheet({
             selectedDate: formatISO(new Date(), { representation: "date" }),
           })
         }
       >
-        <Icons.Tracker size={13} className="text-muted-foreground/40" />
+        <Icons.Tracker
+          size={13}
+          className="text-muted-foreground/40 group-hover:text-foreground transition-colors duration-300"
+        />
         <span>Track Time</span>
       </button>
 
       <button
         type="button"
-        className="flex items-center gap-1.5 border border-border px-3 py-1.5 text-xs text-muted-foreground/60 hover:text-foreground hover:border-primary/30 transition-colors cursor-pointer"
+        className="flex items-center gap-1.5 border bg-white border-[#e6e6e6] hover:bg-[#f7f7f7] hover:border-[#d0d0d0] dark:border-[#1d1d1d] dark:bg-[#0c0c0c] dark:hover:bg-[#0f0f0f] dark:hover:border-[#222222] px-3 py-1.5 text-xs text-muted-foreground/60 hover:text-foreground transition-all duration-300 cursor-pointer group"
         onClick={openFilePicker}
       >
-        <Icons.Inbox2 size={13} className="text-muted-foreground/40" />
+        <Icons.Inbox2
+          size={13}
+          className="text-muted-foreground/40 group-hover:text-foreground transition-colors duration-300"
+        />
         <span>Upload Receipt</span>
       </button>
     </div>

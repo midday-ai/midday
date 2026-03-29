@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import { useCallback } from "react";
 import { useChatState } from "@/components/chat/chat-context";
 import { ChatInput } from "@/components/chat/chat-input";
@@ -49,7 +50,13 @@ export function InputBar({
   );
 }
 
-export function ChatView({ onClose }: { onClose: () => void }) {
+export function ChatView({
+  onClose,
+  header,
+}: {
+  onClose: () => void;
+  header?: React.ReactNode;
+}) {
   const {
     messages,
     sendMessage,
@@ -79,8 +86,13 @@ export function ChatView({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-[calc(100vh-160px)]">
       <Conversation className="flex-1 hide-scrollbar">
-        <ConversationContent className="gap-4 p-0 pb-40">
-          <div className="max-w-[680px] mx-auto w-full pt-4 whitespace-normal">
+        <ConversationContent className="gap-4 p-0 pb-20">
+          {header && (
+            <div className="sticky top-0 z-20 flex items-center justify-between pt-4 pb-2 bg-background/[0.99] backdrop-blur-xl">
+              {header}
+            </div>
+          )}
+          <div className="max-w-[680px] mx-auto w-full pt-12 whitespace-normal">
             <ChatMessages messages={messages} status={status} />
           </div>
         </ConversationContent>

@@ -86,6 +86,8 @@ You CANNOT: send emails (other than invoice send/remind), connect bank accounts,
 
 ## Formatting
 - When presenting multiple items (transactions, invoices, time entries, projects, etc.), always use a markdown table.
+- In transaction tables, always make the name/description a markdown link using the format \`[Name](#txn:TRANSACTION_ID)\` so the user can click to view details.
+- In invoice tables, always make the invoice number a markdown link using the format \`[INV-001](#inv:INVOICE_ID)\` so the user can click to view details.
 - Format currency amounts using ${ctx.baseCurrency} and the user's locale conventions (e.g. "$1,234.56" for en-US, "1.234,56 €" for de-DE, "1 234,56 kr" for sv-SE).
 - Format dates using the user's preferred date format${ctx.dateFormat ? ` ("${ctx.dateFormat}")` : ""} and times using ${timeLabel} format.
 - Reference items by their identifiers (invoice number, transaction ID, project name).
