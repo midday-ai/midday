@@ -66,7 +66,9 @@ const SUGGESTION_POOL: Record<string, string[]> = {
 };
 
 function pickSuggestions(): string[] {
-  return Object.values(SUGGESTION_POOL).flat();
+  return Object.values(SUGGESTION_POOL).map(
+    (items) => items[Math.floor(Math.random() * items.length)]!,
+  );
 }
 
 const ACCEPTED_TYPES = "image/*,application/pdf";
@@ -82,6 +84,7 @@ export type ChatInputProps = {
   autoFocus?: boolean;
   onEscape?: () => void;
   onSuggestion?: (text: string) => void;
+  menuPosition?: "above" | "below";
 };
 
 function AttachmentPreview({
@@ -132,6 +135,7 @@ export function ChatInput({
   autoFocus = false,
   onEscape,
   onSuggestion,
+  menuPosition = "below",
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -255,7 +259,10 @@ export function ChatInput({
       {showSuggestions && (
         <div
           ref={menuRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-[rgba(247,247,247,0.96)] dark:bg-[rgba(19,19,19,0.98)] backdrop-blur-lg max-h-[220px] overflow-y-auto z-30"
+          className={cn(
+            "absolute left-0 right-0 bg-[rgba(247,247,247,0.96)] dark:bg-[rgba(19,19,19,0.98)] backdrop-blur-lg max-h-[220px] overflow-y-auto z-30",
+            menuPosition === "above" ? "bottom-full mb-1" : "top-full mt-1",
+          )}
         >
           <div className="p-1">
             {suggestions.map((action) => (
@@ -344,7 +351,7 @@ export function ChatInput({
               </button>
             </PopoverTrigger>
             <PopoverContent
-              side="bottom"
+              side={menuPosition === "above" ? "top" : "bottom"}
               align="start"
               sideOffset={12}
               className="w-[180px] p-1 bg-[rgba(247,247,247,0.96)] dark:bg-[rgba(19,19,19,0.98)] backdrop-blur-lg border-border shadow-sm"

@@ -17,11 +17,16 @@ export function useInboxUpload() {
   const { toast, dismiss, update } = useToast();
   const toastIdRef = useRef<string | undefined>(undefined);
 
-  const processAttachmentsMutation = useMutation(
-    trpc.inbox.processAttachments.mutationOptions(),
-  );
-  const createInboxItemMutation = useMutation(
+  // dismiss/update from useToast are new arrow functions each render;
+  // keep them in a ref so the callback doesn't recreate every render.
+  const toastRef = useRef({ toast, dismiss, update });
+  toastRef.current = { toast, dismiss, update };
+
+  const { mutateAsync: createInboxItem } = useMutation(
     trpc.inbox.create.mutationOptions(),
+  );
+  const { mutate: processAttachments } = useMutation(
+    trpc.inbox.processAttachments.mutationOptions(),
   );
 
   const uploadFiles = useCallback(
@@ -31,7 +36,7 @@ export function useInboxUpload() {
       const path = [user?.teamId, "inbox"] as string[];
       const progress = files.map(() => 0);
 
-      const { id } = toast({
+      const { id } = toastRef.current.toast({
         title: `Uploading ${files.length} ${files.length === 1 ? "file" : "files"}`,
         progress: 0,
         variant: "progress",
@@ -46,7 +51,7 @@ export function useInboxUpload() {
           files.map(async (file) => {
             const processedFilename = stripSpecialCharacters(file.name);
             const filePath = [...path, processedFilename];
-            return createInboxItemMutation.mutateAsync({
+            return createInboxItem({
               filename: processedFilename,
               mimetype: file.type,
               size: file.size,
@@ -74,7 +79,7 @@ export function useInboxUpload() {
                   progress.reduce((a, b) => a + b, 0) / files.length,
                 );
                 if (toastIdRef.current) {
-                  update(toastIdRef.current, {
+                  toastRef.current.update(toastIdRef.current, {
                     id: toastIdRef.current,
                     progress: total,
                     title: `Uploading ${files.length} ${files.length === 1 ? "file" : "files"}`,
@@ -85,7 +90,7 @@ export function useInboxUpload() {
           ),
         );
 
-        processAttachmentsMutation.mutate(
+        processAttachments(
           (results as { filename: string; file: File }[]).map((result) => ({
             filePath: [...path, result.filename],
             mimetype: result.file.type,
@@ -93,10 +98,10 @@ export function useInboxUpload() {
           })),
         );
 
-        dismiss(toastIdRef.current);
+        toastRef.current.dismiss(toastIdRef.current);
         toastIdRef.current = undefined;
 
-        toast({
+        toastRef.current.toast({
           title: "Upload successful.",
           variant: "success",
           duration: 2000,
@@ -105,17 +110,24 @@ export function useInboxUpload() {
         queryClient.invalidateQueries({
           queryKey: trpc.inbox.get.queryKey(),
         });
-        dismiss(toastIdRef.current);
+        toastRef.current.dismiss(toastIdRef.current);
         toastIdRef.current = undefined;
 
-        toast({
+        toastRef.current.toast({
           duration: 2500,
           variant: "error",
           title: "Something went wrong please try again.",
         });
       }
     },
-    [user?.teamId],
+    [
+      user?.teamId,
+      queryClient,
+      trpc,
+      supabase,
+      createInboxItem,
+      processAttachments,
+    ],
   );
 
   const openFilePicker = useCallback(() => {

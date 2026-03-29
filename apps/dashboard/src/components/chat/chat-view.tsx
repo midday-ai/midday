@@ -22,6 +22,7 @@ export function InputBar({
   onStop,
   onEscape,
   onSuggestion,
+  menuPosition,
 }: {
   isActive?: boolean;
   hasMessages?: boolean;
@@ -32,6 +33,7 @@ export function InputBar({
   onStop: () => void;
   onEscape?: () => void;
   onSuggestion?: (text: string) => void;
+  menuPosition?: "above" | "below";
 }) {
   return (
     <div className="bg-[rgba(247,247,247,0.85)] dark:bg-[rgba(19,19,19,0.7)] backdrop-blur-lg">
@@ -45,6 +47,7 @@ export function InputBar({
         autoFocus={isActive}
         onEscape={onEscape}
         onSuggestion={onSuggestion}
+        menuPosition={menuPosition}
       />
     </div>
   );
@@ -115,6 +118,7 @@ export function ChatView({
             onChange={setInputValue}
             onSubmit={handleSubmit}
             onStop={stop}
+            menuPosition="above"
             onSuggestion={(text) => {
               sendMessage({ text });
             }}
