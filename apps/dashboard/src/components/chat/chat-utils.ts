@@ -1,3 +1,5 @@
+export const ENTITY_LINK_RE = /^#(txn|inv|cust|project|inbox|doc):/;
+
 export const ICON_SIZE = 13;
 
 export const STATUS_ROW = "flex items-center gap-1.5 h-5 text-xs";

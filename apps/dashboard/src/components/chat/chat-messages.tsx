@@ -4,7 +4,11 @@ import { InvoiceTemplate } from "@midday/mcp-apps/invoice";
 import type { UIMessage } from "ai";
 import { useCallback } from "react";
 import { Streamdown } from "streamdown";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useDocumentParams } from "@/hooks/use-document-params";
+import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import {
   type DynamicToolPart,
@@ -31,21 +35,38 @@ type ChatMessagesProps = {
 export function ChatMessages({ messages, status }: ChatMessagesProps) {
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
+  const { setParams: setCustomerParams } = useCustomerParams();
+  const { setParams: setTrackerParams } = useTrackerParams();
+  const { setParams: setInboxParams } = useInboxParams();
+  const { setParams: setDocumentParams } = useDocumentParams();
 
-  const handleEntityLink = useCallback(
-    (href: string) => {
-      if (href.startsWith("#txn:")) {
-        setTransactionParams({ transactionId: href.slice(5) });
-        return true;
-      }
-      if (href.startsWith("#inv:")) {
-        setInvoiceParams({ invoiceId: href.slice(5), type: "details" });
-        return true;
-      }
-      return false;
-    },
-    [setTransactionParams, setInvoiceParams],
-  );
+  const handleEntityLink = useCallback((href: string) => {
+    if (href.startsWith("#txn:")) {
+      setTransactionParams({ transactionId: href.slice(5) });
+      return true;
+    }
+    if (href.startsWith("#inv:")) {
+      setInvoiceParams({ invoiceId: href.slice(5), type: "details" });
+      return true;
+    }
+    if (href.startsWith("#cust:")) {
+      setCustomerParams({ customerId: href.slice(6), details: true });
+      return true;
+    }
+    if (href.startsWith("#project:")) {
+      setTrackerParams({ projectId: href.slice(9), update: true });
+      return true;
+    }
+    if (href.startsWith("#inbox:")) {
+      setInboxParams({ inboxId: href.slice(7), type: "details" });
+      return true;
+    }
+    if (href.startsWith("#doc:")) {
+      setDocumentParams({ documentId: href.slice(5) });
+      return true;
+    }
+    return false;
+  }, []);
 
   const components = useCallback(
     () => makeStreamdownComponents(handleEntityLink),

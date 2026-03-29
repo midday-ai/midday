@@ -3,6 +3,7 @@ import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { IconMap } from "streamdown";
+import { ENTITY_LINK_RE } from "./chat-utils";
 
 export const streamdownIcons: Partial<IconMap> = {
   CheckIcon: Icons.Check as IconMap["CheckIcon"],
@@ -31,7 +32,7 @@ export function makeStreamdownComponents(
 ): Record<string, React.FC<{ href?: string; children?: ReactNode }>> {
   return {
     a: ({ href, children }) => {
-      if (href?.startsWith("#txn:") || href?.startsWith("#inv:")) {
+      if (href && ENTITY_LINK_RE.test(href)) {
         return (
           <button
             type="button"
