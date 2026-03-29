@@ -30,7 +30,12 @@ const linkClass =
 function buildDescription(
   data: {
     openInvoices: { count: number; totalAmount: number; currency: string };
-    unbilledTime: { totalDuration: number; projectCount: number };
+    unbilledTime: {
+      totalDuration: number;
+      totalAmount: number;
+      projectCount: number;
+      currency: string;
+    };
     inboxPending: { count: number };
     transactionsToReview: { count: number };
   },
@@ -63,42 +68,58 @@ function buildDescription(
   }
 
   if (unbilledTime.totalDuration > 0) {
-    const timeStr = secondsToHoursAndMinutes(unbilledTime.totalDuration);
+    const unbilledLabel =
+      unbilledTime.totalAmount > 0
+        ? formatAmount({
+            amount: unbilledTime.totalAmount,
+            currency: unbilledTime.currency,
+            maximumFractionDigits: 0,
+            locale,
+          })
+        : secondsToHoursAndMinutes(unbilledTime.totalDuration);
+
     parts.push(
       <span key="time">
         <Link href="/tracker?status=in_progress" className={linkClass}>
-          {timeStr}
+          {unbilledLabel}
         </Link>{" "}
-        of unbilled time
-      </span>,
-    );
-  }
-
-  if (transactionsToReview.count > 0) {
-    parts.push(
-      <span key="transactions">
-        <Link href="/transactions?tab=review" className={linkClass}>
-          {transactionsToReview.count}{" "}
-          {transactionsToReview.count === 1 ? "transaction" : "transactions"}
-        </Link>{" "}
-        ready to export
-      </span>,
-    );
-  }
-
-  if (inboxPending.count > 0) {
-    parts.push(
-      <span key="inbox">
-        <Link href="/inbox?status=pending" className={linkClass}>
-          {inboxPending.count} inbox{" "}
-          {inboxPending.count === 1 ? "item" : "items"}
-        </Link>{" "}
-        to review
+        in unbilled time
       </span>,
     );
   }
 
   if (parts.length === 0) {
+    const opsCount = transactionsToReview.count + inboxPending.count;
+    if (opsCount > 0) {
+      return (
+        <span>
+          You have{" "}
+          {transactionsToReview.count > 0 && (
+            <span>
+              <Link href="/transactions?tab=review" className={linkClass}>
+                {transactionsToReview.count}{" "}
+                {transactionsToReview.count === 1
+                  ? "transaction"
+                  : "transactions"}
+              </Link>{" "}
+              ready to export
+            </span>
+          )}
+          {transactionsToReview.count > 0 && inboxPending.count > 0 && " and "}
+          {inboxPending.count > 0 && (
+            <span>
+              <Link href="/inbox?status=pending" className={linkClass}>
+                {inboxPending.count} inbox{" "}
+                {inboxPending.count === 1 ? "item" : "items"}
+              </Link>{" "}
+              to review
+            </span>
+          )}
+          .
+        </span>
+      );
+    }
+
     return <span>Everything is up to date. Nothing needs your attention.</span>;
   }
 
@@ -149,7 +170,7 @@ export function WelcomeSection() {
           </>
         ) : null}
       </h1>
-      <p className="text-muted-foreground text-sm mt-3 max-w-md leading-relaxed">
+      <p className="text-muted-foreground text-sm mt-3 max-w-lg leading-relaxed">
         {buildDescription(data, user?.locale)}
       </p>
     </div>

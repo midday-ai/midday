@@ -59,11 +59,29 @@ export function WidgetCards() {
   const openDetail =
     data.openInvoices.count > 0 ? `${openAmount} outstanding` : "All paid";
 
-  const unbilledValue = secondsToHoursAndMinutes(
+  const hasUnbilledAmount = data.unbilledTime.totalAmount > 0;
+  const unbilledTimeStr = secondsToHoursAndMinutes(
     data.unbilledTime.totalDuration,
   );
-  const unbilledDetail =
-    data.unbilledTime.projectCount > 0
+  const unbilledValue = hasUnbilledAmount
+    ? formatAmount({
+        amount: data.unbilledTime.totalAmount,
+        currency: data.unbilledTime.currency,
+        maximumFractionDigits: 0,
+        locale,
+      })
+    : unbilledTimeStr;
+
+  const unbilledDetail = hasUnbilledAmount
+    ? [
+        unbilledTimeStr,
+        data.unbilledTime.projectCount > 0
+          ? `across ${data.unbilledTime.projectCount} ${data.unbilledTime.projectCount === 1 ? "project" : "projects"}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" ")
+    : data.unbilledTime.projectCount > 0
       ? `across ${data.unbilledTime.projectCount} ${data.unbilledTime.projectCount === 1 ? "project" : "projects"}`
       : undefined;
 

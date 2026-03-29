@@ -249,7 +249,7 @@ export function ChatInput({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         rows={1}
-        className="w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-sm outline-none placeholder:text-[#878787]/60 min-h-[44px] max-h-[150px]"
+        className="w-full resize-none bg-transparent px-4 pt-4 pb-2.5 text-sm outline-none placeholder:text-[#878787]/60 min-h-[52px] max-h-[150px]"
       />
 
       <div className="flex items-center justify-between px-3 pb-2.5">

@@ -83,7 +83,7 @@ const TOOL_ICON_MAP: Record<string, (s: number) => ReactNode> = {
   invoice_recurring: (s) => <Icons.Invoice size={s} />,
   customers: (s) => <Icons.Customers size={s} />,
   bank_accounts: (s) => <Icons.Accounts size={s} />,
-  reports: (s) => <Icons.Leaderboard size={s} />,
+  reports: (s) => <Icons.Monitoring size={s} />,
   tracker: (s) => <Icons.Tracker size={s} />,
   categories: (s) => <Icons.Category size={s} />,
   tags: (s) => <Icons.Status size={s} />,
