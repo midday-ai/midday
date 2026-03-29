@@ -33,19 +33,21 @@ export function SelectAttachment({
 }: Props) {
   const [debouncedValue, setDebouncedValue] = useDebounceValue("", 200);
   const [isOpen, setIsOpen] = useState(false);
+  const [hasFocused, setHasFocused] = useState(false);
   const { data: user } = useUserQuery();
   const { setParams } = useDocumentParams();
 
   const trpc = useTRPC();
 
-  // Only fetch suggestions when user is actively searching (not just on focus)
+  const isSearching = debouncedValue.length > 0;
+
   const { data: items, isLoading } = useQuery({
     ...trpc.search.attachments.queryOptions({
-      q: debouncedValue.length > 0 ? debouncedValue : undefined,
+      q: isSearching ? debouncedValue : undefined,
       transactionId,
-      limit: debouncedValue.length > 0 ? 30 : 3,
+      limit: isSearching ? 30 : 1,
     }),
-    enabled: Boolean(debouncedValue.length > 0 || transactionId), // Enable for search OR suggestions
+    enabled: Boolean(isSearching || (transactionId && hasFocused)),
   });
 
   const handleOnSelect = (item: Attachment) => {
@@ -104,7 +106,7 @@ export function SelectAttachment({
         }
 
         const showBestMatch =
-          !!transactionId && index === 0 && items?.length > 1;
+          !!transactionId && index === 0 && items.length > 1;
 
         return {
           id: item.id,
@@ -166,7 +168,8 @@ export function SelectAttachment({
     : [];
 
   const handleFocus = () => {
-    if (!isOpen && !debouncedValue) {
+    setHasFocused(true);
+    if (!isOpen) {
       setIsOpen(true);
     }
   };
