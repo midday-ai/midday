@@ -18,7 +18,7 @@ export const streamdownControls = {
 } as const;
 
 export const streamdownClassName = cn(
-  "font-sans text-sm [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 space-y-3",
+  "font-sans text-sm text-[#666666] [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 space-y-3",
   "[&_[data-streamdown=table-wrapper]]:rounded-none [&_[data-streamdown=table-wrapper]]:bg-transparent [&_[data-streamdown=table-wrapper]]:p-0 [&_[data-streamdown=table-wrapper]]:border-0 [&_[data-streamdown=table-wrapper]]:gap-1",
   "[&_[data-streamdown=table-wrapper]_>div:last-child]:rounded-none",
   "[&_[data-streamdown=table]]:text-sm",
@@ -45,47 +45,43 @@ export function makeStreamdownComponents(
       return (
         <Link
           href={href || "#"}
-          className="border-b border-dashed border-[#878787]/30 hover:text-foreground transition-colors"
+          className="border-b border-dashed border-[#666666] hover:text-foreground transition-colors"
         >
           {children}
         </Link>
       );
     },
-    p: ({ children }) => <p className="text-sm leading-relaxed">{children}</p>,
+    p: ({ children }) => (
+      <p className="text-sm leading-relaxed text-[#666666]">{children}</p>
+    ),
     ul: ({ children }) => <ul className="space-y-1 pl-4">{children}</ul>,
     ol: ({ children }) => (
       <ol className="space-y-1 pl-4 list-decimal">{children}</ol>
     ),
     li: ({ children }) => (
-      <li className="text-sm leading-relaxed list-disc marker:text-muted-foreground/40">
+      <li className="text-sm leading-relaxed text-[#666666] list-disc marker:text-[#666666]">
         {children}
       </li>
     ),
     h1: ({ children }) => (
-      <h1 className="text-sm font-medium text-foreground mt-3 mb-1">
-        {children}
-      </h1>
+      <h1 className="text-lg text-primary mt-6 mb-2">{children}</h1>
     ),
     h2: ({ children }) => (
-      <h2 className="text-sm font-medium text-foreground mt-3 mb-1">
-        {children}
-      </h2>
+      <h2 className="text-lg text-primary mt-6 mb-2">{children}</h2>
     ),
     h3: ({ children }) => (
-      <h3 className="text-sm font-medium text-muted-foreground mt-2 mb-0.5">
-        {children}
-      </h3>
+      <h3 className="text-base text-primary mt-4 mb-1.5">{children}</h3>
     ),
     strong: ({ children }) => (
-      <strong className="font-medium text-foreground">{children}</strong>
+      <strong className="font-medium text-primary">{children}</strong>
     ),
     code: ({ children }) => (
-      <code className="px-1 py-0.5 bg-secondary text-foreground text-[13px]">
+      <code className="px-1 py-0.5 bg-secondary text-primary text-[13px]">
         {children}
       </code>
     ),
     pre: ({ children }) => (
-      <pre className="p-3 bg-secondary text-foreground text-[13px] overflow-x-auto">
+      <pre className="p-3 bg-secondary text-primary text-[13px] overflow-x-auto">
         {children}
       </pre>
     ),
@@ -104,7 +100,9 @@ export function makeStreamdownComponents(
       </th>
     ),
     td: ({ children }) => (
-      <td className="px-4 py-2 align-middle whitespace-nowrap">{children}</td>
+      <td className="px-4 py-2 align-middle whitespace-nowrap text-[#666666]">
+        {children}
+      </td>
     ),
   };
 }

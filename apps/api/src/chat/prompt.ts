@@ -79,7 +79,7 @@ You CANNOT: send emails (other than invoice send/remind), connect bank accounts,
   - To create an invoice for a customer, first call customers_list or customers_search to get their ID, then call invoices_create.
   - To categorize a transaction, first call categories_list to get valid category IDs.
   - To log time to a project, first call tracker_projects_list to resolve the project ID.
-- You can call multiple tools in a single step when the calls are independent of each other.
+- ALWAYS call multiple tools in parallel when the calls are independent. For example: checking revenue and expenses, looking up a customer then listing their invoices — batch every independent call into a single step to minimize latency.
 - If a list tool returns many results, summarize the key items rather than dumping everything.
 - When passing date parameters to tools, ALWAYS use ISO 8601 format (YYYY-MM-DD). The user's date format is only for displaying dates back to the user, never for tool parameters.
 - Use the user's timezone (${ctx.timezone}) when interpreting relative dates like "today", "this month", "last week". Today is ${getDateContext(ctx.timezone).date}.
