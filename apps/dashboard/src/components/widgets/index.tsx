@@ -2,13 +2,14 @@
 
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useCallback, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { ChatProvider } from "@/components/chat/chat-context";
 import { ChatTitle } from "@/components/chat/chat-title";
 import { ChatView } from "@/components/chat/chat-view";
 import { NewChatButton } from "@/components/chat/new-chat-button";
 import { AskMidday } from "./ask-midday";
 import { McpBanner } from "./mcp-banner";
+import { OverviewSkeleton } from "./overview-skeleton";
 import { QuickActions } from "./quick-actions";
 import { WelcomeSection } from "./welcome-section";
 import { WidgetCards } from "./widget-cards";
@@ -37,10 +38,12 @@ export function OverviewView() {
 
       {view === "overview" && (
         <div className="mt-2 pb-16 flex flex-col justify-center min-h-[calc(100vh-120px)] max-w-3xl mx-auto w-full">
-          <WelcomeSection />
-          <AskMidday onChatOpen={() => setView("chat")} />
-          <QuickActions />
-          <WidgetCards />
+          <Suspense fallback={<OverviewSkeleton />}>
+            <WelcomeSection />
+            <AskMidday onChatOpen={() => setView("chat")} />
+            <QuickActions />
+            <WidgetCards />
+          </Suspense>
         </div>
       )}
       <McpBanner />

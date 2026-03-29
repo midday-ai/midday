@@ -220,14 +220,14 @@ export function ChatInput({
       {showSuggestions && (
         <div
           ref={menuRef}
-          className="absolute bottom-full left-0 right-0 mb-1 bg-[rgba(247,247,247,0.95)] dark:bg-[rgba(19,19,19,0.95)] backdrop-blur-lg max-h-80 overflow-y-auto z-30"
+          className="absolute bottom-full left-0 right-0 mb-1 bg-[rgba(247,247,247,0.95)] dark:bg-[rgba(19,19,19,0.95)] backdrop-blur-lg max-h-48 overflow-y-auto z-30"
         >
-          <div className="p-1.5">
+          <div className="p-1">
             {SUGGESTED_ACTIONS.map((action) => (
               <button
                 key={action}
                 type="button"
-                className="w-full text-left px-3 py-2 text-sm text-[#666] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className="w-full text-left px-2.5 py-1.5 text-xs text-[#666] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleSuggestionClick(action)}
               >
@@ -341,7 +341,7 @@ export function ChatInput({
           type="button"
           onClick={handleSubmit}
           disabled={!isStreaming && !value.trim() && !files.length}
-          className="size-7 flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
+          className="size-7 flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           {isStreaming ? (
             <Icons.Stop className="size-3.5" />

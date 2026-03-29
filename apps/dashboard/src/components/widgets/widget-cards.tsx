@@ -1,6 +1,10 @@
 "use client";
 
+import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 
 interface WidgetCardProps {
   label: string;
@@ -27,48 +31,95 @@ function WidgetCard({ label, href, value, detail }: WidgetCardProps) {
 }
 
 export function WidgetCards() {
+  const trpc = useTRPC();
+  const { data } = useSuspenseQuery(trpc.overview.summary.queryOptions());
+  const { data: user } = useUserQuery();
+  const locale = user?.locale;
+
+  const cashValue =
+    formatAmount({
+      amount: data.cashBalance.totalBalance,
+      currency: data.cashBalance.currency,
+      maximumFractionDigits: 0,
+      locale,
+    }) ?? "$0";
+
+  const cashDetail =
+    data.cashBalance.accountCount > 0
+      ? `across ${data.cashBalance.accountCount} ${data.cashBalance.accountCount === 1 ? "account" : "accounts"}`
+      : undefined;
+
+  const openValue = String(data.openInvoices.count);
+  const openAmount = formatAmount({
+    amount: data.openInvoices.totalAmount,
+    currency: data.openInvoices.currency,
+    maximumFractionDigits: 0,
+    locale,
+  });
+  const openDetail =
+    data.openInvoices.count > 0 ? `${openAmount} outstanding` : "All paid";
+
+  const unbilledValue = secondsToHoursAndMinutes(
+    data.unbilledTime.totalDuration,
+  );
+  const unbilledDetail =
+    data.unbilledTime.projectCount > 0
+      ? `across ${data.unbilledTime.projectCount} ${data.unbilledTime.projectCount === 1 ? "project" : "projects"}`
+      : undefined;
+
+  const runwayValue =
+    data.runway > 0
+      ? `${data.runway} ${data.runway === 1 ? "mo" : "mos"}`
+      : "-";
+  const runwayDetail = data.runway > 0 ? "at current burn rate" : "No data yet";
+
+  const reviewValue = String(data.transactionsToReview.count);
+  const reviewDetail =
+    data.transactionsToReview.count === 0
+      ? "All up to date"
+      : "Ready to export";
+
+  const inboxValue = String(data.inboxPending.count);
+  const inboxDetail =
+    data.inboxPending.count === 0 ? "All caught up" : "To review";
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
       <WidgetCard
         label="Cash Balance"
-        href="/transactions"
-        value="$42,300"
-        detail="+$3,200 this month"
+        href="/reports?scrollTo=cash-balance"
+        value={cashValue}
+        detail={cashDetail}
       />
-
       <WidgetCard
-        label="Profit This Month"
-        href="/reports"
-        value="$4,820"
-        detail="⋅ +12% vs last month"
+        label="Open Invoices"
+        href="/invoices?statuses=draft,scheduled,unpaid"
+        value={openValue}
+        detail={openDetail}
       />
-
-      <WidgetCard
-        label="Unpaid Invoices"
-        href="/invoices"
-        value="3"
-        detail="$8,200 outstanding ⋅ 1 overdue"
-      />
-
       <WidgetCard
         label="Unbilled Time"
-        href="/tracker"
-        value="12h"
-        detail="across 3 projects"
+        href="/tracker?status=in_progress"
+        value={unbilledValue}
+        detail={unbilledDetail}
       />
-
       <WidgetCard
-        label="Burn Rate"
-        href="/reports"
-        value="$7,630"
-        detail="/mo ⋅ -8% vs last month"
+        label="Transactions"
+        href="/transactions?tab=review"
+        value={reviewValue}
+        detail={reviewDetail}
       />
-
       <WidgetCard
-        label="Inbox to Review"
-        href="/inbox"
-        value="0"
-        detail="All caught up"
+        label="Runway"
+        href="/reports?scrollTo=runway"
+        value={runwayValue}
+        detail={runwayDetail}
+      />
+      <WidgetCard
+        label="Inbox"
+        href="/inbox?status=pending"
+        value={inboxValue}
+        detail={inboxDetail}
       />
     </div>
   );
