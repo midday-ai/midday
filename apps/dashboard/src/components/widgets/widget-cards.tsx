@@ -64,12 +64,12 @@ export function WidgetCards() {
     data.unbilledTime.totalDuration,
   );
   const unbilledValue = hasUnbilledAmount
-    ? formatAmount({
+    ? (formatAmount({
         amount: data.unbilledTime.totalAmount,
         currency: data.unbilledTime.currency,
         maximumFractionDigits: 0,
         locale,
-      })
+      }) ?? unbilledTimeStr)
     : unbilledTimeStr;
 
   const unbilledDetail = hasUnbilledAmount
