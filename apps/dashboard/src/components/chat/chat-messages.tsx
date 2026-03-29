@@ -17,6 +17,7 @@ import {
   INVOICE_TOOLS,
   type SourceUrlPart,
 } from "./chat-utils";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "./reasoning";
 import { SourcesList } from "./sources-list";
 import {
   makeStreamdownComponents,
@@ -113,6 +114,16 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
           (p) => p.type === "source-url",
         ) as SourceUrlPart[];
 
+        const reasoningParts = message.parts.filter(
+          (p) => p.type === "reasoning",
+        ) as { type: "reasoning"; text: string }[];
+        const reasoningText = reasoningParts.map((p) => p.text).join("\n\n");
+        const hasReasoning = reasoningParts.length > 0;
+        const isReasoningStreaming =
+          isStreaming &&
+          message.id === lastId &&
+          message.parts.at(-1)?.type === "reasoning";
+
         const invoiceParts = toolParts.filter(
           (p) =>
             INVOICE_TOOLS.has(p.toolName) &&
@@ -122,12 +133,13 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
 
         const isLast = isStreaming && message.id === lastId;
         const showThinking =
-          isLast && !textContent && visibleTools.length === 0;
+          isLast && !textContent && visibleTools.length === 0 && !hasReasoning;
         const hasContent =
           textContent ||
           visibleTools.length > 0 ||
           invoiceParts.length > 0 ||
-          sourceParts.length > 0;
+          sourceParts.length > 0 ||
+          hasReasoning;
 
         if (!hasContent && !showThinking) return null;
 
@@ -135,6 +147,19 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
           <div key={message.id} className="flex justify-start">
             <div className="w-full text-sm text-muted-foreground">
               {showThinking && <ThinkingIndicator />}
+
+              {hasReasoning && (
+                <div
+                  className={
+                    textContent || visibleTools.length > 0 ? "mb-3" : undefined
+                  }
+                >
+                  <Reasoning isStreaming={isReasoningStreaming}>
+                    <ReasoningTrigger />
+                    <ReasoningContent>{reasoningText}</ReasoningContent>
+                  </Reasoning>
+                </div>
+              )}
 
               {visibleTools.length > 0 && (
                 <div className={textContent ? "mb-3" : undefined}>

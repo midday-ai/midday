@@ -14,6 +14,8 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
     inputValue,
     setInputValue,
     setChatTitle,
+    mode,
+    setMode,
   } = useChatState();
 
   const isStreaming = status === "streaming" || status === "submitted";
@@ -62,10 +64,9 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
         onSubmit={handleSubmit}
         onStop={stop}
         onSuggestion={handleSuggestion}
+        mode={mode}
+        onModeChange={setMode}
       />
-      <p className="text-center text-[11px] text-[#878787]/50 pt-1.5">
-        Midday AI can make mistakes. Please double-check responses.
-      </p>
     </div>
   );
 }

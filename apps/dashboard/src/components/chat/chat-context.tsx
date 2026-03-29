@@ -6,6 +6,8 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useState } from "react";
 import { getAccessToken } from "@/utils/session";
 
+export type ChatMode = "auto" | "instant" | "thinking";
+
 const chatTransport = new DefaultChatTransport({
   api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
   headers: async () => {
@@ -14,6 +16,9 @@ const chatTransport = new DefaultChatTransport({
       ? ({ Authorization: `Bearer ${token}` } as Record<string, string>)
       : ({} as Record<string, string>);
   },
+  body: () => ({
+    mode: localStorage.getItem("chat-mode") ?? "auto",
+  }),
 });
 
 export type ChatState = ReturnType<typeof useChat> & {
@@ -21,6 +26,8 @@ export type ChatState = ReturnType<typeof useChat> & {
   setInputValue: (v: string) => void;
   chatTitle: string | null;
   setChatTitle: (v: string | null) => void;
+  mode: ChatMode;
+  setMode: (m: ChatMode) => void;
 };
 
 const ChatContext = createContext<ChatState | null>(null);
@@ -31,9 +38,21 @@ export function useChatState() {
   return ctx;
 }
 
+function getInitialMode(): ChatMode {
+  if (typeof window === "undefined") return "auto";
+  return (localStorage.getItem("chat-mode") as ChatMode) ?? "auto";
+}
+
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [inputValue, setInputValue] = useState("");
   const [chatTitle, setChatTitle] = useState<string | null>(null);
+  const [mode, setModeState] = useState<ChatMode>(getInitialMode);
+
+  const setMode = (m: ChatMode) => {
+    setModeState(m);
+    localStorage.setItem("chat-mode", m);
+  };
+
   const chat = useChat({
     transport: chatTransport,
     experimental_throttle: 50,
@@ -49,7 +68,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   return (
     <ChatContext.Provider
-      value={{ ...chat, inputValue, setInputValue, chatTitle, setChatTitle }}
+      value={{
+        ...chat,
+        inputValue,
+        setInputValue,
+        chatTitle,
+        setChatTitle,
+        mode,
+        setMode,
+      }}
     >
       {children}
     </ChatContext.Provider>

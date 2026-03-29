@@ -23,6 +23,8 @@ export function InputBar({
   onEscape,
   onSuggestion,
   menuPosition,
+  mode,
+  onModeChange,
 }: {
   isActive?: boolean;
   hasMessages?: boolean;
@@ -34,6 +36,8 @@ export function InputBar({
   onEscape?: () => void;
   onSuggestion?: (text: string) => void;
   menuPosition?: "above" | "below";
+  mode?: "auto" | "instant" | "thinking";
+  onModeChange?: (mode: "auto" | "instant" | "thinking") => void;
 }) {
   return (
     <div className="bg-[rgba(247,247,247,0.85)] dark:bg-[rgba(19,19,19,0.7)] backdrop-blur-lg">
@@ -48,6 +52,8 @@ export function InputBar({
         onEscape={onEscape}
         onSuggestion={onSuggestion}
         menuPosition={menuPosition}
+        mode={mode}
+        onModeChange={onModeChange}
       />
     </div>
   );
@@ -68,6 +74,8 @@ export function ChatView({
     error,
     inputValue,
     setInputValue,
+    mode,
+    setMode,
   } = useChatState();
 
   const isStreaming = status === "streaming" || status === "submitted";
@@ -119,6 +127,8 @@ export function ChatView({
             onSubmit={handleSubmit}
             onStop={stop}
             menuPosition="above"
+            mode={mode}
+            onModeChange={setMode}
             onSuggestion={(text) => {
               sendMessage({ text });
             }}

@@ -76,7 +76,6 @@ export function buildPrepareStep<T extends Record<string, Tool>>(options: {
   const base = cachedIndex.prepareStep({ maxTools: options.maxTools });
   const always = options.alwaysActive ?? [];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- toolpick returns PrepareStepFunction<any>; the generic boundary is contained here
   return (async (stepOptions: any) => {
     const step = await base(stepOptions);
     if (step?.activeTools && always.length > 0) {

@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { AnimatePresence, motion } from "framer-motion";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { ChatMode } from "./chat-context";
 
 const MCP_CLIENTS = [
   { id: "claude-mcp", name: "Claude", Logo: ClaudeMcpLogo },
@@ -71,6 +72,16 @@ function pickSuggestions(): string[] {
   );
 }
 
+const MODE_OPTIONS: {
+  id: ChatMode;
+  label: string;
+  description: string;
+}[] = [
+  { id: "auto", label: "Auto", description: "Smart routing" },
+  { id: "instant", label: "Instant", description: "Fast answers" },
+  { id: "thinking", label: "Thinking", description: "Deep analysis" },
+];
+
 const ACCEPTED_TYPES = "image/*,application/pdf";
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -85,6 +96,8 @@ export type ChatInputProps = {
   onEscape?: () => void;
   onSuggestion?: (text: string) => void;
   menuPosition?: "above" | "below";
+  mode?: ChatMode;
+  onModeChange?: (mode: ChatMode) => void;
 };
 
 function AttachmentPreview({
@@ -136,14 +149,20 @@ export function ChatInput({
   onEscape,
   onSuggestion,
   menuPosition = "below",
+  mode = "auto",
+  onModeChange,
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [suggestions] = useState(pickSuggestions);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mcpOpen, setMcpOpen] = useState(false);
+  const [modeOpen, setModeOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [, setParams] = useQueryStates({ "mcp-app": parseAsString });
+
+  const activeMode =
+    MODE_OPTIONS.find((m) => m.id === mode) ?? MODE_OPTIONS[0]!;
 
   const adjustHeight = useCallback(() => {
     const textarea = textareaRef.current;
@@ -313,6 +332,7 @@ export function ChatInput({
             onClick={() => {
               setShowSuggestions(!showSuggestions);
               setMcpOpen(false);
+              setModeOpen(false);
             }}
             className="flex items-center h-6 cursor-pointer"
           >
@@ -373,6 +393,60 @@ export function ChatInput({
                     <Logo />
                   </span>
                   <span>{name}</span>
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
+
+          <Popover
+            open={modeOpen}
+            onOpenChange={(open) => {
+              setModeOpen(open);
+              if (open) {
+                setShowSuggestions(false);
+                setMcpOpen(false);
+              }
+            }}
+          >
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  "flex items-center h-6 cursor-pointer text-xs transition-colors",
+                  modeOpen
+                    ? "text-foreground"
+                    : "text-[#878787]/60 hover:text-foreground",
+                )}
+              >
+                {activeMode.label}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              side={menuPosition === "above" ? "top" : "bottom"}
+              align="start"
+              sideOffset={12}
+              className="w-[180px] p-1 bg-[rgba(247,247,247,0.96)] dark:bg-[rgba(19,19,19,0.98)] backdrop-blur-lg border-border shadow-sm"
+            >
+              <p className="px-2 py-1 text-[10px] text-[#878787]">Model</p>
+              {MODE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  className={cn(
+                    "flex items-center gap-2 w-full px-2 py-1.5 text-xs transition-colors",
+                    mode === opt.id
+                      ? "text-foreground bg-black/5 dark:bg-white/5"
+                      : "text-[#666] hover:bg-black/5 dark:hover:bg-white/5",
+                  )}
+                  onClick={() => {
+                    onModeChange?.(opt.id);
+                    setModeOpen(false);
+                  }}
+                >
+                  <span className="flex-1 text-left">{opt.label}</span>
+                  <span className="text-[#878787] text-[10px]">
+                    {opt.description}
+                  </span>
                 </button>
               ))}
             </PopoverContent>
