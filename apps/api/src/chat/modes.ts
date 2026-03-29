@@ -2,6 +2,17 @@ import { openai } from "@ai-sdk/openai";
 
 export type ChatMode = "auto" | "instant" | "thinking";
 
+const PRO_MODES = new Set<ChatMode>(["thinking"]);
+const PRO_PLANS = new Set(["pro", "trial"]);
+
+export function effectiveMode(
+  mode: ChatMode,
+  plan: string | null | undefined,
+): ChatMode {
+  if (PRO_MODES.has(mode) && !PRO_PLANS.has(plan ?? "")) return "auto";
+  return mode;
+}
+
 export function resolveModel(mode: ChatMode, isComplex: boolean) {
   switch (mode) {
     case "instant":

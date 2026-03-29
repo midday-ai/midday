@@ -76,10 +76,16 @@ const MODE_OPTIONS: {
   id: ChatMode;
   label: string;
   description: string;
+  pro?: boolean;
 }[] = [
   { id: "auto", label: "Auto", description: "Smart routing" },
   { id: "instant", label: "Instant", description: "Fast answers" },
-  { id: "thinking", label: "Thinking", description: "Deep analysis" },
+  {
+    id: "thinking",
+    label: "Thinking",
+    description: "Deep analysis",
+    pro: true,
+  },
 ];
 
 const ACCEPTED_TYPES = "image/*,application/pdf";
@@ -98,6 +104,7 @@ export type ChatInputProps = {
   menuPosition?: "above" | "below";
   mode?: ChatMode;
   onModeChange?: (mode: ChatMode) => void;
+  plan?: string;
 };
 
 function AttachmentPreview({
@@ -151,6 +158,7 @@ export function ChatInput({
   menuPosition = "below",
   mode = "auto",
   onModeChange,
+  plan,
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -161,6 +169,7 @@ export function ChatInput({
   const [files, setFiles] = useState<File[]>([]);
   const [, setParams] = useQueryStates({ "mcp-app": parseAsString });
 
+  const isPro = plan === "pro" || plan === "trial";
   const activeMode =
     MODE_OPTIONS.find((m) => m.id === mode) ?? MODE_OPTIONS[0]!;
 
@@ -398,59 +407,73 @@ export function ChatInput({
             </PopoverContent>
           </Popover>
 
-          <Popover
-            open={modeOpen}
-            onOpenChange={(open) => {
-              setModeOpen(open);
-              if (open) {
-                setShowSuggestions(false);
-                setMcpOpen(false);
-              }
-            }}
-          >
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className={cn(
-                  "flex items-center h-6 cursor-pointer text-xs transition-colors",
-                  modeOpen
-                    ? "text-foreground"
-                    : "text-[#878787]/60 hover:text-foreground",
-                )}
-              >
-                {activeMode.label}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent
-              side={menuPosition === "above" ? "top" : "bottom"}
-              align="start"
-              sideOffset={12}
-              className="w-[180px] p-1 bg-[rgba(247,247,247,0.96)] dark:bg-[rgba(19,19,19,0.98)] backdrop-blur-lg border-border shadow-sm"
+          <div className="border-l border-border pl-3 ml-1 self-center h-4 flex items-center">
+            <Popover
+              open={modeOpen}
+              onOpenChange={(open) => {
+                setModeOpen(open);
+                if (open) {
+                  setShowSuggestions(false);
+                  setMcpOpen(false);
+                }
+              }}
             >
-              <p className="px-2 py-1 text-[10px] text-[#878787]">Model</p>
-              {MODE_OPTIONS.map((opt) => (
+              <PopoverTrigger asChild>
                 <button
-                  key={opt.id}
                   type="button"
                   className={cn(
-                    "flex items-center gap-2 w-full px-2 py-1.5 text-xs transition-colors",
-                    mode === opt.id
-                      ? "text-foreground bg-black/5 dark:bg-white/5"
-                      : "text-[#666] hover:bg-black/5 dark:hover:bg-white/5",
+                    "flex items-center h-6 cursor-pointer text-xs transition-colors",
+                    modeOpen
+                      ? "text-foreground"
+                      : "text-[#878787]/60 hover:text-foreground",
                   )}
-                  onClick={() => {
-                    onModeChange?.(opt.id);
-                    setModeOpen(false);
-                  }}
                 >
-                  <span className="flex-1 text-left">{opt.label}</span>
-                  <span className="text-[#878787] text-[10px]">
-                    {opt.description}
-                  </span>
+                  {activeMode.label}
                 </button>
-              ))}
-            </PopoverContent>
-          </Popover>
+              </PopoverTrigger>
+              <PopoverContent
+                side={menuPosition === "above" ? "top" : "bottom"}
+                align="start"
+                sideOffset={12}
+                className="w-[260px] p-1 bg-[rgba(247,247,247,0.96)] dark:bg-[rgba(19,19,19,0.98)] backdrop-blur-lg border-border shadow-sm"
+              >
+                <p className="px-2 py-1 text-[10px] text-[#878787]">Model</p>
+                {MODE_OPTIONS.map((opt) => {
+                  const locked = opt.pro && !isPro;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      className={cn(
+                        "flex items-center gap-2 w-full px-2 py-1.5 text-xs transition-colors",
+                        locked && "opacity-50 cursor-default",
+                        !locked && mode === opt.id
+                          ? "text-foreground bg-black/5 dark:bg-white/5"
+                          : "text-[#666] hover:bg-black/5 dark:hover:bg-white/5",
+                      )}
+                      onClick={() => {
+                        if (locked) return;
+                        onModeChange?.(opt.id);
+                        setModeOpen(false);
+                      }}
+                    >
+                      <span className="flex items-center gap-1.5 flex-1 text-left">
+                        {opt.label}
+                        {locked && (
+                          <span className="text-[9px] font-medium bg-border text-muted-foreground px-1 py-0.5">
+                            Pro
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-[#878787] text-[10px]">
+                        {opt.description}
+                      </span>
+                    </button>
+                  );
+                })}
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         <button

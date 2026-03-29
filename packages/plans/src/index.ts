@@ -228,6 +228,11 @@ export const proFeatures: PlanFeature[] = [
       "Revenue forecasting, category breakdowns, and detailed financial analysis across your business.",
   },
   {
+    label: "Advanced AI thinking",
+    tooltip:
+      "Deep analysis mode with extended reasoning for complex financial questions.",
+  },
+  {
     label: "Shareable report and document links",
     tooltip:
       "Generate view-only links with optional expiration for reports, receipts, and vault documents.",

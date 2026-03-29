@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
 import { useCallback } from "react";
 import { useChatState } from "@/components/chat/chat-context";
@@ -25,6 +26,7 @@ export function InputBar({
   menuPosition,
   mode,
   onModeChange,
+  plan,
 }: {
   isActive?: boolean;
   hasMessages?: boolean;
@@ -38,6 +40,7 @@ export function InputBar({
   menuPosition?: "above" | "below";
   mode?: "auto" | "instant" | "thinking";
   onModeChange?: (mode: "auto" | "instant" | "thinking") => void;
+  plan?: string;
 }) {
   return (
     <div className="bg-[rgba(247,247,247,0.85)] dark:bg-[rgba(19,19,19,0.7)] backdrop-blur-lg">
@@ -54,6 +57,7 @@ export function InputBar({
         menuPosition={menuPosition}
         mode={mode}
         onModeChange={onModeChange}
+        plan={plan}
       />
     </div>
   );
@@ -76,9 +80,14 @@ export function ChatView({
     setInputValue,
     mode,
     setMode,
+    plan,
+    rateLimit,
+    rateLimitExceeded,
   } = useChatState();
 
   const isStreaming = status === "streaming" || status === "submitted";
+  const showLimitWarning =
+    rateLimitExceeded || (rateLimit && rateLimit.remaining <= 10);
 
   const handleSubmit = useCallback(
     async (rawFiles?: File[]) => {
@@ -97,7 +106,7 @@ export function ChatView({
   return (
     <div className="flex flex-col h-[calc(100vh-160px)]">
       <Conversation className="flex-1 hide-scrollbar">
-        <ConversationContent className="gap-4 p-0 pb-20">
+        <ConversationContent className="gap-4 p-0 pb-28">
           {header && (
             <div className="sticky top-0 z-20 flex items-center justify-between pt-4 pb-2 bg-background/[0.99] backdrop-blur-xl">
               {header}
@@ -110,14 +119,35 @@ export function ChatView({
         <ConversationScrollButton />
       </Conversation>
 
-      {error && (
+      {error && !rateLimitExceeded && (
         <p className="text-xs text-destructive text-center py-2">
           Something went wrong. Please try again.
         </p>
       )}
 
-      <div className="fixed bottom-0 left-0 md:left-[70px] right-0 bg-gradient-to-t from-background via-background to-transparent pt-8 pb-4 z-40">
-        <div className="max-w-[680px] mx-auto w-full px-4">
+      <div className="fixed bottom-0 left-0 md:left-[70px] right-0 bg-gradient-to-t from-background via-background to-transparent pt-8 pb-4 z-40 px-4">
+        <div className="max-w-[680px] mx-auto w-full">
+          <AnimatePresence>
+            {showLimitWarning && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="overflow-hidden"
+              >
+                <div className="bg-[rgba(247,247,247,0.85)] dark:bg-[rgba(19,19,19,0.7)] backdrop-blur-lg px-4 py-1.5 mb-0.5">
+                  <p className="text-center text-[11px] text-[#878787]/50">
+                    {rateLimitExceeded
+                      ? "Message limit reached. Please wait a few minutes."
+                      : rateLimit?.remaining === 0
+                        ? "Message limit reached. Please wait a few minutes."
+                        : `${rateLimit?.remaining} ${rateLimit?.remaining === 1 ? "message" : "messages"} remaining`}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <InputBar
             isActive
             hasMessages
@@ -129,6 +159,7 @@ export function ChatView({
             menuPosition="above"
             mode={mode}
             onModeChange={setMode}
+            plan={plan}
             onSuggestion={(text) => {
               sendMessage({ text });
             }}

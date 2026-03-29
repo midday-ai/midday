@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { type ChatMode, resolveModel } from "@api/chat/modes";
+import { type ChatMode, effectiveMode, resolveModel } from "@api/chat/modes";
 import { buildSystemPrompt } from "@api/chat/prompt";
 import {
   buildPrepareStep,
@@ -25,8 +25,28 @@ import {
   stepCountIs,
   ToolLoopAgent,
 } from "ai";
+import { type RateLimitInfo, rateLimiter } from "hono-rate-limiter";
 
-const app = new OpenAPIHono<Context>();
+type ChatContext = {
+  Variables: Context["Variables"] & {
+    rateLimit: RateLimitInfo;
+  };
+};
+
+const app = new OpenAPIHono<ChatContext>();
+
+app.use(
+  rateLimiter<ChatContext>({
+    windowMs: 10 * 60 * 1000,
+    limit: Number(process.env.CHAT_RATE_LIMIT) || 50,
+    keyGenerator: (c) => c.get("session")?.user?.id ?? "unknown",
+    handler: (c) =>
+      c.json(
+        { code: "RATE_LIMIT_EXCEEDED", error: "Chat rate limit exceeded" },
+        429,
+      ),
+  }),
+);
 
 app.post("/", async (c) => {
   let mcpClient: ChatMCPClient | null = null;
@@ -41,7 +61,10 @@ app.post("/", async (c) => {
 
     const body = await c.req.json();
     const uiMessages = body.messages as any[];
-    const mode: ChatMode = body.mode ?? "auto";
+    const mode = effectiveMode(
+      (body.mode as ChatMode) ?? "auto",
+      user?.team?.plan,
+    );
 
     const mcpCtx: McpContext = {
       db,
@@ -87,8 +110,21 @@ app.post("/", async (c) => {
     const isComplex = classifyComplexity(uiMessages as any[]);
     const resolved = resolveModel(mode, isComplex);
 
+    const rateLimitInfo = c.get("rateLimit");
+
     const stream = createUIMessageStream({
       execute: async ({ writer }) => {
+        if (rateLimitInfo) {
+          writer.write({
+            type: "data-rate-limit",
+            id: "rate-limit",
+            data: {
+              limit: rateLimitInfo.limit,
+              remaining: rateLimitInfo.remaining,
+            },
+          });
+        }
+
         const titlePromise = writeChatTitle(writer, uiMessages);
 
         const agent = new ToolLoopAgent({

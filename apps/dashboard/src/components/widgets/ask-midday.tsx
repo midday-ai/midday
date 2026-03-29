@@ -16,6 +16,7 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
     setChatTitle,
     mode,
     setMode,
+    plan,
   } = useChatState();
 
   const isStreaming = status === "streaming" || status === "submitted";
@@ -66,6 +67,7 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
         onSuggestion={handleSuggestion}
         mode={mode}
         onModeChange={setMode}
+        plan={plan}
       />
     </div>
   );
