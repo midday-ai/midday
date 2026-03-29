@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "catalog:",
+    "@ai-sdk/react": "^3.0.143",
     "@date-fns/tz": "catalog:",
     "@date-fns/utc": "^2.1.1",
     "@dnd-kit/core": "^6.3.1",
@@ -29,6 +30,7 @@
     "@midday/inbox": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/location": "workspace:*",
+    "@midday/mcp-apps": "workspace:*",
     "@midday/plans": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/trpc": "workspace:*",
@@ -78,6 +80,7 @@
     "recharts": "^3.6.0",
     "resend": "catalog:",
     "server-only": "^0.0.1",
+    "streamdown": "^2.5.0",
     "tippy.js": "^6.3.7",
     "tus-js-client": "4.3.1",
     "use-places-autocomplete": "^4.0.1",

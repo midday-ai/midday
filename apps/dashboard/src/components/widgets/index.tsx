@@ -1,31 +1,43 @@
 "use client";
 
-import { use, useState } from "react";
-import { MetricsView } from "../metrics/metrics-view";
-import type { ChartLayoutItem } from "../metrics/utils/chart-types";
-import { DEFAULT_CHART_LAYOUT } from "../metrics/utils/chart-types";
-import { WidgetsHeader } from "./header";
-import { McpBanner } from "./mcp-banner";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
+import { useCallback, useState } from "react";
+import { AskMidday, ChatProvider, ChatView, McpConnect } from "./ask-midday";
+import { QuickActions } from "./quick-actions";
+import { WelcomeSection } from "./welcome-section";
+import { WidgetCards } from "./widget-cards";
 
-interface OverviewViewProps {
-  chartLayoutPromise?: Promise<ChartLayoutItem[]>;
-}
+type SubView = "overview" | "chat";
 
-export function OverviewView({ chartLayoutPromise }: OverviewViewProps) {
-  const initialLayout = chartLayoutPromise
-    ? use(chartLayoutPromise)
-    : DEFAULT_CHART_LAYOUT;
+export function OverviewView() {
+  const [view, setView] = useState<SubView>("overview");
 
-  const [isEditing, setIsEditing] = useState(false);
+  const goBack = useCallback(() => setView("overview"), []);
 
   return (
-    <div className="flex flex-col mt-6">
-      <WidgetsHeader
-        isEditing={isEditing}
-        onToggleEditing={() => setIsEditing((prev) => !prev)}
-      />
-      <MetricsView initialLayout={initialLayout} isEditing={isEditing} />
-      <McpBanner />
-    </div>
+    <ChatProvider>
+      {view === "chat" && (
+        <div className="mt-2">
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" size="icon" onClick={goBack}>
+              <Icons.ArrowBack className="size-4" />
+            </Button>
+            <ChatView.NewChatButton />
+          </div>
+          <ChatView onClose={goBack} />
+        </div>
+      )}
+
+      {view === "overview" && (
+        <div className="mt-2 pb-16 flex flex-col min-h-[calc(100vh-120px)] max-w-3xl mx-auto w-full">
+          <WelcomeSection />
+          <AskMidday onChatOpen={() => setView("chat")} />
+          <QuickActions />
+          <WidgetCards />
+          <McpConnect />
+        </div>
+      )}
+    </ChatProvider>
   );
 }

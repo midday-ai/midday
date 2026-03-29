@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 
 const icons = {
   "/": () => <Icons.Overview size={20} />,
+  "/reports": () => <Icons.Leaderboard size={20} />,
   "/transactions": () => <Icons.Transactions size={20} />,
   "/invoices": () => <Icons.Invoice size={20} />,
   "/tracker": () => <Icons.Tracker size={20} />,
@@ -22,6 +23,10 @@ const items = [
   {
     path: "/",
     name: "Overview",
+  },
+  {
+    path: "/reports",
+    name: "Reports",
   },
   {
     path: "/transactions",
