@@ -48,8 +48,6 @@ Quick question — was there one thing that would have made you stick around?
 
 Every bit of feedback helps us improve, and I'd genuinely love to hear your thoughts.
 
-Either way, your data is still there if you ever want to come back. This is the last email from us — I won't bother you again.
-
 Pontus`,
     });
 

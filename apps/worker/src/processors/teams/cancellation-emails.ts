@@ -26,11 +26,9 @@ export class CancellationEmailsProcessor extends BaseProcessor<CancellationEmail
       subject: "Thanks for being a customer",
       text: `Hey ${firstName},
 
-I saw you canceled your Midday subscription — no hard feelings at all.
+I noticed you canceled your Midday subscription. I'd love to understand what didn't work for you or what was missing — even a one-line reply would be really helpful.
 
-I genuinely appreciate you giving us a try. Your data is exactly where you left it, and your account stays active until the end of your billing period. If anything changes, you can reactivate in one click from settings.
-
-All the best,
+Thanks for giving us a try,
 
 Pontus`,
     });
