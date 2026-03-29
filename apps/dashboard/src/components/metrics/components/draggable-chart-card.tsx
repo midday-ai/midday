@@ -92,8 +92,9 @@ export function DraggableChartCard({
 
   return (
     <div
+      id={id}
       ref={composedRef}
-      className={`relative transition-opacity duration-150 ${isDragging ? "opacity-30" : ""} ${isEditing ? "cursor-grab active:cursor-grabbing" : ""}`}
+      className={`relative transition-opacity duration-150 scroll-mt-24 ${isDragging ? "opacity-30" : ""} ${isEditing ? "cursor-grab active:cursor-grabbing" : ""}`}
       {...(isEditing ? { ...attributes, ...listeners } : {})}
     >
       {children}

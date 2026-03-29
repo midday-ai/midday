@@ -1,31 +1,52 @@
 "use client";
 
-import { use, useState } from "react";
-import { MetricsView } from "../metrics/metrics-view";
-import type { ChartLayoutItem } from "../metrics/utils/chart-types";
-import { DEFAULT_CHART_LAYOUT } from "../metrics/utils/chart-types";
-import { WidgetsHeader } from "./header";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
+import { Suspense, useCallback, useState } from "react";
+import { ChatProvider } from "@/components/chat/chat-context";
+import { ChatTitle } from "@/components/chat/chat-title";
+import { ChatView } from "@/components/chat/chat-view";
+import { NewChatButton } from "@/components/chat/new-chat-button";
+import { AskMidday } from "./ask-midday";
 import { McpBanner } from "./mcp-banner";
+import { OverviewSkeleton } from "./overview-skeleton";
+import { QuickActions } from "./quick-actions";
+import { WelcomeSection } from "./welcome-section";
+import { WidgetCards } from "./widget-cards";
 
-interface OverviewViewProps {
-  chartLayoutPromise?: Promise<ChartLayoutItem[]>;
-}
+type SubView = "overview" | "chat";
 
-export function OverviewView({ chartLayoutPromise }: OverviewViewProps) {
-  const initialLayout = chartLayoutPromise
-    ? use(chartLayoutPromise)
-    : DEFAULT_CHART_LAYOUT;
+export function OverviewView() {
+  const [view, setView] = useState<SubView>("overview");
 
-  const [isEditing, setIsEditing] = useState(false);
+  const goBack = useCallback(() => setView("overview"), []);
 
   return (
-    <div className="flex flex-col mt-6">
-      <WidgetsHeader
-        isEditing={isEditing}
-        onToggleEditing={() => setIsEditing((prev) => !prev)}
-      />
-      <MetricsView initialLayout={initialLayout} isEditing={isEditing} />
+    <ChatProvider>
+      {view === "chat" && (
+        <div className="mt-2">
+          <div className="flex items-center justify-between">
+            <Button variant="outline" size="icon" onClick={goBack}>
+              <Icons.ArrowBack className="size-4" />
+            </Button>
+            <ChatTitle />
+            <NewChatButton variant="outline" />
+          </div>
+          <ChatView onClose={goBack} />
+        </div>
+      )}
+
+      {view === "overview" && (
+        <div className="mt-2 pb-16 flex flex-col justify-center min-h-[calc(100vh-120px)] max-w-3xl mx-auto w-full">
+          <Suspense fallback={<OverviewSkeleton />}>
+            <WelcomeSection />
+            <AskMidday onChatOpen={() => setView("chat")} />
+            <QuickActions />
+            <WidgetCards />
+          </Suspense>
+        </div>
+      )}
       <McpBanner />
-    </div>
+    </ChatProvider>
   );
 }

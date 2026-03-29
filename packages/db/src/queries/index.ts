@@ -26,6 +26,7 @@ export * from "./invoices";
 export * from "./notification-settings";
 export * from "./oauth-applications";
 export * from "./oauth-flow";
+export * from "./overview";
 export * from "./reports";
 export * from "./search";
 export * from "./short-links";

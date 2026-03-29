@@ -13,7 +13,8 @@
     "./trpc/routers/_app": "./src/trpc/routers/_app.ts"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "3.0.64",
+    "@ai-sdk/anthropic": "^3.0.64",
+    "@ai-sdk/mcp": "^1.0.30",
     "@ai-sdk/openai": "catalog:",
     "@date-fns/tz": "catalog:",
     "@hono/mcp": "^0.2.4",
@@ -31,13 +32,12 @@
     "@midday/health": "workspace:*",
     "@midday/import": "workspace:*",
     "@midday/inbox": "workspace:*",
-
     "@midday/invoice": "workspace:*",
-    "@midday/mcp-apps": "workspace:*",
     "@midday/job-client": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/logger": "workspace:*",
+    "@midday/mcp-apps": "workspace:*",
     "@midday/notifications": "workspace:*",
     "@midday/plans": "workspace:*",
     "@midday/supabase": "workspace:*",

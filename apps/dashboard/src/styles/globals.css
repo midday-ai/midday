@@ -253,3 +253,14 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border-bottom: 0px;
   border-top: 1px;
 }
+
+.hide-scrollbar,
+.hide-scrollbar * {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar,
+.hide-scrollbar *::-webkit-scrollbar {
+  display: none;
+}

@@ -66,5 +66,9 @@
     "@biomejs/biome": "2.4.9",
     "turbo": "2.8.20",
     "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "toolpick": "^0.2.0",
+    "use-stick-to-bottom": "^1.1.3"
   }
 }

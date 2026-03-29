@@ -196,6 +196,11 @@ export const starterFeatures: PlanFeature[] = [
     tooltip:
       "Store customer details, track history, and reuse across invoices and projects.",
   },
+  {
+    label: "API, CLI, and MCP",
+    tooltip:
+      "REST API, CLI, SDKs, and MCP server for AI agents and custom workflows.",
+  },
   { label: "3 banks · 15 invoices/mo · 10GB storage" },
 ];
 
@@ -227,11 +232,11 @@ export const proFeatures: PlanFeature[] = [
     tooltip:
       "Generate view-only links with optional expiration for reports, receipts, and vault documents.",
   },
-  {
-    label: "API and MCP",
-    tooltip:
-      "REST API, SDKs, and MCP server for AI agents and custom workflows.",
-  },
+  // {
+  //   label: "E-Invoicing (Peppol)",
+  //   tooltip:
+  //     "Send and receive e-invoices via the Peppol network for EU/global compliance.",
+  // },
   { label: "Priority support" },
 ];
 
