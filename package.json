@@ -35,7 +35,7 @@
     "@sentry/bun": "^10.46.0",
     "@sindresorhus/slugify": "^3.0.0",
     "@trigger.dev/sdk": "4.4.3",
-    "ai": "6.0.138",
+    "ai": "6.0.141",
     "bullmq": "^5.71.1",
     "camelcase-keys": "^10.0.2",
     "change-case": "^5.4.4",

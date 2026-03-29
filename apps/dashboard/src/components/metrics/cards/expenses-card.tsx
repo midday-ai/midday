@@ -6,6 +6,7 @@ import { AnimatedNumber } from "@/components/animated-number";
 import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import { useTRPC } from "@/trpc/client";
 import { ChartFadeIn } from "../components/chart-loading-overlay";
+import { DragIndicator } from "../components/drag-indicator";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface ExpensesCardProps {
@@ -13,6 +14,7 @@ interface ExpensesCardProps {
   to: string;
   currency?: string;
   locale?: string;
+  isCustomizing?: boolean;
 }
 
 export function ExpensesCard({
@@ -20,6 +22,7 @@ export function ExpensesCard({
   to,
   currency,
   locale,
+  isCustomizing,
 }: ExpensesCardProps) {
   const trpc = useTRPC();
 
@@ -41,13 +44,23 @@ export function ExpensesCard({
           <h3 className="text-sm font-normal text-muted-foreground">
             Average Monthly Expenses
           </h3>
-          <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <ShareMetricButton
-              type="expense"
-              from={from}
-              to={to}
-              currency={currency}
-            />
+          <div
+            className={
+              isCustomizing
+                ? ""
+                : "opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity"
+            }
+          >
+            {isCustomizing ? (
+              <DragIndicator />
+            ) : (
+              <ShareMetricButton
+                type="expense"
+                from={from}
+                to={to}
+                currency={currency}
+              />
+            )}
           </div>
         </div>
         <p className="text-3xl font-normal mb-3">

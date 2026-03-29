@@ -172,7 +172,7 @@ export function MetricsView({
       to,
       currency,
       locale,
-      isCustomizing: false,
+      isCustomizing: isEditing,
       revenueType,
     };
 
@@ -193,7 +193,13 @@ export function MetricsView({
         case "category-expenses":
           return <CategoryExpensesCard {...commonProps} />;
         case "cash-balance":
-          return <CashBalanceCard currency={currency} locale={locale} />;
+          return (
+            <CashBalanceCard
+              currency={currency}
+              locale={locale}
+              isCustomizing={isEditing}
+            />
+          );
         default:
           return null;
       }

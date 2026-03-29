@@ -63,6 +63,9 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
         onStop={stop}
         onSuggestion={handleSuggestion}
       />
+      <p className="text-center text-[11px] text-[#878787]/50 pt-1.5">
+        Midday AI can make mistakes. Please double-check responses.
+      </p>
     </div>
   );
 }

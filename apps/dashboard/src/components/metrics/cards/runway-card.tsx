@@ -9,14 +9,20 @@ import { RunwayChart } from "@/components/charts/runway-chart";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { ChartFadeIn } from "../components/chart-loading-overlay";
+import { DragIndicator } from "../components/drag-indicator";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RunwayCardProps {
   currency?: string;
   locale?: string;
+  isCustomizing?: boolean;
 }
 
-export function RunwayCard({ currency, locale }: RunwayCardProps) {
+export function RunwayCard({
+  currency,
+  locale,
+  isCustomizing,
+}: RunwayCardProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const [displayRunway, setDisplayRunway] = useState<number>(0);
@@ -158,13 +164,23 @@ export function RunwayCard({ currency, locale }: RunwayCardProps) {
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">Runway</h3>
-          <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <ShareMetricButton
-              type="runway"
-              from={burnRateWindow.from}
-              to={burnRateWindow.to}
-              currency={currency}
-            />
+          <div
+            className={
+              isCustomizing
+                ? ""
+                : "opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity"
+            }
+          >
+            {isCustomizing ? (
+              <DragIndicator />
+            ) : (
+              <ShareMetricButton
+                type="runway"
+                from={burnRateWindow.from}
+                to={burnRateWindow.to}
+                currency={currency}
+              />
+            )}
           </div>
         </div>
         <p className="text-3xl font-normal">

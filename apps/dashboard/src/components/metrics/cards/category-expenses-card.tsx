@@ -10,6 +10,7 @@ import {
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { ChartFadeIn } from "../components/chart-loading-overlay";
+import { DragIndicator } from "../components/drag-indicator";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface CategoryExpensesCardProps {
@@ -17,6 +18,7 @@ interface CategoryExpensesCardProps {
   to: string;
   currency?: string;
   locale?: string;
+  isCustomizing?: boolean;
 }
 
 export function CategoryExpensesCard({
@@ -24,6 +26,7 @@ export function CategoryExpensesCard({
   to,
   currency,
   locale,
+  isCustomizing,
 }: CategoryExpensesCardProps) {
   const trpc = useTRPC();
 
@@ -73,13 +76,23 @@ export function CategoryExpensesCard({
           <h3 className="text-sm font-normal text-muted-foreground">
             Expenses by Category
           </h3>
-          <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <ShareMetricButton
-              type="category_expenses"
-              from={from}
-              to={to}
-              currency={currency}
-            />
+          <div
+            className={
+              isCustomizing
+                ? ""
+                : "opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity"
+            }
+          >
+            {isCustomizing ? (
+              <DragIndicator />
+            ) : (
+              <ShareMetricButton
+                type="category_expenses"
+                from={from}
+                to={to}
+                currency={currency}
+              />
+            )}
           </div>
         </div>
         <p className="text-3xl font-normal">

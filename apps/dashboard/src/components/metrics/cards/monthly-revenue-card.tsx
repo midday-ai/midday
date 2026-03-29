@@ -7,6 +7,7 @@ import { formatChartMonth } from "@/components/charts/chart-utils";
 import { MonthlyRevenueChart } from "@/components/charts/monthly-revenue-chart";
 import { useTRPC } from "@/trpc/client";
 import { ChartFadeIn } from "../components/chart-loading-overlay";
+import { DragIndicator } from "../components/drag-indicator";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface MonthlyRevenueCardProps {
@@ -15,6 +16,7 @@ interface MonthlyRevenueCardProps {
   currency?: string;
   locale?: string;
   revenueType: "net" | "gross";
+  isCustomizing?: boolean;
 }
 
 export function MonthlyRevenueCard({
@@ -23,6 +25,7 @@ export function MonthlyRevenueCard({
   currency,
   locale,
   revenueType = "net",
+  isCustomizing,
 }: MonthlyRevenueCardProps) {
   const trpc = useTRPC();
 
@@ -64,13 +67,23 @@ export function MonthlyRevenueCard({
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">Revenue</h3>
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <ShareMetricButton
-              type="monthly_revenue"
-              from={from}
-              to={to}
-              currency={currency}
-            />
+          <div
+            className={
+              isCustomizing
+                ? "flex items-center gap-2"
+                : "flex items-center gap-2 opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity"
+            }
+          >
+            {isCustomizing ? (
+              <DragIndicator />
+            ) : (
+              <ShareMetricButton
+                type="monthly_revenue"
+                from={from}
+                to={to}
+                currency={currency}
+              />
+            )}
           </div>
         </div>
         <p className="text-3xl font-normal mb-3">

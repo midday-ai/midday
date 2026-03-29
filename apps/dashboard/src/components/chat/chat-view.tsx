@@ -123,6 +123,9 @@ export function ChatView({
               sendMessage({ text });
             }}
           />
+          <p className="text-center text-[11px] text-[#878787]/50 pt-1.5">
+            Midday AI can make mistakes. Please double-check responses.
+          </p>
         </div>
       </div>
     </div>
