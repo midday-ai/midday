@@ -3,7 +3,8 @@
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { useCallback, useState } from "react";
-import { AskMidday, ChatProvider, ChatView, McpConnect } from "./ask-midday";
+import { AskMidday, ChatProvider, ChatView } from "./ask-midday";
+import { McpBanner } from "./mcp-banner";
 import { QuickActions } from "./quick-actions";
 import { WelcomeSection } from "./welcome-section";
 import { WidgetCards } from "./widget-cards";
@@ -30,14 +31,14 @@ export function OverviewView() {
       )}
 
       {view === "overview" && (
-        <div className="mt-2 pb-16 flex flex-col min-h-[calc(100vh-120px)] max-w-3xl mx-auto w-full">
+        <div className="mt-2 pb-16 flex flex-col justify-center min-h-[calc(100vh-120px)] max-w-3xl mx-auto w-full">
           <WelcomeSection />
           <AskMidday onChatOpen={() => setView("chat")} />
           <QuickActions />
           <WidgetCards />
-          <McpConnect />
         </div>
       )}
+      <McpBanner />
     </ChatProvider>
   );
 }

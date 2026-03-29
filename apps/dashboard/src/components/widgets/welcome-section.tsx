@@ -43,7 +43,7 @@ export function WelcomeSection() {
   const firstName = user?.fullName?.split(" ")[0];
 
   return (
-    <div className="flex flex-col items-center text-center pt-28 pb-8 w-full">
+    <div className="flex flex-col items-center text-center pt-6 pb-10 w-full">
       <h1 className="text-[38px] font-serif leading-tight">
         {greeting}
         {firstName ? (

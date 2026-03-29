@@ -1,10 +1,11 @@
 "use client";
 
 import { InvoiceTemplate } from "@midday/mcp-apps/invoice";
+import { Icons } from "@midday/ui/icons";
 import { TextShimmer } from "@midday/ui/text-shimmer";
 import type { UIMessage } from "ai";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import type { ReactNode } from "react";
 import { Streamdown } from "streamdown";
 
 type ChatMessagesProps = {
@@ -18,6 +19,8 @@ const INVOICE_TOOLS = new Set([
   "invoices_update_draft",
   "invoices_create_from_tracker",
 ]);
+
+const HIDDEN_TOOLS = new Set(["toolSearch"]);
 
 const TOOL_LABELS: Record<string, string> = {
   transactions_list: "Looking up transactions",
@@ -66,22 +69,68 @@ function extractInvoiceData(output: unknown): Record<string, unknown> | null {
   return null;
 }
 
-function ToolCallIndicator({
-  toolName,
-  state,
-}: {
-  toolName: string;
-  state: string;
-}) {
-  const label = formatToolName(toolName);
-  const isDone = state === "output-available" || state === "output-error";
+const TOOL_ICON_MAP: Record<string, (s: number) => ReactNode> = {
+  transactions: (s) => <Icons.Transactions size={s} />,
+  invoices: (s) => <Icons.Invoice size={s} />,
+  invoice_products: (s) => <Icons.Invoice size={s} />,
+  invoice_template: (s) => <Icons.Invoice size={s} />,
+  invoice_recurring: (s) => <Icons.Invoice size={s} />,
+  customers: (s) => <Icons.Customers size={s} />,
+  bank_accounts: (s) => <Icons.Accounts size={s} />,
+  reports: (s) => <Icons.Leaderboard size={s} />,
+  tracker: (s) => <Icons.Tracker size={s} />,
+  categories: (s) => <Icons.Category size={s} />,
+  tags: (s) => <Icons.Status size={s} />,
+  inbox: (s) => <Icons.Inbox2 size={s} />,
+  documents: (s) => <Icons.Description size={s} />,
+  search: (s) => <Icons.Search size={s} />,
+  team: (s) => <Icons.Face size={s} />,
+};
 
-  if (isDone) return null;
+function getToolIcon(toolName: string, size: number): ReactNode {
+  const prefix = Object.keys(TOOL_ICON_MAP).find((k) => toolName.startsWith(k));
+  return prefix ? (
+    (TOOL_ICON_MAP[prefix]?.(size) ?? <Icons.AI size={size} />)
+  ) : (
+    <Icons.AI size={size} />
+  );
+}
+
+function ToolCallGroup({ parts }: { parts: DynamicToolPart[] }) {
+  const visible = parts.filter((p) => !HIDDEN_TOOLS.has(p.toolName));
+  if (visible.length === 0) return null;
+
+  const allDone = visible.every(
+    (p) => p.state === "output-available" || p.state === "output-error",
+  );
+
+  if (allDone) {
+    const count = visible.length;
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground/50">
+        <Icons.Check size={14} />
+        {count === 1
+          ? formatToolName(visible[0]!.toolName)
+          : `Used ${count} tools`}
+      </span>
+    );
+  }
+
+  const active = [...visible]
+    .reverse()
+    .find((p) => p.state !== "output-available" && p.state !== "output-error");
+
+  if (!active) return null;
 
   return (
-    <TextShimmer className="text-xs font-normal" duration={0.75}>
-      {`${label}...`}
-    </TextShimmer>
+    <span className="flex items-center gap-1.5 text-xs">
+      <span className="shrink-0 text-muted-foreground/50">
+        {getToolIcon(active.toolName, 14)}
+      </span>
+      <TextShimmer className="text-xs font-normal" duration={0.75}>
+        {formatToolName(active.toolName)}
+      </TextShimmer>
+    </span>
   );
 }
 
@@ -93,13 +142,37 @@ function InvoicePreview({ data }: { data: Record<string, unknown> }) {
   );
 }
 
+function shouldShowThinking(messages: UIMessage[]): boolean {
+  const last = messages[messages.length - 1];
+  if (!last) return false;
+
+  if (last.role === "user") return true;
+
+  if (last.role === "assistant") {
+    const hasText = last.parts.some(
+      (p) => p.type === "text" && p.text.length > 0,
+    );
+    if (hasText) return false;
+
+    const toolParts = last.parts.filter(
+      (p) => p.type === "dynamic-tool",
+    ) as DynamicToolPart[];
+
+    const hasActiveTool = toolParts.some(
+      (p) =>
+        !HIDDEN_TOOLS.has(p.toolName) &&
+        p.state !== "output-available" &&
+        p.state !== "output-error",
+    );
+    if (hasActiveTool) return false;
+
+    return true;
+  }
+
+  return false;
+}
+
 export function ChatMessages({ messages, status }: ChatMessagesProps) {
-  const endRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
   if (messages.length === 0) return null;
 
   const isStreaming = status === "streaming" || status === "submitted";
@@ -150,14 +223,8 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
               }
             >
               {toolParts.length > 0 && (
-                <div className="mb-2">
-                  {toolParts.map((part) => (
-                    <ToolCallIndicator
-                      key={part.toolCallId}
-                      toolName={part.toolName}
-                      state={part.state}
-                    />
-                  ))}
+                <div className="mb-4">
+                  <ToolCallGroup parts={toolParts} />
                 </div>
               )}
 
@@ -271,15 +338,13 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
         );
       })}
 
-      {isStreaming && messages[messages.length - 1]?.role === "user" && (
+      {isStreaming && shouldShowThinking(messages) && (
         <div className="flex items-center h-6">
           <TextShimmer className="text-xs font-normal" duration={0.75}>
             Thinking...
           </TextShimmer>
         </div>
       )}
-
-      <div ref={endRef} />
     </div>
   );
 }

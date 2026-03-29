@@ -1,41 +1,19 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import {
-  ChatGPTMcpLogo,
-  ClaudeMcpLogo,
-  ManusMcpLogo,
-  PerplexityMcpLogo,
-} from "@midday/app-store/logos";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
 import { DefaultChatTransport } from "ai";
-import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessages } from "@/components/chat/chat-messages";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@/components/chat/conversation";
 import { getAccessToken } from "@/utils/session";
-
-const mcpApps = [
-  { Logo: ChatGPTMcpLogo, name: "ChatGPT", id: "chatgpt-mcp" },
-  { Logo: ClaudeMcpLogo, name: "Claude", id: "claude-mcp" },
-  { Logo: PerplexityMcpLogo, name: "Perplexity", id: "perplexity-mcp" },
-  { Logo: ManusMcpLogo, name: "Manus", id: "manus-mcp" },
-];
 
 const chatTransport = new DefaultChatTransport({
   api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
@@ -64,6 +42,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [inputValue, setInputValue] = useState("");
   const chat = useChat({
     transport: chatTransport,
+    experimental_throttle: 50,
     onError: (err) => {
       console.error("Chat error:", err);
     },
@@ -73,42 +52,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     <ChatContext.Provider value={{ ...chat, inputValue, setInputValue }}>
       {children}
     </ChatContext.Provider>
-  );
-}
-
-export function McpConnect() {
-  return (
-    <div className="flex justify-center mt-auto pt-8">
-      <div className="flex items-center gap-2 border border-border rounded-full px-3 py-1.5">
-        <span className="text-xs text-[#878787]/60">Connect</span>
-        <McpLogos />
-      </div>
-    </div>
-  );
-}
-
-function McpLogos() {
-  return (
-    <TooltipProvider delayDuration={0}>
-      <div className="flex items-center -space-x-1">
-        {mcpApps.map(({ Logo, name, id }) => (
-          <Tooltip key={id}>
-            <TooltipTrigger asChild>
-              <Link
-                href={`?mcp-app=${id}`}
-                className="size-5 rounded-full overflow-hidden border-2 border-background hover:z-10 hover:scale-110 transition-transform [&_img]:!w-full [&_img]:!h-full [&_img]:!rounded-none [&_svg]:!w-full [&_svg]:!h-full [&_svg]:!rounded-none"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Logo />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              Use in {name}
-            </TooltipContent>
-          </Tooltip>
-        ))}
-      </div>
-    </TooltipProvider>
   );
 }
 
@@ -182,7 +125,7 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
   );
 
   return (
-    <div className="pb-10 w-full">
+    <div className="pb-6 w-full">
       <InputBar
         inputValue={inputValue}
         isStreaming={isStreaming}
@@ -206,14 +149,7 @@ function ChatViewComponent({ onClose }: { onClose: () => void }) {
     setInputValue,
   } = useChatState();
 
-  const scrollRef = useRef<HTMLDivElement>(null);
   const isStreaming = status === "streaming" || status === "submitted";
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
 
   const handleSubmit = useCallback(() => {
     if (!inputValue.trim() || isStreaming) return;
@@ -223,15 +159,15 @@ function ChatViewComponent({ onClose }: { onClose: () => void }) {
   }, [inputValue, isStreaming, sendMessage, setInputValue]);
 
   return (
-    <div className="h-[calc(100vh-160px)]">
-      <div
-        ref={scrollRef}
-        className="h-full overflow-y-auto pb-40 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-      >
-        <div className="max-w-[680px] mx-auto pt-4 whitespace-normal">
-          <ChatMessages messages={messages} status={status} />
-        </div>
-      </div>
+    <div className="flex flex-col h-[calc(100vh-160px)]">
+      <Conversation className="flex-1">
+        <ConversationContent className="gap-4 p-0 pb-40">
+          <div className="max-w-[680px] mx-auto w-full pt-4 whitespace-normal">
+            <ChatMessages messages={messages} status={status} />
+          </div>
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
       {error && (
         <p className="text-xs text-destructive text-center py-2">
