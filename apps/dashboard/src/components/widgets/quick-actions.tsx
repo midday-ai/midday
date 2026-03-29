@@ -33,38 +33,38 @@ export function QuickActions() {
   };
 
   return (
-    <div className="flex items-center justify-center gap-6 pt-2 pb-12 w-full flex-wrap">
+    <div className="flex items-center justify-center gap-3 pt-2 pb-12 w-full flex-wrap">
       {SHEET_ACTIONS.map(({ label, icon: Icon, params }) => (
         <button
           key={label}
           type="button"
-          className="flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-foreground transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 border border-border px-3 py-1.5 text-xs text-muted-foreground/60 hover:text-foreground hover:border-primary/30 transition-colors cursor-pointer"
           onClick={() => openSheet(params)}
         >
-          <Icon size={14} />
+          <Icon size={13} className="text-muted-foreground/40" />
           <span>{label}</span>
         </button>
       ))}
 
       <button
         type="button"
-        className="flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-foreground transition-colors cursor-pointer"
+        className="flex items-center gap-1.5 border border-border px-3 py-1.5 text-xs text-muted-foreground/60 hover:text-foreground hover:border-primary/30 transition-colors cursor-pointer"
         onClick={() =>
           openSheet({
             selectedDate: formatISO(new Date(), { representation: "date" }),
           })
         }
       >
-        <Icons.Tracker size={14} />
+        <Icons.Tracker size={13} className="text-muted-foreground/40" />
         <span>Track Time</span>
       </button>
 
       <button
         type="button"
-        className="flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-foreground transition-colors cursor-pointer"
+        className="flex items-center gap-1.5 border border-border px-3 py-1.5 text-xs text-muted-foreground/60 hover:text-foreground hover:border-primary/30 transition-colors cursor-pointer"
         onClick={openFilePicker}
       >
-        <Icons.Inbox2 size={14} />
+        <Icons.Inbox2 size={13} className="text-muted-foreground/40" />
         <span>Upload Receipt</span>
       </button>
     </div>

@@ -11,6 +11,7 @@ import {
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { AnimatePresence, motion } from "framer-motion";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -34,10 +35,13 @@ const SUGGESTED_ACTIONS = [
   "Find untagged transactions from last month",
 ];
 
-type ChatInputProps = {
+const ACCEPTED_TYPES = "image/*,application/pdf";
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+export type ChatInputProps = {
   value: string;
   onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (files?: File[]) => void;
   onStop: () => void;
   isStreaming: boolean;
   placeholder?: string;
@@ -45,6 +49,44 @@ type ChatInputProps = {
   onEscape?: () => void;
   onSuggestion?: (text: string) => void;
 };
+
+function AttachmentPreview({
+  files,
+  onRemove,
+}: {
+  files: File[];
+  onRemove: (index: number) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2 px-4 pt-2 pb-1">
+      <AnimatePresence mode="popLayout">
+        {files.map((file, i) => (
+          <motion.button
+            key={`${file.name}-${file.size}`}
+            layout
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: "auto", opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            type="button"
+            onClick={() => onRemove(i)}
+            className="group flex items-center gap-1.5 border border-border px-2.5 py-1 text-xs text-muted-foreground hover:border-primary/30 transition-colors max-w-[180px] overflow-hidden"
+          >
+            <Icons.Attachments
+              size={13}
+              className="flex-shrink-0 text-muted-foreground/40"
+            />
+            <span className="truncate">{file.name}</span>
+            <Icons.Close
+              size={10}
+              className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            />
+          </motion.button>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export function ChatInput({
   value,
@@ -61,6 +103,7 @@ export function ChatInput({
   const menuRef = useRef<HTMLDivElement>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mcpOpen, setMcpOpen] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
   const [, setParams] = useQueryStates({ "mcp-app": parseAsString });
 
   const adjustHeight = useCallback(() => {
@@ -95,14 +138,45 @@ export function ChatInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showSuggestions]);
 
+  const addFiles = useCallback((incoming: File[]) => {
+    const valid = incoming.filter((f) => f.size <= MAX_FILE_SIZE);
+    if (!valid.length) return;
+    setFiles((prev) => [...prev, ...valid]);
+  }, []);
+
+  const removeFile = useCallback((index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+    textareaRef.current?.focus();
+  }, []);
+
+  const openFilePicker = useCallback(() => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ACCEPTED_TYPES;
+    input.multiple = true;
+    input.onchange = () => {
+      if (input.files?.length) {
+        addFiles(Array.from(input.files));
+      }
+      textareaRef.current?.focus();
+    };
+    input.click();
+  }, [addFiles]);
+
+  const handleSubmit = useCallback(() => {
+    if (isStreaming) {
+      onStop();
+      return;
+    }
+    if (!value.trim() && !files.length) return;
+    onSubmit(files.length ? files : undefined);
+    setFiles([]);
+  }, [value, files, isStreaming, onSubmit, onStop]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (isStreaming) {
-        onStop();
-      } else if (value.trim()) {
-        onSubmit();
-      }
+      handleSubmit();
     }
     if (e.key === "Escape") {
       if (showSuggestions) {
@@ -127,8 +201,22 @@ export function ChatInput({
     }
   };
 
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      if (e.dataTransfer.files?.length) {
+        addFiles(Array.from(e.dataTransfer.files));
+      }
+    },
+    [addFiles],
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
   return (
-    <div className="relative">
+    <div className="relative" onDrop={handleDrop} onDragOver={handleDragOver}>
       {showSuggestions && (
         <div
           ref={menuRef}
@@ -150,6 +238,10 @@ export function ChatInput({
         </div>
       )}
 
+      {files.length > 0 && (
+        <AttachmentPreview files={files} onRemove={removeFile} />
+      )}
+
       <textarea
         ref={textareaRef}
         value={value}
@@ -157,11 +249,22 @@ export function ChatInput({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         rows={1}
-        className="w-full resize-none bg-transparent px-4 pt-3 pb-1 text-sm outline-none placeholder:text-[#878787]/60 min-h-[36px] max-h-[150px]"
+        className="w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-sm outline-none placeholder:text-[#878787]/60 min-h-[44px] max-h-[150px]"
       />
 
       <div className="flex items-center justify-between px-3 pb-2.5">
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={openFilePicker}
+            className="flex items-center h-6 cursor-pointer"
+          >
+            <Icons.Add
+              size={16}
+              className="text-[#878787]/60 hover:text-foreground transition-colors"
+            />
+          </button>
+
           <button
             type="button"
             data-suggestions-toggle
@@ -236,9 +339,9 @@ export function ChatInput({
 
         <button
           type="button"
-          onClick={isStreaming ? onStop : onSubmit}
-          disabled={!isStreaming && !value.trim()}
-          className="size-7 flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+          onClick={handleSubmit}
+          disabled={!isStreaming && !value.trim() && !files.length}
+          className="size-7 flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
         >
           {isStreaming ? (
             <Icons.Stop className="size-3.5" />

@@ -3,7 +3,11 @@
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { useCallback, useState } from "react";
-import { AskMidday, ChatProvider, ChatView } from "./ask-midday";
+import { ChatProvider } from "@/components/chat/chat-context";
+import { ChatTitle } from "@/components/chat/chat-title";
+import { ChatView } from "@/components/chat/chat-view";
+import { NewChatButton } from "@/components/chat/new-chat-button";
+import { AskMidday } from "./ask-midday";
 import { McpBanner } from "./mcp-banner";
 import { QuickActions } from "./quick-actions";
 import { WelcomeSection } from "./welcome-section";
@@ -21,10 +25,11 @@ export function OverviewView() {
       {view === "chat" && (
         <div className="mt-2">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" size="icon" onClick={goBack}>
+            <Button variant="outline" size="icon" onClick={goBack}>
               <Icons.ArrowBack className="size-4" />
             </Button>
-            <ChatView.NewChatButton />
+            <ChatTitle />
+            <NewChatButton variant="outline" />
           </div>
           <ChatView onClose={goBack} />
         </div>

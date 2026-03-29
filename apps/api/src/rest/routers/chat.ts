@@ -10,7 +10,14 @@ import type { Scope } from "@api/utils/scopes";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { getUserById } from "@midday/db/queries";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { convertToModelMessages, stepCountIs, streamText } from "ai";
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  generateText,
+  stepCountIs,
+  streamText,
+} from "ai";
 import { createToolIndex } from "toolpick";
 
 const app = new OpenAPIHono<Context>();
@@ -30,7 +37,7 @@ function buildSystemPrompt(ctx: UserContext): string {
   const dateCtx = getDateContext(ctx.timezone);
   const timeLabel = ctx.timeFormat === 12 ? "12-hour (AM/PM)" : "24-hour";
 
-  return `You are Midday's financial assistant. You can ONLY do what is listed below — nothing else.
+  return `You are Midday's financial assistant. You help SMB owners understand their finances and take action.
 
 ## User context
 - Name: ${ctx.fullName ?? "unknown"}
@@ -43,14 +50,14 @@ function buildSystemPrompt(ctx: UserContext): string {
 - Time format: ${timeLabel}
 
 ## Critical rules
-- NEVER invent, estimate, or guess any numbers, amounts, dates, names, or IDs. Every piece of data you present must come directly from a tool call.
-- If you cannot find the data the user asked for, say so plainly. Never fill in gaps with plausible-sounding information.
-- If a user asks for something outside your capabilities (e.g. complex analysis, forecasting, advice, or anything not listed below), tell them honestly and suggest connecting Midday to Claude, ChatGPT, or other AI assistants via MCP for deeper insights. Example: "I can't do that directly, but you can connect Midday to Claude or ChatGPT via MCP for deeper analysis."
+- NEVER invent or guess numbers, amounts, dates, names, or IDs. Every data point must come from a tool call (internal or web search).
+- When you combine data from multiple sources (e.g. a product price from web search + the user's bank balance), clearly state where each number comes from.
+- If you truly cannot answer even after using tools and web search, say so and suggest connecting Midday to Claude, ChatGPT, or other AI assistants via MCP for deeper analysis.
 - Address the user by their first name when appropriate.
 
 ## Your capabilities
-You have tools for the following and nothing else:
 
+### Internal tools
 - **Transactions** — list, search, view details, create, update, delete (single and bulk), export, and sync with accounting integrations.
 - **Invoices** — list, search by number, view payment status and analytics, create, update drafts, duplicate, send, remind, mark as paid, cancel, and delete. Create invoices from tracked time entries.
 - **Recurring invoices** — list, view upcoming, create, pause, resume, and delete.
@@ -67,7 +74,22 @@ You have tools for the following and nothing else:
 - **Search** — global search across all entities.
 - **Team** — view team info and list members.
 
-You CANNOT: send emails (other than invoice send/remind), connect bank accounts, modify user settings, manage billing/subscriptions, upload files, or access external services.
+### Web search
+You can search the internet for real-time external information. Use it for:
+- Prices of products, services, or assets the user asks about (e.g. "Can I afford a Tesla?", "How much does Figma cost?")
+- Current exchange rates, market data, or commodity prices
+- Tax rules, regulations, VAT rates, or compliance requirements
+- Industry benchmarks or standard rates
+- News or events relevant to the user's business
+- Information about a specific company, product, or service
+
+### Combining sources
+When a question involves both external information and the user's finances, use BOTH web search and internal tools in the same response. For example:
+- "Can I afford X?" → search for the price of X, then check bank balances or runway, and give a clear answer.
+- "What's the VAT rate for my country?" → search for the rate, then check relevant transactions if needed.
+- "How does my revenue compare to industry average?" → search for benchmarks, then pull the user's revenue data.
+
+You CANNOT: send emails (other than invoice send/remind), connect bank accounts, modify user settings, manage billing/subscriptions, or upload files.
 
 ## Tone
 - Concise and professional. No emojis, no filler, no exclamation marks.
@@ -95,7 +117,6 @@ You CANNOT: send emails (other than invoice send/remind), connect bank accounts,
 let cachedToolDefinitions: Awaited<ReturnType<MCPClient["listTools"]>> | null =
   null;
 
-// biome-ignore lint/suspicious/noExplicitAny: dynamic MCP tool types don't align with ToolSet generics
 let toolIndex: any = null;
 
 async function bootstrapToolDefinitions(ctx: McpContext) {
@@ -180,19 +201,82 @@ app.post("/", async (c) => {
 
     const mcpTools = mcpClient.toolsFromDefinitions(cachedToolDefinitions!);
 
-    const result = streamText({
-      model: openai("gpt-4o"),
-      system: systemPrompt,
-      messages: modelMessages,
-      tools: mcpTools,
-      prepareStep: toolIndex!.prepareStep({ maxTools: 10 }) as any,
-      stopWhen: stepCountIs(8),
-      onFinish: async () => {
-        await mcpClient.close();
+    const firstUserText = uiMessages
+      .filter((m: any) => m.role === "user")
+      .map((m: any) =>
+        Array.isArray(m.parts)
+          ? m.parts
+              .filter((p: any) => p.type === "text")
+              .map((p: any) => p.text)
+              .join("")
+          : typeof m.content === "string"
+            ? m.content
+            : "",
+      )
+      .at(-1) as string | undefined;
+
+    const stream = createUIMessageStream({
+      execute: ({ writer }) => {
+        const result = streamText({
+          model: openai("gpt-4o"),
+          system: systemPrompt,
+          messages: modelMessages,
+          tools: {
+            ...mcpTools,
+            web_search: openai.tools.webSearch({
+              searchContextSize: "medium",
+              userLocation: {
+                type: "approximate",
+                country: mcpCtx.countryCode ?? undefined,
+                timezone: mcpCtx.timezone ?? undefined,
+              },
+            }),
+          },
+          prepareStep: toolIndex!.prepareStep({ maxTools: 10 }) as any,
+          stopWhen: stepCountIs(8),
+          experimental_download: async (options) =>
+            options.map(({ url }) => {
+              if (url.protocol === "data:") {
+                const [header, base64] = url.href.split(",");
+                const mediaType =
+                  header?.match(/data:([^;]+)/)?.[1] ??
+                  "application/octet-stream";
+                return {
+                  data: Uint8Array.from(atob(base64 ?? ""), (c) =>
+                    c.charCodeAt(0),
+                  ),
+                  mediaType,
+                };
+              }
+              return null;
+            }),
+          onFinish: async () => {
+            if (firstUserText?.trim()) {
+              const { text: raw } = await generateText({
+                model: openai("gpt-4o-mini"),
+                prompt: `Generate a concise 3-5 word title for this conversation. Output ONLY the title, no quotes, no punctuation at the end.\n\nUser: ${firstUserText.trim()}`,
+              });
+
+              const title = raw.trim().replace(/^["']+|["']+$/g, "");
+
+              if (title) {
+                writer.write({
+                  type: "data-title" as any,
+                  id: "chat-title",
+                  data: { title },
+                });
+              }
+            }
+
+            await mcpClient.close();
+          },
+        });
+
+        writer.merge(result.toUIMessageStream({ sendSources: true }));
       },
     });
 
-    return result.toUIMessageStreamResponse();
+    return createUIMessageStreamResponse({ stream });
   } catch (err) {
     console.error("[chat] Error:", err);
     return c.json(

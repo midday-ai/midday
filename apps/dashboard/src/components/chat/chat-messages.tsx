@@ -1,11 +1,16 @@
 "use client";
 
 import { InvoiceTemplate } from "@midday/mcp-apps/invoice";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@midday/ui/collapsible";
 import { Icons } from "@midday/ui/icons";
 import { TextShimmer } from "@midday/ui/text-shimmer";
 import type { UIMessage } from "ai";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Streamdown } from "streamdown";
 
 type ChatMessagesProps = {
@@ -43,6 +48,7 @@ const TOOL_LABELS: Record<string, string> = {
   inbox_list: "Checking inbox",
   categories_list: "Fetching categories",
   search_global: "Searching",
+  web_search: "Searching the web",
 };
 
 function formatToolName(name: string): string {
@@ -84,6 +90,7 @@ const TOOL_ICON_MAP: Record<string, (s: number) => ReactNode> = {
   inbox: (s) => <Icons.Inbox2 size={s} />,
   documents: (s) => <Icons.Description size={s} />,
   search: (s) => <Icons.Search size={s} />,
+  web_search: (s) => <Icons.Globle size={s} />,
   team: (s) => <Icons.Face size={s} />,
 };
 
@@ -97,6 +104,7 @@ function getToolIcon(toolName: string, size: number): ReactNode {
 }
 
 function ToolCallGroup({ parts }: { parts: DynamicToolPart[] }) {
+  const [open, setOpen] = useState(false);
   const visible = parts.filter((p) => !HIDDEN_TOOLS.has(p.toolName));
   if (visible.length === 0) return null;
 
@@ -106,13 +114,39 @@ function ToolCallGroup({ parts }: { parts: DynamicToolPart[] }) {
 
   if (allDone) {
     const count = visible.length;
+
+    if (count === 1) {
+      return (
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground/50">
+          <Icons.Check size={14} />
+          {formatToolName(visible[0]!.toolName)}
+        </span>
+      );
+    }
+
     return (
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground/50">
-        <Icons.Check size={14} />
-        {count === 1
-          ? formatToolName(visible[0]!.toolName)
-          : `Used ${count} tools`}
-      </span>
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-pointer">
+          <Icons.ChevronRight
+            size={14}
+            className={`transition-transform duration-150 ${open ? "rotate-90" : ""}`}
+          />
+          Used {count} tools
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="mt-1.5 ml-0.5 flex flex-col gap-1">
+            {visible.map((p) => (
+              <span
+                key={p.toolCallId}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground/50"
+              >
+                <span className="shrink-0">{getToolIcon(p.toolName, 13)}</span>
+                {formatToolName(p.toolName)}
+              </span>
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     );
   }
 
@@ -139,6 +173,62 @@ function InvoicePreview({ data }: { data: Record<string, unknown> }) {
     <div className="mt-3">
       <InvoiceTemplate data={data} />
     </div>
+  );
+}
+
+type SourceUrlPart = {
+  type: "source-url";
+  sourceId: string;
+  url: string;
+  title?: string;
+};
+
+function getDomain(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+function SourcesList({ sources }: { sources: SourceUrlPart[] }) {
+  const [open, setOpen] = useState(false);
+  if (sources.length === 0) return null;
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="mt-3">
+      <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors cursor-pointer">
+        <Icons.ChevronRight
+          size={14}
+          className={`transition-transform duration-150 ${open ? "rotate-90" : ""}`}
+        />
+        <span>
+          {sources.length} {sources.length === 1 ? "source" : "sources"}
+        </span>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {sources.map((source) => (
+            <a
+              key={source.sourceId}
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 border border-border px-2 py-1 text-xs text-muted-foreground hover:border-primary/30 hover:text-foreground transition-colors max-w-[240px]"
+            >
+              <img
+                src={`https://www.google.com/s2/favicons?sz=32&domain=${getDomain(source.url)}`}
+                alt=""
+                className="size-3.5 flex-shrink-0"
+              />
+              <span className="truncate">
+                {source.title || getDomain(source.url)}
+              </span>
+            </a>
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
@@ -204,6 +294,10 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
           (p) => p.type === "dynamic-tool",
         ) as DynamicToolPart[];
 
+        const sourceParts = message.parts.filter(
+          (p) => p.type === "source-url",
+        ) as SourceUrlPart[];
+
         const invoiceParts = toolParts.filter(
           (p) =>
             INVOICE_TOOLS.has(p.toolName) &&
@@ -234,7 +328,7 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
                     isStreaming &&
                     message.id === messages[messages.length - 1]?.id
                   }
-                  className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0 space-y-3"
+                  className="font-sans text-sm [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 space-y-3"
                   components={{
                     a: ({ href, children }) => (
                       <Link
@@ -245,7 +339,7 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
                       </Link>
                     ),
                     p: ({ children }) => (
-                      <p className="leading-relaxed">{children}</p>
+                      <p className="text-sm leading-relaxed">{children}</p>
                     ),
                     ul: ({ children }) => (
                       <ul className="space-y-1 pl-4">{children}</ul>
@@ -256,12 +350,12 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
                       </ol>
                     ),
                     li: ({ children }) => (
-                      <li className="leading-relaxed list-disc marker:text-muted-foreground/40">
+                      <li className="text-sm leading-relaxed list-disc marker:text-muted-foreground/40">
                         {children}
                       </li>
                     ),
                     h1: ({ children }) => (
-                      <h1 className="text-sm font-medium text-foreground mt-4 mb-1">
+                      <h1 className="text-sm font-medium text-foreground mt-3 mb-1">
                         {children}
                       </h1>
                     ),
@@ -271,7 +365,7 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
                       </h2>
                     ),
                     h3: ({ children }) => (
-                      <h3 className="text-sm font-medium text-foreground mt-2 mb-1">
+                      <h3 className="text-sm font-medium text-muted-foreground mt-2 mb-0.5">
                         {children}
                       </h3>
                     ),
@@ -281,12 +375,12 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
                       </strong>
                     ),
                     code: ({ children }) => (
-                      <code className="px-1 py-0.5 bg-secondary text-foreground text-xs font-mono">
+                      <code className="px-1 py-0.5 bg-secondary text-foreground text-[13px]">
                         {children}
                       </code>
                     ),
                     pre: ({ children }) => (
-                      <pre className="p-3 bg-secondary text-foreground text-xs font-mono overflow-x-auto">
+                      <pre className="p-3 bg-secondary text-foreground text-[13px] overflow-x-auto">
                         {children}
                       </pre>
                     ),
@@ -333,6 +427,8 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
                   <InvoicePreview key={part.toolCallId} data={invoiceData} />
                 );
               })}
+
+              {sourceParts.length > 0 && <SourcesList sources={sourceParts} />}
             </div>
           </div>
         );
