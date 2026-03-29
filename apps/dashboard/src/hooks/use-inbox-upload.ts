@@ -15,7 +15,7 @@ export function useInboxUpload() {
   const supabase = createClient();
   const queryClient = useQueryClient();
   const { toast, dismiss, update } = useToast();
-  const toastIdRef = useRef<string | undefined>();
+  const toastIdRef = useRef<string | undefined>(undefined);
 
   const processAttachmentsMutation = useMutation(
     trpc.inbox.processAttachments.mutationOptions(),
