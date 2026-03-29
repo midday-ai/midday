@@ -20,7 +20,11 @@ import {
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
-import { getJobStatus, triggerJob } from "@midday/job-client";
+import {
+  getJobStatus,
+  triggerJob,
+  triggerJobAndWait,
+} from "@midday/job-client";
 import { z } from "zod";
 import {
   mcpTransactionDetailSchema,
@@ -35,7 +39,11 @@ import {
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
-import { truncateListResponse, withErrorHandling } from "../utils";
+import {
+  getVaultSignedUrl,
+  truncateListResponse,
+  withErrorHandling,
+} from "../utils";
 
 export const registerTransactionTools: RegisterTools = (server, ctx) => {
   const { db, teamId, userId, userEmail } = ctx;
@@ -473,12 +481,52 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
       {
         title: "Export Transactions (File)",
         description:
-          "Export transactions as a ZIP file containing CSV and/or XLSX spreadsheets plus receipt attachments. Optionally emails the file to your accountant. Returns a job ID — poll with export_job_status to track progress.",
+          "Export transactions as a ZIP file containing CSV and/or XLSX spreadsheets plus receipt attachments. Optionally emails the file to your accountant. Provide either transactionIds directly OR use filter parameters (start, end, categories, statuses, accounts, q, type) to select transactions by criteria. For up to 500 transactions the export completes synchronously and returns a download URL; larger exports return a jobId for polling with export_job_status.",
         inputSchema: {
           transactionIds: z
             .array(z.string().uuid())
-            .min(1)
-            .describe("Transaction IDs to export"),
+            .optional()
+            .describe(
+              "Transaction IDs to export. Optional if filter parameters are provided instead.",
+            ),
+          start: z
+            .string()
+            .optional()
+            .describe(
+              "Start date (inclusive, ISO 8601) to filter transactions for export",
+            ),
+          end: z
+            .string()
+            .optional()
+            .describe(
+              "End date (inclusive, ISO 8601) to filter transactions for export",
+            ),
+          q: z
+            .string()
+            .optional()
+            .describe("Search query to filter transactions for export"),
+          categories: z
+            .array(z.string())
+            .optional()
+            .describe(
+              "Category slugs to filter transactions for export (from categories_list)",
+            ),
+          statuses: z
+            .array(z.string())
+            .optional()
+            .describe("Status filters for transactions to export"),
+          accounts: z
+            .array(z.string())
+            .optional()
+            .describe("Bank account IDs to filter transactions for export"),
+          type: z
+            .enum(["income", "expense"])
+            .optional()
+            .describe("Transaction type filter: income or expense"),
+          tags: z
+            .array(z.string())
+            .optional()
+            .describe("Tag IDs to filter transactions for export"),
           locale: z
             .string()
             .optional()
@@ -537,24 +585,143 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
             };
           }
 
-          const result = await triggerJob(
-            "export-transactions",
-            {
-              teamId,
-              userId,
-              userEmail: userEmail ?? undefined,
-              locale: params.locale ?? ctx.locale ?? "en",
-              transactionIds: params.transactionIds,
-              dateFormat: params.dateFormat ?? ctx.dateFormat ?? undefined,
-              exportSettings: {
-                csvDelimiter: params.csvDelimiter ?? ",",
-                includeCSV: params.includeCSV ?? true,
-                includeXLSX: params.includeXLSX ?? true,
-                sendEmail: params.sendEmail ?? false,
-                sendCopyToMe: params.sendCopyToMe ?? false,
-                accountantEmail: params.accountantEmail,
-              },
+          let transactionIds = params.transactionIds;
+
+          const hasFilters =
+            params.start ||
+            params.end ||
+            params.q ||
+            params.categories?.length ||
+            params.statuses?.length ||
+            params.accounts?.length ||
+            params.type ||
+            params.tags?.length;
+
+          if (!transactionIds?.length && !hasFilters) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "Provide either transactionIds or at least one filter parameter (start, end, q, categories, statuses, accounts, type, tags).",
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          if (!transactionIds?.length && hasFilters) {
+            const ids: string[] = [];
+            let cursor: string | null = null;
+            const MAX_EXPORT_ROWS = 10_000;
+
+            do {
+              const page = await getTransactions(db, {
+                teamId,
+                cursor,
+                pageSize: 500,
+                q: params.q ?? null,
+                start: params.start ?? null,
+                end: params.end ?? null,
+                categories: params.categories ?? null,
+                statuses:
+                  (params.statuses as
+                    | (
+                        | "blank"
+                        | "receipt_match"
+                        | "in_review"
+                        | "export_error"
+                        | "exported"
+                        | "excluded"
+                        | "archived"
+                      )[]
+                    | null) ?? null,
+                type: params.type ?? null,
+                accounts: params.accounts ?? null,
+                tags: params.tags ?? null,
+                sort: null,
+                assignees: null,
+                recurring: null,
+                attachments: null,
+                amountRange: null,
+                amount: null,
+                manual: null,
+              });
+
+              for (const txn of page.data ?? []) {
+                ids.push(txn.id);
+              }
+
+              cursor = page.meta.hasNextPage
+                ? (page.meta.cursor ?? null)
+                : null;
+            } while (cursor && ids.length < MAX_EXPORT_ROWS);
+
+            if (ids.length === 0) {
+              return {
+                content: [
+                  {
+                    type: "text",
+                    text: "No transactions matched the provided filters.",
+                  },
+                ],
+                isError: true,
+              };
+            }
+
+            transactionIds = ids;
+          }
+
+          const jobPayload = {
+            teamId,
+            userId,
+            userEmail: userEmail ?? undefined,
+            locale: params.locale ?? ctx.locale ?? "en",
+            transactionIds: transactionIds!,
+            dateFormat: params.dateFormat ?? ctx.dateFormat ?? undefined,
+            exportSettings: {
+              csvDelimiter: params.csvDelimiter ?? ",",
+              includeCSV: params.includeCSV ?? true,
+              includeXLSX: params.includeXLSX ?? true,
+              sendEmail: params.sendEmail ?? false,
+              sendCopyToMe: params.sendCopyToMe ?? false,
+              accountantEmail: params.accountantEmail,
             },
+          };
+
+          const SYNC_THRESHOLD = 500;
+
+          if (transactionIds!.length <= SYNC_THRESHOLD) {
+            const { result } = await triggerJobAndWait(
+              "export-transactions",
+              jobPayload,
+              "transactions",
+              { timeout: 120_000 },
+            );
+
+            const jobResult = result as
+              | { fullPath?: string; fileName?: string; totalItems?: number }
+              | undefined;
+
+            const downloadUrl = jobResult?.fullPath
+              ? await getVaultSignedUrl(jobResult.fullPath)
+              : null;
+
+            const response = {
+              status: "completed" as const,
+              fileName: jobResult?.fileName ?? null,
+              totalItems: jobResult?.totalItems ?? transactionIds!.length,
+              downloadUrl,
+            };
+
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+              structuredContent: response,
+            };
+          }
+
+          const triggerResult = await triggerJob(
+            "export-transactions",
+            jobPayload,
             "transactions",
           );
 
@@ -562,8 +729,8 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
             message: params.sendEmail
               ? `Export started. Your accountant at ${params.accountantEmail} will receive the file once ready.`
               : "Export started. Poll export_job_status with the jobId to track progress and get the download URL.",
-            jobId: result.id,
-            transactionCount: params.transactionIds.length,
+            jobId: triggerResult.id,
+            transactionCount: transactionIds!.length,
           };
 
           return {
@@ -684,7 +851,26 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
       async ({ jobId }) => {
         try {
           const status = await getJobStatus(jobId, { teamId });
-          const response = { ...status };
+          const response: Record<string, unknown> = { ...status };
+
+          if (
+            status.status === "completed" &&
+            status.result &&
+            typeof status.result === "object" &&
+            "fullPath" in status.result &&
+            typeof (status.result as Record<string, unknown>).fullPath ===
+              "string"
+          ) {
+            const downloadUrl = await getVaultSignedUrl(
+              (status.result as Record<string, unknown>).fullPath as string,
+            );
+            if (downloadUrl) {
+              response.result = {
+                ...(status.result as Record<string, unknown>),
+                downloadUrl,
+              };
+            }
+          }
 
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
