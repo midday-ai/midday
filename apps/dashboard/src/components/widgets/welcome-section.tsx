@@ -289,10 +289,8 @@ function SummaryTicker({ insights }: { insights: Insight[] }) {
   );
 }
 
-export function WelcomeSection() {
+export function WelcomeGreeting() {
   const { data: user } = useUserQuery();
-  const trpc = useTRPC();
-  const { data } = useSuspenseQuery(trpc.overview.summary.queryOptions());
   const [greeting, setGreeting] = useState(() =>
     getTimeBasedGreeting(user?.timezone ?? undefined),
   );
@@ -311,19 +309,24 @@ export function WelcomeSection() {
   }, [user?.timezone]);
 
   const firstName = user?.fullName?.split(" ")[0];
-  const insights = buildInsights(data, user?.locale);
 
   return (
-    <div className="flex flex-col items-center text-center pt-6 pb-10 w-full">
-      <h1 className="text-[38px] font-serif leading-tight">
-        {greeting}
-        {firstName ? (
-          <>
-            , <span className="text-muted-foreground">{firstName}</span>
-          </>
-        ) : null}
-      </h1>
-      <SummaryTicker insights={insights} />
-    </div>
+    <h1 className="text-[38px] font-serif leading-tight text-center">
+      {greeting}
+      {firstName ? (
+        <>
+          , <span className="text-muted-foreground">{firstName}</span>
+        </>
+      ) : null}
+    </h1>
   );
+}
+
+export function WelcomeSummary() {
+  const { data: user } = useUserQuery();
+  const trpc = useTRPC();
+  const { data } = useSuspenseQuery(trpc.overview.summary.queryOptions());
+  const insights = buildInsights(data, user?.locale);
+
+  return <SummaryTicker insights={insights} />;
 }

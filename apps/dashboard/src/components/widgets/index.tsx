@@ -9,9 +9,9 @@ import { ChatView } from "@/components/chat/chat-view";
 import { NewChatButton } from "@/components/chat/new-chat-button";
 import { AskMidday } from "./ask-midday";
 import { McpBanner } from "./mcp-banner";
-import { OverviewSkeleton } from "./overview-skeleton";
+import { SummarySkeleton, WidgetCardsSkeleton } from "./overview-skeleton";
 import { QuickActions } from "./quick-actions";
-import { WelcomeSection } from "./welcome-section";
+import { WelcomeGreeting, WelcomeSummary } from "./welcome-section";
 import { WidgetCards } from "./widget-cards";
 
 type SubView = "overview" | "chat";
@@ -42,10 +42,15 @@ export function OverviewView() {
 
       {view === "overview" && (
         <div className="mt-2 pb-16 flex flex-col justify-center min-h-[calc(100vh-120px)] max-w-3xl mx-auto w-full">
-          <Suspense fallback={<OverviewSkeleton />}>
-            <WelcomeSection />
-            <AskMidday onChatOpen={() => setView("chat")} />
-            <QuickActions />
+          <div className="flex flex-col items-center text-center pt-6 pb-10 w-full">
+            <WelcomeGreeting />
+            <Suspense fallback={<SummarySkeleton />}>
+              <WelcomeSummary />
+            </Suspense>
+          </div>
+          <AskMidday onChatOpen={() => setView("chat")} />
+          <QuickActions />
+          <Suspense fallback={<WidgetCardsSkeleton />}>
             <WidgetCards />
           </Suspense>
         </div>

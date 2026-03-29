@@ -15,8 +15,8 @@
     "./fetch-with-retry": "./src/fetch-with-retry.ts"
   },
   "dependencies": {
-    "@trpc/client": "^11.15.0",
-    "@trpc/server": "^11.15.0",
+    "@trpc/client": "^11.16.0",
+    "@trpc/server": "^11.16.0",
     "superjson": "^2.2.6"
   },
   "devDependencies": {
