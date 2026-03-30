@@ -1,6 +1,7 @@
 "use client";
 
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { LogEvents } from "@midday/events/events";
 import {
   Accordion,
   AccordionContent,
@@ -24,6 +25,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
 import { isValidEmailList } from "@midday/utils";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { z } from "zod/v3";
@@ -106,6 +108,7 @@ type Props = {
 export function CustomerForm({ data }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { track } = useOpenPanel();
   const isEdit = !!data;
 
   const { setParams: setCustomerParams, name } = useCustomerParams();
@@ -115,6 +118,10 @@ export function CustomerForm({ data }: Props) {
   const upsertCustomerMutation = useMutation(
     trpc.customers.upsert.mutationOptions({
       onSuccess: (data) => {
+        if (!isEdit) {
+          track(LogEvents.CustomerCreated.name);
+        }
+
         queryClient.invalidateQueries({
           queryKey: trpc.customers.get.infiniteQueryKey(),
         });

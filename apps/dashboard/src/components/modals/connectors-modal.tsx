@@ -2,6 +2,7 @@
 
 import { connectorApps } from "@midday/connectors";
 import type { ConnectorApp } from "@midday/connectors/types";
+import { LogEvents } from "@midday/events/events";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import {
@@ -15,6 +16,7 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Skeleton } from "@midday/ui/skeleton";
+import { useOpenPanel } from "@openpanel/nextjs";
 import {
   useMutation,
   useQuery,
@@ -87,6 +89,8 @@ function ConnectorCard({
     <div
       role="button"
       tabIndex={0}
+      data-track="Connector Viewed"
+      data-connector={connector.name}
       onClick={() => onSelect(connector)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -377,6 +381,7 @@ function ConnectorsContent({
 }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { track } = useOpenPanel();
   const [search, setSearch] = useState("");
   const [selectedConnector, setSelectedConnector] = useState<Connector | null>(
     null,
@@ -455,6 +460,7 @@ function ConnectorsContent({
             setIsConnecting(false);
             invalidateConnectors();
             setSelectedConnector(null);
+            track(LogEvents.ConnectorConnected.name, { connector: slug });
           }
         };
 
@@ -486,18 +492,21 @@ function ConnectorsContent({
 
   const handleDisconnect = useCallback(
     (connectedAccountId: string) => {
+      track(LogEvents.ConnectorDisconnected.name, { connectedAccountId });
       disconnectMutation.mutate({ connectedAccountId });
     },
-    [disconnectMutation],
+    [disconnectMutation, track],
   );
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      track(LogEvents.ConnectorModalOpened.name);
+    } else {
       setSearch("");
       setSelectedConnector(null);
       setIsConnecting(false);
     }
-  }, [open]);
+  }, [open, track]);
 
   useEffect(() => {
     onDetailChange(selectedConnector !== null);

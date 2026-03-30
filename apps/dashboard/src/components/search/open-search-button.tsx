@@ -10,6 +10,7 @@ export function OpenSearchButton() {
   return (
     <Button
       variant="outline"
+      data-track="Search Opened"
       className="relative min-w-[250px] w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64 border-0 p-0 hover:bg-transparent font-normal no-drag hidden md:flex"
       onClick={() => setOpen()}
     >

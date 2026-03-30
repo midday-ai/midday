@@ -1,6 +1,7 @@
 "use client";
 
 import { TZDate } from "@date-fns/tz";
+import { LogEvents } from "@midday/events/events";
 import { Calendar } from "@midday/ui/calendar";
 import {
   DropdownMenuGroup,
@@ -18,6 +19,7 @@ import {
 } from "@midday/ui/select";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   endOfMonth,
@@ -88,6 +90,7 @@ const getPresetOptions = (weekStartsOnMonday: boolean): PresetOption[] => {
 export function TrackerCreateInvoice({ projectId }: Props) {
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const { toast } = useToast();
+  const { track } = useOpenPanel();
   const { data: user } = useUserQuery();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -107,7 +110,8 @@ export function TrackerCreateInvoice({ projectId }: Props) {
   const createInvoiceFromTrackerMutation = useMutation(
     trpc.invoice.createFromTracker.mutationOptions({
       onSuccess: (data) => {
-        // Invalidate invoice queries
+        track(LogEvents.TrackerInvoiceCreated.name);
+
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.get.infiniteQueryKey(),
         });

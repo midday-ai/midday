@@ -1,7 +1,9 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { Suspense, useCallback, useState } from "react";
 import { ChatProvider } from "@/components/chat/chat-context";
 import { ChatTitle } from "@/components/chat/chat-title";
@@ -18,6 +20,12 @@ type SubView = "overview" | "chat";
 
 export function OverviewView() {
   const [view, setView] = useState<SubView>("overview");
+  const { track } = useOpenPanel();
+
+  const openChat = useCallback(() => {
+    track(LogEvents.AssistantOpened.name);
+    setView("chat");
+  }, [track]);
 
   const goBack = useCallback(() => setView("overview"), []);
 
@@ -48,8 +56,8 @@ export function OverviewView() {
               <WelcomeSummary />
             </Suspense>
           </div>
-          <AskMidday onChatOpen={() => setView("chat")} />
-          <QuickActions onChatOpen={() => setView("chat")} />
+          <AskMidday onChatOpen={openChat} />
+          <QuickActions onChatOpen={openChat} />
           <Suspense fallback={<WidgetCardsSkeleton />}>
             <WidgetCards />
           </Suspense>

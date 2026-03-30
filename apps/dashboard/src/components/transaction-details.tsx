@@ -1,5 +1,6 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
 import {
   Accordion,
   AccordionContent,
@@ -21,6 +22,7 @@ import { Switch } from "@midday/ui/switch";
 import { ToastAction } from "@midday/ui/toast";
 import { toast } from "@midday/ui/use-toast";
 import { getTaxTypeLabel } from "@midday/utils/tax";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
@@ -42,6 +44,7 @@ export function TransactionDetails() {
   const trpc = useTRPC();
   const { transactionId } = useTransactionParams();
   const queryClient = useQueryClient();
+  const { track } = useOpenPanel();
   const invalidateTransactionQueries = useInvalidateTransactionQueries();
 
   const { updateCategory } = useUpdateTransactionCategory({
@@ -73,11 +76,15 @@ export function TransactionDetails() {
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions({
       onSuccess: (_, variables) => {
-        // If category or internal (exclude from reports) changed, invalidate reports
+        track(LogEvents.TransactionUpdated.name);
+        if ("categorySlug" in variables) {
+          track(LogEvents.TransactionCategoryChanged.name, {
+            category: variables.categorySlug,
+          });
+        }
         if ("categorySlug" in variables || "internal" in variables) {
           invalidateTransactionQueries();
         } else {
-          // Otherwise just invalidate transaction queries
           queryClient.invalidateQueries({
             queryKey: trpc.transactions.get.infiniteQueryKey(),
           });

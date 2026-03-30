@@ -1,7 +1,9 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
@@ -20,6 +22,7 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
   const [, copy] = useCopyToClipboard();
   const [isCopied, setIsCopied] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { track } = useOpenPanel();
   const trpc = useTRPC();
 
   const fileName = filePath.at(-1);
@@ -35,6 +38,7 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
         setIsCopied(true);
       },
       onSuccess: (data) => {
+        track(LogEvents.VaultFileShared.name);
         if (data?.shortUrl) {
           copy(data.shortUrl);
 
@@ -54,6 +58,7 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
         className="rounded-full size-7 bg-background"
         onClick={() => {
           if (downloadUrl && fileName) {
+            track(LogEvents.VaultFileDownloaded.name);
             downloadFile(downloadUrl, fileName);
           }
         }}

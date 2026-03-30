@@ -1,5 +1,7 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
 import { useCallback } from "react";
@@ -84,6 +86,7 @@ export function ChatView({
     rateLimit,
     rateLimitExceeded,
   } = useChatState();
+  const { track } = useOpenPanel();
 
   const isStreaming = status === "streaming" || status === "submitted";
   const showLimitWarning =
@@ -163,6 +166,9 @@ export function ChatView({
             onModeChange={setMode}
             plan={plan}
             onSuggestion={(text) => {
+              track(LogEvents.AssistantSuggestionUsed.name, {
+                suggestion: text,
+              });
               sendMessage({ text });
             }}
           />

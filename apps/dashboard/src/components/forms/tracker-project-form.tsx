@@ -1,6 +1,7 @@
 "use client";
 
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { LogEvents } from "@midday/events/events";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
 import { CurrencyInput } from "@midday/ui/currency-input";
@@ -25,6 +26,7 @@ import {
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { z } from "zod/v3";
@@ -66,6 +68,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
   const isEdit = !!data;
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { track } = useOpenPanel();
   const { data: user } = useUserQuery();
   const { setParams: setTrackerParams } = useTrackerParams();
   const { setParams: setCustomerParams } = useCustomerParams();
@@ -74,6 +77,9 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
   const upsertTrackerProjectMutation = useMutation(
     trpc.trackerProjects.upsert.mutationOptions({
       onSuccess: (result) => {
+        if (!isEdit) {
+          track(LogEvents.TrackerProjectCreated.name);
+        }
         setLatestProjectId(result?.id ?? null);
 
         queryClient.invalidateQueries({

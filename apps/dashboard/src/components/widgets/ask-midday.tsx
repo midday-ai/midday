@@ -1,5 +1,7 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useCallback } from "react";
 import { flushSync } from "react-dom";
 import { useChatState } from "@/components/chat/chat-context";
@@ -20,6 +22,7 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
     setMode,
     plan,
   } = useChatState();
+  const { track } = useOpenPanel();
 
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -52,6 +55,7 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
 
   const handleSuggestion = useCallback(
     (suggestion: string) => {
+      track(LogEvents.AssistantSuggestionUsed.name, { suggestion });
       flushSync(() => {
         setMessages([]);
         setChatTitle(null);
@@ -59,7 +63,7 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
       sendMessage({ text: suggestion });
       onChatOpen();
     },
-    [sendMessage, setMessages, setChatTitle, onChatOpen],
+    [sendMessage, setMessages, setChatTitle, onChatOpen, track],
   );
 
   return (

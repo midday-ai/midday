@@ -48,6 +48,8 @@ function McpConnectButton({
     <Button
       className="px-4 font-medium h-[40px] w-full"
       variant="outline"
+      data-track="MCP App Selected"
+      data-app={name}
       onClick={() => onConnect(id)}
     >
       <div className="flex items-center space-x-2">

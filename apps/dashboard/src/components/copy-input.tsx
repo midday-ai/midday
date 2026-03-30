@@ -28,6 +28,7 @@ export function CopyInput({ value, className }: Props) {
   return (
     <button
       type="button"
+      data-track="Copied to Clipboard"
       onClick={handleClipboard}
       className={cn(
         "flex items-center relative w-full border py-2 px-4 cursor-pointer",

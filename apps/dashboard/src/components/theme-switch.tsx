@@ -1,5 +1,6 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
 import {
   Select,
   SelectContent,
@@ -8,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -32,6 +34,7 @@ const ThemeIcon = ({ currentTheme }: Props) => {
 export const ThemeSwitch = () => {
   const { theme, setTheme, themes, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { track } = useOpenPanel();
 
   // After mounting, we have access to the theme
   useEffect(() => setMounted(true), []);
@@ -42,7 +45,13 @@ export const ThemeSwitch = () => {
 
   return (
     <div className="flex items-center relative">
-      <Select value={theme} onValueChange={(value: Theme) => setTheme(value)}>
+      <Select
+        value={theme}
+        onValueChange={(value: Theme) => {
+          setTheme(value);
+          track(LogEvents.ThemeChanged.name, { theme: value });
+        }}
+      >
         <SelectTrigger className="w-full pl-6 pr-3 py-0.5 bg-transparent outline-none capitalize h-[24px] text-xs border-0 shadow-none">
           <SelectValue>
             {theme

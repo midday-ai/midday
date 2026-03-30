@@ -1,8 +1,10 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
 import { createClient } from "@midday/supabase/client";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 import { useUserQuery } from "@/hooks/use-user";
@@ -12,6 +14,7 @@ import { resumableUpload } from "@/utils/upload";
 export function useInboxUpload() {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
+  const { track } = useOpenPanel();
   const supabase = createClient();
   const queryClient = useQueryClient();
   const { toast, dismiss, update } = useToast();
@@ -101,6 +104,7 @@ export function useInboxUpload() {
         toastRef.current.dismiss(toastIdRef.current);
         toastIdRef.current = undefined;
 
+        track(LogEvents.InboxUpload.name, { count: files.length });
         toastRef.current.toast({
           title: "Upload successful.",
           variant: "success",

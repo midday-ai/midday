@@ -15,6 +15,7 @@ export function NewChatButton({
     <Button
       variant={variant}
       size="icon"
+      data-track="Assistant New Chat"
       onClick={() => {
         setMessages([]);
         setInputValue("");

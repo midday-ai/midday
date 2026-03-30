@@ -53,6 +53,8 @@ export function QuickActions({ onChatOpen }: { onChatOpen: () => void }) {
         <button
           key={label}
           type="button"
+          data-track="Assistant Quick Action"
+          data-action={label}
           className={buttonClassName}
           onClick={() => handleChatAction(message)}
         >
@@ -63,6 +65,8 @@ export function QuickActions({ onChatOpen }: { onChatOpen: () => void }) {
 
       <button
         type="button"
+        data-track="Assistant Quick Action"
+        data-action="Upload Receipt"
         className={buttonClassName}
         onClick={openFilePicker}
       >
