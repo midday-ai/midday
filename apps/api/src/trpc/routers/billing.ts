@@ -66,7 +66,7 @@ export const billingRouter = createTRPCRouter({
 
       if (requireTrial && !trialEligible) {
         throw new TRPCError({
-          code: "PRECONDITION_FAILED",
+          code: "BAD_REQUEST",
           message: "Team is not eligible for a trial",
         });
       }
@@ -112,11 +112,10 @@ export const billingRouter = createTRPCRouter({
         },
         embedOrigin,
         currency: currency === "EUR" ? "eur" : "usd",
-        ...(requireTrial &&
-          trialEligible && {
-            trialInterval: "day" as const,
-            trialIntervalCount: 14,
-          }),
+        ...(trialEligible && {
+          trialInterval: "day" as const,
+          trialIntervalCount: 14,
+        }),
       });
 
       return { url: checkout.url };
