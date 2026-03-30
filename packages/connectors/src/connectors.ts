@@ -589,6 +589,23 @@ export const connectorApps: ConnectorApp[] = [
     ],
   },
 
+  {
+    id: "connector-linkedin",
+    name: "LinkedIn",
+    slug: "connector-linkedin",
+    category: "connector",
+    active: true,
+    short_description:
+      "Access LinkedIn for networking, posts, and lead generation",
+    description:
+      "Connect LinkedIn to let the AI assistant view your profile, manage connections, and interact with your professional network.",
+    features: [
+      "View profile and connections",
+      "Create and manage posts",
+      "Search people and companies",
+    ],
+  },
+
   // Design & Creative
   {
     id: "connector-figma",
@@ -789,6 +806,22 @@ export const connectorApps: ConnectorApp[] = [
     ],
   },
 
+  {
+    id: "connector-square",
+    name: "Square",
+    slug: "connector-square",
+    category: "connector",
+    active: true,
+    short_description: "Access payments, customers, and orders from Square",
+    description:
+      "Connect Square to let the AI assistant query payment transactions, view customer data, and access order information.",
+    features: [
+      "Query payment transactions",
+      "View customer data",
+      "Access order information",
+    ],
+  },
+
   // HR & Recruiting
   {
     id: "connector-bamboohr",
@@ -865,6 +898,39 @@ export const connectorApps: ConnectorApp[] = [
       "View keyword rankings",
       "Access site audit data",
       "Analyze competitor performance",
+    ],
+  },
+
+  {
+    id: "connector-mailchimp",
+    name: "Mailchimp",
+    slug: "connector-mailchimp",
+    category: "connector",
+    active: true,
+    short_description:
+      "Manage email campaigns, audiences, and analytics in Mailchimp",
+    description:
+      "Connect Mailchimp to let the AI assistant manage email campaigns, view audience data, and access campaign analytics.",
+    features: [
+      "Manage email campaigns",
+      "View audience and subscriber data",
+      "Access campaign analytics",
+    ],
+  },
+  {
+    id: "connector-google-analytics",
+    name: "Google Analytics",
+    slug: "connector-google-analytics",
+    category: "connector",
+    active: true,
+    short_description:
+      "Access website traffic and analytics data from Google Analytics",
+    description:
+      "Connect Google Analytics to let the AI assistant query website traffic, view user behavior, and access performance reports.",
+    features: [
+      "Query website traffic data",
+      "View user behavior and conversions",
+      "Access performance reports",
     ],
   },
 
@@ -951,6 +1017,54 @@ export const connectorApps: ConnectorApp[] = [
     ],
   },
 
+  // Time Tracking
+  {
+    id: "connector-clockify",
+    name: "Clockify",
+    slug: "connector-clockify",
+    category: "connector",
+    active: true,
+    short_description:
+      "Access time entries, projects, and reports from Clockify",
+    description:
+      "Connect Clockify to let the AI assistant view time entries, manage projects, and pull time tracking reports.",
+    features: [
+      "View and manage time entries",
+      "Access project data",
+      "Pull time tracking reports",
+    ],
+  },
+  {
+    id: "connector-toggl",
+    name: "Toggl",
+    slug: "connector-toggl",
+    category: "connector",
+    active: true,
+    short_description: "Access time tracking data and reports from Toggl",
+    description:
+      "Connect Toggl to let the AI assistant view time entries, manage projects, and access detailed time reports.",
+    features: [
+      "View and manage time entries",
+      "Access project and client data",
+      "Pull detailed time reports",
+    ],
+  },
+  {
+    id: "connector-harvest",
+    name: "Harvest",
+    slug: "connector-harvest",
+    category: "connector",
+    active: true,
+    short_description: "Access time tracking and invoicing data from Harvest",
+    description:
+      "Connect Harvest to let the AI assistant view time entries, access project budgets, and pull invoicing data.",
+    features: [
+      "View time entries and timesheets",
+      "Access project budgets",
+      "Pull invoicing and expense data",
+    ],
+  },
+
   // Meetings & Transcription
   {
     id: "connector-fireflies",
@@ -965,6 +1079,23 @@ export const connectorApps: ConnectorApp[] = [
       "Search meeting transcripts",
       "Access meeting summaries",
       "Retrieve action items",
+    ],
+  },
+  {
+    id: "connector-granola",
+    name: "Granola",
+    slug: "connector-granola",
+    category: "connector",
+    active: true,
+    short_description:
+      "Access meeting notes, transcripts, and AI summaries from Granola",
+    description:
+      "Connect Granola to let the AI assistant search meeting notes, retrieve transcripts, access AI-generated summaries, and query meetings using natural language.",
+    features: [
+      "Search and query meeting notes",
+      "Access meeting transcripts",
+      "Retrieve AI-generated summaries",
+      "Browse meetings by date range",
     ],
   },
 ];

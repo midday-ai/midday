@@ -47,6 +47,7 @@ export const CURATED_TOOLKIT_SLUGS = [
   "close",
   "capsulecrm",
   "affinity",
+  "linkedin",
 
   // Design & Creative
   "figma",
@@ -65,6 +66,7 @@ export const CURATED_TOOLKIT_SLUGS = [
   "zoho_books",
   "sage",
   "wave_accounting",
+  "square",
 
   // HR & Recruiting
   "bamboohr",
@@ -74,6 +76,8 @@ export const CURATED_TOOLKIT_SLUGS = [
   "googleads",
   "metaads",
   "semrush",
+  "mailchimp",
+  "google_analytics",
 
   // Customer Support
   "intercom",
@@ -86,8 +90,14 @@ export const CURATED_TOOLKIT_SLUGS = [
   // Signing & Contracts
   "docusign",
 
+  // Time Tracking
+  "clockify",
+  "toggl",
+  "harvest",
+
   // Meetings & Transcription
   "fireflies",
+  "granola_mcp",
 ] as const;
 
 export type CuratedToolkitSlug = (typeof CURATED_TOOLKIT_SLUGS)[number];
@@ -105,6 +115,7 @@ const COMPOSIO_SLUG_OVERRIDES: Record<string, string> = {
   google_tasks: "googletasks",
   google_ads: "googleads",
   meta_ads: "metaads",
+  granola: "granola_mcp",
 };
 
 /**
