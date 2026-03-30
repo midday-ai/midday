@@ -92,8 +92,9 @@ export function DraggableChartCard({
 
   return (
     <div
+      id={id}
       ref={composedRef}
-      className={`relative transition-opacity duration-150 ${isDragging ? "opacity-30" : ""} ${isEditing ? "cursor-grab active:cursor-grabbing" : ""}`}
+      className={`relative transition-opacity duration-150 scroll-mt-24 ${isDragging ? "opacity-30" : ""} ${isEditing ? "cursor-grab active:cursor-grabbing" : ""}`}
       {...(isEditing ? { ...attributes, ...listeners } : {})}
     >
       {children}
@@ -104,13 +105,13 @@ export function DraggableChartCard({
             className="absolute inset-y-0 left-0 w-4 z-20 cursor-col-resize group/resize-l"
             onPointerDown={(e) => startResize(e, "left")}
           >
-            <div className="absolute top-1/2 -translate-y-1/2 left-0.5 w-1 h-8 rounded-full bg-border opacity-0 group-hover/resize-l:opacity-100 transition-opacity" />
+            <div className="absolute top-1/2 -translate-y-1/2 left-0.5 w-1 h-8 rounded-full bg-border opacity-60 group-hover/resize-l:opacity-100 transition-opacity" />
           </div>
           <div
             className="absolute inset-y-0 right-0 w-4 z-20 cursor-col-resize group/resize-r"
             onPointerDown={(e) => startResize(e, "right")}
           >
-            <div className="absolute top-1/2 -translate-y-1/2 right-0.5 w-1 h-8 rounded-full bg-border opacity-0 group-hover/resize-r:opacity-100 transition-opacity" />
+            <div className="absolute top-1/2 -translate-y-1/2 right-0.5 w-1 h-8 rounded-full bg-border opacity-60 group-hover/resize-r:opacity-100 transition-opacity" />
           </div>
         </>
       )}

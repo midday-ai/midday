@@ -47,7 +47,7 @@ export const billingRouter = createTRPCRouter({
   createCheckout: protectedProcedure
     .input(createCheckoutSchema)
     .mutation(async ({ input, ctx: { db, session, teamId } }) => {
-      const { plan, planType, embedOrigin, currency, trial } = input;
+      const { plan, planType, embedOrigin, currency, requireTrial } = input;
 
       // Get team data
       const team = await getTeamById(db, teamId!);
@@ -59,18 +59,16 @@ export const billingRouter = createTRPCRouter({
       const yearly = planType?.endsWith("_yearly") ?? false;
       const productId = getPlanProductId(plan, yearly);
 
-      if (trial) {
-        const trialEligible =
-          team.plan === "trial" &&
-          team.subscriptionStatus == null &&
-          team.canceledAt == null;
+      const trialEligible =
+        team.plan === "trial" &&
+        team.subscriptionStatus == null &&
+        team.canceledAt == null;
 
-        if (!trialEligible) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Team is not eligible for a trial",
-          });
-        }
+      if (requireTrial && !trialEligible) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Team is not eligible for a trial",
+        });
       }
 
       // Resolve or create Polar customer so checkout skips email identification.
@@ -114,7 +112,7 @@ export const billingRouter = createTRPCRouter({
         },
         embedOrigin,
         currency: currency === "EUR" ? "eur" : "usd",
-        ...(trial && {
+        ...(trialEligible && {
           trialInterval: "day" as const,
           trialIntervalCount: 14,
         }),

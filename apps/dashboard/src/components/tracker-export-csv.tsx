@@ -103,7 +103,12 @@ export function TrackerExportCSV({ name, projectId }: Props) {
             />
 
             <div className="p-4 space-y-4">
-              <Button onClick={downloadCSV} className="w-full" disabled={!date}>
+              <Button
+                onClick={downloadCSV}
+                className="w-full"
+                disabled={!date}
+                data-track="Tracker Exported"
+              >
                 Export
               </Button>
             </div>

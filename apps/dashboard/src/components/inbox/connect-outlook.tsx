@@ -28,6 +28,8 @@ export function ConnectOutlook({ redirectPath }: Props) {
     <SubmitButton
       className="px-4 font-medium h-[40px] w-full"
       variant="outline"
+      data-track="Inbox Email Connected"
+      data-provider="outlook"
       onClick={() =>
         connectMutation.mutate({ provider: "outlook", redirectPath })
       }

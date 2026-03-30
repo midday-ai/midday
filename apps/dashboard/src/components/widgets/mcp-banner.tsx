@@ -46,6 +46,7 @@ export function McpBanner() {
           <div className="group relative border border-border bg-background shadow-lg w-[300px] overflow-hidden">
             <button
               type="button"
+              data-track="MCP Banner Dismissed"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -81,6 +82,8 @@ export function McpBanner() {
                 >
                   <button
                     type="button"
+                    data-track="MCP App Selected"
+                    data-app="chatgpt"
                     onClick={() => setParams({ "mcp-app": "chatgpt-mcp" })}
                     className="block size-9 overflow-hidden rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                   >
@@ -94,6 +97,8 @@ export function McpBanner() {
                 >
                   <button
                     type="button"
+                    data-track="MCP App Selected"
+                    data-app="claude"
                     onClick={() => setParams({ "mcp-app": "claude-mcp" })}
                     className="block size-9 overflow-hidden rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                   >
@@ -107,6 +112,8 @@ export function McpBanner() {
                 >
                   <button
                     type="button"
+                    data-track="MCP App Selected"
+                    data-app="manus"
                     onClick={() => setParams({ "mcp-app": "manus-mcp" })}
                     className="block size-9 overflow-hidden rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                   >
@@ -120,6 +127,8 @@ export function McpBanner() {
                 >
                   <button
                     type="button"
+                    data-track="MCP App Selected"
+                    data-app="perplexity"
                     onClick={() => setParams({ "mcp-app": "perplexity-mcp" })}
                     className="block size-9 overflow-hidden rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                   >
@@ -131,11 +140,11 @@ export function McpBanner() {
 
             <Link href="/apps?q=mcp" className="block p-4">
               <h3 className="text-sm font-medium mb-1">
-                Midday works with your AI tools
+                Use Midday where you already work
               </h3>
               <p className="text-xs text-muted-foreground">
-                Connect ChatGPT, Claude, Manus and more to your financial data
-                via MCP.
+                Ask questions and take action without leaving your favorite AI
+                tool.
               </p>
             </Link>
           </div>

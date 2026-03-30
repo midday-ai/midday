@@ -47,6 +47,9 @@ export function DeleteConnection({ connection }: Props) {
         queryClient.invalidateQueries({
           queryKey: trpc.bankConnections.get.queryKey(),
         });
+        queryClient.invalidateQueries({
+          queryKey: trpc.overview.summary.queryKey(),
+        });
 
         setOpen(false);
         setValue("");

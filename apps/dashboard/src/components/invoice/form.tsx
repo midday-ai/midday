@@ -1,3 +1,4 @@
+import { LogEvents } from "@midday/events/events";
 import { isDateInFutureUTC } from "@midday/invoice/recurring";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -9,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
+import { useOpenPanel } from "@openpanel/nextjs";
 import {
   useIsMutating,
   useMutation,
@@ -43,6 +45,7 @@ import { transformFormValuesToDraft } from "./utils";
 export function Form() {
   const { invoiceId, setParams } = useInvoiceParams();
   const { data: user } = useUserQuery();
+  const { track } = useOpenPanel();
 
   const form = useFormContext();
   const token = form.watch("token");
@@ -79,6 +82,7 @@ export function Form() {
   const createInvoiceMutation = useMutation(
     trpc.invoice.create.mutationOptions({
       onSuccess: (data) => {
+        track(LogEvents.InvoiceCreated.name);
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.get.infiniteQueryKey(),
         });
@@ -124,6 +128,7 @@ export function Form() {
   const createRecurringInvoiceMutation = useMutation(
     trpc.invoiceRecurring.create.mutationOptions({
       onSuccess: () => {
+        track(LogEvents.RecurringInvoiceCreated.name);
         // Invalidate queries - the form will be closed by createInvoiceMutation
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.get.infiniteQueryKey(),

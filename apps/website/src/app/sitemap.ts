@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     "",
     "/agents",
+    "/assistant",
     "/about",
     "/bank-coverage",
     "/compare",
@@ -57,7 +58,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Integration pages
-  const integrations = getAllSlugs().map((slug) => ({
+  const allSlugs = getAllSlugs();
+  const integrations = allSlugs.map((slug) => ({
     url: `${baseUrl}/integrations/${slug}`,
     lastModified,
   }));

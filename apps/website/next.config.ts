@@ -44,11 +44,6 @@ const config = {
         permanent: true,
       },
       {
-        source: "/assistant",
-        destination: "/",
-        permanent: true,
-      },
-      {
         source: "/insights",
         destination: "/",
         permanent: true,

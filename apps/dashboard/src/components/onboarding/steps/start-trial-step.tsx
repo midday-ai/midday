@@ -5,6 +5,7 @@ import { LogEvents } from "@midday/events/events";
 import { getPlanPricing } from "@midday/plans";
 import { cn } from "@midday/ui/cn";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -18,6 +19,7 @@ const POLLING_TIMEOUT_MS = 30_000;
 type PlanOption = "starter" | "pro";
 
 export function StartTrialStep() {
+  const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<PlanOption>("pro");
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "yearly",
@@ -143,7 +145,7 @@ export function StartTrialStep() {
         planType,
         embedOrigin: window.location.origin,
         currency,
-        trial: true,
+        requireTrial: true,
       });
 
       const checkout = await PolarEmbedCheckout.create(url, { theme });
@@ -172,7 +174,17 @@ export function StartTrialStep() {
         }
       });
     } catch (error) {
-      console.error("Failed to open checkout", error);
+      const isTrialIneligible =
+        (error as any)?.data?.code === "PRECONDITION_FAILED";
+
+      toast({
+        duration: 3500,
+        title: "Something went wrong",
+        description: isTrialIneligible
+          ? "Your account is not eligible for a free trial."
+          : "Please try again or contact support.",
+      });
+
       setIsSubmitting(false);
     }
   };

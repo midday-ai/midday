@@ -138,6 +138,9 @@ export function AddBankAccountsModal({
         queryClient.invalidateQueries({
           queryKey: trpc.bankAccounts.get.queryKey(),
         });
+        queryClient.invalidateQueries({
+          queryKey: trpc.overview.summary.queryKey(),
+        });
         setSelectedIds(new Set());
         onOpenChange(false);
         onAccountsAdded?.();

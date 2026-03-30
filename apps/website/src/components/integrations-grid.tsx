@@ -72,7 +72,7 @@ export function IntegrationsGrid({
                     app.id.includes("-mcp") ? "w-10" : "w-10",
                   )}
                 >
-                  <AppLogo appId={app.id} />
+                  <AppLogo appId={app.id} logoUrl={app.logoUrl} />
                 </div>
                 <div className="flex gap-1">
                   {app.beta && (

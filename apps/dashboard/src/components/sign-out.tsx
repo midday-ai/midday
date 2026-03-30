@@ -21,7 +21,11 @@ export function SignOut() {
   };
 
   return (
-    <DropdownMenuItem className="text-xs" onClick={handleSignOut}>
+    <DropdownMenuItem
+      className="text-xs"
+      data-track="User Signed Out"
+      onClick={handleSignOut}
+    >
       {isLoading ? "Loading..." : "Sign out"}
     </DropdownMenuItem>
   );

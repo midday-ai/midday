@@ -26,16 +26,25 @@ function resolveDist(): string | null {
   }
 }
 
-export function registerMcpApps(server: McpServer): void {
+const htmlCache = new Map<string, string>();
+
+function loadViewsOnce(): void {
+  if (htmlCache.size > 0) return;
+
   const dist = resolveDist();
   if (!dist) return;
 
   for (const [uri, file] of Object.entries(views)) {
     const filePath = join(dist, file);
     if (!existsSync(filePath)) continue;
+    htmlCache.set(uri, readFileSync(filePath, "utf-8"));
+  }
+}
 
-    const html = readFileSync(filePath, "utf-8");
+export function registerMcpApps(server: McpServer): void {
+  loadViewsOnce();
 
+  for (const [uri, html] of htmlCache) {
     registerAppResource(
       server,
       uri,

@@ -1,6 +1,8 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
 import { Icons } from "@midday/ui/icons";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
@@ -10,6 +12,7 @@ import { TransactionMatchItem } from "./transaction-match-item";
 export function TransactionUnmatchItem() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { track } = useOpenPanel();
   const { params } = useInboxParams();
   const { data: user } = useUserQuery();
 
@@ -88,7 +91,10 @@ export function TransactionUnmatchItem() {
       />
 
       <button
-        onClick={() => unmatchTransactionMutation.mutate({ id: id! })}
+        onClick={() => {
+          track(LogEvents.InboxUnmatched.name);
+          unmatchTransactionMutation.mutate({ id: id! });
+        }}
         type="button"
       >
         <Icons.Delete className="w-4 h-4 text-[#878787]" />

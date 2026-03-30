@@ -10,7 +10,6 @@ interface Props {
 }
 
 export function IntegrationDetailPage({ app }: Props) {
-  // Get related apps from same category (excluding current)
   const relatedApps = apps
     .filter((a) => a.category === app.category && a.id !== app.id)
     .slice(0, 3);
@@ -44,7 +43,11 @@ export function IntegrationDetailPage({ app }: Props) {
             {/* Header */}
             <div className="flex items-start gap-6 mb-8">
               <div className="w-16 h-16 flex items-center justify-center">
-                <AppLogo appId={app.id} className="w-14 h-14" />
+                <AppLogo
+                  appId={app.id}
+                  logoUrl={app.logoUrl}
+                  className="w-14 h-14"
+                />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
@@ -139,7 +142,11 @@ export function IntegrationDetailPage({ app }: Props) {
                         className="flex items-center gap-3 group"
                       >
                         <div className="w-10 h-10 flex items-center justify-center">
-                          <AppLogo appId={relatedApp.id} className="w-8 h-8" />
+                          <AppLogo
+                            appId={relatedApp.id}
+                            logoUrl={relatedApp.logoUrl}
+                            className="w-8 h-8"
+                          />
                         </div>
                         <span className="font-sans text-sm text-foreground group-hover:text-muted-foreground transition-colors">
                           {relatedApp.name}

@@ -9,13 +9,19 @@ import {
 } from "@/components/charts/cash-balance-donut-chart";
 import { useTRPC } from "@/trpc/client";
 import { ChartFadeIn } from "../components/chart-loading-overlay";
+import { DragIndicator } from "../components/drag-indicator";
 
 interface CashBalanceCardProps {
   currency?: string;
   locale?: string;
+  isCustomizing?: boolean;
 }
 
-export function CashBalanceCard({ currency, locale }: CashBalanceCardProps) {
+export function CashBalanceCard({
+  currency,
+  locale,
+  isCustomizing,
+}: CashBalanceCardProps) {
   const trpc = useTRPC();
 
   const { data, isPending } = useQuery(
@@ -48,9 +54,16 @@ export function CashBalanceCard({ currency, locale }: CashBalanceCardProps) {
   return (
     <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
-        <h3 className="text-sm font-normal text-muted-foreground">
-          Cash Balance
-        </h3>
+        <div className="flex items-start justify-between h-7">
+          <h3 className="text-sm font-normal text-muted-foreground">
+            Cash Balance
+          </h3>
+          {isCustomizing && (
+            <div>
+              <DragIndicator />
+            </div>
+          )}
+        </div>
         <p className="text-3xl font-normal">
           <AnimatedNumber
             value={totalBalance}

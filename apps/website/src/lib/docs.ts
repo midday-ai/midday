@@ -407,6 +407,12 @@ export const docsNavigation: DocSection[] = [
         description: "Cursor, Claude, ChatGPT",
         order: 2,
       },
+      {
+        slug: "assistant-connectors",
+        title: "Connected Apps",
+        description: "Gmail, Slack, Calendar & more",
+        order: 3,
+      },
     ],
   },
   {

@@ -187,4 +187,238 @@ export const LogEvents = {
     name: "Subscription Canceled",
     channel: "billing",
   },
+
+  // Assistant
+  AssistantOpened: {
+    name: "Assistant Opened",
+    channel: "assistant",
+  },
+  AssistantMessageSent: {
+    name: "Assistant Message Sent",
+    channel: "assistant",
+  },
+  AssistantNewChat: {
+    name: "Assistant New Chat",
+    channel: "assistant",
+  },
+  AssistantQuickAction: {
+    name: "Assistant Quick Action",
+    channel: "assistant",
+  },
+  AssistantSuggestionUsed: {
+    name: "Assistant Suggestion Used",
+    channel: "assistant",
+  },
+  AssistantModeChanged: {
+    name: "Assistant Mode Changed",
+    channel: "assistant",
+  },
+  AssistantFileAttached: {
+    name: "Assistant File Attached",
+    channel: "assistant",
+  },
+  AssistantStopped: {
+    name: "Assistant Stopped",
+    channel: "assistant",
+  },
+
+  // Connectors
+  ConnectorModalOpened: {
+    name: "Connector Modal Opened",
+    channel: "connectors",
+  },
+  ConnectorConnected: {
+    name: "Connector Connected",
+    channel: "connectors",
+  },
+  ConnectorDisconnected: {
+    name: "Connector Disconnected",
+    channel: "connectors",
+  },
+  ConnectorViewed: {
+    name: "Connector Viewed",
+    channel: "connectors",
+  },
+
+  // MCP
+  McpAppSelected: {
+    name: "MCP App Selected",
+    channel: "mcp",
+  },
+  McpBannerDismissed: {
+    name: "MCP Banner Dismissed",
+    channel: "mcp",
+  },
+
+  // Transactions
+  TransactionCreated: {
+    name: "Transaction Created",
+    channel: "transaction",
+  },
+  TransactionUpdated: {
+    name: "Transaction Updated",
+    channel: "transaction",
+  },
+  TransactionDeleted: {
+    name: "Transaction Deleted",
+    channel: "transaction",
+  },
+  TransactionCategoryChanged: {
+    name: "Transaction Category Changed",
+    channel: "transaction",
+  },
+  TransactionAttachmentAdded: {
+    name: "Transaction Attachment Added",
+    channel: "transaction",
+  },
+
+  // Invoices
+  InvoiceCreated: {
+    name: "Invoice Created",
+    channel: "invoice",
+  },
+  InvoiceSent: {
+    name: "Invoice Sent",
+    channel: "invoice",
+  },
+  InvoiceDeleted: {
+    name: "Invoice Deleted",
+    channel: "invoice",
+  },
+  InvoiceDuplicated: {
+    name: "Invoice Duplicated",
+    channel: "invoice",
+  },
+  InvoiceReminderSent: {
+    name: "Invoice Reminder Sent",
+    channel: "invoice",
+  },
+  RecurringInvoiceCreated: {
+    name: "Recurring Invoice Created",
+    channel: "invoice",
+  },
+  InvoicePaid: {
+    name: "Invoice Paid",
+    channel: "invoice",
+  },
+
+  // Inbox
+  InboxMatched: {
+    name: "Inbox Matched",
+    channel: "inbox",
+  },
+  InboxUnmatched: {
+    name: "Inbox Unmatched",
+    channel: "inbox",
+  },
+  InboxItemDeleted: {
+    name: "Inbox Item Deleted",
+    channel: "inbox",
+  },
+  InboxBulkDeleted: {
+    name: "Inbox Bulk Deleted",
+    channel: "inbox",
+  },
+  InboxEmailConnected: {
+    name: "Inbox Email Connected",
+    channel: "inbox",
+  },
+
+  // Tracker
+  TrackerStarted: {
+    name: "Tracker Started",
+    channel: "tracker",
+  },
+  TrackerStopped: {
+    name: "Tracker Stopped",
+    channel: "tracker",
+  },
+  TrackerProjectCreated: {
+    name: "Tracker Project Created",
+    channel: "tracker",
+  },
+  TrackerProjectDeleted: {
+    name: "Tracker Project Deleted",
+    channel: "tracker",
+  },
+  TrackerEntryCreated: {
+    name: "Tracker Entry Created",
+    channel: "tracker",
+  },
+  TrackerInvoiceCreated: {
+    name: "Tracker Invoice Created",
+    channel: "tracker",
+  },
+
+  // Vault
+  VaultFileUploaded: {
+    name: "Vault File Uploaded",
+    channel: "vault",
+  },
+  VaultTagAssigned: {
+    name: "Vault Tag Assigned",
+    channel: "vault",
+  },
+  VaultFileDeleted: {
+    name: "Vault File Deleted",
+    channel: "vault",
+  },
+  VaultFileShared: {
+    name: "Vault File Shared",
+    channel: "vault",
+  },
+  VaultFileDownloaded: {
+    name: "Vault File Downloaded",
+    channel: "vault",
+  },
+
+  // Customers
+  CustomerCreated: {
+    name: "Customer Created",
+    channel: "customer",
+  },
+  CustomerDeleted: {
+    name: "Customer Deleted",
+    channel: "customer",
+  },
+  CustomerEnriched: {
+    name: "Customer Enriched",
+    channel: "customer",
+  },
+
+  // Team & Settings
+  MemberInvited: {
+    name: "Member Invited",
+    channel: "team",
+  },
+  MemberRemoved: {
+    name: "Member Removed",
+    channel: "team",
+  },
+  ApiKeyCreated: {
+    name: "API Key Created",
+    channel: "settings",
+  },
+  ApiKeyDeleted: {
+    name: "API Key Deleted",
+    channel: "settings",
+  },
+  ThemeChanged: {
+    name: "Theme Changed",
+    channel: "settings",
+  },
+  AccountDeleted: {
+    name: "Account Deleted",
+    channel: "settings",
+  },
+
+  // Cross-cutting
+  CopiedToClipboard: {
+    name: "Copied to Clipboard",
+    channel: "general",
+  },
+  SearchOpened: {
+    name: "Search Opened",
+    channel: "general",
+  },
 };

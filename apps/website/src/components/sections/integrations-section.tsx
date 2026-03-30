@@ -18,10 +18,12 @@ function IntegrationPill({
   id,
   name,
   slug,
+  logoUrl,
 }: {
   id: string;
   name: string;
   slug: string;
+  logoUrl?: string;
 }) {
   return (
     <Link
@@ -29,7 +31,7 @@ function IntegrationPill({
       className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background whitespace-nowrap hover:border-foreground/20 transition-colors"
     >
       <div className="w-4 h-4 flex-shrink-0">
-        <AppLogo appId={id} />
+        <AppLogo appId={id} logoUrl={logoUrl} />
       </div>
       <span className="font-sans text-sm text-foreground">{name}</span>
     </Link>
@@ -80,6 +82,7 @@ export function IntegrationsSection({
                     id={app.id}
                     name={app.name}
                     slug={app.slug}
+                    logoUrl={app.logoUrl}
                   />
                 ))}
               </div>
@@ -90,6 +93,7 @@ export function IntegrationsSection({
                     id={app.id}
                     name={app.name}
                     slug={app.slug}
+                    logoUrl={app.logoUrl}
                   />
                 ))}
               </div>
@@ -104,6 +108,7 @@ export function IntegrationsSection({
                     id={app.id}
                     name={app.name}
                     slug={app.slug}
+                    logoUrl={app.logoUrl}
                   />
                 ))}
               </div>
@@ -114,6 +119,7 @@ export function IntegrationsSection({
                     id={app.id}
                     name={app.name}
                     slug={app.slug}
+                    logoUrl={app.logoUrl}
                   />
                 ))}
               </div>

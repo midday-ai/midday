@@ -8,6 +8,7 @@ import { formatChartMonth } from "@/components/charts/chart-utils";
 import { ProfitChart } from "@/components/charts/profit-chart";
 import { useTRPC } from "@/trpc/client";
 import { ChartFadeIn } from "../components/chart-loading-overlay";
+import { DragIndicator } from "../components/drag-indicator";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface ProfitCardProps {
@@ -16,6 +17,7 @@ interface ProfitCardProps {
   currency?: string;
   locale?: string;
   revenueType?: "net" | "gross";
+  isCustomizing?: boolean;
 }
 
 export function ProfitCard({
@@ -24,6 +26,7 @@ export function ProfitCard({
   currency,
   locale,
   revenueType = "net",
+  isCustomizing,
 }: ProfitCardProps) {
   const trpc = useTRPC();
 
@@ -73,13 +76,23 @@ export function ProfitCard({
           <h3 className="text-sm font-normal text-muted-foreground">
             Profit & Loss
           </h3>
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <ShareMetricButton
-              type="profit"
-              from={from}
-              to={to}
-              currency={currency}
-            />
+          <div
+            className={
+              isCustomizing
+                ? "flex items-center gap-2"
+                : "flex items-center gap-2 opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity"
+            }
+          >
+            {isCustomizing ? (
+              <DragIndicator />
+            ) : (
+              <ShareMetricButton
+                type="profit"
+                from={from}
+                to={to}
+                currency={currency}
+              />
+            )}
           </div>
         </div>
         <p className="text-3xl font-normal">

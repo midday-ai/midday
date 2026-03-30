@@ -116,6 +116,7 @@ export function getPlanName(plan: string | null | undefined): string {
 export type PlanLimits = {
   users: number;
   bankConnections: number;
+  connectors: number;
   storage: number;
   inbox: number;
   invoices: number;
@@ -187,6 +188,11 @@ export const starterFeatures: PlanFeature[] = [
     tooltip: "Slack, Gmail, Outlook, Stripe, Google Drive, Dropbox, and more.",
   },
   {
+    label: "5 AI Connectors",
+    tooltip:
+      "Connect up to 5 of 60+ tools like Linear, Notion, HubSpot, and GitHub to the AI assistant.",
+  },
+  {
     label: "Multi-currency",
     tooltip:
       "Invoice in any currency. Converted to your base currency automatically.",
@@ -196,12 +202,22 @@ export const starterFeatures: PlanFeature[] = [
     tooltip:
       "Store customer details, track history, and reuse across invoices and projects.",
   },
+  {
+    label: "API, CLI, and MCP",
+    tooltip:
+      "REST API, CLI, SDKs, and MCP server for AI agents and custom workflows.",
+  },
   { label: "3 banks · 15 invoices/mo · 10GB storage" },
 ];
 
 export const proFeatures: PlanFeature[] = [
   { label: "Everything in Starter" },
   { label: "10 banks · 50 invoices/mo · 100GB storage" },
+  {
+    label: "20 AI Connectors",
+    tooltip:
+      "Connect up to 20 of 60+ tools like Linear, Notion, HubSpot, Figma, and more to the AI assistant.",
+  },
   {
     label: "Custom transaction categories",
     tooltip:
@@ -223,15 +239,20 @@ export const proFeatures: PlanFeature[] = [
       "Revenue forecasting, category breakdowns, and detailed financial analysis across your business.",
   },
   {
+    label: "Advanced AI thinking",
+    tooltip:
+      "Deep analysis mode with extended reasoning for complex financial questions.",
+  },
+  {
     label: "Shareable report and document links",
     tooltip:
       "Generate view-only links with optional expiration for reports, receipts, and vault documents.",
   },
-  {
-    label: "API and MCP",
-    tooltip:
-      "REST API, SDKs, and MCP server for AI agents and custom workflows.",
-  },
+  // {
+  //   label: "E-Invoicing (Peppol)",
+  //   tooltip:
+  //     "Send and receive e-invoices via the Peppol network for EU/global compliance.",
+  // },
   { label: "Priority support" },
 ];
 
@@ -244,6 +265,7 @@ export function getPlanLimits(plan: string): PlanLimits {
       return {
         users: 2,
         bankConnections: 3,
+        connectors: 5,
         storage: 10 * 1024 * 1024 * 1024,
         inbox: 150,
         invoices: 15,
@@ -253,6 +275,7 @@ export function getPlanLimits(plan: string): PlanLimits {
       return {
         users: 10,
         bankConnections: 10,
+        connectors: 20,
         storage: 100 * 1024 * 1024 * 1024,
         inbox: 500,
         invoices: 50,
@@ -261,6 +284,7 @@ export function getPlanLimits(plan: string): PlanLimits {
       return {
         users: 1,
         bankConnections: 1,
+        connectors: 2,
         storage: 1 * 1024 * 1024 * 1024,
         inbox: 50,
         invoices: 5,

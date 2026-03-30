@@ -11,11 +11,13 @@ import {
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
+import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
+import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useAppOAuth } from "@/hooks/use-app-oauth";
@@ -49,6 +51,114 @@ const oauthAppConfig: Record<
     queryKey: "stripeStatus",
   },
 };
+
+function ConnectorDetailContent({ slug }: { slug: string }) {
+  const trpc = useTRPC();
+  const { data, isLoading } = useQuery(
+    trpc.connectors.detail.queryOptions({ slug }),
+  );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+        <div className="space-y-2 mt-4">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  return (
+    <Accordion
+      type="multiple"
+      defaultValue={["about", "tools"]}
+      className="mt-4"
+    >
+      <AccordionItem value="about" className="border-none">
+        <AccordionTrigger>About</AccordionTrigger>
+        <AccordionContent className="text-[#878787] text-sm">
+          <p>{data.description}</p>
+
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {data.categories.map((cat) => (
+              <Badge key={cat.slug} variant="tag">
+                {cat.name}
+              </Badge>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4 mt-3 text-xs">
+            <span>{data.toolsCount} tools available</span>
+            {data.triggersCount > 0 && (
+              <span>{data.triggersCount} triggers</span>
+            )}
+          </div>
+
+          {data.appUrl && (
+            <a
+              href={data.appUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs mt-3 hover:underline"
+            >
+              Visit website
+              <Icons.ExternalLink className="size-3" />
+            </a>
+          )}
+        </AccordionContent>
+      </AccordionItem>
+
+      {data.tools.length > 0 && (
+        <AccordionItem value="tools" className="border-none">
+          <AccordionTrigger>
+            Available tools ({data.tools.length})
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-3">
+              {data.tools.map((tool) => (
+                <div key={tool.slug}>
+                  <div className="flex items-start gap-2">
+                    <div className="size-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {tool.name}
+                      </p>
+                      <p className="text-xs text-[#878787] line-clamp-2">
+                        {tool.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      )}
+
+      {data.authSchemes.length > 0 && (
+        <AccordionItem value="auth" className="border-none">
+          <AccordionTrigger>Authentication</AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-wrap gap-1.5">
+              {data.authSchemes.map((scheme) => (
+                <Badge key={scheme} variant="tag">
+                  {scheme.replace(/_/g, " ").toUpperCase()}
+                </Badge>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      )}
+    </Accordion>
+  );
+}
 
 interface UnifiedAppProps {
   app: UnifiedApp;
@@ -167,6 +277,20 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     }),
   );
 
+  const connectorAuthorizeMutation = useMutation(
+    trpc.connectors.authorize.mutationOptions(),
+  );
+
+  const connectorDisconnectMutation = useMutation(
+    trpc.connectors.disconnect.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.connectors.list.queryKey(),
+        });
+      },
+    }),
+  );
+
   // Mutation to disconnect Stripe Payments
   const disconnectStripeMutation = useMutation(
     trpc.invoicePayments.disconnectStripe.mutationOptions({
@@ -184,7 +308,8 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     disconnectOfficialAppMutation.isPending ||
     revokeExternalAppMutation.isPending ||
     disconnectInboxAccountMutation.isPending ||
-    disconnectStripeMutation.isPending;
+    disconnectStripeMutation.isPending ||
+    connectorDisconnectMutation.isPending;
 
   const handleDisconnect = () => {
     // Gmail and Outlook use inbox_accounts table
@@ -199,6 +324,13 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
       return;
     }
 
+    if (app.type === "connector" && app.connectedAccountId) {
+      connectorDisconnectMutation.mutate({
+        connectedAccountId: app.connectedAccountId,
+      });
+      return;
+    }
+
     if (app.type === "official") {
       disconnectOfficialAppMutation.mutate({ appId: app.id });
     } else {
@@ -210,6 +342,70 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     setLoading(true);
 
     try {
+      if (app.type === "connector" && app.connectorSlug) {
+        const callbackUrl = `${window.location.origin}/connectors/callback`;
+        const result = await connectorAuthorizeMutation.mutateAsync({
+          toolkit: app.connectorSlug,
+          callbackUrl,
+        });
+
+        const redirectUrl = result.redirectUrl;
+        if (!redirectUrl) {
+          setLoading(false);
+          return;
+        }
+
+        const width = 600;
+        const height = 700;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2.5;
+
+        const popup = window.open(
+          redirectUrl,
+          "composio_auth",
+          `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${width}, height=${height}, top=${top}, left=${left}`,
+        );
+
+        if (!popup) {
+          window.location.href = redirectUrl;
+          return;
+        }
+
+        const listener = (e: MessageEvent) => {
+          if (e.data === "connector_oauth_completed") {
+            window.removeEventListener("message", listener);
+            queryClient.invalidateQueries({
+              queryKey: trpc.connectors.list.queryKey(),
+            });
+            setLoading(false);
+          }
+        };
+
+        window.addEventListener("message", listener);
+
+        const checkInterval = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkInterval);
+            window.removeEventListener("message", listener);
+            queryClient.invalidateQueries({
+              queryKey: trpc.connectors.list.queryKey(),
+            });
+            setLoading(false);
+          }
+        }, 500);
+
+        setTimeout(
+          () => {
+            clearInterval(checkInterval);
+            window.removeEventListener("message", listener);
+            setLoading(false);
+          },
+          5 * 60 * 1000,
+        );
+
+        return;
+      }
+
       // Use OAuth hook for configured apps
       if (oauthConfig) {
         await appOAuth.connect();
@@ -363,9 +559,11 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
 
                 <span className="text-xs text-[#878787]">
                   {app.category} •{" "}
-                  {app.type === "external"
-                    ? `By ${app.developerName}`
-                    : "By Midday"}
+                  {app.type === "connector"
+                    ? "Connected app"
+                    : app.type === "external"
+                      ? `By ${app.developerName}`
+                      : "By Midday"}
                 </span>
               </div>
 
@@ -397,111 +595,117 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
 
             <div className="mt-4 flex-1 min-h-0 flex flex-col">
               <ScrollArea className="flex-1 h-0" hideScrollbar>
-                <Accordion
-                  type="multiple"
-                  defaultValue={[
-                    "description",
-                    ...(params.settings ? ["settings"] : []),
-                  ]}
-                  className="mt-4"
-                >
-                  <AccordionItem value="description" className="border-none">
-                    <AccordionTrigger>How it works</AccordionTrigger>
-                    <AccordionContent className="text-[#878787] text-sm">
-                      {app.id === "chatgpt-mcp" ? (
-                        <ChatGPTSetupInstructions />
-                      ) : app.id === "claude-mcp" ? (
-                        <ClaudeSetupInstructions />
-                      ) : app.id === "gemini-mcp" ? (
-                        <GeminiSetupInstructions />
-                      ) : app.id === "windsurf-mcp" ? (
-                        <WindsurfSetupInstructions />
-                      ) : app.id === "cline-mcp" ? (
-                        <ClineSetupInstructions />
-                      ) : app.id === "zed-mcp" ? (
-                        <ZedSetupInstructions />
-                      ) : app.id === "manus-mcp" ? (
-                        <ManusSetupInstructions />
-                      ) : (
-                        <div className="prose prose-sm prose-invert prose-p:text-[#878787] prose-p:my-3 [&_strong]:text-primary [&_strong]:font-normal max-w-none">
-                          <MemoizedReactMarkdown>
-                            {app.description || app.overview || ""}
-                          </MemoizedReactMarkdown>
-                        </div>
+                {app.type === "connector" && app.connectorSlug ? (
+                  <ConnectorDetailContent slug={app.connectorSlug} />
+                ) : (
+                  <Accordion
+                    type="multiple"
+                    defaultValue={[
+                      "description",
+                      ...(params.settings ? ["settings"] : []),
+                    ]}
+                    className="mt-4"
+                  >
+                    <AccordionItem value="description" className="border-none">
+                      <AccordionTrigger>How it works</AccordionTrigger>
+                      <AccordionContent className="text-[#878787] text-sm">
+                        {app.id === "chatgpt-mcp" ? (
+                          <ChatGPTSetupInstructions />
+                        ) : app.id === "claude-mcp" ? (
+                          <ClaudeSetupInstructions />
+                        ) : app.id === "gemini-mcp" ? (
+                          <GeminiSetupInstructions />
+                        ) : app.id === "windsurf-mcp" ? (
+                          <WindsurfSetupInstructions />
+                        ) : app.id === "cline-mcp" ? (
+                          <ClineSetupInstructions />
+                        ) : app.id === "zed-mcp" ? (
+                          <ZedSetupInstructions />
+                        ) : app.id === "manus-mcp" ? (
+                          <ManusSetupInstructions />
+                        ) : (
+                          <div className="prose prose-sm prose-invert prose-p:text-[#878787] prose-p:my-3 [&_strong]:text-primary [&_strong]:font-normal max-w-none">
+                            <MemoizedReactMarkdown>
+                              {app.description || app.overview || ""}
+                            </MemoizedReactMarkdown>
+                          </div>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    {app.type === "official" &&
+                      app.settings &&
+                      app.settings.length > 0 && (
+                        <AccordionItem value="settings" className="border-none">
+                          <AccordionTrigger>Settings</AccordionTrigger>
+                          <AccordionContent className="text-[#878787] text-sm">
+                            <AppSettings
+                              appId={app.id}
+                              settings={app.settings.map((setting) => {
+                                const userSetting = Array.isArray(
+                                  app.userSettings,
+                                )
+                                  ? app.userSettings.find(
+                                      (us: any) => us.id === setting.id,
+                                    )
+                                  : null;
+
+                                return {
+                                  ...setting,
+                                  type: setting.type as
+                                    | "switch"
+                                    | "text"
+                                    | "select",
+                                  value: userSetting?.value ?? setting.value,
+                                };
+                              })}
+                            />
+                          </AccordionContent>
+                        </AccordionItem>
                       )}
-                    </AccordionContent>
-                  </AccordionItem>
 
-                  {app.type === "official" &&
-                    app.settings &&
-                    app.settings.length > 0 && (
-                      <AccordionItem value="settings" className="border-none">
-                        <AccordionTrigger>Settings</AccordionTrigger>
-                        <AccordionContent className="text-[#878787] text-sm">
-                          <AppSettings
-                            appId={app.id}
-                            settings={app.settings.map((setting) => {
-                              // Find the user setting for this setting ID
-                              const userSetting = Array.isArray(
-                                app.userSettings,
-                              )
-                                ? app.userSettings.find(
-                                    (us: any) => us.id === setting.id,
-                                  )
-                                : null;
+                    {app.type === "external" && (
+                      <>
+                        {app.website && (
+                          <AccordionItem
+                            value="website"
+                            className="border-none"
+                          >
+                            <AccordionTrigger>Website</AccordionTrigger>
+                            <AccordionContent>
+                              <a
+                                href={app.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm hover:underline text-[#878787]"
+                              >
+                                {app.website}
+                              </a>
+                            </AccordionContent>
+                          </AccordionItem>
+                        )}
 
-                              return {
-                                ...setting,
-                                type: setting.type as
-                                  | "switch"
-                                  | "text"
-                                  | "select",
-                                value: userSetting?.value ?? setting.value,
-                              };
-                            })}
-                          />
-                        </AccordionContent>
-                      </AccordionItem>
+                        {app.scopes && app.scopes.length > 0 && (
+                          <AccordionItem
+                            value="permissions"
+                            className="border-none"
+                          >
+                            <AccordionTrigger>Permissions</AccordionTrigger>
+                            <AccordionContent>
+                              <div className="flex flex-wrap gap-2">
+                                {app.scopes.map((scope) => (
+                                  <Badge key={scope} variant="tag">
+                                    {getScopeDescription(scope).label}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        )}
+                      </>
                     )}
-
-                  {app.type === "external" && (
-                    <>
-                      {app.website && (
-                        <AccordionItem value="website" className="border-none">
-                          <AccordionTrigger>Website</AccordionTrigger>
-                          <AccordionContent>
-                            <a
-                              href={app.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm hover:underline text-[#878787]"
-                            >
-                              {app.website}
-                            </a>
-                          </AccordionContent>
-                        </AccordionItem>
-                      )}
-
-                      {app.scopes && app.scopes.length > 0 && (
-                        <AccordionItem
-                          value="permissions"
-                          className="border-none"
-                        >
-                          <AccordionTrigger>Permissions</AccordionTrigger>
-                          <AccordionContent>
-                            <div className="flex flex-wrap gap-2">
-                              {app.scopes.map((scope) => (
-                                <Badge key={scope} variant="tag">
-                                  {getScopeDescription(scope).label}
-                                </Badge>
-                              ))}
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      )}
-                    </>
-                  )}
-                </Accordion>
+                  </Accordion>
+                )}
               </ScrollArea>
 
               <div className="shrink-0 pt-4 border-t border-border">

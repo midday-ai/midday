@@ -2,8 +2,9 @@
 
 import { Button } from "@midday/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { updateMetricsSettingsAction } from "@/actions/update-metrics-settings-action";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
@@ -171,7 +172,7 @@ export function MetricsView({
       to,
       currency,
       locale,
-      isCustomizing: false,
+      isCustomizing: isEditing,
       revenueType,
     };
 
@@ -192,7 +193,13 @@ export function MetricsView({
         case "category-expenses":
           return <CategoryExpensesCard {...commonProps} />;
         case "cash-balance":
-          return <CashBalanceCard currency={currency} locale={locale} />;
+          return (
+            <CashBalanceCard
+              currency={currency}
+              locale={locale}
+              isCustomizing={isEditing}
+            />
+          );
         default:
           return null;
       }
@@ -232,6 +239,30 @@ export function MetricsView({
       </DraggableChartCard>
     );
   };
+
+  const searchParams = useSearchParams();
+  const scrollTo = searchParams.get("scrollTo");
+
+  useEffect(() => {
+    if (!scrollTo) return;
+
+    let attempts = 0;
+    const maxAttempts = 15;
+
+    const tryScroll = () => {
+      const el = document.getElementById(scrollTo);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(tryScroll, 100);
+      }
+    };
+
+    tryScroll();
+  }, [scrollTo]);
 
   return (
     <div className="flex flex-col gap-6" ref={gridRef}>

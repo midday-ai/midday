@@ -1,5 +1,6 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import {
@@ -13,6 +14,7 @@ import { Icons } from "@midday/ui/icons";
 import { SubmitButtonMorph } from "@midday/ui/submit-button-morph";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useRef, useState } from "react";
@@ -34,6 +36,7 @@ export function ImportModal() {
   const { data: team } = useTeamQuery();
   const defaultCurrency = team?.baseCurrency || "USD";
   const trpc = useTRPC();
+  const { track } = useOpenPanel();
   const queryClient = useQueryClient();
   const invalidateTransactionQueries = useInvalidateTransactionQueries();
   const [jobId, setJobId] = useState<string | undefined>();
@@ -224,7 +227,7 @@ export function ImportModal() {
 
   useEffect(() => {
     if (status === "completed") {
-      // Invalidate all transaction-related queries (transactions, reports)
+      track(LogEvents.ImportTransactions.name);
       invalidateTransactionQueries();
 
       // Also invalidate bank-related queries

@@ -1,5 +1,6 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { useToast } from "@midday/ui/use-toast";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -44,6 +46,7 @@ export function ActionsMenu({ row }: Props) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
+  const { track } = useOpenPanel();
   const { setParams } = useInvoiceParams();
   const { toast } = useToast();
   const [, copy] = useCopyToClipboard();
@@ -70,6 +73,7 @@ export function ActionsMenu({ row }: Props) {
   const deleteInvoiceMutation = useMutation(
     trpc.invoice.delete.mutationOptions({
       onSuccess: () => {
+        track(LogEvents.InvoiceDeleted.name);
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.get.infiniteQueryKey(),
         });
@@ -128,6 +132,7 @@ export function ActionsMenu({ row }: Props) {
   const duplicateInvoiceMutation = useMutation(
     trpc.invoice.duplicate.mutationOptions({
       onSuccess: (data) => {
+        track(LogEvents.InvoiceDuplicated.name);
         if (data) {
           setParams({
             invoiceId: data.id,

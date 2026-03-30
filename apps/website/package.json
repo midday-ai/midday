@@ -14,6 +14,7 @@
     "@ai-sdk/openai": "^3.0.48",
     "@ai-sdk/react": "^3.0.140",
     "@midday/app-store": "workspace:*",
+    "@midday/connectors": "workspace:*",
     "@midday/ui": "workspace:*",
     "@openpanel/nextjs": "^1.4.0",
     "@openstatus/react": "^0.0.3",

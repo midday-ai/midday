@@ -2,7 +2,8 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { protectedMiddleware } from "../middleware";
 import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
-
+import { chatRouter } from "./chat";
+import { connectorsCatalogRouter } from "./connectors-catalog";
 import { customersRouter } from "./customers";
 import { desktopRouter } from "./desktop";
 import { documentsRouter } from "./documents";
@@ -35,6 +36,7 @@ routers.route("/apps", appsRouter);
 routers.route("/invoice-payments", invoicePaymentsRouter);
 routers.route("/desktop", desktopRouter);
 routers.route("/mcp", mcpRouter);
+routers.route("/connectors/catalog", connectorsCatalogRouter);
 
 // Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);
@@ -55,5 +57,6 @@ routers.route("/search", searchRouter);
 routers.route("/reports", reportsRouter);
 routers.route("/tracker-projects", trackerProjectsRouter);
 routers.route("/tracker-entries", trackerEntriesRouter);
+routers.route("/chat", chatRouter);
 
 export { routers };

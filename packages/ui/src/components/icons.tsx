@@ -30,6 +30,7 @@ import {
   MdOutlineAccountBalance,
   MdOutlineAccountCircle,
   MdOutlineAdd,
+  MdOutlineAddLink,
   MdOutlineArrowOutward,
   MdOutlineAssuredWorkload,
   MdOutlineAttachEmail,
@@ -62,6 +63,7 @@ import {
   MdOutlineInventory2,
   MdOutlineLanguage,
   MdOutlineLaunch,
+  MdOutlineLeaderboard,
   MdOutlineLightMode,
   MdOutlineLink,
   MdOutlineListAlt,
@@ -671,6 +673,7 @@ export const Icons = {
   DragIndicator: MdDragIndicator,
   ExternalLink: MdOutlineLaunch,
   Link: MdOutlineLink,
+  AddLink: MdOutlineAddLink,
   CropFree: MdOutlineCropFree,
   DateFormat: MdOutlineFactCheck,
   Tax: MdOutlineAssuredWorkload,
@@ -705,6 +708,12 @@ export const Icons = {
   Bolt: MdBolt,
   Star: MdOutlineStar,
   ShowChart: MdOutlineShowChart,
+  Leaderboard: MdOutlineLeaderboard,
+  Monitoring: (props: SVGIconProps) => (
+    <SVGIcon {...props} viewBox="0 -960 960 960" strokeWidth={0}>
+      <path d="M120-120v-80l80-80v160h-80Zm160 0v-240l80-80v320h-80Zm160 0v-320l80 81v239h-80Zm160 0v-239l80-80v319h-80Zm160 0v-400l80-80v480h-80ZM120-327v-113l280-280 160 160 280-280v113L560-447 400-607 120-327Z" />
+    </SVGIcon>
+  ),
   PieChart: MdOutlinePieChart,
   ArrowDropDown: MdArrowDropDown,
   Block: MdOutlineBlock,

@@ -7,6 +7,7 @@ import { BurnRateChart } from "@/components/charts/burn-rate-chart";
 import { formatChartMonth } from "@/components/charts/chart-utils";
 import { useTRPC } from "@/trpc/client";
 import { ChartFadeIn } from "../components/chart-loading-overlay";
+import { DragIndicator } from "../components/drag-indicator";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface BurnRateCardProps {
@@ -14,6 +15,7 @@ interface BurnRateCardProps {
   to: string;
   currency?: string;
   locale?: string;
+  isCustomizing?: boolean;
 }
 
 export function BurnRateCard({
@@ -21,6 +23,7 @@ export function BurnRateCard({
   to,
   currency,
   locale,
+  isCustomizing,
 }: BurnRateCardProps) {
   const trpc = useTRPC();
 
@@ -63,13 +66,23 @@ export function BurnRateCard({
           <h3 className="text-sm font-normal text-muted-foreground">
             Average Monthly Burn Rate
           </h3>
-          <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <ShareMetricButton
-              type="burn_rate"
-              from={from}
-              to={to}
-              currency={currency}
-            />
+          <div
+            className={
+              isCustomizing
+                ? ""
+                : "opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity"
+            }
+          >
+            {isCustomizing ? (
+              <DragIndicator />
+            ) : (
+              <ShareMetricButton
+                type="burn_rate"
+                from={from}
+                to={to}
+                currency={currency}
+              />
+            )}
           </div>
         </div>
         <p className="text-3xl font-normal mb-3">

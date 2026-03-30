@@ -3,6 +3,7 @@
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { TZDate, tz } from "@date-fns/tz";
 import { UTCDate } from "@date-fns/utc";
+import { LogEvents } from "@midday/events/events";
 import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,
@@ -12,6 +13,7 @@ import {
   ContextMenuTrigger,
 } from "@midday/ui/context-menu";
 import { ScrollArea } from "@midday/ui/scroll-area";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDays,
@@ -476,6 +478,7 @@ const updateEventTime = (
 const useTrackerData = (selectedDate: string | null) => {
   const trpc = useTRPC();
   const { setParams: setTrackerParams } = useTrackerParams();
+  const { track } = useOpenPanel();
   const queryClient = useQueryClient();
   const [data, setData] = useState<TrackerRecord[]>([]);
   const [totalDuration, setTotalDuration] = useState(0);
@@ -509,6 +512,8 @@ const useTrackerData = (selectedDate: string | null) => {
   const upsertTrackerEntry = useMutation(
     trpc.trackerEntries.upsert.mutationOptions({
       onSuccess: () => {
+        track(LogEvents.TrackerEntryCreated.name);
+
         queryClient.invalidateQueries({
           queryKey: trpc.trackerEntries.byRange.queryKey(),
         });

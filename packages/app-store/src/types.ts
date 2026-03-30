@@ -9,7 +9,7 @@ export interface UnifiedApp {
   description?: string;
   images: string[];
   installed: boolean;
-  type: "official" | "external";
+  type: "official" | "external" | "connector";
 
   // Official app specific
   onInitialize?: (params: {
@@ -40,4 +40,8 @@ export interface UnifiedApp {
   createdAt?: string;
   status?: "draft" | "pending" | "approved" | "rejected";
   lastUsedAt?: string;
+
+  // Connector app specific (Composio)
+  connectorSlug?: string;
+  connectedAccountId?: string;
 }

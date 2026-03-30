@@ -12,7 +12,7 @@ export const createCheckoutSchema = z.object({
   planType: z.string().optional(),
   embedOrigin: z.string(),
   currency: z.enum(["USD", "EUR"]).optional(),
-  trial: z.boolean().optional(),
+  requireTrial: z.boolean().optional(),
 });
 
 export type CreateCheckoutSchema = z.infer<typeof createCheckoutSchema>;

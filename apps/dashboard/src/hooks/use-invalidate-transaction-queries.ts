@@ -42,6 +42,11 @@ export function useInvalidateTransactionQueries() {
       queryKey: trpc.reports.revenueForecast.queryKey(),
     });
 
+    // Invalidate overview summary
+    queryClient.invalidateQueries({
+      queryKey: trpc.overview.summary.queryKey(),
+    });
+
     // Invalidate global search
     queryClient.invalidateQueries({
       queryKey: trpc.search.global.queryKey(),

@@ -1,8 +1,10 @@
 "use client";
 
+import { LogEvents } from "@midday/events/events";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { type FileRejection, useDropzone } from "react-dropzone";
@@ -29,6 +31,7 @@ type Props = {
 export function VaultUploadZone({ onUpload, children }: Props) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
+  const { track } = useOpenPanel();
   const supabase = createClient();
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
@@ -111,6 +114,8 @@ export function VaultUploadZone({ onUpload, children }: Props) {
       uploadProgress.current = [];
 
       setProgress(0);
+      track(LogEvents.VaultFileUploaded.name, { count: files.length });
+
       toast({
         title: "Upload successful.",
         variant: "success",

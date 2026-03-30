@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 
 const icons = {
   "/": () => <Icons.Overview size={20} />,
+  "/reports": () => <Icons.Monitoring size={20} />,
   "/transactions": () => <Icons.Transactions size={20} />,
   "/invoices": () => <Icons.Invoice size={20} />,
   "/tracker": () => <Icons.Tracker size={20} />,
@@ -22,6 +23,10 @@ const items = [
   {
     path: "/",
     name: "Overview",
+  },
+  {
+    path: "/reports",
+    name: "Reports",
   },
   {
     path: "/transactions",
@@ -283,7 +288,7 @@ export function MainMenu({ onSelect, isExpanded = false }: Props) {
   }, [isExpanded]);
 
   return (
-    <div className="mt-6 w-full">
+    <div className="mt-4 w-full">
       <nav className="w-full">
         <div className="flex flex-col gap-2">
           {items.map((item) => {

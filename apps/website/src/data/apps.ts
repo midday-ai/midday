@@ -1,5 +1,8 @@
-// Import apps from the app-store package (source of truth)
 import { apps as appStoreApps } from "@midday/app-store";
+import {
+  connectorApps as connectorAppDefs,
+  getConnectorLogoUrl,
+} from "@midday/connectors";
 
 export interface WebsiteApp {
   id: string;
@@ -12,9 +15,9 @@ export interface WebsiteApp {
   description: string | null;
   features: string[];
   installUrl?: string;
+  logoUrl?: string;
 }
 
-// Website-specific extensions for each app (features and slugs only)
 const appExtensions: Record<
   string,
   { slug: string; features: string[]; installUrl?: string }
@@ -266,8 +269,7 @@ const appExtensions: Record<
   },
 };
 
-// Merge app-store data with website extensions
-export const apps: WebsiteApp[] = appStoreApps
+const officialApps: WebsiteApp[] = appStoreApps
   .map((app): WebsiteApp | null => {
     const extension = appExtensions[app.id];
     if (!extension) return null;
@@ -293,14 +295,23 @@ export const apps: WebsiteApp[] = appStoreApps
   })
   .filter((app): app is WebsiteApp => app !== null);
 
+const connectorApps: WebsiteApp[] = connectorAppDefs
+  .filter((c) => c.active)
+  .map((c) => ({
+    ...c,
+    logoUrl: getConnectorLogoUrl(c.id),
+  }));
+
+export const apps: WebsiteApp[] = [...officialApps, ...connectorApps];
+
 export const categories = [
   { id: "all", name: "All" },
   { id: "capture", name: "Capture" },
   { id: "accounting", name: "Accounting" },
   { id: "payments", name: "Payments" },
-  { id: "storage", name: "Storage" },
   { id: "apps", name: "Apps" },
-  { id: "ai-automation", name: "AI & Automation" },
+  { id: "ai-automation", name: "AI Assistants" },
+  { id: "connector", name: "AI Connectors" },
 ];
 
 export function getAppBySlug(slug: string): WebsiteApp | undefined {

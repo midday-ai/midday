@@ -1,4 +1,5 @@
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { LogEvents } from "@midday/events/events";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,7 @@ import type { ColumnDef, FilterFn, Row } from "@tanstack/react-table";
 import { Loader2, MoreHorizontal } from "lucide-react";
 import { useI18n } from "@/locales/client";
 import "@tanstack/react-table";
+import { useOpenPanel } from "@openpanel/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTRPC } from "@/trpc/client";
@@ -88,12 +90,14 @@ export const columns: ColumnDef<TeamMember>[] = [
       const { toast } = useToast();
       const meta = table.options.meta;
       const trpc = useTRPC();
+      const { track } = useOpenPanel();
       const queryClient = useQueryClient();
       const router = useRouter();
 
       const deleteMemberMutation = useMutation(
         trpc.team.deleteMember.mutationOptions({
           onSuccess: () => {
+            track(LogEvents.MemberRemoved.name);
             queryClient.invalidateQueries({
               queryKey: trpc.team.members.queryKey(),
             });
