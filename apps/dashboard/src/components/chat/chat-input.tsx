@@ -657,17 +657,17 @@ export function ChatInput({
               Connected apps
             </p>
             {!connectedApps || connectedApps.length === 0 ? (
-              <div className="px-2 py-3 text-center">
-                <p className="text-xs text-[#878787] mb-2">No apps connected</p>
+              <div className="px-2 pt-3 pb-4 flex justify-center">
                 <button
                   type="button"
-                  className="text-xs text-foreground hover:underline"
+                  className="inline-flex items-center gap-1 text-xs text-[#878787] hover:text-foreground transition-colors"
                   onClick={() => {
                     closeMentionPanel();
                     setConnectorsModalOpen(true);
                   }}
                 >
-                  Connect
+                  Connect apps
+                  <Icons.ChevronRight size={12} />
                 </button>
               </div>
             ) : filteredApps && filteredApps.length > 0 ? (

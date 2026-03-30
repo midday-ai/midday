@@ -147,7 +147,7 @@ export function ChatView({
           </div>
         </ConversationContent>
         <ConversationScrollButton
-          className={showLimitWarning ? "bottom-[105px]" : "bottom-[85px]"}
+          className={showLimitWarning ? "bottom-[105px]" : "bottom-[55px]"}
         />
       </Conversation>
 
