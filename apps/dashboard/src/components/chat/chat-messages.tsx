@@ -1,24 +1,18 @@
 "use client";
 
-import { InvoiceTemplate } from "@midday/mcp-apps/invoice";
 import type { UIMessage } from "ai";
+import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { Streamdown } from "streamdown";
+import { useConnectParams } from "@/hooks/use-connect-params";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
-import {
-  extractInvoiceData,
-  HIDDEN_TOOLS,
-  INVOICE_TOOLS,
-  isToolPart,
-  type NormalizedToolPart,
-  normalizeToolPart,
-  type SourceUrlPart,
-} from "./chat-utils";
+import { ChatInvoiceCard } from "./chat-invoice-card";
+import { extractInvoiceData, parseAssistantMessage } from "./chat-utils";
 import { Reasoning, ReasoningContent, ReasoningTrigger } from "./reasoning";
 import { SourcesList } from "./sources-list";
 import {
@@ -42,8 +36,18 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
   const { setParams: setTrackerParams } = useTrackerParams();
   const { setParams: setInboxParams } = useInboxParams();
   const { setParams: setDocumentParams } = useDocumentParams();
+  const { setParams: setConnectParams } = useConnectParams();
+  const router = useRouter();
 
   const handleEntityLink = useCallback((href: string) => {
+    if (href === "#connect:bank") {
+      setConnectParams({ step: "connect" });
+      return true;
+    }
+    if (href.startsWith("#navigate:")) {
+      router.push(href.slice(10));
+      return true;
+    }
     if (href.startsWith("#txn:")) {
       setTransactionParams({ transactionId: href.slice(5) });
       return true;
@@ -99,49 +103,24 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
           );
         }
 
-        const textContent = message.parts
-          .filter((p) => p.type === "text")
-          .map((p) => p.text)
-          .join("");
+        const parsed = parseAssistantMessage(message, {
+          isStreaming,
+          isLastMessage: isStreaming && message.id === lastId,
+        });
 
-        const toolParts: NormalizedToolPart[] = message.parts
-          .filter((p) => isToolPart(p as { type: string }))
-          .map((p) => normalizeToolPart(p as Record<string, unknown>));
-
-        const visibleTools = toolParts.filter(
-          (p) => !HIDDEN_TOOLS.has(p.toolName),
-        );
-
-        const sourceParts = message.parts.filter(
-          (p) => p.type === "source-url",
-        ) as SourceUrlPart[];
-
-        const reasoningParts = message.parts.filter(
-          (p) => p.type === "reasoning",
-        ) as { type: "reasoning"; text: string }[];
-        const reasoningText = reasoningParts.map((p) => p.text).join("\n\n");
-        const hasReasoning = reasoningParts.length > 0;
-        const isReasoningStreaming =
-          isStreaming &&
-          message.id === lastId &&
-          message.parts.at(-1)?.type === "reasoning";
-
-        const invoiceParts = toolParts.filter(
-          (p) =>
-            INVOICE_TOOLS.has(p.toolName) &&
-            p.state === "output-available" &&
-            p.output,
-        );
-
-        const isLast = isStreaming && message.id === lastId;
-        const showThinking =
-          isLast && !textContent && visibleTools.length === 0 && !hasReasoning;
-        const hasContent =
-          textContent ||
-          visibleTools.length > 0 ||
-          invoiceParts.length > 0 ||
-          sourceParts.length > 0 ||
-          hasReasoning;
+        const {
+          toolParts,
+          visibleTools,
+          invoiceParts,
+          textContent,
+          sourceParts,
+          reasoningText,
+          hasReasoning,
+          isReasoningStreaming,
+          showThinking,
+          hasContent,
+          isLastMessage,
+        } = parsed;
 
         if (!hasContent && !showThinking) return null;
 
@@ -171,7 +150,7 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
 
               {textContent && (
                 <Streamdown
-                  isAnimating={isLast}
+                  isAnimating={isLastMessage}
                   icons={streamdownIcons}
                   controls={streamdownControls}
                   className={streamdownClassName}
@@ -185,9 +164,16 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
                 const data = extractInvoiceData(part.output);
                 if (!data) return null;
                 return (
-                  <div key={part.toolCallId} className="mt-3">
-                    <InvoiceTemplate data={data} />
-                  </div>
+                  <ChatInvoiceCard
+                    key={part.toolCallId}
+                    data={data}
+                    onEdit={(id) =>
+                      setInvoiceParams({ type: "edit", invoiceId: id })
+                    }
+                    onViewDetails={(id) =>
+                      setInvoiceParams({ type: "details", invoiceId: id })
+                    }
+                  />
                 );
               })}
 

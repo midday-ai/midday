@@ -36,7 +36,7 @@ export function makeStreamdownComponents(
         return (
           <button
             type="button"
-            className="text-left hover:text-foreground transition-colors cursor-pointer"
+            className="text-left border-b border-dashed border-[#666666] hover:text-foreground transition-colors cursor-pointer"
             onClick={() => onEntityLink(href)}
           >
             {children}

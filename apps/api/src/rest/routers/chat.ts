@@ -67,6 +67,11 @@ app.post("/", async (c) => {
       user?.team?.plan,
     );
 
+    const clientTimezone = (body.timezone as string) || null;
+    const clientLocalTime = (body.localTime as string) || null;
+    const resolvedTimezone =
+      user?.timezone || clientTimezone || geo.timezone || "UTC";
+
     const mcpCtx: McpContext = {
       db,
       teamId,
@@ -74,7 +79,7 @@ app.post("/", async (c) => {
       userEmail: user?.email ?? session.user.email ?? null,
       scopes,
       apiUrl: process.env.MIDDAY_API_URL!,
-      timezone: user?.timezone || geo.timezone,
+      timezone: resolvedTimezone,
       locale: user?.locale || geo.locale,
       countryCode: geo.country,
       dateFormat: user?.dateFormat ?? null,
@@ -84,12 +89,13 @@ app.post("/", async (c) => {
     const systemPrompt = buildSystemPrompt({
       fullName: user?.fullName ?? null,
       locale: user?.locale || geo.locale || "en",
-      timezone: user?.timezone || geo.timezone || "UTC",
+      timezone: resolvedTimezone,
       dateFormat: user?.dateFormat ?? null,
       timeFormat: user?.timeFormat ?? 24,
       baseCurrency: user?.team?.baseCurrency ?? "USD",
       teamName: user?.team?.name ?? null,
       countryCode: user?.team?.countryCode ?? geo.country,
+      localTime: clientLocalTime,
     });
 
     const executionClientPromise = createExecutionClient(mcpCtx);

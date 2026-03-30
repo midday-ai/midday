@@ -49,12 +49,8 @@ export function Reasoning({
       if (startRef.current === null) {
         startRef.current = Date.now();
       }
-      setIsOpen(true);
-    } else {
-      if (startRef.current !== null) {
-        setDuration(Math.round((Date.now() - startRef.current) / 1000));
-      }
-      setIsOpen(false);
+    } else if (startRef.current !== null) {
+      setDuration(Math.round((Date.now() - startRef.current) / 1000));
     }
   }, [isStreaming]);
 
@@ -91,7 +87,7 @@ export function ReasoningTrigger() {
           Thinking...
         </TextShimmer>
       ) : (
-        <span>Thought for {duration}s</span>
+        <span>Thought for {Math.max(duration, 1)}s</span>
       )}
     </CollapsibleTrigger>
   );

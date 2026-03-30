@@ -190,7 +190,7 @@ export const starterFeatures: PlanFeature[] = [
   {
     label: "5 AI Connectors",
     tooltip:
-      "Connect tools like Linear, Notion, HubSpot, and GitHub to the AI assistant.",
+      "Connect up to 5 of 60+ tools like Linear, Notion, HubSpot, and GitHub to the AI assistant.",
   },
   {
     label: "Multi-currency",
@@ -216,7 +216,7 @@ export const proFeatures: PlanFeature[] = [
   {
     label: "20 AI Connectors",
     tooltip:
-      "Connect 40+ tools like Linear, Notion, HubSpot, Figma, and more to the AI assistant.",
+      "Connect up to 20 of 60+ tools like Linear, Notion, HubSpot, Figma, and more to the AI assistant.",
   },
   {
     label: "Custom transaction categories",

@@ -3,25 +3,12 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { ReactNode } from "react";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useUserQuery } from "@/hooks/use-user";
 import { getAccessToken } from "@/utils/session";
 
 export type ChatMode = "auto" | "instant" | "thinking";
-
-const chatTransport = new DefaultChatTransport({
-  api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
-  headers: async () => {
-    const token = await getAccessToken();
-    return token
-      ? ({ Authorization: `Bearer ${token}` } as Record<string, string>)
-      : ({} as Record<string, string>);
-  },
-  body: () => ({
-    mode: localStorage.getItem("chat-mode") ?? "auto",
-  }),
-});
 
 export type RateLimitInfo = { limit: number; remaining: number };
 
@@ -54,6 +41,31 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useLocalStorage<ChatMode>("chat-mode", "auto");
   const [rateLimit, setRateLimit] = useState<RateLimitInfo | null>(null);
   const [rateLimitExceeded, setRateLimitExceeded] = useState(false);
+
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+
+  const chatTransport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
+        headers: async () => {
+          const token = await getAccessToken();
+          const timezone =
+            Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC";
+          return {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            "x-user-timezone": timezone,
+          } as Record<string, string>;
+        },
+        body: () => ({
+          mode: modeRef.current,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC",
+          localTime: new Date().toISOString(),
+        }),
+      }),
+    [],
+  );
 
   const chat = useChat({
     transport: chatTransport,

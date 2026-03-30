@@ -1,4 +1,7 @@
-export const ENTITY_LINK_RE = /^#(txn|inv|cust|project|inbox|doc):/;
+import type { UIMessage } from "ai";
+
+export const ENTITY_LINK_RE =
+  /^#(txn|inv|cust|project|inbox|doc|connect|navigate):/;
 
 export const ICON_SIZE = 13;
 
@@ -133,4 +136,102 @@ export function addUtmSource(url: string): string {
   } catch {
     return url;
   }
+}
+
+export type ParsedAssistantMessage = {
+  toolParts: NormalizedToolPart[];
+  visibleTools: NormalizedToolPart[];
+  invoiceParts: NormalizedToolPart[];
+  textContent: string;
+  sourceParts: SourceUrlPart[];
+  reasoningText: string;
+  hasReasoning: boolean;
+  isReasoningStreaming: boolean;
+  showThinking: boolean;
+  hasContent: boolean;
+  isLastMessage: boolean;
+};
+
+export function parseAssistantMessage(
+  message: UIMessage,
+  opts: { isStreaming: boolean; isLastMessage: boolean },
+): ParsedAssistantMessage {
+  const { isStreaming, isLastMessage } = opts;
+
+  const toolParts: NormalizedToolPart[] = message.parts
+    .filter((p) => isToolPart(p as { type: string }))
+    .map((p) => normalizeToolPart(p as Record<string, unknown>));
+
+  const hasTools = toolParts.length > 0;
+  const lastToolIndex = hasTools
+    ? Math.max(
+        ...message.parts.map((p, i) =>
+          isToolPart(p as { type: string }) ? i : -1,
+        ),
+      )
+    : -1;
+
+  const toolsInProgress =
+    hasTools &&
+    toolParts.some(
+      (p) => p.state !== "output-available" && p.state !== "output-error",
+    );
+
+  const rawText =
+    isLastMessage && toolsInProgress
+      ? ""
+      : message.parts
+          .filter(
+            (p, i): p is { type: "text"; text: string } =>
+              p.type === "text" && (!hasTools || i > lastToolIndex),
+          )
+          .map((p) => p.text)
+          .join("");
+
+  const textContent = rawText.trim() ? rawText : "";
+
+  const visibleTools = toolParts.filter((p) => !HIDDEN_TOOLS.has(p.toolName));
+
+  const sourceParts = message.parts.filter(
+    (p) => p.type === "source-url",
+  ) as SourceUrlPart[];
+
+  const reasoningParts = message.parts.filter(
+    (p) => p.type === "reasoning",
+  ) as { type: "reasoning"; text: string }[];
+  const reasoningText = reasoningParts.map((p) => p.text).join("\n\n");
+  const hasReasoning = reasoningParts.length > 0;
+  const isReasoningStreaming =
+    isStreaming && isLastMessage && message.parts.at(-1)?.type === "reasoning";
+
+  const invoiceParts = toolParts.filter(
+    (p) =>
+      INVOICE_TOOLS.has(p.toolName) &&
+      p.state === "output-available" &&
+      p.output,
+  );
+
+  const showThinking =
+    isLastMessage && !textContent && visibleTools.length === 0 && !hasReasoning;
+
+  const hasContent =
+    !!textContent ||
+    visibleTools.length > 0 ||
+    invoiceParts.length > 0 ||
+    sourceParts.length > 0 ||
+    hasReasoning;
+
+  return {
+    toolParts,
+    visibleTools,
+    invoiceParts,
+    textContent,
+    sourceParts,
+    reasoningText,
+    hasReasoning,
+    isReasoningStreaming,
+    showThinking,
+    hasContent,
+    isLastMessage,
+  };
 }

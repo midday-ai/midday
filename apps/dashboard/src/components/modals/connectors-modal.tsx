@@ -84,10 +84,17 @@ function ConnectorCard({
   onConnect: (slug: string) => void;
 }) {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onSelect(connector)}
-      className="flex items-center justify-between w-full p-3 border border-border hover:bg-accent/50 transition-colors text-left"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(connector);
+        }
+      }}
+      className="flex items-center justify-between w-full p-3 border border-border hover:bg-accent/50 transition-colors text-left cursor-pointer"
     >
       <div className="flex items-center gap-3 min-w-0">
         <ConnectorLogo src={connector.logo} name={connector.name} />
@@ -124,7 +131,7 @@ function ConnectorCard({
           <Icons.Add className="size-3.5" />
         )}
       </Button>
-    </button>
+    </div>
   );
 }
 

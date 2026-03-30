@@ -49,13 +49,13 @@ export function OverviewView() {
             </Suspense>
           </div>
           <AskMidday onChatOpen={() => setView("chat")} />
-          <QuickActions />
+          <QuickActions onChatOpen={() => setView("chat")} />
           <Suspense fallback={<WidgetCardsSkeleton />}>
             <WidgetCards />
           </Suspense>
+          <McpBanner />
         </div>
       )}
-      <McpBanner />
     </ChatProvider>
   );
 }

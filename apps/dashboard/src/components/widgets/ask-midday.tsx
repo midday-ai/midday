@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { flushSync } from "react-dom";
 import { useChatState } from "@/components/chat/chat-context";
 import { InputBar } from "@/components/chat/chat-view";
 import { filesToUIParts } from "@/components/chat/file-utils";
@@ -27,9 +28,11 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
       if (!inputValue.trim() && !rawFiles?.length) return;
       if (isStreaming) return;
       const text = inputValue.trim();
-      setInputValue("");
-      setMessages([]);
-      setChatTitle(null);
+      flushSync(() => {
+        setInputValue("");
+        setMessages([]);
+        setChatTitle(null);
+      });
       const files = rawFiles?.length
         ? await filesToUIParts(rawFiles)
         : undefined;
@@ -49,8 +52,10 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
 
   const handleSuggestion = useCallback(
     (suggestion: string) => {
-      setMessages([]);
-      setChatTitle(null);
+      flushSync(() => {
+        setMessages([]);
+        setChatTitle(null);
+      });
       sendMessage({ text: suggestion });
       onChatOpen();
     },
