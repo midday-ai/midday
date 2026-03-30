@@ -74,7 +74,7 @@ export function ConnectorsBar() {
             variants={text}
             className="inline-flex items-center gap-1 text-[11px] text-muted-foreground group-hover:text-foreground transition-colors"
           >
-            Add connections
+            Connect apps
             <Icons.ChevronRight size={11} />
           </motion.span>
           <div className="flex items-center -space-x-1.5">

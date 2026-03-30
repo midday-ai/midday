@@ -658,7 +658,7 @@ export function ChatInput({
             </p>
             {!connectedApps || connectedApps.length === 0 ? (
               <div className="px-2 py-3 text-center">
-                <p className="text-xs text-[#878787] mb-2">No connected apps</p>
+                <p className="text-xs text-[#878787] mb-2">No apps connected</p>
                 <button
                   type="button"
                   className="text-xs text-foreground hover:underline"
@@ -667,7 +667,7 @@ export function ChatInput({
                     setConnectorsModalOpen(true);
                   }}
                 >
-                  Connect apps
+                  Connect
                 </button>
               </div>
             ) : filteredApps && filteredApps.length > 0 ? (
@@ -691,9 +691,7 @@ export function ChatInput({
               ))
             ) : (
               <p className="px-2.5 py-2.5 text-xs text-[#878787]">
-                {mentionQuery
-                  ? "No matching apps"
-                  : "All connected apps are mentioned"}
+                {mentionQuery ? "No matching apps" : "All apps are mentioned"}
               </p>
             )}
           </div>

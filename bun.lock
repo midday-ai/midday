@@ -62,6 +62,7 @@
         "hono": "catalog:",
         "hono-rate-limiter": "0.5.3",
         "jose": "catalog:",
+        "lru-cache": "^11.2.7",
         "nanoid": "catalog:",
         "parse-duration": "^2.1.5",
         "resend": "catalog:",

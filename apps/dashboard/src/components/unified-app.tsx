@@ -560,7 +560,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                 <span className="text-xs text-[#878787]">
                   {app.category} •{" "}
                   {app.type === "connector"
-                    ? "AI Connector"
+                    ? "Connected app"
                     : app.type === "external"
                       ? `By ${app.developerName}`
                       : "By Midday"}

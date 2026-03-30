@@ -3,7 +3,11 @@
 import { apps as appStoreApps } from "@midday/app-store";
 import type { UnifiedApp } from "@midday/app-store/types";
 import { Button } from "@midday/ui/button";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { AppConnectionToast } from "@/components/app-connection-toast";
@@ -62,8 +66,16 @@ export function Apps() {
     trpc.invoicePayments.stripeStatus.queryOptions(),
   );
 
-  const { data: connectors } = useSuspenseQuery(
-    trpc.connectors.list.queryOptions(),
+  const { data: catalog } = useSuspenseQuery(
+    trpc.connectors.list.queryOptions(undefined, {
+      staleTime: 30 * 60 * 1000,
+    }),
+  );
+
+  const { data: connections } = useQuery(
+    trpc.connectors.connections.queryOptions(undefined, {
+      staleTime: 2 * 60 * 1000,
+    }),
   );
 
   const searchParams = useSearchParams();
@@ -171,28 +183,29 @@ export function Apps() {
     }),
   );
 
-  // Transform connector apps
-  const transformedConnectorApps: UnifiedApp[] = connectors.map(
+  const connectionMap = new Map(
+    (connections ?? []).map((c) => [c.slug, c.connectedAccountId]),
+  );
+
+  const transformedConnectorApps: UnifiedApp[] = catalog.map(
     (c: {
       slug: string;
       name: string;
       logo: string | null;
       description: string | null;
-      isConnected: boolean;
-      connectedAccountId: string | null;
     }) => ({
       id: `connector-${c.slug}`,
       name: c.name,
-      category: "AI Connector",
+      category: "Connected app",
       active: true,
       logo: c.logo || undefined,
       short_description:
         c.description || `Connect ${c.name} to use with the AI assistant.`,
       images: [],
-      installed: c.isConnected,
+      installed: connectionMap.has(c.slug),
       type: "connector" as const,
       connectorSlug: c.slug,
-      connectedAccountId: c.connectedAccountId || undefined,
+      connectedAccountId: connectionMap.get(c.slug) || undefined,
     }),
   );
 

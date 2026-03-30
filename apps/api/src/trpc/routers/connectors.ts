@@ -1,10 +1,10 @@
 import { getCatalog } from "@api/composio/catalog";
 import {
-  buildConnectionMap,
   composio,
   composioFetch,
   extractActiveConnections,
-  getTeamToolkits,
+  getUserToolkits,
+  invalidateUserToolkitsCache,
   type ToolkitDetail,
   type ToolsResponse,
 } from "@api/composio/client";
@@ -14,28 +14,13 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const connectorsRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({ ctx: { teamId } }) => {
-    const [catalog, toolkits] = await Promise.all([
-      getCatalog(),
-      getTeamToolkits(teamId!),
-    ]);
-
-    const connectionMap = buildConnectionMap(toolkits);
-
-    return catalog
-      .filter((c) => connectionMap.has(c.slug))
-      .map((c) => {
-        const conn = connectionMap.get(c.slug)!;
-        return {
-          ...c,
-          isConnected: conn.isConnected,
-          connectedAccountId: conn.connectedAccountId,
-        };
-      });
+  list: protectedProcedure.query(async () => {
+    return getCatalog();
   }),
 
-  connections: protectedProcedure.query(async ({ ctx: { teamId } }) => {
-    const toolkits = await getTeamToolkits(teamId!);
+  connections: protectedProcedure.query(async ({ ctx: { session } }) => {
+    const userId = session.user.id;
+    const toolkits = await getUserToolkits(userId);
     return extractActiveConnections(toolkits);
   }),
 
@@ -75,7 +60,9 @@ export const connectorsRouter = createTRPCRouter({
         callbackUrl: z.string().url(),
       }),
     )
-    .mutation(async ({ ctx: { teamId }, input }) => {
+    .mutation(async ({ ctx: { session }, input }) => {
+      const userId = session.user.id;
+
       if (
         !CURATED_TOOLKIT_SLUGS.includes(
           input.toolkit as (typeof CURATED_TOOLKIT_SLUGS)[number],
@@ -87,18 +74,36 @@ export const connectorsRouter = createTRPCRouter({
         });
       }
 
-      const session = await composio.create(teamId!);
-      const request = await session.authorize(input.toolkit, {
+      const composioSession = await composio.create(userId);
+      const request = await composioSession.authorize(input.toolkit, {
         callbackUrl: input.callbackUrl,
       });
+
+      await invalidateUserToolkitsCache(userId);
 
       return { redirectUrl: request.redirectUrl };
     }),
 
   disconnect: protectedProcedure
     .input(z.object({ connectedAccountId: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx: { session }, input }) => {
+      const userId = session.user.id;
+
+      const { items } = await composio.connectedAccounts.list({
+        userIds: [userId],
+      });
+
+      const ownsAccount = items.some((a) => a.id === input.connectedAccountId);
+
+      if (!ownsAccount) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Connected account does not belong to this user",
+        });
+      }
+
       await composio.connectedAccounts.delete(input.connectedAccountId);
+      await invalidateUserToolkitsCache(userId);
       return { success: true };
     }),
 });

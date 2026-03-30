@@ -1,7 +1,9 @@
 import { Composio } from "@composio/core";
 import { VercelProvider } from "@composio/vercel";
+import { connectorsCache } from "@midday/cache/connectors-cache";
 import { CURATED_TOOLKIT_SLUGS } from "@midday/connectors";
 import { logger } from "@midday/logger";
+import { LRUCache } from "lru-cache";
 
 export const composio = new Composio({
   apiKey: process.env.COMPOSIO_API_KEY,
@@ -44,13 +46,28 @@ function asToolkitItems(items: unknown[]): ToolkitItem[] {
 // Helpers used by TRPC routes
 // ---------------------------------------------------------------------------
 
-export async function getTeamToolkits(teamId: string): Promise<ToolkitItem[]> {
-  const session = await composio.create(teamId);
-  const { items } = await session.toolkits({
-    toolkits: [...CURATED_TOOLKIT_SLUGS],
-    limit: 100,
-  });
-  return asToolkitItems(items);
+const TOOLKIT_CACHE_TTL = 120; // 2 min in seconds
+
+export async function getUserToolkits(userId: string): Promise<ToolkitItem[]> {
+  return connectorsCache.getOrSet<ToolkitItem[]>(
+    `toolkits:${userId}`,
+    TOOLKIT_CACHE_TTL,
+    async () => {
+      const session = await composio.create(userId);
+      const { items } = await session.toolkits({
+        toolkits: [...CURATED_TOOLKIT_SLUGS],
+        limit: 100,
+      });
+      return asToolkitItems(items);
+    },
+  );
+}
+
+export async function invalidateUserToolkitsCache(
+  userId: string,
+): Promise<void> {
+  await connectorsCache.delete(`toolkits:${userId}`);
+  toolsCache.delete(userId);
 }
 
 export function buildConnectionMap(
@@ -84,20 +101,35 @@ export function extractActiveConnections(toolkits: ToolkitItem[]) {
 }
 
 /**
- * Resolve the Composio meta-tools (COMPOSIO_SEARCH_TOOLS, etc.) for a team.
+ * Resolve the Composio meta-tools (COMPOSIO_SEARCH_TOOLS, etc.) for a user.
  * Returns an empty object when Composio is not configured or unavailable.
+ *
+ * Cached in-memory with LRU eviction (tools contain functions that can't be
+ * serialised to Redis). Invalidated alongside the toolkit cache on
+ * connect/disconnect.
  */
+
+const toolsCache = new LRUCache<string, Record<string, unknown>>({
+  max: 500,
+  ttl: 20 * 60 * 1000, // 20 min
+});
+
 export async function getComposioTools(
-  teamId: string,
+  userId: string,
 ): Promise<Record<string, never> | Record<string, unknown>> {
   if (!process.env.COMPOSIO_API_KEY) return {};
 
+  const cached = toolsCache.get(userId);
+  if (cached) return cached;
+
   try {
-    const session = await composio.create(teamId, {
+    const session = await composio.create(userId, {
       manageConnections: false,
       workbench: { enable: false },
     });
-    return await session.tools();
+    const tools = await session.tools();
+    toolsCache.set(userId, tools);
+    return tools;
   } catch (err) {
     logger.warn("[composio] Tools unavailable:", { error: err });
     return {};

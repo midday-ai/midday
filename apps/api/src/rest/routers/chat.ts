@@ -104,7 +104,7 @@ app.post("/", async (c) => {
     });
 
     const executionClientPromise = createExecutionClient(mcpCtx);
-    const composioToolsPromise = getComposioTools(teamId!);
+    const composioToolsPromise = getComposioTools(mcpCtx.userId);
 
     const [, modelMessages, resolvedClient, composioMetaTools] =
       await Promise.all([

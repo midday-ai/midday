@@ -349,7 +349,7 @@ function GridSkeleton() {
   return (
     <div className="flex flex-col h-full">
       <Input
-        placeholder={`Search ${connectorApps.filter((c) => c.active).length} connectors...`}
+        placeholder={`Search ${connectorApps.filter((c) => c.active).length} apps...`}
         disabled
         className="shrink-0 mb-3"
       />
@@ -388,9 +388,28 @@ function ConnectorsContent({
   );
   const [isConnecting, setIsConnecting] = useState(false);
 
-  const { data: connectors } = useSuspenseQuery(
-    trpc.connectors.list.queryOptions(),
+  const { data: catalog } = useSuspenseQuery(
+    trpc.connectors.list.queryOptions(undefined, {
+      staleTime: 30 * 60 * 1000,
+    }),
   );
+
+  const { data: connections } = useQuery(
+    trpc.connectors.connections.queryOptions(undefined, {
+      staleTime: 2 * 60 * 1000,
+    }),
+  );
+
+  const connectors: Connector[] = useMemo(() => {
+    const connMap = new Map(
+      (connections ?? []).map((c) => [c.slug, c.connectedAccountId]),
+    );
+    return catalog.map((c) => ({
+      ...c,
+      isConnected: connMap.has(c.slug),
+      connectedAccountId: connMap.get(c.slug) ?? null,
+    }));
+  }, [catalog, connections]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return connectors;
@@ -534,7 +553,7 @@ function ConnectorsContent({
   return (
     <div className="flex flex-col h-full">
       <Input
-        placeholder={`Search ${connectorApps.filter((c) => c.active).length} connectors...`}
+        placeholder={`Search ${connectorApps.filter((c) => c.active).length} apps...`}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         autoFocus
@@ -555,7 +574,7 @@ function ConnectorsContent({
 
         {filtered.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-8">
-            No connectors found
+            No apps found
           </p>
         )}
       </ScrollArea>
@@ -578,10 +597,10 @@ export function ConnectorsModal({
         <div className="p-4 h-[500px] flex flex-col">
           {!isDetail && (
             <DialogHeader className="mb-4 shrink-0">
-              <DialogTitle>Connectors</DialogTitle>
+              <DialogTitle>Connected apps</DialogTitle>
               <DialogDescription>
                 Connect your apps and services to Midday. Your AI assistant can
-                then access and interact with your connected tools.
+                then access and interact with them.
               </DialogDescription>
             </DialogHeader>
           )}
