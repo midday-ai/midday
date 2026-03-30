@@ -94,12 +94,15 @@ export function decodeDataUrl(
 ): { data: Uint8Array; mediaType: string } | null {
   if (url.protocol !== "data:") return null;
 
-  const [header, base64] = url.href.split(",");
+  const href = url.href;
+  const commaIdx = href.indexOf(",");
+  const header = commaIdx === -1 ? href : href.slice(0, commaIdx);
+  const body = commaIdx === -1 ? "" : href.slice(commaIdx + 1);
   const mediaType =
-    header?.match(/data:([^;]+)/)?.[1] ?? "application/octet-stream";
+    header.match(/data:([^;]+)/)?.[1] ?? "application/octet-stream";
 
   return {
-    data: Uint8Array.from(atob(base64 ?? ""), (c) => c.charCodeAt(0)),
+    data: Uint8Array.from(atob(body), (c) => c.charCodeAt(0)),
     mediaType,
   };
 }

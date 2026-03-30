@@ -70,25 +70,6 @@ export async function invalidateUserToolkitsCache(
   toolsCache.delete(userId);
 }
 
-export function buildConnectionMap(
-  toolkits: ToolkitItem[],
-): Map<string, { isConnected: boolean; connectedAccountId: string | null }> {
-  const map = new Map<
-    string,
-    { isConnected: boolean; connectedAccountId: string | null }
-  >();
-
-  for (const t of toolkits) {
-    if (t.isNoAuth) continue;
-    map.set(t.slug, {
-      isConnected: t.connection?.isActive ?? false,
-      connectedAccountId: t.connection?.connectedAccount?.id ?? null,
-    });
-  }
-
-  return map;
-}
-
 export function extractActiveConnections(toolkits: ToolkitItem[]) {
   return toolkits
     .filter((t) => t.connection?.isActive)
