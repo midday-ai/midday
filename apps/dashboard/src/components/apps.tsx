@@ -62,6 +62,10 @@ export function Apps() {
     trpc.invoicePayments.stripeStatus.queryOptions(),
   );
 
+  const { data: connectors } = useSuspenseQuery(
+    trpc.connectors.list.queryOptions(),
+  );
+
   const searchParams = useSearchParams();
   const isInstalledPage = searchParams.get("tab") === "installed";
   const search = searchParams.get("q");
@@ -167,8 +171,37 @@ export function Apps() {
     }),
   );
 
+  // Transform connector apps
+  const transformedConnectorApps: UnifiedApp[] = connectors.map(
+    (c: {
+      slug: string;
+      name: string;
+      logo: string | null;
+      description: string | null;
+      isConnected: boolean;
+      connectedAccountId: string | null;
+    }) => ({
+      id: `connector-${c.slug}`,
+      name: c.name,
+      category: "AI Connector",
+      active: true,
+      logo: c.logo || undefined,
+      short_description:
+        c.description || `Connect ${c.name} to use with the AI assistant.`,
+      images: [],
+      installed: c.isConnected,
+      type: "connector" as const,
+      connectorSlug: c.slug,
+      connectedAccountId: c.connectedAccountId || undefined,
+    }),
+  );
+
   // Combine all apps
-  const allApps = [...transformedOfficialApps, ...transformedExternalApps];
+  const allApps = [
+    ...transformedOfficialApps,
+    ...transformedExternalApps,
+    ...transformedConnectorApps,
+  ];
 
   // Filter apps
   const filteredApps = allApps

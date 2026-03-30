@@ -232,7 +232,7 @@ function SummaryTicker({ insights }: { insights: Insight[] }) {
 
   return (
     <div
-      className="flex flex-col items-center mt-3 max-w-lg w-full gap-3"
+      className="flex flex-col items-center max-w-lg w-full gap-3"
       onMouseEnter={() => {
         hoveredRef.current = true;
         elapsedOnPauseRef.current += Date.now() - startRef.current;

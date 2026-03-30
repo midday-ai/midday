@@ -4,6 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { ReactNode } from "react";
 import { createContext, useContext, useState } from "react";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useUserQuery } from "@/hooks/use-user";
 import { getAccessToken } from "@/utils/session";
 
@@ -44,25 +45,15 @@ export function useChatState() {
   return ctx;
 }
 
-function getInitialMode(): ChatMode {
-  if (typeof window === "undefined") return "auto";
-  return (localStorage.getItem("chat-mode") as ChatMode) ?? "auto";
-}
-
 export function ChatProvider({ children }: { children: ReactNode }) {
   const { data: userData } = useUserQuery();
   const plan = userData?.team?.plan ?? "trial";
 
   const [inputValue, setInputValue] = useState("");
   const [chatTitle, setChatTitle] = useState<string | null>(null);
-  const [mode, setModeState] = useState<ChatMode>(getInitialMode);
+  const [mode, setMode] = useLocalStorage<ChatMode>("chat-mode", "auto");
   const [rateLimit, setRateLimit] = useState<RateLimitInfo | null>(null);
   const [rateLimitExceeded, setRateLimitExceeded] = useState(false);
-
-  const setMode = (m: ChatMode) => {
-    setModeState(m);
-    localStorage.setItem("chat-mode", m);
-  };
 
   const chat = useChat({
     transport: chatTransport,

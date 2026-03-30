@@ -24,6 +24,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@midday/api": "workspace:*",
     "@midday/app-store": "workspace:*",
+    "@midday/connectors": "workspace:*",
     "@midday/desktop-client": "workspace:*",
     "@midday/documents": "workspace:*",
     "@midday/events": "workspace:*",

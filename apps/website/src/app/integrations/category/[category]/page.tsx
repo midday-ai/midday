@@ -8,12 +8,11 @@ interface Props {
   params: Promise<{ category: string }>;
 }
 
-// Get valid category IDs (excluding "all" since that's the main /integrations page)
 const validCategories = categories
   .filter((c) => c.id !== "all")
   .map((c) => c.id);
 
-export async function generateStaticParams() {
+export function generateStaticParams() {
   return validCategories.map((category) => ({ category }));
 }
 
@@ -54,7 +53,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Page({ params }: Props) {
   const { category } = await params;
 
-  // Validate category exists
   if (!validCategories.includes(category)) {
     notFound();
   }

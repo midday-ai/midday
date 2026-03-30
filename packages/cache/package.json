@@ -19,6 +19,7 @@
     "./redis-client": "./src/redis-client.ts",
     "./shared-redis": "./src/shared-redis.ts",
     "./health": "./src/health.ts",
-    "./banking-cache": "./src/banking-cache.ts"
+    "./banking-cache": "./src/banking-cache.ts",
+    "./connectors-cache": "./src/connectors-cache.ts"
   }
 }

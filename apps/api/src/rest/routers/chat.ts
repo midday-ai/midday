@@ -13,6 +13,7 @@ import {
   decodeDataUrl,
   writeChatTitle,
 } from "@api/chat/utils";
+import { composio } from "@api/composio/client";
 import type { McpContext } from "@api/mcp/types";
 import type { Context } from "@api/rest/types";
 import { getGeoContext } from "@api/utils/geo";
@@ -93,14 +94,29 @@ app.post("/", async (c) => {
 
     const executionClientPromise = createExecutionClient(mcpCtx);
 
-    const [, modelMessages, resolvedClient] = await Promise.all([
-      ensureToolIndex(mcpCtx),
-      convertToModelMessages(uiMessages),
-      executionClientPromise,
-    ]).catch(async (err) => {
-      await executionClientPromise.then((c) => c.close()).catch(() => {});
-      throw err;
-    });
+    const composioToolsPromise = process.env.COMPOSIO_API_KEY
+      ? composio
+          .create(teamId!, {
+            manageConnections: false,
+            workbench: { enable: false },
+          })
+          .then((s) => s.tools())
+          .catch((err) => {
+            logger.warn("[chat] Composio tools unavailable:", { error: err });
+            return {} as Record<string, never>;
+          })
+      : Promise.resolve({} as Record<string, never>);
+
+    const [, modelMessages, resolvedClient, composioMetaTools] =
+      await Promise.all([
+        ensureToolIndex(mcpCtx),
+        convertToModelMessages(uiMessages),
+        executionClientPromise,
+        composioToolsPromise,
+      ]).catch(async (err) => {
+        await executionClientPromise.then((c) => c.close()).catch(() => {});
+        throw err;
+      });
 
     mcpClient = resolvedClient;
 
@@ -127,11 +143,14 @@ app.post("/", async (c) => {
 
         const titlePromise = writeChatTitle(writer, uiMessages);
 
+        const composioToolNames = Object.keys(composioMetaTools);
+
         const agent = new ToolLoopAgent({
           model: resolved.model,
           instructions: systemPrompt,
           tools: {
             ...mcpTools,
+            ...composioMetaTools,
             web_search: openai.tools.webSearch({
               searchContextSize: "medium",
               userLocation: {
@@ -151,7 +170,7 @@ app.post("/", async (c) => {
           }),
           prepareStep: buildPrepareStep({
             maxTools: 10,
-            alwaysActive: ["web_search"],
+            alwaysActive: ["web_search", ...composioToolNames],
           }),
           stopWhen: stepCountIs(10),
           experimental_download: async (options) =>

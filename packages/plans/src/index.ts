@@ -116,6 +116,7 @@ export function getPlanName(plan: string | null | undefined): string {
 export type PlanLimits = {
   users: number;
   bankConnections: number;
+  connectors: number;
   storage: number;
   inbox: number;
   invoices: number;
@@ -187,6 +188,11 @@ export const starterFeatures: PlanFeature[] = [
     tooltip: "Slack, Gmail, Outlook, Stripe, Google Drive, Dropbox, and more.",
   },
   {
+    label: "5 AI Connectors",
+    tooltip:
+      "Connect tools like Linear, Notion, HubSpot, and GitHub to the AI assistant.",
+  },
+  {
     label: "Multi-currency",
     tooltip:
       "Invoice in any currency. Converted to your base currency automatically.",
@@ -207,6 +213,11 @@ export const starterFeatures: PlanFeature[] = [
 export const proFeatures: PlanFeature[] = [
   { label: "Everything in Starter" },
   { label: "10 banks · 50 invoices/mo · 100GB storage" },
+  {
+    label: "20 AI Connectors",
+    tooltip:
+      "Connect 40+ tools like Linear, Notion, HubSpot, Figma, and more to the AI assistant.",
+  },
   {
     label: "Custom transaction categories",
     tooltip:
@@ -254,6 +265,7 @@ export function getPlanLimits(plan: string): PlanLimits {
       return {
         users: 2,
         bankConnections: 3,
+        connectors: 5,
         storage: 10 * 1024 * 1024 * 1024,
         inbox: 150,
         invoices: 15,
@@ -263,6 +275,7 @@ export function getPlanLimits(plan: string): PlanLimits {
       return {
         users: 10,
         bankConnections: 10,
+        connectors: 20,
         storage: 100 * 1024 * 1024 * 1024,
         inbox: 500,
         invoices: 50,
@@ -271,6 +284,7 @@ export function getPlanLimits(plan: string): PlanLimits {
       return {
         users: 1,
         bankConnections: 1,
+        connectors: 2,
         storage: 1 * 1024 * 1024 * 1024,
         inbox: 50,
         invoices: 5,

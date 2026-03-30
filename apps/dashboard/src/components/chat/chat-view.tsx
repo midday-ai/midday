@@ -116,7 +116,9 @@ export function ChatView({
             <ChatMessages messages={messages} status={status} />
           </div>
         </ConversationContent>
-        <ConversationScrollButton />
+        <ConversationScrollButton
+          className={showLimitWarning ? "bottom-[105px]" : "bottom-[85px]"}
+        />
       </Conversation>
 
       {error && !rateLimitExceeded && (

@@ -155,6 +155,9 @@ export function BankAccount({ data, provider }: Props) {
         queryClient.invalidateQueries({
           queryKey: trpc.bankConnections.get.queryKey(),
         });
+        queryClient.invalidateQueries({
+          queryKey: trpc.overview.summary.queryKey(),
+        });
         setDeleteValue("");
         setDeleteOpen(false);
       },
@@ -169,6 +172,9 @@ export function BankAccount({ data, provider }: Props) {
         });
         queryClient.invalidateQueries({
           queryKey: trpc.bankConnections.get.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.overview.summary.queryKey(),
         });
       },
     }),

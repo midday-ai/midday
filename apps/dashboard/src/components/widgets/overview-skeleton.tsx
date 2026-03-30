@@ -2,7 +2,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 
 export function SummarySkeleton() {
   return (
-    <div className="flex flex-col items-center mt-3 max-w-lg w-full gap-3">
+    <div className="flex flex-col items-center max-w-lg w-full gap-3">
       <div className="h-10 flex items-center">
         <Skeleton className="h-[14px] w-[280px]" />
       </div>

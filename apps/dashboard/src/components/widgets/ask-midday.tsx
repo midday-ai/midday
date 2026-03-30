@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useChatState } from "@/components/chat/chat-context";
 import { InputBar } from "@/components/chat/chat-view";
 import { filesToUIParts } from "@/components/chat/file-utils";
+import { ConnectorsBar } from "./connectors-bar";
 
 export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
   const {
@@ -69,6 +70,7 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
         onModeChange={setMode}
         plan={plan}
       />
+      <ConnectorsBar />
     </div>
   );
 }

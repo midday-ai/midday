@@ -8,6 +8,7 @@ import { bankConnectionsRouter } from "./bank-connections";
 import { bankingRouter } from "./banking";
 import { billingRouter } from "./billing";
 
+import { connectorsRouter } from "./connectors";
 import { customersRouter } from "./customers";
 import { documentTagAssignmentsRouter } from "./document-tag-assignments";
 import { documentTagsRouter } from "./document-tags";
@@ -50,6 +51,7 @@ export const appRouter = createTRPCRouter({
   bankAccounts: bankAccountsRouter,
   bankConnections: bankConnectionsRouter,
 
+  connectors: connectorsRouter,
   customers: customersRouter,
   documents: documentsRouter,
   documentTagAssignments: documentTagAssignmentsRouter,
