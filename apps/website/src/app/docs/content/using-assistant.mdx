@@ -1,73 +1,109 @@
 ---
 title: Using the Assistant
-description: Ask Midday questions about your business finances.
+description: Ask questions, take actions, and manage your business from a single conversation.
 section: assistant
 order: 1
 ---
 
-The Midday assistant lets you ask questions about your finances in plain language and get instant answers.
+The Midday assistant lets you ask questions, take actions, and manage your business in plain language — directly from the dashboard.
 
 ## Access the assistant
 
 1. Open [Midday](https://app.midday.ai)
 2. The assistant is available from the home screen
-3. Type your question
-4. Get an instant response
+3. Type your question or request
+4. Get an instant response — or watch the assistant take action for you
 
-## What you can ask
+## Chat modes
 
-The assistant understands questions about your financial data:
+The assistant supports three modes you can switch between:
 
-### Revenue and income
+- **Auto** — The default. Automatically picks the best approach for your question — fast for simple lookups, more thorough for complex analysis.
+- **Instant** — Optimized for speed. Best for quick lookups like "show my balance" or "list overdue invoices".
+- **Thinking** — Deep reasoning mode for complex questions like financial comparisons, forecasts, or multi-step analysis. Available on Pro plans.
+
+## What you can do
+
+The assistant can both answer questions and take real actions on your behalf.
+
+### Ask about your finances
+
 - "What was my revenue last month?"
 - "Show me revenue by customer this quarter"
 - "How does this month compare to last month?"
-
-### Expenses and spending
 - "What did I spend on software last quarter?"
-- "Show my top expenses this year"
-- "How much have I spent with Amazon?"
-
-### Cash and runway
 - "What's my current balance?"
 - "How long will my cash last?"
-- "What's my monthly burn rate?"
 
-### Invoices
-- "Do I have any overdue invoices?"
-- "Who owes me money?"
-- "Show unpaid invoices for Acme Corp"
+### Create and manage invoices
 
-### Time tracking
+- "Create an invoice for Acme Corp for 10 hours of consulting at $150/hr"
+- "Send the draft invoice to Acme Corp"
+- "Remind Beta Inc about their overdue invoice"
+- "Mark invoice INV-0042 as paid"
+- "What invoices are overdue?"
+
+### Manage transactions
+
+- "Categorize all my Stripe transactions as income"
+- "Tag these transactions as tax-deductible"
+- "Delete the manual transaction from yesterday"
+- "Show transactions from last month"
+
+### Track time
+
+- "Start a timer on Project X"
+- "Log 2 hours for the client meeting yesterday"
 - "How many hours did I track this week?"
-- "Show time by project this month"
-- "What's unbilled for Client X?"
+- "What's unbilled for Project X?"
 
-## How it works
+### Export and report
 
-The assistant:
+- "Export my January transactions to my accountant at lisa@accounting.com"
+- "What's my growth rate compared to last quarter?"
+- "Give me a balance sheet as of today"
+- "Show spending by category for last month"
 
-1. Understands your question using AI
-2. Queries your actual Midday data
-3. Returns accurate, real-time answers
+## Web search
 
-It's not making up numbers—it's reading from your transactions, invoices, and tracked time.
+The assistant can search the web for real-time information and combine it with your business data:
+
+- "Can I afford a Tesla Model 3?" — looks up the current price and checks your balance or runway.
+- "What's the VAT rate in Germany?" — finds the rate and checks your relevant transactions.
+- "How does my revenue compare to industry average?" — searches for benchmarks and pulls your actual numbers.
+
+This is useful for questions involving prices, exchange rates, tax rules, or industry benchmarks.
+
+## Connected apps
+
+The assistant can interact with external tools you've connected — Gmail, Slack, Google Calendar, Notion, GitHub, Linear, and more.
+
+- "Check my calendar for tomorrow"
+- "Send a Slack message to the team channel"
+- "Look up the latest GitHub issue on our repo"
+- "Create a Notion page with this month's revenue summary"
+
+Connect apps from the **Connectors** settings in your dashboard. See [Connected Apps](/docs/assistant-connectors) for the full list and setup instructions.
 
 ## Tips
 
-- Be specific: "Revenue last month" is better than "How am I doing?"
-- Include time periods: "this month," "last quarter," "in 2024"
-- Ask follow-ups: The assistant remembers context in a conversation
+- **Be specific**: "Revenue last month" works better than "How am I doing?"
+- **Include time periods**: "this month," "last quarter," "in 2025"
+- **Ask follow-ups**: The assistant remembers context within a conversation
+- **Combine actions**: "Create an invoice for Acme Corp and send it" works in one go
+- **Use natural language**: You don't need special syntax — just describe what you want
 
 ## Limitations
 
-The assistant can answer questions about data in Midday. It cannot:
+The assistant cannot:
 
-- Make predictions or forecasts
-- Access external data
-- Make changes to your account (it's read-only)
-- Answer questions about features not yet available
+- Send emails (other than invoice send/remind)
+- Connect bank accounts or modify account settings
+- Manage billing or subscriptions
+- Upload files
+
+For these, use the corresponding pages in the Midday dashboard.
 
 ## Privacy
 
-Your conversations with the assistant are private. We don't use your financial data to train AI models.
+Your conversations with the assistant are private. We don't use your financial data or conversation history to train AI models.

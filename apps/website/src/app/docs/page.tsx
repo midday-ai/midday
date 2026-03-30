@@ -127,6 +127,7 @@ const sections = [
     links: [
       { title: "Using Assistant", href: "/docs/using-assistant" },
       { title: "AI Tools (MCP)", href: "/docs/assistant-mcp" },
+      { title: "Connected Apps", href: "/docs/assistant-connectors" },
     ],
   },
   {

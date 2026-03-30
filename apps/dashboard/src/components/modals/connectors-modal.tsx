@@ -433,7 +433,10 @@ function ConnectorsContent({
         const top = window.screenY + (window.outerHeight - height) / 2.5;
 
         const redirectUrl = result.redirectUrl;
-        if (!redirectUrl) return;
+        if (!redirectUrl) {
+          setIsConnecting(false);
+          return;
+        }
 
         const popup = window.open(
           redirectUrl,

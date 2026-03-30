@@ -37,7 +37,7 @@ export function Footer() {
                   { href: "/customers", label: "Customers" },
                   { href: "/file-storage", label: "Files" },
                   { href: "/pre-accounting", label: "Exports" },
-                  { href: "/mcp", label: "AI integrations" },
+                  { href: "/assistant", label: "Assistant" },
                 ].map((item) => (
                   <Link
                     key={item.href}

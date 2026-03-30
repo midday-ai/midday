@@ -82,7 +82,7 @@ export function ConnectMcpStep() {
         transition={{ duration: 0.4, delay: 0.1 }}
         className="text-lg lg:text-xl font-serif"
       >
-        Your finances, where you already work
+        Use Midday where you already work
       </motion.h1>
 
       <motion.p
@@ -91,8 +91,7 @@ export function ConnectMcpStep() {
         transition={{ duration: 0.4, delay: 0.2 }}
         className="text-sm text-muted-foreground leading-relaxed"
       >
-        Connect your AI assistant to handle invoices, expenses, and reports —
-        right from the tools you already use.
+        Ask questions and take action without leaving your favorite AI tool.
       </motion.p>
 
       <motion.ul
@@ -102,10 +101,10 @@ export function ConnectMcpStep() {
         transition={{ duration: 0.35, delay: 0.3 }}
       >
         {[
-          "Send invoices and track payments without leaving your workflow",
-          "Ask about profit, burn rate, or revenue in plain English",
-          "Categorize transactions and export to your accounting software",
-          "Works with the AI tools you already use every day",
+          "Send invoices and track payments in natural language",
+          "Ask about your business — revenue, expenses, runway and more",
+          "Categorize transactions and export reports",
+          "Works with ChatGPT, Claude, Cursor and other AI tools",
         ].map((feature, index) => (
           <motion.li
             key={feature}

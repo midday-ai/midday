@@ -2,13 +2,22 @@ import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { Assistant } from "@/components/assistant";
 
-const title = "AI Assistant";
+const title = "AI Assistant for Small Business";
 const description =
-  "Your AI-powered business assistant. Ask questions about your business and get clear, actionable answers based on your real business data.";
+  "Manage your finances, invoices, time tracking, and connected tools from a single conversation. An AI assistant that knows your business and gets things done.";
 
 export const metadata: Metadata = {
   title,
   description,
+  keywords: [
+    "AI assistant",
+    "small business assistant",
+    "AI bookkeeping",
+    "invoice assistant",
+    "business finance AI",
+    "connected apps",
+    "AI time tracking",
+  ],
   openGraph: {
     title,
     description,

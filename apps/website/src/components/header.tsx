@@ -389,9 +389,9 @@ export function Header({
                                   desc: "Accounting ready",
                                 },
                                 {
-                                  href: "/mcp",
-                                  title: "AI integrations",
-                                  desc: "Connect your AI tools",
+                                  href: "/assistant",
+                                  title: "Assistant",
+                                  desc: "Ask anything, get things done",
                                 },
                               ].map((item, index) => (
                                 <div
@@ -919,7 +919,7 @@ export function Header({
                           { href: "/customers", label: "Customers" },
                           { href: "/file-storage", label: "Files" },
                           { href: "/pre-accounting", label: "Exports" },
-                          { href: "/mcp", label: "AI integrations" },
+                          { href: "/assistant", label: "Assistant" },
                         ].map((item) => (
                           <Link
                             key={item.href}

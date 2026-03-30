@@ -131,11 +131,11 @@ export function McpBanner() {
 
             <Link href="/apps?q=mcp" className="block p-4">
               <h3 className="text-sm font-medium mb-1">
-                Midday works with your AI tools
+                Use Midday where you already work
               </h3>
               <p className="text-xs text-muted-foreground">
-                Connect ChatGPT, Claude, Manus and more to your financial data
-                via MCP.
+                Ask questions and take action without leaving your favorite AI
+                tool.
               </p>
             </Link>
           </div>
