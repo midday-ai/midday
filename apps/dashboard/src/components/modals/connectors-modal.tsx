@@ -407,6 +407,9 @@ function ConnectorsContent({
     queryClient.invalidateQueries({
       queryKey: trpc.connectors.list.queryKey(),
     });
+    queryClient.invalidateQueries({
+      queryKey: trpc.connectors.connections.queryKey(),
+    });
   }, [queryClient, trpc]);
 
   const authorizeMutation = useMutation(

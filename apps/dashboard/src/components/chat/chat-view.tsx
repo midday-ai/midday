@@ -2,9 +2,11 @@
 
 import { LogEvents } from "@midday/events/events";
 import { useOpenPanel } from "@openpanel/nextjs";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
 import { useCallback } from "react";
+import type { ConnectedApp } from "@/components/chat/chat-context";
 import { useChatState } from "@/components/chat/chat-context";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessages } from "@/components/chat/chat-messages";
@@ -14,6 +16,7 @@ import {
   ConversationScrollButton,
 } from "@/components/chat/conversation";
 import { filesToUIParts } from "@/components/chat/file-utils";
+import { useTRPC } from "@/trpc/client";
 
 export function InputBar({
   isActive,
@@ -29,6 +32,10 @@ export function InputBar({
   mode,
   onModeChange,
   plan,
+  connectedApps,
+  mentionedApps,
+  onMentionApp,
+  onRemoveMention,
 }: {
   isActive?: boolean;
   hasMessages?: boolean;
@@ -43,6 +50,10 @@ export function InputBar({
   mode?: "auto" | "instant" | "thinking";
   onModeChange?: (mode: "auto" | "instant" | "thinking") => void;
   plan?: string;
+  connectedApps?: ConnectedApp[];
+  mentionedApps?: ConnectedApp[];
+  onMentionApp?: (app: ConnectedApp) => void;
+  onRemoveMention?: (slug: string) => void;
 }) {
   return (
     <div className="bg-[rgba(247,247,247,0.85)] dark:bg-[rgba(19,19,19,0.7)] backdrop-blur-lg">
@@ -60,6 +71,10 @@ export function InputBar({
         mode={mode}
         onModeChange={onModeChange}
         plan={plan}
+        connectedApps={connectedApps}
+        mentionedApps={mentionedApps}
+        onMentionApp={onMentionApp}
+        onRemoveMention={onRemoveMention}
       />
     </div>
   );
@@ -85,8 +100,19 @@ export function ChatView({
     plan,
     rateLimit,
     rateLimitExceeded,
+    mentionedApps,
+    addMentionedApp,
+    removeMentionedApp,
+    clearMentionedApps,
   } = useChatState();
   const { track } = useOpenPanel();
+
+  const trpc = useTRPC();
+  const { data: connectedApps } = useQuery(
+    trpc.connectors.connections.queryOptions(undefined, {
+      staleTime: 5 * 60 * 1000,
+    }),
+  );
 
   const isStreaming = status === "streaming" || status === "submitted";
   const showLimitWarning =
@@ -98,12 +124,13 @@ export function ChatView({
       if (isStreaming) return;
       const text = inputValue.trim();
       setInputValue("");
+      clearMentionedApps();
       const files = rawFiles?.length
         ? await filesToUIParts(rawFiles)
         : undefined;
       sendMessage({ text: text || "Attached files", files });
     },
-    [inputValue, isStreaming, sendMessage, setInputValue],
+    [inputValue, isStreaming, sendMessage, setInputValue, clearMentionedApps],
   );
 
   return (
@@ -165,6 +192,10 @@ export function ChatView({
             mode={mode}
             onModeChange={setMode}
             plan={plan}
+            connectedApps={connectedApps}
+            mentionedApps={mentionedApps}
+            onMentionApp={addMentionedApp}
+            onRemoveMention={removeMentionedApp}
             onSuggestion={(text) => {
               track(LogEvents.AssistantSuggestionUsed.name, {
                 suggestion: text,

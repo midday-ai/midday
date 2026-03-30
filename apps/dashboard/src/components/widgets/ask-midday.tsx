@@ -2,11 +2,13 @@
 
 import { LogEvents } from "@midday/events/events";
 import { useOpenPanel } from "@openpanel/nextjs";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { flushSync } from "react-dom";
 import { useChatState } from "@/components/chat/chat-context";
 import { InputBar } from "@/components/chat/chat-view";
 import { filesToUIParts } from "@/components/chat/file-utils";
+import { useTRPC } from "@/trpc/client";
 import { ConnectorsBar } from "./connectors-bar";
 
 export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
@@ -21,8 +23,18 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
     mode,
     setMode,
     plan,
+    mentionedApps,
+    addMentionedApp,
+    removeMentionedApp,
+    clearMentionedApps,
   } = useChatState();
   const { track } = useOpenPanel();
+  const trpc = useTRPC();
+  const { data: connectedApps } = useQuery(
+    trpc.connectors.connections.queryOptions(undefined, {
+      staleTime: 5 * 60 * 1000,
+    }),
+  );
 
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -36,6 +48,7 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
         setMessages([]);
         setChatTitle(null);
       });
+      clearMentionedApps();
       const files = rawFiles?.length
         ? await filesToUIParts(rawFiles)
         : undefined;
@@ -49,6 +62,7 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
       setMessages,
       setInputValue,
       setChatTitle,
+      clearMentionedApps,
       onChatOpen,
     ],
   );
@@ -79,6 +93,10 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
           mode={mode}
           onModeChange={setMode}
           plan={plan}
+          connectedApps={connectedApps}
+          mentionedApps={mentionedApps}
+          onMentionApp={addMentionedApp}
+          onRemoveMention={removeMentionedApp}
         />
       </div>
       <ConnectorsBar />

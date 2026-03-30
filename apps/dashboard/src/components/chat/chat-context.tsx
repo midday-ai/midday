@@ -21,6 +21,12 @@ export type ChatMode = "auto" | "instant" | "thinking";
 
 export type RateLimitInfo = { limit: number; remaining: number };
 
+export type ConnectedApp = {
+  slug: string;
+  name: string;
+  logo: string | null;
+};
+
 export type ChatState = ReturnType<typeof useChat> & {
   inputValue: string;
   setInputValue: (v: string) => void;
@@ -31,6 +37,10 @@ export type ChatState = ReturnType<typeof useChat> & {
   plan: string;
   rateLimit: RateLimitInfo | null;
   rateLimitExceeded: boolean;
+  mentionedApps: ConnectedApp[];
+  addMentionedApp: (app: ConnectedApp) => void;
+  removeMentionedApp: (slug: string) => void;
+  clearMentionedApps: () => void;
 };
 
 const ChatContext = createContext<ChatState | null>(null);
@@ -51,9 +61,28 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useLocalStorage<ChatMode>("chat-mode", "auto");
   const [rateLimit, setRateLimit] = useState<RateLimitInfo | null>(null);
   const [rateLimitExceeded, setRateLimitExceeded] = useState(false);
+  const [mentionedApps, setMentionedApps] = useState<ConnectedApp[]>([]);
 
   const modeRef = useRef(mode);
   modeRef.current = mode;
+
+  const mentionedAppsRef = useRef(mentionedApps);
+  mentionedAppsRef.current = mentionedApps;
+
+  const addMentionedApp = useCallback((app: ConnectedApp) => {
+    setMentionedApps((prev) => {
+      if (prev.some((a) => a.slug === app.slug)) return prev;
+      return [...prev, app];
+    });
+  }, []);
+
+  const removeMentionedApp = useCallback((slug: string) => {
+    setMentionedApps((prev) => prev.filter((a) => a.slug !== slug));
+  }, []);
+
+  const clearMentionedApps = useCallback(() => {
+    setMentionedApps([]);
+  }, []);
 
   const chatTransport = useMemo(
     () =>
@@ -70,6 +99,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         },
         body: () => ({
           mode: modeRef.current,
+          mentionedApps: mentionedAppsRef.current.map((a) => ({
+            slug: a.slug,
+            name: a.name,
+          })),
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC",
           localTime: new Date().toISOString(),
         }),
@@ -120,6 +153,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         plan,
         rateLimit,
         rateLimitExceeded,
+        mentionedApps,
+        addMentionedApp,
+        removeMentionedApp,
+        clearMentionedApps,
       }}
     >
       {children}

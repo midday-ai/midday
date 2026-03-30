@@ -1,5 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import { type ChatMode, effectiveMode, resolveModel } from "@api/chat/modes";
+import type { MentionedApp } from "@api/chat/prompt";
 import { buildSystemPrompt } from "@api/chat/prompt";
 import {
   buildPrepareStep,
@@ -13,7 +14,7 @@ import {
   decodeDataUrl,
   writeChatTitle,
 } from "@api/chat/utils";
-import { composio } from "@api/composio/client";
+import { getComposioTools } from "@api/composio/client";
 import type { McpContext } from "@api/mcp/types";
 import type { Context } from "@api/rest/types";
 import { getGeoContext } from "@api/utils/geo";
@@ -86,6 +87,9 @@ app.post("/", async (c) => {
       timeFormat: user?.timeFormat ?? null,
     };
 
+    const mentionedApps =
+      (body.mentionedApps as MentionedApp[] | undefined) ?? [];
+
     const systemPrompt = buildSystemPrompt({
       fullName: user?.fullName ?? null,
       locale: user?.locale || geo.locale || "en",
@@ -96,22 +100,11 @@ app.post("/", async (c) => {
       teamName: user?.team?.name ?? null,
       countryCode: user?.team?.countryCode ?? geo.country,
       localTime: clientLocalTime,
+      mentionedApps,
     });
 
     const executionClientPromise = createExecutionClient(mcpCtx);
-
-    const composioToolsPromise = process.env.COMPOSIO_API_KEY
-      ? composio
-          .create(teamId!, {
-            manageConnections: false,
-            workbench: { enable: false },
-          })
-          .then((s) => s.tools())
-          .catch((err) => {
-            logger.warn("[chat] Composio tools unavailable:", { error: err });
-            return {} as Record<string, never>;
-          })
-      : Promise.resolve({} as Record<string, never>);
+    const composioToolsPromise = getComposioTools(teamId!);
 
     const [, modelMessages, resolvedClient, composioMetaTools] =
       await Promise.all([

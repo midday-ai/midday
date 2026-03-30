@@ -1,5 +1,10 @@
 import { getDateContext } from "@api/mcp/utils";
 
+export interface MentionedApp {
+  slug: string;
+  name: string;
+}
+
 export interface UserContext {
   fullName: string | null;
   locale: string;
@@ -10,6 +15,7 @@ export interface UserContext {
   teamName: string | null;
   countryCode: string | null;
   localTime: string | null;
+  mentionedApps?: MentionedApp[];
 }
 
 export function buildSystemPrompt(ctx: UserContext): string {
@@ -17,7 +23,8 @@ export function buildSystemPrompt(ctx: UserContext): string {
   const timeLabel = ctx.timeFormat === 12 ? "12-hour (AM/PM)" : "24-hour";
   const currentTime = ctx.localTime ?? new Date().toISOString();
 
-  return `You are Midday's AI assistant. You help SMB owners manage their business — finances, invoicing, time tracking, and connected tools.
+  return (
+    `You are Midday's AI assistant. You help SMB owners manage their business — finances, invoicing, time tracking, and connected tools.
 
 ## User context
 - Name: ${ctx.fullName ?? "unknown"}
@@ -136,5 +143,13 @@ You CANNOT: send emails (other than invoice send/remind), connect bank accounts,
   - Support: \`[Contact support](#navigate:/account/support)\`
 - Format currency amounts using ${ctx.baseCurrency} and the user's locale conventions (e.g. "$1,234.56" for en-US, "1.234,56 €" for de-DE, "1 234,56 kr" for sv-SE).
 - Format dates using the user's preferred date format${ctx.dateFormat ? ` ("${ctx.dateFormat}")` : ""} and times using ${timeLabel} format.
-- Use bullet points only for short non-tabular summaries.`;
+- Use bullet points only for short non-tabular summaries.` +
+    buildMentionedAppsSection(ctx.mentionedApps)
+  );
+}
+
+function buildMentionedAppsSection(apps?: MentionedApp[]): string {
+  if (!apps?.length) return "";
+  const names = apps.map((a) => a.name).join(", ");
+  return `\n\n## Targeted apps\nThe user has specifically mentioned these connected apps: ${names}. Prioritize using COMPOSIO_SEARCH_TOOLS and COMPOSIO_MULTI_EXECUTE_TOOL to interact with these services. If the user's message relates to any of these apps, use the corresponding connected-app tools rather than asking if they want to use them.`;
 }

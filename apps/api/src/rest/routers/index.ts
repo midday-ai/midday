@@ -3,7 +3,7 @@ import { protectedMiddleware } from "../middleware";
 import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
 import { chatRouter } from "./chat";
-import { connectorsMetadataRouter } from "./connectors-metadata";
+import { connectorsCatalogRouter } from "./connectors-catalog";
 import { customersRouter } from "./customers";
 import { desktopRouter } from "./desktop";
 import { documentsRouter } from "./documents";
@@ -36,7 +36,7 @@ routers.route("/apps", appsRouter);
 routers.route("/invoice-payments", invoicePaymentsRouter);
 routers.route("/desktop", desktopRouter);
 routers.route("/mcp", mcpRouter);
-routers.route("/connectors/metadata", connectorsMetadataRouter);
+routers.route("/connectors/catalog", connectorsCatalogRouter);
 
 // Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);

@@ -1,6 +1,10 @@
+import { getCatalog } from "@api/composio/catalog";
 import {
+  buildConnectionMap,
   composio,
   composioFetch,
+  extractActiveConnections,
+  getTeamToolkits,
   type ToolkitDetail,
   type ToolsResponse,
 } from "@api/composio/client";
@@ -11,33 +15,28 @@ import { z } from "zod";
 
 export const connectorsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx: { teamId } }) => {
-    const session = await composio.create(teamId!);
-    const { items } = await session.toolkits({
-      toolkits: [...CURATED_TOOLKIT_SLUGS],
-      limit: 100,
-    });
+    const [catalog, toolkits] = await Promise.all([
+      getCatalog(),
+      getTeamToolkits(teamId!),
+    ]);
 
-    return items
-      .filter((t: { slug: string; isNoAuth?: boolean }) => !t.isNoAuth)
-      .map(
-        (t: {
-          slug: string;
-          name: string;
-          logo?: string;
-          description?: string;
-          connection?: {
-            isActive?: boolean;
-            connectedAccount?: { id?: string };
-          };
-        }) => ({
-          slug: t.slug,
-          name: t.name,
-          logo: t.logo ?? null,
-          description: t.description ?? null,
-          isConnected: t.connection?.isActive ?? false,
-          connectedAccountId: t.connection?.connectedAccount?.id ?? null,
-        }),
-      );
+    const connectionMap = buildConnectionMap(toolkits);
+
+    return catalog
+      .filter((c) => connectionMap.has(c.slug))
+      .map((c) => {
+        const conn = connectionMap.get(c.slug)!;
+        return {
+          ...c,
+          isConnected: conn.isConnected,
+          connectedAccountId: conn.connectedAccountId,
+        };
+      });
+  }),
+
+  connections: protectedProcedure.query(async ({ ctx: { teamId } }) => {
+    const toolkits = await getTeamToolkits(teamId!);
+    return extractActiveConnections(toolkits);
   }),
 
   detail: protectedProcedure
@@ -77,25 +76,23 @@ export const connectorsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx: { teamId }, input }) => {
-      const { toolkit, callbackUrl } = input;
-
       if (
         !CURATED_TOOLKIT_SLUGS.includes(
-          toolkit as (typeof CURATED_TOOLKIT_SLUGS)[number],
+          input.toolkit as (typeof CURATED_TOOLKIT_SLUGS)[number],
         )
       ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: `Toolkit "${toolkit}" is not available`,
+          message: `Toolkit "${input.toolkit}" is not available`,
         });
       }
 
       const session = await composio.create(teamId!);
-      const connectionRequest = await session.authorize(toolkit, {
-        callbackUrl,
+      const request = await session.authorize(input.toolkit, {
+        callbackUrl: input.callbackUrl,
       });
 
-      return { redirectUrl: connectionRequest.redirectUrl };
+      return { redirectUrl: request.redirectUrl };
     }),
 
   disconnect: protectedProcedure

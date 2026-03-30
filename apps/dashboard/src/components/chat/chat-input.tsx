@@ -14,9 +14,11 @@ import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useOpenPanel } from "@openpanel/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ChatMode } from "./chat-context";
+import { ConnectorsModal } from "@/components/modals/connectors-modal";
+import type { ChatMode, ConnectedApp } from "./chat-context";
 
 const MCP_CLIENTS = [
   { id: "claude-mcp", name: "Claude", Logo: ClaudeMcpLogo },
@@ -107,7 +109,124 @@ export type ChatInputProps = {
   mode?: ChatMode;
   onModeChange?: (mode: ChatMode) => void;
   plan?: string;
+  connectedApps?: ConnectedApp[];
+  mentionedApps?: ConnectedApp[];
+  onMentionApp?: (app: ConnectedApp) => void;
+  onRemoveMention?: (slug: string) => void;
 };
+
+function AppLogo({
+  src,
+  name,
+  size = 14,
+}: {
+  src: string | null;
+  name: string;
+  size?: number;
+}) {
+  if (!src) {
+    return (
+      <span
+        className="bg-muted flex items-center justify-center text-[8px] font-medium rounded-sm shrink-0"
+        style={{ width: size, height: size }}
+      >
+        {name.charAt(0).toUpperCase()}
+      </span>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={name}
+      width={size}
+      height={size}
+      className="rounded-sm shrink-0"
+      unoptimized
+    />
+  );
+}
+
+function createMentionSpan(app: {
+  slug: string;
+  name: string;
+  logo: string | null;
+}): HTMLSpanElement {
+  const span = document.createElement("span");
+  span.contentEditable = "false";
+  span.dataset.mentionSlug = app.slug;
+  span.dataset.mentionName = app.name;
+  span.className =
+    "inline-flex items-center gap-1 border border-border px-1 text-[11px] text-muted-foreground align-middle mx-0.5 select-none";
+  span.style.lineHeight = "16px";
+  span.style.verticalAlign = "middle";
+
+  if (app.logo) {
+    const img = document.createElement("img");
+    img.src = app.logo;
+    img.alt = app.name;
+    img.width = 12;
+    img.height = 12;
+    img.className = "rounded-sm shrink-0";
+    span.appendChild(img);
+  } else {
+    const initial = document.createElement("span");
+    initial.className =
+      "bg-muted inline-flex items-center justify-center text-[7px] font-medium rounded-sm shrink-0";
+    initial.style.width = "12px";
+    initial.style.height = "12px";
+    initial.textContent = app.name.charAt(0).toUpperCase();
+    span.appendChild(initial);
+  }
+
+  const nameEl = document.createElement("span");
+  nameEl.textContent = app.name;
+  span.appendChild(nameEl);
+
+  return span;
+}
+
+function extractTextValue(el: HTMLElement): string {
+  let text = "";
+  for (const node of Array.from(el.childNodes)) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += node.textContent ?? "";
+    } else if (node instanceof HTMLBRElement) {
+      text += "\n";
+    } else if (node instanceof HTMLElement) {
+      if (node.dataset.mentionSlug) {
+        text += `@${node.dataset.mentionName ?? ""}`;
+      } else {
+        if (node.tagName === "DIV" && text.length > 0 && !text.endsWith("\n")) {
+          text += "\n";
+        }
+        text += extractTextValue(node);
+      }
+    }
+  }
+  return text;
+}
+
+function getMentionSlugsFromDOM(el: HTMLElement): string[] {
+  return Array.from(el.querySelectorAll<HTMLElement>("[data-mention-slug]"))
+    .map((span) => span.dataset.mentionSlug!)
+    .filter(Boolean);
+}
+
+function getTextBeforeCursorInEditable(el: HTMLElement): string {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return "";
+
+  const range = sel.getRangeAt(0);
+  const preRange = document.createRange();
+  preRange.selectNodeContents(el);
+  preRange.setEnd(range.startContainer, range.startOffset);
+
+  const fragment = preRange.cloneContents();
+  const temp = document.createElement("div");
+  temp.appendChild(fragment);
+  return extractTextValue(temp);
+}
 
 function AttachmentPreview({
   files,
@@ -161,13 +280,28 @@ export function ChatInput({
   mode = "auto",
   onModeChange,
   plan,
+  connectedApps,
+  mentionedApps,
+  onMentionApp,
+  onRemoveMention,
 }: ChatInputProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editableRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const appsPanelRef = useRef<HTMLDivElement>(null);
+  const extractedValueRef = useRef(value);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [suggestions] = useState(pickSuggestions);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mcpOpen, setMcpOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false);
+  const [showAppsPanel, setShowAppsPanel] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [connectorsModalOpen, setConnectorsModalOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [, setParams] = useQueryStates({ "mcp-app": parseAsString });
   const { track } = useOpenPanel();
@@ -176,20 +310,43 @@ export function ChatInput({
   const activeMode =
     MODE_OPTIONS.find((m) => m.id === mode) ?? MODE_OPTIONS[0]!;
 
-  const adjustHeight = useCallback(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    textarea.style.height = "auto";
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
-  }, []);
+  const mentionedSlugs = new Set(mentionedApps?.map((a) => a.slug));
+  const availableApps = connectedApps?.filter(
+    (a) => !mentionedSlugs.has(a.slug),
+  );
+
+  const filteredApps =
+    mentionQuery != null
+      ? availableApps?.filter((a) =>
+          a.name.toLowerCase().startsWith(mentionQuery.toLowerCase()),
+        )
+      : availableApps;
 
   useEffect(() => {
-    adjustHeight();
-  }, [value, adjustHeight]);
+    const el = editableRef.current;
+    if (!el) return;
+
+    if (value !== extractedValueRef.current) {
+      if (value === "") {
+        el.innerHTML = "";
+      } else {
+        el.textContent = value;
+        const sel = window.getSelection();
+        if (sel) {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      }
+      extractedValueRef.current = value;
+    }
+  }, [value]);
 
   useEffect(() => {
     if (autoFocus) {
-      textareaRef.current?.focus();
+      editableRef.current?.focus();
     }
   }, [autoFocus]);
 
@@ -208,6 +365,22 @@ export function ChatInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showSuggestions]);
 
+  useEffect(() => {
+    if (!showAppsPanel) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        appsPanelRef.current &&
+        !appsPanelRef.current.contains(e.target as Node) &&
+        !(e.target as Element).closest("[data-apps-toggle]")
+      ) {
+        setShowAppsPanel(false);
+        setMentionQuery(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showAppsPanel]);
+
   const addFiles = useCallback(
     (incoming: File[]) => {
       const valid = incoming.filter((f) => f.size <= MAX_FILE_SIZE);
@@ -220,7 +393,7 @@ export function ChatInput({
 
   const removeFile = useCallback((index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
-    textareaRef.current?.focus();
+    editableRef.current?.focus();
   }, []);
 
   const openFilePicker = useCallback(() => {
@@ -232,10 +405,137 @@ export function ChatInput({
       if (input.files?.length) {
         addFiles(Array.from(input.files));
       }
-      textareaRef.current?.focus();
+      editableRef.current?.focus();
     };
     input.click();
   }, [addFiles]);
+
+  const closeMentionPanel = useCallback(() => {
+    setShowAppsPanel(false);
+    setMentionQuery(null);
+    setHighlightedIndex(0);
+  }, []);
+
+  const insertMention = useCallback(
+    (app: ConnectedApp) => {
+      onMentionApp?.(app);
+
+      const el = editableRef.current;
+      if (!el) {
+        closeMentionPanel();
+        return;
+      }
+
+      const sel = window.getSelection();
+      const mentionSpan = createMentionSpan(app);
+      const spaceNode = document.createTextNode(" ");
+
+      if (mentionQuery != null && sel && sel.rangeCount > 0) {
+        const focusNode = sel.focusNode;
+        const focusOffset = sel.focusOffset;
+
+        if (focusNode && focusNode.nodeType === Node.TEXT_NODE) {
+          const text = focusNode.textContent ?? "";
+          const beforeCursor = text.slice(0, focusOffset);
+          const atIdx = beforeCursor.lastIndexOf("@");
+
+          if (atIdx !== -1) {
+            const beforeAt = text.slice(0, atIdx);
+            const afterCursor = text.slice(focusOffset);
+            const parent = focusNode.parentNode!;
+
+            if (beforeAt) {
+              parent.insertBefore(document.createTextNode(beforeAt), focusNode);
+            }
+            parent.insertBefore(mentionSpan, focusNode);
+            parent.insertBefore(spaceNode, focusNode);
+            if (afterCursor) {
+              parent.insertBefore(
+                document.createTextNode(afterCursor),
+                focusNode,
+              );
+            }
+            parent.removeChild(focusNode);
+          }
+        }
+      } else {
+        el.appendChild(mentionSpan);
+        el.appendChild(spaceNode);
+      }
+
+      const range = document.createRange();
+      range.setStartAfter(spaceNode);
+      range.collapse(true);
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+
+      const newText = extractTextValue(el);
+      extractedValueRef.current = newText;
+      onChange(newText);
+
+      closeMentionPanel();
+      el.focus();
+    },
+    [onMentionApp, mentionQuery, onChange, closeMentionPanel],
+  );
+
+  const handleInput = useCallback(() => {
+    const el = editableRef.current;
+    if (!el) return;
+
+    let text = extractTextValue(el);
+
+    if (!text.trim() && getMentionSlugsFromDOM(el).length === 0) {
+      text = "";
+      if (el.innerHTML !== "") {
+        el.innerHTML = "";
+      }
+    }
+
+    extractedValueRef.current = text;
+    onChange(text);
+
+    if (mentionedApps && onRemoveMention) {
+      const domSlugs = new Set(getMentionSlugsFromDOM(el));
+      for (const app of mentionedApps) {
+        if (!domSlugs.has(app.slug)) {
+          onRemoveMention(app.slug);
+        }
+      }
+    }
+
+    const textBeforeCursor = getTextBeforeCursorInEditable(el);
+    const atIndex = textBeforeCursor.lastIndexOf("@");
+
+    if (
+      atIndex !== -1 &&
+      (atIndex === 0 || /\s/.test(textBeforeCursor[atIndex - 1]!))
+    ) {
+      const query = textBeforeCursor.slice(atIndex + 1);
+      if (!/\s/.test(query)) {
+        setMentionQuery(query);
+        setShowAppsPanel(true);
+        setHighlightedIndex(0);
+        return;
+      }
+    }
+
+    if (mentionQuery != null) {
+      closeMentionPanel();
+    }
+  }, [
+    onChange,
+    mentionedApps,
+    onRemoveMention,
+    mentionQuery,
+    closeMentionPanel,
+  ]);
+
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+  }, []);
 
   const handleSubmit = useCallback(() => {
     if (isStreaming) {
@@ -247,12 +547,41 @@ export function ChatInput({
     setFiles([]);
   }, [value, files, isStreaming, onSubmit, onStop]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (showAppsPanel && filteredApps && filteredApps.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightedIndex((i) => (i + 1) % filteredApps.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightedIndex(
+          (i) => (i - 1 + filteredApps.length) % filteredApps.length,
+        );
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        const app = filteredApps[highlightedIndex];
+        if (app) insertMention(app);
+        return;
+      }
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
+    if (e.key === "Enter" && e.shiftKey) {
+      e.preventDefault();
+      document.execCommand("insertLineBreak");
+    }
     if (e.key === "Escape") {
+      if (showAppsPanel) {
+        closeMentionPanel();
+        return;
+      }
       if (showSuggestions) {
         setShowSuggestions(false);
         return;
@@ -261,7 +590,7 @@ export function ChatInput({
         setMcpOpen(false);
         return;
       }
-      textareaRef.current?.blur();
+      editableRef.current?.blur();
       onEscape?.();
     }
   };
@@ -315,19 +644,85 @@ export function ChatInput({
         </div>
       )}
 
+      {showAppsPanel && (
+        <div
+          ref={appsPanelRef}
+          className={cn(
+            "absolute left-0 right-0 bg-[rgba(247,247,247,0.96)] dark:bg-[rgba(19,19,19,0.98)] backdrop-blur-lg max-h-[220px] overflow-y-auto z-30",
+            menuPosition === "above" ? "bottom-full mb-1" : "top-full mt-1",
+          )}
+        >
+          <div className="p-1">
+            <p className="px-2 py-1 text-[10px] text-[#878787]">
+              Connected apps
+            </p>
+            {!connectedApps || connectedApps.length === 0 ? (
+              <div className="px-2 py-3 text-center">
+                <p className="text-xs text-[#878787] mb-2">No connected apps</p>
+                <button
+                  type="button"
+                  className="text-xs text-foreground hover:underline"
+                  onClick={() => {
+                    closeMentionPanel();
+                    setConnectorsModalOpen(true);
+                  }}
+                >
+                  Connect apps
+                </button>
+              </div>
+            ) : filteredApps && filteredApps.length > 0 ? (
+              filteredApps.map((app, i) => (
+                <button
+                  key={app.slug}
+                  type="button"
+                  className={cn(
+                    "flex items-center gap-2 w-full px-2.5 py-2.5 text-xs text-[#666] transition-colors",
+                    i === highlightedIndex
+                      ? "bg-black/5 dark:bg-white/5"
+                      : "hover:bg-black/5 dark:hover:bg-white/5",
+                  )}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => insertMention(app)}
+                  onMouseEnter={() => setHighlightedIndex(i)}
+                >
+                  <AppLogo src={app.logo} name={app.name} />
+                  <span>{app.name}</span>
+                </button>
+              ))
+            ) : (
+              <p className="px-2.5 py-2.5 text-xs text-[#878787]">
+                {mentionQuery
+                  ? "No matching apps"
+                  : "All connected apps are mentioned"}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {files.length > 0 && (
         <AttachmentPreview files={files} onRemove={removeFile} />
       )}
 
-      <textarea
-        ref={textareaRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        rows={1}
-        className="w-full resize-none bg-transparent px-4 pt-4 pb-2.5 text-sm outline-none placeholder:text-[#878787]/60 min-h-[52px] max-h-[150px]"
-      />
+      <div className="relative px-4 pt-4 pb-2.5 min-h-[52px]">
+        <div
+          ref={editableRef}
+          contentEditable={mounted}
+          suppressContentEditableWarning
+          role="textbox"
+          aria-multiline={true}
+          tabIndex={0}
+          onInput={handleInput}
+          onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
+          className="w-full text-sm leading-[22px] outline-none max-h-[150px] overflow-y-auto whitespace-pre-wrap break-words"
+        />
+        {!value.trim() && (
+          <div className="absolute top-4 left-4 text-sm leading-[22px] text-[#878787]/60 pointer-events-none">
+            {placeholder}
+          </div>
+        )}
+      </div>
 
       <div className="flex items-center justify-between px-3 pb-2.5">
         <div className="flex items-center gap-2">
@@ -349,6 +744,7 @@ export function ChatInput({
               setShowSuggestions(!showSuggestions);
               setMcpOpen(false);
               setModeOpen(false);
+              closeMentionPanel();
             }}
             className="flex items-center h-6 cursor-pointer"
           >
@@ -363,11 +759,38 @@ export function ChatInput({
             />
           </button>
 
+          <button
+            type="button"
+            data-apps-toggle
+            onClick={() => {
+              const next = !showAppsPanel;
+              setShowAppsPanel(next);
+              if (next) {
+                setMentionQuery(null);
+                setHighlightedIndex(0);
+                setShowSuggestions(false);
+                setMcpOpen(false);
+                setModeOpen(false);
+              }
+            }}
+            className={cn(
+              "flex items-center h-6 cursor-pointer text-sm font-medium transition-colors",
+              showAppsPanel
+                ? "text-foreground"
+                : "text-[#878787]/60 hover:text-foreground",
+            )}
+          >
+            @
+          </button>
+
           <Popover
             open={mcpOpen}
             onOpenChange={(open) => {
               setMcpOpen(open);
-              if (open) setShowSuggestions(false);
+              if (open) {
+                setShowSuggestions(false);
+                closeMentionPanel();
+              }
             }}
           >
             <PopoverTrigger asChild>
@@ -424,6 +847,7 @@ export function ChatInput({
                 if (open) {
                   setShowSuggestions(false);
                   setMcpOpen(false);
+                  closeMentionPanel();
                 }
               }}
             >
@@ -503,6 +927,11 @@ export function ChatInput({
           )}
         </button>
       </div>
+
+      <ConnectorsModal
+        open={connectorsModalOpen}
+        onOpenChange={setConnectorsModalOpen}
+      />
     </div>
   );
 }
