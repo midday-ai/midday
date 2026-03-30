@@ -59,17 +59,19 @@ export function AskMidday({ onChatOpen }: { onChatOpen: () => void }) {
 
   return (
     <div className="pb-6 w-full">
-      <InputBar
-        inputValue={inputValue}
-        isStreaming={isStreaming}
-        onChange={setInputValue}
-        onSubmit={handleSubmit}
-        onStop={stop}
-        onSuggestion={handleSuggestion}
-        mode={mode}
-        onModeChange={setMode}
-        plan={plan}
-      />
+      <div className="relative z-10">
+        <InputBar
+          inputValue={inputValue}
+          isStreaming={isStreaming}
+          onChange={setInputValue}
+          onSubmit={handleSubmit}
+          onStop={stop}
+          onSuggestion={handleSuggestion}
+          mode={mode}
+          onModeChange={setMode}
+          plan={plan}
+        />
+      </div>
       <ConnectorsBar />
     </div>
   );

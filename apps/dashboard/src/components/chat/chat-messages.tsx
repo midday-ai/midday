@@ -11,10 +11,12 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import {
-  type DynamicToolPart,
   extractInvoiceData,
   HIDDEN_TOOLS,
   INVOICE_TOOLS,
+  isToolPart,
+  type NormalizedToolPart,
+  normalizeToolPart,
   type SourceUrlPart,
 } from "./chat-utils";
 import { Reasoning, ReasoningContent, ReasoningTrigger } from "./reasoning";
@@ -102,9 +104,9 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
           .map((p) => p.text)
           .join("");
 
-        const toolParts = message.parts.filter(
-          (p) => p.type === "dynamic-tool",
-        ) as DynamicToolPart[];
+        const toolParts: NormalizedToolPart[] = message.parts
+          .filter((p) => isToolPart(p as { type: string }))
+          .map((p) => normalizeToolPart(p as Record<string, unknown>));
 
         const visibleTools = toolParts.filter(
           (p) => !HIDDEN_TOOLS.has(p.toolName),

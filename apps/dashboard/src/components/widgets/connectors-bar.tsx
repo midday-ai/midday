@@ -10,8 +10,10 @@ const DISPLAY_COUNT = 7;
 
 type DisplayItem = { id: string; name: string; logo: string };
 
+const activeConnectors = connectorApps.filter((c) => c.active);
+
 function pickRandom(): DisplayItem[] {
-  const copy = [...connectorApps];
+  const copy = [...activeConnectors];
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [copy[i], copy[j]] = [copy[j]!, copy[i]!];

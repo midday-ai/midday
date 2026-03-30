@@ -295,10 +295,12 @@ const officialApps: WebsiteApp[] = appStoreApps
   })
   .filter((app): app is WebsiteApp => app !== null);
 
-const connectorApps: WebsiteApp[] = connectorAppDefs.map((c) => ({
-  ...c,
-  logoUrl: getConnectorLogoUrl(c.id),
-}));
+const connectorApps: WebsiteApp[] = connectorAppDefs
+  .filter((c) => c.active)
+  .map((c) => ({
+    ...c,
+    logoUrl: getConnectorLogoUrl(c.id),
+  }));
 
 export const apps: WebsiteApp[] = [...officialApps, ...connectorApps];
 

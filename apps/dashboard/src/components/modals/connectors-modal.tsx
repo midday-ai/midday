@@ -336,7 +336,13 @@ function ConnectorDetail({
 
 function GridSkeleton() {
   return (
-    <div className="h-full">
+    <div className="flex flex-col h-full">
+      <Input
+        placeholder={`Search ${connectorApps.filter((c) => c.active).length} connectors...`}
+        disabled
+        className="shrink-0 mb-3"
+      />
+
       <div className="grid grid-cols-2 gap-2">
         {Array.from({ length: 12 }).map((_, i) => (
           <div
@@ -506,7 +512,7 @@ function ConnectorsContent({
   return (
     <div className="flex flex-col h-full">
       <Input
-        placeholder="Search connectors..."
+        placeholder={`Search ${connectorApps.filter((c) => c.active).length} connectors...`}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         autoFocus

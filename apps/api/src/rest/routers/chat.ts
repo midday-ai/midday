@@ -39,7 +39,7 @@ const app = new OpenAPIHono<ChatContext>();
 app.use(
   rateLimiter<ChatContext>({
     windowMs: 10 * 60 * 1000,
-    limit: Number(process.env.CHAT_RATE_LIMIT) || 50,
+    limit: Number(process.env.CHAT_RATE_LIMIT) || 100,
     keyGenerator: (c) => c.get("session")?.user?.id ?? "unknown",
     handler: (c) =>
       c.json(
@@ -144,6 +144,11 @@ app.post("/", async (c) => {
         const titlePromise = writeChatTitle(writer, uiMessages);
 
         const composioToolNames = Object.keys(composioMetaTools);
+        if (composioToolNames.length > 0) {
+          logger.info("[chat] Composio tools available:", {
+            tools: composioToolNames,
+          });
+        }
 
         const agent = new ToolLoopAgent({
           model: resolved.model,
@@ -169,7 +174,7 @@ app.post("/", async (c) => {
             },
           }),
           prepareStep: buildPrepareStep({
-            maxTools: 10,
+            maxTools: 25,
             alwaysActive: ["web_search", ...composioToolNames],
           }),
           stopWhen: stepCountIs(10),

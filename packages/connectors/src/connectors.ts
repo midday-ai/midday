@@ -127,6 +127,21 @@ export const connectorApps: ConnectorApp[] = [
       "Access meeting details",
     ],
   },
+  {
+    id: "connector-zoom",
+    name: "Zoom",
+    slug: "connector-zoom",
+    category: "connector",
+    active: true,
+    short_description: "Manage meetings and webinars in Zoom via AI",
+    description:
+      "Connect Zoom to let the AI assistant create meetings, manage participants, and access meeting recordings and transcripts.",
+    features: [
+      "Create and schedule meetings",
+      "Manage participants and registrations",
+      "Access recordings and transcripts",
+    ],
+  },
 
   // Documents, Knowledge & Storage
   {
@@ -405,6 +420,37 @@ export const connectorApps: ConnectorApp[] = [
       "Set due dates and priorities",
     ],
   },
+  {
+    id: "connector-basecamp",
+    name: "Basecamp",
+    slug: "connector-basecamp",
+    category: "connector",
+    active: true,
+    short_description:
+      "Manage projects and team collaboration in Basecamp via AI",
+    description:
+      "Connect Basecamp to let the AI assistant manage projects, to-dos, and team communication in one place.",
+    features: [
+      "Manage projects and to-dos",
+      "Access message boards",
+      "Track schedules and milestones",
+    ],
+  },
+  {
+    id: "connector-todoist",
+    name: "Todoist",
+    slug: "connector-todoist",
+    category: "connector",
+    active: true,
+    short_description: "Manage tasks and projects in Todoist via AI",
+    description:
+      "Connect Todoist to let the AI assistant create tasks, organize projects, and manage your to-do lists.",
+    features: [
+      "Create and complete tasks",
+      "Organize projects and labels",
+      "Set priorities and due dates",
+    ],
+  },
 
   // CRM & Sales
   {
@@ -495,6 +541,51 @@ export const connectorApps: ConnectorApp[] = [
       "Search and enrich leads",
       "Manage outreach sequences",
       "Access contact data",
+    ],
+  },
+  {
+    id: "connector-close",
+    name: "Close",
+    slug: "connector-close",
+    category: "connector",
+    active: true,
+    short_description: "Manage sales pipeline and leads in Close CRM via AI",
+    description:
+      "Connect Close to let the AI assistant manage leads, track deals, and automate sales workflows in your CRM.",
+    features: [
+      "Manage leads and opportunities",
+      "Track deal pipeline",
+      "Log calls and emails",
+    ],
+  },
+  {
+    id: "connector-capsulecrm",
+    name: "Capsule",
+    slug: "connector-capsulecrm",
+    category: "connector",
+    active: true,
+    short_description: "Manage contacts and sales in Capsule CRM via AI",
+    description:
+      "Connect Capsule to let the AI assistant manage contacts, track sales opportunities, and organize your customer relationships.",
+    features: [
+      "Manage contacts and organizations",
+      "Track sales opportunities",
+      "View tasks and activities",
+    ],
+  },
+  {
+    id: "connector-affinity",
+    name: "Affinity",
+    slug: "connector-affinity",
+    category: "connector",
+    active: true,
+    short_description: "Track relationships and deals in Affinity via AI",
+    description:
+      "Connect Affinity to let the AI assistant track relationships, manage deal flow, and access relationship intelligence data.",
+    features: [
+      "Track relationships and interactions",
+      "Manage deal pipeline",
+      "Access relationship intelligence",
     ],
   },
 
@@ -637,11 +728,27 @@ export const connectorApps: ConnectorApp[] = [
     ],
   },
   {
+    id: "connector-zoho-books",
+    name: "Zoho Books",
+    slug: "connector-zoho-books",
+    category: "connector",
+    active: true,
+    short_description: "Access Zoho Books accounting data via the AI assistant",
+    description:
+      "Connect Zoho Books to let the AI assistant manage invoices, expenses, payments, and financial reports alongside your Midday data.",
+    features: [
+      "Manage invoices and expenses",
+      "Track payments and bank reconciliation",
+      "Access financial reports",
+      "Manage customers and vendors",
+    ],
+  },
+  {
     id: "connector-xero",
     name: "Xero",
     slug: "connector-xero",
     category: "connector",
-    active: true,
+    active: false,
     short_description: "Access Xero accounting data via the AI assistant",
     description:
       "Connect Xero to let the AI assistant query invoices, bank transactions, and financial reports alongside your native Midday integration.",
@@ -649,6 +756,115 @@ export const connectorApps: ConnectorApp[] = [
       "Query invoices and transactions",
       "Access financial reports",
       "Manage contacts and accounts",
+    ],
+  },
+  {
+    id: "connector-sage",
+    name: "Sage",
+    slug: "connector-sage",
+    category: "connector",
+    active: true,
+    short_description: "Access Sage accounting data via the AI assistant",
+    description:
+      "Connect Sage to let the AI assistant manage invoices, track expenses, and access financial reports from your Sage account.",
+    features: [
+      "Manage invoices and bills",
+      "Track expenses and payments",
+      "Access financial reports",
+    ],
+  },
+  {
+    id: "connector-wave-accounting",
+    name: "Wave",
+    slug: "connector-wave-accounting",
+    category: "connector",
+    active: true,
+    short_description: "Access Wave accounting data via the AI assistant",
+    description:
+      "Connect Wave to let the AI assistant manage invoices, track expenses, and access your free accounting data.",
+    features: [
+      "Manage invoices and receipts",
+      "Track income and expenses",
+      "Access financial reports",
+    ],
+  },
+
+  // HR & Recruiting
+  {
+    id: "connector-bamboohr",
+    name: "BambooHR",
+    slug: "connector-bamboohr",
+    category: "connector",
+    active: true,
+    short_description: "Access employee and HR data in BambooHR via AI",
+    description:
+      "Connect BambooHR to let the AI assistant access employee records, time-off requests, and HR reports.",
+    features: [
+      "Access employee directory",
+      "View time-off balances and requests",
+      "Access HR reports",
+    ],
+  },
+  {
+    id: "connector-workable",
+    name: "Workable",
+    slug: "connector-workable",
+    category: "connector",
+    active: true,
+    short_description: "Manage hiring and recruitment in Workable via AI",
+    description:
+      "Connect Workable to let the AI assistant track candidates, manage job postings, and access recruitment data.",
+    features: [
+      "Track candidates and applications",
+      "Manage job postings",
+      "Access hiring pipeline",
+    ],
+  },
+
+  // Advertising & Marketing
+  {
+    id: "connector-google-ads",
+    name: "Google Ads",
+    slug: "connector-google-ads",
+    category: "connector",
+    active: true,
+    short_description: "Access Google Ads campaigns and spend data via AI",
+    description:
+      "Connect Google Ads to let the AI assistant view campaign performance, track ad spend, and access advertising reports.",
+    features: [
+      "View campaign performance",
+      "Track ad spend and ROI",
+      "Access keyword and audience data",
+    ],
+  },
+  {
+    id: "connector-meta-ads",
+    name: "Meta Ads",
+    slug: "connector-meta-ads",
+    category: "connector",
+    active: true,
+    short_description: "Access Facebook and Instagram ad data via AI",
+    description:
+      "Connect Meta Ads to let the AI assistant view campaign performance, track ad spend across Facebook and Instagram.",
+    features: [
+      "View campaign performance",
+      "Track ad spend across platforms",
+      "Access audience insights",
+    ],
+  },
+  {
+    id: "connector-semrush",
+    name: "Semrush",
+    slug: "connector-semrush",
+    category: "connector",
+    active: true,
+    short_description: "Access SEO analytics and keyword data via AI",
+    description:
+      "Connect Semrush to let the AI assistant access keyword rankings, site audits, and competitor analysis data.",
+    features: [
+      "View keyword rankings",
+      "Access site audit data",
+      "Analyze competitor performance",
     ],
   },
 

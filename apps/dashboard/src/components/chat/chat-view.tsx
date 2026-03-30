@@ -50,7 +50,7 @@ export function InputBar({
         onSubmit={onSubmit}
         onStop={onStop}
         isStreaming={isStreaming}
-        placeholder={hasMessages ? "Ask a follow-up..." : "Ask anything"}
+        placeholder={hasMessages ? "Reply..." : "How can I help you today?"}
         autoFocus={isActive}
         onEscape={onEscape}
         onSuggestion={onSuggestion}

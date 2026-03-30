@@ -151,7 +151,7 @@ export function ChatInput({
   onSubmit,
   onStop,
   isStreaming,
-  placeholder = "Ask anything",
+  placeholder = "How can I help you today?",
   autoFocus = false,
   onEscape,
   onSuggestion,

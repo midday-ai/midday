@@ -11,6 +11,7 @@ export const CURATED_TOOLKIT_SLUGS = [
 
   // Video Conferencing
   "googlemeet",
+  "zoom",
 
   // Documents, Knowledge & Storage
   "googledrive",
@@ -33,6 +34,8 @@ export const CURATED_TOOLKIT_SLUGS = [
   "wrike",
   "shortcut",
   "googletasks",
+  "basecamp",
+  "todoist",
 
   // CRM & Sales
   "hubspot",
@@ -41,6 +44,9 @@ export const CURATED_TOOLKIT_SLUGS = [
   "attio",
   "zoho",
   "apollo",
+  "close",
+  "capsulecrm",
+  "affinity",
 
   // Design & Creative
   "figma",
@@ -56,7 +62,18 @@ export const CURATED_TOOLKIT_SLUGS = [
   "freshbooks",
   "brex",
   "quickbooks",
-  "xero",
+  "zoho_books",
+  "sage",
+  "wave_accounting",
+
+  // HR & Recruiting
+  "bamboohr",
+  "workable",
+
+  // Advertising & Marketing
+  "googleads",
+  "metaads",
+  "semrush",
 
   // Customer Support
   "intercom",
@@ -86,6 +103,8 @@ const COMPOSIO_SLUG_OVERRIDES: Record<string, string> = {
   google_sheets: "googlesheets",
   google_meet: "googlemeet",
   google_tasks: "googletasks",
+  google_ads: "googleads",
+  meta_ads: "metaads",
 };
 
 /**

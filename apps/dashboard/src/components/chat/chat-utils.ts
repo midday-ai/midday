@@ -35,6 +35,12 @@ export const TOOL_LABELS: Record<string, string> = {
   categories_list: "Fetching categories",
   search_global: "Searching",
   web_search: "Searching the web",
+  COMPOSIO_SEARCH_TOOLS: "Looking up your connections",
+  COMPOSIO_GET_TOOL_SCHEMAS: "Preparing action",
+  COMPOSIO_MANAGE_CONNECTIONS: "Checking connection",
+  COMPOSIO_MULTI_EXECUTE_TOOL: "Running action",
+  COMPOSIO_REMOTE_WORKBENCH: "Background agent working",
+  COMPOSIO_REMOTE_BASH_TOOL: "Background agent working",
 };
 
 export type DynamicToolPart = {
@@ -44,6 +50,43 @@ export type DynamicToolPart = {
   toolCallId: string;
   output?: unknown;
 };
+
+export type NormalizedToolPart = {
+  toolName: string;
+  state: string;
+  toolCallId: string;
+  output?: unknown;
+};
+
+export function isToolPart(part: { type: string }): part is {
+  type: string;
+  toolName?: string;
+  state: string;
+  toolCallId: string;
+  output?: unknown;
+} {
+  return part.type === "dynamic-tool" || part.type.startsWith("tool-");
+}
+
+export function normalizeToolPart(
+  part: Record<string, unknown>,
+): NormalizedToolPart {
+  if (part.type === "dynamic-tool") {
+    return {
+      toolName: part.toolName as string,
+      state: part.state as string,
+      toolCallId: part.toolCallId as string,
+      output: part.output,
+    };
+  }
+  const type = part.type as string;
+  return {
+    toolName: type.replace(/^tool-/, ""),
+    state: part.state as string,
+    toolCallId: part.toolCallId as string,
+    output: part.output,
+  };
+}
 
 export type SourceUrlPart = {
   type: "source-url";

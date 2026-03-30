@@ -11,10 +11,10 @@ import { TextShimmer } from "@midday/ui/text-shimmer";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import {
-  type DynamicToolPart,
   formatToolName,
   HIDDEN_TOOLS,
   ICON_SIZE,
+  type NormalizedToolPart,
   STATUS_ROW,
 } from "./chat-utils";
 
@@ -35,6 +35,7 @@ const TOOL_ICON_MAP: Record<string, (s: number) => ReactNode> = {
   search: (s) => <Icons.Search size={s} />,
   web_search: (s) => <Icons.Globle size={s} />,
   team: (s) => <Icons.Face size={s} />,
+  COMPOSIO: (s) => <Icons.AddLink size={s} className="-rotate-45" />,
 };
 
 function getToolIcon(toolName: string, size: number): ReactNode {
@@ -42,7 +43,7 @@ function getToolIcon(toolName: string, size: number): ReactNode {
   return TOOL_ICON_MAP[prefix!]?.(size) ?? <Icons.AI size={size} />;
 }
 
-export function ToolCallGroup({ parts }: { parts: DynamicToolPart[] }) {
+export function ToolCallGroup({ parts }: { parts: NormalizedToolPart[] }) {
   const [open, setOpen] = useState(false);
   const visible = parts.filter((p) => !HIDDEN_TOOLS.has(p.toolName));
   if (visible.length === 0) return null;
