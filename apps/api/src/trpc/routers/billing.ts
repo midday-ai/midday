@@ -112,10 +112,11 @@ export const billingRouter = createTRPCRouter({
         },
         embedOrigin,
         currency: currency === "EUR" ? "eur" : "usd",
-        ...(trialEligible && {
-          trialInterval: "day" as const,
-          trialIntervalCount: 14,
-        }),
+        ...(requireTrial &&
+          trialEligible && {
+            trialInterval: "day" as const,
+            trialIntervalCount: 14,
+          }),
       });
 
       return { url: checkout.url };

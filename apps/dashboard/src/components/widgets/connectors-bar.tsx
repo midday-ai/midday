@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { ConnectorsModal } from "@/components/modals/connectors-modal";
 
-const DISPLAY_COUNT = 7;
+const DISPLAY_COUNT = 3;
 
 type DisplayItem = { id: string; name: string; logo: string };
 
@@ -23,6 +23,34 @@ function pickRandom(): DisplayItem[] {
     .map((c) => ({ id: c.id, name: c.name, logo: getConnectorLogoUrl(c.id) }));
 }
 
+const container = {
+  hidden: {},
+  show: {
+    transition: {
+      delayChildren: 0.2,
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, x: 6, scale: 0.8 },
+  show: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: { duration: 0.25, ease: [0.25, 1, 0.5, 1] as const },
+  },
+};
+
+const text = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { duration: 0.3, ease: "easeOut" as const },
+  },
+};
+
 export function ConnectorsBar() {
   const [open, setOpen] = useState(false);
   const [displayed, setDisplayed] = useState<DisplayItem[] | null>(null);
@@ -33,55 +61,39 @@ export function ConnectorsBar() {
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-      >
-        <button
+      <div className="flex justify-end mt-1">
+        <motion.button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex items-center justify-between w-full px-4 py-2 mt-0.5 bg-[rgba(247,247,247,0.85)] dark:bg-[rgba(19,19,19,0.7)] backdrop-blur-lg hover:bg-[rgba(240,240,240,0.95)] dark:hover:bg-[rgba(25,25,25,0.85)] transition-colors group"
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="inline-flex items-center gap-2 px-3 py-1.5 group"
         >
-          <span className="text-[12px] text-[#878787]/60 group-hover:text-[#878787] transition-colors">
-            Connect your tools to Midday
-          </span>
-
-          <div className="flex items-center">
-            <div className="flex items-center -space-x-2">
-              {displayed?.map(({ id, name, logo }, i) => (
-                <motion.div
-                  key={id}
-                  initial={{ opacity: 0, scale: 0.6 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{
-                    duration: 0.3,
-                    ease: [0.16, 1, 0.3, 1],
-                    delay: 0.05 + i * 0.05,
-                  }}
-                  className="size-[18px] overflow-hidden rounded-full border-[1.5px] border-background flex-shrink-0 bg-background"
-                >
-                  <img
-                    src={logo}
-                    alt={name}
-                    className="w-full h-full object-contain"
-                  />
-                </motion.div>
-              ))}
-            </div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.4 }}
-            >
-              <Icons.ChevronRight
-                size={16}
-                className="text-[#878787]/40 ml-1 group-hover:text-[#878787] transition-colors"
-              />
-            </motion.div>
+          <motion.span
+            variants={text}
+            className="inline-flex items-center gap-1 text-[11px] text-muted-foreground group-hover:text-foreground transition-colors"
+          >
+            Add connections
+            <Icons.ChevronRight size={11} />
+          </motion.span>
+          <div className="flex items-center -space-x-1.5">
+            {displayed?.map(({ id, name, logo }) => (
+              <motion.div
+                key={id}
+                variants={item}
+                className="size-4 overflow-hidden rounded-full border border-background flex-shrink-0 bg-background"
+              >
+                <img
+                  src={logo}
+                  alt={name}
+                  className="w-full h-full object-contain"
+                />
+              </motion.div>
+            ))}
           </div>
-        </button>
-      </motion.div>
+        </motion.button>
+      </div>
 
       <ConnectorsModal open={open} onOpenChange={setOpen} />
     </>
