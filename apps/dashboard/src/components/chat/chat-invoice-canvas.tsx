@@ -71,6 +71,7 @@ export function ChatInvoiceCanvas() {
             "w-full md:w-[650px]",
             "bg-background",
             "border-l border-border",
+            "will-change-transform",
           )}
         >
           <Suspense
