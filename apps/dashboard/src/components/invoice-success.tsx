@@ -19,7 +19,8 @@ import { OpenURL } from "./open-url";
 
 export function InvoiceSuccess() {
   const trpc = useTRPC();
-  const { invoiceId, setParams } = useInvoiceParams();
+  const { invoiceId, canvas, setParams } = useInvoiceParams();
+  const isCanvas = canvas === true;
 
   const { data: invoice } = useQuery(
     trpc.invoice.getById.queryOptions(
@@ -43,9 +44,9 @@ export function InvoiceSuccess() {
 
   return (
     <>
-      <InvoiceSheetHeader invoiceId={invoiceId!} />
+      {!isCanvas && <InvoiceSheetHeader invoiceId={invoiceId!} />}
 
-      <div className="flex flex-col justify-center h-[calc(100vh-260px)]">
+      <div className="flex flex-col justify-center h-[calc(100vh-260px)] max-w-[450px] mx-auto w-full">
         <div className="bg-[#F2F2F2] dark:bg-[#121212] p-6 relative">
           <motion.div
             initial={{ opacity: 0 }}
@@ -180,17 +181,19 @@ export function InvoiceSuccess() {
           <Button variant="secondary">View invoice</Button>
         </OpenURL>
 
-        <Button
-          onClick={() => {
-            setParams(null);
+        {!isCanvas && (
+          <Button
+            onClick={() => {
+              setParams(null);
 
-            setTimeout(() => {
-              setParams({ type: "create" });
-            }, 600);
-          }}
-        >
-          Create another
-        </Button>
+              setTimeout(() => {
+                setParams({ type: "create" });
+              }, 600);
+            }}
+          >
+            Create another
+          </Button>
+        )}
       </div>
     </>
   );

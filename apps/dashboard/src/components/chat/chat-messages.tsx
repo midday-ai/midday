@@ -11,7 +11,6 @@ import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
-import { ChatInvoiceCard } from "./chat-invoice-card";
 import {
   extractInvoiceData,
   INVOICE_TOOLS,
@@ -56,13 +55,10 @@ type AssistantMessageProps = {
   message: UIMessage;
   isStreaming: boolean;
   isLastMessage: boolean;
-  canvasOpen?: boolean;
   components: Record<
     string,
     React.FC<{ href?: string; children?: React.ReactNode }>
   >;
-  onEditInvoice: (id: string) => void;
-  onViewInvoiceDetails: (id: string) => void;
 };
 
 const AssistantMessage = memo(
@@ -70,10 +66,7 @@ const AssistantMessage = memo(
     message,
     isStreaming,
     isLastMessage,
-    canvasOpen,
     components,
-    onEditInvoice,
-    onViewInvoiceDetails,
   }: AssistantMessageProps) {
     const parsed = parseAssistantMessage(message, {
       isStreaming,
@@ -83,7 +76,6 @@ const AssistantMessage = memo(
     const {
       toolParts,
       visibleTools,
-      invoiceParts,
       textContent,
       sourceParts,
       showThinking,
@@ -98,12 +90,6 @@ const AssistantMessage = memo(
         <div className="w-full text-sm text-muted-foreground">
           {showThinking && <ThinkingIndicator />}
 
-          {visibleTools.length > 0 && (
-            <div className={textContent ? "mb-3" : undefined}>
-              <ToolCallGroup parts={toolParts} />
-            </div>
-          )}
-
           {textContent && (
             <Streamdown
               isAnimating={parsedIsLast}
@@ -116,19 +102,11 @@ const AssistantMessage = memo(
             </Streamdown>
           )}
 
-          {invoiceParts.map((part) => {
-            const data = extractInvoiceData(part.output);
-            if (!data) return null;
-            return (
-              <ChatInvoiceCard
-                key={part.toolCallId}
-                data={data}
-                compact={canvasOpen}
-                onEdit={onEditInvoice}
-                onViewDetails={onViewInvoiceDetails}
-              />
-            );
-          })}
+          {visibleTools.length > 0 && (
+            <div className={textContent ? "mt-3" : undefined}>
+              <ToolCallGroup parts={toolParts} />
+            </div>
+          )}
 
           {sourceParts.length > 0 && (
             <SourcesList sources={sourceParts.slice(0, 8)} />
@@ -139,7 +117,6 @@ const AssistantMessage = memo(
   },
   (prev, next) => {
     if (prev.isLastMessage || next.isLastMessage) return false;
-    if (prev.canvasOpen !== next.canvasOpen) return false;
     return prev.message === next.message;
   },
 );
@@ -186,14 +163,12 @@ type ChatMessagesProps = {
   messages: UIMessage[];
   status: string;
   onInvoiceUpdate?: (invoiceId: string) => void;
-  canvasOpen?: boolean;
 };
 
 export function ChatMessages({
   messages,
   status,
   onInvoiceUpdate,
-  canvasOpen,
 }: ChatMessagesProps) {
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
@@ -245,16 +220,6 @@ export function ChatMessages({
     [handleEntityLink],
   );
 
-  const onEditInvoice = useCallback(
-    (id: string) => setInvoiceParams({ type: "edit", invoiceId: id }),
-    [setInvoiceParams],
-  );
-
-  const onViewInvoiceDetails = useCallback(
-    (id: string) => setInvoiceParams({ type: "details", invoiceId: id }),
-    [setInvoiceParams],
-  );
-
   const lastEmittedRef = useRef<{ id: string | null; count: number }>({
     id: null,
     count: 0,
@@ -295,10 +260,7 @@ export function ChatMessages({
             message={message}
             isStreaming={isStreaming}
             isLastMessage={isLast}
-            canvasOpen={canvasOpen}
             components={components}
-            onEditInvoice={onEditInvoice}
-            onViewInvoiceDetails={onViewInvoiceDetails}
           />
         );
       })}

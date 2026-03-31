@@ -15,7 +15,6 @@ import {
   HIDDEN_TOOLS,
   ICON_SIZE,
   type NormalizedToolPart,
-  STATUS_ROW,
 } from "./chat-utils";
 
 const TOOL_ICON_MAP: Record<string, (s: number) => ReactNode> = {
@@ -43,6 +42,11 @@ function getToolIcon(toolName: string, size: number): ReactNode {
   return TOOL_ICON_MAP[prefix!]?.(size) ?? <Icons.AI size={size} />;
 }
 
+const boxClassName =
+  "inline-flex items-center gap-1.5 border bg-white border-[#e6e6e6] dark:border-[#1d1d1d] dark:bg-[#0c0c0c] px-2 py-1 text-[11px] leading-none text-muted-foreground/60";
+
+const iconClassName = "text-muted-foreground/40";
+
 export function ToolCallGroup({ parts }: { parts: NormalizedToolPart[] }) {
   const [open, setOpen] = useState(false);
   const visible = parts.filter((p) => !HIDDEN_TOOLS.has(p.toolName));
@@ -55,45 +59,43 @@ export function ToolCallGroup({ parts }: { parts: NormalizedToolPart[] }) {
   if (allDone) {
     if (visible.length === 1) {
       return (
-        <span className={cn(STATUS_ROW, "text-muted-foreground/50")}>
-          <Icons.Check size={ICON_SIZE} />
-          {formatToolName(visible[0]!.toolName)}
-        </span>
+        <div className={boxClassName}>
+          <span className={cn("shrink-0", iconClassName)}>
+            {getToolIcon(visible[0]!.toolName, ICON_SIZE)}
+          </span>
+          <span>{formatToolName(visible[0]!.toolName)}</span>
+        </div>
       );
     }
 
     return (
       <Collapsible open={open} onOpenChange={setOpen}>
-        <CollapsibleTrigger
-          className={cn(
-            STATUS_ROW,
-            "text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-pointer",
-          )}
-        >
-          <Icons.ChevronRight
-            size={ICON_SIZE}
-            className={cn(
-              "transition-transform duration-150",
-              open && "rotate-90",
-            )}
-          />
-          Used {visible.length} tools
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="mt-1.5 ml-0.5 flex flex-col gap-1">
+        <div className="inline-flex flex-col border bg-white border-[#e6e6e6] dark:border-[#1d1d1d] dark:bg-[#0c0c0c] overflow-hidden">
+          <CollapsibleTrigger className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-muted-foreground/60 cursor-pointer hover:bg-[#f7f7f7] dark:hover:bg-[#0f0f0f] hover:text-foreground transition-all duration-300">
+            <Icons.ChevronRight
+              size={ICON_SIZE}
+              className={cn(
+                iconClassName,
+                "transition-transform duration-150",
+                open && "rotate-90",
+              )}
+            />
+            <span>Used {visible.length} tools</span>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
             {visible.map((p) => (
-              <span
+              <div
                 key={p.toolCallId}
-                className={cn(STATUS_ROW, "text-muted-foreground/50")}
+                className="flex items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-muted-foreground/60 border-t border-[#e6e6e6] dark:border-[#1d1d1d]"
               >
-                <span className="shrink-0">
+                <span className={cn("shrink-0", iconClassName)}>
                   {getToolIcon(p.toolName, ICON_SIZE)}
                 </span>
-                {formatToolName(p.toolName)}
-              </span>
+                <span>{formatToolName(p.toolName)}</span>
+              </div>
             ))}
-          </div>
-        </CollapsibleContent>
+          </CollapsibleContent>
+        </div>
       </Collapsible>
     );
   }
@@ -105,13 +107,16 @@ export function ToolCallGroup({ parts }: { parts: NormalizedToolPart[] }) {
   if (!active) return null;
 
   return (
-    <span className={STATUS_ROW}>
-      <span className="shrink-0 text-muted-foreground/50">
+    <div className={boxClassName}>
+      <span className={cn("shrink-0", iconClassName)}>
         {getToolIcon(active.toolName, ICON_SIZE)}
       </span>
-      <TextShimmer className="text-xs font-normal" duration={0.75}>
+      <TextShimmer
+        className="text-[11px] leading-none font-normal"
+        duration={0.75}
+      >
         {formatToolName(active.toolName)}
       </TextShimmer>
-    </span>
+    </div>
   );
 }

@@ -167,7 +167,6 @@ export function ChatView({
                 messages={messages}
                 status={status}
                 onInvoiceUpdate={handleInvoiceUpdate}
-                canvasOpen={isCanvasOpen}
               />
             </div>
           </ConversationContent>
