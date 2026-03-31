@@ -3,6 +3,7 @@ import { createMCPClient } from "@ai-sdk/mcp";
 import { openai } from "@ai-sdk/openai";
 import { createMcpServer } from "@api/mcp/server";
 import type { McpContext } from "@api/mcp/types";
+import { expandScopes } from "@api/utils/scopes";
 import { logger } from "@midday/logger";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import type { PrepareStepFunction, Tool } from "ai";
@@ -52,6 +53,8 @@ export function ensureToolIndex(ctx: McpContext): Promise<ToolIndex<any>> {
         invoice_recurring_create: ["customers_list"],
         tracker_timer_start: ["tracker_projects_list"],
         tracker_entries_create: ["tracker_projects_list"],
+        tracker_entries_list: ["tracker_projects_list"],
+        tracker_projects_list: ["tracker_entries_list"],
         transactions_update: ["categories_list"],
       },
     });
@@ -127,7 +130,7 @@ export function warmToolIndex(): void {
     teamId: "warmup",
     userId: "warmup",
     userEmail: null,
-    scopes: [],
+    scopes: expandScopes(["apis.all"]) as McpContext["scopes"],
     apiUrl: process.env.MIDDAY_API_URL ?? "https://api.midday.ai",
     timezone: "UTC",
     locale: "en",

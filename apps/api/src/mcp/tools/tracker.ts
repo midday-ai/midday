@@ -69,7 +69,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "List Tracker Projects",
         description:
-          "List time tracking projects with filtering by status (in_progress/completed), customer, date range, tags (tag IDs from tags_list), and search. Returns paginated results (default 25) with project name, billable rate, estimate, total tracked hours, and customer.",
+          "List time tracking projects with filtering by status (in_progress/completed), customer, project creation date range, tags (tag IDs from tags_list), and search. The start/end parameters filter by when the project was CREATED, not by when time was logged. To query time logged in a date range, use tracker_entries_list instead. Returns paginated results (default 25) with project name, billable rate, estimate, all-time total tracked hours, and customer.",
         inputSchema: {
           ...trackerProjectsListFields,
           sortBy: z
@@ -365,7 +365,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "List Tracker Entries",
         description:
-          "List time tracking entries within a date range. Optionally filter by project ID. Returns entries grouped by date with start/stop times, duration, description, project, and assigned user. Both from and to dates are required (YYYY-MM-DD). Large ranges are automatically truncated — use narrower date ranges for complete data.",
+          "Query logged time / tracked hours within a date range. This is the primary tool for answering 'how much time was logged' questions. Optionally filter by project ID. Returns entries grouped by date with start/stop times, duration, description, project, and assigned user. meta.totalDuration contains the total seconds logged in the queried range. Both from and to dates are required (YYYY-MM-DD). Large ranges are automatically truncated — use narrower date ranges for complete data.",
         inputSchema: {
           from: z.string().describe("Start date (YYYY-MM-DD) — required"),
           to: z.string().describe("End date (YYYY-MM-DD) — required"),

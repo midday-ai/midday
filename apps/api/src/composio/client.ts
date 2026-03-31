@@ -56,7 +56,7 @@ export async function getUserToolkits(userId: string): Promise<ToolkitItem[]> {
       const session = await composio.create(userId);
       const { items } = await session.toolkits({
         toolkits: [...CURATED_TOOLKIT_SLUGS],
-        limit: 100,
+        limit: 50,
       });
       return asToolkitItems(items);
     },
