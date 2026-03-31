@@ -12,8 +12,8 @@ export type ChatMCPClient = Awaited<ReturnType<typeof createMCPClient>>;
 type ToolDefinitions = Awaited<ReturnType<MCPClient["listTools"]>>;
 
 let cachedDefinitions: ToolDefinitions | null = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- tool generics from toolpick and ai-sdk are contravariant
 let cachedIndex: ToolIndex<any> | null = null;
+let inflightIndexPromise: Promise<ToolIndex<any>> | null = null;
 
 async function bootstrapTools(ctx: McpContext) {
   const mcpServer = createMcpServer(ctx);
@@ -34,32 +34,39 @@ async function bootstrapTools(ctx: McpContext) {
   return { definitions, tools };
 }
 
-export async function ensureToolIndex(
+export function ensureToolIndex(
   ctx: McpContext,
 ): Promise<ToolIndex<any>> {
-  if (cachedIndex && cachedDefinitions) return cachedIndex;
+  if (cachedIndex) return Promise.resolve(cachedIndex);
+  if (inflightIndexPromise) return inflightIndexPromise;
 
-  const { definitions, tools } = await bootstrapTools(ctx);
-  cachedDefinitions = definitions;
+  inflightIndexPromise = (async () => {
+    const { definitions, tools } = await bootstrapTools(ctx);
+    cachedDefinitions = definitions;
 
-  const index = await createToolIndex(tools, {
-    embeddingModel: openai.embeddingModel("text-embedding-3-small"),
-    embeddingCache: fileCache(".toolpick-cache.json"),
-    relatedTools: {
-      invoices_create: ["customers_list"],
-      invoices_create_from_tracker: ["customers_list"],
-      invoice_recurring_create: ["customers_list"],
-      tracker_timer_start: ["tracker_projects_list"],
-      tracker_entries_create: ["tracker_projects_list"],
-      transactions_update: ["categories_list"],
-    },
+    const index = await createToolIndex(tools, {
+      embeddingModel: openai.embeddingModel("text-embedding-3-small"),
+      embeddingCache: fileCache(".toolpick-cache.json"),
+      relatedTools: {
+        invoices_create: ["customers_list"],
+        invoices_create_from_tracker: ["customers_list"],
+        invoice_recurring_create: ["customers_list"],
+        tracker_timer_start: ["tracker_projects_list"],
+        tracker_entries_create: ["tracker_projects_list"],
+        transactions_update: ["categories_list"],
+      },
+    });
+
+    await index.warmUp();
+
+    cachedIndex = index;
+    return index;
+  })().catch((err) => {
+    inflightIndexPromise = null;
+    throw err;
   });
 
-  await index.warmUp();
-
-  cachedIndex = index;
-
-  return index;
+  return inflightIndexPromise;
 }
 
 export function getToolDefinitions(): ToolDefinitions {
