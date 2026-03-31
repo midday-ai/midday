@@ -2,7 +2,7 @@
 
 import type { UIMessage } from "ai";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Streamdown } from "streamdown";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useCustomerParams } from "@/hooks/use-customer-params";
@@ -27,9 +27,16 @@ import { ToolCallGroup } from "./tool-call-group";
 type ChatMessagesProps = {
   messages: UIMessage[];
   status: string;
+  onInvoiceUpdate?: (invoiceId: string) => void;
+  canvasOpen?: boolean;
 };
 
-export function ChatMessages({ messages, status }: ChatMessagesProps) {
+export function ChatMessages({
+  messages,
+  status,
+  onInvoiceUpdate,
+  canvasOpen,
+}: ChatMessagesProps) {
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const { setParams: setCustomerParams } = useCustomerParams();
@@ -79,6 +86,42 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
     () => makeStreamdownComponents(handleEntityLink),
     [handleEntityLink],
   );
+
+  const lastEmittedRef = useRef<{ id: string | null; count: number }>({
+    id: null,
+    count: 0,
+  });
+
+  useEffect(() => {
+    if (!onInvoiceUpdate) return;
+
+    let latestInvoiceId: string | null = null;
+    let invoiceCount = 0;
+    for (const message of messages) {
+      if (message.role !== "assistant") continue;
+      const parsed = parseAssistantMessage(message, {
+        isStreaming: false,
+        isLastMessage: false,
+      });
+      for (const part of parsed.invoiceParts) {
+        const data = extractInvoiceData(part.output);
+        const id = data?.id as string | undefined;
+        if (id) {
+          latestInvoiceId = id;
+          invoiceCount++;
+        }
+      }
+    }
+
+    if (
+      latestInvoiceId &&
+      (latestInvoiceId !== lastEmittedRef.current.id ||
+        invoiceCount !== lastEmittedRef.current.count)
+    ) {
+      lastEmittedRef.current = { id: latestInvoiceId, count: invoiceCount };
+      onInvoiceUpdate(latestInvoiceId);
+    }
+  }, [messages, onInvoiceUpdate]);
 
   if (messages.length === 0) return null;
 
@@ -167,6 +210,7 @@ export function ChatMessages({ messages, status }: ChatMessagesProps) {
                   <ChatInvoiceCard
                     key={part.toolCallId}
                     data={data}
+                    compact={canvasOpen}
                     onEdit={(id) =>
                       setInvoiceParams({ type: "edit", invoiceId: id })
                     }

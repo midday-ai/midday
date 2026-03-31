@@ -4,6 +4,7 @@ import { Icons } from "@midday/ui/icons";
 
 type ChatInvoiceCardProps = {
   data: Record<string, unknown>;
+  compact?: boolean;
   onEdit: (invoiceId: string) => void;
   onViewDetails: (invoiceId: string) => void;
 };
@@ -15,15 +16,33 @@ function getInvoiceMaxWidth(data: Record<string, unknown>): number {
 
 export function ChatInvoiceCard({
   data,
+  compact,
   onEdit,
   onViewDetails,
 }: ChatInvoiceCardProps) {
   const invoiceId = data.id as string | undefined;
+  const invoiceNumber = data.invoiceNumber as string | undefined;
   const status = data.status as string | undefined;
   const previewUrl = data.previewUrl as string | undefined;
   const pdfUrl = data.pdfUrl as string | undefined;
   const isDraft = status === "draft";
   const maxWidth = getInvoiceMaxWidth(data);
+
+  if (compact) {
+    return (
+      <div className="mt-4 flex items-center gap-3 px-3 py-2.5 border border-border bg-muted/30">
+        <Icons.Invoice className="size-4 text-muted-foreground shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium truncate">
+            {invoiceNumber ?? "Invoice"}{" "}
+            <span className="text-muted-foreground font-normal">
+              — Editing in canvas
+            </span>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-6 w-full" style={{ maxWidth }}>

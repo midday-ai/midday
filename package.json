@@ -68,7 +68,7 @@
     "typescript": "^6.0.2"
   },
   "dependencies": {
-    "toolpick": "^0.2.0",
+    "toolpick": "^0.4.0",
     "use-stick-to-bottom": "^1.1.3"
   }
 }

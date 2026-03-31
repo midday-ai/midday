@@ -6,6 +6,7 @@ import {
   type ChatMCPClient,
   createExecutionClient,
   ensureToolIndex,
+  getSearchTool,
   getToolDefinitions,
 } from "@api/chat/tools";
 import { decodeDataUrl, writeChatTitle } from "@api/chat/utils";
@@ -146,6 +147,7 @@ app.post("/", async (c) => {
           tools: {
             ...mcpTools,
             ...composioMetaTools,
+            search_tools: getSearchTool(),
             web_search: openai.tools.webSearch({
               searchContextSize: "medium",
               userLocation: {
@@ -156,8 +158,8 @@ app.post("/", async (c) => {
             }),
           },
           prepareStep: buildPrepareStep({
-            maxTools: 25,
-            alwaysActive: ["web_search", ...composioToolNames],
+            maxTools: 12,
+            alwaysActive: ["web_search", "search_tools", ...composioToolNames],
           }),
           stopWhen: stepCountIs(10),
           experimental_download: async (options) =>

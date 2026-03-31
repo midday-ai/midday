@@ -101,15 +101,39 @@ jobs:
         run: bunx turbo test --affected
 
   # ---------------------------------------------------------------------------
+  # Tool selection evals — runs when API changes to catch regressions
+  # ---------------------------------------------------------------------------
+  eval-tool-selection:
+    name: Tool selection evals
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.api == 'true'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 10
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - name: Rebuild better-sqlite3 for Node
+        run: cd node_modules/better-sqlite3 && npx --yes node-gyp rebuild
+
+      - name: Run tool selection evals
+        run: bun run eval:run
+        working-directory: apps/api
+
+  # ---------------------------------------------------------------------------
   # Deploy API to Railway staging
   # ---------------------------------------------------------------------------
   deploy-api-staging:
     name: Deploy API (staging)
-    needs: [detect-changes, validate]
+    needs: [detect-changes, validate, eval-tool-selection]
     if: >-
       always() &&
       needs.validate.result == 'success' &&
-      needs.detect-changes.outputs.api == 'true'
+      needs.detect-changes.outputs.api == 'true' &&
+      (needs.eval-tool-selection.result == 'success' || needs.eval-tool-selection.result == 'skipped')
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
     concurrency: railway-api-staging

@@ -60,7 +60,8 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
       "tags_get",
       {
         title: "Get Tag",
-        description: "Get a single tag by ID with its name.",
+        description:
+          "Get a single transaction/project tag by ID. Returns the tag name. Use tags_list to find available tag IDs before looking up details.",
         inputSchema: {
           id: z.string().uuid().describe("Tag ID"),
         },
@@ -94,7 +95,8 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
       "tags_create",
       {
         title: "Create Tag",
-        description: "Create a new tag for the team.",
+        description:
+          "Create a new transaction/project tag. Tags can be used to label and filter transactions in transactions_list and projects in tracker_projects_list. Use tags_list first to check if the tag already exists.",
         inputSchema: createTagSchema.shape,
         annotations: WRITE_ANNOTATIONS,
       },
@@ -136,7 +138,8 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
       "tags_update",
       {
         title: "Update Tag",
-        description: "Rename an existing tag by ID.",
+        description:
+          "Rename an existing transaction/project tag by ID. The updated name will apply to all transactions and projects that use this tag.",
         inputSchema: updateTagSchema.shape,
         annotations: WRITE_ANNOTATIONS,
       },
@@ -175,7 +178,8 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
       "tags_delete",
       {
         title: "Delete Tag",
-        description: "Delete a tag by ID.",
+        description:
+          "Delete a transaction/project tag by ID. Removes the tag from all transactions and projects it was applied to. This action cannot be undone.",
         inputSchema: deleteTagSchema.shape,
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },

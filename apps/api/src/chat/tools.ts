@@ -1,11 +1,12 @@
 import type { MCPClient } from "@ai-sdk/mcp";
 import { createMCPClient } from "@ai-sdk/mcp";
+import { openai } from "@ai-sdk/openai";
 import { createMcpServer } from "@api/mcp/server";
 import type { McpContext } from "@api/mcp/types";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import type { PrepareStepFunction, Tool } from "ai";
 import type { ToolIndex } from "toolpick";
-import { createToolIndex } from "toolpick";
+import { createToolIndex, fileCache } from "toolpick";
 
 export type ChatMCPClient = Awaited<ReturnType<typeof createMCPClient>>;
 type ToolDefinitions = Awaited<ReturnType<MCPClient["listTools"]>>;
@@ -33,7 +34,6 @@ async function bootstrapTools(ctx: McpContext) {
   return { definitions, tools };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- see cachedIndex
 export async function ensureToolIndex(
   ctx: McpContext,
 ): Promise<ToolIndex<any>> {
@@ -42,7 +42,21 @@ export async function ensureToolIndex(
   const { definitions, tools } = await bootstrapTools(ctx);
   cachedDefinitions = definitions;
 
-  const index = await createToolIndex(tools);
+  const index = await createToolIndex(tools, {
+    embeddingModel: openai.embeddingModel("text-embedding-3-small"),
+    embeddingCache: fileCache(".toolpick-cache.json"),
+    relatedTools: {
+      invoices_create: ["customers_list"],
+      invoices_create_from_tracker: ["customers_list"],
+      invoice_recurring_create: ["customers_list"],
+      tracker_timer_start: ["tracker_projects_list"],
+      tracker_entries_create: ["tracker_projects_list"],
+      transactions_update: ["categories_list"],
+    },
+  });
+
+  await index.warmUp();
+
   cachedIndex = index;
 
   return index;
@@ -87,6 +101,13 @@ export function buildPrepareStep<T extends Record<string, Tool>>(options: {
     }
     return step;
   }) as PrepareStepFunction<T>;
+}
+
+export function getSearchTool() {
+  if (!cachedIndex) {
+    throw new Error("Tool index not bootstrapped — call ensureToolIndex first");
+  }
+  return cachedIndex.searchTool();
 }
 
 export async function createExecutionClient(ctx: McpContext) {
