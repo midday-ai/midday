@@ -97,16 +97,16 @@ export async function getTrackerRecordsByRange(
 ) {
   const { teamId, from, to, projectId, userId } = params;
 
+  const NIL_UUID = "00000000-0000-0000-0000-000000000000";
+
   // Build the where conditions array
   const whereConditions = [
     eq(trackerEntries.teamId, teamId),
-    // Use gte and lte for date range
     gte(trackerEntries.date, from),
     lte(trackerEntries.date, to),
   ];
 
-  // Add optional conditions
-  if (projectId) {
+  if (projectId && projectId !== NIL_UUID) {
     whereConditions.push(eq(trackerEntries.projectId, projectId));
   }
 

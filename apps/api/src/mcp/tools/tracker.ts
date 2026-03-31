@@ -373,7 +373,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             .string()
             .uuid()
             .optional()
-            .describe("Filter by project ID"),
+            .describe(
+              "Only pass this if the user explicitly names or references a project. Omit for general time queries.",
+            ),
         },
         outputSchema: {
           meta: z.looseObject({
