@@ -98,7 +98,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const chat = useChat({
     transport: chatTransport,
-    experimental_throttle: 20,
     onData: (part: any) => {
       if (part.type === "data-title" && part.data?.title) {
         setChatTitle(part.data.title);

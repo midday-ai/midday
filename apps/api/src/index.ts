@@ -435,6 +435,11 @@ process.on("unhandledRejection", (reason, promise) => {
   );
 });
 
+// Pre-warm the chat tool index in the background so the first request is fast.
+import { warmToolIndex } from "./chat/tools";
+
+warmToolIndex();
+
 export default {
   port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
   fetch: app.fetch,

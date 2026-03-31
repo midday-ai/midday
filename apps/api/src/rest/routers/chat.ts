@@ -6,6 +6,7 @@ import {
   type ChatMCPClient,
   createExecutionClient,
   ensureToolIndex,
+  getSearchTool,
   getToolDefinitions,
 } from "@api/chat/tools";
 import { decodeDataUrl, writeChatTitle } from "@api/chat/utils";
@@ -47,7 +48,7 @@ app.use(
 );
 
 app.post("/", async (c) => {
-  let mcpClient: ChatMCPClient | null = null;
+  let executionClientPromise: Promise<ChatMCPClient> | null = null;
 
   try {
     const db = c.get("db");
@@ -95,28 +96,19 @@ app.post("/", async (c) => {
       mentionedApps,
     });
 
-    const executionClientPromise = createExecutionClient(mcpCtx);
+    executionClientPromise = createExecutionClient(mcpCtx);
     const composioToolsPromise = getComposioTools(mcpCtx.userId);
 
-    const [, modelMessages, resolvedClient, composioMetaTools] =
-      await Promise.all([
-        ensureToolIndex(mcpCtx),
-        convertToModelMessages(uiMessages),
-        executionClientPromise,
-        composioToolsPromise,
-      ]).catch(async (err) => {
-        await executionClientPromise.then((c) => c.close()).catch(() => {});
-        throw err;
-      });
-
-    mcpClient = resolvedClient;
-
-    const mcpTools = mcpClient.toolsFromDefinitions(getToolDefinitions());
-    const client = mcpClient;
+    const [, modelMessages] = await Promise.all([
+      ensureToolIndex(mcpCtx),
+      convertToModelMessages(uiMessages),
+    ]);
 
     const model = openai("gpt-4.1-mini");
 
     const rateLimitInfo = c.get("rateLimit");
+
+    const clientPromise = executionClientPromise;
 
     const stream = createUIMessageStream({
       execute: async ({ writer }) => {
@@ -133,6 +125,18 @@ app.post("/", async (c) => {
 
         const titlePromise = writeChatTitle(writer, uiMessages);
 
+        const [resolvedClient, composioMetaTools] = await Promise.all([
+          clientPromise,
+          composioToolsPromise,
+        ]).catch(async (err) => {
+          await clientPromise.then((cl) => cl.close()).catch(() => {});
+          throw err;
+        });
+
+        const mcpTools = resolvedClient.toolsFromDefinitions(
+          getToolDefinitions(),
+        );
+
         const composioToolNames = Object.keys(composioMetaTools);
         if (composioToolNames.length > 0) {
           logger.info("[chat] Composio tools available:", {
@@ -146,6 +150,7 @@ app.post("/", async (c) => {
           tools: {
             ...mcpTools,
             ...composioMetaTools,
+            search_tools: getSearchTool(),
             web_search: openai.tools.webSearch({
               searchContextSize: "medium",
               userLocation: {
@@ -156,15 +161,15 @@ app.post("/", async (c) => {
             }),
           },
           prepareStep: buildPrepareStep({
-            maxTools: 25,
-            alwaysActive: ["web_search", ...composioToolNames],
+            maxTools: 12,
+            alwaysActive: ["web_search", "search_tools", ...composioToolNames],
           }),
           stopWhen: stepCountIs(10),
           experimental_download: async (options) =>
             options.map(({ url }) => decodeDataUrl(url)),
           onFinish: async () => {
             await titlePromise;
-            await client.close();
+            await resolvedClient.close();
           },
         });
 
@@ -177,12 +182,12 @@ app.post("/", async (c) => {
       },
     });
 
-    mcpClient = null;
+    executionClientPromise = null;
 
     return createUIMessageStreamResponse({ stream });
   } catch (err) {
-    if (mcpClient) {
-      await mcpClient.close().catch(() => {});
+    if (executionClientPromise) {
+      await executionClientPromise.then((cl) => cl.close()).catch(() => {});
     }
     logger.error("[chat] Error:", { error: err });
 

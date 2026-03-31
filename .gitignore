@@ -89,3 +89,6 @@ dist-ssr
 
 # Matching eval history (local progress tracking)
 .matching-eval-history.json
+
+# Toolpick embedding cache (auto-generated on first boot)
+.toolpick-cache.json

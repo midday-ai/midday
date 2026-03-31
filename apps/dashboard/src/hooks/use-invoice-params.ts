@@ -7,6 +7,7 @@ const invoiceParamsSchema = {
   invoiceId: parseAsString,
   editRecurringId: parseAsString,
   emailPreview: parseAsBoolean,
+  canvas: parseAsBoolean,
 };
 
 export function useInvoiceParams() {

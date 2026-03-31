@@ -1,14 +1,16 @@
 "use client";
 
 import { LogEvents } from "@midday/events/events";
+import { cn } from "@midday/ui/cn";
 import { useOpenPanel } from "@openpanel/nextjs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import type { ConnectedApp } from "@/components/chat/chat-context";
 import { useChatState } from "@/components/chat/chat-context";
 import { ChatInput } from "@/components/chat/chat-input";
+import { ChatInvoiceCanvas } from "@/components/chat/chat-invoice-canvas";
 import { ChatMessages } from "@/components/chat/chat-messages";
 import {
   Conversation,
@@ -16,6 +18,8 @@ import {
   ConversationScrollButton,
 } from "@/components/chat/conversation";
 import { filesToUIParts } from "@/components/chat/file-utils";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useInvoiceEditorStore } from "@/store/invoice-editor";
 import { useTRPC } from "@/trpc/client";
 
 export function InputBar({
@@ -96,10 +100,32 @@ export function ChatView({
   const { track } = useOpenPanel();
 
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { data: connectedApps } = useQuery(
     trpc.connectors.connections.queryOptions(undefined, {
       staleTime: 5 * 60 * 1000,
     }),
+  );
+
+  const { canvas, setParams: setInvoiceParams } = useInvoiceParams();
+  const isCanvasOpen = canvas === true;
+
+  useEffect(() => {
+    return () => {
+      useInvoiceEditorStore.getState().reset();
+      setInvoiceParams(null);
+    };
+  }, [setInvoiceParams]);
+
+  const handleInvoiceUpdate = useCallback(
+    (invoiceId: string) => {
+      useInvoiceEditorStore.getState().reset();
+      setInvoiceParams({ canvas: true, invoiceId });
+      queryClient.invalidateQueries({
+        queryKey: trpc.invoice.getById.queryKey(),
+      });
+    },
+    [setInvoiceParams, queryClient, trpc.invoice.getById],
   );
 
   const isStreaming = status === "streaming" || status === "submitted";
@@ -122,30 +148,46 @@ export function ChatView({
   );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-160px)]">
-      <Conversation className="flex-1 hide-scrollbar">
-        <ConversationContent className="gap-4 p-0 pb-28">
-          {header && (
-            <div className="sticky top-0 z-20 flex items-center justify-between pt-4 pb-2 bg-background/[0.99] backdrop-blur-xl">
-              {header}
+    <div className="relative flex flex-col h-[calc(100vh-160px)]">
+      <div
+        className={cn(
+          "flex flex-col flex-1 min-h-0 transition-[margin] duration-300 ease-in-out",
+          isCanvasOpen && "md:mr-[650px]",
+        )}
+      >
+        <Conversation className="flex-1 hide-scrollbar">
+          <ConversationContent className="gap-4 p-0 pb-28">
+            {header && (
+              <div className="sticky top-0 z-20 flex items-center justify-between pt-4 pb-2 bg-background/[0.99] backdrop-blur-xl">
+                {header}
+              </div>
+            )}
+            <div className="max-w-[680px] mx-auto w-full pt-12 whitespace-normal">
+              <ChatMessages
+                messages={messages}
+                status={status}
+                onInvoiceUpdate={handleInvoiceUpdate}
+              />
             </div>
-          )}
-          <div className="max-w-[680px] mx-auto w-full pt-12 whitespace-normal">
-            <ChatMessages messages={messages} status={status} />
-          </div>
-        </ConversationContent>
-        <ConversationScrollButton
-          className={showLimitWarning ? "bottom-[105px]" : "bottom-[55px]"}
-        />
-      </Conversation>
+          </ConversationContent>
+          <ConversationScrollButton
+            className={showLimitWarning ? "bottom-[105px]" : "bottom-[55px]"}
+          />
+        </Conversation>
 
-      {error && !rateLimitExceeded && (
-        <p className="text-xs text-destructive text-center py-2">
-          Something went wrong. Please try again.
-        </p>
-      )}
+        {error && !rateLimitExceeded && (
+          <p className="text-xs text-destructive text-center py-2">
+            Something went wrong. Please try again.
+          </p>
+        )}
+      </div>
 
-      <div className="fixed bottom-0 left-0 md:left-[70px] right-0 bg-gradient-to-t from-background via-background to-transparent pt-8 pb-4 z-40 px-4">
+      <div
+        className={cn(
+          "fixed bottom-0 left-0 md:left-[70px] right-0 bg-gradient-to-t from-background via-background to-transparent pt-8 pb-4 z-40 px-4 transition-[right] duration-300 ease-in-out",
+          isCanvasOpen && "md:right-[650px]",
+        )}
+      >
         <div className="max-w-[680px] mx-auto w-full">
           <AnimatePresence>
             {showLimitWarning && (
@@ -193,6 +235,8 @@ export function ChatView({
           </p>
         </div>
       </div>
+
+      <ChatInvoiceCanvas />
     </div>
   );
 }

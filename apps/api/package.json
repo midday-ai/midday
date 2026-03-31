@@ -7,7 +7,9 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "test": "bun test --exit --timeout 30000 --preload ./src/__tests__/setup.ts src/__tests__/trpc/ src/__tests__/routers/ && bun test --exit --timeout 30000 src/__tests__/mcp/mcp-router.test.ts",
-    "test:e2e": "bun test --exit --timeout 30000 src/__tests__/e2e/"
+    "test:e2e": "bun test --exit --timeout 30000 src/__tests__/e2e/",
+    "eval": "bunx evalite watch",
+    "eval:run": "bunx evalite"
   },
   "exports": {
     "./trpc/routers/_app": "./src/trpc/routers/_app.ts"
@@ -64,10 +66,13 @@
     "resend": "catalog:",
     "stripe": "^20.4.1",
     "superjson": "^2.2.6",
+    "toolpick": "0.4.0",
     "uuid": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "evalite": "^0.19.0",
+    "vitest": "^4.1.1"
   }
 }
