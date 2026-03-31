@@ -3,6 +3,7 @@ import { createMCPClient } from "@ai-sdk/mcp";
 import { openai } from "@ai-sdk/openai";
 import { createMcpServer } from "@api/mcp/server";
 import type { McpContext } from "@api/mcp/types";
+import { logger } from "@midday/logger";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import type { PrepareStepFunction, Tool } from "ai";
 import type { ToolIndex } from "toolpick";
@@ -113,6 +114,36 @@ export function getSearchTool() {
     throw new Error("Tool index not bootstrapped — call ensureToolIndex first");
   }
   return cachedIndex.searchTool();
+}
+
+/**
+ * Pre-warm the tool index at server startup so the first chat request
+ * doesn't pay the MCP bootstrap + embedding cost. Safe to call multiple
+ * times — subsequent calls are no-ops once the index is cached.
+ */
+export function warmToolIndex(): void {
+  const stubCtx: McpContext = {
+    db: {} as McpContext["db"],
+    teamId: "warmup",
+    userId: "warmup",
+    userEmail: null,
+    scopes: [],
+    apiUrl: process.env.MIDDAY_API_URL ?? "https://api.midday.ai",
+    timezone: "UTC",
+    locale: "en",
+    countryCode: null,
+    dateFormat: null,
+    timeFormat: 24,
+  };
+
+  ensureToolIndex(stubCtx).catch((err) => {
+    logger.warn(
+      "[chat] Tool index warm-up failed (will retry on first request)",
+      {
+        error: err instanceof Error ? err.message : String(err),
+      },
+    );
+  });
 }
 
 export async function createExecutionClient(ctx: McpContext) {

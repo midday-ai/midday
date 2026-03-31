@@ -14,7 +14,7 @@ export const INVOICE_TOOLS = new Set([
   "invoices_create_from_tracker",
 ]);
 
-export const HIDDEN_TOOLS = new Set(["toolSearch"]);
+export const HIDDEN_TOOLS = new Set(["search_tools"]);
 
 export const TOOL_LABELS: Record<string, string> = {
   transactions_list: "Looking up transactions",
@@ -144,9 +144,6 @@ export type ParsedAssistantMessage = {
   invoiceParts: NormalizedToolPart[];
   textContent: string;
   sourceParts: SourceUrlPart[];
-  reasoningText: string;
-  hasReasoning: boolean;
-  isReasoningStreaming: boolean;
   showThinking: boolean;
   hasContent: boolean;
   isLastMessage: boolean;
@@ -156,7 +153,7 @@ export function parseAssistantMessage(
   message: UIMessage,
   opts: { isStreaming: boolean; isLastMessage: boolean },
 ): ParsedAssistantMessage {
-  const { isStreaming, isLastMessage } = opts;
+  const { isLastMessage } = opts;
 
   const toolParts: NormalizedToolPart[] = message.parts
     .filter((p) => isToolPart(p as { type: string }))
@@ -196,14 +193,6 @@ export function parseAssistantMessage(
     (p) => p.type === "source-url",
   ) as SourceUrlPart[];
 
-  const reasoningParts = message.parts.filter(
-    (p) => p.type === "reasoning",
-  ) as { type: "reasoning"; text: string }[];
-  const reasoningText = reasoningParts.map((p) => p.text).join("\n\n");
-  const hasReasoning = reasoningParts.length > 0;
-  const isReasoningStreaming =
-    isStreaming && isLastMessage && message.parts.at(-1)?.type === "reasoning";
-
   const invoiceParts = toolParts.filter(
     (p) =>
       INVOICE_TOOLS.has(p.toolName) &&
@@ -212,14 +201,13 @@ export function parseAssistantMessage(
   );
 
   const showThinking =
-    isLastMessage && !textContent && visibleTools.length === 0 && !hasReasoning;
+    isLastMessage && !textContent && visibleTools.length === 0;
 
   const hasContent =
     !!textContent ||
     visibleTools.length > 0 ||
     invoiceParts.length > 0 ||
-    sourceParts.length > 0 ||
-    hasReasoning;
+    sourceParts.length > 0;
 
   return {
     toolParts,
@@ -227,9 +215,6 @@ export function parseAssistantMessage(
     invoiceParts,
     textContent,
     sourceParts,
-    reasoningText,
-    hasReasoning,
-    isReasoningStreaming,
     showThinking,
     hasContent,
     isLastMessage,
