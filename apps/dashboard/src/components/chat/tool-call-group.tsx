@@ -117,7 +117,7 @@ export function ToolCallGroup({ parts }: { parts: NormalizedToolPart[] }) {
         {getToolIcon(active.toolName, ICON_SIZE)}
       </span>
       <TextShimmer
-        className="text-[11px] leading-none font-normal"
+        className="text-[11px] leading-tight font-normal"
         duration={0.75}
       >
         {formatToolName(active.toolName)}

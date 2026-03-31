@@ -1,7 +1,6 @@
 "use client";
 
 import { LogEvents } from "@midday/events/events";
-import { cn } from "@midday/ui/cn";
 import { useOpenPanel } from "@openpanel/nextjs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
@@ -110,6 +109,8 @@ export function ChatView({
   const { canvas, setParams: setInvoiceParams } = useInvoiceParams();
   const isCanvasOpen = canvas === true;
 
+  const canvasSpring = { type: "spring" as const, stiffness: 400, damping: 40 };
+
   useEffect(() => {
     return () => {
       useInvoiceEditorStore.getState().reset();
@@ -149,11 +150,10 @@ export function ChatView({
 
   return (
     <div className="relative flex flex-col h-[calc(100vh-160px)]">
-      <div
-        className={cn(
-          "flex flex-col flex-1 min-h-0 transition-[margin] duration-300 ease-in-out",
-          isCanvasOpen && "md:mr-[650px]",
-        )}
+      <motion.div
+        className="flex flex-col flex-1 min-h-0"
+        animate={{ marginRight: isCanvasOpen ? 650 : 0 }}
+        transition={canvasSpring}
       >
         <Conversation className="flex-1 hide-scrollbar">
           <ConversationContent className="gap-4 p-0 pb-28">
@@ -180,13 +180,12 @@ export function ChatView({
             Something went wrong. Please try again.
           </p>
         )}
-      </div>
+      </motion.div>
 
-      <div
-        className={cn(
-          "fixed bottom-0 left-0 md:left-[70px] right-0 bg-gradient-to-t from-background via-background to-transparent pt-8 pb-4 z-40 px-4 transition-[right] duration-300 ease-in-out",
-          isCanvasOpen && "md:right-[650px]",
-        )}
+      <motion.div
+        className="fixed bottom-0 left-0 md:left-[70px] right-0 bg-gradient-to-t from-background via-background to-transparent pt-8 pb-4 z-40 px-4"
+        animate={{ right: isCanvasOpen ? 650 : 0 }}
+        transition={canvasSpring}
       >
         <div className="max-w-[680px] mx-auto w-full">
           <AnimatePresence>
@@ -234,7 +233,7 @@ export function ChatView({
             Midday AI can make mistakes. Please double-check responses.
           </p>
         </div>
-      </div>
+      </motion.div>
 
       <ChatInvoiceCanvas />
     </div>
