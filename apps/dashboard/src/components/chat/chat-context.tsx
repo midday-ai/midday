@@ -13,11 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import { useUserQuery } from "@/hooks/use-user";
 import { getAccessToken } from "@/utils/session";
-
-export type ChatMode = "auto" | "instant" | "thinking";
 
 export type RateLimitInfo = { limit: number; remaining: number };
 
@@ -32,9 +28,6 @@ export type ChatState = ReturnType<typeof useChat> & {
   setInputValue: (v: string) => void;
   chatTitle: string | null;
   setChatTitle: (v: string | null) => void;
-  mode: ChatMode;
-  setMode: (m: ChatMode) => void;
-  plan: string;
   rateLimit: RateLimitInfo | null;
   rateLimitExceeded: boolean;
   mentionedApps: ConnectedApp[];
@@ -52,19 +45,13 @@ export function useChatState() {
 }
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const { data: userData } = useUserQuery();
-  const plan = userData?.team?.plan ?? "trial";
   const { track } = useOpenPanel();
 
   const [inputValue, setInputValue] = useState("");
   const [chatTitle, setChatTitle] = useState<string | null>(null);
-  const [mode, setMode] = useLocalStorage<ChatMode>("chat-mode", "auto");
   const [rateLimit, setRateLimit] = useState<RateLimitInfo | null>(null);
   const [rateLimitExceeded, setRateLimitExceeded] = useState(false);
   const [mentionedApps, setMentionedApps] = useState<ConnectedApp[]>([]);
-
-  const modeRef = useRef(mode);
-  modeRef.current = mode;
 
   const mentionedAppsRef = useRef(mentionedApps);
   mentionedAppsRef.current = mentionedApps;
@@ -98,7 +85,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           } as Record<string, string>;
         },
         body: () => ({
-          mode: modeRef.current,
           mentionedApps: mentionedAppsRef.current.map((a) => ({
             slug: a.slug,
             name: a.name,
@@ -112,7 +98,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const chat = useChat({
     transport: chatTransport,
-    experimental_throttle: 50,
+    experimental_throttle: 20,
     onData: (part: any) => {
       if (part.type === "data-title" && part.data?.title) {
         setChatTitle(part.data.title);
@@ -133,7 +119,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const trackedSendMessage: typeof chat.sendMessage = useCallback(
     (...args) => {
-      track(LogEvents.AssistantMessageSent.name, { mode: modeRef.current });
+      track(LogEvents.AssistantMessageSent.name);
       return chat.sendMessage(...args);
     },
     [chat.sendMessage, track],
@@ -148,9 +134,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setInputValue,
         chatTitle,
         setChatTitle,
-        mode,
-        setMode,
-        plan,
         rateLimit,
         rateLimitExceeded,
         mentionedApps,

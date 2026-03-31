@@ -18,7 +18,7 @@ import Image from "next/image";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ConnectorsModal } from "@/components/modals/connectors-modal";
-import type { ChatMode, ConnectedApp } from "./chat-context";
+import type { ConnectedApp } from "./chat-context";
 
 const MCP_CLIENTS = [
   { id: "claude-mcp", name: "Claude", Logo: ClaudeMcpLogo },
@@ -76,22 +76,6 @@ function pickSuggestions(): string[] {
   );
 }
 
-const MODE_OPTIONS: {
-  id: ChatMode;
-  label: string;
-  description: string;
-  pro?: boolean;
-}[] = [
-  { id: "auto", label: "Auto", description: "Smart routing" },
-  { id: "instant", label: "Instant", description: "Fast answers" },
-  {
-    id: "thinking",
-    label: "Thinking",
-    description: "Deep analysis",
-    pro: true,
-  },
-];
-
 const ACCEPTED_TYPES = "image/*,application/pdf";
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -106,9 +90,6 @@ export type ChatInputProps = {
   onEscape?: () => void;
   onSuggestion?: (text: string) => void;
   menuPosition?: "above" | "below";
-  mode?: ChatMode;
-  onModeChange?: (mode: ChatMode) => void;
-  plan?: string;
   connectedApps?: ConnectedApp[];
   mentionedApps?: ConnectedApp[];
   onMentionApp?: (app: ConnectedApp) => void;
@@ -277,9 +258,6 @@ export function ChatInput({
   onEscape,
   onSuggestion,
   menuPosition = "below",
-  mode = "auto",
-  onModeChange,
-  plan,
   connectedApps,
   mentionedApps,
   onMentionApp,
@@ -297,7 +275,6 @@ export function ChatInput({
   const [suggestions] = useState(pickSuggestions);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mcpOpen, setMcpOpen] = useState(false);
-  const [modeOpen, setModeOpen] = useState(false);
   const [showAppsPanel, setShowAppsPanel] = useState(false);
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -305,10 +282,6 @@ export function ChatInput({
   const [files, setFiles] = useState<File[]>([]);
   const [, setParams] = useQueryStates({ "mcp-app": parseAsString });
   const { track } = useOpenPanel();
-
-  const isPro = plan === "pro" || plan === "trial";
-  const activeMode =
-    MODE_OPTIONS.find((m) => m.id === mode) ?? MODE_OPTIONS[0]!;
 
   const mentionedSlugs = new Set(mentionedApps?.map((a) => a.slug));
   const availableApps = connectedApps?.filter(
@@ -741,7 +714,6 @@ export function ChatInput({
             onClick={() => {
               setShowSuggestions(!showSuggestions);
               setMcpOpen(false);
-              setModeOpen(false);
               closeMentionPanel();
             }}
             className="flex items-center h-6 cursor-pointer"
@@ -768,7 +740,6 @@ export function ChatInput({
                 setHighlightedIndex(0);
                 setShowSuggestions(false);
                 setMcpOpen(false);
-                setModeOpen(false);
               }
             }}
             className={cn(
@@ -836,77 +807,6 @@ export function ChatInput({
               ))}
             </PopoverContent>
           </Popover>
-
-          <div className="border-l border-border pl-3 ml-1 self-center h-4 flex items-center">
-            <Popover
-              open={modeOpen}
-              onOpenChange={(open) => {
-                setModeOpen(open);
-                if (open) {
-                  setShowSuggestions(false);
-                  setMcpOpen(false);
-                  closeMentionPanel();
-                }
-              }}
-            >
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className={cn(
-                    "flex items-center h-6 cursor-pointer text-xs transition-colors",
-                    modeOpen
-                      ? "text-foreground"
-                      : "text-[#878787]/60 hover:text-foreground",
-                  )}
-                >
-                  {activeMode.label}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                side={menuPosition === "above" ? "top" : "bottom"}
-                align="start"
-                sideOffset={12}
-                className="w-[260px] p-1 bg-[rgba(247,247,247,0.96)] dark:bg-[rgba(19,19,19,0.98)] backdrop-blur-lg border-border shadow-sm"
-              >
-                <p className="px-2 py-1 text-[10px] text-[#878787]">Model</p>
-                {MODE_OPTIONS.map((opt) => {
-                  const locked = opt.pro && !isPro;
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      className={cn(
-                        "flex items-center gap-2 w-full px-2 py-1.5 text-xs transition-colors",
-                        locked && "opacity-50 cursor-default",
-                        !locked && mode === opt.id
-                          ? "text-foreground bg-black/5 dark:bg-white/5"
-                          : "text-[#666] hover:bg-black/5 dark:hover:bg-white/5",
-                      )}
-                      data-track="Assistant Mode Changed"
-                      data-mode={opt.id}
-                      onClick={() => {
-                        if (locked) return;
-                        onModeChange?.(opt.id);
-                        setModeOpen(false);
-                      }}
-                    >
-                      <span className="flex items-center gap-1.5 flex-1 text-left">
-                        {opt.label}
-                        {locked && (
-                          <span className="text-[9px] font-medium bg-border text-muted-foreground px-1 py-0.5">
-                            Pro
-                          </span>
-                        )}
-                      </span>
-                      <span className="text-[#878787] text-[10px]">
-                        {opt.description}
-                      </span>
-                    </button>
-                  );
-                })}
-              </PopoverContent>
-            </Popover>
-          </div>
         </div>
 
         <button

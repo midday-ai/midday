@@ -1,5 +1,4 @@
 import { openai } from "@ai-sdk/openai";
-import { type ChatMode, effectiveMode, resolveModel } from "@api/chat/modes";
 import type { MentionedApp } from "@api/chat/prompt";
 import { buildSystemPrompt } from "@api/chat/prompt";
 import {
@@ -9,11 +8,7 @@ import {
   ensureToolIndex,
   getToolDefinitions,
 } from "@api/chat/tools";
-import {
-  classifyComplexity,
-  decodeDataUrl,
-  writeChatTitle,
-} from "@api/chat/utils";
+import { decodeDataUrl, writeChatTitle } from "@api/chat/utils";
 import { getComposioTools } from "@api/composio/client";
 import type { McpContext } from "@api/mcp/types";
 import type { Context } from "@api/rest/types";
@@ -24,6 +19,7 @@ import {
   convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
+  smoothStream,
   stepCountIs,
   ToolLoopAgent,
 } from "ai";
@@ -63,10 +59,6 @@ app.post("/", async (c) => {
 
     const body = await c.req.json();
     const uiMessages = body.messages as any[];
-    const mode = effectiveMode(
-      (body.mode as ChatMode) ?? "auto",
-      user?.team?.plan,
-    );
 
     const clientTimezone = (body.timezone as string) || null;
     const clientLocalTime = (body.localTime as string) || null;
@@ -122,8 +114,7 @@ app.post("/", async (c) => {
     const mcpTools = mcpClient.toolsFromDefinitions(getToolDefinitions());
     const client = mcpClient;
 
-    const isComplex = classifyComplexity(uiMessages as any[]);
-    const resolved = resolveModel(mode, isComplex);
+    const model = openai("gpt-4.1-mini");
 
     const rateLimitInfo = c.get("rateLimit");
 
@@ -150,7 +141,7 @@ app.post("/", async (c) => {
         }
 
         const agent = new ToolLoopAgent({
-          model: resolved.model,
+          model,
           instructions: systemPrompt,
           tools: {
             ...mcpTools,
@@ -164,14 +155,6 @@ app.post("/", async (c) => {
               },
             }),
           },
-          ...(resolved.reasoning && {
-            providerOptions: {
-              openai: {
-                reasoningEffort: "medium" as const,
-                reasoningSummary: "detailed" as const,
-              },
-            },
-          }),
           prepareStep: buildPrepareStep({
             maxTools: 25,
             alwaysActive: ["web_search", ...composioToolNames],
@@ -185,14 +168,12 @@ app.post("/", async (c) => {
           },
         });
 
-        const result = await agent.stream({ messages: modelMessages });
+        const result = await agent.stream({
+          messages: modelMessages,
+          experimental_transform: smoothStream(),
+        });
 
-        writer.merge(
-          result.toUIMessageStream({
-            sendSources: true,
-            ...(resolved.reasoning && { sendReasoning: true }),
-          }),
-        );
+        writer.merge(result.toUIMessageStream({ sendSources: true }));
       },
     });
 
