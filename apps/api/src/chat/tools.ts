@@ -34,9 +34,7 @@ async function bootstrapTools(ctx: McpContext) {
   return { definitions, tools };
 }
 
-export function ensureToolIndex(
-  ctx: McpContext,
-): Promise<ToolIndex<any>> {
+export function ensureToolIndex(ctx: McpContext): Promise<ToolIndex<any>> {
   if (cachedIndex) return Promise.resolve(cachedIndex);
   if (inflightIndexPromise) return inflightIndexPromise;
 
