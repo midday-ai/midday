@@ -29,9 +29,6 @@ export function InputBar({
   onEscape,
   onSuggestion,
   menuPosition,
-  mode,
-  onModeChange,
-  plan,
   connectedApps,
   mentionedApps,
   onMentionApp,
@@ -47,9 +44,6 @@ export function InputBar({
   onEscape?: () => void;
   onSuggestion?: (text: string) => void;
   menuPosition?: "above" | "below";
-  mode?: "auto" | "instant" | "thinking";
-  onModeChange?: (mode: "auto" | "instant" | "thinking") => void;
-  plan?: string;
   connectedApps?: ConnectedApp[];
   mentionedApps?: ConnectedApp[];
   onMentionApp?: (app: ConnectedApp) => void;
@@ -68,9 +62,6 @@ export function InputBar({
         onEscape={onEscape}
         onSuggestion={onSuggestion}
         menuPosition={menuPosition}
-        mode={mode}
-        onModeChange={onModeChange}
-        plan={plan}
         connectedApps={connectedApps}
         mentionedApps={mentionedApps}
         onMentionApp={onMentionApp}
@@ -95,9 +86,6 @@ export function ChatView({
     error,
     inputValue,
     setInputValue,
-    mode,
-    setMode,
-    plan,
     rateLimit,
     rateLimitExceeded,
     mentionedApps,
@@ -189,9 +177,6 @@ export function ChatView({
             onSubmit={handleSubmit}
             onStop={stop}
             menuPosition="above"
-            mode={mode}
-            onModeChange={setMode}
-            plan={plan}
             connectedApps={connectedApps}
             mentionedApps={mentionedApps}
             onMentionApp={addMentionedApp}
