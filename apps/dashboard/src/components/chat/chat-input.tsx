@@ -318,10 +318,10 @@ export function ChatInput({
   }, [value]);
 
   useEffect(() => {
-    if (autoFocus) {
+    if (autoFocus && mounted) {
       editableRef.current?.focus();
     }
-  }, [autoFocus]);
+  }, [autoFocus, mounted]);
 
   useEffect(() => {
     if (!showSuggestions) return;

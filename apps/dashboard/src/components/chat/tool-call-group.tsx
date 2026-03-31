@@ -60,8 +60,8 @@ export function ToolCallGroup({ parts }: { parts: NormalizedToolPart[] }) {
     if (visible.length === 1) {
       return (
         <div className={boxClassName}>
-          <span className={cn("shrink-0", iconClassName)}>
-            {getToolIcon(visible[0]!.toolName, ICON_SIZE)}
+          <span className={cn("shrink-0 text-muted-foreground/40")}>
+            <Icons.Check size={ICON_SIZE} />
           </span>
           <span>{formatToolName(visible[0]!.toolName)}</span>
         </div>
@@ -72,11 +72,16 @@ export function ToolCallGroup({ parts }: { parts: NormalizedToolPart[] }) {
       <Collapsible open={open} onOpenChange={setOpen}>
         <div className="inline-flex flex-col border bg-white border-[#e6e6e6] dark:border-[#1d1d1d] dark:bg-[#0c0c0c] overflow-hidden">
           <CollapsibleTrigger className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] leading-none text-muted-foreground/60 cursor-pointer hover:bg-[#f7f7f7] dark:hover:bg-[#0f0f0f] hover:text-foreground transition-all duration-300">
+            <Icons.Check
+              size={ICON_SIZE}
+              className={cn(iconClassName, open && "hidden")}
+            />
             <Icons.ChevronRight
               size={ICON_SIZE}
               className={cn(
                 iconClassName,
                 "transition-transform duration-150",
+                !open && "hidden",
                 open && "rotate-90",
               )}
             />
