@@ -1,3 +1,5 @@
+import { UTCDate } from "@date-fns/utc";
+import { format, subMonths } from "date-fns";
 import type { Database } from "../../client";
 import {
   bankAccounts,
@@ -12,6 +14,15 @@ import {
   transactions,
   users,
 } from "../../schema";
+
+// Runway seed dates are relative to today so they always fall within
+// the trailing 6-month window used by getRunway / getBurnRate.
+const _now = new UTCDate();
+const RW_DATE_1 = format(subMonths(_now, 5), "yyyy-MM-dd");
+const RW_DATE_2 = format(subMonths(_now, 4), "yyyy-MM-dd");
+const RW_DATE_3 = format(subMonths(_now, 3), "yyyy-MM-dd");
+const RW_DATE_4 = format(subMonths(_now, 2), "yyyy-MM-dd");
+const RW_DATE_5 = format(subMonths(_now, 1), "yyyy-MM-dd");
 
 // ─── Deterministic IDs ───────────────────────────────────────────────────────
 // Using fixed UUIDs so tests can reference specific records.
@@ -1203,12 +1214,13 @@ async function seedTransactions(db: Database): Promise<void> {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // RECENT 2025-2026 — For runway calculation (trailing 6-month window)
+    // RECENT — For runway calculation (trailing 6-month window)
+    // Dates are relative to today so they never drift out of the window.
     // ═══════════════════════════════════════════════════════════════════════
 
     {
       id: "a0000000-0000-0000-0000-000000020001",
-      date: "2025-10-15",
+      date: RW_DATE_1,
       name: "Recent Office Rent",
       method: "transfer",
       amount: -3000,
@@ -1224,7 +1236,7 @@ async function seedTransactions(db: Database): Promise<void> {
     },
     {
       id: "a0000000-0000-0000-0000-000000020002",
-      date: "2025-11-15",
+      date: RW_DATE_2,
       name: "Recent Software",
       method: "card_purchase",
       amount: -1000,
@@ -1240,7 +1252,7 @@ async function seedTransactions(db: Database): Promise<void> {
     },
     {
       id: "a0000000-0000-0000-0000-000000020003",
-      date: "2025-12-15",
+      date: RW_DATE_3,
       name: "Recent Marketing",
       method: "card_purchase",
       amount: -2000,
@@ -1256,7 +1268,7 @@ async function seedTransactions(db: Database): Promise<void> {
     },
     {
       id: "a0000000-0000-0000-0000-000000020004",
-      date: "2026-01-15",
+      date: RW_DATE_4,
       name: "Recent Travel",
       method: "card_purchase",
       amount: -1500,
@@ -1272,7 +1284,7 @@ async function seedTransactions(db: Database): Promise<void> {
     },
     {
       id: "a0000000-0000-0000-0000-000000020005",
-      date: "2026-02-15",
+      date: RW_DATE_5,
       name: "Recent Supplies",
       method: "card_purchase",
       amount: -500,

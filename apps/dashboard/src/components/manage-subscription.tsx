@@ -18,6 +18,7 @@ export function ManageSubscription() {
 
   const queryClient = useQueryClient();
   const isCanceling = !!user?.team?.canceledAt;
+  const isTrialing = user?.team?.subscriptionStatus === "trialing";
 
   const getPortalUrlMutation = useMutation(
     trpc.billing.getPortalUrl.mutationOptions({
@@ -85,8 +86,9 @@ export function ManageSubscription() {
 
         {isCanceling && (
           <p className="text-xs text-[#878787]">
-            Your subscription has been canceled and will end at the end of your
-            billing period.
+            {isTrialing
+              ? "Your trial has been canceled and will end when your trial period expires. You won't be charged."
+              : "Your subscription has been canceled and will end at the end of your billing period."}
           </p>
         )}
       </Card>

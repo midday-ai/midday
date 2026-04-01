@@ -1247,7 +1247,8 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
       });
 
       // Cash: Checking(50000) + Savings(25000) + EUR(baseBalance=11000) = 86000
-      // Burn: RW1(3000) + RW2(1000) + RW3(2000) + RW4(1500) + RW5(500) = 8000 over 6 months
+      // Burn (trailing 6-month window, seed dates are relative to today):
+      //   RW1(3000) + RW2(1000) + RW3(2000) + RW4(1500) + RW5(500) = 8000 over 6 months
       // Avg burn = Math.round(8000/6) = 1333
       // Runway = Math.round(86000/1333) = 65
       expect(result).toBeGreaterThan(0);
@@ -2007,8 +2008,8 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
         currency: "USD",
       });
 
-      // Software has 36-month useful life. E2 is Jan 2024, E5 is Mar 2024, RW2 is Nov 2025.
-      // All are 4+ months old → depreciation > 0
+      // Software has 36-month useful life. E2 is Jan 2024, E5 is Mar 2024, RW2 is recent.
+      // All are 1+ months old → depreciation > 0
       expect(result.assets.nonCurrent.accumulatedDepreciation).toBeGreaterThan(
         0,
       );
@@ -2028,7 +2029,7 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
       // Only Jan + Feb transactions should be included
       // Cash is from bank accounts (not filtered by date), so same
       expect(result.assets.current.cash).toBe(86000);
-      // But software assets should only have E2(200) from Jan, not E5(500) from Mar or RW2(1000) from Nov 2025
+      // But software assets should only have E2(200) from Jan, not E5(500) from Mar or RW2(1000) from recent months
       expect(result.assets.nonCurrent.softwareTechnology).toBe(200);
     });
   });
