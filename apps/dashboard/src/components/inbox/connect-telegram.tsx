@@ -51,6 +51,7 @@ export function ConnectTelegram({ showTrigger = true }: ConnectTelegramProps) {
     telegramBotUsername && linkCode
       ? `https://t.me/${telegramBotUsername}?start=${encodeURIComponent(linkCode)}`
       : "";
+  const isTelegramReady = Boolean(telegramUrl);
 
   useEffect(() => {
     if (!open || !telegramBotUsername) {
@@ -152,11 +153,23 @@ export function ConnectTelegram({ showTrigger = true }: ConnectTelegramProps) {
           <div className="w-full border-t" />
 
           <div className="flex gap-2 w-full">
-            <Button asChild className="flex-1" variant="outline">
-              <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
-                <TelegramIcon className="mr-2 h-4 w-4" />
-                Open Telegram
-              </a>
+            <Button
+              asChild={isTelegramReady}
+              className="flex-1"
+              variant="outline"
+              disabled={!isTelegramReady}
+            >
+              {isTelegramReady ? (
+                <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
+                  <TelegramIcon className="mr-2 h-4 w-4" />
+                  Open Telegram
+                </a>
+              ) : (
+                <span>
+                  <TelegramIcon className="mr-2 h-4 w-4" />
+                  Open Telegram
+                </span>
+              )}
             </Button>
 
             <Button

@@ -1,6 +1,6 @@
 import type { BotPlatform } from "@midday/bot";
 
-type BotThreadState = {
+export type BotThreadState = {
   teamId?: string;
   actingUserId?: string;
   platform?: BotPlatform;
@@ -16,11 +16,16 @@ export function canReuseCachedThreadState(
 ) {
   const { platform, externalUserId } = params;
 
-  if (!state.teamId || !state.actingUserId || !externalUserId) {
+  if (
+    !state.teamId ||
+    !state.actingUserId ||
+    !state.platform ||
+    !externalUserId
+  ) {
     return false;
   }
 
-  if (state.platform && state.platform !== platform) {
+  if (state.platform !== platform) {
     return false;
   }
 

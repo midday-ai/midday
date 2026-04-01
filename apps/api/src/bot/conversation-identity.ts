@@ -25,19 +25,19 @@ export function getPlatformIdentityNotificationContext(metadata?: unknown) {
     : null;
 }
 
-export function withResolvedConversationIdentity(
+export function requireResolvedConversationIdentity(
   resolved: ConnectedResolvedConversation,
   identity: PlatformIdentityLike | null,
-): ConnectedResolvedConversation {
+): ConnectedResolvedConversation | null {
   if (!identity) {
-    return resolved;
+    return null;
   }
 
   if (
     identity.teamId !== resolved.teamId ||
     identity.userId !== resolved.actingUserId
   ) {
-    return resolved;
+    return null;
   }
 
   return {
@@ -47,4 +47,11 @@ export function withResolvedConversationIdentity(
       identity.metadata,
     ),
   };
+}
+
+export function withResolvedConversationIdentity(
+  resolved: ConnectedResolvedConversation,
+  identity: PlatformIdentityLike | null,
+): ConnectedResolvedConversation {
+  return requireResolvedConversationIdentity(resolved, identity) ?? resolved;
 }

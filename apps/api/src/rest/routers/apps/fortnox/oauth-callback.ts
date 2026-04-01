@@ -121,10 +121,10 @@ app.openapi(
       const companyInfo = await provider.getTenantInfo("default");
 
       // Create app integration in database
-      await createApp(db, {
+      await createApp<"fortnox">(db, {
         teamId: parsedState.teamId,
         createdBy: parsedState.userId,
-        appId: config.id,
+        appId: "fortnox",
         settings: config.settings,
         config: {
           provider: "fortnox",

@@ -53,6 +53,22 @@ describe("bot thread state reuse", () => {
     ).toBe(false);
   });
 
+  test("does not reuse cached state when platform is missing", () => {
+    expect(
+      canReuseCachedThreadState(
+        {
+          teamId: "team_123",
+          actingUserId: "user_123",
+          externalUserId: "shared_user_id",
+        },
+        {
+          platform: "telegram",
+          externalUserId: "shared_user_id",
+        },
+      ),
+    ).toBe(false);
+  });
+
   test("does not reuse cached state without a sender id", () => {
     expect(
       canReuseCachedThreadState(

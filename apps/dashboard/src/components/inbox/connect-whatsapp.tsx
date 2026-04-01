@@ -45,6 +45,7 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
     whatsappNumber && message
       ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
       : "";
+  const isWhatsAppReady = Boolean(whatsappUrl);
 
   useEffect(() => {
     if (!open || !whatsappNumber) {
@@ -161,11 +162,23 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
           <div className="w-full border-t" />
 
           <div className="flex gap-2 w-full">
-            <Button asChild className="flex-1" variant="outline">
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                <Icons.WhatsApp className="mr-2 h-4 w-4 text-[#25D366]" />
-                Open WhatsApp
-              </a>
+            <Button
+              asChild={isWhatsAppReady}
+              className="flex-1"
+              variant="outline"
+              disabled={!isWhatsAppReady}
+            >
+              {isWhatsAppReady ? (
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                  <Icons.WhatsApp className="mr-2 h-4 w-4 text-[#25D366]" />
+                  Open WhatsApp
+                </a>
+              ) : (
+                <span>
+                  <Icons.WhatsApp className="mr-2 h-4 w-4 text-[#25D366]" />
+                  Open WhatsApp
+                </span>
+              )}
             </Button>
             <Button
               onClick={copyToClipboard}

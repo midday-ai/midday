@@ -22,6 +22,7 @@ import {
   varchar,
   vector,
 } from "drizzle-orm/pg-core";
+import type { AnyAppConfig } from "./app-config";
 
 export const tsvector = customType<{
   data: string;
@@ -1837,7 +1838,7 @@ export const apps = pgTable(
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     teamId: uuid("team_id").defaultRandom(),
-    config: jsonb(),
+    config: jsonb().$type<AnyAppConfig>(),
     createdAt: timestamp("created_at", {
       withTimezone: true,
       mode: "string",

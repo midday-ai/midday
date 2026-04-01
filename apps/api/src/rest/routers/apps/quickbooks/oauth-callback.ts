@@ -144,10 +144,10 @@ app.openapi(
       const companyInfo = await providerWithTokens.getTenantInfo(realmId);
 
       // Create app integration in database
-      await createApp(db, {
+      await createApp<"quickbooks">(db, {
         teamId: parsedState.teamId,
         createdBy: parsedState.userId,
-        appId: config.id,
+        appId: "quickbooks",
         settings: config.settings,
         config: {
           provider: "quickbooks", // Discriminator field

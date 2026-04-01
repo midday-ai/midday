@@ -703,6 +703,35 @@ export const mocks = {
 
   // Apps
   getApps: mock(() => Promise.resolve([])) as MockFn,
+  createApp: mock(() =>
+    Promise.resolve({
+      config: {},
+      settings: {},
+    }),
+  ) as MockFn,
+  addTelegramConnection: mock(() =>
+    Promise.resolve({
+      id: "telegram_app_123",
+    }),
+  ) as MockFn,
+  addWhatsAppConnection: mock(() =>
+    Promise.resolve({
+      id: "whatsapp_app_123",
+    }),
+  ) as MockFn,
+  consumePlatformLinkToken: mock(() =>
+    Promise.resolve({
+      code: "mb_test_link_token",
+      provider: "slack",
+      teamId: "test-team-id",
+      userId: "test-user-id",
+    }),
+  ) as MockFn,
+  createOrUpdatePlatformIdentity: mock(() =>
+    Promise.resolve({
+      id: "identity_123",
+    }),
+  ) as MockFn,
   createPlatformLinkToken: mock(() =>
     Promise.resolve({
       code: "mb_test_link_token",
@@ -711,6 +740,9 @@ export const mocks = {
       userId: "test-user-id",
     }),
   ) as MockFn,
+  getAppBySlackTeamId: mock(() => Promise.resolve(null)) as MockFn,
+  getPlatformIdentity: mock(() => Promise.resolve(null)) as MockFn,
+  updatePlatformIdentityMetadata: mock(() => Promise.resolve(null)) as MockFn,
 
   // Bank connections
   getBankConnections: mock(() => Promise.resolve([])) as MockFn,
@@ -1041,8 +1073,16 @@ const dbQueriesMock = new Proxy(
     bulkUpdateNotificationSettings: mocks.bulkUpdateNotificationSettings,
 
     // Apps
+    addTelegramConnection: mocks.addTelegramConnection,
+    addWhatsAppConnection: mocks.addWhatsAppConnection,
+    consumePlatformLinkToken: mocks.consumePlatformLinkToken,
     getApps: mocks.getApps,
+    createApp: mocks.createApp,
+    createOrUpdatePlatformIdentity: mocks.createOrUpdatePlatformIdentity,
     createPlatformLinkToken: mocks.createPlatformLinkToken,
+    getAppBySlackTeamId: mocks.getAppBySlackTeamId,
+    getPlatformIdentity: mocks.getPlatformIdentity,
+    updatePlatformIdentityMetadata: mocks.updatePlatformIdentityMetadata,
     getAppByAppId: createDefaultMock(),
     deleteApp: createDefaultMock(),
 

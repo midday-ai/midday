@@ -1,10 +1,13 @@
 import {
   type ConnectedResolvedConversation,
   getPlatformIdentityNotificationContext,
-  withResolvedConversationIdentity,
+  requireResolvedConversationIdentity,
 } from "@api/bot/conversation-identity";
 import { extractConnectionToken, getMessageAuthorId } from "@api/bot/linking";
-import { canReuseCachedThreadState } from "@api/bot/thread-state";
+import {
+  type BotThreadState,
+  canReuseCachedThreadState,
+} from "@api/bot/thread-state";
 import { streamMiddayAssistant } from "@api/chat/assistant-runtime";
 import { buildSystemPrompt } from "@api/chat/prompt";
 import type { McpContext } from "@api/mcp/types";
@@ -45,15 +48,8 @@ const logger = createLoggerWithContext("bot-runtime");
 
 const ALL_ASSISTANT_SCOPES = expandScopes(["apis.all"]) as McpContext["scopes"];
 
-type BotThreadState = {
-  teamId?: string;
-  actingUserId?: string;
-  platform?: BotPlatform;
-  externalUserId?: string;
-};
-
 type ResolvedConversation =
-  | ConnectedResolvedConversation
+  | (ConnectedResolvedConversation & { consumed?: boolean })
   | { connected: false };
 
 let registered = false;
@@ -112,11 +108,26 @@ async function handleIncomingMessage(thread: any, message: any) {
     return;
   }
 
+  if (resolved.consumed) {
+    return;
+  }
+
   const connectedConversation = await hydrateResolvedConversationIdentity({
+    thread,
     message,
     platform,
     resolved,
   });
+
+  if (!connectedConversation) {
+    await forgetThreadState(thread);
+    await thread
+      .post(
+        "This chat is no longer linked to an authorized Midday workspace. Reconnect it from Midday and try again.",
+      )
+      .catch(() => {});
+    return;
+  }
 
   if (connectedConversation.identityId) {
     await updatePlatformIdentityMetadata(db, {
@@ -238,28 +249,32 @@ async function resolveConversation(
   return null;
 }
 
+function consumeResolvedConversation(resolved: ConnectedResolvedConversation) {
+  return {
+    ...resolved,
+    consumed: true as const,
+  };
+}
+
 async function hydrateResolvedConversationIdentity(params: {
+  thread: any;
   message: any;
   platform: BotPlatform;
   resolved: ConnectedResolvedConversation;
 }) {
-  const { message, platform, resolved } = params;
-
-  if (resolved.identityId) {
-    return resolved;
-  }
+  const { thread, message, platform, resolved } = params;
 
   if (
     platform !== "slack" &&
     platform !== "telegram" &&
     platform !== "whatsapp"
   ) {
-    return resolved;
+    return null;
   }
 
   const externalUserId = getMessageAuthorId(message);
   if (!externalUserId) {
-    return resolved;
+    return null;
   }
 
   const identity = await getPlatformIdentity(db, {
@@ -268,7 +283,43 @@ async function hydrateResolvedConversationIdentity(params: {
     externalTeamId: platform === "slack" ? getSlackTeamId(message) : undefined,
   });
 
-  return withResolvedConversationIdentity(resolved, identity);
+  const connectedConversation = requireResolvedConversationIdentity(
+    resolved,
+    identity,
+  );
+
+  if (!connectedConversation) {
+    return null;
+  }
+
+  if (
+    !(await hasCurrentTeamAccess(
+      thread,
+      connectedConversation.teamId,
+      connectedConversation.actingUserId,
+    ))
+  ) {
+    return null;
+  }
+
+  if (platform === "slack" && !thread.isDM) {
+    const slackTeamId = getSlackTeamId(message);
+
+    if (!slackTeamId) {
+      return null;
+    }
+
+    const app = await getAppBySlackTeamId(db, {
+      slackTeamId,
+      channelId: thread.channelId,
+    });
+
+    if (!app?.teamId || app.teamId !== connectedConversation.teamId) {
+      return null;
+    }
+  }
+
+  return connectedConversation;
 }
 
 async function resolveWhatsAppConversation(thread: any, message: any) {
@@ -283,6 +334,16 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
   });
 
   if (existingIdentity?.teamId && existingIdentity.userId) {
+    if (
+      !(await hasCurrentTeamAccess(
+        thread,
+        existingIdentity.teamId,
+        existingIdentity.userId,
+      ))
+    ) {
+      return { connected: false as const };
+    }
+
     await rememberThreadState(thread, {
       teamId: existingIdentity.teamId,
       actingUserId: existingIdentity.userId,
@@ -319,6 +380,10 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
     await thread.post(
       "That WhatsApp link code is invalid or expired. Open Midday and generate a new one.",
     );
+    return { connected: false as const };
+  }
+
+  if (!(await hasCurrentTeamAccess(thread, token.teamId, token.userId))) {
     return { connected: false as const };
   }
 
@@ -361,12 +426,12 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
       `Connected to ${team?.name ?? "Midday"}. You can now chat with Midday or send receipts and PDFs here.`,
     );
 
-    return {
+    return consumeResolvedConversation({
       connected: true as const,
       teamId: token.teamId,
       actingUserId,
       identityId: identity.id,
-    };
+    });
   } catch (error) {
     if (error instanceof WhatsAppAlreadyConnectedToAnotherTeamError) {
       await thread.post(
@@ -405,6 +470,16 @@ async function resolveTelegramConversation(thread: any, message: any) {
   });
 
   if (existingIdentity?.teamId && existingIdentity.userId) {
+    if (
+      !(await hasCurrentTeamAccess(
+        thread,
+        existingIdentity.teamId,
+        existingIdentity.userId,
+      ))
+    ) {
+      return { connected: false as const };
+    }
+
     await rememberThreadState(thread, {
       teamId: existingIdentity.teamId,
       actingUserId: existingIdentity.userId,
@@ -441,6 +516,10 @@ async function resolveTelegramConversation(thread: any, message: any) {
     await thread.post(
       "That Telegram link code is invalid or expired. Open Midday and generate a new one.",
     );
+    return { connected: false as const };
+  }
+
+  if (!(await hasCurrentTeamAccess(thread, token.teamId, token.userId))) {
     return { connected: false as const };
   }
 
@@ -487,12 +566,12 @@ async function resolveTelegramConversation(thread: any, message: any) {
       `Connected to ${team?.name ?? "Midday"}. You can now send receipts or ask Midday questions here.`,
     );
 
-    return {
+    return consumeResolvedConversation({
       connected: true as const,
       teamId: token.teamId,
       actingUserId,
       identityId: identity.id,
-    };
+    });
   } catch (error) {
     if (error instanceof TelegramAlreadyConnectedToAnotherTeamError) {
       await thread.post(
@@ -537,6 +616,16 @@ async function resolveSlackConversation(thread: any, message: any) {
   });
 
   if (thread.isDM && existingIdentity?.teamId && existingIdentity.userId) {
+    if (
+      !(await hasCurrentTeamAccess(
+        thread,
+        existingIdentity.teamId,
+        existingIdentity.userId,
+      ))
+    ) {
+      return { connected: false as const };
+    }
+
     await rememberThreadState(thread, {
       teamId: existingIdentity.teamId,
       actingUserId: existingIdentity.userId,
@@ -582,6 +671,10 @@ async function resolveSlackConversation(thread: any, message: any) {
       return { connected: false as const };
     }
 
+    if (!(await hasCurrentTeamAccess(thread, token.teamId, token.userId))) {
+      return { connected: false as const };
+    }
+
     try {
       const identity = await createOrUpdatePlatformIdentity(db, {
         provider: "slack",
@@ -610,12 +703,12 @@ async function resolveSlackConversation(thread: any, message: any) {
         `Linked to ${team?.name ?? "Midday"}. Your future Slack messages will run as your Midday user.`,
       );
 
-      return {
+      return consumeResolvedConversation({
         connected: true as const,
         teamId: token.teamId,
         actingUserId: token.userId,
         identityId: identity.id,
-      };
+      });
     } catch (error) {
       if (error instanceof PlatformIdentityAlreadyLinkedToAnotherUserError) {
         await thread.post(
@@ -650,15 +743,13 @@ async function resolveSlackConversation(thread: any, message: any) {
     return { connected: false as const };
   }
 
-  const canAccessTeam = await hasTeamAccess(
-    db,
-    resolvedTeamId,
-    existingIdentity.userId,
-  );
-  if (!canAccessTeam) {
-    await thread.post(
-      "Your Slack user is linked, but that Midday user does not have access to this workspace.",
-    );
+  if (
+    !(await hasCurrentTeamAccess(
+      thread,
+      resolvedTeamId,
+      existingIdentity.userId,
+    ))
+  ) {
     return { connected: false as const };
   }
 
@@ -779,6 +870,31 @@ function isSupportedAttachment(attachment: any) {
 
 async function rememberThreadState(thread: any, state: BotThreadState) {
   await thread.setState(state);
+}
+
+async function forgetThreadState(thread: any) {
+  await thread.setState({});
+}
+
+async function hasCurrentTeamAccess(
+  thread: any,
+  teamId: string,
+  userId: string,
+) {
+  const canAccessTeam = await hasTeamAccess(db, teamId, userId);
+
+  if (canAccessTeam) {
+    return true;
+  }
+
+  await forgetThreadState(thread);
+  await thread
+    .post(
+      "This chat is linked, but that Midday user no longer has access to this workspace. Reconnect it from Midday and try again.",
+    )
+    .catch(() => {});
+
+  return false;
 }
 
 function getSlackTeamId(message: any) {

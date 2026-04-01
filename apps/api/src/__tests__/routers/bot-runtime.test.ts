@@ -1,0 +1,273 @@
+import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { mocks } from "../setup";
+
+const streamMiddayAssistantMock = mock(() =>
+  Promise.resolve({ fullStream: "assistant reply" }),
+);
+const toAiMessagesMock = mock(() => Promise.resolve([]));
+const buildSystemPromptMock = mock(() => "system prompt");
+
+let subscribedMessageHandler:
+  | ((thread: any, message: any) => Promise<void>)
+  | undefined;
+let slackDmMessageHandler:
+  | ((thread: any, message: any) => Promise<void>)
+  | undefined;
+
+mock.module("@api/chat/assistant-runtime", () => ({
+  streamMiddayAssistant: streamMiddayAssistantMock,
+}));
+
+mock.module("@api/chat/prompt", () => ({
+  buildSystemPrompt: buildSystemPromptMock,
+}));
+
+mock.module("@api/utils/scopes", () => ({
+  expandScopes: () => ["apis.all"],
+}));
+
+mock.module("chat", () => ({
+  toAiMessages: toAiMessagesMock,
+}));
+
+mock.module("@midday/logger", () => ({
+  createLoggerWithContext: () => ({
+    warn: mock(() => undefined),
+    debug: mock(() => undefined),
+  }),
+}));
+
+mock.module("@midday/bot", () => ({
+  bot: {
+    onNewMention: mock(() => undefined),
+    onSubscribedMessage: mock(
+      (handler: (thread: any, message: any) => Promise<void>) => {
+        subscribedMessageHandler = handler;
+      },
+    ),
+    onNewMessage: mock(
+      (
+        _pattern: RegExp,
+        handler: (thread: any, message: any) => Promise<void>,
+      ) => {
+        slackDmMessageHandler = handler;
+      },
+    ),
+    onAssistantThreadStarted: mock(() => undefined),
+    onAssistantContextChanged: mock(() => undefined),
+    getAdapter: mock(() => ({
+      setSuggestedPrompts: mock(() => Promise.resolve()),
+    })),
+  },
+  formatNotificationContextForPrompt: mock(() => ""),
+  formatProcessedUploadSummary: mock(() => ""),
+  getPlatformInstructions: mock(() => ""),
+  isSupportedInboxUploadMediaType: mock(() => false),
+  processInboxUpload: mock(() => Promise.resolve(null)),
+}));
+
+const { registerMiddayBotRuntime } = await import("../../bot/runtime");
+
+registerMiddayBotRuntime();
+
+function createLinkedUser() {
+  return {
+    id: "user_123",
+    email: "test@example.com",
+    timezone: "UTC",
+    locale: "en",
+    dateFormat: null,
+    timeFormat: 24,
+    fullName: "Test User",
+    team: {
+      baseCurrency: "USD",
+      name: "Midday Test Team",
+      countryCode: "US",
+    },
+  };
+}
+
+function createThread(platform: "whatsapp" | "telegram" | "slack") {
+  const posts: string[] = [];
+
+  return {
+    posts,
+    thread: {
+      adapter: { name: platform },
+      id: `${platform}_thread_123`,
+      channelId: `${platform}_channel_123`,
+      isDM: platform === "slack",
+      recentMessages: [],
+      state: {},
+      setState: mock(() => Promise.resolve()),
+      post: mock((text: string) => {
+        posts.push(text);
+        return Promise.resolve();
+      }),
+      startTyping: mock(() => Promise.resolve()),
+      subscribe: mock(() => Promise.resolve()),
+    },
+  };
+}
+
+function primeCommonLinkingMocks() {
+  mocks.hasTeamAccess.mockReset();
+  mocks.hasTeamAccess.mockImplementation(() => Promise.resolve(true));
+  mocks.getTeamById.mockReset();
+  mocks.getTeamById.mockImplementation(() =>
+    Promise.resolve({ name: "Midday Test Team" }),
+  );
+  mocks.getUserById.mockReset();
+  mocks.getUserById.mockImplementation(() =>
+    Promise.resolve(createLinkedUser()),
+  );
+  mocks.createOrUpdatePlatformIdentity.mockReset();
+  mocks.createOrUpdatePlatformIdentity.mockImplementation(() =>
+    Promise.resolve({ id: "identity_123" }),
+  );
+
+  streamMiddayAssistantMock.mockReset();
+  streamMiddayAssistantMock.mockImplementation(() =>
+    Promise.resolve({ fullStream: "assistant reply" }),
+  );
+  toAiMessagesMock.mockReset();
+  toAiMessagesMock.mockImplementation(() => Promise.resolve([]));
+  buildSystemPromptMock.mockReset();
+  buildSystemPromptMock.mockImplementation(() => "system prompt");
+
+  mocks.consumePlatformLinkToken.mockReset();
+  mocks.consumePlatformLinkToken.mockImplementation(() =>
+    Promise.resolve({
+      code: "mb_abc123456789",
+      provider: "whatsapp",
+      teamId: "team_123",
+      userId: "user_123",
+    }),
+  );
+
+  mocks.getPlatformIdentity.mockReset();
+  mocks.getPlatformIdentity
+    .mockImplementationOnce(() => Promise.resolve(null))
+    .mockImplementationOnce(() =>
+      Promise.resolve({
+        id: "identity_123",
+        teamId: "team_123",
+        userId: "user_123",
+        metadata: null,
+      }),
+    );
+}
+
+describe("bot runtime link-code consumption", () => {
+  beforeEach(() => {
+    primeCommonLinkingMocks();
+
+    mocks.addWhatsAppConnection.mockReset();
+    mocks.addWhatsAppConnection.mockImplementation(() =>
+      Promise.resolve({ id: "whatsapp_app_123" }),
+    );
+
+    mocks.addTelegramConnection.mockReset();
+    mocks.addTelegramConnection.mockImplementation(() =>
+      Promise.resolve({ id: "telegram_app_123" }),
+    );
+
+    mocks.getAppBySlackTeamId.mockReset();
+    mocks.getAppBySlackTeamId.mockImplementation(() => Promise.resolve(null));
+  });
+
+  test("consumes a first-time WhatsApp link code before assistant processing", async () => {
+    const { posts, thread } = createThread("whatsapp");
+    const message = {
+      id: "message_123",
+      text: "Connect to Midday: mb_abc123456789",
+      author: {
+        userId: "+15551234567",
+        fullName: "WhatsApp User",
+        userName: "whatsapp_user",
+      },
+      attachments: [],
+    };
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "Connected to Midday Test Team. You can now chat with Midday or send receipts and PDFs here.",
+    ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+    expect(toAiMessagesMock).not.toHaveBeenCalled();
+    expect(mocks.getUserById).not.toHaveBeenCalled();
+    expect(thread.startTyping).not.toHaveBeenCalled();
+  });
+
+  test("consumes a first-time Telegram link code before assistant processing", async () => {
+    const { posts, thread } = createThread("telegram");
+    const message = {
+      id: "message_123",
+      text: "/start mb_abc123456789",
+      author: {
+        userId: "telegram_user_123",
+        fullName: "Telegram User",
+        userName: "telegram_user",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve({
+        code: "mb_abc123456789",
+        provider: "telegram",
+        teamId: "team_123",
+        userId: "user_123",
+      }),
+    );
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "Connected to Midday Test Team. You can now send receipts or ask Midday questions here.",
+    ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+    expect(toAiMessagesMock).not.toHaveBeenCalled();
+    expect(mocks.getUserById).not.toHaveBeenCalled();
+    expect(thread.startTyping).not.toHaveBeenCalled();
+  });
+
+  test("consumes a first-time Slack link code before assistant processing", async () => {
+    const { posts, thread } = createThread("slack");
+    const message = {
+      id: "message_123",
+      text: "Connect to Midday: mb_abc123456789",
+      raw: {
+        team: "T123",
+      },
+      author: {
+        userId: "U123",
+        fullName: "Slack User",
+        userName: "slack_user",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve({
+        code: "mb_abc123456789",
+        provider: "slack",
+        teamId: "team_123",
+        userId: "user_123",
+      }),
+    );
+
+    await slackDmMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "Linked to Midday Test Team. Your future Slack messages will run as your Midday user.",
+    ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+    expect(toAiMessagesMock).not.toHaveBeenCalled();
+    expect(mocks.getUserById).not.toHaveBeenCalled();
+    expect(thread.startTyping).not.toHaveBeenCalled();
+  });
+});
