@@ -32,7 +32,6 @@ export async function loadDocument({
       try {
         const arrayBuffer = await content.arrayBuffer();
         const base64Content = Buffer.from(arrayBuffer).toString("base64");
-        const dataUri = `data:application/pdf;base64,${base64Content}`;
 
         // Use retry logic to handle transient failures (503 errors, timeouts)
         const result = await retryCall(
@@ -50,7 +49,7 @@ export async function loadDocument({
                     },
                     {
                       type: "file",
-                      data: dataUri,
+                      data: base64Content,
                       mediaType: "application/pdf",
                     },
                   ],
