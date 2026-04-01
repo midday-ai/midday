@@ -703,6 +703,14 @@ export const mocks = {
 
   // Apps
   getApps: mock(() => Promise.resolve([])) as MockFn,
+  createPlatformLinkToken: mock(() =>
+    Promise.resolve({
+      code: "mb_test_link_token",
+      provider: "slack",
+      teamId: "test-team-id",
+      userId: "test-user-id",
+    }),
+  ) as MockFn,
 
   // Bank connections
   getBankConnections: mock(() => Promise.resolve([])) as MockFn,
@@ -1034,6 +1042,7 @@ const dbQueriesMock = new Proxy(
 
     // Apps
     getApps: mocks.getApps,
+    createPlatformLinkToken: mocks.createPlatformLinkToken,
     getAppByAppId: createDefaultMock(),
     deleteApp: createDefaultMock(),
 
