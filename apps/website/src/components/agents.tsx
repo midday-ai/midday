@@ -354,9 +354,7 @@ function Terminal({ pixelFontClass }: { pixelFontClass?: string }) {
   const [typed2, setTyped2] = useState("");
   const [frame, setFrame] = useState(0);
   const [cursorOn, setCursorOn] = useState(true);
-  const [brandTyped, setBrandTyped] = useState("");
   const termRef = useRef<HTMLDivElement>(null);
-  const brandText = "midday";
 
   const scenario = SCENARIOS[activeTab] as Scenario;
 
@@ -379,19 +377,6 @@ function Terminal({ pixelFontClass }: { pixelFontClass?: string }) {
 
   useEffect(() => {
     const id = setInterval(() => setCursorOn((v) => !v), 530);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    let i = 0;
-    const id = setInterval(() => {
-      if (i <= brandText.length) {
-        setBrandTyped(brandText.slice(0, i));
-        i++;
-      } else {
-        clearInterval(id);
-      }
-    }, 120);
     return () => clearInterval(id);
   }, []);
 
@@ -535,10 +520,7 @@ function Terminal({ pixelFontClass }: { pixelFontClass?: string }) {
               pixelFontClass,
             )}
           >
-            {brandTyped}
-            {brandTyped.length < brandText.length && (
-              <span className={cursorOn ? "opacity-100" : "opacity-0"}>▊</span>
-            )}
+            midday
           </div>
           <div className="text-[hsl(225,60%,75%)] text-[10px] tracking-widest mt-1.5 mb-5">
             v0.1.0 · agent@acme.corp · Midday Labs AB
