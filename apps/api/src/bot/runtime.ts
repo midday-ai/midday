@@ -1,3 +1,8 @@
+import {
+  type ConnectedResolvedConversation,
+  getPlatformIdentityNotificationContext,
+  withResolvedConversationIdentity,
+} from "@api/bot/conversation-identity";
 import { extractConnectionToken, getMessageAuthorId } from "@api/bot/linking";
 import { canReuseCachedThreadState } from "@api/bot/thread-state";
 import { streamMiddayAssistant } from "@api/chat/assistant-runtime";
@@ -48,13 +53,7 @@ type BotThreadState = {
 };
 
 type ResolvedConversation =
-  | {
-      connected: true;
-      teamId: string;
-      actingUserId: string;
-      identityId?: string;
-      notificationContext?: Record<string, unknown> | null;
-    }
+  | ConnectedResolvedConversation
   | { connected: false };
 
 let registered = false;
@@ -113,16 +112,22 @@ async function handleIncomingMessage(thread: any, message: any) {
     return;
   }
 
-  if (resolved.identityId) {
+  const connectedConversation = await hydrateResolvedConversationIdentity({
+    message,
+    platform,
+    resolved,
+  });
+
+  if (connectedConversation.identityId) {
     await updatePlatformIdentityMetadata(db, {
-      id: resolved.identityId,
+      id: connectedConversation.identityId,
       metadata: {
         lastSeenAt: new Date().toISOString(),
       },
     }).catch(() => {});
   }
 
-  const user = await getUserById(db, resolved.actingUserId);
+  const user = await getUserById(db, connectedConversation.actingUserId);
 
   if (!user) {
     await thread.post(
@@ -136,8 +141,8 @@ async function handleIncomingMessage(thread: any, message: any) {
   const recentUploadSummaries = await processIncomingAttachments({
     thread,
     message,
-    teamId: resolved.teamId,
-    actingUserId: resolved.actingUserId,
+    teamId: connectedConversation.teamId,
+    actingUserId: connectedConversation.actingUserId,
     platform,
   });
 
@@ -145,7 +150,7 @@ async function handleIncomingMessage(thread: any, message: any) {
 
   const mcpCtx: McpContext = {
     db,
-    teamId: resolved.teamId,
+    teamId: connectedConversation.teamId,
     userId: user.id,
     userEmail: user.email ?? null,
     scopes: ALL_ASSISTANT_SCOPES,
@@ -171,9 +176,9 @@ async function handleIncomingMessage(thread: any, message: any) {
       recentUploadSummaries,
     }) +
     getPlatformInstructions(platform) +
-    (resolved.notificationContext
+    (connectedConversation.notificationContext
       ? `\n\n${formatNotificationContextForPrompt(
-          resolved.notificationContext as any,
+          connectedConversation.notificationContext as any,
         )}`
       : "");
 
@@ -189,9 +194,12 @@ async function handleIncomingMessage(thread: any, message: any) {
 
   await thread.post(result.fullStream);
 
-  if (resolved.identityId && resolved.notificationContext) {
+  if (
+    connectedConversation.identityId &&
+    connectedConversation.notificationContext
+  ) {
     await updatePlatformIdentityMetadata(db, {
-      id: resolved.identityId,
+      id: connectedConversation.identityId,
       metadata: {
         lastNotificationContext: null,
       },
@@ -230,6 +238,39 @@ async function resolveConversation(
   return null;
 }
 
+async function hydrateResolvedConversationIdentity(params: {
+  message: any;
+  platform: BotPlatform;
+  resolved: ConnectedResolvedConversation;
+}) {
+  const { message, platform, resolved } = params;
+
+  if (resolved.identityId) {
+    return resolved;
+  }
+
+  if (
+    platform !== "slack" &&
+    platform !== "telegram" &&
+    platform !== "whatsapp"
+  ) {
+    return resolved;
+  }
+
+  const externalUserId = getMessageAuthorId(message);
+  if (!externalUserId) {
+    return resolved;
+  }
+
+  const identity = await getPlatformIdentity(db, {
+    provider: platform,
+    externalUserId,
+    externalTeamId: platform === "slack" ? getSlackTeamId(message) : undefined,
+  });
+
+  return withResolvedConversationIdentity(resolved, identity);
+}
+
 async function resolveWhatsAppConversation(thread: any, message: any) {
   const phoneNumber = getMessageAuthorId(message);
   if (!phoneNumber) {
@@ -254,9 +295,9 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
       teamId: existingIdentity.teamId,
       actingUserId: existingIdentity.userId,
       identityId: existingIdentity.id,
-      notificationContext:
-        (existingIdentity.metadata as Record<string, unknown> | null)
-          ?.lastNotificationContext ?? null,
+      notificationContext: getPlatformIdentityNotificationContext(
+        existingIdentity.metadata as Record<string, unknown> | null,
+      ),
     };
   }
 
@@ -376,9 +417,9 @@ async function resolveTelegramConversation(thread: any, message: any) {
       teamId: existingIdentity.teamId,
       actingUserId: existingIdentity.userId,
       identityId: existingIdentity.id,
-      notificationContext:
-        (existingIdentity.metadata as Record<string, unknown> | null)
-          ?.lastNotificationContext ?? null,
+      notificationContext: getPlatformIdentityNotificationContext(
+        existingIdentity.metadata as Record<string, unknown> | null,
+      ),
     };
   }
 
@@ -479,15 +520,7 @@ async function resolveTelegramConversation(thread: any, message: any) {
 }
 
 async function resolveSlackConversation(thread: any, message: any) {
-  const raw = message?.raw as
-    | {
-        team?: string;
-        team_id?: string;
-        teamId?: string;
-      }
-    | undefined;
-
-  const slackTeamId = raw?.team || raw?.team_id || raw?.teamId;
+  const slackTeamId = getSlackTeamId(message);
   const slackUserId = getMessageAuthorId(message);
 
   if (!slackTeamId || !slackUserId) {
@@ -516,9 +549,9 @@ async function resolveSlackConversation(thread: any, message: any) {
       teamId: existingIdentity.teamId,
       actingUserId: existingIdentity.userId,
       identityId: existingIdentity.id,
-      notificationContext:
-        (existingIdentity.metadata as Record<string, unknown> | null)
-          ?.lastNotificationContext ?? null,
+      notificationContext: getPlatformIdentityNotificationContext(
+        existingIdentity.metadata as Record<string, unknown> | null,
+      ),
     };
   }
 
@@ -641,9 +674,9 @@ async function resolveSlackConversation(thread: any, message: any) {
     teamId: resolvedTeamId,
     actingUserId: existingIdentity.userId,
     identityId: existingIdentity.id,
-    notificationContext:
-      (existingIdentity.metadata as Record<string, unknown> | null)
-        ?.lastNotificationContext ?? null,
+    notificationContext: getPlatformIdentityNotificationContext(
+      existingIdentity.metadata as Record<string, unknown> | null,
+    ),
   };
 }
 
@@ -746,6 +779,18 @@ function isSupportedAttachment(attachment: any) {
 
 async function rememberThreadState(thread: any, state: BotThreadState) {
   await thread.setState(state);
+}
+
+function getSlackTeamId(message: any) {
+  const raw = message?.raw as
+    | {
+        team?: string;
+        team_id?: string;
+        teamId?: string;
+      }
+    | undefined;
+
+  return raw?.team || raw?.team_id || raw?.teamId;
 }
 
 function normalizePlatform(platformName: string): BotPlatform | null {
