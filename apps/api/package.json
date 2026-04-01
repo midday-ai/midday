@@ -27,6 +27,7 @@
     "@midday/accounting": "workspace:*",
     "@midday/app-store": "workspace:*",
     "@midday/banking": "workspace:*",
+    "@midday/bot": "workspace:*",
     "@midday/cache": "workspace:*",
     "@midday/categories": "workspace:*",
     "@midday/connectors": "workspace:*",

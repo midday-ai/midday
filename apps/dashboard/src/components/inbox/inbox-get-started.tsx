@@ -14,6 +14,7 @@ import { AppConnectionToast } from "@/components/app-connection-toast";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
 import { ConnectOutlook } from "@/components/inbox/connect-outlook";
 import { ConnectSlack } from "@/components/inbox/connect-slack";
+import { ConnectTelegram } from "@/components/inbox/connect-telegram";
 import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useRealtime } from "@/hooks/use-realtime";
@@ -105,6 +106,7 @@ export function InboxGetStarted() {
                   <AccordionContent className="mt-4">
                     <div className="flex flex-col space-y-4">
                       <ConnectSlack />
+                      <ConnectTelegram />
                       <ConnectWhatsApp />
                       {user?.team?.inboxId && (
                         <CopyInput value={getInboxEmail(user.team.inboxId)} />

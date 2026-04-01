@@ -12,6 +12,7 @@ import { CopyInput } from "@/components/copy-input";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
 import { ConnectOutlook } from "@/components/inbox/connect-outlook";
 import { ConnectSlack } from "@/components/inbox/connect-slack";
+import { ConnectTelegram } from "@/components/inbox/connect-telegram";
 import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
 import { useUserQuery } from "@/hooks/use-user";
 
@@ -108,6 +109,7 @@ export function ConnectInboxStep() {
             <AccordionContent className="mt-4">
               <div className="flex flex-col space-y-4">
                 <ConnectSlack />
+                <ConnectTelegram />
                 <ConnectWhatsApp />
                 {inboxEmail && <CopyInput value={inboxEmail} />}
               </div>

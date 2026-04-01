@@ -7,7 +7,8 @@ import {
   getSlackInstaller,
   publishAppHome,
 } from "@midday/app-store/slack/server";
-import { createApp } from "@midday/db/queries";
+import { bot } from "@midday/bot";
+import { createApp, createOrUpdatePlatformIdentity } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
 import { sendWelcomeMessage } from "./messages";
@@ -167,6 +168,14 @@ app.openapi(
         });
       }
 
+      await bot.initialize();
+      const slackAdapter = bot.getAdapter("slack");
+      await slackAdapter.setInstallation(parsedJson.data.team.id, {
+        botToken: parsedJson.data.access_token,
+        botUserId: parsedJson.data.bot_user_id,
+        teamName: parsedJson.data.team.name,
+      });
+
       // Create app integration in database
       const createdSlackIntegration = await createApp(db, {
         teamId: parsedMetadata.data.teamId,
@@ -183,6 +192,17 @@ app.openapi(
             parsedJson.data.incoming_webhook.configuration_url,
           url: parsedJson.data.incoming_webhook.url,
           bot_user_id: parsedJson.data.bot_user_id,
+        },
+      });
+
+      await createOrUpdatePlatformIdentity(db, {
+        provider: "slack",
+        teamId: parsedMetadata.data.teamId,
+        userId: parsedMetadata.data.userId,
+        externalUserId: parsedJson.data.authed_user.id,
+        externalTeamId: parsedJson.data.team.id,
+        metadata: {
+          source: "slack_oauth_install",
         },
       });
 

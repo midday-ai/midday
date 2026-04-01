@@ -5,6 +5,7 @@ import { inboxWebhookRouter } from "./inbox";
 import { plaidWebhookRouter } from "./plaid";
 import { polarWebhookRouter } from "./polar";
 import { stripeWebhookRouter } from "./stripe";
+import { telegramWebhookRouter } from "./telegram";
 import { tellerWebhookRouter } from "./teller";
 import { whatsappWebhookRouter } from "./whatsapp";
 
@@ -19,6 +20,7 @@ app.route("/plaid", plaidWebhookRouter);
 app.route("/polar", polarWebhookRouter);
 app.route("/stripe", stripeWebhookRouter);
 app.route("/teller", tellerWebhookRouter);
+app.route("/telegram", telegramWebhookRouter);
 app.route("/whatsapp", whatsappWebhookRouter);
 
 export { app as webhookRouter };

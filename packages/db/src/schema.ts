@@ -296,6 +296,11 @@ export const insightStatusEnum = pgEnum("insight_status", [
   "completed",
   "failed",
 ]);
+export const platformProviderEnum = pgEnum("platform_provider", [
+  "slack",
+  "telegram",
+  "whatsapp",
+]);
 
 export const documentTagEmbeddings = pgTable(
   "document_tag_embeddings",
@@ -1873,6 +1878,140 @@ export const apps = pgTable(
       as: "permissive",
       for: "update",
       to: ["public"],
+    }),
+  ],
+);
+
+export const platformIdentities = pgTable(
+  "platform_identities",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    provider: platformProviderEnum().notNull(),
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    externalUserId: text("external_user_id").notNull(),
+    externalTeamId: text("external_team_id").default("").notNull(),
+    externalChannelId: text("external_channel_id"),
+    metadata: jsonb(),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    }).defaultNow(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    }).defaultNow(),
+  },
+  (table) => [
+    index("platform_identities_provider_external_idx").on(
+      table.provider,
+      table.externalTeamId,
+      table.externalUserId,
+    ),
+    index("platform_identities_team_id_idx").on(table.teamId),
+    index("platform_identities_user_id_idx").on(table.userId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "platform_identities_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "platform_identities_user_id_fkey",
+    }).onDelete("cascade"),
+    unique("platform_identities_provider_external_unique").on(
+      table.provider,
+      table.externalTeamId,
+      table.externalUserId,
+    ),
+    pgPolicy("Platform identities can be created by a member of the team", {
+      as: "permissive",
+      for: "insert",
+      to: ["authenticated"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Platform identities can be selected by a member of the team", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Platform identities can be updated by a member of the team", {
+      as: "permissive",
+      for: "update",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Platform identities can be deleted by a member of the team", {
+      as: "permissive",
+      for: "delete",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const platformLinkTokens = pgTable(
+  "platform_link_tokens",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    code: text().notNull(),
+    provider: platformProviderEnum().notNull(),
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    usedAt: timestamp("used_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    metadata: jsonb(),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    }).defaultNow(),
+  },
+  (table) => [
+    index("platform_link_tokens_code_idx").on(table.code),
+    index("platform_link_tokens_team_id_idx").on(table.teamId),
+    index("platform_link_tokens_user_id_idx").on(table.userId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "platform_link_tokens_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "platform_link_tokens_user_id_fkey",
+    }).onDelete("cascade"),
+    unique("platform_link_tokens_code_unique").on(table.code),
+    pgPolicy("Platform link tokens can be created by a member of the team", {
+      as: "permissive",
+      for: "insert",
+      to: ["authenticated"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Platform link tokens can be selected by a member of the team", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Platform link tokens can be updated by a member of the team", {
+      as: "permissive",
+      for: "update",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Platform link tokens can be deleted by a member of the team", {
+      as: "permissive",
+      for: "delete",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
     }),
   ],
 );

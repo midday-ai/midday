@@ -5,7 +5,7 @@ import {
   sendSlackInvoicePaidNotification,
   sendSlackMatchNotification,
 } from "@midday/app-store/slack/server";
-import { sendMatchNotification } from "@midday/app-store/whatsapp/server";
+import { sendWhatsAppMatchNotification } from "@midday/bot";
 import type { Database } from "@midday/db/client";
 import {
   getAppByAppId,
@@ -427,7 +427,7 @@ async function sendWhatsAppNotification<T extends ProviderNotificationType>(
       return;
     }
 
-    await sendMatchNotification({
+    await sendWhatsAppMatchNotification({
       phoneNumber: connection.phoneNumber,
       inboxId: matchPayload.inboxId,
       transactionId: matchPayload.transactionId,
@@ -435,7 +435,6 @@ async function sendWhatsAppNotification<T extends ProviderNotificationType>(
       transactionName: matchPayload.transactionName,
       amount: matchPayload.documentAmount,
       currency: matchPayload.documentCurrency,
-      confidence: matchPayload.confidenceScore,
       transactionDate: matchPayload.transactionDate,
     });
 

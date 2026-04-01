@@ -19,6 +19,7 @@ import raycastMcpApp from "./raycast-mcp/config";
 // Import client config for dashboard (includes images)
 import slackApp from "./slack/config-client";
 import stripePaymentsApp from "./stripe-payments/config-client";
+import telegramApp from "./telegram/config-client";
 import whatsappApp from "./whatsapp/config-client";
 import windsurfMcpApp from "./windsurf-mcp/config";
 import xeroApp from "./xero/config-client";
@@ -29,6 +30,7 @@ export const apps = [
   gmailApp,
   outlookApp,
   slackApp,
+  telegramApp,
   quickBooksApp,
   xeroApp,
   fortnoxApp,

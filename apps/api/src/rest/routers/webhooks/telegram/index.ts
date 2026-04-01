@@ -9,7 +9,7 @@ registerMiddayBotRuntime();
 
 app.post("/", async (c) => {
   await bot.initialize();
-  return bot.webhooks.slack(c.req.raw);
+  return bot.webhooks.telegram(c.req.raw);
 });
 
-export const interactionsRouter = app;
+export const telegramWebhookRouter = app;

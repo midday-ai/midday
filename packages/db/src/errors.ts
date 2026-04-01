@@ -33,3 +33,30 @@ export class WhatsAppAlreadyConnectedToAnotherTeamError extends Error {
     this.name = "WhatsAppAlreadyConnectedToAnotherTeamError";
   }
 }
+
+export class TelegramAlreadyConnectedToAnotherTeamError extends Error {
+  code = "TELEGRAM_ALREADY_CONNECTED_TO_ANOTHER_TEAM" as const;
+
+  constructor() {
+    super("Telegram account already connected to another team");
+    this.name = "TelegramAlreadyConnectedToAnotherTeamError";
+  }
+}
+
+export class PlatformIdentityAlreadyLinkedToAnotherUserError extends Error {
+  code = "PLATFORM_IDENTITY_ALREADY_LINKED_TO_ANOTHER_USER" as const;
+
+  constructor() {
+    super("Platform identity is already linked to another user");
+    this.name = "PlatformIdentityAlreadyLinkedToAnotherUserError";
+  }
+}
+
+export class PlatformIdentityAlreadyLinkedToAnotherTeamError extends Error {
+  code = "PLATFORM_IDENTITY_ALREADY_LINKED_TO_ANOTHER_TEAM" as const;
+
+  constructor() {
+    super("Platform identity is already linked to another team");
+    this.name = "PlatformIdentityAlreadyLinkedToAnotherTeamError";
+  }
+}

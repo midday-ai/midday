@@ -16,6 +16,7 @@ export interface UserContext {
   countryCode: string | null;
   localTime: string | null;
   mentionedApps?: MentionedApp[];
+  recentUploadSummaries?: string[];
 }
 
 const MIDDAY_DOMAINS =
@@ -85,8 +86,13 @@ Rules:
 - NEVER search COMPOSIO for Midday-native actions. Queries like "create invoice", "create customer", or "list transactions" will return wrong results from external apps. Use \`search_tools\` to find internal tools instead.
 - Do not authenticate services in chat.
 
+### File uploads
+When the user sends an image or PDF, it may already have been processed through Midday's inbox pipeline before you respond.
+- If recent upload summaries are provided below, acknowledge them briefly and continue helping with follow-up actions such as categorizing, matching, or creating records from the extracted data.
+- Do not claim you cannot handle file uploads when upload summaries are present.
+
 ### Boundaries
-You CANNOT: send emails (other than invoice send/remind), connect bank accounts, modify user settings, manage billing/subscriptions, or upload files.
+You CANNOT: send emails (other than invoice send/remind), connect bank accounts, modify user settings, or manage billing/subscriptions.
 
 ## Language
 - Always respond in English unless the user explicitly asks for another language.
@@ -145,8 +151,15 @@ You CANNOT: send emails (other than invoice send/remind), connect bank accounts,
 - Format currency amounts using ${ctx.baseCurrency} and the user's locale conventions (e.g. "$1,234.56" for en-US, "1.234,56 €" for de-DE, "1 234,56 kr" for sv-SE).
 - Format dates using the user's preferred date format${ctx.dateFormat ? ` ("${ctx.dateFormat}")` : ""} and times using ${timeLabel} format.
 - Use bullet points only for short non-tabular summaries.` +
+    buildRecentUploadsSection(ctx.recentUploadSummaries) +
     buildMentionedAppsSection(ctx.mentionedApps)
   );
+}
+
+function buildRecentUploadsSection(summaries?: string[]): string {
+  if (!summaries?.length) return "";
+
+  return `\n\n## Recent uploaded files\nThese files were just processed through Midday's inbox pipeline before your response:\n${summaries.map((summary) => `- ${summary}`).join("\n")}`;
 }
 
 function buildMentionedAppsSection(apps?: MentionedApp[]): string {
