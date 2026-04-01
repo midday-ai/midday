@@ -64,6 +64,7 @@ export function CancellationDialog({
   const queryClient = useQueryClient();
   const { data: user } = useUserQuery();
   const plan = user?.team?.plan;
+  const isTrialing = user?.team?.subscriptionStatus === "trialing";
   const theme = useTheme().resolvedTheme === "dark" ? "dark" : "light";
   const checkoutRef = useRef<Awaited<
     ReturnType<typeof PolarEmbedCheckout.create>
@@ -230,6 +231,7 @@ export function CancellationDialog({
                 <motion.div key="step-3" {...stepTransition}>
                   <StepThree
                     isSubmitting={cancelMutation.isPending}
+                    isTrialing={isTrialing}
                     onConfirm={handleCancel}
                     onKeepPlan={() => handleClose(false)}
                     onBack={() => setStep(2)}
@@ -239,7 +241,10 @@ export function CancellationDialog({
 
               {step === "done" && (
                 <motion.div key="step-done" {...stepTransition}>
-                  <StepDone onClose={() => handleClose(false)} />
+                  <StepDone
+                    isTrialing={isTrialing}
+                    onClose={() => handleClose(false)}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -502,11 +507,13 @@ function StepTwo({
 
 function StepThree({
   isSubmitting,
+  isTrialing,
   onConfirm,
   onKeepPlan,
   onBack,
 }: {
   isSubmitting: boolean;
+  isTrialing: boolean;
   onConfirm: () => void;
   onKeepPlan: () => void;
   onBack: () => void;
@@ -518,8 +525,9 @@ function StepThree({
           Confirm cancellation
         </DialogTitle>
         <DialogDescription>
-          Your plan will remain active until the end of your current billing
-          period. You won't be charged again.
+          {isTrialing
+            ? "Your trial will remain active until it ends. You won't be charged."
+            : "Your plan will remain active until the end of your current billing period. You won't be charged again."}
         </DialogDescription>
       </DialogHeader>
 
@@ -556,7 +564,13 @@ function StepThree({
   );
 }
 
-function StepDone({ onClose }: { onClose: () => void }) {
+function StepDone({
+  isTrialing,
+  onClose,
+}: {
+  isTrialing: boolean;
+  onClose: () => void;
+}) {
   return (
     <div>
       <DialogHeader className="mb-6">
@@ -564,8 +578,9 @@ function StepDone({ onClose }: { onClose: () => void }) {
           Subscription canceled
         </DialogTitle>
         <DialogDescription>
-          Your plan remains active until the end of your billing period. Your
-          data will be kept safe — you can resubscribe anytime.
+          {isTrialing
+            ? "Your trial remains active until it ends. After that, you'll need to subscribe to continue using Midday. Your data will be kept safe."
+            : "Your plan remains active until the end of your billing period. Your data will be kept safe — you can resubscribe anytime."}
         </DialogDescription>
       </DialogHeader>
 

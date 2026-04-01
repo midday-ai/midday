@@ -22,6 +22,7 @@ export const getUserById = async (db: Database, id: string) => {
         logoUrl: teams.logoUrl,
         email: teams.email,
         plan: teams.plan,
+        subscriptionStatus: teams.subscriptionStatus,
         inboxId: teams.inboxId,
         createdAt: teams.createdAt,
         countryCode: teams.countryCode,

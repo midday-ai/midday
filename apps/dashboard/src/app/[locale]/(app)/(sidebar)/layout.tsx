@@ -44,10 +44,13 @@ export default async function Layout({
 
   // New teams created after this date must complete onboarding (incl. plan
   // selection) before accessing the dashboard. Existing teams are unaffected.
+  // Teams with canceledAt set have already been through onboarding and had a
+  // subscription -- they should see the upgrade page, not the onboarding flow.
   const ONBOARDING_ENFORCEMENT_DATE = "2026-03-24T00:00:00.000Z";
   if (
     user.team?.plan === "trial" &&
     user.team?.createdAt &&
+    !user.team?.canceledAt &&
     new Date(user.team.createdAt) >= new Date(ONBOARDING_ENFORCEMENT_DATE)
   ) {
     redirect("/onboarding?s=start-trial");

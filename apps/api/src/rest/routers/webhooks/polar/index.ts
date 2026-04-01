@@ -154,17 +154,20 @@ app.openapi(
             break;
           }
 
+          // subscription.canceled fires immediately when the user cancels --
+          // the subscription is still active/trialing with cancel_at_period_end: true.
+          // Only record the cancellation intent; the actual plan downgrade
+          // happens on subscription.revoked when the period ends.
           await updateTeamById(db, {
             id: teamId,
             data: {
-              email: event.data.customer.email ?? undefined,
-              plan: "trial",
               canceledAt: new Date().toISOString(),
-              subscriptionStatus: null,
             },
           });
 
-          logger.info("Team subscription canceled", { teamId });
+          logger.info("Team subscription scheduled for cancellation", {
+            teamId,
+          });
 
           try {
             const [owner, teamHasData] = await Promise.all([
@@ -265,7 +268,8 @@ app.openapi(
               teamId,
             });
           } else {
-            // Payment retries exhausted - downgrade to trial
+            // Subscription definitively ended (end-of-period cancellation
+            // or payment retries exhausted) -- downgrade to trial
             await updateTeamById(db, {
               id: teamId,
               data: {
