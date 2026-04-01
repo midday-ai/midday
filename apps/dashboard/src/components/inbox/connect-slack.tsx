@@ -68,7 +68,10 @@ export function ConnectSlack() {
     <Dialog open={open} onOpenChange={setOpen}>
       {isInstalled ? (
         <DialogTrigger asChild>
-          <Button className="px-6 py-4 w-full font-medium h-[40px]" variant="outline">
+          <Button
+            className="px-6 py-4 w-full font-medium h-[40px]"
+            variant="outline"
+          >
             <div className="flex items-center space-x-2">
               <Icons.Slack className="size-5" />
               <span>Link Slack User</span>

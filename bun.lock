@@ -237,6 +237,7 @@
         "@midday/accounting": "workspace:*",
         "@midday/app-store": "workspace:*",
         "@midday/banking": "workspace:*",
+        "@midday/bot": "workspace:*",
         "@midday/customers": "workspace:*",
         "@midday/db": "workspace:*",
         "@midday/documents": "workspace:*",
@@ -332,6 +333,7 @@
         "@chat-adapter/state-redis": "^4.23.0",
         "@chat-adapter/telegram": "^4.23.0",
         "@chat-adapter/whatsapp": "^4.23.0",
+        "@midday/app-store": "workspace:*",
         "@midday/db": "workspace:*",
         "@midday/documents": "workspace:*",
         "@midday/job-client": "workspace:*",
@@ -584,6 +586,7 @@
       "dependencies": {
         "@ai-sdk/google": "catalog:",
         "@fast-csv/format": "catalog:",
+        "@midday/bot": "workspace:*",
         "@midday/db": "workspace:*",
         "@midday/email": "workspace:*",
         "@midday/encryption": "workspace:*",

@@ -99,24 +99,23 @@ export function ConnectTelegram({ showTrigger = true }: ConnectTelegramProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {showTrigger &&
-        (
-          <DialogTrigger asChild>
-            <Button
-              className="px-6 py-4 w-full font-medium h-[40px]"
-              variant="outline"
-            >
-              <div className="flex items-center space-x-2">
-                <TelegramIcon />
-                <span>
-                  {connections.length > 0
-                    ? `Telegram (${connections.length} connected)`
-                    : "Connect Telegram"}
-                </span>
-              </div>
-            </Button>
-          </DialogTrigger>
-        )}
+      {showTrigger && (
+        <DialogTrigger asChild>
+          <Button
+            className="px-6 py-4 w-full font-medium h-[40px]"
+            variant="outline"
+          >
+            <div className="flex items-center space-x-2">
+              <TelegramIcon />
+              <span>
+                {connections.length > 0
+                  ? `Telegram (${connections.length} connected)`
+                  : "Connect Telegram"}
+              </span>
+            </div>
+          </Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="sm:max-w-[400px] p-0" hideClose>
         <div className="p-6 pb-0">

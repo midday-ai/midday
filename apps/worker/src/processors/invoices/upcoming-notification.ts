@@ -1,3 +1,4 @@
+import { sendToProviders } from "@midday/bot";
 import {
   getUpcomingDueRecurring,
   markUpcomingNotificationSent,
@@ -212,6 +213,18 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
           },
           { sendEmail: true },
         );
+
+        await sendToProviders(db, teamId, "recurring_invoice_upcoming", {
+          invoices: teamInvoices.map((inv) => ({
+            recurringId: inv.id,
+            customerName: inv.customerName ?? undefined,
+            amount: inv.amount ?? undefined,
+            currency: inv.currency ?? undefined,
+            scheduledAt: inv.nextScheduledAt!,
+            frequency: inv.frequency,
+          })),
+          count: teamInvoices.length,
+        });
 
         // Mark all invoices in this batch as notified
         for (const invoice of teamInvoices) {

@@ -109,24 +109,23 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {showTrigger &&
-        (
-          <DialogTrigger asChild>
-            <Button
-              className="px-6 py-4 w-full font-medium h-[40px]"
-              variant="outline"
-            >
-              <div className="flex items-center space-x-2">
-                <Icons.WhatsApp className="size-5 text-[#25D366]" />
-                <span>
-                  {connections.length > 0
-                    ? `WhatsApp (${connections.length} connected)`
-                    : "Connect WhatsApp"}
-                </span>
-              </div>
-            </Button>
-          </DialogTrigger>
-        )}
+      {showTrigger && (
+        <DialogTrigger asChild>
+          <Button
+            className="px-6 py-4 w-full font-medium h-[40px]"
+            variant="outline"
+          >
+            <div className="flex items-center space-x-2">
+              <Icons.WhatsApp className="size-5 text-[#25D366]" />
+              <span>
+                {connections.length > 0
+                  ? `WhatsApp (${connections.length} connected)`
+                  : "Connect WhatsApp"}
+              </span>
+            </div>
+          </Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="sm:max-w-[400px] p-0" hideClose>
         <div className="p-6 pb-0">

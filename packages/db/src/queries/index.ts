@@ -28,6 +28,7 @@ export * from "./oauth-applications";
 export * from "./oauth-flow";
 export * from "./overview";
 export * from "./platform-identities";
+export * from "./provider-notification-batches";
 export * from "./reports";
 export * from "./search";
 export * from "./short-links";

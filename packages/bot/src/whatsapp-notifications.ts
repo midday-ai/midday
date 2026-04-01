@@ -69,6 +69,39 @@ async function sendInteractiveButtons(params: {
   }
 }
 
+export async function sendWhatsAppTextNotification(params: {
+  phoneNumber: string;
+  body: string;
+}) {
+  const { phoneNumberId, accessToken } = getWhatsAppConfig();
+
+  const response = await fetch(
+    `${WHATSAPP_API_URL}/${phoneNumberId}/messages`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: params.phoneNumber,
+        type: "text",
+        text: {
+          preview_url: false,
+          body: params.body,
+        },
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`WhatsApp API error: ${response.status} - ${error}`);
+  }
+}
+
 function formatCurrency(amount: number, currency: string) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",

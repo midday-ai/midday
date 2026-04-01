@@ -1,5 +1,6 @@
-import { streamMiddayAssistant } from "@api/chat/assistant-runtime";
 import { extractConnectionToken, getMessageAuthorId } from "@api/bot/linking";
+import { canReuseCachedThreadState } from "@api/bot/thread-state";
+import { streamMiddayAssistant } from "@api/chat/assistant-runtime";
 import { buildSystemPrompt } from "@api/chat/prompt";
 import type { McpContext } from "@api/mcp/types";
 import { expandScopes } from "@api/utils/scopes";
@@ -7,6 +8,7 @@ import type { SlackAdapter } from "@chat-adapter/slack";
 import {
   type BotPlatform,
   bot,
+  formatNotificationContextForPrompt,
   formatProcessedUploadSummary,
   getPlatformInstructions,
   isSupportedInboxUploadMediaType,
@@ -29,6 +31,7 @@ import {
   getTeamById,
   getUserById,
   hasTeamAccess,
+  updatePlatformIdentityMetadata,
 } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
 import { toAiMessages } from "chat";
@@ -43,6 +46,16 @@ type BotThreadState = {
   platform?: BotPlatform;
   externalUserId?: string;
 };
+
+type ResolvedConversation =
+  | {
+      connected: true;
+      teamId: string;
+      actingUserId: string;
+      identityId?: string;
+      notificationContext?: Record<string, unknown> | null;
+    }
+  | { connected: false };
 
 let registered = false;
 
@@ -90,10 +103,23 @@ async function handleIncomingMessage(thread: any, message: any) {
     return;
   }
 
-  const resolved = await resolveConversation(thread, message, platform);
+  const resolved = (await resolveConversation(
+    thread,
+    message,
+    platform,
+  )) as ResolvedConversation | null;
 
   if (!resolved || resolved.connected === false) {
     return;
+  }
+
+  if (resolved.identityId) {
+    await updatePlatformIdentityMetadata(db, {
+      id: resolved.identityId,
+      metadata: {
+        lastSeenAt: new Date().toISOString(),
+      },
+    }).catch(() => {});
   }
 
   const user = await getUserById(db, resolved.actingUserId);
@@ -143,7 +169,13 @@ async function handleIncomingMessage(thread: any, message: any) {
       countryCode: user.team?.countryCode ?? null,
       localTime: null,
       recentUploadSummaries,
-    }) + getPlatformInstructions(platform);
+    }) +
+    getPlatformInstructions(platform) +
+    (resolved.notificationContext
+      ? `\n\n${formatNotificationContextForPrompt(
+          resolved.notificationContext as any,
+        )}`
+      : "");
 
   const modelMessages = await toAiMessages(history, {
     includeNames: platform === "slack",
@@ -156,6 +188,15 @@ async function handleIncomingMessage(thread: any, message: any) {
   });
 
   await thread.post(result.fullStream);
+
+  if (resolved.identityId && resolved.notificationContext) {
+    await updatePlatformIdentityMetadata(db, {
+      id: resolved.identityId,
+      metadata: {
+        lastNotificationContext: null,
+      },
+    }).catch(() => {});
+  }
 }
 
 async function resolveConversation(
@@ -166,11 +207,7 @@ async function resolveConversation(
   const threadState = ((await thread.state) ?? {}) as BotThreadState;
   const externalUserId = getMessageAuthorId(message);
 
-  if (
-    threadState.teamId &&
-    threadState.actingUserId &&
-    (platform !== "slack" || threadState.externalUserId === externalUserId)
-  ) {
+  if (canReuseCachedThreadState(threadState, { platform, externalUserId })) {
     return {
       connected: true as const,
       teamId: threadState.teamId,
@@ -216,6 +253,10 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
       connected: true as const,
       teamId: existingIdentity.teamId,
       actingUserId: existingIdentity.userId,
+      identityId: existingIdentity.id,
+      notificationContext:
+        (existingIdentity.metadata as Record<string, unknown> | null)
+          ?.lastNotificationContext ?? null,
     };
   }
 
@@ -241,7 +282,7 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
   }
 
   try {
-    await createOrUpdatePlatformIdentity(db, {
+    const identity = await createOrUpdatePlatformIdentity(db, {
       provider: "whatsapp",
       teamId: token.teamId,
       userId: token.userId,
@@ -283,6 +324,7 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
       connected: true as const,
       teamId: token.teamId,
       actingUserId,
+      identityId: identity.id,
     };
   } catch (error) {
     if (error instanceof WhatsAppAlreadyConnectedToAnotherTeamError) {
@@ -333,6 +375,10 @@ async function resolveTelegramConversation(thread: any, message: any) {
       connected: true as const,
       teamId: existingIdentity.teamId,
       actingUserId: existingIdentity.userId,
+      identityId: existingIdentity.id,
+      notificationContext:
+        (existingIdentity.metadata as Record<string, unknown> | null)
+          ?.lastNotificationContext ?? null,
     };
   }
 
@@ -358,7 +404,7 @@ async function resolveTelegramConversation(thread: any, message: any) {
   }
 
   try {
-    await createOrUpdatePlatformIdentity(db, {
+    const identity = await createOrUpdatePlatformIdentity(db, {
       provider: "telegram",
       teamId: token.teamId,
       userId: token.userId,
@@ -404,6 +450,7 @@ async function resolveTelegramConversation(thread: any, message: any) {
       connected: true as const,
       teamId: token.teamId,
       actingUserId,
+      identityId: identity.id,
     };
   } catch (error) {
     if (error instanceof TelegramAlreadyConnectedToAnotherTeamError) {
@@ -468,6 +515,10 @@ async function resolveSlackConversation(thread: any, message: any) {
       connected: true as const,
       teamId: existingIdentity.teamId,
       actingUserId: existingIdentity.userId,
+      identityId: existingIdentity.id,
+      notificationContext:
+        (existingIdentity.metadata as Record<string, unknown> | null)
+          ?.lastNotificationContext ?? null,
     };
   }
 
@@ -499,7 +550,7 @@ async function resolveSlackConversation(thread: any, message: any) {
     }
 
     try {
-      await createOrUpdatePlatformIdentity(db, {
+      const identity = await createOrUpdatePlatformIdentity(db, {
         provider: "slack",
         teamId: token.teamId,
         userId: token.userId,
@@ -530,6 +581,7 @@ async function resolveSlackConversation(thread: any, message: any) {
         connected: true as const,
         teamId: token.teamId,
         actingUserId: token.userId,
+        identityId: identity.id,
       };
     } catch (error) {
       if (error instanceof PlatformIdentityAlreadyLinkedToAnotherUserError) {
@@ -565,7 +617,11 @@ async function resolveSlackConversation(thread: any, message: any) {
     return { connected: false as const };
   }
 
-  const canAccessTeam = await hasTeamAccess(db, resolvedTeamId, existingIdentity.userId);
+  const canAccessTeam = await hasTeamAccess(
+    db,
+    resolvedTeamId,
+    existingIdentity.userId,
+  );
   if (!canAccessTeam) {
     await thread.post(
       "Your Slack user is linked, but that Midday user does not have access to this workspace.",
@@ -584,6 +640,10 @@ async function resolveSlackConversation(thread: any, message: any) {
     connected: true as const,
     teamId: resolvedTeamId,
     actingUserId: existingIdentity.userId,
+    identityId: existingIdentity.id,
+    notificationContext:
+      (existingIdentity.metadata as Record<string, unknown> | null)
+        ?.lastNotificationContext ?? null,
   };
 }
 

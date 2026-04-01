@@ -21,8 +21,12 @@ describe("bot link code extraction", () => {
   });
 
   test("ignores non-link messages", () => {
-    expect(extractConnectionToken("telegram", "/start team_inbox_id")).toBeNull();
-    expect(extractConnectionToken("slack", "Summarize my cash flow")).toBeNull();
+    expect(
+      extractConnectionToken("telegram", "/start team_inbox_id"),
+    ).toBeNull();
+    expect(
+      extractConnectionToken("slack", "Summarize my cash flow"),
+    ).toBeNull();
     expect(extractConnectionToken("whatsapp", "hello there")).toBeNull();
   });
 });

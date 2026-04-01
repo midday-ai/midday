@@ -8,18 +8,22 @@ const app = new OpenAPIHono<Context>();
 registerMiddayBotRuntime();
 
 app.get("/whatsapp", async (c) => {
+  await bot.initialize();
   return bot.webhooks.whatsapp(c.req.raw);
 });
 
 app.post("/whatsapp", async (c) => {
+  await bot.initialize();
   return bot.webhooks.whatsapp(c.req.raw);
 });
 
 app.post("/telegram", async (c) => {
+  await bot.initialize();
   return bot.webhooks.telegram(c.req.raw);
 });
 
 app.post("/slack", async (c) => {
+  await bot.initialize();
   return bot.webhooks.slack(c.req.raw);
 });
 

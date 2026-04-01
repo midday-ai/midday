@@ -5,10 +5,7 @@ import {
   PlatformIdentityAlreadyLinkedToAnotherTeamError,
   PlatformIdentityAlreadyLinkedToAnotherUserError,
 } from "../errors";
-import {
-  platformIdentities,
-  platformLinkTokens,
-} from "../schema";
+import { platformIdentities, platformLinkTokens } from "../schema";
 
 export type PlatformProvider = "slack" | "telegram" | "whatsapp";
 
@@ -60,6 +57,34 @@ export async function getPlatformIdentityForUser(
   return result ?? null;
 }
 
+export async function getPlatformIdentityById(db: Database, id: string) {
+  const [result] = await db
+    .select()
+    .from(platformIdentities)
+    .where(eq(platformIdentities.id, id))
+    .limit(1);
+
+  return result ?? null;
+}
+
+export async function listPlatformIdentitiesForTeam(
+  db: Database,
+  params: {
+    provider: PlatformProvider;
+    teamId: string;
+  },
+) {
+  return db
+    .select()
+    .from(platformIdentities)
+    .where(
+      and(
+        eq(platformIdentities.provider, params.provider),
+        eq(platformIdentities.teamId, params.teamId),
+      ),
+    );
+}
+
 export async function createOrUpdatePlatformIdentity(
   db: Database,
   params: {
@@ -91,7 +116,8 @@ export async function createOrUpdatePlatformIdentity(
     const [updated] = await db
       .update(platformIdentities)
       .set({
-        externalChannelId: params.externalChannelId ?? existing.externalChannelId,
+        externalChannelId:
+          params.externalChannelId ?? existing.externalChannelId,
         metadata: params.metadata
           ? {
               ...(existing.metadata as Record<string, unknown> | null),
@@ -120,6 +146,34 @@ export async function createOrUpdatePlatformIdentity(
     .returning();
 
   return created!;
+}
+
+export async function updatePlatformIdentityMetadata(
+  db: Database,
+  params: {
+    id: string;
+    metadata: Record<string, unknown>;
+  },
+) {
+  const identity = await getPlatformIdentityById(db, params.id);
+
+  if (!identity) {
+    return null;
+  }
+
+  const [updated] = await db
+    .update(platformIdentities)
+    .set({
+      metadata: {
+        ...(identity.metadata as Record<string, unknown> | null),
+        ...params.metadata,
+      },
+      updatedAt: sql`now()`,
+    })
+    .where(eq(platformIdentities.id, params.id))
+    .returning();
+
+  return updated ?? identity;
 }
 
 export async function deletePlatformIdentity(

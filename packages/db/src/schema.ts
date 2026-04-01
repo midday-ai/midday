@@ -2016,6 +2016,99 @@ export const platformLinkTokens = pgTable(
   ],
 );
 
+export const providerNotificationBatches = pgTable(
+  "provider_notification_batches",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    batchKey: text("batch_key").notNull(),
+    platformIdentityId: uuid("platform_identity_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    provider: platformProviderEnum().notNull(),
+    eventFamily: text("event_family").notNull(),
+    payload: jsonb().notNull(),
+    notificationContext: jsonb("notification_context"),
+    windowEndsAt: timestamp("window_ends_at", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    sentAt: timestamp("sent_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    }).defaultNow(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    }).defaultNow(),
+  },
+  (table) => [
+    index("provider_notification_batches_due_idx").on(
+      table.sentAt,
+      table.windowEndsAt,
+    ),
+    index("provider_notification_batches_identity_idx").on(
+      table.platformIdentityId,
+    ),
+    index("provider_notification_batches_team_id_idx").on(table.teamId),
+    foreignKey({
+      columns: [table.platformIdentityId],
+      foreignColumns: [platformIdentities.id],
+      name: "provider_notification_batches_identity_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "provider_notification_batches_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "provider_notification_batches_user_id_fkey",
+    }).onDelete("cascade"),
+    unique("provider_notification_batches_batch_key_unique").on(table.batchKey),
+    pgPolicy(
+      "Provider notification batches can be created by a member of the team",
+      {
+        as: "permissive",
+        for: "insert",
+        to: ["authenticated"],
+        withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+      },
+    ),
+    pgPolicy(
+      "Provider notification batches can be selected by a member of the team",
+      {
+        as: "permissive",
+        for: "select",
+        to: ["authenticated"],
+        using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+      },
+    ),
+    pgPolicy(
+      "Provider notification batches can be updated by a member of the team",
+      {
+        as: "permissive",
+        for: "update",
+        to: ["authenticated"],
+        using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+      },
+    ),
+    pgPolicy(
+      "Provider notification batches can be deleted by a member of the team",
+      {
+        as: "permissive",
+        for: "delete",
+        to: ["authenticated"],
+        using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+      },
+    ),
+  ],
+);
+
 export const invoiceTemplates = pgTable(
   "invoice_templates",
   {
