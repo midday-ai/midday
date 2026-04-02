@@ -23,14 +23,18 @@ export function InboxOrdering() {
       <DropdownMenuContent>
         <DropdownMenuCheckboxItem
           checked={params.inboxSort === "date" && params.inboxOrder === "asc"}
-          onCheckedChange={() => setParams({ inboxSort: "date", inboxOrder: "asc" })}
+          onCheckedChange={() =>
+            setParams({ inboxSort: "date", inboxOrder: "asc" })
+          }
         >
           Most recent
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
           checked={params.inboxSort === "date" && params.inboxOrder === "desc"}
-          onCheckedChange={() => setParams({ inboxSort: "date", inboxOrder: "desc" })}
+          onCheckedChange={() =>
+            setParams({ inboxSort: "date", inboxOrder: "desc" })
+          }
         >
           Oldest first
         </DropdownMenuCheckboxItem>
@@ -45,7 +49,9 @@ export function InboxOrdering() {
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={params.inboxSort === "document_date" && params.inboxOrder === "desc"}
+          checked={
+            params.inboxSort === "document_date" && params.inboxOrder === "desc"
+          }
           onCheckedChange={() =>
             setParams({ inboxSort: "document_date", inboxOrder: "desc" })
           }
@@ -54,7 +60,9 @@ export function InboxOrdering() {
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={params.inboxSort === "document_date" && params.inboxOrder === "asc"}
+          checked={
+            params.inboxSort === "document_date" && params.inboxOrder === "asc"
+          }
           onCheckedChange={() =>
             setParams({ inboxSort: "document_date", inboxOrder: "asc" })
           }

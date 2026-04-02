@@ -303,7 +303,10 @@ const useSearchNavigation = () => {
     },
     // Action helpers
     createInvoice: () => {
-      return navigateWithParams({ invoiceType: "create" as const }, setInvoiceParams);
+      return navigateWithParams(
+        { invoiceType: "create" as const },
+        setInvoiceParams,
+      );
     },
     createCustomer: (params = { createCustomer: true }) => {
       return navigateWithParams(params, setCustomerParams);

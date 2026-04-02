@@ -256,7 +256,13 @@ export function InboxView() {
   // since item positions in tableData will change
   useEffect(() => {
     setLastClickedIndex(null);
-  }, [params.inboxSort, params.inboxOrder, filter.q, filter.status, filter.tab]);
+  }, [
+    params.inboxSort,
+    params.inboxOrder,
+    filter.q,
+    filter.status,
+    filter.tab,
+  ]);
 
   // Arrow key navigation
   useHotkeys(
