@@ -142,7 +142,8 @@ export type EnrichCustomerOptions = {
 export type EnrichmentMetrics = {
   durationMs: number;
   source: string;
-  domainMatch: boolean;
+  /** true = verified match, false = mismatch (discarded), null = couldn't compare */
+  domainMatch: boolean | null;
 };
 
 export type EnrichCustomerResult = {

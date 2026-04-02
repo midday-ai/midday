@@ -92,10 +92,9 @@ export async function enrichCustomer(
           ? "companyenrich:domain"
           : "companyenrich:name",
         domainMatch:
-          result.matchedByDomain ||
-          !domain ||
-          !result.data.domain ||
-          domainsMatch(domain, result.data.domain),
+          domain && result.data.domain
+            ? result.matchedByDomain || domainsMatch(domain, result.data.domain)
+            : null,
       },
     };
   } finally {
