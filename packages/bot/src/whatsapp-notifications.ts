@@ -207,7 +207,10 @@ function buildTemplateBodyParameters(
 export function buildBatchTemplateComponents(
   eventFamily: string,
   entries: Array<Record<string, unknown>>,
-): { templateName: WhatsAppTemplateName; components: Array<Record<string, unknown>> } | null {
+): {
+  templateName: WhatsAppTemplateName;
+  components: Array<Record<string, unknown>>;
+} | null {
   switch (eventFamily) {
     case "transaction": {
       const count = entries.flatMap(
@@ -260,7 +263,10 @@ export function buildBatchTemplateComponents(
 export function buildMatchTemplateComponents(
   documentName: string,
   transactionName: string,
-): { templateName: WhatsAppTemplateName; components: Array<Record<string, unknown>> } {
+): {
+  templateName: WhatsAppTemplateName;
+  components: Array<Record<string, unknown>>;
+} {
   return {
     templateName: WHATSAPP_TEMPLATE_NAMES.match,
     components: buildTemplateBodyParameters([documentName, transactionName]),

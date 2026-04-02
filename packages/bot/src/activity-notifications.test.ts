@@ -5,9 +5,9 @@ import {
   isWithinWhatsAppSessionWindow,
 } from "./activity-notifications";
 import {
-  WHATSAPP_TEMPLATE_NAMES,
   buildBatchTemplateComponents,
   buildMatchTemplateComponents,
+  WHATSAPP_TEMPLATE_NAMES,
 } from "./whatsapp-notifications";
 
 describe("activity notifications", () => {
@@ -85,9 +85,7 @@ describe("isWithinWhatsAppSessionWindow", () => {
   });
 
   it("returns false when lastSeenAt is older than 24 hours", () => {
-    const oldDate = new Date(
-      Date.now() - 25 * 60 * 60 * 1000,
-    ).toISOString();
+    const oldDate = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
     expect(isWithinWhatsAppSessionWindow(oldDate)).toBe(false);
   });
 });
@@ -97,8 +95,20 @@ describe("buildBatchTemplateComponents", () => {
     const result = buildBatchTemplateComponents("transaction", [
       {
         transactions: [
-          { id: "tx_1", name: "Coffee", amount: 5, currency: "USD", date: "2026-03-31" },
-          { id: "tx_2", name: "Lunch", amount: 12, currency: "USD", date: "2026-03-31" },
+          {
+            id: "tx_1",
+            name: "Coffee",
+            amount: 5,
+            currency: "USD",
+            date: "2026-03-31",
+          },
+          {
+            id: "tx_2",
+            name: "Lunch",
+            amount: 12,
+            currency: "USD",
+            date: "2026-03-31",
+          },
         ],
       },
     ]);
@@ -114,7 +124,9 @@ describe("buildBatchTemplateComponents", () => {
   });
 
   it("returns null for transaction with no entries", () => {
-    expect(buildBatchTemplateComponents("transaction", [{ transactions: [] }])).toBeNull();
+    expect(
+      buildBatchTemplateComponents("transaction", [{ transactions: [] }]),
+    ).toBeNull();
   });
 
   it("builds invoice_paid template with count and labels", () => {
@@ -163,7 +175,9 @@ describe("buildBatchTemplateComponents", () => {
     ]);
 
     expect(result).not.toBeNull();
-    expect(result!.templateName).toBe(WHATSAPP_TEMPLATE_NAMES.recurring_invoice_upcoming);
+    expect(result!.templateName).toBe(
+      WHATSAPP_TEMPLATE_NAMES.recurring_invoice_upcoming,
+    );
     expect(result!.components).toEqual([
       {
         type: "body",

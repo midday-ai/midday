@@ -543,10 +543,7 @@ async function sendSummaryToIdentity(
       }
 
       if (eventFamily && entries) {
-        const templateData = buildBatchTemplateComponents(
-          eventFamily,
-          entries,
-        );
+        const templateData = buildBatchTemplateComponents(eventFamily, entries);
 
         if (templateData) {
           await sendWhatsAppTemplateNotification({
