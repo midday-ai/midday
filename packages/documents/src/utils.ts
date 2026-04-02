@@ -238,22 +238,59 @@ export function isMimeTypeSupportedForProcessing(mimetype: string): boolean {
   return false;
 }
 
+function removeRtfGroups(input: string, groupNames: string[]): string {
+  const result: string[] = [];
+  let i = 0;
+
+  while (i < input.length) {
+    if (input[i] !== "{") {
+      result.push(input[i]!);
+      i++;
+      continue;
+    }
+
+    let matched = false;
+    for (const name of groupNames) {
+      if (
+        input.startsWith(name, i + 1) &&
+        (i + 1 + name.length >= input.length ||
+          !/[a-z]/i.test(input[i + 1 + name.length]!))
+      ) {
+        matched = true;
+        break;
+      }
+    }
+
+    if (!matched) {
+      result.push(input[i]!);
+      i++;
+      continue;
+    }
+
+    let depth = 1;
+    i++;
+    while (i < input.length && depth > 0) {
+      if (input[i] === "{") depth++;
+      else if (input[i] === "}") depth--;
+      i++;
+    }
+  }
+
+  return result.join("");
+}
+
 export function extractTextFromRtf(buffer: Buffer): string {
   let rtfContent = buffer.toString("utf-8");
 
-  // Remove font tables, color tables, and other metadata groups
-  rtfContent = rtfContent.replace(
-    /{\\(?:fonttbl|colortbl|stylesheet)[^}]*}/gi,
-    "",
-  );
-
-  // Remove RTF header
-  rtfContent = rtfContent.replace(/^{\\rtf1[^}]*}/i, "");
-
-  // Remove embedded pictures, objects
-  rtfContent = rtfContent.replace(/{\\\*\\shppict[^}]*}/gi, "");
-  rtfContent = rtfContent.replace(/{\\object[^}]*}/gi, "");
-  rtfContent = rtfContent.replace(/{\\pict[^}]*}/gi, "");
+  // Remove font tables, color tables, other metadata groups, pictures, and objects
+  rtfContent = removeRtfGroups(rtfContent, [
+    "\\fonttbl",
+    "\\colortbl",
+    "\\stylesheet",
+    "\\*\\shppict",
+    "\\object",
+    "\\pict",
+  ]);
 
   // Remove Unicode characters like \u1234? (keep the fallback '?')
   rtfContent = rtfContent.replace(/\\u-?\d+\??/g, "");
