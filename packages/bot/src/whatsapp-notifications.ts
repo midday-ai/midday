@@ -177,3 +177,129 @@ export async function sendWhatsAppMatchNotification(
     ],
   });
 }
+
+export const WHATSAPP_TEMPLATE_NAMES = {
+  transaction: "midday_new_transactions",
+  invoice_paid: "midday_invoice_paid",
+  invoice_overdue: "midday_invoice_overdue",
+  recurring_invoice_upcoming: "midday_recurring_upcoming",
+  match: "midday_receipt_matched",
+} as const;
+
+export type WhatsAppTemplateName =
+  (typeof WHATSAPP_TEMPLATE_NAMES)[keyof typeof WHATSAPP_TEMPLATE_NAMES];
+
+function buildTemplateBodyParameters(
+  texts: string[],
+): Array<Record<string, unknown>> {
+  if (texts.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      type: "body",
+      parameters: texts.map((text) => ({ type: "text", text })),
+    },
+  ];
+}
+
+export function buildBatchTemplateComponents(
+  eventFamily: string,
+  entries: Array<Record<string, unknown>>,
+): { templateName: WhatsAppTemplateName; components: Array<Record<string, unknown>> } | null {
+  switch (eventFamily) {
+    case "transaction": {
+      const count = entries.flatMap(
+        (e) => (e.transactions as Array<unknown> | undefined) ?? [],
+      ).length;
+      if (count === 0) return null;
+      return {
+        templateName: WHATSAPP_TEMPLATE_NAMES.transaction,
+        components: buildTemplateBodyParameters([String(count)]),
+      };
+    }
+    case "invoice_paid": {
+      const invoices = entries as Array<{ invoiceNumber?: string }>;
+      if (invoices.length === 0) return null;
+      const labels = invoices
+        .slice(0, 3)
+        .map((i) => i.invoiceNumber ?? "")
+        .filter(Boolean)
+        .join(", ");
+      return {
+        templateName: WHATSAPP_TEMPLATE_NAMES.invoice_paid,
+        components: buildTemplateBodyParameters([
+          String(invoices.length),
+          labels || "-",
+        ]),
+      };
+    }
+    case "invoice_overdue": {
+      if (entries.length === 0) return null;
+      return {
+        templateName: WHATSAPP_TEMPLATE_NAMES.invoice_overdue,
+        components: buildTemplateBodyParameters([String(entries.length)]),
+      };
+    }
+    case "recurring_invoice_upcoming": {
+      const invoices = entries.flatMap(
+        (e) => (e.invoices as Array<unknown> | undefined) ?? [],
+      );
+      if (invoices.length === 0) return null;
+      return {
+        templateName: WHATSAPP_TEMPLATE_NAMES.recurring_invoice_upcoming,
+        components: buildTemplateBodyParameters([String(invoices.length)]),
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+export function buildMatchTemplateComponents(
+  documentName: string,
+  transactionName: string,
+): { templateName: WhatsAppTemplateName; components: Array<Record<string, unknown>> } {
+  return {
+    templateName: WHATSAPP_TEMPLATE_NAMES.match,
+    components: buildTemplateBodyParameters([documentName, transactionName]),
+  };
+}
+
+export async function sendWhatsAppTemplateNotification(params: {
+  phoneNumber: string;
+  templateName: string;
+  components?: Array<Record<string, unknown>>;
+}) {
+  const { phoneNumberId, accessToken } = getWhatsAppConfig();
+
+  const response = await fetch(
+    `${WHATSAPP_API_URL}/${phoneNumberId}/messages`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: params.phoneNumber,
+        type: "template",
+        template: {
+          name: params.templateName,
+          language: { code: "en" },
+          components: params.components,
+        },
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(
+      `WhatsApp template API error: ${response.status} - ${error}`,
+    );
+  }
+}

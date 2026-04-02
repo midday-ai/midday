@@ -17,7 +17,10 @@ import {
 import { createLoggerWithContext } from "@midday/logger";
 import { sendTelegramTextNotification } from "./telegram-notifications";
 import {
+  buildBatchTemplateComponents,
+  buildMatchTemplateComponents,
   sendWhatsAppMatchNotification,
+  sendWhatsAppTemplateNotification,
   sendWhatsAppTextNotification,
 } from "./whatsapp-notifications";
 
@@ -247,7 +250,17 @@ export async function flushDueActivityNotificationBatches(db: Database) {
       continue;
     }
 
-    const sent = await sendSummaryToIdentity(app, identity, summary.text);
+    const entries =
+      (batch.payload as { entries?: Array<Record<string, unknown>> } | null)
+        ?.entries ?? [];
+
+    const sent = await sendSummaryToIdentity(
+      app,
+      identity,
+      summary.text,
+      batch.eventFamily,
+      entries,
+    );
 
     if (!sent) {
       await markProviderNotificationBatchSent(db, { id: batch.id });
@@ -385,21 +398,37 @@ async function sendImmediateMatchNotifications(
       return;
     }
 
-    await sendWhatsAppMatchNotification({
-      phoneNumber,
-      inboxId: payload.inboxId,
-      transactionId: payload.transactionId,
-      inboxName: payload.documentName,
-      transactionName: payload.transactionName,
-      amount: payload.transactionAmount,
-      currency: payload.transactionCurrency,
-      transactionDate: payload.transactionDate,
-    });
-
     const identity = await getPlatformIdentity(db, {
       provider: "whatsapp",
       externalUserId: phoneNumber,
     });
+
+    const metadata =
+      (identity?.metadata as PlatformIdentityMetadata | null) ?? {};
+
+    if (isWithinWhatsAppSessionWindow(metadata.lastSeenAt)) {
+      await sendWhatsAppMatchNotification({
+        phoneNumber,
+        inboxId: payload.inboxId,
+        transactionId: payload.transactionId,
+        inboxName: payload.documentName,
+        transactionName: payload.transactionName,
+        amount: payload.transactionAmount,
+        currency: payload.transactionCurrency,
+        transactionDate: payload.transactionDate,
+      });
+    } else {
+      const { templateName, components } = buildMatchTemplateComponents(
+        payload.documentName,
+        payload.transactionName,
+      );
+
+      await sendWhatsAppTemplateNotification({
+        phoneNumber,
+        templateName,
+        components,
+      });
+    }
 
     if (identity) {
       await updatePlatformIdentityMetadata(db, {
@@ -460,6 +489,8 @@ async function sendSummaryToIdentity(
   app: AppConfig,
   identity: Awaited<ReturnType<typeof getPlatformIdentityById>>,
   text: string,
+  eventFamily?: string,
+  entries?: Array<Record<string, unknown>>,
 ) {
   if (!identity) {
     return false;
@@ -502,27 +533,44 @@ async function sendSummaryToIdentity(
     case "whatsapp": {
       const metadata =
         (identity.metadata as PlatformIdentityMetadata | null) ?? {};
-      if (!isWithinWhatsAppSessionWindow(metadata.lastSeenAt)) {
-        logger.info(
-          "Skipping WhatsApp activity notification outside session window",
-          {
-            identityId: identity.id,
-            teamId: identity.teamId,
-          },
-        );
-        return false;
+
+      if (isWithinWhatsAppSessionWindow(metadata.lastSeenAt)) {
+        await sendWhatsAppTextNotification({
+          phoneNumber: identity.externalUserId,
+          body: text,
+        });
+        return true;
       }
 
-      await sendWhatsAppTextNotification({
-        phoneNumber: identity.externalUserId,
-        body: text,
-      });
-      return true;
+      if (eventFamily && entries) {
+        const templateData = buildBatchTemplateComponents(
+          eventFamily,
+          entries,
+        );
+
+        if (templateData) {
+          await sendWhatsAppTemplateNotification({
+            phoneNumber: identity.externalUserId,
+            templateName: templateData.templateName,
+            components: templateData.components,
+          });
+          return true;
+        }
+      }
+
+      logger.info(
+        "Skipping WhatsApp activity notification — outside session window and no template available",
+        {
+          identityId: identity.id,
+          teamId: identity.teamId,
+        },
+      );
+      return false;
     }
   }
 }
 
-function isWithinWhatsAppSessionWindow(lastSeenAt?: string) {
+export function isWithinWhatsAppSessionWindow(lastSeenAt?: string) {
   if (!lastSeenAt) {
     return false;
   }
