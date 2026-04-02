@@ -59,6 +59,24 @@ export const getTeamByIdSchema = z.object({
     }),
 });
 
+/**
+ * Validates that a URL is hosted on a trusted midday.ai domain.
+ * Prevents SSRF by checking the hostname, not just URL contents.
+ */
+function isValidMiddayUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+    return (
+      hostname === "cdn.midday.ai" ||
+      hostname === "midday.ai" ||
+      hostname.endsWith(".midday.ai")
+    );
+  } catch {
+    return false;
+  }
+}
+
 export const updateTeamByIdSchema = z.object({
   name: z.string().min(2).max(32).optional().openapi({
     description:
@@ -72,8 +90,8 @@ export const updateTeamByIdSchema = z.object({
   logoUrl: z
     .string()
     .url()
-    .refine((url) => url.includes("midday.ai"), {
-      message: "logoUrl must be a midday.ai domain URL",
+    .refine(isValidMiddayUrl, {
+      message: "logoUrl must be hosted on midday.ai domain",
     })
     .optional()
     .openapi({
