@@ -40,7 +40,6 @@ export function OverviewView() {
       {isChat && (
         <div>
           <ChatView
-            onClose={goBack}
             header={
               <>
                 <Button variant="outline" size="icon" onClick={goBack}>

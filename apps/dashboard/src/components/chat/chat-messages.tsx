@@ -11,6 +11,7 @@ import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useChatToolInvalidation } from "./chat-invalidation";
 import {
   extractInvoiceData,
   INVOICE_TOOLS,
@@ -170,6 +171,8 @@ export function ChatMessages({
   status,
   onInvoiceUpdate,
 }: ChatMessagesProps) {
+  useChatToolInvalidation(messages);
+
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const { setParams: setCustomerParams } = useCustomerParams();
