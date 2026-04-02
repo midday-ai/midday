@@ -294,7 +294,6 @@ async function hydrateResolvedConversationIdentity(params: {
 
   if (
     !(await hasCurrentTeamAccess(
-      thread,
       connectedConversation.teamId,
       connectedConversation.actingUserId,
     ))
@@ -336,11 +335,11 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
   if (existingIdentity?.teamId && existingIdentity.userId) {
     if (
       !(await hasCurrentTeamAccess(
-        thread,
         existingIdentity.teamId,
         existingIdentity.userId,
       ))
     ) {
+      await notifyTeamAccessRevoked(thread);
       return { connected: false as const };
     }
 
@@ -383,7 +382,8 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
     return { connected: false as const };
   }
 
-  if (!(await hasCurrentTeamAccess(thread, token.teamId, token.userId))) {
+  if (!(await hasCurrentTeamAccess(token.teamId, token.userId))) {
+    await notifyTeamAccessRevoked(thread);
     return { connected: false as const };
   }
 
@@ -472,11 +472,11 @@ async function resolveTelegramConversation(thread: any, message: any) {
   if (existingIdentity?.teamId && existingIdentity.userId) {
     if (
       !(await hasCurrentTeamAccess(
-        thread,
         existingIdentity.teamId,
         existingIdentity.userId,
       ))
     ) {
+      await notifyTeamAccessRevoked(thread);
       return { connected: false as const };
     }
 
@@ -519,7 +519,8 @@ async function resolveTelegramConversation(thread: any, message: any) {
     return { connected: false as const };
   }
 
-  if (!(await hasCurrentTeamAccess(thread, token.teamId, token.userId))) {
+  if (!(await hasCurrentTeamAccess(token.teamId, token.userId))) {
+    await notifyTeamAccessRevoked(thread);
     return { connected: false as const };
   }
 
@@ -618,11 +619,11 @@ async function resolveSlackConversation(thread: any, message: any) {
   if (thread.isDM && existingIdentity?.teamId && existingIdentity.userId) {
     if (
       !(await hasCurrentTeamAccess(
-        thread,
         existingIdentity.teamId,
         existingIdentity.userId,
       ))
     ) {
+      await notifyTeamAccessRevoked(thread);
       return { connected: false as const };
     }
 
@@ -671,7 +672,8 @@ async function resolveSlackConversation(thread: any, message: any) {
       return { connected: false as const };
     }
 
-    if (!(await hasCurrentTeamAccess(thread, token.teamId, token.userId))) {
+    if (!(await hasCurrentTeamAccess(token.teamId, token.userId))) {
+      await notifyTeamAccessRevoked(thread);
       return { connected: false as const };
     }
 
@@ -743,13 +745,8 @@ async function resolveSlackConversation(thread: any, message: any) {
     return { connected: false as const };
   }
 
-  if (
-    !(await hasCurrentTeamAccess(
-      thread,
-      resolvedTeamId,
-      existingIdentity.userId,
-    ))
-  ) {
+  if (!(await hasCurrentTeamAccess(resolvedTeamId, existingIdentity.userId))) {
+    await notifyTeamAccessRevoked(thread);
     return { connected: false as const };
   }
 
@@ -876,25 +873,17 @@ async function forgetThreadState(thread: any) {
   await thread.setState({});
 }
 
-async function hasCurrentTeamAccess(
-  thread: any,
-  teamId: string,
-  userId: string,
-) {
-  const canAccessTeam = await hasTeamAccess(db, teamId, userId);
+async function hasCurrentTeamAccess(teamId: string, userId: string) {
+  return hasTeamAccess(db, teamId, userId);
+}
 
-  if (canAccessTeam) {
-    return true;
-  }
-
+async function notifyTeamAccessRevoked(thread: any) {
   await forgetThreadState(thread);
   await thread
     .post(
       "This chat is linked, but that Midday user no longer has access to this workspace. Reconnect it from Midday and try again.",
     )
     .catch(() => {});
-
-  return false;
 }
 
 function getSlackTeamId(message: any) {
