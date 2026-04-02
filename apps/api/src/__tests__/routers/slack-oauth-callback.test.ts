@@ -155,7 +155,7 @@ describe("REST: GET /apps/slack/oauth-callback", () => {
           },
         }),
       ),
-    ) as typeof fetch;
+    ) as unknown as typeof fetch;
   });
 
   test("persists Slack installation only after database records exist", async () => {

@@ -609,7 +609,7 @@ export function buildBatchSummary(
       return null;
     }
 
-    const summary = `${transactions.length} new transaction${transactions.length === 1 ? "" : "s"} were imported. Reply "show me them" and I can help review them.`;
+    const summary = `${transactions.length} new transaction${transactions.length === 1 ? "" : "s"}. Reply "show me them" and I can help review them.`;
 
     return {
       text: summary,
