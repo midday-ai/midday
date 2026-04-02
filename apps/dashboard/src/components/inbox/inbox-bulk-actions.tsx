@@ -117,7 +117,7 @@ export function InboxBulkActions() {
 
         // Navigate to empty state if inbox is empty and no filters
         if (remainingInboxes.length === 0 && !hasFilters) {
-          setParams({ inboxId: null, inboxConnected: null });
+          setParams({ inboxId: null, connected: null });
           router.push("/inbox", { scroll: false });
         }
 

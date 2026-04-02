@@ -71,7 +71,7 @@ export default async function Page(props: Props) {
     hasSyncedAccounts &&
     !hasInboxItems &&
     !hasFilter &&
-    !params.inboxConnected
+    !params.connected
   ) {
     return (
       <Inbox>

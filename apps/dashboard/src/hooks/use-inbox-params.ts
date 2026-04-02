@@ -16,7 +16,7 @@ export const inboxParamsSchema = {
     "alphabetical",
     "document_date",
   ]).withDefault("date"),
-  inboxConnected: parseAsBoolean,
+  connected: parseAsBoolean,
 };
 
 export function useInboxParams() {

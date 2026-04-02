@@ -138,7 +138,7 @@ export function DeleteInboxDialog({
 
         // If inbox is empty and no filters, navigate to show empty state
         if (remainingInboxes.length === 0 && !hasFilters) {
-          setParams({ inboxId: null, inboxConnected: null });
+          setParams({ inboxId: null, connected: null });
           router.push("/inbox", { scroll: false });
         }
 

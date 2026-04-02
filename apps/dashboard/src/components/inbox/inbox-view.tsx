@@ -50,15 +50,15 @@ export function InboxView() {
   // Capture the "just connected" state locally so it persists even after URL params are cleared
   // (AppConnectionToast clears params after 100ms, but we need this state for the 60s timeout)
   const [wasJustConnected, setWasJustConnected] = useState(
-    () => params.inboxConnected === true,
+    () => params.connected === true,
   );
 
-  // Update local state when params.inboxConnected becomes truthy
+  // Update local state when params.connected becomes truthy
   useEffect(() => {
-    if (params.inboxConnected === true) {
+    if (params.connected === true) {
       setWasJustConnected(true);
     }
-  }, [params.inboxConnected]);
+  }, [params.connected]);
 
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
