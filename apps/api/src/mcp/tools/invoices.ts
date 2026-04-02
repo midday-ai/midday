@@ -1215,7 +1215,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
       {
         title: "Update Draft Invoice",
         description:
-          "Edit a draft invoice's content: line items, customer, dates, note, discount, and tax/VAT settings. Only works on invoices in draft status. Amounts are automatically recalculated when line items, discount, or tax settings change.",
+          "Edit a draft invoice's content: line items, customer, dates, payment terms, note, discount, and tax/VAT settings. Only works on invoices in draft status. Amounts are automatically recalculated when line items, discount, or tax settings change. Use paymentTermsDays to set the due date relative to the issue date (e.g. 30 for net-30). Prefer this tool over invoice_template_update when the user wants to change an existing draft invoice.",
         _meta: { ui: { resourceUri: "ui://midday/invoice-preview" } },
         inputSchema: {
           id: z.string().uuid().describe("ID of the draft invoice to update"),
@@ -1251,7 +1251,17 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           dueDate: z
             .string()
             .optional()
-            .describe("New due date in ISO 8601 format"),
+            .describe(
+              "New due date in ISO 8601 format. Ignored when paymentTermsDays is provided.",
+            ),
+          paymentTermsDays: z
+            .number()
+            .min(0)
+            .max(365)
+            .optional()
+            .describe(
+              "Payment terms in days (e.g. 30 for net-30). Sets the due date to issueDate + this many days. Takes precedence over dueDate.",
+            ),
           issueDate: z
             .string()
             .optional()
@@ -1445,13 +1455,22 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
                 ? JSON.stringify(existing.noteDetails)
                 : null;
 
+          const resolvedIssueDate = params.issueDate ?? existing.issueDate!;
+          const resolvedDueDate =
+            params.paymentTermsDays !== undefined
+              ? addDays(
+                  new Date(resolvedIssueDate),
+                  params.paymentTermsDays,
+                ).toISOString()
+              : (params.dueDate ?? existing.dueDate!);
+
           const result = await draftInvoice(db, {
             id: params.id,
             teamId,
             userId,
             invoiceNumber: existing.invoiceNumber!,
-            issueDate: params.issueDate ?? existing.issueDate!,
-            dueDate: params.dueDate ?? existing.dueDate!,
+            issueDate: resolvedIssueDate,
+            dueDate: resolvedDueDate,
             templateId: existing.templateId ?? null,
             template: updatedTemplate as any,
             customerId,
