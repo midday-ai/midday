@@ -14,12 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.53",
-    "@exalabs/ai-sdk": "^2.0.1",
-    "@midday/logger": "workspace:*",
-    "ai": "^6.0.138",
-    "exa-js": "^2.10.1",
-    "zod": "catalog:"
+    "@midday/logger": "workspace:*"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",

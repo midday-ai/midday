@@ -35,7 +35,6 @@ export function verifyLinkedInUrl(url: string | null): string | null {
   );
 
   if (!match) {
-    console.log("[verifyLinkedInUrl] Invalid format:", url);
     return null;
   }
 
@@ -45,7 +44,6 @@ export function verifyLinkedInUrl(url: string | null): string | null {
     normalizedUrl = normalizedUrl.replace("linkedin.com", "www.linkedin.com");
   }
 
-  console.log("[verifyLinkedInUrl] Valid:", normalizedUrl);
   return normalizedUrl;
 }
 
@@ -71,7 +69,6 @@ export function verifyTwitterUrl(url: string | null): string | null {
   );
 
   if (!match) {
-    console.log("[verifyTwitterUrl] Invalid format:", url);
     return null;
   }
 
@@ -84,7 +81,6 @@ export function verifyTwitterUrl(url: string | null): string | null {
     .replace("twitter.com", "x.com")
     .replace("www.x.com", "x.com");
 
-  console.log("[verifyTwitterUrl] Valid:", normalizedUrl);
   return normalizedUrl;
 }
 
@@ -110,7 +106,6 @@ export function verifyInstagramUrl(url: string | null): string | null {
   );
 
   if (!match) {
-    console.log("[verifyInstagramUrl] Invalid format:", url);
     return null;
   }
 
@@ -120,7 +115,6 @@ export function verifyInstagramUrl(url: string | null): string | null {
     normalizedUrl = normalizedUrl.replace("instagram.com", "www.instagram.com");
   }
 
-  console.log("[verifyInstagramUrl] Valid:", normalizedUrl);
   return normalizedUrl;
 }
 
@@ -146,7 +140,6 @@ export function verifyFacebookUrl(url: string | null): string | null {
   );
 
   if (!match) {
-    console.log("[verifyFacebookUrl] Invalid format:", url);
     return null;
   }
 
@@ -156,7 +149,6 @@ export function verifyFacebookUrl(url: string | null): string | null {
     normalizedUrl = normalizedUrl.replace("facebook.com", "www.facebook.com");
   }
 
-  console.log("[verifyFacebookUrl] Valid:", normalizedUrl);
   return normalizedUrl;
 }
 

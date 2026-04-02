@@ -71,8 +71,12 @@ export const customersRouter = createTRPCRouter({
         userId: session.user.id,
       });
 
-      // Auto-trigger enrichment for new customers with a website
-      if (isNewCustomer && customer?.website && customer?.id) {
+      // Auto-trigger enrichment for new customers with a website or email
+      if (
+        isNewCustomer &&
+        (customer?.website || customer?.email) &&
+        customer?.id
+      ) {
         try {
           // Set status to pending first, then trigger job
           await updateCustomerEnrichmentStatus(db, {
@@ -87,6 +91,7 @@ export const customersRouter = createTRPCRouter({
               teamId: teamId!,
             },
             "customers",
+            { attempts: 1 },
           );
         } catch (error) {
           // Log but don't fail the customer creation
@@ -128,10 +133,11 @@ export const customersRouter = createTRPCRouter({
         });
       }
 
-      if (!customer.website) {
+      if (!customer.website && !customer.email) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Customer has no website - enrichment requires a website",
+          message:
+            "Customer has no website or email - enrichment requires at least one",
         });
       }
 
@@ -148,6 +154,7 @@ export const customersRouter = createTRPCRouter({
           teamId: teamId!,
         },
         "customers",
+        { attempts: 1 },
       );
 
       return { queued: true };

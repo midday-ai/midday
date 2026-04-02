@@ -62,74 +62,56 @@ export function useRealtime<TN extends TableName>({
     }
 
     const supabase = getSupabaseClient();
-    let channel: RealtimeChannel | null = null;
-    let isCleanedUp = false;
 
-    const setupChannel = () => {
-      if (isCleanedUp) return;
+    // Unique suffix avoids reusing an already-subscribed channel when React
+    // Strict Mode (or a dependency change) re-runs this effect before the
+    // previous removeChannel() has fully completed.
+    const id = Math.random().toString(36).slice(2, 8);
+    const channel = supabase.channel(`${channelName}:${id}`);
+    channelRef.current = channel;
 
-      channel = supabase.channel(channelName);
-      channelRef.current = channel;
-
-      // Add listeners for each event type (avoids "*" which causes issues with Supabase)
-      if (events.includes("INSERT")) {
-        channel.on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table, filter },
-          (payload) =>
-            onEventRef.current(
-              payload as RealtimePostgresChangesPayload<Tables[TN]["Row"]>,
-            ),
-        );
-      }
-      if (events.includes("UPDATE")) {
-        channel.on(
-          "postgres_changes",
-          { event: "UPDATE", schema: "public", table, filter },
-          (payload) =>
-            onEventRef.current(
-              payload as RealtimePostgresChangesPayload<Tables[TN]["Row"]>,
-            ),
-        );
-      }
-      if (events.includes("DELETE")) {
-        channel.on(
-          "postgres_changes",
-          { event: "DELETE", schema: "public", table, filter },
-          (payload) =>
-            onEventRef.current(
-              payload as RealtimePostgresChangesPayload<Tables[TN]["Row"]>,
-            ),
-        );
-      }
-
-      channel.subscribe((status, err) => {
-        if (status === "CHANNEL_ERROR") {
-          console.error(`[Realtime] Channel error for ${channelName}:`, err);
-        } else if (status === "TIMED_OUT") {
-          console.warn(`[Realtime] Subscription timed out for ${channelName}`);
-        }
-      });
-    };
-
-    // Remove existing channel first, then setup new one
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current).then(() => {
-        channelRef.current = null;
-        setupChannel();
-      });
-    } else {
-      setupChannel();
+    if (events.includes("INSERT")) {
+      channel.on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table, filter },
+        (payload) =>
+          onEventRef.current(
+            payload as RealtimePostgresChangesPayload<Tables[TN]["Row"]>,
+          ),
+      );
+    }
+    if (events.includes("UPDATE")) {
+      channel.on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table, filter },
+        (payload) =>
+          onEventRef.current(
+            payload as RealtimePostgresChangesPayload<Tables[TN]["Row"]>,
+          ),
+      );
+    }
+    if (events.includes("DELETE")) {
+      channel.on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table, filter },
+        (payload) =>
+          onEventRef.current(
+            payload as RealtimePostgresChangesPayload<Tables[TN]["Row"]>,
+          ),
+      );
     }
 
-    return () => {
-      isCleanedUp = true;
-      if (channel) {
-        supabase.removeChannel(channel);
+    channel.subscribe((status, err) => {
+      if (status === "CHANNEL_ERROR") {
+        console.error(`[Realtime] Channel error for ${channelName}:`, err);
+      } else if (status === "TIMED_OUT") {
+        console.warn(`[Realtime] Subscription timed out for ${channelName}`);
       }
+    });
+
+    return () => {
+      supabase.removeChannel(channel);
       channelRef.current = null;
     };
-    // events is intentionally excluded - it's typically static and including it causes issues
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channelName, table, filter]);
 }
