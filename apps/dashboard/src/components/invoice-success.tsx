@@ -187,7 +187,7 @@ export function InvoiceSuccess() {
               setParams(null);
 
               setTimeout(() => {
-                setParams({ type: "create" });
+                setParams({ invoiceType: "create" });
               }, 600);
             }}
           >

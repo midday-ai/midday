@@ -7,12 +7,12 @@ import { useInboxParams } from "@/hooks/use-inbox-params";
 export function InboxDetailsSheet() {
   const { params, setParams } = useInboxParams();
 
-  const isOpen = Boolean(params.inboxId && params.type === "details");
+  const isOpen = Boolean(params.inboxId && params.inboxType === "details");
 
   return (
     <Sheet
       open={isOpen}
-      onOpenChange={() => setParams({ type: null, inboxId: null })}
+      onOpenChange={() => setParams({ inboxType: null, inboxId: null })}
     >
       <SheetContent style={{ maxWidth: 647 }}>
         <InboxSheetDetails />

@@ -22,7 +22,7 @@ export function EmptyState() {
           variant="outline"
           onClick={() =>
             setParams({
-              type: "create",
+              invoiceType: "create",
             })
           }
         >

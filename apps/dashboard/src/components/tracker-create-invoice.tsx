@@ -119,7 +119,7 @@ export function TrackerCreateInvoice({ projectId }: Props) {
         // Open the created invoice for editing
         if (data?.id) {
           setInvoiceParams({
-            type: "edit",
+            invoiceType: "edit",
             invoiceId: data.id,
           });
         }

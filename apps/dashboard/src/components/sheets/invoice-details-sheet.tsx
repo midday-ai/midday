@@ -3,14 +3,14 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { InvoiceDetails } from "../invoice-details";
 
 export function InvoiceDetailsSheet() {
-  const { invoiceId, type, setParams } = useInvoiceParams();
+  const { invoiceId, invoiceType, setParams } = useInvoiceParams();
 
-  const isOpen = Boolean(invoiceId && type === "details");
+  const isOpen = Boolean(invoiceId && invoiceType === "details");
 
   return (
     <Sheet
       open={isOpen}
-      onOpenChange={() => setParams({ invoiceId: null, type: null })}
+      onOpenChange={() => setParams({ invoiceId: null, invoiceType: null })}
     >
       <SheetContent>
         <InvoiceDetails />

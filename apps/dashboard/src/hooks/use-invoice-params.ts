@@ -3,7 +3,7 @@ import { createLoader, parseAsString, parseAsStringEnum } from "nuqs/server";
 
 const invoiceParamsSchema = {
   selectedCustomerId: parseAsString,
-  type: parseAsStringEnum(["edit", "create", "details", "success"]),
+  invoiceType: parseAsStringEnum(["edit", "create", "details", "success"]),
   invoiceId: parseAsString,
   editRecurringId: parseAsString,
   emailPreview: parseAsBoolean,

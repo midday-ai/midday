@@ -33,8 +33,8 @@ export default async function Page(props: Props) {
       .fetchInfiniteQuery(
         trpc.inbox.get.infiniteQueryOptions(
           {
-            order: params.order,
-            sort: params.sort,
+            order: params.inboxOrder,
+            sort: params.inboxSort,
             ...filter,
             tab: filter.tab ?? "all",
           },
@@ -71,7 +71,7 @@ export default async function Page(props: Props) {
     hasSyncedAccounts &&
     !hasInboxItems &&
     !hasFilter &&
-    !params.connected
+    !params.inboxConnected
   ) {
     return (
       <Inbox>

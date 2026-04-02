@@ -69,7 +69,7 @@ export function NotificationLink({
         case "invoice_reminder_sent":
         case "invoice_cancelled":
         case "invoice_refunded":
-          setInvoiceParams({ invoiceId: recordId!, type: "details" });
+          setInvoiceParams({ invoiceId: recordId!, invoiceType: "details" });
           break;
 
         case "transactions_created":
@@ -91,7 +91,7 @@ export function NotificationLink({
         case "inbox_cross_currency_matched":
           // Use the inboxId from metadata to open the inbox details sheet
           if (metadata?.inboxId) {
-            setInboxParams({ inboxId: metadata.inboxId, type: "details" });
+            setInboxParams({ inboxId: metadata.inboxId, inboxType: "details" });
           } else {
             // Fallback to inbox page if no inboxId
             router.push("/inbox");
@@ -104,7 +104,7 @@ export function NotificationLink({
           if (metadata?.invoiceId) {
             setInvoiceParams({
               invoiceId: metadata.invoiceId,
-              type: "details",
+              invoiceType: "details",
             });
           } else if (recordId) {
             // Fallback: open the edit recurring sheet

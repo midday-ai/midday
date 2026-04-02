@@ -7,13 +7,13 @@ import { InvoiceSuccess } from "@/components/invoice-success";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 
 export function InvoiceContent() {
-  const { type } = useInvoiceParams();
+  const { invoiceType } = useInvoiceParams();
   const { watch } = useFormContext();
   const templateSize = watch("template.size");
 
   const size = templateSize === "a4" ? 650 : 740;
 
-  if (type === "success") {
+  if (invoiceType === "success") {
     return (
       <SheetContent className="bg-white dark:bg-[#080808] transition-[max-width] duration-300 ease-in-out">
         <InvoiceSuccess />

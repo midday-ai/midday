@@ -112,8 +112,8 @@ export function CustomerForm({ data }: Props) {
   const isEdit = !!data;
 
   const { setParams: setCustomerParams, name } = useCustomerParams();
-  const { setParams: setInvoiceParams, type } = useInvoiceParams();
-  const fromInvoice = type === "create" || type === "edit";
+  const { setParams: setInvoiceParams, invoiceType } = useInvoiceParams();
+  const fromInvoice = invoiceType === "create" || invoiceType === "edit";
 
   const upsertCustomerMutation = useMutation(
     trpc.customers.upsert.mutationOptions({

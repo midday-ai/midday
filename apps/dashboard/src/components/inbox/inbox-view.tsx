@@ -50,20 +50,20 @@ export function InboxView() {
   // Capture the "just connected" state locally so it persists even after URL params are cleared
   // (AppConnectionToast clears params after 100ms, but we need this state for the 60s timeout)
   const [wasJustConnected, setWasJustConnected] = useState(
-    () => params.connected === true,
+    () => params.inboxConnected === true,
   );
 
-  // Update local state when params.connected becomes truthy
+  // Update local state when params.inboxConnected becomes truthy
   useEffect(() => {
-    if (params.connected === true) {
+    if (params.inboxConnected === true) {
       setWasJustConnected(true);
     }
-  }, [params.connected]);
+  }, [params.inboxConnected]);
 
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
-      order: params.order,
-      sort: params.sort,
+      order: params.inboxOrder,
+      sort: params.inboxSort,
       ...filter,
       tab: filter.tab ?? "all", // Default to "all" tab
     },
@@ -256,7 +256,7 @@ export function InboxView() {
   // since item positions in tableData will change
   useEffect(() => {
     setLastClickedIndex(null);
-  }, [params.sort, params.order, filter.q, filter.status, filter.tab]);
+  }, [params.inboxSort, params.inboxOrder, filter.q, filter.status, filter.tab]);
 
   // Arrow key navigation
   useHotkeys(

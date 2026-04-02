@@ -539,7 +539,7 @@ export function InboxDetails() {
                     }
                     url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${data?.filePath.join("/")}`}
                     // Include contentType in key to remount after HEIC conversion (busts browser cache)
-                    key={`${params.order}-${JSON.stringify(filterParams)}-${data.contentType}-primary`}
+                    key={`${params.inboxOrder}-${JSON.stringify(filterParams)}-${data.contentType}-primary`}
                   />
                 )}
               </div>
@@ -568,7 +568,7 @@ export function InboxDetails() {
                           }
                           url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${relatedItem.filePath.join("/")}`}
                           // Include contentType in key to remount after HEIC conversion
-                          key={`${relatedItem.id}-${params.order}-${JSON.stringify(filterParams)}-${relatedItem.contentType}`}
+                          key={`${relatedItem.id}-${params.inboxOrder}-${JSON.stringify(filterParams)}-${relatedItem.contentType}`}
                         />
                       )}
                     </div>

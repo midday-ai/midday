@@ -136,7 +136,7 @@ export function ActionsMenu({ row }: Props) {
         if (data) {
           setParams({
             invoiceId: data.id,
-            type: "edit",
+            invoiceType: "edit",
           });
         }
 
@@ -261,7 +261,7 @@ export function ActionsMenu({ row }: Props) {
               onClick={() =>
                 setParams({
                   invoiceId: row.id,
-                  type: "edit",
+                  invoiceType: "edit",
                 })
               }
             >

@@ -27,7 +27,7 @@ export function InvoiceNo() {
   const trpc = useTRPC();
   const { updateTemplate } = useTemplateUpdate();
 
-  const { type } = useInvoiceParams();
+  const { invoiceType } = useInvoiceParams();
 
   const { data } = useQuery(
     trpc.invoice.searchInvoiceNumber.queryOptions(
@@ -36,7 +36,7 @@ export function InvoiceNo() {
       },
       {
         // Only search for invoice number if we are creating a new invoice
-        enabled: type === "create" && invoiceNumber !== "",
+        enabled: invoiceType === "create" && invoiceNumber !== "",
         // Never cache the result
         gcTime: 0,
       },

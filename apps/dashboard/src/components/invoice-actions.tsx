@@ -439,7 +439,7 @@ export function InvoiceActions({
               size="sm"
               variant="secondary"
               className="flex items-center space-x-2 hover:bg-secondary w-full"
-              onClick={() => setParams({ invoiceId: id, type: "edit" })}
+              onClick={() => setParams({ invoiceId: id, invoiceType: "edit" })}
             >
               <Icons.Edit className="size-3.5" />
               <span>Edit</span>
@@ -567,7 +567,7 @@ export function InvoiceActions({
               size="sm"
               variant="secondary"
               className="flex items-center space-x-2 hover:bg-secondary w-full"
-              onClick={() => setParams({ invoiceId: id, type: "edit" })}
+              onClick={() => setParams({ invoiceId: id, invoiceType: "edit" })}
             >
               <Icons.Edit className="size-3.5" />
               <span>Edit</span>
