@@ -89,6 +89,10 @@ export function ConnectTelegram({ showTrigger = true }: ConnectTelegramProps) {
   }
 
   const copyToClipboard = async () => {
+    if (!telegramUrl) {
+      return;
+    }
+
     try {
       await navigator.clipboard.writeText(telegramUrl);
       setCopied(true);
@@ -176,6 +180,7 @@ export function ConnectTelegram({ showTrigger = true }: ConnectTelegramProps) {
               onClick={copyToClipboard}
               variant="outline"
               className="flex-1"
+              disabled={!telegramUrl}
             >
               {copied ? (
                 <>
