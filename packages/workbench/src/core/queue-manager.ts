@@ -1002,6 +1002,8 @@ export class QueueManager {
 
         if (value) {
           filters[field] = value;
+        } else {
+          textParts.push(`${field}:`);
         }
         i = j;
       } else {
