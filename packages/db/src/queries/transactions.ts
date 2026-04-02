@@ -707,16 +707,18 @@ export async function getTransactions(
   const processedData = fetchedData.map((row) => {
     const { account, connection, ...rest } = row;
 
-    const newAccount = {
-      ...account,
-      connection: connection?.id
-        ? {
-            id: connection.id,
-            name: connection.name,
-            logoUrl: connection.logoUrl,
-          }
-        : null,
-    };
+    const newAccount = account?.id
+      ? {
+          ...account,
+          connection: connection?.id
+            ? {
+                id: connection.id,
+                name: connection.name,
+                logoUrl: connection.logoUrl,
+              }
+            : null,
+        }
+      : null;
 
     const { taxAmount, taxRate, taxType } = resolveTaxValues({
       transactionAmount: rest.amount,

@@ -21,7 +21,7 @@
     "@midday/location": "workspace:*",
     "@midday/logger": "workspace:*",
     "@t3-oss/env-core": "^0.13.11",
-    "axios": "^1.13.6",
+    "axios": "^1.14.0",
     "change-case": "catalog:",
     "date-fns": "catalog:",
     "jose": "catalog:",

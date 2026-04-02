@@ -406,11 +406,11 @@ export const transactionResponseSchema = z
           description: "Unique identifier of the bank account",
           example: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
         }),
-        name: z.string().openapi({
+        name: z.string().nullable().openapi({
           description: "Display name of the bank account",
           example: "Company Credit Card",
         }),
-        currency: z.string().openapi({
+        currency: z.string().nullable().openapi({
           description: "Currency of the bank account in ISO 4217 format",
           example: "USD",
         }),

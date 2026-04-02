@@ -968,34 +968,52 @@ export class QueueManager {
     text: string;
   } {
     const filters: Record<string, string> = {};
-    const parts: string[] = [];
+    const textParts: string[] = [];
+    const len = query.length;
+    let i = 0;
 
-    // Match field:value patterns (supporting quoted values)
-    const regex = /(\w+):(?:"([^"]+)"|(\S+))/g;
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
+    while (i < len) {
+      while (i < len && query[i] === " ") i++;
+      if (i >= len) break;
 
-    while (true) {
-      match = regex.exec(query);
-      if (!match) break;
-      // Add any text before this match
-      if (match.index > lastIndex) {
-        parts.push(query.slice(lastIndex, match.index).trim());
+      let j = i;
+      while (j < len && /\w/.test(query[j]!)) j++;
+
+      if (j > i && j < len && query[j] === ":") {
+        const field = query.slice(i, j);
+        j++;
+
+        let value: string;
+        if (j < len && query[j] === '"') {
+          j++;
+          const closeQuote = query.indexOf('"', j);
+          if (closeQuote !== -1) {
+            value = query.slice(j, closeQuote);
+            j = closeQuote + 1;
+          } else {
+            value = query.slice(j);
+            j = len;
+          }
+        } else {
+          const valueStart = j;
+          while (j < len && query[j] !== " ") j++;
+          value = query.slice(valueStart, j);
+        }
+
+        if (value) {
+          filters[field] = value;
+        }
+        i = j;
+      } else {
+        const start = i;
+        while (i < len && query[i] !== " ") i++;
+        textParts.push(query.slice(start, i));
       }
-      const field = match[1];
-      const value = match[2] || match[3]; // quoted or unquoted value
-      filters[field] = value;
-      lastIndex = regex.lastIndex;
-    }
-
-    // Add remaining text after last match
-    if (lastIndex < query.length) {
-      parts.push(query.slice(lastIndex).trim());
     }
 
     return {
       filters,
-      text: parts.filter(Boolean).join(" "),
+      text: textParts.filter(Boolean).join(" "),
     };
   }
 

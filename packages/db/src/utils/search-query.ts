@@ -9,7 +9,7 @@ export const buildSearchQuery = (input: string) => {
     .map((term) => {
       // Escape special characters for PostgreSQL full-text search
       // Special characters: & | ! ( ) : * ' " + - ~
-      const escaped = term.toLowerCase().replace(/[&|!():*'"+~-]/g, "\\$&");
+      const escaped = term.toLowerCase().replace(/[\\&|!():*'"+~-]/g, "\\$&");
       return `${escaped}:*`;
     })
     .join(" & ");
