@@ -281,13 +281,17 @@ app.openAPIRegistry.registerComponent("securitySchemes", "token", {
   "x-speakeasy-example": "MIDDAY_API_KEY",
 });
 
+const dashboardUrl =
+  process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
+const apiUrl = process.env.MIDDAY_API_URL || "https://api.midday.ai";
+
 app.openAPIRegistry.registerComponent("securitySchemes", "oauth2", {
   type: "oauth2",
   description: "OAuth 2.0 Authorization Code flow",
   flows: {
     authorizationCode: {
-      authorizationUrl: "https://api.midday.ai/oauth/authorize",
-      tokenUrl: "https://api.midday.ai/oauth/token",
+      authorizationUrl: `${dashboardUrl}/oauth/authorize`,
+      tokenUrl: `${apiUrl}/oauth/token`,
       scopes: {
         "bank-accounts.read": "Read bank accounts",
         "bank-accounts.write": "Write bank accounts",

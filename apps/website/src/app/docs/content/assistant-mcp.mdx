@@ -155,7 +155,7 @@ Trigger Raycast and use Midday commands to query your financial data.
 
 ## Available tools
 
-The MCP server exposes 80+ tools covering your entire business workflow.
+The MCP server exposes 107 tools covering your entire business workflow.
 
 ### Transactions
 
@@ -184,6 +184,7 @@ The MCP server exposes 80+ tools covering your entire business workflow.
 | `transactions_export_to_accounting` | Push transactions to Xero, QuickBooks, or Fortnox |
 | `export_job_status` | Poll the progress of an export job |
 | `accounting_connections` | List connected accounting providers |
+| `accounting_sync_status` | Check sync status of transactions with accounting software |
 
 **Example queries**:
 - "Export my January transactions to my accountant at lisa@accounting.com"
@@ -198,6 +199,9 @@ The MCP server exposes 80+ tools covering your entire business workflow.
 | `invoices_list` | List invoices with filters (status, customer, date) |
 | `invoices_get` | Get full invoice details with line items and payment history |
 | `invoices_summary` | Get totals by status (draft, unpaid, paid, overdue) |
+| `invoices_search_number` | Search for an invoice by number |
+| `invoices_payment_status` | Get overall invoice payment health score |
+| `invoices_analytics` | Invoice analytics: avg days to payment, top clients, trends |
 | `invoices_create` | Create a new invoice (saved as draft by default) |
 | `invoices_update_draft` | Edit a draft invoice's line items, customer, dates, or discount |
 | `invoices_send` | Send a draft invoice to the customer via email |
@@ -207,6 +211,7 @@ The MCP server exposes 80+ tools covering your entire business workflow.
 | `invoices_cancel` | Cancel an invoice |
 | `invoices_duplicate` | Duplicate an existing invoice with a new number |
 | `invoices_delete` | Permanently delete an invoice |
+| `invoices_create_from_tracker` | Create an invoice from tracked time entries on a project |
 
 **Example queries**:
 - "Create an invoice for Acme Corp for 10 hours of consulting at $150/hr"
@@ -214,6 +219,37 @@ The MCP server exposes 80+ tools covering your entire business workflow.
 - "Remind Beta Inc about their overdue invoice"
 - "Mark invoice INV-0042 as paid"
 - "What invoices are overdue?"
+- "Invoice the time I tracked on Project X this month"
+
+### Invoice Templates
+
+| Tool | Description |
+|------|-------------|
+| `invoice_template_list` | List all invoice templates |
+| `invoice_template_get` | Get a template's labels and settings |
+| `invoice_template_update` | Update template labels, tax rates, currency, or payment details |
+
+### Invoice Products
+
+| Tool | Description |
+|------|-------------|
+| `invoice_products_list` | List saved line item products (product catalog) |
+| `invoice_products_get` | Get product details (name, price, currency, tax rate) |
+| `invoice_products_create` | Create a reusable invoice line item product |
+| `invoice_products_update` | Update a product |
+| `invoice_products_delete` | Delete a product |
+
+### Recurring Invoices
+
+| Tool | Description |
+|------|-------------|
+| `invoice_recurring_list` | List recurring invoice schedules |
+| `invoice_recurring_get` | Get recurring schedule details |
+| `invoice_recurring_upcoming` | Preview upcoming scheduled invoices |
+| `invoice_recurring_create` | Set up a recurring invoice schedule |
+| `invoice_recurring_pause` | Pause a recurring schedule |
+| `invoice_recurring_resume` | Resume a paused schedule |
+| `invoice_recurring_delete` | Delete a recurring schedule |
 
 ### Customers
 
@@ -278,6 +314,16 @@ The MCP server exposes 80+ tools covering your entire business workflow.
 - "What's my growth rate compared to last quarter?"
 - "Give me a balance sheet as of today"
 
+### Categories
+
+| Tool | Description |
+|------|-------------|
+| `categories_list` | List all transaction categories as a tree |
+| `categories_get` | Get a category with children, color, and tax settings |
+| `categories_create` | Create a custom category |
+| `categories_update` | Update a category |
+| `categories_delete` | Delete a custom category |
+
 ### Tags
 
 | Tool | Description |
@@ -288,32 +334,57 @@ The MCP server exposes 80+ tools covering your entire business workflow.
 | `tags_update` | Rename a tag |
 | `tags_delete` | Delete a tag |
 
-### Bank accounts
+### Bank Accounts
 
 | Tool | Description |
 |------|-------------|
-| `bank_accounts_list` | List connected accounts and balances |
+| `bank_accounts_list` | List connected accounts with balance, currency, and connection info |
+| `bank_accounts_balances` | Get current balances for all accounts |
+| `bank_accounts_currencies` | List all unique currencies across accounts |
+| `bank_accounts_details` | Get banking details (IBAN, account number, routing number) |
 
 **Example queries**:
 - "What's my current cash balance?"
 - "Show all connected accounts"
+- "What currencies do my accounts use?"
 
-### Documents & Inbox
+### Documents
 
 | Tool | Description |
 |------|-------------|
-| `documents_list` | List documents in the vault |
-| `documents_get` | Get document details with download URL |
+| `documents_list` | List documents in the vault with search and tag filters |
+| `documents_get` | Get document details with signed download URL |
+| `documents_delete` | Delete a document from the vault |
+| `document_tags_list` | List all document tags |
+| `document_tags_create` | Create a document tag |
+| `document_tags_delete` | Delete a document tag |
+| `document_tags_assign` | Add a tag to a document |
+| `document_tags_unassign` | Remove a tag from a document |
+
+### Inbox
+
+| Tool | Description |
+|------|-------------|
 | `inbox_list` | List inbox items (receipts, invoices pending processing) |
 | `inbox_get` | Get inbox item details with matched transaction |
+| `inbox_update` | Update an inbox item's status, name, or amount |
+| `inbox_delete` | Delete an inbox item |
+| `inbox_match_transaction` | Link an inbox item to a transaction |
+| `inbox_unmatch_transaction` | Remove the link between an inbox item and a transaction |
+| `inbox_confirm_match` | Confirm an AI-suggested match |
+| `inbox_decline_match` | Decline an AI-suggested match |
+
+**Example queries**:
+- "Show my unprocessed receipts"
+- "Match this receipt to the Stripe transaction"
 
 ### Search & Team
 
 | Tool | Description |
 |------|-------------|
-| `search_global` | Search across all data types |
-| `team_get` | Get team info (name, currency, locale, timezone) |
-| `team_members` | List team members with roles |
+| `search_global` | Full-text search across all data types |
+| `team_get` | Get team info (name, currency, plan, fiscal year) |
+| `team_members` | List team members with roles and user IDs |
 
 ---
 
@@ -366,6 +437,14 @@ The MCP server exposes 80+ tools covering your entire business workflow.
 > - Wednesday: 5h (Testing)
 > - Thursday: 3h (Bug fixes)
 > - Friday: 3h (Documentation)
+
+---
+
+## Scopes & Permissions
+
+Every tool is gated by scopes. When you create an API key or authorize via OAuth, you choose exactly which data and actions are accessible. For example, `transactions.read` enables listing and searching transactions, while `transactions.write` additionally allows creating, updating, and deleting them.
+
+See the full [OAuth Scopes Reference](/docs/oauth-scopes) for the complete list of available scopes.
 
 ---
 
