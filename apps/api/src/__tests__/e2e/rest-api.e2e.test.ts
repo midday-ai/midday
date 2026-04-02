@@ -547,8 +547,18 @@ describe("Teams", () => {
     expect(data).toHaveProperty("data");
     expect(Array.isArray(data.data)).toBe(true);
     if (data.data.length > 0) {
-      teamId = data.data[0].id;
       expect(data.data[0]).toHaveProperty("name");
+
+      // The API key is scoped to a single team. Find it by probing
+      // GET /teams/:id which enforces the token-team check.
+      for (const team of data.data) {
+        const res = await api<any>("GET", `/teams/${team.id}`);
+        if (res.status === 200) {
+          teamId = team.id;
+          break;
+        }
+      }
+      expect(teamId).not.toBeNull();
     }
   });
 

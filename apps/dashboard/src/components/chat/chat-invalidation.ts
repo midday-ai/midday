@@ -110,6 +110,7 @@ const TOOL_INVALIDATION_MAP: Record<string, InvalidationFn> = {
   transactions_delete_bulk: invalidateTransactions,
 
   invoices_create: invalidateInvoices,
+  invoices_update: invalidateInvoices,
   invoices_update_draft: invalidateInvoices,
   invoices_delete: invalidateInvoices,
   invoices_send: invalidateInvoices,
@@ -140,8 +141,8 @@ const TOOL_INVALIDATION_MAP: Record<string, InvalidationFn> = {
 
   inbox_update: invalidateInbox,
   inbox_delete: invalidateInbox,
-  inbox_match: invalidateInbox,
-  inbox_unmatch: invalidateInbox,
+  inbox_match_transaction: invalidateInbox,
+  inbox_unmatch_transaction: invalidateInbox,
 
   documents_delete: invalidateDocuments,
   document_tags_create: invalidateDocuments,
