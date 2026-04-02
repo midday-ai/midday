@@ -68,7 +68,7 @@ sequenceDiagram
 ## Runway
 
 ```
-Runway (months) = Cash Balance / Average Monthly Burn Rate
+Runway (months) = Cash Balance / Median Monthly Burn Rate (last 3 completed months)
 ```
 
 **Cash Balance includes:**

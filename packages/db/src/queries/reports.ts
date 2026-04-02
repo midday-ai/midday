@@ -1070,34 +1070,31 @@ export type GetRunwayParams = {
 };
 
 /**
- * Calculate cash runway using a fixed trailing 6-month window for burn rate.
+ * Calculate cash runway using the median burn rate of the last 3 completed
+ * months.
  *
- * Runway is a forward-looking metric (how many months can we survive?) and
- * should not fluctuate based on an arbitrary user-selected date range.
- * The burn rate is always averaged over the last 6 months to smooth out
- * seasonal variance while remaining recent enough to reflect current
- * spending patterns.
+ * Runway is a forward-looking metric (how many months can we survive?).
+ * We exclude the current (incomplete) month and take the **median** of
+ * the 3 most recent completed months. Median is resistant to one-off
+ * spikes (e.g. quarterly tax payments, annual subscriptions) that would
+ * otherwise distort a simple average.
  */
 export async function getRunway(db: Database, params: GetRunwayParams) {
   const { teamId, currency: inputCurrency } = params;
 
-  // Fixed 6-month trailing window for burn rate calculation
-  // subMonths(toDate, 5) + startOfMonth gives 6 months inclusive of current month
-  const toDate = endOfMonth(new UTCDate());
-  const fromDate = startOfMonth(subMonths(toDate, 5));
+  const now = new UTCDate();
+  const toDate = endOfMonth(subMonths(now, 1));
+  const fromDate = startOfMonth(subMonths(now, 3));
 
   const burnRateFrom = format(fromDate, "yyyy-MM-dd");
   const burnRateTo = format(toDate, "yyyy-MM-dd");
 
-  // Step 1: Get the target currency (cached)
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
 
   if (!targetCurrency) {
     return 0;
   }
 
-  // Step 2: Get total cash balance (depository + other_asset only)
-  // Credit/loan balances are excluded - credit payments are already in burn rate as expenses
   const balanceConditions = [
     eq(bankAccounts.teamId, teamId),
     eq(bankAccounts.enabled, true),
@@ -1128,15 +1125,26 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
     return 0;
   }
 
-  const totalBurnRate = burnRateData.reduce((sum, item) => sum + item.value, 0);
-  const avgBurnRate = Math.round(totalBurnRate / burnRateData.length);
+  const values = burnRateData
+    .map((d) => d.value)
+    .filter((v) => v > 0)
+    .sort((a, b) => a - b);
 
-  // Step 5: Calculate runway
-  if (avgBurnRate === 0) {
+  if (values.length === 0) {
     return 0;
   }
 
-  return Math.round(totalBalance / avgBurnRate);
+  const mid = Math.floor(values.length / 2);
+  const medianBurn =
+    values.length % 2 !== 0
+      ? values[mid]!
+      : (values[mid - 1]! + values[mid]!) / 2;
+
+  if (medianBurn === 0) {
+    return 0;
+  }
+
+  return Math.round(totalBalance / medianBurn);
 }
 
 export type GetSpendingForPeriodParams = {
@@ -4231,8 +4239,9 @@ export async function getChartDataByLinkId(db: Database, linkId: string) {
         }),
       };
     case "runway": {
-      // Use the same fixed 6-month trailing window that getRunway uses
-      // internally so the burn-rate average and runway number are consistent.
+      // Fetch 6 months of burn rate data for the chart visualization.
+      // The runway number itself comes from getRunway() which uses
+      // median-of-3-completed-months internally.
       const burnRateToDate = endOfMonth(new UTCDate());
       const burnRateFromDate = startOfMonth(subMonths(burnRateToDate, 5));
       const burnRateFrom = format(burnRateFromDate, "yyyy-MM-dd");

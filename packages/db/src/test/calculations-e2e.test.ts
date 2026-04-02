@@ -1236,7 +1236,7 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // getRunway — bank balances, burn rate averaging
+  // getRunway — bank balances, median burn rate
   // ─────────────────────────────────────────────────────────────────────────
 
   describe("Runway", () => {
@@ -1247,12 +1247,12 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
       });
 
       // Cash: Checking(50000) + Savings(25000) + EUR(baseBalance=11000) = 86000
-      // Burn (trailing 6-month window, seed dates are relative to today):
-      //   RW1(3000) + RW2(1000) + RW3(2000) + RW4(1500) + RW5(500) = 8000 over 6 months
-      // Avg burn = Math.round(8000/6) = 1333
-      // Runway = Math.round(86000/1333) = 65
+      // Burn (last 3 completed months, seed dates relative to today):
+      //   RW3(2000, month-3) + RW4(1500, month-2) + RW5(500, month-1)
+      // Median of [500, 1500, 2000] = 1500
+      // Runway = Math.round(86000/1500) = 57
       expect(result).toBeGreaterThan(0);
-      expect(result).toBe(Math.round(86000 / Math.round(8000 / 6)));
+      expect(result).toBe(Math.round(86000 / 1500));
     });
 
     test("team with no bank accounts returns 0", async () => {
@@ -2492,8 +2492,8 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
   // ─────────────────────────────────────────────────────────────────────────
   describe("Runway — Edge Cases", () => {
     test("team with no expenses in trailing window returns 0 runway", async () => {
-      // TEAM_EUR has only Jan 2024 transactions, so 6-month trailing
-      // window (current month) should have 0 burn
+      // TEAM_EUR has only Jan 2024 transactions, so trailing 3 completed
+      // months should have 0 burn
       const result = await getRunway(db, {
         teamId: TEAM_EUR_ID,
         currency: "EUR",

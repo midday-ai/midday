@@ -29,8 +29,8 @@ export function RunwayCard({
   const displayRunwayRef = useRef<number>(0);
   const hasInitializedRef = useRef<boolean>(false);
 
-  // Fixed 6-month trailing window for burn rate (matches backend getRunway logic)
-  // subMonths(to, 5) + startOfMonth gives 6 months inclusive of current month
+  // Fetch 6 months of burn rate for the chart visualization.
+  // The runway number uses median-of-3-completed-months (backend).
   const burnRateWindow = useMemo(() => {
     const to = endOfMonth(new UTCDate());
     const from = startOfMonth(subMonths(to, 5));
@@ -76,11 +76,21 @@ export function RunwayCard({
       return [];
     }
 
-    const burnRateAvg =
-      burnRateData && burnRateData.length > 0
-        ? burnRateData.reduce((sum, item) => sum + item.value, 0) /
-          burnRateData.length
-        : 0;
+    // Use median of the last 3 completed months (matches backend getRunway)
+    const burnRateAvg = (() => {
+      if (!burnRateData || burnRateData.length === 0) return 0;
+      const completed = burnRateData.slice(0, -1);
+      const recent = completed.slice(-3);
+      const sorted = recent
+        .map((d) => d.value)
+        .filter((v) => v > 0)
+        .sort((a, b) => a - b);
+      if (sorted.length === 0) return 0;
+      const mid = Math.floor(sorted.length / 2);
+      return sorted.length % 2 !== 0
+        ? sorted[mid]!
+        : (sorted[mid - 1]! + sorted[mid]!) / 2;
+    })();
 
     // Return empty array if burn rate is 0 or invalid
     if (burnRateAvg <= 0 || !Number.isFinite(burnRateAvg)) {
@@ -197,7 +207,7 @@ export function RunwayCard({
           months
         </p>
         <p className="text-xs mt-1 text-muted-foreground">
-          Based on last 6 months
+          Based on last 3 months
         </p>
       </div>
       <div className="h-80">
