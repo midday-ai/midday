@@ -10,10 +10,7 @@ const ALLOWED_LOGO_HOSTS = new Set([
 
 function isAllowedLogoHost(hostname: string): boolean {
   const lower = hostname.toLowerCase();
-  return (
-    ALLOWED_LOGO_HOSTS.has(lower) ||
-    lower.endsWith(".midday.ai")
-  );
+  return ALLOWED_LOGO_HOSTS.has(lower) || lower.endsWith(".midday.ai");
 }
 
 export async function isValidLogoUrl(url: string): Promise<boolean> {

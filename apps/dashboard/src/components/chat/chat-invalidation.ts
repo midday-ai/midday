@@ -109,7 +109,6 @@ const TOOL_INVALIDATION_MAP: Record<string, InvalidationFn> = {
   transactions_delete: invalidateTransactions,
   transactions_delete_bulk: invalidateTransactions,
 
-  invoices_get: invalidateInvoices,
   invoices_create: invalidateInvoices,
   invoices_update: invalidateInvoices,
   invoices_update_draft: invalidateInvoices,
