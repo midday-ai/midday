@@ -3,30 +3,12 @@ import { RedisClient } from "bun";
 
 const logger = createLoggerWithContext("redis");
 
-const REGION_URL_MAP: Record<string, string> = {
-  "europe-west4-drams3a": "REDIS_URL_EU",
-  "us-east4-eqdc4a": "REDIS_URL_US_EAST",
-  "us-west2": "REDIS_URL_US_WEST",
-};
-
 function resolveRedisUrl(): string {
-  const region = process.env.RAILWAY_REPLICA_REGION;
-  if (region) {
-    const envVar = REGION_URL_MAP[region];
-    const url = envVar ? process.env[envVar] : undefined;
-    if (url) {
-      logger.info(`Using regional Redis: ${envVar} (${region})`);
-      return url;
-    }
-  }
   if (process.env.REDIS_URL) {
-    logger.info("Using default REDIS_URL (no region match)");
     return process.env.REDIS_URL;
   }
 
-  throw new Error(
-    "No Redis URL configured. Set REDIS_URL or region-specific REDIS_URL_EU / REDIS_URL_US_EAST / REDIS_URL_US_WEST",
-  );
+  throw new Error("No Redis URL configured. Set REDIS_URL.");
 }
 
 let sharedClient: RedisClient | null = null;
@@ -115,12 +97,15 @@ function createClient(): RedisClient {
   connectedAt = null;
   connectStartedAt = performance.now();
 
+  const isTLS = resolvedUrl.startsWith("rediss://");
+
   const client = new RedisClient(resolvedUrl, {
     autoReconnect: true,
     enableOfflineQueue: false,
     maxRetries: 20,
     connectionTimeout: isProduction ? 5_000 : 3_000,
     idleTimeout: 0,
+    ...(isTLS && { tls: true }),
   });
 
   client.onconnect = () => {
@@ -179,7 +164,8 @@ function createClient(): RedisClient {
 
 /**
  * Get or create a shared Bun RedisClient singleton.
- * Automatically selects the correct regional Redis URL based on RAILWAY_REPLICA_REGION.
+ * Connects to Upstash multi-region Redis via REDIS_URL — Upstash routes
+ * reads to the nearest replica and writes to the primary automatically.
  *
  * Self-healing: if the client has been disconnected for longer than
  * MAX_DISCONNECT_MS (auto-reconnect exhausted), it is destroyed and a
