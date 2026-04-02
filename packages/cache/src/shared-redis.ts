@@ -3,7 +3,7 @@ import { RedisClient } from "bun";
 
 const logger = createLoggerWithContext("redis");
 
-function resolveRedisUrl(): string {
+export function resolveRedisUrl(): string {
   if (process.env.REDIS_URL) {
     return process.env.REDIS_URL;
   }
