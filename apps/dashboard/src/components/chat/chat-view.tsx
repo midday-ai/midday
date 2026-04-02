@@ -2,7 +2,7 @@
 
 import { LogEvents } from "@midday/events/events";
 import { useOpenPanel } from "@openpanel/nextjs";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
 import { useCallback, useEffect } from "react";
@@ -99,7 +99,6 @@ export function ChatView({
   const { track } = useOpenPanel();
 
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { data: connectedApps } = useQuery(
     trpc.connectors.connections.queryOptions(undefined, {
       staleTime: 5 * 60 * 1000,
@@ -122,11 +121,8 @@ export function ChatView({
     (invoiceId: string) => {
       useInvoiceEditorStore.getState().reset();
       setInvoiceParams({ canvas: true, invoiceId });
-      queryClient.invalidateQueries({
-        queryKey: trpc.invoice.getById.queryKey(),
-      });
     },
-    [setInvoiceParams, queryClient, trpc.invoice.getById],
+    [setInvoiceParams],
   );
 
   const isStreaming = status === "streaming" || status === "submitted";
