@@ -290,7 +290,6 @@ export function extractTextFromRtf(buffer: Buffer): string {
     "\\*\\shppict",
     "\\object",
     "\\pict",
-    "\\rtf1",
   ]);
 
   // Remove Unicode characters like \u1234? (keep the fallback '?')
