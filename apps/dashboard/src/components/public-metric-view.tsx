@@ -462,16 +462,13 @@ function RunwayChartView({ linkId }: { linkId: string }) {
   const runwayChartResponse =
     chartData?.type === "runway"
       ? (chartData.data as {
-          runway: number;
+          runway: { months: number; medianBurn: number };
           burnRate: Array<{ date: string; value: number; currency: string }>;
         })
       : null;
-  const runwayData = runwayChartResponse?.runway ?? null;
+  const runwayResult = runwayChartResponse?.runway ?? null;
   const burnRateData = runwayChartResponse?.burnRate ?? null;
   const currency = burnRateData?.[0]?.currency || "USD";
-
-  // Cash balance can't be fetched without auth, so we'll estimate from runway * burn rate
-  const cashBalanceData = null;
 
   const runwayChartData = useMemo<
     Array<{
@@ -482,18 +479,13 @@ function RunwayChartView({ linkId }: { linkId: string }) {
       runwayMonths: number;
     }>
   >(() => {
-    if (!runwayData || typeof runwayData !== "number") return [];
+    if (!runwayResult) return [];
 
-    const burnRateAvg =
-      burnRateData && burnRateData.length > 0
-        ? burnRateData.reduce((sum, item) => sum + item.value, 0) /
-          burnRateData.length
-        : 0;
+    const { months: runwayMonths, medianBurn } = runwayResult;
 
-    if (burnRateAvg <= 0 || !Number.isFinite(burnRateAvg)) return [];
+    if (medianBurn <= 0 || !Number.isFinite(medianBurn)) return [];
 
-    // Estimate cash balance from runway * burn rate (can't fetch account balances without auth)
-    const currentCashBalance = runwayData * burnRateAvg;
+    const currentCashBalance = runwayMonths * medianBurn;
 
     if (!Number.isFinite(currentCashBalance)) return [];
 
@@ -509,17 +501,17 @@ function RunwayChartView({ linkId }: { linkId: string }) {
       const monthsFromNow = i;
       const remainingCash = Math.max(
         0,
-        currentCashBalance - burnRateAvg * monthsFromNow,
+        currentCashBalance - medianBurn * monthsFromNow,
       );
       const projectedRunwayMonths =
-        burnRateAvg > 0 ? remainingCash / burnRateAvg : 0;
+        medianBurn > 0 ? remainingCash / medianBurn : 0;
 
       if (!Number.isFinite(projectedRunwayMonths)) continue;
 
       projections.push({
         month: i === 0 ? "Now" : `+${i}mo`,
         cashRemaining: remainingCash,
-        burnRate: burnRateAvg,
+        burnRate: medianBurn,
         projectedCash: i > 0 ? remainingCash : undefined,
         runwayMonths: projectedRunwayMonths,
       });
@@ -528,9 +520,9 @@ function RunwayChartView({ linkId }: { linkId: string }) {
     }
 
     return projections;
-  }, [runwayData, burnRateData, cashBalanceData]);
+  }, [runwayResult]);
 
-  const currentRunway = typeof runwayData === "number" ? runwayData : 0;
+  const currentRunway = runwayResult?.months ?? 0;
 
   useEffect(() => {
     if (

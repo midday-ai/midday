@@ -29,8 +29,7 @@ export function RunwayCard({
   const displayRunwayRef = useRef<number>(0);
   const hasInitializedRef = useRef<boolean>(false);
 
-  // Fetch 6 months of burn rate for the chart visualization.
-  // The runway number uses median-of-3-completed-months (backend).
+  // Date window used by ShareMetricButton to create shared report links.
   const burnRateWindow = useMemo(() => {
     const to = endOfMonth(new UTCDate());
     const from = startOfMonth(subMonths(to, 5));
@@ -52,15 +51,7 @@ export function RunwayCard({
     }),
   );
 
-  const { data: burnRateData, isPending: isBurnRatePending } = useQuery(
-    trpc.reports.burnRate.queryOptions({
-      from: burnRateWindow.from,
-      to: burnRateWindow.to,
-      currency: currency,
-    }),
-  );
-
-  const isAnyPending = isRunwayPending || isBalancePending || isBurnRatePending;
+  const isAnyPending = isRunwayPending || isBalancePending;
 
   // Transform runway data - need to calculate monthly projections
   const runwayChartData = useMemo<
@@ -72,34 +63,18 @@ export function RunwayCard({
       runwayMonths: number;
     }>
   >(() => {
-    if (!runwayData || typeof runwayData !== "number") {
+    if (!runwayData || typeof runwayData !== "object") {
       return [];
     }
 
-    // Use median of the last 3 completed months (matches backend getRunway)
-    const burnRateAvg = (() => {
-      if (!burnRateData || burnRateData.length === 0) return 0;
-      const completed = burnRateData.slice(0, -1);
-      const recent = completed.slice(-3);
-      const sorted = recent
-        .map((d) => d.value)
-        .filter((v) => v > 0)
-        .sort((a, b) => a - b);
-      if (sorted.length === 0) return 0;
-      const mid = Math.floor(sorted.length / 2);
-      return sorted.length % 2 !== 0
-        ? sorted[mid]!
-        : (sorted[mid - 1]! + sorted[mid]!) / 2;
-    })();
+    const { months: runwayMonths, medianBurn } = runwayData;
 
-    // Return empty array if burn rate is 0 or invalid
-    if (burnRateAvg <= 0 || !Number.isFinite(burnRateAvg)) {
+    if (medianBurn <= 0 || !Number.isFinite(medianBurn)) {
       return [];
     }
 
-    // Get current cash balance from account balances or estimate from runway
     const currentCashBalance =
-      cashBalanceData?.result?.totalBalance ?? runwayData * burnRateAvg;
+      cashBalanceData?.result?.totalBalance ?? runwayMonths * medianBurn;
 
     // Return empty array if cash balance is invalid (but allow 0 for edge cases)
     if (!Number.isFinite(currentCashBalance)) {
@@ -119,30 +94,29 @@ export function RunwayCard({
       const monthsFromNow = i;
       const remainingCash = Math.max(
         0,
-        currentCashBalance - burnRateAvg * monthsFromNow,
+        currentCashBalance - medianBurn * monthsFromNow,
       );
       const projectedRunwayMonths =
-        burnRateAvg > 0 ? remainingCash / burnRateAvg : 0;
+        medianBurn > 0 ? remainingCash / medianBurn : 0;
 
-      // Skip if runwayMonths is invalid
       if (!Number.isFinite(projectedRunwayMonths)) continue;
 
       projections.push({
         month: i === 0 ? "Now" : `+${i}mo`,
         cashRemaining: remainingCash,
-        burnRate: burnRateAvg,
+        burnRate: medianBurn,
         projectedCash: i > 0 ? remainingCash : undefined,
         runwayMonths: projectedRunwayMonths,
       });
 
-      // Stop adding projections once runway reaches 0
       if (projectedRunwayMonths <= 0) break;
     }
 
     return projections;
-  }, [runwayData, burnRateData, cashBalanceData]);
+  }, [runwayData, cashBalanceData]);
 
-  const currentRunway = typeof runwayData === "number" ? runwayData : 0;
+  const currentRunway =
+    runwayData && typeof runwayData === "object" ? runwayData.months : 0;
 
   // Update display value when runway data changes
   // Note: 0 is a legitimate value (zero runway means no months of cash remaining)

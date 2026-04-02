@@ -145,7 +145,7 @@ export const registerReportTools: RegisterTools = (server, ctx) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(result) }],
-        structuredContent: { months: result },
+        structuredContent: { months: result.months },
       };
     }, "Failed to get runway report"),
   );

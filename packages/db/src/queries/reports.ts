@@ -1091,8 +1091,10 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
 
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
 
+  const zeroResult = { months: 0, medianBurn: 0 };
+
   if (!targetCurrency) {
-    return 0;
+    return zeroResult;
   }
 
   const balanceConditions = [
@@ -1122,7 +1124,7 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
 
   const totalBalance = balanceResult[0]?.totalBalance || 0;
   if (burnRateData.length === 0) {
-    return 0;
+    return zeroResult;
   }
 
   const values = burnRateData
@@ -1131,7 +1133,7 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
     .sort((a, b) => a - b);
 
   if (values.length === 0) {
-    return 0;
+    return zeroResult;
   }
 
   const mid = Math.floor(values.length / 2);
@@ -1141,10 +1143,13 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
       : (values[mid - 1]! + values[mid]!) / 2;
 
   if (medianBurn === 0) {
-    return 0;
+    return { months: 0, medianBurn: 0 };
   }
 
-  return Math.round(totalBalance / medianBurn);
+  return {
+    months: Math.round(totalBalance / medianBurn),
+    medianBurn,
+  };
 }
 
 export type GetSpendingForPeriodParams = {
@@ -4239,15 +4244,12 @@ export async function getChartDataByLinkId(db: Database, linkId: string) {
         }),
       };
     case "runway": {
-      // Fetch 6 months of burn rate data for the chart visualization.
-      // The runway number itself comes from getRunway() which uses
-      // median-of-3-completed-months internally.
       const burnRateToDate = endOfMonth(new UTCDate());
       const burnRateFromDate = startOfMonth(subMonths(burnRateToDate, 5));
       const burnRateFrom = format(burnRateFromDate, "yyyy-MM-dd");
       const burnRateTo = format(burnRateToDate, "yyyy-MM-dd");
 
-      const [runwayData, burnRateData] = await Promise.all([
+      const [runwayResult, burnRateData] = await Promise.all([
         getRunway(db, {
           teamId,
           currency,
@@ -4262,7 +4264,7 @@ export async function getChartDataByLinkId(db: Database, linkId: string) {
       return {
         type: "runway" as const,
         data: {
-          runway: runwayData,
+          runway: runwayResult,
           burnRate: burnRateData,
         },
       };

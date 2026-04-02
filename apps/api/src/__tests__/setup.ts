@@ -471,7 +471,7 @@ export const mocks = {
     result: [],
   })) as MockFn,
   getBurnRate: mock(() => ({ data: [], currency: "USD" })) as MockFn,
-  getRunway: mock(() => ({ months: 12 })) as MockFn,
+  getRunway: mock(() => ({ months: 12, medianBurn: 5000 })) as MockFn,
   getExpenses: mock(() => ({ data: [], meta: {} })) as MockFn,
   getSpending: mock(() => []) as MockFn,
   getTaxSummary: mock(() =>

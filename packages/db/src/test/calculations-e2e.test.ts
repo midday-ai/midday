@@ -1251,8 +1251,9 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
       //   RW3(2000, month-3) + RW4(1500, month-2) + RW5(500, month-1)
       // Median of [500, 1500, 2000] = 1500
       // Runway = Math.round(86000/1500) = 57
-      expect(result).toBeGreaterThan(0);
-      expect(result).toBe(Math.round(86000 / 1500));
+      expect(result.months).toBeGreaterThan(0);
+      expect(result.months).toBe(Math.round(86000 / 1500));
+      expect(result.medianBurn).toBe(1500);
     });
 
     test("team with no bank accounts returns 0", async () => {
@@ -1261,7 +1262,8 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
         currency: "EUR",
       });
 
-      expect(result).toBe(0);
+      expect(result.months).toBe(0);
+      expect(result.medianBurn).toBe(0);
     });
   });
 
@@ -2499,7 +2501,8 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
         currency: "EUR",
       });
 
-      expect(result).toBe(0);
+      expect(result.months).toBe(0);
+      expect(result.medianBurn).toBe(0);
     });
   });
 

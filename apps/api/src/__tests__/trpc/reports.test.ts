@@ -119,14 +119,16 @@ describe("tRPC: reports.burnRate", () => {
 describe("tRPC: reports.runway", () => {
   beforeEach(() => {
     mocks.getRunway.mockReset();
-    mocks.getRunway.mockImplementation(() => Promise.resolve(12));
+    mocks.getRunway.mockImplementation(() =>
+      Promise.resolve({ months: 12, medianBurn: 5000 }),
+    );
   });
 
   test("returns runway with empty input", async () => {
     const caller = createCaller(createTestContext());
     const result = await caller.runway({});
 
-    expect(result).toBe(12);
+    expect(result).toEqual({ months: 12, medianBurn: 5000 });
     expect(mocks.getRunway).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ teamId: "test-team-id" }),
