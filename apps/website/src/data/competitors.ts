@@ -94,6 +94,7 @@ export const middayPricing: PricingTier[] = [
       "Custom transaction categories",
       "Invoice templates",
       "Customer portal",
+      "Customer enrichment",
       "Advanced AI insights",
       "Priority support",
     ],

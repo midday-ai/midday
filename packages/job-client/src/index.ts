@@ -18,6 +18,8 @@ export interface TriggerJobOptions {
   delay?: number;
   /** Custom job ID for deduplication - BullMQ will reject duplicates with the same jobId */
   jobId?: string;
+  /** Number of attempts before the job is marked as failed (overrides queue default of 3) */
+  attempts?: number;
 }
 
 /**
@@ -41,6 +43,7 @@ export async function triggerJob(
     const job = await queue.add(jobName, payload, {
       delay: options?.delay,
       jobId: options?.jobId,
+      ...(options?.attempts != null && { attempts: options.attempts }),
     });
 
     if (!job?.id) {

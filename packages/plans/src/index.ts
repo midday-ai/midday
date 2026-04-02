@@ -234,6 +234,11 @@ export const proFeatures: PlanFeature[] = [
       "Let customers view and pay invoices through their own branded portal.",
   },
   {
+    label: "Customer enrichment",
+    tooltip:
+      "Automatically enrich customer profiles with company details, social links, funding info, and more.",
+  },
+  {
     label: "Advanced metrics",
     tooltip:
       "Revenue forecasting, category breakdowns, and detailed financial analysis across your business.",
