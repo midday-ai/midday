@@ -109,6 +109,7 @@ const TOOL_INVALIDATION_MAP: Record<string, InvalidationFn> = {
   transactions_delete: invalidateTransactions,
   transactions_delete_bulk: invalidateTransactions,
 
+  invoices_get: invalidateInvoices,
   invoices_create: invalidateInvoices,
   invoices_update: invalidateInvoices,
   invoices_update_draft: invalidateInvoices,
@@ -141,12 +142,25 @@ const TOOL_INVALIDATION_MAP: Record<string, InvalidationFn> = {
 
   inbox_update: invalidateInbox,
   inbox_delete: invalidateInbox,
-  inbox_match_transaction: invalidateInbox,
-  inbox_unmatch_transaction: invalidateInbox,
+  inbox_match_transaction: (trpc, qc) => {
+    invalidateInbox(trpc, qc);
+    invalidateTransactions(trpc, qc);
+  },
+  inbox_unmatch_transaction: (trpc, qc) => {
+    invalidateInbox(trpc, qc);
+    invalidateTransactions(trpc, qc);
+  },
+  inbox_confirm_match: (trpc, qc) => {
+    invalidateInbox(trpc, qc);
+    invalidateTransactions(trpc, qc);
+  },
+  inbox_decline_match: invalidateInbox,
 
   documents_delete: invalidateDocuments,
   document_tags_create: invalidateDocuments,
   document_tags_delete: invalidateDocuments,
+  document_tags_assign: invalidateDocuments,
+  document_tags_unassign: invalidateDocuments,
 };
 
 export function useChatToolInvalidation(messages: UIMessage[]) {

@@ -74,13 +74,7 @@ export function InputBar({
   );
 }
 
-export function ChatView({
-  onClose,
-  header,
-}: {
-  onClose: () => void;
-  header?: React.ReactNode;
-}) {
+export function ChatView({ header }: { header?: React.ReactNode }) {
   const {
     messages,
     sendMessage,
