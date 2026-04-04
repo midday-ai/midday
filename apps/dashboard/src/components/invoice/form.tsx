@@ -104,6 +104,13 @@ export function Form() {
           queryKey: trpc.search.global.queryKey(),
         });
 
+        // Next suggested invoice number must advance after a successful send;
+        // otherwise "Create another" resets from stale defaultSettings and shows
+        // a duplicate-number validation error.
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.defaultSettings.queryKey(),
+        });
+
         setParams({ invoiceType: "success", invoiceId: data.id });
       },
       onError: (error) => {
@@ -377,6 +384,9 @@ export function Form() {
           });
           queryClient.invalidateQueries({
             queryKey: trpc.invoice.invoiceSummary.queryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: trpc.invoice.defaultSettings.queryKey(),
           });
           setParams({ invoiceType: "success", invoiceId: values.id });
         } else {
