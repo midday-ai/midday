@@ -948,30 +948,8 @@ async function processIncomingAttachments(params: {
 }
 
 async function getConversationHistory(thread: any) {
-  const cached = [...(thread.recentMessages || [])];
-
-  try {
-    const result = await thread.adapter.fetchMessages(thread.id, { limit: 20 });
-    const combined = [...(result?.messages || []), ...cached];
-    return dedupeMessages(combined);
-  } catch {
-    return dedupeMessages(cached);
-  }
-}
-
-function dedupeMessages(messages: any[]) {
-  const seen = new Set<string>();
-
-  return messages.filter((message) => {
-    const id = String(message?.id || "");
-
-    if (!id || seen.has(id)) {
-      return false;
-    }
-
-    seen.add(id);
-    return true;
-  });
+  await thread.refresh();
+  return thread.recentMessages || [];
 }
 
 function isSupportedAttachment(attachment: any) {

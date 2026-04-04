@@ -8,6 +8,8 @@ import type {
   FormattedContent,
   Logger,
   RawMessage,
+  StreamChunk,
+  StreamOptions,
   ThreadInfo,
   WebhookOptions,
 } from "chat";
@@ -23,13 +25,14 @@ import type {
 } from "./types";
 import { REACTION_ALIASES, VALID_REACTIONS } from "./types";
 
-const DEFAULT_WEBHOOK_SECRET_HEADER = "x-webhook-secret";
+const DEFAULT_WEBHOOK_SECRET_HEADER = "sb-signing-secret";
 const DEFAULT_ALLOWED_SERVICES = ["iMessage"];
 
 export class SendblueAdapter
   implements Adapter<SendblueThreadId, SendblueMessagePayload>
 {
   readonly name = "sendblue";
+  readonly persistMessageHistory = true;
   readonly userName: string;
 
   private chat: ChatInstance | null = null;
@@ -136,6 +139,7 @@ export class SendblueAdapter
         this.logger.debug("Sendblue webhook filtered by service", {
           service: payload.service,
         });
+
         return new Response("OK", { status: 200 });
       }
 
@@ -149,6 +153,7 @@ export class SendblueAdapter
     this.logger.debug("Sendblue webhook ignored (unrecognized type)", {
       keys: Object.keys(body),
     });
+
     return new Response("OK", { status: 200 });
   }
 
@@ -159,6 +164,8 @@ export class SendblueAdapter
     if (!this.chat) return;
 
     const threadId = this.threadIdFromPayload(payload);
+
+    this.markRead(threadId).catch(() => {});
 
     const factory = async (): Promise<Message<SendblueMessagePayload>> => {
       return this.parseMessage(payload);
@@ -237,19 +244,28 @@ export class SendblueAdapter
     const decoded = this.decodeThreadId(threadId);
     const text = this.renderOutbound(message);
 
+    if (!text?.trim()) {
+      this.logger.debug("Skipping empty outbound message");
+      return {
+        raw: {} as SendblueMessagePayload,
+        id: "",
+        threadId,
+      };
+    }
+
     let response: SendblueAPI.MessageResponse;
 
     if (decoded.groupId) {
       response = await this.sdk.groups.sendMessage({
         from_number: decoded.fromNumber,
-        content: text || "",
+        content: text,
         group_id: decoded.groupId,
       });
     } else {
       response = await this.sdk.messages.send({
         number: decoded.contactNumber!,
         from_number: decoded.fromNumber,
-        content: text || "",
+        content: text,
         media_url: undefined,
         status_callback: this.config.statusCallbackUrl,
       });
@@ -260,6 +276,51 @@ export class SendblueAdapter
       id: response.message_handle ?? "",
       threadId,
     };
+  }
+
+  async stream(
+    threadId: string,
+    textStream: AsyncIterable<string | StreamChunk>,
+    _options?: StreamOptions,
+  ): Promise<RawMessage<SendblueMessagePayload>> {
+    let lastResult: RawMessage<SendblueMessagePayload> | undefined;
+    let current = "";
+
+    for await (const chunk of textStream) {
+      let text = "";
+      if (typeof chunk === "string") {
+        text = chunk;
+      } else if (chunk.type === "markdown_text") {
+        text = chunk.text;
+      }
+      if (!text) continue;
+
+      current += text;
+
+      const parts = current.split("\n\n");
+      if (parts.length > 1) {
+        for (let i = 0; i < parts.length - 1; i++) {
+          const seg = parts[i]!.trim();
+          if (seg) {
+            lastResult = await this.postMessage(threadId, { markdown: seg });
+          }
+        }
+        current = parts[parts.length - 1]!;
+      }
+    }
+
+    if (current.trim()) {
+      lastResult = await this.postMessage(threadId, {
+        markdown: current.trim(),
+      });
+    }
+
+    if (!lastResult) {
+      this.logger.debug("Stream produced no content, skipping send");
+      return { raw: {} as SendblueMessagePayload, id: "", threadId };
+    }
+
+    return lastResult;
   }
 
   async editMessage(
@@ -312,9 +373,7 @@ export class SendblueAdapter
     _messageId: string,
     _emoji: EmojiValue | string,
   ): Promise<void> {
-    this.logger.debug(
-      "Sendblue does not support removing reactions via API",
-    );
+    this.logger.debug("Sendblue does not support removing reactions via API");
   }
 
   // ---------------------------------------------------------------------------
@@ -334,16 +393,16 @@ export class SendblueAdapter
       limit,
       offset,
       order_by: "sentAt",
-      order_direction: "asc",
+      order_direction: "desc",
       number: decoded.contactNumber,
       sendblue_number: decoded.fromNumber,
       group_id: decoded.groupId,
       message_type: decoded.groupId ? "group" : "message",
     });
 
-    const messages = (result.data ?? []).map((raw) =>
-      this.parseMessage(raw as unknown as SendblueMessagePayload),
-    );
+    const messages = (result.data ?? [])
+      .map((raw) => this.parseMessage(raw as unknown as SendblueMessagePayload))
+      .reverse();
 
     const total = result.pagination?.total ?? 0;
     const nextOffset = offset + limit;
@@ -386,8 +445,7 @@ export class SendblueAdapter
         from_number: decoded.fromNumber,
       });
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : String(error);
       if (message.includes("No route mapping")) {
         this.logger.debug(
           "Sendblue typing indicator skipped: no route mapping",
@@ -453,8 +511,14 @@ export class SendblueAdapter
 
   private renderOutbound(message: AdapterPostableMessage): string {
     if (typeof message === "string") return toPlainText(message);
+    if ("markdown" in message && typeof message.markdown === "string") {
+      return toPlainText(message.markdown);
+    }
     if ("text" in message && typeof message.text === "string") {
       return toPlainText(message.text);
+    }
+    if ("ast" in message && message.ast) {
+      return toPlainText(stringifyMarkdown(message.ast));
     }
     return "";
   }

@@ -4,11 +4,11 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { inboxWebhookRouter } from "./inbox";
 import { plaidWebhookRouter } from "./plaid";
 import { polarWebhookRouter } from "./polar";
+import { sendblueWebhookRouter } from "./sendblue";
 import { stripeWebhookRouter } from "./stripe";
 import { telegramWebhookRouter } from "./telegram";
 import { tellerWebhookRouter } from "./teller";
 import { whatsappWebhookRouter } from "./whatsapp";
-import { sendblueWebhookRouter } from "./sendblue";
 
 const app = new OpenAPIHono<Context>();
 

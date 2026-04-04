@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { revalidateInbox } from "@/actions/revalidate-action";
 import { AppConnectionToast } from "@/components/app-connection-toast";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
+import { ConnectIMessage } from "@/components/inbox/connect-imessage";
 import { ConnectOutlook } from "@/components/inbox/connect-outlook";
 import { ConnectSlack } from "@/components/inbox/connect-slack";
 import { ConnectTelegram } from "@/components/inbox/connect-telegram";
@@ -108,6 +109,7 @@ export function InboxGetStarted() {
                       <ConnectSlack />
                       <ConnectTelegram />
                       <ConnectWhatsApp />
+                      <ConnectIMessage />
                       {user?.team?.inboxId && (
                         <CopyInput value={getInboxEmail(user.team.inboxId)} />
                       )}

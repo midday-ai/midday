@@ -1,4 +1,4 @@
-CREATE TYPE platform_provider AS ENUM ('slack', 'telegram', 'whatsapp');
+CREATE TYPE platform_provider AS ENUM ('slack', 'telegram', 'whatsapp', 'sendblue');
 
 CREATE TABLE platform_identities (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,

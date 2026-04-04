@@ -7,7 +7,7 @@ export interface SendblueAdapterConfig {
   webhookSecret?: string;
   /**
    * Header name Sendblue uses to deliver the webhook secret.
-   * @default "x-webhook-secret"
+   * @default "sb-signing-secret"
    */
   webhookSecretHeader?: string;
   statusCallbackUrl?: string;

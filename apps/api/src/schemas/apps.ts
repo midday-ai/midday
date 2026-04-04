@@ -17,5 +17,5 @@ export const removeWhatsAppConnectionSchema = z.object({
 });
 
 export const createPlatformLinkTokenSchema = z.object({
-  provider: z.enum(["slack", "telegram", "whatsapp"]),
+  provider: z.enum(["slack", "telegram", "whatsapp", "sendblue"]),
 });

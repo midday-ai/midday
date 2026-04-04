@@ -7,6 +7,7 @@ import eInvoiceApp from "./e-invoice/config";
 import fortnoxApp from "./fortnox/config-client";
 import geminiMcpApp from "./gemini-mcp/config";
 import gmailApp from "./gmail/config-client";
+import imessageApp from "./imessage/config-client";
 import makeMcpApp from "./make-mcp/config";
 import manusMcpApp from "./manus-mcp/config";
 import middayDesktopApp from "./midday-desktop/config";
@@ -35,6 +36,7 @@ export const apps = [
   xeroApp,
   fortnoxApp,
   whatsappApp,
+  imessageApp,
   stripePaymentsApp,
   middayDesktopApp,
   eInvoiceApp,

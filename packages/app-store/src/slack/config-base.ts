@@ -8,15 +8,14 @@ export const baseConfig = {
   active: true,
   logo: Logo,
   short_description:
-    "Get transaction notifications and upload receipts directly from Slack. Midday automatically extracts data and matches them to transactions.",
+    "Use the Midday assistant in Slack — upload receipts, track expenses, create invoices, and manage your finances without leaving your workspace.",
   description:
-    "Connect Midday with Slack to streamline your financial workflow without leaving your workspace.\n\n**Transaction Notifications**\nGet notified in your chosen Slack channel whenever new transactions are added, keeping your team informed in real-time.\n\n**Receipt & Invoice Upload**\nUpload receipts, invoices, or any documents directly from Slack. Simply share a file in a channel where Midday is added, and it will automatically be processed.\n\n**Smart Matching**\nMidday extracts key information (amount, date, vendor) from your documents and automatically matches them to the right transactions. You'll receive a notification in the same thread with the match result.\n\n**Approve or Decline**\nReview suggested matches and approve or decline them directly from Slack with one click—no need to switch to the Midday app.",
+    "Bring Midday into your team's workflow. Connect Slack to access the full Midday assistant right where you work.\n\n**Midday Assistant**\nAsk questions about your finances, get spending summaries, check outstanding invoices, or look up any transaction — all from a Slack channel or DM.\n\n**Upload Receipts & Invoices**\nDrop a receipt or invoice into Slack and Midday extracts the details automatically. It matches documents to the right transactions so your books stay up to date.\n\n**Create & Track Invoices**\nDraft and send invoices, check payment status, and get notified when invoices are paid or overdue — without switching apps.\n\n**Team Notifications**\nKeep your team in the loop with real-time alerts for new transactions, invoice activity, and receipt matches in your chosen channel.",
   settings: [
     {
       id: "transactions",
       label: "Transactions",
-      description:
-        "Get notified when a new transaction is added. This will notify you in the channel you have selected.",
+      description: "Get alerts for new transactions and spending activity.",
       type: "switch",
       required: false,
       value: true,
@@ -25,7 +24,7 @@ export const baseConfig = {
       id: "invoices",
       label: "Invoices",
       description:
-        "Get notified when invoices are paid or become overdue. This will notify you in the channel you have selected.",
+        "Get notified when invoices are paid, overdue, or need attention.",
       type: "switch",
       required: false,
       value: true,
@@ -34,7 +33,7 @@ export const baseConfig = {
       id: "matches",
       label: "Match Suggestions",
       description:
-        "Get notified when receipts are matched or need review. This will notify you in the same thread where you uploaded the file.",
+        "Get notified when uploads are matched to transactions or need review.",
       type: "switch",
       required: false,
       value: true,
