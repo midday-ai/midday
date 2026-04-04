@@ -246,6 +246,10 @@ async function resolveConversation(
     return resolveSlackConversation(thread, message);
   }
 
+  if (platform === "sendblue") {
+    return resolveSendblueConversation(thread, message);
+  }
+
   return null;
 }
 
@@ -267,7 +271,8 @@ async function hydrateResolvedConversationIdentity(params: {
   if (
     platform !== "slack" &&
     platform !== "telegram" &&
-    platform !== "whatsapp"
+    platform !== "whatsapp" &&
+    platform !== "sendblue"
   ) {
     return null;
   }
@@ -450,6 +455,123 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
     if (error instanceof PlatformIdentityAlreadyLinkedToAnotherTeamError) {
       await thread.post(
         "This WhatsApp number is already linked to another Midday workspace.",
+      );
+      return { connected: false as const };
+    }
+
+    throw error;
+  }
+}
+
+async function resolveSendblueConversation(thread: any, message: any) {
+  const phoneNumber = getMessageAuthorId(message);
+  if (!phoneNumber) {
+    return null;
+  }
+
+  const existingIdentity = await getPlatformIdentity(db, {
+    provider: "sendblue",
+    externalUserId: phoneNumber,
+  });
+
+  if (existingIdentity?.teamId && existingIdentity.userId) {
+    if (
+      !(await hasCurrentTeamAccess(
+        existingIdentity.teamId,
+        existingIdentity.userId,
+      ))
+    ) {
+      await notifyTeamAccessRevoked(thread);
+      return { connected: false as const };
+    }
+
+    await rememberThreadState(thread, {
+      teamId: existingIdentity.teamId,
+      actingUserId: existingIdentity.userId,
+      platform: "sendblue",
+      externalUserId: phoneNumber,
+    });
+
+    return {
+      connected: true as const,
+      teamId: existingIdentity.teamId,
+      actingUserId: existingIdentity.userId,
+      identityId: existingIdentity.id,
+      notificationContext: getPlatformIdentityNotificationContext(
+        existingIdentity.metadata as Record<string, unknown> | null,
+      ),
+    };
+  }
+
+  const code = extractConnectionToken("sendblue", message?.text);
+
+  if (!code) {
+    await thread.post(
+      "Connect iMessage from Midday first, then send the connection code here.",
+    );
+    return { connected: false as const };
+  }
+
+  const token = await consumePlatformLinkToken(db, {
+    provider: "sendblue",
+    code,
+  });
+
+  if (!token) {
+    await thread.post(
+      "That iMessage link code is invalid or expired. Open Midday and generate a new one.",
+    );
+    return { connected: false as const };
+  }
+
+  if (!(await hasCurrentTeamAccess(token.teamId, token.userId))) {
+    await notifyTeamAccessRevoked(thread);
+    return { connected: false as const };
+  }
+
+  try {
+    const identity = await createOrUpdatePlatformIdentity(db, {
+      provider: "sendblue",
+      teamId: token.teamId,
+      userId: token.userId,
+      externalUserId: phoneNumber,
+      metadata: {
+        displayName:
+          message?.author?.fullName || message?.author?.userName || undefined,
+      },
+    });
+
+    const team = await getTeamById(db, token.teamId);
+    const actingUserId = token.userId;
+
+    await rememberThreadState(thread, {
+      teamId: token.teamId,
+      actingUserId,
+      platform: "sendblue",
+      externalUserId: phoneNumber,
+    });
+
+    await thread.post(
+      `Connected to ${team?.name ?? "Midday"}. You can now chat with Midday via iMessage.`,
+    );
+
+    return consumeResolvedConversation({
+      connected: true as const,
+      teamId: token.teamId,
+      actingUserId,
+      identityId: identity.id,
+    });
+  } catch (error) {
+    if (error instanceof PlatformIdentityAlreadyLinkedToAnotherUserError) {
+      await thread.post(
+        "This phone number is already linked to another Midday user.",
+      );
+      return { connected: false as const };
+    }
+
+    if (error instanceof PlatformIdentityAlreadyLinkedToAnotherTeamError) {
+      await thread.post(
+        "This phone number is already linked to another Midday workspace.",
       );
       return { connected: false as const };
     }
@@ -903,7 +1025,8 @@ function normalizePlatform(platformName: string): BotPlatform | null {
     platformName === "dashboard" ||
     platformName === "whatsapp" ||
     platformName === "telegram" ||
-    platformName === "slack"
+    platformName === "slack" ||
+    platformName === "sendblue"
   ) {
     return platformName;
   }

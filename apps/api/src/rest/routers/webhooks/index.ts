@@ -8,6 +8,7 @@ import { stripeWebhookRouter } from "./stripe";
 import { telegramWebhookRouter } from "./telegram";
 import { tellerWebhookRouter } from "./teller";
 import { whatsappWebhookRouter } from "./whatsapp";
+import { sendblueWebhookRouter } from "./sendblue";
 
 const app = new OpenAPIHono<Context>();
 
@@ -18,6 +19,7 @@ app.use("*", ...publicMiddleware);
 app.route("/inbox", inboxWebhookRouter);
 app.route("/plaid", plaidWebhookRouter);
 app.route("/polar", polarWebhookRouter);
+app.route("/sendblue", sendblueWebhookRouter);
 app.route("/stripe", stripeWebhookRouter);
 app.route("/teller", tellerWebhookRouter);
 app.route("/telegram", telegramWebhookRouter);

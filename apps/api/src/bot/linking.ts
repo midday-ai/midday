@@ -1,4 +1,4 @@
-type SupportedLinkPlatform = "slack" | "telegram" | "whatsapp";
+type SupportedLinkPlatform = "slack" | "telegram" | "whatsapp" | "sendblue";
 
 const PLATFORM_LINK_CODE_PATTERN = /^mb_[A-Za-z0-9_-]{10,}$/;
 

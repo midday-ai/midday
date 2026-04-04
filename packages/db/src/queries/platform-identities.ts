@@ -7,7 +7,7 @@ import {
 } from "../errors";
 import { platformIdentities, platformLinkTokens } from "../schema";
 
-export type PlatformProvider = "slack" | "telegram" | "whatsapp";
+export type PlatformProvider = "slack" | "telegram" | "whatsapp" | "sendblue";
 
 type PlatformIdentityRecord = typeof platformIdentities.$inferSelect;
 

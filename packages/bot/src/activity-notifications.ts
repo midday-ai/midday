@@ -117,7 +117,7 @@ export type NotificationContext = {
   entityType: string;
   entityIds: string[];
   summary: string;
-  sourcePlatform: "slack" | "telegram" | "whatsapp";
+  sourcePlatform: "slack" | "telegram" | "whatsapp" | "sendblue";
   sourceMessageId?: string;
   suggestedPrompts: string[];
   sentAt: string;
@@ -586,7 +586,7 @@ export function buildBatchSummary(
   params: {
     teamId: string;
     userId: string;
-    provider: "slack" | "telegram" | "whatsapp";
+    provider: "slack" | "telegram" | "whatsapp" | "sendblue";
   },
 ) {
   const sentAt = new Date().toISOString();
@@ -794,7 +794,7 @@ function isSettingEnabled(
 
 async function getAppConfig(
   db: Database,
-  appId: "slack" | "telegram" | "whatsapp",
+  appId: "slack" | "telegram" | "whatsapp" | "sendblue",
   teamId: string,
 ): Promise<AppConfig | null> {
   const app = await getAppByAppId(db, { appId, teamId });

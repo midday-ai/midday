@@ -16,7 +16,8 @@ export type InboxUploadPlatform =
   | "dashboard"
   | "whatsapp"
   | "telegram"
-  | "slack";
+  | "slack"
+  | "sendblue";
 
 export type ProcessInboxUploadParams = {
   db: Database;

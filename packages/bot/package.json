@@ -17,6 +17,7 @@
     "@chat-adapter/state-redis": "^4.23.0",
     "@chat-adapter/telegram": "^4.23.0",
     "@chat-adapter/whatsapp": "^4.23.0",
+    "chat-adapter-sendblue": "workspace:*",
     "@midday/app-store": "workspace:*",
     "@midday/cache": "workspace:*",
     "@midday/db": "workspace:*",

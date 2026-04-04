@@ -1,4 +1,4 @@
-export type BotPlatform = "dashboard" | "whatsapp" | "telegram" | "slack";
+export type BotPlatform = "dashboard" | "whatsapp" | "telegram" | "slack" | "sendblue";
 
 export function getPlatformInstructions(platform: BotPlatform): string {
   switch (platform) {
@@ -28,6 +28,14 @@ export function getPlatformInstructions(platform: BotPlatform): string {
 ## Platform: Slack
 - Slack supports richer formatting than mobile messaging platforms.
 - It is fine to use tables and richer summaries when helpful.`;
+    case "sendblue":
+      return `
+
+## Platform: iMessage (via Sendblue)
+- iMessage is plain text only — markdown formatting is not rendered.
+- Keep responses concise and mobile-friendly.
+- Avoid tables, headers, and code blocks.
+- You can send images and files as attachments.`;
     default:
       return "";
   }

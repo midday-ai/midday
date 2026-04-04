@@ -297,10 +297,12 @@ export const insightStatusEnum = pgEnum("insight_status", [
   "completed",
   "failed",
 ]);
+
 export const platformProviderEnum = pgEnum("platform_provider", [
   "slack",
   "telegram",
   "whatsapp",
+  "sendblue",
 ]);
 
 export const documentTagEmbeddings = pgTable(
