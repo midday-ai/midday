@@ -16,7 +16,7 @@ import {
 } from "../../schema";
 
 // Runway seed dates are relative to today so they always fall within
-// the trailing 6-month window used by getRunway / getBurnRate.
+// the trailing window used by getRunway (3 completed months) / getBurnRate.
 const _now = new UTCDate();
 const RW_DATE_1 = format(subMonths(_now, 5), "yyyy-MM-dd");
 const RW_DATE_2 = format(subMonths(_now, 4), "yyyy-MM-dd");
@@ -1214,7 +1214,7 @@ async function seedTransactions(db: Database): Promise<void> {
     },
 
     // ═══════════════════════════════════════════════════════════════════════
-    // RECENT — For runway calculation (trailing 6-month window)
+    // RECENT — For runway calculation (last 3 completed months)
     // Dates are relative to today so they never drift out of the window.
     // ═══════════════════════════════════════════════════════════════════════
 

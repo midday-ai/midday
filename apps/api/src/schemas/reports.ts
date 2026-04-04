@@ -365,12 +365,20 @@ export const getBurnRateResponseSchema = z
   )
   .openapi("GetBurnRateResponseSchema");
 
-export const getRunwayResponseSchema = z.number().openapi({
-  title: "GetRunwayResponseSchema",
-  description:
-    "Number of months of runway remaining, based on current burn rate and available cash.",
-  example: 12,
-});
+export const getRunwayResponseSchema = z
+  .object({
+    months: z
+      .number()
+      .describe(
+        "Number of months of runway remaining, based on current burn rate and available cash.",
+      ),
+    medianBurn: z
+      .number()
+      .describe(
+        "Median monthly burn rate (last 3 completed months) used to compute runway.",
+      ),
+  })
+  .openapi("GetRunwayResponseSchema");
 
 export const getExpensesResponseSchema = z
   .object({

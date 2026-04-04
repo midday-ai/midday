@@ -45,7 +45,7 @@ export async function getOverviewSummary(
   const { teamId, currency } = params;
   const today = formatISO(new Date(), { representation: "date" });
 
-  const [openInv, billable, pendingInbox, reviewCount, cash, runwayMonths] =
+  const [openInv, billable, pendingInbox, reviewCount, cash, runwayResult] =
     await Promise.all([
       getInvoiceSummary(db, {
         teamId,
@@ -81,6 +81,6 @@ export async function getOverviewSummary(
       currency: cash.currency,
       accountCount: cash.accountCount,
     },
-    runway: runwayMonths,
+    runway: runwayResult.months,
   };
 }

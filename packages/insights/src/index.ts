@@ -432,7 +432,7 @@ export class InsightsService {
       getRunway(this.db, {
         teamId,
         currency,
-      }).catch(() => 0),
+      }).catch(() => ({ months: 0, medianBurn: 0 })),
       getSpending(this.db, { teamId, from, to, currency }).catch(() => []),
       getCashBalance(this.db, { teamId, currency }).catch(() => ({
         totalBalance: 0,
@@ -505,7 +505,10 @@ export class InsightsService {
       netProfit: profitTotal,
       cashFlow: netCashFlow,
       profitMargin,
-      runwayMonths: typeof runwayData === "number" ? runwayData : 0,
+      runwayMonths:
+        typeof runwayData === "object" && runwayData !== null
+          ? runwayData.months
+          : 0,
       cashBalance,
       categorySpending: categorySpendingData,
     };
