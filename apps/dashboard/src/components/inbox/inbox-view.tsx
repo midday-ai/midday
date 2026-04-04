@@ -62,8 +62,8 @@ export function InboxView() {
 
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
-      order: params.order,
-      sort: params.sort,
+      order: params.inboxOrder,
+      sort: params.inboxSort,
       ...filter,
       tab: filter.tab ?? "all", // Default to "all" tab
     },
@@ -256,7 +256,13 @@ export function InboxView() {
   // since item positions in tableData will change
   useEffect(() => {
     setLastClickedIndex(null);
-  }, [params.sort, params.order, filter.q, filter.status, filter.tab]);
+  }, [
+    params.inboxSort,
+    params.inboxOrder,
+    filter.q,
+    filter.status,
+    filter.tab,
+  ]);
 
   // Arrow key navigation
   useHotkeys(

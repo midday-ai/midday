@@ -15,9 +15,12 @@ import { useTRPC } from "@/trpc/client";
 export function InvoiceSheet() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { setParams, type, invoiceId, canvas } = useInvoiceParams();
+  const { setParams, invoiceType, invoiceId, canvas } = useInvoiceParams();
   const isOpen =
-    !canvas && (type === "create" || type === "edit" || type === "success");
+    !canvas &&
+    (invoiceType === "create" ||
+      invoiceType === "edit" ||
+      invoiceType === "success");
 
   // Get default settings for new invoices
   const { data: defaultSettings } = useSuspenseQuery(

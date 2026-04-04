@@ -60,7 +60,7 @@ export async function sendSlackInvoicePaidNotification(
   try {
     await ensureBotInChannel({ client, channelId });
 
-    const invoiceLink = `${getAppUrl()}/invoices?invoiceId=${encodeURIComponent(payload.invoiceId)}&type=details`;
+    const invoiceLink = `${getAppUrl()}/invoices?invoiceId=${encodeURIComponent(payload.invoiceId)}&invoiceType=details`;
 
     await client.chat.postMessage({
       channel: channelId,
@@ -138,7 +138,7 @@ export async function sendSlackInvoiceOverdueNotification(
   try {
     await ensureBotInChannel({ client, channelId });
 
-    const invoiceLink = `${getAppUrl()}/invoices?invoiceId=${encodeURIComponent(payload.invoiceId)}&type=details`;
+    const invoiceLink = `${getAppUrl()}/invoices?invoiceId=${encodeURIComponent(payload.invoiceId)}&invoiceType=details`;
 
     await client.chat.postMessage({
       channel: channelId,

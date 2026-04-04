@@ -22,41 +22,49 @@ export function InboxOrdering() {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuCheckboxItem
-          checked={params.sort === "date" && params.order === "asc"}
-          onCheckedChange={() => setParams({ sort: "date", order: "asc" })}
+          checked={params.inboxSort === "date" && params.inboxOrder === "asc"}
+          onCheckedChange={() =>
+            setParams({ inboxSort: "date", inboxOrder: "asc" })
+          }
         >
           Most recent
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={params.sort === "date" && params.order === "desc"}
-          onCheckedChange={() => setParams({ sort: "date", order: "desc" })}
+          checked={params.inboxSort === "date" && params.inboxOrder === "desc"}
+          onCheckedChange={() =>
+            setParams({ inboxSort: "date", inboxOrder: "desc" })
+          }
         >
           Oldest first
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={params.sort === "alphabetical"}
+          checked={params.inboxSort === "alphabetical"}
           onCheckedChange={() =>
-            setParams({ sort: "alphabetical", order: "asc" })
+            setParams({ inboxSort: "alphabetical", inboxOrder: "asc" })
           }
         >
           Alphabetically
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={params.sort === "document_date" && params.order === "desc"}
+          checked={
+            params.inboxSort === "document_date" && params.inboxOrder === "desc"
+          }
           onCheckedChange={() =>
-            setParams({ sort: "document_date", order: "desc" })
+            setParams({ inboxSort: "document_date", inboxOrder: "desc" })
           }
         >
           Document date (newest first)
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={params.sort === "document_date" && params.order === "asc"}
+          checked={
+            params.inboxSort === "document_date" && params.inboxOrder === "asc"
+          }
           onCheckedChange={() =>
-            setParams({ sort: "document_date", order: "asc" })
+            setParams({ inboxSort: "document_date", inboxOrder: "asc" })
           }
         >
           Document date (oldest first)

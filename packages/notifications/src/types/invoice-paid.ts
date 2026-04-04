@@ -33,7 +33,7 @@ export const invoicePaid: NotificationHandler = {
       user,
       data: {
         invoiceNumber: data.invoiceNumber,
-        link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
+        link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&invoiceType=details`,
       },
     };
   },

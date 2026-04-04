@@ -4,7 +4,7 @@ import { TZDate } from "@date-fns/tz";
 import { formatEditorContent } from "@midday/invoice/format-to-html";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { useFileUrl } from "@/hooks/use-file-url";
@@ -19,6 +19,7 @@ import { OpenURL } from "./open-url";
 
 export function InvoiceSuccess() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { invoiceId, canvas, setParams } = useInvoiceParams();
   const isCanvas = canvas === true;
 
@@ -183,12 +184,13 @@ export function InvoiceSuccess() {
 
         {!isCanvas && (
           <Button
-            onClick={() => {
+            onClick={async () => {
+              await queryClient.refetchQueries({
+                queryKey: trpc.invoice.defaultSettings.queryKey(),
+              });
               setParams(null);
 
-              setTimeout(() => {
-                setParams({ type: "create" });
-              }, 600);
+              setParams({ invoiceType: "create" });
             }}
           >
             Create another

@@ -32,7 +32,7 @@ export const invoiceOverdue: NotificationHandler = {
       data: {
         invoiceNumber: data.invoiceNumber,
         customerName: data.customerName,
-        link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
+        link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&invoiceType=details`,
       },
     };
   },

@@ -1202,7 +1202,7 @@ export function CustomerDetails() {
                               // Open invoice details
                               setInvoiceParams({
                                 invoiceId: invoice.id,
-                                type: "details",
+                                invoiceType: "details",
                               });
                             }}
                           >
@@ -1302,7 +1302,7 @@ export function CustomerDetails() {
                           setParams({ customerId: null, details: null });
                           // Open invoice creation with customer pre-selected
                           setInvoiceParams({
-                            type: "create",
+                            invoiceType: "create",
                             selectedCustomerId: customerId!,
                           });
                         }}

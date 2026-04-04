@@ -20,7 +20,7 @@ export function InboxSheetDetails() {
   const { params } = useInboxParams();
   const { data: user } = useUserQuery();
 
-  const isOpen = Boolean(params.inboxId && params.type === "details");
+  const isOpen = Boolean(params.inboxId && params.inboxType === "details");
 
   const { data, isLoading } = useQuery({
     ...trpc.inbox.getById.queryOptions({

@@ -9,9 +9,9 @@ import { startTransition } from "react";
 
 export const inboxParamsSchema = {
   inboxId: parseAsString,
-  type: parseAsStringLiteral(["list", "details"]),
-  order: parseAsStringLiteral(["asc", "desc"]).withDefault("asc"),
-  sort: parseAsStringLiteral([
+  inboxType: parseAsStringLiteral(["list", "details"]),
+  inboxOrder: parseAsStringLiteral(["asc", "desc"]).withDefault("asc"),
+  inboxSort: parseAsStringLiteral([
     "date",
     "alphabetical",
     "document_date",

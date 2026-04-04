@@ -19,7 +19,7 @@ import { useTRPC } from "@/trpc/client";
 function InvoiceCanvasContent() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { type, invoiceId } = useInvoiceParams();
+  const { invoiceType, invoiceId } = useInvoiceParams();
   const prevInvoiceIdRef = useRef(invoiceId);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ function InvoiceCanvasContent() {
     <FormContext defaultSettings={defaultSettings} data={data}>
       <div className="flex flex-col h-full">
         <div className="flex-1 min-h-0">
-          {type === "success" ? <InvoiceSuccess /> : <Form />}
+          {invoiceType === "success" ? <InvoiceSuccess /> : <Form />}
         </div>
       </div>
     </FormContext>

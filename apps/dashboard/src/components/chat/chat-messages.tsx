@@ -196,7 +196,7 @@ export function ChatMessages({
       return true;
     }
     if (href.startsWith("#inv:")) {
-      setInvoiceParams({ invoiceId: href.slice(5), type: "details" });
+      setInvoiceParams({ invoiceId: href.slice(5), invoiceType: "details" });
       return true;
     }
     if (href.startsWith("#cust:")) {
@@ -208,7 +208,7 @@ export function ChatMessages({
       return true;
     }
     if (href.startsWith("#inbox:")) {
-      setInboxParams({ inboxId: href.slice(7), type: "details" });
+      setInboxParams({ inboxId: href.slice(7), inboxType: "details" });
       return true;
     }
     if (href.startsWith("#doc:")) {

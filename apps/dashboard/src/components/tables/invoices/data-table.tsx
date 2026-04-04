@@ -131,7 +131,7 @@ export function DataTable({ initialSettings }: Props) {
   // Stable cell click handler for VirtualRow
   const handleCellClick = useCallback(
     (rowId: string) => {
-      setParams({ invoiceId: rowId, type: "details" });
+      setParams({ invoiceId: rowId, invoiceType: "details" });
     },
     [setParams],
   );

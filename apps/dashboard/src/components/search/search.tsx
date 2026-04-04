@@ -280,7 +280,7 @@ const useSearchNavigation = () => {
     },
     navigateToInvoice: (params: {
       invoiceId: string;
-      type: "details" | "create" | "edit" | "success";
+      invoiceType: "details" | "create" | "edit" | "success";
     }) => {
       return navigateWithParams(params, setInvoiceParams);
     },
@@ -303,7 +303,10 @@ const useSearchNavigation = () => {
     },
     // Action helpers
     createInvoice: () => {
-      return navigateWithParams({ type: "create" as const }, setInvoiceParams);
+      return navigateWithParams(
+        { invoiceType: "create" as const },
+        setInvoiceParams,
+      );
     },
     createCustomer: (params = { createCustomer: true }) => {
       return navigateWithParams(params, setCustomerParams);
@@ -412,7 +415,7 @@ const SearchResultItemDisplay = ({
       }
       case "invoice": {
         onSelect = () =>
-          nav.navigateToInvoice({ invoiceId: item.id, type: "details" });
+          nav.navigateToInvoice({ invoiceId: item.id, invoiceType: "details" });
 
         icon = (
           <Icons.Invoice className="size-4 dark:text-[#666] text-primary" />
@@ -425,7 +428,7 @@ const SearchResultItemDisplay = ({
               <InvoiceStatus status={item.data?.status} />
             </div>
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
-              <CopyButton path={`?invoiceId=${item.id}&type=details`} />
+              <CopyButton path={`?invoiceId=${item.id}&invoiceType=details`} />
               <DownloadButton
                 href={`${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${item.id}&size=${item?.data?.template?.size}`}
                 filename={`${item.data.invoice_number || "invoice"}.pdf`}

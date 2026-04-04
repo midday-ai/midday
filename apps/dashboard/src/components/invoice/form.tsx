@@ -65,7 +65,7 @@ export function Form() {
     trpc.invoice.draft.mutationOptions({
       onSuccess: (data) => {
         if (!invoiceId && data?.id) {
-          setParams({ type: "edit", invoiceId: data.id });
+          setParams({ invoiceType: "edit", invoiceId: data.id });
         }
 
         queryClient.invalidateQueries({
@@ -104,7 +104,14 @@ export function Form() {
           queryKey: trpc.search.global.queryKey(),
         });
 
-        setParams({ type: "success", invoiceId: data.id });
+        // Next suggested invoice number must advance after a successful send;
+        // otherwise "Create another" resets from stale defaultSettings and shows
+        // a duplicate-number validation error.
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.defaultSettings.queryKey(),
+        });
+
+        setParams({ invoiceType: "success", invoiceId: data.id });
       },
       onError: (error) => {
         // Check if this is a scheduling error using the specific error code
@@ -378,7 +385,10 @@ export function Form() {
           queryClient.invalidateQueries({
             queryKey: trpc.invoice.invoiceSummary.queryKey(),
           });
-          setParams({ type: "success", invoiceId: values.id });
+          queryClient.invalidateQueries({
+            queryKey: trpc.invoice.defaultSettings.queryKey(),
+          });
+          setParams({ invoiceType: "success", invoiceId: values.id });
         } else {
           // Issue date is today or in the past - send immediately
           createInvoiceMutation.mutate({
