@@ -46,6 +46,7 @@ import {
 } from "../utils/transaction-matching";
 import { createActivity } from "./activities";
 import { type Attachment, createAttachments } from "./transaction-attachments";
+import { findTopMatches } from "./transaction-matching";
 
 const logger = createLoggerWithContext("transactions");
 
@@ -1148,7 +1149,6 @@ export async function searchTransactionMatch(
     query,
     inboxId,
     maxResults = 5,
-    minConfidenceScore = 0.5,
     includeAlreadyMatched = false,
   } = params;
 
@@ -1338,167 +1338,25 @@ export async function searchTransactionMatch(
 
   if (inboxId) {
     try {
-      const inboxItem = await db
-        .select({
-          id: inbox.id,
-          displayName: inbox.displayName,
-          amount: inbox.amount,
-          currency: inbox.currency,
-          date: inbox.date,
-          baseAmount: inbox.baseAmount,
-          baseCurrency: inbox.baseCurrency,
-        })
-        .from(inbox)
-        .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
-        .limit(1);
-
-      if (!inboxItem.length) {
-        return [];
-      }
-
-      const item = inboxItem[0]!;
-      const inboxAmount = Math.abs(item.amount || 0);
-      const inboxBaseAmount = Math.abs(item.baseAmount || 0);
-
-      const candidateTransactions = await db.transaction(async (tx) => {
-        await tx.execute(
-          sql`SET LOCAL pg_trgm.word_similarity_threshold = 0.3`,
-        );
-        return tx
-          .select({
-            transactionId: transactions.id,
-            name: transactions.name,
-            transactionAmount: transactions.amount,
-            transactionCurrency: transactions.currency,
-            transactionDate: transactions.date,
-            baseAmount: transactions.baseAmount,
-            baseCurrency: transactions.baseCurrency,
-            isAlreadyMatched: sql<boolean>`
-              (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')
-            `.as("is_already_matched"),
-            attachmentFilename: sql<string | null>`
-              (SELECT ${transactionAttachments.name} FROM ${transactionAttachments} 
-               WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)} 
-               LIMIT 1)
-            `.as("attachment_filename"),
-            merchantName: transactions.merchantName,
-          })
-          .from(transactions)
-          .where(
-            and(
-              eq(transactions.teamId, teamId),
-              eq(transactions.status, "posted"),
-              sql`${transactions.date} IS NOT NULL`,
-              sql`${transactions.date} BETWEEN ${item.date}::date - INTERVAL '90 days' AND ${item.date}::date + INTERVAL '30 days'`,
-              ...(includeAlreadyMatched
-                ? []
-                : [
-                    sql`NOT (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
-                  ]),
-              or(
-                and(
-                  eq(transactions.currency, item.currency ?? ""),
-                  sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) < GREATEST(1, ${inboxAmount} * 0.25)`,
-                ),
-                sql`(${item.displayName ?? ""} %> ${transactions.name} OR ${item.displayName ?? ""} %> ${transactions.merchantName})`,
-                and(
-                  sql`${transactions.baseCurrency} IS NOT NULL`,
-                  sql`${item.baseCurrency ?? ""} != ''`,
-                  eq(transactions.baseCurrency, item.baseCurrency ?? ""),
-                  sql`ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ${inboxBaseAmount}) < GREATEST(50, ${inboxBaseAmount} * 0.15)`,
-                ),
-              ),
-            ),
-          )
-          .orderBy(
-            sql`GREATEST(word_similarity(${item.displayName ?? ""}, ${transactions.name}), word_similarity(${item.displayName ?? ""}, ${transactions.merchantName})) DESC`,
-            sql`ABS(ABS(${transactions.amount}) - ${inboxAmount}) / GREATEST(1.0, ${inboxAmount})`,
-            sql`ABS(${transactions.date} - ${item.date}::date)`,
-          )
-          .limit(Math.max(maxResults * 3, 30));
+      const matches = await findTopMatches(db, {
+        teamId,
+        inboxId,
+        limit: maxResults,
       });
 
-      const scoredResults = candidateTransactions
-        .map((transaction) => {
-          const nameScore = calculateNameScore(
-            item.displayName,
-            transaction.name,
-            transaction.merchantName,
-          );
-          const amountScore = calculateAmountScore(
-            {
-              amount: item.amount,
-              currency: item.currency,
-              baseAmount: item.baseAmount,
-              baseCurrency: item.baseCurrency,
-            },
-            {
-              amount: transaction.transactionAmount,
-              currency: transaction.transactionCurrency,
-              baseAmount: transaction.baseAmount,
-              baseCurrency: transaction.baseCurrency,
-            },
-          );
-          const currencyScore = calculateCurrencyScore(
-            item.currency || undefined,
-            transaction.transactionCurrency || undefined,
-            item.baseCurrency || undefined,
-            transaction.baseCurrency || undefined,
-          );
-          const dateScore = calculateDateScore(
-            item.date!,
-            transaction.transactionDate,
-          );
-          const isExactAmount =
-            item.amount !== null &&
-            Math.abs(
-              Math.abs(item.amount || 0) -
-                Math.abs(transaction.transactionAmount || 0),
-            ) < 0.01;
-          const isSameCurrency =
-            item.currency === transaction.transactionCurrency;
-          const confidence = scoreMatch({
-            nameScore,
-            amountScore,
-            dateScore,
-            currencyScore,
-            isSameCurrency,
-            isExactAmount,
-          });
-
-          const result = {
-            transaction_id: transaction.transactionId,
-            name: transaction.name,
-            transaction_amount: transaction.transactionAmount,
-            transaction_currency: transaction.transactionCurrency,
-            transaction_date: transaction.transactionDate,
-            name_score: Math.round(nameScore * 1000) / 1000,
-            amount_score: Math.round(amountScore * 1000) / 1000,
-            currency_score: Math.round(currencyScore * 1000) / 1000,
-            date_score: Math.round(dateScore * 1000) / 1000,
-            confidence_score: Math.round(confidence * 1000) / 1000,
-            is_already_matched: transaction.isAlreadyMatched,
-            matched_attachment_filename:
-              transaction.attachmentFilename ?? undefined,
-          };
-
-          return result;
-        })
-        .filter((result) => result.confidence_score >= minConfidenceScore)
-        .sort((a, b) => {
-          if (a.confidence_score !== b.confidence_score) {
-            return b.confidence_score - a.confidence_score;
-          }
-
-          if (a.is_already_matched !== b.is_already_matched) {
-            return a.is_already_matched ? 1 : -1;
-          }
-
-          return 0;
-        })
-        .slice(0, maxResults);
-
-      return scoredResults;
+      return matches.map((m) => ({
+        transaction_id: m.transactionId,
+        name: m.name,
+        transaction_amount: m.amount,
+        transaction_currency: m.currency,
+        transaction_date: m.date,
+        name_score: m.nameScore ?? 0,
+        amount_score: m.amountScore,
+        currency_score: m.currencyScore,
+        date_score: m.dateScore,
+        confidence_score: m.confidenceScore,
+        is_already_matched: m.isAlreadyMatched,
+      }));
     } catch {
       return [];
     }
