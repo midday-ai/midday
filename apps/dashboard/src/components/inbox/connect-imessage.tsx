@@ -15,6 +15,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { useTRPC } from "@/trpc/client";
+import { useConnectDialogReset } from "./use-connect-dialog";
 
 interface ConnectIMessageProps {
   showTrigger?: boolean;
@@ -42,6 +43,14 @@ export function ConnectIMessage({ showTrigger = true }: ConnectIMessageProps) {
       },
     }),
   );
+
+  const handleOpenChange = useConnectDialogReset({
+    setOpen,
+    setLinkCode,
+    setQrCodeUrl,
+    setCopied,
+    resetMutation: () => createLinkTokenMutation.reset(),
+  });
 
   const sendblueNumber = process.env.NEXT_PUBLIC_SENDBLUE_NUMBER || "";
   const message = linkCode ? `Connect to Midday: ${linkCode}` : "";
@@ -113,7 +122,7 @@ export function ConnectIMessage({ showTrigger = true }: ConnectIMessageProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {showTrigger && (
         <DialogTrigger asChild>
           <Button

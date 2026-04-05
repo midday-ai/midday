@@ -9,14 +9,17 @@ import {
 import { getComposioTools } from "@api/composio/client";
 import type { McpContext } from "@api/mcp/types";
 import { logger } from "@midday/logger";
-import { smoothStream, stepCountIs, ToolLoopAgent } from "ai";
-
-type ModelMessages = Array<Record<string, unknown>>;
+import {
+  type ModelMessage,
+  smoothStream,
+  stepCountIs,
+  ToolLoopAgent,
+} from "ai";
 
 export async function streamMiddayAssistant(params: {
   mcpCtx: McpContext;
   systemPrompt: string;
-  modelMessages: ModelMessages;
+  modelMessages: Array<ModelMessage>;
 }) {
   const { mcpCtx, systemPrompt, modelMessages } = params;
 
@@ -26,6 +29,13 @@ export async function streamMiddayAssistant(params: {
     createExecutionClient(mcpCtx),
     getComposioTools(mcpCtx.userId),
   ]);
+
+  let closed = false;
+  const closeClient = async () => {
+    if (closed) return;
+    closed = true;
+    await resolvedClient.close().catch(() => {});
+  };
 
   try {
     const mcpTools = resolvedClient.toolsFromDefinitions(getToolDefinitions());
@@ -58,17 +68,17 @@ export async function streamMiddayAssistant(params: {
         alwaysActive: ["web_search", "search_tools", ...composioToolNames],
       }),
       stopWhen: stepCountIs(10),
-      onFinish: async () => {
-        await resolvedClient.close();
-      },
+      onFinish: closeClient,
     });
 
-    return await agent.stream({
-      messages: modelMessages as any,
+    const result = await agent.stream({
+      messages: modelMessages,
       experimental_transform: smoothStream(),
     });
+
+    return Object.assign(result, { cleanup: closeClient });
   } catch (error) {
-    await resolvedClient.close().catch(() => {});
+    await closeClient();
     throw error;
   }
 }

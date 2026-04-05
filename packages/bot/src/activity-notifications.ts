@@ -15,6 +15,7 @@ import {
   updatePlatformIdentityMetadata,
 } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
+import { sendSendblueTextNotification } from "./sendblue-notifications";
 import { sendTelegramTextNotification } from "./telegram-notifications";
 import {
   buildBatchTemplateComponents,
@@ -307,7 +308,12 @@ async function queueTeamWideNotification(
     | InvoiceOverduePayload
     | RecurringInvoiceUpcomingPayload,
 ) {
-  for (const provider of ["slack", "telegram", "whatsapp"] as const) {
+  for (const provider of [
+    "slack",
+    "telegram",
+    "whatsapp",
+    "sendblue",
+  ] as const) {
     const app = await getAppConfig(db, provider, teamId);
 
     if (!app || !isSettingEnabled(app, type)) {
@@ -456,32 +462,39 @@ async function sendImmediateMatchNotifications(
       return;
     }
 
-    await sendTelegramTextNotification({
-      chatId,
-      text: buildTelegramMatchText(payload),
-    });
-
     if (externalUserId) {
-      const identity = await getPlatformIdentity(db, {
+      await sendPlainTextMatchNotification({
+        db,
         provider: "telegram",
+        sendFn: (text) => sendTelegramTextNotification({ chatId, text }),
         externalUserId,
+        teamId,
+        payload,
       });
-
-      if (identity) {
-        await updatePlatformIdentityMetadata(db, {
-          id: identity.id,
-          metadata: {
-            lastNotificationContext: buildMatchContext(
-              identity.userId,
-              teamId,
-              "telegram",
-              payload,
-            ),
-            lastNotificationSentAt: new Date().toISOString(),
-          },
-        });
-      }
+    } else {
+      await sendTelegramTextNotification({
+        chatId,
+        text: buildPlainMatchText(payload),
+      });
     }
+  }
+
+  if (source === "sendblue") {
+    const phoneNumber = options?.inboxMeta?.sourceMetadata?.phoneNumber;
+    const externalUserId = options?.inboxMeta?.sourceMetadata?.externalUserId;
+
+    if (!phoneNumber) {
+      return;
+    }
+
+    await sendPlainTextMatchNotification({
+      db,
+      provider: "sendblue",
+      sendFn: (text) => sendSendblueTextNotification({ phoneNumber, text }),
+      externalUserId: externalUserId || phoneNumber,
+      teamId,
+      payload,
+    });
   }
 }
 
@@ -563,6 +576,13 @@ async function sendSummaryToIdentity(
         },
       );
       return false;
+    }
+    case "sendblue": {
+      await sendSendblueTextNotification({
+        phoneNumber: identity.externalUserId,
+        text,
+      });
+      return true;
     }
   }
 }
@@ -734,7 +754,7 @@ export function buildBatchSummary(
 function buildMatchContext(
   userId: string,
   teamId: string,
-  provider: "telegram" | "whatsapp",
+  provider: "telegram" | "whatsapp" | "sendblue",
   payload: MatchPayload,
 ): NotificationContext {
   const summary =
@@ -755,7 +775,47 @@ function buildMatchContext(
   };
 }
 
-function buildTelegramMatchText(payload: MatchPayload) {
+async function sendPlainTextMatchNotification(params: {
+  db: Database;
+  provider: "telegram" | "sendblue";
+  sendFn: (text: string) => Promise<void>;
+  externalUserId: string;
+  teamId: string;
+  payload: MatchPayload;
+}) {
+  const {
+    db: database,
+    provider,
+    sendFn,
+    externalUserId,
+    teamId,
+    payload,
+  } = params;
+
+  await sendFn(buildPlainMatchText(payload));
+
+  const identity = await getPlatformIdentity(database, {
+    provider,
+    externalUserId,
+  });
+
+  if (identity) {
+    await updatePlatformIdentityMetadata(database, {
+      id: identity.id,
+      metadata: {
+        lastNotificationContext: buildMatchContext(
+          identity.userId,
+          teamId,
+          provider,
+          payload,
+        ),
+        lastNotificationSentAt: new Date().toISOString(),
+      },
+    });
+  }
+}
+
+function buildPlainMatchText(payload: MatchPayload) {
   if (payload.matchType === "auto_matched") {
     return `${payload.documentName} was auto-matched to ${payload.transactionName}. Reply here if you want me to explain the match.`;
   }

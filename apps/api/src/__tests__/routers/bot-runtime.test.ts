@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { mocks } from "../setup";
 
 const streamMiddayAssistantMock = mock(() =>
-  Promise.resolve({ fullStream: "assistant reply" }),
+  Promise.resolve({
+    fullStream: "assistant reply",
+    cleanup: () => Promise.resolve(),
+  }),
 );
 const toAiMessagesMock = mock(() => Promise.resolve([]));
 const buildSystemPromptMock = mock(() => "system prompt");
@@ -133,7 +136,10 @@ function primeCommonLinkingMocks() {
 
   streamMiddayAssistantMock.mockReset();
   streamMiddayAssistantMock.mockImplementation(() =>
-    Promise.resolve({ fullStream: "assistant reply" }),
+    Promise.resolve({
+      fullStream: "assistant reply",
+      cleanup: () => Promise.resolve(),
+    }),
   );
   toAiMessagesMock.mockReset();
   toAiMessagesMock.mockImplementation(() => Promise.resolve([]));
@@ -197,7 +203,7 @@ describe("bot runtime link-code consumption", () => {
     await subscribedMessageHandler?.(thread, message);
 
     expect(posts).toEqual([
-      "Connected to Midday Test Team. You can now chat with Midday or send receipts and PDFs here.",
+      "Connected to Midday Test Team. You can chat with Midday, send receipts and PDFs, or create invoices \u2014 all from WhatsApp.\n\nYou'll receive notifications for new transactions, invoices, and receipt matches (all on by default). To manage these, go to Apps \u2192 WhatsApp \u2192 Settings in Midday.\n\nTry sending a receipt or asking \u201cWhat did I spend this week?\u201d",
     ]);
     expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
     expect(toAiMessagesMock).not.toHaveBeenCalled();
@@ -231,7 +237,7 @@ describe("bot runtime link-code consumption", () => {
     await subscribedMessageHandler?.(thread, message);
 
     expect(posts).toEqual([
-      "Connected to Midday Test Team. You can now send receipts or ask Midday questions here.",
+      "Connected to Midday Test Team. You can chat with Midday, send receipts and PDFs, or create invoices \u2014 all from Telegram.\n\nYou'll receive notifications for new transactions, invoices, and receipt matches (all on by default). To manage these, go to Apps \u2192 Telegram \u2192 Settings in Midday.\n\nTry sending a receipt or asking \u201cWhat did I spend this week?\u201d",
     ]);
     expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
     expect(toAiMessagesMock).not.toHaveBeenCalled();
@@ -268,7 +274,7 @@ describe("bot runtime link-code consumption", () => {
     await slackDmMessageHandler?.(thread, message);
 
     expect(posts).toEqual([
-      "Linked to Midday Test Team. Your future Slack messages will run as your Midday user.",
+      "Connected to Midday Test Team. You can ask Midday questions, upload receipts, and track invoices right from Slack.\n\nYou'll receive notifications for new transactions, invoices, and match suggestions (all on by default). To manage these, go to Apps \u2192 Slack \u2192 Settings in Midday.\n\nTry asking \u201cWhat's my cash flow this month?\u201d",
     ]);
     expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
     expect(toAiMessagesMock).not.toHaveBeenCalled();
@@ -302,7 +308,7 @@ describe("bot runtime link-code consumption", () => {
     await subscribedMessageHandler?.(thread, message);
 
     expect(posts).toEqual([
-      "Connected to Midday Test Team. You can now chat with Midday via iMessage.",
+      "Connected to Midday Test Team. You can chat with Midday, send receipts and PDFs, or create invoices \u2014 all from iMessage.\n\nYou'll receive notifications for new transactions, invoices, and receipt matches (all on by default). To manage these, go to Apps \u2192 iMessage \u2192 Settings in Midday.\n\nTry sending a receipt or asking \u201cWhat did I spend this week?\u201d",
     ]);
     const dashboardUrl =
       process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
@@ -314,5 +320,61 @@ describe("bot runtime link-code consumption", () => {
     expect(toAiMessagesMock).not.toHaveBeenCalled();
     expect(mocks.getUserById).not.toHaveBeenCalled();
     expect(thread.startTyping).not.toHaveBeenCalled();
+  });
+
+  test("re-connects Sendblue when a stale identity exists and a new link code is sent", async () => {
+    const { posts, thread } = createThread("sendblue");
+    const message = {
+      id: "message_123",
+      text: "abc12345",
+      author: {
+        userId: "+14155551234",
+        fullName: "iMessage User",
+        userName: "+14155551234",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve({
+        code: "abc12345",
+        provider: "sendblue",
+        teamId: "team_new",
+        userId: "user_new",
+      }),
+    );
+
+    mocks.hasTeamAccess.mockReset();
+    mocks.hasTeamAccess.mockImplementation(() => Promise.resolve(true));
+
+    mocks.getPlatformIdentity.mockReset();
+    mocks.getPlatformIdentity.mockImplementation(() =>
+      Promise.resolve({
+        id: "stale_identity",
+        teamId: "team_old",
+        userId: "user_old",
+        metadata: null,
+      }),
+    );
+
+    mocks.createOrUpdatePlatformIdentity.mockReset();
+    mocks.createOrUpdatePlatformIdentity.mockImplementation(() =>
+      Promise.resolve({ id: "identity_new" }),
+    );
+
+    mocks.getTeamById.mockReset();
+    mocks.getTeamById.mockImplementation(() =>
+      Promise.resolve({ name: "New Team" }),
+    );
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "Connected to New Team. You can chat with Midday, send receipts and PDFs, or create invoices \u2014 all from iMessage.\n\nYou'll receive notifications for new transactions, invoices, and receipt matches (all on by default). To manage these, go to Apps \u2192 iMessage \u2192 Settings in Midday.\n\nTry sending a receipt or asking \u201cWhat did I spend this week?\u201d",
+    ]);
+    expect(mocks.consumePlatformLinkToken).toHaveBeenCalled();
+    expect(mocks.createOrUpdatePlatformIdentity).toHaveBeenCalled();
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
   });
 });

@@ -15,6 +15,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { useTRPC } from "@/trpc/client";
+import { useConnectDialogReset } from "./use-connect-dialog";
 
 interface ConnectWhatsAppProps {
   showTrigger?: boolean;
@@ -38,6 +39,14 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
       },
     }),
   );
+
+  const handleOpenChange = useConnectDialogReset({
+    setOpen,
+    setLinkCode,
+    setQrCodeUrl,
+    setCopied,
+    resetMutation: () => createLinkTokenMutation.reset(),
+  });
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
   const message = linkCode ? `Connect to Midday: ${linkCode}` : "";
@@ -109,7 +118,7 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {showTrigger && (
         <DialogTrigger asChild>
           <Button

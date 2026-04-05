@@ -303,6 +303,7 @@ export const platformProviderEnum = pgEnum("platform_provider", [
   "telegram",
   "whatsapp",
   "sendblue",
+  "sendblue",
 ]);
 
 export const documentTagEmbeddings = pgTable(

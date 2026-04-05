@@ -15,6 +15,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { useTRPC } from "@/trpc/client";
+import { useConnectDialogReset } from "./use-connect-dialog";
 
 interface ConnectTelegramProps {
   showTrigger?: boolean;
@@ -44,6 +45,14 @@ export function ConnectTelegram({ showTrigger = true }: ConnectTelegramProps) {
       },
     }),
   );
+
+  const handleOpenChange = useConnectDialogReset({
+    setOpen,
+    setLinkCode,
+    setQrCodeUrl,
+    setCopied,
+    resetMutation: () => createLinkTokenMutation.reset(),
+  });
 
   const telegramBotUsername =
     process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "";
@@ -103,7 +112,7 @@ export function ConnectTelegram({ showTrigger = true }: ConnectTelegramProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {showTrigger && (
         <DialogTrigger asChild>
           <Button

@@ -2,7 +2,7 @@ import type { Message } from "chat";
 
 type SupportedLinkPlatform = "slack" | "telegram" | "whatsapp" | "sendblue";
 
-const PLATFORM_LINK_CODE_PATTERN = /^[A-Za-z0-9_-]{8}$/;
+const PLATFORM_LINK_CODE_PATTERN = /^[A-Za-z0-9]{8}$/;
 
 export function getMessageAuthorId(message: Message) {
   const userId = message.author?.userId;

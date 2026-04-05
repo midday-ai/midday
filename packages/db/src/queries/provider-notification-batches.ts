@@ -13,7 +13,7 @@ export async function queueProviderNotificationBatch(
     platformIdentityId: string;
     teamId: string;
     userId: string;
-    provider: "slack" | "telegram" | "whatsapp";
+    provider: "slack" | "telegram" | "whatsapp" | "sendblue";
     eventFamily: string;
     entry: Record<string, unknown>;
     notificationContext?: Record<string, unknown> | null;

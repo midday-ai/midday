@@ -15,7 +15,7 @@ export const baseConfig = {
     {
       id: "transactions",
       label: "Transactions",
-      description: "Get alerts for new transactions and spending activity.",
+      description: "Get notified about new transactions and spending activity.",
       type: "switch",
       required: false,
       value: true,
