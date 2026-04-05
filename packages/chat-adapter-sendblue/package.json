@@ -1,6 +1,6 @@
 {
   "name": "chat-adapter-sendblue",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Sendblue (iMessage/SMS) adapter for Chat SDK",
   "type": "module",
   "main": "./dist/index.js",

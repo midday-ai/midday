@@ -47,9 +47,7 @@ export function ConnectSlack() {
       return;
     }
 
-    createLinkTokenMutation
-      .mutateAsync({ provider: "slack" })
-      .catch(() => setLinkCode(""));
+    createLinkTokenMutation.mutate({ provider: "slack" });
   }, [open, isInstalled]);
 
   const linkMessage = linkCode ? `Connect to Midday: ${linkCode}` : "";
@@ -65,7 +63,17 @@ export function ConnectSlack() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        setOpen(value);
+        if (!value) {
+          setLinkCode("");
+          setCopied(false);
+          createLinkTokenMutation.reset();
+        }
+      }}
+    >
       {isInstalled ? (
         <DialogTrigger asChild>
           <Button
@@ -109,7 +117,13 @@ export function ConnectSlack() {
 
         <div className="flex flex-col items-center space-y-4 p-6">
           <div className="w-full rounded-md border p-4 text-sm text-center">
-            {linkMessage || (
+            {createLinkTokenMutation.isError ? (
+              <span className="text-destructive">
+                Failed to generate link code.
+              </span>
+            ) : linkMessage ? (
+              linkMessage
+            ) : (
               <span className="text-muted-foreground inline-flex items-center gap-2">
                 <Spinner className="size-4 animate-spin" />
                 Generating link code...
@@ -118,12 +132,18 @@ export function ConnectSlack() {
           </div>
 
           <Button
-            onClick={copyToClipboard}
+            onClick={
+              createLinkTokenMutation.isError
+                ? () => createLinkTokenMutation.mutate({ provider: "slack" })
+                : copyToClipboard
+            }
             variant="outline"
             className="w-full"
-            disabled={!linkMessage}
+            disabled={createLinkTokenMutation.isPending}
           >
-            {copied ? (
+            {createLinkTokenMutation.isError ? (
+              "Retry"
+            ) : copied ? (
               <>
                 <Icons.Check className="mr-2 h-4 w-4" />
                 Copied!

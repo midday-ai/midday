@@ -6,7 +6,14 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 
-type InboxSource = "gmail" | "outlook" | "slack" | "whatsapp" | null;
+type InboxSource =
+  | "gmail"
+  | "outlook"
+  | "slack"
+  | "whatsapp"
+  | "telegram"
+  | "sendblue"
+  | null;
 
 function getInboxSource(data: {
   inboxAccount?: { provider?: string } | null;
@@ -25,6 +32,8 @@ function getInboxSource(data: {
     const source = (data.meta as Record<string, unknown>).source;
     if (source === "slack") return "slack";
     if (source === "whatsapp") return "whatsapp";
+    if (source === "telegram") return "telegram";
+    if (source === "sendblue") return "sendblue";
   }
 
   return null;
@@ -51,6 +60,14 @@ const sourceConfigs: Record<Exclude<InboxSource, null>, SourceIconConfig> = {
   whatsapp: {
     icon: Icons.WhatsApp,
     tooltip: "Shared via WhatsApp",
+  },
+  telegram: {
+    icon: Icons.Telegram,
+    tooltip: "Shared via Telegram",
+  },
+  sendblue: {
+    icon: Icons.IMessage,
+    tooltip: "Shared via iMessage",
   },
 };
 

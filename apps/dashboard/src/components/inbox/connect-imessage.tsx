@@ -121,7 +121,7 @@ export function ConnectIMessage({ showTrigger = true }: ConnectIMessageProps) {
             variant="outline"
           >
             <div className="flex items-center space-x-2">
-              <IMessageIcon className="size-5" />
+              <Icons.IMessage className="size-5" />
               <span>
                 {connections.length > 0
                   ? `iMessage (${connections.length} connected)`
@@ -174,12 +174,12 @@ export function ConnectIMessage({ showTrigger = true }: ConnectIMessageProps) {
             >
               {isReady ? (
                 <a href={smsUrl}>
-                  <IMessageIcon className="mr-2 h-4 w-4" />
+                  <Icons.IMessage className="mr-2 h-4 w-4" />
                   Open Messages
                 </a>
               ) : (
                 <span>
-                  <IMessageIcon className="mr-2 h-4 w-4" />
+                  <Icons.IMessage className="mr-2 h-4 w-4" />
                   Open Messages
                 </span>
               )}
@@ -231,21 +231,5 @@ export function ConnectIMessage({ showTrigger = true }: ConnectIMessageProps) {
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function IMessageIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M12 2C6.477 2 2 5.813 2 10.5c0 2.698 1.468 5.098 3.758 6.672-.193 1.398-.756 2.614-1.7 3.578a.5.5 0 00.354.854c2.16-.048 3.946-.95 5.155-2.076A11.44 11.44 0 0012 19c5.523 0 10-3.813 10-8.5S17.523 2 12 2z"
-        fill="#34C759"
-      />
-    </svg>
   );
 }

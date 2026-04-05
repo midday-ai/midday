@@ -48,10 +48,3 @@ export function requireResolvedConversationIdentity(
     ),
   };
 }
-
-export function withResolvedConversationIdentity(
-  resolved: ConnectedResolvedConversation,
-  identity: PlatformIdentityLike | null,
-): ConnectedResolvedConversation {
-  return requireResolvedConversationIdentity(resolved, identity) ?? resolved;
-}

@@ -164,7 +164,10 @@ describe("SendblueAdapter", () => {
       await adapter.postMessage(threadId, "Hello!");
 
       expect(sendMock).toHaveBeenCalledTimes(1);
-      const args = sendMock.mock.calls[0]![0] as Record<string, unknown>;
+      const args = (sendMock.mock.calls as unknown[][])[0]![0] as Record<
+        string,
+        unknown
+      >;
       expect(args.number).toBe("+14155551234");
       expect(args.from_number).toBe("+13137386158");
       expect(args.content).toBe("Hello!");
@@ -192,7 +195,10 @@ describe("SendblueAdapter", () => {
 
       await adapter.postMessage(threadId, { markdown: "**bold** text" });
 
-      const args = sendMock.mock.calls[0]![0] as Record<string, unknown>;
+      const args = (sendMock.mock.calls as unknown[][])[0]![0] as Record<
+        string,
+        unknown
+      >;
       expect(args.content).toBe("bold text");
     });
   });
@@ -215,7 +221,10 @@ describe("SendblueAdapter", () => {
       );
 
       expect(sendMock).toHaveBeenCalledTimes(1);
-      const args = sendMock.mock.calls[0]![0] as Record<string, unknown>;
+      const args = (sendMock.mock.calls as unknown[][])[0]![0] as Record<
+        string,
+        unknown
+      >;
       expect(args.media_url).toBe("https://app.midday.ai/midday-contact.vcf");
       expect(args.content).toBe("");
     });

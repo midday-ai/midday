@@ -950,20 +950,9 @@ async function processIncomingAttachments(params: {
   const summaries: string[] = [];
   const richMessages: string[] = [];
 
-  logger.info("[attachments] Processing incoming attachments", {
-    platform,
-    attachmentCount: (message?.attachments || []).length,
-    attachments: (message.attachments ?? []).map((a) => ({
-      type: a.type,
-      mimeType: a.mimeType,
-      name: a.name,
-      hasData: !!a.data,
-      hasFetchData: typeof a.fetchData === "function",
-      hasUrl: !!a.url,
-    })),
-  });
+  const attachments = message.attachments ?? [];
 
-  for (const [index, attachment] of (message.attachments ?? []).entries()) {
+  for (const [index, attachment] of attachments.entries()) {
     if (!isSupportedAttachment(attachment)) {
       logger.info("[attachments] Skipping unsupported attachment", {
         type: attachment.type,
@@ -1089,7 +1078,6 @@ function getSlackTeamId(message: Message) {
 
 function normalizePlatform(platformName: string): BotPlatform | null {
   if (
-    platformName === "dashboard" ||
     platformName === "whatsapp" ||
     platformName === "telegram" ||
     platformName === "slack" ||
@@ -1108,9 +1096,18 @@ async function updateSlackSuggestedPrompts(
   try {
     const slack = bot.getAdapter("slack") as SlackAdapter;
     await slack.setSuggestedPrompts(channelId, threadTs, [
-      { title: "Cash flow", message: "Summarize my cash flow this month" },
-      { title: "Inbox review", message: "What needs attention in my inbox?" },
-      { title: "Recent invoices", message: "Show my latest unpaid invoices" },
+      {
+        title: "How's my business doing?",
+        message: "Give me a financial overview of this month so far",
+      },
+      {
+        title: "Burn rate & runway",
+        message: "What's my current burn rate and how long is my runway?",
+      },
+      {
+        title: "Draft an invoice",
+        message: "Help me draft a new invoice",
+      },
     ]);
   } catch (error) {
     logger.debug("Failed to update Slack suggested prompts", {
