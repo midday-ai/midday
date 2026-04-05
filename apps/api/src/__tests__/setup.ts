@@ -721,7 +721,7 @@ export const mocks = {
   ) as MockFn,
   consumePlatformLinkToken: mock(() =>
     Promise.resolve({
-      code: "mb_test_link_token",
+      code: "tst12345",
       provider: "slack",
       teamId: "test-team-id",
       userId: "test-user-id",
@@ -734,7 +734,7 @@ export const mocks = {
   ) as MockFn,
   createPlatformLinkToken: mock(() =>
     Promise.resolve({
-      code: "mb_test_link_token",
+      code: "tst12345",
       provider: "slack",
       teamId: "test-team-id",
       userId: "test-user-id",

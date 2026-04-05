@@ -64,6 +64,43 @@ function resolveFileName(fileName: string | undefined, mimeType: string) {
     : `${baseFileName}${getExtensionFromMimeType(mimeType)}`;
 }
 
+export function formatInboxResultMessage(
+  result: ProcessInboxUploadResult,
+): string {
+  if (result.status === "other") {
+    return `${result.displayName ?? "File"} added to your inbox.`;
+  }
+
+  if (result.status === "pending") {
+    return `${result.displayName ?? "File"} added to your inbox — needs manual review.`;
+  }
+
+  const isInvoice = result.type === "invoice";
+  const lines: string[] = [];
+
+  if (result.displayName) lines.push(result.displayName);
+  if (result.invoiceNumber) lines.push(result.invoiceNumber);
+
+  const amountParts: string[] = [];
+  if (result.amount != null && result.currency)
+    amountParts.push(`${result.amount} ${result.currency}`);
+  if (result.taxAmount != null && result.taxType)
+    amountParts.push(`${result.taxType} ${result.taxAmount}`);
+  if (amountParts.length > 0)
+    lines.push(
+      amountParts.join(" (incl. ") + (amountParts.length > 1 ? ")" : ""),
+    );
+
+  if (result.date) lines.push(isInvoice ? `Due: ${result.date}` : result.date);
+
+  const header = isInvoice ? "Invoice received" : "Receipt received";
+  const footer = isInvoice
+    ? "Added to your inbox."
+    : "Added to your inbox — we'll match it to a transaction automatically.";
+
+  return `${header}\n${lines.join("\n")}\n${footer}`;
+}
+
 export function formatProcessedUploadSummary(result: ProcessInboxUploadResult) {
   if (result.status === "other") {
     return `${result.displayName ?? "File"} was added to your inbox as an other document.`;

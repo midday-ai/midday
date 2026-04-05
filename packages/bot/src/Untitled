@@ -1,0 +1,5 @@
+$ tsc --noEmit
+src/processors/accounting/base.ts(128,18): error TS2352: Conversion of type 'UnknownAppConfig' to type 'AccountingProviderConfig' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'UnknownAppConfig' is missing the following properties from type 'FortnoxProviderConfig': provider, accessToken, refreshToken, expiresAt
+@midday/api:typecheck
+@midday/dashboard:typecheck

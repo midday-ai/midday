@@ -16,10 +16,12 @@ import type { SlackAdapter } from "@chat-adapter/slack";
 import {
   type BotPlatform,
   bot,
+  formatInboxResultMessage,
   formatNotificationContextForPrompt,
   formatProcessedUploadSummary,
   getPlatformInstructions,
   isSupportedInboxUploadMediaType,
+  type NotificationContext,
   processInboxUpload,
 } from "@midday/bot";
 import { db } from "@midday/db/client";
@@ -42,7 +44,9 @@ import {
   updatePlatformIdentityMetadata,
 } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
+import type { Attachment, Message, Thread } from "chat";
 import { toAiMessages } from "chat";
+import type { SendblueAdapter } from "chat-adapter-sendblue";
 
 const logger = createLoggerWithContext("bot-runtime");
 
@@ -88,7 +92,10 @@ export function registerMiddayBotRuntime() {
   });
 }
 
-async function handleIncomingMessage(thread: any, message: any) {
+async function handleIncomingMessage(
+  thread: Thread<BotThreadState>,
+  message: Message,
+) {
   if (message?.author?.isMe || message?.author?.isBot) {
     return;
   }
@@ -149,13 +156,25 @@ async function handleIncomingMessage(thread: any, message: any) {
 
   await thread.startTyping("Working in Midday...").catch(() => {});
 
-  const recentUploadSummaries = await processIncomingAttachments({
-    thread,
-    message,
-    teamId: connectedConversation.teamId,
-    actingUserId: connectedConversation.actingUserId,
-    platform,
-  });
+  const { summaries: recentUploadSummaries, richMessages: uploadMessages } =
+    await processIncomingAttachments({
+      thread,
+      message,
+      teamId: connectedConversation.teamId,
+      actingUserId: connectedConversation.actingUserId,
+      platform,
+    });
+
+  if (uploadMessages.length > 0) {
+    for (const msg of uploadMessages) {
+      await thread.post(msg).catch(() => {});
+    }
+
+    const textContent = (message?.text ?? "").trim();
+    if (!textContent) {
+      return;
+    }
+  }
 
   const history = await getConversationHistory(thread);
 
@@ -189,13 +208,20 @@ async function handleIncomingMessage(thread: any, message: any) {
     getPlatformInstructions(platform) +
     (connectedConversation.notificationContext
       ? `\n\n${formatNotificationContextForPrompt(
-          connectedConversation.notificationContext as any,
+          connectedConversation.notificationContext as NotificationContext,
         )}`
       : "");
 
   const modelMessages = await toAiMessages(history, {
     includeNames: platform === "slack",
   });
+
+  for (const msg of modelMessages) {
+    if (msg.role !== "user" || !Array.isArray(msg.content)) continue;
+    msg.content = msg.content.filter(
+      (part) => part.type !== "image" && part.type !== "file",
+    );
+  }
 
   const result = await streamMiddayAssistant({
     mcpCtx,
@@ -219,8 +245,8 @@ async function handleIncomingMessage(thread: any, message: any) {
 }
 
 async function resolveConversation(
-  thread: any,
-  message: any,
+  thread: Thread<BotThreadState>,
+  message: Message,
   platform: BotPlatform,
 ) {
   const threadState = ((await thread.state) ?? {}) as BotThreadState;
@@ -261,8 +287,8 @@ function consumeResolvedConversation(resolved: ConnectedResolvedConversation) {
 }
 
 async function hydrateResolvedConversationIdentity(params: {
-  thread: any;
-  message: any;
+  thread: Thread<BotThreadState>;
+  message: Message;
   platform: BotPlatform;
   resolved: ConnectedResolvedConversation;
 }) {
@@ -326,7 +352,10 @@ async function hydrateResolvedConversationIdentity(params: {
   return connectedConversation;
 }
 
-async function resolveWhatsAppConversation(thread: any, message: any) {
+async function resolveWhatsAppConversation(
+  thread: Thread<BotThreadState>,
+  message: Message,
+) {
   const phoneNumber = getMessageAuthorId(message);
   if (!phoneNumber) {
     return null;
@@ -463,7 +492,10 @@ async function resolveWhatsAppConversation(thread: any, message: any) {
   }
 }
 
-async function resolveSendblueConversation(thread: any, message: any) {
+async function resolveSendblueConversation(
+  thread: Thread<BotThreadState>,
+  message: Message,
+) {
   const phoneNumber = getMessageAuthorId(message);
   if (!phoneNumber) {
     return null;
@@ -555,6 +587,17 @@ async function resolveSendblueConversation(thread: any, message: any) {
       `Connected to ${team?.name ?? "Midday"}. You can now chat with Midday via iMessage.`,
     );
 
+    try {
+      const dashboardUrl =
+        process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
+      await (thread.adapter as SendblueAdapter).sendMediaMessage(
+        thread.id,
+        `${dashboardUrl}/midday-contact.vcf`,
+      );
+    } catch {
+      // Contact card is best-effort
+    }
+
     return consumeResolvedConversation({
       connected: true as const,
       teamId: token.teamId,
@@ -580,7 +623,10 @@ async function resolveSendblueConversation(thread: any, message: any) {
   }
 }
 
-async function resolveTelegramConversation(thread: any, message: any) {
+async function resolveTelegramConversation(
+  thread: Thread<BotThreadState>,
+  message: Message,
+) {
   const telegramUserId = getMessageAuthorId(message);
   if (!telegramUserId) {
     return null;
@@ -721,7 +767,10 @@ async function resolveTelegramConversation(thread: any, message: any) {
   }
 }
 
-async function resolveSlackConversation(thread: any, message: any) {
+async function resolveSlackConversation(
+  thread: Thread<BotThreadState>,
+  message: Message,
+) {
   const slackTeamId = getSlackTeamId(message);
   const slackUserId = getMessageAuthorId(message);
 
@@ -891,28 +940,56 @@ async function resolveSlackConversation(thread: any, message: any) {
 }
 
 async function processIncomingAttachments(params: {
-  thread: any;
-  message: any;
+  thread: Thread<BotThreadState>;
+  message: Message;
   teamId: string;
   actingUserId: string;
   platform: BotPlatform;
 }) {
   const { thread, message, teamId, actingUserId, platform } = params;
   const summaries: string[] = [];
+  const richMessages: string[] = [];
 
-  for (const [index, attachment] of (message?.attachments || []).entries()) {
+  logger.info("[attachments] Processing incoming attachments", {
+    platform,
+    attachmentCount: (message?.attachments || []).length,
+    attachments: (message.attachments ?? []).map((a) => ({
+      type: a.type,
+      mimeType: a.mimeType,
+      name: a.name,
+      hasData: !!a.data,
+      hasFetchData: typeof a.fetchData === "function",
+      hasUrl: !!a.url,
+    })),
+  });
+
+  for (const [index, attachment] of (message.attachments ?? []).entries()) {
     if (!isSupportedAttachment(attachment)) {
+      logger.info("[attachments] Skipping unsupported attachment", {
+        type: attachment.type,
+        mimeType: attachment.mimeType,
+      });
       continue;
     }
 
     try {
-      const data =
-        attachment?.data ??
-        (typeof attachment?.fetchData === "function"
+      let data =
+        attachment.data ??
+        (typeof attachment.fetchData === "function"
           ? await attachment.fetchData()
           : null);
 
+      if (!data && attachment.url) {
+        const res = await fetch(attachment.url);
+        if (res.ok) {
+          data = Buffer.from(await res.arrayBuffer());
+        }
+      }
+
       if (!data) {
+        logger.info("[attachments] No data resolved for attachment", {
+          name: attachment.name,
+        });
         continue;
       }
 
@@ -920,7 +997,11 @@ async function processIncomingAttachments(params: {
         db,
         teamId,
         userId: actingUserId,
-        fileData: new Uint8Array(data),
+        fileData: new Uint8Array(
+          data instanceof Blob
+            ? await data.arrayBuffer()
+            : (data as ArrayBuffer | Buffer),
+        ),
         mimeType: attachment.mimeType || "application/octet-stream",
         fileName: attachment.name,
         referenceId: `${platform}_${message?.id || thread.id}_${index}`,
@@ -935,41 +1016,49 @@ async function processIncomingAttachments(params: {
       });
 
       summaries.push(formatProcessedUploadSummary(result));
+      richMessages.push(formatInboxResultMessage(result));
+
+      try {
+        await thread.adapter.addReaction(thread.id, message.id, "like");
+      } catch {
+        // Reaction is best-effort
+      }
     } catch (error) {
       logger.warn("Failed to process bot attachment", {
         platform,
         error: error instanceof Error ? error.message : String(error),
-        filename: attachment?.name,
+        filename: attachment.name,
       });
     }
   }
 
-  return summaries;
+  return { summaries, richMessages };
 }
 
-async function getConversationHistory(thread: any) {
+async function getConversationHistory(thread: Thread<BotThreadState>) {
   await thread.refresh();
   return thread.recentMessages || [];
 }
 
-function isSupportedAttachment(attachment: any) {
-  const mimeType = attachment?.mimeType as string | undefined;
-
-  if (!mimeType) {
+function isSupportedAttachment(attachment: Attachment) {
+  if (!attachment.mimeType) {
     return false;
   }
 
   return (
-    (attachment?.type === "image" || attachment?.type === "file") &&
-    isSupportedInboxUploadMediaType(mimeType)
+    (attachment.type === "image" || attachment.type === "file") &&
+    isSupportedInboxUploadMediaType(attachment.mimeType)
   );
 }
 
-async function rememberThreadState(thread: any, state: BotThreadState) {
+async function rememberThreadState(
+  thread: Thread<BotThreadState>,
+  state: BotThreadState,
+) {
   await thread.setState(state);
 }
 
-async function forgetThreadState(thread: any) {
+async function forgetThreadState(thread: Thread<BotThreadState>) {
   await thread.setState({});
 }
 
@@ -977,7 +1066,7 @@ async function hasCurrentTeamAccess(teamId: string, userId: string) {
   return hasTeamAccess(db, teamId, userId);
 }
 
-async function notifyTeamAccessRevoked(thread: any) {
+async function notifyTeamAccessRevoked(thread: Thread<BotThreadState>) {
   await forgetThreadState(thread);
   await thread
     .post(
@@ -986,8 +1075,8 @@ async function notifyTeamAccessRevoked(thread: any) {
     .catch(() => {});
 }
 
-function getSlackTeamId(message: any) {
-  const raw = message?.raw as
+function getSlackTeamId(message: Message) {
+  const raw = message.raw as
     | {
         team?: string;
         team_id?: string;

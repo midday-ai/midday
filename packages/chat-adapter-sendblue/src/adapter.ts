@@ -1,6 +1,7 @@
 import type {
   Adapter,
   AdapterPostableMessage,
+  Attachment,
   ChatInstance,
   EmojiValue,
   FetchOptions,
@@ -135,6 +136,15 @@ export class SendblueAdapter
     if ("message_handle" in body && typeof body.message_handle === "string") {
       const payload = body as unknown as SendblueMessagePayload;
 
+      this.logger.info("Sendblue webhook message received", {
+        is_outbound: payload.is_outbound,
+        status: payload.status,
+        hasContent: !!payload.content,
+        hasMediaUrl: !!payload.media_url,
+        mediaUrlPrefix: payload.media_url?.slice(0, 50),
+        service: payload.service,
+      });
+
       if (!this.isServiceAllowed(payload.service)) {
         this.logger.debug("Sendblue webhook filtered by service", {
           service: payload.service,
@@ -189,24 +199,10 @@ export class SendblueAdapter
     const threadId = this.threadIdFromPayload(raw);
     const text = raw.content ?? "";
 
-    const attachments: Array<{
-      type: "image" | "file";
-      name: string;
-      mimeType: string;
-      url: string;
-    }> = [];
+    const attachments: Attachment[] = [];
 
     if (raw.media_url && raw.media_url.length > 0) {
-      const ext = raw.media_url.split(".").pop()?.toLowerCase() ?? "";
-      const imageExts = new Set(["jpg", "jpeg", "png", "gif", "heic", "webp"]);
-      attachments.push({
-        type: imageExts.has(ext) ? "image" : "file",
-        name: raw.media_url.split("/").pop() ?? "attachment",
-        mimeType: imageExts.has(ext)
-          ? `image/${ext === "jpg" ? "jpeg" : ext}`
-          : "application/octet-stream",
-        url: raw.media_url,
-      });
+      attachments.push(this.buildAttachment(raw.media_url));
     }
 
     return new Message({
@@ -276,6 +272,23 @@ export class SendblueAdapter
       id: response.message_handle ?? "",
       threadId,
     };
+  }
+
+  async sendMediaMessage(
+    threadId: string,
+    mediaUrl: string,
+    content?: string,
+  ): Promise<void> {
+    const decoded = this.decodeThreadId(threadId);
+    if (decoded.groupId) return;
+
+    await this.sdk.messages.send({
+      number: decoded.contactNumber!,
+      from_number: decoded.fromNumber,
+      content: content ?? "",
+      media_url: mediaUrl,
+      status_callback: this.config.statusCallbackUrl,
+    });
   }
 
   async stream(
@@ -548,5 +561,42 @@ export class SendblueAdapter
     const lower = name.toLowerCase();
     if (VALID_REACTIONS.has(lower)) return lower as SendblueReaction;
     return REACTION_ALIASES[lower] ?? null;
+  }
+
+  private buildAttachment(mediaUrl: string): Attachment {
+    const IMAGE_EXTS = new Set(["jpg", "jpeg", "png", "gif", "heic", "webp"]);
+
+    if (mediaUrl.startsWith("data:")) {
+      const commaIdx = mediaUrl.indexOf(",");
+      if (commaIdx !== -1) {
+        const header = mediaUrl.slice(5, commaIdx);
+        const mime =
+          header.replace(";base64", "") || "application/octet-stream";
+        const ext = mime.split("/")[1] ?? "bin";
+        const decoded = Buffer.from(mediaUrl.slice(commaIdx + 1), "base64");
+        return {
+          type: mime.startsWith("image/") ? "image" : "file",
+          name: `attachment.${ext}`,
+          mimeType: mime,
+          data: decoded,
+          fetchData: async () => decoded,
+        };
+      }
+    }
+
+    const ext = mediaUrl.split(".").pop()?.toLowerCase() ?? "";
+    const isImage = IMAGE_EXTS.has(ext);
+    return {
+      type: isImage ? "image" : "file",
+      name: mediaUrl.split("/").pop() ?? "attachment",
+      mimeType: isImage
+        ? `image/${ext === "jpg" ? "jpeg" : ext}`
+        : "application/octet-stream",
+      url: mediaUrl,
+      fetchData: async () => {
+        const res = await fetch(mediaUrl);
+        return Buffer.from(await res.arrayBuffer());
+      },
+    };
   }
 }

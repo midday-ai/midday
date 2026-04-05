@@ -20,6 +20,7 @@
     "dev": "tsup --watch",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
+    "test": "bun test",
     "lint": "biome check .",
     "lint:fix": "biome check --write ."
   },

@@ -59,6 +59,7 @@ mock.module("@midday/bot", () => ({
       setSuggestedPrompts: mock(() => Promise.resolve()),
     })),
   },
+  formatInboxResultMessage: mock(() => ""),
   formatNotificationContextForPrompt: mock(() => ""),
   formatProcessedUploadSummary: mock(() => ""),
   getPlatformInstructions: mock(() => ""),
@@ -87,13 +88,17 @@ function createLinkedUser() {
   };
 }
 
-function createThread(platform: "whatsapp" | "telegram" | "slack") {
+function createThread(
+  platform: "whatsapp" | "telegram" | "slack" | "sendblue",
+) {
   const posts: string[] = [];
+  const sendMediaMessageMock = mock(() => Promise.resolve());
 
   return {
     posts,
+    sendMediaMessageMock,
     thread: {
-      adapter: { name: platform },
+      adapter: { name: platform, sendMediaMessage: sendMediaMessageMock },
       id: `${platform}_thread_123`,
       channelId: `${platform}_channel_123`,
       isDM: platform === "slack",
@@ -138,7 +143,7 @@ function primeCommonLinkingMocks() {
   mocks.consumePlatformLinkToken.mockReset();
   mocks.consumePlatformLinkToken.mockImplementation(() =>
     Promise.resolve({
-      code: "mb_abc123456789",
+      code: "abc12345",
       provider: "whatsapp",
       teamId: "team_123",
       userId: "user_123",
@@ -180,7 +185,7 @@ describe("bot runtime link-code consumption", () => {
     const { posts, thread } = createThread("whatsapp");
     const message = {
       id: "message_123",
-      text: "Connect to Midday: mb_abc123456789",
+      text: "Connect to Midday: abc12345",
       author: {
         userId: "+15551234567",
         fullName: "WhatsApp User",
@@ -204,7 +209,7 @@ describe("bot runtime link-code consumption", () => {
     const { posts, thread } = createThread("telegram");
     const message = {
       id: "message_123",
-      text: "/start mb_abc123456789",
+      text: "/start abc12345",
       author: {
         userId: "telegram_user_123",
         fullName: "Telegram User",
@@ -216,7 +221,7 @@ describe("bot runtime link-code consumption", () => {
     mocks.consumePlatformLinkToken.mockReset();
     mocks.consumePlatformLinkToken.mockImplementation(() =>
       Promise.resolve({
-        code: "mb_abc123456789",
+        code: "abc12345",
         provider: "telegram",
         teamId: "team_123",
         userId: "user_123",
@@ -238,7 +243,7 @@ describe("bot runtime link-code consumption", () => {
     const { posts, thread } = createThread("slack");
     const message = {
       id: "message_123",
-      text: "Connect to Midday: mb_abc123456789",
+      text: "Connect to Midday: abc12345",
       raw: {
         team: "T123",
       },
@@ -253,7 +258,7 @@ describe("bot runtime link-code consumption", () => {
     mocks.consumePlatformLinkToken.mockReset();
     mocks.consumePlatformLinkToken.mockImplementation(() =>
       Promise.resolve({
-        code: "mb_abc123456789",
+        code: "abc12345",
         provider: "slack",
         teamId: "team_123",
         userId: "user_123",
@@ -265,6 +270,46 @@ describe("bot runtime link-code consumption", () => {
     expect(posts).toEqual([
       "Linked to Midday Test Team. Your future Slack messages will run as your Midday user.",
     ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+    expect(toAiMessagesMock).not.toHaveBeenCalled();
+    expect(mocks.getUserById).not.toHaveBeenCalled();
+    expect(thread.startTyping).not.toHaveBeenCalled();
+  });
+
+  test("consumes a first-time Sendblue link code and sends vCard", async () => {
+    const { posts, sendMediaMessageMock, thread } = createThread("sendblue");
+    const message = {
+      id: "message_123",
+      text: "abc12345",
+      author: {
+        userId: "+14155551234",
+        fullName: "iMessage User",
+        userName: "+14155551234",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve({
+        code: "abc12345",
+        provider: "sendblue",
+        teamId: "team_123",
+        userId: "user_123",
+      }),
+    );
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "Connected to Midday Test Team. You can now chat with Midday via iMessage.",
+    ]);
+    const dashboardUrl =
+      process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
+    expect(sendMediaMessageMock).toHaveBeenCalledWith(
+      thread.id,
+      `${dashboardUrl}/midday-contact.vcf`,
+    );
     expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
     expect(toAiMessagesMock).not.toHaveBeenCalled();
     expect(mocks.getUserById).not.toHaveBeenCalled();

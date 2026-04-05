@@ -226,7 +226,7 @@ export async function createPlatformLinkToken(
     metadata?: Record<string, unknown>;
   },
 ) {
-  const code = `mb_${nanoid(18)}`;
+  const code = nanoid(8);
   const expiresAt =
     params.expiresAt ??
     new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();

@@ -3,7 +3,7 @@ import { Command } from "commander";
 import { del, get, post, put } from "../../client/api.js";
 import { type GlobalFlags, resolveFormat } from "../../output/formatter.js";
 import { printJson, printJsonList } from "../../output/json.js";
-import { printDetail, printTable } from "../../output/table.js";
+import { printTable } from "../../output/table.js";
 import { withSpinner } from "../../ui/spinner.js";
 import { handleError } from "../../utils/errors.js";
 
