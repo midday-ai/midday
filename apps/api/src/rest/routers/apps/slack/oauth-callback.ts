@@ -7,7 +7,8 @@ import {
   getSlackInstaller,
   publishAppHome,
 } from "@midday/app-store/slack/server";
-import { createApp } from "@midday/db/queries";
+import { bot } from "@midday/bot";
+import { createApp, createOrUpdatePlatformIdentity } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
 import { sendWelcomeMessage } from "./messages";
@@ -168,10 +169,10 @@ app.openapi(
       }
 
       // Create app integration in database
-      const createdSlackIntegration = await createApp(db, {
+      const createdSlackIntegration = await createApp<"slack">(db, {
         teamId: parsedMetadata.data.teamId,
         createdBy: parsedMetadata.data.userId,
-        appId: config.id,
+        appId: "slack",
         settings: config.settings,
         config: {
           access_token: parsedJson.data.access_token,
@@ -186,65 +187,80 @@ app.openapi(
         },
       });
 
-      if (createdSlackIntegration?.config) {
-        // @ts-expect-error - config is JSONB
-        const accessToken = createdSlackIntegration.config.access_token;
-        // @ts-expect-error - config is JSONB
-        const channelId = createdSlackIntegration.config.channel_id;
+      await createOrUpdatePlatformIdentity(db, {
+        provider: "slack",
+        teamId: parsedMetadata.data.teamId,
+        userId: parsedMetadata.data.userId,
+        externalUserId: parsedJson.data.authed_user.id,
+        externalTeamId: parsedJson.data.team.id,
+        metadata: {
+          source: "slack_oauth_install",
+        },
+      });
 
-        // Send welcome message to Slack channel
-        // This is non-blocking - OAuth flow continues even if it fails
-        sendWelcomeMessage({
-          channelId,
-          accessToken,
-          // @ts-expect-error - config is JSONB
-          botUserId: createdSlackIntegration.config.bot_user_id,
-          // @ts-expect-error - config is JSONB
-          webhookUrl: createdSlackIntegration.config.url,
-        }).catch(() => {
-          // Silently handle errors - welcome message is non-critical
+      if (!createdSlackIntegration?.config) {
+        throw new HTTPException(500, {
+          message: "Failed to create app integration",
         });
-
-        // Publish App Home for the installing user
-        // This is non-blocking - OAuth flow continues even if it fails
-        // Use Slack user ID (not Midday user ID) for views.publish
-        const slackUserId = parsedJson.data.authed_user.id;
-        const client = createSlackWebClient({ token: accessToken });
-        publishAppHome({
-          client,
-          userId: slackUserId,
-          db,
-          teamId: parsedMetadata.data.teamId,
-          slackApp: {
-            config: createdSlackIntegration.config,
-            settings: createdSlackIntegration.settings,
-          },
-        }).catch((error) => {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-          // Only log if it's not the "not_enabled" error (which is handled gracefully in publishAppHome)
-          if (!errorMessage.includes("not_enabled")) {
-            logger.error("Failed to publish App Home on install", {
-              error: errorMessage,
-              stack: error instanceof Error ? error.stack : undefined,
-              slackUserId,
-              middayUserId: parsedMetadata.data.userId,
-              teamId: parsedMetadata.data.teamId,
-            });
-          }
-          // Silently handle errors - App Home is non-critical
-        });
-
-        // Build redirect URL to dashboard
-        const dashboardUrl =
-          process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
-
-        return c.redirect(`${dashboardUrl}/oauth-callback?status=success`, 302);
       }
 
-      throw new HTTPException(500, {
-        message: "Failed to create app integration",
+      await bot.initialize();
+      const slackAdapter = bot.getAdapter("slack");
+      await slackAdapter.setInstallation(parsedJson.data.team.id, {
+        botToken: parsedJson.data.access_token,
+        botUserId: parsedJson.data.bot_user_id,
+        teamName: parsedJson.data.team.name,
       });
+
+      const accessToken = createdSlackIntegration.config.access_token;
+      const channelId = createdSlackIntegration.config.channel_id;
+
+      // Send welcome message to Slack channel
+      // This is non-blocking - OAuth flow continues even if it fails
+      sendWelcomeMessage({
+        channelId,
+        accessToken,
+        botUserId: createdSlackIntegration.config.bot_user_id,
+        webhookUrl: createdSlackIntegration.config.url,
+      }).catch(() => {
+        // Silently handle errors - welcome message is non-critical
+      });
+
+      // Publish App Home for the installing user
+      // This is non-blocking - OAuth flow continues even if it fails
+      // Use Slack user ID (not Midday user ID) for views.publish
+      const slackUserId = parsedJson.data.authed_user.id;
+      const client = createSlackWebClient({ token: accessToken });
+      publishAppHome({
+        client,
+        userId: slackUserId,
+        db,
+        teamId: parsedMetadata.data.teamId,
+        slackApp: {
+          config: createdSlackIntegration.config,
+          settings: createdSlackIntegration.settings,
+        },
+      }).catch((error) => {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        // Only log if it's not the "not_enabled" error (which is handled gracefully in publishAppHome)
+        if (!errorMessage.includes("not_enabled")) {
+          logger.error("Failed to publish App Home on install", {
+            error: errorMessage,
+            stack: error instanceof Error ? error.stack : undefined,
+            slackUserId,
+            middayUserId: parsedMetadata.data.userId,
+            teamId: parsedMetadata.data.teamId,
+          });
+        }
+        // Silently handle errors - App Home is non-critical
+      });
+
+      // Build redirect URL to dashboard
+      const dashboardUrl =
+        process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
+
+      return c.redirect(`${dashboardUrl}/oauth-callback?status=success`, 302);
     } catch (err) {
       if (err instanceof HTTPException) {
         throw err;

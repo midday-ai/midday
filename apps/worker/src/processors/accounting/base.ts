@@ -125,7 +125,7 @@ export abstract class AccountingProcessorBase<
       throw new Error(`${providerId} is not connected for this team`);
     }
 
-    let config = app.config as AccountingProviderConfig;
+    let config = app.config as unknown as AccountingProviderConfig;
 
     // Validate required config fields
     if (!hasRequiredConfigFields(config)) {

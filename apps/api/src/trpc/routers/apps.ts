@@ -1,10 +1,12 @@
 import {
+  createPlatformLinkTokenSchema,
   disconnectAppSchema,
   removeWhatsAppConnectionSchema,
   updateAppSettingsSchema,
 } from "@api/schemas/apps";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  createPlatformLinkToken,
   disconnectApp,
   getApps,
   removeWhatsAppConnection,
@@ -72,6 +74,16 @@ export const appsRouter = createTRPCRouter({
       return removeWhatsAppConnection(db, {
         teamId: teamId!,
         phoneNumber,
+      });
+    }),
+
+  createPlatformLinkToken: protectedProcedure
+    .input(createPlatformLinkTokenSchema)
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
+      return createPlatformLinkToken(db, {
+        provider: input.provider,
+        teamId: teamId!,
+        userId: session.user.id,
       });
     }),
 });

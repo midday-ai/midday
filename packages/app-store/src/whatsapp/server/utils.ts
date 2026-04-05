@@ -1,6 +1,4 @@
 import crypto from "node:crypto";
-import { triggerJob } from "@midday/job-client";
-import { logger } from "@midday/logger";
 
 // WhatsApp webhook payload types
 export interface WhatsAppWebhookPayload {
@@ -162,49 +160,4 @@ export function isAllowedMimeType(mimeType: string): boolean {
     "application/pdf",
   ];
   return allowedTypes.includes(mimeType.toLowerCase());
-}
-
-/**
- * Trigger the whatsapp-upload job
- */
-export async function triggerWhatsAppUploadJob(params: {
-  teamId: string;
-  phoneNumber: string;
-  messageId: string;
-  mediaId: string;
-  mimeType: string;
-  filename?: string;
-  caption?: string;
-}) {
-  const {
-    teamId,
-    phoneNumber,
-    messageId,
-    mediaId,
-    mimeType,
-    filename,
-    caption,
-  } = params;
-
-  logger.info("Triggering whatsapp-upload job", {
-    teamId,
-    phoneNumber,
-    messageId,
-    mediaId,
-    mimeType,
-  });
-
-  await triggerJob(
-    "whatsapp-upload",
-    {
-      teamId,
-      phoneNumber,
-      messageId,
-      mediaId,
-      mimeType,
-      filename,
-      caption,
-    },
-    "inbox",
-  );
 }

@@ -127,10 +127,10 @@ app.openapi(
       }
 
       // Create app integration in database
-      await createApp(db, {
+      await createApp<"xero">(db, {
         teamId: parsedState.teamId,
         createdBy: parsedState.userId,
-        appId: config.id,
+        appId: "xero",
         settings: config.settings,
         config: {
           provider: "xero", // Discriminator field

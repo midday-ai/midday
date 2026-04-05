@@ -692,6 +692,12 @@ export function Header({
                                   desc: "Typed SDKs to build faster.",
                                   external: false,
                                 },
+                                {
+                                  href: "/chat",
+                                  title: "Chat",
+                                  desc: "Run your business from any chat app.",
+                                  external: false,
+                                },
                               ].map((item, index) => (
                                 <div
                                   key={`${item.href}-${item.title}`}
@@ -1090,6 +1096,17 @@ export function Header({
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           SDKs
+                        </Link>
+                        <Link
+                          href="/chat"
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            setIsMobileAppsOpen(false);
+                          }}
+                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Chat
                         </Link>
                       </div>
                     </div>

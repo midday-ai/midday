@@ -4,7 +4,9 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { inboxWebhookRouter } from "./inbox";
 import { plaidWebhookRouter } from "./plaid";
 import { polarWebhookRouter } from "./polar";
+import { sendblueWebhookRouter } from "./sendblue";
 import { stripeWebhookRouter } from "./stripe";
+import { telegramWebhookRouter } from "./telegram";
 import { tellerWebhookRouter } from "./teller";
 import { whatsappWebhookRouter } from "./whatsapp";
 
@@ -17,8 +19,10 @@ app.use("*", ...publicMiddleware);
 app.route("/inbox", inboxWebhookRouter);
 app.route("/plaid", plaidWebhookRouter);
 app.route("/polar", polarWebhookRouter);
+app.route("/sendblue", sendblueWebhookRouter);
 app.route("/stripe", stripeWebhookRouter);
 app.route("/teller", tellerWebhookRouter);
+app.route("/telegram", telegramWebhookRouter);
 app.route("/whatsapp", whatsappWebhookRouter);
 
 export { app as webhookRouter };

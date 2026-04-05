@@ -1,4 +1,11 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  expect,
+  setSystemTime,
+  test,
+} from "bun:test";
 import type { Database } from "../client";
 import {
   createReport,
@@ -1240,6 +1247,16 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   describe("Runway", () => {
+    beforeAll(() => {
+      // Freeze time so the trailing 6-month runway window stays aligned
+      // with the seeded "recent" expense fixtures.
+      setSystemTime(new Date("2026-02-20T12:00:00.000Z"));
+    });
+
+    afterAll(() => {
+      setSystemTime();
+    });
+
     test("returns positive runway with recent burn data and bank balances", async () => {
       const result = await getRunway(db, {
         teamId: TEAM_USD_ID,
@@ -2493,6 +2510,14 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
   // Runway — Zero Burn Rate
   // ─────────────────────────────────────────────────────────────────────────
   describe("Runway — Edge Cases", () => {
+    beforeAll(() => {
+      setSystemTime(new Date("2026-02-20T12:00:00.000Z"));
+    });
+
+    afterAll(() => {
+      setSystemTime();
+    });
+
     test("team with no expenses in trailing window returns 0 runway", async () => {
       // TEAM_EUR has only Jan 2024 transactions, so trailing 3 completed
       // months should have 0 burn

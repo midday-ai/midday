@@ -41,7 +41,7 @@ export async function sendSlackMatchNotification({
 }: MatchNotificationParams) {
   const db = getWorkerDb();
 
-  const slackApp = await getAppByAppId(db, {
+  const slackApp = await getAppByAppId<"slack">(db, {
     appId: "slack",
     teamId,
   });
@@ -51,14 +51,7 @@ export async function sendSlackMatchNotification({
     return;
   }
 
-  const config = slackApp.config as {
-    access_token?: string;
-    channel_id?: string;
-    team_id?: string;
-    team_name?: string;
-  };
-
-  const accessToken = config.access_token;
+  const accessToken = slackApp.config.access_token;
 
   if (!accessToken) {
     logger.debug("Slack access token not found", { teamId });

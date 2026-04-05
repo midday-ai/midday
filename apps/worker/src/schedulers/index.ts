@@ -9,6 +9,7 @@ import {
 import { insightsStaticSchedulers } from "./insights.config";
 import { institutionsStaticSchedulers } from "./institutions.config";
 import { invoicesStaticSchedulers } from "./invoices.config";
+import { notificationsStaticSchedulers } from "./notifications.config";
 import { ratesStaticSchedulers } from "./rates.config";
 
 /**
@@ -19,6 +20,7 @@ export const staticSchedulerConfigs: StaticSchedulerConfig[] = [
   ...inboxStaticSchedulers,
   ...institutionsStaticSchedulers,
   ...invoicesStaticSchedulers,
+  ...notificationsStaticSchedulers,
   ...ratesStaticSchedulers,
   ...insightsStaticSchedulers,
 ];

@@ -7,6 +7,7 @@ import eInvoiceApp from "./e-invoice/config";
 import fortnoxApp from "./fortnox/config-client";
 import geminiMcpApp from "./gemini-mcp/config";
 import gmailApp from "./gmail/config-client";
+import imessageApp from "./imessage/config-client";
 import makeMcpApp from "./make-mcp/config";
 import manusMcpApp from "./manus-mcp/config";
 import middayDesktopApp from "./midday-desktop/config";
@@ -19,6 +20,7 @@ import raycastMcpApp from "./raycast-mcp/config";
 // Import client config for dashboard (includes images)
 import slackApp from "./slack/config-client";
 import stripePaymentsApp from "./stripe-payments/config-client";
+import telegramApp from "./telegram/config-client";
 import whatsappApp from "./whatsapp/config-client";
 import windsurfMcpApp from "./windsurf-mcp/config";
 import xeroApp from "./xero/config-client";
@@ -29,10 +31,12 @@ export const apps = [
   gmailApp,
   outlookApp,
   slackApp,
+  telegramApp,
   quickBooksApp,
   xeroApp,
   fortnoxApp,
   whatsappApp,
+  imessageApp,
   stripePaymentsApp,
   middayDesktopApp,
   eInvoiceApp,

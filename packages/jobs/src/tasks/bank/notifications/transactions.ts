@@ -1,4 +1,5 @@
 import { getDb } from "@jobs/init";
+import { sendToProviders } from "@midday/bot";
 import { Notifications } from "@midday/notifications";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
@@ -14,7 +15,8 @@ export const transactionNotifications = schemaTask({
   }),
   run: async ({ teamId }) => {
     const supabase = createClient();
-    const notifications = new Notifications(getDb());
+    const db = getDb();
+    const notifications = new Notifications(db);
 
     try {
       // Update all unnotified transactions for the team as notified and return those transactions
@@ -32,24 +34,29 @@ export const transactionNotifications = schemaTask({
       });
 
       if (sortedTransactions && sortedTransactions.length > 0) {
+        const transactions = sortedTransactions.map((transaction) => ({
+          id: transaction.id,
+          date: transaction.date,
+          amount: transaction.amount,
+          name: transaction.name,
+          currency: transaction.currency,
+        }));
+
         // Create notification - ProviderNotificationService will handle provider-specific
         // notifications (e.g., Slack) based on app settings
         await notifications.create(
           "transactions_created",
           teamId,
           {
-            transactions: sortedTransactions.map((transaction) => ({
-              id: transaction.id,
-              date: transaction.date,
-              amount: transaction.amount,
-              name: transaction.name,
-              currency: transaction.currency,
-            })),
+            transactions,
           },
           {
             sendEmail: true,
           },
         );
+        await sendToProviders(db, teamId, "transaction", {
+          transactions,
+        });
       }
     } catch (error) {
       await logger.error("Transactions notification", { error });

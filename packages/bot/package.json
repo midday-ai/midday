@@ -1,0 +1,36 @@
+{
+  "name": "@midday/bot",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@chat-adapter/slack": "^4.23.0",
+    "@chat-adapter/state-redis": "^4.23.0",
+    "@chat-adapter/telegram": "^4.23.0",
+    "@chat-adapter/whatsapp": "^4.23.0",
+    "chat-adapter-sendblue": "^0.2.0",
+    "@midday/app-store": "workspace:*",
+    "@midday/cache": "workspace:*",
+    "@midday/db": "workspace:*",
+    "@midday/documents": "workspace:*",
+    "@midday/job-client": "workspace:*",
+    "@midday/logger": "workspace:*",
+    "@midday/supabase": "workspace:*",
+    "@midday/utils": "workspace:*",
+    "chat": "^4.23.0",
+    "nanoid": "catalog:"
+  },
+  "devDependencies": {
+    "@midday/tsconfig": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

@@ -49,6 +49,15 @@ const appExtensions: Record<
       "One-click approve or decline",
     ],
   },
+  telegram: {
+    slug: "telegram",
+    features: [
+      "Open the Midday bot instantly",
+      "Forward receipts while on the go",
+      "Smart document matching",
+      "Real-time invoice and transaction notifications",
+    ],
+  },
   whatsapp: {
     slug: "whatsapp",
     features: [
@@ -56,6 +65,15 @@ const appExtensions: Record<
       "Forward receipts on the go",
       "Smart document matching",
       "One-tap approve or decline",
+    ],
+  },
+  sendblue: {
+    slug: "imessage",
+    features: [
+      "Use Midday directly from iMessage",
+      "Forward receipts from your iPhone",
+      "Create invoices in chat",
+      "Real-time invoice and transaction notifications",
     ],
   },
   xero: {
