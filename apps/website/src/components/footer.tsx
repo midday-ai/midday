@@ -114,6 +114,7 @@ export function Footer() {
               </h3>
               <div className="space-y-2.5">
                 {[
+                  { href: "/chat", label: "Chat", external: false },
                   { href: "/docs", label: "Documentation", external: false },
                   { href: "/agents", label: "Agents", external: false },
                   {

@@ -1,0 +1,85 @@
+import type { Metadata } from "next";
+import { baseUrl } from "@/app/sitemap";
+import { ChatPlatformPage } from "@/components/chat-platform-page";
+
+const title = "Midday for Slack";
+const description =
+  "Run your business from Slack. Ask questions, upload receipts, track invoices, and get notifications — without leaving your workspace.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  keywords: [
+    "Slack business",
+    "Slack invoicing",
+    "Slack receipts",
+    "Slack bookkeeping",
+    "Midday Slack",
+    "Slack finance bot",
+    "Slack accounting",
+  ],
+  openGraph: {
+    title,
+    description,
+    type: "website",
+    url: `${baseUrl}/chat/slack`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+  alternates: {
+    canonical: `${baseUrl}/chat/slack`,
+  },
+};
+
+const config = {
+  name: "Slack",
+  slug: "slack",
+  appId: "slack",
+  icon: (
+    <svg className="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" />
+    </svg>
+  ),
+  headline: "Your business, right from Slack",
+  description:
+    "Connect Midday to Slack and manage your finances without leaving your workspace. Ask about your cash flow, upload receipts, track invoices — Midday works right in your DMs or a shared channel.",
+  steps: [
+    {
+      title: "Open Apps in Midday",
+      description:
+        "Go to the Apps section in your Midday dashboard and find Slack.",
+      href: "https://app.midday.ai/apps?app=slack",
+    },
+    {
+      title: "Install to your workspace",
+      description:
+        "Click Connect and authorize Midday in your Slack workspace. Choose a channel or use direct messages.",
+    },
+    {
+      title: "Start chatting",
+      description:
+        "Send your first message — try asking \"What's my cash flow this month?\" or upload a receipt.",
+    },
+  ],
+  notifications: [
+    "New transactions from connected bank accounts",
+    "Invoice status changes (paid, overdue)",
+    "Match suggestions for receipts and transactions",
+    "Recurring invoice reminders",
+  ],
+  capabilities: [
+    "Ask questions about your finances in plain language",
+    "Upload receipts and documents directly in Slack",
+    "Track invoices and get status updates",
+    "Log time entries through conversation",
+    "Get real-time notifications for transactions and invoices",
+  ],
+  settingsPath: "Apps \u2192 Slack \u2192 Settings",
+};
+
+export default function Page() {
+  return <ChatPlatformPage config={config} />;
+}
