@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Icons } from "@midday/ui/icons";
 import { baseUrl } from "@/app/sitemap";
 import { ChatPlatformPage } from "@/components/chat-platform-page";
 
@@ -38,11 +39,7 @@ const config = {
   name: "iMessage",
   slug: "imessage",
   appId: "sendblue",
-  icon: (
-    <svg className="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M2.4 6.8c0-2.2 1.6-4 3.7-4.4C7.4 2.1 9 2 12 2c3 0 4.6.1 5.9.4 2.1.4 3.7 2.2 3.7 4.4v5.4c0 2.2-1.6 4-3.7 4.4-.8.2-1.8.3-3.2.3l-3.2 3.5c-.7.8-2 .3-2-.7v-2.8c-1.3 0-2.2-.1-2.9-.3-2.1-.4-3.7-2.2-3.7-4.4V6.8z" />
-    </svg>
-  ),
+  icon: <Icons.IMessage size={40} className="h-10 w-10" />,
   headline: "Your business, right from iMessage",
   description:
     "Connect Midday to iMessage and manage your finances without leaving your conversations. Send a photo of a receipt, ask about your cash flow, create an invoice — Midday handles it all through natural conversation.",

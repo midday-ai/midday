@@ -3,20 +3,24 @@
 import type { ReactNode } from "react";
 
 const SCREEN_PATH =
-  "M8 88C8 59.9974 8 45.9961 13.4497 35.3005C18.2433 25.8924 25.8924 18.2433 35.3005 13.4497C45.9961 8 59.9974 8 88 8H330C358.003 8 372.004 8 382.7 13.4497C392.108 18.2433 399.757 25.8924 404.55 35.3005C410 45.9961 410 59.9974 410 88V802C410 830.003 410 844.004 404.55 854.7C399.757 864.108 392.108 871.757 382.7 876.55C372.004 882 358.003 882 330 882H88C59.9974 882 45.9961 882 35.3005 876.55C25.8924 871.757 18.2433 864.108 13.4497 854.7C8 844.004 8 830.003 8 802V88Z";
-
-const BORDER_PATH =
-  "M35.3005 876.55L31.6686 883.678L35.3005 876.55ZM13.4497 854.7L6.32162 858.331L13.4497 854.7ZM404.55 854.7L411.678 858.331L404.55 854.7ZM382.7 876.55L386.331 883.678L382.7 876.55ZM404.55 35.3005L411.678 31.6686L404.55 35.3005ZM88 16H330V0H88V16ZM402 88V802H418V88H402ZM330 874H88V890H330V874ZM16 802V88H0V802H16ZM88 874C73.8667 874 63.7478 873.994 55.8116 873.345C47.9687 872.705 42.9645 871.477 38.9324 869.422L31.6686 883.678C38.3321 887.074 45.6763 888.571 54.5086 889.292C63.2476 890.006 74.1307 890 88 890V874ZM0 802C0 815.869 -0.00622177 826.752 0.707778 835.491C1.42941 844.324 2.92638 851.668 6.32162 858.331L20.5777 851.068C18.5233 847.036 17.2954 842.031 16.6546 834.188C16.0062 826.252 16 816.133 16 802H0ZM38.9324 869.422C31.0296 865.396 24.6044 858.97 20.5777 851.068L6.32162 858.331C11.8823 869.245 20.7551 878.118 31.6686 883.678L38.9324 869.422ZM402 802C402 816.133 401.994 826.252 401.345 834.188C400.705 842.031 399.477 847.036 397.422 851.068L411.678 858.331C415.074 851.668 416.571 844.324 417.292 835.491C418.006 826.752 418 815.869 418 802H402ZM330 890C343.869 890 354.752 890.006 363.491 889.292C372.324 888.571 379.668 887.074 386.331 883.678L379.068 869.422C375.036 871.477 370.031 872.705 362.188 873.345C354.252 873.994 344.133 874 330 874V890ZM397.422 851.068C393.396 858.97 386.97 865.396 379.068 869.422L386.331 883.678C397.245 878.118 406.118 869.245 411.678 858.331L397.422 851.068ZM330 16C344.133 16 354.252 16.0062 362.188 16.6546C370.031 17.2954 375.036 18.5233 379.068 20.5777L386.331 6.32162C379.668 2.92638 372.324 1.42941 363.491 0.707778C354.752 -0.00622177 343.869 0 330 0V16ZM418 88C418 74.1307 418.006 63.2476 417.292 54.5086C416.571 45.6763 415.074 38.3321 411.678 31.6686L397.422 38.9324C399.477 42.9644 400.705 47.9687 401.345 55.8116C401.994 63.7478 402 73.8667 402 88H418ZM379.068 20.5777C386.97 24.6044 393.396 31.0296 397.422 38.9324L411.678 31.6686C406.118 20.7551 397.245 11.8823 386.331 6.32162L379.068 20.5777ZM88 0C74.1307 0 63.2476 -0.00622177 54.5086 0.707778C45.6763 1.42941 38.3321 2.92638 31.6686 6.32162L38.9324 20.5777C42.9644 18.5233 47.9687 17.2954 55.8116 16.6546C63.7478 16.0062 73.8667 16 88 16V0ZM16 88C16 73.8667 16.0062 63.7478 16.6546 55.8116C17.2954 47.9687 18.5233 42.9644 20.5777 38.9324L6.32162 31.6686C2.92638 38.3321 1.42941 45.6763 0.707778 54.5086C-0.00622177 63.2476 0 74.1307 0 88H16ZM31.6686 6.32162C20.7551 11.8823 11.8823 20.7551 6.32162 31.6686L20.5777 38.9324C24.6044 31.0296 31.0296 24.6044 38.9324 20.5777L31.6686 6.32162Z";
-
-const CONIC_GRADIENT =
-  "conic-gradient(from 90deg, rgba(225,226,229,1) 0deg, rgba(193,196,202,0.98) 14deg, rgba(244,245,247,1) 31deg, rgba(179,183,190,0.96) 51deg, rgba(250,250,252,1) 74deg, rgba(205,208,214,0.98) 101deg, rgba(255,255,255,1) 131deg, rgba(186,190,197,0.97) 162deg, rgba(238,239,242,1) 194deg, rgba(171,175,183,0.96) 224deg, rgba(253,253,254,1) 252deg, rgba(196,200,207,0.98) 282deg, rgba(247,248,249,1) 317deg, rgba(201,205,211,0.98) 343deg, rgba(225,226,229,1) 360deg)";
+  "M113.81 20.4039C80.2907 20.4039 63.5312 20.4036 50.7286 27.0752C39.467 32.9438 30.3109 42.3083 24.5729 53.8261C18.0497 66.92 18.05 84.0608 18.05 118.3428V771.6572C18.05 805.9407 18.0497 823.08 24.5729 836.1725C30.3109 847.691 39.467 857.0574 50.7286 862.9259C63.5312 869.5961 80.2907 869.5961 113.81 869.5961H304.19C337.7093 869.5961 354.4688 869.5961 367.2714 862.9259C378.5332 857.0574 387.6893 847.691 393.4273 836.1725C399.9505 823.08 399.95 805.9407 399.95 771.6572V118.3428C399.95 84.0608 399.9505 66.92 393.4273 53.8261C387.6893 42.3083 378.5332 32.9438 367.2714 27.0752C354.4688 20.4036 337.7093 20.4039 304.19 20.4039H113.81Z";
+const CONTENT_WIDTH = 418;
+const CONTENT_HEIGHT = 890;
+const SCREEN_LEFT = 18.05;
+const SCREEN_TOP = 20.4;
+const SCREEN_WIDTH = 381.9;
+const SCREEN_HEIGHT = 849.2;
+const SCREEN_SCALE_X = SCREEN_WIDTH / CONTENT_WIDTH;
+const SCREEN_SCALE_Y = SCREEN_HEIGHT / CONTENT_HEIGHT;
 
 export function IPhoneMock({
   children,
   className,
+  isDark = true,
 }: {
   children: ReactNode;
   className?: string;
+  isDark?: boolean;
 }) {
   return (
     <div
@@ -25,76 +29,36 @@ export function IPhoneMock({
         width: 418,
         height: 890,
         position: "relative",
-        filter:
-          "drop-shadow(0 38px 70px rgba(0,0,0,0.22)) drop-shadow(0 10px 24px rgba(0,0,0,0.16))",
+        filter: "none",
       }}
     >
-      {/* Screen content — clipped to the rounded screen shape */}
+      {/* Screen content — clipped to the screen opening from the provided SVG */}
       <div
         className="absolute inset-0 overflow-hidden"
         style={{ clipPath: `path('${SCREEN_PATH}')` }}
       >
-        {children}
+        <div
+          style={{
+            position: "absolute",
+            left: SCREEN_LEFT,
+            top: SCREEN_TOP,
+            width: CONTENT_WIDTH,
+            height: CONTENT_HEIGHT,
+            transform: `scale(${SCREEN_SCALE_X}, ${SCREEN_SCALE_Y})`,
+            transformOrigin: "top left",
+          }}
+        >
+          {children}
+        </div>
       </div>
 
-      {/* Frame overlay — border gradient, Dynamic Island, rendered on top */}
-      <svg
-        className="absolute inset-0 pointer-events-none"
-        width="418"
-        height="890"
-        viewBox="0 0 418 890"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+      <img
+        src="/images/iphone-17-pro-silver.svg"
+        alt=""
         aria-hidden="true"
-      >
-        <defs>
-          <mask
-            id="iphone-frame-mask"
-            maskUnits="userSpaceOnUse"
-            x="0"
-            y="0"
-            width="418"
-            height="890"
-            fill="black"
-          >
-            <rect fill="white" width="418" height="890" />
-            <path d={SCREEN_PATH} />
-          </mask>
-          <clipPath id="iphone-gradient-clip">
-            <path d={BORDER_PATH} mask="url(#iphone-frame-mask)" />
-          </clipPath>
-        </defs>
-
-        {/* Dynamic Island */}
-        <rect x="162" y="11" width="95" height="30" rx="15" fill="black" />
-
-        {/* Frame border — silver / white titanium base */}
-        <path d={BORDER_PATH} fill="#c7c9ce" mask="url(#iphone-frame-mask)" />
-
-        {/* Frame border — silver / white titanium conic gradient */}
-        <g
-          clipPath="url(#iphone-gradient-clip)"
-          mask="url(#iphone-frame-mask)"
-        >
-          <g transform="matrix(0.0227547 0.437 -0.201 0.0494717 209 445)">
-            <foreignObject
-              x="-1140.46"
-              y="-1140.46"
-              width="2280.93"
-              height="2280.93"
-            >
-              <div
-                style={{
-                  background: CONIC_GRADIENT,
-                  height: "100%",
-                  width: "100%",
-                  opacity: 0.94,
-                }}
-              />
-            </foreignObject>
-          </g>
-        </g>
-      </svg>
+        className="absolute inset-0 h-full w-full pointer-events-none select-none"
+        draggable={false}
+      />
     </div>
   );
 }

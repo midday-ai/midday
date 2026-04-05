@@ -33,13 +33,19 @@ import {
   ZapierMcpLogo,
   ZedMcpLogo,
 } from "@midday/app-store/logos";
+import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/cn";
+
+const IMessageLogo = () => <Icons.IMessage className="h-full w-full" />;
+const TelegramLogo = () => <Icons.Telegram className="h-full w-full" />;
 
 const logoMap: Record<string, React.ComponentType> = {
   gmail: GmailLogo,
   outlook: OutlookLogo,
   slack: SlackLogo,
+  telegram: TelegramLogo,
   whatsapp: WhatsAppLogo,
+  sendblue: IMessageLogo,
   xero: XeroLogo,
   quickbooks: QuickBooksLogo,
   fortnox: FortnoxLogo,
