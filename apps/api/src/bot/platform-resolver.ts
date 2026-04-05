@@ -2,12 +2,12 @@ import type { ConnectedResolvedConversation } from "@api/bot/conversation-identi
 import { getPlatformIdentityNotificationContext } from "@api/bot/conversation-identity";
 import { extractConnectionToken, getMessageAuthorId } from "@api/bot/linking";
 import type { BotThreadState } from "@api/bot/thread-state";
-import type { BotPlatform } from "@midday/bot";
 import { db } from "@midday/db/client";
 import {
   PlatformIdentityAlreadyLinkedToAnotherTeamError,
   PlatformIdentityAlreadyLinkedToAnotherUserError,
 } from "@midday/db/errors";
+import type { PlatformProvider } from "@midday/db/queries";
 import {
   consumePlatformLinkToken,
   createOrUpdatePlatformIdentity,
@@ -186,7 +186,7 @@ export async function resolvePlatformLinkCode(
 
 export async function resolveFromExistingIdentity(
   thread: Thread<BotThreadState>,
-  provider: BotPlatform,
+  provider: PlatformProvider,
   externalUserId: string,
   lookupOpts?: { externalTeamId?: string },
 ): Promise<ResolvedConversation | null> {
