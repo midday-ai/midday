@@ -1149,6 +1149,23 @@ const dbQueriesMock = new Proxy(
 
 mock.module("@midday/db/queries", () => dbQueriesMock);
 
+const noop = () => undefined;
+const createMockLogger = () => ({
+  info: mock(noop),
+  error: mock(noop),
+  warn: mock(noop),
+  debug: mock(noop),
+  trace: mock(noop),
+  fatal: mock(noop),
+});
+const mockLogger = createMockLogger();
+mock.module("@midday/logger", () => ({
+  logger: mockLogger,
+  default: mockLogger,
+  createLoggerWithContext: () => createMockLogger(),
+  setLogLevel: mock(noop),
+}));
+
 mock.module("@midday/cache/api-key-cache", () => ({
   apiKeyCache: {
     delete: mock(() => Promise.resolve()),

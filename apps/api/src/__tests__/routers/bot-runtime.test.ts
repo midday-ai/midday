@@ -35,8 +35,12 @@ mock.module("chat", () => ({
 
 mock.module("@midday/logger", () => ({
   createLoggerWithContext: () => ({
+    info: mock(() => undefined),
+    error: mock(() => undefined),
     warn: mock(() => undefined),
     debug: mock(() => undefined),
+    trace: mock(() => undefined),
+    fatal: mock(() => undefined),
   }),
 }));
 
