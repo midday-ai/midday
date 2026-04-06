@@ -62,7 +62,10 @@
         "SENTRY_PROJECT",
         "SENTRY_RELEASE",
         "NEXT_PUBLIC_SENTRY_DSN",
-        "GIT_COMMIT_SHA"
+        "GIT_COMMIT_SHA",
+        "NEXT_PUBLIC_WHATSAPP_NUMBER",
+        "NEXT_PUBLIC_TELEGRAM_BOT_USERNAME",
+        "NEXT_PUBLIC_SENDBLUE_NUMBER"
       ]
     },
     "start": {
