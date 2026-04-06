@@ -66,6 +66,23 @@ import type { SendblueAdapter } from "chat-adapter-sendblue";
 
 const logger = createLoggerWithContext("bot-runtime");
 
+const ALLOWED_ATTACHMENT_HOSTS = new Set([
+  "files.slack.com",
+  "api.telegram.org",
+  "lookaside.fbsbx.com",
+  "media.sendblue.co",
+]);
+
+function isSafeAttachmentUrl(raw: string): boolean {
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "https:") return false;
+    return ALLOWED_ATTACHMENT_HOSTS.has(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 const ALL_ASSISTANT_SCOPES = expandScopes(["apis.all"]) as McpContext["scopes"];
 
 type ResolvedConversation =
@@ -82,12 +99,26 @@ export function registerMiddayBotRuntime() {
   registered = true;
 
   bot.onNewMention(async (thread, message) => {
-    await thread.subscribe().catch(() => {});
-    await handleIncomingMessage(thread, message);
+    try {
+      await thread.subscribe().catch(() => {});
+      await handleIncomingMessage(thread, message);
+    } catch (error) {
+      logger.error("[bot] Unhandled error in onNewMention", {
+        error: error instanceof Error ? error.message : String(error),
+        threadId: thread?.id,
+      });
+    }
   });
 
   bot.onSubscribedMessage(async (thread, message) => {
-    await handleIncomingMessage(thread, message);
+    try {
+      await handleIncomingMessage(thread, message);
+    } catch (error) {
+      logger.error("[bot] Unhandled error in onSubscribedMessage", {
+        error: error instanceof Error ? error.message : String(error),
+        threadId: thread?.id,
+      });
+    }
   });
 
   bot.onNewMessage(/[\s\S]*/u, async (thread, message) => {
@@ -95,8 +126,15 @@ export function registerMiddayBotRuntime() {
       return;
     }
 
-    await thread.subscribe().catch(() => {});
-    await handleIncomingMessage(thread, message);
+    try {
+      await thread.subscribe().catch(() => {});
+      await handleIncomingMessage(thread, message);
+    } catch (error) {
+      logger.error("[bot] Unhandled error in onNewMessage (Slack DM)", {
+        error: error instanceof Error ? error.message : String(error),
+        threadId: thread?.id,
+      });
+    }
   });
 
   bot.onAssistantThreadStarted(async (event) => {
@@ -200,7 +238,7 @@ async function handleIncomingMessage(
     userId: user.id,
     userEmail: user.email ?? null,
     scopes: ALL_ASSISTANT_SCOPES,
-    apiUrl: process.env.MIDDAY_API_URL!,
+    apiUrl: process.env.MIDDAY_API_URL || "https://api.midday.ai",
     timezone: user.timezone ?? "UTC",
     locale: user.locale ?? "en",
     countryCode: user.team?.countryCode ?? null,
@@ -426,11 +464,9 @@ function resolveSendblueConversation(
     }),
     afterConnect: async ({ thread: t }) => {
       try {
-        const dashboardUrl =
-          process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
         await (t.adapter as SendblueAdapter).sendMediaMessage(
           t.id,
-          `${dashboardUrl}/midday-contact.vcf`,
+          "https://cdn.midday.ai/midday-contact.vcf",
         );
       } catch {
         // Contact card is best-effort
@@ -695,7 +731,7 @@ async function processIncomingAttachments(params: {
           ? await attachment.fetchData()
           : null);
 
-      if (!data && attachment.url) {
+      if (!data && attachment.url && isSafeAttachmentUrl(attachment.url)) {
         const res = await fetch(attachment.url);
         if (res.ok) {
           data = Buffer.from(await res.arrayBuffer());

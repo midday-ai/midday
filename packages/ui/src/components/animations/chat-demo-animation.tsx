@@ -239,12 +239,7 @@ const SCENARIOS: Record<ChatDemoScenario, ScenarioConfig> = {
   },
 };
 
-const STABLE_READ_RECEIPTS: Record<ChatDemoScenario, string[]> = {
-  reminder: ["Read 6:34 PM"],
-  "create-invoice": ["Read 6:35 PM", "Read 6:36 PM"],
-  "receipt-match": ["Read 6:37 PM"],
-  "latest-transactions": ["Read 6:40 PM", "Read 6:41 PM"],
-};
+const FALLBACK_READ_LABEL = `Read ${formatShortTime(new Date())}`;
 
 const MIDDAY_LOGO_PATH =
   "M21.22 4.763a13.07 13.07 0 0 1 0 8.265l-.774 2.318 2.873-2.546a10.54 10.54 0 0 0 3.333-5.771l.815-3.982 2.477.507-.815 3.982a13.07 13.07 0 0 1-4.132 7.157l-1.832 1.624 3.763-.77a10.541 10.541 0 0 0 5.773-3.332l2.696-3.04 1.892 1.677-2.696 3.04a13.07 13.07 0 0 1-7.158 4.132l-2.4.49 3.645 1.216a10.54 10.54 0 0 0 6.666 0l3.855-1.285.799 2.398-3.855 1.285a13.069 13.069 0 0 1-8.264 0l-2.32-.774 2.547 2.874a10.537 10.537 0 0 0 5.772 3.33l3.98.817-.506 2.477-3.981-.815a13.069 13.069 0 0 1-7.158-4.132l-1.622-1.83.77 3.761a10.537 10.537 0 0 0 3.33 5.772l3.04 2.696-1.677 1.891-3.04-2.696a13.066 13.066 0 0 1-4.132-7.156l-.49-2.397-1.214 3.642a10.54 10.54 0 0 0 0 6.666l1.285 3.855-2.4.8-1.285-3.855a13.069 13.069 0 0 1 0-8.265l.773-2.324-2.873 2.55a10.542 10.542 0 0 0-3.332 5.773l-.815 3.98-2.476-.508.814-3.98a13.07 13.07 0 0 1 4.132-7.157l1.83-1.625-3.761.77A10.539 10.539 0 0 0 7.3 29.603l-2.697 3.04-1.891-1.677 2.696-3.04a13.066 13.066 0 0 1 7.156-4.133l2.398-.492-3.643-1.213a10.54 10.54 0 0 0-6.666 0L.8 23.372 0 20.973l3.855-1.285a13.069 13.069 0 0 1 8.264 0l2.32.773-2.547-2.872a10.539 10.539 0 0 0-5.772-3.333l-3.98-.815.506-2.476 3.981.814a13.069 13.069 0 0 1 7.158 4.133l1.62 1.828-.767-3.76a10.537 10.537 0 0 0-3.332-5.771l-3.04-2.696 1.677-1.894 3.04 2.696a13.069 13.069 0 0 1 4.133 7.158l.49 2.399 1.215-3.644a10.54 10.54 0 0 0 0-6.666l-1.284-3.854 2.398-.8 1.285 3.855ZM20 16.957a3.953 3.953 0 0 0-3.951 3.951l.021.404a3.951 3.951 0 0 0 7.86 0l.02-.404-.02-.404a3.952 3.952 0 0 0-3.526-3.525L20 16.957Z";
@@ -261,6 +256,49 @@ const SF_FONT =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif";
 const SF_DISPLAY =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif";
+
+function formatShortTime(d: Date): string {
+  return d.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function formatClockTime(d: Date): string {
+  return d
+    .toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+    .replace(/\s?[APap][Mm]/, "");
+}
+
+function formatLockDate(d: Date): string {
+  return d.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function useClientNow(): Date | null {
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    setNow(new Date());
+  }, []);
+  return now;
+}
+
+function buildReadReceipts(): Record<ChatDemoScenario, string[]> {
+  const now = new Date();
+  const fmt = (offsetMin: number) => {
+    const d = new Date(now.getTime() - offsetMin * 60_000);
+    return `Read ${formatShortTime(d)}`;
+  };
+  return {
+    reminder: [fmt(7)],
+    "create-invoice": [fmt(6), fmt(5)],
+    "receipt-match": [fmt(4)],
+    "latest-transactions": [fmt(1), fmt(0)],
+  };
+}
 const HIDE_SCROLLBAR_CSS = `
   [data-chat-scroll="true"]::-webkit-scrollbar {
     display: none;
@@ -292,6 +330,7 @@ function buildGlobalBeats(): DemoBeat[] {
   const beats: DemoBeat[] = [];
   const scenarioCount = SCENARIO_ORDER.length;
   let globalMessageId = 0;
+  const readReceiptMap = buildReadReceipts();
 
   for (let si = 0; si < scenarioCount; si++) {
     const scenarioId = SCENARIO_ORDER[si]!;
@@ -300,7 +339,7 @@ function buildGlobalBeats(): DemoBeat[] {
     const notificationText =
       config.notificationText ??
       "Invoice #1042 is 14 days overdue — $2,400 from Acme Corp. Want me to send a reminder?";
-    const readLabels = STABLE_READ_RECEIPTS[scenarioId];
+    const readLabels = readReceiptMap[scenarioId];
     let userMsgCount = 0;
 
     const localBeats: Array<{
@@ -374,7 +413,7 @@ function buildGlobalBeats(): DemoBeat[] {
           const label =
             readLabels[userMsgCount] ??
             readLabels[readLabels.length - 1] ??
-            "Read 6:34 PM";
+            FALLBACK_READ_LABEL;
           userMsgCount++;
           snap(HOLD_CHAT_OPEN, { lockOpacity: 0, chatOpacity: 1 });
           currentReceipts[msgId] = label;
@@ -406,7 +445,7 @@ function buildGlobalBeats(): DemoBeat[] {
           const label =
             readLabels[userMsgCount] ??
             readLabels[readLabels.length - 1] ??
-            "Read 6:34 PM";
+            FALLBACK_READ_LABEL;
           userMsgCount++;
           currentReceipts[msgId] = label;
           snap(HOLD_READ_RECEIPT);
@@ -433,7 +472,7 @@ function buildGlobalBeats(): DemoBeat[] {
           const label =
             readLabels[userMsgCount] ??
             readLabels[readLabels.length - 1] ??
-            "Read 6:34 PM";
+            FALLBACK_READ_LABEL;
           userMsgCount++;
           currentReceipts[msgId] = label;
           snap(HOLD_READ_RECEIPT);
@@ -460,7 +499,7 @@ function buildGlobalBeats(): DemoBeat[] {
           const label =
             readLabels[userMsgCount] ??
             readLabels[readLabels.length - 1] ??
-            "Read 6:34 PM";
+            FALLBACK_READ_LABEL;
           userMsgCount++;
           currentReceipts[msgId] = label;
           snap(HOLD_READ_RECEIPT);
@@ -794,6 +833,7 @@ function LiquidGlass({
 /* ------------------------------------------------------------------ */
 
 function StatusBar({ dark }: { dark?: boolean }) {
+  const now = useClientNow();
   const color = dark ? "#000" : "#fff";
 
   return (
@@ -810,7 +850,7 @@ function StatusBar({ dark }: { dark?: boolean }) {
           letterSpacing: 0.2,
         }}
       >
-        9:41 AM
+        {now ? formatShortTime(now) : "9:41"}
       </span>
 
       <svg
@@ -877,12 +917,221 @@ function HomeIndicator({ dark }: { dark?: boolean }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Lock screen clock — auto-sized glass digits                        */
+/* ------------------------------------------------------------------ */
+
+const CLOCK_MAX_WIDTH = 390;
+
+function LockScreenClock({ timeStr }: { timeStr: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [fontSize, setFontSize] = useState(168);
+  const letterSpacing = Math.round(fontSize * -0.042);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const measure = el.firstElementChild as HTMLElement | null;
+    if (!measure) return;
+    const natural = measure.scrollWidth;
+    if (natural > CLOCK_MAX_WIDTH) {
+      setFontSize((prev) =>
+        Math.max(100, Math.floor(prev * (CLOCK_MAX_WIDTH / natural))),
+      );
+    } else if (natural < CLOCK_MAX_WIDTH * 0.85 && fontSize < 168) {
+      setFontSize((prev) => Math.min(168, prev + 4));
+    }
+  }, [timeStr, fontSize]);
+
+  const shared: React.CSSProperties = {
+    fontSize,
+    fontWeight: 700,
+    fontFamily: SF_DISPLAY,
+    lineHeight: 0.86,
+    letterSpacing,
+    textAlign: "center",
+    fontFeatureSettings: '"tnum"',
+    whiteSpace: "nowrap",
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        position: "relative",
+        marginTop: -4,
+        maxWidth: CLOCK_MAX_WIDTH,
+        width: "100%",
+        alignSelf: "center",
+      }}
+    >
+      {/* 1 · Soft ambient glow */}
+      <div
+        style={{
+          ...shared,
+          position: "absolute",
+          inset: 0,
+          color: "rgba(255,255,255,0.09)",
+          filter: "blur(20px)",
+          transform: "translateY(1px)",
+          pointerEvents: "none",
+        }}
+      >
+        {timeStr}
+      </div>
+
+      {/* 2 · Glass body — radial highlight suggesting depth + curvature */}
+      <div
+        style={{
+          ...shared,
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 120% 80% at 50% 28%, rgba(255,255,255,0.48) 0%, rgba(220,235,255,0.14) 50%, rgba(200,215,240,0.02) 100%)",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+          opacity: 0.6,
+          pointerEvents: "none",
+        }}
+      >
+        {timeStr}
+      </div>
+
+      {/* 3 · Base translucent fill with inner shadow */}
+      <div
+        style={{
+          ...shared,
+          position: "relative",
+          color: "rgba(235,242,255,0.30)",
+          textShadow: [
+            "0 1px 0 rgba(255,255,255,0.20)",
+            "0 -1px 0 rgba(255,255,255,0.08)",
+            "0 2px 6px rgba(0,0,0,0.12)",
+            "0 0 28px rgba(255,255,255,0.04)",
+          ].join(", "),
+          WebkitTextStroke: "0.5px rgba(255,255,255,0.14)",
+        }}
+      >
+        {timeStr}
+      </div>
+
+      {/* 4 · Top-to-bottom refraction gradient */}
+      <div
+        style={{
+          ...shared,
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(245,250,255,0.22) 40%, rgba(225,235,250,0.02) 100%)",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+          opacity: 0.68,
+          mixBlendMode: "screen",
+          pointerEvents: "none",
+        }}
+      >
+        {timeStr}
+      </div>
+
+      {/* 5 · Sharp inner top-edge light — glass surface catch */}
+      <div
+        style={{
+          ...shared,
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.3) 8%, rgba(255,255,255,0) 20%)",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+          opacity: 0.22,
+          pointerEvents: "none",
+        }}
+      >
+        {timeStr}
+      </div>
+
+      {/* 6 · Specular edge highlight */}
+      <div
+        style={{
+          ...shared,
+          position: "absolute",
+          inset: 0,
+          color: "rgba(255,255,255,0.16)",
+          mixBlendMode: "color-dodge",
+          opacity: 0.4,
+          pointerEvents: "none",
+        }}
+      >
+        {timeStr}
+      </div>
+
+      {/* 7 · Upper-left catch light edge — masked stroke */}
+      <div
+        style={{
+          ...shared,
+          position: "absolute",
+          inset: 0,
+          color: "transparent",
+          WebkitTextStroke: "0.7px rgba(255,255,255,0.44)",
+          maskImage:
+            "linear-gradient(145deg, white 0%, rgba(255,255,255,0.45) 30%, rgba(255,255,255,0.08) 55%, transparent 70%)",
+          WebkitMaskImage:
+            "linear-gradient(145deg, white 0%, rgba(255,255,255,0.45) 30%, rgba(255,255,255,0.08) 55%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      >
+        {timeStr}
+      </div>
+
+      {/* 8 · Bottom-right rim shadow edge — masked stroke */}
+      <div
+        style={{
+          ...shared,
+          position: "absolute",
+          inset: 0,
+          color: "transparent",
+          WebkitTextStroke: "0.5px rgba(0,0,0,0.14)",
+          maskImage:
+            "linear-gradient(325deg, white 0%, rgba(255,255,255,0.3) 25%, transparent 50%)",
+          WebkitMaskImage:
+            "linear-gradient(325deg, white 0%, rgba(255,255,255,0.3) 25%, transparent 50%)",
+          pointerEvents: "none",
+        }}
+      >
+        {timeStr}
+      </div>
+
+      {/* 9 · Bottom-edge refraction — thin light line at base */}
+      <div
+        style={{
+          ...shared,
+          position: "absolute",
+          inset: 0,
+          color: "transparent",
+          WebkitTextStroke: "0.3px rgba(255,255,255,0.22)",
+          maskImage:
+            "linear-gradient(0deg, white 0%, rgba(255,255,255,0.3) 12%, transparent 25%)",
+          WebkitMaskImage:
+            "linear-gradient(0deg, white 0%, rgba(255,255,255,0.3) 12%, transparent 25%)",
+          pointerEvents: "none",
+        }}
+      >
+        {timeStr}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Lock screen — iOS 26 Liquid Glass                                  */
 /* ------------------------------------------------------------------ */
 
 function LockScreen() {
-  const timeStr = "9:41";
-  const dateStr = "Sunday, April 5";
+  const now = useClientNow();
+  const timeStr = now ? formatClockTime(now) : "09:41";
+  const dateStr = now ? formatLockDate(now) : "Sunday, April 5";
 
   return (
     <motion.div
@@ -892,7 +1141,7 @@ function LockScreen() {
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <img
-        src="https://cdn.midday.ai/chat-lock-wallpaper.jpg"
+        src="https://cdn.midday.ai/background-remote-v7.png"
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
         style={{ zIndex: 0 }}
@@ -928,91 +1177,7 @@ function LockScreen() {
           {dateStr}
         </div>
 
-        <div
-          style={{
-            position: "relative",
-            marginTop: -6,
-            minWidth: 352,
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              fontSize: 188,
-              fontWeight: 200,
-              color: "rgba(235,244,255,0.24)",
-              fontFamily: SF_DISPLAY,
-              lineHeight: 0.86,
-              letterSpacing: -12,
-              textAlign: "center",
-              filter: "blur(6px)",
-              transform: "translateY(1px)",
-              pointerEvents: "none",
-            }}
-          >
-            {timeStr}
-          </div>
-          <div
-            style={{
-              position: "relative",
-              fontSize: 188,
-              fontWeight: 200,
-              color: "rgba(245,249,255,0.52)",
-              fontFamily: SF_DISPLAY,
-              lineHeight: 0.86,
-              letterSpacing: -12,
-              textAlign: "center",
-              textShadow:
-                "0 1px 0 rgba(255,255,255,0.32), 0 0 18px rgba(255,255,255,0.07)",
-              WebkitTextStroke: "0.45px rgba(255,255,255,0.3)",
-            }}
-          >
-            {timeStr}
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background:
-                "linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(232,241,255,0.42) 48%, rgba(210,225,255,0.12) 100%)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-              fontSize: 188,
-              fontWeight: 200,
-              fontFamily: SF_DISPLAY,
-              lineHeight: 0.86,
-              letterSpacing: -12,
-              textAlign: "center",
-              opacity: 0.84,
-              mixBlendMode: "screen",
-              pointerEvents: "none",
-            }}
-          >
-            {timeStr}
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              color: "rgba(255,255,255,0.24)",
-              fontSize: 188,
-              fontWeight: 200,
-              fontFamily: SF_DISPLAY,
-              lineHeight: 0.86,
-              letterSpacing: -12,
-              textAlign: "center",
-              mixBlendMode: "color-dodge",
-              opacity: 0.5,
-              pointerEvents: "none",
-            }}
-          >
-            {timeStr}
-          </div>
-        </div>
+        <LockScreenClock timeStr={timeStr} />
       </div>
 
       {/* iOS 26 bottom controls — flashlight & camera (Liquid Glass circles) */}
