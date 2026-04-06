@@ -1324,6 +1324,7 @@ function LockScreen() {
             color: "rgba(255,255,255,0.94)",
             fontFamily: SF_FONT,
             letterSpacing: -0.35,
+            marginBottom: 10,
             textShadow: "0 1px 10px rgba(255,255,255,0.08)",
           }}
         >

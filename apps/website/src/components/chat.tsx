@@ -153,25 +153,20 @@ function DemoSetupCta({ className }: { className?: string }) {
         mass: 0.72,
       }}
     >
-      <div className="bg-[rgba(247,247,247,0.98)] p-4 backdrop-blur-[18px] dark:bg-[rgba(19,19,19,0.98)]">
-        <div className="space-y-3">
-          <div className="space-y-1.5">
-            <h3 className="font-sans text-sm font-medium text-foreground">
-              Set up your company
-            </h3>
-            <p className="font-sans text-sm leading-relaxed text-muted-foreground">
-              Start with chat, invoices, receipts, and notifications in minutes.
-            </p>
-          </div>
-
-          <a
-            href="https://app.midday.ai"
-            className="inline-flex items-center justify-center bg-foreground px-4 py-2 font-sans text-sm font-medium text-background transition-opacity hover:opacity-90"
-          >
-            Get started
-          </a>
+      <a
+        href="https://app.midday.ai"
+        className="group block bg-[rgba(247,247,247,0.98)] p-4 backdrop-blur-[18px] transition-all duration-200 hover:bg-[rgba(247,247,247,1)] dark:bg-[rgba(19,19,19,0.98)] dark:hover:bg-[rgba(19,19,19,1)]"
+      >
+        <div className="space-y-1.5">
+          <h3 className="inline-flex items-center gap-1.5 font-sans text-sm font-medium text-foreground">
+            <span>Set up your company</span>
+            <Icons.ArrowOutward className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </h3>
+          <p className="font-sans text-sm leading-relaxed text-muted-foreground">
+            Start with chat, invoices, receipts, and notifications in minutes.
+          </p>
         </div>
-      </div>
+      </a>
     </motion.div>
   );
 }
@@ -503,7 +498,7 @@ export function Chat() {
                     <PhoneMock
                       isDark={isDark}
                       scenario={activeScenario}
-                      playing={demoActive || !hasExitedDemo}
+                      playing={demoActive}
                     />
                   </div>
                 </div>
