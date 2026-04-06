@@ -56,7 +56,7 @@ export function ConnectIMessage({ showTrigger = true }: ConnectIMessageProps) {
   const message = linkCode ? `Connect to Midday: ${linkCode}` : "";
   const smsUrl =
     sendblueNumber && message
-      ? `sms:${sendblueNumber}&body=${encodeURIComponent(message)}`
+      ? `sms:${sendblueNumber}?body=${encodeURIComponent(message)}`
       : "";
   const isReady = Boolean(smsUrl);
 
