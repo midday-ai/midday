@@ -95,11 +95,15 @@ export const upsertTrackerEntriesSchema = z.object({
         "Unique identifier of the user assigned to this tracker entry. If not provided, will use the authenticated user",
       example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     }),
-  projectId: z.string().describe("Project ID to track time against").openapi({
-    description:
-      "Unique identifier of the project associated with this tracker entry",
-    example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
-  }),
+  projectId: z
+    .string()
+    .uuid()
+    .describe("Project ID to track time against")
+    .openapi({
+      description:
+        "Unique identifier of the project associated with this tracker entry",
+      example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
+    }),
   description: z
     .string()
     .optional()

@@ -4,10 +4,13 @@ import { download, signedUrl } from "@midday/supabase/storage";
 import {
   format,
   getQuarter,
+  isValid,
+  parseISO,
   startOfMonth,
   startOfQuarter,
   startOfYear,
 } from "date-fns";
+import { z } from "zod";
 
 export interface DateContext {
   date: string;
@@ -226,3 +229,36 @@ export async function streamToResource(
     resource: { uri, mimeType, blob },
   };
 }
+
+const HAS_TZ = /(?:Z|[+-]\d{2}:?\d{2})$/;
+
+/**
+ * Accept any ISO 8601-ish datetime string and return a canonical
+ * UTC ISO string (always ending in Z).  Strings without timezone
+ * info are assumed to be UTC — we append `Z` *before* parsing so
+ * `date-fns/parseISO` doesn't interpret them as local time.
+ */
+export function normalizeDateTime(value: string): string {
+  let trimmed = value.trim();
+  if (!HAS_TZ.test(trimmed)) {
+    trimmed = `${trimmed}Z`;
+  }
+  const parsed = parseISO(trimmed);
+  if (!isValid(parsed)) {
+    throw new Error(
+      `Invalid datetime: "${value}". Use ISO 8601 format, e.g. 2024-04-15T09:00:00Z`,
+    );
+  }
+  return parsed.toISOString();
+}
+
+/**
+ * Lenient Zod schema for MCP tool datetime inputs.
+ * Accepts any ISO 8601 string; the handler should run
+ * `normalizeDateTime()` before passing to the DB layer.
+ */
+export const lenientDateTimeSchema = z
+  .string()
+  .describe(
+    "ISO 8601 datetime (e.g. 2024-04-15T09:00:00Z). Timezone-naive strings are treated as UTC.",
+  );

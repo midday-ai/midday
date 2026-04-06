@@ -37,7 +37,12 @@ import {
   type RegisterTools,
   WRITE_ANNOTATIONS,
 } from "../types";
-import { truncateListResponse, withErrorHandling } from "../utils";
+import {
+  lenientDateTimeSchema,
+  normalizeDateTime,
+  truncateListResponse,
+  withErrorHandling,
+} from "../utils";
 
 export const registerTrackerTools: RegisterTools = (server, ctx) => {
   const { db, teamId, userId } = ctx;
@@ -484,12 +489,14 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "Create Tracker Entry",
         description:
-          "Create a manual time tracking entry. Requires a project ID, at least one date (YYYY-MM-DD), start/stop times (ISO 8601 datetime), and duration in seconds. Optionally assign to a team member.",
+          "Create a manual time tracking entry. Requires a project ID, at least one date (YYYY-MM-DD), start/stop times (ISO 8601 datetime, e.g. 2024-04-15T09:00:00Z), and duration in seconds. Optionally assign to a team member.",
         inputSchema: {
           projectId: upsertTrackerEntriesSchema.shape.projectId,
           dates: upsertTrackerEntriesSchema.shape.dates,
-          start: upsertTrackerEntriesSchema.shape.start,
-          stop: upsertTrackerEntriesSchema.shape.stop,
+          start: lenientDateTimeSchema.describe(
+            "Start time (ISO 8601 datetime)",
+          ),
+          stop: lenientDateTimeSchema.describe("Stop time (ISO 8601 datetime)"),
           duration: upsertTrackerEntriesSchema.shape.duration,
           description: upsertTrackerEntriesSchema.shape.description,
           assignedId: upsertTrackerEntriesSchema.shape.assignedId,
@@ -502,8 +509,8 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             teamId,
             projectId: params.projectId,
             dates: params.dates,
-            start: params.start,
-            stop: params.stop,
+            start: normalizeDateTime(params.start),
+            stop: normalizeDateTime(params.stop),
             duration: params.duration,
             description: params.description,
             assignedId: params.assignedId ?? userId,
@@ -541,8 +548,12 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           id: z.string().uuid().describe("The ID of the entry to update"),
           projectId: upsertTrackerEntriesSchema.shape.projectId.optional(),
-          start: upsertTrackerEntriesSchema.shape.start.optional(),
-          stop: upsertTrackerEntriesSchema.shape.stop.optional(),
+          start: lenientDateTimeSchema
+            .optional()
+            .describe("Start time (ISO 8601 datetime)"),
+          stop: lenientDateTimeSchema
+            .optional()
+            .describe("Stop time (ISO 8601 datetime)"),
           duration: upsertTrackerEntriesSchema.shape.duration.optional(),
           description: upsertTrackerEntriesSchema.shape.description,
           assignedId: upsertTrackerEntriesSchema.shape.assignedId,
@@ -564,8 +575,12 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           }
 
           const projectId = params.projectId ?? existing.projectId;
-          const start = params.start ?? existing.start;
-          const stop = params.stop ?? existing.stop;
+          const start = params.start
+            ? normalizeDateTime(params.start)
+            : existing.start;
+          const stop = params.stop
+            ? normalizeDateTime(params.stop)
+            : existing.stop;
 
           if (!projectId || !start || !stop) {
             return {
@@ -677,7 +692,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           projectId: startTimerSchema.shape.projectId,
           description: startTimerSchema.shape.description,
           assignedId: startTimerSchema.shape.assignedId,
-          start: startTimerSchema.shape.start,
+          start: lenientDateTimeSchema
+            .optional()
+            .describe("Start time (ISO 8601). Defaults to now."),
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -688,7 +705,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             projectId: params.projectId,
             description: params.description,
             assignedId: params.assignedId ?? userId,
-            start: params.start,
+            start: params.start ? normalizeDateTime(params.start) : undefined,
           });
 
           const clean = sanitize(mcpTrackerEntrySchema, result);
@@ -723,7 +740,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           entryId: stopTimerSchema.shape.entryId,
           assignedId: stopTimerSchema.shape.assignedId,
-          stop: stopTimerSchema.shape.stop,
+          stop: lenientDateTimeSchema
+            .optional()
+            .describe("Stop time (ISO 8601). Defaults to now."),
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -733,7 +752,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             teamId,
             entryId: params.entryId,
             assignedId: params.assignedId ?? userId,
-            stop: params.stop,
+            stop: params.stop ? normalizeDateTime(params.stop) : undefined,
           });
 
           const clean = sanitize(mcpTrackerEntrySchema, result);
