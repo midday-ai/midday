@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from "bun:test";
 import { createCallerFactory } from "../../trpc/init";
 import { billingRouter } from "../../trpc/routers/billing";
 import { createTestContext } from "../helpers/test-context";
-import { mocks } from "../setup";
+import { mockDb, mocks } from "../setup";
 
 const createCaller = createCallerFactory(billingRouter);
 
@@ -36,6 +36,15 @@ describe("tRPC: billing.cancelSubscription", () => {
     mocks.polarSubscriptionsList.mockReset();
     mocks.polarSubscriptionsUpdate.mockReset();
     mocks.updateTeam.mockReset();
+    mockDb.query.users.findFirst.mockReset();
+    mockDb.query.users.findFirst.mockImplementation(() =>
+      Promise.resolve({
+        id: "test-user-id",
+        teamId: "test-team-id",
+        email: "test@example.com",
+        usersOnTeams: [{ id: "membership-1", teamId: "test-team-id" }],
+      }),
+    );
     mocks.polarSubscriptionsUpdate.mockImplementation(() =>
       Promise.resolve({}),
     );
