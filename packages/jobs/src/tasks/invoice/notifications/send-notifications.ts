@@ -1,5 +1,4 @@
 import { getDb } from "@jobs/init";
-import { sendToProviders } from "@midday/bot";
 import { Notifications } from "@midday/notifications";
 import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
@@ -33,11 +32,12 @@ export const sendInvoiceNotifications = schemaTask({
             sendEmail: true,
           },
         );
-        await sendToProviders(db, teamId, "invoice_paid", {
-          invoiceId,
-          invoiceNumber,
-          customerName,
-        });
+        // TODO: migrating to worker
+        // await sendToProviders(db, teamId, "invoice_paid", {
+        //   invoiceId,
+        //   invoiceNumber,
+        //   customerName,
+        // });
         break;
       }
       case "overdue": {
@@ -54,11 +54,12 @@ export const sendInvoiceNotifications = schemaTask({
             sendEmail: true,
           },
         );
-        await sendToProviders(db, teamId, "invoice_overdue", {
-          invoiceId,
-          invoiceNumber,
-          customerName,
-        });
+        // TODO: migrating to worker
+        // await sendToProviders(db, teamId, "invoice_overdue", {
+        //   invoiceId,
+        //   invoiceNumber,
+        //   customerName,
+        // });
         break;
       }
     }

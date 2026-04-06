@@ -1,5 +1,4 @@
 import { getDb } from "@jobs/init";
-import { sendToProviders } from "@midday/bot";
 import { Notifications } from "@midday/notifications";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
@@ -54,9 +53,10 @@ export const transactionNotifications = schemaTask({
             sendEmail: true,
           },
         );
-        await sendToProviders(db, teamId, "transaction", {
-          transactions,
-        });
+        // TODO: migrating to worker
+        // await sendToProviders(db, teamId, "transaction", {
+        //   transactions,
+        // });
       }
     } catch (error) {
       await logger.error("Transactions notification", { error });

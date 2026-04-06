@@ -2,7 +2,9 @@ import type { Message } from "chat";
 
 type SupportedLinkPlatform = "slack" | "telegram" | "whatsapp" | "sendblue";
 
-const PLATFORM_LINK_CODE_PATTERN = /^[A-Za-z0-9]{8}$/;
+const LINK_CODE_CHARS = /^[A-Za-z0-9]{8}$/;
+const MIXED_ALPHANUMERIC = /^(?=.*[0-9])(?=.*[A-Za-z])[A-Za-z0-9]{8}$/;
+const CONNECT_PREFIX = /^connect\s+to\s+midday\s*:\s*/i;
 
 export function getMessageAuthorId(message: Message) {
   const userId = message.author?.userId;
@@ -22,13 +24,14 @@ export function extractConnectionToken(
   if (platform === "telegram") {
     const match = value.match(/^\/start(?:@\w+)?\s+(.+)$/i);
     const token = match?.[1]?.trim();
-    return token && PLATFORM_LINK_CODE_PATTERN.test(token) ? token : null;
+    return token && LINK_CODE_CHARS.test(token) ? token : null;
   }
 
-  const parts = value.split(/[:\s]+/).filter(Boolean);
-  const candidate = parts[parts.length - 1];
+  const prefixMatch = value.match(CONNECT_PREFIX);
+  if (prefixMatch) {
+    const candidate = value.slice(prefixMatch[0].length).trim();
+    return LINK_CODE_CHARS.test(candidate) ? candidate : null;
+  }
 
-  return candidate && PLATFORM_LINK_CODE_PATTERN.test(candidate)
-    ? candidate
-    : null;
+  return MIXED_ALPHANUMERIC.test(value) ? value : null;
 }

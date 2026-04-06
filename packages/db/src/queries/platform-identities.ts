@@ -1,5 +1,5 @@
 import { and, eq, gt, isNull, sql } from "drizzle-orm";
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
 import type { Database } from "../client";
 import {
   PlatformIdentityAlreadyLinkedToAnotherTeamError,
@@ -216,6 +216,23 @@ export async function deletePlatformIdentitiesForTeam(
     .returning();
 }
 
+const LINK_CODE_ALPHABET =
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const generateRawCode = customAlphabet(LINK_CODE_ALPHABET, 8);
+
+function generateLinkCode(): string {
+  for (let i = 0; i < 10; i++) {
+    const code = generateRawCode();
+    if (/[0-9]/.test(code) && /[A-Za-z]/.test(code)) {
+      return code;
+    }
+  }
+  const chars = Array.from(generateRawCode());
+  chars[0] = LINK_CODE_ALPHABET.charAt(Math.floor(Math.random() * 10));
+  chars[1] = LINK_CODE_ALPHABET.charAt(10 + Math.floor(Math.random() * 52));
+  return chars.join("");
+}
+
 export async function createPlatformLinkToken(
   db: Database,
   params: {
@@ -226,7 +243,7 @@ export async function createPlatformLinkToken(
     metadata?: Record<string, unknown>;
   },
 ) {
-  const code = nanoid(8);
+  const code = generateLinkCode();
   const expiresAt =
     params.expiresAt ??
     new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();

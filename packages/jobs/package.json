@@ -16,7 +16,6 @@
   "dependencies": {
     "@ai-sdk/google": "catalog:",
     "@fast-csv/format": "catalog:",
-    "@midday/bot": "workspace:*",
     "@midday/db": "workspace:*",
     "@midday/email": "workspace:*",
     "@midday/encryption": "workspace:*",
