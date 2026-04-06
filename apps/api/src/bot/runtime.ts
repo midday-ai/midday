@@ -23,6 +23,7 @@ import {
 } from "@api/bot/thread-state";
 import { streamMiddayAssistant } from "@api/chat/assistant-runtime";
 import { buildSystemPrompt } from "@api/chat/prompt";
+import { stripFileAndImageParts } from "@api/chat/utils";
 import type { McpContext } from "@api/mcp/types";
 import { expandScopes } from "@api/utils/scopes";
 import type { SlackAdapter } from "@chat-adapter/slack";
@@ -227,12 +228,7 @@ async function handleIncomingMessage(
     includeNames: platform === "slack",
   });
 
-  for (const msg of modelMessages) {
-    if (msg.role !== "user" || !Array.isArray(msg.content)) continue;
-    msg.content = msg.content.filter(
-      (part) => part.type !== "image" && part.type !== "file",
-    );
-  }
+  stripFileAndImageParts(modelMessages as Array<ModelMessage>);
 
   const result = await streamMiddayAssistant({
     mcpCtx,

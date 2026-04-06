@@ -1,7 +1,11 @@
 import { streamMiddayAssistant } from "@api/chat/assistant-runtime";
 import type { MentionedApp } from "@api/chat/prompt";
 import { buildSystemPrompt } from "@api/chat/prompt";
-import { decodeDataUrl, writeChatTitle } from "@api/chat/utils";
+import {
+  decodeDataUrl,
+  stripFileAndImageParts,
+  writeChatTitle,
+} from "@api/chat/utils";
 import type { McpContext } from "@api/mcp/types";
 import type { Context } from "@api/rest/types";
 import { getGeoContext } from "@api/utils/geo";
@@ -131,6 +135,7 @@ app.post("/", async (c) => {
       }) + getPlatformInstructions("dashboard");
 
     const modelMessages = await convertToModelMessages(uiMessages);
+    stripFileAndImageParts(modelMessages);
 
     const rateLimitInfo = c.get("rateLimit");
 
