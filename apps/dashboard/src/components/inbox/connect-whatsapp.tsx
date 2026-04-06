@@ -127,11 +127,7 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
           >
             <div className="flex items-center space-x-2">
               <Icons.WhatsApp className="size-5 text-[#25D366]" />
-              <span>
-                {connections.length > 0
-                  ? `WhatsApp (${connections.length} connected)`
-                  : "Connect WhatsApp"}
-              </span>
+              <span>Connect WhatsApp</span>
             </div>
           </Button>
         </DialogTrigger>

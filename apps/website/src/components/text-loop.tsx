@@ -2,11 +2,11 @@
 
 import { cn } from "@midday/ui/cn";
 import {
-  type AnimatePresenceProps,
   AnimatePresence,
+  type AnimatePresenceProps,
+  motion,
   type Transition,
   type Variants,
-  motion,
 } from "motion/react";
 import { Children, useEffect, useState } from "react";
 

@@ -1,11 +1,7 @@
 "use client";
 
 import { cn } from "@midday/ui/cn";
-import {
-  AnimatePresence,
-  type Transition,
-  motion,
-} from "motion/react";
+import { AnimatePresence, motion, type Transition } from "motion/react";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
 export type TextMorphProps = {
@@ -40,7 +36,9 @@ export function TextMorph({
       return [children];
     }
 
-    const labels = Array.isArray(preserveSpace) ? preserveSpace : [preserveSpace];
+    const labels = Array.isArray(preserveSpace)
+      ? preserveSpace
+      : [preserveSpace];
     return Array.from(new Set([...labels, children]));
   }, [children, preserveSpace]);
 
@@ -50,8 +48,9 @@ export function TextMorph({
     }
 
     const nextWidth =
-      measureRefs.current[labelsToMeasure.indexOf(children)]?.getBoundingClientRect()
-        .width ?? 0;
+      measureRefs.current[
+        labelsToMeasure.indexOf(children)
+      ]?.getBoundingClientRect().width ?? 0;
 
     if (nextWidth > 0) {
       setCurrentWidth(nextWidth);
@@ -67,7 +66,10 @@ export function TextMorph({
 
   return (
     <Component
-      className={cn("relative inline-flex justify-center whitespace-nowrap", className)}
+      className={cn(
+        "relative inline-flex justify-center whitespace-nowrap",
+        className,
+      )}
       aria-label={children}
       style={{
         ...style,

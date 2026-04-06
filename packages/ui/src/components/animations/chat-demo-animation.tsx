@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -192,7 +192,7 @@ const SCENARIOS: Record<ChatDemoScenario, ScenarioConfig> = {
           title: "IMG_4821.HEIC",
           subtitle: "Hemköp receipt",
           amount: "SEK 1,018.35",
-          imageSrc: "/images/chat-receipt-hemkop.png",
+          imageSrc: "https://cdn.midday.ai/chat-receipt-hemkop.png",
         },
         delayAfterMs: 700,
       },
@@ -277,8 +277,6 @@ function useIsDarkTheme() {
 
   return mounted && resolvedTheme === "dark";
 }
-
-
 
 const HOLD_LOCK_SCREEN = 200;
 const HOLD_NOTIFICATION_ENTER = 1800;
@@ -415,6 +413,8 @@ function buildGlobalBeats(): DemoBeat[] {
         }
       }
     } else {
+      snap(HOLD_CHAT_OPEN);
+
       const firstStep = config.steps[0];
 
       if (firstStep) {
@@ -892,7 +892,7 @@ function LockScreen() {
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <img
-        src="/images/chat-lock-wallpaper.jpg"
+        src="https://cdn.midday.ai/chat-lock-wallpaper.jpg"
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
         style={{ zIndex: 0 }}
@@ -2250,16 +2250,22 @@ function ChatView({
 export function ChatIMessageAnimation({
   scenario = "reminder" as ChatDemoScenario,
   playing = false,
+  skipLockScreen = false,
+  onComplete,
 }: {
   scenario?: ChatDemoScenario;
   playing?: boolean;
+  skipLockScreen?: boolean;
+  onComplete?: () => void;
 }) {
   const allBeats = useMemo(() => buildGlobalBeats(), []);
 
-  const scenarioBeats = useMemo(
-    () => allBeats.filter((b) => b.scenario === scenario),
-    [allBeats, scenario],
-  );
+  const scenarioBeats = useMemo(() => {
+    const beats = allBeats.filter((b) => b.scenario === scenario);
+    if (!skipLockScreen) return beats;
+    const firstChatIdx = beats.findIndex((b) => b.chatOpacity > 0);
+    return firstChatIdx > 0 ? beats.slice(firstChatIdx) : beats;
+  }, [allBeats, scenario, skipLockScreen]);
 
   const [beatIndex, setBeatIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -2295,6 +2301,7 @@ export function ChatIMessageAnimation({
       idx++;
       if (idx >= scenarioBeats.length) {
         timerRef.current = null;
+        onComplete?.();
         return;
       }
       setBeatIndex(idx);
@@ -2309,9 +2316,10 @@ export function ChatIMessageAnimation({
         timerRef.current = null;
       }
     };
-  }, [playing, scenarioBeats]);
+  }, [playing, scenarioBeats, onComplete]);
 
-  const beat = scenarioBeats[beatIndex] ?? scenarioBeats[0];
+  const clampedIndex = Math.min(beatIndex, scenarioBeats.length - 1);
+  const beat = scenarioBeats[clampedIndex] ?? scenarioBeats[0];
 
   if (!beat) {
     return (

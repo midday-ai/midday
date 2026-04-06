@@ -109,9 +109,7 @@ export function ChatPlatformPage({ config }: { config: PlatformConfig }) {
                 </ul>
                 <p className="font-sans text-sm text-muted-foreground leading-relaxed">
                   All notifications are on by default. To manage them, go to{" "}
-                  <span className="text-foreground">
-                    {config.settingsPath}
-                  </span>{" "}
+                  <span className="text-foreground">{config.settingsPath}</span>{" "}
                   in Midday.
                 </p>
               </div>

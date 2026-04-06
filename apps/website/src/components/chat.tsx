@@ -1,15 +1,15 @@
 "use client";
 
-import { Icons } from "@midday/ui/icons";
-import { motion } from "motion/react";
-import { useTheme } from "next-themes";
-import type { ComponentType } from "react";
-import { useEffect, useRef, useState } from "react";
 import {
   type ChatDemoScenario,
   ChatIMessageAnimation,
-} from "./chat-imessage-animation";
-import { IPhoneMock } from "./iphone-mock";
+} from "@midday/ui/animations/chat-demo";
+import { ChatDemoRail, DEMO_STORIES } from "@midday/ui/chat-demo-rail";
+import { Icons } from "@midday/ui/icons";
+import { IPhoneMock } from "@midday/ui/iphone-mock";
+import { motion } from "motion/react";
+import { useTheme } from "next-themes";
+import { useEffect, useRef, useState } from "react";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { PricingSection } from "./sections/pricing-section";
 import { TestimonialsSection } from "./sections/testimonials-section";
@@ -21,19 +21,18 @@ const MOBILE_SCALE = 0.6;
 const DESKTOP_STORY_SCALE = 0.86;
 const MOBILE_FRAME_GUTTER = 8;
 const DESKTOP_FRAME_GUTTER = 36;
-const HERO_CHAT_PLATFORMS = ["iMessage", "WhatsApp", "Slack", "Telegram"] as const;
+const HERO_CHAT_PLATFORMS = [
+  "iMessage",
+  "WhatsApp",
+  "Slack",
+  "Telegram",
+] as const;
 
-const DEMO_STORIES: Array<{
-  id: ChatDemoScenario;
-  label: string;
-  title: string;
-  description: string;
-  bullets: string[];
-  icon: ComponentType<{ className?: string }>;
-}> = [
-  {
-    id: "reminder",
-    label: "Push notification",
+const DEMO_STORY_META: Record<
+  ChatDemoScenario,
+  { title: string; description: string; bullets: string[] }
+> = {
+  reminder: {
     title: "Catch overdue invoices right from a notification",
     description:
       "Start on the lock screen, open Midday from the push, and send a reminder without breaking focus.",
@@ -42,11 +41,8 @@ const DEMO_STORIES: Array<{
       "Midday drafts the reminder and sends the payment link automatically.",
       "Perfect for chasing cash the moment an invoice goes overdue.",
     ],
-    icon: Icons.Notifications,
   },
-  {
-    id: "create-invoice",
-    label: "Create invoice",
+  "create-invoice": {
     title: "Draft and send invoices from the chat itself",
     description:
       "Turn a plain-language instruction into a polished invoice, then send it immediately from the same thread.",
@@ -55,11 +51,8 @@ const DEMO_STORIES: Array<{
       "Keep everything in context instead of jumping back to the dashboard.",
       "Ideal for founders who invoice between meetings.",
     ],
-    icon: Icons.Invoice,
   },
-  {
-    id: "receipt-match",
-    label: "Receipt match",
+  "receipt-match": {
     title: "Upload a receipt and let Midday match the transaction",
     description:
       "Drop a receipt photo into the conversation and get back the exact card transaction it belongs to.",
@@ -68,11 +61,8 @@ const DEMO_STORIES: Array<{
       "Midday finds the matching transaction automatically.",
       "A fast way to keep expenses reconciled without inbox cleanup.",
     ],
-    icon: Icons.ReceiptLong,
   },
-  {
-    id: "latest-transactions",
-    label: "Latest transactions",
+  "latest-transactions": {
     title: "Ask for the latest activity and spot anything unusual",
     description:
       "Get the newest transactions in a compact summary and ask follow-up questions without leaving chat.",
@@ -81,9 +71,8 @@ const DEMO_STORIES: Array<{
       "Ask Midday to flag anomalies or explain changes instantly.",
       "Useful when you want a quick financial pulse check on the go.",
     ],
-    icon: Icons.Transactions,
   },
-];
+};
 
 const CHAT_PLATFORM_LINKS = [
   { href: "/chat/imessage", label: "iMessage", Icon: Icons.IMessage },
@@ -122,57 +111,12 @@ function PhoneMock({
 }) {
   return (
     <IPhoneMock isDark={isDark}>
-      <ChatIMessageAnimation scenario={scenario} playing={playing} />
+      <ChatIMessageAnimation
+        key={scenario}
+        scenario={scenario}
+        playing={playing}
+      />
     </IPhoneMock>
-  );
-}
-
-function DemoRail({
-  activeScenario,
-  onSelect,
-  className,
-}: {
-  activeScenario: ChatDemoScenario;
-  onSelect: (scenario: ChatDemoScenario) => void;
-  className?: string;
-}) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ y: 18, opacity: 0, scale: 0.96, filter: "blur(10px)" }}
-      animate={{ y: 0, opacity: 1, scale: 1, filter: "blur(0px)" }}
-      transition={{
-        type: "spring",
-        stiffness: 220,
-        damping: 24,
-        mass: 0.95,
-      }}
-    >
-      <div className="pointer-events-auto flex max-w-[calc(100vw-1.5rem)] items-center gap-1 overflow-x-auto border border-black/5 bg-[rgba(247,247,247,0.98)] p-1 backdrop-blur-[18px] sm:gap-1 sm:p-1.5 dark:border-white/8 dark:bg-[rgba(19,19,19,0.98)]">
-        {DEMO_STORIES.map((story) => {
-          const Icon = story.icon;
-          const isActive = activeScenario === story.id;
-
-          return (
-            <button
-              key={story.id}
-              type="button"
-              onClick={() => onSelect(story.id)}
-              className={`flex shrink-0 items-center gap-2 px-2.5 py-1.5 font-sans text-sm transition-colors sm:px-3 sm:py-1.5 ${
-                isActive
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Icon className="size-4" />
-              <span className="whitespace-nowrap font-medium">
-                {story.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </motion.div>
   );
 }
 
@@ -231,7 +175,9 @@ export function Chat() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setHeroPlatformIndex((current) => (current + 1) % HERO_CHAT_PLATFORMS.length);
+      setHeroPlatformIndex(
+        (current) => (current + 1) % HERO_CHAT_PLATFORMS.length,
+      );
     }, 3000);
 
     return () => clearInterval(timer);
@@ -324,7 +270,12 @@ export function Chat() {
                       className="align-baseline"
                       children={currentHeroPlatform ?? HERO_CHAT_PLATFORMS[0]}
                       preserveSpace={HERO_CHAT_PLATFORMS as unknown as string[]}
-                      transition={{ type: "spring", stiffness: 280, damping: 18, mass: 0.3 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 280,
+                        damping: 18,
+                        mass: 0.3,
+                      }}
                     />
                   </span>
                 </h1>
@@ -412,7 +363,7 @@ export function Chat() {
               </div>
 
               {hasExitedDemo ? (
-                <DemoRail
+                <ChatDemoRail
                   activeScenario={activeScenario}
                   onSelect={scrollToScenario}
                   className="flex justify-center px-3 sm:px-4 lg:px-6"
@@ -421,30 +372,33 @@ export function Chat() {
             </div>
 
             <div className="relative -mt-[48vh] pb-20 pt-[56vh] lg:-mt-[58vh] lg:pb-32 lg:pt-[66vh]">
-              {DEMO_STORIES.map((story) => (
-                <article
-                  key={story.id}
-                  ref={(node) => {
-                    sectionRefs.current[story.id] = node;
-                  }}
-                  data-scenario={story.id}
-                  className="min-h-[78vh] lg:min-h-[100vh]"
-                  style={{ scrollMarginTop: 120 }}
-                  aria-label={story.title}
-                >
-                  <div className="sr-only">
-                    <h2>{story.title}</h2>
-                    <p>{story.description}</p>
-                  </div>
-                </article>
-              ))}
+              {DEMO_STORIES.map((story) => {
+                const meta = DEMO_STORY_META[story.id];
+                return (
+                  <article
+                    key={story.id}
+                    ref={(node) => {
+                      sectionRefs.current[story.id] = node;
+                    }}
+                    data-scenario={story.id}
+                    className="min-h-[78vh] lg:min-h-[100vh]"
+                    style={{ scrollMarginTop: 120 }}
+                    aria-label={meta.title}
+                  >
+                    <div className="sr-only">
+                      <h2>{meta.title}</h2>
+                      <p>{meta.description}</p>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </div>
       </section>
 
       {!hasExitedDemo ? (
-        <DemoRail
+        <ChatDemoRail
           activeScenario={activeScenario}
           onSelect={scrollToScenario}
           className="fixed inset-x-0 bottom-4 z-50 flex justify-center px-3 sm:px-4 lg:px-6"

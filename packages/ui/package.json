@@ -94,7 +94,11 @@
     "./animations/invoice-prompt": "./src/components/animations/invoice-prompt-animation.tsx",
     "./animations/receipt-attachment": "./src/components/animations/receipt-attachment-animation.tsx",
     "./animations/transaction-flow": "./src/components/animations/transaction-flow-animation.tsx",
-    "./animations/widgets": "./src/components/animations/widgets-animation.tsx"
+    "./animations/widgets": "./src/components/animations/widgets-animation.tsx",
+    "./iphone-mock": "./src/components/iphone-mock.tsx",
+    "./chat-demo-rail": "./src/components/chat-demo-rail.tsx",
+    "./animations/chat-demo": "./src/components/animations/chat-demo-animation.tsx",
+    "./animations/chat-demo-autoplay": "./src/components/animations/chat-demo-autoplay.tsx"
   },
   "dependencies": {
     "@midday/plans": "workspace:*",
@@ -149,8 +153,17 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2"
   },
+  "peerDependencies": {
+    "next-themes": ">=0.3.0"
+  },
+  "peerDependenciesMeta": {
+    "next-themes": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "autoprefixer": "^10.4.23",
+    "next-themes": "^0.4.6",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "catalog:"

@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { Icons } from "@midday/ui/icons";
+import type { Metadata } from "next";
 import { baseUrl } from "@/app/sitemap";
 import { ChatPlatformPage } from "@/components/chat-platform-page";
 
@@ -58,7 +58,7 @@ const config = {
     {
       title: "Start chatting",
       description:
-        "Send your first message — try asking \"What's my cash flow this month?\" or upload a receipt.",
+        'Send your first message — try asking "What\'s my cash flow this month?" or upload a receipt.',
     },
   ],
   notifications: [
