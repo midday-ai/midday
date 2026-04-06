@@ -1,9 +1,9 @@
 "use client";
 
-import type { ChatDemoScenario } from "@midday/ui/animations/chat-demo";
 import { ChatIMessageAnimation } from "@midday/ui/animations/chat-demo";
-import { ChatDemoRail, DEMO_STORIES } from "@midday/ui/chat-demo-rail";
+import { DEMO_STORIES } from "@midday/ui/chat-demo-rail";
 import { IPhoneMock } from "@midday/ui/iphone-mock";
+import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const PAUSE_BETWEEN_SCENARIOS_MS = 1500;
@@ -23,19 +23,6 @@ export function ChatDemoWithRail() {
       setScenarioIndex((prev) => (prev + 1) % DEMO_STORIES.length);
       pauseTimerRef.current = null;
     }, PAUSE_BETWEEN_SCENARIOS_MS);
-  }, []);
-
-  const handleSelect = useCallback((id: ChatDemoScenario) => {
-    if (pauseTimerRef.current !== null) {
-      clearTimeout(pauseTimerRef.current);
-      pauseTimerRef.current = null;
-    }
-    const idx = DEMO_STORIES.findIndex((s) => s.id === id);
-    if (idx >= 0) {
-      setScenarioIndex(idx);
-      setPlaying(true);
-      setHasPlayedOnce(true);
-    }
   }, []);
 
   useEffect(() => {
@@ -62,23 +49,54 @@ export function ChatDemoWithRail() {
           }}
         >
           <IPhoneMock>
-            <ChatIMessageAnimation
-              key={scenario.id}
-              scenario={scenario.id}
-              playing={playing}
-              skipLockScreen={hasPlayedOnce}
-              onComplete={handleComplete}
-            />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={scenario.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, ease: "easeInOut" }}
+                className="w-full h-full"
+              >
+                <ChatIMessageAnimation
+                  scenario={scenario.id}
+                  playing={playing}
+                  skipLockScreen={hasPlayedOnce}
+                  onComplete={handleComplete}
+                />
+              </motion.div>
+            </AnimatePresence>
           </IPhoneMock>
         </div>
       </div>
 
-      <ChatDemoRail
-        activeScenario={scenario.id}
-        onSelect={handleSelect}
-        size="sm"
-        className="shrink-0 pb-2"
-      />
+      <div className="shrink-0 pb-2 flex flex-col items-center gap-3">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={scenario.id}
+            initial={{ opacity: 0, y: 4, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -4, filter: "blur(4px)" }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="text-xs font-medium text-muted-foreground"
+          >
+            {scenario.label}
+          </motion.span>
+        </AnimatePresence>
+
+        <div className="flex items-center gap-1.5">
+          {DEMO_STORIES.map((story, i) => (
+            <motion.div
+              key={story.id}
+              className={`h-1.5 rounded-full ${
+                i === scenarioIndex ? "bg-foreground" : "bg-foreground/20"
+              }`}
+              animate={{ width: i === scenarioIndex ? 16 : 6 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

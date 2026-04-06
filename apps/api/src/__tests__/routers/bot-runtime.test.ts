@@ -440,4 +440,91 @@ describe("bot runtime link-code consumption", () => {
     expect(mocks.createOrUpdatePlatformIdentity).toHaveBeenCalled();
     expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
   });
+
+  test("bare alphanumeric message from unlinked WhatsApp user shows prompt, not invalid-code error", async () => {
+    const { posts, thread } = createThread("whatsapp");
+    const message = {
+      id: "message_123",
+      text: "test1234",
+      author: {
+        userId: "+15559999999",
+        fullName: "New User",
+        userName: "new_user",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve(null),
+    );
+
+    mocks.getPlatformIdentity.mockReset();
+    mocks.getPlatformIdentity.mockImplementation(() => Promise.resolve(null));
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "Connect WhatsApp from Midday first, then send the prefilled connection message here.",
+    ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+  });
+
+  test("bare alphanumeric message from unlinked Sendblue user shows prompt, not invalid-code error", async () => {
+    const { posts, thread } = createThread("sendblue");
+    const message = {
+      id: "message_123",
+      text: "test1234",
+      author: {
+        userId: "+15559999999",
+        fullName: "New User",
+        userName: "+15559999999",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve(null),
+    );
+
+    mocks.getPlatformIdentity.mockReset();
+    mocks.getPlatformIdentity.mockImplementation(() => Promise.resolve(null));
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "Connect iMessage from Midday first, then send the connection code here.",
+    ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+  });
+
+  test("explicit 'Connect to Midday:' with invalid code shows invalid-code error", async () => {
+    const { posts, thread } = createThread("whatsapp");
+    const message = {
+      id: "message_123",
+      text: "Connect to Midday: xyzW0000",
+      author: {
+        userId: "+15559999999",
+        fullName: "New User",
+        userName: "new_user",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve(null),
+    );
+
+    mocks.getPlatformIdentity.mockReset();
+    mocks.getPlatformIdentity.mockImplementation(() => Promise.resolve(null));
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "That WhatsApp link code is invalid or expired. Open Midday and generate a new one.",
+    ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+  });
 });

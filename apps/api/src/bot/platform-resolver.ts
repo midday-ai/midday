@@ -1,6 +1,10 @@
 import type { ConnectedResolvedConversation } from "@api/bot/conversation-identity";
 import { getPlatformIdentityNotificationContext } from "@api/bot/conversation-identity";
-import { extractConnectionToken, getMessageAuthorId } from "@api/bot/linking";
+import {
+  extractConnectionToken,
+  getMessageAuthorId,
+  isExplicitConnectionAttempt,
+} from "@api/bot/linking";
 import {
   consumeResolvedConversation,
   hasCurrentTeamAccess,
@@ -157,7 +161,7 @@ export async function resolvePlatformLinkCode(
     return existing;
   }
 
-  if (code) {
+  if (code && isExplicitConnectionAttempt(config.provider, message?.text)) {
     await thread.post(config.invalidCodeMessage);
   } else {
     await thread.post(config.promptConnectMessage);
@@ -165,7 +169,7 @@ export async function resolvePlatformLinkCode(
   return { connected: false };
 }
 
-export async function resolveFromExistingIdentity(
+async function resolveFromExistingIdentity(
   thread: Thread<BotThreadState>,
   provider: PlatformProvider,
   externalUserId: string,

@@ -35,3 +35,15 @@ export function extractConnectionToken(
 
   return MIXED_ALPHANUMERIC.test(value) ? value : null;
 }
+
+export function isExplicitConnectionAttempt(
+  platform: SupportedLinkPlatform,
+  text: string | undefined,
+): boolean {
+  const value = text?.trim();
+  if (!value) return false;
+  if (platform === "telegram") {
+    return /^\/start(?:@\w+)?\s+/i.test(value);
+  }
+  return CONNECT_PREFIX.test(value);
+}

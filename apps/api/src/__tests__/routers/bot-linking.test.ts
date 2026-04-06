@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { extractConnectionToken } from "../../bot/linking";
+import {
+  extractConnectionToken,
+  isExplicitConnectionAttempt,
+} from "../../bot/linking";
 
 describe("bot link code extraction", () => {
   test("extracts telegram /start payloads", () => {
@@ -82,5 +85,42 @@ describe("bot link code extraction", () => {
   test("ignores bare pure-digit 8-char strings", () => {
     expect(extractConnectionToken("whatsapp", "12345678")).toBeNull();
     expect(extractConnectionToken("sendblue", "99887766")).toBeNull();
+  });
+});
+
+describe("isExplicitConnectionAttempt", () => {
+  test("returns true for telegram /start with payload", () => {
+    expect(isExplicitConnectionAttempt("telegram", "/start abc12345")).toBe(
+      true,
+    );
+    expect(
+      isExplicitConnectionAttempt("telegram", "/start@midday_bot abc12345"),
+    ).toBe(true);
+  });
+
+  test("returns true for 'Connect to Midday:' prefix", () => {
+    expect(
+      isExplicitConnectionAttempt("whatsapp", "Connect to Midday: abc12345"),
+    ).toBe(true);
+    expect(
+      isExplicitConnectionAttempt("sendblue", "connect to midday:abc12345"),
+    ).toBe(true);
+    expect(
+      isExplicitConnectionAttempt("slack", "Connect to Midday: xyzABCDE"),
+    ).toBe(true);
+  });
+
+  test("returns false for bare alphanumeric strings", () => {
+    expect(isExplicitConnectionAttempt("whatsapp", "abc12345")).toBe(false);
+    expect(isExplicitConnectionAttempt("sendblue", "test1234")).toBe(false);
+    expect(isExplicitConnectionAttempt("whatsapp", "a1b2c3d4")).toBe(false);
+  });
+
+  test("returns false for regular messages", () => {
+    expect(isExplicitConnectionAttempt("whatsapp", "hello there")).toBe(false);
+    expect(isExplicitConnectionAttempt("sendblue", undefined)).toBe(false);
+    expect(isExplicitConnectionAttempt("telegram", "just chatting")).toBe(
+      false,
+    );
   });
 });
