@@ -326,6 +326,65 @@ describe("bot runtime link-code consumption", () => {
     expect(thread.startTyping).not.toHaveBeenCalled();
   });
 
+  test("re-connects Slack DM when an existing identity exists and a new link code is sent", async () => {
+    const { posts, thread } = createThread("slack");
+    const message = {
+      id: "message_123",
+      text: "Connect to Midday: xyzABCDE",
+      raw: {
+        team: "T123",
+      },
+      author: {
+        userId: "U123",
+        fullName: "Slack User",
+        userName: "slack_user",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve({
+        code: "xyzABCDE",
+        provider: "slack",
+        teamId: "team_new",
+        userId: "user_new",
+      }),
+    );
+
+    mocks.hasTeamAccess.mockReset();
+    mocks.hasTeamAccess.mockImplementation(() => Promise.resolve(true));
+
+    mocks.getPlatformIdentity.mockReset();
+    mocks.getPlatformIdentity.mockImplementation(() =>
+      Promise.resolve({
+        id: "stale_identity",
+        teamId: "team_old",
+        userId: "user_old",
+        metadata: null,
+      }),
+    );
+
+    mocks.createOrUpdatePlatformIdentity.mockReset();
+    mocks.createOrUpdatePlatformIdentity.mockImplementation(() =>
+      Promise.resolve({ id: "identity_new" }),
+    );
+
+    mocks.getTeamById.mockReset();
+    mocks.getTeamById.mockImplementation(() =>
+      Promise.resolve({ name: "New Slack Team" }),
+    );
+
+    await slackDmMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "Connected to New Slack Team. You can ask Midday questions, upload receipts, and track invoices right from Slack.\n\nYou'll receive notifications for new transactions, invoices, and match suggestions (all on by default). To manage these, go to Apps \u2192 Slack \u2192 Settings in Midday.\n\nTry asking \u201cWhat's my cash flow this month?\u201d",
+    ]);
+    expect(mocks.consumePlatformLinkToken).toHaveBeenCalled();
+    expect(mocks.createOrUpdatePlatformIdentity).toHaveBeenCalled();
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+  });
+
   test("re-connects Sendblue when a stale identity exists and a new link code is sent", async () => {
     const { posts, thread } = createThread("sendblue");
     const message = {

@@ -11,6 +11,13 @@ import {
   resolvePlatformLinkCode,
 } from "@api/bot/platform-resolver";
 import {
+  consumeResolvedConversation,
+  forgetThreadState,
+  hasCurrentTeamAccess,
+  notifyTeamAccessRevoked,
+  rememberThreadState,
+} from "@api/bot/thread-helpers";
+import {
   type BotThreadState,
   canReuseCachedThreadState,
 } from "@api/bot/thread-state";
@@ -44,7 +51,6 @@ import {
   getPlatformIdentity,
   getTeamById,
   getUserById,
-  hasTeamAccess,
   updatePlatformIdentityMetadata,
 } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
@@ -299,13 +305,6 @@ async function resolveConversation(
   return null;
 }
 
-function consumeResolvedConversation(resolved: ConnectedResolvedConversation) {
-  return {
-    ...resolved,
-    consumed: true as const,
-  };
-}
-
 async function hydrateResolvedConversationIdentity(params: {
   thread: Thread<BotThreadState>;
   message: Message;
@@ -514,7 +513,14 @@ async function resolveSlackConversation(
     externalTeamId: slackTeamId,
   });
 
-  if (thread.isDM && existingIdentity?.teamId && existingIdentity.userId) {
+  const code = extractConnectionToken("slack", message?.text);
+
+  if (
+    thread.isDM &&
+    !code &&
+    existingIdentity?.teamId &&
+    existingIdentity.userId
+  ) {
     if (
       !(await hasCurrentTeamAccess(
         existingIdentity.teamId,
@@ -548,9 +554,7 @@ async function resolveSlackConversation(
     channelId: thread.isDM ? undefined : thread.channelId,
   });
 
-  const code = extractConnectionToken("slack", message?.text);
-
-  if (!existingIdentity && code) {
+  if (code) {
     const token = await consumePlatformLinkToken(db, {
       provider: "slack",
       code,
@@ -754,30 +758,6 @@ function isSupportedAttachment(attachment: Attachment) {
     (attachment.type === "image" || attachment.type === "file") &&
     isSupportedInboxUploadMediaType(attachment.mimeType)
   );
-}
-
-async function rememberThreadState(
-  thread: Thread<BotThreadState>,
-  state: BotThreadState,
-) {
-  await thread.setState(state);
-}
-
-async function forgetThreadState(thread: Thread<BotThreadState>) {
-  await thread.setState({});
-}
-
-async function hasCurrentTeamAccess(teamId: string, userId: string) {
-  return hasTeamAccess(db, teamId, userId);
-}
-
-async function notifyTeamAccessRevoked(thread: Thread<BotThreadState>) {
-  await forgetThreadState(thread);
-  await thread
-    .post(
-      "This chat is linked, but that Midday user no longer has access to this workspace. Reconnect it from Midday and try again.",
-    )
-    .catch(() => {});
 }
 
 function getSlackTeamId(message: Message) {

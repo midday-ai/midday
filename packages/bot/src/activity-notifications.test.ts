@@ -118,7 +118,13 @@ describe("buildBatchTemplateComponents", () => {
     expect(result!.components).toEqual([
       {
         type: "body",
-        parameters: [{ type: "text", text: "2" }],
+        parameters: [{ type: "text", text: "2 new transactions" }],
+      },
+      {
+        type: "button",
+        sub_type: "url",
+        index: "0",
+        parameters: [{ type: "text", text: "/transactions" }],
       },
     ]);
   });
@@ -141,9 +147,15 @@ describe("buildBatchTemplateComponents", () => {
       {
         type: "body",
         parameters: [
-          { type: "text", text: "2" },
+          { type: "text", text: "2 invoices have" },
           { type: "text", text: "INV-001, INV-002" },
         ],
+      },
+      {
+        type: "button",
+        sub_type: "url",
+        index: "0",
+        parameters: [{ type: "text", text: "/invoices?statuses=paid" }],
       },
     ]);
   });
@@ -158,7 +170,13 @@ describe("buildBatchTemplateComponents", () => {
     expect(result!.components).toEqual([
       {
         type: "body",
-        parameters: [{ type: "text", text: "1" }],
+        parameters: [{ type: "text", text: "1 invoice is" }],
+      },
+      {
+        type: "button",
+        sub_type: "url",
+        index: "0",
+        parameters: [{ type: "text", text: "/invoices?statuses=overdue" }],
       },
     ]);
   });
@@ -181,7 +199,13 @@ describe("buildBatchTemplateComponents", () => {
     expect(result!.components).toEqual([
       {
         type: "body",
-        parameters: [{ type: "text", text: "2" }],
+        parameters: [{ type: "text", text: "2 recurring invoices are" }],
+      },
+      {
+        type: "button",
+        sub_type: "url",
+        index: "0",
+        parameters: [{ type: "text", text: "/invoices?recurring=true" }],
       },
     ]);
   });
@@ -203,6 +227,12 @@ describe("buildMatchTemplateComponents", () => {
           { type: "text", text: "receipt.pdf" },
           { type: "text", text: "Coffee Shop" },
         ],
+      },
+      {
+        type: "button",
+        sub_type: "url",
+        index: "0",
+        parameters: [{ type: "text", text: "/inbox" }],
       },
     ]);
   });

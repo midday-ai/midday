@@ -1,6 +1,12 @@
 import type { ConnectedResolvedConversation } from "@api/bot/conversation-identity";
 import { getPlatformIdentityNotificationContext } from "@api/bot/conversation-identity";
 import { extractConnectionToken, getMessageAuthorId } from "@api/bot/linking";
+import {
+  consumeResolvedConversation,
+  hasCurrentTeamAccess,
+  notifyTeamAccessRevoked,
+  rememberThreadState,
+} from "@api/bot/thread-helpers";
 import type { BotThreadState } from "@api/bot/thread-state";
 import { db } from "@midday/db/client";
 import {
@@ -13,7 +19,6 @@ import {
   createOrUpdatePlatformIdentity,
   getPlatformIdentity,
   getTeamById,
-  hasTeamAccess,
 } from "@midday/db/queries";
 import type { Message, Thread } from "chat";
 
@@ -55,30 +60,6 @@ type PlatformResolverConfig = {
   invalidCodeMessage: string;
   promptConnectMessage: string;
 };
-
-function consumeResolvedConversation(resolved: ConnectedResolvedConversation) {
-  return { ...resolved, consumed: true as const };
-}
-
-async function hasCurrentTeamAccess(teamId: string, userId: string) {
-  return hasTeamAccess(db, teamId, userId);
-}
-
-async function rememberThreadState(
-  thread: Thread<BotThreadState>,
-  state: BotThreadState,
-) {
-  await thread.setState(state);
-}
-
-async function notifyTeamAccessRevoked(thread: Thread<BotThreadState>) {
-  await thread.setState({});
-  await thread
-    .post(
-      "This chat is linked, but that Midday user no longer has access to this workspace. Reconnect it from Midday and try again.",
-    )
-    .catch(() => {});
-}
 
 export async function resolvePlatformLinkCode(
   thread: Thread<BotThreadState>,

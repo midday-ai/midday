@@ -38,8 +38,8 @@ export async function triggerMatchingNotification({
       return;
     }
 
-    const documentName =
-      inboxItem.displayName || inboxItem.fileName || "Document";
+    const fileName = inboxItem.fileName?.replace(/\.[^.]+$/, "") || "Document";
+    const documentName = inboxItem.displayName || fileName;
     const transactionName = transactionItem.name || "Transaction";
 
     // Check if this is a cross-currency match (for context, not routing)

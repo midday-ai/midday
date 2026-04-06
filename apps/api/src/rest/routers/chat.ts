@@ -154,8 +154,12 @@ app.post("/", async (c) => {
           modelMessages,
         });
 
-        writer.merge(result.toUIMessageStream({ sendSources: true }));
-        await titlePromise;
+        try {
+          writer.merge(result.toUIMessageStream({ sendSources: true }));
+          await titlePromise;
+        } finally {
+          await result.cleanup();
+        }
       },
     });
 

@@ -189,6 +189,10 @@ export const WHATSAPP_TEMPLATE_NAMES = {
 export type WhatsAppTemplateName =
   (typeof WHATSAPP_TEMPLATE_NAMES)[keyof typeof WHATSAPP_TEMPLATE_NAMES];
 
+function pluralize(count: number, singular: string, plural: string): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 function buildTemplateBodyParameters(
   texts: string[],
 ): Array<Record<string, unknown>> {
@@ -202,6 +206,18 @@ function buildTemplateBodyParameters(
       parameters: texts.map((text) => ({ type: "text", text })),
     },
   ];
+}
+
+function buildTemplateUrlButton(
+  index: number,
+  dynamicSuffix: string,
+): Record<string, unknown> {
+  return {
+    type: "button",
+    sub_type: "url",
+    index: String(index),
+    parameters: [{ type: "text", text: dynamicSuffix }],
+  };
 }
 
 export function buildBatchTemplateComponents(
@@ -219,7 +235,12 @@ export function buildBatchTemplateComponents(
       if (count === 0) return null;
       return {
         templateName: WHATSAPP_TEMPLATE_NAMES.transaction,
-        components: buildTemplateBodyParameters([String(count)]),
+        components: [
+          ...buildTemplateBodyParameters([
+            pluralize(count, "new transaction", "new transactions"),
+          ]),
+          buildTemplateUrlButton(0, "/transactions"),
+        ],
       };
     }
     case "invoice_paid": {
@@ -232,17 +253,25 @@ export function buildBatchTemplateComponents(
         .join(", ");
       return {
         templateName: WHATSAPP_TEMPLATE_NAMES.invoice_paid,
-        components: buildTemplateBodyParameters([
-          String(invoices.length),
-          labels || "-",
-        ]),
+        components: [
+          ...buildTemplateBodyParameters([
+            pluralize(invoices.length, "invoice has", "invoices have"),
+            labels || "-",
+          ]),
+          buildTemplateUrlButton(0, "/invoices?statuses=paid"),
+        ],
       };
     }
     case "invoice_overdue": {
       if (entries.length === 0) return null;
       return {
         templateName: WHATSAPP_TEMPLATE_NAMES.invoice_overdue,
-        components: buildTemplateBodyParameters([String(entries.length)]),
+        components: [
+          ...buildTemplateBodyParameters([
+            pluralize(entries.length, "invoice is", "invoices are"),
+          ]),
+          buildTemplateUrlButton(0, "/invoices?statuses=overdue"),
+        ],
       };
     }
     case "recurring_invoice_upcoming": {
@@ -252,7 +281,16 @@ export function buildBatchTemplateComponents(
       if (invoices.length === 0) return null;
       return {
         templateName: WHATSAPP_TEMPLATE_NAMES.recurring_invoice_upcoming,
-        components: buildTemplateBodyParameters([String(invoices.length)]),
+        components: [
+          ...buildTemplateBodyParameters([
+            pluralize(
+              invoices.length,
+              "recurring invoice is",
+              "recurring invoices are",
+            ),
+          ]),
+          buildTemplateUrlButton(0, "/invoices?recurring=true"),
+        ],
       };
     }
     default:
@@ -269,7 +307,10 @@ export function buildMatchTemplateComponents(
 } {
   return {
     templateName: WHATSAPP_TEMPLATE_NAMES.match,
-    components: buildTemplateBodyParameters([documentName, transactionName]),
+    components: [
+      ...buildTemplateBodyParameters([documentName, transactionName]),
+      buildTemplateUrlButton(0, "/inbox"),
+    ],
   };
 }
 
