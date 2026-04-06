@@ -6,7 +6,7 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "test": "bun test --exit --timeout 30000 --preload ./src/__tests__/setup.ts src/__tests__/trpc/ src/__tests__/routers/ && bun test --exit --timeout 30000 src/__tests__/mcp/mcp-router.test.ts",
+    "test": "bun test --exit --timeout 30000 --preload ./src/__tests__/setup.ts --path-ignore-patterns '**/bot-runtime*' --path-ignore-patterns '**/slack-oauth*' src/__tests__/trpc/ src/__tests__/routers/ && bun test --exit --timeout 30000 src/__tests__/routers/bot-runtime.test.ts && bun test --exit --timeout 30000 src/__tests__/routers/slack-oauth-callback.test.ts && bun test --exit --timeout 30000 src/__tests__/mcp/mcp-router.test.ts",
     "test:e2e": "bun test --exit --timeout 30000 src/__tests__/e2e/",
     "eval": "bunx evalite watch",
     "eval:run": "bunx evalite"
