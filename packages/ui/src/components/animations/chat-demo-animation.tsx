@@ -1,9 +1,10 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import { useTheme } from "next-themes";
 import type { CSSProperties, ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 type ReceiptAttachment = {
   kind: "receipt";
@@ -924,8 +925,14 @@ const CLOCK_MAX_WIDTH = 390;
 
 function LockScreenClock({ timeStr }: { timeStr: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgId = useId().replace(/:/g, "");
   const [fontSize, setFontSize] = useState(168);
   const letterSpacing = Math.round(fontSize * -0.042);
+  const svgHeight = Math.round(fontSize * 0.9);
+  const baselineY = Math.round(svgHeight * 0.8);
+  const mainStrokeWidth = Math.max(1.28, fontSize * 0.0072);
+  const edgeStrokeWidth = Math.max(0.82, fontSize * 0.0049);
+  const hairlineStrokeWidth = Math.max(0.52, fontSize * 0.003);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -942,9 +949,9 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
     }
   }, [timeStr, fontSize]);
 
-  const shared: React.CSSProperties = {
+  const shared: CSSProperties = {
     fontSize,
-    fontWeight: 700,
+    fontWeight: 560,
     fontFamily: SF_DISPLAY,
     lineHeight: 0.86,
     letterSpacing,
@@ -964,162 +971,305 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
         alignSelf: "center",
       }}
     >
-      {/* 1 · Soft ambient glow */}
-      <div
+      <span
+        aria-hidden
         style={{
           ...shared,
-          position: "absolute",
-          inset: 0,
-          color: "rgba(255,255,255,0.09)",
-          filter: "blur(20px)",
-          transform: "translateY(1px)",
+          display: "block",
+          visibility: "hidden",
           pointerEvents: "none",
         }}
       >
         {timeStr}
-      </div>
+      </span>
 
-      {/* 2 · Glass body — radial highlight suggesting depth + curvature */}
-      <div
+      <svg
+        aria-hidden
+        width="100%"
+        height={svgHeight}
+        viewBox={`0 0 ${CLOCK_MAX_WIDTH} ${svgHeight}`}
         style={{
-          ...shared,
           position: "absolute",
           inset: 0,
-          background:
-            "radial-gradient(ellipse 120% 80% at 50% 28%, rgba(255,255,255,0.48) 0%, rgba(220,235,255,0.14) 50%, rgba(200,215,240,0.02) 100%)",
-          WebkitBackgroundClip: "text",
-          backgroundClip: "text",
-          color: "transparent",
-          opacity: 0.6,
           pointerEvents: "none",
+          overflow: "visible",
         }}
       >
-        {timeStr}
-      </div>
+        <defs>
+          <filter
+            id={`${svgId}-ambient`}
+            x="-20%"
+            y="-20%"
+            width="140%"
+            height="160%"
+          >
+            <feGaussianBlur stdDeviation="4.5" />
+          </filter>
 
-      {/* 3 · Base translucent fill with inner shadow */}
-      <div
-        style={{
-          ...shared,
-          position: "relative",
-          color: "rgba(235,242,255,0.30)",
-          textShadow: [
-            "0 1px 0 rgba(255,255,255,0.20)",
-            "0 -1px 0 rgba(255,255,255,0.08)",
-            "0 2px 6px rgba(0,0,0,0.12)",
-            "0 0 28px rgba(255,255,255,0.04)",
-          ].join(", "),
-          WebkitTextStroke: "0.5px rgba(255,255,255,0.14)",
-        }}
-      >
-        {timeStr}
-      </div>
+          <linearGradient
+            id={`${svgId}-fill`}
+            x1="0%"
+            y1="0%"
+            x2="0%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
+            <stop offset="52%" stopColor="rgba(241,243,242,0.92)" />
+            <stop offset="100%" stopColor="rgba(225,228,226,0.9)" />
+          </linearGradient>
 
-      {/* 4 · Top-to-bottom refraction gradient */}
-      <div
-        style={{
-          ...shared,
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(245,250,255,0.22) 40%, rgba(225,235,250,0.02) 100%)",
-          WebkitBackgroundClip: "text",
-          backgroundClip: "text",
-          color: "transparent",
-          opacity: 0.68,
-          mixBlendMode: "screen",
-          pointerEvents: "none",
-        }}
-      >
-        {timeStr}
-      </div>
+          <radialGradient
+            id={`${svgId}-body`}
+            cx="50%"
+            cy="18%"
+            r="92%"
+            fx="48%"
+            fy="14%"
+          >
+            <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
+            <stop offset="45%" stopColor="rgba(255,255,255,0.07)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+          </radialGradient>
 
-      {/* 5 · Sharp inner top-edge light — glass surface catch */}
-      <div
-        style={{
-          ...shared,
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.3) 8%, rgba(255,255,255,0) 20%)",
-          WebkitBackgroundClip: "text",
-          backgroundClip: "text",
-          color: "transparent",
-          opacity: 0.22,
-          pointerEvents: "none",
-        }}
-      >
-        {timeStr}
-      </div>
+          <linearGradient
+            id={`${svgId}-outer-border`}
+            x1="0%"
+            y1="0%"
+            x2="0%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="rgba(255,255,255,1)" />
+            <stop offset="55%" stopColor="rgba(255,255,255,0.88)" />
+            <stop offset="100%" stopColor="rgba(222,226,226,0.72)" />
+          </linearGradient>
 
-      {/* 6 · Specular edge highlight */}
-      <div
-        style={{
-          ...shared,
-          position: "absolute",
-          inset: 0,
-          color: "rgba(255,255,255,0.16)",
-          mixBlendMode: "color-dodge",
-          opacity: 0.4,
-          pointerEvents: "none",
-        }}
-      >
-        {timeStr}
-      </div>
+          <linearGradient
+            id={`${svgId}-top-hairline`}
+            x1="0%"
+            y1="0%"
+            x2="0%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="rgba(255,255,255,1)" />
+            <stop offset="16%" stopColor="rgba(255,255,255,0.96)" />
+            <stop offset="34%" stopColor="rgba(255,255,255,0.32)" />
+            <stop offset="62%" stopColor="rgba(255,255,255,0)" />
+          </linearGradient>
 
-      {/* 7 · Upper-left catch light edge — masked stroke */}
-      <div
-        style={{
-          ...shared,
-          position: "absolute",
-          inset: 0,
-          color: "transparent",
-          WebkitTextStroke: "0.7px rgba(255,255,255,0.44)",
-          maskImage:
-            "linear-gradient(145deg, white 0%, rgba(255,255,255,0.45) 30%, rgba(255,255,255,0.08) 55%, transparent 70%)",
-          WebkitMaskImage:
-            "linear-gradient(145deg, white 0%, rgba(255,255,255,0.45) 30%, rgba(255,255,255,0.08) 55%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      >
-        {timeStr}
-      </div>
+          <linearGradient
+            id={`${svgId}-inner-top-shadow`}
+            x1="0%"
+            y1="0%"
+            x2="0%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="rgba(0,0,0,0)" />
+            <stop offset="10%" stopColor="rgba(60,62,64,0.5)" />
+            <stop offset="24%" stopColor="rgba(60,62,64,0.36)" />
+            <stop offset="46%" stopColor="rgba(60,62,64,0)" />
+          </linearGradient>
 
-      {/* 8 · Bottom-right rim shadow edge — masked stroke */}
-      <div
-        style={{
-          ...shared,
-          position: "absolute",
-          inset: 0,
-          color: "transparent",
-          WebkitTextStroke: "0.5px rgba(0,0,0,0.14)",
-          maskImage:
-            "linear-gradient(325deg, white 0%, rgba(255,255,255,0.3) 25%, transparent 50%)",
-          WebkitMaskImage:
-            "linear-gradient(325deg, white 0%, rgba(255,255,255,0.3) 25%, transparent 50%)",
-          pointerEvents: "none",
-        }}
-      >
-        {timeStr}
-      </div>
+          <linearGradient
+            id={`${svgId}-light-edge`}
+            x1="6%"
+            y1="0%"
+            x2="78%"
+            y2="74%"
+          >
+            <stop offset="0%" stopColor="rgba(255,255,255,1)" />
+            <stop offset="20%" stopColor="rgba(255,255,255,0.68)" />
+            <stop offset="50%" stopColor="rgba(255,255,255,0.16)" />
+            <stop offset="78%" stopColor="rgba(255,255,255,0)" />
+          </linearGradient>
 
-      {/* 9 · Bottom-edge refraction — thin light line at base */}
-      <div
-        style={{
-          ...shared,
-          position: "absolute",
-          inset: 0,
-          color: "transparent",
-          WebkitTextStroke: "0.3px rgba(255,255,255,0.22)",
-          maskImage:
-            "linear-gradient(0deg, white 0%, rgba(255,255,255,0.3) 12%, transparent 25%)",
-          WebkitMaskImage:
-            "linear-gradient(0deg, white 0%, rgba(255,255,255,0.3) 12%, transparent 25%)",
-          pointerEvents: "none",
-        }}
-      >
-        {timeStr}
-      </div>
+          <linearGradient
+            id={`${svgId}-shadow-edge`}
+            x1="86%"
+            y1="78%"
+            x2="24%"
+            y2="16%"
+          >
+            <stop offset="0%" stopColor="rgba(84,88,90,0.24)" />
+            <stop offset="32%" stopColor="rgba(84,88,90,0.1)" />
+            <stop offset="64%" stopColor="rgba(84,88,90,0.02)" />
+            <stop offset="100%" stopColor="rgba(80,84,86,0)" />
+          </linearGradient>
+
+          <linearGradient
+            id={`${svgId}-top-sheen`}
+            x1="0%"
+            y1="0%"
+            x2="0%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="rgba(255,255,255,0.42)" />
+            <stop offset="10%" stopColor="rgba(255,255,255,0.1)" />
+            <stop offset="24%" stopColor="rgba(255,255,255,0)" />
+          </linearGradient>
+
+          <linearGradient
+            id={`${svgId}-bottom-rim`}
+            x1="0%"
+            y1="100%"
+            x2="0%"
+            y2="0%"
+          >
+            <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
+            <stop offset="10%" stopColor="rgba(255,255,255,0.08)" />
+            <stop offset="24%" stopColor="rgba(255,255,255,0)" />
+          </linearGradient>
+        </defs>
+
+        <text
+          x="50%"
+          y={baselineY + 2}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
+            fill: "rgba(255,255,255,0.04)",
+            filter: `url(#${svgId}-ambient)`,
+          }}
+        >
+          {timeStr}
+        </text>
+
+        <text
+          x="50%"
+          y={baselineY}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
+            fill: "transparent",
+            stroke: `url(#${svgId}-outer-border)`,
+            strokeWidth: mainStrokeWidth,
+            paintOrder: "stroke fill",
+          }}
+        >
+          {timeStr}
+        </text>
+
+        <text
+          x="50%"
+          y={baselineY}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
+            fill: `url(#${svgId}-fill)`,
+            stroke: "rgba(255,255,255,0.1)",
+            strokeWidth: Math.max(0.22, mainStrokeWidth * 0.38),
+            paintOrder: "stroke fill",
+          }}
+        >
+          {timeStr}
+        </text>
+
+        <text
+          x="50%"
+          y={baselineY}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
+            fill: `url(#${svgId}-body)`,
+            opacity: 0.52,
+          }}
+        >
+          {timeStr}
+        </text>
+
+        <text
+          x="50%"
+          y={baselineY}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
+            fill: `url(#${svgId}-inner-top-shadow)`,
+            opacity: 0.58,
+          }}
+        >
+          {timeStr}
+        </text>
+
+        <text
+          x="50%"
+          y={baselineY}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
+            fill: `url(#${svgId}-top-sheen)`,
+            opacity: 0.24,
+          }}
+        >
+          {timeStr}
+        </text>
+
+        <text
+          x="50%"
+          y={baselineY}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
+            fill: "transparent",
+            stroke: `url(#${svgId}-top-hairline)`,
+            strokeWidth: hairlineStrokeWidth,
+            paintOrder: "stroke fill",
+          }}
+        >
+          {timeStr}
+        </text>
+
+        <text
+          x="50%"
+          y={baselineY}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
+            fill: "transparent",
+            stroke: `url(#${svgId}-light-edge)`,
+            strokeWidth: edgeStrokeWidth,
+            paintOrder: "stroke fill",
+          }}
+        >
+          {timeStr}
+        </text>
+
+        <text
+          x="50%"
+          y={baselineY}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
+            fill: "transparent",
+            stroke: `url(#${svgId}-shadow-edge)`,
+            strokeWidth: edgeStrokeWidth,
+            paintOrder: "stroke fill",
+          }}
+        >
+          {timeStr}
+        </text>
+
+        <text
+          x="50%"
+          y={baselineY}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
+            fill: `url(#${svgId}-bottom-rim)`,
+            opacity: 0.22,
+          }}
+        >
+          {timeStr}
+        </text>
+      </svg>
     </div>
   );
 }
@@ -1140,10 +1290,13 @@ function LockScreen() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <img
+      <Image
         src="https://cdn.midday.ai/background-remote-v7.png"
         alt=""
-        className="absolute inset-0 w-full h-full object-cover"
+        fill
+        priority
+        sizes="390px"
+        className="absolute inset-0 object-cover"
         style={{ zIndex: 0 }}
       />
       <div
@@ -1419,15 +1572,20 @@ function ReceiptPreview({
           width: "100%",
         }}
       >
-        <img
-          src={attachment.imageSrc}
-          alt={attachment.subtitle}
-          style={{
-            display: "block",
-            width: "100%",
-            height: "auto",
-          }}
-        />
+        {attachment.imageSrc ? (
+          <Image
+            src={attachment.imageSrc}
+            alt={attachment.subtitle}
+            width={1080}
+            height={1440}
+            sizes="(max-width: 768px) 100vw, 320px"
+            style={{
+              display: "block",
+              width: "100%",
+              height: "auto",
+            }}
+          />
+        ) : null}
       </div>
     );
   }
@@ -1796,9 +1954,12 @@ function InvoiceOgArtwork({ attachment }: { attachment: OgAttachment }) {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
           {attachment.website ? (
-            <img
+            <Image
               src={getWebsiteLogo(attachment.website)}
               alt={attachment.customer}
+              width={15}
+              height={15}
+              sizes="15px"
               style={{
                 width: 15,
                 height: 15,

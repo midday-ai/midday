@@ -8,7 +8,6 @@ type PlatformConfig = {
   slug: string;
   appId: string;
   icon: React.ReactNode;
-  headline: string;
   description: string;
   steps: { title: string; description: string; href?: string }[];
   notifications: string[];
@@ -47,8 +46,7 @@ export function ChatPlatformPage({ config }: { config: PlatformConfig }) {
               </h1>
             </div>
 
-            <div className="space-y-4 mb-12">
-              <SectionHeading>{config.headline}</SectionHeading>
+            <div className="mb-12">
               <p className="font-sans text-base text-muted-foreground leading-relaxed">
                 {config.description}
               </p>

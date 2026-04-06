@@ -40,7 +40,6 @@ const config = {
   slug: "telegram",
   appId: "telegram",
   icon: <Icons.Telegram size={40} className="h-10 w-10" />,
-  headline: "Your business, right from Telegram",
   description:
     "Connect Midday to Telegram and manage your finances without leaving your conversations. Send a photo of a receipt, ask about your cash flow, create an invoice — Midday handles it all through natural conversation.",
   steps: [

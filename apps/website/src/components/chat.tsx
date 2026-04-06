@@ -9,7 +9,7 @@ import { Icons } from "@midday/ui/icons";
 import { IPhoneMock } from "@midday/ui/iphone-mock";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { PricingSection } from "./sections/pricing-section";
 import { TestimonialsSection } from "./sections/testimonials-section";
@@ -17,10 +17,13 @@ import { TextMorph } from "./text-morph";
 
 const PHONE_W = 418;
 const PHONE_H = 890;
-const MOBILE_SCALE = 0.6;
+const MOBILE_SCALE = 0.66;
 const DESKTOP_STORY_SCALE = 0.86;
 const MOBILE_FRAME_GUTTER = 8;
 const DESKTOP_FRAME_GUTTER = 36;
+const MOBILE_PHONE_MIN_SCALE = 0.44;
+const MOBILE_PHONE_SAFE_X = 24;
+const MOBILE_PHONE_SAFE_Y = 120;
 const HERO_CHAT_PLATFORMS = [
   "iMessage",
   "WhatsApp",
@@ -74,25 +77,42 @@ const DEMO_STORY_META: Record<
   },
 };
 
-const CHAT_PLATFORM_LINKS = [
+const CHAT_PLATFORM_LINKS: ReadonlyArray<{
+  href: string;
+  label: string;
+  Icon: typeof Icons.IMessage;
+  iconClassName?: string;
+}> = [
   { href: "/chat/imessage", label: "iMessage", Icon: Icons.IMessage },
-  { href: "/chat/whatsapp", label: "WhatsApp", Icon: Icons.WhatsApp },
   { href: "/chat/slack", label: "Slack", Icon: Icons.Slack },
+  {
+    href: "/chat/whatsapp",
+    label: "WhatsApp",
+    Icon: Icons.WhatsApp,
+    iconClassName: "hover:text-[#25D366]",
+  },
   { href: "/chat/telegram", label: "Telegram", Icon: Icons.Telegram },
-] as const;
+];
 
 function PlatformIcons() {
   return (
     <div className="flex items-center justify-center gap-3 pt-4">
       <div className="flex items-center gap-2.5">
-        {CHAT_PLATFORM_LINKS.map(({ href, label, Icon }) => (
+        {CHAT_PLATFORM_LINKS.map(({ href, label, Icon, iconClassName }) => (
           <a
             key={href}
             href={href}
             aria-label={label}
             className="opacity-40 transition-all duration-200 hover:opacity-100"
           >
-            <Icon className="h-[18px] w-[18px] grayscale saturate-0 brightness-90 contrast-75 transition-all duration-200 hover:grayscale-0 hover:saturate-100 hover:brightness-100 hover:contrast-100" />
+            <Icon
+              className={[
+                "h-[18px] w-[18px] grayscale saturate-0 brightness-90 contrast-75 transition-all duration-200 hover:grayscale-0 hover:saturate-100 hover:brightness-100 hover:contrast-100",
+                iconClassName,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            />
           </a>
         ))}
       </div>
@@ -159,11 +179,18 @@ function DemoSetupCta({ className }: { className?: string }) {
 export function Chat() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [mobileScale, setMobileScale] = useState(MOBILE_SCALE);
+  const [mobileScenarioIndex, setMobileScenarioIndex] = useState(0);
+  const [mobilePlaying, setMobilePlaying] = useState(true);
   const [heroPlatformIndex, setHeroPlatformIndex] = useState(0);
   const [activeScenario, setActiveScenario] =
     useState<ChatDemoScenario>("reminder");
   const [demoActive, setDemoActive] = useState(false);
   const [hasExitedDemo, setHasExitedDemo] = useState(false);
+  const mobilePauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const sectionRefs = useRef<
     Partial<Record<ChatDemoScenario, HTMLElement | null>>
   >({});
@@ -171,6 +198,59 @@ export function Chat() {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const updateMobileScale = () => {
+      setIsMobileViewport(window.innerWidth < 1024);
+
+      const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+      const viewportHeight =
+        window.visualViewport?.height ?? window.innerHeight;
+      const availableWidth =
+        viewportWidth - MOBILE_PHONE_SAFE_X - MOBILE_FRAME_GUTTER * 2;
+      const availableHeight =
+        viewportHeight - MOBILE_PHONE_SAFE_Y - MOBILE_FRAME_GUTTER;
+
+      const widthScale = availableWidth / PHONE_W;
+      const heightScale = availableHeight / PHONE_H;
+
+      setMobileScale(
+        Math.max(
+          MOBILE_PHONE_MIN_SCALE,
+          Math.min(MOBILE_SCALE, widthScale, heightScale),
+        ),
+      );
+    };
+
+    updateMobileScale();
+    window.addEventListener("resize", updateMobileScale);
+    window.visualViewport?.addEventListener("resize", updateMobileScale);
+    window.visualViewport?.addEventListener("scroll", updateMobileScale);
+
+    return () => {
+      window.removeEventListener("resize", updateMobileScale);
+      window.visualViewport?.removeEventListener("resize", updateMobileScale);
+      window.visualViewport?.removeEventListener("scroll", updateMobileScale);
+    };
+  }, []);
+
+  const handleMobileComplete = useCallback(() => {
+    setMobilePlaying(false);
+
+    mobilePauseTimerRef.current = setTimeout(() => {
+      setMobileScenarioIndex((prev) => (prev + 1) % DEMO_STORIES.length);
+      setMobilePlaying(true);
+      mobilePauseTimerRef.current = null;
+    }, 1500);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (mobilePauseTimerRef.current !== null) {
+        clearTimeout(mobilePauseTimerRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -187,10 +267,19 @@ export function Chat() {
   const currentHeroPlatform = mounted
     ? (HERO_CHAT_PLATFORMS[heroPlatformIndex] ?? HERO_CHAT_PLATFORMS[0])
     : HERO_CHAT_PLATFORMS[0];
+  const mobileScenario = DEMO_STORIES[mobileScenarioIndex]?.id ?? "reminder";
   const showDemoSetupCta =
-    hasExitedDemo && activeScenario === "latest-transactions";
+    !isMobileViewport &&
+    hasExitedDemo &&
+    activeScenario === "latest-transactions";
 
   useEffect(() => {
+    if (isMobileViewport) {
+      setDemoActive(false);
+      setHasExitedDemo(false);
+      return;
+    }
+
     const handleScroll = () => {
       const section = demoSectionRef.current;
 
@@ -244,13 +333,27 @@ export function Chat() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
-  }, []);
+  }, [isMobileViewport]);
 
   const scrollToScenario = (scenario: ChatDemoScenario) => {
     sectionRefs.current[scenario]?.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
+  };
+
+  const selectMobileScenario = (scenario: ChatDemoScenario) => {
+    if (mobilePauseTimerRef.current !== null) {
+      clearTimeout(mobilePauseTimerRef.current);
+      mobilePauseTimerRef.current = null;
+    }
+
+    const nextIndex = DEMO_STORIES.findIndex((story) => story.id === scenario);
+
+    if (nextIndex >= 0) {
+      setMobileScenarioIndex(nextIndex);
+      setMobilePlaying(true);
+    }
   };
 
   return (
@@ -300,64 +403,108 @@ export function Chat() {
         </div>
       </div>
 
-      <section ref={demoSectionRef} className="relative pb-24 pt-6 lg:pt-0">
+      <section className="relative pb-12 pt-6 lg:hidden">
+        <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-4 px-3 sm:px-4">
+          <div
+            className="relative flex w-full justify-center"
+            style={{
+              height: Math.round(PHONE_H * mobileScale) + MOBILE_FRAME_GUTTER,
+            }}
+          >
+            <div
+              className="relative"
+              style={{
+                width:
+                  Math.round(PHONE_W * mobileScale) + MOBILE_FRAME_GUTTER * 2,
+                height: Math.round(PHONE_H * mobileScale) + MOBILE_FRAME_GUTTER,
+              }}
+            >
+              <div
+                className="absolute top-0 origin-top-left"
+                style={{
+                  left: MOBILE_FRAME_GUTTER,
+                  transform: `scale(${mobileScale})`,
+                }}
+              >
+                <IPhoneMock isDark={isDark}>
+                  <ChatIMessageAnimation
+                    key={mobileScenario}
+                    scenario={mobileScenario}
+                    playing={mobilePlaying}
+                    onComplete={handleMobileComplete}
+                  />
+                </IPhoneMock>
+              </div>
+            </div>
+          </div>
+
+          <div className="shrink-0 pb-1 flex flex-col items-center gap-3">
+            <motion.span
+              key={mobileScenario}
+              initial={{ opacity: 0, y: 4, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="text-xs font-medium text-muted-foreground"
+            >
+              {DEMO_STORIES[mobileScenarioIndex]?.label}
+            </motion.span>
+
+            <div className="flex items-center gap-1.5">
+              {DEMO_STORIES.map((story, i) => (
+                <button
+                  key={story.id}
+                  type="button"
+                  aria-label={story.label}
+                  onClick={() => selectMobileScenario(story.id)}
+                  className="flex items-center"
+                >
+                  <motion.div
+                    className={`h-1.5 rounded-full ${
+                      i === mobileScenarioIndex
+                        ? "bg-foreground"
+                        : "bg-foreground/20"
+                    }`}
+                    animate={{ width: i === mobileScenarioIndex ? 16 : 6 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        ref={demoSectionRef}
+        className="relative hidden pb-24 pt-6 lg:block lg:pt-0"
+      >
         <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-8">
           <div className="relative">
             <div className="sticky top-20 z-20 flex flex-col items-center gap-4 sm:gap-5">
               <div className="flex w-full justify-center">
-                <div className="lg:hidden">
+                <div
+                  className="relative"
+                  style={{
+                    width:
+                      Math.round(PHONE_W * DESKTOP_STORY_SCALE) +
+                      DESKTOP_FRAME_GUTTER * 2,
+                    height:
+                      Math.round(PHONE_H * DESKTOP_STORY_SCALE) +
+                      DESKTOP_FRAME_GUTTER,
+                  }}
+                >
                   <div
-                    className="relative"
+                    className="absolute top-0 origin-top-left"
                     style={{
-                      width:
-                        Math.round(PHONE_W * MOBILE_SCALE) +
-                        MOBILE_FRAME_GUTTER * 2,
-                      height:
-                        Math.round(PHONE_H * MOBILE_SCALE) +
-                        MOBILE_FRAME_GUTTER,
+                      left: DESKTOP_FRAME_GUTTER,
+                      transform: `scale(${DESKTOP_STORY_SCALE})`,
                     }}
                   >
-                    <div
-                      className="absolute top-0 origin-top-left"
-                      style={{
-                        left: MOBILE_FRAME_GUTTER,
-                        transform: `scale(${MOBILE_SCALE})`,
-                      }}
-                    >
-                      <PhoneMock
-                        isDark={isDark}
-                        scenario={activeScenario}
-                        playing={demoActive}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="hidden lg:block">
-                  <div
-                    className="relative"
-                    style={{
-                      width:
-                        Math.round(PHONE_W * DESKTOP_STORY_SCALE) +
-                        DESKTOP_FRAME_GUTTER * 2,
-                      height:
-                        Math.round(PHONE_H * DESKTOP_STORY_SCALE) +
-                        DESKTOP_FRAME_GUTTER,
-                    }}
-                  >
-                    <div
-                      className="absolute top-0 origin-top-left"
-                      style={{
-                        left: DESKTOP_FRAME_GUTTER,
-                        transform: `scale(${DESKTOP_STORY_SCALE})`,
-                      }}
-                    >
-                      <PhoneMock
-                        isDark={isDark}
-                        scenario={activeScenario}
-                        playing={demoActive}
-                      />
-                    </div>
+                    <PhoneMock
+                      isDark={isDark}
+                      scenario={activeScenario}
+                      playing={demoActive || !hasExitedDemo}
+                    />
                   </div>
                 </div>
               </div>
@@ -371,7 +518,7 @@ export function Chat() {
               ) : null}
             </div>
 
-            <div className="relative -mt-[48vh] pb-20 pt-[56vh] lg:-mt-[58vh] lg:pb-32 lg:pt-[66vh]">
+            <div className="relative -mt-[58vh] pb-32 pt-[66vh]">
               {DEMO_STORIES.map((story) => {
                 const meta = DEMO_STORY_META[story.id];
                 return (
@@ -381,7 +528,7 @@ export function Chat() {
                       sectionRefs.current[story.id] = node;
                     }}
                     data-scenario={story.id}
-                    className="min-h-[78vh] lg:min-h-[100vh]"
+                    className="min-h-[100vh]"
                     style={{ scrollMarginTop: 120 }}
                     aria-label={meta.title}
                   >
@@ -401,7 +548,7 @@ export function Chat() {
         <ChatDemoRail
           activeScenario={activeScenario}
           onSelect={scrollToScenario}
-          className="fixed inset-x-0 bottom-4 z-50 flex justify-center px-3 sm:px-4 lg:px-6"
+          className="hidden lg:flex fixed inset-x-0 bottom-4 z-50 justify-center px-3 sm:px-4 lg:px-6"
         />
       ) : null}
 

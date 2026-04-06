@@ -40,7 +40,6 @@ const config = {
   slug: "slack",
   appId: "slack",
   icon: <Icons.Slack size={40} className="h-10 w-10" />,
-  headline: "Your business, right from Slack",
   description:
     "Connect Midday to Slack and manage your finances without leaving your workspace. Ask about your cash flow, upload receipts, track invoices — Midday works right in your DMs or a shared channel.",
   steps: [

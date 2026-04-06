@@ -40,7 +40,6 @@ const config = {
   slug: "imessage",
   appId: "sendblue",
   icon: <Icons.IMessage size={40} className="h-10 w-10" />,
-  headline: "Your business, right from iMessage",
   description:
     "Connect Midday to iMessage and manage your finances without leaving your conversations. Send a photo of a receipt, ask about your cash flow, create an invoice — Midday handles it all through natural conversation.",
   steps: [

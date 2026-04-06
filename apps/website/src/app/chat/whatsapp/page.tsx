@@ -38,8 +38,7 @@ const config = {
   name: "WhatsApp",
   slug: "whatsapp",
   appId: "whatsapp",
-  icon: <Icons.WhatsApp size={40} className="h-10 w-10" />,
-  headline: "Your business, right from WhatsApp",
+  icon: <Icons.WhatsApp size={40} className="h-10 w-10 text-[#25D366]" />,
   description:
     "Connect Midday to WhatsApp and manage your finances without leaving your conversations. Send a photo of a receipt, ask about your cash flow, create an invoice — Midday handles it all through natural conversation.",
   steps: [
