@@ -30,6 +30,7 @@ import {
   getTaxSummary,
 } from "../queries/reports";
 import {
+  SEED_REFERENCE_DATE,
   seedAll,
   TEAM_EUR_ID,
   TEAM_USD_ID,
@@ -1248,9 +1249,7 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
 
   describe("Runway", () => {
     beforeAll(() => {
-      // Freeze time so the trailing 6-month runway window stays aligned
-      // with the seeded "recent" expense fixtures.
-      setSystemTime(new Date("2026-02-20T12:00:00.000Z"));
+      setSystemTime(SEED_REFERENCE_DATE);
     });
 
     afterAll(() => {
@@ -2511,7 +2510,7 @@ describe.skipIf(SKIP)("E2E Calculation Tests", () => {
   // ─────────────────────────────────────────────────────────────────────────
   describe("Runway — Edge Cases", () => {
     beforeAll(() => {
-      setSystemTime(new Date("2026-02-20T12:00:00.000Z"));
+      setSystemTime(SEED_REFERENCE_DATE);
     });
 
     afterAll(() => {

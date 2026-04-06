@@ -2043,7 +2043,7 @@ function ChatView({
       <div
         className="relative"
         style={{
-          marginTop: 48,
+          marginTop: 52,
           padding: "6px 14px 12px",
           background: headerBackground,
         }}
