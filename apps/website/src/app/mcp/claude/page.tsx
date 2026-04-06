@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCPClaude } from "@/components/mcp-claude";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Claude MCP Integration";
-const description =
-  "Connect Claude to your Midday data via Model Context Protocol. Get AI-powered financial insights grounded in your real business numbers.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Claude MCP Integration",
+  description:
+    "Connect Claude to your Midday data via Model Context Protocol. Get AI-powered financial insights grounded in your real business numbers.",
+  path: "/mcp/claude",
+  og: {
+    title: "Claude + Midday",
+    description: "Financial insights from your real business data",
+  },
   keywords: [
     "Claude MCP",
     "Claude integration",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "Anthropic Claude",
     "AI financial assistant",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp/claude`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp/claude`,
-  },
-};
+});
 
 export default function Page() {
   return <MCPClaude />;

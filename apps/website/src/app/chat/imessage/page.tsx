@@ -1,15 +1,16 @@
 import { Icons } from "@midday/ui/icons";
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { ChatPlatformPage } from "@/components/chat-platform-page";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Midday for iMessage";
-const description =
-  "Run your business from iMessage. Send receipts, create invoices, track time, and get notifications — all from your favorite messaging app.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Midday for iMessage",
+  description:
+    "Run your business from iMessage. Send receipts, create invoices, track time, and get notifications — all from your favorite messaging app.",
+  path: "/chat/imessage",
+  og: {
+    title: "Midday for iMessage",
+    description: "Your business, right in Messages",
+  },
   keywords: [
     "iMessage business",
     "iMessage invoicing",
@@ -19,21 +20,7 @@ export const metadata: Metadata = {
     "business chat iMessage",
     "Sendblue",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/chat/imessage`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/chat/imessage`,
-  },
-};
+});
 
 const config = {
   name: "iMessage",

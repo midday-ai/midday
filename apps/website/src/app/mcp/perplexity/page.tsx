@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCPPerplexity } from "@/components/mcp-perplexity";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Perplexity MCP Integration";
-const description =
-  "Connect Perplexity to your Midday data via MCP. Query transactions, invoices, and financial reports with natural language AI search.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Perplexity MCP Integration",
+  description:
+    "Connect Perplexity to your Midday data via MCP. Query transactions, invoices, and financial reports with natural language AI search.",
+  path: "/mcp/perplexity",
+  og: {
+    title: "Perplexity + Midday",
+    description: "Search your finances with natural language",
+  },
   keywords: [
     "Perplexity MCP",
     "Perplexity integration",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "AI search",
     "natural language queries",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp/perplexity`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp/perplexity`,
-  },
-};
+});
 
 export default function Page() {
   return <MCPPerplexity />;

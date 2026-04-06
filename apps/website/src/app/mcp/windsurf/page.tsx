@@ -1,35 +1,22 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCPWindsurf } from "@/components/mcp-windsurf";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Windsurf MCP Integration";
-const description =
-  "Connect Windsurf to your Midday data via Model Context Protocol. Query transactions, invoices, and reports from your AI IDE.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Windsurf MCP Integration",
+  description:
+    "Connect Windsurf to your Midday data via Model Context Protocol. Query transactions, invoices, and reports from your AI IDE.",
+  path: "/mcp/windsurf",
+  og: {
+    title: "Windsurf + Midday",
+    description: "Business data from your AI IDE",
+  },
   keywords: [
     "Windsurf MCP",
     "Windsurf integration",
     "Model Context Protocol",
     "AI IDE financial data",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp/windsurf`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp/windsurf`,
-  },
-};
+});
 
 export default function Page() {
   return <MCPWindsurf />;

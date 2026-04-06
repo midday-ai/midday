@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { FileStorage } from "@/components/file-storage";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Secure Document Storage for Business";
-const description =
-  "Store and organize all your business documents in one secure place. Access receipts, contracts, invoices, and files anytime. Built for small business owners.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Secure Document Storage for Business",
+  description:
+    "Store and organize all your business documents in one secure place. Access receipts, contracts, invoices, and files anytime. Built for small business owners.",
+  path: "/file-storage",
+  og: {
+    title: "File Storage",
+    description: "All your business documents in one place",
+  },
   keywords: [
     "document storage",
     "business file storage",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "receipt storage",
     "contract management",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/file-storage`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/file-storage`,
-  },
-};
+});
 
 export default function Page() {
   return <FileStorage />;

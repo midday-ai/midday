@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCPOpenCode } from "@/components/mcp-opencode";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "OpenCode MCP Integration";
-const description =
-  "Connect OpenCode to your Midday data via MCP. Track time for client projects, start timers, and log hours directly from your terminal.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "OpenCode MCP Integration",
+  description:
+    "Connect OpenCode to your Midday data via MCP. Track time for client projects, start timers, and log hours directly from your terminal.",
+  path: "/mcp/opencode",
+  og: {
+    title: "OpenCode + Midday",
+    description: "Track time and log hours from your terminal",
+  },
   keywords: [
     "OpenCode MCP",
     "OpenCode integration",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "terminal time tracking",
     "developer tools",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp/opencode`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp/opencode`,
-  },
-};
+});
 
 export default function Page() {
   return <MCPOpenCode />;

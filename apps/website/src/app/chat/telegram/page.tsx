@@ -1,15 +1,16 @@
 import { Icons } from "@midday/ui/icons";
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { ChatPlatformPage } from "@/components/chat-platform-page";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Midday for Telegram";
-const description =
-  "Run your business from Telegram. Send receipts, create invoices, track time, and get notifications — all from the messaging app you already use.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Midday for Telegram",
+  description:
+    "Run your business from Telegram. Send receipts, create invoices, track time, and get notifications — all from the messaging app you already use.",
+  path: "/chat/telegram",
+  og: {
+    title: "Midday for Telegram",
+    description: "Your business, right in Telegram",
+  },
   keywords: [
     "Telegram business",
     "Telegram invoicing",
@@ -19,21 +20,7 @@ export const metadata: Metadata = {
     "Telegram finance bot",
     "Telegram accounting",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/chat/telegram`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/chat/telegram`,
-  },
-};
+});
 
 const config = {
   name: "Telegram",

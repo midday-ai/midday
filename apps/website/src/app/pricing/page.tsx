@@ -1,35 +1,19 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { Pricing } from "@/components/pricing";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Pricing";
-const description =
-  "Simple, transparent pricing for Midday. Start free and upgrade as you grow. Invoicing, expense tracking, and financial tools for small business owners.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Pricing",
+  description:
+    "Simple, transparent pricing for Midday. Start free and upgrade as you grow. Invoicing, expense tracking, and financial tools for small business owners.",
+  path: "/pricing",
+  og: { title: "Pricing", description: "Start free, upgrade as you grow" },
   keywords: [
     "midday pricing",
     "free accounting software",
     "small business software pricing",
     "invoicing software cost",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/pricing`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/pricing`,
-  },
-};
+});
 
 const jsonLd = {
   "@context": "https://schema.org",

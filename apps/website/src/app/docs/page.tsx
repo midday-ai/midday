@@ -1,30 +1,17 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { baseUrl } from "@/app/sitemap";
 import { DocsHomeHero } from "@/components/docs/docs-home-hero";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Documentation";
-const description =
-  "Learn how to use Midday to run your business. Get answers about invoicing, banking, time tracking, reports, and more.";
-
-export const metadata: Metadata = {
-  title,
-  description,
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/docs`,
+export const metadata = createPageMetadata({
+  title: "Documentation",
+  description:
+    "Learn how to use Midday to run your business. Get answers about invoicing, banking, time tracking, reports, and more.",
+  path: "/docs",
+  og: {
+    title: "Documentation",
+    description: "Everything you need to know about Midday",
   },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/docs`,
-  },
-};
+});
 
 const popularGuides = [
   {

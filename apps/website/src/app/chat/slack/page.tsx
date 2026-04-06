@@ -1,15 +1,16 @@
 import { Icons } from "@midday/ui/icons";
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { ChatPlatformPage } from "@/components/chat-platform-page";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Midday for Slack";
-const description =
-  "Run your business from Slack. Ask questions, upload receipts, track invoices, and get notifications — without leaving your workspace.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Midday for Slack",
+  description:
+    "Run your business from Slack. Ask questions, upload receipts, track invoices, and get notifications — without leaving your workspace.",
+  path: "/chat/slack",
+  og: {
+    title: "Midday for Slack",
+    description: "Your business, without leaving Slack",
+  },
   keywords: [
     "Slack business",
     "Slack invoicing",
@@ -19,21 +20,7 @@ export const metadata: Metadata = {
     "Slack finance bot",
     "Slack accounting",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/chat/slack`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/chat/slack`,
-  },
-};
+});
 
 const config = {
   name: "Slack",

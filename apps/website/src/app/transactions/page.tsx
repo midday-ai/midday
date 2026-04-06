@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { Transactions } from "@/components/transactions";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Business Transaction Tracking & Bank Sync";
-const description =
-  "Track all your business expenses in one place. Automatically sync and categorize transactions from your bank accounts. Built for small business owners.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Business Transaction Tracking & Bank Sync",
+  description:
+    "Track all your business expenses in one place. Automatically sync and categorize transactions from your bank accounts. Built for small business owners.",
+  path: "/transactions",
+  og: {
+    title: "Transactions",
+    description: "Every expense, automatically synced and sorted",
+  },
   keywords: [
     "expense tracking",
     "business expenses",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "expense categorization",
     "small business accounting",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/transactions`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/transactions`,
-  },
-};
+});
 
 export default function Page() {
   return <Transactions />;

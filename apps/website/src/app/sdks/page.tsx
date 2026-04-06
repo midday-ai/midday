@@ -1,29 +1,16 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { SDKs } from "@/components/sdks";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "SDKs";
-const description =
-  "Typed SDKs to build faster with Midday. Integrate Midday into your applications with our official client libraries.";
-
-export const metadata: Metadata = {
-  title,
-  description,
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/sdks`,
+export const metadata = createPageMetadata({
+  title: "SDKs",
+  description:
+    "Typed SDKs to build faster with Midday. Integrate Midday into your applications with our official client libraries.",
+  path: "/sdks",
+  og: {
+    title: "SDKs",
+    description: "Typed client libraries for the Midday API",
   },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/sdks`,
-  },
-};
+});
 
 export default function Page() {
   return <SDKs />;

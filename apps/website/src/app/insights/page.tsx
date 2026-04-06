@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { Insights } from "@/components/insights";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Business Insights";
-const description =
-  "Understand your business at a glance. Get weekly summaries, cash flow analysis, and clear explanations of revenue and spending trends.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Business Insights",
+  description:
+    "Understand your business at a glance. Get weekly summaries, cash flow analysis, and clear explanations of revenue and spending trends.",
+  path: "/insights",
+  og: {
+    title: "Insights",
+    description: "Understand your business at a glance",
+  },
   keywords: [
     "business insights",
     "business analytics",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "revenue tracking",
     "spending analysis",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/insights`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/insights`,
-  },
-};
+});
 
 export default function Page() {
   return <Insights />;

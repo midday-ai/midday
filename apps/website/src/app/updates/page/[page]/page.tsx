@@ -1,12 +1,11 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { baseUrl } from "@/app/sitemap";
 import { CustomMDX } from "@/components/mdx";
 import { Pagination } from "@/components/pagination";
 import { PostStatus } from "@/components/post-status";
 import { getBlogPosts } from "@/lib/blog";
+import { createPageMetadata } from "@/lib/metadata";
 
 const POSTS_PER_PAGE = 3;
 
@@ -14,7 +13,6 @@ export async function generateStaticParams() {
   const posts = getBlogPosts();
   const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
 
-  // Generate pages 2 onwards (page 1 is handled by /updates)
   return Array.from({ length: totalPages - 1 }, (_, i) => ({
     page: String(i + 2),
   }));
@@ -24,31 +22,16 @@ type Props = {
   params: Promise<{ page: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props) {
   const { page } = await params;
-  const title = `Updates - Page ${page}`;
-  const description =
-    "The latest updates and improvements to Midday. See what we've been building to help you manage your business finances better.";
-  const url = `${baseUrl}/updates/page/${page}`;
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      url,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-    alternates: {
-      canonical: url,
-    },
-  };
+  return createPageMetadata({
+    title: `Updates - Page ${page}`,
+    description:
+      "The latest updates and improvements to Midday. See what we've been building to help you manage your business finances better.",
+    path: `/updates/page/${page}`,
+    canonical: false,
+  });
 }
 
 export default async function UpdatesPagePaginated({ params }: Props) {

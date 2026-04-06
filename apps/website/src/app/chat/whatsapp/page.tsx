@@ -1,15 +1,16 @@
 import { Icons } from "@midday/ui/icons";
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { ChatPlatformPage } from "@/components/chat-platform-page";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Midday for WhatsApp";
-const description =
-  "Run your business from WhatsApp. Send receipts, create invoices, track time, and get notifications — all from the messaging app you already use.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Midday for WhatsApp",
+  description:
+    "Run your business from WhatsApp. Send receipts, create invoices, track time, and get notifications — all from the messaging app you already use.",
+  path: "/chat/whatsapp",
+  og: {
+    title: "Midday for WhatsApp",
+    description: "Your business, right in WhatsApp",
+  },
   keywords: [
     "WhatsApp business",
     "WhatsApp invoicing",
@@ -18,21 +19,7 @@ export const metadata: Metadata = {
     "Midday WhatsApp",
     "business chat WhatsApp",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/chat/whatsapp`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/chat/whatsapp`,
-  },
-};
+});
 
 const config = {
   name: "WhatsApp",

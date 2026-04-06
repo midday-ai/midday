@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { Inbox } from "@/components/inbox";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Automatic Receipt Matching & Management";
-const description =
-  "Capture receipts and invoices automatically. Match documents to transactions, search your records, and stay organized. Built for small business owners.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Automatic Receipt Matching & Management",
+  description:
+    "Capture receipts and invoices automatically. Match documents to transactions, search your records, and stay organized. Built for small business owners.",
+  path: "/inbox",
+  og: {
+    title: "Inbox",
+    description: "Receipts matched to transactions, automatically",
+  },
   keywords: [
     "receipt management",
     "receipt scanner",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "document management",
     "expense receipts",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/inbox`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/inbox`,
-  },
-};
+});
 
 export default function Page() {
   return <Inbox />;

@@ -1,15 +1,13 @@
 import { GeistPixelLine } from "geist/font/pixel";
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { Agents } from "@/components/agents";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Agents — Let agents run your business";
-const description =
-  "Midday CLI and MCP server let AI agents create invoices, reconcile transactions, track time, and manage your finances from any tool.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Agents — Let agents run your business",
+  description:
+    "Midday CLI and MCP server let AI agents create invoices, reconcile transactions, track time, and manage your finances from any tool.",
+  path: "/agents",
+  og: { title: "Agents", description: "Let AI agents run your business" },
   keywords: [
     "agent native cli",
     "business infrastructure for agents",
@@ -18,21 +16,7 @@ export const metadata: Metadata = {
     "finance operations",
     "business automation",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/agents`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/agents`,
-  },
-};
+});
 
 export default function Page() {
   return (

@@ -634,4 +634,43 @@ describe("bot runtime link-code consumption", () => {
     ]);
     expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
   });
+
+  test("explicit 'Connect to Midday:' with invalid code shows error even when existing identity exists", async () => {
+    const { posts, thread } = createThread("whatsapp");
+    const message = {
+      id: "message_123",
+      text: "Connect to Midday: xyzW0000",
+      author: {
+        userId: "+15551234567",
+        fullName: "WhatsApp User",
+        userName: "whatsapp_user",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve(null),
+    );
+
+    mocks.getPlatformIdentity.mockReset();
+    mocks.getPlatformIdentity.mockImplementation(() =>
+      Promise.resolve({
+        id: "identity_123",
+        teamId: "team_123",
+        userId: "user_123",
+        metadata: null,
+      }),
+    );
+
+    mocks.hasTeamAccess.mockReset();
+    mocks.hasTeamAccess.mockImplementation(() => Promise.resolve(true));
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "That WhatsApp link code is invalid or expired. Open Midday and generate a new one.",
+    ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+  });
 });

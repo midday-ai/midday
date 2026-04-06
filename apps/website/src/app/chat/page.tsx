@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { Chat } from "@/components/chat";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Run your business from iMessage, WhatsApp, Slack & Telegram";
-const description =
-  "Get invoices paid, track time, manage expenses — right from iMessage, WhatsApp, Slack, or Telegram. Run your business from any chat app.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Run your business from iMessage, WhatsApp, Slack & Telegram",
+  description:
+    "Get invoices paid, track time, manage expenses — right from iMessage, WhatsApp, Slack, or Telegram. Run your business from any chat app.",
+  path: "/chat",
+  og: {
+    title: "Chat",
+    description: "Run your business from any messaging app",
+  },
   keywords: [
     "iMessage business",
     "WhatsApp invoicing",
@@ -18,21 +19,7 @@ export const metadata: Metadata = {
     "conversational finance",
     "business messaging",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/chat`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/chat`,
-  },
-};
+});
 
 export default function Page() {
   return <Chat />;

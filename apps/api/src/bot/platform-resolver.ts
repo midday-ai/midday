@@ -150,6 +150,11 @@ export async function resolvePlatformLinkCode(
     }
   }
 
+  if (code && isExplicitConnectionAttempt(config.provider, message?.text)) {
+    await thread.post(config.invalidCodeMessage);
+    return { connected: false };
+  }
+
   const existing = await resolveFromExistingIdentity(
     thread,
     config.provider,
@@ -159,11 +164,7 @@ export async function resolvePlatformLinkCode(
     return existing;
   }
 
-  if (code && isExplicitConnectionAttempt(config.provider, message?.text)) {
-    await thread.post(config.invalidCodeMessage);
-  } else {
-    await thread.post(config.promptConnectMessage);
-  }
+  await thread.post(config.promptConnectMessage);
   return { connected: false };
 }
 
