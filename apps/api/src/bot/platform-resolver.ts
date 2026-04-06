@@ -51,7 +51,6 @@ type PlatformResolverConfig = {
   };
   afterConnect?: (params: {
     token: { teamId: string; userId: string };
-    identity: { id: string };
     externalUserId: string;
     message: Message;
     thread: Thread<BotThreadState>;
@@ -90,6 +89,15 @@ export async function resolvePlatformLinkCode(
       }
 
       try {
+        if (config.afterConnect) {
+          await config.afterConnect({
+            token,
+            externalUserId,
+            message,
+            thread,
+          });
+        }
+
         const identityFields = config.buildIdentityFields({
           externalUserId,
           message,
@@ -104,16 +112,6 @@ export async function resolvePlatformLinkCode(
           externalChannelId: identityFields.externalChannelId,
           metadata: identityFields.metadata,
         });
-
-        if (config.afterConnect) {
-          await config.afterConnect({
-            token,
-            identity,
-            externalUserId,
-            message,
-            thread,
-          });
-        }
 
         const team = await getTeamById(db, token.teamId);
 

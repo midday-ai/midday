@@ -3,7 +3,11 @@ import {
   getPlatformIdentityNotificationContext,
   requireResolvedConversationIdentity,
 } from "@api/bot/conversation-identity";
-import { extractConnectionToken, getMessageAuthorId } from "@api/bot/linking";
+import {
+  extractConnectionToken,
+  getMessageAuthorId,
+  isExplicitConnectionAttempt,
+} from "@api/bot/linking";
 import {
   buildWelcomeMessage,
   mapPlatformLinkError,
@@ -556,64 +560,71 @@ async function resolveSlackConversation(
       code,
     });
 
-    if (!token) {
+    if (token) {
+      if (app?.teamId && app.teamId !== token.teamId) {
+        await thread.post(
+          "That Slack link code belongs to another Midday workspace. Generate a new code for this workspace.",
+        );
+        return { connected: false as const };
+      }
+
+      if (!(await hasCurrentTeamAccess(token.teamId, token.userId))) {
+        await notifyTeamAccessRevoked(thread);
+        return { connected: false as const };
+      }
+
+      try {
+        const identity = await createOrUpdatePlatformIdentity(db, {
+          provider: "slack",
+          teamId: token.teamId,
+          userId: token.userId,
+          externalUserId: slackUserId,
+          externalTeamId: slackTeamId,
+          externalChannelId: thread.channelId,
+          metadata: {
+            displayName:
+              message?.author?.fullName ||
+              message?.author?.userName ||
+              undefined,
+            source: "slack_link_code",
+          },
+        });
+
+        const team = await getTeamById(db, token.teamId);
+
+        await rememberThreadState(thread, {
+          teamId: token.teamId,
+          actingUserId: token.userId,
+          platform: "slack",
+          externalUserId: slackUserId,
+        });
+
+        await thread.post(buildWelcomeMessage(team?.name ?? "Midday", "slack"));
+
+        return consumeResolvedConversation({
+          connected: true as const,
+          teamId: token.teamId,
+          actingUserId: token.userId,
+          identityId: identity.id,
+        });
+      } catch (error) {
+        const platformMsg = mapPlatformLinkError(error, "Slack user");
+        if (platformMsg) {
+          await thread.post(platformMsg);
+          return { connected: false as const };
+        }
+        throw error;
+      }
+    }
+
+    if (
+      !(thread.isDM && existingIdentity?.teamId && existingIdentity.userId) &&
+      isExplicitConnectionAttempt("slack", message?.text)
+    ) {
       await thread.post(
         "That Slack link code is invalid or expired. Open Midday and generate a new one.",
       );
       return { connected: false as const };
-    }
-
-    if (app?.teamId && app.teamId !== token.teamId) {
-      await thread.post(
-        "That Slack link code belongs to another Midday workspace. Generate a new code for this workspace.",
-      );
-      return { connected: false as const };
-    }
-
-    if (!(await hasCurrentTeamAccess(token.teamId, token.userId))) {
-      await notifyTeamAccessRevoked(thread);
-      return { connected: false as const };
-    }
-
-    try {
-      const identity = await createOrUpdatePlatformIdentity(db, {
-        provider: "slack",
-        teamId: token.teamId,
-        userId: token.userId,
-        externalUserId: slackUserId,
-        externalTeamId: slackTeamId,
-        externalChannelId: thread.channelId,
-        metadata: {
-          displayName:
-            message?.author?.fullName || message?.author?.userName || undefined,
-          source: "slack_link_code",
-        },
-      });
-
-      const team = await getTeamById(db, token.teamId);
-
-      await rememberThreadState(thread, {
-        teamId: token.teamId,
-        actingUserId: token.userId,
-        platform: "slack",
-        externalUserId: slackUserId,
-      });
-
-      await thread.post(buildWelcomeMessage(team?.name ?? "Midday", "slack"));
-
-      return consumeResolvedConversation({
-        connected: true as const,
-        teamId: token.teamId,
-        actingUserId: token.userId,
-        identityId: identity.id,
-      });
-    } catch (error) {
-      const platformMsg = mapPlatformLinkError(error, "Slack user");
-      if (platformMsg) {
-        await thread.post(platformMsg);
-        return { connected: false as const };
-      }
-      throw error;
     }
   }
 

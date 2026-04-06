@@ -118,6 +118,7 @@ function createThread(
       }),
       startTyping: mock(() => Promise.resolve()),
       subscribe: mock(() => Promise.resolve()),
+      refresh: mock(() => Promise.resolve()),
     },
   };
 }
@@ -496,6 +497,114 @@ describe("bot runtime link-code consumption", () => {
     expect(posts).toEqual([
       "Connect iMessage from Midday first, then send the connection code here.",
     ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+  });
+
+  test("connected Slack DM user sending bare alphanumeric message gets assistant reply, not invalid-code error", async () => {
+    const { posts, thread } = createThread("slack");
+    const message = {
+      id: "message_123",
+      text: "test1234",
+      raw: {
+        team: "T123",
+      },
+      author: {
+        userId: "U123",
+        fullName: "Slack User",
+        userName: "slack_user",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve(null),
+    );
+
+    mocks.hasTeamAccess.mockReset();
+    mocks.hasTeamAccess.mockImplementation(() => Promise.resolve(true));
+
+    mocks.getPlatformIdentity.mockReset();
+    mocks.getPlatformIdentity.mockImplementation(() =>
+      Promise.resolve({
+        id: "identity_123",
+        teamId: "team_123",
+        userId: "user_123",
+        metadata: null,
+      }),
+    );
+
+    mocks.getUserById.mockReset();
+    mocks.getUserById.mockImplementation(() =>
+      Promise.resolve(createLinkedUser()),
+    );
+
+    await slackDmMessageHandler?.(thread, message);
+
+    expect(posts).not.toContain(
+      "That Slack link code is invalid or expired. Open Midday and generate a new one.",
+    );
+    expect(streamMiddayAssistantMock).toHaveBeenCalled();
+    expect(thread.startTyping).toHaveBeenCalled();
+  });
+
+  test("afterConnect failure does not leave an orphaned identity (WhatsApp)", async () => {
+    const { posts, thread } = createThread("whatsapp");
+    const message = {
+      id: "message_123",
+      text: "Connect to Midday: abc12345",
+      author: {
+        userId: "+15551234567",
+        fullName: "WhatsApp User",
+        userName: "whatsapp_user",
+      },
+      attachments: [],
+    };
+
+    mocks.addWhatsAppConnection.mockReset();
+    mocks.addWhatsAppConnection.mockImplementation(() => Promise.resolve(null));
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "Connected, but I couldn't finish setup. Try again.",
+    ]);
+    expect(mocks.createOrUpdatePlatformIdentity).not.toHaveBeenCalled();
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+  });
+
+  test("afterConnect failure does not leave an orphaned identity (Telegram)", async () => {
+    const { posts, thread } = createThread("telegram");
+    const message = {
+      id: "message_123",
+      text: "/start abc12345",
+      author: {
+        userId: "telegram_user_123",
+        fullName: "Telegram User",
+        userName: "telegram_user",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve({
+        code: "abc12345",
+        provider: "telegram",
+        teamId: "team_123",
+        userId: "user_123",
+      }),
+    );
+
+    mocks.addTelegramConnection.mockReset();
+    mocks.addTelegramConnection.mockImplementation(() => Promise.resolve(null));
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "Connected, but I couldn't finish setup. Try again.",
+    ]);
+    expect(mocks.createOrUpdatePlatformIdentity).not.toHaveBeenCalled();
     expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
   });
 
