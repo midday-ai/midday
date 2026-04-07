@@ -400,9 +400,6 @@ const SCENARIOS: Record<ChatDemoScenario, ScenarioConfig> = {
   },
   "latest-transactions": {
     startOnLockScreen: false,
-    setupNotificationTitle: "Get started with Midday",
-    setupNotificationBody:
-      "Connect your company to chat, send invoices, and match receipts right from Messages.",
     steps: [
       {
         sender: "user",
@@ -868,7 +865,7 @@ function buildGlobalBeats(): DemoBeat[] {
 function IOSKeyboard() {
   return (
     <img
-      src="/images/ios-keyboard-dark.svg"
+      src="https://cdn.midday.ai/ios-keyboard-dark.svg"
       alt=""
       draggable={false}
       style={{ width: "100%", display: "block" }}
@@ -3933,7 +3930,7 @@ function ChatView({
           style={{
             width: "calc(100% - 20px)",
             margin: "0 auto",
-            padding: "8px 10px 14px",
+            padding: "12px 16px 22px",
             background: composerShell,
           }}
         >
