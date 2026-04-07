@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { Command } from "commander";
-import { del, get, post, put } from "../../client/api.js";
+import { del, get, post } from "../../client/api.js";
 import { type GlobalFlags, resolveFormat } from "../../output/formatter.js";
 import { printJson, printJsonList } from "../../output/json.js";
 import { printTable } from "../../output/table.js";
