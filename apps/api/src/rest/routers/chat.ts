@@ -71,7 +71,7 @@ app.post("/", async (c) => {
       userId: user?.id ?? session.user.id,
       userEmail: user?.email ?? session.user.email ?? null,
       scopes,
-      apiUrl: process.env.MIDDAY_API_URL!,
+      apiUrl: process.env.MIDDAY_API_URL || "https://api.midday.ai",
       timezone: resolvedTimezone,
       locale: user?.locale || geo.locale,
       countryCode: geo.country,
