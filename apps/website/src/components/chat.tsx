@@ -140,37 +140,6 @@ function PhoneMock({
   );
 }
 
-function DemoSetupCta({ className }: { className?: string }) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 12, scale: 0.985, filter: "blur(6px)" }}
-      animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-      transition={{
-        type: "spring",
-        stiffness: 340,
-        damping: 26,
-        mass: 0.72,
-      }}
-    >
-      <a
-        href="https://app.midday.ai"
-        className="group block bg-[rgba(247,247,247,0.98)] p-4 backdrop-blur-[18px] transition-all duration-200 hover:bg-[rgba(247,247,247,1)] dark:bg-[rgba(19,19,19,0.98)] dark:hover:bg-[rgba(19,19,19,1)]"
-      >
-        <div className="space-y-1.5">
-          <h3 className="inline-flex items-center gap-1.5 font-sans text-sm font-medium text-foreground">
-            <span>Set up your company</span>
-            <Icons.ArrowOutward className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-          </h3>
-          <p className="font-sans text-sm leading-relaxed text-muted-foreground">
-            Start with chat, invoices, receipts, and notifications in minutes.
-          </p>
-        </div>
-      </a>
-    </motion.div>
-  );
-}
-
 export function Chat() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -263,11 +232,6 @@ export function Chat() {
     ? (HERO_CHAT_PLATFORMS[heroPlatformIndex] ?? HERO_CHAT_PLATFORMS[0])
     : HERO_CHAT_PLATFORMS[0];
   const mobileScenario = DEMO_STORIES[mobileScenarioIndex]?.id ?? "reminder";
-  const showDemoSetupCta =
-    !isMobileViewport &&
-    hasExitedDemo &&
-    activeScenario === "latest-transactions";
-
   useEffect(() => {
     if (isMobileViewport) {
       setDemoActive(false);
@@ -398,146 +362,155 @@ export function Chat() {
         </div>
       </div>
 
-      <section className="relative pb-12 pt-6 lg:hidden">
-        <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-4 px-3 sm:px-4">
-          <div
-            className="relative flex w-full justify-center"
-            style={{
-              height: Math.round(PHONE_H * mobileScale) + MOBILE_FRAME_GUTTER,
-            }}
-          >
+      {isMobileViewport && (
+        <section className="relative pb-12 pt-6 lg:hidden">
+          <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-4 px-3 sm:px-4">
             <div
-              className="relative"
+              className="relative flex w-full justify-center"
               style={{
-                width:
-                  Math.round(PHONE_W * mobileScale) + MOBILE_FRAME_GUTTER * 2,
                 height: Math.round(PHONE_H * mobileScale) + MOBILE_FRAME_GUTTER,
               }}
             >
               <div
-                className="absolute top-0 origin-top-left"
+                className="relative"
                 style={{
-                  left: MOBILE_FRAME_GUTTER,
-                  transform: `scale(${mobileScale})`,
+                  width:
+                    Math.round(PHONE_W * mobileScale) + MOBILE_FRAME_GUTTER * 2,
+                  height:
+                    Math.round(PHONE_H * mobileScale) + MOBILE_FRAME_GUTTER,
                 }}
               >
-                <IPhoneMock isDark={isDark}>
-                  <ChatIMessageAnimation
-                    key={mobileScenario}
-                    scenario={mobileScenario}
-                    playing={mobilePlaying}
-                    onComplete={handleMobileComplete}
-                  />
-                </IPhoneMock>
-              </div>
-            </div>
-          </div>
-
-          <div className="shrink-0 pb-1 flex flex-col items-center gap-3">
-            <motion.span
-              key={mobileScenario}
-              initial={{ opacity: 0, y: 4, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="text-xs font-medium text-muted-foreground"
-            >
-              {DEMO_STORIES[mobileScenarioIndex]?.label}
-            </motion.span>
-
-            <div className="flex items-center gap-1.5">
-              {DEMO_STORIES.map((story, i) => (
-                <button
-                  key={story.id}
-                  type="button"
-                  aria-label={story.label}
-                  onClick={() => selectMobileScenario(story.id)}
-                  className="flex items-center"
-                >
-                  <motion.div
-                    className={`h-1.5 rounded-full ${
-                      i === mobileScenarioIndex
-                        ? "bg-foreground"
-                        : "bg-foreground/20"
-                    }`}
-                    animate={{ width: i === mobileScenarioIndex ? 16 : 6 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
-        ref={demoSectionRef}
-        className="relative hidden pb-24 pt-6 lg:block lg:pt-0"
-      >
-        <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-8">
-          <div className="relative">
-            <div className="sticky top-20 z-20 flex flex-col items-center gap-4 sm:gap-5">
-              <div className="flex w-full justify-center">
                 <div
-                  className="relative"
+                  className="absolute top-0 origin-top-left"
                   style={{
-                    width:
-                      Math.round(PHONE_W * DESKTOP_STORY_SCALE) +
-                      DESKTOP_FRAME_GUTTER * 2,
-                    height:
-                      Math.round(PHONE_H * DESKTOP_STORY_SCALE) +
-                      DESKTOP_FRAME_GUTTER,
+                    left: MOBILE_FRAME_GUTTER,
+                    transform: `scale(${mobileScale})`,
                   }}
                 >
-                  <div
-                    className="absolute top-0 origin-top-left"
-                    style={{
-                      left: DESKTOP_FRAME_GUTTER,
-                      transform: `scale(${DESKTOP_STORY_SCALE})`,
-                    }}
-                  >
-                    <PhoneMock
-                      isDark={isDark}
-                      scenario={activeScenario}
-                      playing={demoActive}
+                  <IPhoneMock isDark={isDark}>
+                    <ChatIMessageAnimation
+                      key={mobileScenario}
+                      scenario={mobileScenario}
+                      playing={mobilePlaying}
+                      onComplete={handleMobileComplete}
                     />
-                  </div>
+                  </IPhoneMock>
                 </div>
               </div>
-
-              {hasExitedDemo ? (
-                <ChatDemoRail
-                  activeScenario={activeScenario}
-                  onSelect={scrollToScenario}
-                  className="flex justify-center px-3 sm:px-4 lg:px-6"
-                />
-              ) : null}
             </div>
 
-            <div className="relative -mt-[58vh] pb-32 pt-[66vh]">
-              {DEMO_STORIES.map((story) => {
-                const meta = DEMO_STORY_META[story.id];
-                return (
-                  <article
+            <div className="shrink-0 pb-1 flex flex-col items-center gap-3">
+              <motion.span
+                key={mobileScenario}
+                initial={{ opacity: 0, y: 4, filter: "blur(4px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                className="text-xs font-medium text-muted-foreground"
+              >
+                {DEMO_STORIES[mobileScenarioIndex]?.label}
+              </motion.span>
+
+              <div className="flex items-center gap-1.5">
+                {DEMO_STORIES.map((story, i) => (
+                  <button
                     key={story.id}
-                    ref={(node) => {
-                      sectionRefs.current[story.id] = node;
-                    }}
-                    data-scenario={story.id}
-                    className="min-h-[100vh]"
-                    style={{ scrollMarginTop: 120 }}
-                    aria-label={meta.title}
+                    type="button"
+                    aria-label={story.label}
+                    onClick={() => selectMobileScenario(story.id)}
+                    className="flex items-center"
                   >
-                    <div className="sr-only">
-                      <h2>{meta.title}</h2>
-                      <p>{meta.description}</p>
-                    </div>
-                  </article>
-                );
-              })}
+                    <motion.div
+                      className={`h-1.5 rounded-full ${
+                        i === mobileScenarioIndex
+                          ? "bg-foreground"
+                          : "bg-foreground/20"
+                      }`}
+                      animate={{ width: i === mobileScenarioIndex ? 16 : 6 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 25,
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {!isMobileViewport && (
+        <section
+          ref={demoSectionRef}
+          className="relative hidden pb-24 pt-6 lg:block lg:pt-0"
+        >
+          <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-8">
+            <div className="relative">
+              <div className="sticky top-20 z-20 flex flex-col items-center gap-4 sm:gap-5">
+                <div className="flex w-full justify-center">
+                  <div
+                    className="relative"
+                    style={{
+                      width:
+                        Math.round(PHONE_W * DESKTOP_STORY_SCALE) +
+                        DESKTOP_FRAME_GUTTER * 2,
+                      height:
+                        Math.round(PHONE_H * DESKTOP_STORY_SCALE) +
+                        DESKTOP_FRAME_GUTTER,
+                    }}
+                  >
+                    <div
+                      className="absolute top-0 origin-top-left"
+                      style={{
+                        left: DESKTOP_FRAME_GUTTER,
+                        transform: `scale(${DESKTOP_STORY_SCALE})`,
+                      }}
+                    >
+                      <PhoneMock
+                        isDark={isDark}
+                        scenario={activeScenario}
+                        playing={demoActive}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {hasExitedDemo ? (
+                  <ChatDemoRail
+                    activeScenario={activeScenario}
+                    onSelect={scrollToScenario}
+                    className="flex justify-center px-3 sm:px-4 lg:px-6"
+                  />
+                ) : null}
+              </div>
+
+              <div className="relative -mt-[58vh] pb-32 pt-[66vh]">
+                {DEMO_STORIES.map((story) => {
+                  const meta = DEMO_STORY_META[story.id];
+                  return (
+                    <article
+                      key={story.id}
+                      ref={(node) => {
+                        sectionRefs.current[story.id] = node;
+                      }}
+                      data-scenario={story.id}
+                      className="min-h-[100vh]"
+                      style={{ scrollMarginTop: 120 }}
+                      aria-label={meta.title}
+                    >
+                      <div className="sr-only">
+                        <h2>{meta.title}</h2>
+                        <p>{meta.description}</p>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {!hasExitedDemo ? (
         <ChatDemoRail
@@ -545,10 +518,6 @@ export function Chat() {
           onSelect={scrollToScenario}
           className="hidden lg:flex fixed inset-x-0 bottom-4 z-50 justify-center px-3 sm:px-4 lg:px-6"
         />
-      ) : null}
-
-      {showDemoSetupCta ? (
-        <DemoSetupCta className="fixed bottom-4 right-4 z-50 w-[min(280px,calc(100vw-1.5rem))]" />
       ) : null}
 
       {/* Divider */}

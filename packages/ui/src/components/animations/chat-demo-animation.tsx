@@ -6,6 +6,177 @@ import { useTheme } from "next-themes";
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
+/* ------------------------------------------------------------------ */
+/*  Audio — real MP3 samples for notification & keyboard clicks        */
+/* ------------------------------------------------------------------ */
+
+const NOTIFICATION_MP3 = "https://cdn.midday.ai/notification.mp3";
+const KEYBOARD_MP3 = "https://cdn.midday.ai/keyboard.mp3";
+let audioCtx: AudioContext | null = null;
+let notificationBuffer: AudioBuffer | null = null;
+let keyboardBuffer: AudioBuffer | null = null;
+let rawNotificationData: ArrayBuffer | null = null;
+let rawKeyboardData: ArrayBuffer | null = null;
+let hasUserInteracted = false;
+let isMuted = true;
+const muteListeners = new Set<(muted: boolean) => void>();
+
+export function isDemoMuted() {
+  return isMuted;
+}
+
+export function toggleDemoMute() {
+  isMuted = !isMuted;
+  for (const fn of muteListeners) fn(isMuted);
+  return isMuted;
+}
+
+export function onDemoMuteChange(fn: (muted: boolean) => void) {
+  muteListeners.add(fn);
+  return () => {
+    muteListeners.delete(fn);
+  };
+}
+
+function getOrCreateContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  if (!audioCtx) {
+    try {
+      audioCtx = new AudioContext();
+    } catch {
+      return null;
+    }
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+
+function decodeBuffers() {
+  const ctx = audioCtx;
+  if (!ctx) return;
+  if (!notificationBuffer && rawNotificationData) {
+    const data = rawNotificationData;
+    rawNotificationData = null;
+    ctx
+      .decodeAudioData(data)
+      .then((b) => {
+        notificationBuffer = b;
+      })
+      .catch(() => {});
+  }
+  if (!keyboardBuffer && rawKeyboardData) {
+    const data = rawKeyboardData;
+    rawKeyboardData = null;
+    ctx
+      .decodeAudioData(data)
+      .then((b) => {
+        keyboardBuffer = b;
+      })
+      .catch(() => {});
+  }
+}
+
+if (typeof window !== "undefined") {
+  fetch(NOTIFICATION_MP3)
+    .then((r) => r.arrayBuffer())
+    .then((arr) => {
+      rawNotificationData = arr;
+      decodeBuffers();
+    })
+    .catch(() => {});
+  fetch(KEYBOARD_MP3)
+    .then((r) => r.arrayBuffer())
+    .then((arr) => {
+      rawKeyboardData = arr;
+      decodeBuffers();
+    })
+    .catch(() => {});
+
+  const onInteract = () => {
+    hasUserInteracted = true;
+    getOrCreateContext();
+    decodeBuffers();
+    for (const e of [
+      "click",
+      "touchstart",
+      "keydown",
+      "scroll",
+      "mousedown",
+    ] as const)
+      document.removeEventListener(e, onInteract, true);
+  };
+  for (const e of [
+    "click",
+    "touchstart",
+    "keydown",
+    "scroll",
+    "mousedown",
+  ] as const)
+    document.addEventListener(e, onInteract, {
+      capture: true,
+      once: false,
+      passive: true,
+    });
+}
+
+function playNotificationSound() {
+  try {
+    if (isMuted || !hasUserInteracted || !notificationBuffer) return;
+    const ctx = getOrCreateContext();
+    if (!ctx || ctx.state !== "running") return;
+    const src = ctx.createBufferSource();
+    src.buffer = notificationBuffer;
+    src.connect(ctx.destination);
+    src.start();
+  } catch {
+    // Audio not available
+  }
+}
+
+function createKeyboardAudio(): {
+  src: AudioBufferSourceNode;
+  gain: GainNode;
+} | null {
+  try {
+    if (isMuted || !hasUserInteracted || !keyboardBuffer) return null;
+    const ctx = getOrCreateContext();
+    if (!ctx || ctx.state !== "running") return null;
+
+    const maxOffset = Math.max(0, keyboardBuffer.duration - 5);
+    const offset = Math.random() * maxOffset;
+
+    const src = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    src.buffer = keyboardBuffer;
+    gain.gain.setValueAtTime(1, ctx.currentTime);
+    src.connect(gain).connect(ctx.destination);
+    src.start(ctx.currentTime, offset);
+    return { src, gain };
+  } catch {
+    return null;
+  }
+}
+
+function destroyKeyboardAudio(
+  src: AudioBufferSourceNode | null,
+  gain: GainNode | null,
+) {
+  if (!src || !gain) return;
+  try {
+    gain.gain.cancelScheduledValues(0);
+    gain.gain.setValueAtTime(0, 0);
+  } catch {}
+  try {
+    src.stop();
+  } catch {}
+  try {
+    src.disconnect();
+  } catch {}
+  try {
+    gain.disconnect();
+  } catch {}
+}
+
 type ReceiptAttachment = {
   kind: "receipt";
   title: string;
@@ -79,6 +250,8 @@ const SCENARIO_ORDER: ChatDemoScenario[] = [
 type ScenarioConfig = {
   startOnLockScreen: boolean;
   notificationText?: string;
+  setupNotificationTitle?: string;
+  setupNotificationBody?: string;
   notificationVisibleMs?: number;
   lockHoldMs?: number;
   transitionMs?: number;
@@ -91,12 +264,19 @@ type DemoBeat = {
   holdMs: number;
   messages: ChatMessage[];
   isTyping: boolean;
+  showKeyboard: boolean;
+  composerText: string;
+  showCamera: boolean;
+  cameraFlash: boolean;
   readReceiptLabels: Record<number, string>;
   lockOpacity: number;
   chatOpacity: number;
   showNotification: boolean;
+  showSetupNotification: boolean;
   notificationTapped: boolean;
   notificationText: string;
+  setupNotificationTitle?: string;
+  setupNotificationBody?: string;
 };
 
 const SCENARIOS: Record<ChatDemoScenario, ScenarioConfig> = {
@@ -213,6 +393,9 @@ const SCENARIOS: Record<ChatDemoScenario, ScenarioConfig> = {
   },
   "latest-transactions": {
     startOnLockScreen: false,
+    setupNotificationTitle: "Get started with Midday",
+    setupNotificationBody:
+      "Connect your company to chat, send invoices, and match receipts right from Messages.",
     steps: [
       {
         sender: "user",
@@ -281,9 +464,36 @@ function formatLockDate(d: Date): string {
 
 function useClientNow(): Date | null {
   const [now, setNow] = useState<Date | null>(null);
+
   useEffect(() => {
-    setNow(new Date());
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+
+    const sync = () => {
+      setNow(new Date());
+    };
+
+    sync();
+
+    const schedule = () => {
+      const current = new Date();
+      const msUntilNextMinute =
+        (60 - current.getSeconds()) * 1000 - current.getMilliseconds();
+
+      timeoutId = setTimeout(() => {
+        sync();
+        intervalId = setInterval(sync, 60_000);
+      }, msUntilNextMinute);
+    };
+
+    schedule();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
+    };
   }, []);
+
   return now;
 }
 
@@ -303,6 +513,10 @@ function buildReadReceipts(): Record<ChatDemoScenario, string[]> {
 const HIDE_SCROLLBAR_CSS = `
   [data-chat-scroll="true"]::-webkit-scrollbar {
     display: none;
+  }
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
   }
 `;
 
@@ -326,6 +540,12 @@ const HOLD_READ_RECEIPT = 500;
 const HOLD_TYPING = 750;
 const HOLD_MIDDAY_MESSAGE = 850;
 const HOLD_SCENARIO_BOUNDARY = 350;
+const HOLD_KEYBOARD_UP = 500;
+const CHAR_TYPE_MS = 35;
+const SUBMIT_PAUSE_MS = 300;
+const HOLD_CAMERA_OPEN = 2000;
+const HOLD_CAMERA_FLASH = 500;
+const HOLD_SETUP_NOTIFICATION = 2200;
 
 function buildGlobalBeats(): DemoBeat[] {
   const beats: DemoBeat[] = [];
@@ -347,10 +567,15 @@ function buildGlobalBeats(): DemoBeat[] {
       holdMs: number;
       messages: ChatMessage[];
       isTyping: boolean;
+      showKeyboard: boolean;
+      composerText: string;
+      showCamera: boolean;
+      cameraFlash: boolean;
       readReceiptLabels: Record<number, string>;
       lockOpacity: number;
       chatOpacity: number;
       showNotification: boolean;
+      showSetupNotification: boolean;
       notificationTapped: boolean;
     }> = [];
 
@@ -361,9 +586,14 @@ function buildGlobalBeats(): DemoBeat[] {
       holdMs: number,
       overrides?: Partial<{
         isTyping: boolean;
+        showKeyboard: boolean;
+        composerText: string;
+        showCamera: boolean;
+        cameraFlash: boolean;
         lockOpacity: number;
         chatOpacity: number;
         showNotification: boolean;
+        showSetupNotification: boolean;
         notificationTapped: boolean;
       }>,
     ) => {
@@ -371,10 +601,15 @@ function buildGlobalBeats(): DemoBeat[] {
         holdMs,
         messages: [...currentMessages],
         isTyping: overrides?.isTyping ?? false,
+        showKeyboard: overrides?.showKeyboard ?? false,
+        composerText: overrides?.composerText ?? "",
+        showCamera: overrides?.showCamera ?? false,
+        cameraFlash: overrides?.cameraFlash ?? false,
         readReceiptLabels: { ...currentReceipts },
         lockOpacity: overrides?.lockOpacity ?? 0,
         chatOpacity: overrides?.chatOpacity ?? 1,
         showNotification: overrides?.showNotification ?? false,
+        showSetupNotification: overrides?.showSetupNotification ?? false,
         notificationTapped: overrides?.notificationTapped ?? false,
       });
     };
@@ -402,24 +637,40 @@ function buildGlobalBeats(): DemoBeat[] {
       const firstStep = config.steps[0];
 
       if (firstStep) {
-        const msgId = globalMessageId++;
-        currentMessages.push({
-          id: msgId,
-          sender: firstStep.sender,
-          text: firstStep.text,
-          attachment: firstStep.attachment,
-        });
-
         if (firstStep.sender === "user") {
+          snap(HOLD_CHAT_OPEN, { lockOpacity: 0, chatOpacity: 1 });
+          snap(HOLD_KEYBOARD_UP, { showKeyboard: true });
+          if (firstStep.text) {
+            const typingHoldMs =
+              firstStep.text.length * CHAR_TYPE_MS + SUBMIT_PAUSE_MS;
+            snap(typingHoldMs, {
+              showKeyboard: true,
+              composerText: firstStep.text,
+            });
+          }
+          const msgId = globalMessageId++;
+          currentMessages.push({
+            id: msgId,
+            sender: firstStep.sender,
+            text: firstStep.text,
+            attachment: firstStep.attachment,
+          });
+          snap(HOLD_USER_MESSAGE);
           const label =
             readLabels[userMsgCount] ??
             readLabels[readLabels.length - 1] ??
             FALLBACK_READ_LABEL;
           userMsgCount++;
-          snap(HOLD_CHAT_OPEN, { lockOpacity: 0, chatOpacity: 1 });
           currentReceipts[msgId] = label;
           snap(HOLD_READ_RECEIPT);
         } else {
+          const msgId = globalMessageId++;
+          currentMessages.push({
+            id: msgId,
+            sender: firstStep.sender,
+            text: firstStep.text,
+            attachment: firstStep.attachment,
+          });
           snap(HOLD_CHAT_OPEN, { lockOpacity: 0, chatOpacity: 1 });
         }
       } else {
@@ -429,6 +680,18 @@ function buildGlobalBeats(): DemoBeat[] {
       for (let stepIdx = 1; stepIdx < config.steps.length; stepIdx++) {
         const step = config.steps[stepIdx]!;
         const msgId = globalMessageId++;
+
+        if (step.sender === "user") {
+          snap(HOLD_KEYBOARD_UP, { showKeyboard: true });
+          if (step.text) {
+            const typingHoldMs =
+              step.text.length * CHAR_TYPE_MS + SUBMIT_PAUSE_MS;
+            snap(typingHoldMs, {
+              showKeyboard: true,
+              composerText: step.text,
+            });
+          }
+        }
 
         if (step.sender === "midday" && step.typingMs) {
           snap(HOLD_TYPING, { isTyping: true });
@@ -456,8 +719,36 @@ function buildGlobalBeats(): DemoBeat[] {
       snap(HOLD_CHAT_OPEN);
 
       const firstStep = config.steps[0];
+      const isReceiptCamera =
+        scenarioId === "receipt-match" &&
+        firstStep?.sender === "user" &&
+        firstStep?.attachment;
 
       if (firstStep) {
+        if (isReceiptCamera) {
+          snap(700, { showKeyboard: true });
+          snap(HOLD_CAMERA_OPEN, { showCamera: true, chatOpacity: 0 });
+          snap(HOLD_CAMERA_FLASH, {
+            showCamera: true,
+            cameraFlash: true,
+            chatOpacity: 0,
+          });
+        } else if (firstStep.sender === "user") {
+          snap(HOLD_KEYBOARD_UP, { showKeyboard: true });
+          if (firstStep.text) {
+            const typingHoldMs =
+              firstStep.text.length * CHAR_TYPE_MS + SUBMIT_PAUSE_MS;
+            snap(typingHoldMs, {
+              showKeyboard: true,
+              composerText: firstStep.text,
+            });
+          }
+        }
+
+        if (firstStep.sender === "midday" && firstStep.typingMs) {
+          snap(HOLD_TYPING, { isTyping: true });
+        }
+
         const msgId = globalMessageId++;
         currentMessages.push({
           id: msgId,
@@ -484,6 +775,18 @@ function buildGlobalBeats(): DemoBeat[] {
         const step = config.steps[stepIdx]!;
         const msgId = globalMessageId++;
 
+        if (step.sender === "user") {
+          snap(HOLD_KEYBOARD_UP, { showKeyboard: true });
+          if (step.text) {
+            const typingHoldMs =
+              step.text.length * CHAR_TYPE_MS + SUBMIT_PAUSE_MS;
+            snap(typingHoldMs, {
+              showKeyboard: true,
+              composerText: step.text,
+            });
+          }
+        }
+
         if (step.sender === "midday" && step.typingMs) {
           snap(HOLD_TYPING, { isTyping: true });
         }
@@ -506,6 +809,14 @@ function buildGlobalBeats(): DemoBeat[] {
           snap(HOLD_READ_RECEIPT);
         }
       }
+
+      if (
+        si === scenarioCount - 1 &&
+        config.setupNotificationTitle &&
+        config.setupNotificationBody
+      ) {
+        snap(HOLD_SETUP_NOTIFICATION, { showSetupNotification: true });
+      }
     }
 
     const beatCount = localBeats.length;
@@ -523,17 +834,39 @@ function buildGlobalBeats(): DemoBeat[] {
             : local.holdMs,
         messages: local.messages,
         isTyping: local.isTyping,
+        showKeyboard: local.showKeyboard,
+        composerText: local.composerText,
+        showCamera: local.showCamera,
+        cameraFlash: local.cameraFlash,
         readReceiptLabels: local.readReceiptLabels,
         lockOpacity: local.lockOpacity,
         chatOpacity: local.chatOpacity,
         showNotification: local.showNotification,
+        showSetupNotification: local.showSetupNotification,
         notificationTapped: local.notificationTapped,
         notificationText,
+        setupNotificationTitle: config.setupNotificationTitle,
+        setupNotificationBody: config.setupNotificationBody,
       });
     }
   }
 
   return beats;
+}
+
+/* ------------------------------------------------------------------ */
+/*  iOS keyboard (inlined from Keyboard.svg)                            */
+/* ------------------------------------------------------------------ */
+
+function IOSKeyboard() {
+  return (
+    <img
+      src="/images/ios-keyboard-dark.svg"
+      alt=""
+      draggable={false}
+      style={{ width: "100%", display: "block" }}
+    />
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -569,7 +902,7 @@ function ContactAvatar({ size = 64 }: { size?: number }) {
   const logoSize = Math.round(size * 0.53);
   return (
     <div
-      className="flex items-center justify-center"
+      className="flex items-center justify-center z-10"
       style={{
         width: size,
         height: size,
@@ -709,6 +1042,28 @@ function ComposerMicIcon({ color }: { color: string }) {
         stroke={color}
         strokeWidth="1.45"
         strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function ComposerSendIcon() {
+  return (
+    <svg
+      width="26"
+      height="26"
+      viewBox="0 0 26 26"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <circle cx="13" cy="13" r="13" fill="#007AFF" />
+      <path
+        d="M13 18.5V8.5M13 8.5L8.5 12.5M13 8.5L17.5 12.5"
+        stroke="#FFFFFF"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -922,6 +1277,7 @@ function HomeIndicator({ dark }: { dark?: boolean }) {
 /* ------------------------------------------------------------------ */
 
 const CLOCK_MAX_WIDTH = 390;
+const LOCK_SCREEN_WALLPAPER = "https://cdn.midday.ai/background-remote-v7.png";
 
 function LockScreenClock({ timeStr }: { timeStr: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -930,9 +1286,9 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
   const letterSpacing = Math.round(fontSize * -0.042);
   const svgHeight = Math.round(fontSize * 0.9);
   const baselineY = Math.round(svgHeight * 0.8);
-  const mainStrokeWidth = Math.max(1.28, fontSize * 0.0072);
-  const edgeStrokeWidth = Math.max(0.82, fontSize * 0.0049);
-  const hairlineStrokeWidth = Math.max(0.52, fontSize * 0.003);
+  const mainStrokeWidth = Math.max(1.02, fontSize * 0.0058);
+  const edgeStrokeWidth = Math.max(0.62, fontSize * 0.0038);
+  const hairlineStrokeWidth = Math.max(0.44, fontSize * 0.0026);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -1003,8 +1359,32 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             width="140%"
             height="160%"
           >
-            <feGaussianBlur stdDeviation="4.5" />
+            <feGaussianBlur stdDeviation="6.5" />
           </filter>
+
+          <pattern
+            id={`${svgId}-wallpaper`}
+            patternUnits="userSpaceOnUse"
+            width={CLOCK_MAX_WIDTH}
+            height={svgHeight}
+          >
+            <image
+              href={LOCK_SCREEN_WALLPAPER}
+              x="0"
+              y="-138"
+              width={CLOCK_MAX_WIDTH}
+              height="844"
+              preserveAspectRatio="xMidYMid slice"
+              opacity="0.72"
+            />
+            <rect
+              x="0"
+              y="0"
+              width={CLOCK_MAX_WIDTH}
+              height={svgHeight}
+              fill="rgba(255,255,255,0.16)"
+            />
+          </pattern>
 
           <linearGradient
             id={`${svgId}-fill`}
@@ -1013,9 +1393,9 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             x2="0%"
             y2="100%"
           >
-            <stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
-            <stop offset="52%" stopColor="rgba(241,243,242,0.92)" />
-            <stop offset="100%" stopColor="rgba(225,228,226,0.9)" />
+            <stop offset="0%" stopColor="rgba(255,255,255,0.96)" />
+            <stop offset="48%" stopColor="rgba(242,245,248,0.82)" />
+            <stop offset="100%" stopColor="rgba(220,225,231,0.68)" />
           </linearGradient>
 
           <radialGradient
@@ -1027,8 +1407,9 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             fy="14%"
           >
             <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
-            <stop offset="45%" stopColor="rgba(255,255,255,0.07)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+            <stop offset="36%" stopColor="rgba(255,255,255,0.08)" />
+            <stop offset="74%" stopColor="rgba(255,255,255,0.06)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0.03)" />
           </radialGradient>
 
           <linearGradient
@@ -1038,9 +1419,9 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             x2="0%"
             y2="100%"
           >
-            <stop offset="0%" stopColor="rgba(255,255,255,1)" />
-            <stop offset="55%" stopColor="rgba(255,255,255,0.88)" />
-            <stop offset="100%" stopColor="rgba(222,226,226,0.72)" />
+            <stop offset="0%" stopColor="rgba(255,255,255,0.82)" />
+            <stop offset="52%" stopColor="rgba(239,242,246,0.46)" />
+            <stop offset="100%" stopColor="rgba(190,196,204,0.14)" />
           </linearGradient>
 
           <linearGradient
@@ -1051,9 +1432,9 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             y2="100%"
           >
             <stop offset="0%" stopColor="rgba(255,255,255,1)" />
-            <stop offset="16%" stopColor="rgba(255,255,255,0.96)" />
-            <stop offset="34%" stopColor="rgba(255,255,255,0.32)" />
-            <stop offset="62%" stopColor="rgba(255,255,255,0)" />
+            <stop offset="12%" stopColor="rgba(255,255,255,0.92)" />
+            <stop offset="28%" stopColor="rgba(255,255,255,0.22)" />
+            <stop offset="56%" stopColor="rgba(255,255,255,0)" />
           </linearGradient>
 
           <linearGradient
@@ -1064,9 +1445,9 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             y2="100%"
           >
             <stop offset="0%" stopColor="rgba(0,0,0,0)" />
-            <stop offset="10%" stopColor="rgba(60,62,64,0.5)" />
-            <stop offset="24%" stopColor="rgba(60,62,64,0.36)" />
-            <stop offset="46%" stopColor="rgba(60,62,64,0)" />
+            <stop offset="8%" stopColor="rgba(14,16,20,0.72)" />
+            <stop offset="24%" stopColor="rgba(18,20,24,0.42)" />
+            <stop offset="48%" stopColor="rgba(18,20,24,0)" />
           </linearGradient>
 
           <linearGradient
@@ -1077,8 +1458,8 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             y2="74%"
           >
             <stop offset="0%" stopColor="rgba(255,255,255,1)" />
-            <stop offset="20%" stopColor="rgba(255,255,255,0.68)" />
-            <stop offset="50%" stopColor="rgba(255,255,255,0.16)" />
+            <stop offset="16%" stopColor="rgba(255,255,255,0.72)" />
+            <stop offset="42%" stopColor="rgba(255,255,255,0.2)" />
             <stop offset="78%" stopColor="rgba(255,255,255,0)" />
           </linearGradient>
 
@@ -1089,10 +1470,10 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             x2="24%"
             y2="16%"
           >
-            <stop offset="0%" stopColor="rgba(84,88,90,0.24)" />
-            <stop offset="32%" stopColor="rgba(84,88,90,0.1)" />
-            <stop offset="64%" stopColor="rgba(84,88,90,0.02)" />
-            <stop offset="100%" stopColor="rgba(80,84,86,0)" />
+            <stop offset="0%" stopColor="rgba(10,12,16,0.38)" />
+            <stop offset="28%" stopColor="rgba(12,14,18,0.16)" />
+            <stop offset="58%" stopColor="rgba(12,14,18,0.03)" />
+            <stop offset="100%" stopColor="rgba(12,14,18,0)" />
           </linearGradient>
 
           <linearGradient
@@ -1102,8 +1483,8 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             x2="0%"
             y2="100%"
           >
-            <stop offset="0%" stopColor="rgba(255,255,255,0.42)" />
-            <stop offset="10%" stopColor="rgba(255,255,255,0.1)" />
+            <stop offset="0%" stopColor="rgba(255,255,255,0.26)" />
+            <stop offset="10%" stopColor="rgba(255,255,255,0.08)" />
             <stop offset="24%" stopColor="rgba(255,255,255,0)" />
           </linearGradient>
 
@@ -1114,9 +1495,9 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             x2="0%"
             y2="0%"
           >
-            <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
-            <stop offset="10%" stopColor="rgba(255,255,255,0.08)" />
-            <stop offset="24%" stopColor="rgba(255,255,255,0)" />
+            <stop offset="0%" stopColor="rgba(255,255,255,0.22)" />
+            <stop offset="12%" stopColor="rgba(255,255,255,0.1)" />
+            <stop offset="30%" stopColor="rgba(255,255,255,0.02)" />
           </linearGradient>
         </defs>
 
@@ -1157,9 +1538,23 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
           style={{
             ...shared,
             letterSpacing: `${letterSpacing}px`,
+            fill: `url(#${svgId}-wallpaper)`,
+            opacity: 0.54,
+          }}
+        >
+          {timeStr}
+        </text>
+
+        <text
+          x="50%"
+          y={baselineY}
+          textAnchor="middle"
+          style={{
+            ...shared,
+            letterSpacing: `${letterSpacing}px`,
             fill: `url(#${svgId}-fill)`,
-            stroke: "rgba(255,255,255,0.1)",
-            strokeWidth: Math.max(0.22, mainStrokeWidth * 0.38),
+            stroke: "rgba(255,255,255,0.04)",
+            strokeWidth: Math.max(0.14, mainStrokeWidth * 0.22),
             paintOrder: "stroke fill",
           }}
         >
@@ -1174,7 +1569,7 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             ...shared,
             letterSpacing: `${letterSpacing}px`,
             fill: `url(#${svgId}-body)`,
-            opacity: 0.52,
+            opacity: 0.72,
           }}
         >
           {timeStr}
@@ -1202,7 +1597,7 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
             ...shared,
             letterSpacing: `${letterSpacing}px`,
             fill: `url(#${svgId}-top-sheen)`,
-            opacity: 0.24,
+            opacity: 0.18,
           }}
         >
           {timeStr}
@@ -1275,6 +1670,468 @@ function LockScreenClock({ timeStr }: { timeStr: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Weather data — browser geolocation + Open-Meteo (free, no key)     */
+/* ------------------------------------------------------------------ */
+
+type WeatherData = {
+  temp: number;
+  high: number;
+  low: number;
+  code: number;
+  city: string;
+  sunset?: string;
+  unit?: "celsius" | "fahrenheit";
+};
+
+function getBrowserTemperatureUnit(): "celsius" | "fahrenheit" {
+  if (typeof navigator === "undefined") return "celsius";
+
+  const languages = navigator.languages?.length
+    ? navigator.languages
+    : [navigator.language];
+
+  for (const language of languages) {
+    const region = language.split("-")[1]?.toUpperCase();
+    if (
+      region &&
+      ["US", "BS", "BZ", "KY", "PW", "LR", "FM", "MH"].includes(region)
+    ) {
+      return "fahrenheit";
+    }
+  }
+
+  return "celsius";
+}
+
+function useWeather(): WeatherData | null {
+  const [data, setData] = useState<WeatherData | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let cancelled = false;
+    const unit = getBrowserTemperatureUnit();
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/geo?unit=${unit}`);
+        if (cancelled || !res.ok) return;
+        const json = await res.json();
+        if (cancelled) return;
+
+        setData({
+          temp: json.temp,
+          high: json.high,
+          low: json.low,
+          code: json.code,
+          city: json.city ?? "My Location",
+          sunset: json.sunset,
+          unit: json.unit ?? unit,
+        });
+      } catch {
+        // Silently fail — widgets just won't show
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return data;
+}
+
+const WEATHER_LABELS: Record<number, string> = {
+  0: "Clear Sky",
+  1: "Mainly Clear",
+  2: "Partly Cloudy",
+  3: "Overcast",
+  45: "Foggy",
+  48: "Icy Fog",
+  51: "Light Drizzle",
+  53: "Drizzle",
+  55: "Heavy Drizzle",
+  61: "Light Rain",
+  63: "Rain",
+  65: "Heavy Rain",
+  71: "Light Snow",
+  73: "Snow",
+  75: "Heavy Snow",
+  80: "Light Showers",
+  81: "Showers",
+  82: "Heavy Showers",
+  95: "Thunderstorm",
+};
+
+function weatherLabel(code: number): string {
+  return (
+    WEATHER_LABELS[code] ??
+    WEATHER_LABELS[Math.floor(code / 10) * 10] ??
+    "Partly Cloudy"
+  );
+}
+
+function polarToCartesian(
+  cx: number,
+  cy: number,
+  radius: number,
+  angleInDegrees: number,
+) {
+  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180;
+
+  return {
+    x: cx + radius * Math.cos(angleInRadians),
+    y: cy + radius * Math.sin(angleInRadians),
+  };
+}
+
+function describeArc(
+  cx: number,
+  cy: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+) {
+  const start = polarToCartesian(cx, cy, radius, endAngle);
+  const end = polarToCartesian(cx, cy, radius, startAngle);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+  return [
+    "M",
+    start.x,
+    start.y,
+    "A",
+    radius,
+    radius,
+    0,
+    largeArcFlag,
+    0,
+    end.x,
+    end.y,
+  ].join(" ");
+}
+
+function LockWeatherIcon({ code }: { code: number }) {
+  const isClear = code <= 1;
+  const isCloudy = code >= 2 && code <= 3;
+  const isRain = (code >= 51 && code <= 65) || (code >= 80 && code <= 82);
+  const isSnow = code >= 71 && code <= 75;
+
+  if (isClear) {
+    return (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="10" r="3.7" fill="#999999" />
+        {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+          <line
+            key={deg}
+            x1="10"
+            y1="1.9"
+            x2="10"
+            y2="3.8"
+            stroke="#999999"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            transform={`rotate(${deg} 10 10)`}
+          />
+        ))}
+      </svg>
+    );
+  }
+
+  if (isSnow) {
+    return (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path
+          d="M4.6 12.8a3.6 3.6 0 0 1-.2-7.2 4.9 4.9 0 0 1 9.4 0 2.9 2.9 0 0 1-.2 7.2H4.6Z"
+          fill="#999999"
+        />
+        <circle cx="7" cy="15.6" r="0.7" fill="#999999" />
+        <circle cx="10" cy="16.2" r="0.7" fill="#999999" />
+        <circle cx="13" cy="15.4" r="0.7" fill="#999999" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <circle cx="12" cy="6.5" r="2.6" fill="#999999" />
+      <path
+        d="M4.2 13.3a3.6 3.6 0 0 1-.2-7.2 4.9 4.9 0 0 1 9.4 0 2.9 2.9 0 0 1-.2 7.2H4.2Z"
+        fill="#999999"
+      />
+      {(isCloudy || isRain) &&
+        [0, 60, 120, 180, 240, 300].map((deg) => (
+          <line
+            key={deg}
+            x1="12"
+            y1="2.1"
+            x2="12"
+            y2="3.3"
+            stroke="#999999"
+            strokeWidth="1"
+            strokeLinecap="round"
+            transform={`rotate(${deg} 12 6.5)`}
+          />
+        ))}
+      {isRain && (
+        <>
+          <line
+            x1="7"
+            y1="15"
+            x2="6.3"
+            y2="16.8"
+            stroke="#999999"
+            strokeWidth="1.1"
+            strokeLinecap="round"
+          />
+          <line
+            x1="10"
+            y1="15"
+            x2="9.3"
+            y2="16.8"
+            stroke="#999999"
+            strokeWidth="1.1"
+            strokeLinecap="round"
+          />
+          <line
+            x1="13"
+            y1="15"
+            x2="12.3"
+            y2="16.8"
+            stroke="#999999"
+            strokeWidth="1.1"
+            strokeLinecap="round"
+          />
+        </>
+      )}
+    </svg>
+  );
+}
+
+function LockScreenWidgets({ weather }: { weather: WeatherData | null }) {
+  if (!weather) return null;
+
+  const condition = weatherLabel(weather.code);
+  const gaugeMin = weather.low;
+  const gaugeMax = Math.max(weather.high, gaugeMin + 1);
+  const progress = Math.max(
+    0,
+    Math.min(1, (weather.temp - gaugeMin) / (gaugeMax - gaugeMin)),
+  );
+  const startAngle = 238;
+  const endAngle = 482;
+  const valueAngle = startAngle + (endAngle - startAngle) * progress;
+  const dot = polarToCartesian(246, 39, 26, valueAngle);
+  const sunsetParts = weather.sunset?.split(" ");
+  const sunsetTime = sunsetParts?.[0] ?? "8:29";
+  const sunsetMeridiem = sunsetParts?.[1] ?? "PM";
+  const widgetTextStyle = {
+    textRendering: "geometricPrecision" as const,
+    fontKerning: "normal" as const,
+  };
+
+  return (
+    <motion.div
+      style={{
+        width: "100%",
+        marginTop: 18,
+        padding: "0",
+        zIndex: 10,
+        boxSizing: "border-box",
+      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.45, ease: "easeOut", delay: 0.08 }}
+    >
+      <svg
+        viewBox="0 0 402 72"
+        style={{
+          display: "block",
+          width: "100%",
+          height: "auto",
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+      >
+        <g
+          transform="translate(-30 -1.5) scale(1.08)"
+          style={{ mixBlendMode: "plus-lighter" }}
+        >
+          <foreignObject x="34" y="4" width="22" height="22">
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                backdropFilter: "blur(68px)",
+                WebkitBackdropFilter: "blur(68px)",
+              }}
+            />
+          </foreignObject>
+          <g transform="translate(37.5 7)">
+            <LockWeatherIcon code={weather.code} />
+          </g>
+          <text
+            x="60"
+            y="22"
+            fill="#999999"
+            style={{
+              ...widgetTextStyle,
+              fontFamily: SF_FONT,
+              fontSize: 14.5,
+              fontWeight: 500,
+              letterSpacing: "0px",
+            }}
+          >
+            {weather.temp}°
+          </text>
+        </g>
+
+        <g
+          transform="translate(-30 -1.5) scale(1.08)"
+          style={{ mixBlendMode: "plus-lighter" }}
+        >
+          <text
+            x="38"
+            y="42.5"
+            fill="white"
+            style={{
+              ...widgetTextStyle,
+              fontFamily: SF_DISPLAY,
+              fontSize: 16.5,
+              fontWeight: 400,
+              letterSpacing: "-0.18px",
+            }}
+          >
+            {condition}
+          </text>
+          <text
+            x="38"
+            y="62.5"
+            fill="white"
+            style={{
+              ...widgetTextStyle,
+              fontFamily: SF_FONT,
+              fontSize: 14,
+              fontWeight: 400,
+              letterSpacing: "-0.04px",
+            }}
+          >
+            H:{weather.high}° L:{weather.low}°
+          </text>
+        </g>
+
+        <g
+          transform="translate(-24 -2) scale(1.1)"
+          style={{ mixBlendMode: "plus-lighter" }}
+        >
+          <path
+            d={describeArc(246, 39, 26, startAngle, endAngle)}
+            fill="none"
+            stroke="#333333"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+          <path
+            d={describeArc(246, 39, 26, startAngle, valueAngle)}
+            fill="none"
+            stroke="white"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+          <circle cx={dot.x} cy={dot.y} r="3.6" fill="white" />
+          <text
+            x="246"
+            y="45"
+            textAnchor="middle"
+            fill="white"
+            style={{
+              ...widgetTextStyle,
+              fontFamily: SF_DISPLAY,
+              fontSize: 25.5,
+              fontWeight: 500,
+              letterSpacing: "-0.45px",
+            }}
+          >
+            {weather.temp}
+          </text>
+          <text
+            x="241"
+            y="66"
+            textAnchor="end"
+            fill="white"
+            style={{
+              ...widgetTextStyle,
+              fontFamily: SF_FONT,
+              fontSize: 10.5,
+              fontWeight: 400,
+              letterSpacing: "0px",
+            }}
+          >
+            {weather.low}
+          </text>
+          <text
+            x="251"
+            y="66"
+            textAnchor="start"
+            fill="white"
+            style={{
+              ...widgetTextStyle,
+              fontFamily: SF_FONT,
+              fontSize: 10.5,
+              fontWeight: 400,
+              letterSpacing: "0px",
+            }}
+          >
+            {weather.high}
+          </text>
+        </g>
+
+        <g
+          transform="translate(-1 -4) scale(1.1)"
+          style={{ mixBlendMode: "plus-lighter" }}
+        >
+          <circle cx="334" cy="36" r="29.5" fill="#333333" />
+          <path
+            d="M336.911 24.0977C336.911 24.2731 336.893 24.4432 336.857 24.6079C336.825 24.7726 336.779 24.9302 336.718 25.0806H331.277C331.216 24.9302 331.168 24.7726 331.132 24.6079C331.1 24.4432 331.083 24.2731 331.083 24.0977C331.083 23.6966 331.159 23.3206 331.309 22.9697C331.463 22.6188 331.673 22.3091 331.938 22.0405C332.206 21.772 332.516 21.5625 332.867 21.4121C333.221 21.2581 333.599 21.1812 334 21.1812C334.397 21.1812 334.772 21.2581 335.123 21.4121C335.477 21.5625 335.787 21.772 336.052 22.0405C336.32 22.3091 336.53 22.6188 336.68 22.9697C336.834 23.3206 336.911 23.6966 336.911 24.0977ZM328.317 24.377C328.171 24.377 328.047 24.3304 327.947 24.2373C327.85 24.1442 327.802 24.0314 327.802 23.8989C327.802 23.77 327.85 23.659 327.947 23.5659C328.043 23.4728 328.167 23.4263 328.317 23.4263H329.558C329.708 23.4263 329.832 23.4728 329.929 23.5659C330.025 23.659 330.076 23.77 330.079 23.8989C330.079 24.0314 330.029 24.1442 329.929 24.2373C329.832 24.3304 329.708 24.377 329.558 24.377H328.317ZM330.52 21.3047L329.639 20.4292C329.535 20.3218 329.481 20.2 329.478 20.064C329.478 19.9279 329.524 19.8151 329.617 19.7256C329.71 19.6361 329.823 19.5913 329.956 19.5913C330.092 19.5913 330.212 19.645 330.315 19.7524L331.196 20.6279C331.304 20.7318 331.357 20.8517 331.357 20.9878C331.361 21.1239 331.316 21.2384 331.223 21.3315C331.134 21.4282 331.019 21.4748 330.879 21.4712C330.743 21.464 330.623 21.4085 330.52 21.3047ZM336.771 21.3315C336.678 21.242 336.632 21.1292 336.632 20.9932C336.635 20.8535 336.691 20.7318 336.798 20.6279L337.679 19.7524C337.783 19.645 337.903 19.5913 338.039 19.5913C338.175 19.5877 338.288 19.6325 338.377 19.7256C338.471 19.8187 338.515 19.9333 338.512 20.0693C338.512 20.2018 338.46 20.3218 338.356 20.4292L337.475 21.3047C337.371 21.4085 337.251 21.4622 337.115 21.4658C336.979 21.4694 336.865 21.4246 336.771 21.3315ZM338.437 24.377C338.293 24.377 338.172 24.3304 338.071 24.2373C337.971 24.1442 337.919 24.0314 337.916 23.8989C337.916 23.77 337.966 23.659 338.066 23.5659C338.166 23.4728 338.29 23.4263 338.437 23.4263H339.677C339.828 23.4263 339.951 23.4728 340.048 23.5659C340.145 23.659 340.193 23.77 340.193 23.8989C340.193 24.0314 340.145 24.1442 340.048 24.2373C339.951 24.3304 339.828 24.377 339.677 24.377H338.437Z"
+            fill="white"
+          />
+          <text
+            x="334"
+            y="43"
+            textAnchor="middle"
+            fill="white"
+            style={{
+              ...widgetTextStyle,
+              fontFamily: SF_DISPLAY,
+              fontSize: 15,
+              fontWeight: 500,
+              letterSpacing: "-0.12px",
+            }}
+          >
+            {sunsetTime}
+          </text>
+          <text
+            x="334"
+            y="57.5"
+            textAnchor="middle"
+            fill="white"
+            style={{
+              ...widgetTextStyle,
+              fontFamily: SF_FONT,
+              fontSize: 8.5,
+              fontWeight: 400,
+              letterSpacing: "0px",
+            }}
+          >
+            {sunsetMeridiem}
+          </text>
+        </g>
+      </svg>
+    </motion.div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Lock screen — iOS 26 Liquid Glass                                  */
 /* ------------------------------------------------------------------ */
 
@@ -1282,6 +2139,7 @@ function LockScreen() {
   const now = useClientNow();
   const timeStr = now ? formatClockTime(now) : "09:41";
   const dateStr = now ? formatLockDate(now) : "Sunday, April 5";
+  const weather = useWeather();
 
   return (
     <motion.div
@@ -1291,7 +2149,7 @@ function LockScreen() {
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <Image
-        src="https://cdn.midday.ai/background-remote-v7.png"
+        src={LOCK_SCREEN_WALLPAPER}
         alt=""
         fill
         priority
@@ -1332,6 +2190,8 @@ function LockScreen() {
         </div>
 
         <LockScreenClock timeStr={timeStr} />
+
+        <LockScreenWidgets weather={weather} />
       </div>
 
       {/* iOS 26 bottom controls — flashlight & camera (Liquid Glass circles) */}
@@ -1509,6 +2369,142 @@ function NotificationBanner({
         </div>
       </div>
     </motion.div>
+  );
+}
+
+function SetupNotificationBanner({
+  title,
+  body,
+}: {
+  title: string;
+  body: string;
+}) {
+  return (
+    <motion.a
+      href="https://app.midday.ai"
+      target="_blank"
+      rel="noreferrer"
+      initial={{ y: -88, opacity: 0, scale: 0.96, filter: "blur(10px)" }}
+      animate={{ y: 0, opacity: 1, scale: 1, filter: "blur(0px)" }}
+      whileHover={{ scale: 1.018, y: -1 }}
+      whileTap={{ scale: 0.992 }}
+      transition={{ type: "spring", damping: 26, stiffness: 250, mass: 0.95 }}
+      className="absolute"
+      style={{
+        top: 59,
+        left: 12,
+        right: 12,
+        zIndex: 40,
+        pointerEvents: "auto",
+        textDecoration: "none",
+      }}
+    >
+      <motion.div
+        aria-hidden="true"
+        initial={{ opacity: 0, y: -36, scale: 0.98 }}
+        animate={{ opacity: 0.18, y: 10, scale: 1 }}
+        transition={{ type: "spring", damping: 28, stiffness: 210 }}
+        className="absolute left-0 right-0"
+        style={{
+          height: 72,
+          borderRadius: 24,
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08))",
+          backdropFilter: "blur(34px) saturate(135%)",
+          WebkitBackdropFilter: "blur(34px) saturate(135%)",
+          border: "0.7px solid rgba(255,255,255,0.1)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.14), 0 20px 40px rgba(0,0,0,0.16)",
+        }}
+      />
+      <motion.div
+        aria-hidden="true"
+        initial={{ opacity: 0, y: -24, scale: 0.97 }}
+        animate={{ opacity: 0.12, y: 18, scale: 1 }}
+        transition={{ type: "spring", damping: 28, stiffness: 210 }}
+        className="absolute left-4 right-4"
+        style={{
+          height: 72,
+          borderRadius: 24,
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))",
+          backdropFilter: "blur(32px) saturate(132%)",
+          WebkitBackdropFilter: "blur(32px) saturate(132%)",
+          border: "0.7px solid rgba(255,255,255,0.08)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.1), 0 18px 34px rgba(0,0,0,0.12)",
+        }}
+      />
+
+      <div
+        className="relative flex items-start gap-3"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.13))",
+          backdropFilter: "blur(46px) saturate(145%)",
+          WebkitBackdropFilter: "blur(46px) saturate(145%)",
+          borderRadius: 24,
+          padding: "12px 14px",
+          border: "0.7px solid rgba(255, 255, 255, 0.12)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.18), 0 10px 34px rgba(0,0,0,0.18)",
+        }}
+      >
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            borderRadius: 24,
+            background:
+              "linear-gradient(180deg, rgba(46,46,52,0.46), rgba(20,20,24,0.62))",
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            borderRadius: 24,
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05) 34%, rgba(255,255,255,0.01) 56%), radial-gradient(140% 70% at 50% 0%, rgba(255,255,255,0.14), rgba(255,255,255,0) 60%)",
+            mixBlendMode: "screen",
+          }}
+        />
+
+        <div className="relative">
+          <MiddayLogo size={38} borderRadius={9} />
+        </div>
+
+        <div className="relative flex-1 min-w-0">
+          <p
+            className="mt-0.5"
+            style={{
+              fontSize: 13.5,
+              lineHeight: 1.25,
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.96)",
+              fontFamily: SF_FONT,
+            }}
+          >
+            {title}
+          </p>
+          <p
+            className="mt-0.5"
+            style={{
+              fontSize: 13,
+              lineHeight: 1.3,
+              color: "rgba(255,255,255,0.78)",
+              fontFamily: SF_FONT,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {body}
+          </p>
+        </div>
+      </div>
+    </motion.a>
   );
 }
 
@@ -2327,16 +3323,285 @@ function MessageBubble({
 }
 
 /* ------------------------------------------------------------------ */
+/*  iOS Camera viewfinder                                              */
+/* ------------------------------------------------------------------ */
+
+const RECEIPT_IMAGE_SRC = "https://cdn.midday.ai/reciept.jpg";
+
+const CAMERA_DRIFT_CSS = `
+@keyframes cameraDriftX {
+  0%   { transform: translateX(0px); }
+  13%  { transform: translateX(-1.8px); }
+  27%  { transform: translateX(0.6px); }
+  45%  { transform: translateX(-0.9px); }
+  62%  { transform: translateX(1.4px); }
+  78%  { transform: translateX(-0.4px); }
+  100% { transform: translateX(0px); }
+}
+@keyframes cameraDriftY {
+  0%   { transform: translateY(0px); }
+  17%  { transform: translateY(1.2px); }
+  35%  { transform: translateY(-0.7px); }
+  52%  { transform: translateY(1.6px); }
+  70%  { transform: translateY(-1.1px); }
+  85%  { transform: translateY(0.5px); }
+  100% { transform: translateY(0px); }
+}
+@keyframes cameraDriftRotate {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(-0.3deg); }
+  50%  { transform: rotate(0.2deg); }
+  75%  { transform: rotate(-0.15deg); }
+  100% { transform: rotate(0deg); }
+}
+`;
+
+function IOSCameraView({ flash }: { flash: boolean }) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        backgroundColor: "#000",
+        overflow: "hidden",
+      }}
+    >
+      <style>{CAMERA_DRIFT_CSS}</style>
+      {/* Viewfinder background — three nested layers for organic handheld drift */}
+      <div
+        style={{
+          position: "absolute",
+          inset: -10,
+          animation: "cameraDriftX 2.8s ease-in-out infinite",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            animation: "cameraDriftY 3.3s ease-in-out infinite",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              backgroundImage: `url(${RECEIPT_IMAGE_SRC})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "brightness(0.85)",
+              transform: "scale(1.05)",
+              animation: "cameraDriftRotate 4s ease-in-out infinite",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Status bar */}
+      <StatusBar dark={false} />
+
+      {/* Top bar — flash & flip icons */}
+      <div
+        style={{
+          position: "absolute",
+          top: 54,
+          left: 0,
+          right: 0,
+          height: 44,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 20px",
+          zIndex: 10,
+        }}
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M13 3L10.72 5.28C10.38 5.62 10.54 6.18 11.01 6.3L11.53 6.44C8.98 7.18 7 9.42 7 12.16V13H9V12.16C9 10.08 10.68 8.18 13 7.84V9.5C13 9.89 13.47 10.08 13.74 9.81L17.15 6.39C17.34 6.21 17.34 5.9 17.15 5.72L13.74 2.3C13.47 2.03 13 2.22 13 2.61V3Z"
+            fill="rgba(255,255,255,0.85)"
+          />
+          <path
+            d="M17 12V12.84C17 14.92 15.32 16.82 13 17.16V15.5C13 15.11 12.53 14.92 12.26 15.19L8.85 18.61C8.66 18.79 8.66 19.1 8.85 19.28L12.26 22.7C12.53 22.97 13 22.78 13 22.39V21C15.02 20.72 16.62 19.53 17.28 17.72L17.47 17.56C17.53 17.5 18 17.18 18 16.84V12H17Z"
+            fill="rgba(255,255,255,0.85)"
+          />
+        </svg>
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M7 2V13H10V16H13V13H21L17 8L21 3H13V2H7ZM9 4H11V5H17.5L15 8L17.5 11H11V10H9V4Z"
+            fill="rgba(255,255,255,0.85)"
+          />
+        </svg>
+      </div>
+
+      {/* Bottom bar */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 140,
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.7) 60%, transparent)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          paddingTop: 12,
+          zIndex: 10,
+        }}
+      >
+        {/* Mode labels */}
+        <div
+          style={{
+            display: "flex",
+            gap: 16,
+            marginBottom: 16,
+            fontFamily: SF_FONT,
+            fontSize: 13,
+            fontWeight: 500,
+          }}
+        >
+          <span style={{ color: "rgba(255,255,255,0.5)" }}>Video</span>
+          <span style={{ color: "#FFD60A", fontWeight: 600 }}>Photo</span>
+          <span style={{ color: "rgba(255,255,255,0.5)" }}>Portrait</span>
+        </div>
+
+        {/* Shutter row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            paddingLeft: 40,
+            paddingRight: 40,
+          }}
+        >
+          {/* Thumbnail placeholder */}
+          <div
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 8,
+              border: "2px solid rgba(255,255,255,0.4)",
+              overflow: "hidden",
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                backgroundImage: `url(${RECEIPT_IMAGE_SRC})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+          </div>
+
+          {/* Shutter button */}
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 68,
+                height: 68,
+                borderRadius: "50%",
+                border: "4px solid rgba(255,255,255,0.9)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                style={{
+                  width: 58,
+                  height: 58,
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(255,255,255,0.95)",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Flip camera icon */}
+          <div style={{ width: 38, height: 38, flexShrink: 0 }}>
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ margin: "3px" }}
+            >
+              <path
+                d="M20 5H16.83L15 3H9L7.17 5H4C2.9 5 2 5.9 2 7V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V7C22 5.9 21.1 5 20 5ZM12 18C9.24 18 7 15.76 7 13C7 10.24 9.24 8 12 8C14.76 8 17 10.24 17 13C17 15.76 14.76 18 12 18Z"
+                fill="rgba(255,255,255,0.85)"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Flash overlay */}
+      <AnimatePresence>
+        {flash && (
+          <motion.div
+            key="camera-flash"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundColor: "#fff",
+              zIndex: 50,
+              pointerEvents: "none",
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Home indicator */}
+      <HomeIndicator />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Chat view — iOS 26 Liquid Glass iMessage                           */
 /* ------------------------------------------------------------------ */
 
 function ChatView({
   messages,
   isTyping,
+  showKeyboard,
+  composerText,
   readReceiptLabels,
 }: {
   messages: ChatMessage[];
   isTyping: boolean;
+  showKeyboard: boolean;
+  composerText: string;
   readReceiptLabels: Record<number, string>;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -2350,11 +3615,70 @@ function ChatView({
   const composerPlusIconColor = isDark ? "#FFFFFF" : "#000000";
   const composerPlaceholderColor = isDark ? "#8E8E93" : "#8E8E93";
 
+  const [typedLength, setTypedLength] = useState(0);
+  const composerTextRef = useRef(composerText);
+  const kbSrcRef = useRef<AudioBufferSourceNode | null>(null);
+  const kbGainRef = useRef<GainNode | null>(null);
+
+  useEffect(() => {
+    if (composerText !== composerTextRef.current) {
+      composerTextRef.current = composerText;
+      setTypedLength(0);
+    }
+    if (!composerText) return;
+    if (typedLength >= composerText.length) return;
+    const timer = setTimeout(() => {
+      setTypedLength((prev) => prev + 1);
+    }, CHAR_TYPE_MS);
+    return () => clearTimeout(timer);
+  }, [composerText, typedLength]);
+
+  useEffect(() => {
+    const isVisible = scrollRef.current?.offsetParent !== null;
+    if (showKeyboard && composerText && isVisible) {
+      if (!kbSrcRef.current) {
+        const audio = createKeyboardAudio();
+        if (audio) {
+          kbSrcRef.current = audio.src;
+          kbGainRef.current = audio.gain;
+          audio.src.onended = () => {
+            kbSrcRef.current = null;
+            kbGainRef.current = null;
+          };
+        }
+      }
+    } else {
+      destroyKeyboardAudio(kbSrcRef.current, kbGainRef.current);
+      kbSrcRef.current = null;
+      kbGainRef.current = null;
+    }
+    return () => {
+      destroyKeyboardAudio(kbSrcRef.current, kbGainRef.current);
+      kbSrcRef.current = null;
+      kbGainRef.current = null;
+    };
+  }, [showKeyboard, composerText]);
+
+  useEffect(() => {
+    return onDemoMuteChange((muted) => {
+      if (muted) {
+        destroyKeyboardAudio(kbSrcRef.current, kbGainRef.current);
+        kbSrcRef.current = null;
+        kbGainRef.current = null;
+      }
+    });
+  }, []);
+
+  const visibleComposerText = composerText
+    ? composerText.slice(0, typedLength)
+    : "";
+  const showSendButton = composerText.length > 0 && typedLength > 0;
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages.length, isTyping]);
+  }, [messages.length, isTyping, showKeyboard]);
 
   return (
     <div
@@ -2384,7 +3708,10 @@ function ChatView({
             <HeaderBackIcon color={controlIconColor} />
           </LiquidGlass>
 
-          <div
+          <a
+            href="https://cal.com/pontus-midday/15min"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center justify-center"
             style={{ width: 36, minWidth: 36 }}
           >
@@ -2395,7 +3722,7 @@ function ChatView({
             >
               <HeaderVideoIcon color={controlIconColor} />
             </LiquidGlass>
-          </div>
+          </a>
         </div>
 
         <div className="flex flex-col items-center" style={{ marginTop: -30 }}>
@@ -2404,9 +3731,9 @@ function ChatView({
           <LiquidGlass
             borderRadius={16}
             style={{
-              marginTop: 8,
-              minHeight: 33,
-              padding: "0 15px",
+              marginTop: -4,
+              minHeight: 30,
+              padding: "0 12px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -2514,8 +3841,9 @@ function ChatView({
       <div
         className="flex items-center gap-[8px]"
         style={{
-          padding: "8px 14px 36px",
+          padding: showKeyboard ? "8px 14px 8px" : "8px 14px 36px",
           background: composerShell,
+          transition: "padding 0.32s cubic-bezier(0.25, 0.1, 0.25, 1)",
         }}
       >
         <LiquidGlass
@@ -2546,26 +3874,75 @@ function ChatView({
             paddingRight: 10,
           }}
         >
-          <span
-            style={{
-              fontSize: 16,
-              color: composerPlaceholderColor,
-              fontFamily: SF_FONT,
-              letterSpacing: -0.2,
-            }}
-          >
-            iMessage
-          </span>
+          {visibleComposerText ? (
+            <span
+              style={{
+                fontSize: 16,
+                color: isDark ? "#FFFFFF" : "#000000",
+                fontFamily: SF_FONT,
+                letterSpacing: -0.2,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+              }}
+            >
+              {visibleComposerText}
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 2,
+                  height: 18,
+                  marginLeft: 1,
+                  background: "#007AFF",
+                  verticalAlign: "text-bottom",
+                  animation: "cursorBlink 1s step-end infinite",
+                }}
+              />
+            </span>
+          ) : (
+            <span
+              style={{
+                fontSize: 16,
+                color: composerPlaceholderColor,
+                fontFamily: SF_FONT,
+                letterSpacing: -0.2,
+              }}
+            >
+              iMessage
+            </span>
+          )}
           <div
             className="flex items-center justify-center"
-            style={{ width: 17, height: 17 }}
+            style={{
+              width: showSendButton ? 26 : 17,
+              height: showSendButton ? 26 : 17,
+              transition: "all 0.15s ease",
+            }}
           >
-            <ComposerMicIcon color={composerIconColor} />
+            {showSendButton ? (
+              <ComposerSendIcon />
+            ) : (
+              <ComposerMicIcon color={composerIconColor} />
+            )}
           </div>
         </LiquidGlass>
       </div>
 
-      <HomeIndicator dark={!isDark} />
+      {/* iOS keyboard slide-up */}
+      <AnimatePresence>
+        {showKeyboard && (
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
+            transition={{ duration: 0.32, ease: [0.25, 0.1, 0.25, 1] }}
+            style={{ overflow: "hidden", flexShrink: 0 }}
+          >
+            <IOSKeyboard />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!showKeyboard && <HomeIndicator dark={!isDark} />}
     </div>
   );
 }
@@ -2594,9 +3971,11 @@ export function ChatIMessageAnimation({
     return firstChatIdx > 0 ? beats.slice(firstChatIdx) : beats;
   }, [allBeats, scenario, skipLockScreen]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const [beatIndex, setBeatIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasStartedRef = useRef(false);
+  const prevNotificationRef = useRef(false);
 
   useEffect(() => {
     if (timerRef.current !== null) {
@@ -2605,6 +3984,7 @@ export function ChatIMessageAnimation({
     }
     setBeatIndex(0);
     hasStartedRef.current = false;
+    prevNotificationRef.current = false;
   }, [scenario]);
 
   useEffect(() => {
@@ -2615,6 +3995,7 @@ export function ChatIMessageAnimation({
       }
       setBeatIndex(0);
       hasStartedRef.current = false;
+      prevNotificationRef.current = false;
       return;
     }
 
@@ -2648,6 +4029,17 @@ export function ChatIMessageAnimation({
   const clampedIndex = Math.min(beatIndex, scenarioBeats.length - 1);
   const beat = scenarioBeats[clampedIndex] ?? scenarioBeats[0];
 
+  useEffect(() => {
+    const showing =
+      (beat?.showNotification ?? false) ||
+      (beat?.showSetupNotification ?? false);
+    const isVisible = containerRef.current?.offsetParent !== null;
+    if (showing && !prevNotificationRef.current && playing && isVisible) {
+      playNotificationSound();
+    }
+    prevNotificationRef.current = showing;
+  }, [beat?.showNotification, beat?.showSetupNotification, playing]);
+
   if (!beat) {
     return (
       <div className="relative w-full h-full" style={{ background: "#000" }} />
@@ -2657,7 +4049,11 @@ export function ChatIMessageAnimation({
   const showLock = beat.lockOpacity > 0;
 
   return (
-    <div className="relative w-full h-full" style={{ background: "#000" }}>
+    <div
+      ref={containerRef}
+      className="relative w-full h-full"
+      style={{ background: "#000" }}
+    >
       <style>{HIDE_SCROLLBAR_CSS}</style>
       {showLock ? (
         <div
@@ -2674,6 +4070,29 @@ export function ChatIMessageAnimation({
         </div>
       ) : null}
 
+      {beat.showCamera && (
+        <div
+          className="absolute inset-0"
+          style={{ zIndex: 30, pointerEvents: "none" }}
+        >
+          <IOSCameraView flash={beat.cameraFlash} />
+        </div>
+      )}
+
+      {beat.showSetupNotification &&
+      beat.setupNotificationTitle &&
+      beat.setupNotificationBody ? (
+        <div
+          className="absolute inset-0"
+          style={{ zIndex: 40, pointerEvents: "none" }}
+        >
+          <SetupNotificationBanner
+            title={beat.setupNotificationTitle}
+            body={beat.setupNotificationBody}
+          />
+        </div>
+      ) : null}
+
       <div
         className="absolute inset-0"
         style={{ opacity: beat.chatOpacity, pointerEvents: "none" }}
@@ -2681,6 +4100,8 @@ export function ChatIMessageAnimation({
         <ChatView
           messages={beat.messages}
           isTyping={beat.isTyping}
+          showKeyboard={beat.showKeyboard}
+          composerText={beat.composerText}
           readReceiptLabels={beat.readReceiptLabels}
         />
       </div>
