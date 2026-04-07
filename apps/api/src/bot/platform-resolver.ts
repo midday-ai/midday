@@ -150,7 +150,7 @@ export async function resolvePlatformLinkCode(
     }
   }
 
-  if (code && isExplicitConnectionAttempt(config.provider, message?.text)) {
+  if (isExplicitConnectionAttempt(config.provider, message?.text)) {
     await thread.post(config.invalidCodeMessage);
     return { connected: false };
   }

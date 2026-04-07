@@ -17,10 +17,32 @@ const PAUSE_BETWEEN_SCENARIOS_MS = 1500;
 export function ChatDemoAutoplay({ className }: { className?: string }) {
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [playing, setPlaying] = useState(true);
+  const [startAtEnd, setStartAtEnd] = useState(false);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const goToPreviousScenario = useCallback(() => {
+    if (scenarioIndex <= 0) {
+      return;
+    }
+
+    if (pauseTimerRef.current !== null) {
+      clearTimeout(pauseTimerRef.current);
+      pauseTimerRef.current = null;
+    }
+
+    setPlaying(false);
+    setStartAtEnd(true);
+    setScenarioIndex((prev) => Math.max(prev - 1, 0));
+
+    pauseTimerRef.current = setTimeout(() => {
+      setPlaying(true);
+      pauseTimerRef.current = null;
+    }, 60);
+  }, [scenarioIndex]);
 
   const handleComplete = useCallback(() => {
     setPlaying(false);
+    setStartAtEnd(false);
 
     pauseTimerRef.current = setTimeout(() => {
       setScenarioIndex((prev) => (prev + 1) % SCENARIOS.length);
@@ -58,9 +80,12 @@ export function ChatDemoAutoplay({ className }: { className?: string }) {
         }}
       >
         <ChatIMessageAnimation
+          key={`${scenario}-${startAtEnd ? "end" : "start"}`}
           scenario={scenario}
           playing={playing}
+          startAtEnd={startAtEnd}
           onComplete={handleComplete}
+          onBackTap={goToPreviousScenario}
         />
       </IPhoneMock>
     </div>

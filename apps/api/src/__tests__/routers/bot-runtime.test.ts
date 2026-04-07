@@ -673,4 +673,62 @@ describe("bot runtime link-code consumption", () => {
     ]);
     expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
   });
+
+  test("explicit 'Connect to Midday:' with malformed code (too short) shows invalid-code error", async () => {
+    const { posts, thread } = createThread("whatsapp");
+    const message = {
+      id: "message_123",
+      text: "Connect to Midday: short",
+      author: {
+        userId: "+15559999999",
+        fullName: "New User",
+        userName: "new_user",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve(null),
+    );
+
+    mocks.getPlatformIdentity.mockReset();
+    mocks.getPlatformIdentity.mockImplementation(() => Promise.resolve(null));
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "That WhatsApp link code is invalid or expired. Open Midday and generate a new one.",
+    ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+  });
+
+  test("telegram /start with malformed code (too long) shows invalid-code error", async () => {
+    const { posts, thread } = createThread("telegram");
+    const message = {
+      id: "message_123",
+      text: "/start toolongcode123",
+      author: {
+        userId: "telegram_user_123",
+        fullName: "Telegram User",
+        userName: "telegram_user",
+      },
+      attachments: [],
+    };
+
+    mocks.consumePlatformLinkToken.mockReset();
+    mocks.consumePlatformLinkToken.mockImplementation(() =>
+      Promise.resolve(null),
+    );
+
+    mocks.getPlatformIdentity.mockReset();
+    mocks.getPlatformIdentity.mockImplementation(() => Promise.resolve(null));
+
+    await subscribedMessageHandler?.(thread, message);
+
+    expect(posts).toEqual([
+      "That Telegram link code is invalid or expired. Open Midday and generate a new one.",
+    ]);
+    expect(streamMiddayAssistantMock).not.toHaveBeenCalled();
+  });
 });

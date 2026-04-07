@@ -4,7 +4,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import type { CSSProperties, ReactNode } from "react";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /* ------------------------------------------------------------------ */
 /*  Audio — real MP3 samples for notification & keyboard clicks        */
@@ -283,7 +290,7 @@ const SCENARIOS: Record<ChatDemoScenario, ScenarioConfig> = {
   reminder: {
     startOnLockScreen: true,
     notificationText:
-      "Invoice #1042 is 14 days overdue — $2,400 from Acme Corp. Want me to send a reminder?",
+      "Invoice #1042 from Acme Corp is 14 days overdue. Total due is $2,400. Want me to send a reminder?",
     notificationVisibleMs: 1200,
     lockHoldMs: 1300,
     transitionMs: 350,
@@ -301,7 +308,7 @@ const SCENARIOS: Record<ChatDemoScenario, ScenarioConfig> = {
       },
       {
         sender: "midday",
-        text: "Done — reminder sent to john@acme.com with a payment link. I’ll keep watching for payment.",
+        text: "Done. I sent a reminder to john@acme.com with a payment link. I’ll keep watching for payment.",
         typingMs: 900,
         delayAfterMs: 1000,
       },
@@ -312,12 +319,12 @@ const SCENARIOS: Record<ChatDemoScenario, ScenarioConfig> = {
     steps: [
       {
         sender: "user",
-        text: "Create an invoice for Linear — 40h at $150/h",
+        text: "Create an invoice for Linear for 40 hours at $150 an hour",
         delayAfterMs: 650,
       },
       {
         sender: "midday",
-        text: "Invoice draft created for Linear — $6,000 total. Want me to send it now or schedule it?",
+        text: "I created a draft invoice for Linear. Total is $6,000. Want me to send it now or schedule it?",
         typingMs: 1000,
         delayAfterMs: 950,
       },
@@ -404,18 +411,18 @@ const SCENARIOS: Record<ChatDemoScenario, ScenarioConfig> = {
       },
       {
         sender: "midday",
-        text: "Latest activity:\n• Blue Bottle — $42.50\n• Vercel — $20.00\n• Stripe payout — +$4,820.00\n• Figma — $15.00",
+        text: "Here are your latest transactions:\n• Stripe payout, +$4,820.00\n• Vercel, $20.00\n• Figma, $15.00\n• OpenAI, $24.00",
         typingMs: 1000,
         delayAfterMs: 1100,
       },
       {
         sender: "user",
-        text: "Flag anything unusual",
+        text: "What's the total for software this month?",
         delayAfterMs: 550,
       },
       {
         sender: "midday",
-        text: "Nothing unusual today. The only notable change is that software spend is 12% higher than last week.",
+        text: "So far this month, software spend is $59.00.",
         typingMs: 900,
         delayAfterMs: 1000,
       },
@@ -559,7 +566,7 @@ function buildGlobalBeats(): DemoBeat[] {
     const scrollBase = si;
     const notificationText =
       config.notificationText ??
-      "Invoice #1042 is 14 days overdue — $2,400 from Acme Corp. Want me to send a reminder?";
+      "Invoice #1042 from Acme Corp is 14 days overdue. Total due is $2,400. Want me to send a reminder?";
     const readLabels = readReceiptMap[scenarioId];
     let userMsgCount = 0;
 
@@ -2391,7 +2398,7 @@ function SetupNotificationBanner({
       transition={{ type: "spring", damping: 26, stiffness: 250, mass: 0.95 }}
       className="absolute"
       style={{
-        top: 59,
+        top: 57,
         left: 12,
         right: 12,
         zIndex: 40,
@@ -2409,12 +2416,12 @@ function SetupNotificationBanner({
           height: 72,
           borderRadius: 24,
           background:
-            "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08))",
-          backdropFilter: "blur(34px) saturate(135%)",
-          WebkitBackdropFilter: "blur(34px) saturate(135%)",
-          border: "0.7px solid rgba(255,255,255,0.1)",
+            "linear-gradient(180deg, rgba(58,58,64,0.34), rgba(24,24,28,0.26))",
+          backdropFilter: "blur(34px) saturate(125%)",
+          WebkitBackdropFilter: "blur(34px) saturate(125%)",
+          border: "0.7px solid rgba(255,255,255,0.07)",
           boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.14), 0 20px 40px rgba(0,0,0,0.16)",
+            "inset 0 1px 0 rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.18)",
         }}
       />
       <motion.div
@@ -2427,12 +2434,12 @@ function SetupNotificationBanner({
           height: 72,
           borderRadius: 24,
           background:
-            "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))",
-          backdropFilter: "blur(32px) saturate(132%)",
-          WebkitBackdropFilter: "blur(32px) saturate(132%)",
-          border: "0.7px solid rgba(255,255,255,0.08)",
+            "linear-gradient(180deg, rgba(52,52,58,0.3), rgba(20,20,24,0.22))",
+          backdropFilter: "blur(32px) saturate(122%)",
+          WebkitBackdropFilter: "blur(32px) saturate(122%)",
+          border: "0.7px solid rgba(255,255,255,0.06)",
           boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.1), 0 18px 34px rgba(0,0,0,0.12)",
+            "inset 0 1px 0 rgba(255,255,255,0.06), 0 18px 34px rgba(0,0,0,0.14)",
         }}
       />
 
@@ -2440,14 +2447,14 @@ function SetupNotificationBanner({
         className="relative flex items-start gap-3"
         style={{
           background:
-            "linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.13))",
-          backdropFilter: "blur(46px) saturate(145%)",
-          WebkitBackdropFilter: "blur(46px) saturate(145%)",
+            "linear-gradient(180deg, rgba(42,42,46,0.78), rgba(18,18,20,0.7))",
+          backdropFilter: "blur(40px) saturate(118%)",
+          WebkitBackdropFilter: "blur(40px) saturate(118%)",
           borderRadius: 24,
           padding: "12px 14px",
-          border: "0.7px solid rgba(255, 255, 255, 0.12)",
+          border: "0.7px solid rgba(255, 255, 255, 0.08)",
           boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.18), 0 10px 34px rgba(0,0,0,0.18)",
+            "inset 0 1px 0 rgba(255,255,255,0.1), 0 10px 34px rgba(0,0,0,0.22)",
         }}
       >
         <div
@@ -2456,7 +2463,7 @@ function SetupNotificationBanner({
           style={{
             borderRadius: 24,
             background:
-              "linear-gradient(180deg, rgba(46,46,52,0.46), rgba(20,20,24,0.62))",
+              "linear-gradient(180deg, rgba(34,34,38,0.5), rgba(12,12,14,0.66))",
           }}
         />
         <div
@@ -2465,7 +2472,7 @@ function SetupNotificationBanner({
           style={{
             borderRadius: 24,
             background:
-              "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05) 34%, rgba(255,255,255,0.01) 56%), radial-gradient(140% 70% at 50% 0%, rgba(255,255,255,0.14), rgba(255,255,255,0) 60%)",
+              "linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012) 34%, rgba(255,255,255,0) 56%), radial-gradient(140% 70% at 50% 0%, rgba(255,255,255,0.04), rgba(255,255,255,0) 60%)",
             mixBlendMode: "screen",
           }}
         />
@@ -3597,12 +3604,18 @@ function ChatView({
   showKeyboard,
   composerText,
   readReceiptLabels,
+  onBackTap,
+  onInputTap,
+  animateKeyboardDock,
 }: {
   messages: ChatMessage[];
   isTyping: boolean;
   showKeyboard: boolean;
   composerText: string;
   readReceiptLabels: Record<number, string>;
+  onBackTap?: () => void;
+  onInputTap?: () => void;
+  animateKeyboardDock: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isDark = useIsDarkTheme();
@@ -3614,6 +3627,10 @@ function ChatView({
   const composerIconColor = isDark ? "rgba(255,255,255,0.58)" : "#6B7280";
   const composerPlusIconColor = isDark ? "#FFFFFF" : "#000000";
   const composerPlaceholderColor = isDark ? "#8E8E93" : "#8E8E93";
+  const keyboardHeight = 342;
+  const keyboardHiddenOffset = 4;
+  const composerInset = 114;
+  const visibleBottomInset = showKeyboard ? keyboardHeight + 52 : composerInset;
 
   const [typedLength, setTypedLength] = useState(0);
   const composerTextRef = useRef(composerText);
@@ -3686,6 +3703,8 @@ function ChatView({
       style={{
         background: isDark ? "#000000" : "#FFFFFF",
         color: isDark ? "#FFFFFF" : "#000000",
+        pointerEvents: "none",
+        overflow: "hidden",
       }}
     >
       <StatusBar dark={!isDark} />
@@ -3700,20 +3719,43 @@ function ChatView({
         }}
       >
         <div className="flex items-center justify-between">
-          <LiquidGlass
-            borderRadius="50%"
+          <button
+            type="button"
+            onClick={onBackTap}
             className="flex items-center justify-center"
-            style={{ width: 36, height: 36 }}
+            style={{
+              width: 36,
+              height: 36,
+              position: "relative",
+              zIndex: 30,
+              pointerEvents: "auto",
+              background: "transparent",
+              border: "none",
+              padding: 0,
+              cursor: onBackTap ? "pointer" : "default",
+            }}
           >
-            <HeaderBackIcon color={controlIconColor} />
-          </LiquidGlass>
+            <LiquidGlass
+              borderRadius="50%"
+              className="flex items-center justify-center"
+              style={{ width: 36, height: 36 }}
+            >
+              <HeaderBackIcon color={controlIconColor} />
+            </LiquidGlass>
+          </button>
 
           <a
             href="https://cal.com/pontus-midday/15min"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center"
-            style={{ width: 36, minWidth: 36 }}
+            style={{
+              width: 36,
+              minWidth: 36,
+              position: "relative",
+              zIndex: 30,
+              pointerEvents: "auto",
+            }}
           >
             <LiquidGlass
               borderRadius="50%"
@@ -3726,7 +3768,19 @@ function ChatView({
         </div>
 
         <div className="flex flex-col items-center" style={{ marginTop: -30 }}>
-          <ContactAvatar size={56} />
+          <a
+            href="https://x.com/middayai"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              position: "relative",
+              zIndex: 30,
+              pointerEvents: "auto",
+              display: "inline-flex",
+            }}
+          >
+            <ContactAvatar size={56} />
+          </a>
 
           <LiquidGlass
             borderRadius={16}
@@ -3805,13 +3859,28 @@ function ChatView({
       </div>
 
       {/* Messages area */}
-      <div
+      <motion.div
+        layout
         ref={scrollRef}
         className="flex-1 overflow-y-auto"
         data-chat-scroll="true"
-        style={{
+        animate={{
           paddingTop: 6,
-          paddingBottom: 8,
+          paddingBottom: visibleBottomInset,
+        }}
+        transition={{
+          ...(animateKeyboardDock
+            ? {
+                type: "spring" as const,
+                stiffness: 380,
+                damping: 34,
+                mass: 0.92,
+              }
+            : {
+                duration: 0,
+              }),
+        }}
+        style={{
           background: isDark ? "#000000" : "#FFFFFF",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
@@ -3835,114 +3904,163 @@ function ChatView({
           </AnimatePresence>
           {isTyping && <TypingIndicator isDark={isDark} />}
         </div>
-      </div>
+      </motion.div>
 
-      {/* iOS Messages composer */}
-      <div
-        className="flex items-center gap-[8px]"
+      <motion.div
+        className="absolute left-0 right-0 bottom-0"
+        animate={{
+          y: showKeyboard ? 0 : keyboardHeight + keyboardHiddenOffset,
+        }}
+        transition={{
+          ...(animateKeyboardDock
+            ? {
+                type: "spring" as const,
+                stiffness: 390,
+                damping: 34,
+                mass: 0.92,
+              }
+            : {
+                duration: 0,
+              }),
+        }}
         style={{
-          padding: showKeyboard ? "8px 14px 8px" : "8px 14px 36px",
-          background: composerShell,
-          transition: "padding 0.32s cubic-bezier(0.25, 0.1, 0.25, 1)",
+          zIndex: 20,
+          willChange: "transform",
         }}
       >
-        <LiquidGlass
-          borderRadius="50%"
-          className="flex items-center justify-center"
+        <div
+          className="flex items-center gap-[8px]"
           style={{
-            width: 36,
-            height: 36,
+            width: "calc(100% - 20px)",
+            margin: "0 auto",
+            padding: "8px 10px 14px",
+            background: composerShell,
           }}
         >
-          <ComposerPlusIcon color={composerPlusIconColor} />
-        </LiquidGlass>
-        <LiquidGlass
-          borderRadius={18}
-          className="flex-1"
-          style={{
-            height: 36,
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.008))",
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(255,255,255,0.008), 0 2px 6px rgba(0,0,0,0.03)",
-            backdropFilter: "blur(5px) saturate(106%)",
-            WebkitBackdropFilter: "blur(5px) saturate(106%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingLeft: 15,
-            paddingRight: 10,
-          }}
-        >
-          {visibleComposerText ? (
-            <span
-              style={{
-                fontSize: 16,
-                color: isDark ? "#FFFFFF" : "#000000",
-                fontFamily: SF_FONT,
-                letterSpacing: -0.2,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-              }}
-            >
-              {visibleComposerText}
-              <span
-                style={{
-                  display: "inline-block",
-                  width: 2,
-                  height: 18,
-                  marginLeft: 1,
-                  background: "#007AFF",
-                  verticalAlign: "text-bottom",
-                  animation: "cursorBlink 1s step-end infinite",
-                }}
-              />
-            </span>
-          ) : (
-            <span
-              style={{
-                fontSize: 16,
-                color: composerPlaceholderColor,
-                fontFamily: SF_FONT,
-                letterSpacing: -0.2,
-              }}
-            >
-              iMessage
-            </span>
-          )}
-          <div
+          <LiquidGlass
+            borderRadius="50%"
             className="flex items-center justify-center"
             style={{
-              width: showSendButton ? 26 : 17,
-              height: showSendButton ? 26 : 17,
-              transition: "all 0.15s ease",
+              width: 36,
+              height: 36,
             }}
           >
-            {showSendButton ? (
-              <ComposerSendIcon />
-            ) : (
-              <ComposerMicIcon color={composerIconColor} />
-            )}
-          </div>
-        </LiquidGlass>
-      </div>
-
-      {/* iOS keyboard slide-up */}
-      <AnimatePresence>
-        {showKeyboard && (
-          <motion.div
-            initial={{ height: 0 }}
-            animate={{ height: "auto" }}
-            exit={{ height: 0 }}
-            transition={{ duration: 0.32, ease: [0.25, 0.1, 0.25, 1] }}
-            style={{ overflow: "hidden", flexShrink: 0 }}
+            <ComposerPlusIcon color={composerPlusIconColor} />
+          </LiquidGlass>
+          <button
+            type="button"
+            onClick={onInputTap}
+            className="flex-1"
+            style={{
+              display: "block",
+              flex: 1,
+              minWidth: 0,
+              pointerEvents: "auto",
+              background: "transparent",
+              border: "none",
+              padding: 0,
+              textAlign: "left",
+              cursor: "text",
+            }}
           >
-            <IOSKeyboard />
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <LiquidGlass
+              borderRadius={18}
+              className="flex-1"
+              style={{
+                width: "100%",
+                height: 36,
+                background:
+                  "linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.008))",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(255,255,255,0.008), 0 2px 6px rgba(0,0,0,0.03)",
+                backdropFilter: "blur(5px) saturate(106%)",
+                WebkitBackdropFilter: "blur(5px) saturate(106%)",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                paddingLeft: 15,
+                paddingRight: 10,
+                minWidth: 0,
+              }}
+            >
+              {visibleComposerText ? (
+                <span
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: "block",
+                    fontSize: 16,
+                    color: isDark ? "#FFFFFF" : "#000000",
+                    fontFamily: SF_FONT,
+                    letterSpacing: -0.2,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    direction: "rtl",
+                    textAlign: "left",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "flex-end",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                      direction: "ltr",
+                    }}
+                  >
+                    {visibleComposerText}
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: 2,
+                        height: 18,
+                        marginLeft: 1,
+                        background: "#007AFF",
+                        verticalAlign: "text-bottom",
+                        animation: "cursorBlink 1s step-end infinite",
+                        flexShrink: 0,
+                      }}
+                    />
+                  </span>
+                </span>
+              ) : (
+                <span
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    fontSize: 16,
+                    color: composerPlaceholderColor,
+                    fontFamily: SF_FONT,
+                    letterSpacing: -0.2,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  iMessage
+                </span>
+              )}
+              <div
+                className="flex items-center justify-center"
+                style={{
+                  width: showSendButton ? 26 : 17,
+                  height: showSendButton ? 26 : 17,
+                  transition: "all 0.15s ease",
+                  flexShrink: 0,
+                }}
+              >
+                {showSendButton ? (
+                  <ComposerSendIcon />
+                ) : (
+                  <ComposerMicIcon color={composerIconColor} />
+                )}
+              </div>
+            </LiquidGlass>
+          </button>
+        </div>
 
-      {!showKeyboard && <HomeIndicator dark={!isDark} />}
+        <IOSKeyboard />
+      </motion.div>
     </div>
   );
 }
@@ -3955,12 +4073,16 @@ export function ChatIMessageAnimation({
   scenario = "reminder" as ChatDemoScenario,
   playing = false,
   skipLockScreen = false,
+  startAtEnd = false,
   onComplete,
+  onBackTap,
 }: {
   scenario?: ChatDemoScenario;
   playing?: boolean;
   skipLockScreen?: boolean;
+  startAtEnd?: boolean;
   onComplete?: () => void;
+  onBackTap?: () => void;
 }) {
   const allBeats = useMemo(() => buildGlobalBeats(), []);
 
@@ -3973,19 +4095,37 @@ export function ChatIMessageAnimation({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [beatIndex, setBeatIndex] = useState(0);
+  const [manualKeyboardOpen, setManualKeyboardOpen] = useState(false);
+  const [shouldAnimateKeyboardDock, setShouldAnimateKeyboardDock] =
+    useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasStartedRef = useRef(false);
+  const hasCompletedRef = useRef(false);
   const prevNotificationRef = useRef(false);
 
   useEffect(() => {
+    let frameId: number | null = null;
+
     if (timerRef.current !== null) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    setBeatIndex(0);
-    hasStartedRef.current = false;
+
+    setShouldAnimateKeyboardDock(false);
+    setBeatIndex(startAtEnd ? Math.max(scenarioBeats.length - 1, 0) : 0);
+    setManualKeyboardOpen(false);
+    hasCompletedRef.current = startAtEnd;
     prevNotificationRef.current = false;
-  }, [scenario]);
+
+    frameId = window.requestAnimationFrame(() => {
+      setShouldAnimateKeyboardDock(true);
+    });
+
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, [scenario, startAtEnd, scenarioBeats.length]);
 
   useEffect(() => {
     if (!playing) {
@@ -3994,29 +4134,27 @@ export function ChatIMessageAnimation({
         timerRef.current = null;
       }
       setBeatIndex(0);
-      hasStartedRef.current = false;
+      setManualKeyboardOpen(false);
+      hasCompletedRef.current = false;
       prevNotificationRef.current = false;
       return;
     }
 
-    if (hasStartedRef.current) return;
     if (scenarioBeats.length <= 1) return;
 
-    hasStartedRef.current = true;
-    let idx = 0;
-
-    const tick = () => {
-      idx++;
-      if (idx >= scenarioBeats.length) {
-        timerRef.current = null;
+    const isLastBeat = beatIndex >= scenarioBeats.length - 1;
+    if (isLastBeat) {
+      if (!hasCompletedRef.current) {
+        hasCompletedRef.current = true;
         onComplete?.();
-        return;
       }
-      setBeatIndex(idx);
-      timerRef.current = setTimeout(tick, scenarioBeats[idx]?.holdMs ?? 500);
-    };
+      return;
+    }
 
-    timerRef.current = setTimeout(tick, scenarioBeats[0]?.holdMs ?? 500);
+    hasCompletedRef.current = false;
+    timerRef.current = setTimeout(() => {
+      setBeatIndex((prev) => Math.min(prev + 1, scenarioBeats.length - 1));
+    }, scenarioBeats[beatIndex]?.holdMs ?? 500);
 
     return () => {
       if (timerRef.current !== null) {
@@ -4024,10 +4162,42 @@ export function ChatIMessageAnimation({
         timerRef.current = null;
       }
     };
-  }, [playing, scenarioBeats, onComplete]);
+  }, [playing, scenarioBeats, beatIndex, onComplete]);
 
   const clampedIndex = Math.min(beatIndex, scenarioBeats.length - 1);
   const beat = scenarioBeats[clampedIndex] ?? scenarioBeats[0];
+  const effectiveShowKeyboard =
+    (beat?.showKeyboard ?? false) || manualKeyboardOpen;
+  const hasLockScreenStart = (scenarioBeats[0]?.lockOpacity ?? 0) > 0;
+  const isShowingLockScreen = (beat?.lockOpacity ?? 0) > 0;
+
+  const handleBackStep = useCallback(() => {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    hasCompletedRef.current = false;
+
+    if (manualKeyboardOpen && !(beat?.showKeyboard ?? false)) {
+      setManualKeyboardOpen(false);
+      return;
+    }
+
+    if (hasLockScreenStart && !isShowingLockScreen) {
+      setBeatIndex(0);
+      setManualKeyboardOpen(false);
+      return;
+    }
+
+    onBackTap?.();
+  }, [
+    manualKeyboardOpen,
+    beat?.showKeyboard,
+    hasLockScreenStart,
+    isShowingLockScreen,
+    onBackTap,
+  ]);
 
   useEffect(() => {
     const showing =
@@ -4095,14 +4265,17 @@ export function ChatIMessageAnimation({
 
       <div
         className="absolute inset-0"
-        style={{ opacity: beat.chatOpacity, pointerEvents: "none" }}
+        style={{ opacity: beat.chatOpacity, pointerEvents: "auto" }}
       >
         <ChatView
           messages={beat.messages}
           isTyping={beat.isTyping}
-          showKeyboard={beat.showKeyboard}
+          showKeyboard={effectiveShowKeyboard}
           composerText={beat.composerText}
           readReceiptLabels={beat.readReceiptLabels}
+          onBackTap={handleBackStep}
+          onInputTap={() => setManualKeyboardOpen(true)}
+          animateKeyboardDock={shouldAnimateKeyboardDock}
         />
       </div>
     </div>

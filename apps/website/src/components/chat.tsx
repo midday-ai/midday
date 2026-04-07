@@ -124,17 +124,23 @@ function PhoneMock({
   isDark,
   scenario,
   playing,
+  onBackTap,
+  startAtEnd,
 }: {
   isDark: boolean;
   scenario: ChatDemoScenario;
   playing: boolean;
+  onBackTap?: () => void;
+  startAtEnd?: boolean;
 }) {
   return (
     <IPhoneMock isDark={isDark}>
       <ChatIMessageAnimation
-        key={scenario}
+        key={`${scenario}-${startAtEnd ? "end" : "start"}`}
         scenario={scenario}
         playing={playing}
+        startAtEnd={startAtEnd}
+        onBackTap={onBackTap}
       />
     </IPhoneMock>
   );
@@ -147,11 +153,14 @@ export function Chat() {
   const [mobileScale, setMobileScale] = useState(MOBILE_SCALE);
   const [mobileScenarioIndex, setMobileScenarioIndex] = useState(0);
   const [mobilePlaying, setMobilePlaying] = useState(true);
+  const [mobileStartAtEnd, setMobileStartAtEnd] = useState(false);
   const [heroPlatformIndex, setHeroPlatformIndex] = useState(0);
   const [activeScenario, setActiveScenario] =
     useState<ChatDemoScenario>("reminder");
   const [demoActive, setDemoActive] = useState(false);
   const [hasExitedDemo, setHasExitedDemo] = useState(false);
+  const [desktopStartAtEndScenario, setDesktopStartAtEndScenario] =
+    useState<ChatDemoScenario | null>(null);
   const mobilePauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -201,6 +210,7 @@ export function Chat() {
 
   const handleMobileComplete = useCallback(() => {
     setMobilePlaying(false);
+    setMobileStartAtEnd(false);
 
     mobilePauseTimerRef.current = setTimeout(() => {
       setMobileScenarioIndex((prev) => (prev + 1) % DEMO_STORIES.length);
@@ -301,7 +311,40 @@ export function Chat() {
     });
   };
 
-  const selectMobileScenario = (scenario: ChatDemoScenario) => {
+  const getPreviousScenario = useCallback((current: ChatDemoScenario) => {
+    const currentIndex = DEMO_STORIES.findIndex(
+      (story) => story.id === current,
+    );
+    if (currentIndex <= 0) return null;
+    return DEMO_STORIES[currentIndex - 1]?.id ?? null;
+  }, []);
+
+  const handleMobileBackTap = useCallback(() => {
+    const previousScenario = getPreviousScenario(mobileScenario);
+    if (!previousScenario) return;
+    selectMobileScenario(previousScenario, { startAtEnd: true });
+  }, [getPreviousScenario, mobileScenario]);
+
+  const handleDesktopBackTap = useCallback(() => {
+    const previousScenario = getPreviousScenario(activeScenario);
+    if (!previousScenario) return;
+    setDesktopStartAtEndScenario(previousScenario);
+    scrollToScenario(previousScenario);
+  }, [activeScenario, getPreviousScenario]);
+
+  useEffect(() => {
+    if (
+      desktopStartAtEndScenario &&
+      activeScenario === desktopStartAtEndScenario
+    ) {
+      setDesktopStartAtEndScenario(null);
+    }
+  }, [activeScenario, desktopStartAtEndScenario]);
+
+  const selectMobileScenario = (
+    scenario: ChatDemoScenario,
+    options?: { startAtEnd?: boolean },
+  ) => {
     if (mobilePauseTimerRef.current !== null) {
       clearTimeout(mobilePauseTimerRef.current);
       mobilePauseTimerRef.current = null;
@@ -310,6 +353,7 @@ export function Chat() {
     const nextIndex = DEMO_STORIES.findIndex((story) => story.id === scenario);
 
     if (nextIndex >= 0) {
+      setMobileStartAtEnd(options?.startAtEnd ?? false);
       setMobileScenarioIndex(nextIndex);
       setMobilePlaying(true);
     }
@@ -389,10 +433,12 @@ export function Chat() {
                 >
                   <IPhoneMock isDark={isDark}>
                     <ChatIMessageAnimation
-                      key={mobileScenario}
+                      key={`${mobileScenario}-${mobileStartAtEnd ? "end" : "start"}`}
                       scenario={mobileScenario}
                       playing={mobilePlaying}
+                      startAtEnd={mobileStartAtEnd}
                       onComplete={handleMobileComplete}
+                      onBackTap={handleMobileBackTap}
                     />
                   </IPhoneMock>
                 </div>
@@ -471,6 +517,10 @@ export function Chat() {
                         isDark={isDark}
                         scenario={activeScenario}
                         playing={demoActive}
+                        startAtEnd={
+                          desktopStartAtEndScenario === activeScenario
+                        }
+                        onBackTap={handleDesktopBackTap}
                       />
                     </div>
                   </div>
