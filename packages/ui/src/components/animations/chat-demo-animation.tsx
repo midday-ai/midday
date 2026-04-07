@@ -865,7 +865,7 @@ function buildGlobalBeats(): DemoBeat[] {
 function IOSKeyboard() {
   return (
     <img
-      src="https://cdn.midday.ai/ios-keyboard-dark.svg"
+      src="https://cdn.midday.ai/ios-keyboard-dark-v1.svg"
       alt=""
       draggable={false}
       style={{ width: "100%", display: "block" }}
