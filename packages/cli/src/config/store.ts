@@ -18,7 +18,7 @@ interface Config {
 }
 
 function getConfigDir(): string {
-  const xdg = process.env["XDG_CONFIG_HOME"];
+  const xdg = process.env.XDG_CONFIG_HOME;
   const base = xdg || path.join(os.homedir(), ".config");
   return path.join(base, "midday");
 }
@@ -76,7 +76,7 @@ export function saveConfig(config: Config): void {
 }
 
 export function getToken(): string | null {
-  const envKey = process.env["MIDDAY_API_KEY"];
+  const envKey = process.env.MIDDAY_API_KEY;
   if (envKey) return envKey;
 
   const creds = getCredentials();
