@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { baseUrl } from "@/app/sitemap";
 import { IntegrationsGrid } from "@/components/integrations-grid";
 import { categories, getAppsByCategory } from "@/data/apps";
+import { createPageMetadata } from "@/lib/metadata";
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -16,38 +15,19 @@ export function generateStaticParams() {
   return validCategories.map((category) => ({ category }));
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props) {
   const { category } = await params;
   const categoryData = categories.find((c) => c.id === category);
 
   if (!categoryData) {
-    return {
-      title: "Category Not Found",
-    };
+    return { title: "Category Not Found" };
   }
 
-  const title = `${categoryData.name} Integrations`;
-  const description = `Connect Midday with ${categoryData.name.toLowerCase()} tools. Explore our ${categoryData.name.toLowerCase()} integrations to streamline your financial workflow.`;
-  const url = `${baseUrl}/integrations/category/${category}`;
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      url,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-    alternates: {
-      canonical: url,
-    },
-  };
+  return createPageMetadata({
+    title: `${categoryData.name} Integrations`,
+    description: `Connect Midday with ${categoryData.name.toLowerCase()} tools. Explore our ${categoryData.name.toLowerCase()} integrations to streamline your financial workflow.`,
+    path: `/integrations/category/${category}`,
+  });
 }
 
 export default async function Page({ params }: Props) {

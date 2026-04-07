@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { TimeTracking } from "@/components/time-tracking";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Time Tracking for Freelancers & Consultants";
-const description =
-  "Track billable hours with ease. Get monthly breakdowns, link time to projects and customers, and generate invoices. Built for consultants and small business owners.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Time Tracking for Freelancers & Consultants",
+  description:
+    "Track billable hours with ease. Get monthly breakdowns, link time to projects and customers, and generate invoices. Built for consultants and small business owners.",
+  path: "/time-tracking",
+  og: {
+    title: "Time Tracking",
+    description: "Billable hours, monthly breakdowns, and invoices",
+  },
   keywords: [
     "time tracking",
     "billable hours",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "project time tracking",
     "small business time management",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/time-tracking`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/time-tracking`,
-  },
-};
+});
 
 export default function Page() {
   return <TimeTracking />;

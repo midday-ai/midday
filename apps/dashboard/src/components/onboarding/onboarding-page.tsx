@@ -32,6 +32,7 @@ import { AppDetailSheet } from "@/components/sheets/app-detail-sheet";
 import { useOnboardingStep } from "@/hooks/use-onboarding-step";
 import { useOnboardingTracking } from "@/hooks/use-onboarding-tracking";
 import { useTRPC } from "@/trpc/client";
+import { ChatDemoWithRail } from "./chat-demo-with-rail";
 import {
   type BankSyncState,
   type InboxSyncState,
@@ -39,6 +40,7 @@ import {
 } from "./onboarding-sync-status";
 import { OnboardingUserMenu } from "./onboarding-user-menu";
 import { ConnectBankStep } from "./steps/connect-bank-step";
+import { ConnectChatStep } from "./steps/connect-chat-step";
 import { ConnectInboxStep } from "./steps/connect-inbox-step";
 import { ConnectMcpStep } from "./steps/connect-mcp-step";
 import { CreateTeamStep } from "./steps/create-team-step";
@@ -400,7 +402,16 @@ export function OnboardingPage({
         canGoBack: true,
         trackEvent: LogEvents.OnboardingStepCompleted,
       },
-      // Step 7 — Plan selection + Polar checkout with CC-required trial
+      // Step 7 — Connect chat platforms (iMessage, WhatsApp, Slack, Telegram)
+      {
+        key: "connect-chat",
+        animation: <ChatDemoWithRail />,
+        content: <ConnectChatStep />,
+        navigation: "skip",
+        canGoBack: true,
+        trackEvent: LogEvents.OnboardingStepCompleted,
+      },
+      // Step 8 — Plan selection + Polar checkout with CC-required trial
       {
         key: "start-trial",
         animation: <DashboardImageAnimation />,

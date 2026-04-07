@@ -703,6 +703,46 @@ export const mocks = {
 
   // Apps
   getApps: mock(() => Promise.resolve([])) as MockFn,
+  createApp: mock(() =>
+    Promise.resolve({
+      config: {},
+      settings: {},
+    }),
+  ) as MockFn,
+  addTelegramConnection: mock(() =>
+    Promise.resolve({
+      id: "telegram_app_123",
+    }),
+  ) as MockFn,
+  addWhatsAppConnection: mock(() =>
+    Promise.resolve({
+      id: "whatsapp_app_123",
+    }),
+  ) as MockFn,
+  consumePlatformLinkToken: mock(() =>
+    Promise.resolve({
+      code: "tst12345",
+      provider: "slack",
+      teamId: "test-team-id",
+      userId: "test-user-id",
+    }),
+  ) as MockFn,
+  createOrUpdatePlatformIdentity: mock(() =>
+    Promise.resolve({
+      id: "identity_123",
+    }),
+  ) as MockFn,
+  createPlatformLinkToken: mock(() =>
+    Promise.resolve({
+      code: "tst12345",
+      provider: "slack",
+      teamId: "test-team-id",
+      userId: "test-user-id",
+    }),
+  ) as MockFn,
+  getAppBySlackTeamId: mock(() => Promise.resolve(null)) as MockFn,
+  getPlatformIdentity: mock(() => Promise.resolve(null)) as MockFn,
+  updatePlatformIdentityMetadata: mock(() => Promise.resolve(null)) as MockFn,
 
   // Bank connections
   getBankConnections: mock(() => Promise.resolve([])) as MockFn,
@@ -1033,7 +1073,16 @@ const dbQueriesMock = new Proxy(
     bulkUpdateNotificationSettings: mocks.bulkUpdateNotificationSettings,
 
     // Apps
+    addTelegramConnection: mocks.addTelegramConnection,
+    addWhatsAppConnection: mocks.addWhatsAppConnection,
+    consumePlatformLinkToken: mocks.consumePlatformLinkToken,
     getApps: mocks.getApps,
+    createApp: mocks.createApp,
+    createOrUpdatePlatformIdentity: mocks.createOrUpdatePlatformIdentity,
+    createPlatformLinkToken: mocks.createPlatformLinkToken,
+    getAppBySlackTeamId: mocks.getAppBySlackTeamId,
+    getPlatformIdentity: mocks.getPlatformIdentity,
+    updatePlatformIdentityMetadata: mocks.updatePlatformIdentityMetadata,
     getAppByAppId: createDefaultMock(),
     deleteApp: createDefaultMock(),
 
@@ -1099,6 +1148,23 @@ const dbQueriesMock = new Proxy(
 );
 
 mock.module("@midday/db/queries", () => dbQueriesMock);
+
+const noop = () => undefined;
+const createMockLogger = () => ({
+  info: mock(noop),
+  error: mock(noop),
+  warn: mock(noop),
+  debug: mock(noop),
+  trace: mock(noop),
+  fatal: mock(noop),
+});
+const mockLogger = createMockLogger();
+mock.module("@midday/logger", () => ({
+  logger: mockLogger,
+  default: mockLogger,
+  createLoggerWithContext: () => createMockLogger(),
+  setLogLevel: mock(noop),
+}));
 
 mock.module("@midday/cache/api-key-cache", () => ({
   apiKeyCache: {

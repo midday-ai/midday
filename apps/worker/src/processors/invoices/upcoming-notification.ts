@@ -1,3 +1,4 @@
+import { sendToProviders } from "@midday/bot";
 import {
   getUpcomingDueRecurring,
   markUpcomingNotificationSent,
@@ -213,12 +214,39 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
           { sendEmail: true },
         );
 
-        // Mark all invoices in this batch as notified
+        // Mark all invoices in this batch as notified before best-effort
+        // secondary delivery so a sendToProviders failure can't prevent marking
+        // and cause duplicate emails on retry.
         for (const invoice of teamInvoices) {
           await markUpcomingNotificationSent(db, {
             id: invoice.id,
             teamId: invoice.teamId,
           });
+        }
+
+        try {
+          await sendToProviders(db, teamId, "recurring_invoice_upcoming", {
+            invoices: teamInvoices.map((inv) => ({
+              recurringId: inv.id,
+              customerName: inv.customerName ?? undefined,
+              amount: inv.amount ?? undefined,
+              currency: inv.currency ?? undefined,
+              scheduledAt: inv.nextScheduledAt!,
+              frequency: inv.frequency,
+            })),
+            count: teamInvoices.length,
+          });
+        } catch (providerError) {
+          this.logger.error(
+            "Best-effort sendToProviders failed for upcoming invoice notification",
+            {
+              teamId,
+              error:
+                providerError instanceof Error
+                  ? providerError.message
+                  : "Unknown error",
+            },
+          );
         }
 
         this.logger.info("Sent batched upcoming invoice notification", {

@@ -1,11 +1,11 @@
 import { Icons } from "@midday/ui/icons";
-import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AskAiBar } from "@/components/docs/ask-ai-bar";
 import { FloatingChatInput } from "@/components/docs/floating-chat-input";
 import { DocsMDX } from "@/components/docs/mdx";
 import { docsNavigation, getAllDocSlugs, getDocBySlug } from "@/lib/docs";
+import { createPageMetadata } from "@/lib/metadata";
 
 export async function generateStaticParams() {
   const slugs = getAllDocSlugs();
@@ -14,11 +14,7 @@ export async function generateStaticParams() {
 
 type Params = Promise<{ slug: string }>;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Params;
-}): Promise<Metadata | undefined> {
+export async function generateMetadata({ params }: { params: Params }) {
   const { slug } = await params;
   const doc = getDocBySlug(slug);
 
@@ -26,21 +22,12 @@ export async function generateMetadata({
     return;
   }
 
-  return {
+  return createPageMetadata({
     title: doc.metadata.title,
     description: doc.metadata.description,
-    openGraph: {
-      title: doc.metadata.title,
-      description: doc.metadata.description,
-      type: "article",
-      url: `https://midday.ai/docs/${slug}`,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: doc.metadata.title,
-      description: doc.metadata.description,
-    },
-  };
+    path: `/docs/${slug}`,
+    type: "article",
+  });
 }
 
 function getAdjacentDocs(currentSlug: string) {

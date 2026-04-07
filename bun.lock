@@ -29,6 +29,7 @@
         "@midday/accounting": "workspace:*",
         "@midday/app-store": "workspace:*",
         "@midday/banking": "workspace:*",
+        "@midday/bot": "workspace:*",
         "@midday/cache": "workspace:*",
         "@midday/categories": "workspace:*",
         "@midday/connectors": "workspace:*",
@@ -236,6 +237,7 @@
         "@midday/accounting": "workspace:*",
         "@midday/app-store": "workspace:*",
         "@midday/banking": "workspace:*",
+        "@midday/bot": "workspace:*",
         "@midday/customers": "workspace:*",
         "@midday/db": "workspace:*",
         "@midday/documents": "workspace:*",
@@ -320,6 +322,31 @@
         "zod": "catalog:",
       },
       "devDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "packages/bot": {
+      "name": "@midday/bot",
+      "version": "0.1.0",
+      "dependencies": {
+        "@chat-adapter/slack": "^4.23.0",
+        "@chat-adapter/state-redis": "^4.23.0",
+        "@chat-adapter/telegram": "^4.23.0",
+        "@chat-adapter/whatsapp": "^4.23.0",
+        "@midday/app-store": "workspace:*",
+        "@midday/cache": "workspace:*",
+        "@midday/db": "workspace:*",
+        "@midday/documents": "workspace:*",
+        "@midday/job-client": "workspace:*",
+        "@midday/logger": "workspace:*",
+        "@midday/supabase": "workspace:*",
+        "@midday/utils": "workspace:*",
+        "chat": "^4.23.0",
+        "chat-adapter-sendblue": "^0.2.0",
+        "nanoid": "catalog:",
+      },
+      "devDependencies": {
+        "@midday/tsconfig": "workspace:*",
         "typescript": "catalog:",
       },
     },
@@ -561,6 +588,7 @@
       "dependencies": {
         "@ai-sdk/google": "catalog:",
         "@fast-csv/format": "catalog:",
+        "@midday/bot": "workspace:*",
         "@midday/db": "workspace:*",
         "@midday/email": "workspace:*",
         "@midday/encryption": "workspace:*",
@@ -946,6 +974,16 @@
 
     "@cfworker/json-schema": ["@cfworker/json-schema@4.1.1", "", {}, "sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og=="],
 
+    "@chat-adapter/shared": ["@chat-adapter/shared@4.23.0", "", { "dependencies": { "chat": "4.23.0" } }, "sha512-IDHgrAi3Y8Qptl1kd8zmM6jxWX+lu0cq/uZiURv8jONufWHrVwVr19pN0YK52ASnRlLZkcaNYXoa+mLFGQ2tlw=="],
+
+    "@chat-adapter/slack": ["@chat-adapter/slack@4.23.0", "", { "dependencies": { "@chat-adapter/shared": "4.23.0", "@slack/web-api": "^7.14.0", "chat": "4.23.0" } }, "sha512-J5Ml/Ug8Zdb3zVIcbMhkei9U9aTeY+uqpzuuzcHkwdJC6FDFhwj5TSiuocckctqW9tMCqzFl4h4gU5q9f6KSGA=="],
+
+    "@chat-adapter/state-redis": ["@chat-adapter/state-redis@4.23.0", "", { "dependencies": { "chat": "4.23.0", "redis": "^5.11.0" } }, "sha512-MVOWHz4NjsXc3t7jH5B0juzjCwL7Cn/mz3zblKl6qQxgEIy2rxeP9a+mxvb1KC6zLX1gzKxMOocFEpzjIbotBQ=="],
+
+    "@chat-adapter/telegram": ["@chat-adapter/telegram@4.23.0", "", { "dependencies": { "@chat-adapter/shared": "4.23.0", "chat": "4.23.0" } }, "sha512-9ntCc+LlwSrb5Y3OFFamAt0eyA+c8V0S5XbA5O12DyPFMmCbe7ibQfbZv9qwYKgxvyBLgPG2RfwYp1ocrDs1/A=="],
+
+    "@chat-adapter/whatsapp": ["@chat-adapter/whatsapp@4.23.0", "", { "dependencies": { "@chat-adapter/shared": "4.23.0", "chat": "4.23.0" } }, "sha512-3RV64TbgLAyaCa4gFJsm8Ry+8yMqiMBMk4l03Steqe5UB9MIf28xewZf/La8VewVRHG4SdnLAp2BxT1+BrKiUw=="],
+
     "@chevrotain/cst-dts-gen": ["@chevrotain/cst-dts-gen@11.0.3", "", { "dependencies": { "@chevrotain/gast": "11.0.3", "@chevrotain/types": "11.0.3", "lodash-es": "4.17.21" } }, "sha512-BvIKpRLeS/8UbfxXxgC33xOumsacaeCKAjAeLyOn7Pcp95HiRbrpl14S+9vaZLolnbssPIUuiUd8IvgkRyt6NQ=="],
 
     "@chevrotain/gast": ["@chevrotain/gast@11.0.3", "", { "dependencies": { "@chevrotain/types": "11.0.3", "lodash-es": "4.17.21" } }, "sha512-+qNfcoNk70PyS/uxmj3li5NiECO+2YKZZQMbmjTqRI3Qchu8Hig/Q9vgkHpI3alNjr7M+a2St5pw5w5F6NL5/Q=="],
@@ -1241,6 +1279,8 @@
     "@midday/app-store": ["@midday/app-store@workspace:packages/app-store"],
 
     "@midday/banking": ["@midday/banking@workspace:packages/banking"],
+
+    "@midday/bot": ["@midday/bot@workspace:packages/bot"],
 
     "@midday/cache": ["@midday/cache@workspace:packages/cache"],
 
@@ -1693,6 +1733,16 @@
     "@react-pdf/textkit": ["@react-pdf/textkit@6.1.0", "", { "dependencies": { "@react-pdf/fns": "3.1.2", "bidi-js": "^1.0.2", "hyphen": "^1.6.4", "unicode-properties": "^1.4.1" } }, "sha512-sFlzDC9CDFrJsnL3B/+NHrk9+Advqk7iJZIStiYQDdskbow8GF/AGYrpIk+vWSnh35YxaGbHkqXq53XOxnyrjQ=="],
 
     "@react-pdf/types": ["@react-pdf/types@2.9.2", "", { "dependencies": { "@react-pdf/font": "^4.0.4", "@react-pdf/primitives": "^4.1.1", "@react-pdf/stylesheet": "^6.1.2" } }, "sha512-dufvpKId9OajLLbgn9q7VLUmyo1Jf+iyGk2ZHmCL8nIDtL8N1Ejh9TH7+pXXrR0tdie1nmnEb5Bz9U7g4hI4/g=="],
+
+    "@redis/bloom": ["@redis/bloom@5.11.0", "", { "peerDependencies": { "@redis/client": "^5.11.0" } }, "sha512-KYiVilAhAFN3057afUb/tfYJpsEyTkQB+tQcn5gVVA7DgcNOAj8lLxe4j8ov8BF6I9C1Fe/kwlbuAICcTMX8Lw=="],
+
+    "@redis/client": ["@redis/client@5.11.0", "", { "dependencies": { "cluster-key-slot": "1.1.2" }, "peerDependencies": { "@node-rs/xxhash": "^1.1.0" }, "optionalPeers": ["@node-rs/xxhash"] }, "sha512-GHoprlNQD51Xq2Ztd94HHV94MdFZQ3CVrpA04Fz8MVoHM0B7SlbmPEVIjwTbcv58z8QyjnrOuikS0rWF03k5dQ=="],
+
+    "@redis/json": ["@redis/json@5.11.0", "", { "peerDependencies": { "@redis/client": "^5.11.0" } }, "sha512-1iAy9kAtcD0quB21RbPTbUqqy+T2Uu2JxucwE+B4A+VaDbIRvpZR6DMqV8Iqaws2YxJYB3GC5JVNzPYio2ErUg=="],
+
+    "@redis/search": ["@redis/search@5.11.0", "", { "peerDependencies": { "@redis/client": "^5.11.0" } }, "sha512-g1l7f3Rnyk/xI99oGHIgWHSKFl45Re5YTIcO8j/JE8olz389yUFyz2+A6nqVy/Zi031VgPDWscbbgOk8hlhZ3g=="],
+
+    "@redis/time-series": ["@redis/time-series@5.11.0", "", { "peerDependencies": { "@redis/client": "^5.11.0" } }, "sha512-TWFeOcU4xkj0DkndnOyhtxvX1KWD+78UHT3XX3x3XRBUGWeQrKo3jqzDsZwxbggUgf9yLJr/akFHXru66X5UQA=="],
 
     "@reduxjs/toolkit": ["@reduxjs/toolkit@2.11.2", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "@standard-schema/utils": "^0.3.0", "immer": "^11.0.0", "redux": "^5.0.1", "redux-thunk": "^3.1.0", "reselect": "^5.1.0" }, "peerDependencies": { "react": "^16.9.0 || ^17.0.0 || ^18 || ^19", "react-redux": "^7.2.1 || ^8.1.3 || ^9.0.0" }, "optionalPeers": ["react", "react-redux"] }, "sha512-Kd6kAHTA6/nUpp8mySPqj3en3dm0tdMIgbttnQ1xFMVpufoj+ADi8pXLBsd4xzTRHQa7t/Jv8W5UnCuW4kuWMQ=="],
 
@@ -2324,6 +2374,8 @@
 
     "@webassemblyjs/wast-printer": ["@webassemblyjs/wast-printer@1.14.1", "", { "dependencies": { "@webassemblyjs/ast": "1.14.1", "@xtuc/long": "4.2.2" } }, "sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw=="],
 
+    "@workflow/serde": ["@workflow/serde@4.1.0-beta.2", "", {}, "sha512-8kkeoQKLDaKXefjV5dbhBj2aErfKp1Mc4pb6tj8144cF+Em5SPbyMbyLCHp+BVrFfFVCBluCtMx+jjvaFVZGww=="],
+
     "@xmldom/xmldom": ["@xmldom/xmldom@0.8.11", "", {}, "sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw=="],
 
     "@xstate/fsm": ["@xstate/fsm@1.6.5", "", {}, "sha512-b5o1I6aLNeYlU/3CPlj/Z91ybk1gUsKT+5NAJI+2W4UjvS5KLG28K9v5UvNoFVjHV8PajVZ00RH3vnjyQO7ZAw=="],
@@ -2511,6 +2563,10 @@
     "character-entities-legacy": ["character-entities-legacy@3.0.0", "", {}, "sha512-RpPp0asT/6ufRm//AJVwpViZbGM/MkjQFxJccQRHmISF/22NBtsHqAWmL+/pmkPWoIUJdWyeVleTl1wydHATVQ=="],
 
     "character-reference-invalid": ["character-reference-invalid@2.0.1", "", {}, "sha512-iBZ4F4wRbyORVsu0jPV7gXkOsGYjGHPmAyv+HiHG8gi5PtC9KI2j1+v8/tlibRvjoWX027ypmG/n0HtO5t7unw=="],
+
+    "chat": ["chat@4.23.0", "", { "dependencies": { "@workflow/serde": "4.1.0-beta.2", "mdast-util-to-string": "^4.0.0", "remark-gfm": "^4.0.0", "remark-parse": "^11.0.0", "remark-stringify": "^11.0.0", "remend": "^1.2.1", "unified": "^11.0.5" } }, "sha512-Gmw8yyDrrH9Vxs+TfxF7FoTENrCzJV4T0FiAh7APGcQPhMMYAhrpq66PKj8azhkUSEyaen8ujbneogoJWiY8vg=="],
+
+    "chat-adapter-sendblue": ["chat-adapter-sendblue@0.2.0", "", { "dependencies": { "chat": "^4.23.0", "sendblue": "^3.6.1" } }, "sha512-JKqRa5KyoBsndRrq2LuGhob1uCdO1goWAbqaSLCld3KE9q288CnEo999GdWuDVWa9yqt1uf5F9/Oe3iFkSrW2w=="],
 
     "chevrotain": ["chevrotain@11.0.3", "", { "dependencies": { "@chevrotain/cst-dts-gen": "11.0.3", "@chevrotain/gast": "11.0.3", "@chevrotain/regexp-to-ast": "11.0.3", "@chevrotain/types": "11.0.3", "@chevrotain/utils": "11.0.3", "lodash-es": "4.17.21" } }, "sha512-ci2iJH6LeIkvP9eJW6gpueU8cnZhv85ELY8w8WiFtNjMHA5ad6pQLaJo9mEly/9qUyCpvqX8/POVUTf18/HFdw=="],
 
@@ -4050,6 +4106,8 @@
 
     "recma-stringify": ["recma-stringify@1.0.0", "", { "dependencies": { "@types/estree": "^1.0.0", "estree-util-to-js": "^2.0.0", "unified": "^11.0.0", "vfile": "^6.0.0" } }, "sha512-cjwII1MdIIVloKvC9ErQ+OgAtwHBmcZ0Bg4ciz78FtbT8In39aAYbaA7zvxQ61xVMSPE8WxhLwLbhif4Js2C+g=="],
 
+    "redis": ["redis@5.11.0", "", { "dependencies": { "@redis/bloom": "5.11.0", "@redis/client": "5.11.0", "@redis/json": "5.11.0", "@redis/search": "5.11.0", "@redis/time-series": "5.11.0" } }, "sha512-YwXjATVDT+AuxcyfOwZn046aml9jMlQPvU1VXIlLDVAExe0u93aTfPYSeRgG4p9Q/Jlkj+LXJ1XEoFV+j2JKcQ=="],
+
     "redis-errors": ["redis-errors@1.2.0", "", {}, "sha512-1qny3OExCf0UvUV/5wpYKf2YwPcOqXzkwKKSmKHiE6ZMQs5heeE/c8eXK+PNllPvmjgAbfnsbpkGZWy8cBpn9w=="],
 
     "redis-parser": ["redis-parser@3.0.0", "", { "dependencies": { "redis-errors": "^1.0.0" } }, "sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A=="],
@@ -4165,6 +4223,8 @@
     "semver": ["semver@7.7.4", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA=="],
 
     "send": ["send@1.2.1", "", { "dependencies": { "debug": "^4.4.3", "encodeurl": "^2.0.0", "escape-html": "^1.0.3", "etag": "^1.8.1", "fresh": "^2.0.0", "http-errors": "^2.0.1", "mime-types": "^3.0.2", "ms": "^2.1.3", "on-finished": "^2.4.1", "range-parser": "^1.2.1", "statuses": "^2.0.2" } }, "sha512-1gnZf7DFcoIcajTjTwjwuDjzuz4PPcY2StKPlsGAQ1+YH20IRVrBaXSWmdjowTJ6u8Rc01PoYOGHXfP1mYcZNQ=="],
+
+    "sendblue": ["sendblue@3.6.1", "", {}, "sha512-7AgyIZyppfQzu5nTqsK2ISxpVYm0ZaPQwIJgg/mDdoXnUY57UFvlhfgbUMxFPGLbJ2r4YeMeEwO5eNCRrimPoA=="],
 
     "serialize-javascript": ["serialize-javascript@6.0.2", "", { "dependencies": { "randombytes": "^2.1.0" } }, "sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g=="],
 

@@ -1,29 +1,16 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { Customers } from "@/components/customers";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Customer Management & Revenue Tracking";
-const description =
-  "Know your customers better. Track customer performance, payment history, and outstanding invoices all in one place.";
-
-export const metadata: Metadata = {
-  title,
-  description,
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/customers`,
+export const metadata = createPageMetadata({
+  title: "Customer Management & Revenue Tracking",
+  description:
+    "Know your customers better. Track customer performance, payment history, and outstanding invoices all in one place.",
+  path: "/customers",
+  og: {
+    title: "Customers",
+    description: "Track revenue, payments, and invoices per customer",
   },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/customers`,
-  },
-};
+});
 
 export default function Page() {
   return <Customers />;

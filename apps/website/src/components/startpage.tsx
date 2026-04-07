@@ -269,10 +269,10 @@ export function StartPage() {
             <div className="flex flex-col items-center w-full text-center space-y-6 lg:space-y-8">
               <div className="space-y-5 lg:space-y-6 max-w-3xl 3xl:max-w-5xl mx-auto px-2 lg:px-0">
                 <Link
-                  href="/agents"
+                  href="/chat"
                   className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border text-xs font-sans text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
                 >
-                  Let agents run your business
+                  Run your business from iMessage and more
                   <span aria-hidden="true">&rarr;</span>
                 </Link>
 

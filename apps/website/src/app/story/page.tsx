@@ -1,29 +1,13 @@
-import type { Metadata } from "next";
 import Image from "next/image";
-import { baseUrl } from "@/app/sitemap";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Story";
-const description =
-  "Why we built Midday. Learn about our mission to help one-person companies stay on top of their business finances without the manual work.";
-
-export const metadata: Metadata = {
-  title,
-  description,
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/story`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/story`,
-  },
-};
+export const metadata = createPageMetadata({
+  title: "Story",
+  description:
+    "Why we built Midday. Learn about our mission to help one-person companies stay on top of their business finances without the manual work.",
+  path: "/story",
+  og: { title: "Our Story", description: "Why we built Midday" },
+});
 
 export default function StoryPage() {
   return (

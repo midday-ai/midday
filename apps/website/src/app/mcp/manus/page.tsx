@@ -1,35 +1,22 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCPManus } from "@/components/mcp-manus";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Manus MCP Integration";
-const description =
-  "Connect Manus to your Midday data via Model Context Protocol. Automate financial workflows with AI agents.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Manus MCP Integration",
+  description:
+    "Connect Manus to your Midday data via Model Context Protocol. Automate financial workflows with AI agents.",
+  path: "/mcp/manus",
+  og: {
+    title: "Manus + Midday",
+    description: "Automate workflows with AI agents",
+  },
   keywords: [
     "Manus MCP",
     "Manus integration",
     "Model Context Protocol",
     "AI agent financial data",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp/manus`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp/manus`,
-  },
-};
+});
 
 export default function Page() {
   return <MCPManus />;

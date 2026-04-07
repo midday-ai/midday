@@ -10,6 +10,7 @@ const STEP_KEYS = [
   "connect-inbox",
   "reconciliation",
   "connect-mcp",
+  "connect-chat",
   "start-trial",
 ] as const;
 

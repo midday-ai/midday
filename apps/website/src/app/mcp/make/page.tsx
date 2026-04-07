@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCPMake } from "@/components/mcp-make";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Make MCP Integration";
-const description =
-  "Connect Midday to Make scenarios via MCP. Build visual automations with your financial data and connect to 1,500+ apps.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Make MCP Integration",
+  description:
+    "Connect Midday to Make scenarios via MCP. Build visual automations with your financial data and connect to 1,500+ apps.",
+  path: "/mcp/make",
+  og: {
+    title: "Make + Midday",
+    description: "Visual automations for your financial data",
+  },
   keywords: [
     "Make MCP",
     "Make integration",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "visual automation",
     "no-code workflows",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp/make`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp/make`,
-  },
-};
+});
 
 export default function Page() {
   return <MCPMake />;

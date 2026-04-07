@@ -5,7 +5,6 @@ import { NoMatchSchedulerProcessor } from "./no-match-scheduler";
 import { ProcessAttachmentProcessor } from "./process-attachment";
 import { SlackUploadProcessor } from "./slack-upload";
 import { SyncSchedulerProcessor } from "./sync-scheduler";
-import { WhatsAppUploadProcessor } from "./whatsapp-upload";
 
 /**
  * Export all inbox processors (for type imports)
@@ -17,7 +16,6 @@ export { NoMatchSchedulerProcessor } from "./no-match-scheduler";
 export { ProcessAttachmentProcessor } from "./process-attachment";
 export { SlackUploadProcessor } from "./slack-upload";
 export { SyncSchedulerProcessor } from "./sync-scheduler";
-export { WhatsAppUploadProcessor } from "./whatsapp-upload";
 
 /**
  * Inbox processor registry
@@ -29,7 +27,6 @@ export const inboxProcessors = {
     new MatchTransactionsBidirectionalProcessor(),
   "process-attachment": new ProcessAttachmentProcessor(),
   "slack-upload": new SlackUploadProcessor(),
-  "whatsapp-upload": new WhatsAppUploadProcessor(),
   "no-match-scheduler": new NoMatchSchedulerProcessor(),
   "sync-scheduler": new SyncSchedulerProcessor(),
   "initial-setup": new InitialSetupProcessor(),

@@ -15,7 +15,8 @@ export const sendInvoiceNotifications = schemaTask({
     customerName: z.string(),
   }),
   run: async ({ invoiceId, invoiceNumber, status, teamId, customerName }) => {
-    const notifications = new Notifications(getDb());
+    const db = getDb();
+    const notifications = new Notifications(db);
 
     switch (status) {
       case "paid": {
@@ -31,6 +32,12 @@ export const sendInvoiceNotifications = schemaTask({
             sendEmail: true,
           },
         );
+        // TODO: migrating to worker
+        // await sendToProviders(db, teamId, "invoice_paid", {
+        //   invoiceId,
+        //   invoiceNumber,
+        //   customerName,
+        // });
         break;
       }
       case "overdue": {
@@ -47,6 +54,12 @@ export const sendInvoiceNotifications = schemaTask({
             sendEmail: true,
           },
         );
+        // TODO: migrating to worker
+        // await sendToProviders(db, teamId, "invoice_overdue", {
+        //   invoiceId,
+        //   invoiceNumber,
+        //   customerName,
+        // });
         break;
       }
     }

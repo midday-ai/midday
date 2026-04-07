@@ -15,14 +15,16 @@ import {
   users,
 } from "../../schema";
 
-// Runway seed dates are relative to today so they always fall within
-// the trailing window used by getRunway (3 completed months) / getBurnRate.
-const _now = new UTCDate();
-const RW_DATE_1 = format(subMonths(_now, 5), "yyyy-MM-dd");
-const RW_DATE_2 = format(subMonths(_now, 4), "yyyy-MM-dd");
-const RW_DATE_3 = format(subMonths(_now, 3), "yyyy-MM-dd");
-const RW_DATE_4 = format(subMonths(_now, 2), "yyyy-MM-dd");
-const RW_DATE_5 = format(subMonths(_now, 1), "yyyy-MM-dd");
+// Runway seed dates are relative to SEED_REFERENCE_DATE so they always
+// fall within the trailing window used by getRunway (3 completed months).
+// Tests that call getRunway must freeze time to this same date via
+// setSystemTime so the query window aligns with the seeded data.
+export const SEED_REFERENCE_DATE = new UTCDate();
+const RW_DATE_1 = format(subMonths(SEED_REFERENCE_DATE, 5), "yyyy-MM-dd");
+const RW_DATE_2 = format(subMonths(SEED_REFERENCE_DATE, 4), "yyyy-MM-dd");
+const RW_DATE_3 = format(subMonths(SEED_REFERENCE_DATE, 3), "yyyy-MM-dd");
+const RW_DATE_4 = format(subMonths(SEED_REFERENCE_DATE, 2), "yyyy-MM-dd");
+const RW_DATE_5 = format(subMonths(SEED_REFERENCE_DATE, 1), "yyyy-MM-dd");
 
 // ─── Deterministic IDs ───────────────────────────────────────────────────────
 // Using fixed UUIDs so tests can reference specific records.

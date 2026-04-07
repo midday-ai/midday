@@ -279,7 +279,6 @@ app.openapi(
         }
 
         const slackClient = createSlackWebClient({
-          // @ts-expect-error - config is JSONB
           token: slackApp.config.access_token,
         });
 

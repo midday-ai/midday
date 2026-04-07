@@ -1,5 +1,10 @@
 import { openai } from "@ai-sdk/openai";
-import { generateText, Output, type UIMessageStreamWriter } from "ai";
+import {
+  generateText,
+  type ModelMessage,
+  Output,
+  type UIMessageStreamWriter,
+} from "ai";
 import { z } from "zod";
 
 type UIMessage = {
@@ -39,6 +44,20 @@ export function decodeDataUrl(
     data: Uint8Array.from(atob(body), (c) => c.charCodeAt(0)),
     mediaType,
   };
+}
+
+/**
+ * Remove file and image content parts from user messages so the agent
+ * doesn't receive raw data-URL blobs it can no longer decode.
+ * Summaries from pre-processing are injected into the system prompt instead.
+ */
+export function stripFileAndImageParts(messages: ModelMessage[]) {
+  for (const msg of messages) {
+    if (msg.role !== "user" || !Array.isArray(msg.content)) continue;
+    msg.content = msg.content.filter(
+      (part) => part.type !== "image" && part.type !== "file",
+    );
+  }
 }
 
 const titleSchema = z.object({

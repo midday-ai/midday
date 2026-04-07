@@ -1,28 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Privacy Policy";
-const description =
-  "Privacy Policy for Midday. Learn how we collect, use, and protect your personal data.";
-
-export const metadata: Metadata = {
-  title,
-  description,
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/policy`,
+export const metadata = createPageMetadata({
+  title: "Privacy Policy",
+  description:
+    "Privacy Policy for Midday. Learn how we collect, use, and protect your personal data.",
+  path: "/policy",
+  og: {
+    title: "Privacy Policy",
+    description: "How we protect your data",
   },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/policy`,
-  },
-};
+});
 
 export default function PrivacyPage() {
   return (

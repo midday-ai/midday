@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCPChatGPT } from "@/components/mcp-chatgpt";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "ChatGPT MCP Integration";
-const description =
-  "Build custom ChatGPT integrations with Midday using the MCP SDK. Connect OpenAI-powered apps to your business financial data.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "ChatGPT MCP Integration",
+  description:
+    "Build custom ChatGPT integrations with Midday using the MCP SDK. Connect OpenAI-powered apps to your business financial data.",
+  path: "/mcp/chatgpt",
+  og: {
+    title: "ChatGPT + Midday",
+    description: "Build custom integrations with your business data",
+  },
   keywords: [
     "ChatGPT MCP",
     "ChatGPT integration",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "OpenAI integration",
     "GPT financial data",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp/chatgpt`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp/chatgpt`,
-  },
-};
+});
 
 export default function Page() {
   return <MCPChatGPT />;

@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCPCursor } from "@/components/mcp-cursor";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Cursor MCP Integration";
-const description =
-  "Connect Cursor to your Midday data via MCP. Track time, query finances, and access business data directly from your AI-powered code editor.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Cursor MCP Integration",
+  description:
+    "Connect Cursor to your Midday data via MCP. Track time, query finances, and access business data directly from your AI-powered code editor.",
+  path: "/mcp/cursor",
+  og: {
+    title: "Cursor + Midday",
+    description: "Track time and query finances from your editor",
+  },
   keywords: [
     "Cursor MCP",
     "Cursor integration",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "AI coding assistant",
     "time tracking Cursor",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp/cursor`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp/cursor`,
-  },
-};
+});
 
 export default function Page() {
   return <MCPCursor />;

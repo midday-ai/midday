@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCP } from "@/components/mcp";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "AI Integrations via MCP — Claude, ChatGPT, Cursor & More";
-const description =
-  "Run your business from any AI tool via Model Context Protocol (MCP). Create invoices, export to your accountant, track time, and manage transactions from Cursor, Claude, ChatGPT, Raycast, or Zapier.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "AI Integrations via MCP — Claude, ChatGPT, Cursor & More",
+  description:
+    "Run your business from any AI tool via Model Context Protocol (MCP). Create invoices, export to your accountant, track time, and manage transactions from Cursor, Claude, ChatGPT, Raycast, or Zapier.",
+  path: "/mcp",
+  og: {
+    title: "AI Integrations",
+    description: "Run your business from any AI tool via MCP",
+  },
   keywords: [
     "MCP",
     "Model Context Protocol",
@@ -17,21 +18,7 @@ export const metadata: Metadata = {
     "Cursor MCP",
     "business automation",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp`,
-  },
-};
+});
 
 export default function Page() {
   return <MCP />;

@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCPGemini } from "@/components/mcp-gemini";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Gemini MCP Integration";
-const description =
-  "Connect Gemini CLI to your Midday data via Model Context Protocol. Query transactions, invoices, and reports from your terminal.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Gemini MCP Integration",
+  description:
+    "Connect Gemini CLI to your Midday data via Model Context Protocol. Query transactions, invoices, and reports from your terminal.",
+  path: "/mcp/gemini",
+  og: {
+    title: "Gemini + Midday",
+    description: "Business data from your terminal",
+  },
   keywords: [
     "Gemini MCP",
     "Gemini CLI integration",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "Google Gemini",
     "AI financial assistant",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp/gemini`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp/gemini`,
-  },
-};
+});
 
 export default function Page() {
   return <MCPGemini />;

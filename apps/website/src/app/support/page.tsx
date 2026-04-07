@@ -1,29 +1,13 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { SupportForm } from "@/components/support-form";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Support";
-const description =
-  "Get help with Midday. Contact our team for assistance with any questions or issues you may have.";
-
-export const metadata: Metadata = {
-  title,
-  description,
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/support`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/support`,
-  },
-};
+export const metadata = createPageMetadata({
+  title: "Support",
+  description:
+    "Get help with Midday. Contact our team for assistance with any questions or issues you may have.",
+  path: "/support",
+  og: { title: "Support", description: "We're here to help" },
+});
 
 export default function SupportPage() {
   return <SupportForm />;

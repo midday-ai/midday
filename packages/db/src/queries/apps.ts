@@ -1,17 +1,36 @@
 import { and, desc, eq, sql } from "drizzle-orm";
+import type {
+  AppConfigFor,
+  TelegramConnection,
+  WhatsAppConnection,
+} from "../app-config";
 import type { Database } from "../client";
-import { WhatsAppAlreadyConnectedToAnotherTeamError } from "../errors";
-import { apps, usersOnTeam } from "../schema";
+import {
+  TelegramAlreadyConnectedToAnotherTeamError,
+  WhatsAppAlreadyConnectedToAnotherTeamError,
+} from "../errors";
+import { apps, platformIdentities, usersOnTeam } from "../schema";
 
-export type CreateAppParams = {
-  teamId: string;
-  createdBy: string;
-  appId: string;
-  settings?: unknown;
-  config?: unknown;
+export type AppRecord<TAppId extends string = string> = Omit<
+  typeof apps.$inferSelect,
+  "appId" | "config"
+> & {
+  appId: TAppId;
+  config: AppConfigFor<TAppId> | null;
 };
 
-export const createApp = async (db: Database, params: CreateAppParams) => {
+export type CreateAppParams<TAppId extends string = string> = {
+  teamId: string;
+  createdBy: string;
+  appId: TAppId;
+  settings?: unknown;
+  config?: AppConfigFor<TAppId>;
+};
+
+export const createApp = async <TAppId extends string>(
+  db: Database,
+  params: CreateAppParams<TAppId>,
+): Promise<AppRecord<TAppId> | undefined> => {
   const [result] = await db
     .insert(apps)
     .values({
@@ -30,7 +49,7 @@ export const createApp = async (db: Database, params: CreateAppParams) => {
     })
     .returning();
 
-  return result;
+  return result as AppRecord<TAppId> | undefined;
 };
 
 type AppSetting = {
@@ -52,22 +71,22 @@ export const getApps = async (db: Database, teamId: string) => {
   return result;
 };
 
-export type GetAppByAppIdParams = {
-  appId: string;
+export type GetAppByAppIdParams<TAppId extends string = string> = {
+  appId: TAppId;
   teamId: string;
 };
 
-export const getAppByAppId = async (
+export const getAppByAppId = async <TAppId extends string>(
   db: Database,
-  params: GetAppByAppIdParams,
-) => {
+  params: GetAppByAppIdParams<TAppId>,
+): Promise<AppRecord<TAppId> | null> => {
   const [result] = await db
     .select()
     .from(apps)
     .where(and(eq(apps.appId, params.appId), eq(apps.teamId, params.teamId)))
     .limit(1);
 
-  return result || null;
+  return (result as AppRecord<TAppId> | undefined) ?? null;
 };
 
 export type GetAppBySlackTeamIdParams = {
@@ -100,7 +119,7 @@ export const getAppBySlackTeamId = async (
       )
       .limit(1);
 
-    const result = results[0] || null;
+    const result = (results[0] as AppRecord<"slack"> | undefined) ?? null;
 
     if (!result) {
       // Log for debugging - but do NOT fall back to prevent cross-tenant issues
@@ -114,11 +133,11 @@ export const getAppBySlackTeamId = async (
 
   // When channelId is NOT provided, we must ensure there's no ambiguity
   // Query all integrations for this Slack workspace
-  const allResults = await db
+  const allResults = (await db
     .select()
     .from(apps)
     .where(and(...baseConditions))
-    .orderBy(desc(apps.createdAt));
+    .orderBy(desc(apps.createdAt))) as AppRecord<"slack">[];
 
   // SECURITY: If multiple integrations exist, we cannot safely determine which one
   // to use without a channelId. Return null to fail safely.
@@ -129,11 +148,7 @@ export const getAppBySlackTeamId = async (
         slackTeamId,
         count: allResults.length,
         middayTeamIds: allResults.map((r) => r.teamId),
-        channelIds: allResults.map(
-          (r) =>
-            // @ts-expect-error - config is JSONB
-            r.config?.channel_id,
-        ),
+        channelIds: allResults.map((r) => r.config?.channel_id),
       },
     );
     return null;
@@ -153,6 +168,17 @@ export const disconnectApp = async (
   params: DisconnectAppParams,
 ) => {
   const { appId, teamId } = params;
+
+  if (appId === "slack" || appId === "telegram" || appId === "whatsapp") {
+    await db
+      .delete(platformIdentities)
+      .where(
+        and(
+          eq(platformIdentities.teamId, teamId),
+          eq(platformIdentities.provider, appId),
+        ),
+      );
+  }
 
   const deleted = await db
     .delete(apps)
@@ -258,17 +284,6 @@ export const deleteApp = async (db: Database, params: DeleteAppParams) => {
   return disconnectApp(db, params);
 };
 
-// WhatsApp connection types
-export type WhatsAppConnection = {
-  phoneNumber: string;
-  displayName?: string;
-  connectedAt: string;
-};
-
-type WhatsAppConfig = {
-  connections?: WhatsAppConnection[];
-};
-
 /**
  * Find team by WhatsApp phone number
  * Searches all WhatsApp app installations for a matching phone number in connections
@@ -277,7 +292,7 @@ export const getAppByWhatsAppNumber = async (
   db: Database,
   phoneNumber: string,
 ) => {
-  const results = await db
+  const results = (await db
     .select()
     .from(apps)
     .where(
@@ -285,7 +300,7 @@ export const getAppByWhatsAppNumber = async (
         eq(apps.appId, "whatsapp"),
         sql`${apps.config}->'connections' @> ${JSON.stringify([{ phoneNumber }])}::jsonb`,
       ),
-    );
+    )) as AppRecord<"whatsapp">[];
 
   return results[0] || null;
 };
@@ -294,6 +309,7 @@ export type AddWhatsAppConnectionParams = {
   teamId: string;
   phoneNumber: string;
   displayName?: string;
+  createdBy?: string;
 };
 
 /**
@@ -304,7 +320,7 @@ export const addWhatsAppConnection = async (
   db: Database,
   params: AddWhatsAppConnectionParams,
 ) => {
-  const { teamId, phoneNumber, displayName } = params;
+  const { teamId, phoneNumber, displayName, createdBy: linkingUserId } = params;
 
   // Check if this phone number is already connected to any team
   const existingConnection = await getAppByWhatsAppNumber(db, phoneNumber);
@@ -328,7 +344,7 @@ export const addWhatsAppConnection = async (
 
   if (existingApp) {
     // Add to existing connections
-    const config = (existingApp.config as WhatsAppConfig) || {};
+    const config = existingApp.config ?? {};
     const connections = config.connections || [];
 
     const [result] = await db
@@ -352,7 +368,7 @@ export const addWhatsAppConnection = async (
     .where(eq(usersOnTeam.teamId, teamId))
     .limit(1);
 
-  const createdBy = firstMember[0]?.userId || teamId; // Fallback to teamId if no members
+  const createdBy = linkingUserId || firstMember[0]?.userId || teamId;
 
   // Create new WhatsApp app with this connection
   const [result] = await db
@@ -371,7 +387,7 @@ export const addWhatsAppConnection = async (
     })
     .returning();
 
-  return result;
+  return result as AppRecord<"whatsapp">;
 };
 
 export type RemoveWhatsAppConnectionParams = {
@@ -388,13 +404,24 @@ export const removeWhatsAppConnection = async (
 ) => {
   const { teamId, phoneNumber } = params;
 
+  await db
+    .delete(platformIdentities)
+    .where(
+      and(
+        eq(platformIdentities.teamId, teamId),
+        eq(platformIdentities.provider, "whatsapp"),
+        eq(platformIdentities.externalUserId, phoneNumber),
+        eq(platformIdentities.externalTeamId, ""),
+      ),
+    );
+
   const existingApp = await getAppByAppId(db, { appId: "whatsapp", teamId });
 
   if (!existingApp) {
     throw new Error("WhatsApp app not found for this team");
   }
 
-  const config = (existingApp.config as WhatsAppConfig) || {};
+  const config = existingApp.config ?? {};
   const connections = config.connections || [];
 
   const updatedConnections = connections.filter(
@@ -434,7 +461,121 @@ export const getWhatsAppConnections = async (db: Database, teamId: string) => {
     return [];
   }
 
-  const config = (app.config as WhatsAppConfig) || {};
+  const config = app.config ?? {};
+  return config.connections || [];
+};
+
+export const getAppByTelegramUserId = async (
+  db: Database,
+  telegramUserId: string,
+) => {
+  const results = (await db
+    .select()
+    .from(apps)
+    .where(
+      and(
+        eq(apps.appId, "telegram"),
+        sql`${apps.config}->'connections' @> ${JSON.stringify([{ userId: telegramUserId }])}::jsonb`,
+      ),
+    )) as AppRecord<"telegram">[];
+
+  return results[0] || null;
+};
+
+export type AddTelegramConnectionParams = {
+  teamId: string;
+  userId: string;
+  chatId: string;
+  username?: string;
+  displayName?: string;
+  createdBy?: string;
+};
+
+export const addTelegramConnection = async (
+  db: Database,
+  params: AddTelegramConnectionParams,
+) => {
+  const {
+    teamId,
+    userId,
+    chatId,
+    username,
+    displayName,
+    createdBy: linkingUserId,
+  } = params;
+
+  const existingConnection = await getAppByTelegramUserId(db, userId);
+  if (existingConnection) {
+    if (existingConnection.teamId === teamId) {
+      return existingConnection;
+    }
+
+    throw new TelegramAlreadyConnectedToAnotherTeamError();
+  }
+
+  const existingApp = await getAppByAppId(db, { appId: "telegram", teamId });
+
+  const newConnection: TelegramConnection = {
+    userId,
+    chatId,
+    username,
+    displayName,
+    connectedAt: new Date().toISOString(),
+  };
+
+  if (existingApp) {
+    const config = existingApp.config ?? {};
+    const connections = config.connections || [];
+
+    const [result] = await db
+      .update(apps)
+      .set({
+        config: {
+          ...config,
+          connections: [...connections, newConnection],
+        },
+      })
+      .where(and(eq(apps.appId, "telegram"), eq(apps.teamId, teamId)))
+      .returning();
+
+    return result;
+  }
+
+  const firstMember = await db
+    .select({ userId: usersOnTeam.userId })
+    .from(usersOnTeam)
+    .where(eq(usersOnTeam.teamId, teamId))
+    .limit(1);
+
+  const createdBy = linkingUserId || firstMember[0]?.userId || teamId;
+
+  const [result] = await db
+    .insert(apps)
+    .values({
+      teamId,
+      appId: "telegram",
+      createdBy,
+      config: {
+        connections: [newConnection],
+      },
+      settings: [
+        { id: "receipts", label: "Receipt Processing", value: true },
+        { id: "matches", label: "Match Notifications", value: true },
+      ],
+    })
+    .returning();
+
+  return result as AppRecord<"telegram">;
+};
+
+export const getTelegramConnections = async (db: Database, teamId: string) => {
+  const app = await getAppByAppId(db, { appId: "telegram", teamId });
+
+  if (!app) {
+    return [];
+  }
+
+  const config = app.config ?? {};
   return config.connections || [];
 };
 

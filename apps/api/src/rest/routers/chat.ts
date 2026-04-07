@@ -1,28 +1,26 @@
-import { openai } from "@ai-sdk/openai";
+import { streamMiddayAssistant } from "@api/chat/assistant-runtime";
 import type { MentionedApp } from "@api/chat/prompt";
 import { buildSystemPrompt } from "@api/chat/prompt";
 import {
-  buildPrepareStep,
-  type ChatMCPClient,
-  createExecutionClient,
-  ensureToolIndex,
-  getSearchTool,
-  getToolDefinitions,
-} from "@api/chat/tools";
-import { decodeDataUrl, writeChatTitle } from "@api/chat/utils";
-import { getComposioTools } from "@api/composio/client";
+  decodeDataUrl,
+  stripFileAndImageParts,
+  writeChatTitle,
+} from "@api/chat/utils";
 import type { McpContext } from "@api/mcp/types";
 import type { Context } from "@api/rest/types";
 import { getGeoContext } from "@api/utils/geo";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import {
+  formatProcessedUploadSummary,
+  getPlatformInstructions,
+  isSupportedInboxUploadMediaType,
+  processInboxUpload,
+} from "@midday/bot";
 import { logger } from "@midday/logger";
 import {
   convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
-  smoothStream,
-  stepCountIs,
-  ToolLoopAgent,
 } from "ai";
 import { type RateLimitInfo, rateLimiter } from "hono-rate-limiter";
 
@@ -48,8 +46,6 @@ app.use(
 );
 
 app.post("/", async (c) => {
-  let executionClientPromise: Promise<ChatMCPClient> | null = null;
-
   try {
     const db = c.get("db");
     const teamId = c.get("teamId");
@@ -60,6 +56,9 @@ app.post("/", async (c) => {
 
     const body = await c.req.json();
     const uiMessages = body.messages as any[];
+    const latestUserMessage = [...uiMessages]
+      .reverse()
+      .find((message) => message?.role === "user");
 
     const clientTimezone = (body.timezone as string) || null;
     const clientLocalTime = (body.localTime as string) || null;
@@ -83,32 +82,62 @@ app.post("/", async (c) => {
     const mentionedApps =
       (body.mentionedApps as MentionedApp[] | undefined) ?? [];
 
-    const systemPrompt = buildSystemPrompt({
-      fullName: user?.fullName ?? null,
-      locale: user?.locale || geo.locale || "en",
-      timezone: resolvedTimezone,
-      dateFormat: user?.dateFormat ?? null,
-      timeFormat: user?.timeFormat ?? 24,
-      baseCurrency: user?.team?.baseCurrency ?? "USD",
-      teamName: user?.team?.name ?? null,
-      countryCode: user?.team?.countryCode ?? geo.country,
-      localTime: clientLocalTime,
-      mentionedApps,
-    });
+    const recentUploadSummaries: string[] = [];
 
-    executionClientPromise = createExecutionClient(mcpCtx);
-    const composioToolsPromise = getComposioTools(mcpCtx.userId);
+    if (latestUserMessage?.parts) {
+      const fileParts = latestUserMessage.parts.filter(
+        (part: any) =>
+          part?.type === "file" &&
+          typeof part?.url === "string" &&
+          isSupportedInboxUploadMediaType(part?.mediaType),
+      );
 
-    const [, modelMessages] = await Promise.all([
-      ensureToolIndex(mcpCtx),
-      convertToModelMessages(uiMessages),
-    ]);
+      for (const [index, part] of fileParts.entries()) {
+        try {
+          const decoded = decodeDataUrl(new URL(part.url));
 
-    const model = openai("gpt-4.1-mini");
+          if (!decoded) continue;
+
+          const result = await processInboxUpload({
+            db,
+            teamId,
+            userId: user?.id ?? session.user.id,
+            fileData: decoded.data,
+            mimeType: part.mediaType || decoded.mediaType,
+            fileName: part.filename,
+            referenceId: `dashboard_${latestUserMessage.id ?? "latest"}_${index}`,
+            platform: "dashboard",
+          });
+
+          recentUploadSummaries.push(formatProcessedUploadSummary(result));
+        } catch (error) {
+          logger.warn("[chat] Failed to process uploaded file", {
+            error: error instanceof Error ? error.message : String(error),
+            filename: part?.filename,
+          });
+        }
+      }
+    }
+
+    const systemPrompt =
+      buildSystemPrompt({
+        fullName: user?.fullName ?? null,
+        locale: user?.locale || geo.locale || "en",
+        timezone: resolvedTimezone,
+        dateFormat: user?.dateFormat ?? null,
+        timeFormat: user?.timeFormat ?? 24,
+        baseCurrency: user?.team?.baseCurrency ?? "USD",
+        teamName: user?.team?.name ?? null,
+        countryCode: user?.team?.countryCode ?? geo.country,
+        localTime: clientLocalTime,
+        mentionedApps,
+        recentUploadSummaries,
+      }) + getPlatformInstructions("dashboard");
+
+    const modelMessages = await convertToModelMessages(uiMessages);
+    stripFileAndImageParts(modelMessages);
 
     const rateLimitInfo = c.get("rateLimit");
-
-    const clientPromise = executionClientPromise;
 
     const stream = createUIMessageStream({
       execute: async ({ writer }) => {
@@ -124,71 +153,19 @@ app.post("/", async (c) => {
         }
 
         const titlePromise = writeChatTitle(writer, uiMessages);
-
-        const [resolvedClient, composioMetaTools] = await Promise.all([
-          clientPromise,
-          composioToolsPromise,
-        ]).catch(async (err) => {
-          await clientPromise.then((cl) => cl.close()).catch(() => {});
-          throw err;
-        });
-
-        const mcpTools = resolvedClient.toolsFromDefinitions(
-          getToolDefinitions(),
-        );
-
-        const composioToolNames = Object.keys(composioMetaTools);
-        if (composioToolNames.length > 0) {
-          logger.info("[chat] Composio tools available:", {
-            tools: composioToolNames,
-          });
-        }
-
-        const agent = new ToolLoopAgent({
-          model,
-          instructions: systemPrompt,
-          tools: {
-            ...mcpTools,
-            ...composioMetaTools,
-            search_tools: getSearchTool(),
-            web_search: openai.tools.webSearch({
-              searchContextSize: "medium",
-              userLocation: {
-                type: "approximate",
-                country: mcpCtx.countryCode ?? undefined,
-                timezone: mcpCtx.timezone ?? undefined,
-              },
-            }),
-          },
-          prepareStep: buildPrepareStep({
-            maxTools: 12,
-            alwaysActive: ["web_search", "search_tools", ...composioToolNames],
-          }),
-          stopWhen: stepCountIs(10),
-          experimental_download: async (options) =>
-            options.map(({ url }) => decodeDataUrl(url)),
-          onFinish: async () => {
-            await titlePromise;
-            await resolvedClient.close();
-          },
-        });
-
-        const result = await agent.stream({
-          messages: modelMessages,
-          experimental_transform: smoothStream(),
+        const result = await streamMiddayAssistant({
+          mcpCtx,
+          systemPrompt,
+          modelMessages,
         });
 
         writer.merge(result.toUIMessageStream({ sendSources: true }));
+        await titlePromise;
       },
     });
 
-    executionClientPromise = null;
-
     return createUIMessageStreamResponse({ stream });
   } catch (err) {
-    if (executionClientPromise) {
-      await executionClientPromise.then((cl) => cl.close()).catch(() => {});
-    }
     logger.error("[chat] Error:", { error: err });
 
     return c.json(

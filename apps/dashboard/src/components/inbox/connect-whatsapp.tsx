@@ -10,11 +10,12 @@ import {
   DialogTrigger,
 } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
-import { SubmitButton } from "@midday/ui/submit-button";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Spinner } from "@midday/ui/spinner";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { useTRPC } from "@/trpc/client";
+import { useConnectDialogReset } from "./use-connect-dialog";
 
 interface ConnectWhatsAppProps {
   showTrigger?: boolean;
@@ -22,41 +23,58 @@ interface ConnectWhatsAppProps {
 
 export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [linkCode, setLinkCode] = useState("");
 
-  // Get the team's inbox ID
-  const { data: team } = useQuery(trpc.team.current.queryOptions());
-
-  // Check if WhatsApp is installed
   const { data: installedApps } = useQuery(trpc.apps.get.queryOptions());
   const whatsappApp = installedApps?.find((app) => app.app_id === "whatsapp");
-  const isInstalled = !!whatsappApp;
   const connections = (whatsappApp?.config as any)?.connections || [];
 
-  const disconnectMutation = useMutation(
-    trpc.apps.disconnect.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.apps.get.queryKey() });
+  const createLinkTokenMutation = useMutation(
+    trpc.apps.createPlatformLinkToken.mutationOptions({
+      onSuccess: (token) => {
+        setLinkCode(token.code);
       },
     }),
   );
 
-  // WhatsApp number from environment
+  const handleOpenChange = useConnectDialogReset({
+    setOpen,
+    setLinkCode,
+    setQrCodeUrl,
+    setCopied,
+    resetMutation: () => createLinkTokenMutation.reset(),
+  });
+
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
-  const inboxId = team?.inboxId || "";
-  const message = `Connect to Midday: ${inboxId}`;
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  const message = linkCode ? `Connect to Midday: ${linkCode}` : "";
+  const whatsappUrl =
+    whatsappNumber && message
+      ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
+      : "";
+  const isWhatsAppReady = Boolean(whatsappUrl);
 
   useEffect(() => {
-    if (open && inboxId && whatsappNumber) {
-      generateQRCode();
+    if (!open || !whatsappNumber) {
+      return;
     }
-  }, [open, inboxId, whatsappNumber]);
 
-  // Listen for open event from app store
+    createLinkTokenMutation
+      .mutateAsync({ provider: "whatsapp" })
+      .catch(() => setLinkCode(""));
+  }, [open, whatsappNumber]);
+
+  useEffect(() => {
+    if (!open || !whatsappUrl) {
+      setQrCodeUrl("");
+      return;
+    }
+
+    generateQRCode();
+  }, [open, whatsappUrl]);
+
   useEffect(() => {
     const handleOpen = () => setOpen(true);
     window.addEventListener("openWhatsAppConnect", handleOpen);
@@ -64,7 +82,7 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
   }, []);
 
   const generateQRCode = async () => {
-    if (!whatsappNumber) return;
+    if (!whatsappUrl) return;
 
     try {
       const url = await QRCode.toDataURL(whatsappUrl, {
@@ -83,6 +101,10 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
 
   const copyToClipboard = async () => {
     try {
+      if (!whatsappUrl) {
+        return;
+      }
+
       await navigator.clipboard.writeText(whatsappUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -91,43 +113,25 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
     }
   };
 
-  const handleDisconnect = () => {
-    disconnectMutation.mutate({ appId: "whatsapp" });
-  };
-
-  // Don't render if WhatsApp number not configured
   if (!whatsappNumber) {
     return null;
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {showTrigger &&
-        (isInstalled ? (
-          <SubmitButton
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {showTrigger && (
+        <DialogTrigger asChild>
+          <Button
             className="px-6 py-4 w-full font-medium h-[40px]"
             variant="outline"
-            onClick={handleDisconnect}
-            isSubmitting={disconnectMutation.isPending}
           >
             <div className="flex items-center space-x-2">
               <Icons.WhatsApp className="size-5 text-[#25D366]" />
-              <span>WhatsApp ({connections.length} connected)</span>
+              <span>Connect WhatsApp</span>
             </div>
-          </SubmitButton>
-        ) : (
-          <DialogTrigger asChild>
-            <Button
-              className="px-6 py-4 w-full font-medium h-[40px]"
-              variant="outline"
-            >
-              <div className="flex items-center space-x-2">
-                <Icons.WhatsApp className="size-5 text-[#25D366]" />
-                <span>Connect WhatsApp</span>
-              </div>
-            </Button>
-          </DialogTrigger>
-        ))}
+          </Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="sm:max-w-[400px] p-0" hideClose>
         <div className="p-6 pb-0">
@@ -151,7 +155,11 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
               </div>
             ) : (
               <div className="flex items-center justify-center w-[180px] h-[180px] border border-dashed border-border">
-                <Icons.QrCode className="h-10 w-10 text-muted-foreground" />
+                {createLinkTokenMutation.isPending ? (
+                  <Spinner className="h-10 w-10 animate-spin text-muted-foreground" />
+                ) : (
+                  <Icons.QrCode className="h-10 w-10 text-muted-foreground" />
+                )}
               </div>
             )}
           </div>
@@ -159,11 +167,23 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
           <div className="w-full border-t" />
 
           <div className="flex gap-2 w-full">
-            <Button asChild className="flex-1" variant="outline">
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                <Icons.WhatsApp className="mr-2 h-4 w-4 text-[#25D366]" />
-                Open WhatsApp
-              </a>
+            <Button
+              asChild={isWhatsAppReady}
+              className="flex-1"
+              variant="outline"
+              disabled={!isWhatsAppReady}
+            >
+              {isWhatsAppReady ? (
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                  <Icons.WhatsApp className="mr-2 h-4 w-4 text-[#25D366]" />
+                  Open WhatsApp
+                </a>
+              ) : (
+                <span>
+                  <Icons.WhatsApp className="mr-2 h-4 w-4 text-[#25D366]" />
+                  Open WhatsApp
+                </span>
+              )}
             </Button>
             <Button
               onClick={copyToClipboard}
@@ -185,7 +205,8 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
           </div>
 
           <p className="text-xs text-[#878787] text-center">
-            Just send the prefilled message to connect your number.
+            Just send the prefilled message to link this phone number to your
+            Midday user.
           </p>
 
           {connections.length > 0 && (

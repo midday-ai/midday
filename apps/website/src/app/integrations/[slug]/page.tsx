@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { baseUrl } from "@/app/sitemap";
 import { IntegrationDetailPage } from "@/components/integration-detail-page";
 import { getAllSlugs, getAppBySlug } from "@/data/apps";
+import { createPageMetadata } from "@/lib/metadata";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -12,38 +11,19 @@ export function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const app = getAppBySlug(slug);
 
   if (!app) {
-    return {
-      title: "Integration Not Found",
-    };
+    return { title: "Integration Not Found" };
   }
 
-  const title = `${app.name} Integration`;
-  const description = app.short_description;
-  const url = `${baseUrl}/integrations/${slug}`;
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      url,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-    alternates: {
-      canonical: url,
-    },
-  };
+  return createPageMetadata({
+    title: `${app.name} Integration`,
+    description: app.short_description,
+    path: `/integrations/${slug}`,
+  });
 }
 
 export default async function Page({ params }: Props) {

@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
-import { baseUrl } from "@/app/sitemap";
 import { MCPCopilot } from "@/components/mcp-copilot";
+import { createPageMetadata } from "@/lib/metadata";
 
-const title = "Microsoft Copilot MCP Integration";
-const description =
-  "Connect Midday to Microsoft Copilot Studio via MCP. Query invoices, transactions, and reports from Word, Excel, Outlook, or any Copilot-enabled app.";
-
-export const metadata: Metadata = {
-  title,
-  description,
+export const metadata = createPageMetadata({
+  title: "Microsoft Copilot MCP Integration",
+  description:
+    "Connect Midday to Microsoft Copilot Studio via MCP. Query invoices, transactions, and reports from Word, Excel, Outlook, or any Copilot-enabled app.",
+  path: "/mcp/copilot",
+  og: {
+    title: "Copilot + Midday",
+    description: "Business data in Word, Excel, and Outlook",
+  },
   keywords: [
     "Microsoft Copilot MCP",
     "Copilot integration",
@@ -16,21 +17,7 @@ export const metadata: Metadata = {
     "Microsoft 365",
     "enterprise AI",
   ],
-  openGraph: {
-    title,
-    description,
-    type: "website",
-    url: `${baseUrl}/mcp/copilot`,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-  },
-  alternates: {
-    canonical: `${baseUrl}/mcp/copilot`,
-  },
-};
+});
 
 export default function Page() {
   return <MCPCopilot />;
