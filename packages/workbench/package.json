@@ -79,7 +79,7 @@
     "tailwindcss": "^4.2.2",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "catalog:",
-    "vite": "^8.0.2",
+    "vite": "8.0.2",
     "zod": "catalog:"
   },
   "peerDependencies": {
