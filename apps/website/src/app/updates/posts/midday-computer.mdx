@@ -1,0 +1,122 @@
+---
+title: "Midday Computer: Autonomous Agents for Your Business"
+publishedAt: "2026-04-15"
+summary: "Introducing the private beta of Midday Computer. Describe what you need in plain English and Midday deploys an autonomous agent that runs on your schedule, learns over time, and delivers results while you sleep."
+tag: "Updates"
+---
+
+We've been building Midday as an open-source business operating system. Banking, invoicing, transactions, time tracking, all in one place. Over the past year, we've made all of that accessible through 100+ MCP tools, powering the dashboard chat, the iMessage bot, and the public API.
+
+But we kept running into the same limitation: the assistant responds to you, it doesn't work for you. You still have to ask. You still have to be there.
+
+Today we're opening the **private beta** of **Midday Computer**. Describe what you need, and Midday deploys an autonomous agent that runs on your schedule, learns over time, and delivers results while you sleep.
+
+<br />
+
+### What it enables
+
+Instead of logging in every morning to check on things, imagine:
+
+- **"Chase my overdue invoices every Tuesday"** finds overdue invoices, prioritizes by amount and age, and proposes sending reminders. You approve before anything goes out.
+- **"Give me a weekly briefing every Monday"** delivers cash position, revenue trends, spending breakdown, and action items to your inbox before your first coffee.
+- **"Alert me about expenses over $5,000"** runs daily in the background, learns your spending patterns over time, and stays completely silent unless something looks wrong.
+
+You describe the outcome. Midday handles the rest.
+
+<br />
+
+### Works wherever you are
+
+You don't need to learn a new tool. Midday Computer meets you where you already work:
+
+- **Dashboard chat.** "Enable the invoice chaser" or "Create an agent that monitors my expenses." The assistant handles it conversationally.
+- **iMessage bot.** Get agent notifications and approve proposals right from your phone. No app to open.
+- **CLI.** `npx @midday-ai/cli@latest computer` for developers and power users who want full control from the terminal.
+- **REST API.** Build your own integrations, trigger runs programmatically, review proposals from any system.
+
+Every surface talks to the same engine. Create an agent from chat, approve a proposal from iMessage, check the results from the CLI. It all stays in sync.
+
+<br />
+
+### Agents that get smarter over time
+
+Most automations are stateless. They do the same thing every time. Midday Computer agents have **persistent memory** that compounds across runs:
+
+- The **Weekly Briefing** keeps a rolling 12-week trend history. Each Monday it compares against previous weeks and surfaces patterns you'd miss looking at a single snapshot.
+- The **Invoice Chaser** tracks how many times each invoice has been flagged. If a customer is consistently late, the agent adjusts its urgency.
+- The **Expense Detector** builds spending baselines by category over 90 days. The longer it runs, the better it gets at knowing what's normal for your business.
+
+This is the difference between a cron job and an agent. Agents learn.
+
+<br />
+
+### You stay in control
+
+We think trust is the product when it comes to agents handling your business data. That's why Midday Computer has approval mode built in:
+
+1. The agent analyzes your data and decides what needs to happen.
+2. It proposes actions like "Send reminder for INV-0091" and pauses.
+3. You get a notification via in-app, email, or iMessage.
+4. You review and approve, or reject. Nothing happens without your say.
+
+On top of that, every agent runs in a **secure sandbox** with no filesystem or network access, hard limits on resources, and a full step trace so you can see exactly what the agent did, what data it read, and what it decided.
+
+The agent does the work. You make the calls.
+
+<br />
+
+### Pre-built agents, ready to go
+
+We ship four agents you can enable immediately:
+
+- **Month-End Close** (28th–31st, 8 AM). Runs a close-the-books checklist: uncategorized transactions, pending inbox items, draft invoices, P&L comparison to last month.
+- **Invoice Chaser** (Tuesdays, 9 AM). Finds overdue invoices, prioritizes by urgency, proposes sending reminders. You approve before anything goes out.
+- **Weekly Briefing** (Mondays, 8 AM). Cash position, revenue trends, spending breakdown, action items with week-over-week comparison.
+- **Expense Detector** (Daily, 10 AM). Silent unless something's wrong. Flags duplicates, spending spikes, and unknown vendors.
+
+Or describe your own workflow and Midday generates a custom agent. Type-checked, compiled, and deployed in seconds.
+
+<br />
+
+### How it works under the hood
+
+When you describe a workflow, Midday:
+
+1. Looks at all 100+ available tools and generates typed code that knows exactly what data is available and how to access it.
+2. Type-checks the generated code and automatically repairs any issues before deploying.
+3. Runs agents in a secure sandbox on a schedule, adjusted for your timezone.
+4. Records every step for full transparency: what tools were called, what data was returned, what decisions were made.
+
+Agents can also connect to external services like Slack, Gmail, and Google Sheets through Composio, so results can flow wherever your team needs them.
+
+<br />
+
+### Why we're betting on this
+
+**Business operations are repetitive but judgment-heavy.** Month-end close, invoice follow-ups, expense monitoring. These happen on predictable schedules but require context and decisions. Important enough that you can't ignore them, routine enough that you resent doing them. Agents handle the routine and escalate the judgment calls.
+
+**The tool surface we already built is the foundation.** Every piece of Midday data is already accessible through well-typed tools. Midday Computer is the first consumer of that surface that isn't a human in a chat window. Every tool we add for the assistant automatically becomes available to every agent. The investment compounds.
+
+**Trust requires control.** Most agent platforms optimize for full autonomy. We think business data is different. Approval mode, sandbox constraints, step tracing, and concurrency guards aren't limitations. They're the product. The question isn't "can it act?" but "do you trust it to act?"
+
+<br />
+
+### Private beta
+
+Midday Computer is launching in **private beta**. We're onboarding teams gradually to make sure agents are reliable, the catalog is tuned for real-world usage, and we can iterate closely with early users.
+
+If you want early access, reach out directly or visit [midday.ai/computer](/computer). We're looking for teams that have repetitive workflows they'd like to automate: month-end close, collections, expense monitoring, reporting, or anything that happens on a schedule.
+
+<br />
+
+### What's next
+
+This is v1. The roadmap includes event-based triggers (fire when a new transaction lands, not just on cron), more notification channels, custom agent uploads, a dashboard UI for agent management and proposal review, and cross-agent communication.
+
+We're also expanding the catalog. Each new agent is a real workflow we've seen teams do manually every week.
+
+Midday Computer is open source, like everything else we build. The code is at [github.com/midday-ai/midday](https://github.com/midday-ai/midday).
+
+<br />
+
+[Request early access →](/computer)
