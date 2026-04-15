@@ -90,7 +90,14 @@ const FEATURE_ROUTES = [
 ];
 
 // App pages to prefetch on hover
-const APP_ROUTES = ["/integrations", "/download", "/docs", "/agents", "/computer", "/mcp"];
+const APP_ROUTES = [
+  "/integrations",
+  "/download",
+  "/docs",
+  "/agents",
+  "/computer",
+  "/mcp",
+];
 
 export function Header({
   transparent = false,
