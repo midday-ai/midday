@@ -496,9 +496,7 @@ function Terminal() {
           )}
 
           {past("result-2") && (
-            <>
-              <div className="mt-1">{scenario.result2Line}</div>
-            </>
+            <div className="mt-1">{scenario.result2Line}</div>
           )}
 
           {phase === "done" && (
