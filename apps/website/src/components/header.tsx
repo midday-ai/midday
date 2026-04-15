@@ -90,7 +90,14 @@ const FEATURE_ROUTES = [
 ];
 
 // App pages to prefetch on hover
-const APP_ROUTES = ["/integrations", "/download", "/docs", "/agents", "/mcp"];
+const APP_ROUTES = [
+  "/integrations",
+  "/download",
+  "/docs",
+  "/agents",
+  "/computer",
+  "/mcp",
+];
 
 export function Header({
   transparent = false,
@@ -644,7 +651,7 @@ export function Header({
                                 },
                                 {
                                   href: "/agents",
-                                  title: "Agents",
+                                  title: "CLI",
                                   desc: "Agent-native CLI and MCP workflows.",
                                   external: false,
                                 },
@@ -696,6 +703,12 @@ export function Header({
                                   href: "/chat",
                                   title: "Chat",
                                   desc: "Run your business from any chat app.",
+                                  external: false,
+                                },
+                                {
+                                  href: "/computer",
+                                  title: "Computer",
+                                  desc: "Autonomous agents for your business.",
                                   external: false,
                                 },
                               ].map((item, index) => (
@@ -1062,7 +1075,18 @@ export function Header({
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
-                          Agents
+                          CLI
+                        </Link>
+                        <Link
+                          href="/computer"
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            setIsMobileAppsOpen(false);
+                          }}
+                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Computer
                         </Link>
                         <Link
                           href="/mcp"
