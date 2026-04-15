@@ -13,6 +13,7 @@ import { z } from "zod";
 import {
   mcpDocumentSchema,
   mcpDocumentTagSchema,
+  mcpListMetaSchema,
   sanitize,
   sanitizeArray,
 } from "../schemas";
@@ -53,12 +54,8 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
           "List documents and files stored in the vault. Supports free-text search and filtering by document tag IDs (from document_tags_list, not tags_list). Returns paginated results (default 25) with document name, type, size, and creation date.",
         inputSchema: documentsListFields,
         outputSchema: {
-          meta: z.looseObject({
-            cursor: z.string().nullable().optional(),
-            hasNextPage: z.boolean(),
-            hasPreviousPage: z.boolean(),
-          }),
-          data: z.array(z.record(z.string(), z.any())),
+          meta: mcpListMetaSchema,
+          data: z.array(mcpDocumentSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -102,6 +99,9 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
             .optional()
             .default(false)
             .describe("Include the file content as a downloadable resource"),
+        },
+        outputSchema: {
+          data: mcpDocumentSchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -161,7 +161,7 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
           "List all document tags for the team. These tags are separate from transaction tags and are used to organize documents in the vault.",
         inputSchema: {},
         outputSchema: {
-          data: z.array(z.record(z.string(), z.any())),
+          data: z.array(mcpDocumentTagSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -186,6 +186,10 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
           "Permanently delete a document from the vault. Removes the file and all metadata. This action cannot be undone.",
         inputSchema: {
           id: z.string().uuid().describe("Document ID to delete"),
+        },
+        outputSchema: {
+          success: z.boolean(),
+          deletedId: z.string(),
         },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
@@ -234,6 +238,9 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
           "Create a new document tag for organizing files in the vault. Tag names are auto-slugified.",
         inputSchema: {
           name: z.string().min(1).describe("Tag name"),
+        },
+        outputSchema: {
+          data: mcpDocumentTagSchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -285,6 +292,10 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           id: z.string().uuid().describe("Document tag ID to delete"),
         },
+        outputSchema: {
+          success: z.boolean(),
+          deletedId: z.string(),
+        },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
@@ -334,6 +345,11 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
           documentId: z.string().uuid().describe("Document ID"),
           tagId: z.string().uuid().describe("Document tag ID to assign"),
         },
+        outputSchema: {
+          success: z.boolean(),
+          documentId: z.string(),
+          tagId: z.string(),
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async ({ documentId, tagId }) => {
@@ -378,6 +394,11 @@ export const registerDocumentTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           documentId: z.string().uuid().describe("Document ID"),
           tagId: z.string().uuid().describe("Document tag ID to remove"),
+        },
+        outputSchema: {
+          success: z.boolean(),
+          documentId: z.string(),
+          tagId: z.string(),
         },
         annotations: WRITE_ANNOTATIONS,
       },

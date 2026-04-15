@@ -28,6 +28,7 @@ jobs:
       TURBO_SCM_BASE: ${{ github.event.before }}
     outputs:
       api: ${{ steps.affected.outputs.api }}
+      compute: ${{ steps.affected.outputs.compute }}
       dashboard: ${{ steps.affected.outputs.dashboard }}
       worker: ${{ steps.affected.outputs.worker }}
       website: ${{ steps.affected.outputs.website }}
@@ -45,6 +46,7 @@ jobs:
           AFFECTED=$(bunx turbo build --affected --dry-run=json 2>/dev/null | jq -r '.packages[]' 2>/dev/null || echo "")
           echo "Affected packages: $AFFECTED"
           echo "api=$(echo "$AFFECTED" | grep -q '@midday/api' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "compute=$(echo "$AFFECTED" | grep -q '@midday/compute' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "dashboard=$(echo "$AFFECTED" | grep -q '@midday/dashboard' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "worker=$(echo "$AFFECTED" | grep -q '@midday/worker' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
           echo "website=$(echo "$AFFECTED" | grep -q '@midday/website' && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
@@ -232,6 +234,31 @@ jobs:
 
       - name: Deploy to Railway
         run: npx @railway/cli up --service worker
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy Compute to Railway (waits for API when both change)
+  # ---------------------------------------------------------------------------
+  deploy-compute:
+    name: Deploy Compute
+    needs: [detect-changes, validate, deploy-api]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      needs.detect-changes.outputs.compute == 'true' &&
+      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 20
+    concurrency: railway-compute-production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp git SHA for Docker build
+        run: echo "${{ github.sha }}" > .git-commit-sha
+
+      - name: Deploy to Railway
+        run: npx @railway/cli up --service compute
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 

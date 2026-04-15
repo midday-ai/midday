@@ -24,7 +24,7 @@ export const registerTeamTools: RegisterTools = (server, ctx) => {
         "Get current team details including name, base currency, country code, plan, and fiscal year settings. Call this first when you need to know the team's default currency for formatting.",
       inputSchema: {},
       outputSchema: {
-        data: z.record(z.string(), z.any()),
+        data: mcpTeamSchema,
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
@@ -55,7 +55,7 @@ export const registerTeamTools: RegisterTools = (server, ctx) => {
         "List all members of the current team with their user ID, name, email, avatar, and role. Use the user ID from the response as assignedId when assigning transactions or creating tracker entries.",
       inputSchema: {},
       outputSchema: {
-        data: z.array(z.record(z.string(), z.any())),
+        data: z.array(mcpTeamMemberSchema),
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },

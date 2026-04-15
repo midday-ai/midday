@@ -40,6 +40,7 @@ import { z } from "zod";
 import {
   mcpInvoiceDetailSchema,
   mcpInvoiceListItemSchema,
+  mcpListMetaSchema,
   sanitize,
   sanitizeArray,
 } from "../schemas";
@@ -132,12 +133,8 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             .describe("Sort direction"),
         },
         outputSchema: {
-          meta: z.looseObject({
-            cursor: z.string().nullable().optional(),
-            hasNextPage: z.boolean(),
-            hasPreviousPage: z.boolean(),
-          }),
-          data: z.array(z.record(z.string(), z.any())),
+          meta: mcpListMetaSchema,
+          data: z.array(mcpInvoiceListItemSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -296,7 +293,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           query: z.string().describe("Invoice number to search for"),
         },
         outputSchema: {
-          data: z.record(z.string(), z.any()).nullable(),
+          data: mcpInvoiceListItemSchema.nullable(),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -417,6 +414,9 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             .optional()
             .describe("Internal note visible only to your team"),
         },
+        outputSchema: {
+          data: mcpInvoiceDetailSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -494,6 +494,9 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             .describe(
               "Payment date in ISO 8601 format (defaults to current time)",
             ),
+        },
+        outputSchema: {
+          data: mcpInvoiceDetailSchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -576,6 +579,10 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           id: deleteInvoiceSchema.shape.id,
         },
+        outputSchema: {
+          success: z.boolean(),
+          deletedId: z.string(),
+        },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
@@ -645,6 +652,9 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           id: duplicateInvoiceSchema.shape.id,
         },
+        outputSchema: {
+          data: mcpInvoiceDetailSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async ({ id }) => {
@@ -705,6 +715,9 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           "Cancel an invoice. Cannot cancel an invoice that is already paid. After cancellation the invoice can be deleted if needed.",
         inputSchema: {
           id: z.string().uuid().describe("The ID of the invoice to cancel"),
+        },
+        outputSchema: {
+          data: mcpInvoiceDetailSchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -788,6 +801,12 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             .string()
             .uuid()
             .describe("ID of the invoice to send a reminder for"),
+        },
+        outputSchema: {
+          message: z.string(),
+          invoiceId: z.string(),
+          reminderSentAt: z.string(),
+          previewUrl: z.string().nullable(),
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -1563,6 +1582,13 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
               "Override recipient email address (defaults to customer's email on file)",
             ),
         },
+        outputSchema: {
+          message: z.string(),
+          invoiceId: z.string(),
+          sentTo: z.string(),
+          previewUrl: z.string().nullable(),
+          data: mcpInvoiceDetailSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async ({ id, sentTo }) => {
@@ -1617,15 +1643,34 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
             "invoices",
           );
 
-          const previewUrl = existing.token
-            ? `${DASHBOARD_URL}/i/${existing.token}`
+          const fresh = await getInvoiceById(db, { id, teamId });
+
+          if (!fresh) {
+            return {
+              content: [{ type: "text", text: "Invoice not found after send" }],
+              isError: true,
+            };
+          }
+
+          const pdfUrl = fresh.token
+            ? `${apiUrl}/files/download/invoice?token=${encodeURIComponent(fresh.token)}`
             : null;
+          const previewUrl = fresh.token
+            ? `${DASHBOARD_URL}/i/${fresh.token}`
+            : null;
+
+          const data = sanitize(mcpInvoiceDetailSchema, {
+            ...fresh,
+            pdfUrl,
+            previewUrl,
+          });
 
           const response = {
             message: `Invoice ${existing.invoiceNumber} is being sent to ${recipientEmail}`,
             invoiceId: id,
             sentTo: recipientEmail,
             previewUrl,
+            data,
           };
 
           return {

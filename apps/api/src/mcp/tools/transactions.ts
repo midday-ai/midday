@@ -27,6 +27,7 @@ import {
 } from "@midday/job-client";
 import { z } from "zod";
 import {
+  mcpListMetaSchema,
   mcpTransactionDetailSchema,
   mcpTransactionSchema,
   sanitize,
@@ -108,12 +109,8 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
             .describe("Maximum absolute amount to include"),
         },
         outputSchema: {
-          meta: z.looseObject({
-            cursor: z.string().nullable().optional(),
-            hasNextPage: z.boolean(),
-            hasPreviousPage: z.boolean(),
-          }),
-          data: z.array(z.record(z.string(), z.any())),
+          meta: mcpListMetaSchema,
+          data: z.array(mcpTransactionSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -183,7 +180,7 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
           id: getTransactionByIdSchema.shape.id,
         },
         outputSchema: {
-          data: z.record(z.string(), z.any()),
+          data: mcpTransactionDetailSchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -215,6 +212,9 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         description:
           "Create a manual transaction (not from bank sync). Requires bank account ID, amount, currency, date, and name. Use for manual entries and adjustments.",
         inputSchema: createTransactionSchema.shape,
+        outputSchema: {
+          data: mcpTransactionSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -260,6 +260,9 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         inputSchema: z.object({
           transactions: z.array(createTransactionSchema).min(1).max(100),
         }).shape,
+        outputSchema: {
+          data: z.array(mcpTransactionSchema),
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async ({ transactions: items }) => {
@@ -299,6 +302,9 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         description:
           "Update a single transaction by ID: category, status, note, assignment, amount, tax fields, etc. Use the transaction status field for workflow states (pending, posted, excluded, archived, exported, completed).",
         inputSchema: updateTransactionSchema.shape,
+        outputSchema: {
+          data: mcpTransactionSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -351,6 +357,9 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         description:
           "Apply the same updates to multiple transactions by ID (e.g. bulk categorize, set tag, assignee, status).",
         inputSchema: updateTransactionsSchema.shape,
+        outputSchema: {
+          data: z.array(mcpTransactionSchema),
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -391,6 +400,9 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         description:
           "Delete a single transaction. Only manually created transactions can be deleted; bank-imported rows must be excluded via status instead.",
         inputSchema: deleteTransactionSchema.shape,
+        outputSchema: {
+          data: mcpTransactionSchema,
+        },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
@@ -447,6 +459,9 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
               "Transaction IDs to delete (1–1000 UUIDs, must not be empty)",
             ),
         },
+        outputSchema: {
+          data: z.array(mcpTransactionSchema),
+        },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ ids }) => {
@@ -482,6 +497,15 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         title: "Export Transactions (File)",
         description:
           "Export transactions as a ZIP file containing CSV and/or XLSX spreadsheets plus receipt attachments. Optionally emails the file to your accountant. Provide either transactionIds directly OR use filter parameters (start, end, categories, statuses, accounts, q, type) to select transactions by criteria. For up to 500 transactions the export completes synchronously and returns a download URL; larger exports return a jobId for polling with export_job_status.",
+        outputSchema: {
+          status: z.enum(["completed", "started"]).optional(),
+          message: z.string().optional(),
+          fileName: z.string().nullable().optional(),
+          totalItems: z.number().optional(),
+          downloadUrl: z.string().nullable().optional(),
+          jobId: z.string().optional(),
+          transactionCount: z.number().optional(),
+        },
         inputSchema: {
           transactionIds: z
             .array(z.string().uuid())
@@ -760,6 +784,13 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         title: "Export to Accounting Software",
         description:
           "Push transactions (with receipt attachments) to a connected accounting provider (Xero, QuickBooks, or Fortnox). Use accounting_connections first to check which providers are connected. Returns a job ID — poll with export_job_status to track progress.",
+        outputSchema: {
+          message: z.string(),
+          jobId: z.string(),
+          provider: z.string(),
+          tenantName: z.string(),
+          transactionCount: z.number(),
+        },
         inputSchema: {
           transactionIds: z
             .array(z.string().uuid())
@@ -839,6 +870,10 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         title: "Export Job Status",
         description:
           "Poll the status of an export job (file export or accounting sync). Use the jobId returned by transactions_export or transactions_export_to_accounting. Status progresses: waiting → active → completed/failed.",
+        outputSchema: {
+          status: z.string(),
+          result: z.record(z.string(), z.any()).nullable().optional(),
+        },
         inputSchema: {
           jobId: z
             .string()
@@ -899,6 +934,14 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         title: "List Accounting Connections",
         description:
           "List connected accounting providers (Xero, QuickBooks, Fortnox) for the team. Use this before transactions_export_to_accounting to check which providers are available.",
+        outputSchema: {
+          connections: z.array(
+            z.object({
+              providerId: z.string(),
+              tenantName: z.string(),
+            }),
+          ),
+        },
         inputSchema: {},
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -962,6 +1005,9 @@ export const registerTransactionTools: RegisterTools = (server, ctx) => {
         title: "Accounting Sync Status",
         description:
           "Check the sync status of transactions with connected accounting software. Filter by specific transaction IDs or by provider (xero, quickbooks, fortnox). Returns sync records showing which transactions have been exported and their status.",
+        outputSchema: {
+          data: z.array(z.record(z.string(), z.any())),
+        },
         inputSchema: {
           transactionIds: z
             .array(z.string().uuid())

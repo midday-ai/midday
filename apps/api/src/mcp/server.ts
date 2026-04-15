@@ -5,6 +5,7 @@ import { registerResources } from "./resources";
 import {
   registerBankAccountTools,
   registerCategoryTools,
+  registerComputerTools,
   registerCustomerTools,
   registerDocumentTools,
   registerInboxTools,
@@ -67,6 +68,7 @@ Tools are namespaced by domain — use the prefix to discover related tools:
 - invoice_recurring_* — Recurring invoice schedules
 - tags_* — Reusable labels for organizing records
 - team_* — Team metadata and member information
+- computer_* — AI agent automation (catalog, create, run, history)
 - search_global — Full-text search across all data types
 
 ## Key Patterns
@@ -127,6 +129,7 @@ export function createMcpServer(ctx: McpContext): McpServer {
   registerInboxTools(server, ctx);
   registerTagTools(server, ctx);
   registerTeamTools(server, ctx);
+  registerComputerTools(server, ctx);
 
   registerMcpApps(server);
 

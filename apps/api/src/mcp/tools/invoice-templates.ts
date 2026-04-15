@@ -37,6 +37,9 @@ export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
         description:
           "List all invoice templates for the team. Returns template names, labels, and settings. Use this to see available templates before updating one.",
         inputSchema: {},
+        outputSchema: {
+          data: z.array(mcpInvoiceTemplateSchema),
+        },
         annotations: READ_ONLY_ANNOTATIONS,
       },
       withErrorHandling(async () => {
@@ -53,7 +56,7 @@ export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
 
         return {
           content: [{ type: "text" as const, text }],
-          structuredContent,
+          structuredContent: { data: structuredContent.data },
         };
       }, "Failed to list invoice templates"),
     );
@@ -72,6 +75,10 @@ export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
             .describe(
               "Template ID. If omitted, returns the default (or first) template.",
             ),
+        },
+        outputSchema: {
+          data: mcpInvoiceTemplateSchema,
+          previewUrl: z.string().nullable(),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -96,13 +103,17 @@ export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
 
         const clean = sanitize(mcpInvoiceTemplateSchema, template);
 
+        const previewUrl = `${DASHBOARD_URL}/invoices`;
         const response = {
-          ...clean,
-          previewUrl: `${DASHBOARD_URL}/invoices`,
+          data: clean,
+          previewUrl,
         };
 
         return {
-          content: [{ type: "text" as const, text: JSON.stringify(response) }],
+          content: [
+            { type: "text" as const, text: JSON.stringify(response) },
+          ],
+          structuredContent: response,
         };
       }, "Failed to get invoice template"),
     );
@@ -310,6 +321,11 @@ export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
               "Default footer note for new invoices (plain text, line breaks preserved). e.g. thank you message, terms.",
             ),
         },
+        outputSchema: {
+          message: z.string(),
+          template: mcpInvoiceTemplateSchema,
+          previewUrl: z.string().nullable(),
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -400,6 +416,7 @@ export const registerInvoiceTemplateTools: RegisterTools = (server, ctx) => {
             content: [
               { type: "text" as const, text: JSON.stringify(response) },
             ],
+            structuredContent: response,
           };
         } catch (error) {
           return {
