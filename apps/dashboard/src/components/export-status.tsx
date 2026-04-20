@@ -179,7 +179,10 @@ export function ExportStatus() {
       }
 
       const { id } = toast({
-        title: "Exporting transactions.",
+        title:
+          exportData.exportType === "team-data"
+            ? "Exporting team data."
+            : "Exporting transactions.",
         variant: "progress",
         description: "Please do not close browser until completed",
         duration: Number.POSITIVE_INFINITY,
@@ -247,7 +250,10 @@ export function ExportStatus() {
           update(toastId, {
             id: toastId,
             title: "Export completed",
-            description: `Your export is ready based on ${exportResult.totalItems} transactions. It's stored in your Vault.`,
+            description:
+              exportData?.exportType === "team-data"
+                ? `Your export is ready with ${exportResult.totalItems} items across transactions, invoices, customers, documents, tracker entries and inbox. It's stored in your Vault.`
+                : `Your export is ready based on ${exportResult.totalItems} transactions. It's stored in your Vault.`,
             variant: "success",
             footer: (
               <div className="mt-4 flex space-x-4">
