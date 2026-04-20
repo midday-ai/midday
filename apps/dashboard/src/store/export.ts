@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type ExportType = "file" | "accounting";
+export type ExportType = "file" | "accounting" | "team-data";
 
 interface ExportData {
   runId?: string;

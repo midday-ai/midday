@@ -1,5 +1,6 @@
 import { EnrichTransactionProcessor } from "./enrich-transaction";
 import { ExportTransactionsProcessor } from "./export";
+import { ExportTeamDataProcessor } from "./export-team-data";
 import { ImportTransactionsProcessor } from "./import-transactions";
 import { ProcessTransactionAttachmentProcessor } from "./process-attachment";
 import { ProcessExportProcessor } from "./process-export";
@@ -11,6 +12,7 @@ import { UpdateBaseCurrencyProcessor } from "./update-base-currency";
  */
 export { EnrichTransactionProcessor } from "./enrich-transaction";
 export { ExportTransactionsProcessor } from "./export";
+export { ExportTeamDataProcessor } from "./export-team-data";
 export { ImportTransactionsProcessor } from "./import-transactions";
 export { ProcessTransactionAttachmentProcessor } from "./process-attachment";
 export { ProcessExportProcessor } from "./process-export";
@@ -24,6 +26,7 @@ export { UpdateBaseCurrencyProcessor } from "./update-base-currency";
  */
 export const transactionProcessors = {
   "enrich-transactions": new EnrichTransactionProcessor(),
+  "export-team-data": new ExportTeamDataProcessor(),
   "export-transactions": new ExportTransactionsProcessor(),
   "import-transactions": new ImportTransactionsProcessor(),
   "process-export": new ProcessExportProcessor(),

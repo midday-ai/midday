@@ -397,6 +397,27 @@ export const teamRouter = createTRPCRouter({
       );
     }),
 
+  exportAllData: protectedProcedure.mutation(
+    async ({ ctx: { teamId, session } }) => {
+      if (!teamId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Team not found",
+        });
+      }
+
+      return triggerJob(
+        "export-team-data",
+        {
+          teamId,
+          userId: session.user.id,
+          userEmail: session.user.email ?? undefined,
+        },
+        "transactions",
+      );
+    },
+  ),
+
   /**
    * Get unified connection status for the team.
    * Returns raw connection data - presentation logic handled by client.
