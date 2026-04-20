@@ -27,6 +27,16 @@ export type ExportTransactionsPayload = z.infer<
   typeof exportTransactionsSchema
 >;
 
+export const exportTeamDataSchema = z.object({
+  teamId: z.string().uuid(),
+  userId: z.string().uuid(),
+  userEmail: z.string().email().optional(),
+  locale: z.string().optional(),
+  dateFormat: z.string().nullable().optional(),
+});
+
+export type ExportTeamDataPayload = z.infer<typeof exportTeamDataSchema>;
+
 export const processExportSchema = z.object({
   ids: z.array(z.string().uuid()),
   teamId: z.string().uuid(),

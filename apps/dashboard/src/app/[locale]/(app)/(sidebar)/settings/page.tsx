@@ -6,6 +6,7 @@ import { CompanyFiscalYear } from "@/components/company-fiscal-year";
 import { CompanyLogo } from "@/components/company-logo";
 import { CompanyName } from "@/components/company-name";
 import { DeleteTeam } from "@/components/delete-team";
+import { ExportAllData } from "@/components/export-all-data";
 import { TeamIdSection } from "@/components/team-id-section";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
@@ -26,6 +27,7 @@ export default async function Account() {
         <BaseCurrency />
         <CompanyFiscalYear />
         <TeamIdSection />
+        <ExportAllData />
         <DeleteTeam />
       </div>
     </HydrateClient>
