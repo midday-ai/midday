@@ -2,7 +2,6 @@ import { createLoggerWithContext } from "@midday/logger";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import type { Database } from "./client";
-import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
 const isDevelopment = process.env.NODE_ENV === "development";
@@ -101,10 +100,22 @@ const workerDrizzle = drizzle(workerPool, {
   casing: "snake_case",
 });
 
-// Workers always talk to the primary pool, but shared query helpers call
-// `db.executeOnReplica(...)`. Wrap with `withReplicas` using the same drizzle
-// instance as the "replica" so those helpers keep working at runtime.
-const workerDb = withReplicas(workerDrizzle, [workerDrizzle]);
+// Shared query helpers call `db.executeOnReplica(...)`. Workers don't use
+// replicas, so route those reads through the primary pool via the normal
+// drizzle `execute` and return the rows in the same shape replicas.ts does.
+const workerDb = Object.assign(workerDrizzle, {
+  executeOnReplica: async <
+    TRow extends Record<string, unknown> = Record<string, unknown>,
+  >(
+    query: Parameters<typeof workerDrizzle.execute>[0],
+  ): Promise<TRow[]> => {
+    const result = await workerDrizzle.execute(query);
+    if (Array.isArray(result)) {
+      return result as TRow[];
+    }
+    return (result as { rows: TRow[] }).rows;
+  },
+});
 
 /**
  * Get the shared worker database instance
