@@ -6,6 +6,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { Cookies } from "@/utils/constants";
+import { getUrl } from "@/utils/environment";
+import { isBlockedNewUser } from "@/utils/new-user-gate";
 import { actionClient } from "./safe-action";
 
 export const verifyOtpAction = actionClient
@@ -32,6 +34,11 @@ export const verifyOtpAction = actionClient
 
     if (!session) {
       throw new Error("Failed to establish session after OTP verification");
+    }
+
+    if (isBlockedNewUser(session.user.created_at)) {
+      await supabase.auth.signOut();
+      redirect(`${getUrl()}/login?waitlist=1`);
     }
 
     const cookieStore = await cookies();

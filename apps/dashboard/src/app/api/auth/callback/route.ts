@@ -10,6 +10,7 @@ import { NextResponse } from "next/server";
 import { getTRPCClient } from "@/trpc/server";
 import { Cookies } from "@/utils/constants";
 import { getUrl } from "@/utils/environment";
+import { isBlockedNewUser } from "@/utils/new-user-gate";
 
 export async function GET(req: NextRequest) {
   const cookieStore = await cookies();
@@ -39,6 +40,11 @@ export async function GET(req: NextRequest) {
     } = await getSession();
 
     if (session) {
+      if (isBlockedNewUser(session.user.created_at)) {
+        await supabase.auth.signOut();
+        return NextResponse.redirect(`${origin}/login?waitlist=1`);
+      }
+
       // Set cookie to force primary database reads for subsequent client-side
       // requests after redirect. This prevents replication lag issues when the
       // user record hasn't replicated to read replicas yet.

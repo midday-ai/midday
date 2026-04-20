@@ -15,7 +15,12 @@ export const metadata: Metadata = {
   title: "Login | Midday",
 };
 
-export default async function Page() {
+type Props = {
+  searchParams: Promise<{ waitlist?: string }>;
+};
+
+export default async function Page({ searchParams }: Props) {
+  const { waitlist: waitlistParam } = await searchParams;
   const cookieStore = await cookies();
   const preferred = cookieStore.get(Cookies.PreferredSignInProvider);
   const { device } = userAgent({ headers: await headers() });
@@ -24,7 +29,8 @@ export default async function Page() {
   const {
     data: { user: authUser },
   } = await supabase.auth.getUser();
-  const showQueueNotice = isBlockedNewUser(authUser?.created_at);
+  const showQueueNotice =
+    waitlistParam === "1" || isBlockedNewUser(authUser?.created_at);
 
   let moreSignInOptions = null;
   let preferredSignInOption =
