@@ -1,3 +1,4 @@
+import { createClient } from "@midday/supabase/server";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
@@ -8,15 +9,28 @@ import { LoginVideoBackground } from "@/components/login-video-background";
 import { OAuthSignIn } from "@/components/oauth-sign-in";
 import { OTPSignIn } from "@/components/otp-sign-in";
 import { Cookies } from "@/utils/constants";
+import { isBlockedNewUser } from "@/utils/new-user-gate";
 
 export const metadata: Metadata = {
   title: "Login | Midday",
 };
 
-export default async function Page() {
+type Props = {
+  searchParams: Promise<{ waitlist?: string }>;
+};
+
+export default async function Page({ searchParams }: Props) {
+  const { waitlist: waitlistParam } = await searchParams;
   const cookieStore = await cookies();
   const preferred = cookieStore.get(Cookies.PreferredSignInProvider);
   const { device } = userAgent({ headers: await headers() });
+
+  const supabase = await createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  const showQueueNotice =
+    waitlistParam === "1" || isBlockedNewUser(authUser?.created_at);
 
   let moreSignInOptions = null;
   let preferredSignInOption =
@@ -148,35 +162,50 @@ export default async function Page() {
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-12 pb-2">
         <div className="w-full max-w-md flex flex-col h-full">
           <div className="space-y-8 flex-1 flex flex-col justify-center">
-            {/* Header */}
-            <div className="text-center space-y-2">
-              <h1 className="text-lg lg:text-xl mb-4 font-serif">
-                Welcome to Midday
-              </h1>
-              <p className="font-sans text-sm text-[#878787]">
-                Sign in or create an account
-              </p>
-            </div>
-
-            {/* Sign In Options */}
-            <div className="space-y-3 flex items-center justify-center w-full">
-              {preferredSignInOption}
-            </div>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
+            {showQueueNotice ? (
+              <div className="text-center space-y-2">
+                <h1 className="text-lg lg:text-xl mb-4 font-serif">
+                  You're on the waitlist
+                </h1>
+                <p className="font-sans text-sm text-[#878787]">
+                  Midday is not accepting new sign-ups right now. You've been
+                  added to our queue and we'll email you as soon as a spot opens
+                  up.
+                </p>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-background font-sans text-[#878787]">
-                  or
-                </span>
-              </div>
-            </div>
+            ) : (
+              <>
+                {/* Header */}
+                <div className="text-center space-y-2">
+                  <h1 className="text-lg lg:text-xl mb-4 font-serif">
+                    Welcome to Midday
+                  </h1>
+                  <p className="font-sans text-sm text-[#878787]">
+                    Sign in or create an account
+                  </p>
+                </div>
 
-            {/* More Options Accordion */}
-            <LoginAccordion>{moreSignInOptions}</LoginAccordion>
+                {/* Sign In Options */}
+                <div className="space-y-3 flex items-center justify-center w-full">
+                  {preferredSignInOption}
+                </div>
+
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-background font-sans text-[#878787]">
+                      or
+                    </span>
+                  </div>
+                </div>
+
+                {/* More Options Accordion */}
+                <LoginAccordion>{moreSignInOptions}</LoginAccordion>
+              </>
+            )}
           </div>
 
           {/* Terms and Privacy Policy - Bottom aligned */}
