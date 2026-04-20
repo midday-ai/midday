@@ -2,6 +2,7 @@ import { createLoggerWithContext } from "@midday/logger";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import type { Database } from "./client";
+import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
 const isDevelopment = process.env.NODE_ENV === "development";
@@ -95,16 +96,21 @@ if (DB_POOL_EVENT_LOGGING) {
   });
 }
 
-const workerDb = drizzle(workerPool, {
+const workerDrizzle = drizzle(workerPool, {
   schema,
   casing: "snake_case",
 });
+
+// Workers always talk to the primary pool, but shared query helpers call
+// `db.executeOnReplica(...)`. Wrap with `withReplicas` using the same drizzle
+// instance as the "replica" so those helpers keep working at runtime.
+const workerDb = withReplicas(workerDrizzle, [workerDrizzle]);
 
 /**
  * Get the shared worker database instance
  */
 export const getWorkerDb = (): Database => {
-  return workerDb as Database;
+  return workerDb as unknown as Database;
 };
 
 export const getWorkerPoolStats = () => {
