@@ -1,3 +1,4 @@
+import { PassThrough } from "node:stream";
 import { writeToString } from "@fast-csv/format";
 import {
   getCustomers,
@@ -173,16 +174,20 @@ export class ExportTeamDataProcessor extends BaseProcessor<ExportTeamDataPayload
       return Number.isNaN(dateA) || Number.isNaN(dateB) ? 0 : dateB - dateA;
     });
 
+    // Build the zip fully in memory before uploading. Streaming the archive
+    // directly into Supabase would force `withTimeout(..., FILE_UPLOAD)` to
+    // cover the entire data-gathering phase (vault/invoice/inbox downloads,
+    // paginated queries, etc.), which easily exceeds the 60s upload budget.
     const archive = archiver("zip", { zlib: { level: 9 } });
-    const uploadPromise = withTimeout(
-      supabase.storage.from("vault").upload(fullPath, archive, {
-        upsert: true,
-        contentType: "application/zip",
-        duplex: "half",
-      }),
-      TIMEOUTS.FILE_UPLOAD,
-      `File upload timed out after ${TIMEOUTS.FILE_UPLOAD}ms`,
-    );
+    const zipStream = new PassThrough();
+    const zipChunks: Buffer[] = [];
+    const zipBufferPromise = new Promise<Buffer>((resolve, reject) => {
+      zipStream.on("data", (chunk: Buffer) => zipChunks.push(chunk));
+      zipStream.on("end", () => resolve(Buffer.concat(zipChunks)));
+      zipStream.on("error", reject);
+      archive.on("error", reject);
+    });
+    archive.pipe(zipStream);
 
     try {
       if (sortedRows.length > 0) {
@@ -472,7 +477,16 @@ export class ExportTeamDataProcessor extends BaseProcessor<ExportTeamDataPayload
       throw error;
     }
 
-    const { error: uploadError } = await uploadPromise;
+    const zipBuffer = await zipBufferPromise;
+
+    const { error: uploadError } = await withTimeout(
+      supabase.storage.from("vault").upload(fullPath, zipBuffer, {
+        upsert: true,
+        contentType: "application/zip",
+      }),
+      TIMEOUTS.FILE_UPLOAD,
+      `File upload timed out after ${TIMEOUTS.FILE_UPLOAD}ms`,
+    );
 
     if (uploadError) {
       throw new Error(`Failed to upload export file: ${uploadError.message}`);
