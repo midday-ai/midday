@@ -8,7 +8,11 @@ import {
   resumeInvoiceRecurring,
 } from "@midday/db/queries";
 import { z } from "zod";
-import { sanitize, sanitizeArray } from "../schemas";
+import {
+  mcpListMetaSchema,
+  sanitize,
+  sanitizeArray,
+} from "../schemas";
 import {
   DESTRUCTIVE_ANNOTATIONS,
   hasScope,
@@ -50,6 +54,21 @@ const mcpRecurringInvoiceSchema = z.object({
     .optional(),
 });
 
+const mcpUpcomingInvoicePreviewSchema = z.object({
+  invoices: z.array(
+    z.object({
+      date: z.string(),
+      amount: z.number(),
+    }),
+  ),
+  summary: z.object({
+    hasEndDate: z.boolean(),
+    totalCount: z.number().nullable(),
+    totalAmount: z.number().nullable(),
+    currency: z.string(),
+  }),
+});
+
 export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
 
@@ -86,11 +105,8 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
             .describe("Filter by customer ID"),
         },
         outputSchema: {
-          meta: z.looseObject({
-            cursor: z.string().nullable().optional(),
-            hasNextPage: z.boolean(),
-          }),
-          data: z.array(z.record(z.string(), z.any())),
+          meta: mcpListMetaSchema,
+          data: z.array(mcpRecurringInvoiceSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -131,7 +147,7 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
           id: z.string().uuid().describe("Recurring invoice schedule ID"),
         },
         outputSchema: {
-          data: z.record(z.string(), z.any()),
+          data: mcpRecurringInvoiceSchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -172,7 +188,7 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
             .describe("Number of upcoming invoices to preview (default 6)"),
         },
         outputSchema: {
-          data: z.record(z.string(), z.any()),
+          data: mcpUpcomingInvoicePreviewSchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -195,9 +211,11 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        const clean = sanitize(mcpUpcomingInvoicePreviewSchema, result);
+
         return {
-          content: [{ type: "text" as const, text: JSON.stringify(result) }],
-          structuredContent: { data: result },
+          content: [{ type: "text" as const, text: JSON.stringify(clean) }],
+          structuredContent: { data: clean },
         };
       }, "Failed to get upcoming invoices"),
     );
@@ -278,6 +296,9 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
             .optional()
             .describe("Days after issue date for the due date (default 30)"),
         },
+        outputSchema: {
+          data: mcpRecurringInvoiceSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -342,6 +363,9 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
             .uuid()
             .describe("Recurring invoice schedule ID to pause"),
         },
+        outputSchema: {
+          data: mcpRecurringInvoiceSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async ({ id }) => {
@@ -368,14 +392,11 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
                 type: "text",
                 text: JSON.stringify({
                   message: "Recurring invoice paused",
-                  schedule: clean,
+                  data: clean,
                 }),
               },
             ],
-            structuredContent: {
-              message: "Recurring invoice paused",
-              schedule: clean,
-            },
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -406,6 +427,9 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
             .uuid()
             .describe("Recurring invoice schedule ID to resume"),
         },
+        outputSchema: {
+          data: mcpRecurringInvoiceSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async ({ id }) => {
@@ -432,14 +456,11 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
                 type: "text",
                 text: JSON.stringify({
                   message: "Recurring invoice resumed",
-                  schedule: clean,
+                  data: clean,
                 }),
               },
             ],
-            structuredContent: {
-              message: "Recurring invoice resumed",
-              schedule: clean,
-            },
+            structuredContent: { data: clean },
           };
         } catch (error) {
           return {
@@ -469,6 +490,10 @@ export const registerInvoiceRecurringTools: RegisterTools = (server, ctx) => {
             .string()
             .uuid()
             .describe("Recurring invoice schedule ID to delete"),
+        },
+        outputSchema: {
+          success: z.boolean(),
+          deletedId: z.string(),
         },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },

@@ -56,6 +56,9 @@ export function ensureToolIndex(ctx: McpContext): Promise<ToolIndex<any>> {
         tracker_entries_list: ["tracker_projects_list"],
         tracker_projects_list: ["tracker_entries_list"],
         transactions_update: ["categories_list"],
+        computer_agent_enable: ["computer_catalog_list"],
+        computer_agent_generate: ["computer_agent_confirm"],
+        computer_agent_run: ["computer_agents_list", "computer_agent_runs"],
       },
     });
 

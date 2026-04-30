@@ -35,7 +35,7 @@ export const registerBankAccountTools: RegisterTools = (server, ctx) => {
         "List all connected bank accounts for the team. Returns account name, type, balance, currency, and connection info (institution name and logo). Filter by enabled/manual to narrow results.",
       inputSchema: getBankAccountsSchema.shape,
       outputSchema: {
-        data: z.array(z.record(z.string(), z.any())),
+        data: z.array(mcpBankAccountSchema),
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
@@ -63,7 +63,7 @@ export const registerBankAccountTools: RegisterTools = (server, ctx) => {
         "Get current balances for all bank accounts. Returns each account's balance, currency, and name. Use this for a quick cash position overview.",
       inputSchema: {},
       outputSchema: {
-        data: z.array(z.record(z.string(), z.any())),
+        data: z.array(mcpBankAccountBalanceSchema),
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
@@ -86,7 +86,7 @@ export const registerBankAccountTools: RegisterTools = (server, ctx) => {
         "List all unique currencies across connected bank accounts. Useful for multi-currency reporting.",
       inputSchema: {},
       outputSchema: {
-        data: z.array(z.record(z.string(), z.any())),
+        data: z.array(mcpBankAccountCurrencySchema),
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },
@@ -109,7 +109,7 @@ export const registerBankAccountTools: RegisterTools = (server, ctx) => {
         "Get banking details for a specific account including IBAN, account number, routing number, BIC, and sort code. Only available for accounts that have this information on file.",
       inputSchema: getBankAccountDetailsSchema.shape,
       outputSchema: {
-        data: z.record(z.string(), z.any()).nullable(),
+        data: mcpBankAccountDetailsSchema.nullable(),
       },
       annotations: READ_ONLY_ANNOTATIONS,
     },

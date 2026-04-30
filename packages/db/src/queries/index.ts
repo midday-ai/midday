@@ -4,6 +4,7 @@ export * from "./api-keys";
 export * from "./apps";
 export * from "./bank-accounts";
 export * from "./bank-connections";
+export * from "./computer";
 export * from "./customer-analytics";
 export * from "./customer-enrichment";
 export * from "./customers";

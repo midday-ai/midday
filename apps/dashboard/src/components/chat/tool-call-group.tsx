@@ -34,6 +34,7 @@ const TOOL_ICON_MAP: Record<string, (s: number) => ReactNode> = {
   search: (s) => <Icons.Search size={s} />,
   web_search: (s) => <Icons.Globle size={s} />,
   team: (s) => <Icons.Face size={s} />,
+  computer: (s) => <Icons.Bolt size={s} />,
   COMPOSIO: (s) => <Icons.AddLink size={s} className="-rotate-45" />,
 };
 

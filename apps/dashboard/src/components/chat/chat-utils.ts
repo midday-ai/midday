@@ -129,6 +129,15 @@ export const TOOL_LABELS: Record<string, string> = {
   documents_delete: "Deleting document",
   documents_tag: "Tagging document",
 
+  // Computer agents
+  computer_catalog_list: "Browsing agent catalog",
+  computer_agents_list: "Listing your agents",
+  computer_agent_enable: "Setting up agent",
+  computer_agent_generate: "Generating custom agent",
+  computer_agent_confirm: "Deploying agent",
+  computer_agent_run: "Running agent",
+  computer_agent_runs: "Fetching run history",
+
   // Search & Team
   search_global: "Searching",
   team_members: "Fetching team members",

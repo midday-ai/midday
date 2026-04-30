@@ -501,6 +501,16 @@ export const mcpTeamMemberSchema = z.object({
 });
 
 // ============================================================
+// Shared pagination meta schema
+// ============================================================
+
+export const mcpListMetaSchema = z.object({
+  cursor: z.string().nullable(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean(),
+});
+
+// ============================================================
 // Utility: safe parse with allowlist fallback
 // ============================================================
 

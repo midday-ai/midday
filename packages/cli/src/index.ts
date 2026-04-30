@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { createAuthCommand } from "./commands/auth/index.js";
 import { createBankAccountsCommand } from "./commands/bank-accounts/index.js";
 import { createCategoriesCommand } from "./commands/categories/index.js";
+import { createComputerCommand } from "./commands/computer/index.js";
 import { createCustomersCommand } from "./commands/customers/index.js";
 import { createDocumentsCommand } from "./commands/documents/index.js";
 import { createInboxCommand } from "./commands/inbox/index.js";
@@ -35,6 +36,7 @@ export function createProgram(): Command {
     .option("--debug", "Verbose HTTP logging to stderr");
 
   program.addCommand(createAuthCommand());
+  program.addCommand(createComputerCommand());
   program.addCommand(createTransactionsCommand());
   program.addCommand(createInvoicesCommand());
   program.addCommand(createCustomersCommand());
@@ -56,6 +58,8 @@ Run midday <command> --help for detailed usage and examples.
 
 Examples:
   midday auth login                              # Authenticate via browser
+  midday computer create "check unbilled hours"  # Create an agent from description
+  midday computer catalog                        # List pre-built agents
   midday transactions list --from 2026-01-01     # List recent transactions
   midday invoices create --customer cust_123     # Create a new invoice
   midday tracker start --project proj_abc        # Start time tracking
