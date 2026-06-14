@@ -135,6 +135,13 @@ export const allNotificationTypes: NotificationType[] = [
     category: "invoices",
     order: 1,
   },
+  {
+    type: "agent_alert",
+    channels: ["in_app", "email"],
+    showInSettings: true,
+    category: "computer",
+    order: 1,
+  },
 ];
 
 // Get all notification types (including hidden ones)

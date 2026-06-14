@@ -20,6 +20,7 @@ import { inboxAutoMatched } from "./types/inbox-auto-matched";
 import { inboxCrossCurrencyMatched } from "./types/inbox-cross-currency-matched";
 import { inboxNeedsReview } from "./types/inbox-needs-review";
 import { inboxNew } from "./types/inbox-new";
+import { agentAlert } from "./types/computer-agent-alert";
 import { insightReady } from "./types/insight-ready";
 import { invoiceCancelled } from "./types/invoice-cancelled";
 import { invoiceCreated } from "./types/invoice-created";
@@ -62,6 +63,7 @@ const handlers = {
   recurring_series_paused: recurringSeriesPaused,
   recurring_invoice_upcoming: recurringInvoiceUpcoming,
   insight_ready: insightReady,
+  agent_alert: agentAlert,
 } as const;
 
 export class Notifications {
@@ -410,6 +412,7 @@ export {
 export type { NotificationTypes } from "./schemas";
 // Export schemas and types
 export {
+  agentAlertSchema,
   documentProcessedSchema,
   documentUploadedSchema,
   inboxAutoMatchedSchema,

@@ -1,5 +1,6 @@
 export { registerBankAccountTools } from "./bank-accounts";
 export { registerCategoryTools } from "./categories";
+export { registerComputerTools } from "./computer";
 export { registerCustomerTools } from "./customers";
 export { registerDocumentTools } from "./documents";
 export { registerInboxTools } from "./inbox";

@@ -14,6 +14,7 @@ import { z } from "zod";
 import {
   mcpCustomerDetailSchema,
   mcpCustomerListItemSchema,
+  mcpListMetaSchema,
   sanitize,
   sanitizeArray,
 } from "../schemas";
@@ -70,12 +71,8 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
             .describe("Sort direction"),
         },
         outputSchema: {
-          meta: z.looseObject({
-            cursor: z.string().nullable().optional(),
-            hasNextPage: z.boolean(),
-            hasPreviousPage: z.boolean(),
-          }),
-          data: z.array(z.record(z.string(), z.any())),
+          meta: mcpListMetaSchema,
+          data: z.array(mcpCustomerListItemSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -120,7 +117,7 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           id: getCustomerByIdSchema.shape.id,
         },
         outputSchema: {
-          data: z.record(z.string(), z.any()),
+          data: mcpCustomerDetailSchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -168,6 +165,9 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           vatNumber: upsertCustomerSchema.shape.vatNumber,
           note: upsertCustomerSchema.shape.note,
           tags: upsertCustomerSchema.shape.tags,
+        },
+        outputSchema: {
+          data: mcpCustomerDetailSchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -241,6 +241,9 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           note: upsertCustomerSchema.shape.note,
           tags: upsertCustomerSchema.shape.tags,
         },
+        outputSchema: {
+          data: mcpCustomerDetailSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -309,6 +312,10 @@ export const registerCustomerTools: RegisterTools = (server, ctx) => {
           "Permanently delete a customer by ID. Will fail if the customer has associated invoices or projects — remove those first.",
         inputSchema: {
           id: deleteCustomerSchema.shape.id,
+        },
+        outputSchema: {
+          success: z.boolean(),
+          deleted: z.record(z.string(), z.any()),
         },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },

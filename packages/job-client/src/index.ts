@@ -4,8 +4,10 @@ import type { JobStatus, JobStatusResponse, JobTriggerResponse } from "./types";
 import { decodeJobId, encodeJobId } from "./utils";
 
 // Re-export utilities
-export { getQueue } from "./queues";
+export { getConnectionOptions, getQueue } from "./queues";
 export { decodeJobId, encodeJobId } from "./utils";
+export { COMPUTE_QUEUE_NAME, enqueueReplay, enqueueRun } from "./compute";
+export type { EnqueueReplayOptions, EnqueueRunOptions } from "./compute";
 
 // Create logger with job-client context
 export const logger = createLoggerWithContext("job-client");

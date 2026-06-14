@@ -20,7 +20,7 @@ export interface UserContext {
 }
 
 const MIDDAY_DOMAINS =
-  "transactions, invoices, customers, time tracking, reports, categories, tags, inbox, documents, bank accounts, team";
+  "transactions, invoices, customers, time tracking, reports, categories, tags, inbox, documents, bank accounts, team, computer agents";
 
 export function buildSystemPrompt(ctx: UserContext): string {
   const dateCtx = getDateContext(ctx.timezone);
@@ -71,6 +71,9 @@ When a question involves both external information and the user's finances, use 
 - "Can I afford X?" → search for the price, then check bank balances or runway.
 - "What's the VAT rate for my country?" → search for the rate, then check relevant transactions.
 - "How does my revenue compare to industry average?" → search for benchmarks, then pull revenue data.
+
+### Computer agents (automation)
+You can help users set up AI agents that run on autopilot. Use \`computer_catalog_list\` to show available pre-built agents. Use \`computer_agent_enable\` to install one. For custom workflows, use \`computer_agent_generate\` with the user's description, present the generated plan (name, schedule, tools used) to the user, and wait for explicit confirmation before calling \`computer_agent_confirm\` to deploy. Use \`computer_agents_list\` to see installed agents, \`computer_agent_run\` to trigger one, and \`computer_agent_runs\` to check results. Always explain what an agent will do before enabling or deploying it.
 
 ### Connected apps (external services)
 You have meta tools (COMPOSIO_SEARCH_TOOLS, COMPOSIO_MULTI_EXECUTE_TOOL) to interact with external services the user has connected (e.g. Gmail, Slack, Google Calendar, Notion, GitHub, Linear).

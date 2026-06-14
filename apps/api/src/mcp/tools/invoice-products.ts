@@ -57,7 +57,7 @@ export const registerInvoiceProductTools: RegisterTools = (server, ctx) => {
           currency: z.string().optional().describe("Filter by currency code"),
         },
         outputSchema: {
-          data: z.array(z.record(z.string(), z.any())),
+          data: z.array(mcpInvoiceProductSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -88,7 +88,7 @@ export const registerInvoiceProductTools: RegisterTools = (server, ctx) => {
           id: getInvoiceProductSchema.shape.id,
         },
         outputSchema: {
-          data: z.record(z.string(), z.any()),
+          data: mcpInvoiceProductSchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -129,6 +129,9 @@ export const registerInvoiceProductTools: RegisterTools = (server, ctx) => {
           unit: createInvoiceProductSchema.shape.unit,
           taxRate: createInvoiceProductSchema.shape.taxRate,
           isActive: createInvoiceProductSchema.shape.isActive,
+        },
+        outputSchema: {
+          data: mcpInvoiceProductSchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -184,6 +187,9 @@ export const registerInvoiceProductTools: RegisterTools = (server, ctx) => {
           unit: updateInvoiceProductSchema.shape.unit,
           taxRate: updateInvoiceProductSchema.shape.taxRate,
           isActive: updateInvoiceProductSchema.shape.isActive,
+        },
+        outputSchema: {
+          data: mcpInvoiceProductSchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -244,6 +250,10 @@ export const registerInvoiceProductTools: RegisterTools = (server, ctx) => {
           "Delete an invoice product by ID. This does not affect existing invoices that used this product.",
         inputSchema: {
           id: deleteInvoiceProductSchema.shape.id,
+        },
+        outputSchema: {
+          success: z.boolean(),
+          deletedId: z.string(),
         },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },

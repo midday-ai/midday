@@ -3,6 +3,7 @@ import { protectedMiddleware } from "../middleware";
 import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
 import { chatRouter } from "./chat";
+import { computerRouter } from "./computer";
 import { connectorsCatalogRouter } from "./connectors-catalog";
 import { customersRouter } from "./customers";
 import { desktopRouter } from "./desktop";
@@ -58,5 +59,6 @@ routers.route("/reports", reportsRouter);
 routers.route("/tracker-projects", trackerProjectsRouter);
 routers.route("/tracker-entries", trackerEntriesRouter);
 routers.route("/chat", chatRouter);
+routers.route("/computer", computerRouter);
 
 export { routers };

@@ -25,6 +25,7 @@ import {
 } from "@midday/db/queries";
 import { z } from "zod";
 import {
+  mcpListMetaSchema,
   mcpTrackerEntrySchema,
   mcpTrackerProjectSchema,
   sanitize,
@@ -95,12 +96,8 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             .describe("Sort direction"),
         },
         outputSchema: {
-          meta: z.looseObject({
-            cursor: z.string().nullable().optional(),
-            hasNextPage: z.boolean(),
-            hasPreviousPage: z.boolean(),
-          }),
-          data: z.array(z.record(z.string(), z.any())),
+          meta: mcpListMetaSchema,
+          data: z.array(mcpTrackerProjectSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -150,7 +147,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           id: getTrackerProjectByIdSchema.shape.id,
         },
         outputSchema: {
-          data: z.record(z.string(), z.any()),
+          data: mcpTrackerProjectSchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -190,6 +187,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           currency: upsertTrackerProjectSchema.shape.currency,
           customerId: upsertTrackerProjectSchema.shape.customerId,
           tags: upsertTrackerProjectSchema.shape.tags,
+        },
+        outputSchema: {
+          data: mcpTrackerProjectSchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -247,6 +247,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           currency: upsertTrackerProjectSchema.shape.currency,
           customerId: upsertTrackerProjectSchema.shape.customerId,
           tags: upsertTrackerProjectSchema.shape.tags,
+        },
+        outputSchema: {
+          data: mcpTrackerProjectSchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -314,6 +317,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           "Permanently delete a tracker project and all its associated time entries. This action cannot be undone.",
         inputSchema: {
           id: deleteTrackerProjectSchema.shape.id,
+        },
+        outputSchema: {
+          success: z.boolean(),
+          deletedId: z.string(),
         },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
@@ -463,7 +470,7 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             .describe("User ID to check timer for (optional)"),
         },
         outputSchema: {
-          data: z.record(z.string(), z.any()),
+          data: mcpTrackerEntrySchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -500,6 +507,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           duration: upsertTrackerEntriesSchema.shape.duration,
           description: upsertTrackerEntriesSchema.shape.description,
           assignedId: upsertTrackerEntriesSchema.shape.assignedId,
+        },
+        outputSchema: {
+          data: z.array(mcpTrackerEntrySchema),
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -557,6 +567,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           duration: upsertTrackerEntriesSchema.shape.duration.optional(),
           description: upsertTrackerEntriesSchema.shape.description,
           assignedId: upsertTrackerEntriesSchema.shape.assignedId,
+        },
+        outputSchema: {
+          data: z.array(mcpTrackerEntrySchema),
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -638,6 +651,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           id: deleteTrackerEntrySchema.shape.id,
         },
+        outputSchema: {
+          success: z.boolean(),
+          deletedId: z.string(),
+        },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
@@ -696,6 +713,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
             .optional()
             .describe("Start time (ISO 8601). Defaults to now."),
         },
+        outputSchema: {
+          data: mcpTrackerEntrySchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -743,6 +763,9 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           stop: lenientDateTimeSchema
             .optional()
             .describe("Stop time (ISO 8601). Defaults to now."),
+        },
+        outputSchema: {
+          data: mcpTrackerEntrySchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },

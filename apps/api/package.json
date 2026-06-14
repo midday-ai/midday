@@ -52,6 +52,7 @@
     "@modelcontextprotocol/sdk": "^1.28.0",
     "@polar-sh/sdk": "^0.46.7",
     "@scalar/hono-api-reference": "^0.10.5",
+    "@secure-exec/typescript": "^0.2.1",
     "@sentry/bun": "catalog:",
     "@sindresorhus/slugify": "catalog:",
     "@trigger.dev/sdk": "catalog:",
@@ -61,6 +62,7 @@
     "hono": "catalog:",
     "hono-rate-limiter": "0.5.3",
     "jose": "catalog:",
+    "json-schema-to-typescript": "^15.0.4",
     "lru-cache": "^11.2.7",
     "nanoid": "catalog:",
     "parse-duration": "^2.1.5",
@@ -69,7 +71,8 @@
     "superjson": "^2.2.6",
     "toolpick": "0.4.0",
     "uuid": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
     "@types/bun": "latest",

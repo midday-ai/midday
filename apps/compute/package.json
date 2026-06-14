@@ -1,0 +1,35 @@
+{
+  "name": "@midday/compute",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "start": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "catalog:",
+    "@composio/core": "^0.6.7",
+    "@composio/vercel": "^0.6.7",
+    "@midday/cache": "workspace:*",
+    "@midday/connectors": "workspace:*",
+    "@midday/job-client": "workspace:*",
+    "@midday/db": "workspace:*",
+    "@midday/logger": "workspace:*",
+    "@midday/notifications": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.28.0",
+    "@sentry/bun": "catalog:",
+    "ai": "catalog:",
+    "bullmq": "catalog:",
+    "croner": "^9.1.0",
+    "lru-cache": "^11.2.7",
+    "hono": "catalog:",
+    "secure-exec": "^0.2.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

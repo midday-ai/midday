@@ -4213,3 +4213,219 @@ export const insightUserStatusRelations = relations(
     }),
   }),
 );
+
+// ---------------------------------------------------------------------------
+// Midday Computer -- agents, triggers, runs, steps, memory
+// ---------------------------------------------------------------------------
+
+export const computerAgentSourceEnum = pgEnum("computer_agent_source", [
+  "catalog",
+  "generated",
+]);
+
+export const computerRunStatusEnum = pgEnum("computer_run_status", [
+  "pending",
+  "running",
+  "completed",
+  "failed",
+  "waiting_approval",
+]);
+
+export const computerRunStepTypeEnum = pgEnum("computer_run_step_type", [
+  "tool_call",
+  "ai_generation",
+  "memory_read",
+  "memory_write",
+  "notification",
+  "proposal",
+  "connector_call",
+  "context",
+]);
+
+export const computerAgents = pgTable(
+  "computer_agents",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, { onDelete: "cascade" }),
+    name: varchar({ length: 255 }).notNull(),
+    slug: varchar({ length: 255 }).notNull(),
+    description: text(),
+    source: computerAgentSourceEnum().notNull(),
+    code: text().notNull(),
+    templateId: varchar("template_id", { length: 255 }),
+    scheduleCron: varchar("schedule_cron", { length: 255 }),
+    config: jsonb().$type<Record<string, unknown>>(),
+    enabled: boolean().default(false).notNull(),
+    createdBy: uuid("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("computer_agents_team_slug").on(table.teamId, table.slug),
+    index("computer_agents_team_id_idx").on(table.teamId),
+    index("computer_agents_enabled_idx").on(table.teamId, table.enabled),
+    pgPolicy("Team members can manage their computer agents", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+    }),
+  ],
+);
+
+export const computerAgentsRelations = relations(
+  computerAgents,
+  ({ one, many }) => ({
+    team: one(teams, {
+      fields: [computerAgents.teamId],
+      references: [teams.id],
+    }),
+    createdByUser: one(users, {
+      fields: [computerAgents.createdBy],
+      references: [users.id],
+    }),
+    runs: many(computerRuns),
+    memory: many(computerAgentMemory),
+  }),
+);
+
+export const computerRuns = pgTable(
+  "computer_runs",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    agentId: uuid("agent_id")
+      .notNull()
+      .references(() => computerAgents.id, { onDelete: "cascade" }),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, { onDelete: "cascade" }),
+    status: computerRunStatusEnum().default("pending").notNull(),
+    proposedActions: jsonb("proposed_actions").$type<
+      Array<{ tool: string; args: Record<string, unknown>; description?: string }>
+    >(),
+    summary: text(),
+    error: text(),
+    toolCallCount: integer("tool_call_count").default(0).notNull(),
+    llmCallCount: integer("llm_call_count").default(0).notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("computer_runs_agent_id_idx").on(table.agentId),
+    index("computer_runs_team_id_idx").on(table.teamId),
+    index("computer_runs_status_idx").on(table.agentId, table.status),
+    pgPolicy("Team members can view their computer runs", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+    }),
+  ],
+);
+
+export const computerRunsRelations = relations(
+  computerRuns,
+  ({ one, many }) => ({
+    agent: one(computerAgents, {
+      fields: [computerRuns.agentId],
+      references: [computerAgents.id],
+    }),
+    team: one(teams, {
+      fields: [computerRuns.teamId],
+      references: [teams.id],
+    }),
+    steps: many(computerRunSteps),
+  }),
+);
+
+export const computerRunSteps = pgTable(
+  "computer_run_steps",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    runId: uuid("run_id")
+      .notNull()
+      .references(() => computerRuns.id, { onDelete: "cascade" }),
+    type: computerRunStepTypeEnum().notNull(),
+    name: varchar({ length: 255 }).notNull(),
+    input: jsonb(),
+    output: jsonb(),
+    durationMs: integer("duration_ms"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("computer_run_steps_run_id_idx").on(table.runId),
+    pgPolicy("Team members can view their computer run steps", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+    }),
+  ],
+);
+
+export const computerRunStepsRelations = relations(
+  computerRunSteps,
+  ({ one }) => ({
+    run: one(computerRuns, {
+      fields: [computerRunSteps.runId],
+      references: [computerRuns.id],
+    }),
+  }),
+);
+
+export const computerAgentMemory = pgTable(
+  "computer_agent_memory",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    agentId: uuid("agent_id")
+      .notNull()
+      .references(() => computerAgents.id, { onDelete: "cascade" }),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, { onDelete: "cascade" }),
+    key: varchar({ length: 255 }).notNull(),
+    content: text().notNull(),
+    type: varchar({ length: 100 }),
+    metadata: jsonb().$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("computer_agent_memory_agent_key").on(table.agentId, table.key),
+    index("computer_agent_memory_agent_id_idx").on(table.agentId),
+    index("computer_agent_memory_team_id_idx").on(table.teamId),
+    pgPolicy("Team members can manage their computer agent memory", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+    }),
+  ],
+);
+
+export const computerAgentMemoryRelations = relations(
+  computerAgentMemory,
+  ({ one }) => ({
+    agent: one(computerAgents, {
+      fields: [computerAgentMemory.agentId],
+      references: [computerAgents.id],
+    }),
+    team: one(teams, {
+      fields: [computerAgentMemory.teamId],
+      references: [teams.id],
+    }),
+  }),
+);

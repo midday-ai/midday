@@ -48,7 +48,7 @@ export const registerCategoryTools: RegisterTools = (server, ctx) => {
             ),
         },
         outputSchema: {
-          data: z.array(z.record(z.string(), z.any())),
+          data: z.array(mcpCategoryDetailSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -77,7 +77,7 @@ export const registerCategoryTools: RegisterTools = (server, ctx) => {
           id: getCategoryByIdSchema.shape.id,
         },
         outputSchema: {
-          data: z.record(z.string(), z.any()),
+          data: mcpCategoryDetailSchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -117,6 +117,9 @@ export const registerCategoryTools: RegisterTools = (server, ctx) => {
           taxReportingCode:
             createTransactionCategorySchema.shape.taxReportingCode,
           parentId: createTransactionCategorySchema.shape.parentId,
+        },
+        outputSchema: {
+          data: mcpCategoryDetailSchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -181,6 +184,9 @@ export const registerCategoryTools: RegisterTools = (server, ctx) => {
             updateTransactionCategorySchema.shape.taxReportingCode,
           parentId: updateTransactionCategorySchema.shape.parentId,
         },
+        outputSchema: {
+          data: mcpCategoryDetailSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -237,6 +243,10 @@ export const registerCategoryTools: RegisterTools = (server, ctx) => {
           "Delete a custom transaction category by ID. System default categories cannot be deleted. Returns the deleted category.",
         inputSchema: {
           id: deleteTransactionCategorySchema.shape.id,
+        },
+        outputSchema: {
+          success: z.boolean(),
+          deleted: mcpCategoryDetailSchema,
         },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },

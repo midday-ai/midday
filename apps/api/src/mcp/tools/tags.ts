@@ -40,7 +40,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
           "List all transaction/project tags. Returns tag ID and name. Use these tag IDs for the tags filter in transactions_list and tracker_projects_list. For document tags, use document_tags_list instead.",
         inputSchema: {},
         outputSchema: {
-          data: z.array(z.record(z.string(), z.any())),
+          data: z.array(mcpTagResponseSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -66,7 +66,7 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
           id: z.string().uuid().describe("Tag ID"),
         },
         outputSchema: {
-          data: z.record(z.string(), z.any()),
+          data: mcpTagResponseSchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -98,6 +98,9 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
         description:
           "Create a new transaction/project tag. Tags can be used to label and filter transactions in transactions_list and projects in tracker_projects_list. Use tags_list first to check if the tag already exists.",
         inputSchema: createTagSchema.shape,
+        outputSchema: {
+          data: mcpTagResponseSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -141,6 +144,9 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
         description:
           "Rename an existing transaction/project tag by ID. The updated name will apply to all transactions and projects that use this tag.",
         inputSchema: updateTagSchema.shape,
+        outputSchema: {
+          data: mcpTagResponseSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -181,6 +187,9 @@ export const registerTagTools: RegisterTools = (server, ctx) => {
         description:
           "Delete a transaction/project tag by ID. Removes the tag from all transactions and projects it was applied to. This action cannot be undone.",
         inputSchema: deleteTagSchema.shape,
+        outputSchema: {
+          data: mcpTagResponseSchema,
+        },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       withErrorHandling(async (params) => {

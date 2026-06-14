@@ -22,6 +22,7 @@ import { z } from "zod";
 import {
   mcpInboxDetailSchema,
   mcpInboxItemSchema,
+  mcpListMetaSchema,
   sanitize,
   sanitizeArray,
 } from "../schemas";
@@ -60,12 +61,8 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
           "List inbox items (uploaded receipts, invoices, and documents pending processing). Filter by status (pending, done, suggested_match, no_match, other). Returns paginated results (default 25) with file name, status, and matched transaction.",
         inputSchema: getInboxSchema.shape,
         outputSchema: {
-          meta: z.looseObject({
-            cursor: z.string().nullable().optional(),
-            hasNextPage: z.boolean(),
-            hasPreviousPage: z.boolean(),
-          }),
-          data: z.array(z.record(z.string(), z.any())),
+          meta: mcpListMetaSchema,
+          data: z.array(mcpInboxItemSchema),
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -111,6 +108,9 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
             .optional()
             .default(false)
             .describe("Include the file content as a downloadable resource"),
+        },
+        outputSchema: {
+          data: mcpInboxDetailSchema,
         },
         annotations: READ_ONLY_ANNOTATIONS,
       },
@@ -183,6 +183,9 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
           currency: updateInboxSchema.shape.currency,
           amount: updateInboxSchema.shape.amount,
         },
+        outputSchema: {
+          data: mcpInboxDetailSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -237,6 +240,10 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           id: deleteInboxSchema.shape.id,
         },
+        outputSchema: {
+          success: z.boolean(),
+          deletedId: z.string(),
+        },
         annotations: DESTRUCTIVE_ANNOTATIONS,
       },
       async ({ id }) => {
@@ -285,6 +292,10 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           id: matchTransactionSchema.shape.id,
           transactionId: matchTransactionSchema.shape.transactionId,
+        },
+        outputSchema: {
+          message: z.string(),
+          item: mcpInboxDetailSchema,
         },
         annotations: WRITE_ANNOTATIONS,
       },
@@ -351,6 +362,10 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           id: unmatchTransactionSchema.shape.id,
         },
+        outputSchema: {
+          success: z.boolean(),
+          unmatched: z.string(),
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async ({ id }) => {
@@ -390,6 +405,10 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         description:
           "Confirm an AI-suggested match between an inbox item and a transaction. This links them together as if manually matched.",
         inputSchema: confirmMatchSchema.shape,
+        outputSchema: {
+          message: z.string(),
+          item: mcpInboxDetailSchema,
+        },
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
@@ -449,6 +468,10 @@ export const registerInboxTools: RegisterTools = (server, ctx) => {
         inputSchema: {
           suggestionId: declineMatchSchema.shape.suggestionId,
           inboxId: declineMatchSchema.shape.inboxId,
+        },
+        outputSchema: {
+          success: z.boolean(),
+          message: z.string(),
         },
         annotations: WRITE_ANNOTATIONS,
       },
