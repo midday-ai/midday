@@ -161,8 +161,9 @@ export function LineItems() {
           })
         }
         className="flex items-center space-x-2 text-xs text-[#878787] font-mono"
+        aria-label="Add line item"
       >
-        <Icons.Add />
+        <Icons.Add aria-hidden="true" />
         <span className="text-[11px]">Add item</span>
       </button>
     </div>
@@ -232,8 +233,12 @@ function LineItemRow({
           className="absolute -left-9 -top-[4px] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
           onPointerDown={(e) => controls.start(e)}
           variant="ghost"
+          aria-label="Drag to reorder line item"
         >
-          <Icons.DragIndicator className="size-4 text-[#878787]" />
+          <Icons.DragIndicator
+            className="size-4 text-[#878787]"
+            aria-hidden="true"
+          />
         </Button>
       )}
 
@@ -288,8 +293,9 @@ function LineItemRow({
           onClick={() => handleRemove(index)}
           className="absolute -right-9 -top-[4px] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent text-[#878787]"
           variant="ghost"
+          aria-label="Remove line item"
         >
-          <Icons.Close />
+          <Icons.Close aria-hidden="true" />
         </Button>
       )}
     </Reorder.Item>
