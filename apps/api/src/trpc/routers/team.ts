@@ -158,6 +158,19 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
+      const callerRole = await getTeamMemberRole(
+        db,
+        input.teamId,
+        session.user.id,
+      );
+
+      if (callerRole !== "owner") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only team owners can delete the team",
+        });
+      }
+
       // Fetch team data BEFORE deleting (for cleanup job)
       const team = await getTeamById(db, input.teamId);
 
