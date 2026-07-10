@@ -351,6 +351,8 @@ describe("tRPC: team.delete", () => {
   beforeEach(() => {
     mocks.hasTeamAccess.mockReset();
     mocks.hasTeamAccess.mockImplementation(() => Promise.resolve(true));
+    mocks.getTeamMemberRole.mockReset();
+    mocks.getTeamMemberRole.mockImplementation(() => Promise.resolve("owner"));
     mocks.getTeamById.mockReset();
     mocks.getTeamById.mockImplementation(() =>
       Promise.resolve({
@@ -412,6 +414,21 @@ describe("tRPC: team.delete", () => {
         userId: "test-user-id",
       }),
     );
+  });
+
+  test("rejects when caller is not an owner", async () => {
+    mocks.getTeamMemberRole.mockImplementation(() => Promise.resolve("member"));
+
+    const caller = createCaller(createTestContext());
+
+    await expect(caller.delete({ teamId: deleteTeamId })).rejects.toMatchObject(
+      {
+        code: "FORBIDDEN",
+      },
+    );
+
+    expect(mocks.triggerJob).not.toHaveBeenCalled();
+    expect(mocks.deleteTeam).not.toHaveBeenCalled();
   });
 });
 
