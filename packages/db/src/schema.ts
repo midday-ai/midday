@@ -2360,7 +2360,7 @@ export const users = pgTable(
       as: "permissive",
       for: "insert",
       to: ["public"],
-      withCheck: sql`(auth.uid() = id)`,
+      withCheck: sql`((select auth.uid()) = id)`,
     }),
     pgPolicy("Users can select their own profile.", {
       as: "permissive",
@@ -3893,7 +3893,7 @@ export const notificationSettings = pgTable(
       as: "permissive",
       for: "all",
       to: ["public"],
-      using: sql`(user_id = auth.uid())`,
+      using: sql`(user_id = (select auth.uid()))`,
     }),
   ],
 );
