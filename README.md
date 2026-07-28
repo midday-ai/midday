@@ -79,11 +79,8 @@ We are working on the documentation to get started with Midday for local develop
 
 ## License
 
-This project is licensed under the **[AGPL-3.0](https://opensource.org/licenses/AGPL-3.0)** for non-commercial use. 
+This project is licensed under the **[AGPL-3.0](https://opensource.org/licenses/AGPL-3.0)**. See the [`LICENSE`](./LICENSE) file for the full terms.
 
-### Commercial Use
-
-For commercial use or deployments requiring a setup fee, please contact us
-for a commercial license at [engineer@midday.ai](mailto:engineer@midday.ai).
+AGPL-3.0 is an OSI-approved open-source license and does **not** restrict commercial use by itself. If you need a separate commercial / dual license (for example proprietary SaaS use without AGPL obligations), contact [engineer@midday.ai](mailto:engineer@midday.ai).
 
 By using this software, you agree to the terms of the license.
