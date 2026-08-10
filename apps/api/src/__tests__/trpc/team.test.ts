@@ -377,33 +377,20 @@ describe("tRPC: team.delete", () => {
         memberUserIds: ["test-user-id"],
       }),
     );
+    mocks.getTeamMemberRole.mockReset();
+    mocks.getTeamMemberRole.mockImplementation(() => Promise.resolve("owner"));
     mocks.triggerJob.mockReset();
     mocks.triggerJob.mockImplementation(() => ({ id: "job-del" }));
   });
 
-  test("deletes team after access checks and calls deleteTeam", async () => {
+  test("deletes team when caller is owner and calls deleteTeam", async () => {
     const caller = createCaller(createTestContext());
     await caller.delete({ teamId: deleteTeamId });
 
-    expect(mocks.hasTeamAccess).toHaveBeenCalledWith(
+    expect(mocks.getTeamMemberRole).toHaveBeenCalledWith(
       expect.anything(),
       deleteTeamId,
       "test-user-id",
-    );
-    expect(mocks.getTeamById).toHaveBeenCalledWith(
-      expect.anything(),
-      deleteTeamId,
-    );
-    expect(mocks.getBankConnections).toHaveBeenCalledWith(expect.anything(), {
-      teamId: deleteTeamId,
-    });
-    expect(mocks.triggerJob).toHaveBeenCalledWith(
-      "delete-team",
-      expect.objectContaining({
-        teamId: deleteTeamId,
-        connections: [],
-      }),
-      "teams",
     );
     expect(mocks.deleteTeam).toHaveBeenCalledWith(
       expect.anything(),
@@ -411,6 +398,15 @@ describe("tRPC: team.delete", () => {
         teamId: deleteTeamId,
         userId: "test-user-id",
       }),
+    );
+  });
+
+  test("rejects team deletion when caller is not an owner", async () => {
+    mocks.getTeamMemberRole.mockImplementation(() => Promise.resolve("member"));
+    const caller = createCaller(createTestContext());
+
+    await expect(caller.delete({ teamId: deleteTeamId })).rejects.toThrow(
+      "Only team owners can delete a team",
     );
   });
 });
