@@ -15,7 +15,7 @@ export function formatAmount({
   minimumFractionDigits,
   maximumFractionDigits,
 }: FormatAmountParams) {
-  if (!currency) {
+  if (!currency || typeof amount !== "number" || Number.isNaN(amount)) {
     return;
   }
 
