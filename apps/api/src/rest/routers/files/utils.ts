@@ -30,6 +30,13 @@ export function normalizeAndValidatePath(filePath: string): {
     });
   }
 
+  // Reject path traversal sequences (defense-in-depth)
+  if (pathParts.some((part) => part === ".." || part === ".")) {
+    throw new HTTPException(400, {
+      message: "Invalid path: contains traversal sequences.",
+    });
+  }
+
   return {
     normalizedPath,
     pathTeamId,
@@ -60,6 +67,14 @@ export async function validateTeamAccess(
       message: "Access denied. File does not belong to your team.",
     });
   }
+}
+
+/**
+ * Sanitize filename to prevent Content-Disposition header injection
+ * Removes all characters except alphanumeric, dots, hyphens, and underscores
+ */
+export function sanitizeFilename(name: string): string {
+  return name.replace(/[^a-zA-Z0-9._-]/g, "").slice(0, 255);
 }
 
 /**
