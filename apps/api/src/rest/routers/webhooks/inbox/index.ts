@@ -32,6 +32,10 @@ if (process.env.INBOX_WEBHOOK_USERNAME && process.env.INBOX_WEBHOOK_PASSWORD) {
       password: process.env.INBOX_WEBHOOK_PASSWORD,
     }),
   );
+} else {
+  logger.warn(
+    "Inbox webhook Basic Auth is not configured! Set INBOX_WEBHOOK_USERNAME and INBOX_WEBHOOK_PASSWORD env vars. Falling back to IP whitelist only.",
+  );
 }
 
 // IP address validation

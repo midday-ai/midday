@@ -62,7 +62,14 @@ app.openapi(
     let event: Stripe.Event;
 
     try {
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+      const stripeKey = process.env.STRIPE_SECRET_KEY;
+      if (!stripeKey) {
+        logger.error("STRIPE_SECRET_KEY not configured");
+        throw new HTTPException(500, {
+          message: "Stripe secret key not configured",
+        });
+      }
+      const stripe = new Stripe(stripeKey);
       const rawBody = await c.req.text();
 
       event = await stripe.webhooks.constructEventAsync(

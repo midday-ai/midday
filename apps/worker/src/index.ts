@@ -140,17 +140,25 @@ function initializeWorkbench() {
   }
 
   // Mount workbench with optional auth
+  const hasBoardAuth =
+    process.env.BOARD_USERNAME && process.env.BOARD_PASSWORD;
+
+  if (!hasBoardAuth) {
+    logger.warn(
+      "Worker admin dashboard has no authentication! Set BOARD_USERNAME and BOARD_PASSWORD env vars.",
+    );
+  }
+
   app.route(
     basePath,
     workbench({
       queues,
-      auth:
-        process.env.BOARD_USERNAME && process.env.BOARD_PASSWORD
-          ? {
-              username: process.env.BOARD_USERNAME,
-              password: process.env.BOARD_PASSWORD,
-            }
-          : undefined,
+      auth: hasBoardAuth
+        ? {
+            username: process.env.BOARD_USERNAME,
+            password: process.env.BOARD_PASSWORD,
+          }
+        : undefined,
       title: "Midday Jobs",
       tags: ["teamId"],
     }),

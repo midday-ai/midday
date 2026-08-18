@@ -57,7 +57,7 @@ app.openapi(
       });
     }
 
-    let event: any;
+    let event: Record<string, unknown>;
 
     const rawBody = await c.req.text();
     const webhookHeaders = {
@@ -76,13 +76,12 @@ app.openapi(
         throw new HTTPException(400, { message: "Invalid webhook signature" });
       }
 
-      // Signature was already verified by standardwebhooks inside
-      // validateEvent — the SDK just can't parse this event type yet.
-      // Fall back to the raw JSON so our own switch-case can handle it.
-      logger.warn("Polar SDK could not parse event, using raw payload", {
+      // Any non-verification error means we cannot trust the payload.
+      // Reject rather than falling back to unsigned parsing.
+      logger.error("Polar webhook validation failed with unexpected error", {
         error: err instanceof Error ? err.message : String(err),
       });
-      event = JSON.parse(rawBody);
+      throw new HTTPException(400, { message: "Webhook validation failed" });
     }
 
     logger.info("Polar webhook received", {

@@ -24,6 +24,22 @@ const successResponseSchema = z.object({
   ok: z.boolean(),
 });
 
+/**
+ * Validate that a URL is a Slack response_url (defense-in-depth).
+ * Slack response URLs are always HTTPS and hosted on Slack's infrastructure.
+ */
+function isValidSlackResponseUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.protocol === "https:" &&
+      parsed.hostname.endsWith(".slack.com")
+    );
+  } catch {
+    return false;
+  }
+}
+
 // Helper function to get message timestamp from inbox item and add emoji reaction
 async function addEmojiReactionToOriginalMessage({
   db,
@@ -217,6 +233,12 @@ app.openapi(
       }
 
       const { actions, team, response_url, channel } = parsed.data;
+
+      // Validate response_url is a legitimate Slack URL (defense-in-depth)
+      if (!isValidSlackResponseUrl(response_url)) {
+        logger.error("Invalid Slack response_url", { response_url });
+        throw new HTTPException(400, { message: "Invalid response_url" });
+      }
 
       if (!actions.length) {
         return c.json(validateResponse({ ok: true }, successResponseSchema));

@@ -12,7 +12,11 @@ import { publicMiddleware } from "../../middleware";
 import { withDatabase } from "../../middleware/db";
 import { withFileAuth } from "../../middleware/file-auth";
 import { withClientIp } from "../../middleware/ip";
-import { getContentTypeFromFilename, normalizeAndValidatePath } from "./utils";
+import {
+  getContentTypeFromFilename,
+  normalizeAndValidatePath,
+  sanitizeFilename,
+} from "./utils";
 
 const app = new OpenAPIHono<Context>();
 
@@ -112,7 +116,7 @@ app.openapi(
     };
 
     if (filename) {
-      headers["Content-Disposition"] = `attachment; filename="${filename}"`;
+      headers["Content-Disposition"] = `attachment; filename="${sanitizeFilename(filename)}"`;
     }
 
     return new Response(blob, { headers });
@@ -301,7 +305,7 @@ downloadInvoiceApp.openapi(
         const filename = isReceipt
           ? `receipt-${invoiceData.invoiceNumber}.pdf`
           : `${invoiceData.invoiceNumber}.pdf`;
-        headers["Content-Disposition"] = `attachment; filename="${filename}"`;
+        headers["Content-Disposition"] = `attachment; filename="${sanitizeFilename(filename)}"`;
       }
 
       return new Response(blob, { headers });
